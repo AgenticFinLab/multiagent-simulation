@@ -4,22 +4,26 @@
 
 ## Table of Contents
 
-| §  | Section                                   | Content Summary                                                                              |
-|----|-------------------------------------------|----------------------------------------------------------------------------------------------|
-| §1 | Analysis Objectives                       | 6 research questions (O1–O6) with expected findings and metric mappings                      |
-| §2 | Core Metrics Catalogue                    | 18 metrics with full specifications (formula, calibration source, interpretation, red flags) |
-| §3 | Analysis Dimensions                       | 7 orthogonal analysis perspectives with visualization plans                                  |
-| §4 | Phase Analysis Framework                  | 4-phase lifecycle detection rules, quantitative criteria, failure diagnostics                |
-| §5 | Cross-Variant Comparison Framework        | Protocol for Rule vs LLM vs RuleLLM vs Rag statistical comparison                            |
-| §6 | Expected Results and Validation           | Literature calibration targets, sensitivity grids, failure signs                             |
-| §7 | Visualization Catalogue                   | 10 plot types with axes, overlays, and purpose specifications                                |
-| §8 | Registered Metrics Catalogue (extensible) | 44 metrics × 9 categories; validation gates; 11-panel dashboard set                          |
+| §   | Section                                   | Content Summary                                                                              |
+|-----|-------------------------------------------|----------------------------------------------------------------------------------------------|
+| §1  | Analysis Objectives                       | 6 research questions (O1–O6) with expected findings and metric mappings                      |
+| §2  | Core Metrics Catalogue                    | 42 metrics with full specifications (formula, calibration source, interpretation, red flags) |
+| §3  | Analysis Dimensions                       | 7 orthogonal analysis perspectives with visualization plans                                  |
+| §4  | Phase Analysis Framework                  | 4-phase lifecycle detection rules, quantitative criteria, failure diagnostics                |
+| §5  | Cross-Variant Comparison Framework        | Protocol for Rule vs LLM vs RuleLLM vs Rag statistical comparison                            |
+| §6  | Expected Results and Validation           | Literature calibration targets, sensitivity grids, failure signs                             |
+| §7  | Visualization Catalogue                   | 12 plot types with axes, overlays, and purpose specifications                                |
+| §8  | Registered Metrics Catalogue (extensible) | 44 metrics × 9 categories; validation gates; 11-panel dashboard set                          |
+| §9  | Statistical Methodology                   | Sample size requirements, bootstrap, OLS fit, Ljung-Box, ADF, variance ratios                |
+| §10 | Limitations and Known Constraints         | Model limitations, analysis-specific limitations, failure modes, scope boundary              |
 
-**§2 Metrics Overview (18 detailed specifications)**:
+**§2 Metrics Overview (42 detailed specifications)**:
+
+*Core 19 (documented in §2 base section; #19 Strategy Correlation Matrix follows HHI):*
 
 | #  | Metric                            | Category               | Key Calibration Target            |
 |----|-----------------------------------|------------------------|-----------------------------------|
-| 1  | Price Deviation from Fundamental  | Price Dynamics         |                                   |
+| 1  | Price Deviation from Fundamental  | Price Dynamics         | [−15, +15]%                       |
 | 2  | Mean Absolute Deviation (MAD)     | Anchoring-Specific     | [3, 10]% (Campbell & Sharpe 2009) |
 | 3  | Anchoring Persistence (Half-Life) | Temporal Dynamics      | [20, 60] rounds                   |
 | 4  | Rolling Volatility                | Market Quality         | [0.5, 2.0]% per round             |
@@ -38,6 +42,17 @@
 | 17 | Conditional VaR (CVaR-95)         | Expected Shortfall     | [−6, −1.5]% per round             |
 | 18 | Herfindahl Concentration (HHI)    | Market Concentration   | [0.07, 0.20]                      |
 
+*Extended 23 (documented in subsections §2.2–§2.7):*
+
+| Subsection | Category              | Metrics                                                                                  |
+|------------|-----------------------|------------------------------------------------------------------------------------------|
+| §2.2       | Price Dynamics        | Half-Life Threshold, Return Skewness, Return Kurtosis, Variance Ratio (Lo & MacKinlay)   |
+| §2.3       | Anchoring-Specific    | Anchor Dispersion, Under-Revision Ratio, Regime Transition Lag, Price-to-Anchor Distance |
+| §2.4       | Agent Behaviour       | Action Frequency, Net Position TS, Terminal PnL, Sharpe Ratio, Silent Agent Count        |
+| §2.5       | Microstructure        | Order Imbalance, Signed Volume AC, Corrective/Biased Ratio, Momentum-Anchoring Coupling  |
+| §2.6       | Statistical Inference | MAD Bootstrap CI, Half-Life Bootstrap CI, Ljung-Box p-value, ADF Unit Root p-value       |
+| §2.7       | Phase Decomposition   | Phase Assignment TS, Per-Phase Metrics Table                                             |
+
 **§3 Dimensions at a Glance**:
 
 | Dim | Focus                              | Primary Metrics                                  |
@@ -54,14 +69,14 @@
 
 ## §1 Analysis Objectives
 
-| Objective | Research Question                                                                        | Metric(s)                                          | Expected Finding                                                                       |
-|-----------|------------------------------------------------------------------------------------------|----------------------------------------------------|----------------------------------------------------------------------------------------|
-| O1        | Do anchoring agents create persistent price deviations from fundamental value?           | Price deviation (%), Mean Absolute Deviation (MAD) | Prices remain 3–10% above fundamental for extended periods                             |
-| O2        | How long does it take the market to revert to fundamental after initial mispricing?      | Anchoring persistence half-life                    | Slow convergence: half-life 20–60 rounds (vs. ~5 rounds in a fully rational market)    |
-| O3        | What is the relative corrective power of RationalUpdater vs. anchoring agent resistance? | Agent-type order contribution, deviation slope     | RationalUpdater partially corrects but is insufficient to overcome 4 anchoring agents  |
-| O4        | Does simulation anchoring magnitude match empirical literature calibration targets?      | MAD vs. Campbell & Sharpe (2009) benchmarks        | MAD ∈ [3%, 10%] matching analyst forecast error magnitudes                             |
-| O5        | How does anchoring affect agent portfolio performance?                                   | Portfolio Sharpe ratio, final wealth by agent type | RationalUpdater outperforms AnchoredTrader and HistoricalAnchor long-run               |
-| O6        | Do all variants (Rule/LLM/RuleLLM/Rag) reproduce the anchoring phenomenon?               | Cross-variant MAD and half-life                    | All variants show persistent deviation; LLM more variable; Rag potentially reduced MAD |
+| Objective | Research Question                                                                        | Metric(s)                                          | Expected Finding                                                                                                      |
+|-----------|------------------------------------------------------------------------------------------|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| O1        | Do anchoring agents create persistent price deviations from fundamental value?           | Price deviation (%), Mean Absolute Deviation (MAD) | Prices remain 3–10% above fundamental for extended periods                                                            |
+| O2        | How long does it take the market to revert to fundamental after initial mispricing?      | Anchoring persistence half-life                    | Slow convergence: half-life 20–60 rounds (vs. ~5 rounds in a fully rational market)                                   |
+| O3        | What is the relative corrective power of RationalUpdater vs. anchoring agent resistance? | Agent-type order contribution, deviation slope     | RationalUpdater partially corrects but is insufficient to overcome 6 biased/destabilising agents (AT×2 + HA×2 + DT×2) |
+| O4        | Does simulation anchoring magnitude match empirical literature calibration targets?      | MAD vs. Campbell & Sharpe (2009) benchmarks        | MAD ∈ [3%, 10%] matching analyst forecast error magnitudes                                                            |
+| O5        | How does anchoring affect agent portfolio performance?                                   | Portfolio Sharpe ratio, final wealth by agent type | RationalUpdater outperforms AnchoredTrader and HistoricalAnchor long-run                                              |
+| O6        | Do all variants (Rule/LLM/RuleLLM/Rag) reproduce the anchoring phenomenon?               | Cross-variant MAD and half-life                    | All variants show persistent deviation; LLM more variable; Rag potentially reduced MAD                                |
 
 
 ## §2 Core Metrics Catalogue
@@ -467,6 +482,548 @@
 
 ---
 
+### §2.2 Price Dynamics — Extended Metrics
+
+#### Metric: Half-Life (Threshold-Crossing Method)
+
+- **Category**: Price Dynamics / Temporal Convergence
+- **Definition**: The first round at which |deviation(t)| falls below 50% of its initial value, providing a model-free estimate of anchoring persistence without assuming exponential decay.
+- **Formula**:
+  ```
+  half_life_threshold = min{t : |dev(t)| < |dev(1)| / 2}
+  ```
+- **Function Signature**: `def m_half_life_threshold(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Unlike the OLS exponential fit (half_life_fitted), the threshold method makes no distributional assumptions. It directly answers "when does the mispricing halve?" — robust to non-exponential decay paths common in multi-agent systems with phase transitions. Particularly useful when agents create regime shifts that violate the linear restoring force assumption.
+- **Academic Calibration Source**:
+  - Campbell, S. D., & Sharpe, S. A. (2009): Documents forecast error reduction timelines consistent with 20–60 round equivalent crossings.
+  - Fama, E. F., & French, K. R. (1988): Mean-reversion half-life framework for equity prices.
+- **Interpretation**:
+  - threshold < fitted half-life: Convergence accelerates after initial slow phase (convex decay)
+  - threshold > fitted half-life: Convergence decelerates (concave decay — anchoring reinforcement)
+  - threshold = NaN: Deviation never reaches 50% of initial — strong anchoring throughout
+- **Normal Range**: [15, 70] rounds (slightly wider than fitted due to noise sensitivity)
+- **Red Flag**: threshold = NaN (never crosses) or threshold < 5 (trivially rational)
+
+---
+
+#### Metric: Return Skewness
+
+- **Category**: Price Dynamics / Distribution Shape
+- **Definition**: Third standardised moment of the per-round return distribution, measuring asymmetry. Negative skewness indicates larger downside moves (correction from anchored high); positive skewness indicates larger upside moves.
+- **Formula**:
+  ```
+  skewness = (1/T) × Σ_t [(r(t) − r̄) / σ_r]³
+  ```
+- **Function Signature**: `def m_return_skewness(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Anchoring creates a specific skewness signature: during the persistence phase, returns are slightly positively skewed (small upward drift); during correction, returns become negatively skewed (larger downward moves). Over the full simulation, net skewness should be mildly negative (the correction moves are larger in magnitude than the drift).
+- **Academic Calibration Source**:
+  - Cont, R. (2001). Empirical properties of asset returns: Stylized facts and statistical issues. *Quantitative Finance*, 1(2), 223–236. https://doi.org/10.1080/713665670 — documents negative skewness (−0.1 to −0.5) as a stylized fact of equity returns.
+- **Interpretation**:
+  - skewness ∈ [−0.5, 0.0]: Expected for anchoring with gradual correction
+  - skewness < −1.0: Large correction event dominates (possible over-correction)
+  - skewness > +0.5: Unusual — anchoring creating sustained upward jumps
+- **Normal Range**: [−0.8, +0.3] for 200-round anchoring simulation
+- **Red Flag**: |skewness| > 2.0 (extreme non-normality; check NoiseTrader or MomentumTrader)
+
+---
+
+#### Metric: Return Kurtosis (Excess)
+
+- **Category**: Price Dynamics / Tail Heaviness
+- **Definition**: Excess fourth standardised moment of returns (excess kurtosis = kurtosis − 3), measuring the propensity for extreme moves relative to a Gaussian distribution.
+- **Formula**:
+  ```
+  excess_kurtosis = [(1/T) × Σ_t ((r(t) − r̄) / σ_r)⁴] − 3
+  ```
+- **Function Signature**: `def m_return_kurtosis(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Multi-agent heterogeneity creates fat tails (positive excess kurtosis) because different agent types activate at different price levels, creating regime-dependent return distributions. Anchoring specifically creates moderate kurtosis — not the extreme kurtosis of crash-prone bubble markets, but heavier tails than pure noise.
+- **Academic Calibration Source**:
+  - Cont, R. (2001): Documents excess kurtosis of 3–50 for daily equity returns across markets. For a 200-round simulation with moderate heterogeneity, excess kurtosis of 1–5 is expected.
+  - Mandelbrot, B. (1963). The variation of certain speculative prices. *Journal of Business*, 36(4), 394–419. — foundational paper establishing fat tails in financial returns.
+- **Interpretation**:
+  - excess_kurtosis ∈ [0, 1]: Near-Gaussian — noise dominates (weak heterogeneity)
+  - excess_kurtosis ∈ [1, 5]: Moderate fat tails — expected for anchoring scenario
+  - excess_kurtosis > 10: Extreme tails — possible instability
+- **Normal Range**: [0.5, 6.0] for anchoring-populated multi-agent simulation
+- **Red Flag**: excess_kurtosis > 15 (unstable) or < 0 (platykurtic — homogeneous agents)
+
+---
+
+#### Metric: Variance Ratio (Lo & MacKinlay)
+
+- **Category**: Price Dynamics / Random Walk Test
+- **Definition**: Ratio of multi-period return variance to single-period return variance, scaled by the holding period. Tests whether log prices follow a random walk — a VR significantly different from 1.0 rejects the random walk hypothesis.
+- **Formula**:
+  ```
+  VR(q) = Var(r_t(q)) / [q × Var(r_t(1))]
+  where r_t(q) = log(P(t)) − log(P(t−q)) is the q-period log return
+  ```
+  Computed at q ∈ {2, 4, 8} following Lo & MacKinlay (1988).
+- **Function Signature**: `def m_variance_ratio_lo_mackinlay(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: VR > 1 indicates positive autocorrelation (momentum/persistence) — expected during the anchoring phase when prices drift slowly away from the anchor. VR < 1 indicates mean-reversion — expected during the correction phase. The multi-period structure (q = 2, 4, 8) captures different time-scale dynamics of the anchoring phenomenon.
+- **Academic Calibration Source**:
+  - Lo, A. W., & MacKinlay, A. C. (1988). Stock market prices do not follow random walks: Evidence from a simple specification test. *Review of Financial Studies*, 1(1), 41–66. https://doi.org/10.1093/rfs/1.1.41 — VR(q=2) ≈ 1.17 for US weekly returns.
+  - Lo, A. W., & MacKinlay, A. C. (1989). The size and power of the variance ratio test. *Review of Financial Studies*, 2(2), 187–217. — establishes that n ≥ 8q observations are needed for adequate power.
+- **Interpretation**:
+  - VR(q) ∈ [0.9, 1.1]: Cannot reject random walk (noise dominant)
+  - VR(q) ∈ [1.1, 1.5]: Mild persistence — consistent with anchoring-induced drift
+  - VR(q) > 1.5: Strong persistence — anchoring extremely dominant
+  - VR(q) < 0.8: Strong mean-reversion — correction phase dominates
+- **Normal Range**: VR(2) ∈ [1.0, 1.3]; VR(4) ∈ [0.9, 1.4]; VR(8) ∈ [0.8, 1.5]
+- **Red Flag**: VR(q) > 2.0 or VR(q) < 0.5 (extreme departure from random walk)
+
+---
+
+### §2.3 Anchoring-Specific — Extended Metrics
+
+#### Metric: Anchor Dispersion
+
+- **Category**: Anchoring-Specific / Cross-Agent Heterogeneity
+- **Definition**: Standard deviation of perceived_target values across all AnchoredTrader instances within a given round, measuring whether biased agents converge toward the same anchor or diverge.
+- **Formula**:
+  ```
+  dispersion(t) = std({perceived_target_i(t)} for all AnchoredTrader i)
+  ```
+- **Function Signature**: `def m_anchor_dispersion(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: In a well-calibrated simulation, all AnchoredTrader instances should share the same anchor (initial_price = 105) and adjustment factor (α = 0.3), producing zero dispersion. Non-zero dispersion arises only if agents have heterogeneous parameters or if instance-specific noise perturbs perceived targets. High dispersion indicates that the anchoring mechanism is not monolithic — useful for LLM variants where perceived targets may drift.
+- **Academic Calibration Source**:
+  - Tversky, A., & Kahneman, D. (1974): Individual-level anchor effects show inter-subject variability; standard deviation of adjustment ≈ 30% of mean adjustment in lab settings.
+- **Interpretation**:
+  - dispersion = 0: Homogeneous anchoring (expected for Rule variant with identical parameters)
+  - dispersion ∈ (0, 2%]: Mild heterogeneity (acceptable for LLM variants)
+  - dispersion > 5%: High disagreement among biased agents — anchoring mechanism fragmenting
+- **Normal Range**: [0, 3%] for Rule variant; [0, 8%] for LLM variant
+- **Red Flag**: dispersion > 10% (anchoring agents behaving incoherently)
+
+---
+
+#### Metric: Under-Revision Ratio
+
+- **Category**: Anchoring-Specific / Persistence Verification
+- **Definition**: Fraction of simulation rounds during which the price deviation retains the same sign as the initial deviation, measuring how long the anchoring-induced directional bias persists.
+- **Formula**:
+  ```
+  under_revision_ratio = |{t : sign(P(t) - F) = sign(P(1) - F)}| / T
+  ```
+- **Function Signature**: `def m_under_revision_ratio(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Campbell & Sharpe (2009) document that analyst forecasts maintain the same directional error for 50–80% of forecast periods (under-revision). This metric directly replicates their methodology: if anchoring persists, the market price stays above F (same sign as initial 5% overvaluation) for the majority of rounds.
+- **Academic Calibration Source**:
+  - Campbell, S. D., & Sharpe, S. A. (2009): ~50% under-revision rate in quarterly forecasts; simulation target [0.5, 0.85] for 200-round runs.
+- **Interpretation**:
+  - ratio > 0.8: Very strong anchoring — price almost never crosses fundamental
+  - ratio ∈ [0.5, 0.8]: Moderate anchoring persistence — expected target range
+  - ratio < 0.5: Anchoring collapses early (rapid correction)
+- **Normal Range**: [0.50, 0.85]
+- **Red Flag**: ratio < 0.3 (anchoring ineffective) or ratio > 0.95 (no correction occurring)
+
+---
+
+#### Metric: Regime Transition Lag
+
+- **Category**: Anchoring-Specific / Convergence Timing
+- **Definition**: The first round at which |deviation| falls below 1% — the point where the market has essentially corrected the anchoring-induced mispricing.
+- **Formula**:
+  ```
+  regime_lag = min{t : |dev(t)| < 0.01}
+  ```
+- **Function Signature**: `def m_regime_transition_lag(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: While half-life measures the 50% decay point, regime_transition_lag measures the full correction point (below 1% deviation). This completes the convergence picture: half-life tells how fast the mispricing shrinks; regime lag tells when it’s effectively gone. In a 200-round simulation, we expect regime transition between rounds 80–180.
+- **Academic Calibration Source**:
+  - Campbell & Sharpe (2009): Full forecast error correction typically requires 3–6 quarters — equivalent to 75–150 simulation rounds.
+- **Interpretation**:
+  - lag < 50: Rapid correction (strong γ or many RationalUpdaters)
+  - lag ∈ [80, 180]: Normal convergence for calibrated anchoring
+  - lag = NaN (never reached): Anchoring persists throughout simulation
+- **Normal Range**: [60, 180] rounds for 200-round simulation
+- **Red Flag**: lag = NaN (never converges) or lag < 20 (anchoring trivial)
+
+---
+
+#### Metric: Price-to-Anchor Distance Time-Series
+
+- **Category**: Anchoring-Specific / Anchor Proximity
+- **Definition**: Per-round percentage distance between the market price and the canonical anchor price (initial_price = 105), measuring how far the market has moved from the original anchor reference point.
+- **Formula**:
+  ```
+  distance(t) = (P(t) − anchor) / anchor × 100%
+  ```
+- **Function Signature**: `def m_price_to_anchor_distance_ts(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: The deviation metric measures distance from fundamental; this metric measures distance from the anchor itself. Together they decompose the price position: a price exactly at the anchor has zero anchor-distance but +5% fundamental deviation. As the market corrects toward F, anchor-distance becomes increasingly negative. This dual-reference decomposition reveals whether price is moving toward fundamental or simply drifting from the anchor.
+- **Academic Calibration Source**:
+  - Tversky & Kahneman (1974): Anchoring persists when stimuli remain close to the anchor; drift away from anchor weakens the bias. The distance time-series tests whether the anchoring effect weakens monotonically with price-anchor separation.
+- **Interpretation**:
+  - distance ≈ 0: Price at anchor — anchoring agents holding price near reference
+  - distance < −5%: Price well below anchor, approaching fundamental — correction phase
+  - distance > 0: Price above anchor — momentum overshoot or additional upward pressure
+- **Normal Range**: distance evolves from ≈0% (round 1) to ≈−5% (round 200) as P converges to F
+- **Red Flag**: distance persistently > +5% (diverging from both anchor and fundamental)
+
+---
+
+### §2.4 Agent Behaviour — Extended Metrics
+
+#### Metric: Agent Action Frequency
+
+- **Category**: Agent Behaviour / Activity Profile
+- **Definition**: Per-agent counts of buy, sell, and hold actions across all simulation rounds, profiling each agent's decision pattern and engagement level.
+- **Formula**:
+  ```
+  freq_i = {buy: |{t: action_i(t) = buy}|,
+            sell: |{t: action_i(t) = sell}|,
+            hold: |{t: action_i(t) = hold}|}
+  ```
+- **Function Signature**: `def m_agent_action_frequency(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Volume alone does not distinguish between agents who trade frequently in small sizes vs. agents who trade rarely in large blocks. Action frequency reveals the decision-making tempo of each agent type: AnchoredTrader should buy frequently (supporting anchor); RationalUpdater should sell frequently (correcting); NoiseTrader should show balanced random activity; LiquidityProvider should show high hold frequency (quoting but not always executing).
+- **Academic Calibration Source**:
+  - Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71–100. — distinguishes informed (infrequent, large) from uninformed (frequent, small) trading patterns.
+- **Interpretation**:
+  - AnchoredTrader: buy freq > sell freq (supporting the anchor)
+  - RationalUpdater: sell freq > buy freq when P > F; buy freq > sell freq when P < F
+  - NoiseTrader: approximately balanced buy/sell with high activity rate
+  - LiquidityProvider: high hold frequency (market-making with selective execution)
+- **Normal Range**: All agents should have total actions = T (200 rounds); hold fraction < 0.8 for active agents
+- **Red Flag**: Any active agent with hold fraction > 0.95 (effectively silent) or buy = sell = 0
+
+---
+
+#### Metric: Agent Net Position Time-Series
+
+- **Category**: Agent Behaviour / Position Dynamics
+- **Definition**: Cumulative net position (shares held) per agent over time, revealing inventory accumulation and liquidation patterns.
+- **Formula**:
+  ```
+  position_i(t) = position_i(t−1) + quantity_i(t) × sign(action_i(t))
+  where sign(buy) = +1, sign(sell) = −1, sign(hold) = 0
+  ```
+- **Function Signature**: `def m_agent_net_position_ts(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Position evolution reveals the economic exposure each agent type takes in response to the anchoring phenomenon. AnchoredTrader should accumulate long positions (buying into the overvaluation); RationalUpdater should build short positions (selling into overvaluation) then flatten as price corrects. The shape of the position curve validates that agents respond to mispricing as their strategy dictates.
+- **Academic Calibration Source**:
+  - Glosten & Milgrom (1985): Market makers maintain bounded inventory; directional traders accumulate until their signal expires.
+- **Interpretation**:
+  - AnchoredTrader: monotonically increasing position (persistent buying)
+  - RationalUpdater: initially short (selling into overvaluation), flattening during correction
+  - MomentumTrader: follows recent price direction (positive in persistence, negative in correction)
+  - NoiseTrader: random walk around zero
+- **Normal Range**: |position_i(T)| < initial_cash / P(T) for all agents (no unlimited leverage)
+- **Red Flag**: Any agent position exceeds 5× initial endowment equivalent (unrealistic leverage)
+
+---
+
+#### Metric: Agent Terminal PnL
+
+- **Category**: Agent Behaviour / Performance Attribution
+- **Definition**: Per-agent mark-to-market profit-and-loss at the final round: (terminal_wealth − initial_wealth), attributing economic gains and losses to each strategy.
+- **Formula**:
+  ```
+  PnL_i = W_i(T) − W_i(0)
+        = [cash_i(T) + position_i(T) × P(T)] − [cash_i(0) + position_i(0) × P(0)]
+  ```
+- **Function Signature**: `def m_agent_pnl_terminal(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Terminal PnL is the ultimate performance measure for evaluating whether the theoretical prediction holds: rational agents should profit (positive PnL) by trading against the mispricing, while biased agents should lose (negative PnL) by maintaining overvalued positions. This validates De Long et al.’s (1990) result that noise/biased traders lose to rational traders in expectation.
+- **Academic Calibration Source**:
+  - De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). Noise trader risk in financial markets. *JPE*, 98(4), 703–738. — biased traders lose on average.
+  - De Bondt, W. F. M., & Thaler, R. (1985). Does the stock market overreact? *Journal of Finance*, 40(3), 793–805. — contrarian strategy earns positive alpha.
+- **Interpretation**:
+  - RationalUpdater PnL > 0: Expected — profited from selling overvalued assets
+  - AnchoredTrader PnL < 0: Expected — bought and held overvalued assets
+  - ContrarianTrader PnL > 0: Expected — mean-reversion betting profitable
+- **Normal Range**: |PnL_i| < 30% of initial_wealth for calibrated parameters
+- **Red Flag**: Any agent PnL > +100% (unrealistic leverage gains) or total PnL ≠ 0 (conservation violation)
+
+---
+
+#### Metric: Agent Sharpe Ratio (Terminal)
+
+- **Category**: Agent Behaviour / Risk-Adjusted Performance
+- **Definition**: Per-agent ratio of mean round-level PnL to its standard deviation, measuring risk-adjusted strategy performance.
+- **Formula**:
+  ```
+  Sharpe_i = mean(pnl_i(t)) / std(pnl_i(t))
+  where pnl_i(t) = W_i(t) − W_i(t−1)
+  ```
+- **Function Signature**: `def m_agent_sharpe_terminal(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Raw PnL can be positive due to either skill or luck (high variance). The Sharpe ratio distinguishes consistent performers (high Sharpe) from lucky gamblers (high PnL, high variance, low Sharpe). RationalUpdater should show the highest Sharpe (consistent small gains from corrective trading); NoiseTrader should show Sharpe ≈ 0 (random); MomentumTrader may show high PnL but moderate Sharpe (variable returns).
+- **Academic Calibration Source**:
+  - Sharpe, W. F. (1966). Mutual fund performance. *Journal of Business*, 39(1), 119–138. — original reward-to-variability ratio.
+  - For simulation: annualised Sharpe > 1.0 (round-level Sharpe > 0.07 for 200 rounds) indicates consistent alpha.
+- **Interpretation**:
+  - Sharpe > 0.1: Consistent outperformance (expected for RationalUpdater)
+  - Sharpe ≈ 0: No systematic edge (expected for NoiseTrader)
+  - Sharpe < −0.05: Consistent underperformance (expected for AnchoredTrader)
+- **Normal Range**: [−0.15, +0.20] for round-level Sharpe ratios
+- **Red Flag**: |Sharpe| > 0.5 (unrealistically consistent; check data integrity)
+
+---
+
+#### Metric: Silent Agent Count
+
+- **Category**: Agent Behaviour / System Health
+- **Definition**: Number of agents that never executed a trade (zero total volume) across the entire simulation, serving as a critical system health diagnostic.
+- **Formula**:
+  ```
+  silent_count = |{i : total_volume_i = 0}|
+  ```
+- **Function Signature**: `def m_silent_agent_count(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: A silent agent indicates either a bug (agent never activated), an overly restrictive threshold (perceived deviation too small to trigger action), or a cash/position constraint preventing any trade. In a well-calibrated 200-round simulation with heterogeneous agents, all agents should trade at least once. Silent agents undermine the ecological validity of the multi-agent demonstration.
+- **Academic Calibration Source**:
+  - Not calibrated to empirical literature — this is a simulation health metric. Expected value: 0 silent agents for all variants.
+- **Interpretation**:
+  - silent_count = 0: All agents active — simulation functioning as designed
+  - silent_count = 1–2: Minor issue — check threshold parameters for inactive agents
+  - silent_count > 3: Critical — significant portion of agent ecosystem non-functional
+- **Normal Range**: 0 (expected)
+- **Red Flag**: silent_count > 0 triggers advisory warning in validation output
+
+---
+
+### §2.5 Microstructure Metrics
+
+#### Metric: Order Imbalance Time-Series
+
+- **Category**: Microstructure / Demand Pressure
+- **Definition**: Per-round ratio of net signed demand to gross volume, measuring the directional pressure on price from order flow asymmetry.
+- **Formula**:
+  ```
+  imbalance(t) = (buy_vol(t) − sell_vol(t)) / (buy_vol(t) + sell_vol(t))
+  ```
+  Values range from −1 (all sell) to +1 (all buy); 0 = balanced.
+- **Function Signature**: `def m_order_imbalance_ts(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Order imbalance is the most direct measure of demand-side pressure on price. In anchoring markets, persistent positive imbalance (buy pressure) during the persistence phase reflects biased agents supporting the overvalued price. The transition from positive to negative imbalance marks the correction onset. Chordia et al. (2002) show that order imbalance predicts short-term returns and captures institutional demand shocks.
+- **Academic Calibration Source**:
+  - Chordia, T., Roll, R., & Subrahmanyam, A. (2002). Order imbalance, liquidity, and market returns. *Journal of Financial Economics*, 65(1), 111–130. https://doi.org/10.1016/S0304-405X(02)00136-8 — order imbalance predicts 1-day returns with mean imbalance |μ| ≈ 0.05–0.15.
+- **Interpretation**:
+  - mean imbalance > +0.1: Persistent buy pressure (anchoring agents dominant)
+  - mean imbalance ≈ 0: Balanced market (correction complete or noise-dominated)
+  - mean imbalance < −0.1: Persistent sell pressure (correction/rational agents dominant)
+- **Normal Range**: mean |imbalance| ∈ [0.02, 0.25] for heterogeneous agent simulation
+- **Red Flag**: |imbalance| = 1 for any round (one-sided market — no counterparty)
+
+---
+
+#### Metric: Signed Volume Autocorrelation
+
+- **Category**: Microstructure / Order Flow Persistence
+- **Definition**: Lag-1 autocorrelation of the net signed demand series, measuring whether buy/sell pressure persists across rounds.
+- **Formula**:
+  ```
+  signed_vol_AC1 = Corr(net_demand(t), net_demand(t−1))
+  where net_demand(t) = buy_vol(t) − sell_vol(t)
+  ```
+- **Function Signature**: `def m_signed_volume_autocorr(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Positive signed volume autocorrelation indicates that order flow is persistent — the same directional pressure continues across rounds. In anchoring markets, this is expected during the persistence phase (AnchoredTrader consistently buys). Negative autocorrelation suggests alternating pressure (oscillation). Hasbrouck (1991) demonstrates that trade direction persistence is a key microstructure signature.
+- **Academic Calibration Source**:
+  - Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179–207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x — signed trade autocorrelation ≈ 0.1–0.4 in equity markets.
+- **Interpretation**:
+  - AC > 0.3: Strong persistence — anchoring-driven sustained buying
+  - AC ∈ [0.0, 0.3]: Mild persistence — normal market
+  - AC < 0: Alternating pressure — suggests oscillatory dynamics
+- **Normal Range**: [0.0, 0.5] for anchoring-dominant periods; [−0.2, 0.2] for correction phase
+- **Red Flag**: |AC| > 0.7 (order flow frozen in one direction; check agent diversity)
+
+---
+
+#### Metric: Corrective-to-Biased Volume Ratio
+
+- **Category**: Microstructure / Force Balance
+- **Definition**: Ratio of RationalUpdater corrective trading volume to combined AnchoredTrader + HistoricalAnchor biased volume — directly measures the relative strength of corrective vs. biased forces.
+- **Formula**:
+  ```
+  ratio = volume_RU / (volume_AT + volume_HA)
+  ```
+- **Function Signature**: `def m_corrective_to_biased_volume_ratio(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: This metric operationalises Shleifer & Vishny’s (1997) "limits of arbitrage" concept: rational corrective agents (RU) face finite resources and must overcome biased agents’ combined volume. A ratio < 1 means biased agents dominate volume-wise; a ratio > 1 means corrective agents trade more actively. The balance between these forces determines convergence speed.
+- **Academic Calibration Source**:
+  - Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35–55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x — demonstrates that rational arbitrage is resource-constrained.
+- **Interpretation**:
+  - ratio < 0.5: Biased agents strongly dominant — slow correction expected
+  - ratio ∈ [0.5, 1.5]: Balanced — gradual correction
+  - ratio > 2.0: Corrective agents dominant — fast correction
+- **Normal Range**: [0.3, 2.0] for calibrated 14-agent anchoring simulation
+- **Red Flag**: ratio < 0.1 (RU effectively inactive) or ratio > 5 (biased agents non-functional)
+
+---
+
+#### Metric: Momentum-Anchoring Coupling
+
+- **Category**: Microstructure / Strategy Interaction
+- **Definition**: Pearson correlation between AnchoredTrader net demand and MomentumTrader net demand per round, measuring whether momentum amplifies or counteracts anchoring.
+- **Formula**:
+  ```
+  coupling = Corr(demand_AT(t), demand_MT(t))
+  ```
+- **Function Signature**: `def m_momentum_anchoring_coupling(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Hong & Stein (1999) show that momentum traders can amplify or dampen existing mispricings depending on their position relative to the mispricing lifecycle. During the persistence phase, MomentumTrader should align with AnchoredTrader (both buying into the drift), creating positive coupling. During correction, MomentumTrader reverses (selling into the decline), creating negative coupling. The net correlation over all rounds captures the degree to which momentum amplifies anchoring.
+- **Academic Calibration Source**:
+  - Hong, H., & Stein, J. C. (1999). A unified theory of underreaction, momentum, and overreaction in asset markets. *Journal of Finance*, 54(6), 2143–2184. https://doi.org/10.1111/0022-1082.00184 — momentum traders interact with slow-information-diffusion (analogous to anchoring).
+- **Interpretation**:
+  - coupling > 0.3: Momentum amplifying anchoring — persistence enhanced
+  - coupling ∈ [−0.1, 0.3]: Weak coupling — momentum neutral to anchoring
+  - coupling < −0.2: Momentum opposing anchoring — correction accelerated
+- **Normal Range**: [−0.2, 0.5] for full-simulation correlation
+- **Red Flag**: coupling > 0.8 (strategies effectively identical) or coupling < −0.5 (extreme oscillation risk)
+
+---
+
+### §2.6 Statistical Inference Metrics
+
+#### Metric: MAD Block Bootstrap 95% CI
+
+- **Category**: Statistical Inference / Confidence Estimation
+- **Definition**: Moving-block bootstrap confidence interval for the Mean Absolute Deviation (MAD), providing uncertainty quantification for the primary anchoring magnitude metric.
+- **Formula**:
+  ```
+  1. Choose block length b = ⌈n^(1/3)⌉ (Politis & Romano optimal rule)
+  2. Draw K = 2000 bootstrap replicates by randomly selecting ⌈n/b⌉ blocks
+  3. Compute MAD for each replicate
+  4. CI = [percentile_2.5(MAD*), percentile_97.5(MAD*)]
+  ```
+- **Function Signature**: `def m_mad_block_bootstrap_ci_95(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: A single-point MAD estimate has no error bar. Serial dependence in the deviation series (caused by the persistent anchoring mechanism) violates IID assumptions required by standard bootstrap. The moving-block bootstrap preserves within-block serial correlation, yielding valid confidence intervals. The block length b = n^(1/3) minimises MSE for dependent data (Politis & Romano, 1994).
+- **Academic Calibration Source**:
+  - Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap. *Journal of the American Statistical Association*, 89(428), 1303–1313. https://doi.org/10.1080/01621459.1994.10476870 — establishes moving-block bootstrap for serially dependent time series.
+  - Künsch, H. R. (1989). The jackknife and the bootstrap for general stationary observations. *Annals of Statistics*, 17(3), 1217–1241. — theoretical justification for block resampling.
+- **Interpretation**:
+  - CI entirely within [3%, 10%]: Anchoring calibration confirmed with 95% confidence
+  - CI lower bound > 10%: Significant overcalibration
+  - CI upper bound < 3%: Anchoring too weak (cannot reject no-anchoring null)
+- **Normal Range**: CI width < 4% (tight estimate); CI_low > 2% and CI_high < 12%
+- **Red Flag**: CI width > 8% (insufficient precision; need more rounds or replicates)
+
+---
+
+#### Metric: Half-Life Block Bootstrap 95% CI
+
+- **Category**: Statistical Inference / Persistence Uncertainty
+- **Definition**: Moving-block bootstrap confidence interval for the fitted exponential half-life, quantifying uncertainty in the convergence speed estimate.
+- **Formula**:
+  ```
+  1. Block length b = ⌈n^(1/3)⌉
+  2. Draw K = 2000 replicates; for each, fit OLS on log|dev| vs. round
+  3. Compute half_life = −ln(2)/slope for each valid replicate
+  4. CI = [percentile_2.5(HL*), percentile_97.5(HL*)]
+  ```
+- **Function Signature**: `def m_half_life_block_bootstrap_ci_95(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: The half-life estimate is highly sensitive to the tail behaviour of the deviation series. A few noisy late-round observations can shift the OLS slope significantly. The bootstrap CI reveals whether the half-life is precisely estimated or merely a rough central tendency. Replicates where the slope is positive or zero produce NaN half-lives (filtered as invalid).
+- **Academic Calibration Source**:
+  - Politis & Romano (1994): Block bootstrap methodology (same as MAD CI).
+  - Campbell & Sharpe (2009): Expected half-life 20–60 rounds provides the calibration target against which the CI is validated.
+- **Interpretation**:
+  - CI within [15, 80]: Well-estimated half-life consistent with calibration
+  - CI lower bound < 5: Some replicates show near-instant correction (noise-driven)
+  - CI upper bound > 150: Some replicates show very slow or no convergence
+- **Normal Range**: CI width < 40 rounds; valid_replicates > 90% of K
+- **Red Flag**: valid_replicates < 50% (log-deviation series too noisy for exponential fit)
+
+---
+
+#### Metric: Ljung-Box Returns P-Value
+
+- **Category**: Statistical Inference / Autocorrelation Test
+- **Definition**: Ljung-Box Q-statistic testing the null hypothesis that return autocorrelations at lags 1–10 are jointly zero — i.e., testing whether returns are serially independent.
+- **Formula**:
+  ```
+  Q(m) = n(n+2) × Σ_{k=1}^{m} [ρ̂(k)² / (n−k)]
+  H₀: ρ(1) = ρ(2) = … = ρ(m) = 0  (returns are IID)
+  p-value from χ²(m) distribution
+  ```
+  Uses m = 10 lags following standard practice.
+- **Function Signature**: `def m_ljung_box_returns_pvalue(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: In an efficient market, returns should be unpredictable (IID). Anchoring creates predictable return patterns (positive drift during persistence, negative drift during correction). Rejecting H₀ (p < 0.05) confirms that anchoring generates statistically detectable serial dependence in returns — the market is not efficient in the weak-form sense.
+- **Academic Calibration Source**:
+  - Ljung, G. M., & Box, G. E. P. (1978). On a measure of lack of fit in time series models. *Biometrika*, 65(2), 297–303. https://doi.org/10.1093/biomet/65.2.297 — standard portmanteau test for serial correlation.
+  - For anchoring simulation: expect p < 0.05 (reject null) during persistence phase, p > 0.10 (cannot reject) during convergence.
+- **Interpretation**:
+  - p < 0.01: Strong evidence of serial dependence (anchoring confirmed)
+  - p ∈ [0.01, 0.05]: Moderate evidence — consistent with mild anchoring
+  - p > 0.10: No evidence of serial dependence — market appears efficient
+- **Normal Range**: p ∈ [0.001, 0.10] for full-simulation return series
+- **Red Flag**: p > 0.50 (no detectable anchoring signal) or Q-statistic < 5 (very weak dependence)
+
+---
+
+#### Metric: ADF Unit Root P-Value
+
+- **Category**: Statistical Inference / Stationarity Test
+- **Definition**: Augmented Dickey-Fuller test statistic for the price level series, testing whether prices have a unit root (random walk) or are mean-reverting (stationary around fundamental).
+- **Formula**:
+  ```
+  ΔP(t) = α + βP(t−1) + ε(t)
+  H₀: β = 0 (unit root / random walk)
+  H₁: β < 0 (stationary / mean-reverting)
+  t-statistic compared to Dickey-Fuller critical values
+  ```
+  Uses ADF(0) (no lagged differences) given short series.
+- **Function Signature**: `def m_adf_unit_root_pvalue(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Anchoring creates a price path that is neither pure random walk nor immediately stationary: it’s a slowly mean-reverting process. The ADF test quantifies where on this spectrum the simulation falls. Rejecting the unit root hypothesis confirms that the γ-term and rational agents create statistically detectable mean-reversion, validating the convergence mechanism. Failure to reject suggests that within the simulation horizon, the anchoring effect is too strong for detectable reversion.
+- **Academic Calibration Source**:
+  - Dickey, D. A., & Fuller, W. A. (1979). Distribution of the estimators for autoregressive time series with a unit root. *Journal of the American Statistical Association*, 74(366), 427–431. https://doi.org/10.1080/01621459.1979.10482531
+  - MacKinnon, J. G. (1991). Critical values for cointegration tests. In R. F. Engle & C. W. J. Granger (Eds.), *Long-Run Economic Relationships*. Oxford University Press. — tabulated critical values used for approximate p-value.
+- **Interpretation**:
+  - p < 0.05: Reject unit root — prices are stationary (mean-reverting confirmed)
+  - p ∈ [0.05, 0.20]: Borderline — slow mean-reversion (consistent with long half-life)
+  - p > 0.20: Cannot reject unit root — prices appear non-stationary within simulation horizon
+- **Normal Range**: p ∈ [0.01, 0.20] for 200-round anchoring simulation with γ = 0.01
+- **Red Flag**: p > 0.50 (no detectable mean-reversion; γ may be too low) or p < 0.001 (instant convergence)
+
+---
+
+### §2.7 Phase Decomposition Metrics
+
+#### Metric: Phase Assignment Time-Series
+
+- **Category**: Phase Decomposition / Lifecycle Identification
+- **Definition**: Per-round assignment of the simulation state to one of four phases (Anchor Establishment, Persistent Mispricing, Slow Correction, Convergence) based on the quantitative criteria defined in §4.
+- **Formula**:
+  ```
+  phase(t) = {
+    1 (Establishment):  t ≤ 10 and deviation stabilising
+    2 (Persistence):    mean(dev[t-4:t]) > 0.02
+    3 (Correction):     deviation declining for 5+ rounds
+    4 (Convergence):    |deviation| < 0.01 for 5+ rounds
+  }
+  ```
+  Applied sequentially with transitions requiring sustained conditions.
+- **Function Signature**: `def m_phase_assignment_ts(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: The anchoring lifecycle is not a monotonic decay — it has distinct regimes with qualitatively different dynamics (establishment, persistence, correction, convergence). Phase decomposition enables per-phase metric computation (see per_phase_metrics_table), validation of expected phase durations against §4 targets, and identification of phase transition failures.
+- **Academic Calibration Source**:
+  - Campbell & Sharpe (2009): Documents a multi-phase pattern of forecast error emergence, persistence, and eventual correction over quarterly cycles.
+  - Hamilton, J. D. (1989). A new approach to the economic analysis of nonstationary time series and the business cycle. *Econometrica*, 57(2), 357–384. — regime-switching models as theoretical motivation for discrete phase assignments.
+- **Interpretation**:
+  - Phase 1 duration ≈ 10 rounds: Normal initialisation
+  - Phase 2 duration 30–60 rounds: Expected persistence phase
+  - Phase 3 duration 30–80 rounds: Gradual correction
+  - Phase 4 reached before round 180: Successful convergence
+- **Normal Range**: All 4 phases present; Phase 2 > Phase 1; Phase 4 begins before round 180
+- **Red Flag**: Only 1–2 phases detected (no lifecycle); Phase 2 lasts entire simulation (no correction)
+
+---
+
+#### Metric: Per-Phase Metrics Table
+
+- **Category**: Phase Decomposition / Conditional Statistics
+- **Definition**: Within-phase summary statistics (MAD, volatility, mean return) for each detected phase, enabling comparison of market behaviour across lifecycle stages.
+- **Formula**:
+  ```
+  For each phase p:
+    MAD_p = mean(|deviation(t)|) for t in phase p
+    vol_p = std(returns(t)) for t in phase p
+    ret_p = mean(returns(t)) for t in phase p
+  ```
+- **Function Signature**: `def m_per_phase_metrics_table(data, config) -> dict[str, Any]`
+- **Derivation Rationale**: Aggregate metrics over the full simulation mix together different market regimes, potentially obscuring important dynamics. Per-phase decomposition reveals that MAD is highest in Phase 2 (persistence), volatility may spike at phase transitions, and mean returns are negative in Phase 3 (correction). This conditional analysis validates the theoretical predictions for each lifecycle stage independently.
+- **Academic Calibration Source**:
+  - Hamilton (1989): Regime-switching analysis demonstrates that financial time series exhibit different statistical properties across regimes.
+  - For anchoring simulation: Phase 2 MAD > Phase 3 MAD > Phase 4 MAD (monotonically decreasing as correction proceeds).
+- **Interpretation**:
+  - Phase 2 MAD > 3%: Anchoring active (expected)
+  - Phase 3 MAD < Phase 2 MAD: Correction proceeding (expected)
+  - Phase 4 MAD < 1%: Convergence achieved (expected)
+  - Phase 3 volatility > Phase 2 volatility: Correction creates turbulence (common)
+- **Normal Range**: MAD decreasing across phases 2→3→4; volatility stable or mildly elevated in Phase 3
+- **Red Flag**: Phase 4 MAD > 2% (convergence not achieved) or Phase 2 MAD < Phase 3 MAD (counter-intuitive pattern)
+
+---
+
 
 ## §3 Analysis Dimensions
 
@@ -529,7 +1086,7 @@
 | 1     | Anchor Establishment  | Round 1                                         | deviation stable within ±0.5% for 5+ rounds | AnchoredTrader sets anchor = 105; HistoricalAnchor begins filling history              | Rounds 1–10         |
 | 2     | Persistent Mispricing | `mean(deviation[-5:]) > 0.02` stable            | `mean(deviation[-5:]) < 0.02`               | RationalUpdater buying but price stays elevated; AC1 > 0.1                             | Rounds 10–60        |
 | 3     | Slow Correction       | `deviation` declining for 5+ consecutive rounds | `deviation < 0.01`                          | HistoricalAnchor's rolling average converging toward F; anchoring resistance weakening | Rounds 60–90        |
-| 4     | Convergence           | `deviation < 0.01`                              | End of simulation                           | Price near fundamental; AC1 near zero; all agents near equilibrium                     | Rounds 90–100       |
+| 4     | Convergence           | `deviation < 0.01`                              | End of simulation                           | Price near fundamental; AC1 near zero; all agents near equilibrium                     | Rounds 90+          |
 
 ### Quantitative Phase Criteria
 
@@ -628,6 +1185,8 @@
 | Rolling Autocorrelation   | Line                 | Round      | AC1 (lag-1)                   | Zero line; ±0.2 reference lines                       | Phase shift: persistence → correction                 |
 | Bias Magnitude            | Bar (per agent type) | Agent type | bias_magnitude (%)            | True fundamental reference                            | Compare perceived_target to F for each anchoring type |
 | Cross-Variant Comparison  | Bar (4 groups)       | Metric     | Metric value                  | Error bars for stochastic variants                    | Summary cross-variant result                          |
+| Wealth Dynamics           | Bar + annotation     | Agent type | Terminal wealth ($)           | Gini annotation; wealth transfer direction arrows     | Who profits/loses from anchoring mispricing           |
+| Information & Tail Risk   | Multi-panel (2×2)    | Various    | Efficiency / VaR / HHI / Corr | VaR threshold line; correlation colour scale          | Market efficiency and risk concentration diagnostics  |
 
 
 ## §8 Registered Metrics Catalogue (extensible)
@@ -703,4 +1262,121 @@ Cross-variant artefacts are produced by
 * `cross_variant_metrics.png` — bar grid (one panel per metric).
 * `cross_variant_validation.png` — weighted-score bars vs. 0.60 gate, coloured
   green (VALID) or red (INVALID).
+
+
+## §9 Statistical Methodology
+
+This section documents the statistical methods underpinning the inference metrics and explains design choices, assumptions, and limitations.
+
+### 9.1 Sample Size Requirements
+
+| Method              | Minimum Rounds | Recommended Rounds | Reason                                                               |
+|---------------------|---------------:|-------------------:|----------------------------------------------------------------------|
+| MAD point estimate  |             10 |                 50 | Averaging over < 10 rounds produces high-variance estimate           |
+| Block bootstrap CI  |             30 |                100 | Need ≥ n/b = 5 blocks for valid resampling (b ≈ 6 for n = 200)       |
+| Half-life OLS fit   |             20 |                 80 | Need sufficient post-peak observations for decay slope estimation    |
+| Ljung-Box Q         |             20 |                100 | Asymptotic χ² approximation degrades below n = 20 at m = 10 lags     |
+| Variance ratio      |             16 |                 64 | Require n ≥ 8q; at q = 8, minimum n = 64                             |
+| ADF unit root       |             30 |                100 | Power of ADF is low at small n; critical values shift                |
+| Phase decomposition |             50 |                150 | Need ≥10 rounds per expected phase for meaningful within-phase stats |
+
+### 9.2 Block Bootstrap (Politis & Romano, 1994)
+
+- **Method**: Moving-block bootstrap — divide the time series into overlapping blocks of length b, resample blocks with replacement to form pseudo-series of length n.
+- **Block length selection**: b = ⌈n^(1/3)⌉ (rate-optimal rule minimising bootstrap MSE for weakly dependent data). For n = 200, b = 6.
+- **Why moving-block** (not IID bootstrap): The deviation series has high autocorrelation (ρ > 0.8). IID resampling destroys this dependence, producing anti-conservative confidence intervals. Block resampling preserves within-block serial correlation.
+- **Replicate count**: K = 2000 (standard; doubling to 4000 changes CI endpoints by < 0.1%).
+- **Limitation**: Block bootstrap assumes local stationarity within blocks. Phase transitions (non-stationarity) can inflate CI width. The 95% CI should be interpreted as approximate.
+
+### 9.3 OLS Exponential Decay Fit
+
+- **Model**: log|dev(t)| = a + b×t + ε(t); half_life = −ln(2)/b.
+- **Assumption**: Linear restoring force produces exponential convergence. The γ-term in the price formation model provides this linear force. Violated when: (a) phase transitions cause non-exponential decay, (b) AnchoredTrader creates a price floor producing piecewise-linear not exponential convergence.
+- **Robustness**: When R² < 0.3, the exponential model is a poor fit; the threshold-crossing half-life should be preferred.
+- **Filtering**: Rounds where |deviation| < 0.1% are excluded (log of near-zero is unstable).
+
+### 9.4 Ljung-Box Q-Statistic
+
+- **Null**: Returns are IID (no serial correlation at lags 1–10).
+- **Distribution**: Under H₀, Q ~ χ²(m) asymptotically. Valid for n > 3m (i.e., n > 30 for m = 10).
+- **Power**: At n = 100 and true AC1 = 0.2, power ≈ 80% (adequate). At n = 50, power drops to ~50%.
+- **Multiple testing note**: We do not apply Bonferroni correction across multiple Q-tests because: (a) only one Q-test is computed per simulation run, (b) metrics are correlated (adjusting would be over-conservative).
+
+### 9.5 ADF Unit Root Test
+
+- **Implementation**: ADF(0) without lagged differences (the price series is short and adding lags reduces power). The t-statistic for β is compared to Dickey-Fuller critical values tabulated by MacKinnon (1991).
+- **Approximate p-value**: Since `scipy.stats` is not a dependency, the implementation uses a lookup table of MacKinnon (1991) critical values at {1%, 5%, 10%} significance levels, with linear interpolation for intermediate p-values. This is an approximation — precision is ±2%.
+- **Power consideration**: ADF has notoriously low power against near-unit-root alternatives. For γ = 0.01, the expected β ≈ −0.01, which may not be detectable at n = 100. Borderline p-values (0.05–0.20) are expected and should be interpreted cautiously.
+
+### 9.6 Variance Ratio Test
+
+- **Period selection**: q ∈ {2, 4, 8} following Lo & MacKinlay (1988). These periods capture short-term (2-round), medium-term (4-round), and longer-term (8-round) persistence.
+- **Requirement**: n ≥ 8q observations. At q = 8, need n ≥ 64 (satisfied by 200-round runs).
+- **Heteroscedasticity**: The basic VR test assumes homoscedastic returns. Our simulation has mild heteroscedasticity (volatility varies across phases). The reported VR values should be interpreted as indicative rather than providing formal statistical tests. A robust (heteroscedasticity-consistent) version could be implemented in future.
+
+### 9.7 Multiple Testing and Correlation Structure
+
+The 44 metrics are highly correlated (e.g., MAD and half-life share the same deviation series; VaR and CVaR are mechanically linked). Formal multiple-testing corrections (Bonferroni, FDR) are **not applied** because:
+1. Metrics are not independent hypotheses — correction would be over-conservative.
+2. The validation gates (§8) use a small, curated subset (MAD, half-life, max_drawdown) as the formal decision rule.
+3. All other metrics are **advisory** — they inform interpretation but do not gate pass/fail.
+
+When interpreting multiple metric outputs, focus on **convergent patterns** (multiple metrics pointing the same direction) rather than isolated outliers.
+
+
+## §10 Limitations and Known Constraints
+
+This section explicitly documents what the analysis can and cannot detect, known failure modes, and interpretation boundaries.
+
+### 10.1 Model Limitations
+
+| Limitation                      | Impact on Analysis                                                                 | Mitigation                                                          |
+|---------------------------------|------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| Constant fundamental F = 100    | Cannot study anchoring under fundamental uncertainty or drift                      | All deviation is purely bias-driven; simplifies attribution         |
+| No exogenous event shocks       | Tail risk metrics (VaR, CVaR) reflect only endogenous dynamics                     | Compare to event-driven simulations separately                      |
+| No agent learning or adaptation | Agents do not update their strategies over time; no evolution of α                 | Interpret as “single-episode” anchoring rather than adaptive market |
+| Single-asset, single-venue      | Cannot study cross-asset contagion or venue fragmentation                          | Keep scope limited to single-market anchoring                       |
+| No short-selling constraints    | RationalUpdater can sell without limit; real arbitrage is constrained              | Over-estimates correction speed relative to real markets            |
+| Discrete round structure        | Intraday dynamics, continuous trading, and high-frequency effects are not modelled | Interpret each round as “one decision period” (daily equivalent)    |
+
+### 10.2 Analysis-Specific Limitations
+
+| Metric / Method             | Known Limitation                                                                                                                  |
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| Half-life (OLS fit)         | Assumes exponential decay; violated when agents create piecewise-linear convergence or when phase transitions cause regime shifts |
+| Gini coefficient            | Sensitive to agent count (N = 14); small N inflates or deflates Gini compared to large-N populations                              |
+| VaR / CVaR at 95%           | With ~200 observations, the 5th percentile is estimated from ≤10 data points — high estimation variance                           |
+| Block bootstrap CI          | Block length b = 6 may not capture long-range dependence if ρ > 0.95; CI can be anti-conservative for very persistent series      |
+| ADF p-value                 | Approximate (lookup table, not exact); low power at n = 200 for near-unit-root processes                                          |
+| Variance ratio              | Assumes homoscedastic returns; mild heteroscedasticity in phase transitions biases VR toward 1                                    |
+| Strategy correlation matrix | Pearson correlation assumes linear relationships; non-linear strategy interactions (e.g., threshold activation) are not captured  |
+
+### 10.3 What the Analysis Cannot Detect
+
+- **Nonlinear phase transitions**: The phase decomposition uses heuristic thresholds; subtle regime shifts within phases are not identified.
+- **Emergent coordination**: If agents spontaneously synchronise behaviour (herding) without explicit coordination mechanisms, the current metrics may attribute this to individual strategy properties rather than emergent dynamics.
+- **Long-memory effects**: Metrics are designed for short/medium persistence (ρ ≈ 0.8). True long-memory processes (Hurst exponent > 0.5) would require R/S analysis or GPH estimation (not currently implemented).
+- **Higher-order interactions**: Pairwise strategy correlation (§2 metric) captures only bilateral interactions. Three-way or higher-order strategy interactions (e.g., AT + MT + HA coalition) are not measured.
+- **Causal direction**: Correlations and volume ratios indicate association, not causation. The analysis cannot formally prove that anchoring *causes* mispricing vs. being an artifact of the price formation model.
+
+### 10.4 Minimum Viable Simulation Length
+
+| Rounds | Capability Level                                                                                                    |
+|-------:|---------------------------------------------------------------------------------------------------------------------|
+|     30 | Basic MAD and deviation only; no bootstrap, no phase decomposition, no variance ratios                              |
+|     50 | Point estimates for all metrics; bootstrap CIs unreliable; phase decomposition marginal                             |
+|    100 | Full pipeline operational; bootstrap CIs reasonable; 3–4 phases typically detectable                                |
+|    200 | **Recommended**: All metrics at full power; clean phase decomposition; robust CIs; adequate VR and ADF observations |
+|    500 | Extended: enables sub-phase analysis, rolling metric windows, and higher-order autocorrelation studies              |
+
+### 10.5 Known Failure Modes
+
+| Failure Mode                       | Symptom                                                 | Consequence for Analysis                                                    |
+|------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------------------|
+| All agents hold (no trading)       | All volumes = 0; metrics degenerate to NaN              | Pipeline crashes or produces meaningless zeros                              |
+| NoiseTrader dominates              | Very high volatility; MAD ≈ 0 (noise averages out bias) | Anchoring signal buried; bootstrap CI extremely wide                        |
+| MomentumTrader runaway             | Price diverges; half_life = NaN; max_drawdown > 50%     | Analysis detects instability but cannot provide anchoring-specific insights |
+| Identical agent parameters         | Gini = 0; strategy correlation = 1; HHI = 1/N exactly   | Analysis reports “healthy” but simulation lacks genuine heterogeneity       |
+| Simulation too short (< 50 rounds) | Insufficient observations for most inferential metrics  | Pipeline runs but outputs are unreliable; no phase decomposition possible   |
+
 

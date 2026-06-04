@@ -4,17 +4,19 @@
 
 ## Table of Contents
 
-| §  | Section                           | Subsections                                                                                                                                                                                             |
-|----|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| §1 | Phenomenon Definition             | §1.1 Origin and Source Analysis (Intellectual Lineage, Real-World Events, Practitioner Literature)                                                                                                      |
-| §2 | Theoretical Foundation            | Anchoring & Insufficient Adjustment; Expert Anchoring; Consensus Forecasts; Rational Expectations; Momentum & Trend Following                                                                           |
-| §3 | Market Design Principles          | 3.0 Idealised Market Type; 3.1 Price Formation Model; 3.2 Additional Mechanisms; 3.3 Information Broadcast                                                                                              |
-| §4 | Investor Taxonomy (9 types)       | §4.1 AnchoredTrader; §4.2 HistoricalAnchor; §4.3 RationalUpdater; §4.4 MomentumTrader; §4.5 NoiseTrader; §4.6 DispositionTrader; §4.7 ContrarianTrader; §4.8 FundamentalAnalyst; §4.9 LiquidityProvider |
-| §5 | Agent Diversity Verification      | Time-horizon matrix, information-set coverage, strategy taxonomy                                                                                                                                        |
-| §6 | Parameter Table                   | All configurable parameters with default values and academic calibration sources                                                                                                                        |
-| §7 | Communication and Round Structure | Star topology, message format, round lifecycle                                                                                                                                                          |
-| §8 | Historical Case Studies           | Analyst Earnings Anchoring; Real Estate Appraisal Anchoring; IPO Aftermarket Anchoring                                                                                                                  |
-| §9 | Variant Comparison Preview        | Rule vs LLM vs RuleLLM vs Rag — expected behavioural differences                                                                                                                                        |
+| §   | Section                           | Subsections                                                                                                                                                                                             |
+|-----|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| §1  | Phenomenon Definition             | §1.1 Origin and Source Analysis (Intellectual Lineage, Real-World Events, Practitioner Literature)                                                                                                      |
+| §2  | Theoretical Foundation            | Anchoring & Insufficient Adjustment; Expert Anchoring; Consensus Forecasts; Rational Expectations; Momentum & Trend Following                                                                           |
+| §3  | Market Design Principles          | 3.0 Idealised Market Type; 3.1 Price Formation Model; 3.2 Additional Mechanisms; 3.3 Information Broadcast                                                                                              |
+| §4  | Investor Taxonomy (9 types)       | §4.1 AnchoredTrader; §4.2 HistoricalAnchor; §4.3 RationalUpdater; §4.4 MomentumTrader; §4.5 NoiseTrader; §4.6 DispositionTrader; §4.7 ContrarianTrader; §4.8 FundamentalAnalyst; §4.9 LiquidityProvider |
+| §5  | Agent Diversity Verification      | Time-horizon matrix, information-set coverage, strategy taxonomy                                                                                                                                        |
+| §6  | Parameter Table                   | All configurable parameters with default values and academic calibration sources                                                                                                                        |
+| §7  | Communication and Round Structure | Star topology, message format, round lifecycle                                                                                                                                                          |
+| §8  | Historical Case Studies           | Analyst Earnings Anchoring; Real Estate Appraisal Anchoring; IPO Aftermarket Anchoring                                                                                                                  |
+| §9  | Variant Comparison Preview        | Rule vs LLM vs RuleLLM vs Rag — expected behavioural differences                                                                                                                                        |
+| §10 | Equilibrium Analysis              | Steady-state derivation, biased equilibrium P* > F, convergence eigenvalue, two-phase dynamics                                                                                                          |
+| §11 | Limitations and Assumptions       | Simplifying assumptions, agent limitations, model scope boundary, known fragilities                                                                                                                     |
 
 **Agent Design Summary (§4)**:
 
@@ -1588,3 +1590,157 @@ Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 1
 | Expected MAD             | Stable, predictable 3–8%                                                | Variable, 2–12% with LLM variance                              | Bounded, ≈ Rule ± 20%                                                | Potentially lower if RAG retrieves corrective research                          |
 | Adjustment Rate          | Constant α = 0.3                                                        | LLM-inferred; varies by context                                | Constrained α ≈ 0.3 ± 20%                                            | α modified by retrieved knowledge about anchoring bias                          |
 | Research Question        | Can anchoring formulas reproduce empirically observed price stickiness? | Do LLM personas reproduce anchoring without explicit formulas? | Does embedding rules constrain LLM anchoring to match Rule baseline? | Does domain knowledge about anchoring bias reduce anchoring-driven mispricings? |
+
+
+## §10 Equilibrium Analysis
+
+This section derives the theoretical steady-state price P* given the 9 agent demand functions and the price formation model, showing why anchoring agents create a biased equilibrium above fundamental value.
+
+### 10.1 Price Formation Recap
+
+```
+P(t+1) = P(t) + λ×D(t) + γ×[F − P(t)] + ε(t)
+```
+
+where D(t) = Σ_i demand_i(t) is aggregate net demand, λ = 0.4 (price impact), γ = 0.01 (mean-reversion), F = 100, ε ~ N(0, σ²).
+
+### 10.2 Agent Demand Functions (Linearised)
+
+At steady state, we set E[P(t+1)] = P(t) = P* and E[ε] = 0:
+
+| Agent                   | Demand Function (simplified)                     | Demand at P = P*                  |
+|-------------------------|--------------------------------------------------|-----------------------------------|
+| AnchoredTrader (AT)     | d_AT = k_AT × (perceived_target − P)             | k_AT × [(1−α)(anchor−F) + F − P*] |
+| HistoricalAnchor (HA)   | d_HA = k_HA × (price_avg − P)                    | k_HA × (P* − P*) = 0 at true SS   |
+| RationalUpdater (RU)    | d_RU = k_RU × (F − P)                            | k_RU × (F − P*)                   |
+| MomentumTrader (MT)     | d_MT = k_MT × (P − P_lag) → 0 at SS              | 0                                 |
+| NoiseTrader (NT)        | d_NT ~ N(0, σ_NT²) → E[d_NT] = 0                 | 0                                 |
+| DispositionTrader (DT)  | d_DT depends on gain/loss relative to cost basis | Approximately 0 at long-run SS    |
+| ContrarianTrader (CT)   | d_CT = k_CT × (F − P) (similar to RU, lagged)    | k_CT × (F − P*)                   |
+| FundamentalAnalyst (FA) | d_FA = k_FA × (belief − P); belief → F slowly    | k_FA × (F − P*) at long-run SS    |
+| LiquidityProvider (LP)  | d_LP ≈ 0 (two-sided quoting, net neutral)        | 0                                 |
+
+### 10.3 Steady-State Derivation
+
+At equilibrium: P(t+1) = P(t) = P*, so:
+
+```
+0 = λ×D* + γ×(F − P*)
+```
+
+Substituting demand functions (retaining only non-zero terms at SS):
+
+```
+D* = n_AT × k_AT × [(1−α)(anchor−F) + (F−P*)] + (n_RU×k_RU + n_CT×k_CT + n_FA×k_FA) × (F−P*)
+```
+
+Let K_bias = n_AT × k_AT and K_corr = n_RU×k_RU + n_CT×k_CT + n_FA×k_FA + n_AT×k_AT:
+
+```
+0 = λ × [K_bias × (1−α)(anchor−F) − K_corr × (P*−F)] + γ × (F−P*)
+```
+
+Solving for P*:
+
+```
+P* = F + [λ × K_bias × (1−α) × (anchor−F)] / [λ × K_corr + γ]
+```
+
+### 10.4 Key Insights
+
+1. **Biased equilibrium**: Since anchor > F and α < 1, the numerator is positive, so P* > F. The market equilibrium is permanently biased above fundamental value when anchoring agents are present.
+
+2. **Magnitude**: With baseline parameters (anchor = 105, F = 100, α = 0.3, n_AT = 2):
+   ```
+   Bias = P* − F ∝ (1−0.3) × 5 = 3.5 (normalised by corrective capacity)
+   ```
+   Depending on K_corr and γ, the equilibrium bias is approximately 1–3% above F.
+
+3. **Correction speed**: The eigenvalue governing convergence toward P* is:
+   ```
+   λ_conv = 1 − λ×K_corr − γ ≈ 1 − 0.01 − 0.01 = 0.98
+   ```
+   Half-life ≈ −ln(2)/ln(λ_conv) ≈ 35 rounds (consistent with calibration target [20, 60]).
+
+4. **Parameter sensitivity**:
+   - Increasing γ reduces P* toward F (mechanical mean-reversion dominates)
+   - Increasing n_RU/K_corr reduces the bias (more corrective capacity)
+   - Decreasing α increases the bias (stronger anchoring)
+   - HistoricalAnchor contributes zero demand at true SS but *delays* convergence by temporarily supporting prices during the transient
+
+### 10.5 Dynamic Convergence Path
+
+Starting from P(0) = 105 toward P* ≈ 101–103:
+
+```
+P(t) ≈ P* + (P(0) − P*) × λ_conv^t
+```
+
+The system approaches P* exponentially with half-life ≈ 35 rounds. Then P* itself slowly converges toward F as HistoricalAnchor’s rolling average updates (its anchor drifts toward F over its 60-round window), reducing the effective bias term.
+
+This two-phase convergence (fast approach to biased SS, then slow drift of SS toward F) explains why the simulation shows:
+- Phase 2 (Persistence): Price near P* > F
+- Phase 3 (Slow Correction): P* itself migrating toward F
+- Phase 4 (Convergence): P* ≈ F after HistoricalAnchor’s window fully updates
+
+
+## §11 Limitations and Assumptions
+
+This section explicitly acknowledges simplifying assumptions, model boundaries, and what the simulation cannot study.
+
+### 11.1 Simplifying Assumptions
+
+| Assumption                             | Justification                                                                        | Consequence if Violated                                                        |
+|----------------------------------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| Constant fundamental value F = 100     | Isolates anchoring effect from fundamental uncertainty; all deviation is bias-driven | Cannot study anchoring under fundamental drift or mean-reverting F             |
+| No derivatives or leverage             | Keeps agent dynamics tractable; avoids amplification through margin calls            | Underestimates real-world correction speed (leveraged arb is faster)           |
+| No credit or bankruptcy constraints    | Agents can always trade; no forced liquidation                                       | Removes forced-selling cascades that accelerate real-world corrections         |
+| Single venue, single asset             | Focuses on pure anchoring dynamics without cross-market arbitrage                    | Cannot study fragmentation, dark pools, or multi-asset contagion               |
+| No transaction costs or bid-ask spread | Simplifies analysis; all price impact is via λ-term                                  | Overestimates trading frequency; real agents would trade less often            |
+| Synchronous decision-making            | All agents decide simultaneously per round; no priority or speed advantage           | Cannot study high-frequency effects or latency arbitrage                       |
+| No information asymmetry               | F is known to all agents; anchoring is cognitive, not informational                  | Clean attribution: all mispricing is bias-driven, not adverse-selection-driven |
+
+### 11.2 Agent Limitations
+
+| Limitation                          | Description                                                                          | Real-World Difference                                           |
+|-------------------------------------|--------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| No learning or strategy adaptation  | Agent parameters (α, anchor_weight, lookback_period) are fixed throughout simulation | Real agents update beliefs and may de-bias over time            |
+| No strategic interaction            | Agents do not model other agents’ behaviour; no game-theoretic considerations        | Real markets have strategic interdependence (market makers)     |
+| No memory update for AnchoredTrader | The anchor is permanently set on round 1; never updates to reflect new information   | Real anchoring may fade as anchors become stale                 |
+| Homogeneous parameters within type  | All instances of a given agent type share identical parameters                       | Real-world heterogeneity within strategies is significant       |
+| Fixed order size logic              | Quantity decisions are formula-driven, not adaptive to market conditions             | Real agents adjust position sizing based on conviction and risk |
+| No portfolio constraints            | No maximum position limit, no risk management, no diversification requirement        | Real agents face VaR limits, stop-losses, and compliance rules  |
+
+### 11.3 What Cannot Be Studied With This Model
+
+- **Flash crashes**: No mechanism for sudden liquidity withdrawal or cascading stop-losses
+- **Multi-asset contagion**: Single-asset model cannot produce cross-market spillovers
+- **Margin calls and deleveraging**: No leverage means no forced-selling spirals
+- **Regulatory interventions**: No circuit breakers, trading halts, or short-sale bans
+- **Information arrival shocks**: F is constant; cannot study earnings surprises or macro news
+- **Long-run evolutionary dynamics**: No agent entry/exit, no strategy selection pressure
+- **Social learning and imitation**: Agents do not observe or copy each other’s strategies
+
+### 11.4 Model Scope Boundary
+
+**What the model IS designed to study**:
+- How cognitive anchoring bias translates into market-level mispricing
+- The speed and mechanism of price correction given heterogeneous agents
+- Whether anchoring effects can be reproduced by LLM-driven agents
+- How parameter variations (α, γ, agent mix) affect anchoring magnitude and persistence
+
+**What the model is NOT designed to prove**:
+- That real markets exhibit exactly these dynamics (the model is a demonstration, not a calibrated forecast)
+- That anchoring is the primary cause of any specific real-world anomaly
+- That LLM agents are superior or inferior to rule-based agents (the comparison is descriptive)
+
+### 11.5 Known Model Fragilities
+
+| Parameter Region          | Behaviour                                                 | Resolution                                            |
+|---------------------------|-----------------------------------------------------------|-------------------------------------------------------|
+| γ > 0.05                  | Mean-reversion dominates; anchoring effect negligible     | Keep γ ≤ 0.02 for meaningful anchoring demonstration  |
+| λ > 1.0                   | Price overshoots wildly; possible divergence              | λ = 0.4 is calibrated; do not exceed 0.8              |
+| noise_std > 2.0           | Noise overwhelms all signals; metrics meaningless         | Keep noise_std ≤ 1.0 for clean anchoring signal       |
+| α > 0.8                   | Near-rational; anchoring effect below detection threshold | α ≤ 0.5 for observable effect; α = 0.3 is the default |
+| n_RU > n_AT + n_HA + n_DT | Corrective agents overwhelm biased; instant correction    | Maintain biased/corrective ratio ≥ 1.5                |
+
