@@ -1,0 +1,119 @@
+# HerdingInformation / Noise Trader
+
+## Basic Information
+
+| Field | Content |
+| --- | --- |
+| Scenario | HerdingInformation |
+| Agent type | Noise Trader |
+| Canonical class | `NoiseTrader` |
+| Catalog category | Financial/investment-market participant |
+| Implemented mechanisms | Rule, LLM, RuleLLM, Rag |
+
+## Definition and Goal
+
+**Summary**: Implements Black (1986) noise trader model. Random direction with configurable trade probability. Background liquidity provider -- can accidentally trigger CascadeFollower's cascade_count via random price deviations.
+
+## Financial Theory / Theoretical Basis
+
+### Rule / `NoiseTrader`
+- Theory: simulation-bases.md Section 4.5 -- NoiseTrader
+- Theoretical basis: Noise trader model (Black, 1986).
+
+### LLM / `LLMNoiseTrader`
+- LLM-driven uninformed noise trader. Theory: simulation-bases.md Section 4.5.
+
+### RuleLLM / `RuleLLMNoiseTrader`
+- RuleLLM-driven uninformed noise trader. Theory: simulation-bases.md Section 4.5.
+
+### Rag / `RagLLMNoiseTrader`
+- RagLLM-driven uninformed noise trader. Theory: simulation-bases.md Section 4.5.
+
+## Behavior and Decision Logic
+
+- Key implementation methods: `act`, `decide`, `perceive`
+- This profile includes configured `role: player` agents only; market coordinators are excluded.
+- Concrete trading, holding, intervention, communication, and risk-control behavior is implemented in `decide()` / `_make_decision()` and parameterized by `players.yml`.
+
+## Configuration Parameters
+
+| Parameter | Value by mechanism | Mechanisms |
+| --- | --- | --- |
+| custom_state_hot_limit | Rule: `3`<br>LLM: `3`<br>RuleLLM: `3`<br>Rag: `3` | LLM, Rag, Rule, RuleLLM |
+| fundamental_value | Rule: `100.0`<br>LLM: `100.0`<br>RuleLLM: `100.0`<br>Rag: `100.0` | LLM, Rag, Rule, RuleLLM |
+| initial_cash | Rule: `500000.0`<br>LLM: `500000.0`<br>RuleLLM: `500000.0`<br>Rag: `500000.0` | LLM, Rag, Rule, RuleLLM |
+| initial_position | Rule: `200`<br>LLM: `200`<br>RuleLLM: `200`<br>Rag: `200` | LLM, Rag, Rule, RuleLLM |
+| initial_price | Rule: `100.0`<br>LLM: `100.0`<br>RuleLLM: `100.0`<br>Rag: `100.0` | LLM, Rag, Rule, RuleLLM |
+| llm | LLM: `{'sys_message': 'examples.HerdingInformation.LLM.prompts:LLM_NOISE_TRADER_SYS', 'user_message': 'examples.HerdingInformation.LLM.prompts:LLM_USER_TEMPLATE', 'lm_type': 'api', 'lm_name': 'ark/doubao-seed-2-0-mini-260428', 'generation_config': {'temperature': 0.9, 'max_tokens': 512}}`<br>RuleLLM: `{'sys_message': 'examples.HerdingInformation.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS', 'user_message': 'examples.HerdingInformation.RuleLLM.prompts:RULELLM_USER_TEMPLATE', 'lm_type': 'api', 'lm_name': 'ark/doubao-seed-2-0-mini-260428', 'generation_config': {'temperature': 0.8, 'max_tokens': 512}}`<br>Rag: `{'sys_message': 'examples.HerdingInformation.Rag.prompts:RAGLLM_NOISE_TRADER_SYS', 'user_message': 'examples.HerdingInformation.Rag.prompts:RAG_USER_TEMPLATE', 'lm_type': 'api', 'lm_name': 'ark/doubao-seed-2-0-mini-260428', 'generation_config': {'temperature': 0.9, 'max_tokens': 600}}` | LLM, Rag, RuleLLM |
+| noise_size | Rule: `150`<br>LLM: `150`<br>RuleLLM: `150`<br>Rag: `150` | LLM, Rag, Rule, RuleLLM |
+| private_knowledge | Rag: `{'from_global_resources': ['MinerU_processed'], 'local_resources': {'local_uri': '', 'local_resources': []}, 'rag': {'from_global_index_dir': ['rag_index'], 'local_index_dir': '', 'embed_type': 'litellm', 'embed_model': 'openai/hunyuan-embedding', 'embed_api_key': '{{ HUNYUAN_API_KEY }}', 'embed_api_base': 'https://api.hunyuan.cloud.tencent.com/v1', 'chunk_size': 512, 'chunk_overlap': 64, 'top_k': 5}}` | Rag |
+| trade_probability | Rule: `0.3`<br>LLM: `0.3`<br>RuleLLM: `0.3`<br>Rag: `0.3` | LLM, Rag, Rule, RuleLLM |
+
+## Implemented Variants
+
+| Mechanism | Config key | Display name | Class | Instances | Source |
+| --- | --- | --- | --- | --- | --- |
+| Rule | noisetrader | NoiseTrader | `NoiseTrader` | 2 | `examples/HerdingInformation/Rule/players.py` |
+| LLM | noisetrader | NoiseTrader | `LLMNoiseTrader` | 2 | `examples/HerdingInformation/LLM/players.py` |
+| RuleLLM | noisetrader | NoiseTrader | `RuleLLMNoiseTrader` | 2 | `examples/HerdingInformation/RuleLLM/players.py` |
+| Rag | noisetrader | NoiseTrader | `RagLLMNoiseTrader` | 2 | `examples/HerdingInformation/Rag/players.py` |
+
+## Scenario-Theory Excerpts
+
+### Section 4.5 NoiseTrader
+
+**Summary**: Implements Black (1986) noise trader model. Random direction with configurable trade probability. Background liquidity provider -- can accidentally trigger CascadeFollower's cascade_count via random price deviations.
+
+**Foundation**: Black (1986) noise trader model. `doi:10.1111/j.1540-6261.1986.tb04513.x`
+
+**Design Purpose**: Provide baseline stochastic liquidity. Accidental cascade initiator -- random trades that move price can increment CascadeFollower's cascade_count if `|deviation| > 0.03` results. Mean-neutral over time but adds run-to-run variance.
+
+**Behavioral Framework**:
+
+| Decision Variable | Logic              | Formula                          |
+|-------------------|--------------------|----------------------------------|
+| Activation        | Random per round   | `random() < trade_probability`   |
+| Trade size        | Fixed random range | `random.randint(100, 500)`       |
+| Direction         | Random             | `random.choice(["buy", "sell"])` |
+
+**Decision Walkthrough** (one round):
+1. `if random() < trade_probability`: trade
+2. Randomly choose buy or sell; `qty = random.randint(100, 500)`
+
+**Worked Example** (trade_probability=0.30):
+- 30 % chance of trading per round
+- Expected volume per round: 0.30 x 300 = 90 shares (mean of 100-500 range)
+
+**References**: Black (1986) `doi:10.1111/j.1540-6261.1986.tb04513.x`; De Long et al. (1990)
+
+---
+
+## Source Docstring Excerpts
+
+### Rule / `NoiseTrader`
+
+```text
+Theory: simulation-bases.md Section 4.5 -- NoiseTrader
+
+Theoretical basis: Noise trader model (Black, 1986).
+Noise trader: random uninformed trading providing liquidity.
+See simulation-bases.md Section 4.5 for mathematical model.
+```
+
+### LLM / `LLMNoiseTrader`
+
+```text
+LLM-driven uninformed noise trader. Theory: simulation-bases.md Section 4.5.
+```
+
+### RuleLLM / `RuleLLMNoiseTrader`
+
+```text
+RuleLLM-driven uninformed noise trader. Theory: simulation-bases.md Section 4.5.
+```
+
+### Rag / `RagLLMNoiseTrader`
+
+```text
+RagLLM-driven uninformed noise trader. Theory: simulation-bases.md Section 4.5.
+```
