@@ -13,8 +13,8 @@ EXAMPLES_DIR = Path("examples")
 CONFIGS_DIR = Path("configs")
 EXPERIMENT_DIR = Path("EXPERIMENT")
 
-# Hidden variants — Rag temporarily disabled per user request
-_HIDDEN_VARIANTS = {"Rag"}
+# All implemented variants are available in the simulation workflow.
+_HIDDEN_VARIANTS: set[str] = set()
 
 # Directories excluded from scenario discovery
 _EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo"}

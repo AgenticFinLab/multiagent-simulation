@@ -1,5 +1,5 @@
 """Main Streamlit application for MASIM Web Interface."""
-
+# D:\Anaconda\envs\masim_env\python.exe -m streamlit run "masim\interface\app.py" --server.port=8502
 import asyncio
 import sys
 import time
@@ -24,6 +24,11 @@ from masim.interface.simulation_runner import (
 from masim.interface.components.sidebar import render_sidebar
 from masim.interface.components.analysis_view import render_analysis_page
 from masim.interface.components.docs_view import render_docs_page
+from masim.interface.components.agent_market import (
+    render_agent_market,
+    render_selected_portfolio_strip,
+    render_simulation_setup,
+)
 
 # Page configuration
 st.set_page_config(
@@ -73,9 +78,23 @@ if "viewed_round_idx" not in st.session_state:
 if "sys_messages" not in st.session_state:
     st.session_state.sys_messages = []
 
+if "workflow_stage" not in st.session_state:
+    st.session_state.workflow_stage = "agents"
+
+if "selected_market_agents" not in st.session_state:
+    st.session_state.selected_market_agents = []
+
 
 def main():
     """Main application entry point."""
+    workflow_stage = st.session_state.workflow_stage
+    if workflow_stage == "agents":
+        render_agent_market()
+        return
+    if workflow_stage == "setup":
+        render_simulation_setup()
+        return
+
     selected_scenario = render_sidebar()
 
     if st.session_state.current_page == "Analysis":
@@ -104,6 +123,9 @@ def render_simulation_page(scenario_name: str):
       | system notices                                           |
       └──────────────────────────────────────────────────────────┘
     """
+    render_selected_portfolio_strip()
+    st.divider()
+
     title_col, btn_col = st.columns([3, 1])
     with title_col:
         st.title("Simulation Platform")
