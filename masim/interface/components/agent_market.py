@@ -30,62 +30,86 @@ VARIANT_ORDER = {"Rule": 0, "LLM": 1, "RuleLLM": 2, "Rag": 3}
 def render_entry_choice() -> None:
     """Render the landing chooser: pre-built scenario vs. customized portfolio.
 
-    Two outcomes:
-      - "existing": jump straight to the simulation workspace; the sidebar's
-        scenario picker (already populated from `configs/` which mirrors
-        `examples/`) drives the run, no portfolio assembly needed.
-      - "customize": enter the Agent Market (Step 1) so the user can pick
-        agents from `examples/AGENT_POOL/` before choosing a scenario.
+    User-facing copy only — no file paths, module names, or other code-level
+    details are exposed. Live counts are computed from the scenario registry
+    and agent catalog so the page reflects what is actually runnable.
     """
     _inject_market_styles()
+
+    # Live counts driving the headline copy.
+    groups = discover_scenario_groups()
+    scenario_count = len(groups)
+    variant_count = sum(len(v) for v in groups.values())
+    try:
+        agent_count = len(load_agent_catalog())
+    except Exception:
+        agent_count = 0
+
+    # Friendly preview: a few representative scenario names, spaced out.
+    preview_names = [
+        re.sub(r"(?<!^)(?=[A-Z])", " ", name).strip()
+        for name in list(groups.keys())[:6]
+    ]
+    if scenario_count > len(preview_names):
+        preview_names.append(f"and {scenario_count - len(preview_names)} more")
+    preview_text = ", ".join(preview_names) if preview_names else "—"
+
     with st.sidebar:
         st.title("MASIM")
         st.caption("Investment workflow")
         st.markdown("---")
-        st.markdown("**Choose entry**")
-        st.caption("Pick a path to start")
+        st.markdown("**Welcome**")
+        st.caption("Choose how you want to start")
         st.markdown("---")
         st.caption("MASIM v0.1.0")
 
     st.markdown('<div class="market-kicker">Welcome</div>', unsafe_allow_html=True)
     st.title("How would you like to start?")
     st.write(
-        "Run one of the pre-built scenarios under `examples/`, or build a custom "
-        "portfolio from the agent pool first."
+        "Pick a ready-made market scenario and run it right away, or design "
+        "your own investor lineup before launching a simulation."
     )
+
+    metric_cols = st.columns(3)
+    metric_cols[0].metric("Market scenarios", scenario_count)
+    metric_cols[1].metric("Runnable variants", variant_count)
+    metric_cols[2].metric("Investor profiles", agent_count)
+
+    st.markdown("&nbsp;", unsafe_allow_html=True)
 
     existing_col, custom_col = st.columns(2, gap="large")
 
     with existing_col:
-        st.subheader("Use an existing scenario")
+        st.subheader("📊 Run a ready-made scenario")
         st.markdown(
-            "- Browse scenarios already implemented under `examples/`\n"
-            "- No portfolio assembly required\n"
-            "- Pick scenario + variant from the workspace sidebar\n"
-            "- Fastest path to running a simulation"
+            f"- **{scenario_count} market scenarios** ready to launch\n"
+            f"- **{variant_count} agent-strategy variants** to compare\n"
+            "- No portfolio setup required — jump straight in\n"
+            "- Best for: exploring built-in case studies"
         )
+        st.caption(f"Includes: {preview_text}")
         if st.button(
-            "Use existing scenario",
+            "Run a ready-made scenario",
             type="primary",
             use_container_width=True,
             key="entry_use_existing",
         ):
-            # Existing path skips portfolio assembly entirely.
             st.session_state.selected_market_agents = []
             st.session_state.workflow_stage = "workspace"
             st.session_state.current_page = "Simulation"
             st.rerun()
 
     with custom_col:
-        st.subheader("Customize a portfolio")
+        st.subheader("🎨 Design your own simulation")
         st.markdown(
-            "- Browse the agent pool under `examples/AGENT_POOL/`\n"
-            "- Compose an investor portfolio from archetype profiles\n"
-            "- Bind it to a scenario + variant in Step 2\n"
-            "- Best when you want full control over the roster"
+            f"- Pick from **{agent_count} investor profiles** with distinct styles\n"
+            "- Build a custom portfolio of market participants\n"
+            "- Then choose a scenario to run them through\n"
+            "- Best for: bringing your own simulation idea to life"
         )
+        st.caption("Select investors first, customize parameters (optional), then a scenario to simulate.")
         if st.button(
-            "Customize portfolio",
+            "Design your own simulation",
             use_container_width=True,
             key="entry_customize",
         ):
@@ -99,22 +123,45 @@ def _field_from_summary_table(markdown: str, field: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _profile_intro(markdown: str, display_name: str) -> str:
-    """Build a short hover description from the profile summary table."""
-    archetype = _field_from_summary_table(markdown, "Archetype")
-    scenarios = _field_from_summary_table(markdown, "Scenarios")
-    count = _field_from_summary_table(markdown, "Merged profiles")
+VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
 
-    intro = archetype or display_name
-    if count:
-        intro += f". {count} merged scenario roles"
-    if scenarios:
-        scenario_names = [item.strip() for item in scenarios.split(",") if item.strip()]
-        preview = ", ".join(scenario_names[:4])
-        if len(scenario_names) > 4:
-            preview += f" and {len(scenario_names) - 4} more"
-        intro += f" across {preview}"
-    return intro + "."
+
+def _profile_intro(markdown: str, display_name: str) -> str:
+    """Build a short hover description focused on theory and role.
+
+    The hover always leads with a ``Design Theory:`` label so users instantly
+    recognise what they are reading. When no theoretical basis can be
+    parsed, we fall back to the archetype description alone.
+    """
+    archetype = _field_from_summary_table(markdown, "Archetype")
+    theory = _theory_basis(markdown)
+    role = archetype or display_name
+    if theory:
+        return f"Design Theory: {theory}. Role: {role}."
+    return f"Design Theory: —. Role: {role}."
+
+
+def _available_variants(markdown: str) -> list[str]:
+    """Detect which decision-engine variants this agent ships with.
+
+    The project organises each scenario into ``Rule/``, ``LLM/``,
+    ``RuleLLM/`` and ``Rag/`` subdirectories. ``Rule`` is the foundational
+    engine and is always present, so we include it unconditionally. The
+    remaining engines are detected via explicit markers in the
+    "Consolidated Financial Theory" section of the agent's profile.
+    Returned variants follow the project-wide order: Rule -> LLM ->
+    RuleLLM -> Rag.
+    """
+    variants: list[str] = ["Rule"]
+    if not markdown:
+        return variants
+    if re.search(r"\bLLM[- ][Dd]riven\b", markdown):
+        variants.append("LLM")
+    if re.search(r"\bRuleLLM\b|\bHybrid:", markdown):
+        variants.append("RuleLLM")
+    if re.search(r"\bRAG[- ][Aa]ugmented\b|\bRAG[- ][Dd]riven\b", markdown):
+        variants.append("Rag")
+    return variants
 
 
 def _image_data_uri(path: Path) -> str:
@@ -123,6 +170,49 @@ def _image_data_uri(path: Path) -> str:
     mime = "image/png" if path.suffix.lower() == ".png" else "image/svg+xml"
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"data:{mime};base64,{encoded}"
+
+
+def _theory_basis(markdown: str) -> str:
+    """Extract a short theoretical-basis phrase from a profile markdown.
+
+    Scans the "Consolidated Financial Theory" bullets for the first line
+    that starts with ``- Theoretical basis: ...``. Strips boilerplate prefixes
+    (e.g. ``simulation-bases.md Section X.X``) and trailing punctuation so the
+    result is a short, user-readable citation or mechanism description such
+    as ``Tversky & Kahneman, 1974`` or
+    ``Brady Commission (1988) program trading feedback loops``.
+
+    Returns an empty string when no such line exists.
+    """
+    if not markdown:
+        return ""
+    for match in re.finditer(r"-\s*Theoretical\s+basis:\s*(.+)", markdown, flags=re.IGNORECASE):
+        text = match.group(1).strip()
+        # Drop leading 'simulation-bases.md Section X.Y' boilerplate.
+        text = re.sub(
+            r"^simulation-bases\.md\s+Section\s+[\d.]+\s*[-—]?\s*",
+            "",
+            text,
+            flags=re.IGNORECASE,
+        )
+        # Strip any leading list marker carried over from the source bullet.
+        text = re.sub(r"^[-–—•]\s*", "", text)
+        # Truncate at the first semicolon — keep one citation clause.
+        # Splitting on '.' would break "et al." and year-period citations.
+        text = text.split(";", 1)[0].strip()
+        # Trim trailing punctuation and balance any unmatched parentheses.
+        text = text.rstrip(".,; ")
+        opens = text.count("(")
+        closes = text.count(")")
+        while closes > opens and text.endswith(")"):
+            text = text[:-1].rstrip(".,; ")
+            closes -= 1
+        while opens > closes and text.startswith("("):
+            text = text[1:].lstrip()
+            opens -= 1
+        if text:
+            return text
+    return ""
 
 
 @st.cache_data(show_spinner=False)
@@ -168,6 +258,8 @@ def load_agent_catalog() -> list[dict[str, Any]]:
                 "archetype": _field_from_summary_table(markdown, "Archetype")
                 or display_name,
                 "scenarios": _field_from_summary_table(markdown, "Scenarios"),
+                "theory_basis": _theory_basis(markdown),
+                "variants": _available_variants(markdown),
             }
         )
     return catalog
@@ -200,7 +292,7 @@ def _inject_market_styles() -> None:
     st.markdown(
         """
         <style>
-        .block-container {max-width: 1240px; padding-top: 2rem;}
+        .block-container {max-width: 1240px; padding-top: 4.5rem;}
         .market-kicker {
             color: #287a6d; font-size: 0.78rem; font-weight: 750;
             text-transform: uppercase; letter-spacing: 0;
@@ -208,7 +300,7 @@ def _inject_market_styles() -> None:
         }
         .agent-card {
             border: 1px solid #dce2e8; border-radius: 8px;
-            background: #ffffff; overflow: hidden; min-height: 280px;
+            background: #ffffff; overflow: hidden; min-height: 220px;
             box-shadow: 0 1px 2px rgba(20, 32, 44, 0.06);
         }
         .agent-image-link {
@@ -229,9 +321,31 @@ def _inject_market_styles() -> None:
         }
         .agent-image-link:hover .agent-hover,
         .agent-image-link:focus .agent-hover {opacity: 1; transform: translateY(0);}
-        .agent-card-copy {padding: 0.7rem 0.8rem 0.8rem;}
-        .agent-card-name {font-size: 0.92rem; font-weight: 720; color: #17212b;}
-        .agent-card-type {font-size: 0.68rem; color: #68737d; margin-top: 0.18rem;}
+        .agent-card-copy {padding: 0.55rem 0.6rem 0.6rem;}
+        .agent-card-name {font-size: 0.8rem; font-weight: 700; color: #17212b; line-height: 1.2;}
+        .agent-card-meta {
+            font-size: 0.66rem; color: #68737d; margin-top: 0.18rem;
+            line-height: 1.25;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        .agent-variants {
+            display: flex; gap: 0.2rem; flex-wrap: wrap;
+            margin-top: 0.32rem;
+        }
+        .agent-variant-chip {
+            font-size: 0.56rem; font-weight: 700; line-height: 1.4;
+            padding: 0.04rem 0.34rem;
+            border-radius: 8px;
+            background: #eef3f6; color: #41525f;
+            border: 1px solid #dde4ea;
+            letter-spacing: 0.03em;
+        }
+        .agent-variants-label {
+            font-size: 0.56rem; color: #8a96a3; letter-spacing: 0.04em;
+            text-transform: uppercase; margin-top: 0.32rem;
+            display: block;
+        }
         .profile-banner {
             border-left: 4px solid #287a6d; background: #f3f7f6;
             padding: 0.9rem 1rem; margin: 0.4rem 0 1rem;
@@ -247,8 +361,24 @@ def _inject_market_styles() -> None:
             color: #26323d; font-size: 0.74rem;
         }
         .portfolio-chip img {width: 24px; height: 24px; border-radius: 4px; object-fit: cover;}
+        /* Teal accent for the "Design your own simulation" entry button. */
+        .st-key-entry_customize button {
+            background-color: #287a6d !important;
+            color: #ffffff !important;
+            border: 1px solid #287a6d !important;
+        }
+        .st-key-entry_customize button:hover {
+            background-color: #1f6157 !important;
+            border-color: #1f6157 !important;
+        }
+        .st-key-entry_customize button:focus,
+        .st-key-entry_customize button:active {
+            background-color: #1f6157 !important;
+            border-color: #1f6157 !important;
+            box-shadow: 0 0 0 2px rgba(40, 122, 109, 0.35) !important;
+        }
         @media (max-width: 700px) {
-            .block-container {padding-top: 1.2rem;}
+            .block-container {padding-top: 3.75rem;}
             .agent-card {min-height: 230px;}
         }
         </style>
@@ -266,14 +396,42 @@ def _render_workflow_sidebar(step: int, selected_count: int) -> None:
         st.caption(f"{selected_count} agents selected")
         st.markdown(f"**{'2. Simulation Setup' if step == 2 else '2. Simulation Setup'}**")
         st.markdown("---")
+        st.caption("MASIM v0.1.0")
+
+
+def render_back_to_start_bar(
+    *,
+    key_suffix: str,
+    reset_runtime: bool = False,
+) -> None:
+    """Render a small right-aligned "Back to start" button at the top of
+    the main content area, available on every post-entry page.
+
+    Args:
+        key_suffix: caller-specific suffix to keep widget keys unique across
+            pages that may render in the same session (e.g. ``"agents"``,
+            ``"setup"``, ``"workspace"``).
+        reset_runtime: when True, also clear simulation/replay state so the
+            user returns to a clean welcome page after a run was started.
+    """
+    btn_col, _ = st.columns([1, 6])
+    with btn_col:
         if st.button(
             "← Back to start",
-            key=f"workflow_back_to_entry_step{step}",
+            key=f"main_back_to_start_{key_suffix}",
             use_container_width=True,
+            help="Return to the welcome page.",
         ):
             st.session_state.workflow_stage = "entry"
+            if reset_runtime:
+                st.session_state.simulation_running = False
+                st.session_state.simulation_completed = False
+                st.session_state.replay_active = False
+                st.session_state.replay_rounds = []
+                st.session_state.replay_index = 0
+                st.session_state.viewed_round_idx = 0
+                st.session_state.sys_messages = []
             st.rerun()
-        st.caption("MASIM v0.1.0")
 
 
 def _render_profile(agent: dict[str, Any]) -> None:
@@ -303,6 +461,7 @@ def _render_profile(agent: dict[str, Any]) -> None:
 def _render_agent_card(agent: dict[str, Any]) -> None:
     agent_type = agent["agent_type"]
     href = f"?agent={quote(agent_type)}#agent-profile"
+    variants = agent.get("variants", []) or ["Rule"]
     card = f"""
     <div class="agent-card">
       <a class="agent-image-link" href="{href}" target="_self"
@@ -313,13 +472,30 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
       </a>
       <div class="agent-card-copy">
         <div class="agent-card-name">{html.escape(agent['display_name'])}</div>
-        <div class="agent-card-type">{html.escape(agent_type)}</div>
+        <span class="agent-variants-label">Engine</span>
       </div>
     </div>
     """
     st.markdown(card, unsafe_allow_html=True)
+
+    # Per-agent engine selector. The variant decides parameter set and
+    # decision logic, so each agent in the portfolio can pick its own.
+    engine_key = f"market_engine_{agent_type}"
+    if engine_key not in st.session_state:
+        st.session_state[engine_key] = variants[0]
+    elif st.session_state[engine_key] not in variants:
+        st.session_state[engine_key] = variants[0]
+    st.segmented_control(
+        "Decision engine",
+        options=variants,
+        format_func=lambda v: VARIANT_DISPLAY.get(v, v),
+        key=engine_key,
+        label_visibility="collapsed",
+        help="Pick the decision engine used by this agent. "
+             "Parameter sets differ per engine.",
+    )
     st.checkbox(
-        "Add to portfolio",
+        "Add to Market",
         key=f"market_agent_{agent_type}",
         help=f"Select {agent['display_name']}",
     )
@@ -340,9 +516,16 @@ def render_agent_market() -> None:
 
     _render_workflow_sidebar(1, len(_selected_types(catalog)))
 
+    render_back_to_start_bar(key_suffix="agents")
     st.markdown('<div class="market-kicker">Step 1 of 2</div>', unsafe_allow_html=True)
     st.title("Agent Market")
     st.write("Build an investor portfolio from the available market archetypes.")
+    st.caption(
+        "Each card lets you pick the decision engine — "
+        "**Rule** (deterministic logic), **LLM** (language-model reasoning), "
+        "**RuleLLM** (hybrid), or **RAG** (retrieval-augmented). "
+        "Engines have different parameter sets you will configure in Step 2."
+    )
 
     requested_agent = _query_agent()
     by_type = {agent["agent_type"]: agent for agent in catalog}
@@ -374,9 +557,9 @@ def render_agent_market() -> None:
     if not filtered:
         st.info("No agents match this search.")
     else:
-        for start in range(0, len(filtered), 4):
-            columns = st.columns(4, gap="medium")
-            for column, agent in zip(columns, filtered[start : start + 4]):
+        for start in range(0, len(filtered), 6):
+            columns = st.columns(6, gap="small")
+            for column, agent in zip(columns, filtered[start : start + 6]):
                 with column:
                     _render_agent_card(agent)
 
@@ -430,6 +613,7 @@ def render_simulation_setup() -> None:
         st.rerun()
 
     _render_workflow_sidebar(2, len(selected_agents))
+    render_back_to_start_bar(key_suffix="setup")
     st.markdown('<div class="market-kicker">Step 2 of 2</div>', unsafe_allow_html=True)
     st.title("Simulation Setup")
 

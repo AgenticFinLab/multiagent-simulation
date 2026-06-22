@@ -27,6 +27,7 @@ from masim.interface.components.docs_view import render_docs_page
 from masim.interface.components.agent_market import (
     render_agent_market,
     render_entry_choice,
+    render_back_to_start_bar,
     render_selected_portfolio_strip,
     render_simulation_setup,
 )
@@ -100,6 +101,8 @@ def main():
         return
 
     selected_scenario = render_sidebar()
+
+    render_back_to_start_bar(key_suffix="workspace", reset_runtime=True)
 
     if st.session_state.current_page == "Analysis":
         render_analysis_page(selected_scenario)
