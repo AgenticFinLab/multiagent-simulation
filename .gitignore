@@ -210,6 +210,8 @@ marimo/_lsp/
 __marimo__/
 .DS_Store
 
-EXPERIMENT/
+*EXPERIMENT*/
 
 third-part/
+
+
