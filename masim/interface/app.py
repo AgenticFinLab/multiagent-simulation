@@ -26,6 +26,7 @@ from masim.interface.components.analysis_view import render_analysis_page
 from masim.interface.components.docs_view import render_docs_page
 from masim.interface.components.agent_market import (
     render_agent_market,
+    render_entry_choice,
     render_selected_portfolio_strip,
     render_simulation_setup,
 )
@@ -79,7 +80,7 @@ if "sys_messages" not in st.session_state:
     st.session_state.sys_messages = []
 
 if "workflow_stage" not in st.session_state:
-    st.session_state.workflow_stage = "agents"
+    st.session_state.workflow_stage = "entry"
 
 if "selected_market_agents" not in st.session_state:
     st.session_state.selected_market_agents = []
@@ -88,6 +89,9 @@ if "selected_market_agents" not in st.session_state:
 def main():
     """Main application entry point."""
     workflow_stage = st.session_state.workflow_stage
+    if workflow_stage == "entry":
+        render_entry_choice()
+        return
     if workflow_stage == "agents":
         render_agent_market()
         return

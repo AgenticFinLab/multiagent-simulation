@@ -20,10 +20,77 @@ from ..config_loader import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-IMAGE_ROOT = PROJECT_ROOT / "investor_agent_images"
-PROFILE_ROOT = PROJECT_ROOT / "agent_pool" / "ExtractedExampleInvestors" / "unique"
+AGENT_POOL_ROOT = PROJECT_ROOT / "examples" / "AGENT_POOL"
+IMAGE_ROOT = AGENT_POOL_ROOT / "agent_images"
+PROFILE_ROOT = AGENT_POOL_ROOT / "ExtractedExampleInvestors" / "unique"
 CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
 VARIANT_ORDER = {"Rule": 0, "LLM": 1, "RuleLLM": 2, "Rag": 3}
+
+
+def render_entry_choice() -> None:
+    """Render the landing chooser: pre-built scenario vs. customized portfolio.
+
+    Two outcomes:
+      - "existing": jump straight to the simulation workspace; the sidebar's
+        scenario picker (already populated from `configs/` which mirrors
+        `examples/`) drives the run, no portfolio assembly needed.
+      - "customize": enter the Agent Market (Step 1) so the user can pick
+        agents from `examples/AGENT_POOL/` before choosing a scenario.
+    """
+    _inject_market_styles()
+    with st.sidebar:
+        st.title("MASIM")
+        st.caption("Investment workflow")
+        st.markdown("---")
+        st.markdown("**Choose entry**")
+        st.caption("Pick a path to start")
+        st.markdown("---")
+        st.caption("MASIM v0.1.0")
+
+    st.markdown('<div class="market-kicker">Welcome</div>', unsafe_allow_html=True)
+    st.title("How would you like to start?")
+    st.write(
+        "Run one of the pre-built scenarios under `examples/`, or build a custom "
+        "portfolio from the agent pool first."
+    )
+
+    existing_col, custom_col = st.columns(2, gap="large")
+
+    with existing_col:
+        st.subheader("Use an existing scenario")
+        st.markdown(
+            "- Browse scenarios already implemented under `examples/`\n"
+            "- No portfolio assembly required\n"
+            "- Pick scenario + variant from the workspace sidebar\n"
+            "- Fastest path to running a simulation"
+        )
+        if st.button(
+            "Use existing scenario",
+            type="primary",
+            use_container_width=True,
+            key="entry_use_existing",
+        ):
+            # Existing path skips portfolio assembly entirely.
+            st.session_state.selected_market_agents = []
+            st.session_state.workflow_stage = "workspace"
+            st.session_state.current_page = "Simulation"
+            st.rerun()
+
+    with custom_col:
+        st.subheader("Customize a portfolio")
+        st.markdown(
+            "- Browse the agent pool under `examples/AGENT_POOL/`\n"
+            "- Compose an investor portfolio from archetype profiles\n"
+            "- Bind it to a scenario + variant in Step 2\n"
+            "- Best when you want full control over the roster"
+        )
+        if st.button(
+            "Customize portfolio",
+            use_container_width=True,
+            key="entry_customize",
+        ):
+            st.session_state.workflow_stage = "agents"
+            st.rerun()
 
 
 def _field_from_summary_table(markdown: str, field: str) -> str:
@@ -199,6 +266,13 @@ def _render_workflow_sidebar(step: int, selected_count: int) -> None:
         st.caption(f"{selected_count} agents selected")
         st.markdown(f"**{'2. Simulation Setup' if step == 2 else '2. Simulation Setup'}**")
         st.markdown("---")
+        if st.button(
+            "← Back to start",
+            key=f"workflow_back_to_entry_step{step}",
+            use_container_width=True,
+        ):
+            st.session_state.workflow_stage = "entry"
+            st.rerun()
         st.caption("MASIM v0.1.0")
 
 

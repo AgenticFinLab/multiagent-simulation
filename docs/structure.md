@@ -36,31 +36,29 @@ YAML 配置
 ```text
 multiagent-simulation/
 |-- masim/                    # 通用模拟框架
-|-- examples/                 # 场景实现与运行入口
+|-- examples/                 # 场景实现与运行入口（含 examples/AGENT_POOL/ Agent 原型库与头像）
 |-- configs/                  # 场景运行配置
 |-- scripts/                  # 矩阵运行、预检和回归测试
 |-- docs/                     # 架构、场景和实验规范
 |-- simulation-results/       # 标准化 Simulation-180 结果包
 |-- investment-agents/        # 场景级 Agent 角色档案
-|-- agent_pool/               # 去重后的 Agent 原型库
-|-- investor_agent_images/    # Agent 头像及映射
 |-- setup.py                  # Python 包配置
 `-- requirements.txt          # 项目依赖
 ```
 
 ## 4. 框架模块
 
-| 模块 | 职责 | 主要入口 |
-|---|---|---|
-| `masim/simulator` | 加载配置、管理轮次、拓扑和 Ray Actor | `GeneralSimulator` |
-| `masim/player` | Agent 的感知、决策和行动逻辑 | `GeneralPlayer` |
-| `masim/persona` | 将 Player 包装为 Ray Actor | `PlayerPersona` |
-| `masim/communication` | 消息编码、解码和传输 | `GeneralCommunicationChannel` |
-| `masim/proxy` | 通信、存储、监控和资源代理 | `SendReceiveProxy`、`StorageProxy` |
-| `masim/knowledge` | 文档加载、向量索引和 RAG 检索 | `KnowledgeManager` |
-| `masim/evaluation` | 金融指标、有效性验证和可视化 | `finance/*` |
-| `masim/interface` | Streamlit 场景选择、回放和分析 | `app.py` |
-| `masim/utils` | 配置、拓扑、Ray 和结果读取工具 | `load_config`、`load_results` |
+| 模块                  | 职责                                 | 主要入口                           |
+|-----------------------|--------------------------------------|------------------------------------|
+| `masim/simulator`     | 加载配置、管理轮次、拓扑和 Ray Actor | `GeneralSimulator`                 |
+| `masim/player`        | Agent 的感知、决策和行动逻辑         | `GeneralPlayer`                    |
+| `masim/persona`       | 将 Player 包装为 Ray Actor           | `PlayerPersona`                    |
+| `masim/communication` | 消息编码、解码和传输                 | `GeneralCommunicationChannel`      |
+| `masim/proxy`         | 通信、存储、监控和资源代理           | `SendReceiveProxy`、`StorageProxy` |
+| `masim/knowledge`     | 文档加载、向量索引和 RAG 检索        | `KnowledgeManager`                 |
+| `masim/evaluation`    | 金融指标、有效性验证和可视化         | `finance/*`                        |
+| `masim/interface`     | Streamlit 场景选择、回放和分析       | `app.py`                           |
+| `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`      |
 
 职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则。
 
@@ -68,12 +66,12 @@ multiagent-simulation/
 
 一个正式场景通常具有四种实现：
 
-| 机制 | 决策方式 |
-|---|---|
-| `Rule` | 纯规则，通常稳定且可重复 |
-| `LLM` | 大模型根据市场状态直接决策 |
+| 机制      | 决策方式                             |
+|-----------|--------------------------------------|
+| `Rule`    | 纯规则，通常稳定且可重复             |
+| `LLM`     | 大模型根据市场状态直接决策           |
 | `RuleLLM` | 在显式规则和输出契约约束下调用大模型 |
-| `Rag` | 在 LLM 决策前检索论文或知识库 |
+| `Rag`     | 在 LLM 决策前检索论文或知识库        |
 
 目录采用相同的二级结构：
 
@@ -99,11 +97,11 @@ configs/{Scenario}/{Mechanism}/
 
 框架使用三层消息模型：
 
-| 层 | 数据类型 | 含义 |
-|---|---|---|
-| Player | `Info` | Agent 产生或消费的业务内容 |
-| Proxy | `Message` | 加入发送者、接收者、时间和优先级 |
-| Channel | `SimPacket` | 可记录和传输的编码消息 |
+| 层      | 数据类型    | 含义                             |
+|---------|-------------|----------------------------------|
+| Player  | `Info`      | Agent 产生或消费的业务内容       |
+| Proxy   | `Message`   | 加入发送者、接收者、时间和优先级 |
+| Channel | `SimPacket` | 可记录和传输的编码消息           |
 
 所有节点都是 Player。市场通过 `role: coordinator` 表达协调职责，普通投资者使用 `role: player`；执行先后和通信方向由 `topology.yml` 决定，而不是由角色类型硬编码。
 
@@ -181,14 +179,14 @@ python scripts/test_run_api_full_plan.py
 
 ## 10. 常用定位
 
-| 需求 | 首先查看 |
-|---|---|
-| 修改 Agent 行为 | `examples/{Scenario}/{Mechanism}/players.py` |
-| 修改 LLM 输出 | `prompts.py`、解析器和 `players.yml` |
-| 修改轮数或输出路径 | `simulation.yml` |
-| 增删 Agent 或参数 | `players.yml` |
-| 修改通信关系 | `topology.yml` |
-| 修改记录行为 | `persona.yml` |
-| 分析实验结果 | `analysis.py`、`masim/evaluation/` |
-| 批量运行实验 | `scripts/run_example_matrix.py` |
-| 排查实验失败 | `docs/example-revision-guide/08-runtime-failure-patterns.md` |
+| 需求               | 首先查看                                                     |
+|--------------------|--------------------------------------------------------------|
+| 修改 Agent 行为    | `examples/{Scenario}/{Mechanism}/players.py`                 |
+| 修改 LLM 输出      | `prompts.py`、解析器和 `players.yml`                         |
+| 修改轮数或输出路径 | `simulation.yml`                                             |
+| 增删 Agent 或参数  | `players.yml`                                                |
+| 修改通信关系       | `topology.yml`                                               |
+| 修改记录行为       | `persona.yml`                                                |
+| 分析实验结果       | `analysis.py`、`masim/evaluation/`                           |
+| 批量运行实验       | `scripts/run_example_matrix.py`                              |
+| 排查实验失败       | `docs/example-revision-guide/08-runtime-failure-patterns.md` |
