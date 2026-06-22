@@ -113,7 +113,7 @@ This constraint applies to **ALL four variants** equally. Every `players.py` and
 
 Legitimate exceptions: RAG config resolution (`resolved_rag.get()`), `__getstate__`/`__setstate__` serialization, truly optional config sections (`extras.get("private_knowledge", {})`), and matplotlib styling defaults.
 
-See `docs/create-example-skill/00-overview.md` Principle #6 for the full policy.
+See `masim/format/create-example-skill/00-overview.md` Principle #6 for the full policy.
 
 ### Rule Variant
 - **No hardcoded values.** Every numeric threshold, position size, or parameter must be read from `extras` in `players.yml`.

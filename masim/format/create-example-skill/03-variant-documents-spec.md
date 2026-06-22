@@ -64,20 +64,20 @@ This section is the core of `explain.md`. For EACH investor type from `simulatio
 
 | Design Element (from simulation-bases.md)   | Implementation in This Variant                                                                        |
 |---------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| Theoretical basis → sim-bases §4.{N}.2      | Class: `{ClassName}` in `players.py`; docstring cites sim-bases §4.{N}                                |
-| Behavioral mechanism → sim-bases §4.{N}.4.2 | Method: `_make_decision()` lines [L1–L2]; [brief description of implementation]                       |
-| Mathematical model → sim-bases §4.{N}.4.3   | Trigger: `deviation < self.state.custom_state['threshold']`; Sizing: `quantity = position * fraction` |
-| State variables → sim-bases §4.{N}.4.3      | [Variable name in code] → initialized in `_initialize_investor_state()`                               |
+| Theoretical basis → sim-bases §4.{N}.3      | Class: `{ClassName}` in `players.py`; docstring cites sim-bases §4.{N}                                |
+| Behavioral mechanism → sim-bases §4.{N}.5.2 | Method: `_make_decision()` lines [L1–L2]; [brief description of implementation]                       |
+| Mathematical model → sim-bases §4.{N}.5.4   | Trigger: `deviation < self.state.custom_state['threshold']`; Sizing: `quantity = position * fraction` |
+| State variables → sim-bases §4.{N}.5.4      | [Variable name in code] → initialized in `_initialize_investor_state()`                               |
 | Parameters → sim-bases §6                   | Loaded from `extras.[param_name]` in `players.yml`; default = [value]                                 |
-| Activation scenarios → sim-bases §4.{N}.3   | [Which `if/elif` branch corresponds to which scenario]                                                |
+| Activation triggers  → sim-bases §4.{N}.4   | [Which `if/elif` branch corresponds to which scenario]                                                |
 ```
 
 **For LLM variant — additional row**:
-| LLM persona → sim-bases §4.{N}.4.4 (Behavioral Properties) | System prompt: `[PROMPT_CONSTANT_NAME]` in `prompts.py` |
+| LLM persona → sim-bases §4.{N}.5.5 (Behavioral Properties) | System prompt: `[PROMPT_CONSTANT_NAME]` in `prompts.py` |
 
 **For RuleLLM variant — additional rows**:
-| Behavioral mechanism → sim-bases §4.{N}.4.2 | `== DECISION RULES ==` section in `[PROMPT_CONSTANT_NAME]` embeds the mechanism narrative as quantitative rules |
-| Mathematical model → sim-bases §4.{N}.4.3 | Step-by-step rule text in prompt mirrors the formula from sim-bases §4.{N}.4.3 |
+| Behavioral mechanism → sim-bases §4.{N}.5.2 | `== DECISION RULES ==` section in `[PROMPT_CONSTANT_NAME]` embeds the mechanism narrative as quantitative rules |
+| Mathematical model → sim-bases §4.{N}.5.4 | Step-by-step rule text in prompt mirrors the formula from sim-bases §4.{N}.5.4 |
 
 **For Rag variant — additional row**:
 | Historical case → sim-bases §8 | Knowledge base content derived from sim-bases §8; docs in `configs/{Sim}/Rag/docs/` |
@@ -142,8 +142,8 @@ Every parameter in §6 has a source citation; see `configs/{Sim}/Rule/players.ym
 - System prompts describe [N] distinct investor personalities (see `prompts.py`).
 - LLM discovers market dynamics from `{price, fundamental, deviation}` data alone.
 
-**Prompt design choices** (derived from sim-bases §4.{N}.4.4 Behavioral Properties):
-| Agent       | Prompt Constant | Persona Element → sim-bases §4.{N}.4.4 |
+**Prompt design choices** (derived from sim-bases §4.{N}.5.5 Behavioral Properties):
+| Agent       | Prompt Constant | Persona Element → sim-bases §4.{N}.5.5 |
 |-------------|-----------------|----------------------------------------|
 | [ClassName] | [CONST_NAME]    | [Key trait → citation in sim-bases]    |
 
@@ -157,10 +157,10 @@ Every parameter in §6 has a source citation; see `configs/{Sim}/Rule/players.ym
 **Dual-section prompts** (motivated by sim-bases §9 — "isolate LLM reasoning effect"):
 Every system prompt has:
   == PERSONA == : Character, risk style, emotional traits (same as LLM variant)
-  == DECISION RULES == : Exact formulas from sim-bases §4.{N}.4.3, expressed in plain text
+  == DECISION RULES == : Exact formulas from sim-bases §4.{N}.5.4, expressed in plain text
 
-**Rule embedding fidelity** (derives from sim-bases §4.{N}.4.3):
-| Agent       | Rule in sim-bases §4.{N}.4.3 | Embedded as text in == DECISION RULES == |
+**Rule embedding fidelity** (derives from sim-bases §4.{N}.5.4):
+| Agent       | Rule in sim-bases §4.{N}.5.4 | Embedded as text in == DECISION RULES == |
 |-------------|------------------------------|------------------------------------------|
 | [ClassName] | [Formula]                    | [How it is phrased in the prompt]        |
 
@@ -245,7 +245,7 @@ Key Configuration Parameters (`configs/{SimulationName}/{Variant}/players.yml`):
 
 | Parameter | Config Path     | Value   | Design Justification                                             |
 |-----------|-----------------|---------|------------------------------------------------------------------|
-| [param]   | `extras.[name]` | [value] | [Why this value implements simulation-bases.md §4.{N}.4.3 or §6] |
+| [param]   | `extras.[name]` | [value] | [Why this value implements simulation-bases.md §4.{N}.5.4 or §6] |
 ```
 
 **For Rag variant, additional block**:

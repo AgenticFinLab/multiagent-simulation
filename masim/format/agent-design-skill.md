@@ -1,30 +1,41 @@
 ---
 name: agent-design-skill
-purpose: Format-locked handbook for designing a single simulation investor agent at the theory and behaviour layer, suitable for inclusion in any *bases.md investor taxonomy
+purpose: Format-locked, scenario-domain-agnostic handbook for designing a single simulation participant agent at the theory and behaviour layer. Suitable for inclusion in any *bases.md agent taxonomy.
 status: canonical
-audience: Authors and reviewers of investor agent specifications for inclusion in any *bases.md taxonomy, independent of how the agent will later be realised
+audience: Authors and reviewers of participant-agent specifications, independent of the scenario domain and independent of how the agent will later be realised.
+domain_companions: Scenario-domain row labels, value palettes, and worked substitution examples live in sibling `agent-design-<domain>.md` files (e.g. `agent-design-finance.md`). The core handbook stays domain-neutral.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
 ---
 
-# Investor Agent Design Handbook
+# Simulation Agent Design Handbook
 
 This handbook is the **single source of truth** for designing any
-simulation investor agent at the *design layer*. It governs the
+simulation participant agent at the *design layer*. It governs the
 intrinsic specification of an agent — its theory, role, information
 set, decision mechanism, action space, parameters, and validation
-expectations — and is intended to produce a self-contained section that
-can be embedded directly into any `*bases.md` investor taxonomy.
+expectations — and is intended to produce a self-contained section
+that can be embedded directly into any `*bases.md` agent taxonomy.
+
+The handbook is **scenario-domain agnostic**. Domain-specific row
+labels, value palettes, real-world counterpart enumerations, and
+worked substitution examples are NOT in this file; they live in
+sibling **domain companion files** (`agent-design-<domain>.md`,
+e.g. `agent-design-finance.md`). A conformant specification cites
+the core handbook AND the relevant companion. Sections, headers,
+field schemas, and the validation checklist defined here apply
+uniformly to every domain.
 
 The handbook governs **one agent at a time** and covers only what is
-*intrinsic to the investor*: theory, role, information set, decision
-logic, action choices, self-imposed risk discipline, parameters, and
+*intrinsic to the agent*: theory, role, information set, decision
+logic, action choices, self-imposed discipline, parameters, and
 validation expectations. A conformant specification MUST NOT include
 implementation details (engine code, configuration form, parser
-tokens, file paths, class structure, UI), venue rules (matching
-engine, tick grid, fee schedule, latency, regulator-imposed limits),
-or peer-network / social topology. The same design MUST be reusable
-across any matching mechanism and any peer-graph the scenario layer
-provides.
+tokens, file paths, class structure, UI), environment rules
+(matching engine, tick grid, fee schedule, latency, message-routing
+policy, content-moderation rules, regulator-imposed limits), or
+peer-network / social topology. The same design MUST be reusable
+across any matching mechanism, any message-routing scheme, and any
+peer-graph the scenario layer provides.
 
 A specification that conforms to this handbook MUST be:
 
@@ -48,7 +59,7 @@ A specification that conforms to this handbook MUST be:
 
 Apply this handbook whenever you:
 
-- Author a brand-new investor agent specification.
+- Author a brand-new agent specification.
 - Refactor a legacy agent specification into the unified format.
 - Extend an existing specification with new theory, signals,
   parameters, or validation expectations.
@@ -82,9 +93,10 @@ marked *conditional*.
 | 11 | Academic References                    | `##`   |                                   |
 | 12 | Design Provenance and Versioning       | `##`   | Footer block                      |
 
-Venue rules, matching mechanics, fee / latency models, and
-peer-network topology are not sections of an agent design — they
-belong to the scenario / market specification.
+Environment rules — matching mechanics, fee / latency models,
+message-routing policy, content-moderation rules, and peer-network
+topology — are not sections of an agent design. They belong to the
+scenario / environment specification.
 
 ---
 
@@ -107,7 +119,8 @@ belong to the scenario / market specification.
 ### 3.2 Summary
 
 A seven-row fingerprint table. Field names and order MUST be exactly as
-shown.
+shown. Domain companions MAY relabel `Theory Family` value palette and
+`System Role` row label per `agent-design-<domain>.md §3`.
 
 ```markdown
 ## Summary
@@ -115,29 +128,36 @@ shown.
 | Field                 | Content                                                                  |
 |-----------------------|--------------------------------------------------------------------------|
 | Archetype             | <one-line role phrase, matches the H1>                                   |
-| Theory Family         | <Behavioral Finance / Microstructure / Information Cascade / Quant ...>  |
-| Market Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> |
+| Theory Family         | <see the relevant domain companion for the value palette>                |
+| System Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> |
 | Time Horizon          | <short / medium / long>                                                  |
 | Risk Tolerance        | <low / medium / high>                                                    |
 | Information Asymmetry | <none / partial / full>                                                  |
 | Determinism           | <deterministic / stochastic-given-seed / non-deterministic>              |
 ```
 
+The row label *System Role* refers to the agent's qualitative effect on
+the dynamics of the simulated system as a whole. Domain companions MAY
+substitute a domain-natural label (e.g. *Market Role*); see the
+relevant `agent-design-<domain>.md`.
+
 ### 3.3 Definition and Goals
 
 Three short paragraphs (8–14 sentences total) addressing, in order:
 
-1. **What the agent models.** Describe the real-market participant or
-   behaviour. Name the real-world counterpart class (retail trader,
-   institutional fund, market maker, regulator, news-driven follower,
-   contrarian, fundamentalist, …).
-2. **Decision goal.** State the concrete output produced (action +
-   sizing + price level) and the criterion the agent optimises or
-   follows.
+1. **What the agent models.** Describe the real-world participant or
+   behaviour, and name the real-world counterpart class. Pick the
+   counterpart from the relevant domain companion's enumeration
+   (e.g. `agent-design-finance.md §4`), or supply a more specific
+   counterpart with a citation.
+2. **Decision goal.** State the concrete output produced (action
+   selection + magnitude + any continuous action parameter such as
+   price, opinion target, or message intensity) and the criterion the
+   agent optimises or follows.
 3. **Role inside the simulation.** Specify which **stylized facts**
-   this agent is expected to help produce when active in a population
-   (e.g. fat-tailed returns, volatility clustering, momentum, sustained
-   mispricing, herding cascades, bubble formation). Then state the
+   this agent is expected to help produce when active in a population.
+   Pick stylized facts from the relevant domain companion's catalogue
+   (e.g. `agent-design-finance.md §5`), with a citation. Then state the
    **non-goals** — behaviours this agent MUST NOT exhibit.
 
 ### 3.4 Theoretical Foundation
@@ -193,17 +213,18 @@ Deactivation Conditions:
 - <Inventory / wealth threshold breached>
 - <Regime flip>: <new behaviour or hibernation>
 
-Market Contribution by Regime:
-| Regime | Contribution                | Mechanism  |
-|--------|-----------------------------|------------|
-| Calm   | Stabilising / Destabilising | <one-line> |
-| Stress | Stabilising / Destabilising | <one-line> |
+System Contribution by Regime:
+| Regime     | Contribution                | Mechanism  |
+|------------|-----------------------------|------------|
+| <Regime A> | Stabilising / Destabilising | <one-line> |
+| <Regime B> | Stabilising / Destabilising | <one-line> |
 
-(≥2 rows required. *Calm* and *Stress* are the default labels;
-authors MAY rename or add rows to fit the scenario, e.g.
-*Boom / Bust / Transition* for cycles, *Normal / Panic / Recovery*
-for crashes, *Pre-event / Event / Post-event* for shocks. The three
-columns and their order MUST NOT change.)
+(≥2 rows required. The three columns and their order MUST NOT change.
+Domain companions supply the regime label palette appropriate to the
+scenario — see `agent-design-<domain>.md`. The table label
+*System Contribution by Regime* MAY be relabelled in domain
+companions — e.g. *Market Contribution by Regime* per
+`agent-design-finance.md §6`.)
 
 Interaction with other agents: <one sentence — who it opposes,
 amplifies, or overlaps with>
@@ -238,24 +259,31 @@ programming language.
 
 #### 3.6.3 Action Space
 
-The set of orders the agent may emit and the **self-imposed risk
-discipline** the investor applies to itself. Venue-imposed limits
-(regulatory leverage caps, exchange short-sell bans, tick size, fee
-schedule, latency) MUST NOT appear here — they belong to the
-scenario / market specification. Every aspect below MUST be
-specified.
+The set of actions the agent may emit and the **self-imposed
+discipline** the agent applies to itself. Environment-imposed limits
+(matching engine, tick grid, fee schedule, latency, message-routing
+policy, content-moderation rules, regulator-imposed caps) MUST NOT
+appear here — they belong to the scenario / environment
+specification. Every aspect below MUST be specified.
+
+The eight aspect *dimensions* are canonical and MUST all be visibly
+covered. Their *row labels* are the canonical generic labels shown
+below. Domain companions (`agent-design-<domain>.md`) MAY supply
+domain-natural label substitutes — see, for example,
+`agent-design-finance.md §7` for the financial-domain row labels.
+Row order MUST be preserved.
 
 ```markdown
-| Aspect                | Specification                                              |
-|-----------------------|------------------------------------------------------------|
-| Order types allowed   | <market / limit / IOC / hold-no-op>                        |
-| Price level rule      | <formula or rule for setting the price>                    |
-| Order quantity rule   | <formula or rule for sizing>                               |
-| Order lifetime        | <1 tick / GTC / cancel after K ticks>                      |
-| Cancellation policy   | <cancel-replace on signal change / never / on regime flip> |
-| Inventory constraint  | <max absolute position>                                    |
-| Wealth / leverage cap | <cash floor, notional ceiling, leverage limit>             |
-| Stop-loss / kill rule | <drawdown trigger or "none">                               |
+| Aspect                | Specification                                                            |
+|-----------------------|--------------------------------------------------------------------------|
+| Action types allowed  | <enumerate every discrete action, including no-op>                       |
+| Action parameter rule | <rule for the continuous parameter of an action, e.g. price or target>   |
+| Sizing rule           | <formula or rule for action magnitude / quantity>                        |
+| Action lifetime       | <duration before the action expires or is auto-cancelled>                |
+| Revision policy       | <when and how the agent retracts, replaces, or amends an emitted action> |
+| State constraint      | <self-imposed cap on the agent's internal state>                         |
+| Resource cap          | <self-imposed cap on cumulative cost, capital, or budget>                |
+| Exit rule             | <self-imposed termination trigger, or "none">                            |
 ```
 
 #### 3.6.4 Mathematical Model
@@ -449,10 +477,14 @@ item is a blocker.
 - [ ] §3.6 has all five H4 sub-blocks (Information Set, Mechanism,
       Action Space, Mathematical Model with State-Update Rule and
       Determinism Contract, Behavioral Properties)
-- [ ] §3.6.3 Action Space describes only self-imposed risk discipline;
-      no venue rules (matching engine, tick grid, fees, latency,
-      regulator-imposed short-sell or margin caps) appear anywhere in
-      the specification
+- [ ] §3.6.3 Action Space describes only self-imposed discipline; no
+      environment rules (matching engine, tick grid, fees, latency,
+      message-routing policy, content-moderation rules,
+      regulator-imposed caps) appear anywhere in the specification
+- [ ] §3.6.3 Action Space visibly covers all eight canonical
+      dimensions (Action types, Action parameter, Sizing, Lifetime,
+      Revision, State constraint, Resource cap, Exit), under either
+      the canonical labels or domain-natural substitutes
 - [ ] No section names or describes a peer-network topology, social
       graph, or information-propagation rule (those belong to the
       scenario, not the agent)
@@ -488,8 +520,8 @@ or remove sections.
 | Field                 | Content                                                                  |
 |-----------------------|--------------------------------------------------------------------------|
 | Archetype             | <archetype description, same as H1>                                      |
-| Theory Family         | <Behavioral Finance / Microstructure / Information Cascade / Quant ...>  |
-| Market Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> |
+| Theory Family         | <see the relevant domain companion for the value palette>                |
+| System Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> |
 | Time Horizon          | <short / medium / long>                                                  |
 | Risk Tolerance        | <low / medium / high>                                                    |
 | Information Asymmetry | <none / partial / full>                                                  |
@@ -537,11 +569,11 @@ Activation Triggers:
 Deactivation Conditions:
 - <condition> → <hibernate / exit>
 
-Market Contribution by Regime:
-| Regime | Contribution                | Mechanism  |
-|--------|-----------------------------|------------|
-| Calm   | Stabilising / Destabilising | <one-line> |
-| Stress | Stabilising / Destabilising | <one-line> |
+System Contribution by Regime:
+| Regime     | Contribution                | Mechanism  |
+|------------|-----------------------------|------------|
+| <Regime A> | Stabilising / Destabilising | <one-line> |
+| <Regime B> | Stabilising / Destabilising | <one-line> |
 
 Interaction with other agents: <one sentence>
 
@@ -563,16 +595,16 @@ Does NOT use: <list>.
 
 #### Action Space
 
-| Aspect                | Specification                 |
-|-----------------------|-------------------------------|
-| Order types allowed   | <market / limit / IOC / hold> |
-| Price level rule      | <formula>                     |
-| Order quantity rule   | <formula>                     |
-| Order lifetime        | <1 tick / GTC / K ticks>      |
-| Cancellation policy   | <rule>                        |
-| Inventory constraint  | <max absolute position>       |
-| Wealth / leverage cap | <model>                       |
-| Stop-loss / kill rule | <rule or "none">              |
+| Aspect                | Specification                                         |
+|-----------------------|-------------------------------------------------------|
+| Action types allowed  | <enumerate every discrete action, including no-op>    |
+| Action parameter rule | <rule for the continuous parameter of an action>      |
+| Sizing rule           | <formula or rule for action magnitude / quantity>     |
+| Action lifetime       | <duration before the action expires>                  |
+| Revision policy       | <when and how the agent retracts or amends an action> |
+| State constraint      | <self-imposed cap on the agent's internal state>      |
+| Resource cap          | <self-imposed budget / capital / leverage cap>        |
+| Exit rule             | <self-imposed termination trigger, or "none">         |
 
 #### Mathematical Model
 

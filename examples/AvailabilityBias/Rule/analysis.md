@@ -2,33 +2,33 @@
 
 ## §1 Overview
 
-| Item | Description |
-|---|---|
-| Variant | Rule |
-| Analysis Script | `examples/AvailabilityBias/Rule/analysis.py` |
-| Basis | `../analysis-bases.md` |
-| Outputs | `summary.json`, `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png` |
+| Item            | Description                                                                                                                        |
+|-----------------|------------------------------------------------------------------------------------------------------------------------------------|
+| Variant         | Rule                                                                                                                               |
+| Analysis Script | `examples/AvailabilityBias/Rule/analysis.py`                                                                                       |
+| Basis           | `../analysis-bases.md`                                                                                                             |
+| Outputs         | `summary.json`, `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png` |
 
 ## §2 Metric Implementation
 
-| Metric | Function | analysis-bases.md Ref | Rule-Specific Notes |
-|---|---|---|---|
-| Price Deviation from Fundamental | `_compute_peak_deviation(...)` | `§2 Metric: Price Deviation from Fundamental` | Primary bias-depth statistic. |
-| Bias Persistence Score | `_compute_bias_persistence(...)` | `§2 Metric: Bias Persistence Score` | Detects sustained availability episodes. |
-| Availability Bias Magnitude | volume decomposition in `_compute_stabilization_ratio(...)` | `§2 Metric: Availability Bias Magnitude` | Interpreted through biased/rational volume. |
-| Return Autocorrelation | `_compute_rolling_ac1(...)` | `§2 Metric: Return Autocorrelation` | Detects momentum and reversal. |
-| Agent-Type Volume Share | `_load_data(...)` investor payloads | `§2 Metric: Agent-Type Volume Share` | Separates recency, media, rational, and noise channels. |
-| Stabilization Ratio | `_compute_stabilization_ratio(...)` | `§2 Metric: Stabilization Ratio` | Measures rational correction during bias episodes. |
-| RAG Retrieval Failure Rate | not applicable | `§2 Metric: RAG Retrieval Failure Rate` | Rule variant has no retrieval. |
+| Metric                           | Function                                                    | analysis-bases.md Ref                         | Rule-Specific Notes                                     |
+|----------------------------------|-------------------------------------------------------------|-----------------------------------------------|---------------------------------------------------------|
+| Price Deviation from Fundamental | `_compute_peak_deviation(...)`                              | `§2 Metric: Price Deviation from Fundamental` | Primary bias-depth statistic.                           |
+| Bias Persistence Score           | `_compute_bias_persistence(...)`                            | `§2 Metric: Bias Persistence Score`           | Detects sustained availability episodes.                |
+| Availability Bias Magnitude      | volume decomposition in `_compute_stabilization_ratio(...)` | `§2 Metric: Availability Bias Magnitude`      | Interpreted through biased/rational volume.             |
+| Return Autocorrelation           | `_compute_rolling_ac1(...)`                                 | `§2 Metric: Return Autocorrelation`           | Detects momentum and reversal.                          |
+| Agent-Type Volume Share          | `_load_data(...)` investor payloads                         | `§2 Metric: Agent-Type Volume Share`          | Separates recency, media, rational, and noise channels. |
+| Stabilization Ratio              | `_compute_stabilization_ratio(...)`                         | `§2 Metric: Stabilization Ratio`              | Measures rational correction during bias episodes.      |
+| RAG Retrieval Failure Rate       | not applicable                                              | `§2 Metric: RAG Retrieval Failure Rate`       | Rule variant has no retrieval.                          |
 
 ## §3 Analysis Dimensions
 
-| Dimension | Rule Interpretation |
-|---|---|
-| Bias-Induced Price Dynamics | Rule provides the deterministic formula baseline. |
-| Channel Attribution | Recency and media channels are directly traceable to config parameters. |
+| Dimension                   | Rule Interpretation                                                      |
+|-----------------------------|--------------------------------------------------------------------------|
+| Bias-Induced Price Dynamics | Rule provides the deterministic formula baseline.                        |
+| Channel Attribution         | Recency and media channels are directly traceable to config parameters.  |
 | Stabilization Effectiveness | SystematicAnalyst and ValueTrader correction is exact and interpretable. |
-| Cross-Variant Comparison | Rule is the reference for LLM, RuleLLM, and Rag deviations. |
+| Cross-Variant Comparison    | Rule is the reference for LLM, RuleLLM, and Rag deviations.              |
 
 ## §4 Phase Analysis
 
@@ -58,4 +58,4 @@ No price data, no fundamental batch store, all-zero quantities, or invalid order
 
 ## §7 Visualization Catalogue
 
-The analysis writes the fixed output set required by `docs/create-example-skill/08-step4-implement.md`: `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png`, and `summary.json`.
+The analysis writes the fixed output set required by `masim/format/create-example-skill/08-step4-implement.md`: `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png`, and `summary.json`.

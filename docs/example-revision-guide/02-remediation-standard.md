@@ -4,7 +4,7 @@
 
 This file defines the **compliance criteria** for every file type in a simulation. A file is "compliant" only if it satisfies every criterion in the relevant section. These criteria are the authoritative standard — used both for auditing (determining what needs repair) and for validating repairs (confirming the work is complete).
 
-All structural requirements reference `docs/create-example-skill/` as the upstream source of truth.
+All structural requirements reference `masim/format/create-example-skill/` as the upstream source of truth.
 
 ---
 
@@ -263,15 +263,15 @@ Each investor subsection must use this format:
 
 ### §4.1 Required Sections (in order)
 
-| Section | Title                                  | Minimum Content                                                                                 |
-|---------|----------------------------------------|-------------------------------------------------------------------------------------------------|
-| §1      | Overview                               | Analysis script, output location, imported functions, and variant-specific considerations       |
-| §2      | Metric Implementation                  | Table of all metrics with function name and `analysis-bases.md §2.X` reference                  |
-| §3      | Dimension-by-Dimension Analysis        | How each `analysis-bases.md §3` dimension is computed and interpreted for this variant          |
-| §4      | Variant-Specific Observable Phenomena  | Phenomena unique to this variant and how to observe them                                        |
-| §5      | Scaling and Sensitivity Analysis       | Round scaling, agent-count scaling when relevant, and parameter sensitivity for this variant    |
-| §6      | Output Files Reference                 | Expected analysis output files, generating functions, contents, and interpretation guidance     |
-| §7      | Cross-Variant Comparison Notes         | This variant's expected position in the `analysis-bases.md §5` cross-variant comparison         |
+| Section | Title                                 | Minimum Content                                                                              |
+|---------|---------------------------------------|----------------------------------------------------------------------------------------------|
+| §1      | Overview                              | Analysis script, output location, imported functions, and variant-specific considerations    |
+| §2      | Metric Implementation                 | Table of all metrics with function name and `analysis-bases.md §2.X` reference               |
+| §3      | Dimension-by-Dimension Analysis       | How each `analysis-bases.md §3` dimension is computed and interpreted for this variant       |
+| §4      | Variant-Specific Observable Phenomena | Phenomena unique to this variant and how to observe them                                     |
+| §5      | Scaling and Sensitivity Analysis      | Round scaling, agent-count scaling when relevant, and parameter sensitivity for this variant |
+| §6      | Output Files Reference                | Expected analysis output files, generating functions, contents, and interpretation guidance  |
+| §7      | Cross-Variant Comparison Notes        | This variant's expected position in the `analysis-bases.md §5` cross-variant comparison      |
 
 ### §4.2 Metric → Function Mapping Table (§2)
 

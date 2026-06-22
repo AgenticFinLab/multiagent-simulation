@@ -103,7 +103,7 @@ class {ClassName}(GeneralPlayer):
     [Role description — 1 sentence].
 
     Theoretical basis: simulation-bases.md §4.{N} — {ClassName}
-    Strategy specification: simulation-bases.md §4.{N}.4 — Behavioral Framework
+    Strategy specification: simulation-bases.md §4.{N}.5 — Behavioral Framework
     Parameters: simulation-bases.md §6
     See simulation-bases.md §4.{N} for full investor design specification.
     """

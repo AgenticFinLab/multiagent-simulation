@@ -8,11 +8,11 @@ This guide is **reusable for any simulation in `examples/`** — not tied to any
 
 ---
 
-## Relationship to `docs/create-example-skill/`
+## Relationship to `masim/format/create-example-skill/`
 
 | Guide                                            | Purpose                               | When to Use                                          |
 |--------------------------------------------------|---------------------------------------|------------------------------------------------------|
-| `docs/create-example-skill/`                     | Build a new simulation from scratch   | Creating a new `examples/<Scenario>`                 |
+| `masim/format/create-example-skill/`             | Build a new simulation from scratch   | Creating a new `examples/<Scenario>`                 |
 | `docs/example-revision-guide/` ← **this folder** | Audit and repair existing simulations | Updating, fixing, or upgrading `examples/<Scenario>` |
 
 Both guides share the same compliance standard — the difference is direction: creation goes forward, revision goes backward from the standard.
@@ -21,17 +21,17 @@ Both guides share the same compliance standard — the difference is direction: 
 
 ## Folder Structure and Reading Order
 
-| File                         | Phase      | Purpose                                                                                   |
-|------------------------------|------------|-------------------------------------------------------------------------------------------|
-| `00-overview.md`             | —          | This file: orientation and reading order                                                  |
-| `01-current-state-audit.md`  | Pre-work   | How to fill the `00-simulations.md` state table and produce an audit matrix               |
-| `02-remediation-standard.md` | Standard   | The compliance criteria every file must meet — for documentation, code, and config        |
-| `03-documentation-repair.md` | Repair     | How to create or rewrite `simulation-bases.md`, `analysis-bases.md`, and all variant docs |
-| `04-code-repair.md`          | Repair     | How to audit and fix `players.py` and `prompts.py` for all four variants                  |
-| `05-config-repair.md`        | Repair     | How to audit and fix YAML config files for all four variants                              |
-| `06-execution-order.md`      | Execution  | The per-simulation step-by-step workflow: one simulation at a time                        |
-| `07-validation-checklist.md` | Validation | Final verification gates before marking a simulation complete                             |
-| `08-runtime-failure-patterns.md` | Runtime | Empirical failure patterns discovered during full-round experiment execution              |
+| File                             | Phase      | Purpose                                                                                   |
+|----------------------------------|------------|-------------------------------------------------------------------------------------------|
+| `00-overview.md`                 | —          | This file: orientation and reading order                                                  |
+| `01-current-state-audit.md`      | Pre-work   | How to fill the `00-simulations.md` state table and produce an audit matrix               |
+| `02-remediation-standard.md`     | Standard   | The compliance criteria every file must meet — for documentation, code, and config        |
+| `03-documentation-repair.md`     | Repair     | How to create or rewrite `simulation-bases.md`, `analysis-bases.md`, and all variant docs |
+| `04-code-repair.md`              | Repair     | How to audit and fix `players.py` and `prompts.py` for all four variants                  |
+| `05-config-repair.md`            | Repair     | How to audit and fix YAML config files for all four variants                              |
+| `06-execution-order.md`          | Execution  | The per-simulation step-by-step workflow: one simulation at a time                        |
+| `07-validation-checklist.md`     | Validation | Final verification gates before marking a simulation complete                             |
+| `08-runtime-failure-patterns.md` | Runtime    | Empirical failure patterns discovered during full-round experiment execution              |
 
 ---
 
@@ -129,16 +129,16 @@ Beyond root-cause error handling, **all simulation code** (`players.py` and `ana
 
 **The 8 prohibited pattern categories**:
 
-| # | Pattern                            | Wrong                                          | Correct                                                |
-|---|------------------------------------|------------------------------------------------|--------------------------------------------------------|
+| # | Pattern                            | Wrong                                          | Correct                                                                                                  |
+|---|------------------------------------|------------------------------------------------|----------------------------------------------------------------------------------------------------------|
 | 1 | LLM parse failure → silent hold    | `if decision is None: action, qty = "hold", 0` | Fix the prompt/parser contract; if stochastic malformed output remains, use an explicit counted fallback |
-| 2 | `.get()` on LLM response           | `decision.get("action", "hold")`               | `decision["action"]`                                   |
-| 3 | `.get()` on message payload        | `decision_payload.get("quantity", 0)`          | `decision_payload["quantity"]`                         |
-| 4 | `.get()` on coordinator data       | `fundamentals.get(r, 100.0)`                   | `fundamentals[r]`                                      |
-| 5 | Ternary fallback for required data | `if fundamentals else 1.0`                     | `if not fundamentals: raise ValueError(...)`           |
-| 6 | `.get()` on analysis payload       | `payload.get("rag_context", None)`             | `payload["rag_context"]`                               |
-| 7 | Empty-collection fallback          | `if rates else 0.0`                            | `if not rates: raise ValueError(...)`                  |
-| 8 | Index fallback                     | `prices[i] if i < len(prices) else 0.0`        | `prices[i]` (let IndexError surface)                   |
+| 2 | `.get()` on LLM response           | `decision.get("action", "hold")`               | `decision["action"]`                                                                                     |
+| 3 | `.get()` on message payload        | `decision_payload.get("quantity", 0)`          | `decision_payload["quantity"]`                                                                           |
+| 4 | `.get()` on coordinator data       | `fundamentals.get(r, 100.0)`                   | `fundamentals[r]`                                                                                        |
+| 5 | Ternary fallback for required data | `if fundamentals else 1.0`                     | `if not fundamentals: raise ValueError(...)`                                                             |
+| 6 | `.get()` on analysis payload       | `payload.get("rag_context", None)`             | `payload["rag_context"]`                                                                                 |
+| 7 | Empty-collection fallback          | `if rates else 0.0`                            | `if not rates: raise ValueError(...)`                                                                    |
+| 8 | Index fallback                     | `prices[i] if i < len(prices) else 0.0`        | `prices[i]` (let IndexError surface)                                                                     |
 
 **Scope**: applies to ALL `players.py` and `analysis.py` files in all four variants.
 
@@ -176,13 +176,13 @@ When inconsistency is found, the fix priority is: documentation → code → con
 
 Full details are in `02-remediation-standard.md`. Quick reference:
 
-| File Type               | Sections Required | Key Constraint                                                            |
-|-------------------------|-------------------|---------------------------------------------------------------------------|
-| `simulation-bases.md`   | 9 sections        | §4 investor entries must use 7-part standard; no variant-specific content |
-| `analysis-bases.md`     | 7 sections        | §2 metrics must include Python function signatures                        |
-| `{Variant}/explain.md`  | 9 sections        | §2 Theory→Implementation mapping tables; cites `simulation-bases.md §4.N` |
+| File Type               | Sections Required | Key Constraint                                                                                     |
+|-------------------------|-------------------|----------------------------------------------------------------------------------------------------|
+| `simulation-bases.md`   | 9 sections        | §4 investor entries must use 7-part standard; no variant-specific content                          |
+| `analysis-bases.md`     | 7 sections        | §2 metrics must include Python function signatures                                                 |
+| `{Variant}/explain.md`  | 9 sections        | §2 Theory→Implementation mapping tables; cites `simulation-bases.md §4.N`                          |
 | `{Variant}/analysis.md` | 7 sections        | §2 Metric→Function mapping; §3–§7 map dimensions, phenomena, outputs, and cross-variant comparison |
-| `players.py` docstrings | Class-level       | Each investor class must cite `Theory: simulation-bases.md §4.N`          |
+| `players.py` docstrings | Class-level       | Each investor class must cite `Theory: simulation-bases.md §4.N`                                   |
 
 ---
 

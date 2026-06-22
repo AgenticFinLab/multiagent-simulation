@@ -4,13 +4,13 @@
 
 ### 5.1 Theory-Code Alignment Check
 
-For each investor, verify that the implementation in `players.py._make_decision()` matches the behavioral framework in `simulation-bases.md §4.{N}.4.3`:
+For each investor, verify that the implementation in `players.py._make_decision()` matches the behavioral framework in `simulation-bases.md §4.{N}.5.4`:
 
 ```
 For each investor {ClassName}:
-  □ Trigger condition in code matches §4.{N}.4.3 Trigger Function exactly
-  □ Sizing formula in code matches §4.{N}.4.3 Sizing Function exactly
-  □ State variables in code match §4.{N}.4.3 State Variables exactly
+  □ Trigger condition in code matches §4.{N}.5.4 Trigger Function exactly
+  □ Sizing formula in code matches §4.{N}.5.4 Sizing Function exactly
+  □ State variables in code match §4.{N}.5.4 State Variables exactly
   □ Parameters loaded from config match §6 table values
 ```
 

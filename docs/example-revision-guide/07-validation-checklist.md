@@ -233,7 +233,7 @@ done
 
 ### §3.6 `analysis.py` output standard
 
-Verify each `Rule/analysis.py` produces a structured validation report. Run the analysis script and check its output against the requirements in `docs/create-example-skill/08-step4-implement.md §4.1.4`.
+Verify each `Rule/analysis.py` produces a structured validation report. Run the analysis script and check its output against the requirements in `masim/format/create-example-skill/08-step4-implement.md §4.1.4`.
 
 ```bash
 # 1. Run Rule analysis

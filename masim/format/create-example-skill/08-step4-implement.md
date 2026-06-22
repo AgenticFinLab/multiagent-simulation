@@ -73,7 +73,7 @@ class {ClassName}(GeneralPlayer):
     {1-2 sentence role description}.
 
     Theoretical basis: simulation-bases.md §4.{N} — {ClassName}
-    Strategy specification: simulation-bases.md §4.{N}.4 — Behavioral Framework
+    Strategy specification: simulation-bases.md §4.{N}.5 — Behavioral Framework
     Parameters: simulation-bases.md §6
     See simulation-bases.md §4.{N} for full investor design specification.
     """
@@ -83,7 +83,7 @@ class {ClassName}(GeneralPlayer):
 1. `perceive()` initializes state on first call; extracts market data on all calls
 2. `_initialize_investor_state()` loads ALL parameters from `self.state.config.extras`
 3. `step()` calls `_make_decision()` and sends one order message
-4. `_make_decision()` implements the logic from `simulation-bases.md §4.{N}.4.3 Mathematical Model`
+4. `_make_decision()` implements the logic from `simulation-bases.md §4.{N}.5.4 Mathematical Model`
 5. No hardcoded numbers anywhere in the code — all come from config
 6. No `.get(key, default)`, no `if X else fallback`, no silent error recovery — all missing project data must `raise` immediately; stochastic API fallback is allowed only under `00-overview.md` Principle #6
 
@@ -328,20 +328,20 @@ def main():
 System prompts define investor personalities ONLY.
 They must NOT name the phenomenon, mention the price formula, or hint at the event type.
 
-Reference: simulation-bases.md §4.{N}.4.4 for each investor's Behavioral Properties.
+Reference: simulation-bases.md §4.{N}.5.5 for each investor's Behavioral Properties.
 """
 
 # ─────────────────────────────────────────────
 # {ClassName} — System Prompt
-# Persona basis: simulation-bases.md §4.{N}.4.4 Behavioral Properties
+# Persona basis: simulation-bases.md §4.{N}.5.5 Behavioral Properties
 # ─────────────────────────────────────────────
 
 {CLASS_NAME}_SYSTEM = """You are a [role description] in financial markets.
 
-CORE BELIEF: [One sentence guiding all decisions — derived from sim-bases §4.{N}.4.2]
+CORE BELIEF: [One sentence guiding all decisions — derived from sim-bases §4.{N}.5.2]
 
 YOUR PSYCHOLOGY:
-[2-3 sentences on mindset, biases, tendencies — grounded in sim-bases §4.{N}.2 theories]
+[2-3 sentences on mindset, biases, tendencies — grounded in sim-bases §4.{N}.3 theories]
 
 YOUR STRATEGY:
 1. [Decision step 1]

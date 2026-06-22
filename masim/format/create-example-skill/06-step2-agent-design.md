@@ -98,47 +98,61 @@ Design 4-6 investor types. Fewer than 4 produces insufficient behavioral diversi
 
 **Principle 4 — Distinct information sets**: No two investor types should use identical information signals with identical processing. Diversity in information processing is what creates interesting emergent dynamics.
 
-### 2.2.2 Investor Design Worksheet
+### 2.2.2 Per-Investor Specification — Authored Under the Universal Agent Design Handbook
 
-For EACH investor type (to fill in `simulation-bases.md §4` using the 7-part standard):
+Each investor type is specified under the **Universal Agent Design Handbook**
+at `masim/format/agent-design-skill.md`, with the **Financial Domain
+Companion** at `masim/format/agent-design-finance.md` supplying the
+market-trading row labels, value palettes, and worked instantiation
+examples. The handbook is the single source of truth for the intrinsic
+specification of any participant agent; the companion is the single source
+of truth for its financial-domain instantiation. The methodology in this
+guide does not duplicate or paraphrase either file — it instructs the
+author to apply both.
 
-```
-Investor Type Design Worksheet
-================================
+For each investor type, the author MUST:
 
-Name: [Descriptive name]
-Class Name: [PascalCase — e.g., "MomentumSpeculator", "BeliefAnchor"]
+1. Open `agent-design-skill.md` and copy the **§5 Copy-Paste Skeleton**.
+2. Fill in every section per the handbook's section-by-section requirements
+   (§3.1 through §3.12). Use the handbook's exact section names, header
+   levels, table column names, and validation requirements.
+3. Apply the **Financial Domain Companion** (`agent-design-finance.md`):
+   pick the Theory Family value from §3, the real-world counterpart from
+   §4, the stylized facts from §5, and the regime palette from §6.
+   Instantiate the **Action Space** using the financial-domain row labels
+   in `agent-design-finance.md §7` — `Order types allowed`, `Price level
+   rule`, `Order quantity rule`, `Order lifetime`, `Cancellation policy`,
+   `Inventory constraint`, `Wealth / leverage cap`, `Stop-loss / kill rule`.
+   Relabel `System Role` as `Market Role` and `System Contribution by
+   Regime` as `Market Contribution by Regime`.
+4. Embed the completed entry into `simulation-bases.md §4` per
+   `02-root-documents-spec.md §4.0` (header levels shifted down by two:
+   investor title at `###`, handbook §2 sections at `####`, handbook §4
+   sub-blocks at `######`; numbering scheme `4.{N}.x`).
+5. Run the handbook's **§4 Validation Checklist** AND the companion's
+   **§9 Validation Addendum** against the entry. Every unchecked item is
+   a blocker.
 
-Role: [Destabilizing / Stabilizing / Neutral / Amplifying]
+**Required design inputs.** Before opening the handbook skeleton, ensure the
+following inputs are available from Step 1 (research) and §2.1 (market
+design) of this guide; the handbook fields cannot be filled without them.
 
-Primary Theory (from §2): [Theory name → citation]
-  What mechanism from this theory does this agent implement?
-  [1-2 sentences]
+| Input                          | Drives handbook section                      |
+|--------------------------------|----------------------------------------------|
+| Real-world counterpart class   | §3.3 Definition and Goals (paragraph 1)      |
+| Primary theory + DOI citation  | §3.4 Theoretical Foundation                  |
+| Calibration source per knob    | §3.4 Calibration Source / §3.7 Source column |
+| Activation · deactivation rule | §3.5 Activation Triggers / Deactivation      |
+| Decision signals + rationale   | §3.6.1 Decision Information Set              |
+| Trigger and sizing formulas    | §3.6.4 Mathematical Model                    |
+| Self-imposed risk discipline   | §3.6.3 Action Space                          |
+| Per-knob default + range       | §3.7 Parameters                              |
+| Heterogeneity policy           | §3.8 Population and Heterogeneity            |
+| ≥3 worked cases + 1 edge case  | §3.9 Worked Numerical Examples               |
+| Expected stylized facts        | §3.10 Validation and Calibration             |
 
-Trigger Condition:
-  What market signal(s) does this agent watch?
-  What threshold(s) trigger an action?
-  What is the economic rationale for this threshold value?
-  (The threshold value must trace to a parameter in §6 with a source citation)
-
-Action When Triggered:
-  Buy or Sell?
-  How many shares? (formula, not just "a lot")
-  What constraints bound the action? (cash, position, leverage cap)
-
-State Variables:
-  Does this agent maintain any persistent state across rounds?
-  If yes: what is it, how is it initialized, how is it updated each round?
-  (E.g., "rolling price history," "belief variable," "anchor price")
-
-Unique Feature:
-  What makes this agent different from all others in the simulation?
-  What would the simulation lose if this type were removed?
-
-Theory-to-Code Path:
-  [Theory mechanism] → [Decision logic] → [Python method]
-  This is the direct translation that will appear in explain.md §2 and players.py docstring.
-```
+If any input above is unavailable, return to Step 1 (research) before
+proceeding — do not invent values to fill the handbook.
 
 ### 2.2.3 Diversity Verification
 
@@ -177,16 +191,32 @@ The topology YAML (`topology.yml`) follows the AssetBubble reference exactly for
 
 ## 2.4 LLM Persona Design Principles
 
-For each investor type, the LLM persona is derived from `simulation-bases.md §4.{N}.4.4 Behavioral Properties`. Key rules:
+For each investor type, the LLM persona is derived from the handbook entry's
+**Behavioral Properties** sub-block (handbook §3.6.5; embedded form
+`4.{N}.5.5 Behavioral Properties`) together with the **Theoretical
+Foundation** (handbook §3.4; embedded form `4.{N}.3 Theoretical Foundation`)
+and the **Definition and Goals** (handbook §3.3; embedded form
+`4.{N}.2 Definition and Goals`). The persona MUST NOT introduce traits or
+biases that are not traceable to one of these three sources. Key rules:
 
-1. **No phenomenon name in prompts**: The system prompt describes the investor's personality, not the market event. "You are a leveraged carry trader" — not "You are trading during a carry trade unwind crisis."
+1. **No phenomenon name in prompts**: The system prompt describes the
+   investor's personality, not the market event. "You are a leveraged carry
+   trader" — not "You are trading during a carry trade unwind crisis."
 
-2. **Persona derives from behavioral theory**: Every trait in the persona should trace to a published psychological or behavioral finance study. "Overconfident" must cite Barber & Odean (2001) or similar.
+2. **Persona derives from cited theory only**: Every trait in the persona
+   MUST trace back to a citation in handbook §3.4 (“Calibration Source” /
+   citation chain). “Overconfident” MUST cite Barber & Odean (2001) or an
+   equivalent source named in the entry.
 
 3. **Three-layer persona structure**:
-   - Who they are (professional identity, experience)
-   - How they process information (cognitive style, biases, heuristics)
-   - How they act (decision style, risk tolerance, response to stress)
+   - Who they are (professional identity, experience) — from
+     handbook §3.3 paragraph 1 (real-world counterpart class).
+   - How they process information (cognitive style, biases, heuristics) —
+     from handbook §3.6.5 Psychological profile and §3.6.1 Decision
+     Information Set.
+   - How they act (decision style, risk tolerance, response to stress) —
+     from handbook §3.6.5 (Time horizon, Risk tolerance) and §3.5
+     (Activation · Deactivation · Regime contribution).
 
 4. **Canonical output format** (mandatory at end of every system prompt):
    ```
@@ -211,12 +241,16 @@ Before moving to Step 3, verify:
 - [ ] All applicable market mechanisms decided Yes/No with rationale
 
 **Investor taxonomy**:
-- [ ] 4-6 investor types designed
-- [ ] Every investor maps to exactly one primary theory from §2
+- [ ] 4–7 investor types designed (handbook minimum 4, maximum 7 per
+      `02-root-documents-spec.md §4.2`)
+- [ ] Every investor maps to exactly one primary theory cited in
+      `simulation-bases.md §2`
 - [ ] At least one stabilizing and at least two destabilizing agents
 - [ ] No two investors use identical information + processing combination
-- [ ] Every trigger threshold has a literature-calibrated value (or explicit approximation)
-- [ ] All 7 parts of the investor design standard completable from available research
+- [ ] Every trigger threshold has a literature-calibrated value (or explicit
+      approximation), traceable via handbook §3.4 Calibration Source
+- [ ] Each investor entry passes the handbook's §4 Validation Checklist
+      (`agent-design-skill.md §4`) end-to-end — no unchecked items
 
 **Conflict check**:
 - [ ] Can you describe a scenario where one agent buys while another sells in the same round?
