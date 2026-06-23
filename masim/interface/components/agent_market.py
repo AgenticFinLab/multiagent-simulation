@@ -17,6 +17,14 @@ from ..config_loader import (
     get_scenario_info,
     scenario_display_name,
 )
+from ..customized import (
+    CustomizedAgentSelection,
+    is_archetype_mapped,
+    load_default_prompts,
+    parse_parameters_file,
+    write_customized_bundle,
+)
+from ..customized.handbook_params import ParamSpec
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -346,6 +354,24 @@ def _inject_market_styles() -> None:
             text-transform: uppercase; margin-top: 0.32rem;
             display: block;
         }
+        .agent-status-chip {
+            display: inline-block; margin-top: 0.32rem;
+            font-size: 0.6rem; font-weight: 700; line-height: 1.4;
+            padding: 0.06rem 0.4rem; border-radius: 8px;
+            letter-spacing: 0.02em;
+        }
+        .agent-status-chip.selected {
+            background: #e7f3f0; color: #1f6157;
+            border: 1px solid #b6d8d0;
+        }
+        .agent-status-chip.muted {
+            background: #f3f5f7; color: #8a96a3;
+            border: 1px solid #e1e6ea;
+        }
+        .agent-card.active {
+            border-color: #287a6d;
+            box-shadow: 0 0 0 2px rgba(40, 122, 109, 0.18);
+        }
         .profile-banner {
             border-left: 4px solid #287a6d; background: #f3f7f6;
             padding: 0.9rem 1rem; margin: 0.4rem 0 1rem;
@@ -458,12 +484,421 @@ def _render_profile(agent: dict[str, Any]) -> None:
     st.divider()
 
 
+def _load_param_specs(agent: dict[str, Any]) -> list[ParamSpec]:
+    """Return the parsed Parameters table for an agent (cached on disk mtime)."""
+    profile_path = agent.get("profile_file")
+    if not profile_path:
+        return []
+    return parse_parameters_file(profile_path)
+
+
+def _render_param_panel(agent: dict[str, Any]) -> None:
+    """Render the left-side editable parameter panel for an active agent.
+
+    Behaviour:
+    - Engine selector (segmented control) at the top.
+    - One widget per parameter row: number_input for numerics, selectbox
+      for enums, text_input as a fallback.
+    - "Reset to defaults" reverts the agent's edits to the handbook
+      defaults; "Add to portfolio" persists params and ticks the
+      Add-to-Market checkbox in one atomic action.
+    """
+    agent_type = agent["agent_type"]
+    # Always expose all four standard decision engines. Engines whose
+    # concrete classes have not been wired yet are still shown so the
+    # user can preview parameters and prompts; the bundle writer will
+    # surface a TODO marker when a binding is missing.
+    all_engines = ["Rule", "LLM", "RuleLLM", "Rag"]
+    detected = set(agent.get("variants", []) or ["Rule"])
+    specs = _load_param_specs(agent)
+
+    st.markdown('<div class="market-kicker">Customize</div>', unsafe_allow_html=True)
+    st.subheader(agent["display_name"])
+    st.caption(agent["archetype"])
+
+    # ---- Engine selector ------------------------------------------------
+    engine_key = f"market_engine_{agent_type}"
+    if engine_key not in st.session_state or st.session_state[engine_key] not in all_engines:
+        # Prefer the first detected engine (usually Rule) on first render.
+        st.session_state[engine_key] = next(
+            (e for e in all_engines if e in detected), all_engines[0]
+        )
+
+    def _engine_label(v: str) -> str:
+        base = VARIANT_DISPLAY.get(v, v)
+        return base if v in detected else f"{base} (preview)"
+
+    st.segmented_control(
+        "Decision engine",
+        options=all_engines,
+        format_func=_engine_label,
+        key=engine_key,
+        help=(
+            "Choose the decision-making engine. Rule = deterministic logic; "
+            "LLM = persona-driven prompt; RuleLLM = hybrid; RAG = "
+            "retrieval-augmented. Engines marked '(preview)' are not yet "
+            "shipped with a concrete class for this archetype — your "
+            "customization will be saved but the bundle writer will mark "
+            "them as TODO until the binding lands."
+        ),
+    )
+    engine = st.session_state[engine_key]
+
+    if engine not in detected:
+        st.info(
+            f"`{engine}` is in preview for this archetype — parameters and "
+            f"prompts you set here are persisted, but the generated bundle "
+            f"will need a class binding before it can run."
+        )
+
+    if not is_archetype_mapped(agent_type):
+        st.warning(
+            "This archetype does not yet have a registered class binding. "
+            "You can still edit parameters; the generated bundle will "
+            "include a `TODO_unmapped_archetype` marker that must be "
+            "resolved before launch."
+        )
+
+    if not specs:
+        st.info(
+            "This agent's handbook has no `## Parameters` table; "
+            "defaults will be used as-is."
+        )
+
+    # ---- Per-parameter widgets -----------------------------------------
+    persisted = (
+        st.session_state.setdefault("customized_params", {})
+        .setdefault(agent_type, {})
+        .setdefault(engine, {})
+    )
+    edited: dict[str, Any] = {}
+    with st.container():
+        for spec in specs:
+            value = _render_param_widget(agent_type, engine, spec, persisted)
+            edited[spec.symbol] = value
+
+    # ---- LLM-engine extras (prompt + hyperparameters) ------------------
+    if engine in {"LLM", "RuleLLM", "Rag"}:
+        _render_llm_extras(agent, agent_type, engine, persisted, edited)
+
+    # ---- Action buttons -------------------------------------------------
+    st.divider()
+    btn_add, btn_reset, btn_close = st.columns([2, 1, 1])
+    with btn_add:
+        already_in = bool(st.session_state.get(f"market_agent_{agent_type}", False))
+        primary_label = "Update in portfolio" if already_in else "Add to portfolio"
+        if st.button(primary_label, type="primary", use_container_width=True,
+                     key=f"customized_add_{agent_type}"):
+            persisted.clear()
+            persisted.update(edited)
+            st.session_state[f"market_agent_{agent_type}"] = True
+            st.toast(f"{agent['display_name']} → portfolio", icon="✓")
+            st.rerun()
+    with btn_reset:
+        if st.button("Reset", use_container_width=True,
+                     key=f"customized_reset_{agent_type}"):
+            persisted.clear()
+            for sub_key in list(st.session_state.keys()):
+                if sub_key.startswith(f"customized_input_{agent_type}_{engine}_"):
+                    del st.session_state[sub_key]
+            st.rerun()
+    with btn_close:
+        if st.button("Close", use_container_width=True,
+                     key=f"customized_close_{agent_type}"):
+            st.session_state.customized_active_agent = None
+            st.rerun()
+
+
+def _render_param_widget(
+    agent_type: str,
+    engine: str,
+    spec: ParamSpec,
+    persisted: dict[str, Any],
+) -> Any:
+    """Render one editable widget for a parameter spec, return its value.
+
+    UX rule: the row shows ONLY the human-readable label (and the
+    widget itself).  Every piece of metadata — description, default,
+    range, units, sensitivity, impact, raw config key, source — lives
+    inside the widget's ``help`` tooltip and is revealed on demand
+    when the user hovers the ``?`` icon Streamlit renders next to the
+    label.  No gray captions are emitted below the widget.
+    """
+    widget_key = f"customized_input_{agent_type}_{engine}_{spec.symbol}"
+    initial = persisted.get(spec.symbol, spec.default_value)
+    label_main = spec.display_label
+    help_text = _compose_help(spec)
+
+    if spec.kind == "enum":
+        options = spec.enum_values or []
+        try:
+            index = options.index(initial) if initial in options else 0
+        except ValueError:
+            index = 0
+        return st.selectbox(
+            label_main,
+            options=options or [str(initial or "")],
+            index=index,
+            key=widget_key,
+            help=help_text,
+        )
+
+    if spec.kind == "int":
+        # Streamlit's number_input rejects None; coerce missing values
+        # to 0 so the widget can render.
+        coerced = int(initial) if isinstance(initial, (int, float)) else 0
+        kwargs: dict[str, Any] = {"step": 1, "key": widget_key, "help": help_text}
+        if spec.numeric_low is not None and spec.numeric_low != float("-inf"):
+            kwargs["min_value"] = int(spec.numeric_low)
+        if spec.numeric_high is not None and spec.numeric_high != float("inf"):
+            kwargs["max_value"] = int(spec.numeric_high)
+        return st.number_input(label_main, value=coerced, **kwargs)
+
+    if spec.kind == "float":
+        coerced_f = float(initial) if isinstance(initial, (int, float)) else 0.0
+        kwargs = {"key": widget_key, "help": help_text, "format": "%.6g"}
+        if spec.numeric_low is not None and spec.numeric_low != float("-inf"):
+            kwargs["min_value"] = float(spec.numeric_low)
+        if spec.numeric_high is not None and spec.numeric_high != float("inf"):
+            kwargs["max_value"] = float(spec.numeric_high)
+        return st.number_input(label_main, value=coerced_f, **kwargs)
+
+    # Free-text fallback (covers list-valued defaults like
+    # ``[-0.01, -0.02, ...]`` and Greek-letter symbols).
+    return st.text_input(
+        label_main,
+        value=str(initial) if initial is not None else "",
+        key=widget_key,
+        help=help_text,
+    )
+
+
+def _render_llm_extras(
+    agent: dict[str, Any],
+    agent_type: str,
+    engine: str,
+    persisted: dict[str, Any],
+    edited: dict[str, Any],
+) -> None:
+    """Render LLM hyperparameters and editable prompt textareas.
+
+    Two prompts are exposed because every LLM player in this codebase
+    follows the same two-message contract: a *system prompt* that
+    defines the persona once, and a *user prompt template* that is
+    rendered every round with the current market state injected via
+    ``str.format(**vars)``.  Both are editable here; both are persisted
+    under reserved sentinel keys so they round-trip with the rest of
+    the agent's customized params:
+
+        ``__llm_lm_name__``, ``__llm_temperature__``, ``__llm_max_tokens__``,
+        ``__llm_system_prompt__``, ``__llm_user_prompt__``.
+    """
+    st.markdown("---")
+    st.markdown(f"**LLM settings** — *{VARIANT_DISPLAY.get(engine, engine)} engine*")
+
+    lm_key = f"customized_llm_lm_{agent_type}_{engine}"
+    temp_key = f"customized_llm_temp_{agent_type}_{engine}"
+    tok_key = f"customized_llm_tokens_{agent_type}_{engine}"
+    sys_key = f"customized_llm_sysprompt_{agent_type}_{engine}"
+    usr_key = f"customized_llm_userprompt_{agent_type}_{engine}"
+
+    lm_default = persisted.get("__llm_lm_name__", "ark/doubao-seed-2-0-mini-260428")
+    temp_default = float(persisted.get("__llm_temperature__", 0.7))
+    tok_default = int(persisted.get("__llm_max_tokens__", 512))
+    sys_default = str(persisted.get("__llm_system_prompt__", ""))
+    usr_default = str(persisted.get("__llm_user_prompt__", ""))
+
+    # Pre-fill the textareas with the shipped default prompt so users
+    # can SEE the actual prompt the agent will run with, instead of
+    # staring at an empty box. ``shipped_*`` is the upstream default
+    # imported from the example codebase; ``*_default`` is whatever the
+    # user has typed so far. We treat "persisted matches the shipped
+    # default" as "still default", and the textarea simply renders the
+    # shipped string as its initial value.
+    shipped_sys, shipped_user = load_default_prompts(agent_type, engine)
+    if not sys_default and shipped_sys:
+        sys_default = shipped_sys
+    if not usr_default and shipped_user:
+        usr_default = shipped_user
+    has_shipped_sys = bool(shipped_sys)
+    has_shipped_user = bool(shipped_user)
+
+    edited["__llm_lm_name__"] = st.text_input(
+        "Model identifier",
+        value=lm_default,
+        key=lm_key,
+        help=(
+            "Any identifier accepted by `LangChainAPIInference` — for "
+            "example `ark/doubao-seed-2-0-mini-260428`, "
+            "`openai/gpt-4o-mini`. **Config key:** `lm_name`."
+        ),
+    )
+    col_t, col_n = st.columns(2)
+    with col_t:
+        edited["__llm_temperature__"] = st.number_input(
+            "Temperature",
+            value=temp_default,
+            min_value=0.0,
+            max_value=2.0,
+            step=0.1,
+            format="%.2f",
+            key=temp_key,
+            help=(
+                "Sampling randomness. 0.0 = deterministic; 0.7 = balanced; "
+                ">1.0 = highly creative. **Config key:** `temperature`."
+            ),
+        )
+    with col_n:
+        edited["__llm_max_tokens__"] = st.number_input(
+            "Max response tokens",
+            value=tok_default,
+            min_value=64,
+            max_value=8192,
+            step=64,
+            key=tok_key,
+            help=(
+                "Hard cap on response length per decision. "
+                "**Config key:** `max_tokens`."
+            ),
+        )
+
+    sys_placeholder = (
+        "No default persona is registered for this archetype + engine yet. "
+        "Type a system prompt here: describe the persona, beliefs, and "
+        "trading approach. Do not reveal the underlying market mechanism "
+        "or ground-truth formulas."
+    )
+    sys_label = (
+        "System prompt (default persona shown below — edit to customize)"
+        if has_shipped_sys else
+        "System prompt (no default registered — type a custom persona)"
+    )
+    with st.expander(sys_label, expanded=True):
+        if has_shipped_sys:
+            st.caption(
+                "This is the actual default persona shipped with the "
+                "example codebase. Edit any text here to override; the "
+                "bundle writer will materialize your version into the "
+                "generated `prompts.py` and reference it from "
+                "`players.yml`."
+            )
+        else:
+            st.caption(
+                "No default persona has been registered for this "
+                "archetype + engine combination yet. Type your own below "
+                "— the bundle writer will save it into the generated "
+                "`prompts.py`."
+            )
+        edited["__llm_system_prompt__"] = st.text_area(
+            "System prompt",
+            value=sys_default,
+            placeholder=sys_placeholder,
+            height=260,
+            key=sys_key,
+            label_visibility="collapsed",
+            help=(
+                "Plain-text persona prompt sent as the system message on "
+                "every call. Avoid leaking quantitative thresholds or "
+                "naming the simulated phenomenon. **Config key:** "
+                "`llm.sys_message`."
+            ),
+        )
+
+    usr_placeholder = (
+        "No default per-round template is registered for this archetype "
+        "+ engine yet. Type a Python ``str.format`` template that will be "
+        "rendered every round with current market state injected. "
+        "Available placeholders (scenario-dependent) include: {round}, "
+        "{price}, {prev_price}, {fundamental}, {price_change}, "
+        "{deviation}, {cash}, {position}, {portfolio_value}."
+    )
+    usr_label = (
+        "User prompt template (default shown below — edit to customize)"
+        if has_shipped_user else
+        "User prompt template (no default registered — type your own)"
+    )
+    with st.expander(usr_label, expanded=True):
+        if has_shipped_user:
+            st.caption(
+                "This is the actual per-round template shipped with the "
+                "example codebase. The player class fills in placeholders "
+                "such as `{round}`, `{price}`, `{cash}` every tick. Edit "
+                "to override; the bundle writer will save your version."
+            )
+        else:
+            st.caption(
+                "No default per-round template has been registered for "
+                "this archetype + engine combination yet. Type your own "
+                "below using `str.format` placeholders."
+            )
+        edited["__llm_user_prompt__"] = st.text_area(
+            "User prompt template",
+            value=usr_default,
+            placeholder=usr_placeholder,
+            height=300,
+            key=usr_key,
+            label_visibility="collapsed",
+            help=(
+                "Python `str.format` template sent as the user message on "
+                "every round. Unknown placeholders raise KeyError at "
+                "runtime, so only use the ones the scenario provides. "
+                "**Config key:** `llm.user_message`."
+            ),
+        )
+
+
+def _compose_help(spec: ParamSpec) -> str:
+    """Build the multi-line tooltip shown when the user hovers ``?``.
+
+    All per-parameter metadata is consolidated here so the row stays
+    visually clean by default.  Streamlit renders the ``help`` argument
+    as Markdown, so we use Markdown bullets for legibility.
+    """
+    bits: list[str] = []
+    # Description first — the bulk of the explanation.  Skip when the
+    # display label already shows the description (schema-1 handbooks),
+    # to avoid duplication.
+    if spec.description and spec.description != spec.display_label:
+        bits.append(spec.description)
+    facts: list[str] = []
+    if spec.default:
+        facts.append(f"**Default:** `{spec.default}`")
+    if spec.valid_range:
+        facts.append(f"**Range:** `{spec.valid_range}`")
+    if spec.units:
+        facts.append(f"**Units:** {spec.units}")
+    if spec.sensitivity:
+        facts.append(f"**Sensitivity:** {spec.sensitivity}")
+    if spec.impact:
+        facts.append(f"**Impact:** {spec.impact}")
+    if spec.source:
+        facts.append(f"**Source:** {spec.source}")
+    # Raw config key shown last — power-user reference for cross-
+    # checking ``players.yml`` without polluting the visible row.
+    facts.append(f"**Config key:** `{spec.symbol}`")
+    if facts:
+        bits.append("\n".join(f"- {f}" for f in facts))
+    return "\n\n".join(bits)
+
+
 def _render_agent_card(agent: dict[str, Any]) -> None:
+    """Render one card in the agent grid.
+
+    The card image links to the read-only profile (existing behaviour).
+    A small "Customize" button below the avatar promotes the agent to
+    the active slot in the parameter panel on the left, and a "Selected"
+    badge shows when the agent is already part of the portfolio.
+    """
     agent_type = agent["agent_type"]
     href = f"?agent={quote(agent_type)}#agent-profile"
-    variants = agent.get("variants", []) or ["Rule"]
+    selected = bool(st.session_state.get(f"market_agent_{agent_type}", False))
+    is_active = st.session_state.get("customized_active_agent") == agent_type
+    badge = (
+        "<span class='agent-status-chip selected'>✓ in portfolio</span>"
+        if selected else "<span class='agent-status-chip muted'>not selected</span>"
+    )
     card = f"""
-    <div class="agent-card">
+    <div class="agent-card{(' active' if is_active else '')}">
       <a class="agent-image-link" href="{href}" target="_self"
          title="{html.escape(agent['intro'], quote=True)}"
          aria-label="Open {html.escape(agent['display_name'])} profile">
@@ -472,33 +907,29 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
       </a>
       <div class="agent-card-copy">
         <div class="agent-card-name">{html.escape(agent['display_name'])}</div>
-        <span class="agent-variants-label">Engine</span>
+        {badge}
       </div>
     </div>
     """
     st.markdown(card, unsafe_allow_html=True)
 
-    # Per-agent engine selector. The variant decides parameter set and
-    # decision logic, so each agent in the portfolio can pick its own.
-    engine_key = f"market_engine_{agent_type}"
-    if engine_key not in st.session_state:
-        st.session_state[engine_key] = variants[0]
-    elif st.session_state[engine_key] not in variants:
-        st.session_state[engine_key] = variants[0]
-    st.segmented_control(
-        "Decision engine",
-        options=variants,
-        format_func=lambda v: VARIANT_DISPLAY.get(v, v),
-        key=engine_key,
-        label_visibility="collapsed",
-        help="Pick the decision engine used by this agent. "
-             "Parameter sets differ per engine.",
-    )
-    st.checkbox(
-        "Add to Market",
-        key=f"market_agent_{agent_type}",
-        help=f"Select {agent['display_name']}",
-    )
+    # "Customize" promotes this agent to the active slot in the
+    # left-side parameter panel.  A second click on an already-active
+    # agent collapses the panel (toggle behaviour).
+    label = "Editing…" if is_active else "Customize"
+    if st.button(
+        label,
+        key=f"market_customize_{agent_type}",
+        use_container_width=True,
+        help=(
+            "Open this agent's parameter panel on the left. "
+            "Click again to collapse it."
+        ),
+    ):
+        st.session_state.customized_active_agent = (
+            None if is_active else agent_type
+        )
+        st.rerun()
 
 
 def render_agent_market() -> None:
@@ -557,11 +988,26 @@ def render_agent_market() -> None:
     if not filtered:
         st.info("No agents match this search.")
     else:
-        for start in range(0, len(filtered), 6):
-            columns = st.columns(6, gap="small")
-            for column, agent in zip(columns, filtered[start : start + 6]):
-                with column:
-                    _render_agent_card(agent)
+        active_agent_type = st.session_state.get("customized_active_agent")
+        active_agent = by_type.get(active_agent_type) if active_agent_type else None
+        if active_agent is not None:
+            panel_col, grid_col = st.columns([5, 7], gap="large")
+            grid_columns_per_row = 4
+            with panel_col:
+                _render_param_panel(active_agent)
+            grid_container = grid_col
+        else:
+            grid_columns_per_row = 6
+            grid_container = st.container()
+
+        with grid_container:
+            for start in range(0, len(filtered), grid_columns_per_row):
+                columns = st.columns(grid_columns_per_row, gap="small")
+                for column, agent in zip(
+                    columns, filtered[start : start + grid_columns_per_row]
+                ):
+                    with column:
+                        _render_agent_card(agent)
 
     selected = _selected_types(catalog)
     st.session_state.selected_market_agents = selected
@@ -687,9 +1133,84 @@ def render_simulation_setup() -> None:
 
     st.divider()
     if st.button("Open simulation workspace", type="primary", use_container_width=True):
+        target_scenario = _maybe_write_customized_bundle(
+            selected_agents=selected_agents,
+            base_scenario=selected_scenario,
+        )
+        if target_scenario is not None:
+            st.session_state.selected_scenario = target_scenario
         st.session_state.workflow_stage = "workspace"
         st.session_state.current_page = "Simulation"
         st.rerun()
+
+
+def _maybe_write_customized_bundle(
+    *,
+    selected_agents: list[dict[str, Any]],
+    base_scenario: str,
+) -> str | None:
+    """Materialise a customized bundle when the user has edited any params.
+
+    Returns the new scenario key (e.g. ``"CUSTOMIZED_SIMULATION/Customized-001/Rule"``)
+    when a bundle is written, or ``None`` when no customization is
+    pending (so the caller keeps the originally chosen scenario).
+    """
+    customized_params = st.session_state.get("customized_params") or {}
+    # Only the agents currently in the portfolio matter; ignore stale
+    # edits for agents the user later removed.
+    active_edits = {
+        agent["agent_type"]: customized_params.get(agent["agent_type"], {})
+        for agent in selected_agents
+        if customized_params.get(agent["agent_type"])
+    }
+    if not active_edits:
+        return None
+
+    selections: list[CustomizedAgentSelection] = []
+    for agent in selected_agents:
+        agent_type = agent["agent_type"]
+        engine = st.session_state.get(
+            f"market_engine_{agent_type}",
+            (agent.get("variants") or ["Rule"])[0],
+        )
+        params = customized_params.get(agent_type, {}).get(engine, {})
+        if not params:
+            # No edits for this agent in the chosen engine — fall back
+            # to handbook defaults (params left empty so the bundle
+            # writer applies class defaults).
+            params = {}
+        selections.append(
+            CustomizedAgentSelection(
+                archetype=agent_type,
+                display_name=agent["display_name"],
+                engine=engine,
+                params=params,
+                num_instances=1,
+            )
+        )
+
+    try:
+        result = write_customized_bundle(
+            selections=selections,
+            base_scenario=base_scenario,
+            project_root=PROJECT_ROOT,
+        )
+    except Exception as exc:
+        st.error(f"Failed to materialise customized bundle: {exc}")
+        return None
+
+    st.session_state.customized_dir_id = result.customized_id
+    # Pick the engine of the first selected agent for the bundle's
+    # displayed variant.  All agents share one bundle; the engine
+    # label is purely cosmetic here since the bundle is self-contained.
+    primary_engine = selections[0].engine if selections else "Rule"
+    new_key = f"CUSTOMIZED_SIMULATION/{result.customized_id}"
+    st.toast(
+        f"Customized bundle written: {result.customized_id} "
+        f"(based on {base_scenario})",
+        icon="✨",
+    )
+    return new_key
 
 
 def render_selected_portfolio_strip() -> None:

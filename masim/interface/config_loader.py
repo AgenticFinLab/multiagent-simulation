@@ -17,7 +17,7 @@ EXPERIMENT_DIR = Path("EXPERIMENT")
 _HIDDEN_VARIANTS: set[str] = set()
 
 # Directories excluded from scenario discovery
-_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo"}
+_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION"}
 
 
 def _configs_path(scenario_key: str) -> Path:
