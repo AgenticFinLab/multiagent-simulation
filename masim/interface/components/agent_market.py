@@ -19,9 +19,12 @@ from ..config_loader import (
 )
 from ..customized import (
     CustomizedAgentSelection,
-    is_archetype_mapped,
-    load_default_prompts,
+    get_default_prompts,
+    is_archetype_supported,
+    is_scenario_compatible,
     parse_parameters_file,
+    scenario_market_features,
+    supported_engines as catalog_supported_engines,
     write_customized_bundle,
 )
 from ..customized.handbook_params import ParamSpec
@@ -32,7 +35,8 @@ AGENT_POOL_ROOT = PROJECT_ROOT / "examples" / "AGENT_POOL"
 IMAGE_ROOT = AGENT_POOL_ROOT / "agent_images"
 PROFILE_ROOT = AGENT_POOL_ROOT / "ExtractedExampleInvestors" / "unique"
 CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
-VARIANT_ORDER = {"Rule": 0, "LLM": 1, "RuleLLM": 2, "Rag": 3}
+
+VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
 
 
 def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
@@ -46,17 +50,41 @@ def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
     return tuple((str(path), path.stat().st_mtime_ns) for path in paths)
 
 
+def _scenario_probe_key(base: str, groups: dict) -> str:
+    """Return a scenario key suitable for probing metadata.
+
+    Every scenario folder ships a Rule variant; if for some reason it is
+    missing, fall back to the first available variant key so we still get
+    rounds/description metadata.
+    """
+    variants = groups.get(base) or []
+    rule_key = f"{base}/Rule"
+    if rule_key in variants:
+        return rule_key
+    return variants[0] if variants else base
+
+
 def render_entry_choice() -> None:
     """Render the landing chooser: pre-built scenario vs. customized portfolio.
 
-    User-facing copy only — no file paths, module names, or other code-level
-    details are exposed. Live counts are computed from the scenario registry
-    and agent catalog so the page reflects what is actually runnable.
+    This is the landing page after launching the app. The user first
+    selects *which* market dynamic to simulate (the scenario name fixes
+    the scenario-level parameters such as round count and required
+    market features); then chooses one of two paths:
+
+    * **Run with shipped agents** — small chips launch a curated
+      ``examples/<Scenario>/<Variant>/`` implementation directly.
+    * **Customize my roster** — proceeds to Stage 2 with the scenario
+      locked, where the user assembles their own investor lineup.
+
+    The Rule / LLM / RuleLLM / RAG distinction is presented as an
+    *agent* attribute (which decision engine the shipped agents use),
+    not as part of the scenario itself.
     """
     _inject_market_styles()
 
-    # Live counts driving the headline copy.
     groups = discover_scenario_groups()
+    group_names = list(groups.keys())
     scenario_count = len(groups)
     variant_count = sum(len(v) for v in groups.values())
     try:
@@ -77,72 +105,129 @@ def render_entry_choice() -> None:
         st.title("MASIM")
         st.caption("Investment workflow")
         st.markdown("---")
-        st.markdown("**Welcome**")
-        st.caption("Choose how you want to start")
+        st.markdown("**Stage 1.** Pick a scenario")
+        st.caption(f"{scenario_count} scenarios available")
+        st.markdown("**Stage 2.** Default agents or customize")
         st.markdown("---")
         st.caption("MASIM v0.1.0")
 
-    st.markdown('<div class="market-kicker">Welcome</div>', unsafe_allow_html=True)
-    st.title("How would you like to start?")
+    st.markdown(
+        '<div class="market-kicker">Stage 1 of 2</div>', unsafe_allow_html=True
+    )
+    st.title("Pick a market scenario")
     st.write(
-        "Pick a ready-made market scenario and run it right away, or design "
-        "your own investor lineup before launching a simulation."
+        "Choose the market dynamic you want to simulate. The selected "
+        "scenario fixes the simulation parameters; in Stage 2 you "
+        "decide whether to run with a shipped agent lineup or build "
+        "your own."
     )
 
-    metric_cols = st.columns(3)
-    metric_cols[0].metric("Market scenarios", scenario_count)
-    metric_cols[1].metric("Runnable variants", variant_count)
-    metric_cols[2].metric("Investor profiles", agent_count)
+    if not group_names:
+        st.error("No simulation scenarios were found in `configs/`.")
+        return
 
-    st.markdown("&nbsp;", unsafe_allow_html=True)
+    selected_base = st.session_state.get("selected_scenario_base", "")
 
-    existing_col, custom_col = st.columns(2, gap="large")
+    # --- Scenario card grid -------------------------------------------
+    cols_per_row = 3
+    for start in range(0, len(group_names), cols_per_row):
+        row = st.columns(cols_per_row, gap="medium")
+        for col, base in zip(row, group_names[start : start + cols_per_row]):
+            with col:
+                _render_scenario_card(base, None, selected_base)
 
-    with existing_col:
-        st.subheader("📊 Run a ready-made scenario")
+    # Re-read after the loop in case a click changed the selection.
+    selected_base = st.session_state.get("selected_scenario_base", "")
+    if not selected_base:
+        st.info("Select a scenario above to continue.")
+        return
+
+    # --- Selected-scenario info strip ---------------------------------
+    info = get_scenario_info(_scenario_probe_key(selected_base, groups))
+    st.divider()
+    name_col, rounds_col, features_col = st.columns([3, 1, 2])
+    with name_col:
         st.markdown(
-            f"- **{scenario_count} market scenarios** ready to launch\n"
-            f"- **{variant_count} agent-strategy variants** to compare\n"
-            "- No portfolio setup required — jump straight in\n"
-            "- Best for: exploring built-in case studies"
+            f"<div class='scenario-confirm-chip'>✓ "
+            f"{html.escape(scenario_display_name(selected_base))}"
+            f"</div>",
+            unsafe_allow_html=True,
         )
-        st.caption(f"Includes: {preview_text}")
-        if st.button(
-            "Run a ready-made scenario",
-            type="primary",
-            use_container_width=True,
-            key="entry_use_existing",
-        ):
-            st.session_state.selected_market_agents = []
-            st.session_state.workflow_stage = "workspace"
-            st.session_state.current_page = "Simulation"
-            st.rerun()
+        if info.get("description"):
+            st.caption(info["description"])
+    with rounds_col:
+        st.metric("Rounds", info.get("total_rounds", "—"))
+    with features_col:
+        feats = scenario_market_features(selected_base)
+        st.metric(
+            "Market features",
+            ", ".join(sorted(feats)) if feats else "standard",
+        )
+
+    st.divider()
+    st.subheader("Stage 2 — choose how to run it")
+
+    default_col, custom_col = st.columns(2, gap="large")
+
+    with default_col:
+        variant_keys = groups.get(selected_base) or []
+        st.markdown("**Run with shipped agents**")
+        st.caption(
+            "Each chip launches a curated implementation already wired "
+            "up under `examples/`. The chip label is the decision "
+            "engine the shipped agents use."
+        )
+        if not variant_keys:
+            st.info("No shipped variants for this scenario.")
+        else:
+            chip_cols = st.columns(min(len(variant_keys), 4), gap="small")
+            for col, key in zip(chip_cols, variant_keys):
+                variant = key.split("/", 1)[1] if "/" in key else key
+                with col:
+                    if st.button(
+                        VARIANT_DISPLAY.get(variant, variant),
+                        key=f"stage1_default_{key}",
+                        use_container_width=True,
+                        help=(
+                            f"Launch the shipped {variant} implementation "
+                            f"of {scenario_display_name(selected_base)}."
+                        ),
+                    ):
+                        _launch_default_variant(key)
 
     with custom_col:
-        st.subheader("🎨 Design your own simulation")
-        st.markdown(
-            f"- Pick from **{agent_count} investor profiles** with distinct styles\n"
-            "- Build a custom portfolio of market participants\n"
-            "- Then choose a scenario to run them through\n"
-            "- Best for: bringing your own simulation idea to life"
+        st.markdown("**Build your own investor roster**")
+        st.caption(
+            "Pick from the agent pool, edit each agent's parameters, "
+            "optionally rewrite LLM prompts, then launch. The chosen "
+            "scenario stays locked while you build."
         )
-        st.caption("Select investors first, customize parameters (optional), then a scenario to simulate.")
         if st.button(
-            "Design your own simulation",
+            "Customize my roster →",
+            key="stage1_go_customize",
+            type="primary",
             use_container_width=True,
-            key="entry_customize",
         ):
-            st.session_state.workflow_stage = "agents"
+            st.session_state.workflow_stage = "customize"
             st.rerun()
+
+
+def _launch_default_variant(scenario_key: str) -> None:
+    """Send the user straight to the workspace with a shipped variant."""
+    st.session_state.selected_scenario = scenario_key
+    st.session_state.selected_market_agents = []
+    st.session_state.workflow_stage = "workspace"
+    st.session_state.current_page = "Simulation"
+    # Clear any stale customized bundle id so sidebar / workspace do
+    # not mistakenly think we are inside a customized run.
+    st.session_state.pop("customized_dir_id", None)
+    st.rerun()
 
 
 def _field_from_summary_table(markdown: str, field: str) -> str:
     pattern = rf"^\|\s*{re.escape(field)}\s*\|\s*(.*?)\s*\|\s*$"
     match = re.search(pattern, markdown, flags=re.MULTILINE | re.IGNORECASE)
     return match.group(1).strip() if match else ""
-
-
-VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
 
 
 def _profile_intro(markdown: str, display_name: str) -> str:
@@ -158,29 +243,6 @@ def _profile_intro(markdown: str, display_name: str) -> str:
     if theory:
         return f"Design Theory: {theory}. Role: {role}."
     return f"Design Theory: —. Role: {role}."
-
-
-def _available_variants(markdown: str) -> list[str]:
-    """Detect which decision-engine variants this agent ships with.
-
-    The project organises each scenario into ``Rule/``, ``LLM/``,
-    ``RuleLLM/`` and ``Rag/`` subdirectories. ``Rule`` is the foundational
-    engine and is always present, so we include it unconditionally. The
-    remaining engines are detected via explicit markers in the
-    "Consolidated Financial Theory" section of the agent's profile.
-    Returned variants follow the project-wide order: Rule -> LLM ->
-    RuleLLM -> Rag.
-    """
-    variants: list[str] = ["Rule"]
-    if not markdown:
-        return variants
-    if re.search(r"\bLLM[- ][Dd]riven\b", markdown):
-        variants.append("LLM")
-    if re.search(r"\bRuleLLM\b|\bHybrid:", markdown):
-        variants.append("RuleLLM")
-    if re.search(r"\bRAG[- ][Aa]ugmented\b|\bRAG[- ][Dd]riven\b", markdown):
-        variants.append("Rag")
-    return variants
 
 
 def _image_data_uri(path: Path) -> str:
@@ -278,7 +340,6 @@ def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = No
                 or display_name,
                 "scenarios": _field_from_summary_table(markdown, "Scenarios"),
                 "theory_basis": _theory_basis(markdown),
-                "variants": _available_variants(markdown),
             }
         )
     return catalog
@@ -398,18 +459,18 @@ def _inject_market_styles() -> None:
             color: #26323d; font-size: 0.74rem;
         }
         .portfolio-chip img {width: 24px; height: 24px; border-radius: 4px; object-fit: cover;}
-        /* Teal accent for the "Design your own simulation" entry button. */
-        .st-key-entry_customize button {
+        /* Teal accent for the Stage-1 "Customize my roster" CTA. */
+        .st-key-stage1_go_customize button {
             background-color: #287a6d !important;
             color: #ffffff !important;
             border: 1px solid #287a6d !important;
         }
-        .st-key-entry_customize button:hover {
+        .st-key-stage1_go_customize button:hover {
             background-color: #1f6157 !important;
             border-color: #1f6157 !important;
         }
-        .st-key-entry_customize button:focus,
-        .st-key-entry_customize button:active {
+        .st-key-stage1_go_customize button:focus,
+        .st-key-stage1_go_customize button:active {
             background-color: #1f6157 !important;
             border-color: #1f6157 !important;
             box-shadow: 0 0 0 2px rgba(40, 122, 109, 0.35) !important;
@@ -418,48 +479,111 @@ def _inject_market_styles() -> None:
             .block-container {padding-top: 3.75rem;}
             .agent-card {min-height: 230px;}
         }
+        /* Step-2 scenario cards. Compatibility is conveyed by border
+           colour and the inline status badge. Disabled cards are
+           visually muted but still readable so users can hover the
+           reason. */
+        .scenario-card {
+            border: 1px solid #dce2e8; border-radius: 10px;
+            background: #ffffff; padding: 0.85rem 0.95rem;
+            min-height: 168px; display: flex; flex-direction: column;
+            box-shadow: 0 1px 2px rgba(20, 32, 44, 0.06);
+        }
+        .scenario-card.ready {border-left: 4px solid #287a6d;}
+        .scenario-card.blocked {
+            border-left: 4px solid #c1543c; background: #fbf6f5;
+            opacity: 0.92;
+        }
+        .scenario-card.active {
+            box-shadow: 0 0 0 2px rgba(40, 122, 109, 0.22);
+            border-color: #287a6d;
+        }
+        .scenario-name {
+            font-size: 0.95rem; font-weight: 700; color: #17212b;
+            line-height: 1.25; margin-bottom: 0.18rem;
+        }
+        .scenario-meta {
+            font-size: 0.7rem; color: #68737d; margin-bottom: 0.35rem;
+        }
+        .scen-badge {
+            display: inline-block; font-size: 0.62rem; font-weight: 700;
+            padding: 0.06rem 0.46rem; border-radius: 8px;
+            letter-spacing: 0.02em; line-height: 1.5;
+            margin-bottom: 0.35rem;
+        }
+        .scen-badge.ok {
+            background: #e7f3f0; color: #1f6157;
+            border: 1px solid #b6d8d0;
+        }
+        .scen-badge.bad {
+            background: #f8e3dd; color: #88321b;
+            border: 1px solid #e3b8ac;
+        }
+        .scenario-desc {
+            font-size: 0.74rem; color: #41525f; line-height: 1.36;
+            margin-bottom: 0.3rem;
+            display: -webkit-box; -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .scen-reasons {
+            margin: 0.2rem 0 0 0.95rem; padding: 0;
+            font-size: 0.68rem; color: #6f3826; line-height: 1.42;
+        }
+        .scenario-confirm-chip {
+            display: inline-flex; align-items: center;
+            font-size: 0.78rem; font-weight: 700; color: #1f6157;
+            background: #e7f3f0; border: 1px solid #b6d8d0;
+            padding: 0.28rem 0.7rem; border-radius: 14px;
+            letter-spacing: 0.01em;
+        }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
 
-def _render_workflow_sidebar(step: int, selected_count: int) -> None:
+def _render_customize_sidebar(scenario_base: str, selected_count: int) -> None:
+    """Sidebar shown during the Stage-2 customize flow.
+
+    Surfaces the locked scenario at the top so the user always knows
+    which simulation they are building agents for; the only navigation
+    out of this stage is the back button rendered in the main column.
+    """
     with st.sidebar:
         st.title("MASIM")
         st.caption("Investment workflow")
         st.markdown("---")
-        st.markdown(f"**{'1. Agent Market' if step == 1 else '✓ Agent Market'}**")
-        st.caption(f"{selected_count} agents selected")
-        st.markdown(f"**{'2. Simulation Setup' if step == 2 else '2. Simulation Setup'}**")
+        st.markdown("**✓ Stage 1.** Scenario")
+        st.caption(scenario_display_name(scenario_base) if scenario_base else "—")
+        st.markdown("**Stage 2.** Build your roster")
+        st.caption(f"{selected_count} agents in portfolio")
         st.markdown("---")
         st.caption("MASIM v0.1.0")
 
 
-def render_back_to_start_bar(
+def render_back_to_stage1_bar(
     *,
     key_suffix: str,
     reset_runtime: bool = False,
 ) -> None:
-    """Render a small right-aligned "Back to start" button at the top of
-    the main content area, available on every post-entry page.
+    """Render a small "Back to scenario picker" button at the top of any
+    post-Stage-1 page.
 
     Args:
-        key_suffix: caller-specific suffix to keep widget keys unique across
-            pages that may render in the same session (e.g. ``"agents"``,
-            ``"setup"``, ``"workspace"``).
-        reset_runtime: when True, also clear simulation/replay state so the
-            user returns to a clean welcome page after a run was started.
+        key_suffix: caller-specific suffix to keep widget keys unique
+            across pages (e.g. ``"customize"``, ``"workspace"``).
+        reset_runtime: when True, also clear simulation/replay state so
+            the user returns to a clean Stage-1 page after a run.
     """
     btn_col, _ = st.columns([1, 6])
     with btn_col:
         if st.button(
-            "← Back to start",
-            key=f"main_back_to_start_{key_suffix}",
+            "← Back to scenario",
+            key=f"main_back_to_stage1_{key_suffix}",
             use_container_width=True,
-            help="Return to the welcome page.",
+            help="Return to the scenario picker (Stage 1).",
         ):
-            st.session_state.workflow_stage = "entry"
+            st.session_state.workflow_stage = "scenario_setup"
             if reset_runtime:
                 st.session_state.simulation_running = False
                 st.session_state.simulation_completed = False
@@ -468,6 +592,9 @@ def render_back_to_start_bar(
                 st.session_state.replay_index = 0
                 st.session_state.viewed_round_idx = 0
                 st.session_state.sys_messages = []
+                # Clear customized-bundle id so the next Stage-1 launch
+                # doesn't carry over a stale CUSTOMIZED_SIMULATION key.
+                st.session_state.pop("customized_dir_id", None)
             st.rerun()
 
 
@@ -515,12 +642,13 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
       Add-to-Market checkbox in one atomic action.
     """
     agent_type = agent["agent_type"]
-    # Always expose all four standard decision engines. Engines whose
-    # concrete classes have not been wired yet are still shown so the
-    # user can preview parameters and prompts; the bundle writer will
-    # surface a TODO marker when a binding is missing.
-    all_engines = ["Rule", "LLM", "RuleLLM", "Rag"]
-    detected = set(agent.get("variants", []) or ["Rule"])
+    # The marketplace catalog (discovered from masim.agents class metadata) is
+    # the single source of truth for which engines an archetype supports. When
+    # an archetype is not yet discovered, fall back to offering Rule (the
+    # universal engine) so users can still edit handbook parameters; the
+    # Step-2 compatibility gate will surface a clear error before launch.
+    catalog_engines = tuple(catalog_supported_engines(agent_type))
+    all_engines = list(catalog_engines) if catalog_engines else ["Rule"]
     specs = _load_param_specs(agent)
 
     st.markdown('<div class="market-kicker">Customize</div>', unsafe_allow_html=True)
@@ -530,45 +658,20 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
     # ---- Engine selector ------------------------------------------------
     engine_key = f"market_engine_{agent_type}"
     if engine_key not in st.session_state or st.session_state[engine_key] not in all_engines:
-        # Prefer the first detected engine (usually Rule) on first render.
-        st.session_state[engine_key] = next(
-            (e for e in all_engines if e in detected), all_engines[0]
-        )
-
-    def _engine_label(v: str) -> str:
-        base = VARIANT_DISPLAY.get(v, v)
-        return base if v in detected else f"{base} (preview)"
+        st.session_state[engine_key] = all_engines[0]
 
     st.segmented_control(
         "Decision engine",
         options=all_engines,
-        format_func=_engine_label,
+        format_func=lambda v: VARIANT_DISPLAY.get(v, v),
         key=engine_key,
         help=(
             "Choose the decision-making engine. Rule = deterministic logic; "
-            "LLM = persona-driven prompt; RuleLLM = hybrid; RAG = "
-            "retrieval-augmented. Engines marked '(preview)' are not yet "
-            "shipped with a concrete class for this archetype — your "
-            "customization will be saved but the bundle writer will mark "
-            "them as TODO until the binding lands."
+            "LLM = persona-driven prompt; RuleLLM = hybrid. Only engines "
+            "declared in the agent catalog are offered."
         ),
     )
     engine = st.session_state[engine_key]
-
-    if engine not in detected:
-        st.info(
-            f"`{engine}` is in preview for this archetype — parameters and "
-            f"prompts you set here are persisted, but the generated bundle "
-            f"will need a class binding before it can run."
-        )
-
-    if not is_archetype_mapped(agent_type):
-        st.warning(
-            "This archetype does not yet have a registered class binding. "
-            "You can still edit parameters; the generated bundle will "
-            "include a `TODO_unmapped_archetype` marker that must be "
-            "resolved before launch."
-        )
 
     if not specs:
         st.info(
@@ -726,7 +829,7 @@ def _render_llm_extras(
     # user has typed so far. We treat "persisted matches the shipped
     # default" as "still default", and the textarea simply renders the
     # shipped string as its initial value.
-    shipped_sys, shipped_user = load_default_prompts(agent_type, engine)
+    shipped_sys, shipped_user = get_default_prompts(agent_type, engine)
     if not sys_default and shipped_sys:
         sys_default = shipped_sys
     if not usr_default and shipped_user:
@@ -943,30 +1046,64 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
         st.rerun()
 
 
-def render_agent_market() -> None:
-    """Render step one: browse profiles and compose an investor portfolio."""
+def render_customize() -> None:
+    """Stage 2: build a custom investor roster for the locked scenario.
+
+    The scenario chosen in Stage 1 is shown as a non-editable header
+    with a back button. The user picks agents from the catalog, edits
+    each agent's parameters (and prompts, for LLM engines), then clicks
+    *Launch simulation* to materialise a customized bundle and proceed
+    to the workspace.
+    """
+    scenario_base = st.session_state.get("selected_scenario_base", "")
+    if not scenario_base:
+        # Defensive: a customize stage with no scenario locked is
+        # nonsensical — send the user back to Stage 1.
+        st.session_state.workflow_stage = "scenario_setup"
+        st.rerun()
+
     _inject_market_styles()
     catalog = load_agent_catalog(_agent_catalog_signature())
 
-    # Streamlit removes widget keys while their page is not rendered. Restore
-    # checkboxes from the durable portfolio list when users return from setup.
+    # Streamlit drops widget keys for un-rendered pages; restore the
+    # checkbox state from the durable portfolio list when users return
+    # to this stage from the workspace.
     saved_selection = set(st.session_state.get("selected_market_agents", []))
     for agent in catalog:
         key = f"market_agent_{agent['agent_type']}"
         if key not in st.session_state:
             st.session_state[key] = agent["agent_type"] in saved_selection
 
-    _render_workflow_sidebar(1, len(_selected_types(catalog)))
+    _render_customize_sidebar(scenario_base, len(_selected_types(catalog)))
 
-    render_back_to_start_bar(key_suffix="agents")
-    st.markdown('<div class="market-kicker">Step 1 of 2</div>', unsafe_allow_html=True)
-    st.title("Agent Market")
-    st.write("Build an investor portfolio from the available market archetypes.")
-    st.caption(
-        "Each card lets you pick the decision engine — "
-        "**Rule** (deterministic logic), **LLM** (language-model reasoning), "
-        "**RuleLLM** (hybrid), or **RAG** (retrieval-augmented). "
-        "Engines have different parameter sets you will configure in Step 2."
+    render_back_to_stage1_bar(key_suffix="customize")
+
+    st.markdown(
+        '<div class="market-kicker">Stage 2 of 2</div>', unsafe_allow_html=True
+    )
+    title_col, lock_col = st.columns([2, 3])
+    with title_col:
+        st.title("Build your roster")
+    with lock_col:
+        info = get_scenario_info(
+            _scenario_probe_key(scenario_base, discover_scenario_groups())
+        )
+        rounds = info.get("total_rounds", "—")
+        feats = scenario_market_features(scenario_base)
+        feats_text = ", ".join(sorted(feats)) if feats else "standard"
+        st.markdown(
+            f"<div class='scenario-confirm-chip' style='margin-top:14px'>"
+            f"🔒 {html.escape(scenario_display_name(scenario_base))} · "
+            f"{rounds} rounds · {html.escape(feats_text)}"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.write(
+        "Pick agents from the catalog, edit their parameters, and "
+        "(for LLM engines) tweak the persona / per-round prompt. Each "
+        "agent's decision engine is set per-card and only engines "
+        "declared in the marketplace catalog are offered."
     )
 
     requested_agent = _query_agent()
@@ -1022,23 +1159,58 @@ def render_agent_market() -> None:
 
     selected = _selected_types(catalog)
     st.session_state.selected_market_agents = selected
+    selected_agents = [a for a in catalog if a["agent_type"] in set(selected)]
+
+    # Inline compatibility warning: surface incompatible archetypes
+    # before the user attempts to launch.
+    compat_blocker = None
+    if selected_agents:
+        roster = [a["agent_type"] for a in selected_agents]
+        ok, reasons = is_scenario_compatible(scenario_base, roster)
+        if not ok:
+            compat_blocker = reasons
+
     st.divider()
-    reset_col, proceed_col = st.columns([1, 3])
+    if selected_agents:
+        st.markdown("**Current roster**")
+        _render_portfolio_chips(selected_agents)
+        if compat_blocker:
+            st.error(
+                "The current roster is incompatible with "
+                f"**{scenario_display_name(scenario_base)}**:\n\n"
+                + "\n".join(f"- {r}" for r in compat_blocker)
+            )
+
+    reset_col, launch_col = st.columns([1, 3])
     with reset_col:
-        if st.button("Clear selection", use_container_width=True, disabled=not selected):
+        if st.button(
+            "Clear selection",
+            use_container_width=True,
+            disabled=not selected,
+            key="customize_clear",
+        ):
             for agent in catalog:
                 st.session_state[f"market_agent_{agent['agent_type']}"] = False
             st.session_state.selected_market_agents = []
             st.rerun()
-    with proceed_col:
+    with launch_col:
         if st.button(
-            "Proceed to simulation setup",
+            "Launch simulation →",
             type="primary",
             use_container_width=True,
-            disabled=not selected,
+            disabled=not selected or compat_blocker is not None,
+            key="customize_launch",
         ):
+            target = _write_customized_bundle(
+                selected_agents=selected_agents,
+                scenario_base=scenario_base,
+            )
+            if target is None:
+                return
             _clear_query_agent()
-            st.session_state.workflow_stage = "setup"
+            st.session_state.selected_scenario = target
+            st.session_state.workflow_stage = "workspace"
+            st.session_state.current_page = "Simulation"
             st.rerun()
 
 
@@ -1057,145 +1229,122 @@ def _render_portfolio_chips(agents: list[dict[str, Any]]) -> None:
     )
 
 
-def render_simulation_setup() -> None:
-    """Render step two: choose a scenario and variant, then review the roster."""
-    _inject_market_styles()
-    catalog = load_agent_catalog(_agent_catalog_signature())
-    selected_types = st.session_state.get("selected_market_agents", [])
-    selected_set = set(selected_types)
-    selected_agents = [a for a in catalog if a["agent_type"] in selected_set]
+def _render_scenario_card(
+    scenario_base: str,
+    roster_archetypes: list[str] | None,
+    selected_base: str,
+) -> None:
+    """Render one card in a scenario grid.
 
-    if not selected_agents:
-        st.session_state.workflow_stage = "agents"
-        st.rerun()
-
-    _render_workflow_sidebar(2, len(selected_agents))
-    render_back_to_start_bar(key_suffix="setup")
-    st.markdown('<div class="market-kicker">Step 2 of 2</div>', unsafe_allow_html=True)
-    st.title("Simulation Setup")
-
-    back_col, summary_col = st.columns([1, 4])
-    with back_col:
-        if st.button("Back", use_container_width=True):
-            st.session_state.workflow_stage = "agents"
-            st.rerun()
-    with summary_col:
-        _render_portfolio_chips(selected_agents)
+    When ``roster_archetypes`` is ``None`` (Stage-1 picker, no roster
+    yet) the card is rendered without a compatibility badge — every
+    scenario is selectable. When a roster is provided (legacy callers),
+    a green / red compatibility badge is computed from
+    ``is_scenario_compatible`` and incompatible scenarios are disabled.
+    """
+    has_roster = roster_archetypes is not None
+    if has_roster:
+        compatible, reasons = is_scenario_compatible(
+            scenario_base, roster_archetypes
+        )
+    else:
+        compatible, reasons = True, []
 
     groups = discover_scenario_groups()
-    group_names = list(groups)
-    if not group_names:
-        st.error("No simulation scenarios were found.")
-        return
-
-    current = st.session_state.get("selected_scenario", "")
-    current_group = current.split("/", 1)[0] if current else group_names[0]
-    default_group = group_names.index(current_group) if current_group in group_names else 0
-
-    scenario_col, variant_col = st.columns([2, 3], gap="large")
-    with scenario_col:
-        selected_group = st.selectbox(
-            "Scenario",
-            group_names,
-            index=default_group,
-            format_func=scenario_display_name,
-            key="market_scenario_group",
-        )
-
-    variant_keys = sorted(
-        groups[selected_group],
-        key=lambda key: VARIANT_ORDER.get(key.split("/")[-1], 99),
+    info = get_scenario_info(_scenario_probe_key(scenario_base, groups))
+    rounds = info.get("total_rounds", "—")
+    description = (info.get("description") or "").strip()
+    if len(description) > 160:
+        description = description[:160].rstrip() + "…"
+    name = scenario_display_name(scenario_base)
+    is_selected = scenario_base == selected_base
+    state_class = ("ready" if compatible else "blocked") + (
+        " active" if is_selected else ""
     )
-    variant_labels = [key.split("/", 1)[1] if "/" in key else key for key in variant_keys]
-    current_variant = current.split("/", 1)[1] if "/" in current else ""
-    default_variant = (
-        variant_labels.index(current_variant) if current_variant in variant_labels else 0
+
+    if has_roster:
+        if compatible:
+            badge = (
+                f"<span class='scen-badge ok'>All {len(roster_archetypes)} "
+                f"agents supported</span>"
+            )
+        else:
+            badge = "<span class='scen-badge bad'>Disabled — incompatible</span>"
+    else:
+        # Show the market-features tag so users see what each scenario
+        # implies (e.g. ``leverage``, ``short_selling``) before picking.
+        feats = scenario_market_features(scenario_base)
+        feats_text = ", ".join(sorted(feats)) if feats else "standard"
+        badge = (
+            f"<span class='scen-badge ok'>{html.escape(feats_text)}</span>"
+        )
+
+    reason_html = ""
+    if has_roster and not compatible and reasons:
+        items = "".join(f"<li>{html.escape(r)}</li>" for r in reasons)
+        reason_html = f"<ul class='scen-reasons'>{items}</ul>"
+    st.markdown(
+        f"""
+        <div class="scenario-card {state_class}">
+          <div class="scenario-name">{html.escape(name)}</div>
+          <div class="scenario-meta">{rounds} rounds</div>
+          {badge}
+          <div class="scenario-desc">{html.escape(description)}</div>
+          {reason_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-    with variant_col:
-        selected_variant = st.radio(
-            "Variant",
-            variant_labels,
-            index=default_variant,
-            horizontal=True,
-            key=f"market_variant_{selected_group}",
-        )
-
-    selected_scenario = variant_keys[variant_labels.index(selected_variant)]
-    st.session_state.selected_scenario = selected_scenario
-    info = get_scenario_info(selected_scenario)
-
-    market_col, mode_col, rounds_col = st.columns(3)
-    market_col.metric("Market", scenario_display_name(selected_group))
-    mode_col.metric("Variant", selected_variant)
-    rounds_col.metric("Rounds", info.get("total_rounds", "N/A"))
-    if info.get("description"):
-        st.caption(info["description"])
-
-    st.divider()
-    st.subheader("Selected investor details")
-    for agent in selected_agents:
-        with st.expander(agent["display_name"], expanded=False):
-            image_col, detail_col = st.columns([1, 3], gap="large")
-            with image_col:
-                st.image(agent["image_file"], use_container_width=True)
-                st.caption(agent["agent_type"])
-            with detail_col:
-                st.markdown(agent["profile_markdown"] or "Profile content is unavailable.")
-
-    st.divider()
-    if st.button("Open simulation workspace", type="primary", use_container_width=True):
-        target_scenario = _maybe_write_customized_bundle(
-            selected_agents=selected_agents,
-            base_scenario=selected_scenario,
-        )
-        if target_scenario is not None:
-            st.session_state.selected_scenario = target_scenario
-        st.session_state.workflow_stage = "workspace"
-        st.session_state.current_page = "Simulation"
-        st.rerun()
+    # Selection button — only rendered when the scenario is compatible
+    # (or when there is no roster yet, i.e. Stage-1).
+    if not has_roster or compatible:
+        btn_label = "✓ Selected" if is_selected else "Select"
+        if st.button(
+            btn_label,
+            key=f"scen_card_{scenario_base}",
+            disabled=is_selected,
+            use_container_width=True,
+        ):
+            st.session_state.selected_scenario_base = scenario_base
+            st.rerun()
 
 
-def _maybe_write_customized_bundle(
+def _write_customized_bundle(
     *,
     selected_agents: list[dict[str, Any]],
-    base_scenario: str,
+    scenario_base: str,
 ) -> str | None:
-    """Materialise a customized bundle when the user has edited any params.
+    """Always materialise a customized bundle from the user's roster.
 
-    Returns the new scenario key (e.g. ``"CUSTOMIZED_SIMULATION/Customized-001/Rule"``)
-    when a bundle is written, or ``None`` when no customization is
-    pending (so the caller keeps the originally chosen scenario).
+    Returns the new scenario key (e.g. ``CUSTOMIZED_SIMULATION/Customized-007``)
+    or ``None`` on failure. Defense-in-depth: re-validates compatibility
+    before invoking the writer (the Stage-2 inline check already gates this).
     """
-    customized_params = st.session_state.get("customized_params") or {}
-    # Only the agents currently in the portfolio matter; ignore stale
-    # edits for agents the user later removed.
-    active_edits = {
-        agent["agent_type"]: customized_params.get(agent["agent_type"], {})
-        for agent in selected_agents
-        if customized_params.get(agent["agent_type"])
-    }
-    if not active_edits:
+    roster_archetypes = [a["agent_type"] for a in selected_agents]
+    compatible, reasons = is_scenario_compatible(scenario_base, roster_archetypes)
+    if not compatible:
+        st.error(
+            "This scenario is not compatible with the current roster:\n\n"
+            + "\n".join(f"- {r}" for r in reasons)
+        )
         return None
 
+    customized_params = st.session_state.get("customized_params") or {}
     selections: list[CustomizedAgentSelection] = []
     for agent in selected_agents:
         agent_type = agent["agent_type"]
+        catalog_engines = catalog_supported_engines(agent_type) or ("Rule",)
         engine = st.session_state.get(
             f"market_engine_{agent_type}",
-            (agent.get("variants") or ["Rule"])[0],
+            catalog_engines[0],
         )
-        params = customized_params.get(agent_type, {}).get(engine, {})
-        if not params:
-            # No edits for this agent in the chosen engine — fall back
-            # to handbook defaults (params left empty so the bundle
-            # writer applies class defaults).
-            params = {}
+        params = customized_params.get(agent_type, {}).get(engine, {}) or {}
         selections.append(
             CustomizedAgentSelection(
                 archetype=agent_type,
                 display_name=agent["display_name"],
                 engine=engine,
-                params=params,
+                params=dict(params),
                 num_instances=1,
             )
         )
@@ -1203,7 +1352,7 @@ def _maybe_write_customized_bundle(
     try:
         result = write_customized_bundle(
             selections=selections,
-            base_scenario=base_scenario,
+            scenario_name=scenario_base,
             project_root=PROJECT_ROOT,
         )
     except Exception as exc:
@@ -1211,17 +1360,12 @@ def _maybe_write_customized_bundle(
         return None
 
     st.session_state.customized_dir_id = result.customized_id
-    # Pick the engine of the first selected agent for the bundle's
-    # displayed variant.  All agents share one bundle; the engine
-    # label is purely cosmetic here since the bundle is self-contained.
-    primary_engine = selections[0].engine if selections else "Rule"
-    new_key = f"CUSTOMIZED_SIMULATION/{result.customized_id}"
     st.toast(
         f"Customized bundle written: {result.customized_id} "
-        f"(based on {base_scenario})",
+        f"(scenario {scenario_base})",
         icon="✨",
     )
-    return new_key
+    return f"CUSTOMIZED_SIMULATION/{result.customized_id}"
 
 
 def render_selected_portfolio_strip() -> None:
@@ -1239,6 +1383,6 @@ def render_selected_portfolio_strip() -> None:
         _render_portfolio_chips(agents)
     with action:
         if st.button("Edit portfolio", use_container_width=True):
-            st.session_state.workflow_stage = "agents"
+            st.session_state.workflow_stage = "customize"
             st.session_state.current_page = "Simulation"
             st.rerun()

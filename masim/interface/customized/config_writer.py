@@ -4,49 +4,76 @@ A *bundle* is a self-contained pair of folders that mirrors the layout
 of the existing example scenarios:
 
     configs/CUSTOMIZED_SIMULATION/Customized-NNN/
-        simulation.yml         (copy of the base scenario, !include
+        simulation.yml         (copy of the chosen scenario, !include
                                 directives kept and pointed at local
                                 ``players.yml`` / ``topology.yml`` /
                                 ``persona.yml``)
         players.yml            (regenerated from the user's selection)
         topology.yml           (star topology covering all selected
                                 investors)
-        persona.yml            (verbatim copy of the base scenario)
+        persona.yml            (verbatim copy of the chosen scenario)
 
     examples/CUSTOMIZED_SIMULATION/Customized-NNN/
         run_customized.py      (mirror of the canonical
                                 ``run_<scenario>.py`` runner; points
                                 at the configs/ bundle above)
-        README.md              (provenance: timestamp, base scenario,
+        prompts.py             (canonical, scenario-free LLM prompt
+                                strings — one ``<KEY>_SYS`` /
+                                ``<KEY>_USER`` constant per LLM agent)
+        README.md              (provenance: timestamp, scenario,
                                 agent list, link back to configs/)
 
 The generator never writes into ``examples/<Scenario>/`` — it only
-*reads* the base scenario once to copy ``simulation.yml`` /
+*reads* the chosen scenario once to copy ``simulation.yml`` /
 ``persona.yml`` and to source a single market block.  The customized
-``players.yml`` references the existing player classes via dotted
-import path (``examples.AnchoringEffect.Rule.players:NoiseTrader``),
-which is a pure runtime import.
+``players.yml`` references canonical agent classes via dotted import
+path (``masim.agents.noise_trader:RuleNoiseTrader``); LLM prompts
+reference the bundle-local ``prompts.py`` module so each bundle is
+self-contained and reproducible.
 """
 
 from __future__ import annotations
 
 import datetime as _dt
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
 import yaml
 
-from .archetype_class_map import (
-    ArchetypeBinding,
-    resolve_archetype_binding,
+from .agent_catalog import (
+    get_canonical_class_path,
+    get_default_prompts,
 )
+from .scenario_features import is_scenario_compatible
 
 
 # ----------------------------------------------------------------------
 # Public dataclasses
 # ----------------------------------------------------------------------
+
+
+# Reserved sentinel keys persisted by the Streamlit UI inside
+# ``selection.params`` for LLM-flavoured engines. They carry the LLM
+# hyperparameters and the user-edited prompt strings; we strip them out
+# of the handbook-symbol dict before writing ``extras`` and route them
+# through ``extras.llm.*`` and the bundle-local ``prompts.py`` instead.
+_LLM_LM_KEY = "__llm_lm_name__"
+_LLM_TEMP_KEY = "__llm_temperature__"
+_LLM_TOKENS_KEY = "__llm_max_tokens__"
+_LLM_SYS_KEY = "__llm_system_prompt__"
+_LLM_USR_KEY = "__llm_user_prompt__"
+_LLM_RESERVED = {
+    _LLM_LM_KEY,
+    _LLM_TEMP_KEY,
+    _LLM_TOKENS_KEY,
+    _LLM_SYS_KEY,
+    _LLM_USR_KEY,
+}
+
+# Engines that consult ``extras.llm`` and need a prompts.py entry.
+_LLM_FLAVOURED_ENGINES = {"LLM", "RuleLLM", "Rag"}
 
 
 @dataclass
@@ -58,6 +85,9 @@ class CustomizedAgentSelection:
         display_name: human-readable label from the catalog.
         engine: chosen decision engine (``"Rule"``, ``"LLM"`` …).
         params: handbook ``symbol → value`` dict (already user-edited).
+            May include reserved ``__llm_*__`` sentinel keys carrying
+            LLM hyperparameters and prompt overrides; the bundle writer
+            extracts those into ``extras.llm.*`` and ``prompts.py``.
         num_instances: how many copies to spawn (default 1).
         instance_key: optional explicit YAML block key; auto-derived
             from the archetype when omitted.
@@ -83,7 +113,8 @@ class CustomizedBundleResult:
     topology_yaml: Path
     persona_yaml: Path
     runner_path: Path
-    base_scenario: str
+    scenario_name: str
+    prompts_path: Optional[Path] = None
 
 
 # ----------------------------------------------------------------------
@@ -121,7 +152,7 @@ def next_customized_id(*roots: Path, width: int = 3) -> str:
 def write_customized_bundle(
     *,
     selections: list[CustomizedAgentSelection],
-    base_scenario: str,
+    scenario_name: str,
     project_root: Path,
     customized_id: Optional[str] = None,
     timestamp: Optional[_dt.datetime] = None,
@@ -130,8 +161,9 @@ def write_customized_bundle(
 
     Args:
         selections: list of agents the user picked, with edited params.
-        base_scenario: slash-separated key (e.g. ``"AnchoringEffect/Rule"``)
-            used as the source of ``simulation.yml`` and ``persona.yml``.
+        scenario_name: scenario base name (e.g. ``"AnchoringEffect"``).
+            The writer resolves this to ``"<scenario>/Rule"`` to source
+            ``simulation.yml`` / ``persona.yml`` / the market block.
         project_root: the repo root (parent of ``configs/`` and
             ``examples/``).
         customized_id: optional explicit folder id; defaults to the next
@@ -141,7 +173,35 @@ def write_customized_bundle(
     Returns:
         :class:`CustomizedBundleResult` with absolute paths of every
         artifact written.
+
+    Raises:
+        ValueError: roster is incompatible with the chosen scenario, or
+            an archetype has no canonical class for the chosen engine.
+        FileNotFoundError: the chosen scenario lacks a base
+            ``simulation.yml``.
     """
+    # --- compatibility gate (defense-in-depth; Step-2 already gates) ---
+    roster = [s.archetype for s in selections]
+    compatible, reasons = is_scenario_compatible(scenario_name, roster)
+    if not compatible:
+        raise ValueError(
+            "Roster is not compatible with scenario "
+            f"'{scenario_name}': " + "; ".join(reasons)
+        )
+
+    # --- resolve canonical class paths up front; abort if any unmapped --
+    class_paths: list[str] = []
+    for sel in selections:
+        path = get_canonical_class_path(sel.archetype, sel.engine)
+        if not path:
+            raise ValueError(
+                f"Canonical class for archetype '{sel.archetype}' with "
+                f"engine '{sel.engine}' is not implemented yet. "
+                "Pick a different engine or remove the agent from the "
+                "roster."
+            )
+        class_paths.append(path)
+
     project_root = Path(project_root).resolve()
     configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
     examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
@@ -154,14 +214,19 @@ def write_customized_bundle(
     config_dir.mkdir(parents=True, exist_ok=True)
     example_dir.mkdir(parents=True, exist_ok=True)
 
-    base_path = project_root / "configs" / base_scenario
+    # Resolve the scenario source: every scenario ships a Rule variant
+    # whose simulation.yml / persona.yml / players.yml define the base
+    # market block we copy.
+    base_scenario_subkey = f"{scenario_name}/Rule"
+    base_path = project_root / "configs" / base_scenario_subkey
     base_simulation = base_path / "simulation.yml"
     base_persona = base_path / "persona.yml"
     base_players = base_path / "players.yml"
 
     if not base_simulation.exists():
         raise FileNotFoundError(
-            f"Base scenario simulation file is missing: {base_simulation}"
+            "Scenario simulation file is missing for "
+            f"'{scenario_name}': {base_simulation}"
         )
 
     # --- simulation.yml: copy verbatim and rewrite the record/comm paths
@@ -178,7 +243,16 @@ def write_customized_bundle(
         )
         persona_out.write_text(persona_text, encoding="utf-8")
     else:
-        persona_out.write_text("# (no persona section in base scenario)\n", encoding="utf-8")
+        persona_out.write_text(
+            "# (no persona section in base scenario)\n", encoding="utf-8"
+        )
+
+    # --- prompts.py: materialise inline LLM prompts (if any LLM agents)
+    prompts_path: Optional[Path] = _maybe_write_prompts_module(
+        example_dir=example_dir,
+        cid=cid,
+        selections=selections,
+    )
 
     # --- players.yml: rebuild from selections + base market block
     market_block, market_key = _extract_market_block(base_players, cid)
@@ -186,7 +260,9 @@ def write_customized_bundle(
         market_block=market_block,
         market_key=market_key,
         selections=selections,
+        class_paths=class_paths,
         cid=cid,
+        has_prompts_module=prompts_path is not None,
     )
     players_out = config_dir / "players.yml"
     players_out.write_text(players_yaml_text, encoding="utf-8")
@@ -200,7 +276,7 @@ def write_customized_bundle(
     topology_out.write_text(topology_text, encoding="utf-8")
 
     # --- run_customized.py: parameterised copy of the canonical runner
-    runner_text = _render_runner_script(cid=cid, base_scenario=base_scenario)
+    runner_text = _render_runner_script(cid=cid, scenario_name=scenario_name)
     runner_out = example_dir / "run_customized.py"
     runner_out.write_text(runner_text, encoding="utf-8")
 
@@ -212,7 +288,7 @@ def write_customized_bundle(
     # --- README.md provenance
     readme_text = _render_readme(
         cid=cid,
-        base_scenario=base_scenario,
+        scenario_name=scenario_name,
         selections=selections,
         timestamp=timestamp or _dt.datetime.now(),
     )
@@ -227,7 +303,8 @@ def write_customized_bundle(
         topology_yaml=topology_out,
         persona_yaml=persona_out,
         runner_path=runner_out,
-        base_scenario=base_scenario,
+        scenario_name=scenario_name,
+        prompts_path=prompts_path,
     )
 
 
@@ -248,12 +325,39 @@ def _camel_to_snake(text: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
+def _prompt_var_stem(archetype: str) -> str:
+    """Return the SCREAMING_SNAKE stem used for prompt constants."""
+    return _camel_to_snake(archetype).upper()
+
+
+def _split_handbook_and_llm(
+    selection: CustomizedAgentSelection,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Partition ``selection.params`` into handbook-symbol and LLM-sentinel dicts.
+
+    Reserved ``__llm_*__`` keys carry LLM hyperparameters and prompt
+    overrides persisted by the Streamlit UI. They are routed to
+    ``extras.llm`` / ``prompts.py`` and stripped from the handbook
+    extras the canonical agent receives.
+    """
+    handbook: dict[str, Any] = {}
+    llm: dict[str, Any] = {}
+    for symbol, value in selection.params.items():
+        if symbol in _LLM_RESERVED:
+            llm[symbol] = value
+        else:
+            handbook[symbol] = value
+    return handbook, llm
+
+
 def _render_players_yaml(
     *,
     market_block: str,
     market_key: str,
     selections: list[CustomizedAgentSelection],
+    class_paths: list[str],
     cid: str,
+    has_prompts_module: bool,
 ) -> str:
     """Compose the customized ``players.yml`` text."""
     record_path = f"EXPERIMENT/CUSTOMIZED_SIMULATION/{cid}/records"
@@ -262,8 +366,15 @@ def _render_players_yaml(
     blocks.append(market_block.rstrip() + "\n")
 
     used_keys: set[str] = {market_key}
-    for selection in selections:
-        block = _render_agent_block(selection, record_path, used_keys)
+    for selection, class_path in zip(selections, class_paths):
+        block = _render_agent_block(
+            selection=selection,
+            class_path=class_path,
+            record_path=record_path,
+            used_keys=used_keys,
+            cid=cid,
+            has_prompts_module=has_prompts_module,
+        )
         blocks.append(block)
     return "\n".join(blocks).rstrip() + "\n"
 
@@ -280,12 +391,15 @@ _HEADER_PLAYERS = """\
 
 
 def _render_agent_block(
+    *,
     selection: CustomizedAgentSelection,
+    class_path: str,
     record_path: str,
     used_keys: set[str],
+    cid: str,
+    has_prompts_module: bool,
 ) -> str:
     """Render one investor block for the customized players.yml."""
-    binding = resolve_archetype_binding(selection.archetype, selection.engine)
     base_key = _instance_key(selection)
     key = base_key
     counter = 2
@@ -294,36 +408,26 @@ def _render_agent_block(
         counter += 1
     used_keys.add(key)
 
-    if binding is not None:
-        class_path = binding.class_path
-        extras = _translate_params(selection.params, binding)
-        comment = (
-            f"# Class: {class_path}  (resolved via archetype_class_map.yml)\n"
-            f"# Engine: {binding.engine}"
-        )
-        if binding.engine != selection.engine:
-            comment += (
-                f"  (requested {selection.engine}; falling back to "
-                f"{binding.engine} which has a registered class)"
-            )
-    else:
-        # Unmapped archetype — surface the params as informational so the
-        # YAML is valid and re-runnable, but flag the missing class so a
-        # human can fill it in before launching.
-        class_path = "TODO_unmapped_archetype:CLASS"
-        extras = dict(selection.params)
-        comment = (
-            f"# WARNING: archetype '{selection.archetype}' has no entry in "
-            "archetype_class_map.yml.\n"
-            f"# Replace the 'class:' field with a concrete dotted path before "
-            "running this bundle.\n"
-            f"# Engine requested: {selection.engine}"
-        )
-
+    handbook_params, llm_overrides = _split_handbook_and_llm(selection)
+    extras: dict[str, Any] = dict(handbook_params)
     extras["record_path"] = record_path
     extras.setdefault("custom_state_hot_limit", 3)
     extras.setdefault("initial_cash", 10000.0)
     extras.setdefault("initial_position", 100.0)
+
+    if selection.engine in _LLM_FLAVOURED_ENGINES:
+        extras["llm"] = _build_llm_extras(
+            archetype=selection.archetype,
+            engine=selection.engine,
+            llm_overrides=llm_overrides,
+            cid=cid,
+            has_prompts_module=has_prompts_module,
+        )
+
+    comment = (
+        f"# Class: {class_path}  (canonical, resolved via masim.interface.customized.agent_catalog)\n"
+        f"# Engine: {selection.engine}"
+    )
 
     body = {
         "name": selection.display_name,
@@ -347,6 +451,56 @@ def _render_agent_block(
     return f"{comment}\n{yaml_text}".rstrip() + "\n"
 
 
+def _build_llm_extras(
+    *,
+    archetype: str,
+    engine: str,
+    llm_overrides: dict[str, Any],
+    cid: str,
+    has_prompts_module: bool,
+) -> dict[str, Any]:
+    """Translate the persisted ``__llm_*__`` overrides into ``extras.llm``.
+
+    The result mirrors the schema the canonical
+    :class:`masim.agents._base.CanonicalLLMPlayer` consumes:
+
+        extras:
+          llm:
+            lm_name: <model id>
+            generation_config: {temperature, max_tokens}
+            sys_message: "examples.CUSTOMIZED_SIMULATION.<cid>.prompts:<KEY>_SYS"
+            user_message: "examples.CUSTOMIZED_SIMULATION.<cid>.prompts:<KEY>_USER"
+    """
+    lm_name = str(
+        llm_overrides.get(_LLM_LM_KEY, "ark/doubao-seed-2-0-mini-260428")
+    ).strip()
+    temperature = float(llm_overrides.get(_LLM_TEMP_KEY, 0.7))
+    max_tokens = int(llm_overrides.get(_LLM_TOKENS_KEY, 512))
+
+    if has_prompts_module:
+        prompt_module = f"examples.CUSTOMIZED_SIMULATION.{cid}.prompts"
+        stem = _prompt_var_stem(archetype)
+        sys_ref = f"{prompt_module}:{stem}_SYS"
+        user_ref = f"{prompt_module}:{stem}_USER"
+    else:
+        # Defensive fallback: should never trigger because the writer
+        # always emits a prompts.py when at least one LLM agent is in
+        # the roster, but we keep the references valid YAML so the
+        # bundle is at least loadable.
+        sys_ref = ""
+        user_ref = ""
+
+    return {
+        "lm_name": lm_name,
+        "generation_config": {
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        },
+        "sys_message": sys_ref,
+        "user_message": user_ref,
+    }
+
+
 def _append_persona_include(yaml_text: str, key: str) -> str:
     """Inject ``persona: !include persona.yml`` under the agent's ``config:``.
 
@@ -359,20 +513,100 @@ def _append_persona_include(yaml_text: str, key: str) -> str:
     return yaml_text.rstrip() + "\n" + suffix
 
 
-def _translate_params(
-    handbook_params: dict[str, Any],
-    binding: ArchetypeBinding,
-) -> dict[str, Any]:
-    """Apply the binding's symbol→kwarg remap to user-edited params."""
-    out: dict[str, Any] = {}
-    for symbol, value in handbook_params.items():
-        kwarg = binding.kwarg_name(symbol)
-        if kwarg in out:
-            # Preserve first-write semantics; remap collisions are rare
-            # but could happen if both ``α`` and ``alpha`` are present.
+# ----------------------------------------------------------------------
+# Helpers — prompts.py (LLM)
+# ----------------------------------------------------------------------
+
+
+def _maybe_write_prompts_module(
+    *,
+    example_dir: Path,
+    cid: str,
+    selections: list[CustomizedAgentSelection],
+) -> Optional[Path]:
+    """Materialise ``examples/CUSTOMIZED_SIMULATION/<cid>/prompts.py``.
+
+    Each LLM-flavoured agent contributes one ``<KEY>_SYS`` and one
+    ``<KEY>_USER`` constant where ``KEY`` is the SCREAMING_SNAKE form of
+    the archetype name. User-edited prompt strings (carried via the
+    reserved ``__llm_system_prompt__`` / ``__llm_user_prompt__`` keys)
+    take precedence; otherwise the catalog-shipped scenario-free defaults
+    fill in.
+
+    Returns the prompts.py path if any LLM agents were present, else
+    ``None``.
+    """
+    llm_selections = [
+        s for s in selections if s.engine in _LLM_FLAVOURED_ENGINES
+    ]
+    if not llm_selections:
+        return None
+
+    seen_stems: set[str] = set()
+    entries: list[tuple[str, str, str, str]] = []  # (archetype, engine, sys, user)
+    for sel in llm_selections:
+        stem = _prompt_var_stem(sel.archetype)
+        # Distinct archetypes share a stem only by accident; if two
+        # rosters of the same archetype appear, write the constants
+        # once — both YAML blocks reference the same stem.
+        if stem in seen_stems:
             continue
-        out[kwarg] = value
+        seen_stems.add(stem)
+
+        _, llm_overrides = _split_handbook_and_llm(sel)
+        sys_text = str(llm_overrides.get(_LLM_SYS_KEY, "") or "").strip()
+        user_text = str(llm_overrides.get(_LLM_USR_KEY, "") or "").strip()
+        if not sys_text or not user_text:
+            default_sys, default_user = get_default_prompts(
+                sel.archetype, sel.engine
+            )
+            if not sys_text:
+                sys_text = default_sys
+            if not user_text:
+                user_text = default_user
+        entries.append((sel.archetype, sel.engine, sys_text, user_text))
+
+    text = _render_prompts_module(cid=cid, entries=entries)
+    out = example_dir / "prompts.py"
+    out.write_text(text, encoding="utf-8")
     return out
+
+
+def _render_prompts_module(
+    *,
+    cid: str,
+    entries: list[tuple[str, str, str, str]],
+) -> str:
+    """Compose the ``prompts.py`` text for a customized bundle."""
+    header = (
+        '"""Auto-generated prompt constants for ' + cid + '.\n\n'
+        "One ``<ARCHETYPE>_SYS`` / ``<ARCHETYPE>_USER`` pair per LLM agent\n"
+        "in the bundle. The strings are scenario-agnostic by construction —\n"
+        "they originate from the marketplace catalog (discovered from\n"
+        "masim.agents class metadata) or from the user's edits in the\n"
+        "Streamlit interface, and are referenced by ``players.yml`` via\n"
+        "dotted ``module:VAR`` paths.\n"
+        '"""\n\n'
+    )
+    body_chunks: list[str] = [header]
+    for archetype, engine, sys_text, user_text in entries:
+        stem = _prompt_var_stem(archetype)
+        body_chunks.append(
+            f"# --- {archetype} ({engine}) ---\n"
+            f"{stem}_SYS = {_py_triple_quote(sys_text)}\n\n"
+            f"{stem}_USER = {_py_triple_quote(user_text)}\n\n"
+        )
+    return "".join(body_chunks).rstrip() + "\n"
+
+
+def _py_triple_quote(text: str) -> str:
+    """Render ``text`` as a triple-quoted Python string literal.
+
+    Escapes any embedded triple quotes so the output is always parseable
+    as Python source.
+    """
+    safe = text.replace('"""', '\\"\\"\\"')
+    return '"""\\\n' + safe + '\n"""'
 
 
 # ----------------------------------------------------------------------
@@ -541,7 +775,7 @@ _RUNNER_TEMPLATE = '''\
 """{cid} — Customized Simulation Runner.
 
 Auto-generated by the Customized Simulation Builder.
-Base scenario: {base_scenario}
+Scenario: {scenario_name}
 
 Usage:
     python examples/CUSTOMIZED_SIMULATION/{cid}/run_customized.py \\
@@ -563,7 +797,7 @@ async def main():
     setup_logging()
 
     parser = argparse.ArgumentParser(
-        description="Run customized simulation {cid} (base: {base_scenario})"
+        description="Run customized simulation {cid} (scenario: {scenario_name})"
     )
     parser.add_argument(
         "-c",
@@ -579,7 +813,7 @@ async def main():
     print("\\n" + "=" * 70)
     print("{cid} — Customized Simulation")
     print("=" * 70)
-    print("Base scenario: {base_scenario}")
+    print("Scenario:      {scenario_name}")
     print("Rounds:        %s" % config.setting["total_rounds"])
     print("=" * 70 + "\\n")
 
@@ -600,14 +834,14 @@ if __name__ == "__main__":
 '''
 
 
-def _render_runner_script(*, cid: str, base_scenario: str) -> str:
-    return _RUNNER_TEMPLATE.format(cid=cid, base_scenario=base_scenario)
+def _render_runner_script(*, cid: str, scenario_name: str) -> str:
+    return _RUNNER_TEMPLATE.format(cid=cid, scenario_name=scenario_name)
 
 
 def _render_readme(
     *,
     cid: str,
-    base_scenario: str,
+    scenario_name: str,
     selections: list[CustomizedAgentSelection],
     timestamp: _dt.datetime,
 ) -> str:
@@ -616,7 +850,7 @@ def _render_readme(
         "",
         "Auto-generated customized simulation bundle.",
         "",
-        f"- **Base scenario**: `{base_scenario}`",
+        f"- **Scenario**: `{scenario_name}`",
         f"- **Generated at**: {timestamp.isoformat(timespec='seconds')}",
         f"- **Config bundle**: `configs/CUSTOMIZED_SIMULATION/{cid}/`",
         "",
@@ -626,9 +860,17 @@ def _render_readme(
         "|-----------|--------|-----------|-------------------|",
     ]
     for sel in selections:
-        params_short = ", ".join(f"`{k}={v}`" for k, v in sel.params.items()) or "—"
+        visible = {
+            k: v
+            for k, v in sel.params.items()
+            if k not in _LLM_RESERVED
+        }
+        params_short = (
+            ", ".join(f"`{k}={v}`" for k, v in visible.items()) or "—"
+        )
         lines.append(
-            f"| {sel.archetype} | {sel.engine} | {sel.num_instances} | {params_short} |"
+            f"| {sel.archetype} | {sel.engine} | {sel.num_instances} | "
+            f"{params_short} |"
         )
     lines.extend([
         "",

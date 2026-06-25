@@ -42,6 +42,65 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         st.markdown("---")
 
         # ------------------------------------------------------------------
+        # Customized-bundle short-circuit
+        # ------------------------------------------------------------------
+        # When the user is running a roster they assembled in Stage 2, the
+        # active scenario lives under ``CUSTOMIZED_SIMULATION/<id>``. The
+        # built-in scenario / variant selectors below would silently
+        # rewrite ``selected_scenario`` to a vanilla ``configs/`` key on
+        # the next rerun, dropping the customized bundle entirely. So we
+        # render a read-only header for that case and skip the picker.
+        active = st.session_state.get("selected_scenario", "")
+        if active.startswith("CUSTOMIZED_SIMULATION/"):
+            customized_id = active.split("/", 1)[1] if "/" in active else active
+            st.subheader("Customized bundle")
+            st.markdown(
+                f"<div style='font-size:13px;line-height:1.6;'>"
+                f"✨ <b>{customized_id}</b><br>"
+                f"<span style='color:#9ba8bb;'>Built from your custom "
+                f"roster in Stage 2.</span>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+            if st.button(
+                "Edit roster",
+                use_container_width=True,
+                key="sidebar_edit_customized",
+                help="Return to Stage 2 to modify the agent lineup.",
+            ):
+                st.session_state.workflow_stage = "customize"
+                st.rerun()
+
+            # Compact read-only bundle summary (rounds + roster size).
+            try:
+                info = get_scenario_info(active)
+                rounds = info.get("total_rounds") or info.get("rounds") or "-"
+            except Exception:
+                rounds = "-"
+            try:
+                agents = get_agents_info(active)
+                roster_size = sum(
+                    int(a.get("instances", 1) or 1) for a in agents
+                )
+                roster_kinds = len(agents)
+            except Exception:
+                roster_size = 0
+                roster_kinds = 0
+
+            st.markdown(
+                f"<div style='margin-top:8px;font-size:12px;"
+                f"line-height:1.6;color:#cbd2dc;'>"
+                f"• Rounds: <b>{rounds}</b><br>"
+                f"• Roster: <b>{roster_size}</b> agents"
+                f" ({roster_kinds} archetypes)"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown("---")
+            st.caption("MASIM v0.1.0 | Multi-Agent Simulation Platform")
+            return active
+
+        # ------------------------------------------------------------------
         # Scenario selection
         # ------------------------------------------------------------------
         st.header("Select Scenario")

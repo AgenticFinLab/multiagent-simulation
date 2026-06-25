@@ -25,11 +25,10 @@ from masim.interface.components.sidebar import render_sidebar
 from masim.interface.components.analysis_view import render_analysis_page
 from masim.interface.components.docs_view import render_docs_page
 from masim.interface.components.agent_market import (
-    render_agent_market,
-    render_entry_choice,
-    render_back_to_start_bar,
+    render_back_to_stage1_bar,
+    render_customize,
+    render_scenario_setup,
     render_selected_portfolio_strip,
-    render_simulation_setup,
 )
 
 # Page configuration
@@ -81,7 +80,7 @@ if "sys_messages" not in st.session_state:
     st.session_state.sys_messages = []
 
 if "workflow_stage" not in st.session_state:
-    st.session_state.workflow_stage = "entry"
+    st.session_state.workflow_stage = "scenario_setup"
 
 if "selected_market_agents" not in st.session_state:
     st.session_state.selected_market_agents = []
@@ -103,19 +102,16 @@ if _requested_agent_from_url():
 def main():
     """Main application entry point."""
     workflow_stage = st.session_state.workflow_stage
-    if workflow_stage == "entry":
-        render_entry_choice()
+    if workflow_stage == "scenario_setup":
+        render_scenario_setup()
         return
-    if workflow_stage == "agents":
-        render_agent_market()
-        return
-    if workflow_stage == "setup":
-        render_simulation_setup()
+    if workflow_stage == "customize":
+        render_customize()
         return
 
     selected_scenario = render_sidebar()
 
-    render_back_to_start_bar(key_suffix="workspace", reset_runtime=True)
+    render_back_to_stage1_bar(key_suffix="workspace", reset_runtime=True)
 
     if st.session_state.current_page == "Analysis":
         render_analysis_page(selected_scenario)

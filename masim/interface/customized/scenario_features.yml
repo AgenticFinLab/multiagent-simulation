@@ -1,0 +1,68 @@
+# =============================================================================
+# Customized Simulation Builder — Scenario Feature Manifest
+#
+# Step 2 of the Customized Simulation Builder uses this file ONLY to gate
+# scenario picks based on the roster. It declares which non-standard market
+# features each scenario broadcasts to investors. The defaults assume every
+# scenario provides the standard market state (price, prev_price, fundamental,
+# deviation, round) — this manifest only lists EXTRA features beyond that.
+#
+# An archetype's `REQUIRES_FEATURES` class attribute (declared on its
+# canonical Rule class under `masim.agents.*`) is scenario-compatible iff
+# the required-feature set is a subset of the scenario's `market_features`.
+#
+# Scenarios omitted from this file are treated as `market_features: []`
+# (standard state only). All phase-1 archetypes are portable to such scenarios.
+# =============================================================================
+
+# --- Behavioral / canonical-state scenarios (standard state only) ------------
+AnchoringEffect:           { market_features: [] }
+AssetBubble:               { market_features: [] }
+AvailabilityBias:          { market_features: [] }
+ConfirmationBias:          { market_features: [] }
+Demo:                      { market_features: [] }
+DispositionEffect:         { market_features: [] }
+EchoChamber:               { market_features: [] }
+EndowmentEffect:           { market_features: [] }
+EquityPremium:             { market_features: [] }
+FramingEffect:             { market_features: [] }
+GamblerFallacy:            { market_features: [] }
+HerdEffect:                { market_features: [] }
+HerdingInformation:        { market_features: [] }
+HindsightBias:             { market_features: [] }
+LossAversion:              { market_features: [] }
+MarketCrash:               { market_features: [] }
+MentalAccounting:          { market_features: [] }
+MomentumEffect:            { market_features: [] }
+OverconfidenceBias:        { market_features: [] }
+RepresentativenessBias:    { market_features: [] }
+ReversalEffect:            { market_features: [] }
+RumorSpread:               { market_features: [] }
+StatusQuoBias:             { market_features: [] }
+SunkCostFallacy:           { market_features: [] }
+VolatilityClustering:      { market_features: [] }
+
+# --- Historical-event scenarios (standard state only by default) -------------
+ArchegosCollapse:          { market_features: [] }
+AsianFinancialCrisis:      { market_features: [] }
+BlackMonday1987:           { market_features: [] }
+CarryTradeUnwind:          { market_features: [] }
+CreditCycle:               { market_features: [credit_spread] }
+CurrencyCrisis:            { market_features: [multi_asset] }
+DotComBubble:              { market_features: [] }
+EuropeanDebtCrisis:        { market_features: [credit_spread] }
+GameStopShortSqueeze:      { market_features: [] }
+GFC2008:                   { market_features: [tranche_metrics, credit_spread] }
+LiquidityDryup:            { market_features: [microstructure_book] }
+LTCMCollapse:              { market_features: [] }
+LUNACollapse:              { market_features: [defi_protocol] }
+ShortSqueeze:              { market_features: [] }
+SorosPound:                { market_features: [multi_asset] }
+SouthSeaBubble:            { market_features: [] }
+SVBBankRun:                { market_features: [credit_spread] }
+TulipMania:                { market_features: [] }
+Volmageddon:               { market_features: [vol_surface] }
+
+# --- Microstructure-sensitive scenarios --------------------------------------
+FlashCrash:                { market_features: [microstructure_book] }
+FlashCrash2010:            { market_features: [microstructure_book] }
