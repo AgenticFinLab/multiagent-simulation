@@ -1,9 +1,11 @@
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$pythonPath = "D:\Anaconda\envs\masim_env\python.exe"
-$port = 8501
-$address = "127.0.0.1"
+$pythonPath = if ($env:MASIM_PYTHON) { $env:MASIM_PYTHON } else { "D:\Anaconda\envs\masim_env\python.exe" }
+$port = if ($env:MASIM_PORT) { [int]$env:MASIM_PORT } else { 8501 }
+$address = if ($env:MASIM_ADDRESS) { $env:MASIM_ADDRESS } else { "127.0.0.1" }
+$restart = if ($env:MASIM_RESTART) { $env:MASIM_RESTART -eq "1" } else { $true }
+$appPath = Join-Path $projectRoot "masim\interface\app.py"
 $url = "http://${address}:${port}"
 $healthUrl = "${url}/_stcore/health"
 
@@ -18,12 +20,35 @@ function Test-MASimInterface {
 }
 
 if (-not (Test-Path -LiteralPath $pythonPath)) {
-    Write-Error "Python environment not found: $pythonPath"
-    exit 1
+    $pathPython = Get-Command python -ErrorAction SilentlyContinue
+    if ($pathPython) {
+        $pythonPath = $pathPython.Source
+        Write-Host "MASIM_PYTHON was not found; falling back to PATH python: $pythonPath"
+    }
+    else {
+        Write-Error "Python environment not found: $pythonPath. Set MASIM_PYTHON to a Python executable with streamlit installed."
+        exit 1
+    }
+}
+
+if ($restart) {
+    $escapedAppPath = [regex]::Escape($appPath)
+    $escapedPortArg = [regex]::Escape("--server.port=$port")
+    $existing = Get-CimInstance Win32_Process | Where-Object {
+        $_.CommandLine -match "streamlit" -and
+        $_.CommandLine -match $escapedAppPath -and
+        $_.CommandLine -match $escapedPortArg
+    }
+    foreach ($process in $existing) {
+        Write-Host "Stopping existing MASim interface process: $($process.ProcessId)"
+        Stop-Process -Id $process.ProcessId -Force
+    }
+    if ($existing) {
+        Start-Sleep -Seconds 1
+    }
 }
 
 if (-not (Test-MASimInterface)) {
-    $appPath = Join-Path $projectRoot "masim\interface\app.py"
     $arguments = @(
         "-m",
         "streamlit",

@@ -87,6 +87,19 @@ if "selected_market_agents" not in st.session_state:
     st.session_state.selected_market_agents = []
 
 
+def _requested_agent_from_url() -> str:
+    """Return the agent profile requested through the URL, if any."""
+    if hasattr(st, "query_params"):
+        value = st.query_params.get("agent", "")
+        return value[0] if isinstance(value, list) else value
+    values = st.experimental_get_query_params()
+    return values.get("agent", [""])[0]
+
+
+if _requested_agent_from_url():
+    st.session_state.workflow_stage = "agents"
+
+
 def main():
     """Main application entry point."""
     workflow_stage = st.session_state.workflow_stage

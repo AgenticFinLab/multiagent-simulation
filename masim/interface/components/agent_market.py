@@ -35,6 +35,17 @@ CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
 VARIANT_ORDER = {"Rule": 0, "LLM": 1, "RuleLLM": 2, "Rag": 3}
 
 
+def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
+    """Return a lightweight cache key for avatar metadata and PNG changes."""
+    paths = []
+    if CATALOG_PATH.exists():
+        paths.append(CATALOG_PATH)
+    png_root = IMAGE_ROOT / "png"
+    if png_root.exists():
+        paths.extend(sorted(png_root.glob("*.png")))
+    return tuple((str(path), path.stat().st_mtime_ns) for path in paths)
+
+
 def render_entry_choice() -> None:
     """Render the landing chooser: pre-built scenario vs. customized portfolio.
 
@@ -49,7 +60,7 @@ def render_entry_choice() -> None:
     scenario_count = len(groups)
     variant_count = sum(len(v) for v in groups.values())
     try:
-        agent_count = len(load_agent_catalog())
+        agent_count = len(load_agent_catalog(_agent_catalog_signature()))
     except Exception:
         agent_count = 0
 
@@ -224,7 +235,7 @@ def _theory_basis(markdown: str) -> str:
 
 
 @st.cache_data(show_spinner=False)
-def load_agent_catalog() -> list[dict[str, Any]]:
+def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = None) -> list[dict[str, Any]]:
     """Load avatar metadata and complete Markdown profiles."""
     if CATALOG_PATH.exists():
         raw_items = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
@@ -465,7 +476,7 @@ def _render_profile(agent: dict[str, Any]) -> None:
     heading, close = st.columns([5, 1])
     with heading:
         st.markdown('<div class="market-kicker">Agent profile</div>', unsafe_allow_html=True)
-        st.subheader(agent["archetype"])
+        st.subheader(agent["display_name"])
     with close:
         if st.button("Close", use_container_width=True, key="close_market_profile"):
             _clear_query_agent()
@@ -514,7 +525,7 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
 
     st.markdown('<div class="market-kicker">Customize</div>', unsafe_allow_html=True)
     st.subheader(agent["display_name"])
-    st.caption(agent["archetype"])
+    st.caption(agent["agent_type"])
 
     # ---- Engine selector ------------------------------------------------
     engine_key = f"market_engine_{agent_type}"
@@ -935,7 +946,7 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
 def render_agent_market() -> None:
     """Render step one: browse profiles and compose an investor portfolio."""
     _inject_market_styles()
-    catalog = load_agent_catalog()
+    catalog = load_agent_catalog(_agent_catalog_signature())
 
     # Streamlit removes widget keys while their page is not rendered. Restore
     # checkboxes from the durable portfolio list when users return from setup.
@@ -1049,7 +1060,7 @@ def _render_portfolio_chips(agents: list[dict[str, Any]]) -> None:
 def render_simulation_setup() -> None:
     """Render step two: choose a scenario and variant, then review the roster."""
     _inject_market_styles()
-    catalog = load_agent_catalog()
+    catalog = load_agent_catalog(_agent_catalog_signature())
     selected_types = st.session_state.get("selected_market_agents", [])
     selected_set = set(selected_types)
     selected_agents = [a for a in catalog if a["agent_type"] in selected_set]
@@ -1123,7 +1134,7 @@ def render_simulation_setup() -> None:
     st.divider()
     st.subheader("Selected investor details")
     for agent in selected_agents:
-        with st.expander(agent["archetype"], expanded=False):
+        with st.expander(agent["display_name"], expanded=False):
             image_col, detail_col = st.columns([1, 3], gap="large")
             with image_col:
                 st.image(agent["image_file"], use_container_width=True)
@@ -1216,7 +1227,7 @@ def _maybe_write_customized_bundle(
 def render_selected_portfolio_strip() -> None:
     """Render the selected market portfolio in the simulation workspace."""
     _inject_market_styles()
-    catalog = load_agent_catalog()
+    catalog = load_agent_catalog(_agent_catalog_signature())
     selected = set(st.session_state.get("selected_market_agents", []))
     agents = [agent for agent in catalog if agent["agent_type"] in selected]
     if not agents:
