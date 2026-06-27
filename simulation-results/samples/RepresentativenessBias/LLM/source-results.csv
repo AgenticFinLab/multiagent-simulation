@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-7,9,RepresentativenessBias,LLM,SUCCESS,0,4310.797,2026-05-22T18:03:16,2026-05-22T19:15:07,config/simulation.yml,examples/RepresentativenessBias/LLM/run_representativenessbias_llm.py,logs/RepresentativenessBias__LLM.log,,200,200,,

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
-6,9,HerdingInformation,Rule,SUCCESS,0,40.007,2026-05-22T03:46:46,2026-05-22T03:47:26,config/simulation.yml,examples/HerdingInformation/Rule/run_herdinginformation.py,logs/HerdingInformation__Rule.log,,200,200,,config/simulation.yml

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-1,9,FramingEffect,Rag,SUCCESS,0,4001.167,2026-05-22T05:03:28,2026-05-22T06:10:09,config/simulation.yml,examples/FramingEffect/Rag/run_framingeffect_rag.py,logs/FramingEffect__Rag.log,,200,200,,

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
-9,9,LUNACollapse,Rule,SUCCESS,0,40.006,2026-05-22T03:48:46,2026-05-22T03:49:26,config/simulation.yml,examples/LUNACollapse/Rule/run_lunacollapse.py,logs/LUNACollapse__Rule.log,,200,200,,config/simulation.yml

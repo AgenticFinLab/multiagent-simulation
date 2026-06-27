@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-1,9,SVBBankRun,LLM,SUCCESS,0,8250.69,2026-05-22T04:44:22,2026-05-22T07:01:52,config/simulation.yml,examples/SVBBankRun/LLM/run_svbbankrun_llm.py,logs/SVBBankRun__LLM.log,,200,200,,

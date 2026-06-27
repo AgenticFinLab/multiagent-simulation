@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-2,9,GFC2008,Rag,SUCCESS,0,5542.079,2026-05-22T06:10:09,2026-05-22T07:42:31,config/simulation.yml,examples/GFC2008/Rag/run_gfc2008_rag.py,logs/GFC2008__Rag.log,,200,200,,

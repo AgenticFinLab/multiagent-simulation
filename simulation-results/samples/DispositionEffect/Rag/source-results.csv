@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,DispositionEffect,Rag,SUCCESS,0,4730.773,2026-05-23T01:27:38,2026-05-23T02:46:29,config/simulation.yml,examples/DispositionEffect/Rag/run_disposition_rag.py,logs/DispositionEffect__Rag.log,,200,200,

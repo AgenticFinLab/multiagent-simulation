@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,BlackMonday1987,LLM,SUCCESS,0,6070.33,2026-05-23T16:20:17,2026-05-23T18:01:27,config/simulation.yml,examples/BlackMonday1987/LLM/run_blackmonday1987_llm.py,logs/BlackMonday1987__LLM.log,,200,200,

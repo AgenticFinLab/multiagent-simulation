@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-7,9,RepresentativenessBias,Rag,SUCCESS,0,2810.508,2026-05-22T19:21:33,2026-05-22T20:08:24,config/simulation.yml,examples/RepresentativenessBias/Rag/run_representativenessbias_rag.py,logs/RepresentativenessBias__Rag.log,,200,200,,

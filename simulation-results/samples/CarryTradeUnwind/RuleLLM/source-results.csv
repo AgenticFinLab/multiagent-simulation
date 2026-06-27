@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,CarryTradeUnwind,RuleLLM,SUCCESS,0,12720.758,2026-05-23T19:29:18,2026-05-23T23:01:18,config/simulation.yml,examples/CarryTradeUnwind/RuleLLM/run_carrytradeunwind_rulellm.py,logs/CarryTradeUnwind__RuleLLM.log,,200,200,

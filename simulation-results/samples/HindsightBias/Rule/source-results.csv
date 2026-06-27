@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,config_path
-7,9,HindsightBias,Rule,SUCCESS,0,40.007,2026-05-22T03:47:26,2026-05-22T03:48:06,config/simulation.yml,examples/HindsightBias/Rule/run_hindsightbias.py,logs/HindsightBias__Rule.log,,200,200,,config/simulation.yml

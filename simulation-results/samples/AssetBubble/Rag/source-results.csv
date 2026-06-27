@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-4,9,AssetBubble,Rag,SUCCESS,0,36482.073,2026-05-22T09:41:40,2026-05-22T19:49:42,config/simulation.yml,examples/AssetBubble/Rag/run_bubble_ragllm.py,logs/AssetBubble__Rag.log,,200,200,,
