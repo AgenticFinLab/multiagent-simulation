@@ -322,9 +322,10 @@ programming language.
 - MUST cover ALL trigger branches declared in §3.5 Activation
   Triggers — every activation trigger maps to at least one mechanism
   step; every mechanism step traces to at least one trigger.
-- MUST explicitly separate state-reads (inputs consumed) from
-  state-writes (state variables updated) at each step. Use notation:
-  "Read: ...; Compute: ...; Write: ..." or equivalent clarity.
+- MUST explicitly distinguish state-reads (inputs consumed) from
+  state-writes (state variables updated) at each step. Any clear
+  notation that makes this separation unambiguous is acceptable (e.g.
+  "Read: ...; Compute: ...; Write: ..." or equivalent).
 - Each step MUST trace to a specific theory from §3.4 Theoretical
   Foundation, OR be explicitly marked "(implementation convenience —
   no theoretical claim)" when the step is purely mechanical.
@@ -347,16 +348,17 @@ covered. Row order MUST be preserved.
 **Precision rule:** Every row MUST be answerable with a concrete
 formula, threshold, or named constant. "Depends on context" or "varies"
 is forbidden — if it varies, specify the rule that governs the
-variation. The Sizing rule in particular MUST be a closed-form
-expression referencing only declared signals (§3.6.1) and parameters
-(§3.7).
+variation. The Sizing rule in particular MUST reference only declared
+signals (§3.6.1) and parameters (§3.7); its form (closed-form
+expression, decision table, optimisation objective, heuristic rule) is
+flexible provided it is unambiguously implementable.
 
 ```markdown
 | Aspect                | Specification                                                                    |
 |-----------------------|----------------------------------------------------------------------------------|
 | Action types allowed  | <enumerate every discrete action, including no-op>                               |
 | Action parameter rule | <rule for the continuous parameter of an action, e.g. target value or intensity> |
-| Sizing rule           | <closed-form formula for action magnitude / quantity>                            |
+| Sizing rule           | <formula or rule for action magnitude / quantity>                                |
 | Action lifetime       | <duration before the action expires or is auto-cancelled>                        |
 | Revision policy       | <when and how the agent retracts, replaces, or amends an emitted action>         |
 | State constraint      | <self-imposed cap on the agent's internal state>                                 |
@@ -376,32 +378,53 @@ MUST NOT appear here.
 
 #### 3.6.4 Mathematical Model
 
-- **Decision variable:** the quantity the agent computes per call (e.g.
-  signed trade quantity, target price, opinion shift, message intensity).
-- **Trigger function:** pseudo-code describing under what condition the
-  agent emits a non-hold action. Pseudo-code MUST NOT be tied to a
-  specific language; algebraic notation or English-pseudo is preferred.
-  The trigger function MUST map 1:1 to the Activation Triggers in §3.5.
-- **Sizing function:** pseudo-code mapping signals to quantity.
-- **State variables:** every internal variable the agent persists
-  across calls, with type and initial value.
-- **State-update rule:** when each state variable updates and with what
-  formula. MUST be explicit about update *ordering* (pre-decide,
-  post-decide, post-execution). Each variable MUST be assigned exactly one
-  update phase.
-- **Determinism contract:** state whether the decision rule is
-  deterministic given identical inputs and state, or whether it draws
-  from a named distribution. If stochastic, name the distribution and
-  the seed-bearing source.
-- **Parameter symbol table:** MUST list every symbol used anywhere in
-  §3.6 (mechanism steps, trigger function, sizing function, state-update
-  formulas). No undeclared symbols are permitted.
+This section MUST formalize the agent's decision logic in unambiguous
+mathematical or logical notation. The structural format is flexible —
+choose whatever mathematical framework best fits the agent's decision
+architecture (e.g. threshold-based triggering, utility optimisation,
+Bayesian updating, rule tables, gradient-based adaptation, policy
+functions, state machines, or any other).
+
+Regardless of the chosen framework, the following **content aspects**
+MUST all be explicitly addressed:
+
+1. **Decision output** — what quantity or action the agent computes per
+   call. Name the variable(s) and their type/domain.
+2. **Decision logic formalization** — the complete mathematical or
+   logical mapping from inputs (signals) and internal state to the
+   decision output. MUST be precise enough that two independent
+   implementers produce behaviourally equivalent logic. MUST cover
+   every activation trigger declared in §3.5 (i.e. every condition
+   under which the agent acts or holds). Pseudo-code, equations,
+   inequalities, or decision tables are all acceptable; specific
+   programming languages are NOT.
+3. **State variables** — every internal variable the agent persists
+   across calls, with type and initial value.
+4. **State evolution** — how and when each state variable updates.
+   MUST be explicit about update *ordering* relative to the decision
+   (e.g. pre-decide, post-decide, post-execution). Each variable MUST
+   be assigned exactly one update phase.
+5. **Determinism contract** — state whether the decision is
+   deterministic given identical inputs and state, or stochastic. If
+   stochastic, name the distribution(s) and the seed-bearing source.
+6. **Parameter symbol table** — MUST list every symbol used anywhere
+   in §3.6 (mechanism steps, decision formalization, state-update
+   formulas). No undeclared symbols are permitted.
 
 ```markdown
 | Symbol  | Meaning   | Default Value | Source     |
 |---------|-----------|---------------|------------|
 | `alpha` | <meaning> | <value>       | <citation> |
 ```
+
+**Quality rules:**
+- The formalization MUST NOT be a vague prose description; it MUST be
+  translatable to executable logic without interpretation.
+- Every branch of the decision logic MUST be explicit (no implicit
+  "otherwise do nothing").
+- The mapping from §3.5 Activation Triggers to decision-logic branches
+  MUST be traceable (a reader can identify which part of the
+  formalization handles each trigger).
 
 #### 3.6.5 Behavioral Properties
 
@@ -473,7 +496,7 @@ a fenced block. Each case MUST show:
   (not invented ad-hoc). If a scenario-specific value is needed, state
   it explicitly and justify.
 - The three primary cases MUST collectively cover ALL non-hold branches
-  of the trigger function in §3.6.4. If the trigger has 4 branches
+  of the decision logic in §3.6.4. If the logic has 4 branches
   (e.g. act-up, act-down, hold, deactivate), provide 4 primary cases.
 - The edge case MUST demonstrate at least one of: cold-start (empty
   state), extreme deviation, deactivation condition, cap-clamp,
@@ -585,7 +608,7 @@ sections and prevent orphan content.
 - Every **signal** in §3.6.1 Decision Information Set MUST be consumed
   by at least one step in §3.6.2 Core Behavioral Mechanism.
 - Every **activation trigger** in §3.5 MUST map to a branch in the
-  trigger function of §3.6.4.
+  decision logic formalization of §3.6.4.
 - Every **worked example** in §3.8 MUST use Default values from §3.7
   (or explicitly state and justify any deviation).
 - Every **expected behaviour** in §3.9 MUST be traceable to the
@@ -593,8 +616,8 @@ sections and prevent orphan content.
   mechanism produces the declared individual-level response).
 - Every **citation** anywhere in the specification (§3.4, §3.7 Source,
   §3.9, etc.) MUST appear in the §3.10 Academic References table.
-- Every **symbol** used in §3.6 (mechanism, trigger function, sizing
-  function, state-update formulas) MUST be declared in §3.6.4 Parameter
+- Every **symbol** used in §3.6 (mechanism, decision formalization,
+  state-update formulas) MUST be declared in §3.6.4 Parameter
   symbol table.
 - The **"Does NOT use"** list in §3.6.1 MUST NOT contradict any signal
   actually consumed in §3.6.2.
@@ -633,12 +656,12 @@ blocker.
 - [ ] §3.6.2 is precise enough for two independent implementers to
       produce behaviourally equivalent logic
 - [ ] §3.6.3 Action Space: every row is a concrete formula/threshold;
-      the Sizing rule is a closed-form expression; no environment rules
-      present
+      the Sizing rule references only declared signals and parameters;
+      no environment rules present
 - [ ] §3.6.3 Action Space visibly covers all eight canonical
       dimensions under either generic or domain-specific row labels
-- [ ] §3.6.4 trigger function maps 1:1 to §3.5 Activation Triggers;
-      state-update rule specifies ordering; parameter symbol table has
+- [ ] §3.6.4 decision logic covers all §3.5 Activation Triggers;
+      state evolution specifies ordering; parameter symbol table has
       no undeclared symbols
 - [ ] §3.7 has >=3 rows (or justified fewer); every high-sensitivity
       parameter cites empirical data; every parameter appears in §3.6.4;
@@ -656,7 +679,7 @@ blocker.
 **Cross-section consistency (§4 rules):**
 - [ ] Every §3.7 parameter appears in §3.6.4
 - [ ] Every §3.6.1 signal is consumed in §3.6.2
-- [ ] Every §3.5 trigger maps to a §3.6.4 branch
+- [ ] Every §3.5 trigger maps to a §3.6.4 decision-logic branch
 - [ ] Every §3.8 example uses §3.7 defaults
 - [ ] Every §3.9 behavioural expectation traces to §3.6.2
 - [ ] Every citation appears in §3.10
@@ -773,7 +796,7 @@ Does NOT use: <list>.
 |-----------------------|-------------------------------------------------------|
 | Action types allowed  | <enumerate every discrete action, including no-op>    |
 | Action parameter rule | <concrete rule for the continuous parameter>          |
-| Sizing rule           | <closed-form formula referencing signals + params>    |
+| Sizing rule           | <formula or rule referencing signals + params>        |
 | Action lifetime       | <duration before the action expires>                  |
 | Revision policy       | <when and how the agent retracts or amends an action> |
 | State constraint      | <self-imposed cap on the agent's internal state>      |
@@ -782,17 +805,13 @@ Does NOT use: <list>.
 
 #### Mathematical Model
 
-- Decision variable: <Q*(t) or target etc.>
-- Trigger function:
-  ```
-  <pseudo-code mapping 1:1 to Activation Triggers>
-  ```
-- Sizing function:
-  ```
-  <pseudo-code>
-  ```
+- Decision output: <what the agent computes per call, with type/domain>
+- Decision logic formalization:
+  <mathematical/logical mapping from signals + state to decision output;
+  use equations, pseudo-code, decision tables, or whatever framework fits;
+  must cover all Activation Triggers from §3.5>
 - State variables: <list with type and initial value>
-- State-update rule: <formula + ordering (pre-decide/post-decide/post-execution)>
+- State evolution: <how/when each variable updates + ordering>
 - Determinism contract: <deterministic / stochastic with named distribution>
 
 | Symbol  | Meaning   | Default Value | Source     |
