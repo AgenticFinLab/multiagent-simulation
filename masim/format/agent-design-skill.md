@@ -49,8 +49,10 @@ peer-graph the scenario layer provides.
 
 A specification that conforms to this handbook MUST be:
 
-1. **Theoretically grounded** — every behavioural claim traces back to
-   a named theory or empirical study with a citation.
+1. **Evidence-grounded** — every substantive design choice (signal
+   selection, mechanism logic, action constraints, mathematical
+   framework, parameter values, activation conditions) MUST declare
+   its evidence source. No design choice may exist without provenance.
 2. **Behaviourally complete** — information set, decision mechanism,
    action space, state evolution, and edge cases are all explicit.
 3. **Parameterised** — every tunable knob is named, typed, ranged,
@@ -121,7 +123,7 @@ scenario / environment specification.
 > **Convention.** The numbered labels (`### 3.x`, `#### 3.x.y`) used
 > throughout this section are *internal cross-reference labels for this
 > handbook only*. A conformant specification MUST use the **unnumbered**
-> headers shown in the copy-paste skeleton in §6 (e.g. `## Summary`,
+> headers shown in the copy-paste skeleton in §7 (e.g. `## Summary`,
 > `## Behavioral Framework`, `#### Decision Information Set`), and MUST
 > preserve the exact header levels the skeleton shows.
 
@@ -597,7 +599,84 @@ Footer block. Required.
 
 ---
 
-## 4. Cross-Section Consistency Rules
+## 4. Evidence Provenance Requirement
+
+Every substantive design choice in a conformant specification MUST
+declare its **evidence source**. This rule applies ACROSS ALL sections
+(§3.3–§3.9), not only to the Theoretical Foundation. A "substantive
+design choice" is any claim, value, threshold, signal selection,
+mechanism step, constraint, or mathematical formulation that shapes
+the agent's behaviour.
+
+### 4.1 Evidence Type Taxonomy
+
+Each evidence source MUST be classified into one of the following
+categories. Higher-numbered categories carry weaker epistemic weight;
+authors SHOULD prefer lower-numbered sources where available.
+
+| # | Evidence Type              | Format requirement                                                        |
+|---|----------------------------|---------------------------------------------------------------------------|
+| 1 | **Peer-reviewed research** | Full citation + DOI; specific finding (table, figure, equation number)    |
+| 2 | **Domain textbook**        | Author, title, edition, chapter/section/page; specific principle or model |
+| 3 | **Empirical dataset**      | Dataset name, source, time range, sample size; specific statistic cited   |
+| 4 | **Practitioner consensus** | Named community/standard + reference document (e.g. CFA curriculum, etc.) |
+| 5 | **Logical derivation**     | "Derived from [cited element within this spec]" + derivation sketch       |
+| 6 | **Expert judgment**        | Author's domain expertise; MUST state the assumption explicitly and mark  |
+|   |                            | with ⚠️ so reviewers can challenge or replace it with stronger evidence    |
+
+### 4.2 Application Rules
+
+- **§3.3 Definition and Goals:** The real-world counterpart claim MUST
+  cite evidence (Type 1–4) that this participant type exists and
+  behaves as described.
+- **§3.4 Theoretical Foundation:** Already mandates Type 1–3 evidence
+  via its depth rules.
+- **§3.5 Activation Triggers:** Each trigger condition and each
+  deactivation condition MUST cite WHY this condition is
+  behaviourally relevant (Type 1–5).
+- **§3.6.1 Decision Information Set:** Each signal's inclusion MUST
+  cite evidence that real-world participants of this type use this
+  information (Type 1–5). The "Does NOT use" list SHOULD cite
+  evidence for deliberate exclusion.
+- **§3.6.2 Core Behavioral Mechanism:** Already requires tracing each
+  step to §3.4 (which is evidence-backed). Steps marked
+  "implementation convenience" are exempt.
+- **§3.6.3 Action Space:** Self-imposed constraints (state cap,
+  resource cap, exit rule) MUST cite WHY this constraint exists
+  (Type 1–6). "None" is permitted only if explicitly justified.
+- **§3.6.4 Mathematical Model:** The choice of mathematical framework
+  MUST cite its source (Type 1–5). If the formalization is original,
+  classify as Type 5 or 6 with explicit derivation.
+- **§3.7 Parameters:** Already mandates a Source column per row.
+  High-sensitivity parameters MUST NOT use Type 6.
+- **§3.9 Verification:** Calibration data sources already cite
+  evidence. Sanity bounds MUST trace to mechanism logic (Type 5).
+
+### 4.3 Inline Evidence Notation
+
+Evidence sources SHOULD be cited inline using a compact notation that
+references the §3.10 Academic References table:
+
+```
+[Ref #] or [Ref #, Table 3] or [Textbook, Ch. 5] or [Expert judgment ⚠️]
+```
+
+This notation keeps the specification readable while ensuring every
+claim is traceable. A reviewer MUST be able to trace any design choice
+back to its declared source within 30 seconds.
+
+### 4.4 Minimum Evidence Coverage
+
+- A conformant specification MUST have ≥80% of its substantive design
+  choices backed by Type 1–4 evidence.
+- Type 6 (expert judgment) MUST NOT account for >20% of evidence
+  sources across the entire specification.
+- Every Type 6 citation MUST be marked with ⚠️ and is considered a
+  technical-debt item to be resolved in future versions.
+
+---
+
+## 5. Cross-Section Consistency Rules
 
 A conformant specification MUST satisfy ALL of the following
 traceability constraints. These rules ensure internal coherence across
@@ -624,7 +703,7 @@ sections and prevent orphan content.
 
 ---
 
-## 5. Validation Checklist (Self-Check)
+## 6. Validation Checklist (Self-Check)
 
 An author MUST run through this list and ensure every item is checked
 before declaring the specification complete. Each unchecked item is a
@@ -676,7 +755,7 @@ blocker.
       bounds as falsifiable IF-THEN statements; ablation hooks state
       direction and metric
 
-**Cross-section consistency (§4 rules):**
+**Cross-section consistency (§5 rules):**
 - [ ] Every §3.7 parameter appears in §3.6.4
 - [ ] Every §3.6.1 signal is consumed in §3.6.2
 - [ ] Every §3.5 trigger maps to a §3.6.4 decision-logic branch
@@ -684,6 +763,17 @@ blocker.
 - [ ] Every §3.9 behavioural expectation traces to §3.6.2
 - [ ] Every citation appears in §3.10
 - [ ] No undeclared symbols in §3.6
+
+**Evidence provenance (§4 rules):**
+- [ ] ≥80% of substantive design choices cite Type 1–4 evidence
+- [ ] Type 6 (expert judgment) accounts for ≤20% of total evidence;
+      every Type 6 is marked with ⚠️
+- [ ] Every signal in §3.6.1 cites evidence for inclusion
+- [ ] Every self-imposed constraint in §3.6.3 cites evidence
+- [ ] Mathematical framework in §3.6.4 cites its source
+- [ ] Every activation trigger in §3.5 cites behavioural relevance
+- [ ] Reviewer can trace any design choice to its declared source
+      within 30 seconds
 
 **Scenario-portability:**
 - [ ] No specific scenario names, absolute numeric levels, or fixed round
@@ -696,7 +786,7 @@ blocker.
 
 ---
 
-## 6. Copy-Paste Skeleton
+## 7. Copy-Paste Skeleton
 
 Use this as the starting point for a new agent specification. Replace
 every `<...>` and delete bracketed instructions when done. Do not
@@ -891,7 +981,7 @@ State update: <variable: old -> new>
 
 ---
 
-## 7. Status
+## 8. Status
 
 | Field   | Content                                  |
 |---------|------------------------------------------|
