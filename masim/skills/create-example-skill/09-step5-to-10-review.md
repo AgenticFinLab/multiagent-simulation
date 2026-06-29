@@ -40,7 +40,7 @@ For each variant's players.yml:
   □ All instances are listed in topology.yml
 
 Run YAML syntax validation:
-  python -c "import yaml; [yaml.safe_load(open(f'configs/{Sim}/{v}/{f}')) for v in ['Rule','LLM','RuleLLM','Rag'] for f in ['simulation.yml','players.yml','topology.yml','persona.yml']]"
+  python -c "import yaml; [yaml.safe_load(open(f'configs/{Sim}/{v}/{f}')) for v in <variants marked Yes in target §10.1> for f in ['simulation.yml','players.yml','topology.yml','persona.yml']]"
 ```
 
 ### 5.4 Diversity Check
@@ -247,14 +247,14 @@ After a successful 200-round run, verify:
 - [ ] `Rag/players.py` — `_initialize_rag()`, `_formulate_knowledge_query()`, `_get_rag_context()`
 - [ ] `Rag/analysis.py` — `_RAG_FALLBACK` defined; `analyze_rag_knowledge_effect()` implemented
 
-**Per-Variant Documentation** (Rule, LLM, RuleLLM, Rag):
+**Per-Variant Documentation** (one block per built variant; subset of `Rule / LLM / RuleLLM / Rag` declared `Yes` in target §10.1):
 - [ ] `explain.md` — all 9 sections
 - [ ] `explain.md §2` — every investor traces to code location via sim-bases §N.M
 - [ ] `analysis.md` — all 7 sections
 - [ ] `analysis.md §2` — every metric traces to analysis.py function
 
 **Integration**:
-- [ ] All 4 variants run successfully
+- [ ] Every built variant runs successfully
 - [ ] Analysis scripts produce output for at least Rule variant
 - [ ] Phenomenon clearly visible in price chart output
 - [ ] `SCENARIO_PATH_MAP` in WebUI updated to include new simulation

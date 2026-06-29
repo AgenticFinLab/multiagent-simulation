@@ -7,7 +7,7 @@ This file defines the complete content specifications for the two root-level doc
 1. **`simulation-bases.md`** — 9-section theoretical and design foundation
 2. **`analysis-bases.md`** — 7-section analysis methodology foundation
 
-These documents are the single source of truth for their respective domains. All four variant implementations (`explain.md`, `analysis.md`, `players.py`, `analysis.py`) trace back to these documents.
+These documents are the single source of truth for their respective domains. Every variant implementation built per target §10.1 (`explain.md`, `analysis.md`, `players.py`, `analysis.py`) traces back to these documents.
 
 ---
 
@@ -15,7 +15,7 @@ These documents are the single source of truth for their respective domains. All
 
 **Location**: `examples/{SimulationName}/simulation-bases.md`
 
-**Writing principle**: Write this document **before any code**. It drives all implementation decisions. Every investor type defined here must have a corresponding class in all four `players.py` files. Every parameter value must have a source citation.
+**Writing principle**: Write this document **before any code**. It drives all implementation decisions. Every investor type defined here must have a corresponding class in every built variant's `players.py` (the subset of `Rule / LLM / RuleLLM / Rag` declared `Yes` in target §10.1). Every parameter value must have a source citation.
 
 ---
 
@@ -287,7 +287,7 @@ Each round, the Market broadcasts to all investors:
 
 **Authoritative standard.** Every investor entry in `simulation-bases.md §4`
 MUST conform to the **Universal Agent Design Handbook** at
-`masim/format/agent-design-skill.md`. The handbook is the single source of
+`masim/skills/agent-design-skill.md`. The handbook is the single source of
 truth for the intrinsic specification of any participant agent, in any
 scenario domain. This section therefore does NOT repeat the handbook's
 section schema — it states only how the handbook is applied inside
@@ -308,8 +308,11 @@ variant's `explain.md §2` defines **how that variant encodes it**.
 #### 4.0 How the Universal Handbook Applies Inside simulation-bases.md
 
 Each investor entry occupies one block that conforms section-for-section to
-the handbook's canonical 12-section order. Header levels are **shifted down
-by two** to fit the embedding context, so that the investor's Title (handbook
+the handbook's **11-section canonical order** (`agent-design-skill.md §2`),
+plus one **financial-domain extension** — `Population and Heterogeneity` —
+inserted at position `4.{N}.7` to capture how multiple instances of the same
+archetype are calibrated and sampled. Header levels are **shifted down by
+two** to fit the embedding context, so that the investor's Title (handbook
 `#`) lands at `###` inside `simulation-bases.md §4`, the handbook's `##`
 sections land at `####`, and the handbook's `####` sub-blocks land at
 `######`. All other content — field schemas, table column names, validation
@@ -324,9 +327,9 @@ requirements, RFC-2119 modal verbs — applies unchanged.
 | `#### 4.{N}.4 Design Purpose and Activation Triggers` | `## Design Purpose and Activation Triggers` | Activation / Deactivation / Regime    |
 | `#### 4.{N}.5 Behavioral Framework`                   | `## Behavioral Framework`                   | 5 H4 sub-blocks (see below)           |
 | `#### 4.{N}.6 Parameters`                             | `## Parameters`                             | 8-column parameter table              |
-| `#### 4.{N}.7 Population and Heterogeneity`           | `## Population and Heterogeneity`           | 5-row population table                |
+| `#### 4.{N}.7 Population and Heterogeneity`           | *(financial-domain extension — not in handbook §3 canonical order; see §4.0 below)* | 5-row population table                |
 | `#### 4.{N}.8 Worked Numerical Examples`              | `## Worked Numerical Examples`              | ≥3 cases + 1 edge case                |
-| `#### 4.{N}.9 Validation and Calibration`             | `## Validation and Calibration`             | Includes Ablation Hooks               |
+| `#### 4.{N}.9 Validation and Calibration`             | `## Behavioral Verification and Calibration` | Includes Ablation Hooks               |
 | `#### 4.{N}.10 Academic References`                   | `## Academic References`                    | Numbered citation table               |
 | `#### 4.{N}.11 Design Provenance and Versioning`      | `## Design Provenance and Versioning`       | 6-row provenance footer               |
 
@@ -342,42 +345,113 @@ the first investor).
 #### 4.1 Domain Instantiation for Financial Scenarios
 
 `simulation-bases.md` describes a **market-trading scenario**. The handbook's
-domain-neutral row labels and value palettes are therefore instantiated
-through the **Financial Domain Companion** at
-`masim/format/agent-design-finance.md`. Authors MUST consult that file for:
+domain-neutral row labels and value palettes are therefore instantiated for
+the financial domain inline below. (Earlier drafts referenced a separate
+`agent-design-finance.md` file — that file is intentionally not maintained;
+the instantiation rules live here and are the single source of truth.)
 
-- Theory Family value palette (`agent-design-finance.md §3`)
-- Real-world counterpart enumeration (`agent-design-finance.md §4`)
-- Stylized facts catalogue (`agent-design-finance.md §5`)
-- Regime label palette and `Market Contribution by Regime` relabel
-  (`agent-design-finance.md §6`)
-- Action Space row labels: `Order types allowed`, `Price level rule`,
-  `Order quantity rule`, `Order lifetime`, `Cancellation policy`,
-  `Inventory constraint`, `Wealth / leverage cap`, `Stop-loss / kill rule`
-  (`agent-design-finance.md §7`)
+**4.1.1 Theory Family palette (pick one per investor)**
 
-In particular:
+- `Behavioral Finance` — anchoring, loss aversion, disposition effect,
+  framing, herding, overconfidence, availability, representativeness.
+- `Microstructure` — inventory management, adverse selection, price impact,
+  market making, order flow, latency arbitrage.
+- `Information Cascade / Herding` — rational/irrational imitation,
+  informational cascade, social learning.
+- `Quant / Statistical` — momentum, reversal, statistical arbitrage,
+  pairs trading, factor exposure.
+- `Fundamental / Value` — discounted cash flow, mean reversion to
+  fundamental, value investing.
+- `Liquidity / Funding` — funding constraint, margin spiral, fire sale,
+  liquidity provision.
+- `Leverage / Risk-On-Risk-Off` — VaR-based deleveraging, forced
+  liquidation, prime-broker dynamics.
+- `Noise / Liquidity-providing noise` — uninformed flow, retail noise.
 
-- The **Summary** row labelled `System Role` is relabelled `Market Role`.
-- The **System Contribution by Regime** table is relabelled
-  `Market Contribution by Regime`.
-- The **Action Space** uses the financial-domain row labels listed above.
-- All other handbook fields apply verbatim, including the 8-column Parameters
-  table, the per-theory citation block (Calibration Source, Falsification
-  Conditions, Alternative Theories), and the Determinism Contract.
+**4.1.2 Real-world counterpart enumeration (pick one per investor)**
+
+`Retail investor` · `Active retail trader` · `Hedge fund (long/short)` ·
+`Hedge fund (event-driven)` · `Quant fund / CTA` · `Mutual fund / pension` ·
+`Asset manager (index)` · `Family office` · `Proprietary trading desk` ·
+`Sell-side market maker` · `High-frequency market maker` ·
+`Prime broker / dealer` · `Corporate / strategic buyer` ·
+`Central bank / sovereign` · `Insurance / annuity` ·
+`Crypto-native trader` · `Social-media-driven retail community`.
+
+If no entry fits, an investor MAY supply a more specific counterpart, but
+MUST cite at least one peer-reviewed paper or regulatory report that
+documents that participant class.
+
+**4.1.3 Stylized-fact catalogue (pick the ones this agent helps produce)**
+
+Volatility clustering · Fat tails of returns · Leverage effect ·
+Short-horizon momentum (3-12 month) · Long-horizon reversal (3-5 year) ·
+Bid-ask bounce · Trade-size / volume autocorrelation ·
+Price-impact concavity (square-root law) · Volume spikes around news ·
+Liquidity black holes · Flash-crash signatures · Persistent bubble
+deviation > fundamental · Capitulation tail · Co-movement in factor
+returns · Cross-sectional herding patterns.
+
+Stylized facts cited in §4.{N}.2 (Definition and Goals, paragraph 3)
+MUST come from this catalogue or be supplied with a primary citation.
+
+**4.1.4 Regime palette and relabel rules**
+
+The handbook's `Behavioral Adaptation by Condition` table is **relabelled**
+in the embedded form to `Market Contribution by Regime` (since the embedded
+form is scoped to market scenarios). Use regime labels from the following
+palette (4-8 per investor depending on scenario):
+
+`Calm market` · `Trending market (up)` · `Trending market (down)` ·
+`High-volatility regime` · `Liquidity stress / drought` ·
+`Bubble inflation` · `Post-peak deflation` · `Crash / cascade` ·
+`Post-shock recovery` · `News-driven regime` · `Earnings/macro window`.
+
+Also: the handbook Summary row labelled `Behavioral Tendency` is
+**relabelled** to `Market Role` with values `Stabilising` /
+`Destabilising` / `Context-dependent` — a one-line rationale required.
+
+**4.1.5 Action Space row labels (market-trading instantiation)**
+
+The handbook §3.6.3 row labels are substituted as follows. Row order is
+preserved; only the labels change:
+
+| Handbook generic label   | Market-trading label         |
+|--------------------------|------------------------------|
+| Action types allowed     | Order types allowed          |
+| Action parameter rule    | Price level rule             |
+| Sizing rule              | Order quantity rule          |
+| Action lifetime          | Order lifetime               |
+| Revision policy          | Cancellation policy          |
+| State constraint         | Inventory constraint         |
+| Resource cap             | Wealth / leverage cap        |
+| Exit rule                | Stop-loss / kill rule        |
+
+Environment-imposed limits (matching engine, tick grid, fee schedule,
+latency, regulator-imposed caps) MUST NOT appear in this table — they
+belong to §3 Market Design.
+
+**4.1.6 What stays unchanged from the handbook**
+
+All other handbook fields apply verbatim, including the 8-column
+Parameters table, the per-theory citation block (Calibration Source,
+Falsification Conditions, Alternative Theories), the Mathematical
+Model with State-Update Rule and Determinism Contract, and the
+Behavioral Verification + Ablation Hooks section.
 
 Authors MUST NOT introduce new top-level fields not specified in the
-handbook, and MUST NOT omit any handbook section. If an investor genuinely
-exposes zero tunable parameters, the Parameters section MUST contain the
-literal phrase `_No tunable parameters._` per handbook §3.7.
+handbook, and MUST NOT omit any handbook section. If an investor
+genuinely exposes zero tunable parameters, the Parameters section MUST
+contain the literal phrase `_No tunable parameters._` per handbook §3.7.
 
 ---
 
 #### 4.2 Per-Investor Block Skeleton (Embedded Form)
 
-Use the handbook's Copy-Paste Skeleton (`agent-design-skill.md §5`) as the
-starting point for each investor entry, then re-level it from standalone to
-embedded form per the table in §4.0 above. The minimum number of investor
+Use the handbook's section-by-section schema
+(`agent-design-skill.md §3 Section-by-Section Requirements`) as the
+structural skeleton for each investor entry, then re-level it from standalone
+to embedded form per the table in §4.0 above. The minimum number of investor
 entries is **4**; the maximum is **7**.
 
 The block layout for one investor in `simulation-bases.md` is:
@@ -448,27 +522,28 @@ state direction of effect ("Higher → …"). Every Default MUST trace to
 zero tunable parameters, write `_No tunable parameters._`.>
 
 #### 4.{N}.7 Population and Heterogeneity
-<5-row population table per handbook §3.8: Default population size,
-Parameter heterogeneity policy, Heterogeneity per parameter, Cross-agent
-correlation, Identity persistence.>
+<5-row population table (financial-domain extension; not part of handbook §3
+canonical order): Default population size, Parameter heterogeneity policy,
+Heterogeneity per parameter, Cross-agent correlation, Identity persistence.>
 
 #### 4.{N}.8 Worked Numerical Examples
 <≥3 primary cases covering distinct trigger branches + ≥1 edge case
 (cold-start, extreme deviation, deactivation condition, inventory clamp,
 regime flip, or missing-signal fallback). Each case MUST show market state,
-step-by-step calculation, decision, and state update — per handbook §3.9.>
+step-by-step calculation, decision, and state update — per handbook §3.8.>
 
 #### 4.{N}.9 Validation and Calibration
-<Per handbook §3.10: Calibration data sources (per parameter), Expected
-stylized facts when this agent dominates the population, Sanity bounds (red
-flags during simulation), and at least one Ablation Hook with hypothesis.>
+<Per handbook §3.9 "Behavioral Verification and Calibration": Calibration
+data sources (per parameter), Expected stylized facts when this agent
+dominates the population, Sanity bounds (red flags during simulation), and
+at least one Ablation Hook with hypothesis.>
 
 #### 4.{N}.10 Academic References
-<Numbered citation table per handbook §3.11. Every paper cited anywhere in
+<Numbered citation table per handbook §3.10. Every paper cited anywhere in
 the entry MUST appear here.>
 
 #### 4.{N}.11 Design Provenance and Versioning
-<6-row footer per handbook §3.12: Author, Reviewed by (optional), Created,
+<6-row footer per handbook §3.11: Author, Reviewed by (optional), Created,
 Version (semver), Change log, Status.>
 ```
 
@@ -477,7 +552,7 @@ Version (semver), Change log, Status.>
 #### 4.3 Per-Investor Validation
 
 For each investor entry, run the handbook's **Validation Checklist**
-(`agent-design-skill.md §4`) against the entry. Every unchecked item is a
+(`agent-design-skill.md §6`) against the entry. Every unchecked item is a
 blocker. The same checklist applies regardless of whether the agent will
 later be realised as a Rule, LLM, RuleLLM, or Rag variant.
 

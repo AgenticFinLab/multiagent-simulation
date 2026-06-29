@@ -6,6 +6,40 @@ Build the academic and empirical foundation that makes the simulation scientific
 
 ---
 
+## 1.0 Prerequisite and Seed
+
+Step 1 does **not** start from a blank page. It starts from the user-
+authored target file `examples/{ScenarioName}/{domain}-{scenario}.md`
+(specified by `masim/skills/create-simulation-target-skill.md`),
+which by §11 validation already contains:
+
+- **§4 Theoretical Anchors** — 3 — 6 theories with DOI citations.
+- **§5 Stylized Facts** — 3 — 6 empirical regularities with
+  quantitative ranges and acceptance metrics.
+- **§6 Historical / Empirical Anchors** — 1 — 3 events with arcs.
+- **§9 Parameter Seeds** — every numeric knob with empirical ranges.
+
+Step 1 has three jobs **against** the target file:
+
+1. **Verify.** Resolve every DOI / URL; confirm the quoted ranges
+   appear in the cited works. Any failure → raise an
+   `AskUserQuestion` defect; the target file is unlocked, corrected,
+   re-locked, then research resumes.
+2. **Expand.** For every verified anchor, add the deeper material
+   that this step requires (key equations, parameter calibrations,
+   mechanism diagrams, additional references) into
+   `examples/{ScenarioName}/simulation-define.md §B`.
+3. **Surface gaps.** If verification reveals a material gap (e.g.,
+   a stylized fact whose source does not actually report a numeric
+   range), record the gap in `simulation-define.md §C` and raise
+   it to the author.
+
+The five research dimensions below (§1.1 — §1.5) describe the
+*depth* of the expansion under each target anchor; they are not a
+fresh exploration from scratch.
+
+---
+
 ## 1.1 Research Strategy
 
 Conduct systematic research across five dimensions. Each dimension informs a different part of `simulation-bases.md`.

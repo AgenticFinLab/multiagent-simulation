@@ -10,6 +10,11 @@ Every simulation must conform to the fixed directory and file layout defined in 
 
 ```
 examples/{SimulationName}/
+├── {domain}-{scenario}.md         # UPSTREAM INPUT: user-authored scenario target file
+│                                  #   Spec: masim/skills/create-simulation-target-skill.md
+│                                  #   Status: draft → locked → released
+├── simulation-define.md           # PIPELINE LOG: AGENT_POOL gate (§A), research notes (§B),
+│                                  #   open questions (§C), build log (§D)
 ├── __init__.py                    # Package init (empty or minimal)
 ├── simulation-bases.md            # ROOT: Theoretical & design foundation (all variants share this)
 ├── analysis-bases.md              # ROOT: Analysis methodology foundation (all variants share this)
@@ -50,20 +55,27 @@ examples/{SimulationName}/
     └── analysis.md                # How Rag variant implements analysis-bases.md
 ```
 
+> **Variant folders are conditional.** Build only the variants
+> declared `Yes` in target §10.1. The other variant folders MUST NOT
+> exist; the pipeline records the scenario as `prototype` if fewer
+> than four variants are built.
+
 ---
 
 ## 2. File Roles at a Glance
 
-| File                    | Scope               | Purpose                                                                                                                                    |
-|-------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `simulation-bases.md`   | Root (all variants) | Single source of truth: phenomenon theory, market design, investor taxonomy (economic archetypes), model parameters                        |
-| `analysis-bases.md`     | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale                                              |
-| `{Variant}/explain.md`  | Per variant         | How this variant concretely implements the design in `simulation-bases.md` — every element traces to a `simulation-bases.md §N.M` citation |
-| `{Variant}/analysis.md` | Per variant         | How this variant concretely executes the analysis defined in `analysis-bases.md` — every metric traces to a function in `analysis.py`      |
-| `{Variant}/players.py`  | Per variant         | All agent class implementations                                                                                                            |
-| `{Variant}/prompts.py`  | LLM/RuleLLM/Rag     | System and user prompt constants                                                                                                           |
-| `{Variant}/run_*.py`    | Per variant         | Simulation entry point using `SimulationRunner`                                                                                            |
-| `{Variant}/analysis.py` | Per variant         | Analysis script generating plots and reports                                                                                               |
+| File                       | Scope               | Purpose                                                                                                                                    |
+|----------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `{domain}-{scenario}.md`   | Root (all variants) | UPSTREAM INPUT — user-authored scenario target file. Spec: `masim/skills/create-simulation-target-skill.md`.                              |
+| `simulation-define.md`     | Root (all variants) | PIPELINE LOG — AGENT_POOL gate decisions (§A), research notes (§B), open questions (§C), per-phase build log (§D).                         |
+| `simulation-bases.md`      | Root (all variants) | Single source of truth: phenomenon theory, market design, investor taxonomy (economic archetypes), model parameters                        |
+| `analysis-bases.md`        | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale                                              |
+| `{Variant}/explain.md`     | Per variant         | How this variant concretely implements the design in `simulation-bases.md` — every element traces to a `simulation-bases.md §N.M` citation |
+| `{Variant}/analysis.md`    | Per variant         | How this variant concretely executes the analysis defined in `analysis-bases.md` — every metric traces to a function in `analysis.py`      |
+| `{Variant}/players.py`     | Per variant         | All agent class implementations                                                                                                            |
+| `{Variant}/prompts.py`     | LLM/RuleLLM/Rag     | System and user prompt constants                                                                                                           |
+| `{Variant}/run_*.py`       | Per variant         | Simulation entry point using `SimulationRunner`                                                                                            |
+| `{Variant}/analysis.py`    | Per variant         | Analysis script generating plots and reports                                                                                               |
 
 ---
 
@@ -81,7 +93,7 @@ simulation-bases.md          analysis-bases.md
 {Variant}/players.py        {Variant}/analysis.py
 ```
 
-- `simulation-bases.md` and `analysis-bases.md` are written **once** and are the authoritative source for all four variants.
+- `simulation-bases.md` and `analysis-bases.md` are written **once** and are the authoritative source for every variant built (the subset of `Rule / LLM / RuleLLM / Rag` declared `Yes` in target §10.1).
 - `explain.md` and `analysis.md` **inherit** from the root documents and specify variant-specific implementation details. They must NOT re-state theory — they must cite `simulation-bases.md §N.M` and then state what the code does.
 - The code (`players.py`, `analysis.py`) always has a corresponding documentation file that explains it through the lens of the root documents.
 
@@ -104,7 +116,7 @@ Each variant has a distinct construction approach, goal, and set of non-negotiab
 
 ### Universal: No Defaults, No Defensive Programming
 
-This constraint applies to **ALL four variants** equally. Every `players.py` and `analysis.py` file must follow strict fail-fast principles:
+This constraint applies to **every built variant** equally (whatever subset of `Rule / LLM / RuleLLM / Rag` is declared `Yes` in target §10.1). Every `players.py` and `analysis.py` file must follow strict fail-fast principles:
 
 - **No `.get(key, default)`** on simulation data dicts (config extras, message payloads, LLM responses, coordinator data, analysis records). Use direct `dict["key"]` access.
 - **No `if X else fallback`** for required data fields (e.g., `if fundamentals else 1.0` is forbidden — use `if not fundamentals: raise ValueError(...)`).
@@ -113,7 +125,7 @@ This constraint applies to **ALL four variants** equally. Every `players.py` and
 
 Legitimate exceptions: RAG config resolution (`resolved_rag.get()`), `__getstate__`/`__setstate__` serialization, truly optional config sections (`extras.get("private_knowledge", {})`), and matplotlib styling defaults.
 
-See `masim/format/create-example-skill/00-overview.md` Principle #6 for the full policy.
+See `masim/skills/create-example-skill/00-overview.md` Principle #6 for the full policy.
 
 ### Rule Variant
 - **No hardcoded values.** Every numeric threshold, position size, or parameter must be read from `extras` in `players.yml`.
@@ -172,11 +184,13 @@ Rag/analysis.py        # adds analyze_rag_knowledge_effect() + _RAG_FALLBACK con
 Use this to verify any simulation's structural completeness.
 
 **Root level:**
+- [ ] `{domain}-{scenario}.md` present and `Status: locked` (or `released`)
+- [ ] `simulation-define.md` present with §0, §A, §B, §C, §D blocks
 - [ ] `__init__.py` present
 - [ ] `simulation-bases.md` present and has all 9 sections
 - [ ] `analysis-bases.md` present and has all 7 sections
 
-**Per variant (Rule, LLM, RuleLLM, Rag):**
+**Per built variant (subset of `Rule / LLM / RuleLLM / Rag` declared `Yes` in target §10.1):**
 - [ ] `__init__.py` present
 - [ ] `players.py` present
 - [ ] `prompts.py` present (LLM, RuleLLM, Rag only)

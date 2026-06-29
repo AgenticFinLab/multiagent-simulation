@@ -83,6 +83,88 @@ Optional (add only if a specific agent needs it):
 
 Design 4-6 investor types. Fewer than 4 produces insufficient behavioral diversity; more than 6 makes calibration unwieldy.
 
+### 2.2.0 AGENT_POOL Reuse-or-Create Gate (MANDATORY)
+
+Before writing any new per-investor specification, every candidate archetype
+MUST pass through the **reuse-or-create gate** rooted at
+`examples/AGENT_POOL/<domain>/`. The gate exists because the project has
+already accumulated dozens of agent archetypes across scenarios; duplicating
+an existing archetype under a new name fragments the calibration evidence
+and pollutes downstream comparison.
+
+**Candidate source.** The candidate roster is **not** invented inside Step 2.
+It is read from the target file's **§7 Agent Roster** (specified by
+`masim/skills/create-simulation-target-skill.md`), which the pipeline's
+Phase 2 has already mirrored into `simulation-define.md §B.4` with a
+`Pipeline confirmation` column. Each row of §B.4 is a single candidate to
+push through the gate below.
+
+The gate runs as a **three-stage match** against the domain folder that
+fits the new scenario (for market-trading scenarios this is
+`examples/AGENT_POOL/finance/`; for opinion-dynamics or other domains, create
+a new sibling folder named after the domain in lowercase kebab-case if it
+does not already exist).
+
+**Stage 1 — Filename scan.** List every `*.md` file in the relevant domain
+folder. Map each filename (kebab-case role phrase) to the candidate's
+intended role. A close filename match (e.g. candidate "trend-follower" vs
+existing `momentum-trader.md`) is a strong signal to inspect further.
+
+**Stage 2 — Summary fingerprint check.** For every plausible candidate from
+Stage 1, read **only** the H1 line and the Summary table (the 7 fingerprint
+rows). Compare:
+
+- Archetype phrase
+- Theory Family
+- Behavioral Tendency / Market Role
+- Time Horizon, Risk Tolerance, Information Asymmetry
+
+If at least 5 of the 7 fingerprint rows match the new candidate, escalate
+to Stage 3. If fewer than 5 match, this archetype is genuinely new — proceed
+to design.
+
+**Stage 3 — Full-text inspection.** For every Stage-2 escalation, read the
+full file (Definition and Goals, Theoretical Foundation, Decision
+Information Set, Core Behavioral Mechanism, Parameters). Decide one of:
+
+- **Reuse as-is.** The existing archetype already covers the candidate.
+  Reference the existing file by relative path from `simulation-bases.md §4`
+  (e.g. `> Reuses agent profile: examples/AGENT_POOL/finance/momentum-trader.md`)
+  and embed only the variant-specific population/instance count and
+  parameter calibration. The full handbook block is NOT duplicated in
+  `simulation-bases.md §4` — only the reuse pointer and the calibration
+  delta.
+- **Reuse with parameter adjustment.** Same as above, but the new scenario
+  needs different defaults. Document the per-parameter delta in
+  `simulation-bases.md §4.{N}.6` (Parameters) under a "Scenario calibration
+  override" sub-heading. The pool file is NOT modified.
+- **Fork.** The existing archetype is close but a substantive mechanism
+  differs (different signal set, different mathematical model, different
+  activation logic). Treat as new design (skip to §2.2.2) and store the
+  result as a new file in the pool with a distinct filename. The fork's
+  Theoretical Foundation MUST cite the parent file and explicitly call out
+  the mechanism difference.
+- **Design new.** No existing archetype matched. Proceed to §2.2.2.
+
+**Audit log.** The gate's decisions MUST be captured in
+`examples/{Scenario}/simulation-define.md §A` (see
+`04-step0-define.md §0.3`) as a small table:
+
+```markdown
+| Candidate archetype | Stage reached | Outcome           | Pool file (if reused) |
+|---------------------|---------------|-------------------|-----------------------|
+| <name>              | 1 / 2 / 3     | reuse / fork / new| <relative path>       |
+```
+
+**Where to store new designs.** Every newly designed agent that survives
+§2.2.2 + the validation gate in §2.2.3 MUST be written back to
+`examples/AGENT_POOL/<domain>/<kebab-name>.md` so that future scenarios can
+reuse it. The file uses the **standalone** handbook header levels (H1 for
+title, H2 for sections, H4 for behavioral framework sub-blocks) — NOT the
+embedded form used inside `simulation-bases.md §4`. The same content is
+then re-levelled and copied into `simulation-bases.md §4.{N}` for the
+scenario being built.
+
 ### 2.2.1 Taxonomy Design Principles
 
 **Principle 1 — Theory-first**: Start from each theory in `simulation-bases.md §2`. Each theory should produce exactly one investor type.
@@ -101,37 +183,39 @@ Design 4-6 investor types. Fewer than 4 produces insufficient behavioral diversi
 ### 2.2.2 Per-Investor Specification — Authored Under the Universal Agent Design Handbook
 
 Each investor type is specified under the **Universal Agent Design Handbook**
-at `masim/format/agent-design-skill.md`, with the **Financial Domain
-Companion** at `masim/format/agent-design-finance.md` supplying the
-market-trading row labels, value palettes, and worked instantiation
-examples. The handbook is the single source of truth for the intrinsic
-specification of any participant agent; the companion is the single source
-of truth for its financial-domain instantiation. The methodology in this
-guide does not duplicate or paraphrase either file — it instructs the
-author to apply both.
+at `masim/skills/agent-design-skill.md`. The handbook is the single source of
+truth for the intrinsic specification of any participant agent; the
+financial-domain row labels, value palettes, and worked instantiation rules
+are folded inline into `02-root-documents-spec.md §4.1`. (There is no
+separate `agent-design-finance.md` file — that name appears in older drafts
+and has been retired.)
 
 For each investor type, the author MUST:
 
-1. Open `agent-design-skill.md` and copy the **§5 Copy-Paste Skeleton**.
-2. Fill in every section per the handbook's section-by-section requirements
-   (§3.1 through §3.12). Use the handbook's exact section names, header
-   levels, table column names, and validation requirements.
-3. Apply the **Financial Domain Companion** (`agent-design-finance.md`):
-   pick the Theory Family value from §3, the real-world counterpart from
-   §4, the stylized facts from §5, and the regime palette from §6.
-   Instantiate the **Action Space** using the financial-domain row labels
-   in `agent-design-finance.md §7` — `Order types allowed`, `Price level
-   rule`, `Order quantity rule`, `Order lifetime`, `Cancellation policy`,
-   `Inventory constraint`, `Wealth / leverage cap`, `Stop-loss / kill rule`.
-   Relabel `System Role` as `Market Role` and `System Contribution by
-   Regime` as `Market Contribution by Regime`.
+1. Open `agent-design-skill.md` and use **§3 Section-by-Section Requirements**
+   as the structural skeleton (§3.1 through §3.11).
+2. Fill in every section per the handbook's section-by-section requirements.
+   Use the handbook's exact section names, header levels, table column
+   names, and validation requirements.
+3. Apply the **financial-domain instantiation rules** in
+   `02-root-documents-spec.md §4.1`: pick the Theory Family value from
+   §4.1.1, the real-world counterpart from §4.1.2, the stylized facts from
+   §4.1.3, and the regime palette from §4.1.4. Instantiate the **Action
+   Space** using the financial-domain row labels in §4.1.5 — `Order types
+   allowed`, `Price level rule`, `Order quantity rule`, `Order lifetime`,
+   `Cancellation policy`, `Inventory constraint`, `Wealth / leverage cap`,
+   `Stop-loss / kill rule`. Relabel `Behavioral Tendency` as `Market Role`
+   and `Behavioral Adaptation by Condition` as `Market Contribution by
+   Regime`.
 4. Embed the completed entry into `simulation-bases.md §4` per
    `02-root-documents-spec.md §4.0` (header levels shifted down by two:
-   investor title at `###`, handbook §2 sections at `####`, handbook §4
-   sub-blocks at `######`; numbering scheme `4.{N}.x`).
-5. Run the handbook's **§4 Validation Checklist** AND the companion's
-   **§9 Validation Addendum** against the entry. Every unchecked item is
-   a blocker.
+   investor title at `###`, handbook §3.x sections at `####`, handbook
+   §3.6.y sub-blocks at `######`; numbering scheme `4.{N}.x`).
+5. Run the handbook's **§6 Validation Checklist** against the entry. Every
+   unchecked item is a blocker. The author MUST repeat the checklist run
+   three times (per the project convention encoded in
+   `masim/skills/create-simulation-skill.md`): three consecutive PASS runs
+   are required before the entry is accepted.
 
 **Required design inputs.** Before opening the handbook skeleton, ensure the
 following inputs are available from Step 1 (research) and §2.1 (market
@@ -147,9 +231,9 @@ design) of this guide; the handbook fields cannot be filled without them.
 | Trigger and sizing formulas    | §3.6.4 Mathematical Model                    |
 | Self-imposed risk discipline   | §3.6.3 Action Space                          |
 | Per-knob default + range       | §3.7 Parameters                              |
-| Heterogeneity policy           | §3.8 Population and Heterogeneity            |
-| ≥3 worked cases + 1 edge case  | §3.9 Worked Numerical Examples               |
-| Expected stylized facts        | §3.10 Validation and Calibration             |
+| ≥3 worked cases + 1 edge case  | §3.8 Worked Numerical Examples               |
+| Expected stylized facts        | §3.9 Behavioral Verification and Calibration |
+| Heterogeneity policy           | Embedded-form extension §4.{N}.7 (see `02-root-documents-spec.md §4.0`) |
 
 If any input above is unavailable, return to Step 1 (research) before
 proceeding — do not invent values to fill the handbook.
@@ -243,14 +327,19 @@ Before moving to Step 3, verify:
 **Investor taxonomy**:
 - [ ] 4–7 investor types designed (handbook minimum 4, maximum 7 per
       `02-root-documents-spec.md §4.2`)
+- [ ] AGENT_POOL reuse-or-create gate (§2.2.0) executed for every candidate;
+      decisions logged in `examples/{Scenario}/simulation-define.md §A`
 - [ ] Every investor maps to exactly one primary theory cited in
       `simulation-bases.md §2`
 - [ ] At least one stabilizing and at least two destabilizing agents
 - [ ] No two investors use identical information + processing combination
 - [ ] Every trigger threshold has a literature-calibrated value (or explicit
       approximation), traceable via handbook §3.4 Calibration Source
-- [ ] Each investor entry passes the handbook's §4 Validation Checklist
-      (`agent-design-skill.md §4`) end-to-end — no unchecked items
+- [ ] Each investor entry passes the handbook's §6 Validation Checklist
+      (`agent-design-skill.md §6`) end-to-end — **three consecutive PASS
+      runs** required per §2.2.2 step 5 — no unchecked items
+- [ ] Every newly designed agent has been written back to
+      `examples/AGENT_POOL/<domain>/<kebab-name>.md` in standalone header form
 
 **Conflict check**:
 - [ ] Can you describe a scenario where one agent buys while another sells in the same round?

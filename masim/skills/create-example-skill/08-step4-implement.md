@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Implement all four simulation variants. Rule variant first (baseline), then LLM, RuleLLM, and Rag — in that order. Each variant builds on the previous.
+Implement every simulation variant marked `Yes` in target §10.1. When multiple variants are built, Rule comes first (baseline), then LLM, RuleLLM, and Rag — in that order. Each variant builds on the previous.
 
-**Reference implementations**: All four variants in `examples/AssetBubble/` are the primary reference. Study them before implementing.
+**Reference implementations**: All four variants in `examples/AssetBubble/` exist as the primary reference (study any built variants you need). The AssetBubble RuleLLM and Rag reference variants may also be useful even when not implementing them in your scenario.
 
 ---
 
@@ -393,7 +393,7 @@ What is your trading decision for this round?"""
 - Always `<analysis>` not `<think>`
 
 
-### §4.2.3 LLM Decision Field Access Rule
+### 4.2.3 LLM Decision Field Access Rule
 
 The `decide()` method in LLM/RuleLLM/Rag variants MUST read ALL four decision fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing because the prompt/parser contract is wrong, it must fail-fast via `KeyError`; if the contract is already correct and stochastic malformed API output remains, use only the explicit counted fallback policy in `00-overview.md` Principle #6.
 
@@ -403,7 +403,7 @@ Constraint and execution logic MUST branch on the `action` string value, not on 
 
 **Why**: Deriving fields silently masks missing fields and introduces incorrect values. The principle is that `decide()` should be a pure function that derives outputs from inputs without inferring missing data.
 
-### 4.2.3 `analysis.py` Structure (LLM Variant)
+### 4.2.4 `analysis.py` Structure (LLM Variant)
 
 ```python
 """
@@ -605,4 +605,4 @@ After implementing each variant:
 - [ ] `[SUMMARY]` block present at end of interpretation
 - [ ] Produces exactly 3 PNG files: `01_*.png`, `02_*.png`, `03_*.png` in `{base_dir}/analysis/`
 - [ ] Saves `summary.json` containing `metrics`, `validation` (with `.score`, `.is_valid`, `.criteria`, `.interpretation`)
-- [ ] `py_compile` passes on all four variant `analysis.py` files
+- [ ] `py_compile` passes on each built variant's `analysis.py` file (variants marked `Yes` in target §10.1)

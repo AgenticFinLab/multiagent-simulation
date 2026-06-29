@@ -46,18 +46,25 @@ new_price = max(self._price + price_change + mean_rev + noise, 0.01)
 
 ```python
 def perceive(self, observation):
-    if not self.state.custom_state.get("_initialized"):
+    if not self.state.custom_state.get("_initialized", False):
         self._initialize_investor_state()
     # ... extract market data from observation
 
 def _initialize_investor_state(self):
+    # Per 00-overview.md Principle #6: NO `.get(key, default)` on simulation
+    # data dicts. Direct indexing — raise KeyError if a required parameter
+    # is missing from players.yml.
     extras = self.state.config.extras
     self.state.custom_state["_initialized"] = True
-    self.state.custom_state["cash"] = extras.get("initial_cash", 100000.0)
-    self.state.custom_state["position"] = extras.get("initial_position", 1000)
-    self.state.custom_state["threshold"] = extras.get("threshold", 0.15)
-    # Load ALL parameters from config here — no hardcoded values
+    self.state.custom_state["cash"] = extras["initial_cash"]
+    self.state.custom_state["position"] = extras["initial_position"]
+    self.state.custom_state["threshold"] = extras["threshold"]
+    # Load ALL parameters from config here — no hardcoded values, no defaults
 ```
+
+> *The single `custom_state.get("_initialized", False)` call is permitted
+> because `_initialized` is an internal control flag, not a simulation
+> parameter from `players.yml`.*
 
 ### Pattern 3: LLM Decision Parsing
 
@@ -70,11 +77,15 @@ response = self._llm_client.chat(messages=[
 # Parse <decision>{...}</decision> from response
 import re, json
 match = re.search(r"<decision>(.*?)</decision>", response, re.DOTALL)
-if match:
-    decision = json.loads(match.group(1))
-    action = decision.get("action", "hold")
-    quantity = float(decision.get("quantity", 0))
-    bid_price = float(decision.get("bid_price", market_price))
+if not match:
+    # Use the counted stochastic-malformed fallback policy in
+    # 00-overview.md Principle #6 — do NOT silently substitute a hold.
+    raise RuntimeError("LLM response missing <decision> block")
+decision = json.loads(match.group(1))
+# Direct indexing per 08-step4-implement.md §4.2.3 — never .get(key, default)
+action = decision["action"]
+quantity = float(decision["quantity"])
+bid_price = float(decision["bid_price"])
 ```
 
 ### Pattern 4: Module Docstring Citation
