@@ -65,7 +65,7 @@ A specification that conforms to this handbook MUST be:
 6. **Auditable** — design provenance, version, and ablation hooks are
    declared, not implicit.
 7. **Scenario-portable** — the design MUST NOT reference specific
-   scenario names, absolute price levels, or fixed round counts; all
+   scenario names, absolute numeric levels, or fixed round counts; all
    numeric thresholds MUST be parameterised; decision logic MUST
    function given only the declared signals.
 
@@ -142,21 +142,26 @@ deepen the agent's characterisation.
 ```markdown
 ## Summary
 
-| Field                 | Content                                                                  |
-|-----------------------|--------------------------------------------------------------------------|
-| Archetype             | <one-line role phrase, matches the H1>                                   |
-| Theory Family         | <from a domain-appropriate palette of 4–8 theory families>               |
-| System Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> |
-| Time Horizon          | <short / medium / long>                                                  |
-| Risk Tolerance        | <low / medium / high>                                                    |
-| Information Asymmetry | <none / partial / full>                                                  |
-| Determinism           | <deterministic / stochastic-given-seed / non-deterministic>              |
+| Field                 | Content                                                              |
+|-----------------------|----------------------------------------------------------------------|
+| Archetype             | <one-line role phrase, matches the H1>                               |
+| Theory Family         | <from a domain-appropriate palette of 4–8 theory families>           |
+| Behavioral Tendency   | **Diverging** / **Converging** / **Adaptive** — <one-line rationale> |
+| Time Horizon          | <short / medium / long>                                              |
+| Risk Tolerance        | <low / medium / high>                                                |
+| Information Asymmetry | <none / partial / full>                                              |
+| Determinism           | <deterministic / stochastic-given-seed / non-deterministic>          |
 ```
 
-The row label *System Role* refers to the agent's qualitative effect on
-the dynamics of the simulated system as a whole. Domain-appropriate
-relabelling is permitted (e.g. "Market Role", "Social Role") provided
-the specification states the substitution explicitly.
+The row label *Behavioral Tendency* classifies the agent's inherent
+behavioural direction — whether its decision logic tends to push its
+target variable AWAY from a reference equilibrium (Diverging), TOWARD
+a reference equilibrium (Converging), or switches direction based on
+conditions (Adaptive). The "reference equilibrium" is
+domain-determined (e.g. fundamental value in finance, consensus in
+opinion dynamics, carrying capacity in ecology). This is an intrinsic
+classification of the agent's nature, NOT a judgment about its effect
+on any system.
 
 The *Theory Family* value MUST be drawn from a coherent palette of
 4–8 theory families appropriate to the agent's domain. The authoring
@@ -187,10 +192,11 @@ Three short paragraphs (8–14 sentences total) addressing, in order:
 For each underlying theory **or documented mechanism**, supply one
 sub-block with the labelled lines below. >=1 sub-block is required.
 "Theory" here is read broadly: it admits academic theories (e.g.
-Prospect Theory, Information Cascades, Limits to Arbitrage), documented
-behavioural patterns (e.g. anchoring, herding, disposition effect), and
-named mechanisms (e.g. margin spiral, fire-sale externality,
-dealer-inventory cycle, run dynamics, opinion polarisation).
+Prospect Theory, Information Cascades, Social Identity Theory, Bounded
+Rationality), documented behavioural patterns (e.g. anchoring, herding,
+conformity bias, disposition effect), and named mechanisms (e.g.
+fire-sale externality, opinion polarisation, threshold-based contagion,
+resource depletion spiral, run dynamics).
 
 **Depth rules:**
 - Agents embodying >=2 distinct mechanisms MUST have >=2 theory blocks.
@@ -204,9 +210,10 @@ dealer-inventory cycle, run dynamics, opinion polarisation).
 - "Calibration Source" MUST provide a specific numeric range or table
   reference from which parameter defaults can be drawn. A bare paper
   title without a value is insufficient.
-- "Falsification Conditions" MUST be stated as observable simulation
-  metrics with quantitative thresholds (e.g. "if mispricing half-life
-  < 10 ticks when this agent dominates, the theory is falsified").
+- "Falsification Conditions" MUST be stated as observable behaviours
+  of THIS individual agent with quantitative thresholds (e.g. "if this
+  agent does not reverse its position within 20 ticks of a signal
+  crossing the threshold, the theory is falsified").
 - Citations MUST include a DOI when one exists.
 
 ```markdown
@@ -218,20 +225,23 @@ dealer-inventory cycle, run dynamics, opinion polarisation).
 - Empirical Evidence: <study, dataset, effect size>
 - Relevance to This Agent: <how this agent operationalises the theory>
 - Calibration Source: <paper / dataset + specific numeric range>
-- Falsification Conditions: <metric + threshold>
+- Falsification Conditions: <observable individual-agent behaviour + threshold>
 - Alternative Theories: <named competing theories that could be swapped in>
 ```
 
 ### 3.5 Design Purpose and Activation Triggers
 
-Six fields, in this order. *Activation Triggers* answer **when** the
+Eight fields, in this order. *Activation Triggers* answer **when** the
 agent acts; *Deactivation Conditions* answer **when it stops**;
 *Prerequisite Signals* answer **what must be true before it considers
 acting**; *Missing-Signal Policy* answers **what the agent does when a
-required input is unavailable**.
+required input is unavailable**; *Behavioral Adaptation by Condition*
+declares how the agent's own behaviour changes under varying external
+conditions; *Environmental Dependencies* declares what inputs this
+agent requires from its operating environment.
 
 ```markdown
-Purpose: <one sentence — the behaviour this agent produces in the system>
+Purpose: <one sentence — what behaviour this agent exhibits>
 
 Call Frequency: <every-tick / every-N-ticks / event-driven on signal X>
 
@@ -251,20 +261,22 @@ Deactivation Conditions:
 - <State / resource threshold breached>
 - <Regime flip>: <new behaviour or hibernation>
 
-System Contribution by Regime:
-| Regime     | Contribution                | Mechanism  |
-|------------|-----------------------------|------------|
-| <Regime A> | Stabilising / Destabilising | <one-line> |
-| <Regime B> | Stabilising / Destabilising | <one-line> |
+Behavioral Adaptation by Condition:
+| Condition     | Behavioral change                    | Mechanism  |
+|---------------|--------------------------------------|------------|
+| <Condition A> | <how this agent's behaviour changes> | <one-line> |
+| <Condition B> | <how this agent's behaviour changes> | <one-line> |
 
 (>=2 rows required. The three columns and their order MUST NOT change.
-The regime labels MUST be domain-appropriate — the authoring agent
-generates a palette of >=2 regimes relevant to the target scenario.
-The table header "System Contribution by Regime" MAY be relabelled to
-fit the domain, e.g. "Market Contribution by Regime".)
+The condition labels MUST be domain-appropriate — the authoring agent
+generates a palette of >=2 external conditions relevant to the target
+scenario. This table describes how the agent's OWN behaviour adapts,
+not what it "contributes" to any system.)
 
-Interaction with other agents: <one sentence — who it opposes,
-amplifies, or overlaps with>
+Environmental Dependencies: <what external signals or agent-generated
+inputs this agent requires to function — e.g. "requires a real-time
+data feed", "requires observable peer-action summaries". If none beyond
+the declared signal table, state "none beyond §3.6.1 signals.">
 ```
 
 
@@ -279,8 +291,8 @@ dynamics, memory management, social signalling strategy).
 
 A signal table plus an explicit "does NOT use" line. The *Memory
 Window* column states how far back the agent looks at each signal.
-Signals MAY include observations of peer behaviour (peer-trade flow,
-peer-position summary, public sentiment, news/event feed) when the
+Signals MAY include observations of peer behaviour (peer-action flow,
+peer-state summary, public sentiment, news/event feed) when the
 environment exposes them as readable signals.
 
 **Completeness rule:** Every signal listed here MUST be consumed by at
@@ -288,12 +300,13 @@ least one step in §3.6.2 Core Behavioral Mechanism. Conversely, every
 external input referenced in §3.6.2 MUST appear in this table.
 
 ```markdown
-| Signal        | Type       | Memory Window | Rationale            |
-|---------------|------------|---------------|----------------------|
-| `price`       | Continuous | 1 tick        | Current market price |
-| `fundamental` | Continuous | 1 tick        | True F               |
+| Signal          | Type       | Memory Window | Rationale                          |
+|-----------------|------------|---------------|------------------------------------|
+| `<signal_name>` | Continuous | <N ticks>     | <why this agent needs this signal> |
+| `<signal_name>` | Discrete   | <N ticks>     | <why this agent needs this signal> |
 
-Does NOT use: <list of conspicuous non-signals, e.g. `prev_price`, `momentum`>.
+Does NOT use: <list of conspicuous non-signals that a reader might expect
+this agent to consume, but it deliberately ignores>.
 ```
 
 #### 3.6.2 Core Behavioral Mechanism
@@ -339,16 +352,16 @@ expression referencing only declared signals (§3.6.1) and parameters
 (§3.7).
 
 ```markdown
-| Aspect                | Specification                                                            |
-|-----------------------|--------------------------------------------------------------------------|
-| Action types allowed  | <enumerate every discrete action, including no-op>                       |
-| Action parameter rule | <rule for the continuous parameter of an action, e.g. price or target>   |
-| Sizing rule           | <closed-form formula for action magnitude / quantity>                    |
-| Action lifetime       | <duration before the action expires or is auto-cancelled>                |
-| Revision policy       | <when and how the agent retracts, replaces, or amends an emitted action> |
-| State constraint      | <self-imposed cap on the agent's internal state>                         |
-| Resource cap          | <self-imposed cap on cumulative cost, capital, or budget>                |
-| Exit rule             | <self-imposed termination trigger, or "none">                            |
+| Aspect                | Specification                                                                    |
+|-----------------------|----------------------------------------------------------------------------------|
+| Action types allowed  | <enumerate every discrete action, including no-op>                               |
+| Action parameter rule | <rule for the continuous parameter of an action, e.g. target value or intensity> |
+| Sizing rule           | <closed-form formula for action magnitude / quantity>                            |
+| Action lifetime       | <duration before the action expires or is auto-cancelled>                        |
+| Revision policy       | <when and how the agent retracts, replaces, or amends an emitted action>         |
+| State constraint      | <self-imposed cap on the agent's internal state>                                 |
+| Resource cap          | <self-imposed cap on cumulative cost, capital, or budget>                        |
+| Exit rule             | <self-imposed termination trigger, or "none">                                    |
 ```
 
 The eight row labels above are canonical generic labels. If a
@@ -374,7 +387,7 @@ MUST NOT appear here.
   across calls, with type and initial value.
 - **State-update rule:** when each state variable updates and with what
   formula. MUST be explicit about update *ordering* (pre-decide,
-  post-decide, post-fill). Each variable MUST be assigned exactly one
+  post-decide, post-execution). Each variable MUST be assigned exactly one
   update phase.
 - **Determinism contract:** state whether the decision rule is
   deterministic given identical inputs and state, or whether it draws
@@ -413,12 +426,12 @@ extra metadata (e.g. `Calibration Date`, `Regime Sensitivity`).
   `list<T>` / `distribution<...>`.
 - **Default** — concrete default value. No placeholders.
 - **Valid Range** — admissible domain (`[0, 1]`, `> 0`, `int >= 1`,
-  `{buy, sell, hold}`, named enum). Required for tuning safety.
+  `{action_A, action_B, hold}`, named enum). Required for tuning safety.
 - **Sensitivity** — `high` / `medium` / `low`.
 - **Description** — one-sentence meaning in plain language.
 - **Impact** — direction of effect when the value increases ("Higher ->
   ..."). MUST state direction, not restate the description. SHOULD be
-  quantitative where feasible (e.g. "Higher -> 2x mispricing half-life").
+  quantitative where feasible (e.g. "Higher -> 2x response latency").
 - **Source** — citation, calibration paper, or `Standardised`.
 
 **Depth and quality rules:**
@@ -450,9 +463,9 @@ If the agent design exposes zero tunable parameters, write
 Provide **at least three** worked cases plus **one edge case**, each as
 a fenced block. Each case MUST show:
 
-- The market/system state (real numbers, not placeholders).
+- The system state (real numbers, not placeholders).
 - The intermediate calculation step-by-step.
-- The decision (action, quantity, price / target).
+- The decision (action type, magnitude, continuous parameter if any).
 - The state update post-decision (so the reader sees memory evolve).
 
 **Quality rules:**
@@ -461,7 +474,7 @@ a fenced block. Each case MUST show:
   it explicitly and justify.
 - The three primary cases MUST collectively cover ALL non-hold branches
   of the trigger function in §3.6.4. If the trigger has 4 branches
-  (buy, sell, hold, deactivate), provide 4 primary cases.
+  (e.g. act-up, act-down, hold, deactivate), provide 4 primary cases.
 - The edge case MUST demonstrate at least one of: cold-start (empty
   state), extreme deviation, deactivation condition, cap-clamp,
   regime-flip, or missing-signal fallback from §3.5.
@@ -470,11 +483,11 @@ a fenced block. Each case MUST show:
 
 ```markdown
 ### Case 1 — <branch name>
-Market state: <real numbers from defaults>
+System state: <real numbers from defaults>
 Calculation:
   <step 1: variable = formula = numeric result>
   <step 2: ...>
-Decision: <action, quantity, price>
+Decision: <action type, magnitude, continuous parameter>
 State update: <variable: old_value -> new_value>
 
 ### Case 2 — <branch name>
@@ -605,8 +618,8 @@ blocker.
       have >=2 sub-blocks; each sub-block has all 9 labelled lines
 - [ ] §3.5 declares Call Frequency, Prerequisite Signals,
       Missing-Signal Policy, Activation Triggers (with `<Default>`),
-      Deactivation Conditions, regime table (>=2 rows), and Interaction
-      sentence
+      Deactivation Conditions, Behavioral Adaptation table (>=2 rows),
+      and Environmental Dependencies
 - [ ] §3.6 has all five H4 sub-blocks (Information Set, Mechanism,
       Action Space, Mathematical Model, Behavioral Properties)
 
@@ -650,7 +663,7 @@ blocker.
 - [ ] No undeclared symbols in §3.6
 
 **Scenario-portability:**
-- [ ] No specific scenario names, absolute price levels, or fixed round
+- [ ] No specific scenario names, absolute numeric levels, or fixed round
       counts appear anywhere in the specification
 - [ ] All numeric thresholds are parameterised via §3.7
 - [ ] Decision logic functions given only §3.6.1 declared signals
@@ -672,15 +685,15 @@ rows MAY be appended where the handbook permits expansion.
 
 ## Summary
 
-| Field                 | Content                                                                  |
-|-----------------------|--------------------------------------------------------------------------|
-| Archetype             | <archetype description, same as H1>                                      |
-| Theory Family         | <from a domain-appropriate palette of 4–8 theory families>               |
-| System Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> |
-| Time Horizon          | <short / medium / long>                                                  |
-| Risk Tolerance        | <low / medium / high>                                                    |
-| Information Asymmetry | <none / partial / full>                                                  |
-| Determinism           | <deterministic / stochastic-given-seed / non-deterministic>              |
+| Field                 | Content                                                              |
+|-----------------------|----------------------------------------------------------------------|
+| Archetype             | <archetype description, same as H1>                                  |
+| Theory Family         | <from a domain-appropriate palette of 4–8 theory families>           |
+| Behavioral Tendency   | **Diverging** / **Converging** / **Adaptive** — <one-line rationale> |
+| Time Horizon          | <short / medium / long>                                              |
+| Risk Tolerance        | <low / medium / high>                                                |
+| Information Asymmetry | <none / partial / full>                                              |
+| Determinism           | <deterministic / stochastic-given-seed / non-deterministic>          |
 
 ## Definition and Goals
 
@@ -703,7 +716,7 @@ actions, decision patterns, responses to different conditions,
 - Empirical Evidence: <study, dataset, effect size>
 - Relevance to This Agent: <how this agent operationalises it>
 - Calibration Source: <paper / dataset + specific numeric range>
-- Falsification Conditions: <metric + quantitative threshold>
+- Falsification Conditions: <observable individual-agent behaviour + threshold>
 - Alternative Theories: <named competing theories>
 
 ## Design Purpose and Activation Triggers
@@ -726,13 +739,14 @@ Activation Triggers:
 Deactivation Conditions:
 - <condition> -> <hibernate / exit>
 
-System Contribution by Regime:
-| Regime     | Contribution                | Mechanism  |
-|------------|-----------------------------|------------|
-| <Regime A> | Stabilising / Destabilising | <one-line> |
-| <Regime B> | Stabilising / Destabilising | <one-line> |
+Behavioral Adaptation by Condition:
+| Condition     | Behavioral change                    | Mechanism  |
+|---------------|--------------------------------------|------------|
+| <Condition A> | <how this agent's behaviour changes> | <one-line> |
+| <Condition B> | <how this agent's behaviour changes> | <one-line> |
 
-Interaction with other agents: <one sentence>
+Environmental Dependencies: <signals or inputs required beyond §3.6.1,
+or "none beyond signal table">
 
 ## Behavioral Framework
 
@@ -778,7 +792,7 @@ Does NOT use: <list>.
   <pseudo-code>
   ```
 - State variables: <list with type and initial value>
-- State-update rule: <formula + ordering (pre-decide/post-decide/post-fill)>
+- State-update rule: <formula + ordering (pre-decide/post-decide/post-execution)>
 - Determinism contract: <deterministic / stochastic with named distribution>
 
 | Symbol  | Meaning   | Default Value | Source     |
@@ -801,11 +815,11 @@ Does NOT use: <list>.
 ## Worked Numerical Examples
 
 ### Case 1 — <branch name>
-Market state: <real numbers from §3.7 defaults>
+System state: <real numbers from §3.7 defaults>
 Calculation:
   <step 1: variable = formula = numeric result>
   <step 2: ...>
-Decision: <action, quantity, price/target>
+Decision: <action type, magnitude, continuous parameter>
 State update: <variable: old -> new>
 
 ### Case 2 — <branch name>
