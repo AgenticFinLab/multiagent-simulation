@@ -91,24 +91,23 @@ header levels, and table headers MUST remain identical.
 ## 2. Canonical Section Order
 
 A conformant specification MUST contain at least these top-level
-sections, in this order. Additional sections MAY be appended after §12
+sections, in this order. Additional sections MAY be appended after §11
 if deeper coverage is warranted. Every section listed here is
 **required** unless explicitly marked *conditional*.
 
-| #  | Section                                | Header | Notes                                 |
-|----|----------------------------------------|--------|---------------------------------------|
-| 1  | Title — agent role description         | `#`    |                                       |
-| 2  | Summary                                | `##`   | >=7 rows (minimum set below)          |
-| 3  | Definition and Goals                   | `##`   | Includes non-goals                    |
-| 4  | Theoretical Foundation                 | `##`   | >=1 theory sub-block                  |
-| 5  | Design Purpose and Activation Triggers | `##`   | Includes deactivation                 |
-| 6  | Behavioral Framework                   | `##`   | >=5 H4 sub-blocks (minimum set below) |
-| 7  | Parameters                             | `##`   | >=8-column table                      |
-| 8  | Population and Heterogeneity           | `##`   |                                       |
-| 9  | Worked Numerical Examples              | `##`   | >=3 cases + 1 edge case               |
-| 10 | Behavioral Verification and Calibration | `##`   | Includes Ablation Hooks sub-block     |
-| 11 | Academic References                    | `##`   |                                       |
-| 12 | Design Provenance and Versioning       | `##`   | Footer block                          |
+| #  | Section                                 | Header | Notes                                 |
+|----|-----------------------------------------|--------|---------------------------------------|
+| 1  | Title — agent role description          | `#`    |                                       |
+| 2  | Summary                                 | `##`   | >=7 rows (minimum set below)          |
+| 3  | Definition and Goals                    | `##`   | Includes non-goals                    |
+| 4  | Theoretical Foundation                  | `##`   | >=1 theory sub-block                  |
+| 5  | Design Purpose and Activation Triggers  | `##`   | Includes deactivation                 |
+| 6  | Behavioral Framework                    | `##`   | >=5 H4 sub-blocks (minimum set below) |
+| 7  | Parameters                              | `##`   | >=8-column table                      |
+| 8  | Worked Numerical Examples               | `##`   | >=3 cases + 1 edge case               |
+| 9  | Behavioral Verification and Calibration | `##`   | Includes Ablation Hooks sub-block     |
+| 10 | Academic References                     | `##`   |                                       |
+| 11 | Design Provenance and Versioning        | `##`   | Footer block                          |
 
 Environment rules — matching mechanics, fee / latency models,
 message-routing policy, content-moderation rules, and peer-network
@@ -122,7 +121,7 @@ scenario / environment specification.
 > **Convention.** The numbered labels (`### 3.x`, `#### 3.x.y`) used
 > throughout this section are *internal cross-reference labels for this
 > handbook only*. A conformant specification MUST use the **unnumbered**
-> headers shown in the copy-paste skeleton in §5 (e.g. `## Summary`,
+> headers shown in the copy-paste skeleton in §6 (e.g. `## Summary`,
 > `## Behavioral Framework`, `#### Decision Information Set`), and MUST
 > preserve the exact header levels the skeleton shows.
 
@@ -446,33 +445,7 @@ If the agent design exposes zero tunable parameters, write
 | `<name>`  | <type> | <value> | <domain>    | high/med/low | <one-sentence description> | Higher -> <direction-of-effect> | <citation> |
 ```
 
-### 3.8 Population and Heterogeneity
-
-How the design is intended to be instantiated in a population, and how
-it interacts with other agent categories.
-
-```markdown
-| Aspect                         | Specification                                                                           |
-|--------------------------------|-----------------------------------------------------------------------------------------|
-| Default population size        | <1 / N=<int> / scenario-dependent>                                                      |
-| Parameter heterogeneity policy | <shared point value / iid <distribution> / correlated>                                  |
-| Heterogeneity per parameter    | <name -> distribution>                                                                  |
-| Cross-agent correlation        | <none / Sigma specified / coupling rule>                                                |
-| Identity persistence           | <identical across episodes / re-drawn every episode>                                    |
-| Interaction declaration        | <which archetype categories this agent opposes / amplifies / is neutral to>             |
-| Minimal co-presence assumption | <what other agent categories are assumed present in the scenario for meaningful interaction> |
-```
-
-The **Interaction declaration** row MUST name at least one other
-archetype category and state the interaction type (opposes, amplifies,
-provides input to, or is neutral to).
-
-The **Minimal co-presence assumption** row MUST declare what other
-agent categories are assumed present in the scenario for the agent's
-behaviour to be exercised meaningfully. If the agent operates
-independently of other agent types, state "none — solo-sufficient."
-
-### 3.9 Worked Numerical Examples
+### 3.8 Worked Numerical Examples
 
 Provide **at least three** worked cases plus **one edge case**, each as
 a fenced block. Each case MUST show:
@@ -514,7 +487,7 @@ State update: <variable: old_value -> new_value>
 ...
 ```
 
-### 3.10 Behavioral Verification and Calibration
+### 3.9 Behavioral Verification and Calibration
 
 How a researcher will know this individual agent's implementation is
 correct and its parameters are well-calibrated. This section concerns
@@ -547,7 +520,7 @@ correctly implemented):
 - IF <agent's output is outside declared valid range> THEN <broken because ...>
 ```
 
-#### 3.10.1 Ablation Hooks
+#### 3.9.1 Ablation Hooks
 
 Named knob settings that produce meaningful ablations. Each row MUST
 state the hypothesis, the expected direction, and the metric.
@@ -559,10 +532,10 @@ state the hypothesis, the expected direction, and the metric.
 ```
 
 
-### 3.11 Academic References
+### 3.10 Academic References
 
 Numbered table. Every paper cited anywhere in the specification MUST
-appear here. No citation in any section (§3.4, §3.7 Source, §3.10
+appear here. No citation in any section (§3.4, §3.7 Source, §3.9
 Calibration, etc.) is permitted to be absent from this table.
 
 ```markdown
@@ -571,7 +544,7 @@ Calibration, etc.) is permitted to be absent from this table.
 | 1 | <full citation + DOI> | <relevance> |
 ```
 
-### 3.12 Design Provenance and Versioning
+### 3.11 Design Provenance and Versioning
 
 Footer block. Required.
 
@@ -600,13 +573,13 @@ sections and prevent orphan content.
   by at least one step in §3.6.2 Core Behavioral Mechanism.
 - Every **activation trigger** in §3.5 MUST map to a branch in the
   trigger function of §3.6.4.
-- Every **worked example** in §3.9 MUST use Default values from §3.7
+- Every **worked example** in §3.8 MUST use Default values from §3.7
   (or explicitly state and justify any deviation).
-- Every **expected behaviour** in §3.10 MUST be traceable to the
+- Every **expected behaviour** in §3.9 MUST be traceable to the
   mechanism in §3.6.2 (the reader must be able to see HOW the
   mechanism produces the declared individual-level response).
 - Every **citation** anywhere in the specification (§3.4, §3.7 Source,
-  §3.10, etc.) MUST appear in the §3.11 Academic References table.
+  §3.9, etc.) MUST appear in the §3.10 Academic References table.
 - Every **symbol** used in §3.6 (mechanism, trigger function, sizing
   function, state-update formulas) MUST be declared in §3.6.4 Parameter
   symbol table.
@@ -657,25 +630,23 @@ blocker.
 - [ ] §3.7 has >=3 rows (or justified fewer); every high-sensitivity
       parameter cites empirical data; every parameter appears in §3.6.4;
       every Impact is directional
-- [ ] §3.9 uses Default values from §3.7; covers all non-hold trigger
+- [ ] §3.8 uses Default values from §3.7; covers all non-hold trigger
       branches; edge case demonstrates deactivation/cap/regime-flip;
       every step is single-step verifiable
 
 **Behavioral verification:**
-- [ ] §3.10 behavioural expectations describe individual agent
+- [ ] §3.9 behavioural expectations describe individual agent
       responses (not population-level emergent phenomena); >=3 sanity
       bounds as falsifiable IF-THEN statements; ablation hooks state
       direction and metric
-- [ ] §3.8 Population includes Interaction declaration and Minimal
-      co-presence assumption
 
 **Cross-section consistency (§4 rules):**
 - [ ] Every §3.7 parameter appears in §3.6.4
 - [ ] Every §3.6.1 signal is consumed in §3.6.2
 - [ ] Every §3.5 trigger maps to a §3.6.4 branch
-- [ ] Every §3.9 example uses §3.7 defaults
-- [ ] Every §3.10 behavioural expectation traces to §3.6.2
-- [ ] Every citation appears in §3.11
+- [ ] Every §3.8 example uses §3.7 defaults
+- [ ] Every §3.9 behavioural expectation traces to §3.6.2
+- [ ] Every citation appears in §3.10
 - [ ] No undeclared symbols in §3.6
 
 **Scenario-portability:**
@@ -826,18 +797,6 @@ Does NOT use: <list>.
 | Parameter | Type   | Default | Valid Range | Sensitivity     | Description   | Impact                | Source     |
 |-----------|--------|---------|-------------|-----------------|---------------|-----------------------|------------|
 | `<name>`  | <type> | <value> | <domain>    | high/medium/low | <description> | Higher -> <direction> | <citation> |
-
-## Population and Heterogeneity
-
-| Aspect                         | Specification                                  |
-|--------------------------------|------------------------------------------------|
-| Default population size        | <1 / N / scenario-dependent>                   |
-| Parameter heterogeneity policy | <shared point / iid distribution / correlated> |
-| Heterogeneity per parameter    | <name -> distribution>                         |
-| Cross-agent correlation        | <none / Sigma / coupling rule>                 |
-| Identity persistence           | <identical / re-drawn>                         |
-| Interaction declaration        | <opposes X / amplifies Y / neutral to Z>       |
-| Minimal co-presence assumption | <requires A + B for meaningful interaction>    |
 
 ## Worked Numerical Examples
 
