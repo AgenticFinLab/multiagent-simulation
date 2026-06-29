@@ -88,24 +88,25 @@ header levels, and table headers MUST remain identical.
 
 ## 2. Canonical Section Order
 
-A conformant specification MUST contain exactly these top-level
-sections, in this order. Every section is **required** unless explicitly
-marked *conditional*.
+A conformant specification MUST contain at least these top-level
+sections, in this order. Additional sections MAY be appended after §12
+if deeper coverage is warranted. Every section listed here is
+**required** unless explicitly marked *conditional*.
 
-| #  | Section                                | Header | Notes                             |
-|----|----------------------------------------|--------|-----------------------------------|
-| 1  | Title — agent role description         | `#`    |                                   |
-| 2  | Summary                                | `##`   | 7 fixed rows                      |
-| 3  | Definition and Goals                   | `##`   | Includes non-goals                |
-| 4  | Theoretical Foundation                 | `##`   | >=1 theory sub-block              |
-| 5  | Design Purpose and Activation Triggers | `##`   | Includes deactivation             |
-| 6  | Behavioral Framework                   | `##`   | 5 fixed H4 sub-blocks             |
-| 7  | Parameters                             | `##`   | 8-column table                    |
-| 8  | Population and Heterogeneity           | `##`   |                                   |
-| 9  | Worked Numerical Examples              | `##`   | >=3 cases + 1 edge case           |
-| 10 | Validation and Calibration             | `##`   | Includes Ablation Hooks sub-block |
-| 11 | Academic References                    | `##`   |                                   |
-| 12 | Design Provenance and Versioning       | `##`   | Footer block                      |
+| #  | Section                                | Header | Notes                                 |
+|----|----------------------------------------|--------|---------------------------------------|
+| 1  | Title — agent role description         | `#`    |                                       |
+| 2  | Summary                                | `##`   | >=7 rows (minimum set below)          |
+| 3  | Definition and Goals                   | `##`   | Includes non-goals                    |
+| 4  | Theoretical Foundation                 | `##`   | >=1 theory sub-block                  |
+| 5  | Design Purpose and Activation Triggers | `##`   | Includes deactivation                 |
+| 6  | Behavioral Framework                   | `##`   | >=5 H4 sub-blocks (minimum set below) |
+| 7  | Parameters                             | `##`   | >=8-column table                      |
+| 8  | Population and Heterogeneity           | `##`   |                                       |
+| 9  | Worked Numerical Examples              | `##`   | >=3 cases + 1 edge case               |
+| 10 | Validation and Calibration             | `##`   | Includes Ablation Hooks sub-block     |
+| 11 | Academic References                    | `##`   |                                       |
+| 12 | Design Provenance and Versioning       | `##`   | Footer block                          |
 
 Environment rules — matching mechanics, fee / latency models,
 message-routing policy, content-moderation rules, and peer-network
@@ -132,8 +133,10 @@ scenario / environment specification.
 
 ### 3.2 Summary
 
-A seven-row fingerprint table. Field names and order MUST be exactly as
-shown.
+A fingerprint table with at least the following seven rows. Field
+names and order for these minimum rows MUST be as shown. Additional
+rows MAY be appended to capture domain-specific dimensions that
+deepen the agent's characterisation.
 
 ```markdown
 ## Summary
@@ -268,7 +271,10 @@ amplifies, or overlaps with>
 
 ### 3.6 Behavioral Framework
 
-Five H4 sub-sections, in order. All MUST be present.
+Five H4 sub-sections are the required minimum, in this order. All
+five MUST be present. Additional H4 sub-sections MAY be appended
+after §3.6.5 to deepen the behavioural specification (e.g. learning
+dynamics, memory management, social signalling strategy).
 
 #### 3.6.1 Decision Information Set
 
@@ -398,8 +404,10 @@ Four labelled lines:
 ### 3.7 Parameters **(MANDATORY)**
 
 A single engine-agnostic table that documents every knob the agent
-design exposes. Each row MUST use the canonical **eight columns**
-below. Column names and order MUST NOT change.
+design exposes. Each row MUST use at minimum the canonical **eight
+columns** below. Column names and order for these eight MUST NOT
+change. Additional columns MAY be appended to the right to capture
+extra metadata (e.g. `Calibration Date`, `Regime Sensitivity`).
 
 - **Parameter** — exact key name, back-ticked.
 - **Type** — `int` / `float` / `str` / `bool` / `enum<...>` /
@@ -612,7 +620,8 @@ blocker.
 
 **Structural completeness:**
 - [ ] H1 is a sentence-cased role phrase, not a class or code identifier
-- [ ] §3.2 Summary has exactly the 7 canonical rows in order
+- [ ] §3.2 Summary has at least the 7 canonical rows in order;
+      additional rows permitted
 - [ ] §3.3 Definition and Goals covers (a) what the agent models with a
       named real-world counterpart from a domain-appropriate enumeration, (b)
       decision goal, (c) role + stylized facts with citations, (d) >=2
@@ -680,8 +689,9 @@ blocker.
 ## 6. Copy-Paste Skeleton
 
 Use this as the starting point for a new agent specification. Replace
-every `<...>` and delete bracketed instructions when done. Do not add
-or remove sections.
+every `<...>` and delete bracketed instructions when done. Do not
+remove any of the minimum-required sections. Additional sections and
+rows MAY be appended where the handbook permits expansion.
 
 ```markdown
 # <Sentence-cased agent role description>
