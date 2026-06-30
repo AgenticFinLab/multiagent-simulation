@@ -12,7 +12,7 @@ Key Dynamics:
     - PrimeBroker1: First-mover liquidator — sells quickly, receives better prices
     - PrimeBroker2: Delayed liquidator — faces worse prices due to cascade
     - BlockTradeBuyer: Opportunistic buyer at discount during fire sale
-    - InformationTrader: Detects liquidation signals and front-runs the cascade
+    - InformationTrader: Detects liquidation signals and trades ahead of selling pressure
 
 All parameters are configured via players.yml config file.
 """
@@ -134,14 +134,13 @@ class Market(GeneralPlayer):
 
 class ConcentratedFund(GeneralPlayer):
     """
-    TRS-leveraged concentrated fund (Archegos-style).
+    TRS-leveraged concentrated fund (TRS-based).
 
     Theory: simulation-bases.md §4.1 — ConcentratedFund
-    Theoretical basis: Total Return Swap Leverage (Becketti, 2021); Hidden Leverage
-    (SEC, 2021 Archegos Report).
+    Theoretical basis: Total Return Swap Leverage (Becketti, 2021); Hidden leverage and TRS exposure (Becketti, 2021; FSB, 2022).
     Forced to sell when price drops below margin threshold.
     Sells trs_sell_ratio * position when margin call triggered.
-    See simulation-bases.md §4.1.4.3 for mathematical model.
+    See simulation-bases.md §4.1.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -231,7 +230,7 @@ class PrimeBroker1(GeneralPlayer):
     Acts when price drops below liquidation_threshold.
     Sells liquidation_sell_ratio * position per round at market price.
     First-mover advantage: receives full market price (no price_penalty).
-    See simulation-bases.md §4.2.4.3 for mathematical model.
+    See simulation-bases.md §4.2.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -322,9 +321,9 @@ class PrimeBroker2(GeneralPlayer):
     Theory: simulation-bases.md §4.3 — PrimeBroker2
     Theoretical basis: Creditor Run / Liquidation Race (Gorton & Metrick, 2012).
     Higher threshold required before acting (waits longer than PrimeBroker1).
-    Faces worse prices due to first-mover's cascade selling pressure.
+    Faces worse prices due to first-mover's prior liquidation selling pressure.
     Effective price = market_price * price_penalty.
-    See simulation-bases.md §4.3.4.3 for mathematical model.
+    See simulation-bases.md §4.3.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -414,13 +413,13 @@ class PrimeBroker2(GeneralPlayer):
 
 class BlockTradeBuyer(GeneralPlayer):
     """
-    Opportunistic block trade buyer purchasing at fire-sale discount.
+    Opportunistic block trade buyer purchasing at distressed block discount.
 
     Theory: simulation-bases.md §4.4 — BlockTradeBuyer
     Theoretical basis: Fire-Sale Arbitrage / Liquidity Provider (Shleifer & Vishny, 1992).
     Buys when price drops below discount_threshold (relative to fundamental).
     Deploys buy_ratio of available cash per round.
-    See simulation-bases.md §4.4.4.3 for mathematical model.
+    See simulation-bases.md §4.4.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -477,7 +476,7 @@ class BlockTradeBuyer(GeneralPlayer):
             "quantity": quantity,
             "investor": self.identity,
             "strategy": "BlockTradeBuyer",
-            "reasoning": "fire-sale discount buying rule",
+            "reasoning": "distressed block discount buying rule",
         }
         validate_order(order)
 
@@ -508,10 +507,10 @@ class InformationTrader(GeneralPlayer):
 
     Theory: simulation-bases.md §4.5 — InformationTrader
     Theoretical basis: Informed Trading / Front-Running (Kyle, 1985; Brunnermeier & Pedersen, 2005).
-    Detects cascade signal when deviation < detection_threshold with
+    Detects distress signal when deviation < detection_threshold with
     probability detection_ability. Sells front_run_size shares.
     Covers short when deviation recovers above cover_threshold.
-    See simulation-bases.md §4.5.4.3 for mathematical model.
+    See simulation-bases.md §4.5.5.4 for mathematical model.
     """
 
     async def perceive(

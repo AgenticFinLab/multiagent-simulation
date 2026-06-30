@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""ArchegosCollapse Rule-Based Simulation Analysis
+"""ArchegosCollapse Mathematical Model Simulation Analysis
 
-Analyzes simulation results for forced-liquidation cascade dynamics and
+Analyzes simulation results for forced-liquidation race dynamics and
 prime-broker first-mover advantage.
 Based on analysis-bases.md calibration targets (Archegos 2021 / FSB 2022).
 
@@ -438,7 +438,7 @@ def _build_interpretation(
     lines.append("[SUMMARY]")
     if is_valid:
         lines.append(
-            f"The simulation successfully reproduces Archegos-style forced-liquidation cascade dynamics: "
+            f"The simulation successfully reproduces TRS forced-liquidation dynamics: "
             f"a {max_drawdown_pct:.1f}% drawdown with "
             + (
                 f"cascade onset at round {cascade_onset_round}"
@@ -451,7 +451,7 @@ def _build_interpretation(
         )
     else:
         lines.append(
-            f"The simulation does not fully reproduce Archegos-style cascade dynamics. "
+            f"The simulation does not fully reproduce TRS liquidation-race dynamics. "
             f"Overall Fit Score {overall_score:.1%} is below the 50% threshold. "
             f"Key issues: "
             + ("drawdown too low; " if max_drawdown_pct < 20.0 else "")

@@ -24,16 +24,16 @@ market:
     extras:
       record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
       # Price formation: P(t+1) = P(t) + λ×NetDemand + γ×(F-P(t)) + ε
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.03         # Low: Archegos market had deep liquidity
-      mean_reversion: 0.01       # Very low: forced sellers overwhelm mean reversion
-      noise_std: 0.015           # Background noise
-      custom_state_hot_limit: 3
+      fundamental_value: 100.0  # Source: simulation-bases.md §3.1 and §6; normalized fundamental anchor
+      initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
+      price_impact: 0.03  # Source: Hasbrouck (1991), J. Finance; simulation-bases.md §3.1/§6
+      mean_reversion: 0.01  # Source: French & Roll (1986), JFE; simulation-bases.md §3.1/§6
+      noise_std: 0.015  # Source: Roll (1984), J. Finance; simulation-bases.md §3.1/§6
+      custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# ConcentratedFund — TRS-leveraged position holder (Archegos-style)
+# ConcentratedFund — TRS-leveraged position holder (TRS-based)
 # Theory: Total Return Swap Leverage (Becketti, 2021)
 # -----------------------------------------------------------------------------
 concentrated_fund:
@@ -49,12 +49,12 @@ concentrated_fund:
       - investors
     extras:
       record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 5000.0     # Large concentrated position via TRS
+      initial_cash: 500000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
+      initial_position: 5000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
-      margin_threshold: -0.15      # Margin call when price drops 15%
-      trs_sell_ratio: 0.50         # Forced: sell 50% of position on margin call
-      custom_state_hot_limit: 3
+      margin_threshold: -0.15  # Source: Becketti (2021) and FSB (2022); simulation-bases.md §4.1.6
+      trs_sell_ratio: 0.50  # Source: Becketti (2021) and FSB (2022); simulation-bases.md §4.1.6
+      custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -73,13 +73,13 @@ prime_broker1:
       - investors
     extras:
       record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
-      initial_cash: 200000.0
-      initial_position: 4000.0     # Holds client collateral to liquidate
+      initial_cash: 200000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
+      initial_position: 4000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
-      liquidation_threshold: -0.10 # Acts when price drops 10%
-      liquidation_sell_ratio: 0.40 # Sells 40% of position per round
+      liquidation_threshold: -0.10  # Source: Gorton & Metrick (2012); simulation-bases.md §4.2/§4.3 Parameters
+      liquidation_sell_ratio: 0.40  # Source: Gorton & Metrick (2012); simulation-bases.md §4.2/§4.3 Parameters
       # First mover: receives full market price
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -98,13 +98,13 @@ prime_broker2:
       - investors
     extras:
       record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
-      initial_cash: 200000.0
-      initial_position: 3500.0     # Slightly smaller collateral block
+      initial_cash: 200000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
+      initial_position: 3500.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
-      liquidation_threshold: -0.15 # Acts when price drops 15% (higher threshold)
-      liquidation_sell_ratio: 0.35 # Sells 35% per round (slower)
-      price_penalty: 0.97          # Receives 97% of market (3% worse)
-      custom_state_hot_limit: 3
+      liquidation_threshold: -0.15  # Source: Gorton & Metrick (2012); simulation-bases.md §4.2/§4.3 Parameters
+      liquidation_sell_ratio: 0.35  # Source: Gorton & Metrick (2012); simulation-bases.md §4.2/§4.3 Parameters
+      price_penalty: 0.97  # Source: Archegos broker-loss timing calibration; simulation-bases.md §4.3.6
+      custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -123,12 +123,12 @@ block_trade_buyer:
       - investors
     extras:
       record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
-      initial_cash: 1000000.0     # Deep pockets for block buying
-      initial_position: 0.0
+      initial_cash: 1000000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
+      initial_position: 0.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
-      discount_threshold: -0.10   # Buys when price drops 10% (attractive discount)
-      buy_ratio: 0.30             # Deploys 30% of cash per round
-      custom_state_hot_limit: 3
+      discount_threshold: -0.10  # Source: Grossman & Miller (1988); simulation-bases.md §4.4.6
+      buy_ratio: 0.30  # Source: Grossman & Miller (1988); simulation-bases.md §4.4.6
+      custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -148,13 +148,13 @@ information_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
-      initial_cash: 300000.0
-      initial_position: 1000.0
+      initial_cash: 300000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
+      initial_position: 1000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
-      detection_ability: 0.50     # 50% probability of detecting cascade signal
-      detection_threshold: -0.05  # Trigger when price drops 5%
-      front_run_size: 1000        # Sell up to 1000 shares when detected
-      cover_threshold: -0.03      # Cover short when deviation > -3%
-      cover_size: 500             # Buy back up to 500 shares to cover
-      custom_state_hot_limit: 3
+      detection_ability: 0.50  # Source: Kyle (1985) and Brunnermeier & Pedersen (2005); simulation-bases.md §4.5.6
+      detection_threshold: -0.05  # Source: Kyle (1985); simulation-bases.md §4.5.6
+      front_run_size: 1000  # Source: Brunnermeier & Pedersen (2005); simulation-bases.md §4.5.6
+      cover_threshold: -0.03  # Source: Brunnermeier & Pedersen (2005); simulation-bases.md §4.5.6
+      cover_size: 500  # Source: Brunnermeier & Pedersen (2005); simulation-bases.md §4.5.6
+      custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
   persona: !include persona.yml

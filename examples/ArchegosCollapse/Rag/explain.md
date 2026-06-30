@@ -19,7 +19,7 @@
 
 | Theory Component                                                   | Implementation                                                                                          |
 |--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| TRS leverage rules → sim-bases §4 Rule-Based Behavior              | System prompt = `RAG_CONCENTRATED_FUND_SYS` = `RULELLM_CONCENTRATED_FUND_SYS` (identical rules/persona) |
+| TRS leverage rules → sim-bases §4.N.5.4 Mathematical Model              | System prompt = `RAG_CONCENTRATED_FUND_SYS` = `RULELLM_CONCENTRATED_FUND_SYS` (identical rules/persona) |
 | Historical case knowledge → sim-bases §8 (Historical Case Studies) | RAG knowledge base sources from Archegos collapse (March 2021) described in sim-bases §8                |
 | `{rag_context}` injection → sim-bases §4 Rag notes                 | `RAG_USER_TEMPLATE` contains `"Relevant Domain Knowledge:\n{rag_context}"` section                      |
 | No-retrieval fallback                                              | When retrieval fails: `"(No relevant knowledge retrieved this round.)"` replaces `{rag_context}`        |

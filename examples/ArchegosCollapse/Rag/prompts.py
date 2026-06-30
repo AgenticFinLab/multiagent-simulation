@@ -22,7 +22,7 @@ RAG_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
 - Previous Price: ${prev_price:.2f}
 - Fundamental Value: ${fundamental:.2f}
-- Price Deviation from Fundamental: {deviation:+.2%}
+- Deviation from Fundamental: {deviation:+.2%}
 - Your Cash: ${cash:.2f}
 - Your Position: {position:.2f} shares
 - Portfolio Value: ${portfolio_value:.2f}
@@ -31,8 +31,8 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules to this market state, incorporating the domain knowledge above.
-Show your calculations in the thinking section.
-Respond with your thinking in <analysis>...</analysis> tags followed by your decision in \
+Show your calculations in the analysis section.
+Respond with your analysis in <analysis>...</analysis> tags followed by your decision in \
 <decision>...</decision> tags.
 The decision JSON must contain: action ("buy", "sell", or "hold"), bid_price (float), \
 IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.

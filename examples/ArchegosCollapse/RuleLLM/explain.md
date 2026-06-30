@@ -19,7 +19,7 @@
 
 | Theory Component                                                      | Implementation                                                                                   |
 |-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| TRS leverage / margin call → sim-bases §4 Rule-Based Behavior         | `RULELLM_CONCENTRATED_FUND_SYS` `== DECISION RULES ==`: Step 2 `IF deviation < -0.15 → SELL 50%` |
+| TRS leverage / margin call → sim-bases §4.N.5.4 Mathematical Model         | `RULELLM_CONCENTRATED_FUND_SYS` `== DECISION RULES ==`: Step 2 `IF deviation < -0.15 → SELL 50%` |
 | Embedded rule threshold = −0.15 → sim-bases §6                        | Hard-coded in prompt: "IF deviation < -0.15 (price dropped >15% below fundamental)"              |
 | Sell 50% base, ±20% PERSONA range → sim-bases §4 RuleLLM Hybrid Notes | "Step 3: PERSONA may adjust quantity ±20% (40%–60% of position)"                                 |
 | Denial psychology → sim-bases §4 LLM Persona                          | `== PERSONA ==`: "denial is your first response"; emotionally resistant to acknowledging margin  |
@@ -48,7 +48,7 @@
 
 | Theory Component                                         | Implementation                                                                       |
 |----------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Buy at −10% discount → sim-bases §4 Rule-Based Behavior  | `== DECISION RULES ==`: "IF deviation < -0.10 → BUY: quantity = 0.30 × cash / price" |
+| Buy at −10% discount → sim-bases §4.N.5.4 Mathematical Model  | `== DECISION RULES ==`: "IF deviation < -0.10 → BUY: quantity = 0.30 × cash / price" |
 | Deploy 30% cash base, ±20% → sim-bases §4 RuleLLM Hybrid | "Step 3: PERSONA (deep-pocket buyer) may adjust ±20% (24%–36%)"                      |
 | Deep-pocket patience persona → sim-bases §4 LLM Persona  | `== PERSONA ==`: "you have deep pockets and patience — wait for forced sellers"      |
 
@@ -57,7 +57,7 @@
 
 | Theory Component                                                  | Implementation                                                                                      |
 |-------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| Detect at −0.05, probability 0.50 → sim-bases §4 Rule-Based       | `== DECISION RULES ==`: "IF deviation < -0.05 AND detection probability 0.50 → SELL min(1000, pos)" |
+| Detect at −0.05, probability 0.50 → sim-bases §4 Mathematical Model       | `== DECISION RULES ==`: "IF deviation < -0.05 AND detection probability 0.50 → SELL min(1000, pos)" |
 | Cover at −0.03 → sim-bases §4                                     | `== DECISION RULES ==`: buy up to 500 shares when recovery conditions indicate prior front-run exposure should be covered |
 | Front-runner / fast analytical persona → sim-bases §4 LLM Persona | `== PERSONA ==`: "fast, analytical, and unafraid of being early"                                    |
 
@@ -176,7 +176,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/RuleLLM/`
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 
-- Rule formula thresholds embedded in prompts → `simulation-bases.md §4 (Rule-Based Behavior per investor type)`
+- Rule formula thresholds embedded in prompts → `simulation-bases.md §4.N.5.4 Mathematical Model per investor type`
 - RuleLLM hybrid quantity range → `simulation-bases.md §4 (RuleLLM Hybrid Notes per investor type)`
 - Rule adherence analysis → `analysis.py → analyze_rule_adherence()` (target ≥80%)
 - Dual-section prompt requirement → `create-example-skill.md §{RuleLLM Prompts Design}`

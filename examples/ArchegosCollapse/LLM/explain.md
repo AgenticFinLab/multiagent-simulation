@@ -42,7 +42,7 @@
 |----------------------------------------------------|-------------------------------------------------------------------------|
 | Second-mover reluctance → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER2_SYS`: "slower decision process, reluctant initially" |
 | Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"               |
-| Amplifying role → sim-bases §4                     | "your selling accelerates the cascade triggered by the first broker"    |
+| Amplifying role → sim-bases §4                     | "your selling extends liquidation pressure started by the first broker"    |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
@@ -51,7 +51,7 @@
 |-----------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Opportunistic discount-seeking → sim-bases §4 LLM Persona | `LLM_BLOCK_TRADE_BUYER_SYS`: "wait for dislocations — when forced sellers must unload"    |
 | Deploy fixed capital ratio → sim-bases §4 LLM Persona     | "deploy capital aggressively"; LLM decides actual ratio based on perceived discount depth |
-| Stabilizing force → sim-bases §4                          | "you are the stabilizing force that ultimately limits the cascade"                        |
+| Stabilizing force → sim-bases §4                          | "you are the stabilizing buyer that limits forced-selling pressure"                        |
 
 ### InformationTrader: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.5 — InformationTrader)*

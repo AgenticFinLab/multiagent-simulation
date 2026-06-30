@@ -90,7 +90,7 @@ Code translation:
 
 Price floor: `new_price = max(new_price, 0.01)` — prevents negative prices during extreme cascades.
 
-Deviation broadcast: `deviation = (new_price − fundamental) / fundamental` — key cascade signal.
+Deviation broadcast: `deviation = (new_price − fundamental) / fundamental` — key distress signal.
 
 Additional mechanisms (simulation-bases.md §3.2):
 - Short selling allowed: `InformationTrader` can hold negative `position` and short `front_run_size` shares

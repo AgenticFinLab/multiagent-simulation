@@ -11,7 +11,7 @@
 
 setting:
   name: "archegsoscollapse_rulellm_simulation"
-  description: "Archegos-style collapse: RuleLLM hybrid with explicit margin/liquidation rules in prompts"
+  description: "TRS leverage liquidation-race scenario: RuleLLM hybrid with explicit margin/liquidation rules in prompts"
   total_rounds: 200
   round_history_limit: 3
   record_path: "EXPERIMENT/ArchegosCollapse/RuleLLM/records"
