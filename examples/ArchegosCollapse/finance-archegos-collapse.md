@@ -12,7 +12,7 @@
 | Pipeline      | masim/skills/polish-simulation-pipeline.md                                                                                                                                  |
 | Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                                                     |
 | Status        | locked                                                                                                                                                                      |
-| CHANGELOG     | 2026-07-01  Produced by define-simulation-scenario-skill.md v1.2.0 (Status: draft). / 2026-07-01  Polish target-file gate: existing, §11 three-PASS green, Status locked.    |
+| CHANGELOG     | 2026-07-01  Produced by define-simulation-scenario-skill.md v1.2.0 (Status: draft). / 2026-07-01  Polish target-file gate: existing, §11 three-PASS green, Status locked. / 2026-07-01  Polish Step 1 audit: DOIs verified; six-field completeness passes for all root §2 Theory blocks; bidirectional coverage restored by adding the Kyle 1985 root Theory block to `simulation-bases.md §2` matching target §4.4; §5 stylized facts F1–F5 each trace to a primary-literature citation in-row. |
 
 ## §2 Phenomenon Statement
 

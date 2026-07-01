@@ -63,6 +63,23 @@
 - **Relevance to This Simulation**: `BlockTradeBuyer` activates when deviation crosses −0.10 (a 10% discount from fundamental), representing the opportunistic buyer's risk-compensation threshold. Its presence creates the price floor that eventually halts the cascade.
 - **Calibration Implication**: discount_threshold = 0.10 based on Grossman & Miller's distressed market estimates; cash_deployment = 0.30 represents conservative capital allocation by institutional buyers.
 
+---
+
+### Theory: Informed Order-Flow Front-Running of Anticipated Liquidation
+
+- **Citation**: Kyle, A. S. (1985). Continuous auctions and insider trading. *Econometrica*, 53(6), 1315–1335. https://doi.org/10.2307/1913210
+- **Core Insight**: An informed trader who detects nascent distress before it is public front-runs the anticipated forced order flow. By selling ahead of the mechanical broker liquidation, the informed trader accelerates the initial price decline before rule-based broker thresholds actually trigger, and later covers when the cascade exhausts itself. This is the microstructure counterpart to the creditor-run mechanism: private information about *future* forced supply is transmitted into prices through the informed trader's own order flow.
+- **Mathematical Formulation**:
+  ```
+  Detection event: 1[deviation(t) < θ_det] · Bernoulli(p_det)
+  Order sign:      sign(order) = − sign(expected forced flow)   (short when a cascade is anticipated)
+  Cover branch:    trigger when deviation(t) > cover_threshold and short_position > 0
+  Expected profit rises monotonically with the anticipated cascade depth conditional on successful detection.
+  ```
+- **Empirical Evidence**: Kyle (1985) establishes the informed-trader price-impact framework in which private signals about future flow are impounded into prices through orders whose informativeness scales with the signal precision. Boehmer, Jones, & Zhang (2008), *Journal of Finance*, 63(2), 491–527, https://doi.org/10.1111/j.1540-6261.2008.01324.x, document that short sellers are on average informed and that a non-trivial fraction (about 30 %–70 % depending on regime) detect distress-relevant information before it becomes public.
+- **Relevance to This Simulation**: The `InformationTrader` agent operationalises the Kyle channel by gating a stochastic sell on `deviation(t) < θ_det` with a per-round Bernoulli detection draw, then covering when the deviation recovers. This is the only channel in the scenario that produces informed selling *before* mechanical broker thresholds trigger, so it directly controls the shape of cascade onset (as opposed to cascade amplification, which is Gorton & Metrick 2012's channel).
+- **Calibration Implication**: `θ_det = 0.05` and `p_det = 0.50` locate the informed channel inside the empirical Kyle-signal-precision band; both parameters are exported to `simulation-bases.md §6` and to target §9. The predatory-trading extension (Brunnermeier & Pedersen 2005) is inherited by the agent-embedded block in `§4.5.3` and does not require a duplicate root Theory block, since it is a within-agent elaboration of Kyle's informed-flow mechanism.
+
 
 ## §3 Market Design Principles
 
