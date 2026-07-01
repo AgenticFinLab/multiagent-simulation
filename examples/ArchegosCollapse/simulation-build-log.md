@@ -39,3 +39,4 @@ The normalization pass reused citations already present in `simulation-bases.md`
 | Structure check | 2026-06-30 | partial pass | Codex | Added `simulation-build-log.md`; upstream target file remains absent as legacy gap. |
 | AGENT_POOL gate | 2026-06-30 | pass | Codex | All five agents classified as `new`; pool files created in `examples/AGENT_POOL/finance/`. |
 | Root §4 normalization | 2026-06-30 | pass | Codex | Replaced legacy §4 with handbook-aligned embedded form and pool source links. |
+| Polish supersession | 2026-07-01 | superseded | QoderWork | Superseded by polish audit; polish trail lives in target §1 Meta CHANGELOG (`finance-archegos-collapse.md`) + git history. This build-log is retained for historical reference only and is not maintained by the polish pipeline. |

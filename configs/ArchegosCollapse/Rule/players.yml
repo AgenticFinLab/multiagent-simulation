@@ -22,7 +22,7 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       # Price formation: P(t+1) = P(t) + λ×NetDemand + γ×(F-P(t)) + ε
       fundamental_value: 100.0  # Source: simulation-bases.md §3.1 and §6; normalized fundamental anchor
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
@@ -48,7 +48,7 @@ concentrated_fund:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 500000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 5000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
@@ -72,7 +72,7 @@ prime_broker1:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 200000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 4000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
@@ -97,7 +97,7 @@ prime_broker2:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 200000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 3500.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
@@ -122,7 +122,7 @@ block_trade_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 1000000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 0.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters
@@ -147,7 +147,7 @@ information_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 300000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 1000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       # Rule parameters

@@ -12,20 +12,20 @@
 # Shared Knowledge Configuration
 # =============================================================================
 knowledge:
-  backend: "local"
-  global_uri: "examples/document-sources"
+  backend: "local"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+  global_uri: "examples/document-sources"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
   resource_csv:
     - "examples/document-sources/books.csv"
     - "examples/document-sources/source"
   preprocessing:
-    parser: "mineru"
-    output_position: "MinerU_processed"
+    parser: "mineru"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+    output_position: "MinerU_processed"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
   rag:
-    output_position: "rag_index"
-    embed_type: "litellm"
-    embed_model: "openai/hunyuan-embedding"
-    embed_api_key: "{{ HUNYUAN_API_KEY }}"
-    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    output_position: "rag_index"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+    embed_type: "litellm"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+    embed_model: "openai/hunyuan-embedding"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
     chunk_size: 512  # Source: RAG indexing configuration; 07-step3-config.md §3.7
     chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
     top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
@@ -44,7 +44,7 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       fundamental_value: 100.0  # Source: simulation-bases.md §3.1 and §6; normalized fundamental anchor
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
       price_impact: 0.03  # Source: Hasbrouck (1991), J. Finance; simulation-bases.md §3.1/§6
@@ -69,7 +69,7 @@ ragllm_concentrated_fund:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 500000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 5000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
@@ -79,24 +79,24 @@ ragllm_concentrated_fund:
         from_global_resources:
           - "MinerU_processed"
         local_resources:
-          local_uri: ""
+          local_uri: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           local_resources: []
         rag:
           from_global_index_dir:
             - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          local_index_dir: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_type: "litellm"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_model: "openai/hunyuan-embedding"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           chunk_size: 512  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_CONCENTRATED_FUND_SYS"
-        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_CONCENTRATED_FUND_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         generation_config:
           temperature: 0.5  # Source: variant prompt stochasticity setting; simulation-bases.md §9
           max_new_tokens: 600  # Source: RAG output budget for canonical decision format; 08-step4-implement.md §4.4.4
@@ -117,7 +117,7 @@ ragllm_prime_broker1:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 200000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 4000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
@@ -127,24 +127,24 @@ ragllm_prime_broker1:
         from_global_resources:
           - "MinerU_processed"
         local_resources:
-          local_uri: ""
+          local_uri: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           local_resources: []
         rag:
           from_global_index_dir:
             - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          local_index_dir: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_type: "litellm"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_model: "openai/hunyuan-embedding"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           chunk_size: 512  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER1_SYS"
-        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER1_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         generation_config:
           temperature: 0.4  # Source: variant prompt stochasticity setting; simulation-bases.md §9
           max_new_tokens: 600  # Source: RAG output budget for canonical decision format; 08-step4-implement.md §4.4.4
@@ -165,7 +165,7 @@ ragllm_prime_broker2:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 200000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 3500.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
@@ -175,24 +175,24 @@ ragllm_prime_broker2:
         from_global_resources:
           - "MinerU_processed"
         local_resources:
-          local_uri: ""
+          local_uri: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           local_resources: []
         rag:
           from_global_index_dir:
             - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          local_index_dir: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_type: "litellm"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_model: "openai/hunyuan-embedding"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           chunk_size: 512  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER2_SYS"
-        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER2_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         generation_config:
           temperature: 0.4  # Source: variant prompt stochasticity setting; simulation-bases.md §9
           max_new_tokens: 600  # Source: RAG output budget for canonical decision format; 08-step4-implement.md §4.4.4
@@ -213,7 +213,7 @@ ragllm_block_trade_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 1000000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 0.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
@@ -223,24 +223,24 @@ ragllm_block_trade_buyer:
         from_global_resources:
           - "MinerU_processed"
         local_resources:
-          local_uri: ""
+          local_uri: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           local_resources: []
         rag:
           from_global_index_dir:
             - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          local_index_dir: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_type: "litellm"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_model: "openai/hunyuan-embedding"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           chunk_size: 512  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_BLOCK_TRADE_BUYER_SYS"
-        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_BLOCK_TRADE_BUYER_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         generation_config:
           temperature: 0.4  # Source: variant prompt stochasticity setting; simulation-bases.md §9
           max_new_tokens: 600  # Source: RAG output budget for canonical decision format; 08-step4-implement.md §4.4.4
@@ -262,7 +262,7 @@ ragllm_information_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"
+      record_path: "EXPERIMENT/ArchegosCollapse/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       initial_cash: 300000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized capital
       initial_position: 1000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
@@ -272,24 +272,24 @@ ragllm_information_trader:
         from_global_resources:
           - "MinerU_processed"
         local_resources:
-          local_uri: ""
+          local_uri: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           local_resources: []
         rag:
           from_global_index_dir:
             - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          local_index_dir: ""  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_type: "litellm"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_model: "openai/hunyuan-embedding"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: 08-step4-implement.md §4.3 RAG wiring contract; target §10.1 Rag variant declaration
           chunk_size: 512  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_INFORMATION_TRADER_SYS"
-        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_INFORMATION_TRADER_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         generation_config:
           temperature: 0.5  # Source: variant prompt stochasticity setting; simulation-bases.md §9
           max_new_tokens: 600  # Source: RAG output budget for canonical decision format; 08-step4-implement.md §4.4.4

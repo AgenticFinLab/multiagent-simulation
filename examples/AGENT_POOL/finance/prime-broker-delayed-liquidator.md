@@ -66,6 +66,56 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 ## Behavioral Framework
 
+#### I/O Contract
+
+**Inputs (per decision call).**
+
+| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
+|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| `price`                 | environment broadcast                               | `float`      | yes                     | Row of Decision Information Set                                                                          |
+| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of Decision Information Set                                                                          |
+| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of Decision Information Set                                                                          |
+| `position`              | agent state (Mathematical Model state variables)    | `float`      | yes                     | Collateral inventory remaining to liquidate                                                              |
+| `cash`                  | agent state (Mathematical Model state variables)    | `float`      | yes                     | Populated by init from Parameters                                                                        |
+| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
+| `retrieved_knowledge`   | retrieval store (retrieval-augmented variants only) | `list[str]`  | retrieval variants only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+
+**Outputs (per decision call).** The agent emits exactly one decision object.
+
+| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
+|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action (matches Action Space Order types)            |
+| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (Action Space Price level rule; sell uses `price * price_penalty`) |
+| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (Action Space Order quantity rule)            |
+| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+
+**Content Constraints.**
+
+- Every `Required? = yes` field MUST be present on every call.
+- Extra fields not in the Outputs table MUST NOT be emitted.
+- `quantity` MUST be clamped to `[0, position]` before emission.
+- `bid_price` MUST be strictly positive; if the haircut product `price * price_penalty` is non-positive, floor to `price`.
+- Sign convention: `action = "sell"` corresponds to negative net demand; `quantity` is always non-negative.
+- Determinism marker: deterministic — same inputs and state MUST produce byte-identical outputs across variants.
+
+**Serialization Format.**
+
+```
+<analysis>...free-form reasoning, 1–3 sentences...</analysis>
+<decision>{"action": "sell", "bid_price": 82.45, "quantity": 1225.0, "reasoning": "Deviation crossed liquidation_threshold=-0.15 after first-mover selling; liquidating 35% of collateral at delayed haircut."}</decision>
+```
+
+Every implementation variant declared for this agent (rule-driven, model-driven, hybrid, retrieval-augmented) MUST honour this tag pattern. Rule-driven variants MAY populate `<analysis>` from a deterministic template. Model-driven variants MUST include this tag + JSON schema literally in the system or user prompt. Retrieval-augmented variants MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+
+**Implementer Contract Reminder.**
+
+1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, or the round header.
+2. **Decision emission** — every `Required? = yes` field MUST be populated; `quantity` MUST be clamped to `[0, position]`.
+3. **Prompt drafting** — every model-driven variant's prompt MUST spell out the tag pattern and JSON schema verbatim with a worked example using the later `liquidation_threshold=-0.15` calibration.
+4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range.
+5. **Variant parity** — every declared variant MUST produce the same field set; do not add variant-only fields without extending this contract first.
+6. **Contract-versus-prose** — on any conflict with Core Behavioral Mechanism, Action Space, or Mathematical Model, this I/O Contract wins.
+
 #### Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
@@ -220,5 +270,5 @@ State update: no state becomes negative.
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. |
+| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. |
 | Status | experimental |

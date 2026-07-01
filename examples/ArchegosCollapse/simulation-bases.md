@@ -233,6 +233,56 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 #### 4.1.5 Behavioral Framework
 
+###### 4.1.5.0 I/O Contract
+
+**Inputs (per decision call).**
+
+| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
+|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.1.5.1                                                                                          |
+| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.1.5.1                                                                                          |
+| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.1.5.1                                                                                          |
+| `position`              | agent state (§4.1.5.4 state variables)              | `float`      | yes                     | Persistent long exposure remaining                                                                       |
+| `cash`                  | agent state (§4.1.5.4 state variables)              | `float`      | yes                     | Populated by init from §4.1.6                                                                            |
+| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
+| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+
+**Outputs (per decision call).** The agent emits exactly one decision object.
+
+| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
+|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.1.5.3 Order types)       |
+| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.1.5.3 Price level rule)                       |
+| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (§4.1.5.3 Order quantity rule)                |
+| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+
+**Content Constraints.**
+
+- Every `Required? = yes` field MUST be present on every call.
+- Extra fields not in the Outputs table MUST NOT be emitted.
+- `quantity` MUST be clamped to `[0, position]` before emission.
+- `bid_price` MUST be strictly positive; if computed non-positive, floor to `price`.
+- Sign convention: `action = "sell"` corresponds to negative net demand; `action = "buy"` corresponds to positive net demand; `quantity` is always non-negative.
+- Determinism marker: this agent is `deterministic` (§4.1.5.5); the same inputs and state MUST produce byte-identical outputs across variants.
+
+**Serialization Format.**
+
+```
+<analysis>...free-form reasoning, 1–3 sentences...</analysis>
+<decision>{"action": "sell", "bid_price": 84.0, "quantity": 2500.0, "reasoning": "Deviation crossed margin_threshold, forced close-out of 50% of position."}</decision>
+```
+
+Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rule` variant MAY populate `<analysis>` from a deterministic template. The `LLM`, `RuleLLM`, and `Rag` variants MUST include this tag + JSON schema literally in the system or user prompt. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+
+**Implementer Contract Reminder.**
+
+1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, or the round header.
+2. **Decision emission** — every `Required? = yes` field MUST be populated; `quantity` MUST be clamped to `[0, position]`.
+3. **Prompt drafting** — the `LLM`, `RuleLLM`, and `Rag` prompt templates MUST spell out the tag pattern and JSON schema verbatim with a worked example.
+4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range.
+5. **Variant parity** — all four target §10.1 variants MUST produce the same field set; do not add variant-only fields without extending this contract first.
+6. **Contract-versus-prose** — on any conflict with §4.1.5.2, §4.1.5.3, or §4.1.5.4, this §4.1.5.0 wins.
+
 ###### 4.1.5.1 Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
@@ -388,7 +438,7 @@ State update: no state becomes negative.
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. |
+| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
 | Status | experimental |
 
 ### §4.2 PrimeBroker1
@@ -461,6 +511,56 @@ Market Contribution by Regime:
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
 #### 4.2.5 Behavioral Framework
+
+###### 4.2.5.0 I/O Contract
+
+**Inputs (per decision call).**
+
+| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
+|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.2.5.1                                                                                          |
+| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.2.5.1                                                                                          |
+| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.2.5.1                                                                                          |
+| `position`              | agent state (§4.2.5.4)                              | `float`      | yes                     | Collateral inventory available to liquidate                                                              |
+| `cash`                  | agent state (§4.2.5.4)                              | `float`      | yes                     | Populated by init from §4.2.6                                                                            |
+| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
+| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+
+**Outputs (per decision call).**
+
+| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
+|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.2.5.3 Order types)       |
+| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.2.5.3 Price level rule)                       |
+| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (§4.2.5.3 Order quantity rule)                |
+| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+
+**Content Constraints.**
+
+- Every `Required? = yes` field MUST be present on every call.
+- Extra fields not in the Outputs table MUST NOT be emitted.
+- `quantity` MUST be clamped to `[0, position]` before emission.
+- `bid_price` MUST be strictly positive; if computed non-positive, floor to `price`.
+- Sign convention: `action = "sell"` corresponds to negative net demand; `action = "buy"` corresponds to positive net demand; `quantity` is always non-negative.
+- Determinism marker: this agent is `deterministic` (§4.2.5.5); the same inputs and state MUST produce byte-identical outputs across variants.
+
+**Serialization Format.**
+
+```
+<analysis>...free-form reasoning, 1–3 sentences...</analysis>
+<decision>{"action": "sell", "bid_price": 90.0, "quantity": 800.0, "reasoning": "Deviation −0.11 crossed θ_liq_1 = −0.10; liquidate 40% of position first."}</decision>
+```
+
+Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rule` variant MAY populate `<analysis>` from a deterministic template. The `LLM`, `RuleLLM`, and `Rag` variants MUST include this tag + JSON schema literally in the system or user prompt. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+
+**Implementer Contract Reminder.**
+
+1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, or the round header.
+2. **Decision emission** — every `Required? = yes` field MUST be populated; `quantity` MUST be clamped to `[0, position]`.
+3. **Prompt drafting** — the `LLM`, `RuleLLM`, and `Rag` prompt templates MUST spell out the tag pattern and JSON schema verbatim with a worked example.
+4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range.
+5. **Variant parity** — all four target §10.1 variants MUST produce the same field set; do not add variant-only fields without extending this contract first.
+6. **Contract-versus-prose** — on any conflict with §4.2.5.2, §4.2.5.3, or §4.2.5.4, this §4.2.5.0 wins.
 
 ###### 4.2.5.1 Decision Information Set
 
@@ -614,7 +714,7 @@ State update: no state becomes negative.
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. |
+| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
 | Status | experimental |
 
 ### §4.3 PrimeBroker2
@@ -687,6 +787,56 @@ Market Contribution by Regime:
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
 #### 4.3.5 Behavioral Framework
+
+###### 4.3.5.0 I/O Contract
+
+**Inputs (per decision call).**
+
+| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
+|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.3.5.1                                                                                          |
+| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.3.5.1                                                                                          |
+| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.3.5.1                                                                                          |
+| `position`              | agent state (§4.3.5.4 state variables)              | `float`      | yes                     | Collateral inventory remaining to liquidate                                                              |
+| `cash`                  | agent state (§4.3.5.4 state variables)              | `float`      | yes                     | Populated by init from §4.3.6                                                                            |
+| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
+| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+
+**Outputs (per decision call).** The agent emits exactly one decision object.
+
+| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
+|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.3.5.3 Order types)       |
+| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.3.5.3 Price level rule; sell uses `price * price_penalty`) |
+| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (§4.3.5.3 Order quantity rule)                |
+| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+
+**Content Constraints.**
+
+- Every `Required? = yes` field MUST be present on every call.
+- Extra fields not in the Outputs table MUST NOT be emitted.
+- `quantity` MUST be clamped to `[0, position]` before emission.
+- `bid_price` MUST be strictly positive; if the haircut product `price * price_penalty` is non-positive, floor to `price`.
+- Sign convention: `action = "sell"` corresponds to negative net demand; `quantity` is always non-negative.
+- Determinism marker: this agent is `deterministic` (§4.3.5.5); the same inputs and state MUST produce byte-identical outputs across variants.
+
+**Serialization Format.**
+
+```
+<analysis>...free-form reasoning, 1–3 sentences...</analysis>
+<decision>{"action": "sell", "bid_price": 82.45, "quantity": 1225.0, "reasoning": "Deviation crossed liquidation_threshold=-0.15 after first-mover selling; liquidating 35% of collateral at delayed haircut."}</decision>
+```
+
+Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rule` variant MAY populate `<analysis>` from a deterministic template. The `LLM`, `RuleLLM`, and `Rag` variants MUST include this tag + JSON schema literally in the system or user prompt. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+
+**Implementer Contract Reminder.**
+
+1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, or the round header.
+2. **Decision emission** — every `Required? = yes` field MUST be populated; `quantity` MUST be clamped to `[0, position]`.
+3. **Prompt drafting** — the `LLM`, `RuleLLM`, and `Rag` prompt templates MUST spell out the tag pattern and JSON schema verbatim with a worked example that uses the later `liquidation_threshold=-0.15` calibration.
+4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range.
+5. **Variant parity** — all four target §10.1 variants MUST produce the same field set; do not add variant-only fields without extending this contract first.
+6. **Contract-versus-prose** — on any conflict with §4.3.5.2, §4.3.5.3, or §4.3.5.4, this §4.3.5.0 wins.
 
 ###### 4.3.5.1 Decision Information Set
 
@@ -842,7 +992,7 @@ State update: no state becomes negative.
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. |
+| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
 | Status | experimental |
 
 ### §4.4 BlockTradeBuyer
@@ -926,6 +1076,56 @@ Market Contribution by Regime:
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
 #### 4.4.5 Behavioral Framework
+
+###### 4.4.5.0 I/O Contract
+
+**Inputs (per decision call).**
+
+| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
+|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.4.5.1                                                                                          |
+| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.4.5.1                                                                                          |
+| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.4.5.1                                                                                          |
+| `cash`                  | agent state (§4.4.5.4 state variables)              | `float`      | yes                     | Capital available for distressed block absorption                                                        |
+| `position`              | agent state (§4.4.5.4 state variables)              | `float`      | yes                     | Cumulative inventory accumulated so far                                                                  |
+| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
+| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+
+**Outputs (per decision call).** The agent emits exactly one decision object.
+
+| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
+|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.4.5.3 Order types)       |
+| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.4.5.3 Price level rule; buy uses current `price`) |
+| `quantity`  | float  | ≥ 0, ≤ cash / price        | shares / units of position | yes       | Order magnitude (§4.4.5.3 Order quantity rule)                |
+| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+
+**Content Constraints.**
+
+- Every `Required? = yes` field MUST be present on every call.
+- Extra fields not in the Outputs table MUST NOT be emitted.
+- `quantity` MUST be clamped so that `quantity * bid_price ≤ cash`.
+- `bid_price` MUST be strictly positive; if computed non-positive, floor to `price`.
+- Sign convention: `action = "buy"` corresponds to positive net demand; `quantity` is always non-negative.
+- Determinism marker: this agent is `deterministic` (§4.4.5.5); the same inputs and state MUST produce byte-identical outputs across variants.
+
+**Serialization Format.**
+
+```
+<analysis>...free-form reasoning, 1–3 sentences...</analysis>
+<decision>{"action": "buy", "bid_price": 88.0, "quantity": 3409.09, "reasoning": "Deviation -0.12 exceeds discount_threshold=-0.10; deploying 30% of cash to absorb forced supply."}</decision>
+```
+
+Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rule` variant MAY populate `<analysis>` from a deterministic template. The `LLM`, `RuleLLM`, and `Rag` variants MUST include this tag + JSON schema literally in the system or user prompt. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+
+**Implementer Contract Reminder.**
+
+1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, or the round header.
+2. **Decision emission** — every `Required? = yes` field MUST be populated; `quantity * bid_price` MUST NOT exceed `cash`.
+3. **Prompt drafting** — the `LLM`, `RuleLLM`, and `Rag` prompt templates MUST spell out the tag pattern and JSON schema verbatim with a worked example emitting a `buy` at the current `price`.
+4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range.
+5. **Variant parity** — all four target §10.1 variants MUST produce the same field set; do not add variant-only fields without extending this contract first.
+6. **Contract-versus-prose** — on any conflict with §4.4.5.2, §4.4.5.3, or §4.4.5.4, this §4.4.5.0 wins.
 
 ###### 4.4.5.1 Decision Information Set
 
@@ -1079,7 +1279,7 @@ State update: no state becomes negative.
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. |
+| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
 | Status | experimental |
 
 ### §4.5 InformationTrader
@@ -1165,6 +1365,60 @@ Market Contribution by Regime:
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
 #### 4.5.5 Behavioral Framework
+
+###### 4.5.5.0 I/O Contract
+
+**Inputs (per decision call).**
+
+| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
+|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
+| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.5.5.1                                                                                          |
+| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.5.5.1                                                                                          |
+| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.5.5.1                                                                                          |
+| `prev_price`            | environment broadcast (extended field)              | `float`      | yes                     | Supports local order-flow stress inference [Ref 5]                                                       |
+| `position`              | agent state (§4.5.5.4 state variables)              | `float`      | yes                     | Long inventory available for the sell (front-run) branch                                                 |
+| `short_position`        | agent state (§4.5.5.4 state variables)              | `float`      | yes                     | Determines whether the cover branch can activate                                                         |
+| `cash`                  | agent state (§4.5.5.4 state variables)              | `float`      | yes                     | Bounds the cover-branch buy quantity                                                                     |
+| `rng_state`             | agent state (seeded)                                | `int` / RNG  | yes                     | Detection uses Bernoulli(`p_detect`); seed-reproducible                                                  |
+| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
+| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+
+**Outputs (per decision call).** The agent emits exactly one decision object.
+
+| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
+|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.5.5.3 Order types)       |
+| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.5.5.3 Price level rule; both branches use current `price`) |
+| `quantity`  | float  | ≥ 0; sell ≤ position; buy ≤ min(short_position, cash / price) | shares / units of position | yes | Order magnitude (§4.5.5.3 Order quantity rule)                |
+| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+
+**Content Constraints.**
+
+- Every `Required? = yes` field MUST be present on every call.
+- Extra fields not in the Outputs table MUST NOT be emitted.
+- Sell branch `quantity` MUST be clamped to `[0, min(front_run_size, position)]`.
+- Cover branch `quantity` MUST be clamped to `[0, min(cover_size, short_position, cash / price)]`.
+- `bid_price` MUST be strictly positive; if computed non-positive, floor to `price`.
+- Sign convention: `action = "sell"` corresponds to negative net demand and increases `short_position`; `action = "buy"` corresponds to positive net demand and reduces `short_position`; `quantity` is always non-negative.
+- Determinism marker: this agent is `stochastic-given-seed` (§4.5.5.5); the emitted `<decision>` object MUST allow the round's Bernoulli draw to be reproduced from the declared `rng_state` seed (the implementation MUST log the seed deterministically per round).
+
+**Serialization Format.**
+
+```
+<analysis>...free-form reasoning, 1–3 sentences...</analysis>
+<decision>{"action": "sell", "bid_price": 84.0, "quantity": 1000.0, "reasoning": "Deviation -0.16 crossed detection_threshold=-0.05 and Bernoulli(p_detect=0.5) fired; front-running expected forced flow."}</decision>
+```
+
+Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rule` variant MAY populate `<analysis>` from a deterministic template. The `LLM`, `RuleLLM`, and `Rag` variants MUST include this tag + JSON schema literally in the system or user prompt. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+
+**Implementer Contract Reminder.**
+
+1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, the seeded RNG, or the round header; `prev_price` MUST be added to the environment broadcast payload for this agent.
+2. **Decision emission** — every `Required? = yes` field MUST be populated; sell and cover quantities MUST be clamped per §4.5.5.3.
+3. **Prompt drafting** — the `LLM`, `RuleLLM`, and `Rag` prompt templates MUST spell out the tag pattern and JSON schema verbatim with a worked example that covers both the front-run sell and the cover buy branches, and MUST expose the Bernoulli detection semantics.
+4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range, and (iv) verifies seed reproducibility of the detection branch.
+5. **Variant parity** — all four target §10.1 variants MUST produce the same field set; do not add variant-only fields without extending this contract first.
+6. **Contract-versus-prose** — on any conflict with §4.5.5.2, §4.5.5.3, or §4.5.5.4, this §4.5.5.0 wins.
 
 ###### 4.5.5.1 Decision Information Set
 
@@ -1327,7 +1581,7 @@ State update: no state becomes negative.
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. |
+| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
 | Status | experimental |
 
 ## §5 Agent Diversity Verification
