@@ -1,0 +1,195 @@
+# ArchegosCollapse — Scenario Target
+
+## §1 Meta
+
+| Field         | Content                                                                                                                                                                     |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name          | ArchegosCollapse                                                                                                                                                            |
+| Domain        | finance                                                                                                                                                                     |
+| Requested By  | Sijia Chen                                                                                                                                                                  |
+| Produced By   | define-simulation-scenario-skill.md v1.2.0 (invoking agent: QoderWork)                                                                                                      |
+| Created       | 2026-07-01                                                                                                                                                                  |
+| Pipeline      | masim/skills/polish-simulation-pipeline.md                                                                                                                                  |
+| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                                                     |
+| Status        | locked                                                                                                                                                                      |
+| CHANGELOG     | 2026-07-01  Produced by define-simulation-scenario-skill.md v1.2.0 (Status: draft). / 2026-07-01  Polish target-file gate: existing, §11 three-PASS green, Status locked.    |
+
+## §2 Phenomenon Statement
+
+### §2.1 Trigger
+
+A concentrated fund, using total return swaps to build hidden synthetic equity exposure of roughly 35 to 40 billion USD across five prime brokers at 5x to 8x leverage, faces a decline in the price of its most concentrated reference asset. As the price falls, the notional deviation from fundamental crosses the maintenance-margin threshold on one or more of the swap contracts. Margin calls arrive that the fund cannot meet, converting a discretionary long position into a forced close-out obligation.
+
+### §2.2 Mechanism
+
+The forced close-out sends a large sell order into a market whose fundamental value has not yet moved. Price impact drives the price further below fundamental, which pushes the deviation across additional broker-specific liquidation thresholds. Each prime broker holding collateral against the same distressed borrower knows that acting later means selling into worse prices, so the private optimum is to liquidate first, a creditor-run incentive that turns the initial forced sell into a cascading race. As successive brokers unload inventory, price impact accumulates non-linearly, producing a decline much larger than any single position size would suggest.
+
+### §2.3 Participants
+
+The causal chain requires four archetypes plus one accelerator. The concentrated fund holds and eventually dumps the leveraged position. Two prime brokers with different liquidation thresholds enact the first-mover-advantage race, one selling early at a shallower deviation and one following after a deeper deviation. A block-trade buyer represents opportunistic institutional capital that absorbs supply once the discount from fundamental is large enough to compensate for inventory risk. An information trader that observes early price weakness and front-runs the anticipated forced selling accelerates the initial decline before broker thresholds trigger.
+
+### §2.4 Resolution
+
+The cascade halts when the price discount from fundamental exceeds the block-trade buyer's risk-compensation threshold, at which point opportunistic buyers absorb the remaining forced supply. Broker inventories are also exhausted after their configured liquidation fractions have been applied, so incremental selling pressure fades. Slow mean reversion toward fundamental then begins, but the trough level and the recovery slope both depend on how deep the cascade travelled and how much broker inventory was ultimately liquidated at fire-sale prices.
+
+## §3 Research Goals
+
+1. **Cascade amplification magnitude.** How much larger is the peak deviation from fundamental than the initial deviation caused by the concentrated fund's first forced sell alone? Answered by measuring `max(|deviation|)` across the full run against a counterfactual where only the concentrated fund acts.
+2. **First-mover premium (parameter sweep).** How much better is the average execution price received by the earlier-threshold prime broker compared to the later-threshold prime broker? Answered by a parameter sweep over the gap between `θ_liq_1` and `θ_liq_2`.
+3. **Broker-race ablation.** If the delayed-liquidator prime broker is removed from the roster, does the cascade still develop, and if so how much shallower is the trough? Answered by an ablation turning off `prime-broker-delayed-liquidator`.
+4. **Buyer-absorption threshold (parameter sweep).** How does the depth and duration of the cascade change as the block-trade buyer's discount threshold varies over its empirical range? Answered by a parameter sweep on `θ_disc`.
+5. **Rule vs. reasoning behaviour under stress (variant comparison).** Does an LLM-reasoning variant of the prime brokers produce meaningfully different liquidation timing than the rule-based baseline when both face the same price trajectory? Answered by comparing the `Rule` and `LLM` variants declared in §10.1.
+
+## §4 Theoretical Anchors
+
+### §4.1 TRS Hidden Leverage and Forced Close-out (Becketti 2021)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Becketti, S. (2021). Hidden leverage and the Archegos collapse. *Economic Review*, Federal Reserve Bank of Kansas City, 2021-Q3, 1–12. https://doi.org/10.18651/ER/v106n3Becketti                                                                                                    |
+| Key mechanism (≤30 words) | TRS exposure accumulates outside public equity filings; when reference-asset price falls, maintenance-margin breach converts discretionary holding into forced close-out.                                                                                                             |
+| Key equation              | `equity_ratio_t = equity_t / (|position_t| · P_t)`; forced sell when `deviation_t < θ_margin`.                                                                                                                                                                                       |
+| Motivates agent           | `concentrated-fund` (§7).                                                                                                                                                                                                                                                             |
+| Parameter implication     | `θ_margin` empirical range −0.25 to −0.05, default −0.15; `φ_trs` (sell fraction per trigger) empirical range 0.10 to 1.00, default 0.50 (see §9).                                                                                                                                    |
+
+### §4.2 Creditor Run and First-Mover Advantage (Gorton & Metrick 2012)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016                                                                                                          |
+| Key mechanism (≤30 words) | Multiple creditors holding claims on the same distressed borrower face a coordination game whose dominant strategy is immediate liquidation; later sellers receive worse prices under accumulated impact.                                                                            |
+| Key equation              | `payoff_i = q_i · P(t_i)` with `E[P(t_1) − P(t_2)] ≈ λ · Q_1 > 0`; earlier `t_i` gives strictly higher expected payoff during liquidation pressure.                                                                                                                                   |
+| Motivates agent           | `prime-broker-first-mover` and `prime-broker-delayed-liquidator` (§7); the two agents share this theory but differ by threshold calibration, which is the empirical embodiment of the first-mover advantage.                                                                          |
+| Parameter implication     | `θ_liq_1` empirical range −0.30 to −0.03, default −0.10; `θ_liq_2` empirical range −0.30 to −0.03, default −0.15; the gap is calibrated so that the expected payoff differential matches the observed Morgan Stanley versus Credit Suisse loss ratio of roughly 3x to 5x (see §9).    |
+
+### §4.3 Opportunistic Block Trading and Market Stabilisation (Grossman & Miller 1988)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x                                                                                                                    |
+| Key mechanism (≤30 words) | Liquidity providers absorb forced supply only when the discount from fundamental compensates for inventory risk during the holding period until resale.                                                                                                                              |
+| Key equation              | Activation: `|deviation_t| > θ_disc`; absorbed quantity `Q_buy = α · cash / P_t`, where `θ_disc ≥ risk_premium + expected_holding_cost`.                                                                                                                                             |
+| Motivates agent           | `block-trade-buyer` (§7).                                                                                                                                                                                                                                                             |
+| Parameter implication     | `θ_disc` empirical range 0.05 to 0.15 in distressed markets, default 0.10; capital deployment fraction `α` empirical range 0.20 to 0.40, default 0.30 (see §9).                                                                                                                       |
+
+### §4.4 Insider Trading and Order-Flow-Based Information Advantage (Kyle 1985)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Kyle, A. S. (1985). Continuous auctions and insider trading. *Econometrica*, 53(6), 1315–1335. https://doi.org/10.2307/1913210                                                                                                                                                        |
+| Key mechanism (≤30 words) | An informed trader who detects nascent distress before it is public front-runs anticipated forced order flow, accelerating the initial price decline before rule-based broker thresholds trigger.                                                                                    |
+| Key equation              | Detection probability `p_det` gates the front-running order; conditional order sign `sign(order) = −sign(expected forced flow)`; expected profit rises with cascade depth conditional on successful detection.                                                                        |
+| Motivates agent           | `information-trader` (§7).                                                                                                                                                                                                                                                            |
+| Parameter implication     | `θ_det` empirical range 0.03 to 0.08, default 0.05; `p_det` empirical range 0.30 to 0.70, default 0.50 (see §9).                                                                                                                                                                     |
+
+## §5 Stylized Facts
+
+| #  | Fact (one sentence)                                                                             | Quantitative range                                     | Citation                                                                                              | Acceptance metric                                             |
+|----|-------------------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| F1 | The cascade trough drives price at least 40 % below fundamental.                                | 0.40 ≤ (F − min P) / F ≤ 0.65                          | Archegos ViacomCBS trajectory, Bloomberg (2021); Becketti (2021), 10.18651/ER/v106n3Becketti          | `analysis.py: trough_deviation()` ∈ [0.40, 0.65]              |
+| F2 | Cascade onset to trough completes within 3 to 8 rounds after the first margin breach (dynamic). | 3 ≤ round(trough) − round(margin_breach) ≤ 8           | SEC Staff Report on Archegos Capital Management (2022); five-trading-day historical cascade window    | `analysis.py: cascade_duration_rounds()` ∈ [3, 8]             |
+| F3 | The later-threshold broker earns a materially worse average execution price than the earlier one.| average execution price ratio yields loss ratio ≥ 3x   | Credit Suisse Annual Report (2021); Morgan Stanley Q2 2021 earnings disclosure                        | `analysis.py: broker_loss_ratio()` ≥ 3.0                      |
+| F4 | Removing the delayed broker meaningfully lifts the trough (ablation-visible; dynamic).          | \|trough_full\| − \|trough_no_PB2\| ≥ 0.10             | Gorton & Metrick (2012), 10.1016/j.jfineco.2011.03.016; Archegos five-broker aggregation              | `analysis.py: trough_delta_ablation()` ≥ 0.10                 |
+| F5 | Recovery within 200 rounds is partial, not full; end price stays at least 15 % below fundamental.| (F − P_end) / F ≥ 0.15                                 | Bloomberg (2021) ViacomCBS six-month post-cascade trajectory                                          | `analysis.py: recovery_gap()` ≥ 0.15                          |
+
+## §6 Historical / Empirical Anchors
+
+### §6.1 Archegos Capital Management Collapse (March 22–29, 2021)
+
+| Field             | Content                                                                                                                                                                                                                                                                                              |
+|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name + dates      | Archegos Capital Management collapse; primary cascade March 22 to March 29, 2021.                                                                                                                                                                                                                    |
+| Trigger           | ViacomCBS 3 billion USD secondary equity offering on March 22, 2021, drove VIAC down about 12 % intraday, breaching TRS maintenance-margin thresholds simultaneously at five prime brokers.                                                                                                          |
+| Quantitative arc  | VIAC price fell from 100 USD (March 22 open) to about 40 USD (March 29 close), a 60 % decline in five trading days; Archegos aggregate notional 35 to 40 billion USD across five prime brokers at 5x to 8x equity leverage; Credit Suisse loss 5.5 billion USD, Nomura 2.9 billion USD, Morgan Stanley about 1 billion USD; total counterparty loss about 20 billion USD. |
+| Agent mapping     | `concentrated-fund` maps to Archegos Capital Management (Bill Hwang); `prime-broker-first-mover` maps to Morgan Stanley, which organised block trades March 25 to 26 with the smallest loss; `prime-broker-delayed-liquidator` maps to Credit Suisse and Nomura, which acted on March 29 with the largest losses; `block-trade-buyer` maps to institutional buyers of discounted VIAC and DISCA blocks in late March 2021; `information-trader` maps to hedge funds that reportedly shorted the concentrated names before the public cascade. |
+| Primary source(s) | Becketti, S. (2021). Hidden leverage and the Archegos collapse. *Economic Review*, FRB Kansas City, 2021-Q3, 1–12. https://doi.org/10.18651/ER/v106n3Becketti ; Financial Stability Board (2022). *Global Monitoring Report on Non-Bank Financial Intermediation 2022*, pp. 47–54. https://www.fsb.org/ ; U.S. Securities and Exchange Commission (2022). *SEC Staff Report on Archegos Capital Management*; Credit Suisse Group AG (2021). *Annual Report 2021*, Zurich. |
+
+## §7 Agent Roster
+
+| Agent name (kebab)                | Real-world counterpart                                                     | Theory family (§4 anchor) | Domain role                        | Primary signals                              | Intent line                                                                                             | Expected pool match                                                |
+|-----------------------------------|----------------------------------------------------------------------------|---------------------------|------------------------------------|----------------------------------------------|---------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| concentrated-fund                 | family office or hedge fund with concentrated total-return-swap exposure   | Leverage (§4.1)           | Destabilising (initiator)          | price, fundamental, deviation, position      | "Exists to convert hidden leverage into forced supply once margin breaks."                              | examples/AGENT_POOL/finance/concentrated-fund.md                   |
+| prime-broker-first-mover          | Morgan Stanley-type dealer with early risk-management stance               | Leverage (§4.2)           | Destabilising (amplifier)          | price, fundamental, deviation, position      | "Exists to protect collateral value by liquidating early ahead of peer brokers."                        | examples/AGENT_POOL/finance/prime-broker-first-mover.md            |
+| prime-broker-delayed-liquidator   | Credit Suisse or Nomura-type dealer with delayed reaction                  | Leverage (§4.2)           | Destabilising (amplifier)          | price, fundamental, deviation, position      | "Exists to model the delayed mover who bears the cascade's cumulative price impact."                    | examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md     |
+| block-trade-buyer                 | opportunistic institutional buyer of distressed block trades               | Liquidity (§4.3)          | Stabilising                        | price, fundamental, deviation, cash          | "Exists to absorb forced supply once the discount clears the risk-compensation threshold."              | examples/AGENT_POOL/finance/block-trade-buyer.md                   |
+| information-trader                | hedge fund that detects early distress via order-flow signals              | Informed Trading (§4.4)   | Destabilising then neutral         | price, prev_price, deviation, return         | "Exists to front-run anticipated forced flow, accelerating the initial decline."                        | examples/AGENT_POOL/finance/information-trader.md                  |
+
+Diversity notes: `prime-broker-first-mover` and `prime-broker-delayed-liquidator` share the §4.2 Leverage / creditor-run theory family; the diversity constraint is satisfied because their threshold calibrations differ, which is the direct empirical embodiment of the first-mover-advantage predicted by Gorton & Metrick (2012). `block-trade-buyer` supplies the required Stabilising role. `information-trader` uses `prev_price` and derived `return` as non-headline signals, satisfying the non-state-variable diversity guideline.
+
+## §8 Environment Specification
+
+### §8.1 Price Formation
+
+Single-clearing-price impact-plus-mean-reversion market: `P(t+1) = max(P(t) + λ · D(t) + γ · [F − P(t)] + ε(t), 0.01)`, where `D(t) = Σ buy_qty − Σ sell_qty` aggregates all agent orders in round t, `F` is a constant fundamental value, `λ` is the per-unit price impact coefficient, `γ` is the mean-reversion speed, and `ε(t) ~ N(0, σ²)` is exogenous noise. `λ` is calibrated from Hasbrouck (1991), *J. Finance*, 46(1), 179–207, https://doi.org/10.1111/j.1540-6261.1991.tb03749.x ; `γ` from French & Roll (1986), *JFE*, 17(1), 5–26, https://doi.org/10.1016/0304-405X(86)90004-8 ; `σ` from Roll (1984), *J. Finance*, 39(4), 1127–1139, https://doi.org/10.1111/j.1540-6261.1984.tb03897.x .
+
+### §8.2 Information Broadcast
+
+Each round the market broadcasts the following fields to every agent simultaneously.
+
+| Field         | Type  | Definition                                             | Rationale                                                                                          |
+|---------------|-------|--------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| `price`       | float | Current post-clearing market price                     | Primary state signal; every agent uses it for valuation and threshold checks (§4.1, §4.2, §4.3).   |
+| `prev_price`  | float | Post-clearing price of the previous round              | Required by `information-trader` for early-decline front-running (§4.4).                            |
+| `fundamental` | float | Constant intrinsic fundamental value                   | Required for deviation calculation; anchor for the mean-reversion term in §8.1.                    |
+| `deviation`   | float | `(price − fundamental) / fundamental`                  | Primary trigger signal for `concentrated-fund`, both prime brokers, and `block-trade-buyer`.       |
+| `round`       | int   | Current round number                                    | Frequency control and diagnostic tagging.                                                          |
+
+`return_pct` is not broadcast separately; agents that need it compute it from `price` and `prev_price`. This keeps the signal set minimal in the spirit of §4.3.
+
+### §8.3 Constraints and Frictions
+
+| Item                       | Yes / No | Rationale                                                                                                             |
+|----------------------------|----------|-----------------------------------------------------------------------------------------------------------------------|
+| Short-selling allowed      | Yes      | Required by Kyle (1985) informed-trading channel so `information-trader` can front-run anticipated forced supply.       |
+| Explicit short-borrow cost | No       | The Archegos cascade unfolded over five trading days, faster than short-borrow markets could reprice.                  |
+| Margin (broker-side)       | Implicit | The concentrated-fund's `θ_margin` breach models the margin call; no explicit margin-call re-quote loop is simulated.  |
+| Circuit breaker            | No       | The historical event did not trigger index-level breakers; VIAC declined 60 % across five days without an exchange halt. |
+| Price floor (numerical)    | Yes      | `P(t+1) = max(·, 0.01)` prevents non-positive prices and represents minimum firm-recovery value.                        |
+
+### §8.4 Round Granularity
+
+Each round approximates one trading day. A 200-round run covers roughly 40 trading weeks. Justification: the historical Archegos cascade unfolded over 5 trading days from March 22 to March 29, 2021, per SEC Staff Report (2022); a 200-round horizon lets the simulation cover onset (rounds 10 to 25), trough (rounds 15 to 30), and partial recovery (rounds 30 to 80).
+
+## §9 Parameter Seeds
+
+| Parameter                       | Symbol   | Belongs to (agent / environment)                | Empirical range          | Candidate default | Source citation                                                                                                                                                                     |
+|---------------------------------|----------|-------------------------------------------------|--------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| initial price                   | P(0)     | environment (§8.1)                              | 100 (equity-simulation convention) | 100.0             | Grossman & Miller (1988), *J. Finance*, 43(3); baseline `P(0) = F` normalization for distressed-market simulation                                                                    |
+| fundamental value               | F        | environment (§8.1)                              | 100 (normalized)         | 100.0             | Source: normalization                                                                                                                                                               |
+| price impact                    | λ        | environment (§8.1)                              | 0.01 – 0.05              | 0.03              | Hasbrouck (1991), *J. Finance*, 46(1), 179–207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x                                                                                  |
+| mean reversion speed            | γ        | environment (§8.1)                              | 0.005 – 0.02             | 0.01              | French & Roll (1986), *JFE*, 17(1), 5–26. https://doi.org/10.1016/0304-405X(86)90004-8                                                                                              |
+| noise standard deviation        | σ        | environment (§8.1)                              | 0.01 – 0.03              | 0.015             | Roll (1984), *J. Finance*, 39(4), 1127–1139. https://doi.org/10.1111/j.1540-6261.1984.tb03897.x                                                                                     |
+| margin threshold                | θ_margin | concentrated-fund (§7)                          | −0.25 to −0.05           | −0.15             | Becketti (2021), *Economic Review*, FRB Kansas City, 2021-Q3, 1–12. https://doi.org/10.18651/ER/v106n3Becketti ; FSB (2022), pp. 47–51                                              |
+| TRS sell ratio                  | φ_trs    | concentrated-fund (§7)                          | 0.10 – 1.00              | 0.50              | FSB (2022), *Global Monitoring Report on Non-Bank Financial Intermediation 2022*, pp. 47–51, https://www.fsb.org/                                                                    |
+| fund initial position           | Q_CF     | concentrated-fund (§7)                          | 4000 – 6000 (normalized scale) | 5000.0            | FSB (2022) notional exposure 35 to 40 billion USD, scaled                                                                                                                            |
+| fund initial cash               | C_CF     | concentrated-fund (§7)                          | 400000 – 600000 (normalized scale, ~10 % of notional) | 500000.0        | FSB (2022) equity-ratio range 10 % to 25 % of notional; Becketti (2021)                                                                                                              |
+| PB1 liquidation threshold       | θ_liq_1  | prime-broker-first-mover (§7)                   | −0.30 to −0.03           | −0.10             | Gorton & Metrick (2012), *JFE*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016 ; Morgan Stanley Q2 2021 earnings disclosure                                          |
+| PB1 sell ratio                  | φ_liq_1  | prime-broker-first-mover (§7)                   | 0.05 – 1.00              | 0.40              | Gorton & Metrick (2012), *JFE*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016                                                                                       |
+| PB2 liquidation threshold       | θ_liq_2  | prime-broker-delayed-liquidator (§7)            | −0.30 to −0.03           | −0.15             | Gorton & Metrick (2012), *JFE*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016 ; Credit Suisse Group AG (2021), *Annual Report 2021*                                 |
+| PB2 sell ratio                  | φ_liq_2  | prime-broker-delayed-liquidator (§7)            | 0.05 – 1.00              | 0.35              | Gorton & Metrick (2012), *JFE*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016                                                                                       |
+| BT discount threshold           | θ_disc   | block-trade-buyer (§7)                          | 0.05 – 0.15              | 0.10              | Grossman & Miller (1988), *J. Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x                                                                          |
+| BT cash deployment fraction     | α        | block-trade-buyer (§7)                          | 0.20 – 0.40              | 0.30              | Grossman & Miller (1988), *J. Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x                                                                          |
+| IT detection threshold          | θ_det    | information-trader (§7)                         | 0.03 – 0.08              | 0.05              | Kyle (1985), *Econometrica*, 53(6), 1315–1335. https://doi.org/10.2307/1913210                                                                                                      |
+| IT detection probability        | p_det    | information-trader (§7)                         | 0.30 – 0.70              | 0.50              | Boehmer, Jones, & Zhang (2008). Which shorts are informed? *J. Finance*, 63(2), 491–527. https://doi.org/10.1111/j.1540-6261.2008.01324.x                                            |
+
+Normalization cap: 1 of 17 rows (`fundamental value`) is marked `Source: normalization`, well under the §11 cap of 10 %.
+
+## §10 Variants and Success Criteria
+
+### §10.1 Variants to Build
+
+| Variant   | Build? | Rationale                                                                                                                                     |
+|-----------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| Rule      | Yes    | Deterministic baseline; answers §3 questions 1, 2, 3, and 4 without LLM stochasticity.                                                        |
+| LLM       | Yes    | Required for §3 question 5 (rule-vs-reasoning variant comparison); tests whether LLM personas reproduce denial-then-panic psychology.         |
+| RuleLLM   | Yes    | Isolates the effect of quantitative rule anchoring vs. free LLM reasoning; hybrid keeps thresholds but lets LLM adjust quantity within bounds.|
+| Rag       | Yes    | Retrieval corpus is the §6 Archegos primary sources; tests whether historical knowledge of TRS cascades changes broker timing or severity.    |
+
+### §10.2 Pass / Fail Criteria
+
+| Criterion                                                                                                    | Status when satisfied |
+|--------------------------------------------------------------------------------------------------------------|-----------------------|
+| All §5 stylized facts F1 to F5 reproduced within their ranges                                                | green                 |
+| Every §3 research question Q1 to Q5 answerable from analysis output                                          | green                 |
+| Ablating any §7 agent produces a measurable change in `trough_deviation` or `cascade_duration_rounds`         | green                 |
+| All variants marked `Yes` in §10.1 build without uncaught exceptions                                          | green                 |

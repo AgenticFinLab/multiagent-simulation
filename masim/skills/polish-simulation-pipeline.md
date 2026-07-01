@@ -353,12 +353,18 @@ Polish Hooks branch on whether the target file already exists.
 
 **Case B — target file absent.**
 
-The polish pipeline STRONGLY prefers the "invoke the define skill"
-option, because that skill enforces the same validation surface the
-polish pipeline anchors to. Reverse-reconstruction is a fallback for
-the case where the user cannot easily re-elicit the scenario's minimal
-inputs (e.g., the original author is unavailable and only downstream
-artefacts remain).
+**Policy (binding).** When the scenario is missing its target file, the
+polish pipeline's DEFAULT and MANDATED path is to invoke
+`define-simulation-scenario-skill.md` end-to-end and produce the target
+file through that skill. Reverse-reconstruction is a documented
+last-resort fallback and MUST NOT be selected unless the user
+explicitly rejects the default and asserts that the original scenario
+author's minimal inputs (scenario name, domain, phenomenon sketch,
+variant preference, anchor event) cannot be re-elicited. This policy
+exists because the define skill enforces the same validation surface
+the polish pipeline anchors to, guaranteeing internal consistency of
+the audit chain; reverse-reconstruction bypasses that surface and can
+only ratify what is already in the downstream artefacts.
 
 1. **Pre-consistency check.** Before either option is offered, verify
    internal consistency of the existing artefacts. This is a rapid
@@ -380,18 +386,21 @@ artefacts remain).
    and then rerun this step.
 2. **Halt to `AskUserQuestion`** with two options (max four total per
    the AskUserQuestion hard limit):
-   - **Invoke the define skill (RECOMMENDED).** Direct the user to
+   - **Invoke the define skill (MANDATED DEFAULT).** Direct the user to
      invoke `define-simulation-scenario-skill.md`; that skill produces
      the target file end-to-end from minimal inputs (scenario name,
      domain, phenomenon sketch, optional variant preference, optional
      fixed anchor event). Pause the polish run and resume at Step 0
-     Case A once the file is present.
-   - **Reverse-reconstruct.** Seed the target file section-by-section
-     from the mapping table below, then re-invoke
-     `define-simulation-scenario-skill.md` in §9.3 revise mode to
-     validate and lock the reconstructed target. The polish pipeline
-     writes the seed but does NOT lock the file itself; locking is
-     always performed by the define skill.
+     Case A once the file is present. This option MUST be selected
+     unless the user explicitly asserts the fallback condition below.
+   - **Reverse-reconstruct (LAST-RESORT FALLBACK — requires explicit
+     user override).** Only if the user asserts that the original
+     scenario author's minimal inputs cannot be re-elicited: seed the
+     target file section-by-section from the mapping table below, then
+     re-invoke `define-simulation-scenario-skill.md` in §9.3 revise
+     mode to validate and lock the reconstructed target. The polish
+     pipeline writes the seed but does NOT lock the file itself;
+     locking is always performed by the define skill.
 
 3. **Reverse-reconstruction seed mapping** (used only when the user
    selects the reverse-reconstruct option):
