@@ -279,7 +279,7 @@ create-simulation-pipeline.md          (pipeline #1 入口)
 调用关系 B：升级已有场景（`polish-simulation-pipeline.md`）
 
 ```text
-现有 examples/{Scenario}/                (已有 simulation-bases.md、investors/、Rule/、LLM/ 等)
+现有 examples/{Scenario}/                (已有 simulation-bases.md、analysis-bases.md、Rule/、LLM/ 等)
         |
         v
 polish-simulation-pipeline.md          (pipeline #2 入口)

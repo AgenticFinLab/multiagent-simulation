@@ -10,8 +10,9 @@ Every simulation must conform to the fixed directory and file layout defined in 
 
 ```
 examples/{SimulationName}/
-├── {domain}-{scenario}.md         # UPSTREAM INPUT: user-authored scenario target file
-│                                  #   Spec: masim/skills/define-simulation-scenario-skill.md
+├── {domain}-{scenario}.md         # UPSTREAM INPUT: scenario target file, produced by
+│                                  #   invoking masim/skills/define-simulation-scenario-skill.md
+│                                  #   (users MUST NOT hand-author this file)
 │                                  #   Status: draft → locked → released
 ├── simulation-build-log.md           # PIPELINE LOG: AGENT_POOL gate (§A), research notes (§B),
 │                                  #   open questions (§C), build log (§D)
@@ -29,7 +30,7 @@ examples/{SimulationName}/
 │
 ├── LLM/
 │   ├── __init__.py
-│   ├── players.py                 # Market (copy from Rule) + LLM investor classes
+│   ├── players.py                 # Environment coordinator (copy from Rule) + LLM agent classes
 │   ├── prompts.py                 # System + user prompt constants
 │   ├── run_{name}_llm.py          # Simulation entry point
 │   ├── analysis.py                # Imports from Rule/analysis.py, adds LLM-specific plots
@@ -38,7 +39,7 @@ examples/{SimulationName}/
 │
 ├── RuleLLM/
 │   ├── __init__.py
-│   ├── players.py                 # Market (copy from Rule) + hybrid LLM investor classes
+│   ├── players.py                 # Environment coordinator (copy from Rule) + hybrid LLM agent classes
 │   ├── prompts.py                 # == PERSONA == + == DECISION RULES == dual-section prompts
 │   ├── run_{name}_rulellm.py      # Simulation entry point
 │   ├── analysis.py                # Imports from Rule/analysis.py
@@ -56,9 +57,13 @@ examples/{SimulationName}/
 ```
 
 > **Variant folders are conditional.** Build only the variants
-> declared `Yes` in target §10.1. The other variant folders MUST NOT
-> exist; the pipeline records the scenario as `prototype` if fewer
-> than four variants are built.
+> declared `Yes` in target §10.1. Variant labels shown above (`Rule`,
+> `LLM`, `RuleLLM`, `Rag`) are the canonical finance-scenario scheme;
+> other domains may declare a different variant scheme in target §10.1
+> (e.g., `Baseline`, `LLM`, `Hybrid` for opinion dynamics). The variant
+> folder names MUST match the exact labels in target §10.1. Variants
+> not declared `Yes` MUST NOT have a folder; the pipeline records the
+> scenario as `prototype` if fewer than four variants are built.
 
 ---
 
@@ -66,9 +71,9 @@ examples/{SimulationName}/
 
 | File                       | Scope               | Purpose                                                                                                                                    |
 |----------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `{domain}-{scenario}.md`   | Root (all variants) | UPSTREAM INPUT — user-authored scenario target file. Spec: `masim/skills/define-simulation-scenario-skill.md`.                              |
+| `{domain}-{scenario}.md`   | Root (all variants) | UPSTREAM INPUT — scenario target file, produced by invoking `masim/skills/define-simulation-scenario-skill.md`. Users MUST NOT hand-author this file. |
 | `simulation-build-log.md`     | Root (all variants) | PIPELINE LOG — AGENT_POOL gate decisions (§A), research notes (§B), open questions (§C), per-phase build log (§D).                         |
-| `simulation-bases.md`      | Root (all variants) | Single source of truth: phenomenon theory, market design, investor taxonomy (economic archetypes), model parameters                        |
+| `simulation-bases.md`      | Root (all variants) | Single source of truth: phenomenon theory, environment design, agent taxonomy (behavioral archetypes), model parameters (finance appendix relabels agent → investor, environment → market)                        |
 | `analysis-bases.md`        | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale                                              |
 | `{Variant}/explain.md`     | Per variant         | How this variant concretely implements the design in `simulation-bases.md` — every element traces to a `simulation-bases.md §N.M` citation |
 | `{Variant}/analysis.md`    | Per variant         | How this variant concretely executes the analysis defined in `analysis-bases.md` — every metric traces to a function in `analysis.py`      |
@@ -202,8 +207,8 @@ Use this to verify any simulation's structural completeness.
 **Section coverage in `simulation-bases.md`:**
 - [ ] §1 Phenomenon Definition
 - [ ] §2 Theoretical Foundation (≥2 theories with DOI citations)
-- [ ] §3 Market Design (§3.1 price formula, §3.2 mechanisms, §3.3 broadcast)
-- [ ] §4 Investor Taxonomy — **every investor has all 7 parts** (see `02-root-documents-spec.md`)
+- [ ] §3 Environment Design (§3.1 state dynamics model, §3.2 mechanisms, §3.3 broadcast)
+- [ ] §4 Agent Taxonomy — **every agent has all 7 parts** (see `02-root-documents-spec.md`; finance appendix §4.1.F relabels §4 as "Investor Taxonomy" and each agent as "Investor")
 - [ ] §5 Agent Diversity Verification
 - [ ] §6 Parameter Table (every value has source citation)
 - [ ] §7 Communication and Round Structure

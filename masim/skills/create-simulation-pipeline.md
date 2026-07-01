@@ -1,8 +1,8 @@
 ---
 name: create-simulation-pipeline
-purpose: Top-level pipeline for building a **brand-new** MASim simulation scenario from scratch, starting from a user-authored scenario target file `{domain}-{scenario}.md` (specified by `define-simulation-scenario-skill.md`). Produces the full package: root `*-bases.md`, the variants selected in §10.1, configs, code, analysis, review. Orchestrates target-file load, the AGENT_POOL reuse-or-create gate, the Universal Agent Design Handbook, and the per-step `implement-simulation-skill/` files. **Not for upgrading existing scenarios** — use `polish-simulation-pipeline.md` for that.
+purpose: Top-level pipeline for building a **brand-new** MASim simulation scenario from scratch, starting from a scenario target file `{domain}-{scenario}.md` produced by `define-simulation-scenario-skill.md` (users never hand-author the target file — it is emitted by that upstream skill from minimal user inputs). Produces the full package: root `*-bases.md`, the variants selected in §10.1, configs, code, analysis, review. Orchestrates target-file load, the AGENT_POOL reuse-or-create gate, the Universal Agent Design Handbook, and the per-step `implement-simulation-skill/` files. **Not for upgrading existing scenarios** — use `polish-simulation-pipeline.md` for that.
 status: canonical
-audience: Authors and reviewers building a new simulation scenario from a conforming target file in this repository.
+audience: LLM agents and reviewers building a new simulation scenario from a conforming, skill-produced target file in this repository.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
 invocation: Call this file *after* a target file conforming to `masim/skills/define-simulation-scenario-skill.md` exists at `examples/{ScenarioName}/{domain}-{scenario}.md`, **and** the scenario folder does not yet contain a `simulation-bases.md`. If a scenario already has downstream artefacts and you want to bring it up to the latest skill versions, use `masim/skills/polish-simulation-pipeline.md` instead. Do NOT open `implement-simulation-skill/` files directly for a new scenario — they are sub-skills dispatched from Phase 4 of this pipeline. Do NOT begin pipeline execution without a passing target file.
 ---
@@ -29,13 +29,15 @@ patch loop, not a from-scratch build.
 
 The pipeline does **not** collect user input through long
 AskUserQuestion sessions. Instead, every piece of user intent is
-authored upstream into the scenario target file
-`examples/{ScenarioName}/{domain}-{scenario}.md`, whose format and
-validation are owned by `masim/skills/define-simulation-scenario-skill.md`.
-The pipeline reads that file, re-runs its §11 validation, and proceeds
-only when the file passes; AskUserQuestion is reserved for *defect
-clarifications* raised against the target file, not for collecting
-fresh content.
+emitted upstream into the scenario target file
+`examples/{ScenarioName}/{domain}-{scenario}.md` by
+`masim/skills/define-simulation-scenario-skill.md` (the user supplies
+only the minimal inputs listed in that skill's §9.1). The pipeline
+reads that file, re-runs its §11 validation, and proceeds only when
+the file passes; AskUserQuestion is reserved for *defect
+clarifications* raised against the target file (which the user
+resolves via a revise-mode re-invocation of the upstream skill), not
+for collecting fresh content.
 
 | Concern                                       | Owner                                                      |
 |-----------------------------------------------|------------------------------------------------------------|
@@ -75,18 +77,22 @@ Six commitments shape every step of this pipeline:
    scenario-specific.
 4. **Target file is the contract; AskUserQuestion is for defect
    triage only.** Every piece of user intent — domain, agents,
-   theories, parameters, success criteria — is authored upstream into
-   `examples/{ScenarioName}/{domain}-{scenario}.md` per
-   `define-simulation-scenario-skill.md`. The pipeline reads this file
-   and re-runs its §11 validation. `AskUserQuestion` (≤4 options per
-   question) is used only to ask the *author* of the target file to
-   resolve a discovered defect (e.g., a citation that does not
-   resolve, an agent that lacks a theory anchor). The pipeline never
-   uses AskUserQuestion to invent content the target file should have
-   contained.
+   theories, parameters, success criteria — is emitted upstream into
+   `examples/{ScenarioName}/{domain}-{scenario}.md` by
+   `define-simulation-scenario-skill.md` (the user supplies only the
+   minimal inputs listed in that skill's §9.1). The pipeline reads
+   this file and re-runs its §11 validation. `AskUserQuestion` (≤4
+   options per question) is used only to notify the user of a
+   discovered defect (e.g., a citation that does not resolve, an
+   agent that lacks a theory anchor); repair goes through a re-run
+   of `define-simulation-scenario-skill.md` in revise mode (see that
+   skill's §9.3). The pipeline never uses AskUserQuestion to invent
+   content the target file should have contained, and the pipeline
+   never edits the target file itself.
 5. **Two files per scenario, distinct roles.** The *target file*
-   `{domain}-{scenario}.md` is the upstream, user-authored statement
-   of intent (immutable once locked). The *build-log contract*
+   `{domain}-{scenario}.md` is the upstream, skill-produced statement
+   of user intent (immutable once locked; every write is mediated by
+   `define-simulation-scenario-skill.md`). The *build-log contract*
    `simulation-build-log.md` is the pipeline's own log: it records the
    AGENT_POOL gate decisions (§A), accumulated research notes (§B
    built atop the target file's §4 — §6 entries), open questions
@@ -171,10 +177,12 @@ its exit conditions hold.
 
 ### 3.1 Entry Conditions
 
-- The user (or upstream LLM) has authored a target file at
-  `examples/{ScenarioName}/{domain}-{scenario}.md` that conforms to
-  `masim/skills/define-simulation-scenario-skill.md` and shows
-  `Status: draft`.
+- The user has invoked `define-simulation-scenario-skill.md` and that
+  skill has produced a target file at
+  `examples/{ScenarioName}/{domain}-{scenario}.md` conforming to its
+  §11 validation, with `Status: draft`. Users MUST NOT hand-author
+  this file; if it lacks a `Produced By` row in §1 Meta, refuse to
+  proceed and require a fresh skill invocation.
 - This file (`create-simulation-pipeline.md`) is the active skill.
 
 ### 3.2 Procedure
@@ -182,17 +190,20 @@ its exit conditions hold.
 1. **Read the target file.** Open
    `examples/{ScenarioName}/{domain}-{scenario}.md` end-to-end. If
    the file does not exist, refuse to proceed and instruct the caller
-   to author one per `define-simulation-scenario-skill.md` first.
+   to invoke `define-simulation-scenario-skill.md` first to generate
+   one.
 2. **Re-run the target-file §11 validation.** Run every box in
    `define-simulation-scenario-skill.md §11` against the file. The
-   pipeline does **not** trust the author's local PASS; it re-verifies
-   from scratch.
+   pipeline does **not** trust the upstream skill's local PASS; it
+   re-verifies from scratch.
 3. **For every FAIL item**, raise an `AskUserQuestion` turn (≤4
    options per question) summarising the defect and offering the
    plausible repair options. Use the `Other` escape hatch for
-   free-form corrections. The author edits the target file; the
-   pipeline re-validates. Loop until three consecutive PASS runs are
-   achieved.
+   free-form corrections. The user then re-invokes
+   `define-simulation-scenario-skill.md` in revise mode (its §9.3),
+   which re-emits an updated target file; the pipeline re-validates.
+   Loop until three consecutive PASS runs are achieved. The pipeline
+   MUST NOT edit the target file itself.
 4. **Resolve domain palette.** If the chosen domain's palette is
    already documented (e.g., `finance` → `02-root-documents-spec.md
    §4.1`), use it. Otherwise, require the target file's
@@ -256,7 +267,9 @@ its exit conditions hold.
 file (§1 — §10) and write working notes / build log to
 `simulation-build-log.md`. The target file MUST NOT be edited again
 until the scenario is released; if a defect is discovered later, the
-pipeline halts, the author re-drafts, and Phase 0 restarts.
+pipeline halts, the user re-invokes
+`define-simulation-scenario-skill.md` in revise mode (its §9.3) to
+re-emit the target file, and Phase 0 restarts.
 
 ---
 
@@ -266,9 +279,9 @@ pipeline halts, the author re-drafts, and Phase 0 restarts.
 
 - Phase 0 exit conditions hold (target file locked,
   `simulation-build-log.md` seeded).
-- The author has access to academic databases and the historical
-  record needed to *verify* and *expand on* the target file's
-  §4 — §6 entries.
+- The pipeline agent has access to academic databases and the
+  historical record needed to *verify* and *expand on* the target
+  file's §4 — §6 entries.
 
 ### 4.2 Procedure
 
@@ -280,8 +293,9 @@ Research has three jobs, in order:
 1. **Verify**. For every entry in target §4, §5, §6, resolve the
    citation (DOI / URL) and confirm the quoted quantitative range
    appears in the source. Any failure → `AskUserQuestion` defect
-   raised to the author; target file is unlocked, corrected,
-   re-locked, then research resumes.
+   raised to the user; the user re-invokes
+   `define-simulation-scenario-skill.md` in revise mode; the updated
+   target file is re-locked, then research resumes.
 2. **Expand**. For every verified entry, add the deeper material
    that `05-step1-research.md` requires (key equations, parameter
    estimates, mechanism diagrams) into `simulation-build-log.md §B`.
@@ -290,8 +304,10 @@ Research has three jobs, in order:
 3. **Surface gaps**. If verifying / expanding reveals that the
    target file is materially incomplete (e.g., a stylized fact
    without a primary source), record the gap in
-   `simulation-build-log.md §C` and raise it to the author. Do not
-   silently invent missing content.
+   `simulation-build-log.md §C` and raise it to the user (who then
+   authorises a revise-mode re-invocation of
+   `define-simulation-scenario-skill.md`). Do not silently invent
+   missing content.
 
 ### 4.3 Artefacts
 
@@ -313,7 +329,8 @@ Research has three jobs, in order:
   target file is `locked` again).
 - `simulation-build-log.md §C` has been swept; any remaining open
   question is either explicitly deferred (with a `Defer: <reason>`
-  tag) or escalated to the author.
+  tag) or escalated to the user (who resolves it via a revise-mode
+  re-invocation of `define-simulation-scenario-skill.md`).
 
 ---
 
@@ -346,7 +363,8 @@ For each row in target §7:
 Write the resulting canonical taxonomy table into
 `simulation-build-log.md §B.4`. This table is the input to Phase 3's
 gate. If any row fails to confirm, raise an `AskUserQuestion`
-defect; the author edits target §7; the pipeline re-validates.
+defect; the user re-invokes `define-simulation-scenario-skill.md` in
+revise mode to update target §7; the pipeline re-validates.
 
 The diversity rules of `06-step2-agent-design.md §2.2.1` are
 **already encoded** in `define-simulation-scenario-skill.md §7
@@ -648,11 +666,12 @@ unanchored downstream artefact is a defect and MUST be repaired.
 Run this checklist once before invoking Phase 0:
 
 - [ ] A target file exists at
-      `examples/{ScenarioName}/{domain}-{scenario}.md` and follows
-      `masim/skills/define-simulation-scenario-skill.md`.
-- [ ] The author has locally run **§11 Validation** of
-      `define-simulation-scenario-skill.md` and obtained three
-      consecutive PASS runs.
+      `examples/{ScenarioName}/{domain}-{scenario}.md`, produced by
+      `masim/skills/define-simulation-scenario-skill.md` (its §1 Meta
+      shows a `Produced By` row).
+- [ ] `define-simulation-scenario-skill.md §11 Validation` has been
+      run inside that skill three consecutive times with a PASS result
+      before the file was written to disk.
 - [ ] The proposed `{ScenarioName}` is unique under `examples/`.
 - [ ] The chosen `{domain}` has (or will be created as) a folder
       under `examples/AGENT_POOL/`. For new domains, the target file

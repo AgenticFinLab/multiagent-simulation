@@ -7,7 +7,7 @@ This file defines the complete content specifications for the two per-variant do
 1. **`{Variant}/explain.md`** — 9-section implementation guide (traces design to code)
 2. **`{Variant}/analysis.md`** — 7-section analysis guide (traces metrics to functions)
 
-These documents are written **four times each** — once per variant (Rule, LLM, RuleLLM, Rag). They inherit from the root documents (`simulation-bases.md`, `analysis-bases.md`) and specify how each variant concretely implements the shared design.
+These documents are written **once per variant declared `Yes` in target §10.1** (finance default: Rule, LLM, RuleLLM, Rag; other domains may declare a different scheme). They inherit from the root documents (`simulation-bases.md`, `analysis-bases.md`) and specify how each variant concretely implements the shared design.
 
 ---
 
@@ -55,7 +55,7 @@ The reader goes to `simulation-bases.md §4.1` for depth. They come here only fo
 
 ### §2 Theory → Implementation Mapping
 
-This section is the core of `explain.md`. For EACH investor type from `simulation-bases.md §4`:
+This section is the core of `explain.md`. For EACH agent type from `simulation-bases.md §4` (finance appendix relabels §4 as "Investor Taxonomy"):
 
 ```markdown
 ### {ClassName}: Theory → Implementation Mapping
@@ -84,19 +84,26 @@ This section is the core of `explain.md`. For EACH investor type from `simulatio
 
 ---
 
-### §3 Market Mechanism Implementation
+### §3 Environment Mechanism Implementation
 
 ```markdown
-## 3. Market Mechanism Implementation
+## 3. Environment Mechanism Implementation
 
-### Price Formula Implementation
+### State Dynamics Implementation
 
 Formula source: simulation-bases.md §3.1
+
+<!-- Finance appendix (§4.1.F) instantiation shown below. Non-finance domains: replace the price
+     formula with the state-update law from their §4.1.{X} appendix (opinion: bounded confidence
+     update; epidemics: SIR / SEIR update; sociology: adoption threshold rule); replace
+     Market._clear_market() with the appropriate coordinator method name. -->
+
 ```
 P(t+1) = P(t) + λ·D(t) + γ·[F(t)−P(t)] + ε(t)
 ```
 
-Implemented in: `players.py → Market._clear_market()`
+Implemented in: `players.py → Environment.update()` (finance appendix instantiation:
+`Market._clear_market()`)
 
 Code translation:
 | sim-bases symbol | Python variable     | Config path                | Default |
@@ -105,7 +112,7 @@ Code translation:
 | γ (gamma)        | `mean_reversion`    | `extras.mean_reversion`    | [value] |
 | F (fundamental)  | `self._fundamental` | `extras.fundamental_value` | [value] |
 | ε(t)             | `noise`             | `extras.noise_std` (σ)     | [value] |
-| D(t)             | `net_demand`        | computed from orders       | —       |
+| D(t)             | `net_demand`        | computed from actions      | —       |
 
 Additional mechanisms: simulation-bases.md §3.2
 [For each mechanism: mechanism name → implementing method → config parameter]
@@ -193,14 +200,19 @@ Each agent type has its own `KnowledgeStore` — not shared.
 
 [ASCII diagram showing actual message flow. Must be accurate to implemented code, not conceptual.]
 
-### Rule / LLM / RuleLLM Topology:
+### Rule / LLM / RuleLLM Topology (Environment coordinator + N agents):
+
+<!-- Finance appendix (§4.1.F) instantiation: rename "Environment Coordinator" → "Market",
+     "update() → state-broadcast" → "_clear_market() → P(t+1) formula",
+     broadcast payload → "{price, fundamental, ...}", "actions → coordinator.perceive()" →
+     "orders → Market.perceive()". Non-finance domains keep the neutral labels. -->
 
 ```
-         ┌─────────────────────────────────────────┐
-         │           Market (1 instance)           │
-         │   _clear_market() → P(t+1) formula      │
-         │   Broadcasts: {price, fundamental, ...} │
-         └────────────┬────────────────────────────┘
+         ┌─────────────────────────────────────────────┐
+         │       Environment Coordinator (1 instance)  │
+         │   update() → state-broadcast per §3.1       │
+         │   Broadcasts: {state, anchor, deviation, …} │
+         └────────────┬────────────────────────────────┘
                       │ broadcast (round start)
           ┌───────────┼────────────────┐
           ▼           ▼                ▼
@@ -212,22 +224,22 @@ Each agent type has its own `KnowledgeStore` — not shared.
     └────┬─────┘ └────┬─────┘  └──────┬───────┘
          │            │               │
          └────────────┴───────────────┘
-              orders → Market.perceive()
+              actions → coordinator.perceive()
 ```
 
 ### Rag variant — additional retrieval flow:
 
 ```
-Market broadcast → Agent.perceive()
+Coordinator broadcast → Agent.perceive()
                         │
                         ▼
-         Agent._formulate_knowledge_query(deviation, price)
+         Agent._formulate_knowledge_query(deviation, state)
                         │
                         ▼
          KnowledgeStore.query(q, top_k=3) → retrieved_docs
                         │
                         ▼
-         Agent._build_prompt(market_data, retrieved_docs)
+         Agent._build_prompt(env_data, retrieved_docs)
                         │ {rag_context} injected
                         ▼
          LLM API call → <analysis>...<decision>{...}</decision>
@@ -291,7 +303,7 @@ All outputs written to: `EXPERIMENT/{SimulationName}/{Variant}/`
 
 | Subdirectory     | Contents                                        |
 |------------------|-------------------------------------------------|
-| `records/`       | Per-round market and agent state logs           |
+| `records/`       | Per-round environment and agent state logs      |
 | `communication/` | Raw message logs                                |
 | `analysis/`      | Plots and reports (after running `analysis.py`) |
 ```
@@ -303,15 +315,19 @@ All outputs written to: `EXPERIMENT/{SimulationName}/{Variant}/`
 ```markdown
 ## 8. Expected Behavior Patterns
 
-| Phase          | Rounds  | Expected Agent Behavior                             | Expected Price Dynamics                  |
-|----------------|---------|-----------------------------------------------------|------------------------------------------|
-| [Phase 1 name] | [Range] | [Which agents are active; what decisions they make] | [Price movement direction and magnitude] |
-| [Phase 2 name] | [Range] | [Agent behaviors in this phase]                     | [Dynamics]                               |
-| [Phase 3 name] | [Range] | [Agent behaviors]                                   | [Recovery or continuation]               |
+| Phase          | Rounds  | Expected Agent Behavior                             | Expected State Dynamics                                 |
+|----------------|---------|-----------------------------------------------------|---------------------------------------------------------|
+| [Phase 1 name] | [Range] | [Which agents are active; what decisions they make] | [State movement direction and magnitude]                |
+| [Phase 2 name] | [Range] | [Agent behaviors in this phase]                     | [Dynamics]                                              |
+| [Phase 3 name] | [Range] | [Agent behaviors]                                   | [Recovery or continuation]                              |
+
+<!-- Finance appendix (§4.1.F) instantiation: relabel "State Dynamics" → "Price Dynamics";
+     "State movement" → "Price movement". -->
 
 **Variant-specific deviations from expected behavior**:
-[For LLM/RuleLLM/Rag: what specific behavioral differences from Rule variant are expected,
-and why (based on sim-bases §9 and this variant's design choices).]
+[For each non-baseline variant declared in target §10.1: what specific behavioral differences from
+the baseline variant are expected, and why (based on sim-bases §9 and this variant's design
+choices).]
 ```
 
 ---
@@ -418,9 +434,9 @@ Document phenomena that are **unique to this variant** and not visible in others
 ```markdown
 ## 4. Variant-Specific Observable Phenomena
 
-| Phenomenon | Description                             | How to Observe                   | Contrast with Rule Baseline |
-|------------|-----------------------------------------|----------------------------------|-----------------------------|
-| [Name]     | [What it is — specific to this variant] | [Which metric or chart shows it] | [What differs from Rule]    |
+| Phenomenon | Description                             | How to Observe                   | Contrast with Baseline Variant |
+|------------|-----------------------------------------|----------------------------------|--------------------------------|
+| [Name]     | [What it is — specific to this variant] | [Which metric or chart shows it] | [What differs from baseline]   |
 ```
 
 **By variant type**:
@@ -446,10 +462,10 @@ Document phenomena that are **unique to this variant** and not visible in others
 
 ### Agent Count Scaling
 
-| Agent Count      | Expected Observable | Market Dynamics |
-|------------------|---------------------|-----------------|
-| [Minimum viable] | [What works]        | [Dynamics]      |
-| [Recommended]    | [Full phenomenon]   | [Dynamics]      |
+| Agent Count      | Expected Observable | Environment Dynamics |
+|------------------|---------------------|----------------------|
+| [Minimum viable] | [What works]        | [Dynamics]           |
+| [Recommended]    | [Full phenomenon]   | [Dynamics]           |
 
 ### Parameter Sensitivity (Variant-Specific)
 
@@ -483,10 +499,10 @@ All outputs written to: `EXPERIMENT/{SimulationName}/{Variant}/analysis/`
 
 This variant's expected position in cross-variant comparison (from analysis-bases.md §5):
 
-| Comparison Axis        | This Variant's Expected Position    | Reason                                                |
-|------------------------|-------------------------------------|-------------------------------------------------------|
-| Phenomenon onset speed | [Faster / Same / Slower than Rule]  | [Mechanism explanation]                               |
-| Phenomenon intensity   | [Higher / Same / Lower than Rule]   | [Mechanism explanation]                               |
-| Behavioral realism     | [Assessment]                        | [Why more or less realistic than other variants]      |
-| Decision quality       | [Portfolio performance expectation] | [Which agent types benefit from this variant's logic] |
+| Comparison Axis        | This Variant's Expected Position                    | Reason                                                |
+|------------------------|-----------------------------------------------------|-------------------------------------------------------|
+| Phenomenon onset speed | [Faster / Same / Slower than baseline variant]      | [Mechanism explanation]                               |
+| Phenomenon intensity   | [Higher / Same / Lower than baseline variant]       | [Mechanism explanation]                               |
+| Behavioral realism     | [Assessment]                                        | [Why more or less realistic than other variants]      |
+| Decision quality       | [Outcome distribution vs. baseline]                 | [Which agent types benefit from this variant's logic] |
 ```

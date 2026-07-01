@@ -2,13 +2,61 @@
 
 ## Purpose
 
-Implement every simulation variant marked `Yes` in target §10.1. When multiple variants are built, Rule comes first (baseline), then LLM, RuleLLM, and Rag — in that order. Each variant builds on the previous.
+Implement every simulation variant marked `Yes` in target §10.1, in the sequence declared there (each successive variant builds on the previous, so a purely-computational baseline should typically be listed first).
 
-**Reference implementations**: All four variants in `examples/AssetBubble/` exist as the primary reference (study any built variants you need). The AssetBubble RuleLLM and Rag reference variants may also be useful even when not implementing them in your scenario.
+<!-- Finance-appendix (§4.1.F) instantiation:
+     The finance-default variant sequence is Rule → LLM → RuleLLM → Rag —
+     Rule as the deterministic baseline, LLM adds language-model deliberation,
+     RuleLLM overlays quantitative decision rules on the LLM persona,
+     and Rag finally enriches the LLM with retrieved historical context. -->
+
+**Reference implementations**: The primary reference is `examples/AssetBubble/` (study any built variants you need). This is a finance-appendix (§4.1.F) reference — non-finance scenarios should treat its `Market` class, price formula, and `bid_price`/`quantity` fields as domain-instantiation examples, and map them to their own coordinator, state-update law, and action fields via the finance-appendix pattern.
+
+---
+
+## Contract (Inputs / Outputs / Polish Hooks)
+
+This block is the **stable I/O declaration** for Step 4. Both
+`masim/skills/create-simulation-pipeline.md` and
+`masim/skills/polish-simulation-pipeline.md` anchor to it.
+
+**Inputs (consumed).**
+
+| Source                                              | Used for                                                    |
+|-----------------------------------------------------|-------------------------------------------------------------|
+| Target §10.1 (variants marked `Yes`)                | which `{V}/` folders to implement, and in what order         |
+| `simulation-bases.md §3` Environment Design (finance appendix: Market Design)         | Coordinator class implementation                                |
+| `simulation-bases.md §4.{N}` Agent blocks (finance appendix: Investor blocks)          | one Player class per agent, one prompt per agent (LLM-based variants) |
+| `configs/{ScenarioName}/{V}/*.yml`                  | runtime `extras` values (fail-fast access — no defaults)    |
+| `masim/skills/implement-simulation-skill/03-variant-documents-spec.md` | `explain.md` and `analysis.md` layout          |
+
+**Outputs (produced).**
+
+| Artefact per built `V`                                     | Extent of write                                                |
+|------------------------------------------------------------|----------------------------------------------------------------|
+| `examples/{ScenarioName}/{V}/players.py`                   | Coordinator class + one Player class per §4.{N} block (finance appendix: `Market` + investor players); **fail-fast** — no `extras.get(key, default)`, no `decision.get("action", fallback)` |
+| `examples/{ScenarioName}/{V}/analysis.py`                  | metric functions per `analysis-bases.md §2` (LLM-based: also decision-field extractors per §4.2.3) |
+| `examples/{ScenarioName}/{V}/run_{name}.py`                | orchestration entry point                                      |
+| `examples/{ScenarioName}/{V}/prompts.py` (LLM-based variants only) | system prompt + user prompt template + parser                  |
+| `examples/{ScenarioName}/{V}/explain.md`                   | 9-section implementation guide per `03-variant-documents-spec.md` — traces every §4.{N} back to the class/method that implements it |
+| `examples/{ScenarioName}/{V}/analysis.md`                  | 7-section analysis guide per `03-variant-documents-spec.md` — traces every `analysis-bases.md §2` metric to a function |
+
+**Polish Hooks (what a polish audit re-verifies against this step).**
+When `polish-simulation-pipeline.md` audits Step 4, it MUST re-run
+these six checks — no new features are added:
+
+1. **No-defaults rule.** No `extras.get(key, default)`, no `decision.get("action", "hold")`, no `if X else fallback` for required data. Legitimate exceptions listed in `00-overview.md §Key Design Principles` are permitted.
+2. **`py_compile` clean** on every `players.py`, `analysis.py`, `run_*.py`, `prompts.py` in every built variant.
+3. **LLM decision field access rule** (§4.2.3) followed in every LLM-based variant's `players.py` (finance appendix: LLM / RuleLLM / Rag).
+4. **`explain.md` §2 completeness** — every §4.{N} block in `simulation-bases.md` has a matching Theory → Implementation Mapping row.
+5. **`analysis.md` §2 completeness** — every metric declared in `analysis-bases.md §2` has an implementation trace.
+6. **RAG variant only** (when Rag is declared `Yes` in target §10.1) — `_RAG_FALLBACK` constant present and matches §4.4.3 shape.
 
 ---
 
 ## 4.1 Rule Variant Implementation
+
+> **Domain-neutrality note.** §§4.1–4.4 walk through the four finance-default variants — Rule (deterministic baseline), LLM (persona-driven deliberation), RuleLLM (persona + explicit decision rules), Rag (persona + retrieved historical context). Non-finance scenarios that declare a different variant scheme in target §10.1 (e.g., only `Rule` and `LLM`, or a domain-specific `Compartment` / `Threshold` variant) map their variants onto whichever of these four templates is closest and skip the rest.
 
 ### 4.1.1 Directory Structure
 
@@ -49,7 +97,25 @@ All parameters configured via players.yml.
 """
 ```
 
-**Market class docstring pattern**:
+**Coordinator class docstring pattern**:
+```python
+class {CoordinatorClass}(GeneralPlayer):
+    """
+    Central environment coordinator for {SimulationName}.
+
+    State-update law (see simulation-bases.md §3.1 for full derivation and rationale):
+        S(t+1) = f( S(t), aggregate_action(t), noise(t) )
+
+    Parameters (see simulation-bases.md §6 for source citations):
+        {coeff_1}: [brief description] — loaded from extras.{coeff_1}
+        {coeff_2}: [brief description] — loaded from extras.{coeff_2}
+        ...
+    """
+```
+
+<details>
+<summary>Finance-appendix (§4.1.F) instantiation — <code>Market</code> class docstring pattern</summary>
+
 ```python
 class Market(GeneralPlayer):
     """
@@ -66,7 +132,18 @@ class Market(GeneralPlayer):
     """
 ```
 
-**Investor class docstring pattern**:
+</details>
+
+<!-- Non-finance domain instantiations of the coordinator docstring:
+     - Opinion:    consensus/dispersion coordinator; law is bounded-confidence update
+                   x_i(t+1) = x_i(t) + μ·Σ w_ij·[x_j(t)−x_i(t)]; params μ (trust rate),
+                   ε (confidence bound), σ (noise).
+     - Epidemics:  compartment coordinator; SIR/SEIR update on {S,E,I,R} fractions;
+                   params β (infection rate), γ (recovery rate), σ (E→I rate).
+     - Sociology:  diffusion coordinator; threshold update over adoption fraction;
+                   params θ (adoption threshold), α (imitation weight). -->
+
+**Agent class docstring pattern**:
 ```python
 class {ClassName}(GeneralPlayer):
     """
@@ -75,14 +152,14 @@ class {ClassName}(GeneralPlayer):
     Theoretical basis: simulation-bases.md §4.{N} — {ClassName}
     Strategy specification: simulation-bases.md §4.{N}.5 — Behavioral Framework
     Parameters: simulation-bases.md §6
-    See simulation-bases.md §4.{N} for full investor design specification.
+    See simulation-bases.md §4.{N} for full agent design specification (finance appendix: full investor design specification).
     """
 ```
 
 **Key implementation rules**:
-1. `perceive()` initializes state on first call; extracts market data on all calls
-2. `_initialize_investor_state()` loads ALL parameters from `self.state.config.extras`
-3. `step()` calls `_make_decision()` and sends one order message
+1. `perceive()` initializes state on first call; extracts environment state broadcast on all calls (finance appendix: extracts market data)
+2. `_initialize_agent_state()` (finance appendix: `_initialize_investor_state()`) loads ALL parameters from `self.state.config.extras`
+3. `step()` calls `_make_decision()` and sends one action message (finance appendix: one order message)
 4. `_make_decision()` implements the logic from `simulation-bases.md §4.{N}.5.4 Mathematical Model`
 5. No hardcoded numbers anywhere in the code — all come from config
 6. No `.get(key, default)`, no `if X else fallback`, no silent error recovery — all missing project data must `raise` immediately; stochastic API fallback is allowed only under `00-overview.md` Principle #6
@@ -130,7 +207,7 @@ if __name__ == "__main__":
 | Function                                       | Purpose                                                                                                                                                 |
 |------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `_batch_to_rounds(values)`                     | Convert batch store list to `{round_num: value}` (1-based)                                                                                              |
-| `_load_data(results)`                          | Load all coordinator batch stores + investor turn payloads from `SimulationResults`                                                                     |
+| `_load_data(results)`                          | Load all coordinator batch stores + agent turn payloads from `SimulationResults` (finance appendix: investor turn payloads)                                                                     |
 | `_validate_{scenario}(...)`                    | Validate results against `analysis-bases.md §6` calibration targets; returns a result object with `.score`, `.is_valid`, `.criteria`, `.interpretation` |
 | `analyze_{scenario}(data, config, output_dir)` | Orchestrates metrics → validation → plots → `summary.json`; prints structured report                                                                    |
 | `main()`                                       | `load_config` → `load_results` → `_load_data` → `analyze_{scenario}`                                                                                    |
@@ -272,19 +349,19 @@ Every `Rule/analysis.py` must produce the following PNG files in `{base_dir}/ana
 
 | Filename                     | Contents                                        | Primary metrics shown                       |
 |------------------------------|-------------------------------------------------|---------------------------------------------|
-| `00_investor_bids.png`       | Market price + each investor's bid price curves | Headline overview — agent vs market pricing |
-| `01_{scenario}_dynamics.png` | Price vs. Fundamental time-series + Deviation % | Main phenomenon trajectory                  |
+| `00_agent_actions.png`       | Environment state trajectory + each agent's action-price/level curves | Headline overview — agent behaviour vs environment state (finance appendix: agent bids vs market price) |
+| `01_{scenario}_dynamics.png` | Environment state vs. Anchor/Reference time-series + Deviation % (finance appendix: Price vs. Fundamental)     | Main phenomenon trajectory                  |
 | `02_{scenario}_analysis.png` | Phenomenon-specific deep-dive                   | Scenario-specific metric(s)                 |
-| `03_summary.png`             | Agent volume bar + Persistence/Residual chart   | Agent behavior + convergence                |
+| `03_summary.png`             | Agent volume/participation bar + Persistence/Residual chart   | Agent behavior + convergence                |
 
-**Plot 0 specification** (`00_investor_bids.png`):
+**Plot 0 specification** (`00_agent_actions.png`):
 - Layout: single-panel, `figsize=(16, 8)` — the "headline" chart.
-- **Market price**: thick gold line (`#f0a500`, linewidth 2.5, zorder=10).
-- **Fundamental value**: dashed green horizontal reference line.
-- **Investor bids**: one coloured line per `player_id` from `investor_bids = {pid: {round_num: bid_price}}` with small markers.
-- X-axis = Round, Y-axis = Price.
+- **Environment state**: thick coordinator line (finance appendix: gold `#f0a500`, linewidth 2.5, zorder=10 — market price).
+- **Anchor / Reference**: dashed horizontal reference line (finance appendix: green fundamental value).
+- **Agent action curves**: one coloured line per `player_id` from an `agent_actions = {pid: {round_num: action_scalar}}` dict, with small markers.
+- X-axis = Round, Y-axis = domain-appropriate action/state scalar (finance appendix: Price).
 - Legend at bottom-center, multi-column.
-- Data source: `player.turns.field("bid_price")` for each non-coordinator player.
+- Data source: `player.turns.field("{action_scalar_field}")` for each non-coordinator player (finance appendix: `player.turns.field("bid_price")`).
 
 Plots 01–03 correspond directly to dimensions in `analysis-bases.md §3`.
 
@@ -314,12 +391,75 @@ def main():
 
 ### 4.2.1 Key Differences from Rule
 
-- Market class: **identical copy** from Rule variant
-- Investor classes: Replace `_make_decision()` with LLM call
+- Coordinator class (finance appendix: `Market`): **identical copy** from Rule variant
+- Agent classes (finance appendix: Investor classes): Replace `_make_decision()` with LLM call
 - Add: `prompts.py` with system and user prompt constants
 - `run_*.py`: Same pattern, different import path and config
 
 ### 4.2.2 `prompts.py` Structure
+
+The domain-neutral shell is:
+
+```python
+"""
+{SimulationName} LLM Variant — Prompt Definitions
+
+System prompts define agent personalities ONLY.
+They must NOT name the phenomenon, mention the state-update law, or hint at the event type.
+
+Reference: simulation-bases.md §4.{N}.5.5 for each agent's Behavioral Properties.
+"""
+
+# ─────────────────────────────────────────────
+# {ClassName} — System Prompt
+# Persona basis: simulation-bases.md §4.{N}.5.5 Behavioral Properties
+# ─────────────────────────────────────────────
+
+{CLASS_NAME}_SYSTEM = """You are a [role description] operating in the target domain.
+
+CORE BELIEF: [One sentence guiding all decisions — derived from sim-bases §4.{N}.5.2]
+
+YOUR PSYCHOLOGY:
+[2-3 sentences on mindset, biases, tendencies — grounded in sim-bases §4.{N}.3 theories]
+
+YOUR STRATEGY:
+1. [Decision step 1]
+2. [Decision step 2]
+3. [Decision step 3]
+
+HOW YOU INTERPRET THE ENVIRONMENT STATE BROADCAST:
+- {state_signal_high}: [interpretation]
+- {state_signal_low}:  [interpretation]
+- {deviation_high}:    [interpretation]
+- {deviation_low}:     [interpretation]
+
+ACTION SIZING:
+- Aggressive: [range of the action-magnitude field]
+- Moderate:   [range]
+- Conservative: [range]
+
+CONSTRAINTS:
+- [Domain-specific hard constraints — e.g., resource caps, exposure limits, once-per-round]
+
+OUTPUT FORMAT:
+First output your reasoning inside <analysis>...</analysis> tags,
+then output your decision inside <decision>...</decision> tags.
+The decision must be valid JSON with exactly the fields declared in target §4.1.{X} appendix.
+IMPORTANT: numeric fields MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+"""
+
+{CLASS_NAME}_USER = """Current Environment State:
+{state_broadcast_lines}   # e.g., "- {field_1}: {value_fmt_1}", one per broadcast field
+- Round: {round}
+
+Your Local State:
+{agent_local_state_lines} # e.g., resources, position, exposure — from §4.{N}.5
+
+What is your decision for this round?"""
+```
+
+<details>
+<summary>Finance-appendix (§4.1.F) instantiation — full <code>prompts.py</code> template</summary>
 
 ```python
 """
@@ -386,20 +526,31 @@ Your Portfolio:
 What is your trading decision for this round?"""
 ```
 
-**Critical constraints for LLM prompts**:
-- System prompt must NOT name the phenomenon (no "carry trade", "flash crash", "anchoring bias")
-- System prompt must NOT mention the price formula or its parameters
+</details>
+
+<!-- Non-finance domain instantiations of the LLM prompt output-format JSON:
+     - Opinion:    {"speech_act": "assert"|"defer"|"silent", "opinion": float in [-1,1], "confidence": float, "reasoning": string}
+     - Epidemics:  {"contact_action": "meet"|"avoid", "contact_count": int, "test": bool, "reasoning": string}
+     - Sociology:  {"decision": "adopt"|"reject"|"defer", "confidence": float, "reasoning": string} -->
+
+**Critical constraints for LLM prompts** (domain-neutral):
+- System prompt must NOT name the phenomenon (finance-appendix examples of forbidden phrase types: "carry trade", "flash crash", "anchoring bias"; opinion equivalents: "polarization cascade", "echo chamber"; epidemics: "super-spreader", "herd immunity")
+- System prompt must NOT mention the state-update law or its coefficients (finance appendix: the price formula and its λ, γ, σ parameters)
 - The output format block is mandatory — copy it exactly as shown above
 - Always `<analysis>` not `<think>`
 
 
 ### 4.2.3 LLM Decision Field Access Rule
 
-The `decide()` method in LLM/RuleLLM/Rag variants MUST read ALL four decision fields (`action`, `bid_price`, `quantity`, `reasoning`) directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (e.g., deriving `action` from the sign of `quantity`). If any field is missing because the prompt/parser contract is wrong, it must fail-fast via `KeyError`; if the contract is already correct and stochastic malformed API output remains, use only the explicit counted fallback policy in `00-overview.md` Principle #6.
+The `decide()` method in every LLM-based variant (finance appendix: LLM / RuleLLM / Rag) MUST read **every decision field declared in target §4.1.{X} appendix** directly from the LLM response via `decision["key"]`. NEVER derive or infer a missing field from another field (finance-appendix example: deriving `action` from the sign of `quantity`). If any field is missing because the prompt/parser contract is wrong, it must fail-fast via `KeyError`; if the contract is already correct and stochastic malformed API output remains, use only the explicit counted fallback policy in `00-overview.md` Principle #6.
 
-Constraint and execution logic MUST branch on the `action` string value, not on quantity sign:
-- `if action == "buy"` / `elif action == "sell"` instead of `if quantity > 0` / `elif quantity < 0`
-- `quantity` is always positive per format specification
+<!-- Finance-appendix (§4.1.F) instantiation — the four required decision fields
+     are: action, bid_price, quantity, reasoning. -->
+
+Constraint and execution logic MUST branch on the categorical decision field, not on the sign of a numeric magnitude field:
+- Finance appendix: `if action == "buy"` / `elif action == "sell"` instead of `if quantity > 0` / `elif quantity < 0`; `quantity` is always positive per format specification.
+- Opinion appendix: `if speech_act == "assert"` / `elif speech_act == "defer"`, not on the sign of `opinion`.
+- Epidemics appendix: `if contact_action == "meet"` / `elif contact_action == "avoid"`, not on `contact_count > 0`.
 
 **Why**: Deriving fields silently masks missing fields and introduces incorrect values. The principle is that `decide()` should be a pure function that derives outputs from inputs without inferring missing data.
 
@@ -422,7 +573,8 @@ from examples.{SimulationName}.Rule.analysis import (
 )
 
 def analyze_action_distribution(agent_records):
-    """Analyze distribution of buy/sell/hold decisions by agent type."""
+    """Analyze distribution of the categorical decision field per agent type
+    (finance appendix: buy / sell / hold)."""
     ...
 
 def main():
@@ -441,9 +593,51 @@ def main():
 - Players.py is identical to LLM variant structure
 - `analysis.py` reuses core metrics from Rule/analysis.py — no additional variant-specific analysis function
 
-**Design principle**: The embedded rules are **deeper investor characterization**, not executable mandates. They define what the investor knows, how they habitually think, and what quantitative frameworks they follow. The LLM uses these rules as guidance alongside its persona to make intelligent, context-aware decisions. This is a simulation of an informed investor, not a rule executor.
+**Design principle**: The embedded rules are **deeper agent characterization**, not executable mandates. They define what the agent knows, how they habitually think, and what quantitative frameworks they follow. The LLM uses these rules as guidance alongside its persona to make intelligent, context-aware decisions. This is a simulation of an informed decision-maker, not a rule executor (finance appendix: an informed investor).
 
 ### 4.3.2 RuleLLM Prompt Structure
+
+Domain-neutral shell:
+
+```python
+{CLASS_NAME}_SYSTEM = """
+== PERSONA ==
+
+You are a [role description] operating in the target domain.
+
+CORE BELIEF: [Identical to LLM variant persona]
+
+YOUR PSYCHOLOGY:
+[Identical to LLM variant psychology description]
+
+== DECISION RULES ==
+
+You follow these quantitative rules based on the environment state broadcast:
+
+RULE 1 — [Trigger Name]:
+  When: [Condition on broadcast fields, e.g., "{state_deviation} < −0.15"]
+  Action: [Exact categorical action + magnitude formula in the target §4.1.{X} action space]
+
+RULE 2 — [Next Trigger]:
+  When: [Condition]
+  Action: [Action]
+
+DEFAULT: [Neutral action — e.g., hold / defer / no-op] when no rule triggers.
+
+RULE COMPLIANCE: You MUST follow the categorical direction of the triggered rule.
+You may adjust the magnitude by up to ±20% based on context, but the direction is non-negotiable.
+Explain your adherence or adjustment in the <analysis> section.
+
+OUTPUT FORMAT:
+First output your reasoning inside <analysis>...</analysis> tags,
+then output your decision inside <decision>...</decision> tags.
+The decision must be valid JSON with exactly the fields declared in target §4.1.{X} appendix.
+IMPORTANT: numeric fields MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+"""
+```
+
+<details>
+<summary>Finance-appendix (§4.1.F) instantiation — full RuleLLM prompt template</summary>
 
 ```python
 {CLASS_NAME}_SYSTEM = """
@@ -484,7 +678,9 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 """
 ```
 
-**Critical**: The `== DECISION RULES ==` section must reproduce the EXACT formulas from `Rule/players.py → _make_decision()`. If Rule parameters change, update this section immediately.
+</details>
+
+**Critical**: The `== DECISION RULES ==` section must reproduce the EXACT formulas from `Rule/players.py → _make_decision()` for the same agent class. If Rule parameters change, update this section immediately.
 
 ---
 
@@ -492,12 +688,14 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 
 ### 4.4.1 Key Differences from RuleLLM
 
-- `players.py`: Each investor class adds `_initialize_rag()` and uses retrieval in `step()`
+- `players.py`: Each agent class (finance appendix: investor class) adds `_initialize_rag()` and uses retrieval in `step()`
 - `prompts.py`: User prompt template adds `{rag_context}` placeholder
 - `analysis.py`: Adds `analyze_rag_knowledge_effect()`
 - `players.yml`: Each agent has `rag:` configuration block
 
 ### 4.4.2 Rag Player Additional Methods
+
+Domain-neutral shell:
 
 ```python
 def _initialize_rag(self) -> None:
@@ -511,6 +709,34 @@ def _initialize_rag(self) -> None:
         top_k=rag_config.get("top_k", 3),
     )
 
+def _formulate_knowledge_query(self, state_broadcast: dict) -> str:
+    """Build retrieval query from the current environment state broadcast.
+
+    Query strategy: choose regime-appropriate language for whichever state signal
+    the target §4.1.{X} appendix identifies as the primary deviation-from-anchor signal,
+    then concatenate scenario-relevant vocabulary.
+    """
+    deviation = state_broadcast["{deviation_field}"]  # from target §4.1.{X} appendix
+    if deviation < -0.10:
+        return f"[low-regime historical context] deviation {deviation:.2f}"
+    elif deviation > 0.10:
+        return f"[high-regime historical context] deviation {deviation:.2f}"
+    else:
+        return f"[normal-regime historical context] deviation {deviation:.2f}"
+
+def _get_rag_context(self, state_broadcast: dict) -> str:
+    """Retrieve relevant documents and format as context string."""
+    query = self._formulate_knowledge_query(state_broadcast)
+    docs = self._knowledge_store.query(query)
+    if not docs:
+        return "(No relevant knowledge retrieved this round.)"
+    return "\n\n".join(f"[Context {i+1}]: {doc}" for i, doc in enumerate(docs))
+```
+
+<details>
+<summary>Finance-appendix (§4.1.F) instantiation — <code>_formulate_knowledge_query</code></summary>
+
+```python
 def _formulate_knowledge_query(self, market_data: dict) -> str:
     """Build retrieval query from current market state."""
     deviation = market_data["deviation"]
@@ -521,15 +747,21 @@ def _formulate_knowledge_query(self, market_data: dict) -> str:
         return f"overvalued market bubble deviation {deviation:.2f}"
     else:
         return f"normal market conditions deviation {deviation:.2f}"
-
-def _get_rag_context(self, market_data: dict) -> str:
-    """Retrieve relevant documents and format as context string."""
-    query = self._formulate_knowledge_query(market_data)
-    docs = self._knowledge_store.query(query)
-    if not docs:
-        return "(No relevant knowledge retrieved this round.)"
-    return "\n\n".join(f"[Context {i+1}]: {doc}" for i, doc in enumerate(docs))
 ```
+
+</details>
+
+<!-- Non-finance domain instantiations of the RAG query strategy:
+     - Opinion:    low-regime → "polarization backlash minority-view suppression"
+                   high-regime → "consensus cascade majority reinforcement"
+                   normal    → "steady-state discussion balanced opinion"
+     - Epidemics:  low-regime → "outbreak tail decline recovery phase"
+                   high-regime → "acceleration wave super-spreader event"
+                   normal    → "endemic baseline low incidence"
+     - Sociology:  low-regime → "adoption stall abandonment reversal"
+                   high-regime → "diffusion cascade tipping point"
+                   normal    → "steady adoption S-curve middle" -->
+
 
 ### 4.4.3 `_RAG_FALLBACK` Constant
 
@@ -542,6 +774,25 @@ _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 This exact string is checked by `analyze_rag_knowledge_effect()` to distinguish successful from failed retrievals.
 
 ### 4.4.4 User Prompt Template for Rag
+
+Domain-neutral shell:
+
+```python
+{CLASS_NAME}_USER = """Current Environment State:
+{state_broadcast_lines}   # one line per broadcast field from target §4.1.{X}
+- Round: {round}
+
+Your Local State:
+{agent_local_state_lines} # from §4.{N}.5
+
+Relevant Historical Knowledge:
+{rag_context}
+
+What is your decision for this round?"""
+```
+
+<details>
+<summary>Finance-appendix (§4.1.F) instantiation — Rag user prompt template</summary>
 
 ```python
 {CLASS_NAME}_USER = """Current Market State:
@@ -561,6 +812,8 @@ Relevant Historical Knowledge:
 What is your trading decision for this round?"""
 ```
 
+</details>
+
 The `{rag_context}` placeholder is filled at runtime with either retrieved documents or the fallback string.
 
 ---
@@ -572,25 +825,25 @@ After implementing each variant:
 - [ ] All agent classes have docstrings citing `simulation-bases.md §4.{N}`
 - [ ] All numeric values in `_make_decision()` are loaded from config, not hardcoded
 - [ ] `perceive()` initializes state correctly on first call
-- [ ] `step()` always sends exactly one order message
-- [ ] LLM prompts do NOT name the phenomenon or mention the price formula
+- [ ] `step()` always sends exactly one action message (finance appendix: one order message)
+- [ ] LLM prompts do NOT name the phenomenon or mention the state-update law (finance appendix: the price formula and its λ, γ, σ parameters)
 - [ ] LLM prompts end with canonical `OUTPUT FORMAT` block using `<analysis>` tags
 - [ ] RuleLLM prompts have both `== PERSONA ==` and `== DECISION RULES ==` sections
 - [ ] `Rule/analysis.py` uses `load_results()` + `_load_data()` — no raw `os.listdir()` + `json.load()` on record files
 - [ ] `Rule/analysis.py` exports `_load_data` and metric/validation functions for import by other variants
-- [ ] LLM/RuleLLM/Rag `analysis.py` imports `_load_data` from `Rule/analysis.py`
+- [ ] Every LLM-based variant's `analysis.py` imports `_load_data` from `Rule/analysis.py` (finance appendix: LLM/RuleLLM/Rag)
 - [ ] Rag `analysis.py` defines `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
 - [ ] All `__init__.py` files present
 
-- [ ] LLM/RuleLLM/Rag decide() reads action = decision["action"] directly — no derivation from quantity sign
-- [ ] Constraint/execution logic branches on action string, not quantity sign
-- [ ] validate_order() called before returning order dict
+- [ ] Every LLM-based `decide()` reads every decision field declared in target §4.1.{X} directly — no derivation from another field (finance-appendix example: no derivation of `action` from the sign of `quantity`)
+- [ ] Constraint/execution logic branches on the categorical decision field, not on the sign of a numeric magnitude field
+- [ ] `validate_order()` (or the domain-appropriate `validate_action()` equivalent) called before returning the action dict
 
 #### Strict no-default compliance checklist
 
 - [ ] No `.get(key, default)` on simulation data dicts (config extras, message payloads, LLM responses, coordinator data) — use `dict["key"]`
-- [ ] No `if X else fallback` for required data fields (e.g., `if fundamentals else 1.0` is forbidden)
-- [ ] No silent `hold` substitution when LLM parse fails — must `raise RuntimeError` or use explicit counted stochastic API fallback under `00-overview.md` Principle #6
+- [ ] No `if X else fallback` for required data fields (finance-appendix example of a forbidden pattern: `if fundamentals else 1.0`)
+- [ ] No silent neutral-action substitution when LLM parse fails (finance-appendix example: silent `hold` substitution) — must `raise RuntimeError` or use explicit counted stochastic API fallback under `00-overview.md` Principle #6
 - [ ] No `if rates else 0.0` for computed metrics — must `raise ValueError` if no data collected
 - [ ] No `payload.get("field", None)` in analysis scripts — use `payload["field"]`
 - [ ] Only legitimate `.get()` exceptions remain: RAG config resolution, `__getstate__`/`__setstate__`, truly optional config sections, matplotlib defaults
@@ -603,6 +856,6 @@ After implementing each variant:
 - [ ] Assessment text cites the calibration source from `analysis-bases.md §6` (author + year)
 - [ ] Criterion weights documented in `_validate_*` docstring and sum to 1.0
 - [ ] `[SUMMARY]` block present at end of interpretation
-- [ ] Produces exactly 3 PNG files: `01_*.png`, `02_*.png`, `03_*.png` in `{base_dir}/analysis/`
+- [ ] Produces exactly 4 PNG files: `00_agent_actions.png`, `01_*.png`, `02_*.png`, `03_*.png` in `{base_dir}/analysis/`
 - [ ] Saves `summary.json` containing `metrics`, `validation` (with `.score`, `.is_valid`, `.criteria`, `.interpretation`)
 - [ ] `py_compile` passes on each built variant's `analysis.py` file (variants marked `Yes` in target §10.1)
