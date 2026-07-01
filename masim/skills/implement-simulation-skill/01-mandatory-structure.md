@@ -6,6 +6,41 @@ Every simulation must conform to the fixed directory and file layout defined in 
 
 ---
 
+## Canonical Variant Set (Current Version of `implement-simulation-skill`)
+
+The `implement-simulation-skill/*.md` documents are written against a **fixed, explicitly-enumerated variant set**. Every variant listed below MUST be considered by every implementer, and every rule / checklist / template in these implement-* docs MUST name each variant explicitly. Generalisation ("every model-driven variant") is NOT sufficient at the implementation layer — implementers rely on named, exhaustive coverage.
+
+**Current canonical variant set (v-current):**
+
+| Variant   | Capability class            | Required per-variant files                                                                     |
+|-----------|-----------------------------|------------------------------------------------------------------------------------------------|
+| `Rule`    | rule-driven (deterministic) | `__init__.py`, `players.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md`            |
+| `LLM`     | model-driven                | `__init__.py`, `players.py`, `prompts.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md` |
+| `RuleLLM` | hybrid (rule + model)       | `__init__.py`, `players.py`, `prompts.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md` |
+| `Rag`     | retrieval-augmented         | `__init__.py`, `players.py`, `prompts.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md` |
+
+**Implementation guarantee.** Every variant declared `Yes` in target §10.1 Variant Build Matrix MUST be a member of this canonical set, and MUST have full coverage across:
+
+- `configs/{Sim}/{V}/` (Step 3, see `07-step3-config.md`)
+- `examples/{Sim}/{V}/players.py`, `analysis.py`, `run_*.py`, and `prompts.py` where applicable (Step 4, see `08-step4-implement.md`)
+- `examples/{Sim}/{V}/explain.md` and `analysis.md` (per-variant docs, see `03-variant-documents-spec.md`)
+- Cross-variant review & comparison (Steps 5–10, see `09-step5-to-10-review.md`)
+
+No variant may be silently skipped or partially implemented. If target §10.1 declares only a subset (e.g. `Rule` and `LLM` for a prototype), the *unbuilt* variants MUST NOT have folders, and the scenario MUST be recorded as `prototype` in `simulation-build-log.md`.
+
+**Introducing a new variant.** If a scenario needs a variant outside the canonical set (e.g. `Behavioural`, `EvolutionaryRule`, `MultiModelEnsemble`), the implement-* docs MUST be upgraded in the same commit:
+
+1. Add the new variant as a named row in this table.
+2. Extend every checklist and template in `01-mandatory-structure.md`, `03-variant-documents-spec.md`, `07-step3-config.md`, `08-step4-implement.md`, and `09-step5-to-10-review.md` to name the new variant explicitly and describe its required per-variant files, implementation obligations, and per-variant tests.
+3. Extend `agent-design-skill.md §3.6.0` if the new variant introduces a new input surface or output field.
+4. Bump the version of every touched skill doc and record the addition in its change log.
+
+Renaming or removing a canonical variant follows the same rule — no implicit inheritance from a generic capability class is permitted at the implementation layer. The class labels (rule-driven / model-driven / hybrid / retrieval-augmented) are pedagogical categories only; they clarify *why* a variant has certain files, but they do NOT stand in for explicit enumeration.
+
+> This convention is stricter than the agent-design layer. In `agent-design-skill.md` (the handbook governing per-agent design), obligations attach to capability classes so that a future variant automatically inherits the I/O contract. In the implement-* layer (this document and its siblings), obligations attach to **named variants** so that no variant is ever half-implemented.
+
+---
+
 ## 1. Complete Required Layout
 
 ```
@@ -57,13 +92,17 @@ examples/{SimulationName}/
 ```
 
 > **Variant folders are conditional.** Build only the variants
-> declared `Yes` in target §10.1. Variant labels shown above (`Rule`,
-> `LLM`, `RuleLLM`, `Rag`) are the canonical finance-scenario scheme;
-> other domains may declare a different variant scheme in target §10.1
-> (e.g., `Baseline`, `LLM`, `Hybrid` for opinion dynamics). The variant
-> folder names MUST match the exact labels in target §10.1. Variants
-> not declared `Yes` MUST NOT have a folder; the pipeline records the
-> scenario as `prototype` if fewer than four variants are built.
+> declared `Yes` in target §10.1. The four canonical variants
+> supported by the current version of `implement-simulation-skill`
+> are `Rule`, `LLM`, `RuleLLM`, and `Rag` (see § Canonical Variant
+> Set above). Target §10.1 MUST select from this set; introducing a
+> new variant requires an explicit skill-doc upgrade (see the
+> "Introducing a new variant" clause in § Canonical Variant Set).
+> The variant folder names MUST match the exact labels in target
+> §10.1. Variants declared `No` MUST NOT have a folder. The
+> pipeline records the scenario as `prototype` if fewer than all
+> four canonical variants are built (i.e. any of `Rule`, `LLM`,
+> `RuleLLM`, `Rag` is missing on disk).
 
 ---
 
@@ -98,7 +137,7 @@ simulation-bases.md          analysis-bases.md
 {Variant}/players.py        {Variant}/analysis.py
 ```
 
-- `simulation-bases.md` and `analysis-bases.md` are written **once** and are the authoritative source for every variant built (the subset of `Rule / LLM / RuleLLM / Rag` declared `Yes` in target §10.1).
+- `simulation-bases.md` and `analysis-bases.md` are written **once** and are the authoritative source for every variant built. The current canonical variant set (see § Canonical Variant Set at the top of this document) is `Rule`, `LLM`, `RuleLLM`, `Rag`; each of these four variants MUST be considered by every skill-doc rule, and the subset actually built is declared `Yes` in target §10.1.
 - `explain.md` and `analysis.md` **inherit** from the root documents and specify variant-specific implementation details. They must NOT re-state theory — they must cite `simulation-bases.md §N.M` and then state what the code does.
 - The code (`players.py`, `analysis.py`) always has a corresponding documentation file that explains it through the lens of the root documents.
 
@@ -121,7 +160,7 @@ Each variant has a distinct construction approach, goal, and set of non-negotiab
 
 ### Universal: No Defaults, No Defensive Programming
 
-This constraint applies to **every built variant** equally (whatever subset of `Rule / LLM / RuleLLM / Rag` is declared `Yes` in target §10.1). Every `players.py` and `analysis.py` file must follow strict fail-fast principles:
+This constraint applies to **every one of the four canonical variants** `Rule`, `LLM`, `RuleLLM`, `Rag` equally (subset built per target §10.1 — see § Canonical Variant Set at the top of this document). Every `players.py` and `analysis.py` file in every built variant folder must follow strict fail-fast principles:
 
 - **No `.get(key, default)`** on simulation data dicts (config extras, message payloads, LLM responses, coordinator data, analysis records). Use direct `dict["key"]` access.
 - **No `if X else fallback`** for required data fields (e.g., `if fundamentals else 1.0` is forbidden — use `if not fundamentals: raise ValueError(...)`).
@@ -195,10 +234,10 @@ Use this to verify any simulation's structural completeness.
 - [ ] `simulation-bases.md` present and has all 9 sections
 - [ ] `analysis-bases.md` present and has all 7 sections
 
-**Per built variant (subset of `Rule / LLM / RuleLLM / Rag` declared `Yes` in target §10.1):**
+**Per built variant — every variant declared `Yes` in target §10.1 Variant Build Matrix MUST be from the canonical set `Rule / LLM / RuleLLM / Rag` (see § Canonical Variant Set at the top of this document). Repeat this checklist independently for each of `Rule`, `LLM`, `RuleLLM`, and `Rag` that the target declares `Yes`:**
 - [ ] `__init__.py` present
 - [ ] `players.py` present
-- [ ] `prompts.py` present (LLM, RuleLLM, Rag only)
+- [ ] `prompts.py` present (required for `LLM`, `RuleLLM`, and `Rag`; MUST NOT be present for `Rule`)
 - [ ] `run_*.py` present (correct naming convention)
 - [ ] `analysis.py` present
 - [ ] `explain.md` present

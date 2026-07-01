@@ -108,7 +108,7 @@ communication:
 
 **Notes**:
 - `total_rounds: 200` is standard. Use 500 for research-quality runs.
-- `object_store_memory`: Rule variant needs less (no LLM context); LLM/RuleLLM/Rag need ≥512MB.
+- `object_store_memory`: `Rule` needs less (no LLM context, ~128–256 MB is typical); `LLM`, `RuleLLM`, and `Rag` each need ≥512 MB.
 - `record_messages: false` in production; enable only for debugging message flow.
 
 ---

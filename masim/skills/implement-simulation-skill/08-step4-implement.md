@@ -14,6 +14,24 @@ Implement every simulation variant marked `Yes` in target §10.1, in the sequenc
 
 ---
 
+## Implementer Contract Reminder (READ FIRST, RE-READ EVERY PASS)
+
+Before writing or modifying any code in this step, **open the agent's design specification and re-read its §3.6.0 I/O Contract** (defined by `masim/skills/agent-design-skill.md` v2.3.1). The I/O Contract is the single source of truth for:
+
+1. **Inputs** the agent consumes per call — every row in the Inputs table MUST have a real read against the environment / state / round header. If the engine cannot supply an input listed there, the implementation is incomplete.
+2. **Outputs** the agent emits — every `Required? = yes` field MUST be populated on every call. Extra fields MUST NOT be emitted. Numeric fields MUST be clamped to their declared valid range before emission.
+3. **Content constraints** — required fields, forbidden fields, value ranges, unit conventions, sign conventions, determinism markers.
+4. **Serialization format** — the canonical tag pattern `<analysis>...</analysis><decision>{JSON}</decision>` (see this file's `OUTPUT FORMAT` blocks below) is mandated by the contract, NOT invented here. The JSON keys MUST match the contract's Outputs table verbatim.
+5. **Variant parity** — each of the four canonical variants `Rule`, `LLM`, `RuleLLM`, `Rag` that is declared `Yes` in target §10.1 MUST emit the same output field set. Every variant is implemented independently and MUST pass a smoke run before Step 5. If a target scenario needs a fifth variant, the `implement-simulation-skill` docs MUST be upgraded first (see `01-mandatory-structure.md § Canonical Variant Set — Introducing a new variant`); no variant may be added silently. If any canonical variant needs a new output field, extend the design's §3.6.0 FIRST, then propagate to every one of `Rule`, `LLM`, `RuleLLM`, `Rag`.
+
+**Conflict resolution rule:** on any conflict between the agent's §3.6.0 I/O Contract and prose elsewhere (§3.6.2 mechanism, §3.6.3 action space, or target §4.1.X appendix), the §3.6.0 contract wins. Reconcile the other section in the same commit.
+
+**Canonical variant set:** the four variants named across this file — `Rule`, `LLM`, `RuleLLM`, `Rag` — are the *only* variants supported by the current version of `implement-simulation-skill`. Each MUST be implemented completely and independently for every scenario that declares it `Yes` in target §10.1. If a scenario needs a variant outside this set, follow the upgrade procedure in `01-mandatory-structure.md § Canonical Variant Set — Introducing a new variant` BEFORE writing code (add named coverage in every implement-* doc, then implement).
+
+Every checklist item in this step (parser tests, prompt drafting, decision-emission wiring) is a mechanical projection of the contract. If the contract is missing or ambiguous, STOP and file a design revision before writing code.
+
+---
+
 ## Contract (Inputs / Outputs / Polish Hooks)
 
 This block is the **stable I/O declaration** for Step 4. Both
@@ -47,10 +65,10 @@ these six checks — no new features are added:
 
 1. **No-defaults rule.** No `extras.get(key, default)`, no `decision.get("action", "hold")`, no `if X else fallback` for required data. Legitimate exceptions listed in `00-overview.md §Key Design Principles` are permitted.
 2. **`py_compile` clean** on every `players.py`, `analysis.py`, `run_*.py`, `prompts.py` in every built variant.
-3. **LLM decision field access rule** (§4.2.3) followed in every LLM-based variant's `players.py` (finance appendix: LLM / RuleLLM / Rag).
+3. **LLM decision-field access rule** (§4.2.3) followed in each of `LLM`, `RuleLLM`, and `Rag` `players.py` (all three model-consulting variants in the canonical set; `Rule` is exempt).
 4. **`explain.md` §2 completeness** — every §4.{N} block in `simulation-bases.md` has a matching Theory → Implementation Mapping row.
 5. **`analysis.md` §2 completeness** — every metric declared in `analysis-bases.md §2` has an implementation trace.
-6. **RAG variant only** (when Rag is declared `Yes` in target §10.1) — `_RAG_FALLBACK` constant present and matches §4.4.3 shape.
+6. **`Rag`-only checks** (when `Rag` is declared `Yes` in target §10.1) — `_RAG_FALLBACK` constant present in `Rag/analysis.py` and matches the shape declared in the agent design's §3.6.0 I/O Contract and in `analysis-bases.md §4.4.3` (or the equivalent retrieval-metric section).
 
 ---
 

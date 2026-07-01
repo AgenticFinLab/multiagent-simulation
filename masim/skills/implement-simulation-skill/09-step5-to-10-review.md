@@ -240,7 +240,7 @@ analysis-bases.md:
 
 ### 9.1 Execution Sequence
 
-Run the variants in the order declared in target §10.1. The shell block below assumes the finance-default variant scheme (Rule / LLM / RuleLLM / Rag); non-finance scenarios substitute the variant folder names declared in their own target §10.1.
+Run the four canonical variants in this fixed order — `Rule` → `LLM` → `RuleLLM` → `Rag` — for every variant declared `Yes` in target §10.1. Any variant declared `No` is skipped in place (its step becomes a no-op), but no re-ordering is permitted. The canonical set is fixed by `01-mandatory-structure.md § Canonical Variant Set`; adding a variant requires an explicit implement-* upgrade.
 
 ```bash
 # Step 1: Run Rule variant
@@ -304,16 +304,21 @@ After a successful 200-round run, verify:
 - [ ] `analysis-bases.md §2` — ≥6 metrics with formulas and DOI citations
 - [ ] `analysis-bases.md §6` — calibration targets with literature ranges
 
-**Code**:
+**Code** — every canonical variant declared `Yes` in target §10.1 MUST pass its named checks below. The canonical set is exactly four variants: `Rule`, `LLM`, `RuleLLM`, `Rag` (see `01-mandatory-structure.md § Canonical Variant Set`). No variant may be silently skipped; introducing a new variant requires an explicit implement-* upgrade first.
 - [ ] `Rule/players.py` — all agents; docstrings cite sim-bases §4.{N}
 - [ ] `Rule/run_*.py` — works with `python run.py -c config.yml`
 - [ ] `Rule/analysis.py` — exports `__all__`; all metrics implemented
-- [ ] `LLM/prompts.py` — no phenomenon name; correct output format; `<analysis>` tags
-- [ ] `RuleLLM/prompts.py` — `== PERSONA ==` + `== DECISION RULES ==` present
-- [ ] `Rag/players.py` — `_initialize_rag()`, `_formulate_knowledge_query()`, `_get_rag_context()`
+- [ ] `LLM/prompts.py` — no phenomenon name; correct output format per §3.6.0 I/O Contract; `<analysis>` tags present
+- [ ] `LLM/players.py` — LLM decision-field access rule (§4.2.3) honoured; fail-fast on unparseable model output
+- [ ] `LLM/analysis.py` — exports `__all__`; imports shared loaders from `Rule/analysis.py`
+- [ ] `RuleLLM/prompts.py` — `== PERSONA ==` + `== DECISION RULES ==` present; decision rules exactly reproduce `Rule/players.py` formulas
+- [ ] `RuleLLM/players.py` — same output schema as `LLM`; hybrid path fail-fast when LLM output diverges from encoded rules
+- [ ] `RuleLLM/analysis.py` — reuses `Rule` core metrics; no variant-specific analysis function unless declared in `analysis-bases.md`
+- [ ] `Rag/players.py` — `_initialize_rag()`, `_formulate_knowledge_query()`, `_get_rag_context()` implemented; retrieval fallback sentinel injected verbatim when retrieval is empty
+- [ ] `Rag/prompts.py` — retrieval context slot present in user template; retrieval-fallback sentinel string declared and matches `_RAG_FALLBACK`
 - [ ] `Rag/analysis.py` — `_RAG_FALLBACK` defined; `analyze_rag_knowledge_effect()` implemented
 
-**Per-Variant Documentation** (one block per built variant declared `Yes` in target §10.1; finance-default variant set: `Rule / LLM / RuleLLM / Rag`):
+**Per-Variant Documentation** — repeat each check below independently for each of `Rule`, `LLM`, `RuleLLM`, `Rag` declared `Yes` in target §10.1 (the four canonical variants — see `01-mandatory-structure.md § Canonical Variant Set`):
 - [ ] `explain.md` — all 9 sections
 - [ ] `explain.md §2` — every agent traces to code location via sim-bases §N.M (finance-appendix example: every investor)
 - [ ] `analysis.md` — all 7 sections

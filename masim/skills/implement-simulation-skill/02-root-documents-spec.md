@@ -15,7 +15,7 @@ These documents are the single source of truth for their respective domains. Eve
 
 **Location**: `examples/{SimulationName}/simulation-bases.md`
 
-**Writing principle**: Write this document **before any code**. It drives all implementation decisions. Every agent type declared under target §7 (Agent Roster) must have a corresponding class in every built variant's agent-implementation module (the subset of the variant scheme — commonly `Rule / LLM / RuleLLM / Rag`, but the target file may declare any subset or extension — that is marked `Yes` in target §10.1). Every parameter value must have a source citation.
+**Writing principle**: Write this document **before any code**. It drives all implementation decisions. Every agent type declared under target §7 (Agent Roster) must have a corresponding class in every built variant's agent-implementation module. The canonical variant set at this version of `implement-simulation-skill` is exactly `Rule`, `LLM`, `RuleLLM`, `Rag` (see `01-mandatory-structure.md § Canonical Variant Set`); target §10.1 selects which of these four are built for the current scenario by marking each row `Yes`/`No`, and introducing a new variant requires the explicit upgrade procedure in that section. Every parameter value must have a source citation.
 
 **Domain neutrality.** This specification governs simulations across any domain: financial markets, opinion dynamics, epidemics, sociology, organisational behaviour, ecology, or any future domain. The section spine (§1 – §9) is domain-neutral. Domain-specific vocabulary, palettes, and mechanisms are quarantined to the **domain-instantiation appendices** attached to §4.1 (see §4.1 for the active `Finance` appendix and instructions for adding sibling appendices such as `Opinion`, `Epidemics`, `Sociology`).
 
@@ -826,12 +826,16 @@ Minimum 4 quantitative data points per event.
 
 ### §9 Variant Comparison Preview
 
-Populate the columns of the table below with the variants declared `Yes`
-in target §10.1 (in the target-file variant scheme's canonical order —
-commonly `Rule / LLM / RuleLLM / Rag`, but the target file MAY declare
-any subset or extension). The illustrative row content below assumes the
-common `Rule / LLM / RuleLLM / Rag` scheme as an example; adapt to the
-actual variants of the scenario.
+Populate the columns of the table below with the variants that target
+§10.1 marks `Yes`. The canonical variant set at this version of
+`implement-simulation-skill` is exactly `Rule`, `LLM`, `RuleLLM`, `Rag`
+(see `01-mandatory-structure.md § Canonical Variant Set`); columns MUST
+appear in the fixed canonical order `Rule → LLM → RuleLLM → Rag`,
+omitting any variant marked `No`. The illustrative row content below
+uses the full four-variant scheme as an example; drop columns for
+variants that target §10.1 does not build. Introducing a new variant
+first requires the explicit upgrade procedure in `01-mandatory-structure.md
+§ Canonical Variant Set`.
 
 ```markdown
 ## 9. Variant Comparison Preview
@@ -1112,20 +1116,26 @@ Minimum 4 stylised facts. Each must be verifiable from simulation output within 
 | [Metric B] | ...          | ...                | ...                | ...                           | ...                           |
 
 **Calibration protocol**:
-1. Run the baseline variant declared in target §10.1 (typically the deterministic / rule-based
-   variant; finance instantiation: `Rule`) for 10 seeds with default parameters.
+1. Run the baseline variant `Rule` (the canonical deterministic / rule-based baseline;
+   see `01-mandatory-structure.md § Canonical Variant Set`) for 10 seeds with default
+   parameters. This step is skipped only if target §10.1 marks `Rule` as `No`, in which
+   case the baseline is the first variant marked `Yes` in the canonical order
+   `Rule → LLM → RuleLLM → Rag`.
 2. Compute the mean of each metric across runs.
 3. Compare against target ranges above.
 4. Adjust parameters using the guidance above.
-5. Re-run and verify before proceeding to the remaining variants declared in target §10.1
-   (finance instantiation: `LLM`, `RuleLLM`, `Rag`).
+5. Re-run and verify before proceeding to the remaining canonical variants marked `Yes`
+   in target §10.1, in the fixed order `LLM → RuleLLM → Rag`.
 
 ### 6.3 Cross-Variant Predictions
 
 Based on the theoretical expectations from `simulation-bases.md §9`, state the expected direction
 of metric change for each variant relative to the baseline variant. Column headers below use
-`{V1..Vk}` placeholders and MUST be replaced with the exact variant labels declared in target
-§10.1 (finance default: Rule / LLM / RuleLLM / Rag).
+`{V1..Vk}` placeholders and MUST be replaced with the canonical variant labels declared in target
+§10.1. The canonical set at this version of `implement-simulation-skill` is exactly `Rule`,
+`LLM`, `RuleLLM`, `Rag` (see `01-mandatory-structure.md § Canonical Variant Set`); columns MUST
+appear in the fixed canonical order `Rule → LLM → RuleLLM → Rag`, omitting any variant marked
+`No` in target §10.1.
 
 | Metric     | {V1 — Baseline}           | {V2} Expected                                   | {V3} Expected        | {V4} Expected        | Theoretical Basis                       |
 |------------|---------------------------|-------------------------------------------------|----------------------|----------------------|-----------------------------------------|

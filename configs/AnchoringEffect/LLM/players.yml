@@ -169,6 +169,14 @@ noise_trader:
       initial_cash: 10000.0
       initial_position: 100.0
       custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.9
+          max_tokens: 512
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------

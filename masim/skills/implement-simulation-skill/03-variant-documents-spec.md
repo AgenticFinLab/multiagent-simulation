@@ -7,7 +7,7 @@ This file defines the complete content specifications for the two per-variant do
 1. **`{Variant}/explain.md`** — 9-section implementation guide (traces design to code)
 2. **`{Variant}/analysis.md`** — 7-section analysis guide (traces metrics to functions)
 
-These documents are written **once per variant declared `Yes` in target §10.1** (finance default: Rule, LLM, RuleLLM, Rag; other domains may declare a different scheme). They inherit from the root documents (`simulation-bases.md`, `analysis-bases.md`) and specify how each variant concretely implements the shared design.
+These documents are written **once per variant declared `Yes` in target §10.1 Variant Build Matrix**. The canonical variant set for the current version of `implement-simulation-skill` is exactly four named variants — `Rule`, `LLM`, `RuleLLM`, `Rag` (see `01-mandatory-structure.md § Canonical Variant Set`). Every one of the four MUST have a matching pair of `explain.md` / `analysis.md` under its variant folder whenever it is declared `Yes` in target §10.1. Introducing a variant outside this set requires an explicit `implement-simulation-skill` upgrade (add a named row here and in every sibling doc). They inherit from the root documents (`simulation-bases.md`, `analysis-bases.md`) and specify how each variant concretely implements the shared design.
 
 ---
 
@@ -43,9 +43,9 @@ The reader goes to `simulation-bases.md §4.1` for depth. They come here only fo
 
 | Item                               | Description                                                                                         |
 |------------------------------------|-----------------------------------------------------------------------------------------------------|
-| Variant                            | [Rule / LLM / RuleLLM / Rag]                                                                        |
+| Variant                            | one of the four canonical variants declared `Yes` in target §10.1: `Rule`, `LLM`, `RuleLLM`, or `Rag` (see `01-mandatory-structure.md § Canonical Variant Set`) |
 | Implements                         | `../simulation-bases.md`                                                                            |
-| Decision Logic                     | [Fixed formulas / LLM prompts / Formula-anchored LLM / RAG-augmented LLM]                           |
+| Decision Logic                     | `Rule` → deterministic formulas; `LLM` → LLM prompt; `RuleLLM` → rule-anchored LLM (persona + decision rules); `Rag` → retrieval-augmented LLM (retrieval hook + persona + decision rules) |
 | Key Difference from Other Variants | [1-2 sentences: what makes this variant unique]                                                     |
 | Primary Research Contribution      | [What unique insight running this variant enables]                                                  |
 | Files                              | `players.py`, `run_{name}[_suffix].py`, `analysis.py`, `explain.md`, `analysis.md` [, `prompts.py`] |

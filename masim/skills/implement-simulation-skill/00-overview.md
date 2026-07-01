@@ -42,10 +42,15 @@ for:
    labels and value palettes (finance, opinion, epidemics, sociology, …) live
    in domain-instantiation appendices attached to `02-root-documents-spec.md`
    (Step 2).
-4. Implementing the variants declared in target §10.1 (any subset of the
-   variant scheme configured in the target file — commonly `Rule / LLM /
-   RuleLLM / Rag`, but the target may declare any subset or extension of
-   this scheme) (Step 3 — Step 4).
+4. Implementing the canonical variants selected by target §10.1. The
+   canonical variant set at this version of `implement-simulation-skill`
+   is exactly `Rule`, `LLM`, `RuleLLM`, `Rag` (see
+   `01-mandatory-structure.md § Canonical Variant Set`); target §10.1
+   marks each of these four `Yes` or `No`, and every variant marked `Yes`
+   MUST be fully implemented (no silent skipping). Introducing a new
+   variant is not permitted ad hoc — it requires the explicit upgrade
+   procedure in `01-mandatory-structure.md § Canonical Variant Set`
+   (Step 3 — Step 4).
 5. Validating, reviewing, analysing, documenting, executing, and final review
    (Step 5 — Step 10, all consolidated in `09-step5-to-10-review.md`).
 

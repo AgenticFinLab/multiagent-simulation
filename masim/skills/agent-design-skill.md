@@ -70,6 +70,16 @@ A specification that conforms to this handbook MUST be:
    scenario names, absolute numeric levels, or fixed round counts; all
    numeric thresholds MUST be parameterised; decision logic MUST
    function given only the declared signals.
+8. **I/O-contractual** — the specification MUST declare an explicit
+   §3.6.0 I/O Contract (inputs, outputs, content constraints, and
+   canonical serialization format) that binds **every implementation
+   variant the target declares** in its §10.1 Variant Build Matrix
+   (the variant scheme is scenario-defined and MAY be any subset,
+   superset, or renaming of the illustrative Rule / LLM / RuleLLM /
+   RAG default — the contract MUST hold regardless of which scheme
+   is chosen). Implementers MUST re-open the contract on every
+   coding pass; on conflict with prose elsewhere in the spec, the
+   contract wins.
 
 ---
 
@@ -104,7 +114,7 @@ if deeper coverage is warranted. Every section listed here is
 | 3  | Definition and Goals                    | `##`   | Includes non-goals                    |
 | 4  | Theoretical Foundation                  | `##`   | >=1 theory sub-block                  |
 | 5  | Design Purpose and Activation Triggers  | `##`   | Includes deactivation                 |
-| 6  | Behavioral Framework                    | `##`   | >=5 H4 sub-blocks (minimum set below) |
+| 6  | Behavioral Framework                    | `##`   | >=6 H4 sub-blocks (I/O Contract + minimum set below) |
 | 7  | Parameters                              | `##`   | >=8-column table                      |
 | 8  | Worked Numerical Examples               | `##`   | >=3 cases + 1 edge case               |
 | 9  | Behavioral Verification and Calibration | `##`   | Includes Ablation Hooks sub-block     |
@@ -284,10 +294,208 @@ the declared signal table, state "none beyond §3.6.1 signals.">
 
 ### 3.6 Behavioral Framework
 
-Five H4 sub-sections are the required minimum, in this order. All
-five MUST be present. Additional H4 sub-sections MAY be appended
+Six H4 sub-sections are the required minimum, in this order. All
+six MUST be present. Additional H4 sub-sections MAY be appended
 after §3.6.5 to deepen the behavioural specification (e.g. learning
 dynamics, memory management, social signalling strategy).
+
+**Ordering rationale.** The I/O Contract (§3.6.0) is placed FIRST
+because every downstream implementation — regardless of which
+variant scheme the target declares in its §10.1 Variant Build
+Matrix (Rule / LLM / RuleLLM / RAG is the finance-default
+illustration; other domains MAY declare any subset, superset, or
+renaming) and regardless of which engine or prompt template
+ultimately executes it — MUST honour the same input surface, the
+same output object, and the same serialization format. Placing the
+contract before the decision mechanism guarantees that implementers
+see the binding interface the moment they open the specification.
+
+#### 3.6.0 I/O Contract **(MANDATORY, contract-strength)**
+
+This sub-section is the **binding interface between design and
+implementation**. Every implementation variant declared for this
+agent in the target's §10.1 Variant Build Matrix — whatever the
+scheme (the finance-default `Rule / LLM / RuleLLM / RAG` is one
+example; other domains MAY declare any subset, superset, or
+renaming, and future variants MAY be added) — MUST conform to the
+inputs, outputs, content constraints, and serialization format
+declared here. On conflict with prose elsewhere in this
+specification, this section wins.
+
+**Reading convention.** When any rule below (or any rule in a
+sibling skill document) enumerates literal variant names, project
+them onto the *capability-class* categories used by this handbook.
+The implement layer pins a fixed canonical set of variant labels
+— currently `Rule`, `LLM`, `RuleLLM`, `Rag` — declared and versioned
+in `masim/skills/implement-simulation-skill/01-mandatory-structure.md
+§ Canonical Variant Set`; that section is the authoritative mapping
+from those four labels to their capability classes. The stable
+capability categories are: **rule-driven**, **model-driven**,
+**hybrid (rule + model)**, **retrieval-augmented**, and any future
+class introduced through the explicit upgrade procedure documented
+in that section. All contract obligations in this handbook attach
+to the *class*, so that the same design-level rule automatically
+covers every literal label that maps onto that class.
+
+The I/O Contract has five required blocks: **Inputs**, **Outputs**,
+**Content Constraints**, **Serialization Format**, and **Implementer
+Contract Reminder**. All five MUST be filled. "N/A" is not
+permitted — if a block does not apply, the author MUST justify why
+in one sentence.
+
+```markdown
+##### Inputs (per decision call)
+
+| Input                   | Source                  | Type / Shape             | Required? | Notes                                       |
+|-------------------------|-------------------------|--------------------------|-----------|---------------------------------------------|
+| `<signal_name>`         | environment / peer feed | `float` / `int` / `enum` | yes / no  | maps to a row in §3.6.1                     |
+| `<state_variable>`      | agent's own persisted state | as declared in §3.6.4 | yes       | populated on first call by §3.6.4 init      |
+| `<context_metadata>`    | scheduler / round header | e.g. `round: int`, `identity: str` | yes | round number, agent identity, seed if any |
+| `<retrieved_knowledge>` | retrieval store (retrieval-augmented variants only) | `list[str]` | retrieval variants only | required only for any variant that performs external retrieval (the finance-default `Rag` is one such variant, but any target-declared retrieval variant qualifies); falls back to a declared sentinel if empty |
+
+Every row MUST appear either in §3.6.1 Decision Information Set
+(signals) or in §3.6.4 Mathematical Model (state variables). No
+input in this table may be undeclared elsewhere.
+
+##### Outputs (per decision call)
+
+The agent MUST emit exactly one **decision object** per call. The
+object's schema (all required fields, their types, their valid
+ranges, and their units) is declared here and MUST be honoured by
+every implementation variant.
+
+| Field           | Type    | Valid Range / Enum                                         | Unit     | Required? | Meaning                                                        |
+|-----------------|---------|------------------------------------------------------------|----------|-----------|----------------------------------------------------------------|
+| `action`        | enum    | `{"<action_A>", "<action_B>", "hold"}` (from §3.6.3)       | —        | yes       | discrete action selected this call                             |
+| `<param_1>`     | float   | matches §3.6.3 Action parameter rule                       | as declared | conditional | continuous parameter of the action (e.g. bid price)         |
+| `<sizing_var>`  | float   | matches §3.6.3 Sizing rule                                 | as declared | yes    | action magnitude / quantity                                    |
+| `reasoning`     | string  | length declared by author (default: 1–3 sentences; MAY be tightened, loosened, or replaced with a token cap) | —        | yes       | audit trail explaining WHY (also consumed by analysis skills)  |
+
+The enum of `action` values MUST exactly match the "Action types
+allowed" row in §3.6.3. The valid range of every other field MUST
+exactly match the corresponding §3.6.3 rule. No field may
+contradict §3.6.3.
+
+For agents that emit compound actions (e.g. simultaneous
+buy-and-sell quotes, or multi-target opinion moves), the decision
+object MAY carry a list-of-actions field instead of a scalar
+`action`; the schema then MUST enumerate the per-item field set
+verbatim.
+
+##### Content Constraints
+
+- **Required fields**: every row marked `Required? = yes` in the
+  Outputs table MUST be present on every call.
+- **Forbidden fields**: fields not declared in the Outputs table
+  MUST NOT be emitted (extra fields break downstream parsers).
+- **Value ranges**: every emitted numeric field MUST fall inside
+  its declared valid range; out-of-range values MUST be clamped by
+  the agent (implementer responsibility) before emission.
+- **Units and sign conventions**: units MUST match the declared
+  column verbatim (e.g. price in the same units as `fundamental`,
+  quantity in shares/contracts/units-of-position). Sign conventions
+  MUST be stated (e.g. positive = buy, negative = sell) if the
+  action space uses signed magnitudes.
+- **Determinism markers**: if the decision is
+  `stochastic-given-seed`, the emitted object MUST carry the seed
+  used, or the implementation MUST log it deterministically per
+  round.
+
+##### Serialization Format
+
+The agent's output MUST be serialised in the canonical tagged form
+below so that **every implementation variant declared in the
+target's §10.1 Variant Build Matrix** — whatever its name
+(rule-driven, model-driven, retrieval-augmented, hybrid, or any
+future variant class) — yields byte-comparable output structures:
+
+    <analysis>...free-form reasoning, length as declared in the Outputs table (default guidance: 1–5 sentences)...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "<param_1>": <float>,
+                "<sizing_var>": <float>,
+                "reasoning": "<audit-trail explanation; length as declared in the Outputs table>"}</decision>
+
+Rules that every variant MUST honour:
+
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT
+   optional. Parsers key on them.
+2. The `<decision>` block MUST contain a single valid JSON object
+   whose keys exactly match the Outputs table. Trailing commas,
+   comments, or code fences inside `<decision>` are forbidden.
+3. **Rule-driven variants** (deterministic, no model in the loop)
+   MAY generate `<analysis>` from a deterministic template (e.g.
+   `f"Rule fired: {trigger}"`), but the tags and JSON schema MUST
+   still be present so downstream analysis tooling remains uniform.
+4. **Model-driven variants** (any variant that consults an LLM,
+   rule-plus-LLM hybrid, retrieval-augmented LLM, or future
+   model-based class — regardless of literal variant name) MUST
+   include this exact tag+JSON requirement in the system or user
+   prompt so the model cannot omit or paraphrase the format.
+5. **Retrieval-augmented variants** (any variant that reads
+   external knowledge into the input surface — the finance-default
+   `Rag` is one example) MUST additionally declare a fallback
+   sentinel for the `retrieved_knowledge` input (e.g.
+   `"(No relevant knowledge retrieved this round.)"`) and MUST
+   inject it verbatim when retrieval returns empty; the fallback
+   sentinel is part of this contract, not an implementation detail.
+
+Variant classification is by capability, not literal name; the
+target §10.1 Variant Build Matrix decides which classes are built
+and what names they carry.
+
+The field names shown above (`action`, `<param_1>`, `<sizing_var>`,
+`reasoning`) are canonical **placeholders**. The authoring agent
+MUST rename them to domain-natural identifiers (e.g. `bid_price`,
+`quantity`, `opinion_shift`, `post_intensity`) that match §3.6.3,
+and MUST update every row of the Outputs table in the same pass.
+
+##### Implementer Contract Reminder
+
+**Implementers of this agent MUST re-open this §3.6.0 I/O Contract
+during every coding pass and MUST use it as the single source of
+truth for the following six activities.** Do NOT rely on prose
+elsewhere; when this section and any other section disagree, this
+section wins.
+
+1. **Signal wiring** — every input row above MUST map to a real
+   read against the environment / state / round header. If the
+   engine cannot supply an input listed here, the implementation is
+   incomplete.
+2. **Decision emission** — the code path that emits a decision
+   MUST populate every `Required? = yes` field, and MUST clamp any
+   out-of-range numeric to its declared valid range.
+3. **Prompt drafting (any model-driven variant)** — for every
+   variant that consults a model (LLM, rule-plus-LLM hybrid,
+   retrieval-augmented LLM, or any future model-based class named
+   in target §10.1), the prompt template MUST spell out the tag
+   pattern and the JSON schema literally, so the model cannot
+   invent new fields or drop declared ones. Use a verbatim example
+   that shows the closing `</decision>` tag.
+4. **Parser tests** — the implementation MUST include a smoke test
+   that (i) verifies the tag pattern is present, (ii) parses the
+   `<decision>` JSON, (iii) asserts every required field is present
+   and inside its valid range.
+5. **Variant parity** — every variant declared `Yes` in the
+   target's §10.1 Variant Build Matrix (whatever the scheme —
+   finance defaults to `Rule / LLM / RuleLLM / Rag`, other domains
+   MAY declare any subset, superset, or renaming) MUST produce
+   output objects with the SAME field set. If a variant needs an
+   extra field, extend this contract FIRST, then propagate to every
+   declared variant.
+6. **Contract-versus-prose conflict resolution** — if the mechanism
+   in §3.6.2, the action space in §3.6.3, or the mathematical model
+   in §3.6.4 seems to contradict this contract, the contract wins.
+   Open a design revision and reconcile the other section in the
+   same commit.
+
+Cross-references:
+- Every Input row here MUST also appear in §3.6.1 (signals) or
+  §3.6.4 (state variables).
+- Every Output field here MUST be reachable from the §3.6.3 Action
+  Space specification (types, ranges, sizing).
+- Every field's evidence / rationale MUST be traceable to §3.4 or
+  §3.7 per the §4 Evidence Provenance requirement.
+```
 
 #### 3.6.1 Decision Information Set
 
@@ -700,6 +908,21 @@ sections and prevent orphan content.
   symbol table.
 - The **"Does NOT use"** list in §3.6.1 MUST NOT contradict any signal
   actually consumed in §3.6.2.
+- Every **Input row** in §3.6.0 I/O Contract MUST appear either as a
+  signal in §3.6.1 or as a state variable in §3.6.4. No input in the
+  contract may be undeclared elsewhere.
+- Every **Output field** in §3.6.0 I/O Contract MUST be reachable
+  from the §3.6.3 Action Space: `action` enum values MUST match
+  "Action types allowed" verbatim; every numeric output field's valid
+  range MUST match the corresponding §3.6.3 rule (Action parameter
+  rule, Sizing rule, State constraint, or Resource cap).
+- The **canonical tag pattern** (`<analysis>...</analysis><decision>{JSON}</decision>`)
+  declared in §3.6.0 MUST be honoured by **every implementation
+  variant declared `Yes` in the target's §10.1 Variant Build
+  Matrix** — regardless of the scheme (finance defaults to
+  `Rule / LLM / RuleLLM / Rag`; other domains MAY declare any
+  subset, superset, or renaming). No variant may add or drop
+  declared output fields without first extending §3.6.0.
 
 ---
 
@@ -722,8 +945,19 @@ blocker.
       Missing-Signal Policy, Activation Triggers (with `<Default>`),
       Deactivation Conditions, Behavioral Adaptation table (>=2 rows),
       and Environmental Dependencies
-- [ ] §3.6 has all five H4 sub-blocks (Information Set, Mechanism,
-      Action Space, Mathematical Model, Behavioral Properties)
+- [ ] §3.6 has all six H4 sub-blocks (I/O Contract, Information Set,
+      Mechanism, Action Space, Mathematical Model, Behavioral Properties)
+- [ ] §3.6.0 I/O Contract fills all five required blocks (Inputs,
+      Outputs, Content Constraints, Serialization Format, Implementer
+      Contract Reminder); no block is left as "N/A" without a
+      one-sentence justification
+- [ ] §3.6.0 Outputs table names every required field with a Type,
+      a Valid Range / Enum, a Unit, a Required? flag, and a Meaning
+- [ ] §3.6.0 Serialization Format block declares the literal
+      `<analysis>...</analysis><decision>{JSON}</decision>` tag
+      pattern and states the retrieval fallback sentinel (or an
+      explicit "no retrieval-augmented variant declared in target
+      §10.1" justification)
 
 **Depth and precision:**
 - [ ] §3.4 every "Mathematical Formulation" is a single implementable
@@ -763,6 +997,17 @@ blocker.
 - [ ] Every §3.9 behavioural expectation traces to §3.6.2
 - [ ] Every citation appears in §3.10
 - [ ] No undeclared symbols in §3.6
+- [ ] Every §3.6.0 Input row is declared as a signal in §3.6.1 or
+      as a state variable in §3.6.4
+- [ ] Every §3.6.0 Output field is reachable from §3.6.3 Action
+      Space (enum values match "Action types allowed"; numeric
+      ranges match the corresponding §3.6.3 rules)
+- [ ] The `<analysis>/<decision>` tag pattern in §3.6.0 is honoured
+      by **every implementation variant declared `Yes` in the
+      target's §10.1 Variant Build Matrix** (whatever the scheme —
+      finance-default `Rule / LLM / RuleLLM / Rag`, or any other
+      subset/superset/renaming); variants add no undeclared output
+      fields
 
 **Evidence provenance (§4 rules):**
 - [ ] ≥80% of substantive design choices cite Type 1–4 evidence
@@ -788,9 +1033,10 @@ blocker.
 
 ## 7. Status
 
-| Field   | Content                                  |
-|---------|------------------------------------------|
-| Version | 2.2.0                                    |
-| Created | 2025-06-11                               |
-| Status  | canonical                                |
-| Domains | Domain-agnostic (all simulation domains) |
+| Field   | Content                                                                 |
+|---------|-------------------------------------------------------------------------|
+| Version | 2.3.1                                                                   |
+| Created | 2025-06-11 (v1.0.0); last minor bump 2026-07-01 (v2.3.1)                |
+| Status  | canonical                                                               |
+| Domains | Domain-agnostic (all simulation domains)                                |
+| Change log | 2026-07-01 v2.3.1: de-hardcoded the variant scheme throughout §3.6.0, §5, and §6. Literal `Rule / LLM / RuleLLM / RAG` enumerations replaced with references to the target's §10.1 Variant Build Matrix and with capability-class terminology (rule-driven / model-driven / retrieval-augmented) so any subset, superset, or renaming stays contract-conformant. Retrieval-fallback rule generalised to "any retrieval-augmented variant". <br> 2026-07-01 v2.3.0: added mandatory §3.6.0 I/O Contract (Inputs, Outputs, Content Constraints, Serialization Format `<analysis>...</analysis><decision>{JSON}</decision>`, Implementer Contract Reminder); tightened §5 consistency rules and §6 validation checklist accordingly. |

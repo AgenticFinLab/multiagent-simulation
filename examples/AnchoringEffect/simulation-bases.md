@@ -138,6 +138,7 @@ market-level slow price-discovery process.
 - **Mathematical Formulation**: Rational update: `E[P(t+1) | info(t)] = F(t)` (full updating). Anchored update: `E[P(t+1) | info(t)] = anchor + α × (F(t) − anchor)` (partial updating, α < 1).
 - **Empirical Evidence**: Fama (1970) documents that prices approximate rational expectations in liquid markets on short horizons; however, Campbell & Sharpe (2009), Lo & MacKinlay (1988), and the broader behavioural finance literature establish that medium-horizon deviations from rational expectations are systematic and persistent.
 - **Relevance to This Simulation**: `RationalUpdater` embodies Muth's rational agent — it uses the true `deviation = (price − fundamental) / fundamental` with no anchoring bias, acting as the benchmark corrective force.
+- **Calibration Implication**: `RationalUpdater` trade_threshold = 0.02 encodes the Muth-rational agent that trades whenever price departs from fundamental by more than 2 %; setting the threshold much smaller than the anchoring-induced MAD range [3 %, 10 %] ensures that RU is always active as a corrective force against anchored demand.
 
 ---
 
@@ -148,6 +149,51 @@ market-level slow price-discovery process.
 - **Mathematical Formulation**: `momentum_signal = (price − prev_price) / prev_price`; trade when `|momentum_signal| > entry_threshold`; position size proportional to signal magnitude.
 - **Empirical Evidence**: Jegadeesh & Titman (1993) document 12.01% annualised momentum return in US equities (1965–1989). The momentum effect interacts with anchoring: anchored prices that are drifting slowly toward fundamental provide a weak but predictable trend that momentum traders can amplify temporarily.
 - **Relevance to This Simulation**: `MomentumTrader` amplifies existing trends, including the slow anchoring-driven drift toward or away from fundamental. During the initial overvalued phase, MomentumTrader may briefly extend the mispricing; during correction, it may accelerate it.
+- **Calibration Implication**: `entry_threshold = 0.02` calibrates MomentumTrader to activate on 1-round moves consistent with Jegadeesh & Titman's (1993) empirical positive-serial-correlation regime; larger thresholds silence the agent, smaller thresholds turn it into a noise amplifier.
+
+---
+
+### Theory: Prospect Theory Disposition Effect
+
+- **Citation**: Shefrin, H., & Statman, M. (1985). The disposition to sell winners too early and ride losers too long: Theory and evidence. *Journal of Finance*, 40(3), 777–790. https://doi.org/10.1111/j.1540-6261.1985.tb05002.x; Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. *Econometrica*, 47(2), 263–292. https://doi.org/10.2307/1914185
+- **Core Insight**: Loss-averse investors realise gains at roughly 1.5 – 2.5× the rate at which they realise losses of equal magnitude, because the S-shaped prospect-theory value function is concave for gains and convex for losses. The reference point is the purchase price (cost basis), creating an asymmetric response independent of fundamental value.
+- **Mathematical Formulation**: `sell if (P − cost) / cost > gain_threshold`; `hold if (cost − P) / cost < gain_threshold × loss_aversion_mult`; `V(x) = x^α for x ≥ 0, −λ(−x)^β for x < 0` with `α ≈ β ≈ 0.88`, `λ ≈ 2.25` (Tversky & Kahneman 1992).
+- **Empirical Evidence**: Odean (1998) documents 1.68× gain-vs-loss realisation ratio for retail brokerage accounts. Weber & Camerer (1998) reproduce the disposition effect in controlled experiments. The 2.0 – 2.5× loss-aversion multiplier is stable across markets and countries.
+- **Relevance to This Simulation**: `DispositionTrader` sells early when its position gains above `gain_threshold = 0.04` but holds losing positions until the loss reaches `gain_threshold × loss_aversion_mult ≈ 10 %`, producing asymmetric selling pressure that interacts with the anchoring drift.
+- **Calibration Implication**: `gain_threshold = 0.04` and `loss_aversion_mult = 2.5` calibrate the agent to the empirical 4 % gain-realisation median and the 2.25 – 2.5× loss-aversion multiplier documented by Kahneman & Tversky (1979) and Odean (1998).
+
+---
+
+### Theory: Overreaction and Short-Horizon Reversal
+
+- **Citation**: De Bondt, W. F. M., & Thaler, R. H. (1985). Does the stock market overreact? *Journal of Finance*, 40(3), 793–805. https://doi.org/10.1111/j.1540-6261.1985.tb05004.x; Jegadeesh, N. (1990). Evidence of predictable behavior of security returns. *Journal of Finance*, 45(3), 881–898. https://doi.org/10.1111/j.1540-6261.1990.tb05110.x
+- **Core Insight**: Cumulative returns over short horizons overshoot fair value and are followed by reversals. Contrarian traders exploit this by shorting after cumulative rises and buying after cumulative falls, providing a stabilising counterweight to trend followers.
+- **Mathematical Formulation**: `cum_ret = (P_t − P_{t−k}) / P_{t−k}`; short if `cum_ret > entry_threshold`, long if `cum_ret < −entry_threshold`; position size scales linearly with |cum_ret|.
+- **Empirical Evidence**: De Bondt & Thaler (1985) find 25 % cumulative excess return to contrarian portfolios over 3-year horizons. Jegadeesh (1990) documents negative serial correlation over 1 – 4-week horizons in US equity returns.
+- **Relevance to This Simulation**: `ContrarianTrader` fades the short-horizon cumulative return over a 10-round window, opposing MomentumTrader and providing statistical mean-reversion that complements the deterministic γ term.
+- **Calibration Implication**: `lookback = 10` maps to Jegadeesh's (1990) 2-week reversal horizon scaled to daily rounds; `entry_threshold = 0.05` matches De Bondt & Thaler's (1985) 5 % overreaction threshold.
+
+---
+
+### Theory: Conservatism and Slow Belief Updating
+
+- **Citation**: Barberis, N., Shleifer, A., & Vishny, R. (1998). A model of investor sentiment. *Journal of Financial Economics*, 49(3), 307–343. https://doi.org/10.1016/S0304-405X(98)00027-0
+- **Core Insight**: Institutional investors update beliefs conservatively in response to new information. The BSV model predicts that conservatism produces post-announcement drift as beliefs slowly converge toward the true fundamental, matching the post-earnings announcement drift anomaly.
+- **Mathematical Formulation**: `b_{t+1} = b_t + η × (F − b_t)` (exponential smoothing of belief toward fundamental); trade on `(b_t − P) / P` with a `dev_threshold`.
+- **Empirical Evidence**: Bernard & Thomas (1989) document post-earnings announcement drift lasting 60 – 90 trading days. Barberis, Shleifer & Vishny (1998) estimate learning rates `η ≈ 0.03 – 0.08` from cross-sectional analyst-forecast data.
+- **Relevance to This Simulation**: `FundamentalAnalyst` starts each run with `belief = initial_price = 105` (i.e., anchored to the same salient value as `AnchoredTrader`) and converges toward `F = 100` at rate `η`. Early in the run it aligns with anchored demand; later in the run it aligns with `RationalUpdater` and adds corrective force.
+- **Calibration Implication**: `learning_rate = 0.05` is the midpoint of Barberis, Shleifer & Vishny's (1998) empirical range; `dev_threshold = 0.02` matches the RationalUpdater threshold so the two corrective agents have compatible activation.
+
+---
+
+### Theory: Market Making and Two-Sided Quoting
+
+- **Citation**: Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71–100. https://doi.org/10.1016/0304-405X(85)90044-3; Hendershott, T., Jones, C. M., & Menkveld, A. J. (2011). Does algorithmic trading improve liquidity? *Journal of Finance*, 66(1), 1–33. https://doi.org/10.1111/j.1540-6261.2010.01624.x
+- **Core Insight**: Market makers post continuous two-sided quotes around a short-term fair-value estimate (here, an EMA of the price) and profit from the spread. They neither speculate on direction nor react to the true fundamental; they absorb transient order-flow imbalance and dampen short-term volatility.
+- **Mathematical Formulation**: `EMA_t = (1 − w) · EMA_{t−1} + w · P_t` with `w = 2 / (ema_window + 1)`; `bid = EMA · (1 − half_spread)`, `ask = EMA · (1 + half_spread)`; buy when `P < bid`, sell when `P > ask`.
+- **Empirical Evidence**: Huang & Stoll (1997) estimate effective half-spreads of 0.5 – 2 % for actively traded stocks. Hendershott, Jones & Menkveld (2011) show that algorithmic liquidity providers reduce intraday volatility by 15 – 25 %.
+- **Relevance to This Simulation**: `LiquidityProvider` uses `ema_window = 20` and `half_spread = 0.015` to absorb `NoiseTrader` shocks and to dampen short-horizon volatility without contributing directional pressure. Its presence keeps the anchoring dynamics visible instead of drowning under noise.
+- **Calibration Implication**: `ema_window = 20` is the mid-range algorithmic-MM update interval documented by Hendershott, Jones & Menkveld (2011); `half_spread = 0.015` sits within Huang & Stoll's (1997) empirically observed 0.5 – 2 % effective half-spread band.
 
 
 ## §3 Market Design Principles
