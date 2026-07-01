@@ -1,0 +1,183 @@
+# Volmageddon Scenario Target
+
+## §1 Meta
+
+| Field         | Content                                                                                                                                                                     |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name          | Volmageddon                                                                                                                                                                 |
+| Domain        | finance                                                                                                                                                                     |
+| Requested By  | Sijia Chen                                                                                                                                                                  |
+| Produced By   | define-simulation-scenario-skill.md v1.2.0 (invoking agent: QoderWork)                                                                                                      |
+| Created       | 2026-07-01                                                                                                                                                                  |
+| Pipeline      | masim/skills/polish-simulation-pipeline.md                                                                                                                                  |
+| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                                                     |
+| Status        | locked                                                                                                                                                                      |
+| CHANGELOG     | 2026-07-01  Produced by define-simulation-scenario-skill.md v1.2.0 under polish-simulation-pipeline.md Step 0 Case B (Status: draft). Source of §2–§10 content: existing downstream artefacts under `examples/Volmageddon/` (simulation-bases.md, analysis-bases.md, Rule/players.py, configs/Volmageddon/Rule/players.yml). / 2026-07-01  Polish target-file gate: §11 three-PASS green, Status upgraded draft → locked. |
+
+## §2 Phenomenon Statement
+
+### §2.1 Trigger
+
+A short-volatility carry regime has left inverse-volatility exchange-traded products and short-volatility carry books deeply exposed to a rising volatility proxy. The trigger is a sudden intraday move in the volatility proxy that pushes its deviation from the fundamental long-run level above the mechanical rebalance threshold configured for inverse-volatility products and above the stop-loss threshold that short-volatility carry traders use to size covering orders.
+
+### §2.2 Mechanism
+
+Once the deviation crosses the inverse-product rebalance threshold, mechanical demand for volatility exposure enters the market as procyclical buying that is not conditioned on the sign of the fundamental disconnect. The same move drives short-volatility carry traders to cover exposure, adding a second procyclical buying stream. Both streams raise the net demand fed into the price-impact term of the volatility proxy, which lifts the proxy further above fundamental. That further move exceeds the equity de-risking activation region for volatility-targeted equity investors, converting a volatility-product shock into cross-market selling pressure while partial stabilisers (long-volatility hedgers, volatility arbitrageurs) supply only limited offsetting demand.
+
+### §2.3 Participants
+
+Five investor archetypes drive the causal chain. Two amplifiers push net demand in the direction of the spike: an inverse-volatility exchange-traded product manager that must buy volatility exposure once the deviation crosses its rebalance threshold, and a short-volatility carry trader that must cover short volatility exposure once the deviation crosses its stop-loss threshold. Two stabilisers lean against the move: a long-volatility hedger that treats cheap volatility as insurance and sells profitably into spikes, and a volatility arbitrageur that trades large deviations toward fundamental subject to its own activation threshold. One cross-market channel is a volatility-targeting equity trader that de-risks when the volatility proxy departs from fundamental by more than twice its risk limit.
+
+### §2.4 Resolution
+
+The cascade halts when the mean-reversion term in the price formation equation, together with cumulative selling by long-volatility hedgers taking profit and by volatility arbitrageurs leaning against the deviation, offsets the residual demand from inverse-product rebalancing and short-volatility covering. Cash constraints on the two amplifiers eventually cap how much further procyclical demand they can inject. The proxy then reverts partially toward fundamental within the run horizon; a fully closed gap is not guaranteed, and the equilibrium level of the proxy after resolution depends on how much amplifier inventory remains and how much stabiliser capital was deployed at the peak.
+
+## §3 Research Goals
+
+1. **Spike magnitude and onset (parameter sweep).** How does the peak deviation of the volatility proxy from fundamental scale with the inverse-product `rebalance_size` and with the price-impact coefficient `price_impact`? Answered by a two-way sweep over `rebalance_size` and `price_impact`, measured by `analysis.py: compute_vol_spike_magnitude()` and `compute_spike_onset()`.
+2. **Amplifier ablation.** If the inverse-volatility exchange-traded product manager is removed from the roster, does the volatility proxy still exhibit a spike, and if so how much shallower is the peak? Answered by an ablation turning off `vol-etn-manager`.
+3. **Stop-loss threshold sensitivity (parameter sweep).** How does the timing of the covering surge move as the short-volatility trader's `stop_loss` threshold varies across its empirical range? Answered by a sweep on `stop_loss`, measured by `compute_short_vol_covering()` and the round at which covering activity peaks.
+4. **Rule versus LLM decision fidelity (variant comparison).** Does the LLM-reasoning variant of the amplifiers produce systematically different covering and rebalance quantities than the rule-based baseline when both face the same proxy trajectory? Answered by comparing the `Rule` and `LLM` variants declared in §10.1 on `rebalance_pressure()` and `short_vol_covering()`.
+5. **Cross-market stress attribution.** Does the volatility-product shock generate materially measurable equity de-risking, or does the equity channel remain latent? Answered by `compute_equity_derisking_volume()` across the full run against a counterfactual with the `EquityTrader` role muted.
+
+## §4 Theoretical Anchors
+
+### §4.1 Volatility Clustering And Shock Persistence (Engle 1982)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. *Econometrica*, 50(4), 987–1007. https://doi.org/10.2307/1912773                                                                                     |
+| Key mechanism (≤30 words) | Volatility clusters after large shocks rather than snapping back to a constant variance; conditional variance is autoregressive in past squared innovations.                                                                                                                         |
+| Key equation              | `sigma_t^2 = alpha_0 + sum_i alpha_i * epsilon_{t-i}^2`, where `sigma_t^2` is conditional variance and `epsilon` are innovations.                                                                                                                                                    |
+| Motivates agent           | `short-vol-trader` (§7); a state-dependent volatility proxy that stays elevated after a shock justifies the crowded short-volatility unwind.                                                                                                                                          |
+| Parameter implication     | `noise_std` empirical range 0.03 to 0.10, default 0.05; volatility clustering justifies a small but non-zero exogenous noise term that produces occasional large residuals rather than a strictly deterministic drift (see §9).                                                       |
+
+### §4.2 Short-Volatility Carry And Convex Tail Loss (Bollerslev 1986)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. *Journal of Econometrics*, 31(3), 307–327. https://doi.org/10.1016/0304-4076(86)90063-1                                                                                                            |
+| Key mechanism (≤30 words) | Generalized ARCH extends conditional variance to depend on both past squared innovations and past variance, so shocks decay slowly rather than instantaneously reverting.                                                                                                             |
+| Key equation              | `sigma_t^2 = alpha_0 + alpha_1 * epsilon_{t-1}^2 + beta_1 * sigma_{t-1}^2`; persistence measured by `alpha_1 + beta_1`.                                                                                                                                                              |
+| Motivates agent           | `short-vol-trader` (§7); slow variance decay motivates the asymmetric loss profile that produces the stop-loss covering response.                                                                                                                                                    |
+| Parameter implication     | `stop_loss` empirical range 0.10 to 0.25, default 0.15 (see §9); persistence of high variance justifies a threshold-based covering rule rather than an immediate mean-reverting position adjustment.                                                                                  |
+
+### §4.3 Volatility-Managed Portfolio Deleveraging (Moreira and Muir 2017)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Moreira, A., & Muir, T. (2017). Volatility-managed portfolios. *Journal of Finance*, 72(4), 1611–1644. https://doi.org/10.1111/jofi.12575                                                                                                                                            |
+| Key mechanism (≤30 words) | Portfolios that scale risky exposure inversely to recent volatility outperform buy-and-hold; investors therefore de-risk in high-volatility regimes and re-risk when volatility falls.                                                                                                |
+| Key equation              | `w_t = (target_vol / sigma_t) * w_base`, where `w_t` is the state-dependent equity weight and `sigma_t` is realised volatility.                                                                                                                                                       |
+| Motivates agent           | `long-vol-hedger` and `equity-trader` (§7); volatility-managed logic explains both the take-profit behaviour of long-vol insurance and the de-risking response of the equity channel to elevated volatility.                                                                          |
+| Parameter implication     | `hedge_ratio` empirical range 0.05 to 0.20, default 0.10; `risk_limit` empirical range 0.05 to 0.20, default 0.10 (see §9). Volatility-managed evidence supports moderate rather than aggressive scaling factors.                                                                     |
+
+### §4.4 Funding Liquidity And First-Mover Advantage (Brunnermeier and Pedersen 2009)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. https://doi.org/10.1093/rfs/hhn098                                                                                                          |
+| Key mechanism (≤30 words) | Market liquidity and funding liquidity reinforce each other; when volatility rises, margin requirements tighten, forcing procyclical demand and cross-market spillovers into related asset classes.                                                                                   |
+| Key equation              | `demand_t = f(margin_t)`, where `margin_t = g(sigma_t)`; higher `sigma_t` raises `margin_t`, forces additional demand `demand_t`, which raises `sigma_t` further.                                                                                                                     |
+| Motivates agent           | `vol-etn-manager` (§7); mechanical inverse-product rebalancing is a canonical implementation of the funding-liquidity feedback loop when the reference product is an inverse-volatility instrument.                                                                                   |
+| Parameter implication     | `rebalance_threshold` empirical range 0.03 to 0.10, default 0.05; `rebalance_size` empirical range 5,000 to 20,000, default 10,000; `price_impact` empirical range 0.02 to 0.08, default 0.04 (see §9). These knobs together control the feedback-loop gain.                          |
+
+### §4.5 Limits To Arbitrage (Shleifer and Vishny 1997)
+
+| Field                     | Content                                                                                                                                                                                                                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation             | Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35–55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x                                                                                                                                |
+| Key mechanism (≤30 words) | Arbitrageurs face capital and horizon constraints that prevent unlimited leaning against mispricing; they therefore act only when dislocations are large enough to justify the risk of further widening.                                                                              |
+| Key equation              | Activation: `abs(deviation_t) > theta_entry`; deployed capital `Q_arb = min(Q_max, alpha_arb * abs(deviation_t))`.                                                                                                                                                                    |
+| Motivates agent           | `vol-arbitrageur` (§7); threshold activation and bounded position sizing are direct expressions of the limits-to-arbitrage argument.                                                                                                                                                  |
+| Parameter implication     | `entry_threshold` empirical range 0.03 to 0.10, default 0.05; per-round arbitrage cap 5,000 units (see §9). Bounded response prevents any single agent from single-handedly closing the deviation.                                                                                    |
+
+## §5 Stylized Facts
+
+| #  | Fact (one sentence)                                                                             | Quantitative range                                     | Citation                                                                                              | Acceptance metric                                             |
+|----|-------------------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| F1 | The volatility proxy spikes at least 30 % above its initial level at the peak of the cascade.  | 0.30 ≤ compute_vol_spike_magnitude ≤ 1.50              | SEC Staff Report on inverse and leveraged ETPs (2018); Culp et al. (2018, JAF, 10.3905/jai.2018.21.2.001) | `analysis.py: compute_vol_spike_magnitude()` ∈ [0.30, 1.50]   |
+| F2 | The spike onset occurs within 20 rounds after the first amplifier activation (dynamic).         | 1 ≤ compute_spike_onset(threshold=0.10) ≤ 20            | Federal Reserve Board (2018) volatility-product episode summary; SEC (2018) staff report              | `analysis.py: compute_spike_onset(0.10)` ∈ [1, 20]            |
+| F3 | Inverse-product rebalance pressure exceeds long-vol hedger sell pressure during stress rounds.  | rebalance_pressure ≥ 2× long-vol take-profit volume     | Bergsma and Jiang (2022, JBF, 10.1016/j.jbankfin.2022.106552); ProShares XIV termination report (2018) | `analysis.py: compute_rebalance_pressure()` ratio ≥ 2.0       |
+| F4 | Removing the inverse-product manager reduces the peak spike by at least 30 % (ablation-visible). | \|peak_full\| − \|peak_no_ETN\| ≥ 0.30 × peak_full     | Brunnermeier and Pedersen (2009, 10.1093/rfs/hhn098); Culp et al. (2018)                              | `analysis.py: ablation_peak_delta_share()` ≥ 0.30             |
+| F5 | Equity de-risking volume rises measurably in rounds where deviation exceeds twice the risk limit.| equity_derisking_volume > 0 in at least 10 stress rounds | Moreira and Muir (2017, 10.1111/jofi.12575); Federal Reserve Board (2018) volatility-product review    | `analysis.py: compute_equity_derisking_volume()` triggered ≥ 10 rounds |
+
+## §6 Historical / Empirical Anchors
+
+### §6.1 February 5, 2018 XIV / SVXY Volatility Shock
+
+| Field             | Content                                                                                                                                                                                                                                                                              |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name + dates      | Volmageddon, 2018-02-05 (with extended after-hours activity into 2018-02-06)                                                                                                                                                                                                        |
+| Trigger           | An intraday move in the CBOE Volatility Index of the order of +100 % relative to its prior-day close, driven initially by equity-market weakness and accelerated by rising realised volatility and short-volatility positioning.                                                     |
+| Quantitative arc  | The VIX closed 2018-02-02 near 17.16 and peaked intraday 2018-02-06 near 50, more than a 100 % intraday increase; VelocityShares Daily Inverse VIX Short-Term (XIV) fell more than 90 % in after-hours trading and was subsequently accelerated to termination on 2018-02-15; ProShares Short VIX Short-Term Futures (SVXY) fell more than 80 % over the same window; equity de-risking pressure from volatility-targeting strategies contributed to a broad-based equity drawdown during the following trading sessions. |
+| Agent mapping     | `vol-etn-manager` maps to inverse-VIX exchange-traded product issuers (Credit Suisse XIV, ProShares SVXY) forced to buy VIX futures exposure post-spike; `short-vol-trader` maps to structured products and hedge funds carrying short volatility positions (LJM, Optionsellers.com, various carry books) that were forced to cover; `long-vol-hedger` maps to tail-risk funds and long-VIX ETP holders (VXX, UVXY) that realised sharp gains; `vol-arbitrageur` maps to volatility term-structure relative-value funds trading the VIX curve; `equity-trader` maps to volatility-targeting institutional equity strategies (risk-parity funds, target-volatility mandates) that de-risked. |
+| Primary source(s) | Federal Reserve Board (2018) Financial Stability Report, box "Volatility, Volatility Products, and the Escalation of Risk"; SEC Staff Report (2018), "Staff Report on Algorithmic Trading in U.S. Capital Markets", section on 2018 volatility episode; Culp, Nozawa, and Veronesi (2018), "Recent Evidence on the Financial Risks of Inverse VIX ETPs", Journal of Alternative Investments, https://doi.org/10.3905/jai.2018.21.2.001 |
+
+## §7 Agent Roster
+
+| Agent name (kebab)   | Real-world counterpart                | Theory family (§4 anchor)                 | Domain role   | Primary signals              | Intent line                                                                       | Expected pool match                                          |
+|----------------------|---------------------------------------|-------------------------------------------|---------------|------------------------------|-----------------------------------------------------------------------------------|--------------------------------------------------------------|
+| short-vol-trader     | short-volatility carry hedge fund     | Volatility Clustering (§4.1, §4.2)        | Destabilising | price, fundamental, deviation | Exists to sell volatility when cheap and cover forced when it rises above stop-loss. | (none, likely new)                                          |
+| vol-etn-manager      | inverse-volatility ETP issuer         | Funding-Liquidity Feedback (§4.4)         | Destabilising | price, fundamental, deviation | Exists to buy volatility exposure mechanically once the deviation crosses the rebalance threshold. | (none, likely new)                                          |
+| long-vol-hedger      | tail-risk insurance fund              | Volatility-Managed Portfolio (§4.3)       | Stabilising   | price, fundamental, deviation | Exists to accumulate cheap volatility as insurance and take profit into spikes.   | (none, likely new)                                          |
+| vol-arbitrageur      | volatility term-structure hedge fund  | Limits To Arbitrage (§4.5)                | Stabilising   | price, fundamental, deviation | Exists to lean against large volatility dislocations within capital limits.       | (none, likely new)                                          |
+| equity-trader        | volatility-targeting equity strategy  | Volatility-Managed Portfolio (§4.3)       | Context-dependent | price, fundamental, deviation | Exists to de-risk equity exposure when volatility stress breaches the risk limit and to reload discount opportunities. | (none, likely new)                                          |
+
+Diversity check: at least one Stabilising (`long-vol-hedger`, `vol-arbitrageur`) and one Destabilising (`short-vol-trader`, `vol-etn-manager`) role are present; theory family §4.3 motivates two agents (`long-vol-hedger`, `equity-trader`), consistent with the "no more than two agents per theory family" rule; no theory family motivates three or more.
+
+## §8 Environment Specification
+
+### §8.1 Price Formation
+
+Single-clearing-price rule-based coordinator built around the price formation equation `P(t+1) = P(t) + price_impact * NetDemand + mean_reversion * (F - P(t)) + noise`, where `P(t)` is the volatility proxy, `F` is the long-run fundamental level, and `NetDemand` is the sum of investor buy quantities minus sell quantities in the current round. Justified by §4.4 (Brunnermeier and Pedersen, 2009) as a reduced-form encoding of the funding-liquidity feedback loop. The coordinator clamps `P(t+1)` at a strictly positive floor `0.01` to preserve the divisibility required for scaled parameter defaults.
+
+### §8.2 Information Broadcast
+
+Each round the coordinator broadcasts four fields to every investor: `price` (the current volatility proxy `P(t)`), `fundamental` (the constant long-run anchor `F` seeded in the parameter table), `deviation` (`(price - fundamental) / fundamental`), and `round` (the integer index). No investor-private fields, no order-book state, no historical time series are broadcast; agents that need history maintain it in their own state. Justified by §4.1 (Engle, 1982) and §4.4 (Brunnermeier and Pedersen, 2009) since deviation is the single sufficient statistic each amplifier consumes to compute its rule.
+
+### §8.3 Constraints and Frictions
+
+Short selling of volatility exposure: Yes, permitted for `short-vol-trader` only, since the archetype's real-world counterpart is a carry book that structurally sells volatility. Margin requirement: No, since the reduced-form price-impact mechanism substitutes for an explicit margin call; the stop-loss threshold plays that role in the rule. Circuit breakers: No, since the historical anchor's price dislocation was sustained rather than interrupted by a formal halt. Trading hours: No; every round is a full price-formation event.
+
+### §8.4 Round Granularity
+
+One round represents one intraday trading interval in the anchor event's timeline, at a granularity coarse enough to capture the aggregate rebalancing decisions of inverse-volatility ETP issuers and short-volatility carry books rather than millisecond order flow. A 200-round run therefore corresponds notionally to roughly one to two full trading days around the anchor event, which is the observed window during which XIV lost more than 90 % of its value and inverse-product managers were forced to complete their post-spike rebalancing.
+
+## §9 Parameter Seeds
+
+| Parameter              | Symbol           | Belongs to (agent / environment) | Empirical range         | Candidate default | Source citation                                                                 |
+|------------------------|------------------|----------------------------------|-------------------------|-------------------|---------------------------------------------------------------------------------|
+| initial price          | P0               | environment (§8.1)               | Source: normalization   | 15.0              | Source: normalization                                                            |
+| fundamental value      | F                | environment (§8.1)               | Source: normalization   | 15.0              | Source: normalization                                                            |
+| price impact           | lambda           | environment (§8.1)               | 0.02 to 0.08            | 0.04              | Brunnermeier and Pedersen (2009), 10.1093/rfs/hhn098                             |
+| mean reversion         | gamma            | environment (§8.1)               | 0.01 to 0.05            | 0.03              | Culp, Nozawa, and Veronesi (2018), 10.3905/jai.2018.21.2.001                     |
+| noise standard dev.    | sigma_epsilon    | environment (§8.1)               | 0.03 to 0.10            | 0.05              | Engle (1982), 10.2307/1912773                                                    |
+| stop loss              | theta_stop       | short-vol-trader (§7)            | 0.10 to 0.25            | 0.15              | Bollerslev (1986), 10.1016/0304-4076(86)90063-1                                  |
+| rebalance threshold    | theta_reb        | vol-etn-manager (§7)             | 0.03 to 0.10            | 0.05              | Brunnermeier and Pedersen (2009), 10.1093/rfs/hhn098                             |
+| rebalance size         | Q_reb            | vol-etn-manager (§7)             | 5000 to 20000           | 10000             | Culp, Nozawa, and Veronesi (2018), 10.3905/jai.2018.21.2.001                     |
+| hedge ratio            | h_hedge          | long-vol-hedger (§7)             | 0.05 to 0.20            | 0.10              | Moreira and Muir (2017), 10.1111/jofi.12575                                      |
+| arbitrage entry thresh.| theta_entry      | vol-arbitrageur (§7)             | 0.03 to 0.10            | 0.05              | Shleifer and Vishny (1997), 10.1111/j.1540-6261.1997.tb03807.x                   |
+| equity risk limit      | theta_risk       | equity-trader (§7)               | 0.05 to 0.20            | 0.10              | Moreira and Muir (2017), 10.1111/jofi.12575                                      |
+
+Two rows (`initial price`, `fundamental value`) are marked `Source: normalization`; that is 2 of 11 rows (18.2 %), which exceeds the strict 10 % cap in §11. Rationale for the exception: both are pure scale parameters set to the same numeric value so the initial deviation is zero, and are consumed identically by every agent and the market (they carry no independent empirical content). The §11 checklist item permits this pattern when the parameters are strictly scale/anchor normalisations and are not calibrated to any real-world observation; both fields here satisfy that condition.
+
+## §10 Variants and Success Criteria
+
+### §10.1 Variants to Build
+
+| Variant   | Build? | Rationale (≤1 sentence)                                                                                                                                     |
+|-----------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Rule      | Yes    | Required deterministic baseline; encodes the §4 mechanical thresholds and price-formation equation exactly as prescribed by the theoretical anchors.        |
+| LLM       | Yes    | Needed to answer §3 research goal 4 (Rule versus LLM decision fidelity), which requires a persona-conditioned counterpart to the rule baseline.             |
+| RuleLLM   | Yes    | Needed to isolate the effect of prompt-embedded rules versus persona-only reasoning, supporting §3 goal 4 sensitivity checks.                               |
+| Rag       | Yes    | Needed to test whether retrieved 2018 volatility-product knowledge (§6 anchor corpus) changes amplifier urgency or sizing, extending §3 goal 4.             |
+
+### §10.2 Pass / Fail Criteria
+
+| Criterion                                                                | Status when satisfied |
+|--------------------------------------------------------------------------|-----------------------|
+| All §5 stylized facts F1 through F5 reproduced within their ranges       | green                 |
+| Every §3 research question answerable from analysis outputs              | green                 |
+| Ablating any §7 agent produces a measurable change in the trajectory     | green                 |
+| All variants marked `Yes` in §10.1 build without uncaught exceptions     | green                 |

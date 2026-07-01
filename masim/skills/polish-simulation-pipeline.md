@@ -353,18 +353,29 @@ Polish Hooks branch on whether the target file already exists.
 
 **Case B — target file absent.**
 
-**Policy (binding).** When the scenario is missing its target file, the
-polish pipeline's DEFAULT and MANDATED path is to invoke
-`define-simulation-scenario-skill.md` end-to-end and produce the target
-file through that skill. Reverse-reconstruction is a documented
-last-resort fallback and MUST NOT be selected unless the user
-explicitly rejects the default and asserts that the original scenario
-author's minimal inputs (scenario name, domain, phenomenon sketch,
-variant preference, anchor event) cannot be re-elicited. This policy
-exists because the define skill enforces the same validation surface
-the polish pipeline anchors to, guaranteeing internal consistency of
-the audit chain; reverse-reconstruction bypasses that surface and can
-only ratify what is already in the downstream artefacts.
+**Policy (binding — default standard, ratified 2026-07-01).** When the
+scenario is missing its target file, the polish pipeline's SOLE
+DEFAULT path is to invoke `define-simulation-scenario-skill.md`
+end-to-end and produce the target file through that skill. This is
+recorded as the standing project standard on the grounds of **rigor
+(严谨) and completeness (全面)**: the define skill is the only entry
+point that enforces the full validation surface (§1 – §11 with the
+three-PASS discipline) that the rest of the polish pipeline anchors
+to, so any other path would silently weaken the audit chain that
+Steps 1 – 10 depend on. The invoking agent MUST take this path by
+default and MUST NOT present reverse-reconstruction as an equal
+option in the AskUserQuestion prompt.
+
+Reverse-reconstruction is retained ONLY as an explicit-override
+fallback. It is available if and only if the user, on their own
+initiative and without prompting, names the reverse-reconstruction
+path explicitly and asserts that the original scenario author's
+minimal inputs (scenario name, domain, phenomenon sketch, variant
+preference, anchor event) cannot be re-elicited. Absent that explicit
+override, the invoking agent proceeds directly with the define skill.
+Reverse-reconstruction bypasses the define skill's validation surface
+and can only ratify what is already in the downstream artefacts, so
+it is unsafe as a default.
 
 1. **Pre-consistency check.** Before either option is offered, verify
    internal consistency of the existing artefacts. This is a rapid
@@ -384,23 +395,32 @@ only ratify what is already in the downstream artefacts.
    must resolve the mismatch first (typically by editing the
    downstream artefact that is out of sync with `simulation-bases.md`)
    and then rerun this step.
-2. **Halt to `AskUserQuestion`** with two options (max four total per
-   the AskUserQuestion hard limit):
-   - **Invoke the define skill (MANDATED DEFAULT).** Direct the user to
-     invoke `define-simulation-scenario-skill.md`; that skill produces
-     the target file end-to-end from minimal inputs (scenario name,
-     domain, phenomenon sketch, optional variant preference, optional
-     fixed anchor event). Pause the polish run and resume at Step 0
-     Case A once the file is present. This option MUST be selected
-     unless the user explicitly asserts the fallback condition below.
-   - **Reverse-reconstruct (LAST-RESORT FALLBACK — requires explicit
-     user override).** Only if the user asserts that the original
-     scenario author's minimal inputs cannot be re-elicited: seed the
-     target file section-by-section from the mapping table below, then
-     re-invoke `define-simulation-scenario-skill.md` in §9.3 revise
-     mode to validate and lock the reconstructed target. The polish
-     pipeline writes the seed but does NOT lock the file itself;
-     locking is always performed by the define skill.
+2. **Default action — proceed with the define skill.** Once the
+   pre-consistency check is green, the invoking agent proceeds
+   directly with `define-simulation-scenario-skill.md` end-to-end.
+   No AskUserQuestion prompt is issued to choose between paths — the
+   default standard fixes the path in advance. Minimal inputs
+   (scenario name, domain, phenomenon sketch, optional variant
+   preference, optional fixed anchor event) MAY be collected from the
+   user by the define skill itself; the invoking agent MAY pre-fill
+   any input that can be inferred unambiguously from the existing
+   downstream artefacts (e.g., `Domain` from the folder inventory,
+   variant preference from the built-variant list) and confirm those
+   inferences with the user at the define skill's C-1 checkpoint.
+   Once the define skill returns, resume this step at Case A. This
+   option MUST be taken unless the reverse-reconstruction override
+   (step 2a) has been explicitly invoked by the user.
+
+2a. **Reverse-reconstruct override (LAST-RESORT FALLBACK — user must
+   name the path explicitly).** Available only when the user, without
+   being prompted, names the reverse-reconstruction path explicitly
+   and asserts that the original scenario author's minimal inputs
+   cannot be re-elicited. In that case: seed the target file
+   section-by-section from the mapping table below, then re-invoke
+   `define-simulation-scenario-skill.md` in §9.3 revise mode to
+   validate and lock the reconstructed target. The polish pipeline
+   writes the seed but does NOT lock the file itself; locking is
+   always performed by the define skill.
 
 3. **Reverse-reconstruction seed mapping** (used only when the user
    selects the reverse-reconstruct option):
