@@ -1,7 +1,8 @@
 # =============================================================================
 # AnchoringEffectRag Players Configuration
 # =============================================================================
-# 1 Market (rule-based) + 5 RAG-augmented LLM Investor types
+# 1 Market (rule-based) + 14 RAG-augmented LLM investor instances across 9 personas
+# aligned with simulation-bases.md §4.1–§4.9
 #
 # Knowledge Architecture:
 #   The shared knowledge: block is defined at the TOP of this file, before the
@@ -381,5 +382,217 @@ ragllm_noise:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Disposition Traders — Prospect-Theory asymmetric cost-basis + RAG
+# Theory: Shefrin & Statman (1985); Kahneman & Tversky (1979)
+# Rule: gain_pct = (P - cost_basis) / cost_basis;
+#       sell if gain_pct > 0.04, buy if gain_pct < -0.016;
+#       quantity = min(15, abs(gain_pct) * 500)
+# -----------------------------------------------------------------------------
+ragllm_disposition:
+  name: "RAG Disposition Trader"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMDispositionTrader"
+  # Expander → ragllm_disposition_1, ragllm_disposition_2
+  num_instances: 2
+  config:
+    identity: "ragllm_disposition"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect DispositionTrader)
+      gain_threshold: 0.04
+      loss_aversion_mult: 2.5
+      base_position_size: 15.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_DISPOSITION_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Contrarian Trader — cumulative-return mean reversion + RAG
+# Theory: De Bondt & Thaler (1985); Jegadeesh (1990)
+# Rule: cum_return over 10-round lookback;
+#       sell if cum_return > 0.05, buy if cum_return < -0.05;
+#       quantity = min(20, abs(cum_return) * 400)
+# -----------------------------------------------------------------------------
+ragllm_contrarian:
+  name: "RAG Contrarian Trader"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "ragllm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect ContrarianTrader)
+      lookback_window: 10
+      entry_threshold: 0.05
+      base_position_size: 20.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_CONTRARIAN_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Fundamental Analyst — slow-updating belief (conservatism) + RAG
+# Theory: Barberis, Shleifer & Vishny (1998)
+# Rule: belief_new = 0.95 * belief_prev + 0.05 * fundamental;
+#       dev = (P - belief) / belief; trade when |dev| > 0.02;
+#       quantity = min(25, abs(dev) * 1000)
+# -----------------------------------------------------------------------------
+ragllm_fundamental:
+  name: "RAG Fundamental Analyst"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMFundamentalAnalyst"
+  num_instances: 1
+  config:
+    identity: "ragllm_fundamental"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect FundamentalAnalyst)
+      learning_rate: 0.05
+      base_position_size: 25.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_FUNDAMENTAL_ANALYST_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# RAG Liquidity Provider — passive two-sided EMA quoting + RAG
+# Theory: Glosten & Milgrom (1985); Hendershott et al. (2011)
+# Rule: alpha = 2/21; ema_t = alpha*P + (1-alpha)*ema_{t-1};
+#       fair_quote = 0.5*(P + ema); band = 0.015 * fair_quote;
+#       quantity = min(30, dev * 2000)
+# -----------------------------------------------------------------------------
+ragllm_liquidity:
+  name: "RAG Liquidity Provider"
+  class: "examples.AnchoringEffect.Rag.players:RagLLMLiquidityProvider"
+  num_instances: 1
+  config:
+    identity: "ragllm_liquidity"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      initial_cash: 15000.0
+      initial_position: 150.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect LiquidityProvider)
+      ema_window: 20
+      half_spread: 0.015
+      base_position_size: 30.0
+      private_knowledge:
+        from_global_resources:
+          - "MinerU_processed"
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir:
+            - "rag_index"
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_LIQUIDITY_PROVIDER_SYS"
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.3
           max_new_tokens: 600
   persona: !include persona.yml

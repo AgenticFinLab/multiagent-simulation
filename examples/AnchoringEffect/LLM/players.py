@@ -244,6 +244,30 @@ class LLMNoiseTrader(LLMInvestor):
     pass
 
 
+class LLMDispositionTrader(LLMInvestor):
+    """LLM-driven disposition trader — sells winners early, holds losers (Prospect Theory). Theory: simulation-bases.md §4.6 — DispositionTrader."""
+
+    pass
+
+
+class LLMContrarianTrader(LLMInvestor):
+    """LLM-driven contrarian trader — fades cumulative overextension over a short lookback. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
+
+    pass
+
+
+class LLMFundamentalAnalyst(LLMInvestor):
+    """LLM-driven fundamental analyst — slow belief convergence toward fundamental value (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
+
+    pass
+
+
+class LLMLiquidityProvider(LLMInvestor):
+    """LLM-driven liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
+
+    pass
+
+
 __all__ = [
     "Market",
     "LLMInvestor",
@@ -252,4 +276,8 @@ __all__ = [
     "LLMRationalUpdater",
     "LLMMomentumTrader",
     "LLMNoiseTrader",
+    "LLMDispositionTrader",
+    "LLMContrarianTrader",
+    "LLMFundamentalAnalyst",
+    "LLMLiquidityProvider",
 ]

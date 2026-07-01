@@ -239,6 +239,30 @@ class RuleLLMNoiseTrader(RuleLLMInvestor):
     pass
 
 
+class RuleLLMDispositionTrader(RuleLLMInvestor):
+    """RuleLLM disposition trader — Prospect-Theory asymmetric cost-basis reference. Theory: simulation-bases.md §4.6 — DispositionTrader."""
+
+    pass
+
+
+class RuleLLMContrarianTrader(RuleLLMInvestor):
+    """RuleLLM contrarian trader — fades short-horizon cumulative overextension. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
+
+    pass
+
+
+class RuleLLMFundamentalAnalyst(RuleLLMInvestor):
+    """RuleLLM fundamental analyst — slow belief updating toward fundamental (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
+
+    pass
+
+
+class RuleLLMLiquidityProvider(RuleLLMInvestor):
+    """RuleLLM liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
+
+    pass
+
+
 __all__ = [
     "Market",
     "RuleLLMInvestor",
@@ -247,4 +271,8 @@ __all__ = [
     "RuleLLMRationalUpdater",
     "RuleLLMMomentumTrader",
     "RuleLLMNoiseTrader",
+    "RuleLLMDispositionTrader",
+    "RuleLLMContrarianTrader",
+    "RuleLLMFundamentalAnalyst",
+    "RuleLLMLiquidityProvider",
 ]

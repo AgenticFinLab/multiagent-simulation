@@ -515,6 +515,30 @@ class RagLLMNoiseTrader(RagLLMInvestor):
     pass
 
 
+class RagLLMDispositionTrader(RagLLMInvestor):
+    """RAG-augmented disposition trader — sells winners early, holds losers (Prospect Theory). Theory: simulation-bases.md §4.6 — DispositionTrader."""
+
+    pass
+
+
+class RagLLMContrarianTrader(RagLLMInvestor):
+    """RAG-augmented contrarian trader — fades cumulative overextension over a short lookback. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
+
+    pass
+
+
+class RagLLMFundamentalAnalyst(RagLLMInvestor):
+    """RAG-augmented fundamental analyst — slow belief convergence toward fundamental value (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
+
+    pass
+
+
+class RagLLMLiquidityProvider(RagLLMInvestor):
+    """RAG-augmented liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
+
+    pass
+
+
 __all__ = [
     "Market",
     "RagLLMInvestor",
@@ -523,4 +547,8 @@ __all__ = [
     "RagLLMRationalUpdater",
     "RagLLMMomentumTrader",
     "RagLLMNoiseTrader",
+    "RagLLMDispositionTrader",
+    "RagLLMContrarianTrader",
+    "RagLLMFundamentalAnalyst",
+    "RagLLMLiquidityProvider",
 ]

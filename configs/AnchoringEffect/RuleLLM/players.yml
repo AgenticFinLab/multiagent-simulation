@@ -1,10 +1,11 @@
 # =============================================================================
 # AnchoringEffectRuleLLM Players Configuration
 # =============================================================================
-# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investor types.
+# 1 Market (rule-based) + 12 Hybrid Rule+LLM investor instances across 9 personas
+# aligned with simulation-bases.md §4.1–§4.9.
 # Each LLM agent's system prompt embeds:
-#   - Personal profile: identity, style, behavioral traits (from LLM variant)
-#   - Quantitative rules: exact anchoring formulas and thresholds (from rule-based)
+#   - == PERSONA ==: identity, style, behavioral traits (from LLM variant)
+#   - == DECISION RULES ==: exact quantitative formulas mirroring the Rule variant
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -195,5 +196,149 @@ rulellm_noise:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.9
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Disposition Traders (Prospect-Theory persona + asymmetric cost-basis rule)
+# Theory: Shefrin & Statman (1985); Kahneman & Tversky (1979)
+# Rule: gain_pct = (P - cost_basis) / cost_basis;
+#       sell if gain_pct > 0.04, buy if gain_pct < -0.016;
+#       quantity = min(15, abs(gain_pct) * 500)
+# -----------------------------------------------------------------------------
+rulellm_disposition:
+  name: "RuleLLM Disposition Trader"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMDispositionTrader"
+  # Expander → rulellm_disposition_1, rulellm_disposition_2
+  num_instances: 2
+  config:
+    identity: "rulellm_disposition"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect DispositionTrader)
+      gain_threshold: 0.04
+      loss_aversion_mult: 2.5
+      base_position_size: 15.0
+      llm:
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_DISPOSITION_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Contrarian Trader (Mean-reversion persona + cumulative-return rule)
+# Theory: De Bondt & Thaler (1985); Jegadeesh (1990)
+# Rule: cum_return over 10-round lookback;
+#       sell if cum_return > 0.05, buy if cum_return < -0.05;
+#       quantity = min(20, abs(cum_return) * 400)
+# -----------------------------------------------------------------------------
+rulellm_contrarian:
+  name: "RuleLLM Contrarian Trader"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "rulellm_contrarian"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect ContrarianTrader)
+      lookback_window: 10
+      entry_threshold: 0.05
+      base_position_size: 20.0
+      llm:
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Fundamental Analyst (Conservatism persona + slow-updating belief rule)
+# Theory: Barberis, Shleifer & Vishny (1998)
+# Rule: belief_new = 0.95 * belief_prev + 0.05 * fundamental;
+#       dev = (P - belief) / belief; trade when |dev| > 0.02;
+#       quantity = min(25, abs(dev) * 1000)
+# -----------------------------------------------------------------------------
+rulellm_fundamental:
+  name: "RuleLLM Fundamental Analyst"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMFundamentalAnalyst"
+  num_instances: 1
+  config:
+    identity: "rulellm_fundamental"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect FundamentalAnalyst)
+      learning_rate: 0.05
+      base_position_size: 25.0
+      llm:
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_FUNDAMENTAL_ANALYST_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Hybrid Liquidity Provider (Passive market-maker persona + EMA quoting rule)
+# Theory: Glosten & Milgrom (1985); Hendershott et al. (2011)
+# Rule: alpha = 2/21; ema_t = alpha*P + (1-alpha)*ema_{t-1};
+#       fair_quote = 0.5*(P + ema); band = 0.015 * fair_quote;
+#       quantity = min(30, dev * 2000)
+# -----------------------------------------------------------------------------
+rulellm_liquidity:
+  name: "RuleLLM Liquidity Provider"
+  class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMLiquidityProvider"
+  num_instances: 1
+  config:
+    identity: "rulellm_liquidity"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/RuleLLM/records"
+      initial_cash: 15000.0
+      initial_position: 150.0
+      custom_state_hot_limit: 3
+      # Rule parameters (from AnchoringEffect LiquidityProvider)
+      ema_window: 20
+      half_spread: 0.015
+      base_position_size: 30.0
+      llm:
+        sys_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_LIQUIDITY_PROVIDER_SYS"
+        user_message: "examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
           max_tokens: 512
   persona: !include persona.yml

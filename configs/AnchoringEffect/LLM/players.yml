@@ -1,7 +1,8 @@
 # =============================================================================
 # AnchoringEffectLLM Players Configuration
 # =============================================================================
-# 1 Market (rule-based) + 9 LLM investor instances across 5 anchoring-bias personas.
+# 1 Market (rule-based) + 14 LLM investor instances across 9 personas
+# aligned with simulation-bases.md §4.1–§4.9.
 # Each LLM agent uses a system prompt persona from prompts.py.
 # =============================================================================
 
@@ -168,12 +169,121 @@ noise_trader:
       initial_cash: 10000.0
       initial_position: 100.0
       custom_state_hot_limit: 3
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Disposition Traders — LLM with Prospect-Theory asymmetric-reference persona
+# Theory: Shefrin & Statman (1985); Kahneman & Tversky (1979)
+# -----------------------------------------------------------------------------
+disposition_trader:
+  name: "Disposition Trader"
+  class: "examples.AnchoringEffect.LLM.players:LLMDispositionTrader"
+  # Expander → disposition_trader_1, disposition_trader_2
+  num_instances: 2
+  config:
+    identity: "disposition_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_DISPOSITION_TRADER_SYS"
         user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
-          temperature: 0.9
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Contrarian Trader — LLM with short-horizon mean-reversion persona
+# Theory: De Bondt & Thaler (1985); Jegadeesh (1990)
+# -----------------------------------------------------------------------------
+contrarian_trader:
+  name: "Contrarian Trader"
+  class: "examples.AnchoringEffect.LLM.players:LLMContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "contrarian_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_CONTRARIAN_TRADER_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.7
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Fundamental Analyst — LLM with slow-updating conservatism-bias persona
+# Theory: Barberis, Shleifer & Vishny (1998); Shleifer & Vishny (1997)
+# -----------------------------------------------------------------------------
+fundamental_analyst:
+  name: "Fundamental Analyst"
+  class: "examples.AnchoringEffect.LLM.players:LLMFundamentalAnalyst"
+  num_instances: 1
+  config:
+    identity: "fundamental_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 100.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_FUNDAMENTAL_ANALYST_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
+          max_tokens: 512
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Liquidity Provider — LLM with passive two-sided market-making persona
+# Theory: Glosten & Milgrom (1985); Hendershott et al. (2011)
+# -----------------------------------------------------------------------------
+liquidity_provider:
+  name: "Liquidity Provider"
+  class: "examples.AnchoringEffect.LLM.players:LLMLiquidityProvider"
+  num_instances: 1
+  config:
+    identity: "liquidity_provider"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      initial_cash: 15000.0
+      initial_position: 150.0
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_LIQUIDITY_PROVIDER_SYS"
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.5
           max_tokens: 512
   persona: !include persona.yml
