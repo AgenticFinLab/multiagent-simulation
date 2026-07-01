@@ -6,9 +6,9 @@
 |-------|---------|
 | Name | ArchegosCollapse |
 | Target file | Legacy example: no upstream `{domain}-{scenario}.md` was present before this normalization pass |
-| Target spec | masim/skills/create-simulation-target-skill.md (not available for this legacy example) |
+| Target spec | masim/skills/define-simulation-scenario-skill.md (not available for this legacy example) |
 | Domain | finance |
-| Pipeline | masim/skills/create-simulation-skill.md |
+| Pipeline | masim/skills/create-simulation-pipeline.md |
 | Status | draft |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
@@ -36,6 +36,6 @@ The normalization pass reused citations already present in `simulation-bases.md`
 
 | Phase | Date | Outcome | Reviewer | Notes |
 |-------|------|---------|----------|-------|
-| Structure check | 2026-06-30 | partial pass | Codex | Added `simulation-define.md`; upstream target file remains absent as legacy gap. |
+| Structure check | 2026-06-30 | partial pass | Codex | Added `simulation-build-log.md`; upstream target file remains absent as legacy gap. |
 | AGENT_POOL gate | 2026-06-30 | pass | Codex | All five agents classified as `new`; pool files created in `examples/AGENT_POOL/finance/`. |
 | Root §4 normalization | 2026-06-30 | pass | Codex | Replaced legacy §4 with handbook-aligned embedded form and pool source links. |

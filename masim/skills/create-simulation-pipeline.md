@@ -1,26 +1,37 @@
 ---
-name: create-simulation-skill
-purpose: Top-level pipeline that turns a user-authored scenario target file `{domain}-{scenario}.md` (specified by `create-simulation-target-skill.md`) into a fully built MASim simulation package (root `*-bases.md`, the variants selected in §10.1, configs, code, analysis, review). Orchestrates target-file ingestion, the AGENT_POOL reuse-or-create gate, the Universal Agent Design Handbook, and the per-step `create-example-skill/` files.
+name: create-simulation-pipeline
+purpose: Top-level pipeline for building a **brand-new** MASim simulation scenario from scratch, starting from a user-authored scenario target file `{domain}-{scenario}.md` (specified by `define-simulation-scenario-skill.md`). Produces the full package: root `*-bases.md`, the variants selected in §10.1, configs, code, analysis, review. Orchestrates target-file load, the AGENT_POOL reuse-or-create gate, the Universal Agent Design Handbook, and the per-step `implement-simulation-skill/` files. **Not for upgrading existing scenarios** — use `polish-simulation-pipeline.md` for that.
 status: canonical
 audience: Authors and reviewers building a new simulation scenario from a conforming target file in this repository.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
-invocation: Call this file *after* a target file conforming to `masim/skills/create-simulation-target-skill.md` exists at `examples/{ScenarioName}/{domain}-{scenario}.md`. Do NOT open `create-example-skill/` files directly for a new scenario — they are sub-skills dispatched from Phase 4 of this pipeline. Do NOT begin pipeline execution without a passing target file.
+invocation: Call this file *after* a target file conforming to `masim/skills/define-simulation-scenario-skill.md` exists at `examples/{ScenarioName}/{domain}-{scenario}.md`, **and** the scenario folder does not yet contain a `simulation-bases.md`. If a scenario already has downstream artefacts and you want to bring it up to the latest skill versions, use `masim/skills/polish-simulation-pipeline.md` instead. Do NOT open `implement-simulation-skill/` files directly for a new scenario — they are sub-skills dispatched from Phase 4 of this pipeline. Do NOT begin pipeline execution without a passing target file.
 ---
 
-# Create-Simulation-Skill — End-to-End Scenario Pipeline
+# Create-Simulation-Pipeline — End-to-End Scenario Pipeline
 
 ## 0. Scope and Authority
 
 This skill is the **single entry point** for building a new multi-agent
 simulation scenario in this repository. It is deliberately thin: it owns
-**target-file ingestion, the AGENT_POOL reuse gate, and orchestration**,
+**target-file load, the AGENT_POOL reuse gate, and orchestration**,
 and it delegates everything else to existing, more specialised skills.
+
+**Scope: this file covers *from-scratch* scenario creation only** — the
+target file exists, the scenario folder is empty (or nonexistent), and
+we are building all downstream artefacts for the first time. If the
+scenario folder already contains `simulation-bases.md` and variant
+subdirectories that need to be brought up to the latest skill
+specification, this pipeline does **not** apply; use
+`masim/skills/polish-simulation-pipeline.md` instead. That polish
+pipeline reuses the same skill vocabulary (Universal Handbook,
+AGENT_POOL gate, three-PASS validation) but operates as an audit and
+patch loop, not a from-scratch build.
 
 The pipeline does **not** collect user input through long
 AskUserQuestion sessions. Instead, every piece of user intent is
 authored upstream into the scenario target file
 `examples/{ScenarioName}/{domain}-{scenario}.md`, whose format and
-validation are owned by `masim/skills/create-simulation-target-skill.md`.
+validation are owned by `masim/skills/define-simulation-scenario-skill.md`.
 The pipeline reads that file, re-runs its §11 validation, and proceeds
 only when the file passes; AskUserQuestion is reserved for *defect
 clarifications* raised against the target file, not for collecting
@@ -28,11 +39,11 @@ fresh content.
 
 | Concern                                       | Owner                                                      |
 |-----------------------------------------------|------------------------------------------------------------|
-| **Upstream scenario target file format**      | **`masim/skills/create-simulation-target-skill.md`**       |
+| **Upstream scenario target file format**      | **`masim/skills/define-simulation-scenario-skill.md`**       |
 | Per-agent intrinsic specification             | `masim/skills/agent-design-skill.md` (Universal Handbook)  |
-| Scenario package layout, root + variant specs | `masim/skills/create-example-skill/` (files 01 — 09)       |
-| Domain-instantiation rules for finance        | `create-example-skill/02-root-documents-spec.md §4.1`      |
-| AGENT_POOL three-stage match protocol         | This file §3 and `create-example-skill/06 §2.2.0`          |
+| Scenario package layout, root + variant specs | `masim/skills/implement-simulation-skill/` (files 01 — 09)       |
+| Domain-instantiation rules for finance        | `implement-simulation-skill/02-root-documents-spec.md §4.1`      |
+| AGENT_POOL three-stage match protocol         | This file §3 and `implement-simulation-skill/06 §2.2.0`          |
 | Three-PASS validation discipline              | This file §6 and `agent-design-skill.md §6`                |
 
 When this file and any of the above overlap, **this file decides the
@@ -40,7 +51,7 @@ order and the orchestration**, but the substantive content is governed
 by the file in the right-hand column.
 
 > Do not paste the body of the Universal Agent Design Handbook here, do
-> not paste `create-example-skill/` files here, and do not paste
+> not paste `implement-simulation-skill/` files here, and do not paste
 > `02-root-documents-spec.md §4.1` here. Reference them by relative
 > path and section number.
 
@@ -52,7 +63,7 @@ Six commitments shape every step of this pipeline:
 
 1. **Research before code.** No `.py` file is touched before
    `simulation-bases.md` and `analysis-bases.md` are written; no
-   `*-bases.md` text is written before the `simulation-define.md`
+   `*-bases.md` text is written before the `simulation-build-log.md`
    contract is locked.
 2. **Reuse before invent.** Every candidate agent passes the AGENT_POOL
    gate before any new design is started. New designs are written
@@ -66,7 +77,7 @@ Six commitments shape every step of this pipeline:
    triage only.** Every piece of user intent — domain, agents,
    theories, parameters, success criteria — is authored upstream into
    `examples/{ScenarioName}/{domain}-{scenario}.md` per
-   `create-simulation-target-skill.md`. The pipeline reads this file
+   `define-simulation-scenario-skill.md`. The pipeline reads this file
    and re-runs its §11 validation. `AskUserQuestion` (≤4 options per
    question) is used only to ask the *author* of the target file to
    resolve a discovered defect (e.g., a citation that does not
@@ -76,11 +87,11 @@ Six commitments shape every step of this pipeline:
 5. **Two files per scenario, distinct roles.** The *target file*
    `{domain}-{scenario}.md` is the upstream, user-authored statement
    of intent (immutable once locked). The *build-log contract*
-   `simulation-define.md` is the pipeline's own log: it records the
+   `simulation-build-log.md` is the pipeline's own log: it records the
    AGENT_POOL gate decisions (§A), accumulated research notes (§B
    built atop the target file's §4 — §6 entries), open questions
    raised during execution (§C), and a per-phase build log (§D). The
-   pipeline writes to `simulation-define.md`; it never writes to the
+   pipeline writes to `simulation-build-log.md`; it never writes to the
    target file.
 6. **Three consecutive PASSes equals approved.** Every review checklist
    (agent-level handbook §6, scenario-level §6 of this file) MUST be
@@ -94,16 +105,16 @@ Six commitments shape every step of this pipeline:
 
 ```text
             ┌──────────────────────────────────────────────┐
-            │ Phase 0 — Target File Ingestion              │
+            │ Phase 0 — Target File Load              │
             │   Read examples/{Sim}/{domain}-{scenario}.md │
             │   Re-run §11 validation; raise defects via   │
-            │   AskUserQuestion. Seed simulation-define.md │
+            │   AskUserQuestion. Seed simulation-build-log.md │
             └──────────────────────────────────────────────┘
                               │
                               ▼
             ┌──────────────────────────────────────────────┐
             │ Phase 1 — Research                           │
-            │   create-example-skill/05-step1-research.md  │
+            │   implement-simulation-skill/05-step1-research.md  │
             │   Fills §B Research Notes of the contract    │
             └──────────────────────────────────────────────┘
                               │
@@ -126,7 +137,7 @@ Six commitments shape every step of this pipeline:
                               ▼
             ┌──────────────────────────────────────────────┐
             │ Phase 4 — Scenario Build                     │
-            │   create-example-skill/                      │
+            │   implement-simulation-skill/                      │
             │     02-root-documents-spec.md (bases.md)     │
             │     03-variant-documents-spec.md (explain)   │
             │     07-step3-config.md (yml)                 │
@@ -136,7 +147,7 @@ Six commitments shape every step of this pipeline:
                               ▼
             ┌──────────────────────────────────────────────┐
             │ Phase 5 — Scenario-Level 3-PASS Review       │
-            │   create-example-skill/09-step5-to-10-       │
+            │   implement-simulation-skill/09-step5-to-10-       │
             │     review.md (Steps 5–9) ×3                 │
             └──────────────────────────────────────────────┘
                               │
@@ -156,24 +167,24 @@ its exit conditions hold.
 
 ---
 
-## 3. Phase 0 — Target File Ingestion
+## 3. Phase 0 — Target File Load
 
 ### 3.1 Entry Conditions
 
 - The user (or upstream LLM) has authored a target file at
   `examples/{ScenarioName}/{domain}-{scenario}.md` that conforms to
-  `masim/skills/create-simulation-target-skill.md` and shows
+  `masim/skills/define-simulation-scenario-skill.md` and shows
   `Status: draft`.
-- This file (`create-simulation-skill.md`) is the active skill.
+- This file (`create-simulation-pipeline.md`) is the active skill.
 
 ### 3.2 Procedure
 
 1. **Read the target file.** Open
    `examples/{ScenarioName}/{domain}-{scenario}.md` end-to-end. If
    the file does not exist, refuse to proceed and instruct the caller
-   to author one per `create-simulation-target-skill.md` first.
+   to author one per `define-simulation-scenario-skill.md` first.
 2. **Re-run the target-file §11 validation.** Run every box in
-   `create-simulation-target-skill.md §11` against the file. The
+   `define-simulation-scenario-skill.md §11` against the file. The
    pipeline does **not** trust the author's local PASS; it re-verifies
    from scratch.
 3. **For every FAIL item**, raise an `AskUserQuestion` turn (≤4
@@ -187,8 +198,8 @@ its exit conditions hold.
    §4.1`), use it. Otherwise, require the target file's
    `§A Domain Palette Appendix` to be present and complete; if not,
    block and return.
-5. **Seed `simulation-define.md`.** Create
-   `examples/{ScenarioName}/simulation-define.md` with the
+5. **Seed `simulation-build-log.md`.** Create
+   `examples/{ScenarioName}/simulation-build-log.md` with the
    following minimal skeleton, populating §0 Meta and §B by reference
    (NOT by duplication) to the target file:
 
@@ -201,9 +212,9 @@ its exit conditions hold.
 |--------------|----------------------------------------------------------------------|
 | Name         | {ScenarioName}                                                       |
 | Target file  | examples/{ScenarioName}/{domain}-{scenario}.md                       |
-| Target spec  | masim/skills/create-simulation-target-skill.md (v1.0)                |
+| Target spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
 | Domain       | {Domain from target §1}                                              |
-| Pipeline     | masim/skills/create-simulation-skill.md                              |
+| Pipeline     | masim/skills/create-simulation-pipeline.md                              |
 | Status       | draft                                                                |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
@@ -229,21 +240,21 @@ its exit conditions hold.
 
 - `examples/{ScenarioName}/{domain}-{scenario}.md` —
   `Status: locked`.
-- `examples/{ScenarioName}/simulation-define.md` — `Status: draft`,
+- `examples/{ScenarioName}/simulation-build-log.md` — `Status: draft`,
   §0 Meta filled, §A / §B / §C / §D stubs created.
 
 ### 3.4 Exit Conditions
 
 - Target file §11 has three consecutive PASS runs.
 - Target file `Status: locked`.
-- `simulation-define.md` exists and references the target file by
+- `simulation-build-log.md` exists and references the target file by
   path in §0.
 
 ### 3.5 Handoff
 
 → Phase 1 (Research). Downstream phases read intent from the target
 file (§1 — §10) and write working notes / build log to
-`simulation-define.md`. The target file MUST NOT be edited again
+`simulation-build-log.md`. The target file MUST NOT be edited again
 until the scenario is released; if a defect is discovered later, the
 pipeline halts, the author re-drafts, and Phase 0 restarts.
 
@@ -254,14 +265,14 @@ pipeline halts, the author re-drafts, and Phase 0 restarts.
 ### 4.1 Entry Conditions
 
 - Phase 0 exit conditions hold (target file locked,
-  `simulation-define.md` seeded).
+  `simulation-build-log.md` seeded).
 - The author has access to academic databases and the historical
   record needed to *verify* and *expand on* the target file's
   §4 — §6 entries.
 
 ### 4.2 Procedure
 
-Execute `masim/skills/create-example-skill/05-step1-research.md`,
+Execute `masim/skills/implement-simulation-skill/05-step1-research.md`,
 treating the target file's §4 (Theoretical Anchors), §5 (Stylized
 Facts), and §6 (Historical / Empirical Anchors) as the seed list.
 Research has three jobs, in order:
@@ -273,18 +284,18 @@ Research has three jobs, in order:
    re-locked, then research resumes.
 2. **Expand**. For every verified entry, add the deeper material
    that `05-step1-research.md` requires (key equations, parameter
-   estimates, mechanism diagrams) into `simulation-define.md §B`.
+   estimates, mechanism diagrams) into `simulation-build-log.md §B`.
    The target file is **not** rewritten — `§B` is the expansion
    layer.
 3. **Surface gaps**. If verifying / expanding reveals that the
    target file is materially incomplete (e.g., a stylized fact
    without a primary source), record the gap in
-   `simulation-define.md §C` and raise it to the author. Do not
+   `simulation-build-log.md §C` and raise it to the author. Do not
    silently invent missing content.
 
 ### 4.3 Artefacts
 
-- `simulation-define.md §B.1 Core Theories` — one expanded block per
+- `simulation-build-log.md §B.1 Core Theories` — one expanded block per
   target §4 entry (DOI, key equation, calibration values, mechanism
   detail).
 - `§B.2 Empirical Stylized Facts` — one expanded block per target §5
@@ -297,10 +308,10 @@ Research has three jobs, in order:
 ### 4.4 Exit Conditions
 
 - Every target §4 / §5 / §6 / §9 entry has a corresponding §B block
-  in `simulation-define.md`.
+  in `simulation-build-log.md`.
 - Every defect raised against the target file has been resolved (the
   target file is `locked` again).
-- `simulation-define.md §C` has been swept; any remaining open
+- `simulation-build-log.md §C` has been swept; any remaining open
   question is either explicitly deferred (with a `Defer: <reason>`
   tag) or escalated to the author.
 
@@ -321,7 +332,7 @@ For each row in target §7:
 
 1. Re-confirm the chosen primary theory (target §7 column `Theory
    family`) corresponds to a verified §B.1 entry in
-   `simulation-define.md`.
+   `simulation-build-log.md`.
 2. Re-confirm the real-world counterpart (target §7 column) comes
    from the domain enumeration (for finance,
    `02-root-documents-spec.md §4.1.2`).
@@ -333,17 +344,17 @@ For each row in target §7:
    scenario-name-free.
 
 Write the resulting canonical taxonomy table into
-`simulation-define.md §B.4`. This table is the input to Phase 3's
+`simulation-build-log.md §B.4`. This table is the input to Phase 3's
 gate. If any row fails to confirm, raise an `AskUserQuestion`
 defect; the author edits target §7; the pipeline re-validates.
 
 The diversity rules of `06-step2-agent-design.md §2.2.1` are
-**already encoded** in `create-simulation-target-skill.md §7
+**already encoded** in `define-simulation-scenario-skill.md §7
 diversity rules`; the pipeline re-checks them here.
 
 ### 5.3 Artefacts
 
-- `simulation-define.md §B.4` — taxonomy table that mirrors target
+- `simulation-build-log.md §B.4` — taxonomy table that mirrors target
   §7 with one extra column `Pipeline confirmation` (`confirmed` /
   `defect raised`).
 
@@ -491,7 +502,7 @@ committed into `simulation-bases.md §4`.
 
 ### 7.2 Procedure
 
-Dispatch into `create-example-skill/` in the following order:
+Dispatch into `implement-simulation-skill/` in the following order:
 
 1. `02-root-documents-spec.md` — finish `simulation-bases.md §5 — §9`
    and write `analysis-bases.md` end-to-end.
@@ -537,7 +548,7 @@ returned the target file as a defect before Phase 4 can run.
 
 ### 8.2 Procedure
 
-Run `create-example-skill/09-step5-to-10-review.md` Steps 5 — 9 as a
+Run `implement-simulation-skill/09-step5-to-10-review.md` Steps 5 — 9 as a
 single review batch. Then run the same batch **three times in a row**.
 Three consecutive PASS runs are required before Phase 6 may start.
 
@@ -579,10 +590,10 @@ Execute `09-step5-to-10-review.md` Step 10:
 ### 9.2 Exit Conditions and Closeout
 
 - All smoke-test runs complete without uncaught exceptions.
-- `simulation-define.md §D Build Log` is appended with one row per
+- `simulation-build-log.md §D Build Log` is appended with one row per
   phase recording `Phase`, `Date`, `Outcome`, `Reviewer`, `Notes`.
 - Both the target file `{domain}-{scenario}.md` and
-  `simulation-define.md` have `Status` bumped from `locked` to
+  `simulation-build-log.md` have `Status` bumped from `locked` to
   `released` simultaneously.
 
 ---
@@ -591,10 +602,10 @@ Execute `09-step5-to-10-review.md` Step 10:
 
 This guarantee is the pipeline's final invariant. Every artefact
 produced by any later phase MUST trace back, through
-`simulation-define.md`, to a section of the **target file**
+`simulation-build-log.md`, to a section of the **target file**
 `{domain}-{scenario}.md`:
 
-| Downstream artefact                                    | Anchor in `simulation-define.md` | Original anchor in target file |
+| Downstream artefact                                    | Anchor in `simulation-build-log.md` | Original anchor in target file |
 |--------------------------------------------------------|----------------------------------|--------------------------------|
 | `simulation-bases.md §1` (Phenomenon Definition)       | §B.3 historical events           | target §2 + §6                 |
 | `simulation-bases.md §2` (Theoretical Foundation)      | §B.1 theories                    | target §4                       |
@@ -608,7 +619,7 @@ produced by any later phase MUST trace back, through
 | Variant build choices                                  | — (pipeline records phase)       | target §10.1                    |
 
 Before Phase 6 closes, run a top-down sweep: open
-`simulation-define.md`, walk each table row, and confirm the
+`simulation-build-log.md`, walk each table row, and confirm the
 downstream artefact exists and cites the upstream entry. Any
 unanchored downstream artefact is a defect and MUST be repaired.
 
@@ -638,9 +649,9 @@ Run this checklist once before invoking Phase 0:
 
 - [ ] A target file exists at
       `examples/{ScenarioName}/{domain}-{scenario}.md` and follows
-      `masim/skills/create-simulation-target-skill.md`.
+      `masim/skills/define-simulation-scenario-skill.md`.
 - [ ] The author has locally run **§11 Validation** of
-      `create-simulation-target-skill.md` and obtained three
+      `define-simulation-scenario-skill.md` and obtained three
       consecutive PASS runs.
 - [ ] The proposed `{ScenarioName}` is unique under `examples/`.
 - [ ] The chosen `{domain}` has (or will be created as) a folder
@@ -659,18 +670,18 @@ If any item is unchecked, fix it before starting Phase 0.
 
 | Topic                                | File                                                                       |
 |--------------------------------------|----------------------------------------------------------------------------|
-| **Scenario target file spec**        | `masim/skills/create-simulation-target-skill.md`                           |
+| **Scenario target file spec**        | `masim/skills/define-simulation-scenario-skill.md`                           |
 | Universal Agent Design Handbook       | `masim/skills/agent-design-skill.md`                                       |
-| Methodology overview                  | `masim/skills/create-example-skill/00-overview.md`                         |
-| Directory layout                      | `masim/skills/create-example-skill/01-mandatory-structure.md`              |
-| Root document specs + §4.1 finance    | `masim/skills/create-example-skill/02-root-documents-spec.md`              |
-| Variant document specs                | `masim/skills/create-example-skill/03-variant-documents-spec.md`           |
-| Step 0 (Define) and contract template | `masim/skills/create-example-skill/04-step0-define.md`                     |
-| Step 1 (Research)                     | `masim/skills/create-example-skill/05-step1-research.md`                   |
-| Step 2 (Agent design + Pool gate)     | `masim/skills/create-example-skill/06-step2-agent-design.md`               |
-| Step 3 (Config)                       | `masim/skills/create-example-skill/07-step3-config.md`                     |
-| Step 4 (Implement)                    | `masim/skills/create-example-skill/08-step4-implement.md`                  |
-| Steps 5 — 10 (Validate, review, run)  | `masim/skills/create-example-skill/09-step5-to-10-review.md`               |
-| AssetBubble reference                 | `masim/skills/create-example-skill/15-reference-assetbubble.md`            |
+| Methodology overview                  | `masim/skills/implement-simulation-skill/00-overview.md`                         |
+| Directory layout                      | `masim/skills/implement-simulation-skill/01-mandatory-structure.md`              |
+| Root document specs + §4.1 finance    | `masim/skills/implement-simulation-skill/02-root-documents-spec.md`              |
+| Variant document specs                | `masim/skills/implement-simulation-skill/03-variant-documents-spec.md`           |
+| Step 0 (Define) and contract template | `masim/skills/implement-simulation-skill/04-step0-load-target.md`                     |
+| Step 1 (Research)                     | `masim/skills/implement-simulation-skill/05-step1-research.md`                   |
+| Step 2 (Agent design + Pool gate)     | `masim/skills/implement-simulation-skill/06-step2-agent-design.md`               |
+| Step 3 (Config)                       | `masim/skills/implement-simulation-skill/07-step3-config.md`                     |
+| Step 4 (Implement)                    | `masim/skills/implement-simulation-skill/08-step4-implement.md`                  |
+| Steps 5 — 10 (Validate, review, run)  | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`               |
+| AssetBubble reference                 | `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`            |
 | AGENT_POOL directory                  | `examples/AGENT_POOL/`                                                     |
 | Project structure overview            | `docs/structure.md`                                                        |

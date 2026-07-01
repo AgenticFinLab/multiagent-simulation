@@ -35,7 +35,7 @@ progress-hidden timeouts, and machine-level CPU overcommit.
 
 ## Relationship To Adjacent Guides
 
-`masim/format/create-example-skill/` defines how examples should be built from scratch.
+`masim/format/implement-simulation-skill/` defines how examples should be built from scratch.
 `docs/example-revision-guide/` defines how existing examples should be repaired
 and standardized. This guide does not repair examples directly; it checks
 whether already selected scenario-mode rows are safe to execute as full

@@ -194,7 +194,7 @@ It prevents unnecessary reruns after docs-only repairs while also preventing
 stale samples from representing changed runtime inputs.
 
 **Default principle**: preserve existing runtime semantics whenever the original
-implementation does not violate this guide or `masim/format/create-example-skill`.
+implementation does not violate this guide or `masim/format/implement-simulation-skill`.
 
 **Steps**:
 

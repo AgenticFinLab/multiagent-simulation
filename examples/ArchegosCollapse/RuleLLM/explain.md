@@ -179,6 +179,6 @@ Output location: `EXPERIMENT/ArchegosCollapse/RuleLLM/`
 - Rule formula thresholds embedded in prompts → `simulation-bases.md §4.N.5.4 Mathematical Model per investor type`
 - RuleLLM hybrid quantity range → `simulation-bases.md §4 (RuleLLM Hybrid Notes per investor type)`
 - Rule adherence analysis → `analysis.py → analyze_rule_adherence()` (target ≥80%)
-- Dual-section prompt requirement → `create-example-skill.md §{RuleLLM Prompts Design}`
+- Dual-section prompt requirement → `implement-simulation-skill.md §{RuleLLM Prompts Design}`
 - Price formula → `simulation-bases.md §3.1`
 - Full parameter table → `simulation-bases.md §6`

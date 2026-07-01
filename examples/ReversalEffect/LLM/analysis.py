@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Reversal Effect LLM Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_reversaleffect_dynamics.png,
 02_reversaleffect_analysis.png, and 03_summary.png.
 """

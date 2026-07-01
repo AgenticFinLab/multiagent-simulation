@@ -246,6 +246,6 @@ Cross-references:
 - Expert Anchoring (knowledge base source) → `simulation-bases.md §2.2`, §8 — Historical Case Study: Real Estate Appraisal
 - Consensus Forecast Anchoring (knowledge base source) → `simulation-bases.md §2.3`, §8 — Historical Case Study: Analyst Forecast Anchoring
 - Rational Expectations → `simulation-bases.md §2.4`, §4 — RationalUpdater
-- RAG pipeline design → `create-example-skill.md` — Rag variant section
-- `{rag_context}` injection requirement (fallback string) → `create-example-skill.md` — Rag Core construction rule
+- RAG pipeline design → `implement-simulation-skill.md` — Rag variant section
+- `{rag_context}` injection requirement (fallback string) → `implement-simulation-skill.md` — Rag Core construction rule
 - Historical case studies used as knowledge sources → `simulation-bases.md §8`

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """South Sea Bubble Rag Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_southseabubble_dynamics.png,
 02_southseabubble_analysis.png, 03_summary.png, and rag_stats.json.
 """

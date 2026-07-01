@@ -171,7 +171,7 @@ Output location: `EXPERIMENT/CarryTradeUnwind/RuleLLM/records/`
 
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 
-- RuleLLM construction principles → `create-example-skill.md § RuleLLM`
+- RuleLLM construction principles → `implement-simulation-skill.md § RuleLLM`
 - Carry trade formulas embedded in prompts → `simulation-bases.md §5 — all agents`
 - Dual-section prompt structure → `prompts.py` (PERSONA + DECISION RULES)
 - Core analysis via Rule/analysis.py

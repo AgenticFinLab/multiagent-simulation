@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """2010 Flash Crash RuleLLM Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_flashcrash2010_dynamics.png,
 02_flashcrash2010_analysis.png, and 03_summary.png.
 """

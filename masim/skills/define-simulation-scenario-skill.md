@@ -1,13 +1,13 @@
 ---
-name: create-simulation-target-skill
-purpose: Defines the **canonical specification** for the upstream target file `{domain}-{scenario}.md`. This file is the single piece of user-authored input that drives every downstream skill in `masim/skills/` (the top-level pipeline `create-simulation-skill.md`, the per-step guides `create-example-skill/`, and the per-agent handbook `agent-design-skill.md`). Any user — human author or downstream LLM — MUST follow this specification when authoring a scenario target.
+name: define-simulation-scenario-skill
+purpose: Defines the **canonical specification** for the upstream target file `{domain}-{scenario}.md`. This file is the single piece of user-authored input that drives every downstream skill in `masim/skills/` (the top-level pipeline `create-simulation-pipeline.md`, the per-step guides `implement-simulation-skill/`, and the per-agent handbook `agent-design-skill.md`). Any user — human author or downstream LLM — MUST follow this specification when authoring a scenario target.
 status: canonical
 audience: Authors and LLMs producing scenario target files; reviewers validating those files before invoking the pipeline.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
 invocation: Use this file as the authoring guide and validation reference for `examples/{Scenario}/{domain}-{scenario}.md`. Downstream skills MUST NOT begin scenario construction until a target file conforming to this specification exists and passes §11 validation.
 ---
 
-# Create-Simulation-Target-Skill — Authoring the Scenario Target File
+# Define-Simulation-Scenario-Skill — Authoring the Scenario Target File
 
 ## 0. What This Skill Defines
 
@@ -29,14 +29,14 @@ empirical anchors they rest on. It does **not** specify implementation
 details (no code, no YAML, no prompt strings).
 
 Once a conforming target file exists and passes the §11 validation
-checklist, the top-level pipeline `masim/skills/create-simulation-skill.md`
+checklist, the top-level pipeline `masim/skills/create-simulation-pipeline.md`
 can consume it directly without any further interactive Q&A. Every
 substantive design decision in `simulation-bases.md`, `analysis-bases.md`,
 the variant folders chosen in §10.1, and any AGENT_POOL write-back can be
 traced back to a numbered section of the target file.
 
 The target file is **immutable** once locked. The pipeline records its
-build log in a separate, sibling file (`simulation-define.md`) so that
+build log in a separate, sibling file (`simulation-build-log.md`) so that
 the upstream target stays as the canonical statement of user intent.
 
 ---
@@ -45,11 +45,11 @@ the upstream target stays as the canonical statement of user intent.
 
 | Concern                                          | Owner                                                  |
 |--------------------------------------------------|--------------------------------------------------------|
-| **Target file format and validation**            | **This skill** (`create-simulation-target-skill.md`)   |
-| Pipeline orchestration                           | `masim/skills/create-simulation-skill.md`              |
-| Per-step methodology (research → review → run)   | `masim/skills/create-example-skill/`                   |
+| **Target file format and validation**            | **This skill** (`define-simulation-scenario-skill.md`)   |
+| Pipeline orchestration                           | `masim/skills/create-simulation-pipeline.md`              |
+| Per-step methodology (research → review → run)   | `masim/skills/implement-simulation-skill/`                   |
 | Universal per-agent specification                | `masim/skills/agent-design-skill.md`                   |
-| Domain-instantiation rules (finance reference)   | `create-example-skill/02-root-documents-spec.md §4.1`  |
+| Domain-instantiation rules (finance reference)   | `implement-simulation-skill/02-root-documents-spec.md §4.1`  |
 
 This file is the **single source of truth** for what a target file
 must contain. The pipeline and the per-step skills *consume* it; they
@@ -119,8 +119,8 @@ A single table identifying the file:
 | Domain       | finance / opinion / epidemics / sociology / ...        |
 | Author       | {full name or organisation}                            |
 | Created      | {YYYY-MM-DD}                                           |
-| Pipeline     | masim/skills/create-simulation-skill.md                |
-| Target Spec  | masim/skills/create-simulation-target-skill.md (v1.0)  |
+| Pipeline     | masim/skills/create-simulation-pipeline.md                |
+| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)  |
 | Status       | draft / locked / released                              |
 ```
 
@@ -483,8 +483,8 @@ as the project's domain catalogue grows.
 
 ## 6. The Target File vs. the Pipeline Contract
 
-The pipeline `create-simulation-skill.md` maintains a separate file —
-`examples/{ScenarioName}/simulation-define.md` — as its **build log
+The pipeline `create-simulation-pipeline.md` maintains a separate file —
+`examples/{ScenarioName}/simulation-build-log.md` — as its **build log
 and gate-record contract**. The relationship is:
 
 ```text
@@ -492,7 +492,7 @@ and gate-record contract**. The relationship is:
    │                                  Immutable once locked
    │                                  Spec: this file
    ▼
-simulation-define.md              ←  Authored by the pipeline
+simulation-build-log.md              ←  Authored by the pipeline
                                       Refers to the target file by section number
                                       Adds §A AGENT_POOL gate log
                                       Adds §C Open questions accumulated during research
@@ -520,7 +520,7 @@ re-validates.
   author to set `Status: draft` again and to add a `Revised: YYYY-MM-DD`
   field beneath `Created` in §1.
 - The pipeline upgrades `Status: locked → released` only when Phase 6
-  of `create-simulation-skill.md` completes the smoke test
+  of `create-simulation-pipeline.md` completes the smoke test
   successfully.
 
 ---
@@ -542,8 +542,8 @@ omitted.
 | Domain       | finance                                                |
 | Author       | Sijia Chen                                             |
 | Created      | 2026-06-29                                             |
-| Pipeline     | masim/skills/create-simulation-skill.md                |
-| Target Spec  | masim/skills/create-simulation-target-skill.md (v1.0)  |
+| Pipeline     | masim/skills/create-simulation-pipeline.md                |
+| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)  |
 | Status       | draft                                                  |
 
 ## §2 Phenomenon Statement
@@ -663,7 +663,7 @@ A typical authoring loop with an LLM assistant looks like:
     runs every checklist item. Failures return to the relevant
     section.
 12. **Submit to pipeline.** The human (or the LLM) saves with
-    `Status: draft` and invokes `create-simulation-skill.md`. The
+    `Status: draft` and invokes `create-simulation-pipeline.md`. The
     pipeline re-validates and, on success, upgrades to `locked`.
 
 The pipeline never starts before step 12.
@@ -699,7 +699,7 @@ The pipeline never starts before step 12.
 
 Every item is a blocker. Run all items. Three consecutive PASS runs
 are required, in the style of `agent-design-skill.md §6` and
-`create-simulation-skill.md §6.4`.
+`create-simulation-pipeline.md §6.4`.
 
 **Structural completeness**
 
@@ -776,11 +776,11 @@ upgrade.
 
 | Topic                                       | File                                                              |
 |---------------------------------------------|-------------------------------------------------------------------|
-| Top-level pipeline (consumes this file)     | `masim/skills/create-simulation-skill.md`                         |
-| Per-step methodology                        | `masim/skills/create-example-skill/`                              |
+| Top-level pipeline (consumes this file)     | `masim/skills/create-simulation-pipeline.md`                         |
+| Per-step methodology                        | `masim/skills/implement-simulation-skill/`                              |
 | Universal Agent Design Handbook             | `masim/skills/agent-design-skill.md`                              |
-| Domain-instantiation rules (finance)        | `masim/skills/create-example-skill/02-root-documents-spec.md §4.1` |
-| Step 0 contract template                    | `masim/skills/create-example-skill/04-step0-define.md`            |
+| Domain-instantiation rules (finance)        | `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1` |
+| Step 0 contract template                    | `masim/skills/implement-simulation-skill/04-step0-load-target.md`            |
 | AGENT_POOL directory                        | `examples/AGENT_POOL/`                                            |
 | Project structure overview                  | `docs/structure.md`                                               |
 

@@ -1,17 +1,17 @@
-# Step 0: Ingest the Scenario Target File
+# Step 0: Load the Scenario Target File
 
 ## Purpose
 
 Step 0 is the *handoff point* between the user-authored intent file
 (`{domain}-{scenario}.md`, specified by
-`masim/skills/create-simulation-target-skill.md`) and the per-step
+`masim/skills/define-simulation-scenario-skill.md`) and the per-step
 methodology in this folder. Step 0 does **not** collect new user
 input. It reads the target file, re-validates it, and seeds the
-pipeline's build-log contract (`simulation-define.md`) so that
+pipeline's build-log contract (`simulation-build-log.md`) so that
 Steps 1 — 4 have a stable source of truth.
 
 If a target file does not yet exist, **stop**. Direct the user (or
-upstream LLM) to `masim/skills/create-simulation-target-skill.md`
+upstream LLM) to `masim/skills/define-simulation-scenario-skill.md`
 and have them author the file there first.
 
 ---
@@ -24,7 +24,7 @@ Step 0 requires only one file from the user:
 examples/{ScenarioName}/{domain}-{scenario}.md
 ```
 
-This file MUST conform to `masim/skills/create-simulation-target-skill.md`.
+This file MUST conform to `masim/skills/define-simulation-scenario-skill.md`.
 It contains, in fixed order, ten sections (§1 Meta through §10 Variants and
 Success Criteria) covering name, domain, phenomenon, research goals,
 theory anchors, stylized facts, historical anchors, agent roster,
@@ -44,12 +44,12 @@ to *verify* and *consume* — not to extract more material.
    `ls examples/{ScenarioName}/` and confirm a single file matches
    the pattern `{domain}-{scenario}.md`. Reject if:
    - Zero matches → instruct the user to author one per
-     `create-simulation-target-skill.md`. Stop.
+     `define-simulation-scenario-skill.md`. Stop.
    - Two or more matches → instruct the user to merge or rename.
      Stop.
 
 2. **Re-run target-file validation (§11 of the target spec).** Walk
-   every box in `create-simulation-target-skill.md §11`:
+   every box in `define-simulation-scenario-skill.md §11`:
    structural completeness, cross-section consistency, evidence
    provenance, domain compatibility, distinctiveness, style hygiene.
 
@@ -69,8 +69,8 @@ to *verify* and *consume* — not to extract more material.
      `examples/AGENT_POOL/{Domain}/`.
    - If neither: block and instruct the author to add the appendix.
 
-5. **Seed `simulation-define.md`.** Create
-   `examples/{ScenarioName}/simulation-define.md` with the skeleton
+5. **Seed `simulation-build-log.md`.** Create
+   `examples/{ScenarioName}/simulation-build-log.md` with the skeleton
    below. Populate §0 Meta by *referencing* the target file (not
    duplicating its content).
 
@@ -81,11 +81,11 @@ to *verify* and *consume* — not to extract more material.
 
 ---
 
-## 0.3 `simulation-define.md` Skeleton
+## 0.3 `simulation-build-log.md` Skeleton
 
 The pipeline's build-log contract has four numbered blocks. They
 are filled progressively across Phases 0 — 6 of
-`create-simulation-skill.md`.
+`create-simulation-pipeline.md`.
 
 ```markdown
 # {ScenarioName} — Pipeline Build Log
@@ -96,9 +96,9 @@ are filled progressively across Phases 0 — 6 of
 |--------------|----------------------------------------------------------------------|
 | Name         | {ScenarioName}                                                       |
 | Target file  | examples/{ScenarioName}/{domain}-{scenario}.md                       |
-| Target spec  | masim/skills/create-simulation-target-skill.md (v1.0)                |
+| Target spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
 | Domain       | {Domain from target §1}                                              |
-| Pipeline     | masim/skills/create-simulation-skill.md                              |
+| Pipeline     | masim/skills/create-simulation-pipeline.md                              |
 | Status       | draft  (upgraded to `released` on Phase 6 closeout)                  |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
@@ -144,17 +144,17 @@ which is fully populated.
 
 ## 0.4 What Step 0 Does NOT Do
 
-To avoid duplicating effort with `create-simulation-target-skill.md`,
+To avoid duplicating effort with `define-simulation-scenario-skill.md`,
 the following are explicitly **out of scope** for Step 0:
 
 | Concern                                            | Owned by                                                       |
 |----------------------------------------------------|----------------------------------------------------------------|
-| Authoring phenomenon description, agent roster, … | `create-simulation-target-skill.md` (the target file's author) |
-| Choosing simulation name                           | `create-simulation-target-skill.md §2`                          |
-| Identifying theory anchors                         | `create-simulation-target-skill.md §4`                          |
-| Choosing real-world events                         | `create-simulation-target-skill.md §6`                          |
-| Choosing investor archetypes                       | `create-simulation-target-skill.md §7`                          |
-| Choosing variants to build                         | `create-simulation-target-skill.md §10.1`                       |
+| Authoring phenomenon description, agent roster, … | `define-simulation-scenario-skill.md` (the target file's author) |
+| Choosing simulation name                           | `define-simulation-scenario-skill.md §2`                          |
+| Identifying theory anchors                         | `define-simulation-scenario-skill.md §4`                          |
+| Choosing real-world events                         | `define-simulation-scenario-skill.md §6`                          |
+| Choosing investor archetypes                       | `define-simulation-scenario-skill.md §7`                          |
+| Choosing variants to build                         | `define-simulation-scenario-skill.md §10.1`                       |
 | Expanding theories with research notes             | `05-step1-research.md` (Step 1)                                 |
 | Running the AGENT_POOL gate                        | `06-step2-agent-design.md §2.2.0` (Step 2)                      |
 
@@ -204,7 +204,7 @@ Step 0 is complete when:
 - [ ] Target file §11 has three consecutive PASS runs.
 - [ ] Target file `Status: locked`.
 - [ ] Domain folder `examples/AGENT_POOL/{Domain}/` exists.
-- [ ] `examples/{ScenarioName}/simulation-define.md` exists with the
+- [ ] `examples/{ScenarioName}/simulation-build-log.md` exists with the
       §0.3 skeleton; §0 Meta references the target file by path.
 - [ ] §D Build Log has one row recording Phase 0 outcome.
 
@@ -217,7 +217,7 @@ ticked.
 
 A handful of scenarios under `examples/` were authored before the
 target-file requirement was introduced. For those scenarios, the
-build-log contract `simulation-define.md` may exist *without* a
+build-log contract `simulation-build-log.md` may exist *without* a
 sibling `{domain}-{scenario}.md`. When such a legacy scenario is
 modified, the pipeline SHOULD prompt the author to back-fill a
 target file before the modification proceeds. Greenfield scenarios

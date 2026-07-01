@@ -14,8 +14,8 @@ MASim 是一个面向金融市场与群体行为研究的多智能体模拟框�
 - 标准化实验产物（`EXPERIMENT/` 单次运行 + `simulation-results/` 发布包）；
 - 由 261 个场景级角色合并而来的 29 类通用 Agent 原型，外加 `examples/AGENT_POOL/` 下的可复用 Agent 档案库；
 - Streamlit 实验回放与分析界面；
-- 每个新场景都以一份**用户/上游 LLM 撰写的目标说明文件** `{domain}-{scenario}.md` 作为唯一上游输入（格式由 `create-simulation-target-skill.md` 约束）；
-- 位于 `masim/skills/` 的**设计 / 创建** Skill 体系（`create-simulation-target-skill.md`、`agent-design-skill.md`、`create-example-skill/`，以及自顶向下的 `create-simulation-skill.md`）。
+- 每个新场景都以一份**用户/上游 LLM 撰写的目标说明文件** `{domain}-{scenario}.md` 作为唯一上游输入（格式由 `define-simulation-scenario-skill.md` 约束）；
+- 位于 `masim/skills/` 的**设计 / 创建 / 升级** Skill 体系（`define-simulation-scenario-skill.md`、`agent-design-skill.md`、`implement-simulation-skill/`；两条顶层 pipeline：`create-simulation-pipeline.md` 从零新建、`polish-simulation-pipeline.md` 对已存在场景标准化升级）。
 
 ## 2. 核心执行链
 
@@ -44,7 +44,7 @@ multiagent-simulation/
 |   |-- agents/  communication/  evaluation/  format/
 |   |-- interface/  knowledge/  persona/  player/
 |   |-- proxy/  simulator/  utils/
-|   `-- skills/               # create-simulation-target-skill.md, agent-design-skill.md, create-example-skill/, create-simulation-skill.md
+|   `-- skills/               # define-simulation-scenario-skill.md, agent-design-skill.md, implement-simulation-skill/, create-simulation-pipeline.md (从零新建), polish-simulation-pipeline.md (升级已有)
 |-- examples/                 # 场景实现与运行入口
 |   |-- {Scenario}/           # 45 个正式场景（Rule/LLM/RuleLLM/Rag 四变体）
 |   |-- AGENT_POOL/           # 可复用 Agent 档案库（含 finance/ 等领域子目录、agent_images/）
@@ -98,7 +98,7 @@ multiagent-simulation/
 examples/{Scenario}/
 |-- __init__.py
 |-- {domain}-{scenario}.md  # 用户/上游 LLM 撰写的目标说明（上游输入；锁定后不可改）
-|-- simulation-define.md    # 流水线生成的构建日志（AGENT_POOL 门、研究笔记、待解问题）
+|-- simulation-build-log.md    # 流水线生成的构建日志（AGENT_POOL 门、研究笔记、待解问题）
 |-- simulation-bases.md     # 9 节理论与设计基线（变体共享）
 |-- analysis-bases.md       # 7 节分析方法学基线（变体共享）
 `-- {Mechanism}/            # 是否包含取决于目标文件 §10.1 的 build matrix
@@ -219,46 +219,51 @@ examples/AGENT_POOL/
 - 单个 Agent 档案严格遵循 `masim/skills/agent-design-skill.md` 的 11 节格式；
 - 文件名采用 kebab-case（如 `momentum-trader.md`、`fundamental-analyst.md`），与 H1 一致；
 - 领域子目录（`finance/`、未来可能的 `opinion/`、`epidemics/` 等）由档案的真实领域决定；
-- 添加新 Agent 之前，必须先按 `masim/skills/create-simulation-skill.md` 的三段式匹配流程检索是否已有满足要求的档案。
+- 添加新 Agent 之前，必须先按 `masim/skills/create-simulation-pipeline.md`（新建场景时）或 `masim/skills/polish-simulation-pipeline.md`（升级已有场景时）的三段式匹配流程检索是否已有满足要求的档案。
 
 未发布或试验性的自定义场景写入 `examples/CUSTOMIZED_SIMULATION/`，构成熟稳定后再迁入 `examples/<Scenario>/`。
 
 ## 11. 设计 Skill 体系
 
-`masim/skills/` 是项目的"创建手册"，**不参与运行时**，只在设计阶段被调用：
+`masim/skills/` 是项目的"创建/升级手册"，**不参与运行时**，只在设计阶段被调用：
 
 ```text
 masim/skills/
-|-- create-simulation-target-skill.md   # 上游目标文件 {domain}-{scenario}.md 的格式规范（用户/LLM 撰写）
-|-- agent-design-skill.md               # 单 Agent 设计规范（领域无关，11 节）
-|-- create-example-skill/               # 单场景完整创建流程（Step 0 - Step 10）
+|-- define-simulation-scenario-skill.md   # 上游目标文件 {domain}-{scenario}.md 的格式规范（用户/LLM 撰写）
+|-- agent-design-skill.md                 # 单 Agent 设计规范（领域无关，11 节）
+|-- implement-simulation-skill/           # 单场景的分步方法学（Step 0 - Step 10 子技能库）
 |   |-- 00-overview.md
 |   |-- 01-mandatory-structure.md
 |   |-- 02-root-documents-spec.md
 |   |-- 03-variant-documents-spec.md
-|   |-- 04-step0-define.md
+|   |-- 04-step0-load-target.md
 |   |-- 05-step1-research.md
 |   |-- 06-step2-agent-design.md
 |   |-- 07-step3-config.md
 |   |-- 08-step4-implement.md
 |   |-- 09-step5-to-10-review.md
 |   `-- 15-reference-assetbubble.md
-`-- create-simulation-skill.md          # 自顶向下 pipeline：目标文件摄取 + AGENT_POOL 复用门 + 三遍审查
+|-- create-simulation-pipeline.md         # 顶层 pipeline #1：从零新建场景（目标文件 → 全套 artefact）
+`-- polish-simulation-pipeline.md         # 顶层 pipeline #2：升级已有场景到当前 skill 基线（审计 + 补丁）
 ```
 
-调用关系：
+两条 pipeline 使用同一套子技能（`define-`、`agent-design-`、`implement-`），
+入口不同，流程差异也不同：`create-` 是**构造流程**（从空目录构建全套 artefact），
+`polish-` 是**审计-补丁流程**（对已存在 artefact 做结构对齐、handbook 校验、AGENT_POOL 重新匹配）。
+
+调用关系 A：从零新建场景（`create-simulation-pipeline.md`）
 
 ```text
 用户 / 上游 LLM
         |
-        |-- 依据 create-simulation-target-skill.md 撰写
+        |-- 依据 define-simulation-scenario-skill.md 撰写
         v
 examples/{Scenario}/{domain}-{scenario}.md   (Status: draft)
         |
         v
-create-simulation-skill.md          (pipeline 入口)
+create-simulation-pipeline.md          (pipeline #1 入口)
         |
-        |-- Phase 0: 摄取目标文件 + §11 校验  ----> examples/{Scenario}/simulation-define.md
+        |-- Phase 0: 读取并验证目标文件 + §11 校验 ----> examples/{Scenario}/simulation-build-log.md
         |           (校验通过后将目标文件 Status: draft -> locked)
         |-- Phase 1: 文献研究（验证/扩展目标 §4-§6-§9）
         |-- Phase 2: Agent 角色规划（基于目标 §7）
@@ -266,9 +271,31 @@ create-simulation-skill.md          (pipeline 入口)
         |        |-- 复用现有 agent (examples/AGENT_POOL/<domain>/*.md)
         |        `-- 新建：调用 agent-design-skill.md + 三遍 §6 checklist
         |              ----> 写入 examples/AGENT_POOL/<domain>/<kebab>.md
-        |-- Phase 4: 切换到 create-example-skill/ 的 02 -> 08，完成 simulation-bases / configs / players.py
+        |-- Phase 4: 切换到 implement-simulation-skill/ 的 02 -> 08，完成 simulation-bases / configs / players.py
         `-- Phase 5/6: 三遍场景级审查 + 实验执行
-              (闭包时将目标文件与 simulation-define.md 一并 released)
+              (闭包时将目标文件与 simulation-build-log.md 一并 released)
+```
+
+调用关系 B：升级已有场景（`polish-simulation-pipeline.md`）
+
+```text
+现有 examples/{Scenario}/                (已有 simulation-bases.md、investors/、Rule/、LLM/ 等)
+        |
+        v
+polish-simulation-pipeline.md          (pipeline #2 入口)
+        |
+        |-- Phase A: 现状盘点，生成 gap list（工作区暂存，不入库）
+        |-- Phase B: 若缺失目标文件则反向工程 {domain}-{scenario}.md
+        |           (§11 三-PASS → Status: locked)
+        |-- Phase C: 根文档审计（simulation-bases.md / analysis-bases.md
+        |             vs implement-simulation-skill/02-root-documents-spec.md）
+        |-- Phase D: 每个 agent 审计（handbook §3.1-§3.11 + AGENT_POOL 三段式重跑）
+        |           每个 agent 通过三遍 handbook §6 才算过关
+        |-- Phase E: 每个 variant artefact 审计（explain.md / analysis.md / players.py / *.yml）
+        |-- Phase F: 场景级三遍审查（复用 09-step5-to-10-review.md）
+        `-- Phase G: 每个 variant smoke test → 目标文件 §0 CHANGELOG 追加一行 → Status: released
+              审计痕迹：目标文件 §0 CHANGELOG + agent §3.11 Provenance + git commit history
+              （**不生成** simulation-build-log.md）
 ```
 
 ## 12. 常用定位
@@ -284,7 +311,8 @@ create-simulation-skill.md          (pipeline 入口)
 | 分析实验结果       | `analysis.py`、`masim/evaluation/`                                |
 | 批量运行实验       | `scripts/run_example_matrix.py`                                   |
 | 排查实验失败       | `docs/example-revision-guide/08-runtime-failure-patterns.md`      |
-| 撰写新场景目标文件 | `masim/skills/create-simulation-target-skill.md`（{domain}-{scenario}.md 规范） |
-| 创建新场景         | `masim/skills/create-simulation-skill.md`（顶层 pipeline 入口；需先有目标文件） |
+| 撰写新场景目标文件     | `masim/skills/define-simulation-scenario-skill.md`（{domain}-{scenario}.md 规范）    |
+| 从零创建新场景         | `masim/skills/create-simulation-pipeline.md`（pipeline #1；需先有目标文件）           |
+| 升级已有场景到最新规范 | `masim/skills/polish-simulation-pipeline.md`（pipeline #2；对 examples/ 下已有场景做审计-补丁） |
 | 设计新 Agent       | `masim/skills/agent-design-skill.md` + `examples/AGENT_POOL/`     |
 | 查找可复用 Agent   | `examples/AGENT_POOL/<domain>/`，按文件名/Summary/全文三段式检索  |

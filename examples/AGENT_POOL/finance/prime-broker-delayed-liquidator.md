@@ -14,7 +14,7 @@
 
 ## Definition and Goals
 
-This agent models a prime broker / dealer liquidating client collateral in a finance liquidation setting, using the market-trading domain palette from `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
+This agent models a prime broker / dealer liquidating client collateral in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
 
 The decision goal is to emit one order per decision call: `buy`, `sell`, or `hold`, with a numeric `bid_price` and `quantity`. The agent optimizes the role-specific criterion shown in the mathematical model: maximize private collateral recovery by selling when collateral-quality deviation breaches the broker threshold.
 

@@ -94,8 +94,8 @@ and pollutes downstream comparison.
 
 **Candidate source.** The candidate roster is **not** invented inside Step 2.
 It is read from the target file's **§7 Agent Roster** (specified by
-`masim/skills/create-simulation-target-skill.md`), which the pipeline's
-Phase 2 has already mirrored into `simulation-define.md §B.4` with a
+`masim/skills/define-simulation-scenario-skill.md`), which the pipeline's
+Phase 2 has already mirrored into `simulation-build-log.md §B.4` with a
 `Pipeline confirmation` column. Each row of §B.4 is a single candidate to
 push through the gate below.
 
@@ -147,8 +147,8 @@ Information Set, Core Behavioral Mechanism, Parameters). Decide one of:
 - **Design new.** No existing archetype matched. Proceed to §2.2.2.
 
 **Audit log.** The gate's decisions MUST be captured in
-`examples/{Scenario}/simulation-define.md §A` (see
-`04-step0-define.md §0.3`) as a small table:
+`examples/{Scenario}/simulation-build-log.md §A` (see
+`04-step0-load-target.md §0.3`) as a small table:
 
 ```markdown
 | Candidate archetype | Stage reached | Outcome           | Pool file (if reused) |
@@ -214,7 +214,7 @@ For each investor type, the author MUST:
 5. Run the handbook's **§6 Validation Checklist** against the entry. Every
    unchecked item is a blocker. The author MUST repeat the checklist run
    three times (per the project convention encoded in
-   `masim/skills/create-simulation-skill.md`): three consecutive PASS runs
+   `masim/skills/create-simulation-pipeline.md`): three consecutive PASS runs
    are required before the entry is accepted.
 
 **Required design inputs.** Before opening the handbook skeleton, ensure the
@@ -328,7 +328,7 @@ Before moving to Step 3, verify:
 - [ ] 4–7 investor types designed (handbook minimum 4, maximum 7 per
       `02-root-documents-spec.md §4.2`)
 - [ ] AGENT_POOL reuse-or-create gate (§2.2.0) executed for every candidate;
-      decisions logged in `examples/{Scenario}/simulation-define.md §A`
+      decisions logged in `examples/{Scenario}/simulation-build-log.md §A`
 - [ ] Every investor maps to exactly one primary theory cited in
       `simulation-bases.md §2`
 - [ ] At least one stabilizing and at least two destabilizing agents

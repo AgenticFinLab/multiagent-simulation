@@ -3,7 +3,7 @@
 RAG-augmented prompts for agents using domain knowledge retrieval.
 System prompts combine behavioral persona, quantitative rules, and RAG context injection.
 
-Construction rule (create-example-skill.md — Rag variant):
+Construction rule (implement-simulation-skill.md — Rag variant):
     System prompts are identical to RuleLLM (== PERSONA == + == DECISION RULES ==).
     User prompt template adds {rag_context} placeholder after portfolio state.
     If no documents are retrieved, inject: "(No relevant knowledge retrieved this round.)"

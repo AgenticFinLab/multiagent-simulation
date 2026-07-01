@@ -10,20 +10,20 @@ methodology is expanded into a dedicated, deeply specified file.
 > with a **scenario target file** authored by the user (or an upstream LLM
 > on the user's behalf): `examples/{ScenarioName}/{domain}-{scenario}.md`.
 > The format and validation of that file are owned by
-> `masim/skills/create-simulation-target-skill.md`. The top-level pipeline
-> `masim/skills/create-simulation-skill.md` ingests the target file, re-runs
+> `masim/skills/define-simulation-scenario-skill.md`. The top-level pipeline
+> `masim/skills/create-simulation-pipeline.md` reads and validates the target file, re-runs
 > its §11 validation, runs the AGENT_POOL reuse gate, calls
 > `masim/skills/agent-design-skill.md` for any new agent that has to be
 > designed, and then *enters this folder* at Step 0 to build the actual
 > scenario package. If you are starting a brand-new simulation, you should
-> be invoked through `create-simulation-skill.md` — not opening this folder
+> be invoked through `create-simulation-pipeline.md` — not opening this folder
 > directly.
 
 Reading through these files in order gives a complete, end-to-end methodology
 for:
 
-1. Ingesting the user-authored scenario target file `{domain}-{scenario}.md`
-   and seeding the pipeline build-log `simulation-define.md` (Step 0)
+1. Reading the user-authored scenario target file `{domain}-{scenario}.md`
+   and seeding the pipeline build-log `simulation-build-log.md` (Step 0)
 2. Grounding the target file's §4 — §6 anchors in verified academic and
    empirical research (Step 1)
 3. Designing the market and the investor taxonomy from target §7 + §8. Each
@@ -57,7 +57,7 @@ prevails.
 | `01-mandatory-structure.md`    | Pre-work      | Required directory layout, file roles, design principles                                                                                                                                                                                                                      |
 | `02-root-documents-spec.md`    | Spec          | `simulation-bases.md` (9-section) + `analysis-bases.md` (7-section) full specifications. §4 of `simulation-bases.md` defers per-investor format to the **Universal Agent Design Handbook** (`masim/skills/agent-design-skill.md`), with financial-domain row labels inline. |
 | `03-variant-documents-spec.md` | Spec          | `{Variant}/explain.md` (9-section) + `{Variant}/analysis.md` (7-section) full specifications                                                                                                                                                                                  |
-| `04-step0-define.md`           | Step 0        | Ingest the user-authored scenario target file `{domain}-{scenario}.md` (spec: `masim/skills/create-simulation-target-skill.md`) and seed `simulation-define.md`                                                                                                                                                                                                 |
+| `04-step0-load-target.md`           | Step 0        | Load the user-authored scenario target file `{domain}-{scenario}.md` (spec: `masim/skills/define-simulation-scenario-skill.md`) and seed `simulation-build-log.md`                                                                                                                                                                                                 |
 | `05-step1-research.md`         | Step 1        | Research and theory foundation methodology                                                                                                                                                                                                                                    |
 | `06-step2-agent-design.md`     | Step 2        | Design the market and the investor taxonomy. Includes the AGENT_POOL reuse-or-create gate.                                                                                                                                                                                    |
 | `07-step3-config.md`           | Step 3        | Create configuration files (simulation.yml, players.yml, topology.yml, persona.yml)                                                                                                                                                                                           |
@@ -77,7 +77,7 @@ prevails.
 ### For a New Simulation
 Read files in order: `01` → `02` → `03` → `04` through `09`. Use `15` as a
 reference whenever you need a concrete example. If you arrived here directly
-(not through `create-simulation-skill.md`), the AGENT_POOL reuse gate in
+(not through `create-simulation-pipeline.md`), the AGENT_POOL reuse gate in
 `06-step2-agent-design.md §2.2.0` is the part you most easily overlook — run it.
 
 ### For Reviewing an Existing Simulation
@@ -97,14 +97,14 @@ inline in §4.
 ## Relationship to Code
 
 ```text
-masim/skills/create-simulation-target-skill.md
+masim/skills/define-simulation-scenario-skill.md
         │      ← Spec for the user-authored scenario target file
         ↓
 examples/{ScenarioName}/{domain}-{scenario}.md
         │      ← The actual target file (user-authored, immutable once locked)
         ↓
-masim/skills/create-simulation-skill.md
-        │      ← Top-level pipeline: ingests the target file, runs
+masim/skills/create-simulation-pipeline.md
+        │      ← Top-level pipeline: reads and validates the target file, runs
         │        the AGENT_POOL gate, dispatches into this folder.
         ↓
 masim/skills/agent-design-skill.md   ← Universal handbook: per-agent
@@ -113,13 +113,13 @@ masim/skills/agent-design-skill.md   ← Universal handbook: per-agent
         │ simulation-bases.md (any scenario domain).
         │
         ↓
-masim/skills/create-example-skill/   ← This folder: scenario-build methodology
+masim/skills/implement-simulation-skill/   ← This folder: scenario-build methodology
         │                              (financial-domain row labels inline)
         │ drives
         ↓
 examples/{SimulationName}/
 ├── {domain}-{scenario}.md     ← User-authored target (input)
-├── simulation-define.md       ← Pipeline build log
+├── simulation-build-log.md       ← Pipeline build log
 ├── simulation-bases.md         ← Written per 02-root-documents-spec.md §SIM
 │                                   (§4 entries conform to agent-design-skill.md)
 ├── analysis-bases.md           ← Written per 02-root-documents-spec.md §ANA
@@ -137,7 +137,7 @@ scenarios** are additionally stored at:
 examples/AGENT_POOL/<domain>/<kebab-name>.md   # one file per agent archetype
 ```
 
-(see `masim/skills/create-simulation-skill.md` for the reuse-or-create
+(see `masim/skills/create-simulation-pipeline.md` for the reuse-or-create
 protocol).
 
 ---

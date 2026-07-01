@@ -11,9 +11,9 @@ Every simulation must conform to the fixed directory and file layout defined in 
 ```
 examples/{SimulationName}/
 ├── {domain}-{scenario}.md         # UPSTREAM INPUT: user-authored scenario target file
-│                                  #   Spec: masim/skills/create-simulation-target-skill.md
+│                                  #   Spec: masim/skills/define-simulation-scenario-skill.md
 │                                  #   Status: draft → locked → released
-├── simulation-define.md           # PIPELINE LOG: AGENT_POOL gate (§A), research notes (§B),
+├── simulation-build-log.md           # PIPELINE LOG: AGENT_POOL gate (§A), research notes (§B),
 │                                  #   open questions (§C), build log (§D)
 ├── __init__.py                    # Package init (empty or minimal)
 ├── simulation-bases.md            # ROOT: Theoretical & design foundation (all variants share this)
@@ -66,8 +66,8 @@ examples/{SimulationName}/
 
 | File                       | Scope               | Purpose                                                                                                                                    |
 |----------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `{domain}-{scenario}.md`   | Root (all variants) | UPSTREAM INPUT — user-authored scenario target file. Spec: `masim/skills/create-simulation-target-skill.md`.                              |
-| `simulation-define.md`     | Root (all variants) | PIPELINE LOG — AGENT_POOL gate decisions (§A), research notes (§B), open questions (§C), per-phase build log (§D).                         |
+| `{domain}-{scenario}.md`   | Root (all variants) | UPSTREAM INPUT — user-authored scenario target file. Spec: `masim/skills/define-simulation-scenario-skill.md`.                              |
+| `simulation-build-log.md`     | Root (all variants) | PIPELINE LOG — AGENT_POOL gate decisions (§A), research notes (§B), open questions (§C), per-phase build log (§D).                         |
 | `simulation-bases.md`      | Root (all variants) | Single source of truth: phenomenon theory, market design, investor taxonomy (economic archetypes), model parameters                        |
 | `analysis-bases.md`        | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale                                              |
 | `{Variant}/explain.md`     | Per variant         | How this variant concretely implements the design in `simulation-bases.md` — every element traces to a `simulation-bases.md §N.M` citation |
@@ -125,7 +125,7 @@ This constraint applies to **every built variant** equally (whatever subset of `
 
 Legitimate exceptions: RAG config resolution (`resolved_rag.get()`), `__getstate__`/`__setstate__` serialization, truly optional config sections (`extras.get("private_knowledge", {})`), and matplotlib styling defaults.
 
-See `masim/skills/create-example-skill/00-overview.md` Principle #6 for the full policy.
+See `masim/skills/implement-simulation-skill/00-overview.md` Principle #6 for the full policy.
 
 ### Rule Variant
 - **No hardcoded values.** Every numeric threshold, position size, or parameter must be read from `extras` in `players.yml`.
@@ -185,7 +185,7 @@ Use this to verify any simulation's structural completeness.
 
 **Root level:**
 - [ ] `{domain}-{scenario}.md` present and `Status: locked` (or `released`)
-- [ ] `simulation-define.md` present with §0, §A, §B, §C, §D blocks
+- [ ] `simulation-build-log.md` present with §0, §A, §B, §C, §D blocks
 - [ ] `__init__.py` present
 - [ ] `simulation-bases.md` present and has all 9 sections
 - [ ] `analysis-bases.md` present and has all 7 sections

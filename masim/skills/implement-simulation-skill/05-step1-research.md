@@ -10,7 +10,7 @@ Build the academic and empirical foundation that makes the simulation scientific
 
 Step 1 does **not** start from a blank page. It starts from the user-
 authored target file `examples/{ScenarioName}/{domain}-{scenario}.md`
-(specified by `masim/skills/create-simulation-target-skill.md`),
+(specified by `masim/skills/define-simulation-scenario-skill.md`),
 which by §11 validation already contains:
 
 - **§4 Theoretical Anchors** — 3 — 6 theories with DOI citations.
@@ -28,10 +28,10 @@ Step 1 has three jobs **against** the target file:
 2. **Expand.** For every verified anchor, add the deeper material
    that this step requires (key equations, parameter calibrations,
    mechanism diagrams, additional references) into
-   `examples/{ScenarioName}/simulation-define.md §B`.
+   `examples/{ScenarioName}/simulation-build-log.md §B`.
 3. **Surface gaps.** If verification reveals a material gap (e.g.,
    a stylized fact whose source does not actually report a numeric
-   range), record the gap in `simulation-define.md §C` and raise
+   range), record the gap in `simulation-build-log.md §C` and raise
    it to the author.
 
 The five research dimensions below (§1.1 — §1.5) describe the

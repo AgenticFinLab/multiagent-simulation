@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Short Squeeze Rag Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_shortsqueeze_dynamics.png,
 02_shortsqueeze_analysis.png, 03_summary.png, and rag_stats.json.
 """

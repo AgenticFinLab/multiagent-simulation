@@ -2,7 +2,7 @@
 
 System prompts for RuleLLM-driven agents in the AnchoringEffect simulation.
 
-Construction rule (create-example-skill.md — RuleLLM variant):
+Construction rule (implement-simulation-skill.md — RuleLLM variant):
     Every system prompt MUST have two mandatory labeled sections:
     1. == PERSONA == : who the agent is, risk style, emotional traits
     2. == DECISION RULES == : exact Rule-variant formulas re-expressed in plain text

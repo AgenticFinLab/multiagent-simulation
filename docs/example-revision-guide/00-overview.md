@@ -8,11 +8,11 @@ This guide is **reusable for any simulation in `examples/`** — not tied to any
 
 ---
 
-## Relationship to `masim/format/create-example-skill/`
+## Relationship to `masim/format/implement-simulation-skill/`
 
 | Guide                                            | Purpose                               | When to Use                                          |
 |--------------------------------------------------|---------------------------------------|------------------------------------------------------|
-| `masim/format/create-example-skill/`             | Build a new simulation from scratch   | Creating a new `examples/<Scenario>`                 |
+| `masim/format/implement-simulation-skill/`             | Build a new simulation from scratch   | Creating a new `examples/<Scenario>`                 |
 | `docs/example-revision-guide/` ← **this folder** | Audit and repair existing simulations | Updating, fixing, or upgrading `examples/<Scenario>` |
 
 Both guides share the same compliance standard — the difference is direction: creation goes forward, revision goes backward from the standard.

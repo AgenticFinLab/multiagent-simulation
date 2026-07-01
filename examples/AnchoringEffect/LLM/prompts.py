@@ -2,12 +2,12 @@
 
 System prompts for LLM-driven agents in the AnchoringEffect simulation.
 
-Construction rule (create-example-skill.md — LLM variant):
+Construction rule (implement-simulation-skill.md — LLM variant):
     System prompts define PERSONA ONLY. They must NOT name the phenomenon,
     mention the price formula, hint at what market event is occurring, or
     embed quantitative trading rules or thresholds.
 
-Output format required for all agents (create-example-skill.md — LLM variant):
+Output format required for all agents (implement-simulation-skill.md — LLM variant):
     <analysis>...</analysis><decision>JSON</decision>
     JSON fields: action ("buy"|"sell"|"hold"), bid_price (float), quantity (float), reasoning (string)
 """

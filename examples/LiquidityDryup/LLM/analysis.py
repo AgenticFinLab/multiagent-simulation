@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Liquidity Dry-up LLM Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_liquiditydryup_dynamics.png,
 02_liquiditydryup_analysis.png, and 03_summary.png.
 """

@@ -131,7 +131,7 @@ Each round, the Market broadcasts to all investors:
 
 ## §4 Investor Taxonomy
 
-This section follows `masim/skills/agent-design-skill.md` and the finance instantiation in `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. All five Archegos-specific agents passed the AGENT_POOL gate as `new` because the existing canonical finance pool covers generic anchoring, momentum, liquidity, and noise roles but not TRS hidden leverage, prime-broker liquidation races, delayed broker execution haircuts, or liquidation-signal predatory trading. Each standalone pool file is embedded below in re-levelled form.
+This section follows `masim/skills/agent-design-skill.md` and the finance instantiation in `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. All five Archegos-specific agents passed the AGENT_POOL gate as `new` because the existing canonical finance pool covers generic anchoring, momentum, liquidity, and noise roles but not TRS hidden leverage, prime-broker liquidation races, delayed broker execution haircuts, or liquidation-signal predatory trading. Each standalone pool file is embedded below in re-levelled form.
 
 
 ### §4.1 ConcentratedFund
@@ -153,7 +153,7 @@ This section follows `masim/skills/agent-design-skill.md` and the finance instan
 
 #### 4.1.2 Definition and Goals
 
-This agent models a family office or hedge fund using total return swaps for concentrated equity exposure in a finance liquidation setting, using the market-trading domain palette from `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
+This agent models a family office or hedge fund using total return swaps for concentrated equity exposure in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
 
 The decision goal is to emit one order per decision call: `buy`, `sell`, or `hold`, with a numeric `bid_price` and `quantity`. The agent optimizes the role-specific criterion shown in the mathematical model: minimize margin-breach pressure by selling a fixed fraction of exposure once collateral deterioration crosses the trigger.
 
@@ -393,7 +393,7 @@ State update: no state becomes negative.
 
 #### 4.2.2 Definition and Goals
 
-This agent models a prime broker / dealer liquidating client collateral in a finance liquidation setting, using the market-trading domain palette from `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
+This agent models a prime broker / dealer liquidating client collateral in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
 
 The decision goal is to emit one order per decision call: `buy`, `sell`, or `hold`, with a numeric `bid_price` and `quantity`. The agent optimizes the role-specific criterion shown in the mathematical model: maximize private collateral recovery by selling when collateral-quality deviation breaches the broker threshold.
 
@@ -619,7 +619,7 @@ State update: no state becomes negative.
 
 #### 4.3.2 Definition and Goals
 
-This agent models a prime broker / dealer liquidating client collateral in a finance liquidation setting, using the market-trading domain palette from `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
+This agent models a prime broker / dealer liquidating client collateral in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
 
 The decision goal is to emit one order per decision call: `buy`, `sell`, or `hold`, with a numeric `bid_price` and `quantity`. The agent optimizes the role-specific criterion shown in the mathematical model: maximize private collateral recovery by selling when collateral-quality deviation breaches the broker threshold.
 
@@ -847,7 +847,7 @@ State update: no state becomes negative.
 
 #### 4.4.2 Definition and Goals
 
-This agent models a asset manager, family office, or proprietary desk buying large blocks in distressed markets in a finance liquidation setting, using the market-trading domain palette from `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
+This agent models a asset manager, family office, or proprietary desk buying large blocks in distressed markets in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
 
 The decision goal is to emit one order per decision call: `buy`, `sell`, or `hold`, with a numeric `bid_price` and `quantity`. The agent optimizes the role-specific criterion shown in the mathematical model: deploy a bounded fraction of cash when price discount compensates inventory risk.
 
@@ -1084,7 +1084,7 @@ State update: no state becomes negative.
 
 #### 4.5.2 Definition and Goals
 
-This agent models a proprietary trading desk or informed hedge fund reading order-flow stress in a finance liquidation setting, using the market-trading domain palette from `masim/skills/create-example-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
+This agent models a proprietary trading desk or informed hedge fund reading order-flow stress in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
 
 The decision goal is to emit one order per decision call: `buy`, `sell`, or `hold`, with a numeric `bid_price` and `quantity`. The agent optimizes the role-specific criterion shown in the mathematical model: trade ahead of expected liquidation when a distress signal is detected, then cover after recovery signal appears.
 

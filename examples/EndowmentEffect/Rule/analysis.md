@@ -48,7 +48,7 @@ See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md
 
 `Rule/analysis.py` writes `summary.json`, a structured validation console
 report, the helper plots `price_path.png` and `strategy_volume.png`, and the
-fixed PNG contract required by `masim/format/create-example-skill/08-step4-implement.md`:
+fixed PNG contract required by `masim/format/implement-simulation-skill/08-step4-implement.md`:
 `00_investor_bids.png`, `01_endowmenteffect_dynamics.png`,
 `02_endowmenteffect_analysis.png`, and `03_summary.png`. These artifacts provide
 the deterministic baseline for comparing LLM, RuleLLM, and Rag variants.

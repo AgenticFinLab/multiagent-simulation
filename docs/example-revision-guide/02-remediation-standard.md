@@ -4,7 +4,7 @@
 
 This file defines the **compliance criteria** for every file type in a simulation. A file is "compliant" only if it satisfies every criterion in the relevant section. These criteria are the authoritative standard — used both for auditing (determining what needs repair) and for validating repairs (confirming the work is complete).
 
-All structural requirements reference `masim/format/create-example-skill/` as the upstream source of truth.
+All structural requirements reference `masim/format/implement-simulation-skill/` as the upstream source of truth.
 
 ---
 
