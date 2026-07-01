@@ -30,11 +30,11 @@ market:
     identity: "market"
     role: coordinator
     extras:
-      initial_price: 15.0
-      fundamental_value: 15.0
-      price_impact: 0.04
-      mean_reversion: 0.03
-      noise_std: 0.05
+      initial_price: 15.0        # Source: target §6 initial_price row; normalization (scale-only)
+      fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
+      price_impact: 0.04         # Source: target §6 price_impact row; Brunnermeier & Pedersen (2009) 10.1093/rfs/hhn098
+      mean_reversion: 0.03       # Source: target §6 mean_reversion row; Culp, Nozawa & Veronesi (2018) 10.3905/jai.2018.21.2.001
+      noise_std: 0.05            # Source: target §6 noise_std row; Engle (1982) 10.2307/1912773
 
 short_vol_trader_1:
   name: "ShortVolTrader 1"
@@ -45,14 +45,14 @@ short_vol_trader_1:
     identity: "short_vol_trader_1"
     role: player
     extras:
-      record_path: "EXPERIMENT/Volmageddon/Rag/records"
-      initial_cash: 1000000.00
-      initial_position: 0
-      initial_price: 15.0
-      fundamental_value: 15.0
-      agent_type: "short_vol_trader"
-      knowledge: *volmageddon_knowledge
-      private_knowledge: &volmageddon_private_knowledge
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"   # Source: target §10.1 Rag variant record layout
+      initial_cash: 1000000.00   # Source: target §4.1.6 scenario normalization
+      initial_position: 0        # Source: target §4.1.6 scenario normalization
+      initial_price: 15.0        # Source: target §6 initial_price row; normalization (scale-only)
+      fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
+      agent_type: "short_vol_trader"        # Source: target §4.1.5.0 I/O Contract agent_type field
+      knowledge: *volmageddon_knowledge     # Source: target §10.1 Rag variant knowledge index
+      private_knowledge: &volmageddon_private_knowledge  # Source: target §10.1 Rag variant private-knowledge block
         from_global_resources:
           - "MinerU_processed"
         local_resources:
@@ -69,7 +69,7 @@ short_vol_trader_1:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
-      llm: &volmageddon_rag_llm_config
+      llm: &volmageddon_rag_llm_config      # Source: target §10.1 Rag variant declaration
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
@@ -86,15 +86,15 @@ vol_e_t_n_manager_2:
     identity: "vol_e_t_n_manager_2"
     role: player
     extras:
-      record_path: "EXPERIMENT/Volmageddon/Rag/records"
-      initial_cash: 1000000.00
-      initial_position: 0
-      initial_price: 15.0
-      fundamental_value: 15.0
-      agent_type: "vol_e_t_n_manager"
-      knowledge: *volmageddon_knowledge
-      private_knowledge: *volmageddon_private_knowledge
-      llm: *volmageddon_rag_llm_config
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"   # Source: target §10.1 Rag variant record layout
+      initial_cash: 1000000.00   # Source: target §4.2.6 scenario normalization
+      initial_position: 0        # Source: target §4.2.6 scenario normalization
+      initial_price: 15.0        # Source: target §6 initial_price row; normalization (scale-only)
+      fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
+      agent_type: "vol_e_t_n_manager"       # Source: target §4.2.5.0 I/O Contract agent_type field
+      knowledge: *volmageddon_knowledge     # Source: target §10.1 Rag variant knowledge index
+      private_knowledge: *volmageddon_private_knowledge  # Source: target §10.1 Rag variant private-knowledge block
+      llm: *volmageddon_rag_llm_config      # Source: target §10.1 Rag variant declaration
 
 
 long_vol_hedger_3:
@@ -106,15 +106,15 @@ long_vol_hedger_3:
     identity: "long_vol_hedger_3"
     role: player
     extras:
-      record_path: "EXPERIMENT/Volmageddon/Rag/records"
-      initial_cash: 1000000.00
-      initial_position: 0
-      initial_price: 15.0
-      fundamental_value: 15.0
-      agent_type: "long_vol_hedger"
-      knowledge: *volmageddon_knowledge
-      private_knowledge: *volmageddon_private_knowledge
-      llm: *volmageddon_rag_llm_config
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"   # Source: target §10.1 Rag variant record layout
+      initial_cash: 1000000.00   # Source: target §4.3.6 scenario normalization
+      initial_position: 0        # Source: target §4.3.6 scenario normalization
+      initial_price: 15.0        # Source: target §6 initial_price row; normalization (scale-only)
+      fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
+      agent_type: "long_vol_hedger"         # Source: target §4.3.5.0 I/O Contract agent_type field
+      knowledge: *volmageddon_knowledge     # Source: target §10.1 Rag variant knowledge index
+      private_knowledge: *volmageddon_private_knowledge  # Source: target §10.1 Rag variant private-knowledge block
+      llm: *volmageddon_rag_llm_config      # Source: target §10.1 Rag variant declaration
 
 
 vol_arbitrageur_4:
@@ -126,15 +126,15 @@ vol_arbitrageur_4:
     identity: "vol_arbitrageur_4"
     role: player
     extras:
-      record_path: "EXPERIMENT/Volmageddon/Rag/records"
-      initial_cash: 1000000.00
-      initial_position: 0
-      initial_price: 15.0
-      fundamental_value: 15.0
-      agent_type: "vol_arbitrageur"
-      knowledge: *volmageddon_knowledge
-      private_knowledge: *volmageddon_private_knowledge
-      llm: *volmageddon_rag_llm_config
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"   # Source: target §10.1 Rag variant record layout
+      initial_cash: 1000000.00   # Source: target §4.4.6 scenario normalization
+      initial_position: 0        # Source: target §4.4.6 scenario normalization
+      initial_price: 15.0        # Source: target §6 initial_price row; normalization (scale-only)
+      fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
+      agent_type: "vol_arbitrageur"         # Source: target §4.4.5.0 I/O Contract agent_type field
+      knowledge: *volmageddon_knowledge     # Source: target §10.1 Rag variant knowledge index
+      private_knowledge: *volmageddon_private_knowledge  # Source: target §10.1 Rag variant private-knowledge block
+      llm: *volmageddon_rag_llm_config      # Source: target §10.1 Rag variant declaration
 
 
 equity_trader_5:
@@ -146,12 +146,12 @@ equity_trader_5:
     identity: "equity_trader_5"
     role: player
     extras:
-      record_path: "EXPERIMENT/Volmageddon/Rag/records"
-      initial_cash: 1000000.00
-      initial_position: 0
-      initial_price: 15.0
-      fundamental_value: 15.0
-      agent_type: "equity_trader"
-      knowledge: *volmageddon_knowledge
-      private_knowledge: *volmageddon_private_knowledge
-      llm: *volmageddon_rag_llm_config
+      record_path: "EXPERIMENT/Volmageddon/Rag/records"   # Source: target §10.1 Rag variant record layout
+      initial_cash: 1000000.00   # Source: target §4.5.6 scenario normalization
+      initial_position: 0        # Source: target §4.5.6 scenario normalization
+      initial_price: 15.0        # Source: target §6 initial_price row; normalization (scale-only)
+      fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
+      agent_type: "equity_trader"           # Source: target §4.5.5.0 I/O Contract agent_type field
+      knowledge: *volmageddon_knowledge     # Source: target §10.1 Rag variant knowledge index
+      private_knowledge: *volmageddon_private_knowledge  # Source: target §10.1 Rag variant private-knowledge block
+      llm: *volmageddon_rag_llm_config      # Source: target §10.1 Rag variant declaration
