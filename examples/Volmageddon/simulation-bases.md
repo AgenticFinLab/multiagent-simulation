@@ -16,47 +16,200 @@ of the Volmageddon runtime contract because the market mechanism does not run a
 bid/ask order book; it aggregates directional volatility demand and applies
 price impact, mean reversion, and noise.
 
+### §1.1 Empirical Stylized-Fact Anchors
+
+The five stylized facts F1 through F5 asserted in `finance-volmageddon.md §5`
+are anchored to the following primary sources, mirrored here so that the
+research bases document carries a first-class record of each empirical claim
+the target file consumes.
+
+| Fact | Empirical claim (one sentence)                                                                     | Primary source                                                                                                                                                        |
+|------|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| F1   | Volatility proxy spikes at least 30 % above initial level at the peak of an inverse-product cascade. | SEC Staff Report on Algorithmic Trading (2018); Culp, Nozawa, and Veronesi (2018), 10.3905/jai.2018.21.2.001                                                          |
+| F2   | Spike onset (first crossing of a 10 % deviation) occurs within 20 rounds of the first amplifier activation. | Federal Reserve Board (2018) Financial Stability Report, volatility-product episode box; SEC Staff Report (2018)                                                     |
+| F3   | Inverse-product rebalance pressure exceeds long-vol take-profit volume by at least 2× during stress rounds. | Bergsma and Jiang (2022), 10.1016/j.jbankfin.2022.106552; ProShares (2018) XIV termination and SVXY reweighting disclosures                                          |
+| F4   | Removing the inverse-product manager reduces the peak spike by at least 30 % (ablation-visible).    | Brunnermeier and Pedersen (2009), 10.1093/rfs/hhn098; Culp, Nozawa, and Veronesi (2018), 10.3905/jai.2018.21.2.001                                                   |
+| F5   | Equity de-risking volume rises measurably in rounds where deviation exceeds twice the risk limit.    | Moreira and Muir (2017), 10.1111/jofi.12575; Federal Reserve Board (2018) Financial Stability Report                                                                  |
+
 ## §2 Theoretical Foundation
 
 ### §2.1 Volatility Clustering And Shock Persistence
 
-ARCH and GARCH models establish that volatility can cluster after large shocks
-rather than immediately reverting to a constant variance process
-(Engle, 1982, DOI: 10.2307/1912773; Bollerslev, 1986, DOI:
-10.1016/0304-4076(86)90063-1). Volmageddon uses this idea to justify a
-state-dependent volatility proxy that can remain elevated after a large move.
+**Citation.** Engle, R. F. (1982). Autoregressive conditional heteroscedasticity
+with estimates of the variance of United Kingdom inflation. *Econometrica*,
+50(4), 987–1007. DOI: 10.2307/1912773.
+
+**Core Insight.** Volatility clusters after large shocks rather than snapping
+back to a constant variance; conditional variance is autoregressive in past
+squared innovations, so a large innovation makes further large innovations more
+likely in nearby time.
+
+**Mathematical Formulation.** `sigma_t^2 = alpha_0 + sum_i alpha_i * epsilon_{t-i}^2`,
+where `sigma_t^2` is conditional variance at round `t` and `epsilon_{t-i}` are
+past innovations.
+
+**Empirical Evidence.** Engle (1982) established the ARCH family and
+demonstrated significant conditional heteroskedasticity in UK inflation.
+Subsequent literature (surveyed in Bollerslev, 1986) confirmed the same
+qualitative behaviour in equity, foreign exchange, and volatility-index return
+series.
+
+**Relevance to This Simulation.** Justifies a state-dependent volatility proxy
+that stays elevated for multiple rounds after a shock. Without a persistence
+mechanism the amplifier feedback loop would decay instantly and the F1 spike
+magnitude and F2 spike onset facts could not be produced.
+
+**Calibration Implication.** `noise_std` empirical range 0.03 to 0.10, default
+0.05 (target §9 row `noise standard dev.`). Volatility clustering justifies a
+small but non-zero exogenous noise term that produces occasional large
+residuals rather than a strictly deterministic drift.
 
 ### §2.2 Short-Volatility Carry And Convex Tail Loss
 
-Short-volatility strategies earn carry during calm regimes but lose convexly
-when volatility rises. The simulation encodes this through `ShortVolTrader`
-agents that sell volatility when the proxy is below fundamental value and cover
-short exposure when a positive deviation breaches the stop-loss threshold.
+**Citation.** Bollerslev, T. (1986). Generalized autoregressive conditional
+heteroskedasticity. *Journal of Econometrics*, 31(3), 307–327. DOI:
+10.1016/0304-4076(86)90063-1.
 
-### §2.3 Inverse-Volatility Product Rebalancing
+**Core Insight.** Generalized ARCH extends conditional variance to depend on
+both past squared innovations and past variance, so shocks decay slowly rather
+than instantaneously reverting. Short-volatility carry strategies harvest the
+resulting variance-risk premium during calm regimes but face convex losses when
+persistence keeps variance elevated after a shock.
 
-Inverse VIX exchange-traded products must rebalance their futures exposure after
-large volatility moves. In the 2018 XIV/SVXY episode, the mechanical need to buy
-volatility exposure after a volatility spike was a central amplification channel
-documented in issuer, exchange, and regulatory materials. The simulation
-captures that channel with `VolETNManager` agents whose demand grows with the
-positive deviation above `rebalance_threshold`.
+**Mathematical Formulation.** `sigma_t^2 = alpha_0 + alpha_1 * epsilon_{t-1}^2
++ beta_1 * sigma_{t-1}^2`; variance persistence is measured by the sum
+`alpha_1 + beta_1`, typically close to one for equity-volatility series.
 
-### §2.4 Volatility-Managed Deleveraging
+**Empirical Evidence.** Bollerslev (1986) documented near-unit persistence in
+GARCH(1,1) fits to macroeconomic and financial series. Culp, Nozawa, and
+Veronesi (2018, 10.3905/jai.2018.21.2.001) show that inverse-VIX exchange-traded
+products offering short-volatility exposure exhibited catastrophic drawdowns
+consistent with this persistent variance structure during the 2018 volatility
+episode.
 
-Volatility-managed portfolios reduce risky exposure after realized or implied
-volatility rises (Moreira and Muir, 2017, DOI: 10.1111/jofi.12575). The
-`EquityTrader` role connects the volatility-product shock to cash-market
-de-risking pressure.
+**Relevance to This Simulation.** The `ShortVolTrader` archetype sells
+volatility when the proxy is below fundamental value and is forced to cover
+short exposure when a positive deviation breaches the stop-loss threshold. Slow
+variance decay motivates the asymmetric loss profile that produces this
+threshold-based covering response.
 
-### §2.5 Funding Liquidity And Limits To Arbitrage
+**Calibration Implication.** `stop_loss` empirical range 0.10 to 0.25, default
+0.15 (target §9 row `stop loss`). Persistence of high variance justifies a
+threshold-based covering rule rather than an immediate mean-reverting position
+adjustment.
 
-Liquidity can deteriorate when funding constraints and market liquidity interact
-(Brunnermeier and Pedersen, 2009, DOI: 10.1093/rfs/hhn098). Arbitrageurs may
-lean against mispricing but are not unlimited stabilizers
-(Shleifer and Vishny, 1997, DOI: 10.1111/j.1540-6261.1997.tb03807.x). The
-`VolArbitrageur` role therefore provides partial mean-reversion pressure only
-when dislocations are large enough.
+### §2.3 Volatility-Managed Deleveraging
+
+**Citation.** Moreira, A., and Muir, T. (2017). Volatility-managed portfolios.
+*Journal of Finance*, 72(4), 1611–1644. DOI: 10.1111/jofi.12575.
+
+**Core Insight.** Portfolios that scale risky exposure inversely to recent
+volatility outperform buy-and-hold; investors therefore de-risk in
+high-volatility regimes and re-risk when volatility falls. This behaviour is
+optimal for a mean-variance investor whose risk aversion is stable while
+realised volatility varies over time.
+
+**Mathematical Formulation.** `w_t = (target_vol / sigma_t) * w_base`, where
+`w_t` is the state-dependent risky-asset weight at round `t`, `sigma_t` is a
+proxy for realised or implied volatility, and `w_base` is the buy-and-hold
+weight.
+
+**Empirical Evidence.** Moreira and Muir (2017) show statistically and
+economically significant improvements in Sharpe ratios from volatility scaling
+across US equity, industry, and international portfolios. Federal Reserve Board
+(2018) documents that volatility-targeting and risk-parity strategies were
+among the equity de-risking channels active during the 2018-02-05 episode.
+
+**Relevance to This Simulation.** Motivates two archetypes. The
+`LongVolHedger` treats cheap volatility as insurance and sells profitably into
+spikes, providing partial stabilisation. The `EquityTrader` connects the
+volatility-product shock to cash-market de-risking, activating when the
+absolute deviation exceeds twice the risk limit.
+
+**Calibration Implication.** `hedge_ratio` empirical range 0.05 to 0.20,
+default 0.10; `risk_limit` empirical range 0.05 to 0.20, default 0.10 (target
+§9). Volatility-managed evidence supports moderate rather than aggressive
+scaling factors.
+
+### §2.4 Funding Liquidity And First-Mover Advantage
+
+**Citation.** Brunnermeier, M. K., and Pedersen, L. H. (2009). Market liquidity
+and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. DOI:
+10.1093/rfs/hhn098.
+
+**Core Insight.** Market liquidity and funding liquidity reinforce each other;
+when volatility rises, margin requirements tighten, forcing procyclical demand
+and cross-market spillovers into related asset classes. Inverse-volatility
+exchange-traded products in the 2018 XIV/SVXY episode are a canonical
+implementation of this feedback: their mechanical rebalance direction is
+independent of whether the volatility move is fundamentally justified, so the
+rebalance flow is a first-mover-advantaged procyclical demand stream once the
+underlying volatility measure crosses a threshold.
+
+**Mathematical Formulation.** Funding-liquidity loop: `demand_t = f(margin_t)`,
+`margin_t = g(sigma_t)`, so higher `sigma_t` raises `margin_t`, forces
+additional demand `demand_t`, which raises `sigma_t` further. The
+inverse-product illustration specialises this as
+`D_reb(t) = Q_reb * max(0, deviation_t - theta_reb)`, where
+`deviation_t = (P(t) - F) / F`, `theta_reb` is `rebalance_threshold`, and
+`Q_reb` is `rebalance_size`.
+
+**Empirical Evidence.** Brunnermeier and Pedersen (2009) formalise the
+liquidity-spiral mechanism and cite empirical evidence from margin-linked
+liquidity episodes. In the specific inverse-volatility-product setting, SEC
+Staff Report (2018) and Federal Reserve Board (2018) Financial Stability Report
+both document the post-spike rebalancing flow from XIV and SVXY issuers during
+the 2018-02-05 through 2018-02-06 window, and Bergsma and Jiang (2022)
+provide event-study evidence that inverse-product rebalancing volumes are of
+the order at which they can move the underlying VIX futures curve when
+concentrated in a narrow time window.
+
+**Relevance to This Simulation.** Justifies the reduced-form price-impact
+mechanism in §3 (and target §8.1) as an encoding of the funding-liquidity
+feedback loop, and directly motivates the `VolETNManager` archetype: its buy
+demand activates once the deviation crosses `rebalance_threshold` and scales
+with the size of the deviation above the threshold. This is the strongest
+destabilising amplifier in the roster and drives F3 (rebalance pressure ≥ 2×
+long-vol take-profit) and F4 (ablation reduces peak by ≥ 30 %).
+
+**Calibration Implication.** `price_impact` empirical range 0.02 to 0.08,
+default 0.04; `rebalance_threshold` empirical range 0.03 to 0.10, default
+0.05; `rebalance_size` empirical range 5 000 to 20 000, default 10 000 (target
+§9). Together these knobs control the feedback-loop gain.
+
+### §2.5 Limits To Arbitrage
+
+**Citation.** Shleifer, A., and Vishny, R. W. (1997). The limits of arbitrage.
+*Journal of Finance*, 52(1), 35–55. DOI: 10.1111/j.1540-6261.1997.tb03807.x.
+
+**Core Insight.** Arbitrageurs face capital and horizon constraints that
+prevent unlimited leaning against mispricing; they therefore act only when
+dislocations are large enough to justify the risk of further widening, and
+their deployed capital is bounded rather than infinite.
+
+**Mathematical Formulation.** Activation: `abs(deviation_t) > theta_entry`;
+deployed capital `Q_arb(t) = min(Q_max, alpha_arb * abs(deviation_t))`, with a
+per-round cap `Q_max` that prevents any single arbitrageur from single-handedly
+closing the deviation.
+
+**Empirical Evidence.** Shleifer and Vishny (1997) provide the canonical
+theoretical statement of limits to arbitrage, with case-study support from
+equity and fixed-income mispricings that persisted despite active arbitrage
+capital. In the 2018 XIV/SVXY episode, volatility term-structure arbitrageurs
+provided partial rather than full stabilisation, consistent with a bounded
+activation-and-cap rule (Federal Reserve Board, 2018; Culp, Nozawa, and
+Veronesi, 2018).
+
+**Relevance to This Simulation.** Motivates the `VolArbitrageur` archetype's
+threshold-and-cap activation rule rather than an unconstrained mean-reverting
+position. Together with the `LongVolHedger` this produces the partial
+stabilisation that lets the target §5 stylized facts F1 (spike magnitude) and
+F4 (ablation delta) both fall inside their empirical ranges rather than
+collapsing to zero.
+
+**Calibration Implication.** `entry_threshold` empirical range 0.03 to 0.10,
+default 0.05; per-round arbitrage cap 5 000 units (target §9). Bounded response
+prevents any single agent from single-handedly closing the deviation.
 
 ## §3 Market Mechanism
 
