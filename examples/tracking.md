@@ -6,8 +6,8 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 
 | #  | Scenario               | Status | Modified By | Date       | Executed Variants |
 |----|------------------------|--------|-------------|------------|-------------------|
-| 1  | AnchoringEffect        | ⬜      | Sijia       | Jul 1 2026 | —                 |
-| 2  | ArchegosCollapse       | ⬜      | Sijia       | Jul 1 2026 | —                 |
+| 1  | AnchoringEffect        | 🟢     | Sijia       | Jul 1 2026 | —                 |
+| 2  | ArchegosCollapse       | 🟡     | Sijia       | Jul 1 2026 | —                 |
 | 3  | AsianFinancialCrisis   | ⬜      | —           | —          | —                 |
 | 4  | AssetBubble            | ⬜      | —           | —          | —                 |
 | 5  | AvailabilityBias       | ⬜      | —           | —          | —                 |
