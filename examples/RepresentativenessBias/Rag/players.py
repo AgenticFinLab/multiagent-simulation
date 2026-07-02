@@ -15,7 +15,7 @@ from masim.knowledge import (
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from .prompts import (
     RAG_USER_TEMPLATE,

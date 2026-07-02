@@ -34,6 +34,11 @@ from masim.utils.history import (
     HistoryBuffer,
     create_history_buffer,
 )
+from masim.utils.llm_utils import (
+    is_retryable_llm_error,
+    parse_llm_response_with_thinking,
+    parse_llm_quantity_response_with_thinking,
+)
 
 __all__ = [
     # Config utilities
@@ -58,4 +63,8 @@ __all__ = [
     # History utilities
     "HistoryBuffer",
     "create_history_buffer",
+    # LLM parsing utilities
+    "is_retryable_llm_error",
+    "parse_llm_response_with_thinking",
+    "parse_llm_quantity_response_with_thinking",
 ]

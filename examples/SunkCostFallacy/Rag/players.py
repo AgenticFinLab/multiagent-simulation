@@ -30,7 +30,7 @@ from masim.knowledge import (
 from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     RAGLLM_SUNK_COST_HOLDER_SYS,
     RAGLLM_COMMITMENT_ESCALATOR_SYS,

@@ -31,7 +31,7 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_quantity_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_quantity_response_with_thinking
 
 from .prompts import (
     RAGLLM_CONVERGENCE_TRADER_SYS,

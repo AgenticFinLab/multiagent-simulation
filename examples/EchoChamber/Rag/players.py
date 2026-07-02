@@ -20,7 +20,7 @@ from lmbase.inference.base import InferInput
 import json as _json
 import re as _re
 
-from examples.llm_utils import (
+from masim.utils.llm_utils import (
     is_retryable_llm_error,
     parse_llm_response_with_thinking,
 )  # noqa: F401 (keep for reference)

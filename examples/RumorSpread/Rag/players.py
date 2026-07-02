@@ -62,7 +62,7 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import is_retryable_llm_error
+from masim.utils.llm_utils import is_retryable_llm_error
 from examples.RumorSpread.llm_parser import parse_rumor_response
 
 from .prompts import (

@@ -57,7 +57,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("FlashCrashRuleLLM")
 
@@ -346,7 +346,7 @@ Respond with ONLY valid JSON:
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections.
 
-        Delegates to shared utility in examples/llm_utils.py
+        Delegates to shared utility in masim.utils.llm_utils.py
         """
         decision = parse_llm_response_with_thinking(response_text)
         if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:

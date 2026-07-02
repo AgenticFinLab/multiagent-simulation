@@ -29,7 +29,7 @@ from examples.LUNACollapse.Rule.players import (  # noqa: F401
     _build_order,
     _require_positive,
 )
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("LUNACollapse.Rag")
 

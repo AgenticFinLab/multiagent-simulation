@@ -14,7 +14,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.GFC2008.Rule.players import Market, _build_order
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.GFC2008.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("GFC2008.RuleLLM")

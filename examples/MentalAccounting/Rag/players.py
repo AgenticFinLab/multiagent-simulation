@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.MentalAccounting.Rag.prompts import (
     RULELLM_MENTAL_ACCOUNTANT_SYS,
     RULELLM_HOUSE_MONEY_SYS,

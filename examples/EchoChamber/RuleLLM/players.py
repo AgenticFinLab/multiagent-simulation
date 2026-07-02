@@ -56,7 +56,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("EchoChamberRuleLLM")
 

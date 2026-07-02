@@ -19,7 +19,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.BlackMonday1987.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)

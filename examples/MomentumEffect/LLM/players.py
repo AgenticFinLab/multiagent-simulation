@@ -35,7 +35,7 @@ from .prompts import (
     LLM_FUNDAMENTAL_SYS,
     LLM_USER_TEMPLATE,
 )
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("MomentumEffectLLM")
 

@@ -30,7 +30,7 @@ from .prompts import (
     RULELLM_NOISE_TRADER_SYS,
     RAG_USER_TEMPLATE,
 )
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
     Market,
     _build_order,

@@ -17,7 +17,7 @@ from masim.player.base import Action
 from masim.player.general import GeneralPlayer
 
 from examples.HerdingInformation.Rule.players import Market  # noqa: F401
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.HerdingInformation.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("HerdingInformation.LLM")

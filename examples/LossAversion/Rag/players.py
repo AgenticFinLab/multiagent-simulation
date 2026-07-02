@@ -29,7 +29,7 @@ from masim.player.general import GeneralPlayer
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.LossAversion.RuleLLM.prompts import (
     RULELLM_LOSS_AVERSE_PROMPT,
     RULELLM_BREAK_EVEN_PROMPT,

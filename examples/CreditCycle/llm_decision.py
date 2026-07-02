@@ -7,7 +7,7 @@ from typing import Any, Dict, Mapping, Optional
 
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger(__name__)
 

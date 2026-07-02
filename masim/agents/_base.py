@@ -257,7 +257,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
     The user template is formatted against :class:`StandardMarketState` every
     round. The LLM response is parsed with
-    :func:`examples.llm_utils.parse_llm_response_with_thinking`. On any LLM
+    :func:`masim.utils.llm_utils.parse_llm_response_with_thinking`. On any LLM
     failure the agent degrades gracefully to a ``hold`` order so a single
     network blip does not abort the whole simulation.
 
@@ -438,7 +438,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
     def _run_llm(self, state: StandardMarketState) -> Dict[str, Any]:
         from lmbase.inference.base import InferInput  # type: ignore
-        from examples.llm_utils import parse_llm_response_with_thinking
+        from masim.utils.llm_utils import parse_llm_response_with_thinking
 
         sys_ref = self.state.custom_state.get("sys_message_ref", "")
         user_ref = self.state.custom_state.get("user_message_ref", "")

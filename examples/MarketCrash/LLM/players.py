@@ -39,7 +39,7 @@ from masim.utils.history import HistoryBuffer
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.MarketCrash.LLM.prompts import (
     LLM_PANIC_SELLER_SYS,
     LLM_RISK_PARITY_SYS,

@@ -52,7 +52,7 @@ _DECISION_PARAM_SKIP_KEYS = {
     "llm",
 }
 
-from examples.llm_utils import (
+from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     build_messages,
     call_llm,

@@ -14,7 +14,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.FramingEffect.Rule.players import Market
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.FramingEffect.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("FramingEffect.LLM")

@@ -20,7 +20,7 @@ from examples.HindsightBias.RuleLLM.prompts import (
     RULELLM_USER_TEMPLATE,
 )
 from examples.HindsightBias.Rule.players import Market
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("HindsightBias.RuleLLM")
 

@@ -53,7 +53,7 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from .prompts import (
     RAGLLM_FUNDAMENTALIST_SYS,
     RAGLLM_TREND_FOLLOWER_SYS,

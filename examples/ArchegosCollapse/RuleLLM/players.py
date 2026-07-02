@@ -24,7 +24,7 @@ from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.ArchegosCollapse.Rule.players import Market
 
 logger = logging.getLogger("ArchegosCollapse.RuleLLM")
