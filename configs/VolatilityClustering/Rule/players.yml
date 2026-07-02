@@ -28,16 +28,16 @@ market:
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/Rule/records"
       # Price dynamics
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
+      fundamental_value: 100.0  # Source: target §9 fundamental_value row; normalization
+      initial_price: 100.0  # Source: target §9 initial_price row; normalization
+      price_impact: 0.05  # Source: target §9 price_impact row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
+      mean_reversion: 0.02  # Source: target §9 mean_reversion row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
       # GARCH parameters
-      garch_omega: 0.0001
-      garch_alpha: 0.15
-      garch_beta: 0.80
-      min_volatility: 0.5
-      max_volatility: 10.0
+      garch_omega: 0.0001  # Source: target §9 GARCH_omega row; Engle (1982) 10.2307/1912773
+      garch_alpha: 0.15  # Source: target §9 GARCH_alpha row; Engle (1982) 10.2307/1912773; Bollerslev (1986) 10.1016/0304-4076(86)90063-1
+      garch_beta: 0.80  # Source: target §9 GARCH_beta row; Bollerslev (1986) 10.1016/0304-4076(86)90063-1
+      min_volatility: 0.5  # Source: target §9 min_volatility row; numerical stability bound
+      max_volatility: 10.0  # Source: target §9 max_volatility row; numerical stability bound
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -57,14 +57,14 @@ fundamentalist:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
       custom_state_hot_limit: 3
       # Fundamentalist specific
-      trade_frequency: 3
-      value_sensitivity: 0.5
-      base_position_size: 20.0
-      value_noise_std: 2.0
+      trade_frequency: 3  # Source: target §9 trade_frequency row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
+      value_sensitivity: 0.5  # Source: target §9 value_sensitivity row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
+      base_position_size: 20.0  # Source: target §9 base_position_size row; calibrated
+      value_noise_std: 2.0  # Source: target §9 value_noise_std row; estimation noise
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -83,15 +83,15 @@ trend_follower:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
       custom_state_hot_limit: 3
       # Trend follower specific
-      lookback_window: 3
-      base_position_size: 30.0
-      volatility_sensitivity: 0.8
-      baseline_volatility: 1.0
-      trend_threshold: 0.005
+      lookback_window: 3  # Source: target §9 lookback_window(TF) row; Moskowitz et al. (2012) 10.1016/j.jfineco.2011.11.003
+      base_position_size: 30.0  # Source: target §9 base_position_size row; calibrated
+      volatility_sensitivity: 0.8  # Source: target §9 volatility_sensitivity row; Moskowitz et al. (2012) 10.1016/j.jfineco.2011.11.003
+      baseline_volatility: 1.0  # Source: target §9 baseline_volatility row; calibration reference
+      trend_threshold: 0.005  # Source: target §9 trend_threshold row; Moskowitz et al. (2012) 10.1016/j.jfineco.2011.11.003
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -110,12 +110,12 @@ noise_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
       custom_state_hot_limit: 3
       # Noise trader specific
-      position_volatility: 15.0
-      mean_reversion_speed: 0.1
+      position_volatility: 15.0  # Source: target §9 position_volatility row; De Long et al. (1990) 10.1086/261703
+      mean_reversion_speed: 0.1  # Source: target §9 mean_reversion_speed row; De Long et al. (1990) 10.1086/261703
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -133,13 +133,13 @@ slow_adapter:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
       custom_state_hot_limit: 3
       # Slow adapter specific
-      lookback_window: 10
-      update_weight: 0.1
-      base_position_size: 10.0
+      lookback_window: 10  # Source: target §9 lookback_window(SA) row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
+      update_weight: 0.1  # Source: target §9 update_weight row; adaptive expectations literature
+      base_position_size: 10.0  # Source: target §9 base_position_size row; calibrated
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -157,12 +157,12 @@ volatility_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
       custom_state_hot_limit: 3
       # Volatility trader specific
-      vol_lookback: 5
-      high_vol_threshold: 1.5
-      low_vol_threshold: 0.7
-      base_position_size: 15.0
+      vol_lookback: 5  # Source: target §9 vol_lookback row; Engle (1982) 10.2307/1912773
+      high_vol_threshold: 1.5  # Source: target §9 high_vol_threshold row; Moreira and Muir (2017) 10.1111/jofi.12575
+      low_vol_threshold: 0.7  # Source: target §9 low_vol_threshold row; Moreira and Muir (2017) 10.1111/jofi.12575
+      base_position_size: 15.0  # Source: target §9 base_position_size row; calibrated
   persona: !include persona.yml
