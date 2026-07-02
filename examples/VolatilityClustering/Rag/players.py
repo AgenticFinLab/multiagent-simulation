@@ -74,6 +74,8 @@ from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("VolatilityClusteringRag")
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 # =============================================================================
 # Market — Rule-Based Coordinator (identical to VolatilityClusteringRuleLLM.Market)
@@ -613,7 +615,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         portfolio_value = cash + position * market_data["price"]
