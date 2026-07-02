@@ -48,6 +48,9 @@ market:
       fundamental_value: 100.0  # Source: simulation-bases.md §3.1 and §6; normalized fundamental anchor
       initial_price: 100.0  # Source: simulation-bases.md §3.1 and §6; starts at fundamental value
       price_impact: 0.03  # Source: Hasbrouck (1991), J. Finance; simulation-bases.md §3.1/§6
+      demand_scale: 10.0  # Source: normalized-share scaling for λ×NetDemand; keeps §6 price-impact range comparable to large notional positions
+      initial_shock_round: 1  # Source: target §2.1 ViacomCBS offering / reference-asset drop trigger
+      initial_shock_quantity: 5200.0  # Source: target §2.1 initial forced reference-asset decline calibrated to cross margin threshold
       mean_reversion: 0.01  # Source: French & Roll (1986), JFE; simulation-bases.md §3.1/§6
       noise_std: 0.015  # Source: Roll (1984), J. Finance; simulation-bases.md §3.1/§6
       custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache

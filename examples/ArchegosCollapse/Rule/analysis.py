@@ -13,14 +13,50 @@ Usage:
 import argparse
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
+
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from examples.standard_rule_analysis import _market_data_from_payload, _market_players
+
+
+def _market_players(results) -> Dict[str, Any]:
+    """Return coordinator players that may carry market batch stores."""
+    candidates = results.players_by_role("coordinator")
+    if candidates:
+        return candidates
+    candidates = results.players_by_role("environment")
+    if candidates:
+        return candidates
+    return {
+        pid: player
+        for pid, player in results.players.items()
+        if "market" in pid.lower() or "environment" in pid.lower()
+    }
+
+
+def _market_data_from_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract market-state dict from known MASim turn payload shapes."""
+    if not isinstance(payload, dict):
+        raise ValueError("Market payload is not a dictionary.")
+    for key in ("market_data", "environment_data", "state", "observation"):
+        value = payload.get(key)
+        if isinstance(value, dict):
+            return value
+    if {"price", "fundamental"}.intersection(payload):
+        return payload
+    decision_payload = payload.get("decision_payload")
+    if isinstance(decision_payload, dict):
+        return _market_data_from_payload(decision_payload)
+    return {}
 
 # ---------------------------------------------------------------------------
 # Data loading

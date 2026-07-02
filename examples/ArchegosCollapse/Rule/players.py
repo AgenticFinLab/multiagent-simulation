@@ -54,8 +54,15 @@ class Market(GeneralPlayer):
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["fundamental_value"]
             self.state.custom_state["price_impact"] = extras["price_impact"]
+            self.state.custom_state["demand_scale"] = extras["demand_scale"]
             self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
             self.state.custom_state["noise_std"] = extras["noise_std"]
+            self.state.custom_state["initial_shock_round"] = extras[
+                "initial_shock_round"
+            ]
+            self.state.custom_state["initial_shock_quantity"] = extras[
+                "initial_shock_quantity"
+            ]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, "market", "price"),
                 entry_limit=hot_limit,
@@ -69,17 +76,24 @@ class Market(GeneralPlayer):
         current_price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         price_impact = self.state.custom_state["price_impact"]
+        demand_scale = self.state.custom_state["demand_scale"]
         mean_reversion = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
+        initial_shock_round = self.state.custom_state["initial_shock_round"]
+        initial_shock_quantity = self.state.custom_state["initial_shock_quantity"]
+        if demand_scale <= 0:
+            raise ValueError("demand_scale must be positive")
 
         buy_qty = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_qty = sum(o["quantity"] for o in orders if o["action"] == "sell")
+        if round_num == initial_shock_round:
+            sell_qty += initial_shock_quantity
         net_demand = buy_qty - sell_qty
 
         noise = random.gauss(0, noise_std)
         new_price = (
             current_price
-            + price_impact * net_demand
+            + price_impact * net_demand / demand_scale
             + mean_reversion * (fundamental - current_price)
             + noise
         )
