@@ -17,17 +17,17 @@ market:
     steps_per_turn: 1
     group_tags: [market]
     extras:
-      record_path: "EXPERIMENT/TulipMania/Rag/records/market"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.008
-      noise_std: 0.015
+      record_path: "EXPERIMENT/TulipMania/Rag/records/market"  # Source: target §10.1 Rag variant records path convention
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; normalization (simulation-bases.md §6)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; normalization, equal to initial_price (simulation-bases.md §6)
+      price_impact: 0.02  # Source: target §9 market.extras.price_impact; Shiller (2003), 10.1257/089533003321164967
+      mean_reversion: 0.008  # Source: target §9 market.extras.mean_reversion; Garber (1990), 10.1257/jep.4.2.35
+      noise_std: 0.015  # Source: target §9 market.extras.noise_std; Rule/players.py Market.perceive
 
 trendchaser:
   name: "TrendChaser"
   class: "examples.TulipMania.Rag.players:RagLLMTrendChaser"
-  num_instances: 4
+  num_instances: 4  # Source: target §9 trendchaser.num_instances; §7 Agent Roster
   persona: !include ../Rag/persona.yml
   config:
     identity: "trendchaser"
@@ -35,15 +35,16 @@ trendchaser:
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/TulipMania/Rag/records/trendchaser"
-      initial_cash: 1000000.0
-      initial_position: 300
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trend_threshold: 0.01
-      chase_size: 400
-      custom_state_hot_limit: 3
-      private_knowledge:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/trendchaser"  # Source: target §10.1 Rag variant records path convention
+      initial_cash: 1000000.0  # Source: target §9 trendchaser.extras.initial_cash; normalization
+      initial_position: 300  # Source: target §9 trendchaser.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      trend_threshold: 0.01  # Source: target §9 legacy-extras footnote (retained; runtime uses 0.02 per Shiller 2003, 10.1257/089533003321164967)
+      chase_size: 400  # Source: target §9 legacy-extras footnote (retained; runtime uses cap 800 / slope 5000)
+      agent_type: "trend_chaser"  # Source: target §7 Agent Roster + agent-design-skill §3.6.0 I/O Contract
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
+      private_knowledge:  # Source: target §10.1 Rag variant declaration; §6 historical corpus
         from_global_resources: ["MinerU_processed"]
         rag:
           from_global_index_dir: ["rag_index"]
@@ -54,7 +55,7 @@ trendchaser:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 3
-      llm:
+      llm:  # Source: target §10.1 Rag variant declaration
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_TREND_CHASER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -65,7 +66,7 @@ trendchaser:
 socialprooffollower:
   name: "SocialProofFollower"
   class: "examples.TulipMania.Rag.players:RagLLMSocialProofFollower"
-  num_instances: 3
+  num_instances: 3  # Source: target §9 socialprooffollower.num_instances; §7 Agent Roster
   persona: !include ../Rag/persona.yml
   config:
     identity: "socialprooffollower"
@@ -73,15 +74,16 @@ socialprooffollower:
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/TulipMania/Rag/records/socialprooffollower"
-      initial_cash: 800000.0
-      initial_position: 400
-      initial_price: 100.0
-      fundamental_value: 100.0
-      crowd_threshold: 0.3
-      follow_size: 350
-      custom_state_hot_limit: 3
-      private_knowledge:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/socialprooffollower"  # Source: target §10.1 Rag variant records path convention
+      initial_cash: 800000.0  # Source: target §9 socialprooffollower.extras.initial_cash; normalization
+      initial_position: 400  # Source: target §9 socialprooffollower.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      crowd_threshold: 0.3  # Source: target §9 legacy-extras footnote (retained; runtime uses 0.02 per Bikhchandani, Hirshleifer, and Welch 1992, 10.1086/261849)
+      follow_size: 350  # Source: target §9 legacy-extras footnote (retained; runtime uses cap 800 / slope 5000)
+      agent_type: "social_proof_follower"  # Source: target §7 Agent Roster + agent-design-skill §3.6.0 I/O Contract
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
+      private_knowledge:  # Source: target §10.1 Rag variant declaration; §6 historical corpus
         from_global_resources: ["MinerU_processed"]
         rag:
           from_global_index_dir: ["rag_index"]
@@ -92,7 +94,7 @@ socialprooffollower:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 3
-      llm:
+      llm:  # Source: target §10.1 Rag variant declaration
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_SOCIAL_PROOF_FOLLOWER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -103,7 +105,7 @@ socialprooffollower:
 intrinsicvaluetrader:
   name: "IntrinsicValueTrader"
   class: "examples.TulipMania.Rag.players:RagLLMIntrinsicValueTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 intrinsicvaluetrader.num_instances; §7 Agent Roster
   persona: !include ../Rag/persona.yml
   config:
     identity: "intrinsicvaluetrader"
@@ -111,15 +113,16 @@ intrinsicvaluetrader:
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/TulipMania/Rag/records/intrinsicvaluetrader"
-      initial_cash: 1500000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      overvalue_threshold: 0.2
-      position_size: 350
-      custom_state_hot_limit: 3
-      private_knowledge:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/intrinsicvaluetrader"  # Source: target §10.1 Rag variant records path convention
+      initial_cash: 1500000.0  # Source: target §9 intrinsicvaluetrader.extras.initial_cash; normalization
+      initial_position: 600  # Source: target §9 intrinsicvaluetrader.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      overvalue_threshold: 0.2  # Source: target §9 legacy-extras footnote (retained; runtime uses 0.05 per Garber 1990, 10.1257/jep.4.2.35)
+      position_size: 350  # Source: target §9 legacy-extras footnote (retained; runtime uses cap 500 / slope 3000)
+      agent_type: "intrinsic_value_trader"  # Source: target §7 Agent Roster + agent-design-skill §3.6.0 I/O Contract
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
+      private_knowledge:  # Source: target §10.1 Rag variant declaration; §6 historical corpus
         from_global_resources: ["MinerU_processed"]
         rag:
           from_global_index_dir: ["rag_index"]
@@ -130,7 +133,7 @@ intrinsicvaluetrader:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 3
-      llm:
+      llm:  # Source: target §10.1 Rag variant declaration
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_INTRINSIC_VALUE_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -141,7 +144,7 @@ intrinsicvaluetrader:
 earlyexittrader:
   name: "EarlyExitTrader"
   class: "examples.TulipMania.Rag.players:RagLLMEarlyExitTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 earlyexittrader.num_instances; §7 Agent Roster
   persona: !include ../Rag/persona.yml
   config:
     identity: "earlyexittrader"
@@ -149,15 +152,16 @@ earlyexittrader:
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/TulipMania/Rag/records/earlyexittrader"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      exit_threshold: 0.4
-      exit_size: 400
-      custom_state_hot_limit: 3
-      private_knowledge:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/earlyexittrader"  # Source: target §10.1 Rag variant records path convention
+      initial_cash: 1200000.0  # Source: target §9 earlyexittrader.extras.initial_cash; normalization
+      initial_position: 500  # Source: target §9 earlyexittrader.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      exit_threshold: 0.4  # Source: target §9 legacy-extras footnote (retained; runtime uses 0.05 per Kindleberger and Aliber 2005, 10.1057/9780230628045)
+      exit_size: 400  # Source: target §9 legacy-extras footnote (retained; runtime uses cap 500 / slope 3000)
+      agent_type: "early_exit_trader"  # Source: target §7 Agent Roster + agent-design-skill §3.6.0 I/O Contract
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
+      private_knowledge:  # Source: target §10.1 Rag variant declaration; §6 historical corpus
         from_global_resources: ["MinerU_processed"]
         rag:
           from_global_index_dir: ["rag_index"]
@@ -168,7 +172,7 @@ earlyexittrader:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 3
-      llm:
+      llm:  # Source: target §10.1 Rag variant declaration
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_EARLY_EXIT_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -179,7 +183,7 @@ earlyexittrader:
 noisetrader:
   name: "NoiseTrader"
   class: "examples.TulipMania.Rag.players:RagLLMNoiseTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 noisetrader.num_instances; §7 Agent Roster
   persona: !include ../Rag/persona.yml
   config:
     identity: "noisetrader"
@@ -187,15 +191,16 @@ noisetrader:
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/TulipMania/Rag/records/noisetrader"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
-      private_knowledge:
+      record_path: "EXPERIMENT/TulipMania/Rag/records/noisetrader"  # Source: target §10.1 Rag variant records path convention
+      initial_cash: 500000.0  # Source: target §9 noisetrader.extras.initial_cash; normalization
+      initial_position: 200  # Source: target §9 noisetrader.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      trade_probability: 0.3  # Source: target §9 NoiseTrader trade probability row; simulation-bases.md §4.5
+      noise_size: 100  # Source: target §9 NoiseTrader min order size row (lower bound of uniform draw 100–500); simulation-bases.md §4.5
+      agent_type: "noise_trader"  # Source: target §7 Agent Roster + agent-design-skill §3.6.0 I/O Contract
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
+      private_knowledge:  # Source: target §10.1 Rag variant declaration; §6 historical corpus
         from_global_resources: ["MinerU_processed"]
         rag:
           from_global_index_dir: ["rag_index"]
@@ -206,7 +211,7 @@ noisetrader:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 3
-      llm:
+      llm:  # Source: target §10.1 Rag variant declaration
         sys_message: "examples.TulipMania.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.TulipMania.Rag.prompts:RAG_USER_TEMPLATE"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
