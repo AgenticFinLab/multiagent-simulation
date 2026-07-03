@@ -1,0 +1,170 @@
+# SorosPound Scenario Target
+
+## §1 Meta
+
+| Field         | Content                                                                                                                                                                                                                                                                             |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name          | SorosPound                                                                                                                                                                                                                                                                          |
+| Domain        | finance                                                                                                                                                                                                                                                                             |
+| Requested By  | Sijia Chen                                                                                                                                                                                                                                                                          |
+| Produced By   | define-simulation-scenario-skill.md v1.2.0 (invoking agent: QoderWork)                                                                                                                                                                                                              |
+| Created       | 2026-07-03                                                                                                                                                                                                                                                                          |
+| Pipeline      | masim/skills/polish-simulation-pipeline.md                                                                                                                                                                                                                                          |
+| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                                                                                                                                                             |
+| Status        | draft                                                                                                                                                                                                                                                                               |
+| CHANGELOG     | 2026-07-03  Produced by define-simulation-scenario-skill.md v1.2.0 under polish-simulation-pipeline.md Step 0 Case B (Status: draft). Source of §2–§10 content: existing downstream artefacts under `examples/SorosPound/` (simulation-bases.md, analysis-bases.md, Rule/players.py, configs/SorosPound/Rule/players.yml). |
+
+## §2 Phenomenon Statement
+
+### §2.1 Trigger
+
+A fixed exchange-rate peg is defended at a level above its policy-implied fundamental, so informed macro speculators identify the misalignment and initiate a directional attack once the market-price deviation exceeds their action threshold. The archetypal triggers are the 1992 Black Wednesday sterling exit from the European Exchange Rate Mechanism (Buiter, Corsetti, and Pesenti 1998), the accompanying 1992–1993 ERM turbulence, and the earlier balance-of-payments crisis mechanics formalised by Krugman (1979) and Flood and Garber (1984).
+
+### §2.2 Population
+
+Five investor archetypes populate the currency proxy market: `MacroHedgeFund` (population 2) attacks the overvalued peg once `|deviation| > 0.02`; `PegDefender` (population 1) intervenes stabilisingly only once `|deviation| > 0.05`; `ConvergenceTrader` (population 2) supplies random 30%-gate directional flow expecting the peg to hold; `OpportunisticTrader` (population 2) mirrors the macro attack once the same `|deviation| > 0.02` signal is visible; `NoiseTrader` (population 2) supplies mean-zero background liquidity via a 30% gate. A single `Market` coordinator implements the price-formation law with an intentionally overvalued peg (`peg_rate = 100.0`, `fundamental_value = 95.0`).
+
+### §2.3 Amplification
+
+Amplification is driven by the joint attack pressure of `MacroHedgeFund` and `OpportunisticTrader`: both activate at the same `|deviation| > 0.02` threshold and both sell when the proxy is above fundamental (positive net attack against an overvalued peg is expressed as *selling* toward the weaker anchor once deviation reaches the trigger). Because `PegDefender` requires a much larger `|deviation| > 0.05` before intervening and its size is capped at `min(500, int(|deviation| × 3000))` versus the attackers' `min(800, int(|deviation| × 5000))` per agent (×4 agents combined), a first-generation-style asymmetric attack develops.
+
+### §2.4 Collapse / Correction
+
+There is no discrete collapse — the reduced-form market updates price continuously via `P(t+1) = P(t) + λ × NetDemand + γ × (F − P(t)) + ε`. Correction is driven jointly by (a) the mean-reversion pull `γ × (F − P)` toward the weaker fundamental `F = 95.0` and (b) the offsetting intervention of `PegDefender` once deviation crosses its 0.05 threshold. The typical trajectory is a bounded downward drift of the proxy from the peg toward fundamental, with visible attack/defense volume separation over the 200-round horizon.
+
+## §3 Research Goals
+
+1. Reproduce the first-generation speculative-attack signature (attack volume from `MacroHedgeFund` + `OpportunisticTrader` measurably exceeds defense volume from `PegDefender`) with a quantitative acceptance range measurable from the standard investor-order log.
+2. Verify that the asymmetric threshold structure (attackers at 0.02, defender at 0.05) produces a visible peg-pressure pattern under a bounded 200-round experimental horizon.
+3. Quantify herding share (the fraction of attack-like flow contributed by `OpportunisticTrader` after visible deviation), providing the second-generation self-fulfilling signature.
+4. Compare Rule and LLM decision fidelity: verify whether persona-only LLM agents preserve, dampen, or exaggerate the Rule attack/defense asymmetry.
+5. Measure whether retrieved historical crisis evidence (ERM 1992, Krugman-style crises) shifts attack and defense behavior in the Rag variant, using `rag_stats.json` retrieval coverage as the observable proxy.
+
+## §4 Theoretical Anchors
+
+### §4.1 First-Generation Speculative Attack (Balance-of-Payments Crisis)
+
+- Primary citation: Krugman, P. (1979). "A model of balance-of-payments crises." *Journal of Money, Credit and Banking* 11(3), 311–325. DOI 10.2307/1991793.
+- Supporting citation: Flood, R. P., and Garber, P. M. (1984). "Collapsing exchange-rate regimes: Some linear examples." *Journal of International Economics* 17(1-2), 1–13. DOI 10.1016/0304-3932(84)90002-3.
+- Core mechanism: an inconsistency between the fixed exchange rate and the underlying policy/reserve position makes the peg vulnerable; informed speculators attack once the misalignment is large enough to justify a directional position.
+- Simulation mapping: `MacroHedgeFund` (`examples/SorosPound/Rule/players.py`) implements `act iff |deviation| > 0.02`; the sizing formula `Q = min(800, int(|deviation| × 5000))` bounds each attack order and enforces buy-if-above / sell-if-below toward the fundamental anchor.
+
+### §4.2 Second-Generation Self-Fulfilling Currency Crisis
+
+- Primary citation: Obstfeld, M. (1996). "Models of currency crises with self-fulfilling features." *European Economic Review* 40(3-5), 1037–1047. DOI 10.1016/0014-2921(95)00111-5.
+- Core mechanism: even a fundamentally defensible peg may break when private expectations, political costs, and policy credibility interact adversely; once an attack becomes visible, additional participants join, amplifying pressure to a self-fulfilling equilibrium.
+- Simulation mapping: `OpportunisticTrader` uses the same `|deviation| > 0.02` threshold and the same `min(800, int(|deviation| × 5000))` sizing as `MacroHedgeFund`, encoding the "join the visible attack" second-generation signature; it is not identical to the macro attacker in the simulation-bases §5 diversity axis because its config metadata (`attack_join_threshold`, `position_size`) is distinct.
+
+### §4.3 Peg Defense And Reserve Constraint
+
+- Primary citation: Obstfeld, M. (1996) [as §4.2, DOI 10.1016/0014-2921(95)00111-5]; Eichengreen, B., and Wyplosz, C. (1993). "The unstable EMS." *Brookings Papers on Economic Activity* 1993(1), 51–143. DOI 10.2307/2534598.
+- Core mechanism: central-bank intervention and interest-rate defense stabilise a peg but at rising cost; when the market pressure exceeds the credible defense capacity, the intervention becomes insufficient.
+- Simulation mapping: `PegDefender` implements `act iff |deviation| > 0.05` with `Q = min(500, int(|deviation| × 3000))`; the higher threshold and lower per-agent size cap (versus one attacker) plus the single-instance population make defense measurable and bounded.
+
+### §4.4 Convergence Trades Under Policy Risk
+
+- Primary citation: Fratzscher, M. (2003). "On currency crises and contagion." *International Journal of Finance and Economics* 8(2), 109–129. DOI 10.1002/ijfe.203; supporting: Eichengreen and Wyplosz (1993) DOI 10.2307/2534598 (ERM-specific evidence on peg-belief traders).
+- Core mechanism: convergence strategies invest under the assumption that policy commitment will restore the peg relationship; in a crisis, those positions can lose money or stop stabilising if credibility deteriorates.
+- Simulation mapping: `ConvergenceTrader` uses a random 30% trade gate and random 100–500 quantity with random direction, subject to cash/inventory constraints — a reduced form for the "policy-belief with random exposure sign" behaviour described in simulation-bases §4.3.
+
+### §4.5 Noise And Liquidity Trading
+
+- Primary citation: Black, F. (1986). "Noise." *Journal of Finance* 41(3), 529–543. DOI 10.1111/j.1540-6261.1986.tb04513.x.
+- Core mechanism: uninformed noise-trader flow provides background liquidity independent of valuation and prevents the price path from being purely deterministic; it introduces baseline variance without a directional information advantage.
+- Simulation mapping: `NoiseTrader` samples `Bernoulli(0.3)` (`trade_probability`) and, when active, submits a uniform-random `randint(100, 500)` order with random direction, capped by cash/position. `noise_size` in config is retained metadata; the actual quantity is drawn from `randint(100, 500)` per the retained rule formula.
+
+## §5 Stylized Facts
+
+| # | Fact                                                                                                                     | Acceptance range                                                                                                                                                    | Analysis metric                                                                                                                    |
+|---|--------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| F1 | Attack-like flow (`MacroHedgeFund` + `OpportunisticTrader`) is measurably present once `|deviation| > 0.02`.              | Attack volume ≥ 25% of total investor volume across the 200-round run.                                                                                              | `compute_attack_volume` (analysis-bases.md §2.2).                                                                                   |
+| F2 | Defense flow from `PegDefender` is measurably present once `|deviation| > 0.05`.                                          | Defense volume ≥ 5% of total investor volume across the 200-round run.                                                                                              | `compute_defense_volume` (analysis-bases.md §2.3).                                                                                   |
+| F3 | Peg pressure grows visibly over the run relative to the peg.                                                              | Max absolute peg pressure (deviation from `peg_rate`) ≥ 2% over the 200-round run.                                                                                  | `compute_peg_pressure`, `compute_credibility_loss` (analysis-bases.md §2.1, §2.4).                                                  |
+| F4 | Herding is observable: `OpportunisticTrader` contributes a distinct share of attack-like flow after visible deviation.    | `OpportunisticTrader` herding share ∈ [0.15, 0.75] of attack-like quantity in the same window.                                                                       | `compute_herding_share` (analysis-bases.md §2.5).                                                                                   |
+| F5 | Price path is bounded and finite; defense effectiveness ratio is finite for the full run.                                 | `max(|deviation|)` finite, price path strictly positive; defense/attack ratio finite and reported in `summary.json`.                                                | `compute_defense_effectiveness` (analysis-bases.md §2.7).                                                                            |
+
+## §6 Historical / Empirical Anchors
+
+| Case                                             | Time              | Correspondence to model                                                                                                                                                                                                                                                                                             |
+|--------------------------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Black Wednesday, sterling exit from the ERM      | 1992-09-16        | UK raised base rate from 10% to 12% then 15% and intervened; sterling ultimately left the ERM on 1992-09-16 (Buiter, Corsetti, and Pesenti 1998, DOI 10.1016/S0014-2921(97)00081-X). Maps to `MacroHedgeFund` attack + `PegDefender` bounded intervention + peg pressure crossing F3 threshold.                       |
+| 1992–1993 European Monetary System crisis         | 1992–1993         | Pressure on multiple ERM bands (lira, franc, escudo, punt) demonstrated cross-currency contagion under credibility, cost, and expectations pressure (Eichengreen and Wyplosz 1993, DOI 10.2307/2534598). Maps to the broader validity of the attack/defense asymmetry structure encoded in §4.1–§4.3.                    |
+| Emerging-market peg breaks                        | 1994–2002         | Mexico 1994, Thailand and East Asia 1997, Russia 1998, Brazil 1999, Argentina 2001–2002 — recurring interactions among reserve constraints, credibility loss, speculative pressure, and herd participation (Kaminsky and Reinhart 1999, DOI 10.1257/aer.89.3.473). Maps to F1 attack signature and F4 herding share. |
+| First-generation crisis theory (Krugman 1979)     | 1979              | Analytical foundation for `|deviation| > 0.02` attack triggering when policy inconsistency is priced in (Krugman 1979, DOI 10.2307/1991793).                                                                                                                                                                             |
+| Second-generation crisis theory (Obstfeld 1996)   | 1996              | Analytical foundation for self-fulfilling herding by `OpportunisticTrader` (Obstfeld 1996, DOI 10.1016/0014-2921(95)00111-5).                                                                                                                                                                                              |
+| Primary sources                                   | —                 | Krugman (1979) 10.2307/1991793; Flood and Garber (1984) 10.1016/0304-3932(84)90002-3; Obstfeld (1996) 10.1016/0014-2921(95)00111-5; Eichengreen and Wyplosz (1993) 10.2307/2534598; Black (1986) 10.1111/j.1540-6261.1986.tb04513.x; Kaminsky and Reinhart (1999) 10.1257/aer.89.3.473; Buiter, Corsetti, and Pesenti (1998) 10.1016/S0014-2921(97)00081-X. |
+
+## §7 Agent Roster
+
+| Role                     | Class Name             | Population | Role Type          | Key Behavior                                                                                                                                                                                     | Data Signal                     | Time Horizon                                    |
+|--------------------------|------------------------|-----------:|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|--------------------------------------------------|
+| Macro hedge fund         | `MacroHedgeFund`       | 2          | Destabilising      | On `|deviation| > 0.02` buys if above fundamental / sells if below with `Q = min(800, int(|deviation| × 5000))`, cash/position constrained.                                                       | `attack_volume`                 | Immediate action per round.                       |
+| Peg defender             | `PegDefender`          | 1          | Stabilising        | On `|deviation| > 0.05` buys if below fundamental / sells if above with `Q = min(500, int(|deviation| × 3000))`, cash/position constrained.                                                       | `defense_volume`                | Delayed action per round.                         |
+| Convergence trader       | `ConvergenceTrader`    | 2          | Mixed              | `Bernoulli(0.3)` trade gate; if active, random direction with `randint(100, 500)` quantity, cash/position constrained.                                                                            | `background_volume`             | Random per round.                                 |
+| Opportunistic trader     | `OpportunisticTrader`  | 2          | Destabilising (follow) | Same threshold and sizing as `MacroHedgeFund` (`|deviation| > 0.02`, `Q = min(800, int(|deviation| × 5000))`) — encodes second-generation attack-joining.                                     | `herding_volume`                | Immediate action per round.                       |
+| Noise trader             | `NoiseTrader`          | 2          | Mixed              | `Bernoulli(0.3)` trade gate; if active, random direction with `randint(100, 500)` quantity, cash/position constrained.                                                                            | `background_volume`             | Random per round.                                 |
+
+## §8 Environment Specification
+
+### §8.1 Coordinator Class
+
+`Market` (`examples/SorosPound/Rule/players.py`) is the sole coordinator. It initialises `price = initial_price`, `fundamental = fundamental_value`, collects orders from all investors, computes `net_demand = total_buy − total_sell`, updates the price via `P(t+1) = max(0.01, P(t) + λ × net_demand + γ × (F − P) + ε)` with `ε ~ N(0, noise_std²)`, and broadcasts `{price, fundamental, deviation, round, volume, net_demand}` where `volume = min(total_buy, total_sell) + 0.5 × |net_demand|`.
+
+### §8.2 Order Contract
+
+Each investor emits `{action ∈ {buy, sell, hold}, quantity ≥ 0, agent_type}`; API variants additionally emit `reasoning`, plus parser-quality metadata. The market clears quantities at the current proxy price — no limit prices are used, consistent with `simulation-bases.md` §3.
+
+### §8.3 Communication Topology
+
+Round-based, star topology with `Market` at the centre. Round order: Market broadcasts state → Investors submit orders → Market ingests orders and updates price for the next round → Analysis logs per-round records.
+
+### §8.4 Round Horizon
+
+`total_rounds = 200` per `configs/SorosPound/Rule/simulation.yml` and equivalents. Each Rule investor's decision is synchronous within a round.
+
+## §9 Parameter Seeds
+
+| Parameter                    | Scope                                                                             | Value        | Citation                                                                       |
+|------------------------------|-----------------------------------------------------------------------------------|-------------:|--------------------------------------------------------------------------------|
+| `initial_price`              | Market extras                                                                     | 100.0        | §2.2, §8.1; simulation-bases.md §6.                                            |
+| `peg_rate`                   | Market extras                                                                     | 100.0        | §2.2, §4.3; simulation-bases.md §6.                                            |
+| `fundamental_value`          | Market + all investor extras                                                      | 95.0         | §2.2, §4.1; peg intentionally overvalued vs fundamental; simulation-bases.md §6. |
+| `price_impact`               | Market extras                                                                     | 0.03         | §8.1; simulation-bases.md §6.                                                  |
+| `mean_reversion`             | Market extras                                                                     | 0.015        | §2.4, §8.1; simulation-bases.md §6.                                            |
+| `noise_std`                  | Market extras                                                                     | 0.012        | §8.1; Black 1986 (§4.5); simulation-bases.md §6.                               |
+| `custom_state_hot_limit`     | All extras                                                                        | 3            | Runtime hot-state cap; simulation-bases.md §6.                                 |
+| `initial_cash`               | MacroHedgeFund extras                                                             | 5000000.0    | §7 attack sizing budget; simulation-bases.md §6.                               |
+| `initial_position`           | MacroHedgeFund extras                                                             | 800          | §7 initial inventory; simulation-bases.md §6.                                  |
+| `leverage`                   | MacroHedgeFund extras (retained metadata)                                          | 3.0          | §4.1 metadata; simulation-bases.md §6.                                          |
+| `position_size`              | MacroHedgeFund extras (retained metadata)                                          | 600          | §4.1 metadata; simulation-bases.md §6.                                          |
+| `initial_cash`               | PegDefender extras                                                                | 10000000.0   | §4.3 reserves; simulation-bases.md §6.                                          |
+| `initial_position`           | PegDefender extras                                                                | 0            | §4.3 defender enters flat.                                                     |
+| `reserve_capacity`           | PegDefender extras (retained metadata)                                             | 0.8          | §4.3 metadata; simulation-bases.md §6.                                          |
+| `defense_size`               | PegDefender extras (retained metadata)                                             | 500          | §4.3 metadata; simulation-bases.md §6.                                          |
+| `initial_cash`               | ConvergenceTrader extras                                                          | 1000000.0    | §4.4 medium-book budget.                                                       |
+| `initial_position`           | ConvergenceTrader extras                                                          | 500          | §4.4 initial inventory.                                                        |
+| `convergence_threshold`      | ConvergenceTrader extras (retained metadata)                                       | 0.03         | §4.4 metadata; simulation-bases.md §6.                                          |
+| `position_size`              | ConvergenceTrader extras (retained metadata)                                       | 300          | §4.4 metadata; simulation-bases.md §6.                                          |
+| `initial_cash`               | OpportunisticTrader extras                                                         | 2000000.0    | §4.2 follow-on budget.                                                          |
+| `initial_position`           | OpportunisticTrader extras                                                         | 600          | §4.2 initial inventory.                                                         |
+| `attack_join_threshold`      | OpportunisticTrader extras (retained metadata)                                     | 0.3          | §4.2 metadata; simulation-bases.md §6.                                          |
+| `position_size`              | OpportunisticTrader extras (retained metadata)                                     | 400          | §4.2 metadata; simulation-bases.md §6.                                          |
+| `initial_cash`               | NoiseTrader extras                                                                 | 500000.0     | §4.5 small book.                                                                |
+| `initial_position`           | NoiseTrader extras                                                                 | 200          | §4.5 initial inventory.                                                         |
+| `trade_probability`          | NoiseTrader extras                                                                 | 0.3          | §4.5 Bernoulli gate; simulation-bases.md §6.                                    |
+| `noise_size`                 | NoiseTrader extras (retained metadata; actual size drawn from `randint(100, 500)`) | 150          | §4.5 metadata; simulation-bases.md §6.                                          |
+
+## §10 Variants
+
+### §10.1 Variant Matrix
+
+| Variant  | Decision Source                                       | Class Base                          | Prompt Family      | Extra Runtime Fields                                        |
+|----------|--------------------------------------------------------|-------------------------------------|--------------------|-------------------------------------------------------------|
+| Rule     | Deterministic thresholds + stochastic noise/convergence | `examples.SorosPound.Rule.players`  | none               | none                                                        |
+| LLM      | API decision under persona prompt                       | `examples.SorosPound.LLM.players`   | `LLM_*_SYS`        | `reasoning`, parser-quality metadata                        |
+| RuleLLM  | API decision under rule-echoed prompt                   | `examples.SorosPound.RuleLLM.players` | `RULELLM_*_SYS` / `RULELLM_USER_TEMPLATE` | `reasoning`, parser-quality metadata            |
+| Rag      | API decision under RAG-retrieved context prompt         | `examples.SorosPound.Rag.players`   | `RAGLLM_*_SYS` / `RAG_USER_TEMPLATE` | `reasoning`, `rag_context`, `rag_stats.json`      |
+
+### §10.2 Cross-Variant Constraints
+
+All four variants share `Market` price-formation logic (`P(t+1) = P(t) + λ × net_demand + γ × (F − P) + ε`), `total_rounds = 200`, the same market extras (`initial_price=100.0`, `peg_rate=100.0`, `fundamental_value=95.0`, `price_impact=0.03`, `mean_reversion=0.015`, `noise_std=0.012`), the same investor `extras` seeds from §9, and the same order contract `{action, quantity, agent_type}`. LLM/RuleLLM/Rag additionally emit `reasoning`; Rag additionally emits `rag_context` and writes `rag_stats.json`. Rag config-block requirements: `knowledge:` header block (global_uri, resource_csv, preprocessing, rag config with Hunyuan embedding, top_k=5) and per-agent `private_knowledge:` block (from_global_resources, rag with embed config, top_k=5). Standard runner: `PYTHONPATH=. python3 examples/SorosPound/{Variant}/run_sorospound{,_llm,_rulellm,_rag}.py -c configs/SorosPound/{Variant}/simulation.yml`.
