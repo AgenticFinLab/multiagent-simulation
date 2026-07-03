@@ -13,7 +13,11 @@ See examples/AssetBubble/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
+import sys
+from pathlib import Path
 from typing import Any, Dict
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import numpy as np
 
