@@ -18,16 +18,16 @@ market:
     group_tags: [market]
     extras:
       record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/market"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.015
-      noise_std: 0.01
+      initial_price: 100.0            # Source: target §9 initial_price row; normalized entry/cost base
+      fundamental_value: 100.0        # Source: target §9 fundamental_value row; normalized fundamental anchor
+      price_impact: 0.02              # Source: target §9 price_impact row; Kyle (1985) demand-impact coefficient
+      mean_reversion: 0.015           # Source: target §9 mean_reversion row; slow correction preserves behavioral persistence
+      noise_std: 0.01                 # Source: target §9 noise_std row; Black (1986) low background volatility
 
 sunkcostholder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMSunkCostHolder"
-  num_instances: 3
+  num_instances: 3                    # Source: target §7 SunkCostHolder row; 3 instances represent core sunk-cost inertia mass
   persona: !include ../Rag/persona.yml
   config:
     identity: "sunkcostholder"
@@ -36,13 +36,14 @@ sunkcostholder:
     group_tags: [investors]
     extras:
       record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/sunkcostholder"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      hold_threshold: 0.1
-      base_size: 200
-      custom_state_hot_limit: 3
+      agent_type: "SunkCostHolder"    # Source: agent-design-skill §3.6.0 I/O Contract; required for LLM/Rag variant identity in logs
+      initial_cash: 1000000.0         # Source: target §9 initial_cash (SunkCostHolder) row; retail-holder budget
+      initial_position: 500           # Source: target §9 initial_position (SunkCostHolder) row; embedded historical stake
+      initial_price: 100.0            # Source: target §9 initial_price row; normalized cost basis
+      fundamental_value: 100.0        # Source: target §9 fundamental_value row; forward-looking anchor
+      hold_threshold: 0.10            # Source: target §9 hold_threshold row; Arkes & Blumer (1985) reinforcement gate
+      base_size: 200                  # Source: target §9 base_size row; small reinforcement order magnitude
+      custom_state_hot_limit: 3       # Source: target §9 custom_state_hot_limit row; hot-state ring buffer per §11 masim/utils
       private_knowledge:
         from_global_resources: ["MinerU_processed"]
         rag:
@@ -65,7 +66,7 @@ sunkcostholder:
 commitmentescalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMCommitmentEscalator"
-  num_instances: 3
+  num_instances: 3                    # Source: target §7 CommitmentEscalator row; 3 instances amplify escalation pressure
   persona: !include ../Rag/persona.yml
   config:
     identity: "commitmentescalator"
@@ -74,13 +75,14 @@ commitmentescalator:
     group_tags: [investors]
     extras:
       record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/commitmentescalator"
-      initial_cash: 1200000.0
-      initial_position: 400
-      initial_price: 100.0
-      fundamental_value: 100.0
-      escalation_threshold: 0.05
-      escalation_size: 400
-      custom_state_hot_limit: 3
+      agent_type: "CommitmentEscalator"   # Source: agent-design-skill §3.6.0 I/O Contract
+      initial_cash: 1200000.0         # Source: target §9 initial_cash (CommitmentEscalator) row; larger budget enables averaging down
+      initial_position: 400           # Source: target §9 initial_position (CommitmentEscalator) row; moderate committed stake
+      initial_price: 100.0            # Source: target §9 initial_price row
+      fundamental_value: 100.0        # Source: target §9 fundamental_value row
+      escalation_threshold: 0.05      # Source: target §9 escalation_threshold row; Staw (1976) rapid-activation gate
+      escalation_size: 400            # Source: target §9 escalation_size row; larger than passive holder to represent doubling down
+      custom_state_hot_limit: 3       # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources: ["MinerU_processed"]
         rag:
@@ -103,7 +105,7 @@ commitmentescalator:
 rationalcutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMRationalCutter"
-  num_instances: 2
+  num_instances: 2                    # Source: target §7 RationalCutter row; 2 instances provide rational counter-flow
   persona: !include ../Rag/persona.yml
   config:
     identity: "rationalcutter"
@@ -112,13 +114,14 @@ rationalcutter:
     group_tags: [investors]
     extras:
       record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/rationalcutter"
-      initial_cash: 1500000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      cut_threshold: 0.05
-      position_size: 350
-      custom_state_hot_limit: 3
+      agent_type: "RationalCutter"    # Source: agent-design-skill §3.6.0 I/O Contract
+      initial_cash: 1500000.0         # Source: target §9 initial_cash (RationalCutter) row; well-capitalised rational trader
+      initial_position: 600           # Source: target §9 initial_position (RationalCutter) row
+      initial_price: 100.0            # Source: target §9 initial_price row
+      fundamental_value: 100.0        # Source: target §9 fundamental_value row
+      cut_threshold: 0.05             # Source: target §9 cut_threshold row; forward-looking valuation gate
+      position_size: 350              # Source: target §9 position_size (RationalCutter) row; bounded strategic trade size
+      custom_state_hot_limit: 3       # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources: ["MinerU_processed"]
         rag:
@@ -141,7 +144,7 @@ rationalcutter:
 opportunitycosttrader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMOpportunityCostTrader"
-  num_instances: 2
+  num_instances: 2                    # Source: target §7 OpportunityCostTrader row; 2 instances model reallocation discipline
   persona: !include ../Rag/persona.yml
   config:
     identity: "opportunitycosttrader"
@@ -150,13 +153,14 @@ opportunitycosttrader:
     group_tags: [investors]
     extras:
       record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/opportunitycosttrader"
-      initial_cash: 1300000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      realloc_threshold: 0.08
-      position_size: 300
-      custom_state_hot_limit: 3
+      agent_type: "OpportunityCostTrader"  # Source: agent-design-skill §3.6.0 I/O Contract
+      initial_cash: 1300000.0         # Source: target §9 initial_cash (OpportunityCostTrader) row
+      initial_position: 500           # Source: target §9 initial_position (OpportunityCostTrader) row
+      initial_price: 100.0            # Source: target §9 initial_price row
+      fundamental_value: 100.0        # Source: target §9 fundamental_value row
+      realloc_threshold: 0.08         # Source: target §9 realloc_threshold row; stricter than cut_threshold per Thaler (1980)
+      position_size: 300              # Source: target §9 position_size (OpportunityCostTrader) row
+      custom_state_hot_limit: 3       # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources: ["MinerU_processed"]
         rag:
@@ -179,7 +183,7 @@ opportunitycosttrader:
 noisetrader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMNoiseTrader"
-  num_instances: 2
+  num_instances: 2                    # Source: target §7 NoiseTrader row; 2 instances provide baseline liquidity
   persona: !include ../Rag/persona.yml
   config:
     identity: "noisetrader"
@@ -188,13 +192,14 @@ noisetrader:
     group_tags: [investors]
     extras:
       record_path: "EXPERIMENT/SunkCostFallacy/Rag/records/noisetrader"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
+      agent_type: "NoiseTrader"       # Source: agent-design-skill §3.6.0 I/O Contract
+      initial_cash: 500000.0          # Source: target §9 initial_cash (NoiseTrader) row; small uninformed budget
+      initial_position: 200           # Source: target §9 initial_position (NoiseTrader) row
+      initial_price: 100.0            # Source: target §9 initial_price row
+      fundamental_value: 100.0        # Source: target §9 fundamental_value row
+      trade_probability: 0.30         # Source: target §9 trade_probability row; Black (1986) background activation rate
+      noise_size: 100                 # Source: target §9 noise_size row; keeps noise below strategic order flow
+      custom_state_hot_limit: 3       # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources: ["MinerU_processed"]
         rag:
