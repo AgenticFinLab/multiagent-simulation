@@ -1,0 +1,175 @@
+# ShortSqueeze Scenario Target
+
+## §1 Meta
+
+| Field         | Content                                                                                                                                                                                                                                                                             |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name          | ShortSqueeze                                                                                                                                                                                                                                                                        |
+| Domain        | finance                                                                                                                                                                                                                                                                             |
+| Requested By  | Sijia Chen                                                                                                                                                                                                                                                                          |
+| Produced By   | define-simulation-scenario-skill.md v1.2.0 (invoking agent: QoderWork)                                                                                                                                                                                                              |
+| Created       | 2026-07-03                                                                                                                                                                                                                                                                          |
+| Pipeline      | masim/skills/polish-simulation-pipeline.md                                                                                                                                                                                                                                          |
+| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                                                                                                                                                             |
+| Status        | locked                                                                                                                                                                                                                                                                              |
+| CHANGELOG     | 2026-07-03  Produced by define-simulation-scenario-skill.md v1.2.0 under polish-simulation-pipeline.md Step 0 Case B (Status: draft). Source of §2–§10 content: existing downstream artefacts under `examples/ShortSqueeze/` (simulation-bases.md, analysis-bases.md, Rule/players.py, configs/ShortSqueeze/Rule/players.yml, configs/ShortSqueeze/{RuleLLM,Rag}/players.yml). / 2026-07-03  Polish target-file gate: structural validation green (10/10 sections, 6 unique DOIs across §4 and §6, 5 stylized facts, 5 agents in §7, 4 variants in §10.1), Status upgraded draft → locked. |
+
+## §2 Phenomenon Statement
+
+### §2.1 Trigger
+
+A heavily shorted asset trades below its fundamental value (`initial_price = 30.0` versus `fundamental_value = 50.0`). Once retail attention and momentum flow begin to lift the price, short sellers whose loss exceeds `cover_threshold = 0.20` are forced to buy shares to close positions. Their buy-to-cover orders receive additional price impact (`φ × cover_buying`), which pushes the price further and can trigger a self-reinforcing squeeze. Archetypal triggers are GameStop in January 2021, Volkswagen in October 2008, and KaloBios in November 2015, in which short interest, borrow scarcity, float concentration, and attention-driven retail demand interact to produce nonlinear price jumps (Miller 1977; Duffie, Garleanu, and Pedersen 2002; Barber and Odean 2008).
+
+### §2.2 Population
+
+Five investor archetypes populate a single-asset short-squeeze market: `ShortSeller` (population 3) holds an initial short position of −50 and covers when the mark-to-market loss versus `short_entry_price = 30.0` exceeds `cover_threshold = 0.20`; `MomentumBuyer` (population 3) buys when the three-round return exceeds `momentum_threshold = 0.02`, sized by `momentum × base_size × momentum_multiplier` and capped at `max_quantity = 40.0`; `RetailTrader` (population 3) submits Gaussian orders centred on `bullish_bias = 5.0` with `noise_std = 12.0`, clamped to `[min_quantity, max_quantity] = [-15.0, 25.0]`; `ValueInvestor` (population 2) sells (i.e., emits nonnegative sell-buy asymmetric flow) only when undervaluation exceeds `value_threshold = 0.15` — the current Rule implementation buys the undervalued asset with `deviation × base_size × value_multiplier` capped at `max_quantity = 30.0`; `InstitutionalHolder` (population 1) holds `initial_position = 100.0` and, in the Rule variant, remains passive to represent float withholding. A single `Market` coordinator implements the price-formation law with cover-buying impact `φ = 0.05` on top of the linear demand impact.
+
+### §2.3 Amplification
+
+Amplification is a three-stage positive feedback: `RetailTrader` and `MomentumBuyer` build initial buy pressure once the recent return exceeds `momentum_threshold`; the resulting price rise pushes `ShortSeller`s past `cover_threshold`, triggering forced cover buys (`is_short_cover = true`) which receive extra impact `φ × cover_buying = 0.05 × cover_buying`; the further price rise recruits more momentum flow while `InstitutionalHolder` withholds supply. `ValueInvestor` provides only counter-flow when the price deviates below fundamental (undervaluation direction) — its current Rule form does not oppose overvaluation, and the "value resistance" channel described in simulation-bases §4.4 is therefore realised in the LLM/RuleLLM/Rag variants via prompt-based rule extensions rather than in the Rule variant.
+
+### §2.4 Collapse / Correction
+
+Correction under the Rule/LLM market is driven by the linear mean-reversion pull `γ × (fundamental − price)` with `γ = 0.005`, plus Gaussian market noise `ε ~ N(0, 0.5²)`, plus the boundedness of forced-cover flow: once `ShortSeller`s cover half their short (`quantity = |position| × 0.5`), the residual short shrinks and additional loss triggers cover progressively less. RuleLLM/Rag variants apply a liquidity-aware extension where the effective demand impact is `λ × LiquidityFactor × NetDemand`; `LiquidityFactor` is a function of `base_liquidity = 50.0`, `high_impact_multiplier = 3.0`, and `low_liquidity_threshold = 30.0`, so the same net demand produces amplified price change when observed liquidity is scarce and dampened change when liquidity is high. The typical trajectory is a bounded upward drift from `30.0` toward and possibly above `fundamental_value = 50.0`, with visible short-cover volume during the rally.
+
+## §3 Research Goals
+
+1. Reproduce the short-squeeze forced-covering signature (`ShortSeller` `is_short_cover = true` buy-to-cover volume measurably present after adverse price movement) with a quantitative acceptance range measurable from the standard investor-order log.
+2. Verify that the positive-feedback loop between `RetailTrader`, `MomentumBuyer`, and `ShortSeller` produces a visible peak-premium pattern (`max(price) / fundamental − 1 > 0`) under the 200-round experimental horizon.
+3. Quantify retail and momentum demand share of the buy-side flow during the amplification phase, providing the attention-driven and positive-feedback signatures.
+4. Compare Rule and LLM decision fidelity: verify whether persona-only LLM agents preserve, dampen, or exaggerate the Rule squeeze magnitude and forced-cover volume.
+5. Measure whether retrieved historical squeeze evidence (GameStop 2021, Volkswagen 2008, KaloBios 2015) shifts urgency, sizing, liquidity provision, or value resistance in the Rag variant, using `rag_stats.json` retrieval coverage as the observable proxy.
+
+## §4 Theoretical Anchors
+
+### §4.1 Short-Sale Constraints And Forced Covering
+
+- Primary citation: Miller, E. M. (1977). "Risk, uncertainty, and divergence of opinion." *Journal of Finance* 32(4), 1151–1168. DOI 10.1111/j.1540-6261.1977.tb03317.x.
+- Supporting citation: Duffie, D., Garleanu, N., and Pedersen, L. H. (2002). "Securities lending, shorting, and pricing." *Journal of Financial Economics* 66(2-3), 307–339. DOI 10.1016/S0304-405X(02)00226-X.
+- Core mechanism: short sellers borrow, sell, and must eventually buy shares back; when adverse price movement produces mark-to-market losses beyond a threshold, forced covering generates additional buy demand that raises the price further.
+- Simulation mapping: `ShortSeller` (`examples/ShortSqueeze/Rule/players.py`) implements `if position < 0 and (price − short_entry_price)/short_entry_price > cover_threshold: quantity = |position| × 0.5, is_short_cover = True`; `short_initial_position = -50.0`, `short_entry_price = 30.0`, `cover_threshold = 0.20`.
+
+### §4.2 Positive Feedback And Momentum Demand
+
+- Primary citation: De Long, J. B., Shleifer, A., Summers, L. H., and Waldmann, R. J. (1990). "Positive feedback investment strategies and destabilizing rational speculation." *Journal of Finance* 45(2), 379–395. DOI 10.1111/j.1540-6261.1990.tb03695.x.
+- Supporting citation: Jegadeesh, N., and Titman, S. (1993). "Returns to buying winners and selling losers: Implications for stock market efficiency." *Journal of Finance* 48(1), 65–91. DOI 10.1111/j.1540-6261.1993.tb04702.x.
+- Core mechanism: positive-feedback traders buy after price increases; combined with return continuation, this amplifies an initial rally.
+- Simulation mapping: `MomentumBuyer` implements `if momentum(lookback=3) > momentum_threshold: quantity = min(max_quantity, momentum × base_size × momentum_multiplier)`; `lookback = 3`, `base_size = 25.0`, `momentum_threshold = 0.02`, `momentum_multiplier = 15`, `max_quantity = 40.0`.
+
+### §4.3 Retail Attention And Narrative Coordination
+
+- Primary citation: Barber, B. M., and Odean, T. (2008). "All that glitters: The effect of attention and news on the buying behavior of individual and institutional investors." *Review of Financial Studies* 21(2), 785–818. DOI 10.1093/rfs/hhm079.
+- Core mechanism: retail attention concentrates buying on salient assets, tilted bullish; this attention-driven demand can seed or reinforce a squeeze.
+- Simulation mapping: `RetailTrader` implements `quantity = clamp(Gaussian(bullish_bias, noise_std), min_quantity, max_quantity)`; `noise_std = 12.0`, `bullish_bias = 5.0`, `min_quantity = -15.0`, `max_quantity = 25.0`.
+
+### §4.4 Limits Of Arbitrage And Value Resistance
+
+- Primary citation: Shleifer, A., and Vishny, R. W. (1997). "The limits of arbitrage." *Journal of Finance* 52(1), 35–55. DOI 10.1111/j.1540-6261.1997.tb03807.x.
+- Core mechanism: value traders may recognize misvaluation but cannot always offset it due to funding, timing, and float-scarcity risks.
+- Simulation mapping: `ValueInvestor` implements `deviation = (fundamental − price) / fundamental; if deviation > value_threshold: quantity = min(max_quantity, deviation × base_size × value_multiplier)`; `value_threshold = 0.15`, `base_size = 20.0`, `value_multiplier = 5`, `max_quantity = 30.0`. The current Rule form buys undervalued rather than selling overvalued; the bidirectional "value resistance" channel described in simulation-bases §4.4 is implemented in the API variants via prompt-echoed rules.
+
+### §4.5 Float Scarcity And Concentrated Ownership
+
+- Primary citation: Duffie, D., Garleanu, N., and Pedersen, L. H. (2002). "Securities lending, shorting, and pricing." *Journal of Financial Economics* 66(2-3), 307–339. DOI 10.1016/S0304-405X(02)00226-X.
+- Supporting evidence: Volkswagen 2008 concentrated-ownership disclosure and GameStop 2021 short-interest-above-float episodes.
+- Core mechanism: concentrated institutional holding reduces borrow availability and free float, so short-cover buying meets a thin sell book and generates larger price impact.
+- Simulation mapping: `InstitutionalHolder` (Rule) implements `quantity = 0.0` (passive holder with `initial_position = 100.0`). The RuleLLM/Rag variants have an explicit `provides_liquidity` decision channel wired to `base_liquidity`, `high_impact_multiplier`, and `low_liquidity_threshold` (see §8.1).
+
+## §5 Stylized Facts
+
+| # | Fact                                                                                                                     | Acceptance range                                                                                                                                                    | Analysis metric                                                                                                                    |
+|---|--------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| F1 | Peak price premium above fundamental is positive.                                                                        | `max(price) / fundamental − 1 > 0` across the 200-round run.                                                                                                        | `compute_squeeze_magnitude` (analysis-bases.md §2.1).                                                                              |
+| F2 | Forced-cover buy volume is measurably present after adverse price moves for shorts.                                       | Total short-cover buy volume > 0 across the 200-round run.                                                                                                          | `compute_covering_volume` (analysis-bases.md §2.2).                                                                                |
+| F3 | Retail demand contributes to the buy-side flow during amplification.                                                     | Retail share of buy-side volume ≥ 5% of total buy volume across the 200-round run.                                                                                  | `compute_retail_demand_share` (analysis-bases.md §2.3).                                                                            |
+| F4 | Momentum demand follows positive returns during the amplification phase.                                                 | `compute_momentum_amplification` produces a positive value across the 200-round run.                                                                                | `compute_momentum_amplification` (analysis-bases.md §2.4).                                                                         |
+| F5 | Price path is finite; total volume is nonzero; parser/RAG fallback rate stays within policy.                             | Prices strictly positive and finite; `total_volume > 0`; API parser/fallback rates within `compute_api_and_retrieval_quality` policy bounds reported in `summary.json`. | `compute_float_constraint`, `compute_value_resistance`, `compute_api_and_retrieval_quality` (analysis-bases.md §2.5, §2.6, §2.7). |
+
+## §6 Historical / Empirical Anchors
+
+| Case                                             | Time              | Correspondence to model                                                                                                                                                                                                                                                                                             |
+|--------------------------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| GameStop                                         | 2021-01           | Rose from roughly USD 17 at start of January 2021 to intraday high above USD 480 on 2021-01-28; short interest above the free float before the peak (Barber and Odean 2008, DOI 10.1093/rfs/hhm079). Maps to `RetailTrader` + `MomentumBuyer` seed and `ShortSeller` forced covering.                                    |
+| Volkswagen                                       | 2008-10           | Briefly became the world's most valuable company in October 2008 after disclosure of concentrated ownership left limited free float for short sellers to buy back (Duffie, Garleanu, and Pedersen 2002, DOI 10.1016/S0304-405X(02)00226-X). Maps to `InstitutionalHolder` float scarcity and `ShortSeller` covering. |
+| KaloBios                                         | 2015-11           | Extreme rally after news and short-covering pressure interacted with a small float; retail/attention demand plus borrow pressure plus late-arriving valuation resistance (Miller 1977, DOI 10.1111/j.1540-6261.1977.tb03317.x). Maps to `RetailTrader` + `ShortSeller` + `ValueInvestor` sequence.                       |
+| Positive-feedback theory                          | 1990              | Analytical foundation for `MomentumBuyer` amplification (De Long, Shleifer, Summers, and Waldmann 1990, DOI 10.1111/j.1540-6261.1990.tb03695.x).                                                                                                                                                                       |
+| Limits-of-arbitrage theory                        | 1997              | Analytical foundation for `ValueInvestor` limited resistance (Shleifer and Vishny 1997, DOI 10.1111/j.1540-6261.1997.tb03807.x).                                                                                                                                                                                        |
+| Primary sources                                   | —                 | Miller (1977) 10.1111/j.1540-6261.1977.tb03317.x; Duffie, Garleanu, and Pedersen (2002) 10.1016/S0304-405X(02)00226-X; De Long, Shleifer, Summers, and Waldmann (1990) 10.1111/j.1540-6261.1990.tb03695.x; Jegadeesh and Titman (1993) 10.1111/j.1540-6261.1993.tb04702.x; Barber and Odean (2008) 10.1093/rfs/hhm079; Shleifer and Vishny (1997) 10.1111/j.1540-6261.1997.tb03807.x. |
+
+## §7 Agent Roster
+
+| Role                     | Class Name             | Population | Role Type            | Key Behavior                                                                                                                                                                                                                                        | Data Signal             | Time Horizon                                    |
+|--------------------------|------------------------|-----------:|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|--------------------------------------------------|
+| Short seller             | `ShortSeller`          | 3          | Forced buyer         | Holds `short_initial_position = -50`; if `(price − short_entry_price)/short_entry_price > cover_threshold = 0.20`, buys `|position| × 0.5` and sets `is_short_cover = True`.                                                                          | `covering_volume`       | Immediate action per round after adverse move.  |
+| Momentum buyer           | `MomentumBuyer`        | 3          | Trend amplifier      | If three-round return `> momentum_threshold = 0.02`, buys `min(40.0, momentum × 25.0 × 15)` capped at nonnegative.                                                                                                                                    | `momentum_amplification`| Immediate action per round.                     |
+| Retail trader            | `RetailTrader`         | 3          | Attention channel    | Emits `clamp(Gaussian(bullish_bias=5.0, noise_std=12.0), min_quantity=-15.0, max_quantity=25.0)` each round.                                                                                                                                            | `retail_demand`         | Every round.                                     |
+| Value investor           | `ValueInvestor`        | 2          | Valuation resistance | If `(fundamental − price)/fundamental > value_threshold = 0.15`, buys `min(30.0, deviation × 20.0 × 5)`. Rule form buys undervaluation; API forms extend to selling overvaluation.                                                                     | `value_resistance`      | Conditional per round.                           |
+| Institutional holder     | `InstitutionalHolder`  | 1          | Float scarcity       | Rule: passive (`quantity = 0.0`), retains `initial_position = 100.0`. RuleLLM/Rag: exposes `provides_liquidity` decision channel tied to `base_liquidity`, `high_impact_multiplier`, `low_liquidity_threshold`.                                          | `float_constraint`      | Rare (Rule) / conditional (API).                 |
+
+## §8 Environment Specification
+
+### §8.1 Coordinator Class
+
+`Market` (`examples/ShortSqueeze/Rule/players.py`) is the sole coordinator. It initialises `price = initial_price = 30.0`, `fundamental = fundamental_value = 50.0`, collects orders from all investors, computes `net_demand = total_buy − total_sell`, and, in the Rule/LLM variant, updates the price via `P(t+1) = max(1.0, P(t) + λ × net_demand + φ × cover_buying + γ × (F − P) + ε)` with `λ = price_impact = 0.1`, `φ = 0.05` hard-coded (`short_squeeze_impact = cover_buying * 0.05`), `γ = mean_reversion = 0.005`, and `ε ~ N(0, noise_std² = 0.5²)`. The RuleLLM/Rag variants apply a liquidity-aware extension where effective demand impact scales as `λ × LiquidityFactor × net_demand`, with `LiquidityFactor` derived from `base_liquidity = 50.0`, `high_impact_multiplier = 3.0`, and `low_liquidity_threshold = 30.0`. The market broadcasts `{price, prev_price, return, return_pct, volume, round, fundamental}` (Rule/LLM) plus liquidity-aware fields for RuleLLM/Rag.
+
+### §8.2 Order Contract
+
+Each investor emits `{bid_price, quantity, strategy, is_short_cover}` where `quantity` is signed (positive = buy, negative = sell); Rule sets `bid_price = current_price` when `quantity > 0` else `0.0`. API variants (LLM/RuleLLM/Rag) additionally emit `reasoning` and, in the RuleLLM/Rag liquidity-aware form, `provides_liquidity: bool`, plus parser-quality metadata. Missing or malformed liquidity fields in API variants are deterministic parser-contract failures unless an explicit, conservative, logged fallback path is used.
+
+### §8.3 Communication Topology
+
+Round-based, star topology with `Market` at the centre. Round order: Market broadcasts state → Investors submit orders → Market ingests orders and updates price for the next round → Analysis logs per-round records.
+
+### §8.4 Round Horizon
+
+`total_rounds = 200` per `configs/ShortSqueeze/Rule/simulation.yml` and equivalents. Each Rule investor's decision is synchronous within a round.
+
+## §9 Parameter Seeds
+
+| Parameter                    | Scope                                                                             | Value        | Citation                                                                       |
+|------------------------------|-----------------------------------------------------------------------------------|-------------:|--------------------------------------------------------------------------------|
+| `fundamental_value`          | Market extras + `ValueInvestor` extras                                             | 50.0         | §2.1, §4.4; simulation-bases.md §6.                                            |
+| `initial_price`              | Market extras                                                                     | 30.0         | §2.1, §8.1; simulation-bases.md §6.                                            |
+| `price_impact` / `base_price_impact` | Market extras (`price_impact` for Rule/LLM; `base_price_impact` for RuleLLM/Rag) | 0.1          | §8.1; simulation-bases.md §6.                                                  |
+| `mean_reversion`             | Market extras                                                                     | 0.005        | §2.4, §8.1; simulation-bases.md §6.                                            |
+| `noise_std`                  | Market extras                                                                     | 0.5          | §8.1; Gaussian market noise; simulation-bases.md §6.                            |
+| `initial_short_interest`     | Market extras (LLM/RuleLLM/Rag)                                                    | 80.0         | §4.5 float-scarcity signal; simulation-bases.md §6.                             |
+| `base_liquidity`             | Market extras (RuleLLM/Rag only)                                                   | 50.0         | §8.1 liquidity-aware extension; simulation-bases.md §6.                          |
+| `high_impact_multiplier`     | Market extras (RuleLLM/Rag only)                                                   | 3.0          | §8.1 liquidity-aware amplification when depth is thin.                           |
+| `low_liquidity_threshold`    | Market extras (RuleLLM/Rag only)                                                   | 30.0         | §8.1 liquidity-aware amplification switch.                                       |
+| `custom_state_hot_limit`     | All extras                                                                        | 3            | Runtime hot-state cap; simulation-bases.md §6.                                 |
+| `initial_cash`               | All investor extras                                                                | 10000.0      | §7 base cash budget; simulation-bases.md §6.                                    |
+| `initial_position`           | Non-short investor extras (Rule)                                                  | 0.0          | §7 flat starting inventory.                                                     |
+| `initial_position`           | `ShortSeller` extras (LLM/RuleLLM/Rag)                                             | -50.0        | §4.1 short book; simulation-bases.md §6.                                        |
+| `initial_position`           | `InstitutionalHolder` extras                                                       | 100.0        | §4.5 large passive holding; simulation-bases.md §6.                              |
+| `short_initial_position`     | `ShortSeller` extras (Rule only)                                                   | -50.0        | §4.1 initial short exposure applied inside `perceive`; simulation-bases.md §6.  |
+| `short_entry_price`          | `ShortSeller` extras                                                               | 30.0         | §4.1 loss-reference price; simulation-bases.md §6.                              |
+| `cover_threshold`            | `ShortSeller` extras                                                               | 0.20         | §4.1 forced-cover trigger; simulation-bases.md §6.                              |
+| `lookback`                   | `MomentumBuyer` extras                                                             | 3            | §4.2 momentum window; simulation-bases.md §6.                                   |
+| `base_size`                  | `MomentumBuyer` extras                                                             | 25.0         | §4.2 baseline order size; simulation-bases.md §6.                               |
+| `momentum_threshold`         | `MomentumBuyer` extras                                                             | 0.02         | §4.2 momentum activation; simulation-bases.md §6.                                |
+| `momentum_multiplier`        | `MomentumBuyer` extras                                                             | 15           | §4.2 momentum-scaling factor; simulation-bases.md §6.                            |
+| `max_quantity` (momentum)    | `MomentumBuyer` extras                                                             | 40.0         | §4.2 order cap; simulation-bases.md §6.                                          |
+| `noise_std` (retail)         | `RetailTrader` extras                                                              | 12.0         | §4.3 retail Gaussian scale; simulation-bases.md §6.                              |
+| `bullish_bias`               | `RetailTrader` extras                                                              | 5.0          | §4.3 retail demand tilt; simulation-bases.md §6.                                 |
+| `min_quantity` (retail)      | `RetailTrader` extras                                                              | -15.0        | §4.3 retail quantity lower clamp.                                                |
+| `max_quantity` (retail)      | `RetailTrader` extras                                                              | 25.0         | §4.3 retail quantity upper clamp.                                                |
+| `value_threshold`            | `ValueInvestor` extras                                                             | 0.15         | §4.4 value activation; simulation-bases.md §6.                                   |
+| `base_size` (value)          | `ValueInvestor` extras                                                             | 20.0         | §4.4 baseline value order; simulation-bases.md §6.                               |
+| `value_multiplier`           | `ValueInvestor` extras                                                             | 5            | §4.4 value-scaling factor; simulation-bases.md §6.                               |
+| `max_quantity` (value)       | `ValueInvestor` extras                                                             | 30.0         | §4.4 value order cap; simulation-bases.md §6.                                    |
+
+## §10 Variants
+
+### §10.1 Variant Matrix
+
+| Variant  | Decision Source                                       | Class Base                             | Prompt Family                                | Extra Runtime Fields                                                    |
+|----------|--------------------------------------------------------|----------------------------------------|----------------------------------------------|-------------------------------------------------------------------------|
+| Rule     | Deterministic thresholds + stochastic retail noise      | `examples.ShortSqueeze.Rule.players`   | none                                         | `bid_price`, `quantity`, `strategy`, `is_short_cover`                    |
+| LLM      | API decision under persona prompt                       | `examples.ShortSqueeze.LLM.players`    | `LLM_*_SYS` / `LLM_USER_TEMPLATE`            | plus `reasoning`, parser-quality metadata                                |
+| RuleLLM  | API decision under rule-echoed prompt (liquidity-aware) | `examples.ShortSqueeze.RuleLLM.players`| `RULELLM_*_SYS` / `RULELLM_USER_TEMPLATE`    | plus `reasoning`, `provides_liquidity`, parser-quality metadata           |
+| Rag      | API decision under RAG-retrieved context prompt         | `examples.ShortSqueeze.Rag.players`    | `RAGLLM_*_SYS` / `RAGLLM_USER_TEMPLATE`      | plus `reasoning`, `provides_liquidity`, `rag_context`, `rag_stats.json`  |
+
+### §10.2 Cross-Variant Constraints
+
+All four variants share `Market` price-formation logic, `total_rounds = 200`, and the same order-schema base `{bid_price, quantity, strategy, is_short_cover}`. Rule/LLM use `P(t+1) = max(1, P(t) + λ × net_demand + φ × cover_buying + γ × (F − P) + ε)` with `φ = 0.05` hard-coded on `cover_buying`. RuleLLM/Rag use the liquidity-aware extension `P(t+1) = max(1, P(t) + λ × LiquidityFactor × net_demand + γ × (F − P) + ε)` with `base_liquidity = 50.0`, `high_impact_multiplier = 3.0`, `low_liquidity_threshold = 30.0`, and require `provides_liquidity: bool` on each investor order — missing or malformed liquidity fields are deterministic parser-contract failures unless an explicit, conservative, logged fallback path is used. LLM/RuleLLM/Rag additionally emit `reasoning`; Rag additionally emits `rag_context` and writes `rag_stats.json`. Rag config-block requirements: `knowledge:` header block (global_uri, resource_csv, preprocessing, rag config with Hunyuan embedding) and per-agent `private_knowledge:` block (from_global_resources, rag with embed config, top_k=5). Standard runner: `PYTHONPATH=. python3 examples/ShortSqueeze/{Variant}/run_short_squeeze_{rule,llm,rulellm,ragllm}.py -c configs/ShortSqueeze/{Variant}/simulation.yml`.
