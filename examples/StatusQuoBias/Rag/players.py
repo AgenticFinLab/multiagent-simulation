@@ -42,6 +42,8 @@ from ..Rule.players import Market  # noqa: F401 — re-exported
 
 logger = logging.getLogger("StatusQuoBias.Rag")
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
     """Validate canonical RAG trading decision fields before portfolio mutation."""
@@ -331,7 +333,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         return (
