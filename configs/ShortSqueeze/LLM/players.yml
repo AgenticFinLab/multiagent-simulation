@@ -1,5 +1,12 @@
 # =============================================================================
-# ShortSqueezeLLM Players Configuration
+# ShortSqueeze LLM Players Configuration
+# =============================================================================
+# Traceability: every extras leaf below carries a `# Source: target §9 <param>
+# row; <citation>` comment referencing examples/ShortSqueeze/finance-shortsqueeze.md.
+# Order-contract note: this scenario uses `{bid_price, quantity, strategy,
+# is_short_cover}` where `strategy` is derived at runtime from
+# `self.__class__.__name__` inside the player class, so no `agent_type` field
+# is added to extras (see target §8.2).
 # =============================================================================
 
 market:
@@ -14,13 +21,13 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/LLM/records"
-      fundamental_value: 50.0
-      initial_price: 30.0
-      price_impact: 0.1
-      mean_reversion: 0.005
-      noise_std: 0.5
-      initial_short_interest: 80.0
-      custom_state_hot_limit: 3
+      fundamental_value: 50.0  # Source: target §9 fundamental_value row.
+      initial_price: 30.0  # Source: target §9 initial_price row.
+      price_impact: 0.1  # Source: target §9 price_impact row.
+      mean_reversion: 0.005  # Source: target §9 mean_reversion row.
+      noise_std: 0.5  # Source: target §9 noise_std row.
+      initial_short_interest: 80.0  # Source: target §9 initial_short_interest row; §4.5 float-scarcity signal.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
   persona: !include persona.yml
 
 llm_short_seller:
@@ -36,9 +43,9 @@ llm_short_seller:
       - llm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/LLM/records"
-      initial_cash: 10000.0
-      initial_position: -50.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: -50.0  # Source: target §9 initial_position (ShortSeller LLM/RuleLLM/Rag) row; §4.1 short book.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
@@ -62,9 +69,9 @@ llm_retail_coord:
       - llm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_RETAIL_COORD_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
@@ -88,9 +95,9 @@ llm_momentum:
       - llm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_MOMENTUM_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
@@ -114,9 +121,9 @@ llm_value:
       - llm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"
@@ -139,9 +146,9 @@ llm_institutional:
       - llm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 100.0  # Source: target §9 initial_position (InstitutionalHolder) row; §4.5 float scarcity.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.LLM.prompts:LLM_INSTITUTIONAL_SYS"
         user_message: "examples.ShortSqueeze.LLM.prompts:LLM_USER_TEMPLATE"

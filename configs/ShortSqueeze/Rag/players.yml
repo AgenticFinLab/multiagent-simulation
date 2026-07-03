@@ -1,5 +1,13 @@
 # =============================================================================
-# ShortSqueezeLLM Players Configuration
+# ShortSqueeze Rag Players Configuration
+# =============================================================================
+# Traceability: every extras leaf below carries a `# Source: target §9 <param>
+# row; <citation>` comment referencing examples/ShortSqueeze/finance-shortsqueeze.md.
+# Liquidity-aware market extension (target §8.1) with base_liquidity,
+# high_impact_multiplier, low_liquidity_threshold. Order-contract:
+# `{bid_price, quantity, strategy, is_short_cover, provides_liquidity}` plus
+# `reasoning` and `rag_context`; `strategy` is derived from
+# `self.__class__.__name__`. Rag also writes rag_stats.json.
 # =============================================================================
 
 # =============================================================================
@@ -37,16 +45,16 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      fundamental_value: 50.0
-      initial_price: 30.0
-      base_price_impact: 0.1
-      mean_reversion: 0.005
-      noise_std: 0.5
-      initial_short_interest: 80.0
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      fundamental_value: 50.0  # Source: target §9 fundamental_value row.
+      initial_price: 30.0  # Source: target §9 initial_price row.
+      base_price_impact: 0.1  # Source: target §9 price_impact / base_price_impact row; RuleLLM/Rag alias.
+      mean_reversion: 0.005  # Source: target §9 mean_reversion row.
+      noise_std: 0.5  # Source: target §9 noise_std row.
+      initial_short_interest: 80.0  # Source: target §9 initial_short_interest row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      base_liquidity: 50.0  # Source: target §9 base_liquidity row; RuleLLM/Rag liquidity-aware market.
+      high_impact_multiplier: 3.0  # Source: target §9 high_impact_multiplier row.
+      low_liquidity_threshold: 30.0  # Source: target §9 low_liquidity_threshold row.
   persona: !include persona.yml
 
 ragllm_short_seller:
@@ -62,9 +70,9 @@ ragllm_short_seller:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: -50.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: -50.0  # Source: target §9 initial_position (ShortSeller LLM/RuleLLM/Rag) row; §4.1.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -105,9 +113,9 @@ ragllm_retail_coord:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -148,9 +156,9 @@ ragllm_momentum:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -191,9 +199,9 @@ ragllm_value:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -233,9 +241,9 @@ ragllm_institutional:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 100.0  # Source: target §9 initial_position (InstitutionalHolder) row; §4.5 float scarcity.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

@@ -1,14 +1,15 @@
 # =============================================================================
-# ShortSqueeze Players Configuration
+# ShortSqueeze Players Configuration (Rule variant)
 # =============================================================================
-# Supply-Demand Imbalance Simulation - GameStop 2021 style
+# Traceability: every extras leaf below carries a `# Source: target §9 <param>
+# row; <citation>` comment referencing examples/ShortSqueeze/finance-shortsqueeze.md.
 #
 # Investor Types:
-#   - ShortSeller: Borrows and sells, must cover when losses mount
-#   - MomentumBuyer: Buys on upward momentum
-#   - RetailTrader: Can trigger initial squeeze (bullish bias + noise)
-#   - ValueInvestor: Buys when undervalued relative to fundamental
-#   - InstitutionalHolder: Large passive holder
+#   - ShortSeller (§4.1 Miller 1977 / Duffie-Garleanu-Pedersen 2002)
+#   - MomentumBuyer (§4.2 De Long 1990 / Jegadeesh-Titman 1993)
+#   - RetailTrader (§4.3 Barber-Odean 2008)
+#   - ValueInvestor (§4.4 Shleifer-Vishny 1997)
+#   - InstitutionalHolder (§4.5 Duffie-Garleanu-Pedersen 2002)
 # =============================================================================
 
 market:
@@ -23,16 +24,12 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
-      # Market parameters
-      # Low fundamental - typical for shorted stocks
-      fundamental_value: 50.0
-      # Trading below fundamental
-      initial_price: 30.0
-      price_impact: 0.1
-      # Weak mean reversion - allows squeeze to develop
-      mean_reversion: 0.005
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      fundamental_value: 50.0  # Source: target §9 fundamental_value row; §2.1, §4.4; simulation-bases.md §6.
+      initial_price: 30.0  # Source: target §9 initial_price row; §2.1, §8.1; simulation-bases.md §6.
+      price_impact: 0.1  # Source: target §9 price_impact row; §8.1; simulation-bases.md §6.
+      mean_reversion: 0.005  # Source: target §9 mean_reversion row; §2.4, §8.1; simulation-bases.md §6.
+      noise_std: 0.5  # Source: target §9 noise_std row; §8.1 Gaussian market noise.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime hot-state cap.
   persona: !include persona.yml
 
 short_seller:
@@ -48,17 +45,12 @@ short_seller:
       - investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
-      # Base investor parameters
-      initial_cash: 10000.0
-      # Will be overridden to -50
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # ShortSeller specific
-      short_initial_position: -50.0
-      # Shorted at initial price
-      short_entry_price: 30.0
-      # Cover at 20% loss
-      cover_threshold: 0.20
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; §7 base cash budget.
+      initial_position: 0.0  # Source: target §9 initial_position row; overridden inside ShortSeller.perceive using short_initial_position.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      short_initial_position: -50.0  # Source: target §9 short_initial_position row; §4.1 initial short exposure applied inside perceive.
+      short_entry_price: 30.0  # Source: target §9 short_entry_price row; §4.1 loss-reference price.
+      cover_threshold: 0.20  # Source: target §9 cover_threshold row; §4.1 forced-cover trigger (Miller 1977, DOI 10.1111/j.1540-6261.1977.tb03317.x).
   persona: !include persona.yml
 
 momentum_buyer:
@@ -74,16 +66,14 @@ momentum_buyer:
       - investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
-      # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # MomentumBuyer specific
-      lookback: 3
-      base_size: 25.0
-      momentum_threshold: 0.02
-      momentum_multiplier: 15
-      max_quantity: 40.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row; §7 flat starting inventory.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      lookback: 3  # Source: target §9 lookback row; §4.2 momentum window (De Long 1990, DOI 10.1111/j.1540-6261.1990.tb03695.x).
+      base_size: 25.0  # Source: target §9 base_size (momentum) row.
+      momentum_threshold: 0.02  # Source: target §9 momentum_threshold row; §4.2 momentum activation.
+      momentum_multiplier: 15  # Source: target §9 momentum_multiplier row; §4.2 scaling factor.
+      max_quantity: 40.0  # Source: target §9 max_quantity (momentum) row; §4.2 order cap.
   persona: !include persona.yml
 
 retail:
@@ -99,15 +89,13 @@ retail:
       - investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
-      # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # RetailTrader specific
-      noise_std: 12.0
-      bullish_bias: 5.0
-      min_quantity: -15.0
-      max_quantity: 25.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      noise_std: 12.0  # Source: target §9 noise_std (retail) row; §4.3 retail Gaussian scale (Barber-Odean 2008, DOI 10.1093/rfs/hhm079).
+      bullish_bias: 5.0  # Source: target §9 bullish_bias row; §4.3 retail demand tilt.
+      min_quantity: -15.0  # Source: target §9 min_quantity (retail) row; §4.3 lower clamp.
+      max_quantity: 25.0  # Source: target §9 max_quantity (retail) row; §4.3 upper clamp.
   persona: !include persona.yml
 
 value_investor:
@@ -123,15 +111,13 @@ value_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
-      # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # ValueInvestor specific
-      value_threshold: 0.15
-      base_size: 20.0
-      value_multiplier: 5
-      max_quantity: 30.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      value_threshold: 0.15  # Source: target §9 value_threshold row; §4.4 value activation (Shleifer-Vishny 1997, DOI 10.1111/j.1540-6261.1997.tb03807.x).
+      base_size: 20.0  # Source: target §9 base_size (value) row.
+      value_multiplier: 5  # Source: target §9 value_multiplier row.
+      max_quantity: 30.0  # Source: target §9 max_quantity (value) row.
   persona: !include persona.yml
 
 institutional:
@@ -146,9 +132,7 @@ institutional:
       - investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rule/records"
-      # Base investor parameters
-      initial_cash: 10000.0
-      # Large passive holder
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 100.0  # Source: target §9 initial_position (InstitutionalHolder) row; §4.5 float scarcity.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
   persona: !include persona.yml
