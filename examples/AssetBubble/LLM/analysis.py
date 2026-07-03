@@ -11,6 +11,10 @@ See examples/AssetBubble/Rule/analysis.py for detailed documentation.
 
 import argparse
 import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from masim.utils import load_config, load_results
 

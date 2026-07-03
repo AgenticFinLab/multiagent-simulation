@@ -51,7 +51,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("AssetBubbleLLM")
 
@@ -61,6 +61,13 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _infer_response_text(infer_output: Any) -> str:
+    """Read response text from current or legacy lmbase output objects."""
+    if hasattr(infer_output, "response"):
+        return infer_output.response
+    return infer_output.outputs[0].response
 
 
 class Market(GeneralPlayer):
@@ -91,6 +98,14 @@ class Market(GeneralPlayer):
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["volume_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "volume"),
                 entry_limit=custom_state_hot_limit,
             )
             self.state.custom_state["valuation_ratio_history"] = HistoryBuffer(
@@ -155,6 +170,8 @@ class Market(GeneralPlayer):
         self.state.custom_state["price"] = new_price
         self.state.custom_state["fundamental"] = new_fundamental
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(new_fundamental)
+        self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["valuation_ratio_history"].append(valuation_ratio)
 
         # Log
@@ -332,7 +349,7 @@ Respond with ONLY valid JSON:
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with thinking and decision sections.
 
-        Delegates to shared utility in masim.utils.llm_utils.py
+        Delegates to shared utility in examples/llm_utils.py
         """
         return parse_llm_response_with_thinking(response_text)
 
@@ -368,9 +385,9 @@ Respond with ONLY valid JSON:
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
+            infer_output = llm_client.run(infer_input)
             try:
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                decision = self._parse_llm_response(_infer_response_text(infer_output))
                 break
             except Exception as exc:
                 last_error = exc

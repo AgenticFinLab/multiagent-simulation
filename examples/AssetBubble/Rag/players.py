@@ -62,7 +62,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -83,6 +83,13 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _infer_response_text(infer_output: Any) -> str:
+    """Read response text from current or legacy lmbase output objects."""
+    if hasattr(infer_output, "response"):
+        return infer_output.response
+    return infer_output.outputs[0].response
 
 
 # =============================================================================
@@ -729,7 +736,7 @@ class RagLLMInvestor(GeneralPlayer):
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections.
 
-        Delegates to shared utility in masim.utils.llm_utils.py
+        Delegates to shared utility in examples/llm_utils.py
         """
         return parse_llm_response_with_thinking(response_text)
 
@@ -771,8 +778,8 @@ class RagLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                infer_output = llm_client.run([infer_input])
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                infer_output = llm_client.run(infer_input)
+                decision = self._parse_llm_response(_infer_response_text(infer_output))
                 break
             except Exception as exc:
                 last_error = exc

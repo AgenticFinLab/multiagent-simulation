@@ -57,7 +57,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from examples.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("AssetBubbleRuleLLM")
 
@@ -94,6 +94,13 @@ def is_retryable_llm_error(exc: BaseException) -> bool:
     if any(marker.lower() in message for marker in NON_RETRYABLE_API_MARKERS):
         return False
     return any(marker in message for marker in RETRYABLE_API_MARKERS)
+
+
+def _infer_response_text(infer_output: Any) -> str:
+    """Read response text from current or legacy lmbase output objects."""
+    if hasattr(infer_output, "response"):
+        return infer_output.response
+    return infer_output.outputs[0].response
 
 
 # =============================================================================
@@ -386,7 +393,7 @@ Respond with ONLY valid JSON:
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections.
 
-        Delegates to shared utility in masim.utils.llm_utils.py
+        Delegates to shared utility in examples/llm_utils.py
         """
         return parse_llm_response_with_thinking(response_text)
 
@@ -424,8 +431,8 @@ Respond with ONLY valid JSON:
         for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                infer_output = llm_client.run([infer_input])
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                infer_output = llm_client.run(infer_input)
+                decision = self._parse_llm_response(_infer_response_text(infer_output))
                 break
             except Exception as exc:
                 last_error = exc

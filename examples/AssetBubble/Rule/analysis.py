@@ -10,7 +10,11 @@ Usage:
 import argparse
 import json
 import os
+import sys
+from pathlib import Path
 from typing import Any, Dict
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,7 +32,37 @@ from masim.evaluation.finance import (
     validate_asset_bubble,
 )
 from masim.utils import load_config, load_results
-from examples.standard_rule_analysis import _market_data_from_payload, _market_players
+
+
+def _market_players(results) -> Dict[str, Any]:
+    """Return coordinator players that may carry market batch stores."""
+    candidates = results.players_by_role("coordinator")
+    if candidates:
+        return candidates
+    candidates = results.players_by_role("environment")
+    if candidates:
+        return candidates
+    return {
+        pid: player
+        for pid, player in results.players.items()
+        if "market" in pid.lower() or "environment" in pid.lower()
+    }
+
+
+def _market_data_from_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract market-state dict from known MASim turn payload shapes."""
+    if not isinstance(payload, dict):
+        raise ValueError("Market payload is not a dictionary.")
+    for key in ("market_data", "environment_data", "state", "observation"):
+        value = payload.get(key)
+        if isinstance(value, dict):
+            return value
+    if {"price", "fundamental"}.intersection(payload):
+        return payload
+    decision_payload = payload.get("decision_payload")
+    if isinstance(decision_payload, dict):
+        return _market_data_from_payload(decision_payload)
+    return {}
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
@@ -151,6 +185,12 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
         if len(returns_list) > 5
         else []
     )
+    return_mean = sum(returns.values()) / len(returns) if returns else 0.0
+    return_std = (
+        (sum((r - return_mean) ** 2 for r in returns.values()) / len(returns)) ** 0.5
+        if returns
+        else 0.0
+    )
 
     prices_list = [market_prices[r] for r in sorted(market_prices.keys())]
     max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
@@ -270,7 +310,7 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
             "peak_round": peak_idx,
             "trough_round": trough_idx,
             "crash_duration": trough_idx - peak_idx if trough_idx > peak_idx else 0,
-            "return_autocorr_lag1": round(autocorr[0], 4),
+            "return_autocorr_lag1": round(autocorr[0], 4) if autocorr else None,
         },
         "price": {
             "initial": round(prices_list[0], 4),
@@ -280,22 +320,12 @@ def analyze_bubble(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
             "mean": round(sum(prices_list) / len(prices_list), 4),
         },
         "returns": {
-            "mean": round(sum(returns.values()) / len(returns), 6),
-            "std": round(
-                (
-                    sum(
-                        (r - sum(returns.values()) / len(returns)) ** 2
-                        for r in returns.values()
-                    )
-                    / len(returns)
-                )
-                ** 0.5,
-                6,
-            ),
+            "mean": round(return_mean, 6),
+            "std": round(return_std, 6),
         },
         "volume": {
             "total": sum(volumes.values()),
-            "avg": round(sum(volumes.values()) / len(volumes), 4),
+            "avg": round(sum(volumes.values()) / len(volumes), 4) if volumes else 0.0,
         },
         "validation": validation.to_dict(),
     }
