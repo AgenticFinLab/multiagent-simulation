@@ -1,4 +1,5 @@
 # SouthSeaBubble Rule Agent Configuration
+# Source: examples/SouthSeaBubble/finance-southseabubble.md §9 (Parameter Seeds table)
 
 market:
   name: "Market"
@@ -12,18 +13,18 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/SouthSeaBubble/Rule/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.025
-      mean_reversion: 0.008
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization (simulation-bases.md §6)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization
+      price_impact: 0.025  # Source: target §9 market.extras.price_impact row; simulation-bases.md §3
+      mean_reversion: 0.008  # Source: target §9 market.extras.mean_reversion row; simulation-bases.md §3
+      noise_std: 0.015  # Source: target §9 market.extras.noise_std row; simulation-bases.md §3
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
 insideradvantaged:
   name: "InsiderAdvantaged"
   class: "examples.SouthSeaBubble.Rule.players:InsiderAdvantaged"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 insideradvantaged.num_instances row
   config:
     identity: "insideradvantaged"
     role: player
@@ -32,19 +33,19 @@ insideradvantaged:
       - investors
     extras:
       record_path: "EXPERIMENT/SouthSeaBubble/Rule/records"
-      initial_cash: 3000000.0
-      initial_position: 800
-      initial_price: 100.0
-      fundamental_value: 100.0
-      front_run_size: 500
-      information_advantage: 0.8
-      custom_state_hot_limit: 3
+      initial_cash: 3000000.0  # Source: target §9 insideradvantaged.extras.initial_cash row; timing-advantage endowment (§4.3 Temin-Voth 2004, 10.1257/0002828043052268)
+      initial_position: 800  # Source: target §9 insideradvantaged.extras.initial_position row; timing-advantage inventory (§4.3 Temin-Voth 2004)
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization
+      front_run_size: 500  # Source: target §9 insideradvantaged.extras.front_run_size row; metadata (retained runtime uses cap 800)
+      information_advantage: 0.8  # Source: target §9 insideradvantaged.extras.information_advantage row; metadata (§4.3 Temin-Voth 2004)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
 narrativebeliever:
   name: "NarrativeBeliever"
   class: "examples.SouthSeaBubble.Rule.players:NarrativeBeliever"
-  num_instances: 3
+  num_instances: 3  # Source: target §9 narrativebeliever.num_instances row
   config:
     identity: "narrativebeliever"
     role: player
@@ -53,19 +54,19 @@ narrativebeliever:
       - investors
     extras:
       record_path: "EXPERIMENT/SouthSeaBubble/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      narrative_weight: 0.8
-      base_size: 350
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0  # Source: target §9 narrativebeliever.extras.initial_cash row; normalization
+      initial_position: 500  # Source: target §9 narrativebeliever.extras.initial_position row; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization
+      narrative_weight: 0.8  # Source: target §9 narrativebeliever.extras.narrative_weight row; §4.2 Shiller (2017), 10.1257/aer.107.4.967
+      base_size: 350  # Source: target §9 narrativebeliever.extras.base_size row; metadata (retained runtime uses cap 800)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
 skepticalanalyst:
   name: "SkepticalAnalyst"
   class: "examples.SouthSeaBubble.Rule.players:SkepticalAnalyst"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 skepticalanalyst.num_instances row
   config:
     identity: "skepticalanalyst"
     role: player
@@ -74,19 +75,19 @@ skepticalanalyst:
       - investors
     extras:
       record_path: "EXPERIMENT/SouthSeaBubble/Rule/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      cash_flow_threshold: 0.15
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 1200000.0  # Source: target §9 skepticalanalyst.extras.initial_cash row; normalization
+      initial_position: 500  # Source: target §9 skepticalanalyst.extras.initial_position row; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization
+      cash_flow_threshold: 0.15  # Source: target §9 skepticalanalyst.extras.cash_flow_threshold row; §4.4 Shleifer & Vishny (1997), 10.1111/j.1540-6261.1997.tb03807.x
+      base_size: 300  # Source: target §9 skepticalanalyst.extras.base_size row; metadata (retained runtime uses cap 500)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
 arbitrageur:
   name: "Arbitrageur"
   class: "examples.SouthSeaBubble.Rule.players:Arbitrageur"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 arbitrageur.num_instances row
   config:
     identity: "arbitrageur"
     role: player
@@ -95,19 +96,19 @@ arbitrageur:
       - investors
     extras:
       record_path: "EXPERIMENT/SouthSeaBubble/Rule/records"
-      initial_cash: 2000000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      spread_threshold: 0.25
-      position_size: 350
-      custom_state_hot_limit: 3
+      initial_cash: 2000000.0  # Source: target §9 arbitrageur.extras.initial_cash row; normalization
+      initial_position: 600  # Source: target §9 arbitrageur.extras.initial_position row; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization
+      spread_threshold: 0.25  # Source: target §9 arbitrageur.extras.spread_threshold row; §4.4 Shleifer & Vishny (1997), 10.1111/j.1540-6261.1997.tb03807.x
+      position_size: 350  # Source: target §9 arbitrageur.extras.position_size row; metadata (retained runtime uses cap 500)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
 noisetrader:
   name: "NoiseTrader"
   class: "examples.SouthSeaBubble.Rule.players:NoiseTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 noisetrader.num_instances row
   config:
     identity: "noisetrader"
     role: player
@@ -116,11 +117,11 @@ noisetrader:
       - investors
     extras:
       record_path: "EXPERIMENT/SouthSeaBubble/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      initial_cash: 500000.0  # Source: target §9 noisetrader.extras.initial_cash row; normalization
+      initial_position: 200  # Source: target §9 noisetrader.extras.initial_position row; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization
+      trade_probability: 0.3  # Source: target §9 noisetrader.extras.trade_probability row; §4.5 Black (1986), 10.1111/j.1540-6261.1986.tb04513.x
+      noise_size: 150  # Source: target §9 noisetrader.extras.noise_size row; metadata (retained runtime samples randint(100, 500))
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
