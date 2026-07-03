@@ -276,7 +276,7 @@ Always active: every round generates a stochastic order. Position mean-reversion
 
 **Sizing Function**: `quantity = N(0, position_volatility) + mean_reversion_speed × (0 - position)`. The first term injects random demand; the second term pulls position back toward zero.
 
-**Constraint**: Cash/position constraints same as base investor. Quantity clamped to `[-50, +50]`.
+**Constraint**: Cash/position constraints same as base investor. Quantity clamped to `[-30, +30]`.
 
 **Output format**: `<decision>{"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": str}</decision>`
 
@@ -443,7 +443,7 @@ Activation condition: `vol_ratio = current_vol / MA_vol(vol_lookback)`. Triggers
 
 **Trigger Function**: `vol_ratio > high_vol_threshold OR vol_ratio < low_vol_threshold`.
 
-**Sizing Function**: When high-vol: `quantity = -base_position_size * (vol_ratio - high_vol_threshold)`. When low-vol: `quantity = +base_position_size * (low_vol_threshold - vol_ratio)`. Clamped to `[-15, +15]`.
+**Sizing Function**: When high-vol: `quantity = -base_position_size * (vol_ratio - 1.0)`. When low-vol: `quantity = +base_position_size * (1.0 - vol_ratio)`. Clamped to `[-20, +20]`.
 
 **Constraint**: Cash/position constraints same as base investor.
 

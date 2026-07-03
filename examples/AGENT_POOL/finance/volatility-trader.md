@@ -92,11 +92,13 @@ realized_vol = std(returns_t)
 vol_ratio = realized_vol / baseline_vol
 
 if vol_ratio > high_vol_threshold:
-    quantity = -base_position_size  (sell / de-risk)
+    quantity = -base_position_size * (vol_ratio - 1.0)  (proportional sell)
 elif vol_ratio < low_vol_threshold:
-    quantity = +base_position_size  (buy / re-risk)
+    quantity = +base_position_size * (1.0 - vol_ratio)  (proportional buy)
 else:
     quantity = 0  (hold)
+
+quantity = clamp(quantity, -20, +20)
 ```
 
 ## 6 Parameters
