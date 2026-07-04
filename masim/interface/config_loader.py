@@ -81,6 +81,29 @@ def scenario_display_name(key: str) -> str:
     return display
 
 
+def _resolve_display_key(scenario_key: str) -> str:
+    """Map a rounds-adjusted Default bundle to its source scenario key.
+
+    A ``CUSTOMIZED_SIMULATION/Default-{Scenario}-{Variant}-r{N}`` bundle is a
+    verbatim copy of a shipped scenario with only ``total_rounds`` changed.
+    For scenario-level *metadata* display -- name, market type / description
+    and network topology -- it must behave exactly like the original
+    ``{Scenario}/{Variant}`` scenario. Run-specific artifacts (experiment
+    records / analysis output) are intentionally NOT remapped, since the
+    bundle owns its own run outputs.
+
+    Non-bundle keys are returned unchanged.
+    """
+    if scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
+        bundle_id = scenario_key.split("/", 1)[1]
+        if bundle_id.startswith("Default-"):
+            body = re.sub(r"-r\d+$", "", bundle_id[len("Default-"):])
+            if "-" in body:
+                scenario, variant = body.rsplit("-", 1)
+                return f"{scenario}/{variant}"
+    return scenario_key
+
+
 def discover_scenarios() -> List[str]:
     """Discover all available simulation scenarios from configs directory.
 
@@ -542,6 +565,52 @@ def get_agents_info(scenario_name: str) -> List[Dict[str, Any]]:
     return agents
 
 
+def get_agent_roster(scenario_name: str) -> List[Dict[str, Any]]:
+    """Return the full list of concrete agent instances for a scenario.
+
+    Mirrors ``expand_player_instances`` in ``masim/utils/config.py`` so the
+    instance ids match the simulator's ``sender_id`` values:
+      * ``num_instances == 1`` -> instance id = base key (unchanged)
+      * ``num_instances  > 1`` -> instance ids = ``base_1`` ... ``base_N``
+
+    The market coordinator is excluded. Used by the simulation page to render
+    every configured investor each round (non-trading ones shown as HOLD),
+    so the activity panel matches the sidebar roster.
+
+    Returns:
+        List of dicts with keys ``id``, ``name``, ``base``.
+    """
+    players = load_players_config(scenario_name)
+    roster: List[Dict[str, Any]] = []
+
+    for base_key, config in players.items():
+        if not isinstance(config, dict):
+            continue
+        if base_key == "market":
+            continue
+        role = ""
+        if "config" in config and isinstance(config["config"], dict):
+            role = config["config"].get("role", "")
+        if role == "coordinator":
+            continue
+
+        name = config.get("name", base_key)
+        try:
+            n = int(config.get("num_instances", 1) or 1)
+        except (TypeError, ValueError):
+            n = 1
+
+        if n <= 1:
+            roster.append({"id": base_key, "name": name, "base": base_key})
+        else:
+            for i in range(1, n + 1):
+                roster.append(
+                    {"id": f"{base_key}_{i}", "name": f"{name} {i}", "base": base_key}
+                )
+
+    return roster
+
+
 def check_simulation_results(scenario_name: str) -> bool:
     """Check if simulation results exist for a scenario.
 
@@ -571,6 +640,7 @@ def get_diagram_path(scenario_name: str) -> Optional[Path]:
     Returns:
         Path to the latest topology PNG, or None if not found
     """
+    scenario_name = _resolve_display_key(scenario_name)
     diagram_dir = _experiment_path(scenario_name) / "records" / "diagrams"
     if not diagram_dir.exists():
         return None
@@ -588,6 +658,7 @@ def get_topology_info(scenario_name: str) -> Dict[str, Any]:
     Returns:
         Dict with topology_type, sources, connections (node -> [targets])
     """
+    scenario_name = _resolve_display_key(scenario_name)
     topology_path = _configs_path(scenario_name) / "topology.yml"
 
     result: Dict[str, Any] = {
@@ -774,6 +845,7 @@ def get_market_description(scenario_name: str) -> str:
     Returns:
         Human-readable market description string
     """
+    scenario_name = _resolve_display_key(scenario_name)
     flat = _flat_scenario_name(scenario_name)
     # Fallback: strip LLM/RuleLLM suffix
     base = flat[:-3] if flat.endswith("LLM") else flat
@@ -792,6 +864,7 @@ def get_market_type(scenario_name: str) -> str:
     Returns:
         Human-readable market type string (e.g. 'Stock Market')
     """
+    scenario_name = _resolve_display_key(scenario_name)
     # All current scenarios are equity/stock market simulations
     name_lower = scenario_name.lower()
     if "crypto" in name_lower:

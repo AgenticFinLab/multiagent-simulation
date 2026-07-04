@@ -1,12 +1,48 @@
-"""Async simulation runner with progress streaming for Streamlit.
+"""Simulation runner with two execution modes: Default and Customized.
 
-This module provides async simulation execution with real-time progress updates,
-designed for integration with the Streamlit web UI (masim/interface/app.py).
+This module is the central orchestration layer for running multi-agent
+financial simulations. It supports two workflows:
 
-Usage
------
+Workflows
+---------
 
-1. **Via Streamlit Web UI (Recommended):**
+1. **Default mode** — run a shipped scenario as-is:
+
+   ```python
+   import asyncio
+   from masim.interface.simulation_runner import SimulationRunner
+
+   async def main():
+       runner = SimulationRunner.from_scenario("AssetBubble", variant="Rule")
+       if not await runner.setup():
+           return
+       async for update in runner.run():
+           print(f"Round {update.round_num}")
+       await runner.shutdown()
+
+   asyncio.run(main())
+   ```
+
+2. **Customized mode** — pick agents from AGENT_POOL, generate a bundle, run:
+
+   ```python
+   from masim.interface.simulation_runner import SimulationRunner
+   from masim.interface.customized import CustomizedAgentSelection
+
+   selections = [
+       CustomizedAgentSelection(
+           archetype="NoiseTrader", display_name="Noise Trader",
+           engine="Rule", params={}, num_instances=3,
+       ),
+       CustomizedAgentSelection(
+           archetype="MomentumTrendTrader", display_name="Momentum Trader",
+           engine="LLM", params={}, num_instances=2,
+       ),
+   ]
+   runner = SimulationRunner.from_customized("AssetBubble", selections)
+   ```
+
+3. **Via Streamlit Web UI (Recommended):**
 
    Launch the web interface and select a scenario:
 
@@ -16,81 +52,41 @@ Usage
    ```
 
    Then:
-   - Select a scenario from the sidebar (e.g., AssetBubble, HerdEffect)
-   - Click "Start Simulation" to run
-   - View real-time progress and results
+   - Stage 1: Select a scenario from the grid (e.g., AssetBubble, HerdEffect)
+   - Stage 2: Click a variant chip (Default) or "Customize my roster" (Customized)
+   - View real-time progress and results in the simulation workspace
 
-2. **Programmatic Usage:**
-
-   ```python
-   import asyncio
-   from masim.interface.simulation_runner import SimulationRunner
-
-   async def main():
-       # Initialize with config path
-       runner = SimulationRunner("configs/AssetBubble/Rule/simulation.yml")
-
-       # Setup
-       if not await runner.setup():
-           print(f"Setup failed: {runner.status.error}")
-           return
-
-       # Run with progress callback
-       def on_progress(status):
-           print(f"Progress: {status.progress_pct:.1f}% - {status.message}")
-
-       async for update in runner.run(progress_callback=on_progress):
-           # Process round updates here
-           print(f"Round {update.round_num} completed")
-
-       # Cleanup
-       await runner.shutdown()
-
-   asyncio.run(main())
-   ```
-
-3. **Using Convenience Function:**
+4. **Discovery helpers** (standalone, no Streamlit needed):
 
    ```python
-   from masim.interface.simulation_runner import run_simulation_with_progress
+   from masim.interface.simulation_runner import (
+       discover_available_scenarios,
+       discover_variants,
+       list_agent_pool,
+   )
 
-   async def main():
-       async for status in run_simulation_with_progress(
-           "configs/AssetBubble/Rule/simulation.yml",
-           use_mock=False  # Set True for testing without real simulation
-       ):
-           print(f"{status.state}: {status.progress_pct:.1f}%")
-
-   asyncio.run(main())
-   ```
-
-4. **Mock Mode for Testing:**
-
-   Use mock mode to test the UI without running actual simulations:
-
-   ```python
-   runner = SimulationRunner(config_path)  # Real simulation
-   # vs
-   from masim.interface.simulation_runner import MockSimulationRunner
-   runner = MockSimulationRunner(config_path)  # Mock for testing
+   scenarios = discover_available_scenarios()   # ['AnchoringEffect', ...]
+   variants = discover_variants("AssetBubble")  # ['Rule', 'LLM', 'RuleLLM']
+   agents = list_agent_pool()                   # [{'name': 'noise-trader', ...}, ...]
    ```
 
 Classes
 -------
-- SimulationRunner: Main async runner with progress streaming
+- SimulationRunner: Main async runner with factory constructors
 - MockSimulationRunner: Mock runner for UI testing
 - RoundUpdate: Dataclass for per-round updates
 - SimulationStatus: Dataclass for simulation state
 
-Integration Notes
------------------
+Integration
+-----------
 - Used by: masim/interface/app.py (Streamlit web UI)
-- Depends on: masim/simulator/general.py (GeneralSimulator)
+- Depends on: masim/simulator/general.py, masim/interface/customized/
 - Progress callbacks enable real-time UI updates in Streamlit
 """
 
 import asyncio
 import logging
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -103,6 +99,92 @@ sys.path.insert(0, str(project_root))
 from masim.simulator.general import GeneralSimulator
 from masim.simulator.base import SimulationConfig
 from masim.utils.config import load_config, setup_logging
+
+
+# ---------------------------------------------------------------------------
+# Directory constants
+# ---------------------------------------------------------------------------
+
+_CONFIGS_DIR = project_root / "configs"
+_EXAMPLES_DIR = project_root / "examples"
+_AGENT_POOL_DIR = _EXAMPLES_DIR / "AGENT_POOL"
+_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION", "AGENT_POOL"}
+
+
+# ---------------------------------------------------------------------------
+# Scenario & agent discovery utilities
+# ---------------------------------------------------------------------------
+
+
+def discover_available_scenarios() -> List[str]:
+    """List all scenario names available under configs/.
+
+    Returns:
+        Sorted list of scenario base names (e.g. ['AnchoringEffect', 'AssetBubble', ...]).
+    """
+    if not _CONFIGS_DIR.exists():
+        return []
+    return sorted(
+        d.name
+        for d in _CONFIGS_DIR.iterdir()
+        if d.is_dir() and d.name not in _EXCLUDED_DIRS and not d.name.startswith(".")
+    )
+
+
+def discover_variants(scenario_name: str) -> List[str]:
+    """List variants (Rule, LLM, RuleLLM, Rag) available for a scenario.
+
+    Args:
+        scenario_name: Base scenario name (e.g. 'AssetBubble').
+
+    Returns:
+        List of variant names that have a simulation.yml, e.g. ['Rule', 'LLM'].
+    """
+    scenario_dir = _CONFIGS_DIR / scenario_name
+    if not scenario_dir.exists():
+        return []
+    return sorted(
+        d.name
+        for d in scenario_dir.iterdir()
+        if d.is_dir() and (d / "simulation.yml").exists()
+    )
+
+
+def list_agent_pool() -> List[Dict[str, Any]]:
+    """List available agent archetypes from AGENT_POOL/finance/.
+
+    Each entry contains:
+        - name: filename stem (e.g. 'noise-trader')
+        - path: absolute path to the .md file
+        - archetype: extracted from the Summary table (or derived from name)
+        - time_horizon: extracted from Summary table if present
+        - risk_tolerance: extracted from Summary table if present
+
+    Returns:
+        List of agent metadata dicts, sorted by name.
+    """
+    finance_dir = _AGENT_POOL_DIR / "finance"
+    if not finance_dir.exists():
+        return []
+
+    agents: List[Dict[str, Any]] = []
+    for md_file in sorted(finance_dir.glob("*.md")):
+        content = md_file.read_text(encoding="utf-8")
+        agents.append({
+            "name": md_file.stem,
+            "path": str(md_file),
+            "archetype": _extract_field(content, "Archetype") or md_file.stem,
+            "time_horizon": _extract_field(content, "Time Horizon") or "",
+            "risk_tolerance": _extract_field(content, "Risk Tolerance") or "",
+        })
+    return agents
+
+
+def _extract_field(markdown: str, field: str) -> str:
+    """Extract a value from a markdown Summary table row."""
+    pattern = rf"^\|\s*{re.escape(field)}\s*\|\s*(.*?)\s*\|\s*$"
+    match = re.search(pattern, markdown, flags=re.MULTILINE | re.IGNORECASE)
+    return match.group(1).strip() if match else ""
 
 
 @dataclass
@@ -129,7 +211,13 @@ class SimulationStatus:
 
 
 class SimulationRunner:
-    """Wrapper for running simulations with progress callbacks."""
+    """Async simulation runner with Default and Customized mode support.
+
+    Construction:
+        - ``SimulationRunner(config_path)``          — direct config path
+        - ``SimulationRunner.from_scenario(name)``   — Default mode (shipped scenario)
+        - ``SimulationRunner.from_customized(...)``  — Customized mode (AGENT_POOL)
+    """
 
     def __init__(self, config_path: str):
         """Initialize runner with config path.
@@ -142,6 +230,72 @@ class SimulationRunner:
         self.config: Optional[SimulationConfig] = None
         self.status = SimulationStatus(state="idle")
         self._stop_requested = False
+
+    # ------------------------------------------------------------------
+    # Factory constructors
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def from_scenario(
+        cls, scenario_name: str, variant: str = "Rule"
+    ) -> "SimulationRunner":
+        """Default mode: run a shipped scenario from configs/.
+
+        Resolves *scenario_name* + *variant* to the corresponding
+        ``configs/{scenario_name}/{variant}/simulation.yml``.
+
+        Args:
+            scenario_name: Base scenario name (e.g. 'AssetBubble').
+            variant: Decision-engine variant ('Rule', 'LLM', 'RuleLLM', 'Rag').
+
+        Returns:
+            A configured SimulationRunner ready for ``setup()`` → ``run()``.
+
+        Raises:
+            FileNotFoundError: When the resolved config file does not exist.
+        """
+        config_path = _CONFIGS_DIR / scenario_name / variant / "simulation.yml"
+        if not config_path.exists():
+            raise FileNotFoundError(
+                f"No simulation config found at {config_path}. "
+                f"Available variants for '{scenario_name}': "
+                f"{discover_variants(scenario_name) or '(none)'}"
+            )
+        return cls(str(config_path))
+
+    @classmethod
+    def from_customized(
+        cls,
+        scenario_name: str,
+        agent_selections: List[Any],
+    ) -> "SimulationRunner":
+        """Customized mode: build a bundle from AGENT_POOL selections, then run.
+
+        Generates a self-contained simulation bundle via
+        :func:`masim.interface.customized.write_customized_bundle`, then
+        returns a runner pointing at the generated config.
+
+        Args:
+            scenario_name: Base scenario to inherit market/round settings from.
+            agent_selections: List of ``CustomizedAgentSelection`` objects
+                describing the chosen agents, engines, and parameters.
+
+        Returns:
+            A configured SimulationRunner whose ``config_path`` points to
+            the freshly generated ``simulation.yml``.
+
+        Raises:
+            ValueError: Roster is incompatible with the chosen scenario.
+            FileNotFoundError: Base scenario config is missing.
+        """
+        from masim.interface.customized import write_customized_bundle
+
+        result = write_customized_bundle(
+            selections=agent_selections,
+            scenario_name=scenario_name,
+            project_root=project_root,
+        )
+        return cls(str(result.simulation_yaml))
 
     async def setup(self) -> bool:
         """Setup the simulation.

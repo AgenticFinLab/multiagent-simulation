@@ -24,8 +24,8 @@ from ..customized import (
     is_scenario_compatible,
     parse_parameters_file,
     scenario_market_features,
-    supported_engines as catalog_supported_engines,
     write_customized_bundle,
+    write_default_scenario_bundle,
 )
 from ..customized.handbook_params import ParamSpec
 
@@ -33,10 +33,16 @@ from ..customized.handbook_params import ParamSpec
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 AGENT_POOL_ROOT = PROJECT_ROOT / "examples" / "AGENT_POOL"
 IMAGE_ROOT = AGENT_POOL_ROOT / "agent_images"
-PROFILE_ROOT = AGENT_POOL_ROOT / "ExtractedExampleInvestors" / "unique"
+ICON_ROOT = IMAGE_ROOT / "icons"
+FINANCE_ROOT = AGENT_POOL_ROOT / "finance"
+PROFILE_ROOT = FINANCE_ROOT
 CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
 
 VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
+
+# Every agent supports all decision engines by default, so the customize
+# selector always offers the full set regardless of the agent.
+ALL_ENGINES = ("Rule", "LLM", "RuleLLM", "Rag")
 
 
 def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
@@ -44,9 +50,10 @@ def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
     paths = []
     if CATALOG_PATH.exists():
         paths.append(CATALOG_PATH)
-    png_root = IMAGE_ROOT / "png"
-    if png_root.exists():
-        paths.extend(sorted(png_root.glob("*.png")))
+    if ICON_ROOT.exists():
+        paths.extend(sorted(ICON_ROOT.glob("*.png")))
+    if FINANCE_ROOT.exists():
+        paths.extend(sorted(FINANCE_ROOT.glob("*.md")))
     return tuple((str(path), path.stat().st_mtime_ns) for path in paths)
 
 
@@ -65,20 +72,20 @@ def _scenario_probe_key(base: str, groups: dict) -> str:
 
 
 def render_entry_choice() -> None:
-    """Render the landing chooser: pre-built scenario vs. customized portfolio.
+    """Render the landing chooser: pre-built scenario vs. customized market.
 
     This is the landing page after launching the app. The user first
     selects *which* market dynamic to simulate (the scenario name fixes
     the scenario-level parameters such as round count and required
     market features); then chooses one of two paths:
 
-    * **Run with shipped agents** — small chips launch a curated
-      ``examples/<Scenario>/<Variant>/`` implementation directly.
-    * **Customize my roster** — proceeds to Stage 2 with the scenario
+    * **Default** — launch the pre-configured implementation
+      from ``examples/<Scenario>/<Variant>/`` directly.
+    * **Customize my market** — proceeds to Stage 2 with the scenario
       locked, where the user assembles their own investor lineup.
 
     The Rule / LLM / RuleLLM / RAG distinction is presented as an
-    *agent* attribute (which decision engine the shipped agents use),
+    *agent* attribute (which decision engine the agents use),
     not as part of the scenario itself.
     """
     _inject_market_styles()
@@ -118,8 +125,8 @@ def render_entry_choice() -> None:
     st.write(
         "Choose the market dynamic you want to simulate. The selected "
         "scenario fixes the simulation parameters; in Stage 2 you "
-        "decide whether to run with a shipped agent lineup or build "
-        "your own."
+        "decide whether to run the default setup or build "
+        "your own market."
     )
 
     if not group_names:
@@ -137,14 +144,60 @@ def render_entry_choice() -> None:
                 _render_scenario_card(base, None, selected_base)
 
     # Re-read after the loop in case a click changed the selection.
-    selected_base = st.session_state.get("selected_scenario_base", "")
-    if not selected_base:
+    # Clicking a card sets the selection AND advances to the
+    # variant_choice stage (see _render_scenario_card), so under normal
+    # flow we only reach here when nothing is selected yet.
+    if not st.session_state.get("selected_scenario_base", ""):
         st.info("Select a scenario above to continue.")
         return
 
+    # Defensive: a stale selection lingered without navigating (e.g. an
+    # interrupted rerun). Offer an explicit way forward instead of
+    # silently auto-redirecting (which previously trapped the user).
+    if st.button(
+        f"Continue with {scenario_display_name(selected_base)} →",
+        type="primary",
+    ):
+        st.session_state.workflow_stage = "variant_choice"
+        st.rerun()
+
+
+def render_variant_choice() -> None:
+    """Stage 2: choose Default or Customized (build your own market).
+
+    Rendered on its own page after the user selects a scenario in Stage 1.
+    """
+    _inject_market_styles()
+
+    selected_base = st.session_state.get("selected_scenario_base", "")
+    if not selected_base:
+        # Guard: shouldn't happen, but bounce back to Stage 1.
+        st.session_state.workflow_stage = "scenario_setup"
+        st.rerun()
+        return
+
+    groups = discover_scenario_groups()
+
+    with st.sidebar:
+        st.title("MASIM")
+        st.caption("Investment workflow")
+        st.markdown("---")
+        st.markdown("~~Stage 1. Pick a scenario~~")
+        st.markdown("**Stage 2.** Default agents or customize")
+        st.markdown("---")
+        if st.button("← Back to scenarios", use_container_width=True):
+            st.session_state.workflow_stage = "scenario_setup"
+            st.session_state.pop("selected_scenario_base", None)
+            st.rerun()
+        st.caption("MASIM v0.1.0")
+
+    st.markdown(
+        '<div class="market-kicker">Stage 2 of 2</div>', unsafe_allow_html=True
+    )
+    st.title("Choose how to run it")
+
     # --- Selected-scenario info strip ---------------------------------
     info = get_scenario_info(_scenario_probe_key(selected_base, groups))
-    st.divider()
     name_col, rounds_col, features_col = st.columns([3, 1, 2])
     with name_col:
         st.markdown(
@@ -156,7 +209,26 @@ def render_entry_choice() -> None:
         if info.get("description"):
             st.caption(info["description"])
     with rounds_col:
-        st.metric("Rounds", info.get("total_rounds", "—"))
+        # Editable round count. Keyed by scenario so each scenario keeps its
+        # own value and the widget auto-resets when the user switches
+        # scenarios. The shipped default seeds the initial value; changing
+        # it never mutates the shipped YAML (a copy is generated at launch).
+        try:
+            shipped_rounds = int(info.get("total_rounds") or 0)
+        except (TypeError, ValueError):
+            shipped_rounds = 0
+        st.number_input(
+            "Rounds",
+            min_value=1,
+            value=shipped_rounds if shipped_rounds > 0 else 1,
+            step=1,
+            key=f"variant_rounds_{selected_base}",
+            help=(
+                "Adjust the number of simulation rounds. Leaving it at the "
+                "default launches the shipped config unchanged; changing it "
+                "generates a reproducible copy with the new count."
+            ),
+        )
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
@@ -165,20 +237,18 @@ def render_entry_choice() -> None:
         )
 
     st.divider()
-    st.subheader("Stage 2 — choose how to run it")
 
     default_col, custom_col = st.columns(2, gap="large")
 
     with default_col:
         variant_keys = groups.get(selected_base) or []
-        st.markdown("**Run with shipped agents**")
+        st.markdown("**Default**")
         st.caption(
-            "Each chip launches a curated implementation already wired "
-            "up under `examples/`. The chip label is the decision "
-            "engine the shipped agents use."
+            "Launch the pre-configured scenario directly. "
+            "Each button represents a different decision engine."
         )
         if not variant_keys:
-            st.info("No shipped variants for this scenario.")
+            st.info("No default variants available for this scenario.")
         else:
             chip_cols = st.columns(min(len(variant_keys), 4), gap="small")
             for col, key in zip(chip_cols, variant_keys):
@@ -186,25 +256,25 @@ def render_entry_choice() -> None:
                 with col:
                     if st.button(
                         VARIANT_DISPLAY.get(variant, variant),
-                        key=f"stage1_default_{key}",
+                        key=f"stage2_default_{key}",
                         use_container_width=True,
                         help=(
-                            f"Launch the shipped {variant} implementation "
-                            f"of {scenario_display_name(selected_base)}."
+                            f"Run {scenario_display_name(selected_base)} "
+                            f"with the {variant} decision engine."
                         ),
                     ):
                         _launch_default_variant(key)
 
     with custom_col:
-        st.markdown("**Build your own investor roster**")
+        st.markdown("**Customized**")
         st.caption(
-            "Pick from the agent pool, edit each agent's parameters, "
+            "Select agents from the pool, edit each agent's parameters, "
             "optionally rewrite LLM prompts, then launch. The chosen "
             "scenario stays locked while you build."
         )
         if st.button(
-            "Customize my roster →",
-            key="stage1_go_customize",
+            "Select agents for simulation →",
+            key="stage2_go_customize",
             type="primary",
             use_container_width=True,
         ):
@@ -213,14 +283,55 @@ def render_entry_choice() -> None:
 
 
 def _launch_default_variant(scenario_key: str) -> None:
-    """Send the user straight to the workspace with a shipped variant."""
-    st.session_state.selected_scenario = scenario_key
+    """Send the user to the workspace with a default variant.
+
+    If the user adjusted the round count on the variant_choice page, we
+    never mutate the shipped config: instead a reproducible copy is
+    generated under ``configs/CUSTOMIZED_SIMULATION/Default-...-rN`` and
+    that bundle is launched. Leaving rounds at the shipped default keeps
+    the current zero-copy behaviour.
+    """
+    base = scenario_key.split("/", 1)[0]
+    variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
+
+    # Shipped round count for comparison.
+    info = get_scenario_info(scenario_key)
+    try:
+        shipped_rounds = int(info.get("total_rounds") or 0)
+    except (TypeError, ValueError):
+        shipped_rounds = 0
+    edited_rounds = st.session_state.get(f"variant_rounds_{base}")
+
+    launch_key = scenario_key
+    customized_id = None
+    if (
+        edited_rounds is not None
+        and shipped_rounds > 0
+        and int(edited_rounds) != shipped_rounds
+    ):
+        try:
+            result = write_default_scenario_bundle(
+                scenario_name=base,
+                variant=variant,
+                total_rounds=int(edited_rounds),
+                project_root=PROJECT_ROOT,
+            )
+            launch_key = f"CUSTOMIZED_SIMULATION/{result.customized_id}"
+            customized_id = result.customized_id
+        except (FileNotFoundError, ValueError) as exc:
+            st.error(f"Could not apply the adjusted round count: {exc}")
+            return
+
+    st.session_state.selected_scenario = launch_key
     st.session_state.selected_market_agents = []
     st.session_state.workflow_stage = "workspace"
     st.session_state.current_page = "Simulation"
-    # Clear any stale customized bundle id so sidebar / workspace do
-    # not mistakenly think we are inside a customized run.
-    st.session_state.pop("customized_dir_id", None)
+    # Track (or clear) the generated bundle id so the sidebar / workspace
+    # can label the run correctly.
+    if customized_id is not None:
+        st.session_state.customized_dir_id = customized_id
+    else:
+        st.session_state.pop("customized_dir_id", None)
     st.rerun()
 
 
@@ -296,20 +407,32 @@ def _theory_basis(markdown: str) -> str:
     return ""
 
 
+def _kebab_to_title(stem: str) -> str:
+    """Convert a kebab-case file stem to a Title-Cased display name."""
+    return " ".join(part.capitalize() for part in stem.split("-"))
+
+
 @st.cache_data(show_spinner=False)
 def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = None) -> list[dict[str, Any]]:
-    """Load avatar metadata and complete Markdown profiles."""
+    """Load agent metadata and profiles from finance/ + icons/.
+
+    The canonical agent pool is the set of ``finance/*.md`` specs that
+    have a matching ``agent_images/icons/finance-<stem>.png`` icon (the
+    ``finance-`` prefix encodes the agent's domain). When an explicit
+    ``agent_avatar_map.json`` exists it takes precedence.
+    """
     if CATALOG_PATH.exists():
         raw_items = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
     else:
         raw_items = [
             {
-                "agent_type": path.stem,
-                "display_name": re.sub(r"(?<!^)(?=[A-Z])", " ", path.stem),
-                "image_path": f"png/{path.name}",
-                "source_profile": str(PROFILE_ROOT / f"{path.stem}.md"),
+                "agent_type": md_path.stem,
+                "display_name": _kebab_to_title(md_path.stem),
+                "image_path": f"icons/finance-{md_path.stem}.png",
+                "source_profile": str(md_path),
             }
-            for path in sorted((IMAGE_ROOT / "png").glob("*.png"))
+            for md_path in sorted(FINANCE_ROOT.glob("*.md"))
+            if (ICON_ROOT / f"finance-{md_path.stem}.png").exists()
         ]
 
     catalog: list[dict[str, Any]] = []
@@ -448,17 +571,17 @@ def _inject_market_styles() -> None:
             border-left: 4px solid #287a6d; background: #f3f7f6;
             padding: 0.9rem 1rem; margin: 0.4rem 0 1rem;
         }
-        .portfolio-strip {
+        .market-strip {
             display: flex; gap: 0.45rem; flex-wrap: wrap;
             padding: 0.5rem 0 0.25rem;
         }
-        .portfolio-chip {
+        .market-chip {
             display: inline-flex; align-items: center; gap: 0.38rem;
             border: 1px solid #dce2e8; border-radius: 6px;
             padding: 0.28rem 0.48rem; background: #fff;
             color: #26323d; font-size: 0.74rem;
         }
-        .portfolio-chip img {width: 24px; height: 24px; border-radius: 4px; object-fit: cover;}
+        .market-chip img {width: 24px; height: 24px; border-radius: 4px; object-fit: cover;}
         /* Teal accent for the Stage-1 "Customize my roster" CTA. */
         .st-key-stage1_go_customize button {
             background-color: #287a6d !important;
@@ -555,8 +678,8 @@ def _render_customize_sidebar(scenario_base: str, selected_count: int) -> None:
         st.markdown("---")
         st.markdown("**✓ Stage 1.** Scenario")
         st.caption(scenario_display_name(scenario_base) if scenario_base else "—")
-        st.markdown("**Stage 2.** Build your roster")
-        st.caption(f"{selected_count} agents in portfolio")
+        st.markdown("**Stage 2.** Select agents")
+        st.caption(f"{selected_count} agents in market")
         st.markdown("---")
         st.caption("MASIM v0.1.0")
 
@@ -565,25 +688,39 @@ def render_back_to_stage1_bar(
     *,
     key_suffix: str,
     reset_runtime: bool = False,
+    target_stage: str = "scenario_setup",
 ) -> None:
-    """Render a small "Back to scenario picker" button at the top of any
-    post-Stage-1 page.
+    """Render a small "Back" button at the top of any post-Stage-1 page.
 
     Args:
         key_suffix: caller-specific suffix to keep widget keys unique
             across pages (e.g. ``"customize"``, ``"workspace"``).
         reset_runtime: when True, also clear simulation/replay state so
-            the user returns to a clean Stage-1 page after a run.
+            the user returns to a clean page after a run.
+        target_stage: workflow stage to return to. ``"scenario_setup"``
+            (default) goes all the way back to the scenario picker;
+            ``"variant_choice"`` returns to the "Choose how to run it"
+            page while keeping the committed scenario.
     """
+    if target_stage == "variant_choice":
+        label = "← Back to run options"
+        help_text = 'Return to the "Choose how to run it" page.'
+    else:
+        label = "← Back to scenario"
+        help_text = "Return to the scenario picker (Stage 1)."
     btn_col, _ = st.columns([1, 6])
     with btn_col:
         if st.button(
-            "← Back to scenario",
+            label,
             key=f"main_back_to_stage1_{key_suffix}",
             use_container_width=True,
-            help="Return to the scenario picker (Stage 1).",
+            help=help_text,
         ):
-            st.session_state.workflow_stage = "scenario_setup"
+            st.session_state.workflow_stage = target_stage
+            # Only forget the chosen scenario when going all the way back
+            # to Stage 1; variant_choice still needs it to render.
+            if target_stage == "scenario_setup":
+                st.session_state.pop("selected_scenario_base", None)
             if reset_runtime:
                 st.session_state.simulation_running = False
                 st.session_state.simulation_completed = False
@@ -592,8 +729,8 @@ def render_back_to_stage1_bar(
                 st.session_state.replay_index = 0
                 st.session_state.viewed_round_idx = 0
                 st.session_state.sys_messages = []
-                # Clear customized-bundle id so the next Stage-1 launch
-                # doesn't carry over a stale CUSTOMIZED_SIMULATION key.
+                # Clear customized-bundle id so the next launch doesn't
+                # carry over a stale CUSTOMIZED_SIMULATION key.
                 st.session_state.pop("customized_dir_id", None)
             st.rerun()
 
@@ -638,17 +775,13 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
     - One widget per parameter row: number_input for numerics, selectbox
       for enums, text_input as a fallback.
     - "Reset to defaults" reverts the agent's edits to the handbook
-      defaults; "Add to portfolio" persists params and ticks the
+      defaults; "Add to market" persists params and ticks the
       Add-to-Market checkbox in one atomic action.
     """
     agent_type = agent["agent_type"]
-    # The marketplace catalog (discovered from masim.agents class metadata) is
-    # the single source of truth for which engines an archetype supports. When
-    # an archetype is not yet discovered, fall back to offering Rule (the
-    # universal engine) so users can still edit handbook parameters; the
-    # Step-2 compatibility gate will surface a clear error before launch.
-    catalog_engines = tuple(catalog_supported_engines(agent_type))
-    all_engines = list(catalog_engines) if catalog_engines else ["Rule"]
+    # Every agent supports all decision engines by default, so the selector
+    # always offers the full set (Rule / LLM / RuleLLM / RAG).
+    all_engines = list(ALL_ENGINES)
     specs = _load_param_specs(agent)
 
     st.markdown('<div class="market-kicker">Customize</div>', unsafe_allow_html=True)
@@ -667,8 +800,8 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
         key=engine_key,
         help=(
             "Choose the decision-making engine. Rule = deterministic logic; "
-            "LLM = persona-driven prompt; RuleLLM = hybrid. Only engines "
-            "declared in the agent catalog are offered."
+            "LLM = persona-driven prompt; RuleLLM = hybrid; RAG = "
+            "retrieval-augmented. Every agent supports all engines."
         ),
     )
     engine = st.session_state[engine_key]
@@ -700,13 +833,13 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
     btn_add, btn_reset, btn_close = st.columns([2, 1, 1])
     with btn_add:
         already_in = bool(st.session_state.get(f"market_agent_{agent_type}", False))
-        primary_label = "Update in portfolio" if already_in else "Add to portfolio"
+        primary_label = "Update in market" if already_in else "Add to market"
         if st.button(primary_label, type="primary", use_container_width=True,
                      key=f"customized_add_{agent_type}"):
             persisted.clear()
             persisted.update(edited)
             st.session_state[f"market_agent_{agent_type}"] = True
-            st.toast(f"{agent['display_name']} → portfolio", icon="✓")
+            st.toast(f"{agent['display_name']} → market", icon="✅")
             st.rerun()
     with btn_reset:
         if st.button("Reset", use_container_width=True,
@@ -1001,14 +1134,14 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
     The card image links to the read-only profile (existing behaviour).
     A small "Customize" button below the avatar promotes the agent to
     the active slot in the parameter panel on the left, and a "Selected"
-    badge shows when the agent is already part of the portfolio.
+    badge shows when the agent is already part of the market.
     """
     agent_type = agent["agent_type"]
     href = f"?agent={quote(agent_type)}#agent-profile"
     selected = bool(st.session_state.get(f"market_agent_{agent_type}", False))
     is_active = st.session_state.get("customized_active_agent") == agent_type
     badge = (
-        "<span class='agent-status-chip selected'>✓ in portfolio</span>"
+        "<span class='agent-status-chip selected'>✓ in market</span>"
         if selected else "<span class='agent-status-chip muted'>not selected</span>"
     )
     card = f"""
@@ -1047,13 +1180,13 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
 
 
 def render_customize() -> None:
-    """Stage 2: build a custom investor roster for the locked scenario.
+    """Stage 2 (Customized): select agents for the locked scenario.
 
     The scenario chosen in Stage 1 is shown as a non-editable header
-    with a back button. The user picks agents from the catalog, edits
-    each agent's parameters (and prompts, for LLM engines), then clicks
-    *Launch simulation* to materialise a customized bundle and proceed
-    to the workspace.
+    with a back button. The user selects agents from the pool (shown as
+    icons), edits each agent's parameters (and prompts, for LLM engines),
+    then clicks *Launch simulation* to materialise a customized bundle
+    and proceed to the workspace.
     """
     scenario_base = st.session_state.get("selected_scenario_base", "")
     if not scenario_base:
@@ -1066,7 +1199,7 @@ def render_customize() -> None:
     catalog = load_agent_catalog(_agent_catalog_signature())
 
     # Streamlit drops widget keys for un-rendered pages; restore the
-    # checkbox state from the durable portfolio list when users return
+    # checkbox state from the durable market list when users return
     # to this stage from the workspace.
     saved_selection = set(st.session_state.get("selected_market_agents", []))
     for agent in catalog:
@@ -1076,14 +1209,17 @@ def render_customize() -> None:
 
     _render_customize_sidebar(scenario_base, len(_selected_types(catalog)))
 
-    render_back_to_stage1_bar(key_suffix="customize")
+    render_back_to_stage1_bar(
+        key_suffix="customize",
+        target_stage="variant_choice",
+    )
 
     st.markdown(
         '<div class="market-kicker">Stage 2 of 2</div>', unsafe_allow_html=True
     )
     title_col, lock_col = st.columns([2, 3])
     with title_col:
-        st.title("Build your roster")
+        st.title("Select & Setup Agents")
     with lock_col:
         info = get_scenario_info(
             _scenario_probe_key(scenario_base, discover_scenario_groups())
@@ -1100,10 +1236,10 @@ def render_customize() -> None:
         )
 
     st.write(
-        "Pick agents from the catalog, edit their parameters, and "
-        "(for LLM engines) tweak the persona / per-round prompt. Each "
-        "agent's decision engine is set per-card and only engines "
-        "declared in the marketplace catalog are offered."
+        "Select the agents you want in the simulation. Click an agent's "
+        "icon to view its profile, use **Customize** to edit its "
+        "parameters, and (for LLM engines) tweak the persona / per-round "
+        "prompt. Each agent's decision engine is set per-card."
     )
 
     requested_agent = _query_agent()
@@ -1172,11 +1308,11 @@ def render_customize() -> None:
 
     st.divider()
     if selected_agents:
-        st.markdown("**Current roster**")
-        _render_portfolio_chips(selected_agents)
+        st.markdown("**Current market**")
+        _render_market_chips(selected_agents)
         if compat_blocker:
             st.error(
-                "The current roster is incompatible with "
+                "The current market is incompatible with "
                 f"**{scenario_display_name(scenario_base)}**:\n\n"
                 + "\n".join(f"- {r}" for r in compat_blocker)
             )
@@ -1214,17 +1350,17 @@ def render_customize() -> None:
             st.rerun()
 
 
-def _render_portfolio_chips(agents: list[dict[str, Any]]) -> None:
+def _render_market_chips(agents: list[dict[str, Any]]) -> None:
     chips = []
     for agent in agents:
         chips.append(
-            '<span class="portfolio-chip">'
+            '<span class="market-chip">'
             f'<img src="{agent["image_uri"]}" alt="">'
             f'{html.escape(agent["display_name"])}'
             "</span>"
         )
     st.markdown(
-        f'<div class="portfolio-strip">{"".join(chips)}</div>',
+        f'<div class="market-strip">{"".join(chips)}</div>',
         unsafe_allow_html=True,
     )
 
@@ -1306,6 +1442,7 @@ def _render_scenario_card(
             use_container_width=True,
         ):
             st.session_state.selected_scenario_base = scenario_base
+            st.session_state.workflow_stage = "variant_choice"
             st.rerun()
 
 
@@ -1333,10 +1470,9 @@ def _write_customized_bundle(
     selections: list[CustomizedAgentSelection] = []
     for agent in selected_agents:
         agent_type = agent["agent_type"]
-        catalog_engines = catalog_supported_engines(agent_type) or ("Rule",)
         engine = st.session_state.get(
             f"market_engine_{agent_type}",
-            catalog_engines[0],
+            ALL_ENGINES[0],
         )
         params = customized_params.get(agent_type, {}).get(engine, {}) or {}
         selections.append(
@@ -1350,10 +1486,16 @@ def _write_customized_bundle(
         )
 
     try:
+        # Carry any user-adjusted round count from the variant_choice page
+        # into the generated bundle (None => keep the shipped count).
+        edited_rounds = st.session_state.get(f"variant_rounds_{scenario_base}")
         result = write_customized_bundle(
             selections=selections,
             scenario_name=scenario_base,
             project_root=PROJECT_ROOT,
+            total_rounds=(
+                int(edited_rounds) if edited_rounds is not None else None
+            ),
         )
     except Exception as exc:
         st.error(f"Failed to materialise customized bundle: {exc}")
@@ -1368,8 +1510,8 @@ def _write_customized_bundle(
     return f"CUSTOMIZED_SIMULATION/{result.customized_id}"
 
 
-def render_selected_portfolio_strip() -> None:
-    """Render the selected market portfolio in the simulation workspace."""
+def render_selected_market_strip() -> None:
+    """Render the selected market agents in the simulation workspace."""
     _inject_market_styles()
     catalog = load_agent_catalog(_agent_catalog_signature())
     selected = set(st.session_state.get("selected_market_agents", []))
@@ -1379,10 +1521,16 @@ def render_selected_portfolio_strip() -> None:
 
     heading, action = st.columns([5, 1])
     with heading:
-        st.caption("Selected investor portfolio")
-        _render_portfolio_chips(agents)
+        st.caption("Selected market agents")
+        _render_market_chips(agents)
     with action:
-        if st.button("Edit portfolio", use_container_width=True):
+        if st.button("Edit market", use_container_width=True):
             st.session_state.workflow_stage = "customize"
             st.session_state.current_page = "Simulation"
             st.rerun()
+
+
+# ---------------------------------------------------------------------------
+# Public alias (used by app.py)
+# ---------------------------------------------------------------------------
+render_scenario_setup = render_entry_choice
