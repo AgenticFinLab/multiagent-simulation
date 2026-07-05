@@ -42,6 +42,7 @@ from .config_writer import (
     CustomizedBundleResult,
     next_customized_id,
     write_customized_bundle,
+    write_default_scenario_bundle,
 )
 
 __all__ = [
@@ -68,4 +69,5 @@ __all__ = [
     "CustomizedBundleResult",
     "next_customized_id",
     "write_customized_bundle",
+    "write_default_scenario_bundle",
 ]

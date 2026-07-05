@@ -28,7 +28,8 @@ from masim.interface.components.agent_market import (
     render_back_to_stage1_bar,
     render_customize,
     render_scenario_setup,
-    render_selected_portfolio_strip,
+    render_selected_market_strip,
+    render_variant_choice,
 )
 
 # Page configuration
@@ -86,24 +87,14 @@ if "selected_market_agents" not in st.session_state:
     st.session_state.selected_market_agents = []
 
 
-def _requested_agent_from_url() -> str:
-    """Return the agent profile requested through the URL, if any."""
-    if hasattr(st, "query_params"):
-        value = st.query_params.get("agent", "")
-        return value[0] if isinstance(value, list) else value
-    values = st.experimental_get_query_params()
-    return values.get("agent", [""])[0]
-
-
-if _requested_agent_from_url():
-    st.session_state.workflow_stage = "agents"
-
-
 def main():
     """Main application entry point."""
     workflow_stage = st.session_state.workflow_stage
     if workflow_stage == "scenario_setup":
         render_scenario_setup()
+        return
+    if workflow_stage == "variant_choice":
+        render_variant_choice()
         return
     if workflow_stage == "customize":
         render_customize()
@@ -111,7 +102,11 @@ def main():
 
     selected_scenario = render_sidebar()
 
-    render_back_to_stage1_bar(key_suffix="workspace", reset_runtime=True)
+    render_back_to_stage1_bar(
+        key_suffix="workspace",
+        reset_runtime=True,
+        target_stage="variant_choice",
+    )
 
     if st.session_state.current_page == "Analysis":
         render_analysis_page(selected_scenario)
@@ -139,7 +134,7 @@ def render_simulation_page(scenario_name: str):
       | system notices                                           |
       └──────────────────────────────────────────────────────────┘
     """
-    render_selected_portfolio_strip()
+    render_selected_market_strip()
     st.divider()
 
     title_col, btn_col = st.columns([3, 1])
@@ -203,7 +198,7 @@ def render_simulation_page(scenario_name: str):
 
     # ── Investor Activity panel (single round, refreshes in place) ─────────
     st.markdown("---")
-    _render_investor_activity(rounds[viewed_idx])
+    _render_investor_activity(rounds[viewed_idx], scenario_name)
 
     # ── Replay pump ────────────────────────────────────────────────────────
     # Delivers one new round per Streamlit rerun; the activity panel then
@@ -230,16 +225,22 @@ def render_simulation_page(scenario_name: str):
 # ---------------------------------------------------------------------------
 
 
-def _render_investor_activity(round_data):
+def _render_investor_activity(round_data, scenario_name: str):
     """Render the single-round Investor Activity panel.
 
     Displays market state (price, return, prev price) as metric cards then
-    all agent actions as compact colour-coded cards in a two-column grid.
-    This panel replaces itself on every rerun — no history accumulates.
+    every configured investor as a compact colour-coded card in a two-column
+    grid. Agents that placed no order this round are shown as HOLD, so the
+    panel always reflects the full roster from the sidebar (not just the
+    agents that traded). This panel replaces itself on every rerun.
 
     Args:
         round_data: RoundData from data_loader for the round to display.
+        scenario_name: Active scenario key (to resolve the full roster).
     """
+    from masim.interface.config_loader import get_agent_roster
+    from masim.interface.data_loader import AgentAction
+
     rnd = round_data.round_num
     st.subheader(f"📈 Investor Activity — Round {rnd}")
 
@@ -262,14 +263,29 @@ def _render_investor_activity(round_data):
                 st.metric("Prev Price", f"{prev:.4f}")
         st.markdown("")
 
-    # Agent action cards in a 2-column grid
-    actions = round_data.agent_actions
-    if not actions:
-        st.info("No agent actions recorded for this round.")
+    # Build the full roster and merge in this round's actual actions; agents
+    # with no recorded order are rendered as synthetic HOLD cards.
+    action_by_id = {a.agent_id: a for a in round_data.agent_actions}
+    roster = get_agent_roster(scenario_name)
+    roster_ids = {m["id"] for m in roster}
+
+    display_actions = []
+    for member in roster:
+        act = action_by_id.get(member["id"])
+        if act is None:
+            act = AgentAction(round_num=rnd, agent_id=member["id"], content={})
+        display_actions.append(act)
+    # Safety: include any traded agent not present in the config roster.
+    for a in round_data.agent_actions:
+        if a.agent_id not in roster_ids:
+            display_actions.append(a)
+
+    if not display_actions:
+        st.info("No agents configured for this scenario.")
         return
 
     cols = st.columns(2)
-    for i, act in enumerate(actions):
+    for i, act in enumerate(display_actions):
         with cols[i % 2]:
             _render_action_card(act)
 
@@ -280,12 +296,12 @@ def _render_investor_activity(round_data):
 
 
 def _render_price_chart(rounds: list, viewed_idx: int):
-    """Render a live price-dynamics chart that extends gradually during replay.
+    """Render a live price-dynamics chart that grows up to the current round.
 
-    The chart covers ALL rounds from the start, but only populates data up to
-    *viewed_idx*.  This keeps the x-axis range and trace count stable across
-    reruns so plotly can update in-place (no flicker).  During rapid replay the
-    figure is cached and only rebuilt every few rounds for performance.
+    Only rounds 0..*viewed_idx* are plotted and the x-axis is trimmed to the
+    currently viewed round (no empty future span). The line therefore extends
+    one round at a time during replay. During rapid replay the figure is
+    cached and only rebuilt every few rounds for performance.
 
     Args:
         rounds: Full list of RoundData objects.
@@ -319,17 +335,18 @@ def _render_price_chart(rounds: list, viewed_idx: int):
     market_prices: list = []
     fundamentals: list = []
 
-    for i, rd in enumerate(rounds):
+    for i in range(viewed_idx + 1):
+        rd = rounds[i]
         round_nums.append(rd.round_num)
-        if i <= viewed_idx and rd.market_broadcast is not None:
-            mb = rd.market_broadcast
+        mb = rd.market_broadcast
+        if mb is not None:
             mp = float(mb.stock_price) if mb.stock_price is not None else None
             fv = float(mb.fundamental) if mb.fundamental is not None else None
-            market_prices.append(mp)
-            fundamentals.append(fv)
         else:
-            market_prices.append(None)
-            fundamentals.append(None)
+            mp = None
+            fv = None
+        market_prices.append(mp)
+        fundamentals.append(fv)
 
     has_market = any(p is not None for p in market_prices)
     has_fundamental = any(f is not None for f in fundamentals)
@@ -398,7 +415,7 @@ def _render_price_chart(rounds: list, viewed_idx: int):
             range=[0.5, round_nums[-1] + 0.5],
             gridcolor="rgba(255,255,255,0.06)",
             zeroline=False,
-            dtick=max(1, n_rounds // 10),
+            dtick=max(1, len(round_nums) // 10),
         ),
         yaxis=dict(
             gridcolor="rgba(255,255,255,0.06)",

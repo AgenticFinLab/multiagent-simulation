@@ -156,6 +156,7 @@ def write_customized_bundle(
     project_root: Path,
     customized_id: Optional[str] = None,
     timestamp: Optional[_dt.datetime] = None,
+    total_rounds: Optional[int] = None,
 ) -> CustomizedBundleResult:
     """Materialise a customized bundle on disk.
 
@@ -232,6 +233,10 @@ def write_customized_bundle(
     # --- simulation.yml: copy verbatim and rewrite the record/comm paths
     simulation_text = base_simulation.read_text(encoding="utf-8")
     simulation_text = _retarget_record_paths(simulation_text, cid)
+    # Honour a user-adjusted round count (from the variant_choice page)
+    # by baking it into the generated config, keeping the run reproducible.
+    if total_rounds is not None:
+        simulation_text = _set_total_rounds(simulation_text, int(total_rounds))
     sim_out = config_dir / "simulation.yml"
     sim_out.write_text(simulation_text, encoding="utf-8")
 
@@ -305,6 +310,118 @@ def write_customized_bundle(
         runner_path=runner_out,
         scenario_name=scenario_name,
         prompts_path=prompts_path,
+    )
+
+
+def write_default_scenario_bundle(
+    *,
+    scenario_name: str,
+    variant: str,
+    total_rounds: int,
+    project_root: Path,
+) -> CustomizedBundleResult:
+    """Materialise a rounds-adjusted copy of a shipped scenario/variant.
+
+    Unlike :func:`write_customized_bundle` (which rebuilds the roster from
+    the user's agent picks), this copies the shipped ``{scenario}/{variant}``
+    config *verbatim* and only overrides ``total_rounds``. The copy lives
+    under ``configs/CUSTOMIZED_SIMULATION/Default-{scenario}-{variant}-r{N}``
+    so the shipped YAML is never mutated and the run stays reproducible.
+
+    The folder name is deterministic: re-running the same scenario/variant
+    at the same round count reuses (overwrites) the same bundle, so no
+    duplicate folders accumulate.
+
+    Args:
+        scenario_name: scenario base name (e.g. ``"AssetBubble"``).
+        variant: engine variant folder (e.g. ``"Rule"``).
+        total_rounds: the user-adjusted round count to bake in.
+        project_root: repo root (parent of ``configs/`` and ``examples/``).
+
+    Returns:
+        :class:`CustomizedBundleResult` with absolute paths of the copied
+        artifacts.
+
+    Raises:
+        FileNotFoundError: the scenario/variant folder or its
+            ``simulation.yml`` is missing.
+        ValueError: ``simulation.yml`` has no ``total_rounds`` key.
+    """
+    project_root = Path(project_root).resolve()
+    base_path = project_root / "configs" / scenario_name / variant
+    base_simulation = base_path / "simulation.yml"
+    if not base_simulation.exists():
+        raise FileNotFoundError(
+            "Scenario simulation file is missing for "
+            f"'{scenario_name}/{variant}': {base_simulation}"
+        )
+
+    cid = f"Default-{scenario_name}-{variant}-r{int(total_rounds)}"
+    configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
+    examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
+    config_dir = configs_parent / cid
+    example_dir = examples_parent / cid
+    config_dir.mkdir(parents=True, exist_ok=True)
+    example_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy every YAML verbatim; retarget record paths so this run writes
+    # under its own EXPERIMENT subtree, and bake the new round count into
+    # simulation.yml only.
+    for yml in sorted(base_path.glob("*.yml")):
+        text = _retarget_record_paths(yml.read_text(encoding="utf-8"), cid)
+        if yml.name == "simulation.yml":
+            text = _set_total_rounds(text, int(total_rounds))
+        (config_dir / yml.name).write_text(text, encoding="utf-8")
+
+    def _out(name: str) -> Path:
+        return config_dir / name
+
+    # --- run_customized.py + package marker so the bundle is runnable
+    runner_text = _render_runner_script(cid=cid, scenario_name=scenario_name)
+    runner_out = example_dir / "run_customized.py"
+    runner_out.write_text(runner_text, encoding="utf-8")
+    init_path = example_dir / "__init__.py"
+    if not init_path.exists():
+        init_path.write_text("", encoding="utf-8")
+
+    # --- README.md provenance for the rounds-adjusted copy
+    readme_lines = [
+        f"# {cid}",
+        "",
+        "Auto-generated rounds-adjusted copy of a shipped scenario.",
+        "",
+        f"- **Scenario**: `{scenario_name}/{variant}`",
+        f"- **total_rounds**: {int(total_rounds)}",
+        f"- **Generated at**: "
+        f"{_dt.datetime.now().isoformat(timespec='seconds')}",
+        f"- **Config bundle**: `configs/CUSTOMIZED_SIMULATION/{cid}/`",
+        "",
+        "The roster is identical to the shipped scenario; only the round "
+        "count was changed through the interface.",
+        "",
+        "## Run",
+        "",
+        "```bash",
+        f"python examples/CUSTOMIZED_SIMULATION/{cid}/run_customized.py \\",
+        f"    -c configs/CUSTOMIZED_SIMULATION/{cid}/simulation.yml",
+        "```",
+        "",
+    ]
+    (example_dir / "README.md").write_text(
+        "\n".join(readme_lines), encoding="utf-8"
+    )
+
+    return CustomizedBundleResult(
+        customized_id=cid,
+        config_dir=config_dir,
+        example_dir=example_dir,
+        simulation_yaml=_out("simulation.yml"),
+        players_yaml=_out("players.yml"),
+        topology_yaml=_out("topology.yml"),
+        persona_yaml=_out("persona.yml"),
+        runner_path=runner_out,
+        scenario_name=scenario_name,
+        prompts_path=None,
     )
 
 
@@ -763,6 +880,25 @@ def _retarget_record_paths(text: str, cid: str) -> str:
         return f'{key}: "{target}/{kind}"'
 
     return _RECORD_PATH_RE.sub(_sub, text)
+
+
+_TOTAL_ROUNDS_RE = re.compile(r"^(\s*total_rounds\s*:\s*)\d+", re.MULTILINE)
+
+
+def _set_total_rounds(text: str, total_rounds: int) -> str:
+    """Rewrite the ``total_rounds`` value in a simulation.yml text blob.
+
+    Only the numeric value is replaced; indentation, key spelling and any
+    trailing comment are preserved. Raises ``ValueError`` if no
+    ``total_rounds`` key is present so the caller fails loudly rather than
+    silently launching with the shipped count.
+    """
+    new_text, n = _TOTAL_ROUNDS_RE.subn(
+        lambda m: f"{m.group(1)}{int(total_rounds)}", text
+    )
+    if n == 0:
+        raise ValueError("Could not locate 'total_rounds' in simulation.yml")
+    return new_text
 
 
 # ----------------------------------------------------------------------
