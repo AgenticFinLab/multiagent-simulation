@@ -68,6 +68,23 @@ def _batch_to_rounds(values: list) -> Dict[int, float]:
     return {i + 1: v for i, v in enumerate(values)}
 
 
+def _aligned_market_series(
+    market_prices: Dict[int, float],
+    fundamentals: Dict[int, float],
+) -> Tuple[List[int], List[float], List[float]]:
+    """Return price and fundamental series aligned on market-price rounds."""
+    if not market_prices:
+        raise ValueError("No market price data recorded - simulation data is incomplete")
+    if not fundamentals:
+        raise ValueError("No fundamental data recorded - simulation data is incomplete")
+
+    fallback_fundamental = float(np.mean(list(fundamentals.values())))
+    rounds_sorted = sorted(market_prices.keys())
+    prices_list = [float(market_prices[r]) for r in rounds_sorted]
+    fund_list = [float(fundamentals.get(r, fallback_fundamental)) for r in rounds_sorted]
+    return rounds_sorted, prices_list, fund_list
+
+
 def _load_data(results) -> Dict[str, Any]:
     """Load price/fundamental batch stores and investor turn payloads.
 
@@ -548,9 +565,9 @@ def _create_visualizations(
     02_archegoscollapse_analysis.png : Rolling Volatility + Return Autocorrelation
     03_summary.png         : Agent VWAP comparison + Cascade onset annotation
     """
-    rounds_sorted = sorted(market_prices.keys())
-    prices_list = [market_prices[r] for r in rounds_sorted]
-    fund_list = [fundamentals[r] for r in rounds_sorted]
+    rounds_sorted, prices_list, fund_list = _aligned_market_series(
+        market_prices, fundamentals
+    )
     rounds_arr = np.array(rounds_sorted)
     prices_arr = np.array(prices_list)
     fund_arr = np.array(fund_list)
@@ -806,11 +823,10 @@ def analyze_archegos_collapse(
     fundamentals = data["fundamentals"]
     investor_payloads = data["investor_payloads"]
 
-    rounds_sorted = sorted(market_prices.keys())
-    prices_list = [market_prices[r] for r in rounds_sorted]
-    if not fundamentals:
-        raise ValueError("No fundamental data recorded - simulation data is incomplete")
-    fund_value = float(np.mean(list(fundamentals.values())))
+    rounds_sorted, prices_list, fund_list = _aligned_market_series(
+        market_prices, fundamentals
+    )
+    fund_value = float(np.mean(fund_list))
     total_rounds = len(rounds_sorted)
 
     # Metrics
