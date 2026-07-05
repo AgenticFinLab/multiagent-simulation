@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from examples.standard_rule_analysis import (
+from examples.AnchoringEffect.standard_rule_analysis import (
     MetricUnavailable,
     _market_data_from_payload,
     _market_players,
