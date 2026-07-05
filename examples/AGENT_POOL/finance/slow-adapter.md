@@ -186,3 +186,4 @@ Decision: hold.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - Initial creation based on Brock-Hommes slow-belief archetype |
 | Status | draft |
+| Icon        | ![](../agent_images/icons/finance-slow-adapter.png) |

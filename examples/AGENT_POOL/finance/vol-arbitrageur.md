@@ -294,3 +294,4 @@ State update: cash increases by `5000 * price`; position falls to zero.
 | Version | 1.0.0 |
 | Change log | 1.0.0 — extracted VolArbitrageur into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A. |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-vol-arbitrageur.png) |

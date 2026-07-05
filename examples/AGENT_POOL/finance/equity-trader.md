@@ -295,3 +295,4 @@ State update: cash increases by `1000 * price`; position falls by 1000.
 | Version | 1.0.0 |
 | Change log | 1.0.0 — extracted EquityTrader into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A. |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-equity-trader.png) |
