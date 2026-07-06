@@ -8,11 +8,11 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 |----|------------------------|--------|-------------|-------------|-------------------|
 | 1  | AnchoringEffect        | 🟢     | Sijia       | Jul 1 2026  | —                 |
 | 2  | ArchegosCollapse       | 🟡     | Sijia       | Jul 1 2026  | —                 |
-| 3  | AsianFinancialCrisis   | 🟡      |Wenyou      | Jul 6 2026  | —                 |
-| 4  | AssetBubble            | 🟡      |Wenyou      | Jul 6 2026  | —                 |
-| 5  | AvailabilityBias       | 🟡      |Wenyou      | Jul 6 2026  | —                 |
-| 6  | BlackMonday1987        | ⬜      | —           | —           | —                 |
-| 7  | CarryTradeUnwind       | ⬜      | —           | —           | —                 |
+| 3  | AsianFinancialCrisis   | 🟢      |Qiqi      | Jul 6 2026  | LLM, Rule, RuleLLM, Rag             |
+| 4  | AssetBubble            | 🟢      |Qiqi      | Jul 6 2026  | LLM, Rule, RuleLLM, Rag               |
+| 5  | AvailabilityBias       | 🟢      |Qiqi      | Jul 6 2026  | LLM, Rule, RuleLLM, Rag            |
+| 6  | BlackMonday1987        | 🟡     | Qiqi        | Jul 6 2026          | —                 |
+| 7  | CarryTradeUnwind       | 🟡      | Qiqi        | Jul 6 2026               | —                 |
 | 8  | ConfirmationBias       | ⬜      | —           | —           | —                 |
 | 9  | CreditCycle            | ⬜      | —           | —           | —                 |
 | 10 | CurrencyCrisis         | ⬜      | —           | —           | —                 |
