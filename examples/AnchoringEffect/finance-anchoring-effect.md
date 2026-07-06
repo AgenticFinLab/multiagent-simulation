@@ -121,6 +121,23 @@
   1 normalised §9 row well under the 10 % cap). Status retained
   `locked`; transition `locked → released` deferred to Closeout after
   Steps 1–10 re-verify.
+- 2026-07-06: Round-2 polish Steps 1–3 (research / agent+environment /
+  config re-audit).
+    - Step 1 patch: promoted the calibration content at the tail of
+      Theory#3 (Campbell & Sharpe 2009) `Relevance to This Simulation`
+      bullet in `simulation-bases.md §2` into its own
+      **Calibration Implication** bullet, restoring six-field
+      completeness across all 9 Theory blocks. Bidirectional
+      §2 ↔ target §4 coverage retained (1-to-1 mapping unchanged).
+    - Step 2 re-verify: all 9 AGENT_POOL profiles under
+      `examples/AGENT_POOL/finance/` carry the canonical Handbook §3
+      H2 sections (Summary, Definition, Theoretical Foundation, Design
+      Purpose, Behavioral Framework, Parameters, Worked Examples,
+      Academic References, Design Provenance); root §3 / §5 / §7
+      present. No structural changes required.
+    - Step 3 re-verify: all 16 YAML files parse under SafeLoader with
+      no-op `!include`; variant folder set = {Rule, LLM, RuleLLM, Rag}
+      matches target §10.1 four-`Yes` declaration exactly. No changes.
 
 ### §0 Traceability Matrix (post-polish)
 
