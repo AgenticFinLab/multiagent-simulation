@@ -7,9 +7,9 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | #  | Scenario               | Status | Modified By | Date        | Executed Variants |
 |----|------------------------|--------|-------------|-------------|-------------------|
 | 1  | AnchoringEffect        | 🟢     | Sijia       | Jul 1 2026  | —                 |
-| 2  | ArchegosCollapse       | 🟡     | Sijia       | Jul 1 2026  | —                 |
+| 2  | ArchegosCollapse       | 🟢     | Qiqi       | Jul 6 2026  | LLM, Rule, RuleLLM, Rag                |
 | 3  | AsianFinancialCrisis   | 🟢      |Qiqi      | Jul 6 2026  | LLM, Rule, RuleLLM, Rag             |
-| 4  | AssetBubble            | 🟢      |Qiqi      | Jul 6 2026  | LLM, Rule, RuleLLM, Rag               |
+| 4  | AssetBubble            | 🟡   |Qiqi      | Jul 6 2026  | Rule,             |
 | 5  | AvailabilityBias       | 🟢      |Qiqi      | Jul 6 2026  | LLM, Rule, RuleLLM, Rag            |
 | 6  | BlackMonday1987        | 🟡     | Qiqi        | Jul 6 2026          | —                 |
 | 7  | CarryTradeUnwind       | 🟡      | Qiqi        | Jul 6 2026               | —                 |
