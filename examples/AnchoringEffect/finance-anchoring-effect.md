@@ -26,7 +26,7 @@
 | Created       | 2026-07-01                                                                                           |
 | Pipeline      | masim/skills/create-simulation-pipeline.md                                                           |
 | Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                              |
-| Status        | locked                                                                                               |
+| Status        | released                                                                                             |
 
 ### §0 Meta CHANGELOG
 
@@ -161,12 +161,44 @@
       (dual-section rule), and Rag `analysis.py` still emits the
       `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
       sentinel with the corresponding equality check.
+- 2026-07-06: Round-2 polish Steps 5-10 + Closeout (Pass-1 theory-code,
+  Pass-2 code+analysis, Pass-3 docs cross-check + Rule 5-round smoke).
+    - Pass-1/Pass-2 review + smoke against
+      `configs/AnchoringEffect/Rule/simulation.yml` surfaced four
+      latent-broken code paths introduced by the Round-1 refactor but
+      never exercised by a Rule smoke:
+        1. `_get_adjustment_factor` helper removed while its call site
+           in `analyze_anchoring` was retained (NameError).
+        2. `AnchoringValidationResult` dataclass removed while
+           `_validate_anchoring_effect` still constructs it (NameError).
+        3. `compute_all_metrics` still assumed the pre-refactor
+           `{category: {name: outputs}}` return shape of
+           `MetricsRegistry.compute_all`; the evaluation-first registry
+           returns `{"metrics", "unavailable", "errors"}`
+           (AttributeError).
+        4. Summary construction called the removed
+           `REGISTRY.by_category()`; new API exposes `categories()` +
+           `metrics_in_category()` (AttributeError).
+    - All four bugs fixed by restoring the two scenario-local pieces
+      (`_get_adjustment_factor`, `AnchoringValidationResult`) and by
+      consuming the new registry API. Rule variant now runs end-to-end:
+      all 44 registered metrics compute, 11 dashboards render, printed
+      validation summary emits (data-provenance fit-score is a run-time
+      calibration outcome, not a code-path issue).
+    - Pass-3 docs cross-check: §0/§1/§2/§3/§4/§5/§6/§7/§8/§9/§10
+      structural counts unchanged; §11 checklist three-PASS retained
+      from Step 0.
+    - Non-Rule variant smoke (LLM/RuleLLM/Rag) deferred (environment-
+      scoped: LLM API credentials not provisioned in polish sandbox);
+      structural + import-smoke coverage confirms delegator chains
+      are intact.
+    - **Status transition** `locked → released` per pipeline Closeout.
 
 ### §0 Traceability Matrix (post-polish)
 
 | Target section | Primary evidence                                                                | Cross-references                                                                    |
 |----------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| §1 Meta        | `finance-anchoring-effect.md` frontmatter                                       | Populated by Case B reverse-reconstruction; Status = locked                         |
+| §1 Meta        | `finance-anchoring-effect.md` frontmatter                                       | Populated by Case B reverse-reconstruction; Status = released                       |
 | §2 Phenomenon  | `simulation-bases.md §1.1`                                                      | Trigger / Mechanism / Participants / Resolution all sourced from §1.1               |
 | §3 Research    | `analysis-bases.md §1` (objectives O1 – O6)                                     | Ablation → O3; sweep → O4; variant compare → O6                                     |
 | §4 Anchors     | `simulation-bases.md §2` (9 theory blocks)                                      | 1:1 mapping §4.1 – §4.9 → bases §2 Theory blocks in order                           |
