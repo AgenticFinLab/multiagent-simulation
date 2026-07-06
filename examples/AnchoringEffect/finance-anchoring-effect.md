@@ -113,6 +113,14 @@
       `examples/AnchoringEffect/{,LLM,Rag,Rule,RuleLLM}/` moved to
       `~/.Trash/pycache-anchoringeffect-<epoch>/` per macOS trash
       policy (no permanent deletion).
+- 2026-07-06: Round-2 polish Step 0 (target-file gate, Case A). §11
+  checklist re-run three consecutive PASS under the evaluation-first
+  baseline (`masim/evaluation/README.md`, `10-evaluation-architecture.md`
+  Pass 2 Analysis Migration Rule). Structural counts unchanged
+  (§1–§10 headers, 9 §4 anchors, 9 §7 rows, four §10.1 `Yes` variants,
+  1 normalised §9 row well under the 10 % cap). Status retained
+  `locked`; transition `locked → released` deferred to Closeout after
+  Steps 1–10 re-verify.
 
 ### §0 Traceability Matrix (post-polish)
 
