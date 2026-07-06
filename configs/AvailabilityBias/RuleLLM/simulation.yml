@@ -6,7 +6,7 @@
 # and explicit quantitative rules from the Rule variant.
 #
 # Usage:
-#   python -m examples.AvailabilityBias.RuleLLM.run -c configs/AvailabilityBias/RuleLLM/simulation.yml
+#   python examples/AvailabilityBias/RuleLLM/run_availabilitybias_rulellm.py -c configs/AvailabilityBias/RuleLLM/simulation.yml
 # =============================================================================
 
 setting:
