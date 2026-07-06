@@ -55,6 +55,51 @@ from examples.AnchoringEffect.metrics import REGISTRY
 # ---------------------------------------------------------------------------
 
 
+def _get_adjustment_factor(config: dict) -> float:
+    """Return the anchoring ``adjustment_factor`` from the first player
+    config that exposes it under ``config.extras``.
+
+    Scenario-specific config parsing — kept local because
+    ``adjustment_factor`` is an AnchoringEffect-only field.  Raises if
+    no player carries the field, mirroring the pre-refactor behaviour."""
+
+    players = config["players"]
+    for player_cfg in players.values():
+        if "config" not in player_cfg:
+            continue
+        extras = player_cfg["config"].get("extras", {})
+        if "adjustment_factor" in extras:
+            return float(extras["adjustment_factor"])
+    raise ValueError(
+        "No adjustment_factor found in AnchoringEffect player configs."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Validation — analysis-bases.md §6 (Task 5: tightened gates)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class AnchoringValidationResult:
+    """Result of AnchoringEffect simulation validation."""
+
+    is_valid: bool
+    score: float
+    criteria: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    advisories: List[str] = field(default_factory=list)
+    interpretation: str = ""
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "is_valid": self.is_valid,
+            "score": round(self.score, 4),
+            "criteria": self.criteria,
+            "advisories": self.advisories,
+            "interpretation": self.interpretation,
+        }
+
+
 def _score_band(value: float, lo: float, hi: float, soft: float = 0.5) -> float:
     """Triangular score: 1.0 inside [lo, hi]; linearly decays to ``soft`` at
     [lo/2, 2*hi] then to 0 at [lo/4, 4*hi]."""
@@ -887,17 +932,22 @@ def calculate_metrics(data: Dict[str, Any], config: dict) -> Dict[str, Any]:
 def compute_all_metrics(data: Dict[str, Any], config: dict) -> Dict[str, Any]:
     """Run every registered metric and return a flat ``{name: outputs}`` dict.
 
-    Metrics that raise :class:`MetricUnavailable` are silently skipped (the
-    reason is preserved under the ``_unavailable`` key).
+    The evaluation-first ``MetricsRegistry.compute_all`` returns::
+
+        {"metrics": {name: outputs, ...},
+         "unavailable": [name, ...],
+         "errors": {name: message, ...}}
+
+    We flatten the ``metrics`` payload here so callers can index by metric
+    name directly, and we preserve the unavailable / error lists under
+    reserved ``_unavailable`` / ``_errors`` keys.
     """
-    nested = REGISTRY.compute_all(data, config)
-    flat: Dict[str, Any] = {}
-    for category, metrics in nested.items():
-        if category == "_unavailable":
-            flat["_unavailable"] = metrics
-            continue
-        for name, outputs in metrics.items():
-            flat[name] = outputs
+    result = REGISTRY.compute_all(data, config)
+    flat: Dict[str, Any] = dict(result.get("metrics", {}))
+    if result.get("unavailable"):
+        flat["_unavailable"] = list(result["unavailable"])
+    if result.get("errors"):
+        flat["_errors"] = dict(result["errors"])
     return flat
 
 
@@ -981,9 +1031,9 @@ def analyze_anchoring(
         "fundamental_value": fund_value,
         "adjustment_factor": adjustment_factor,
         "metrics_by_category": {
-            cat: {m.name: computed.get(m.name) for m in metrics
+            cat: {m.name: computed.get(m.name) for m in REGISTRY.metrics_in_category(cat)
                   if computed.get(m.name) is not None}
-            for cat, metrics in REGISTRY.by_category().items()
+            for cat in REGISTRY.categories()
         },
         "metrics_unavailable": computed.get("_unavailable", {}),
         "metrics_flat": {k: v for k, v in computed.items()
