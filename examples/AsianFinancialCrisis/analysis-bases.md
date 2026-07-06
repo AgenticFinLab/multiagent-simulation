@@ -71,7 +71,7 @@
   crisis_velocity = max_t |P(t) − P(t−1)|
   ```
   Computed over all rounds (the maximum will occur during the crisis phase).
-- **Derivation Rationale**: Currency crises are characterised by "sudden stop" dynamics — the deterioration is not gradual but sharp and concentrated in a few rounds. Crisis velocity distinguishes sharp sudden-stop crises (ArchegosCollapse-style) from gradual corrections (AnchoringEffect-style). For the Asian crisis, Radelet & Sachs (1998) document that the Thai baht fell 15–20% in a single day after depegging.
+- **Derivation Rationale**: Currency crises are characterised by "sudden stop" dynamics — the deterioration is not gradual but sharp and concentrated in a few rounds. Crisis velocity distinguishes abrupt capital-flow reversals from gradual exchange-rate corrections. For the Asian crisis, Radelet & Sachs (1998) document that the Thai baht fell 15–20% in a single day after depegging.
 - **Academic Calibration Source**:
   - Radelet & Sachs (1998): Thai baht −15–20% on depegging day; Indonesian rupiah −20% on October 23, 1997 ("Black Thursday"); consistent with simulation velocity target > 2% per round.
   - Calvo, G. A. (1998). Capital flows and capital-market crises: sudden stops typically produce concentrated price drops of 10–30% in 1–5 trading days, translated to 1–5 rounds in the simulation.

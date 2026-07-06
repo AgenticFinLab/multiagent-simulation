@@ -270,3 +270,4 @@ State update: no state becomes negative.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-prime-broker-first-mover.png) |

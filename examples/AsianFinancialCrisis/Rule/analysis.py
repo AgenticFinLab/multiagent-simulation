@@ -18,8 +18,14 @@ Usage:
 import argparse
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
+
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,6 +74,48 @@ def _load_data(results) -> Dict[str, Any]:
         "market_prices": market_prices,
         "fundamentals": fundamentals,
         "investor_bids": investor_bids,
+        "investor_payloads": investor_payloads,
+    }
+
+
+def _load_data_from_communication(config: dict) -> Dict[str, Any]:
+    """Load market and order data from communication message blocks."""
+    storage_path = config["communication"]["storage_path"]
+    market_prices: Dict[int, float] = {}
+    fundamentals: Dict[int, float] = {}
+    investor_payloads: Dict[str, Dict[int, dict]] = {}
+
+    if not os.path.isdir(storage_path):
+        return {
+            "market_prices": market_prices,
+            "fundamentals": fundamentals,
+            "investor_bids": {},
+            "investor_payloads": investor_payloads,
+        }
+
+    for name in sorted(os.listdir(storage_path)):
+        if not name.startswith("msg_block_") or not name.endswith(".json"):
+            continue
+        with open(os.path.join(storage_path, name), "r", encoding="utf-8") as f:
+            block = json.load(f)
+        for entry in block.values():
+            message = json.loads(entry["encoded"])
+            round_num = int(message["extras"]["round_num"])
+            payload = message["payload"]
+            content = payload["content"]
+            content_type = payload["content_type"]
+            if content_type == "market_data":
+                if round_num not in market_prices:
+                    market_prices[round_num] = float(content["price"])
+                    fundamentals[round_num] = float(content["fundamental"])
+            elif content_type == "order":
+                sender = message["sender_id"]
+                investor_payloads.setdefault(sender, {})[round_num] = content
+
+    return {
+        "market_prices": market_prices,
+        "fundamentals": fundamentals,
+        "investor_bids": {},
         "investor_payloads": investor_payloads,
     }
 
@@ -835,6 +883,8 @@ def main() -> None:
 
     results = load_results(config)
     data = _load_data(results)
+    if not data["market_prices"]:
+        data = _load_data_from_communication(config)
     summary = analyze_asian_financial_crisis(data, config, output_dir)
     return summary
 

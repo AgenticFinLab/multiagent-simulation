@@ -8,7 +8,7 @@
 | **Implements**                         | `../simulation-bases.md`                                                                                                                                                |
 | **Decision Logic**                     | LLM with embedded quantitative decision rules — LLM follows formula-determined sign, adjusts quantity ±20% via persona judgment                                         |
 | **Key Difference from Other Variants** | Combines Rule predictability with LLM narrative reasoning; rules constrain the LLM's direction but LLM controls magnitude within bounds                                 |
-| **Primary Research Contribution**      | Does quantitative rule anchoring constrain LLM behavior to near-deterministic outcomes, or does persona judgment introduce meaningful deviation from the Rule baseline? |
+| **Primary Research Contribution**      | Does quantitative rule grounding constrain LLM behavior to near-deterministic outcomes, or does persona judgment introduce meaningful deviation from the Rule baseline? |
 
 ---
 

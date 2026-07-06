@@ -162,7 +162,7 @@
 - **Derivation Rationale**: The half-life captures the pace of mean reversion after the cascade floor, which depends on the balance between the mean-reversion parameter γ and residual selling pressure. A short half-life indicates γ is strong; a long half-life indicates that selling pressure persists.
 - **Academic Calibration Source**:
   - Fama, E. F., & French, K. R. (1988). Permanent and temporary components of stock prices. *Journal of Political Economy*, 96(2), 246–273. https://doi.org/10.1086/261535 — estimates the half-life of mean reversion in equity prices at 3–5 years for fundamental-driven deviations; short-horizon cascade recoveries are faster (days to weeks).
-  - Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x — block trade buyers provide near-immediate stabilization once the discount exceeds the risk-compensation threshold, suggesting a recovery half-life of 5–15 rounds once BlockTradeBuyer activates.
+  - Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x — block trade buyers provide near-immediate stabilization once the discount exceeds the risk-compensation threshold, suggesting a recovery half-life of 5–15 rounds once BlockTradeBuyer activates.
 - **Normal Range**: 5–20 rounds after peak cascade
 - **Red Flag**: half_life < 3 rounds → γ (mean_reversion) too high; recovery unrealistically fast. half_life > 40 rounds → γ too low; recovery never occurs within simulation window
 

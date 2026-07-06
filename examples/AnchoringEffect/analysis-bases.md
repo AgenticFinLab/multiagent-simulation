@@ -1195,7 +1195,7 @@ From AnchoringEffect-Analysis-Overhaul (2026-Q1) the analysis pipeline is
 *registry-driven*: every scalar quantity reported by
 `examples/AnchoringEffect/Rule/analysis.py` is produced by a metric function in
 `examples/AnchoringEffect/metrics.py` and registered with the shared
-`MetricsRegistry` (`examples/standard_rule_analysis.py`). Adding a new metric
+`MetricsRegistry` (`examples/AnchoringEffect/standard_rule_analysis.py`). Adding a new metric
 requires only two steps:
 
 1. Implement `def m_my_metric(data, config) -> dict[str, Any]:` raising
@@ -1378,5 +1378,4 @@ This section explicitly documents what the analysis can and cannot detect, known
 | MomentumTrader runaway             | Price diverges; half_life = NaN; max_drawdown > 50%     | Analysis detects instability but cannot provide anchoring-specific insights |
 | Identical agent parameters         | Gini = 0; strategy correlation = 1; HHI = 1/N exactly   | Analysis reports “healthy” but simulation lacks genuine heterogeneity       |
 | Simulation too short (< 50 rounds) | Insufficient observations for most inferential metrics  | Pipeline runs but outputs are unreliable; no phase decomposition possible   |
-
 

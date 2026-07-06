@@ -233,3 +233,4 @@ State update: belief persists as 100.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.8 |
 | Status | draft |
+| Icon        | ![](../agent_images/icons/finance-fundamental-analyst.png) |

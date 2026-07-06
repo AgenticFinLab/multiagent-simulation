@@ -24,7 +24,7 @@ Inside a market simulation this agent provides stabilising demand and a partial 
 
 **Block liquidity provision**:
 - Theory / Study: Liquidity and market structure.
-- Citation: Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x
+- Citation: Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x
 - Core Insight: Large urgent sellers require immediacy from buyers who must be compensated for inventory risk. Distressed block buyers activate only when discounts exceed expected holding costs and risk premia.
 - Mathematical Formulation: `q_buy = phi_buy * cash_t / price_t` if `deviation_t < theta_discount`.
 - Empirical Evidence: Grossman & Miller (1988) model block liquidity compensation; Archegos block sales traded at sharp discounts during stress.
@@ -268,7 +268,7 @@ State update: no state becomes negative.
 
 | # | Citation | Notes |
 |---|----------|-------|
-| 4 | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x | Block liquidity provision and inventory-risk compensation |
+| 4 | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x | Block liquidity provision and inventory-risk compensation |
 | 8 | Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35-55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x | Limits to arbitrage and capital constraints |
 
 ## Design Provenance and Versioning
@@ -281,3 +281,4 @@ State update: no state becomes negative.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-block-trade-buyer.png) |

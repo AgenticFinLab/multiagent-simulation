@@ -231,3 +231,4 @@ State update: unchanged.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.3 |
 | Status | draft |
+| Icon        | ![](../agent_images/icons/finance-rational-updater.png) |

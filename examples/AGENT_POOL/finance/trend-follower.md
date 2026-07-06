@@ -188,3 +188,4 @@ Decision: hold.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - Initial creation based on CTA/momentum archetype |
 | Status | draft |
+| Icon        | ![](../agent_images/icons/finance-trend-follower.png) |

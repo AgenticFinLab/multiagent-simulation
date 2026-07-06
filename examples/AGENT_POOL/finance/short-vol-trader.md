@@ -265,3 +265,4 @@ Decision: hold or clamped order.
 | Version | 1.0.0 |
 | Change log | 1.0.0 — normalized ShortVolTrader into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A. |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-short-vol-trader.png) |

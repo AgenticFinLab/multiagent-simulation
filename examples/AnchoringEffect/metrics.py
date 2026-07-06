@@ -38,7 +38,7 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from examples.standard_rule_analysis import (
+from examples.AnchoringEffect.standard_rule_analysis import (
     Metric,
     MetricsRegistry,
     MetricUnavailable,

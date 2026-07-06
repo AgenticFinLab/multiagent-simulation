@@ -22,7 +22,7 @@ icon in `icons/`.
 | 6  | `finance/equity-trader.md`                   | `finance-equity-trader.png`                   | 量化型投资者     | Volatility-managed algo equity → code-grid motif      |
 | 7  | `finance/fundamental-analyst.md`             | `finance-fundamental-analyst.png`             | 研究型投资者     | Conservative analyst → magnifier motif                |
 | 8  | `finance/fundamentalist.md`                  | `finance-fundamentalist.png`                  | 价值型投资者     | Brock-Hommes fundamentalist → diamond motif           |
-| 9  | `finance/historical-anchor.md`               | `finance-historical-anchor.png`               | 谨慎型投资者     | Historical-price anchoring → ledger motif             |
+| 9  | `finance/historical-anchor.md`               | `finance-historical-anchor.png`               | 历史锚定型投资者 | Historical-price anchoring → anchor+hourglass motif   |
 | 10 | `finance/information-trader.md`              | `finance-information-trader.png`              | 社交型投资者     | Liquidation-signal information → network-chat motif   |
 | 11 | `finance/liquidity-provider.md`              | `finance-liquidity-provider.png`              | 做市型投资者     | Two-sided LP → bid-ask motif                          |
 | 12 | `finance/long-vol-hedger.md`                 | `finance-long-vol-hedger.png`                 | 波动型投资者     | Long-vol crash insurance → wave motif                 |
@@ -35,16 +35,18 @@ icon in `icons/`.
 | 19 | `finance/slow-adapter.md`                    | `finance-slow-adapter.png`                    | 稳健型投资者     | Slow belief update → pillar/stability motif           |
 | 20 | `finance/trend-follower.md`                  | `finance-trend-follower.png`                  | 跟风型投资者     | CTA/momentum following → nodes/cascade motif          |
 | 21 | `finance/vol-arbitrageur.md`                 | `finance-vol-arbitrageur.png`                 | 套利型投资者     | Volatility mean-reversion arb → scales motif          |
-| 22 | `finance/vol-etn-manager.md`                 | `finance-vol-etn-manager.png`                 | 数字资产型投资者 | Structured product manager → hex/structured motif     |
-| 23 | `finance/volatility-trader.md`               | `finance-volatility-trader.png`               | 宏观型投资者     | Vol-targeting/risk-parity → globe/macro motif         |
+| 22 | `finance/vol-etn-manager.md`                 | `finance-vol-etn-manager.png`                 | 结构产品型投资者 | Structured product manager → stacked-layers motif     |
+| 23 | `finance/volatility-trader.md`               | `finance-volatility-trader.png`               | 波动管理型投资者 | Vol-targeting/risk-parity → volatility-wave motif     |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
 - Icons are 23 total and map 1:1 to the 23 ``finance/`` agent specs.
-- Some mappings are approximate (e.g. #9, #22, #23) because the icon set was
-  originally designed for a different agent taxonomy. Visual motifs are
-  close-enough for identification purposes.
+- Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
+  Provenance table linking to its icon via relative path.
+- 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
+  (previously borrowed from the original taxonomy contact sheet). Old icons
+  backed up in the project workspace.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.

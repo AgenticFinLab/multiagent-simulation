@@ -291,3 +291,4 @@ State update: no state becomes negative.
 | Version | 1.0.0 |
 | Change log | 1.0.0 — extracted LongVolHedger into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A. |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-long-vol-hedger.png) |

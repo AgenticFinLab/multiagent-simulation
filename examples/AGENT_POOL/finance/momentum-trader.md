@@ -228,3 +228,4 @@ State update: set prev_price=100 for next tick.
 | Version | 1.0.0 |
 | Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.4 |
 | Status | draft |
+| Icon        | ![](../agent_images/icons/finance-momentum-trader.png) |
