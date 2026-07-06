@@ -16,7 +16,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 8  | ConfirmationBias       | ⬜      | —           | —           | —                 |
 | 9  | CreditCycle            | ⬜      | —           | —           | —                 |
 | 10 | CurrencyCrisis         | ⬜      | —           | —           | —                 |
-| 11 | DispositionEffect      | 🟡     | Codex       | 2026-07-05  | — (Ray unavailable) |
+| 11 | DispositionEffect      | 🟡     | qihang      | 2026-07-05  | LLM Rule          |
 | 12 | DotComBubble           | ⬜      | —           | —           | —                 |
 | 13 | EchoChamber            | ⬜      | —           | —           | —                 |
 | 14 | EndowmentEffect        | ⬜      | —           | —           | —                 |
