@@ -58,4 +58,4 @@ No price data, no fundamental batch store, all-zero quantities, or invalid order
 
 ## §7 Visualization Catalogue
 
-The analysis writes the fixed output set required by `masim/format/implement-simulation-skill/08-step4-implement.md`: `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png`, and `summary.json`.
+The analysis writes the fixed output set required by `masim/skills/implement-simulation-skill/08-step4-implement.md`: `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png`, and `summary.json`.

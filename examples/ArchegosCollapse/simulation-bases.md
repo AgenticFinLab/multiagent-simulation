@@ -50,7 +50,7 @@
 
 ### Theory: Opportunistic Block Trading and Market Stabilization
 
-- **Citation**: Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x
+- **Citation**: Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x
 - **Core Insight**: In markets with infrequent large-order flow, liquidity providers must hold inventory against the risk of adverse price moves. Block trade buyers will only absorb forced supply when the price discount is sufficient to compensate for inventory risk during the holding period before resale. This creates a natural price floor in liquidation races: when discounts exceed the risk-compensation threshold, opportunistic buyers absorb supply and stabilize prices.
 - **Mathematical Formulation**:
   ```
@@ -110,7 +110,7 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 | σ         | 0.015 | 0.01–0.03       | Roll (1984), *Journal of Finance*, 39(4), 1127–1139 — bid-ask bounce model noise estimate                     | Low: affects variance of threshold crossing timing, not mean behavior                  |
 
 **Economic Rationale**:
-The high λ (0.03) reflects the market-impact amplification typical in concentrated block selling — when a single large seller (ConcentratedFund or a prime broker) submits an order representing 5–10% of daily volume, price impact is significantly larger than normal. The low γ (0.01) models the slow fundamental anchoring characteristic of equity markets over short horizons: prices do not snap back to intrinsic value within rounds. The combination ensures that cascade-induced deviations persist long enough to trigger successive threshold crossings by PrimeBroker1 and PrimeBroker2.
+The high λ (0.03) reflects the market-impact amplification typical in concentrated block selling — when a single large seller (ConcentratedFund or a prime broker) submits an order representing 5–10% of daily volume, price impact is significantly larger than normal. The low γ (0.01) models the slow pull toward fundamental value characteristic of equity markets over short horizons: prices do not snap back to intrinsic value within rounds. The combination ensures that cascade-induced deviations persist long enough to trigger successive threshold crossings by PrimeBroker1 and PrimeBroker2.
 
 **Dynamic Properties**:
 - When D(t) < 0 (ConcentratedFund selling): P falls; deviation increases in magnitude → may cross broker thresholds
@@ -148,7 +148,7 @@ Each round, the Market broadcasts to all investors:
 
 ## §4 Investor Taxonomy
 
-This section follows `masim/skills/agent-design-skill.md` and the finance instantiation in `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. All five Archegos-specific agents passed the AGENT_POOL gate as `new` because the existing canonical finance pool covers generic anchoring, momentum, liquidity, and noise roles but not TRS hidden leverage, prime-broker liquidation races, delayed broker execution haircuts, or liquidation-signal predatory trading. Each standalone pool file is embedded below in re-levelled form.
+This section follows `masim/skills/agent-design-skill.md` and the finance instantiation in `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. All five Archegos-specific agents now pass the AGENT_POOL gate as `reuse approved` because the finance pool contains matching standalone profiles for TRS hidden leverage, prime-broker liquidation races, delayed broker execution haircuts, block-trade absorption, and liquidation-signal predatory trading. Each standalone pool file is embedded below in re-levelled form.
 
 
 ### §4.1 ConcentratedFund
@@ -1024,7 +1024,7 @@ Inside a market simulation this agent provides stabilising demand and a partial 
 
 **Block liquidity provision**:
 - Theory / Study: Liquidity and market structure.
-- Citation: Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x
+- Citation: Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x
 - Core Insight: Large urgent sellers require immediacy from buyers who must be compensated for inventory risk. Distressed block buyers activate only when discounts exceed expected holding costs and risk premia.
 - Mathematical Formulation: `q_buy = phi_buy * cash_t / price_t` if `deviation_t < theta_discount`.
 - Empirical Evidence: Grossman & Miller (1988) model block liquidity compensation; Archegos block sales traded at sharp discounts during stress.
@@ -1268,7 +1268,7 @@ State update: no state becomes negative.
 
 | # | Citation | Notes |
 |---|----------|-------|
-| 4 | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x | Block liquidity provision and inventory-risk compensation |
+| 4 | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x | Block liquidity provision and inventory-risk compensation |
 | 8 | Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35-55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x | Limits to arbitrage and capital constraints |
 
 #### 4.4.11 Design Provenance and Versioning
@@ -1711,6 +1711,6 @@ Round N (t = 1, 2, ..., 200):
 | Expected Cascade Depth    | Consistent ~60% drawdown (calibration target)   | Variable: LLM may hesitate or over-sell; expected 40–70%                                                 | Near-Rule (±15%) — rules constrain behavior                       | Modified by historical case recall; expected similar or slightly moderated                       |
 | Expected Cascade Timing   | Predictable: onset rounds 10–20                 | Variable onset: ±5–10 rounds due to LLM persona effects                                                  | Near-Rule timing (±3–5 rounds)                                    | May onset earlier or later depending on historical context retrieved                             |
 | Key Behavioral Difference | Baseline reference                              | ConcentratedFund may "rationalize" delayed selling (LLM denial effect); PrimeBrokers may show hesitation | Rules ensure threshold adherence; LLM adjusts quantity ±20% only  | Retrieved Archegos/LTCM knowledge may cause earlier pre-emptive action or more calibrated sizing |
-| Research Question         | Does cascade emerge from threshold rules alone? | Do LLM personas reproduce denial-then-panic psychology without knowing the scenario name?                | Does quantitative rule anchoring suppress LLM hesitation effects? | Does historical knowledge of TRS cascades change prime broker timing or severity?                |
+| Research Question         | Does cascade emerge from threshold rules alone? | Do LLM personas reproduce denial-then-panic psychology without knowing the scenario name?                | Does quantitative rule grounding suppress LLM hesitation effects? | Does historical knowledge of TRS cascades change prime broker timing or severity?                |
 
 **Predicted ordering**: Cascade depth: Rule ≈ RuleLLM > LLM ≈ Rag (LLM personas may introduce more hesitation; RAG provides historical calibration)

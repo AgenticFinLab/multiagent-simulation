@@ -5,7 +5,7 @@
 # heterogeneous agents with different information processing styles.
 #
 # Usage:
-#   python -m examples.AvailabilityBias.Rule.run -c configs/AvailabilityBias/Rule/simulation.yml
+#   python examples/AvailabilityBias/Rule/run_availabilitybias.py -c configs/AvailabilityBias/Rule/simulation.yml
 # =============================================================================
 
 setting:

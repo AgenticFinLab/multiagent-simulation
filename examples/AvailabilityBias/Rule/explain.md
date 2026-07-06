@@ -74,7 +74,7 @@ Investor parameters are in `configs/AvailabilityBias/Rule/players.yml`, includin
 ## §6 Running Instructions
 
 ```bash
-python examples/AvailabilityBias/Rule/run_availabilitybias_rule.py \
+python examples/AvailabilityBias/Rule/run_availabilitybias.py \
   -c configs/AvailabilityBias/Rule/simulation.yml
 ```
 

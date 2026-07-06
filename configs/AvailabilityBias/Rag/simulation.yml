@@ -6,7 +6,7 @@
 # availability heuristic to inform their LLM decisions.
 #
 # Usage:
-#   python -m examples.AvailabilityBias.Rag.run -c configs/AvailabilityBias/Rag/simulation.yml
+#   python examples/AvailabilityBias/Rag/run_availabilitybias_rag.py -c configs/AvailabilityBias/Rag/simulation.yml
 # =============================================================================
 
 setting:

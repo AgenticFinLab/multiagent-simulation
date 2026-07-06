@@ -5,7 +5,7 @@
 # to make decisions shaped by their availability bias persona.
 #
 # Usage:
-#   python -m examples.AvailabilityBias.LLM.run -c configs/AvailabilityBias/LLM/simulation.yml
+#   python examples/AvailabilityBias/LLM/run_availabilitybias_llm.py -c configs/AvailabilityBias/LLM/simulation.yml
 # =============================================================================
 
 setting:
