@@ -138,6 +138,29 @@
     - Step 3 re-verify: all 16 YAML files parse under SafeLoader with
       no-op `!include`; variant folder set = {Rule, LLM, RuleLLM, Rag}
       matches target §10.1 four-`Yes` declaration exactly. No changes.
+- 2026-07-06: Round-2 polish Step 4 (implementation audit under Pass 2
+  Analysis Migration Rule).
+    - `examples/AnchoringEffect/metrics.py` header docstring updated to
+      cite `masim/evaluation/README.md` + `10-evaluation-architecture.md`
+      as authoritative catalogue for the 36 standard metrics and the
+      shared `_returns` helper; import block already delegates to
+      `masim.evaluation.registry`, `masim.evaluation.finance`, and
+      `masim.evaluation.data_loader` (no local re-implementations).
+    - `examples/AnchoringEffect/Rule/analysis.py` two residual stub
+      comment blocks that documented removed `_compute_*` helpers
+      consolidated into a single Pass-2 architecture citation block
+      pointing to `masim/evaluation/README.md`. No behavioural change.
+    - Import smoke: `examples.AnchoringEffect.metrics.REGISTRY` carries
+      **44 metrics** (36 standard + 8 scenario-specific), and every
+      variant's `analysis` module imports cleanly under Python 3.13.
+    - `python3 -m py_compile` returns 0 for `metrics.py` + all four
+      variants' `players.py` / `analysis.py` / `prompts.py`
+      (Rule has no separate `prompts.py`).
+    - Structural spot-checks: RuleLLM `prompts.py` retains 20 lines
+      matching `== PERSONA == | == DECISION RULES ==` markers
+      (dual-section rule), and Rag `analysis.py` still emits the
+      `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
+      sentinel with the corresponding equality check.
 
 ### §0 Traceability Matrix (post-polish)
 

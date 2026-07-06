@@ -33,217 +33,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from examples.standard_rule_analysis import (
-    MetricUnavailable,
-    _market_data_from_payload,
-    _market_players,
+from masim.evaluation.registry import MetricUnavailable
+from masim.evaluation.data_loader import (
+    batch_to_rounds as _batch_to_rounds,
+    load_data as _load_data,
+    market_data_from_payload as _market_data_from_payload,
+    market_players as _market_players,
 )
 from examples.AnchoringEffect.metrics import REGISTRY
 
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Evaluation-first architecture (Pass 2 Migration Rule):
+#   * Reusable helpers  → masim.evaluation.data_loader / registry
+#   * Standard metrics  → masim.evaluation.finance.{timeseries,behavioral,microstructure}
+#   * Scenario metrics  → examples.AnchoringEffect.metrics (registry-driven)
+# See ``masim/evaluation/README.md`` for the authoritative catalogue and
+# ``masim/skills/implement-simulation-skill/10-evaluation-architecture.md``
+# for the migration rule.  Nothing in this file re-implements a function
+# that already lives under ``masim.evaluation``.
 # ---------------------------------------------------------------------------
-
-
-def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert batch store list to {round_num: value}, round_num is 1-based."""
-    return {i + 1: v for i, v in enumerate(values)}
-
-
-def _load_data(results) -> Dict[str, Any]:
-    """Load price/fundamental batch stores and investor turn payloads.
-
-    Returns
-    -------
-    dict with keys:
-        market_prices       : {round_num: float}
-        fundamentals        : {round_num: float}
-        investor_quantities : {player_id: {round_num: float}}
-        investor_bids       : {player_id: {round_num: float}}
-        investor_payloads   : {player_id: {round_num: dict}}
-    """
-    market_prices: Dict[int, float] = {}
-    fundamentals: Dict[int, float] = {}
-
-    for player in _market_players(results).values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-        for round_num, payload in player.turns.payloads().items():
-            market_data = _market_data_from_payload(payload)
-            if round_num not in market_prices and "price" in market_data:
-                market_prices[round_num] = float(market_data["price"])
-            if round_num not in fundamentals:
-                if "fundamental" in market_data:
-                    fundamentals[round_num] = float(market_data["fundamental"])
-                elif "fundamental_value" in market_data:
-                    fundamentals[round_num] = float(market_data["fundamental_value"])
-
-    investor_quantities: Dict[str, Dict[int, float]] = {}
-    investor_bids: Dict[str, Dict[int, float]] = {}
-    investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        qty = player.turns.field("quantity")
-        if qty:
-            investor_quantities[pid] = qty
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
-
-    return {
-        "market_prices": market_prices,
-        "fundamentals": fundamentals,
-        "investor_quantities": investor_quantities,
-        "investor_bids": investor_bids,
-        "investor_payloads": investor_payloads,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Helpers retained for backward-compatibility with LLM / RuleLLM / Rag
-# delegators that still ``from ... import _compute_*``.  Do NOT remove.
-# ---------------------------------------------------------------------------
-
-
-def _compute_mad(prices_list: List[float], fundamental: float) -> float:
-    if not prices_list:
-        raise ValueError("Cannot compute MAD without market prices.")
-    if fundamental == 0:
-        raise ValueError("Cannot compute MAD with zero fundamental value.")
-    return float(np.mean(np.abs(np.array(prices_list) - fundamental) / fundamental))
-
-
-def calculate_price_deviation(
-    market_prices: Dict[int, float], fundamentals: Dict[int, float]
-) -> List[float]:
-    if not market_prices:
-        raise ValueError("Cannot compute price deviation without market prices.")
-    if not fundamentals:
-        raise ValueError("Cannot compute price deviation without fundamentals.")
-    deviations: List[float] = []
-    for round_num in sorted(market_prices.keys()):
-        price = market_prices[round_num]
-        fundamental = fundamentals[round_num]
-        if fundamental == 0:
-            raise ValueError(f"Fundamental value is zero at round {round_num}.")
-        deviations.append((price - fundamental) / fundamental)
-    return deviations
-
-
-def _compute_half_life(prices_list: List[float], fundamental: float) -> float:
-    if not prices_list:
-        raise ValueError("Cannot compute half-life without market prices.")
-    if fundamental == 0:
-        raise ValueError("Cannot compute half-life with zero fundamental value.")
-    devs = np.abs((np.array(prices_list) - fundamental) / fundamental)
-    initial_dev = float(devs[0])
-    if initial_dev == 0:
-        return 0.0
-    half_target = initial_dev / 2.0
-    for idx, dev in enumerate(devs):
-        if dev <= half_target:
-            return float(idx)
-    return float(len(prices_list))
-
-
-def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
-    arr = np.array(prices_list)
-    if len(arr) < lag + 2:
-        raise ValueError("Cannot compute autocorrelation with insufficient prices.")
-    returns = np.diff(arr) / arr[:-1]
-    n = len(returns)
-    if n <= lag:
-        raise ValueError("Cannot compute autocorrelation with insufficient returns.")
-    mu = np.mean(returns)
-    centered = returns - mu
-    autocov = np.mean(centered[: n - lag] * centered[lag:])
-    var = np.var(centered)
-    if var < 1e-12:
-        raise ValueError("Cannot compute autocorrelation with zero return variance.")
-    return float(autocov / var)
-
-
-def _compute_max_drawdown(prices_list: List[float]) -> float:
-    arr = np.array(prices_list)
-    if len(arr) < 2:
-        raise ValueError("Cannot compute max drawdown with fewer than two prices.")
-    peak = arr[0]
-    max_dd = 0.0
-    for price in arr:
-        if price > peak:
-            peak = price
-        dd = (peak - price) / peak if peak > 0 else 0.0
-        if dd > max_dd:
-            max_dd = dd
-    return float(-max_dd * 100)
-
-
-def _compute_rolling_volatility(
-    prices_list: List[float], window: int = 10
-) -> List[float]:
-    arr = np.array(prices_list)
-    if len(arr) < 2:
-        raise ValueError(
-            "Cannot compute rolling volatility with fewer than two prices."
-        )
-    returns = np.diff(arr) / arr[:-1] * 100
-    vols = []
-    for i in range(len(returns)):
-        start = max(0, i - window + 1)
-        vols.append(float(np.std(returns[start : i + 1])))
-    return vols
-
-
-def _compute_bias_magnitude(
-    prices_list: List[float], fundamental: float, adjustment_factor: float
-) -> float:
-    if not prices_list:
-        raise ValueError("Cannot compute bias magnitude without market prices.")
-    if fundamental == 0:
-        raise ValueError("Cannot compute bias magnitude with zero fundamental value.")
-    anchor = prices_list[0]
-    return float(abs(1 - adjustment_factor) * abs(anchor - fundamental) / fundamental)
-
-
-def _get_adjustment_factor(config: dict) -> float:
-    players = config["players"]
-    for player_cfg in players.values():
-        if "config" not in player_cfg:
-            continue
-        extras = player_cfg["config"]["extras"]
-        if "adjustment_factor" in extras:
-            return float(extras["adjustment_factor"])
-    raise ValueError("No adjustment_factor found in AnchoringEffect player configs.")
-
-
-# ---------------------------------------------------------------------------
-# Validation — analysis-bases.md §6 (Task 5: tightened gates)
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class AnchoringValidationResult:
-    """Result of AnchoringEffect simulation validation."""
-
-    is_valid: bool
-    score: float
-    criteria: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    advisories: List[str] = field(default_factory=list)
-    interpretation: str = ""
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "is_valid": self.is_valid,
-            "score": round(self.score, 4),
-            "criteria": self.criteria,
-            "advisories": self.advisories,
-            "interpretation": self.interpretation,
-        }
 
 
 def _score_band(value: float, lo: float, hi: float, soft: float = 0.5) -> float:
@@ -1240,17 +1049,10 @@ __all__ = [
     "load_simulation_data",
     "calculate_metrics",
     "compute_all_metrics",
-    "calculate_price_deviation",
     "create_visualizations",
     "analyze_anchoring",
     "_validate_anchoring_effect",
     "_build_interpretation",
-    "_compute_mad",
-    "_compute_half_life",
-    "_compute_autocorrelation",
-    "_compute_max_drawdown",
-    "_compute_rolling_volatility",
-    "_compute_bias_magnitude",
     "_load_data",
     "_batch_to_rounds",
     "AnchoringValidationResult",
