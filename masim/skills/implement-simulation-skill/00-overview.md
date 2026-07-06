@@ -84,6 +84,7 @@ domain.
 | `07-step3-config.md`           | Step 3        | Create configuration files (simulation.yml, players.yml, topology.yml, plus persona.yml for LLM-flavoured variants)                                                                                                                                                          |
 | `08-step4-implement.md`        | Step 4        | Implement code for the variants declared in target §10.1                                                                                                                                                                                                                      |
 | `09-step5-to-10-review.md`     | Steps 5 — 10  | Validate, code-quality review, analysis tools, documentation, execute, and final review (consolidated)                                                                                                                                                                        |
+| `10-evaluation-architecture.md`| Architecture   | Evaluation-first design: all reusable metrics/viz/validation code lives in `masim/evaluation/`; scenario scripts import from there (MANDATORY)                                                                                                                               |
 | `15-reference-assetbubble.md`  | Reference     | AssetBubble reference implementation index (finance domain example)                                                                                                                                                                                                           |
 
 > *Historical note.* Earlier drafts of this guide split Steps 6 — 10 into separate
@@ -287,6 +288,24 @@ Post-run quality gates:
 - `__getstate__`/`__setstate__` serialization infrastructure
 - `config.extras.get("optional_feature", {})` — truly optional config sections like `private_knowledge`
 - Matplotlib styling defaults (colors, line widths)
+
+### 7. Evaluation-first architecture for analysis code
+
+All reusable evaluation, metrics, visualization, and validation code lives in
+`masim/evaluation/` — the project's shared analytical capability library.
+Scenario-specific `analysis.py` scripts import from there; they do not define
+their own generic functions locally.
+
+**The decision rule:**
+1. Need a function? → Check `masim/evaluation/` first.
+2. Found it? → Import it.
+3. Not found but reusable? → Implement in `masim/evaluation/` FIRST, then import.
+4. Truly scenario-specific? → Implement locally with a comment explaining why.
+
+**Full specification:** `masim/skills/implement-simulation-skill/10-evaluation-architecture.md`
+
+This grows the project's shared library with every new scenario and prevents
+the anti-pattern of N scenarios each re-implementing the same metric function.
 
 ---
 

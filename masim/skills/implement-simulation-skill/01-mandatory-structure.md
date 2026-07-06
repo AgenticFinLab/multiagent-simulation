@@ -121,6 +121,14 @@ examples/{SimulationName}/
 | `{Variant}/run_*.py`       | Per variant         | Simulation entry point using `SimulationRunner`                                                                                            |
 | `{Variant}/analysis.py`    | Per variant         | Analysis script generating plots and reports                                                                                               |
 
+### Architecturally Valid Optional Files
+
+| File          | Scope                     | When Warranted                                                        | Purpose                                                                                                        |
+|---------------|---------------------------|-----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| `metrics.py`  | Per scenario (root level) | Scenario defines ≥20 domain-specific metrics with unique behavioral logic | Metric catalogue for the registry; computation delegates to `masim/evaluation/`, error adaptation via wrapper pattern |
+
+These files are not required for structural compliance but are the recognized extension point for large-catalogue scenarios. They MUST import all computation primitives from `masim/evaluation/` and MUST NOT reimplement functions that exist there. Scenario-specific helpers (config parsing, payload accounting, phase detection) may remain local with documenting comments.
+
 ---
 
 ## 3. Design Principle: Hierarchical Authority
@@ -201,25 +209,58 @@ See `masim/skills/implement-simulation-skill/00-overview.md` Principle #6 for th
 
 ## 6. Analysis Module Architecture
 
-The `analysis.py` files follow a DRY hierarchy:
+> **Full specification**: `masim/skills/implement-simulation-skill/10-evaluation-architecture.md`
+
+The analysis code follows a **three-level hierarchy**:
 
 ```
-Rule/analysis.py
-  __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations"]
-  # Authoritative implementations of all 3 core functions
+masim/evaluation/              ← REUSABLE metrics, viz, validation, data loading
+        ▲                        (authoritative for ALL generic functions)
+        │ imports from
+        │
+Rule/analysis.py               ← SCENARIO-SPECIFIC orchestration + validation criteria
+  __all__ = ["analyze_{scenario}", "_validate_{scenario}", ...]
         ▲
         │ imports from
         │
 LLM/analysis.py
 RuleLLM/analysis.py
-Rag/analysis.py        # adds analyze_rag_knowledge_effect() + _RAG_FALLBACK constant
+Rag/analysis.py                ← VARIANT-SPECIFIC additions only
 ```
 
-- `Rule/analysis.py` is the single authoritative source for `load_simulation_data`, `calculate_metrics`, `create_visualizations`.
-- All other variants import these three functions from `Rule/analysis.py` — they do not re-implement them.
-- LLM variant adds action distribution analysis.
-- RuleLLM variant reuses core metrics from Rule — no additional variant-specific analysis function.
-- Rag variant adds `analyze_rag_knowledge_effect()` and defines `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`.
+### Level 1: `masim/evaluation/` (Generic Library)
+
+All reusable functions live here. Scenario analysis scripts MUST import from here for:
+- Time-series metrics → `masim.evaluation.finance.timeseries`
+- Behavioral metrics → `masim.evaluation.finance.behavioral`
+- Volatility metrics → `masim.evaluation.finance.volatility`
+- Microstructure metrics → `masim.evaluation.finance.microstructure`
+- Visualization → `masim.evaluation.finance.visualization`
+- Scenario validation → `masim.evaluation.finance.validation`
+- Metric registry types → `masim.evaluation.registry`
+- Data loading → `masim.evaluation.data_loader`
+
+### Level 2: `Rule/analysis.py` (Scenario Orchestration)
+
+The authoritative source for **this scenario's** orchestration logic:
+- `analyze_{scenario}(data, config, output_dir)` — scenario-specific analysis pipeline
+- `_validate_{scenario}(...)` — scenario-specific criteria and weights
+- `main()` — CLI entry point
+
+### Level 3: Variant Additions
+
+- `LLM/analysis.py` — adds `analyze_action_distribution()`
+- `RuleLLM/analysis.py` — reuses Rule core; no additional function required
+- `Rag/analysis.py` — adds `analyze_rag_knowledge_effect()` + defines `_RAG_FALLBACK`
+
+### Evaluation-First Rule
+
+When a scenario needs a metric that does not exist in `masim/evaluation/`:
+1. Implement it in the correct `masim/evaluation/` submodule FIRST
+2. Add to `__all__` and re-export
+3. Then import it in `analysis.py`
+
+This grows the project's shared analytical capability library and prevents duplication across scenarios.
 
 ---
 

@@ -956,13 +956,31 @@ of every built variant.
 | Pass | Perspective                            | Anchors in `09-step5-to-10-review.md`                       |
 |------|----------------------------------------|-------------------------------------------------------------|
 | 1    | Theory–code alignment                   | §5.1 Theory-Code Alignment; §5.2 Prompt Fidelity; §5.3 Configuration Validation; §5.4 Diversity |
-| 2    | Code quality + analysis tools           | §6.1 Required Documentation; §6.2 Correctness; §6.3 Style; §7.1 Baseline-variant analysis-module Requirements |
+| 2    | Code quality + analysis tools           | §6.1 Required Documentation; §6.2 Correctness; §6.3 Style; §7.1 Baseline-variant analysis-module Requirements; `10-evaluation-architecture.md` import compliance (all reusable code from `masim/evaluation/`) |
 | 3    | Documentation + final cross-check       | §8 Create Documentation; §9 Execute and Debug (dry-run only) |
 
 Any unchecked item in any pass resets the count for that pass. All
 three passes MUST reach three consecutive PASSes; failure to reach
 three PASSes on any pass is a defect that MUST be repaired before the
 smoke run.
+
+**Pass 2 — Analysis Migration Rule.**
+
+During Pass 2, for every `analysis.py` in every variant, apply this mandatory migration procedure:
+
+1. **Search `masim/evaluation/`** for existing functions that match what the analysis script needs (metrics, data loading, visualization, validation). Use the module responsibility boundaries and placement flowchart in `10-evaluation-architecture.md`.
+
+2. **If a matching function exists in `masim/evaluation/`** → replace the local implementation with an import. Remove the local function definition (or, if other in-scenario code still calls it, alias it: `from masim.evaluation.finance.timeseries import calculate_max_drawdown as _compute_max_drawdown`).
+
+3. **If no matching function exists but the local function is reusable** (would serve other scenarios) → migrate it into the appropriate `masim/evaluation/{domain}/{module}.py` file first, add it to `__init__.py` re-exports, then import it back into the analysis script.
+
+4. **If the function is truly scenario-specific** (unique logic that no other scenario would use) → keep it local in the analysis script with a comment: `# Scenario-specific: {reason}`.
+
+5. **Data loading** (`_batch_to_rounds`, `_load_data`, `_market_players`, `_market_data_from_payload`) must always come from `masim.evaluation.data_loader`. Remove any local re-implementations of these.
+
+6. **Registry types** (`Metric`, `MetricsRegistry`, `MetricUnavailable`) must always come from `masim.evaluation.registry`.
+
+After migration, verify with `python3 -c "import examples.{Scenario}.Rule.analysis"` that all imports resolve.
 
 **Smoke run.** For each variant `{V}` marked `Yes` in target §10.1,
 run:

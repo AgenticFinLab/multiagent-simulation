@@ -220,12 +220,35 @@ if __name__ == "__main__":
 
 **Key rule**: Never parse EXPERIMENT files directly. Use `masim.utils.load_results()`.
 
+#### Evaluation-First Import Rule (MANDATORY)
+
+> **Full specification**: See `masim/skills/implement-simulation-skill/10-evaluation-architecture.md`.
+
+All reusable metric, visualization, validation, and data-loading functions live in `masim/evaluation/`. Scenario analysis scripts import from there. The decision flowchart is:
+
+1. **Need a function?** → Check `masim/evaluation/` first (timeseries, behavioral, volatility, microstructure, visualization, validation, registry, data_loader, pipeline).
+2. **Found it?** → Import it. Done.
+3. **Not found but reusable?** → Implement it in the correct `masim/evaluation/` submodule FIRST, then import it.
+4. **Truly scenario-specific?** → Implement locally with a comment explaining why it cannot be generalized.
+
+**Correct imports**:
+```python
+from masim.evaluation.finance.timeseries import calculate_returns, calculate_max_drawdown
+from masim.evaluation.finance.behavioral import calculate_bid_convergence_cv
+from masim.evaluation.finance.volatility import calculate_garch_signature
+from masim.evaluation.finance.visualization import plot_price_dynamics, save_figure
+from masim.evaluation.finance.validation import validate_asset_bubble
+from masim.evaluation.registry import Metric, MetricsRegistry, MetricUnavailable
+from masim.evaluation.data_loader import load_data, batch_to_rounds, market_players, series
+```
+
+The within-scenario DRY hierarchy (`LLM/analysis.py` imports scenario-specific orchestration from `Rule/analysis.py`) remains valid for scenario-specific functions like `analyze_{scenario}()` and `_validate_{scenario}()`. Generic metric/viz/validation utilities always come from `masim/evaluation/`.
+
 #### Required top-level functions
 
 | Function                                       | Purpose                                                                                                                                                 |
 |------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `_batch_to_rounds(values)`                     | Convert batch store list to `{round_num: value}` (1-based)                                                                                              |
-| `_load_data(results)`                          | Load all coordinator batch stores + agent turn payloads from `SimulationResults` (finance appendix: investor turn payloads)                                                                     |
+| `_load_data(results)` (from `masim.evaluation.data_loader.load_data`) | Load all coordinator batch stores + agent turn payloads from `SimulationResults`                                                                     |
 | `_validate_{scenario}(...)`                    | Validate results against `analysis-bases.md §6` calibration targets; returns a result object with `.score`, `.is_valid`, `.criteria`, `.interpretation` |
 | `analyze_{scenario}(data, config, output_dir)` | Orchestrates metrics → validation → plots → `summary.json`; prints structured report                                                                    |
 | `main()`                                       | `load_config` → `load_results` → `_load_data` → `analyze_{scenario}`                                                                                    |

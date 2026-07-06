@@ -337,3 +337,196 @@ def calculate_liquidity_metrics(
         "avg_order_size": avg_order_size,
         "price_impact": price_impact,
     }
+
+
+# ===========================================================================
+# Registry-Compatible Metric Functions (m_* prefix)
+#
+# These functions use the standard MASim data contract and are registered
+# into MetricsRegistry via MICROSTRUCTURE_METRICS.
+# ===========================================================================
+
+from typing import Tuple
+from masim.evaluation.registry import Metric, MetricUnavailable
+from masim.evaluation.data_loader import payload_buy_sell
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers for metric functions
+# ---------------------------------------------------------------------------
+
+
+def _per_round_signed_demand(payloads: Dict[str, Dict[int, dict]]) -> Dict[int, float]:
+    """Net demand (buy - sell) per round, summed across all agents."""
+    demand: Dict[int, float] = {}
+    for round_payloads in payloads.values():
+        for round_num, payload in round_payloads.items():
+            buy, sell = payload_buy_sell(payload)
+            demand[round_num] = demand.get(round_num, 0.0) + (buy - sell)
+    return demand
+
+
+def _per_round_total_volume(payloads: Dict[str, Dict[int, dict]]) -> Dict[int, float]:
+    """Gross volume (buy + sell) per round, summed across all agents."""
+    volume: Dict[int, float] = {}
+    for round_payloads in payloads.values():
+        for round_num, payload in round_payloads.items():
+            buy, sell = payload_buy_sell(payload)
+            volume[round_num] = volume.get(round_num, 0.0) + (buy + sell)
+    return volume
+
+
+# ---------------------------------------------------------------------------
+# Category: microstructure (5 metrics)
+# ---------------------------------------------------------------------------
+
+
+def m_order_imbalance_ts(data, config):
+    """Net signed demand normalised by gross volume per round."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    demand = _per_round_signed_demand(payloads)
+    volume = _per_round_total_volume(payloads)
+    rounds = sorted(demand)
+    imbalance = []
+    for round_num in rounds:
+        denom = volume[round_num]
+        imbalance.append(demand[round_num] / denom if denom > 0 else 0.0)
+    return {
+        "rounds": rounds,
+        "imbalance": imbalance,
+        "mean_imbalance": float(np.mean(imbalance)) if imbalance else 0.0,
+    }
+
+
+def m_signed_volume_autocorr(data, config):
+    """Lag-1 autocorrelation of net signed demand."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    demand = _per_round_signed_demand(payloads)
+    rounds = sorted(demand)
+    if len(rounds) < 3:
+        raise MetricUnavailable("need >=3 rounds for autocorrelation")
+    series = np.asarray([demand[r] for r in rounds], dtype=float)
+    centered = series - float(np.mean(series))
+    var = float(np.var(centered))
+    if var < 1e-12:
+        raise MetricUnavailable("zero signed-volume variance")
+    autocov = float(np.mean(centered[:-1] * centered[1:]))
+    return {"value": autocov / var}
+
+
+def m_herfindahl_volume_concentration(data, config):
+    """HHI of volume across agents; 1/N = dispersed, 1.0 = one agent dominates."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    agent_volumes = []
+    for round_payloads in payloads.values():
+        vol = 0.0
+        for payload in round_payloads.values():
+            buy, sell = payload_buy_sell(payload)
+            vol += buy + sell
+        agent_volumes.append(vol)
+    total = sum(agent_volumes)
+    if total <= 0:
+        raise MetricUnavailable("no trading volume")
+    shares = [v / total for v in agent_volumes]
+    hhi = float(sum(s * s for s in shares))
+    return {"value": hhi, "n_agents": len(agent_volumes)}
+
+
+def m_strategy_correlation_matrix(data, config):
+    """Pairwise Pearson correlation of net demand between strategy types."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    strategy_demand: Dict[str, Dict[int, float]] = {}
+    for round_payloads in payloads.values():
+        for round_num, payload in round_payloads.items():
+            strategy = payload.get("strategy", "unknown")
+            buy, sell = payload_buy_sell(payload)
+            net = buy - sell
+            if strategy not in strategy_demand:
+                strategy_demand[strategy] = {}
+            strategy_demand[strategy][round_num] = (
+                strategy_demand[strategy].get(round_num, 0.0) + net
+            )
+    strategies = sorted(strategy_demand)
+    if len(strategies) < 2:
+        raise MetricUnavailable("need >=2 strategies for correlation matrix")
+    common_rounds = set.intersection(*(set(strategy_demand[s]) for s in strategies))
+    if len(common_rounds) < 10:
+        raise MetricUnavailable("need >=10 common rounds for correlation")
+    common_sorted = sorted(common_rounds)
+    arrays = {
+        s: np.asarray([strategy_demand[s][r] for r in common_sorted], dtype=float)
+        for s in strategies
+    }
+    matrix: Dict[str, Dict[str, float]] = {}
+    for s1 in strategies:
+        row: Dict[str, float] = {}
+        for s2 in strategies:
+            if np.std(arrays[s1]) < 1e-12 or np.std(arrays[s2]) < 1e-12:
+                row[s2] = 0.0
+            else:
+                row[s2] = float(np.corrcoef(arrays[s1], arrays[s2])[0, 1])
+        matrix[s1] = row
+    return {"matrix": matrix, "strategies": strategies, "n_rounds": len(common_sorted)}
+
+
+def m_information_share_by_strategy(data, config):
+    """Fraction of total corrective volume by each stabilizing strategy."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    market_prices = data.get("market_prices", {})
+    fundamentals = data.get("fundamentals", {})
+    strategy_corrective: Dict[str, float] = {}
+    total_corrective = 0.0
+    for round_payloads in payloads.values():
+        for round_num, payload in round_payloads.items():
+            if round_num not in market_prices or round_num not in fundamentals:
+                continue
+            price = float(market_prices[round_num])
+            fundamental = float(fundamentals[round_num])
+            buy, sell = payload_buy_sell(payload)
+            strategy = payload.get("strategy", "unknown")
+            corrective_vol = 0.0
+            if price > fundamental:
+                corrective_vol = sell
+            elif price < fundamental:
+                corrective_vol = buy
+            if corrective_vol > 0:
+                strategy_corrective[strategy] = strategy_corrective.get(strategy, 0.0) + corrective_vol
+                total_corrective += corrective_vol
+    if total_corrective <= 0:
+        raise MetricUnavailable("no corrective volume detected")
+    shares = {k: v / total_corrective for k, v in strategy_corrective.items()}
+    return {"shares": shares, "total_corrective_volume": total_corrective}
+
+
+# ---------------------------------------------------------------------------
+# MICROSTRUCTURE_METRICS — Metric definitions for registry registration
+# ---------------------------------------------------------------------------
+
+
+MICROSTRUCTURE_METRICS: List[Metric] = [
+    Metric(name="order_imbalance_ts", category="microstructure", fn=m_order_imbalance_ts,
+           output_keys=("rounds", "imbalance", "mean_imbalance"), references=("Chordia et al. (2002)",),
+           description="Net signed demand normalised by gross volume per round."),
+    Metric(name="signed_volume_autocorr", category="microstructure", fn=m_signed_volume_autocorr,
+           output_keys=("value",), references=("Hasbrouck (1991)",),
+           description="Lag-1 autocorrelation of net signed demand."),
+    Metric(name="herfindahl_volume_concentration", category="microstructure", fn=m_herfindahl_volume_concentration,
+           output_keys=("value", "n_agents"), references=("Hirschman (1945)",),
+           description="HHI of volume across agents; 1/N = dispersed."),
+    Metric(name="strategy_correlation_matrix", category="microstructure", fn=m_strategy_correlation_matrix,
+           output_keys=("matrix", "strategies", "n_rounds"), references=("Hong & Stein (1999)",),
+           description="Pairwise Pearson corr of net demand between strategy types."),
+    Metric(name="information_share_by_strategy", category="microstructure", fn=m_information_share_by_strategy,
+           output_keys=("shares", "total_corrective_volume"), references=("Grossman & Stiglitz (1980)",),
+           description="Fraction of corrective volume by each stabilizing strategy."),
+]

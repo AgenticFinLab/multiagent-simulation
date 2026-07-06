@@ -573,7 +573,7 @@ Three consecutive PASS runs are required before Phase 6 may start.
 | Pass # | Reviewer perspective                         | Anchors in `09-step5-to-10-review.md` |
 |--------|----------------------------------------------|----------------------------------------|
 | 1      | Theory-code alignment (Step 5)               | §5.1, §5.2, §5.3, §5.4                 |
-| 2      | Code quality + analysis tools (Steps 6 — 7)  | §6.1, §6.2, §6.3, §7.1                 |
+| 2      | Code quality + analysis tools (Steps 6 — 7)  | §6.1, §6.2, §6.3, §7.1; `10-evaluation-architecture.md` import compliance |
 | 3      | Documentation + final cross-check (Steps 8 — 9) | §8 documentation hooks, §9 readiness |
 
 As in §6.4, any unchecked item in any pass resets the count. The

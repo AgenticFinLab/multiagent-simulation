@@ -156,6 +156,30 @@ For each metric in analysis-bases.md §2:
   □ Data source file pattern is documented in analysis-bases.md §2 Implementation Notes
 ```
 
+#### Evaluation-First Import Compliance (MANDATORY)
+
+> Reference: `masim/skills/implement-simulation-skill/10-evaluation-architecture.md`
+
+```
+For each analysis.py file in every built variant:
+  □ All reusable imports come from masim.evaluation (the sole home for shared evaluation code)
+  □ All time-series metrics imported from masim.evaluation.finance.timeseries
+  □ All behavioral metrics imported from masim.evaluation.finance.behavioral
+  □ All volatility metrics imported from masim.evaluation.finance.volatility
+  □ All microstructure metrics imported from masim.evaluation.finance.microstructure
+  □ All reusable plot functions imported from masim.evaluation.finance.visualization
+  □ Scenario validation function imported from masim.evaluation.finance.validation
+  □ Metric registry types (if used) imported from masim.evaluation.registry
+  □ Data loading utilities imported from masim.evaluation.data_loader
+  □ Any NEW reusable function was FIRST added to masim/evaluation/ before being called
+  □ Only scenario-specific orchestration logic (analyze_{scenario}, _validate_{scenario}) remains local
+```
+
+If a needed metric/function does NOT yet exist in `masim/evaluation/`:
+1. Implement it in the correct `masim/evaluation/` submodule
+2. Add to `__all__` and re-export through `__init__.py`
+3. Then import it in the scenario's `analysis.py`
+
 Minimum plots from `analysis-bases.md §7`:
 1. Environment state vs. Anchor / Reference over time (with threshold lines)
    — finance-appendix example: Price vs. Fundamental over time
@@ -308,6 +332,7 @@ After a successful 200-round run, verify:
 - [ ] `Rule/players.py` — all agents; docstrings cite sim-bases §4.{N}
 - [ ] `Rule/run_*.py` — works with `python run.py -c config.yml`
 - [ ] `Rule/analysis.py` — exports `__all__`; all metrics implemented
+- [ ] `Rule/analysis.py` — evaluation-first: all reusable metrics/viz/validation imported from `masim/evaluation/` (see `10-evaluation-architecture.md`)
 - [ ] `LLM/prompts.py` — no phenomenon name; correct output format per §3.6.0 I/O Contract; `<analysis>` tags present
 - [ ] `LLM/players.py` — LLM decision-field access rule (§4.2.3) honoured; fail-fast on unparseable model output
 - [ ] `LLM/analysis.py` — exports `__all__`; imports shared loaders from `Rule/analysis.py`
