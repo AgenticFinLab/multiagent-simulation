@@ -19,7 +19,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 11 | DispositionEffect      | 🟢     | qihang      | Jul 5 2026  | LLM, Rule          |
 | 12 | DotComBubble           | 🟢     | qihang      | Jul 6 2026  | LLM, Rule, RuleLLM |
 | 13 | EchoChamber            | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM |
-| 14 | EndowmentEffect        | 🟡     | qihang      | Jul 7 2026  | LLM               |
+| 14 | EndowmentEffect        | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM|
 | 15 | EquityPremium          | 🟡     | Wenyou      | Jul 6 2026  | —                   |
 | 16 | EuropeanDebtCrisis     | 🟡     | Wenyou      | Jul 6 2026  | —                   |
 | 17 | FlashCrash             | ⬜      | —           | —           | —                 |
