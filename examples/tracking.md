@@ -17,7 +17,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 9  | CreditCycle            | ⬜      | —           | —           | —                 |
 | 10 | CurrencyCrisis         | ⬜      | —           | —           | —                 |
 | 11 | DispositionEffect      | 🟡     | qihang      | 2026-07-05  | LLM Rule          |
-| 12 | DotComBubble           | 🟡      | Wenyou     | Jul 6 2026  | —                 |
+| 12 | DotComBubble           | 🟡      | Wenyou     | Jul 6 2026  | LLM Rule RuleLLM       |
 | 13 | EchoChamber            | 🟡      | Wenyou     | Jul 6 2026  | —                 |
 | 14 | EndowmentEffect        | 🟡      | Wenyou     | Jul 6 2026  | —                 |
 | 15 | EquityPremium          | 🟡      | Wenyou     | Jul 6 2026  | —                 |
