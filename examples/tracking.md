@@ -37,11 +37,11 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 29 | LUNACollapse           | ⬜      | —           | —           | —                 |
 | 30 | MarketCrash            | ⬜      | —           | —           | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
-| 32 | MomentumEffect         | ⬜      | —           | —           | —                 |
-| 33 | OverconfidenceBias     | ⬜      | —           | —           | —                 |
-| 34 | RepresentativenessBias | ⬜      | —           | —           | —                 |
-| 35 | ReversalEffect         | ⬜      | —           | —           | —                 |
-| 36 | RumorSpread            | ⬜      | —           | —           | —                 |
+| 32 | MomentumEffect         | 🟡      | Zihan           | Jul 7 2026           | —                 |
+| 33 | OverconfidenceBias     | 🟡      | Zihan           | Jul 7 2026           | —                 |
+| 34 | RepresentativenessBias | 🟡      | Zihan           | Jul 7 2026           | —                 |
+| 35 | ReversalEffect         | 🟡      | Zihan           | Jul 7 2026           | —                 |
+| 36 | RumorSpread            | 🟡      | Zihan           | Jul 7 2026           | —                 |
 | 37 | ShortSqueeze           | 🟡     | Sijia       | Jun 11 2026 | —                 |
 | 38 | SorosPound             | 🟡     | Sijia       | Jun 11 2026 | —                 |
 | 39 | SouthSeaBubble         | 🟡     | Sijia       | Jun 11 2026 | —                 |
