@@ -42,6 +42,7 @@ endowedholder:
         user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3
         generation_config:
           temperature: 0.6
           max_tokens: 512
@@ -69,6 +70,7 @@ statusquoseller:
         user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3
         generation_config:
           temperature: 0.5
           max_tokens: 512
@@ -96,6 +98,7 @@ rationalarbitrageur:
         user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -123,6 +126,7 @@ newbuyer:
         user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3
         generation_config:
           temperature: 0.4
           max_tokens: 512
@@ -144,12 +148,14 @@ noisetrader:
       initial_position: 0
       trade_probability: 0.3
       noise_size: 150
+      base_size: 150
       custom_state_hot_limit: 3
       llm:
         sys_message: "examples.EndowmentEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3
         generation_config:
           temperature: 0.9
           max_tokens: 512

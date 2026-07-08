@@ -35,7 +35,13 @@ paths. It uses the same environment parameters and topology as Rule.
 ## §6 Running Instructions
 
 ```bash
-python examples/EchoChamber/RuleLLM/run_echo_chamber_rulellm.py -c configs/EchoChamber/RuleLLM/simulation.yml
+python -m examples.EchoChamber.RuleLLM.run_echo_chamber_rulellm -c configs/EchoChamber/RuleLLM/simulation.yml
+```
+
+For a startup check that does not call the model API:
+
+```bash
+python -m examples.EchoChamber.RuleLLM.run_echo_chamber_rulellm -c configs/EchoChamber/RuleLLM/simulation.yml --setup-only
 ```
 
 ## §7 Expected Behavior

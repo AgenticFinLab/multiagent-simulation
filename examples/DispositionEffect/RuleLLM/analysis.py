@@ -12,15 +12,39 @@ See examples/DispositionEffect/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
+import sys
 
-from masim.utils import load_config
+project_root = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from masim.utils import load_config, load_results
 
 from examples.DispositionEffect.Rule.analysis import (
     _write_standard_named_outputs,
     calculate_metrics,
     create_visualizations,
-    load_simulation_data,
+    load_simulation_data as _load_rule_simulation_data,
 )
+
+
+def load_simulation_data(config):
+    """Load shared metrics data, recovering resumed prices from market turns."""
+    data = _load_rule_simulation_data(config)
+    results = load_results(config)
+    coordinators = list(results.players_by_role("coordinator").values())
+    if not coordinators:
+        raise ValueError("No coordinator result found")
+    payloads = coordinators[0].turns.payloads()
+    resumed_prices = [
+        payload["market_data"]["price"]
+        for _, payload in sorted(payloads.items())
+    ]
+    if len(resumed_prices) > len(data["prices"]):
+        data["prices"] = resumed_prices
+    return data
 
 
 def main():

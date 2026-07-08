@@ -12,9 +12,16 @@ See examples/DispositionEffect/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
+import sys
 
-from masim.utils import load_config
+project_root = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
+)
+sys.path.insert(0, project_root)
 
+from masim.utils.config import load_config
 from examples.DispositionEffect.Rule.analysis import (
     _write_standard_named_outputs,
     calculate_metrics,
@@ -32,10 +39,30 @@ def main():
         "-c",
         "--config",
         type=str,
-        required=True,
+        default="configs/DispositionEffect/LLM/simulation.yml",
         help="Path to simulation configuration file (YAML)",
     )
+    parser.add_argument(
+        "--run-dir",
+        help="Run directory to analyze; defaults to the newest timestamped run",
+    )
     args = parser.parse_args()
+
+    run_dir = args.run_dir
+    if run_dir is None:
+        runs_root = os.path.join(
+            project_root, "EXPERIMENT", "DispositionEffect", "LLM", "runs"
+        )
+        if os.path.isdir(runs_root):
+            candidates = [
+                os.path.join(runs_root, name)
+                for name in os.listdir(runs_root)
+                if os.path.isdir(os.path.join(runs_root, name, "records"))
+            ]
+            if candidates:
+                run_dir = max(candidates, key=os.path.getmtime)
+    if run_dir is not None:
+        os.environ["DISPOSITION_LLM_OUTPUT_DIR"] = run_dir
 
     # Load config and derive paths
     config = load_config(args.config)
@@ -46,6 +73,7 @@ def main():
 
     print("=" * 70)
     print("DispositionEffectLLM Analysis - Prospect Theory (LLM Agents)")
+    print(f"Run directory: {base_dir}")
     print("=" * 70)
 
     print("\n[1] Loading simulation data...")

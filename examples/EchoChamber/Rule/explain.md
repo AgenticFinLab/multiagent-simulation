@@ -2,9 +2,10 @@
 
 ## §1 Overview
 
-The Rule variant is the deterministic baseline for the EchoChamber special
+The Rule variant is the formula-driven baseline for the EchoChamber special
 schema. It models opinion polarization through `social_action` messages rather
-than financial orders.
+than financial orders. Agent decisions follow configured equations; the
+environment noise term and passive participation remain explicitly stochastic.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -20,13 +21,16 @@ than financial orders.
 
 `OpinionEnvironment` aggregates `polarize`, `neutral`, and `depolarize`
 intensities, updates polarization, computes mean opinion and cluster separation,
-and broadcasts the next environment state.
+and broadcasts the next environment state. Every coefficient and behavioral
+threshold is loaded fail-fast from `configs/EchoChamber/Rule/players.yml`.
 
 ## §4 Variant Architecture
 
 Social agents inherit `BaseSocialAgent`, store personal opinion histories, and
 emit `Action(action_type="social_action")` payloads. The output schema is
 `action_type`, `intensity`, `agent_role`, `agent_id`, and `opinion`.
+Expanded ideologue instances alternate the sign of the configured initial
+opinion, producing the balanced left/right seed required by the cluster model.
 
 ## §5 Config Reference
 
@@ -37,8 +41,10 @@ routes environment updates and social actions.
 ## §6 Running Instructions
 
 ```bash
-python examples/EchoChamber/Rule/run_echo_chamber.py -c configs/EchoChamber/Rule/simulation.yml
+python -m examples.EchoChamber.Rule.run_echo_chamber -c configs/EchoChamber/Rule/simulation.yml
 ```
+
+For a startup smoke test, append `--steps 2`.
 
 ## §7 Expected Behavior
 

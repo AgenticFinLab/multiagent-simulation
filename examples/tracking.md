@@ -15,7 +15,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 7  | CarryTradeUnwind       | 🟡     | Qiqi        | Jul 6 2026  | —                   |
 | 8  | ConfirmationBias       | 🟡     | Qiqi        | Jul 8 2026          | —                 |
 | 9  | CreditCycle            | 🟡      | Qiqi        | Jul 8 2026         | —                 |
-| 10 | CurrencyCrisis         | 🟡      | Qiqi          | Jul 8 2026         | —                 |
+| 10 | CurrencyCrisis         | 🟡      | Qiqi        | Jul 8 2026         | —                 |
 | 11 | DispositionEffect      | 🟢     | qihang      | Jul 5 2026  | LLM, Rule          |
 | 12 | DotComBubble           | 🟢     | qihang      | Jul 6 2026  | LLM, Rule, RuleLLM |
 | 13 | EchoChamber            | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM |
@@ -28,8 +28,8 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 20 | GamblerFallacy         | 🟡      | Wenyou      | Jul 8 2026 | —                 |
 | 21 | GameStopShortSqueeze   | 🟡      | Wenyou      | Jul 8 2026  | —                 |
 | 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 | —                 |
-| 23 | HerdEffect             | ⬜      | —           | —           | —                 |
-| 24 | HerdingInformation     | ⬜      | —           | —           | —                 |
+| 23 | HerdEffect             | 🟡      | qihang      | Jul 8 2026           | —                 |
+| 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           | —                 |
 | 25 | HindsightBias          | ⬜      | —           | —           | —                 |
 | 26 | LiquidityDryup         | ⬜      | —           | —           | —                 |
 | 27 | LossAversion           | ⬜      | —           | —           | —                 |
@@ -37,11 +37,11 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 29 | LUNACollapse           | ⬜      | —           | —           | —                 |
 | 30 | MarketCrash            | ⬜      | —           | —           | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
-| 32 | MomentumEffect         | 🟢     | chabingcha   | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 33 | OverconfidenceBias     | 🟢     | chabingcha   | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 34 | RepresentativenessBias | 🟢     | chabingcha   | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 35 | ReversalEffect         | 🟢     | chabingcha   | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 36 | RumorSpread            | 🟢     | chabingcha   | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
+| 32 | MomentumEffect         | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
+| 33 | OverconfidenceBias     | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
+| 34 | RepresentativenessBias | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
+| 35 | ReversalEffect         | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
+| 36 | RumorSpread            | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
 | 37 | ShortSqueeze           | 🟡     | Sijia       | Jun 11 2026 | —                 |
 | 38 | SorosPound             | 🟡     | Sijia       | Jun 11 2026 | —                 |
 | 39 | SouthSeaBubble         | 🟡     | Sijia       | Jun 11 2026 | —                 |

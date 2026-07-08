@@ -33,6 +33,7 @@ Environment Variables:
 import logging
 import os
 import json
+import math
 import random
 import re
 import sys
@@ -47,10 +48,14 @@ from masim.utils.history import HistoryBuffer
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-# Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Support direct module loading when the repository is not installed editable.
+PROJECT_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
-from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error
 
 logger = logging.getLogger("EchoChamberLLM")
 
@@ -60,6 +65,24 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def extract_infer_response(infer_output: Any) -> str:
+    """Support both single-response and legacy batched LLM outputs."""
+    response = getattr(infer_output, "response", None)
+    if isinstance(response, str):
+        return response
+
+    outputs = getattr(infer_output, "outputs", None)
+    if outputs:
+        first_output = outputs[0]
+        first_response = getattr(first_output, "response", None)
+        if isinstance(first_response, str):
+            return first_response
+
+    raise AttributeError(
+        "LLM inference output does not expose a usable response or outputs[0].response"
+    )
 
 
 class OpinionEnvironment(GeneralPlayer):
@@ -343,49 +366,25 @@ Respond with ONLY valid JSON:
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse LLM response with analysis and decision sections.
+        """Parse the canonical tagged EchoChamber decision contract.
 
         EchoChamber expects: {"action_type": ..., "intensity": ..., "reasoning": ...}
-        The shared ``parse_llm_response_with_thinking`` validates for financial
-        trading fields, so we do our own field validation here.
+        Both tags are required so malformed model output is retried instead of
+        being silently accepted through an undocumented fallback format.
         """
-        analysis = ""
-        decision_json = None
-
-        # Extract analysis from <analysis>...</analysis> or <think>...</think>
         analysis_match = re.search(
             r"<analysis>(.*?)</analysis>", response_text, re.DOTALL
         )
-        if not analysis_match:
-            analysis_match = re.search(
-                r"<think>(.*?)</think>", response_text, re.DOTALL
-            )
-        if analysis_match:
-            analysis = analysis_match.group(1).strip()
-
-        # Extract decision from <decision>...</decision>
         decision_match = re.search(
             r"<decision>(.*?)</decision>", response_text, re.DOTALL
         )
-        if decision_match:
-            decision_json = decision_match.group(1).strip()
+        if analysis_match is None or not analysis_match.group(1).strip():
+            raise ValueError("Missing or empty <analysis> section")
+        if decision_match is None or not decision_match.group(1).strip():
+            raise ValueError("Missing or empty <decision> section")
 
-        # Fallback: code block or raw JSON
-        if not decision_json:
-            code_match = re.search(
-                r"```(?:json)?\s*(.*?)\s*```", response_text, re.DOTALL
-            )
-            if code_match:
-                decision_json = code_match.group(1).strip()
-            else:
-                json_match = re.search(r"\{[^{}]*\}", response_text, re.DOTALL)
-                if json_match:
-                    decision_json = json_match.group(0)
-
-        if not decision_json:
-            raise ValueError(
-                f"No decision JSON found in response: {response_text[:100]}"
-            )
+        analysis = analysis_match.group(1).strip()
+        decision_json = decision_match.group(1).strip()
 
         try:
             parsed = json.loads(decision_json)
@@ -400,16 +399,20 @@ Respond with ONLY valid JSON:
         action_type = str(parsed["action_type"]).lower()
         if action_type not in {"polarize", "neutral", "depolarize"}:
             raise ValueError(f"Invalid action_type: {parsed['action_type']!r}")
+        if isinstance(parsed["intensity"], bool):
+            raise ValueError(f"Invalid intensity: {parsed['intensity']!r}")
         try:
             intensity = float(parsed["intensity"])
         except (TypeError, ValueError) as exc:
             raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
+        if not math.isfinite(intensity) or not 0.0 <= intensity <= 1.0:
+            raise ValueError(f"Intensity outside [0, 1]: {intensity!r}")
         reasoning = str(parsed["reasoning"]).strip()
         if not reasoning:
             raise ValueError("Empty reasoning")
 
         parsed["action_type"] = action_type
-        parsed["intensity"] = max(0.0, min(1.0, intensity))
+        parsed["intensity"] = intensity
         parsed["reasoning"] = reasoning
         parsed["analysis"] = analysis
         return parsed
@@ -417,6 +420,33 @@ Respond with ONLY valid JSON:
     def _clamp_opinion(self, opinion: float) -> float:
         """Clamp opinion to valid range [-1, 1]."""
         return max(-1.0, min(1.0, opinion))
+
+    def _fallback_decision(self, error: Exception) -> Dict[str, Any]:
+        """Return a deterministic role-compatible action when the LLM is unavailable."""
+        fallback_actions = {
+            "LLMIdeologue": ("polarize", 0.65),
+            "LLMConformist": ("polarize", 0.35),
+            "LLMCriticalThinker": ("depolarize", 0.45),
+            "LLMBridgeBuilder": ("depolarize", 0.65),
+            "LLMPassiveBystander": ("neutral", 0.10),
+        }
+        action_type, intensity = fallback_actions.get(
+            self.__class__.__name__, ("neutral", 0.0)
+        )
+        error_name = type(error).__name__
+        logger.warning(
+            "[%s] LLM unavailable (%s); using %s fallback action",
+            self.identity,
+            error_name,
+            action_type,
+        )
+        return {
+            "action_type": action_type,
+            "intensity": intensity,
+            "reasoning": f"LLM unavailable ({error_name}); role-based fallback used.",
+            "analysis": "Fallback decision generated locally.",
+            "fallback_used": True,
+        }
 
     async def decide(self) -> Dict[str, Any]:
         round_num = self.state.custom_state["round"]
@@ -429,40 +459,46 @@ Respond with ONLY valid JSON:
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        max_retries = 3
+        max_retries = int(llm_config["max_retries"])
+        if max_retries < 1:
+            raise ValueError("extras.llm.max_retries must be at least 1")
         decision = None
         last_error = None
         for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 infer_output = llm_client.run([infer_input])
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                decision = self._parse_llm_response(extract_infer_response(infer_output))
                 break
             except Exception as exc:
                 last_error = exc
                 parse_error = isinstance(exc, (ValueError, KeyError))
                 retryable_api_error = is_retryable_llm_error(exc)
                 if not parse_error and not retryable_api_error:
-                    raise
+                    break
                 if attempt < max_retries - 1:
                     logger.debug("[%s] LLM decision failed, retrying...", self.identity)
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
+            decision = self._fallback_decision(
+                last_error or RuntimeError("LLM returned no decision")
             )
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
-        reasoning = str(decision.pop("reasoning"))[:100]
+        reasoning = str(decision.pop("reasoning"))
         analysis = str(decision.pop("analysis"))
+        fallback_used = bool(decision.pop("fallback_used", False))
 
         # Update opinion based on LLM action
         my_opinion = self.state.custom_state["my_opinion"]
+        polarize_opinion_step = float(self.config.extras["polarize_opinion_step"])
+        depolarize_opinion_step = float(self.config.extras["depolarize_opinion_step"])
         if action_type == "polarize":
-            my_opinion += 0.05 * (1 if my_opinion >= 0 else -1)
+            direction = 1 if my_opinion >= 0 else -1
+            my_opinion += polarize_opinion_step * intensity * direction
         elif action_type == "depolarize":
-            my_opinion *= 0.95
+            my_opinion *= 1.0 - depolarize_opinion_step * intensity
         my_opinion = self._clamp_opinion(my_opinion)
         self.state.custom_state["my_opinion"] = my_opinion
 
@@ -484,6 +520,7 @@ Respond with ONLY valid JSON:
             "opinion": my_opinion,
             "reasoning": reasoning,
             "analysis": analysis,
+            "fallback_used": fallback_used,
         }
 
         return {

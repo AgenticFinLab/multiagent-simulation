@@ -8,33 +8,33 @@ Measure how LLM persona-driven decision-making shapes bubble amplitude, duration
 
 | Metric                              | Function                                                                   | analysis-bases.md ref |
 |-------------------------------------|----------------------------------------------------------------------------|-----------------------|
-| BAI (Bubble Amplitude Index)        | `bubble_amplitude_index(price_history, fundamental)`                       | §2.1                  |
-| BD (Bubble Duration)                | `bubble_duration(price_history, fundamental, bubble_threshold=0.10)`       | §2.2                  |
-| CS (Crash Severity)                 | `crash_severity(price_history)`                                            | §2.3                  |
-| MAF (Momentum Amplification Factor) | `momentum_amplification_factor(agent_volume_by_type, bubble_rounds)`       | §2.4                  |
-| SSR (Short Squeeze Resistance)      | `short_squeeze_resistance(short_seller_orders, momentum_sign_history)`     | §2.5                  |
-| RT (Recovery Time)                  | `recovery_time(price_history, fundamental, recovery_threshold=0.10)`       | §2.6                  |
-| WDI (Wealth Divergence Index)       | `wealth_divergence_index(agent_final_states, final_price, initial_wealth)` | §2.7                  |
+| BAI (Bubble Amplitude Index)        | `bubble_amplitude_index(price_history, fundamental)`                       | §2 BAI                |
+| BD (Bubble Duration)                | `bubble_duration(price_history, fundamental, bubble_threshold=0.10)`       | §2 BD                 |
+| CS (Crash Severity)                 | `crash_severity(price_history)`                                            | §2 CS                 |
+| MAF (Momentum Amplification Factor) | `momentum_amplification_factor(agent_orders, bubble_rounds)`               | §2 MAF                |
+| SSR (Short-Seller Resistance)       | `short_seller_resistance(short_seller_orders, overvaluation_rounds)`       | §2 SSR                |
+| RT (Recovery Time)                  | `recovery_time(price_history, fundamental, recovery_threshold=0.10)`       | §2 RT                 |
+| AQR (API Quality)                   | `api_quality(agent_orders)`                                                | §2 AQR                |
 
 ## §3 LLM-Variant-Specific Notes
 
-- **Higher BAI variance**: Language-model reasoning introduces stochastic decisions; BAI may exceed Rule range in high-temperature runs.
-- **LLMNewEconomyEvangelist**: Narrative persona sustains buying into late-stage bubble — BD may extend beyond Rule if LLM over-weights positive price signals.
-- **LLMMomentumFollower**: SSR is typically lower than Rule — LLM may narrate a "correction incoming" and exit shorts earlier, reducing squeeze resistance.
-- **LLMSkepticalValueInvestor**: Fundamental anchoring in language can be robust; WDI contribution similar to Rule but varies by prompt temperature.
-- **Cross-run replication**: Re-run 3× and report mean ± std for BAI and BD due to LLM non-determinism.
+- **Stochastic paths**: Report replicated distributions rather than treating one sampled path as representative.
+- **Persona attribution**: MAF uses recorded momentum-follower buy volume; SSR uses the constrained skeptical seller's recorded sell actions.
+- **Fail-fast quality**: Provider or parse failures stop the run after the configured retry count; they are not converted into hidden hold actions.
+- **Contract audit**: AQR verifies that every persisted decision has valid action, price, quantity, reasoning, and analysis fields.
+- **Cross-run replication**: Re-run at least 3× and report mean ± standard deviation for BAI and BD.
 
-## §4 Expected Ranges
+## §4 Diagnostic Interpretation
 
-| Metric | LLM-Variant Expected Range | vs. Rule Baseline                       |
-|--------|----------------------------|-----------------------------------------|
-| BAI    | 0.4 – 1.8                  | Wider range; higher upper bound         |
-| BD     | 18 – 55 rounds             | Slight extension possible               |
-| CS     | 0.35 – 0.75                | Slightly wider crash range              |
-| MAF    | 0.30 – 0.65                | Similar; persona amplification varies   |
-| SSR    | 0.20 – 0.55                | Lower — LLM ShortSeller less persistent |
-| RT     | 10 – 35 rounds             | Broader recovery distribution           |
-| WDI    | −0.4 – +0.4                | Wider wealth divergence due to variance |
+| Metric | Review signal |
+|--------|---------------|
+| BAI | `< 0.10` suggests no visible bubble; `> 2.0` requires stability review. |
+| BD | `0` means no persistent bubble; a near-full-run value suggests no resolution. |
+| CS | `< 0.30` is a mild correction; `> 0.80` requires numerical-stability review. |
+| MAF | Near zero means the momentum persona did not materially amplify bubble buying. |
+| SSR | Zero means the inventory-constrained skeptical seller supplied no overvaluation sell pressure. |
+| RT | `null` means no post-trough recovery within the recorded horizon. |
+| AQR | `contract_compliance_rate` must equal `1.0` for an accepted run. |
 
 ## §5 References
 
@@ -53,4 +53,14 @@ See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md
 - Confirm the run completed the configured 200 rounds.
 - Audit parse failures and retry counts before acceptance; deterministic parser or provider failures should fail fast rather than become hidden holds.
 - Confirm accepted decisions produce valid `action` and numeric `quantity` fields.
+- Confirm `summary.json` contains BAI, BD, CS, MAF, SSR, RT, and AQR.
 - Review action distribution for excessive holds that would indicate unusable output quality.
+
+## §8 Running The Analysis
+
+```bash
+python -m examples.DotComBubble.LLM.analysis \
+  -c configs/DotComBubble/LLM/simulation.yml
+```
+
+Outputs are written to `EXPERIMENT/DotComBubble/LLM/analysis/summary.json` and `dotcombubble_llm_dynamics.png` by default.

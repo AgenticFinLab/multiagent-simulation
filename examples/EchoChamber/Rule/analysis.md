@@ -2,7 +2,7 @@
 
 ## §1 Objectives
 
-The Rule analysis verifies deterministic polarization dynamics and provides the
+The Rule analysis verifies formula-driven polarization dynamics and provides the
 baseline for comparing API variants.
 
 ## §2 Core Metrics
@@ -15,7 +15,7 @@ baseline for comparing API variants.
 | Polarize activity | `def compute_polarize_activity(polarize_counts) -> float` | `analysis-bases.md §2.4` |
 | Depolarize activity | `def compute_depolarize_activity(depolarize_counts) -> float` | `analysis-bases.md §2.5` |
 | Opinion dispersion | `def compute_opinion_dispersion(agent_opinions) -> float` | `analysis-bases.md §2.6` |
-| Quality checks | `def compute_api_quality(actions, rag_contexts) -> dict` | `analysis-bases.md §2.7` |
+| Quality checks | `compute_api_quality(actions, rag_contexts)` validates the shared special schema; RAG coverage is optional for Rule | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 
@@ -35,7 +35,8 @@ composition, and final opinion dispersion.
 ## §6 Expected Results and Validation Criteria
 
 A full Rule sample should complete 200 rounds and produce finite polarization,
-cluster, activity, and opinion series.
+cluster, activity, and opinion series. Missing metric directories, empty series,
+invalid JSON, mismatched series lengths, and out-of-range state fail explicitly.
 
 ## §7 Visualization Catalogue
 

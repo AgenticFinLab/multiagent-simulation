@@ -7,13 +7,13 @@ debug_mode: true
 
 proxy:
   storage:
-    checkpoint_dir: "EXPERIMENT/DispositionEffect/Rule/checkpoints"
-    record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+    checkpoint_dir: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/checkpoints"
+    record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"
     record_rounds: true
     turn_block_size: 50
 
   monitoring:
-    record_path: "EXPERIMENT/DispositionEffect/Rule/monitoring"
+    record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/monitoring"
     monitor_hot_limit: 3
 
   communication:

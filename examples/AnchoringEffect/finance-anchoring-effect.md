@@ -26,7 +26,7 @@
 | Created       | 2026-07-01                                                                                           |
 | Pipeline      | masim/skills/create-simulation-pipeline.md                                                           |
 | Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.2)                                              |
-| Status        | locked                                                                                               |
+| Status        | released                                                                                             |
 
 ### §0 Meta CHANGELOG
 
@@ -113,12 +113,92 @@
       `examples/AnchoringEffect/{,LLM,Rag,Rule,RuleLLM}/` moved to
       `~/.Trash/pycache-anchoringeffect-<epoch>/` per macOS trash
       policy (no permanent deletion).
+- 2026-07-06: Round-2 polish Step 0 (target-file gate, Case A). §11
+  checklist re-run three consecutive PASS under the evaluation-first
+  baseline (`masim/evaluation/README.md`, `10-evaluation-architecture.md`
+  Pass 2 Analysis Migration Rule). Structural counts unchanged
+  (§1–§10 headers, 9 §4 anchors, 9 §7 rows, four §10.1 `Yes` variants,
+  1 normalised §9 row well under the 10 % cap). Status retained
+  `locked`; transition `locked → released` deferred to Closeout after
+  Steps 1–10 re-verify.
+- 2026-07-06: Round-2 polish Steps 1–3 (research / agent+environment /
+  config re-audit).
+    - Step 1 patch: promoted the calibration content at the tail of
+      Theory#3 (Campbell & Sharpe 2009) `Relevance to This Simulation`
+      bullet in `simulation-bases.md §2` into its own
+      **Calibration Implication** bullet, restoring six-field
+      completeness across all 9 Theory blocks. Bidirectional
+      §2 ↔ target §4 coverage retained (1-to-1 mapping unchanged).
+    - Step 2 re-verify: all 9 AGENT_POOL profiles under
+      `examples/AGENT_POOL/finance/` carry the canonical Handbook §3
+      H2 sections (Summary, Definition, Theoretical Foundation, Design
+      Purpose, Behavioral Framework, Parameters, Worked Examples,
+      Academic References, Design Provenance); root §3 / §5 / §7
+      present. No structural changes required.
+    - Step 3 re-verify: all 16 YAML files parse under SafeLoader with
+      no-op `!include`; variant folder set = {Rule, LLM, RuleLLM, Rag}
+      matches target §10.1 four-`Yes` declaration exactly. No changes.
+- 2026-07-06: Round-2 polish Step 4 (implementation audit under Pass 2
+  Analysis Migration Rule).
+    - `examples/AnchoringEffect/metrics.py` header docstring updated to
+      cite `masim/evaluation/README.md` + `10-evaluation-architecture.md`
+      as authoritative catalogue for the 36 standard metrics and the
+      shared `_returns` helper; import block already delegates to
+      `masim.evaluation.registry`, `masim.evaluation.finance`, and
+      `masim.evaluation.data_loader` (no local re-implementations).
+    - `examples/AnchoringEffect/Rule/analysis.py` two residual stub
+      comment blocks that documented removed `_compute_*` helpers
+      consolidated into a single Pass-2 architecture citation block
+      pointing to `masim/evaluation/README.md`. No behavioural change.
+    - Import smoke: `examples.AnchoringEffect.metrics.REGISTRY` carries
+      **44 metrics** (36 standard + 8 scenario-specific), and every
+      variant's `analysis` module imports cleanly under Python 3.13.
+    - `python3 -m py_compile` returns 0 for `metrics.py` + all four
+      variants' `players.py` / `analysis.py` / `prompts.py`
+      (Rule has no separate `prompts.py`).
+    - Structural spot-checks: RuleLLM `prompts.py` retains 20 lines
+      matching `== PERSONA == | == DECISION RULES ==` markers
+      (dual-section rule), and Rag `analysis.py` still emits the
+      `_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"`
+      sentinel with the corresponding equality check.
+- 2026-07-06: Round-2 polish Steps 5-10 + Closeout (Pass-1 theory-code,
+  Pass-2 code+analysis, Pass-3 docs cross-check + Rule 5-round smoke).
+    - Pass-1/Pass-2 review + smoke against
+      `configs/AnchoringEffect/Rule/simulation.yml` surfaced four
+      latent-broken code paths introduced by the Round-1 refactor but
+      never exercised by a Rule smoke:
+        1. `_get_adjustment_factor` helper removed while its call site
+           in `analyze_anchoring` was retained (NameError).
+        2. `AnchoringValidationResult` dataclass removed while
+           `_validate_anchoring_effect` still constructs it (NameError).
+        3. `compute_all_metrics` still assumed the pre-refactor
+           `{category: {name: outputs}}` return shape of
+           `MetricsRegistry.compute_all`; the evaluation-first registry
+           returns `{"metrics", "unavailable", "errors"}`
+           (AttributeError).
+        4. Summary construction called the removed
+           `REGISTRY.by_category()`; new API exposes `categories()` +
+           `metrics_in_category()` (AttributeError).
+    - All four bugs fixed by restoring the two scenario-local pieces
+      (`_get_adjustment_factor`, `AnchoringValidationResult`) and by
+      consuming the new registry API. Rule variant now runs end-to-end:
+      all 44 registered metrics compute, 11 dashboards render, printed
+      validation summary emits (data-provenance fit-score is a run-time
+      calibration outcome, not a code-path issue).
+    - Pass-3 docs cross-check: §0/§1/§2/§3/§4/§5/§6/§7/§8/§9/§10
+      structural counts unchanged; §11 checklist three-PASS retained
+      from Step 0.
+    - Non-Rule variant smoke (LLM/RuleLLM/Rag) deferred (environment-
+      scoped: LLM API credentials not provisioned in polish sandbox);
+      structural + import-smoke coverage confirms delegator chains
+      are intact.
+    - **Status transition** `locked → released` per pipeline Closeout.
 
 ### §0 Traceability Matrix (post-polish)
 
 | Target section | Primary evidence                                                                | Cross-references                                                                    |
 |----------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| §1 Meta        | `finance-anchoring-effect.md` frontmatter                                       | Populated by Case B reverse-reconstruction; Status = locked                         |
+| §1 Meta        | `finance-anchoring-effect.md` frontmatter                                       | Populated by Case B reverse-reconstruction; Status = released                       |
 | §2 Phenomenon  | `simulation-bases.md §1.1`                                                      | Trigger / Mechanism / Participants / Resolution all sourced from §1.1               |
 | §3 Research    | `analysis-bases.md §1` (objectives O1 – O6)                                     | Ablation → O3; sweep → O4; variant compare → O6                                     |
 | §4 Anchors     | `simulation-bases.md §2` (9 theory blocks)                                      | 1:1 mapping §4.1 – §4.9 → bases §2 Theory blocks in order                           |

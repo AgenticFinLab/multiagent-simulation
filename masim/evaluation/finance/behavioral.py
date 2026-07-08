@@ -19,7 +19,7 @@ Metrics Summary:
     | Cross-Sectional Std        | σ(bids)                   | Lower = More      |
 """
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 import numpy as np
 from scipy import stats
 
@@ -366,3 +366,298 @@ def detect_herding_episodes(
             episodes.append((episode_start, rounds[-1]))
 
     return episodes
+
+
+# ===========================================================================
+# Registry-Compatible Metric Functions (m_* prefix)
+#
+# These functions use the standard MASim data contract and are registered
+# into MetricsRegistry via BEHAVIORAL_METRICS.
+# ===========================================================================
+
+from masim.evaluation.registry import Metric, MetricUnavailable
+from masim.evaluation.data_loader import payload_buy_sell
+
+
+# ---------------------------------------------------------------------------
+# Category: agent_behaviour (3 metrics)
+# ---------------------------------------------------------------------------
+
+
+def m_agent_action_frequency(data, config):
+    """Per-agent {buy, sell, hold} action counts."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    per_agent: Dict[str, Dict[str, int]] = {}
+    for pid, round_payloads in payloads.items():
+        counts = {"buy": 0, "sell": 0, "hold": 0}
+        for payload in round_payloads.values():
+            action = payload.get("action", "hold")
+            counts[action] = counts.get(action, 0) + 1
+        per_agent[pid] = counts
+    return {"per_agent": per_agent}
+
+
+def m_silent_agent_count(data, config):
+    """Number of agents that never traded; expected 0."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    silent: List[str] = []
+    for pid, round_payloads in payloads.items():
+        traded = any(
+            payload.get("action") in ("buy", "sell") for payload in round_payloads.values()
+        )
+        if not traded:
+            silent.append(pid)
+    return {
+        "silent_agents": silent,
+        "silent_count": len(silent),
+        "total_agents": len(payloads),
+        "silent_ratio": len(silent) / len(payloads) if payloads else 0.0,
+    }
+
+
+def m_agent_volume_buy_sell(data, config):
+    """Per-agent buy/sell/total volume from action-based accounting."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    per_agent: Dict[str, Dict[str, float]] = {}
+    for pid, round_payloads in payloads.items():
+        total_buy = 0.0
+        total_sell = 0.0
+        for payload in round_payloads.values():
+            buy, sell = payload_buy_sell(payload)
+            total_buy += buy
+            total_sell += sell
+        per_agent[pid] = {
+            "total_buy": total_buy,
+            "total_sell": total_sell,
+            "total_volume": total_buy + total_sell,
+        }
+    return {"per_agent": per_agent}
+
+
+# ---------------------------------------------------------------------------
+# Category: agent_behaviour — position/PnL/wealth tracking (5 metrics)
+# ---------------------------------------------------------------------------
+
+from masim.evaluation.data_loader import (
+    aligned_prices_and_fundamentals,
+    per_agent_initial_position,
+    per_agent_initial_cash,
+)
+
+
+def m_agent_net_position_ts(data, config):
+    """Cumulative position evolution per agent (initial_position + Δ)."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    initial_positions = per_agent_initial_position(config)
+    per_agent: Dict[str, Dict[str, Any]] = {}
+    for pid, round_payloads in payloads.items():
+        rounds_sorted = sorted(round_payloads)
+        position = float(initial_positions.get(pid, 0.0))
+        positions = []
+        for round_num in rounds_sorted:
+            payload = round_payloads[round_num]
+            buy, sell = payload_buy_sell(payload)
+            position = position + buy - sell
+            positions.append(position)
+        per_agent[pid] = {
+            "rounds": rounds_sorted,
+            "positions": positions,
+            "final_position": position,
+        }
+    return {"per_agent": per_agent}
+
+
+def m_agent_pnl_terminal(data, config):
+    """Terminal mark-to-market PnL per agent.
+
+    Computes each agent's terminal portfolio value = cash + position * final_price
+    relative to initial wealth, using standard MASim config fields (initial_cash,
+    initial_position) and the payload buy/sell accounting.
+    """
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    market_prices = data.get("market_prices")
+    if not market_prices:
+        raise MetricUnavailable("market_prices is empty")
+    initial_cash_map = per_agent_initial_cash(config)
+    initial_position_map = per_agent_initial_position(config)
+    # Use first available price as initial price for initial value calculation
+    first_round = min(market_prices)
+    initial_price = float(market_prices[first_round])
+    final_round = max(market_prices)
+    final_price = float(market_prices[final_round])
+    per_agent: Dict[str, Dict[str, float]] = {}
+    for pid, round_payloads in payloads.items():
+        cash = float(initial_cash_map.get(pid, 0.0))
+        position = float(initial_position_map.get(pid, 0.0))
+        for round_num in sorted(round_payloads):
+            payload = round_payloads[round_num]
+            bid_price = float(payload.get("bid_price", 0.0)) or float(
+                market_prices.get(round_num, 0.0)
+            )
+            buy, sell = payload_buy_sell(payload)
+            cash -= buy * bid_price
+            cash += sell * bid_price
+            position += buy - sell
+        terminal_value = cash + position * final_price
+        initial_value = float(initial_cash_map.get(pid, 0.0)) + float(
+            initial_position_map.get(pid, 0.0)
+        ) * initial_price
+        per_agent[pid] = {
+            "terminal_cash": cash,
+            "terminal_position": position,
+            "terminal_value": terminal_value,
+            "initial_value": initial_value,
+            "pnl": terminal_value - initial_value,
+            "pnl_pct": (
+                (terminal_value - initial_value) / initial_value * 100
+                if initial_value > 0
+                else 0.0
+            ),
+        }
+    return {"per_agent": per_agent, "final_price": final_price}
+
+
+def m_agent_sharpe_terminal(data, config):
+    """Per-agent Sharpe = mean(round PnL) / std(round PnL).
+
+    Computes round-by-round mark-to-market PnL for each agent and derives
+    the Sharpe ratio over the entire simulation.
+    """
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    market_prices = data.get("market_prices")
+    if not market_prices:
+        raise MetricUnavailable("market_prices is empty")
+    initial_position_map = per_agent_initial_position(config)
+    per_agent: Dict[str, Dict[str, float]] = {}
+    for pid, round_payloads in payloads.items():
+        position = float(initial_position_map.get(pid, 0.0))
+        prev_price = float(market_prices[min(market_prices)])
+        round_pnl: List[float] = []
+        for round_num in sorted(round_payloads):
+            payload = round_payloads[round_num]
+            price = float(market_prices.get(round_num, prev_price))
+            mtm = position * (price - prev_price)
+            buy, sell = payload_buy_sell(payload)
+            bid = float(payload.get("bid_price", 0.0)) or price
+            trade_pnl = sell * (bid - price) - buy * (bid - price)
+            round_pnl.append(mtm + trade_pnl)
+            position = position + buy - sell
+            prev_price = price
+        if not round_pnl:
+            continue
+        mean_pnl = float(np.mean(round_pnl))
+        std_pnl = float(np.std(round_pnl))
+        sharpe = mean_pnl / std_pnl if std_pnl > 1e-12 else float("nan")
+        per_agent[pid] = {
+            "mean_round_pnl": mean_pnl,
+            "std_round_pnl": std_pnl,
+            "sharpe": sharpe,
+        }
+    return {"per_agent": per_agent}
+
+
+def m_agent_wealth_terminal(data, config):
+    """Final portfolio value = cash + position * final_price per agent."""
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    _, prices, _ = aligned_prices_and_fundamentals(data)
+    final_price = float(prices[-1])
+    initial_cash_map = per_agent_initial_cash(config)
+    initial_positions_map = per_agent_initial_position(config)
+    per_agent: Dict[str, Dict[str, Any]] = {}
+    for pid, round_payloads in payloads.items():
+        cash = initial_cash_map.get(pid, 0.0)
+        position = initial_positions_map.get(pid, 0.0)
+        for round_num in sorted(round_payloads):
+            payload = round_payloads[round_num]
+            buy, sell = payload_buy_sell(payload)
+            bid = float(payload.get("bid_price", final_price))
+            cash -= buy * bid
+            cash += sell * bid
+            position = position + buy - sell
+        per_agent[pid] = {
+            "cash": cash,
+            "position": position,
+            "wealth": cash + position * final_price,
+            "final_price": final_price,
+        }
+    return {"per_agent": per_agent, "final_price": final_price}
+
+
+def m_gini_coefficient(data, config):
+    """Gini index of terminal wealth across agents.
+
+    Measures wealth concentration: 0 = perfect equality, 1 = one agent holds all.
+    Uses the standard MASim data contract for position accounting.
+    """
+    payloads = data.get("investor_payloads")
+    if not payloads:
+        raise MetricUnavailable("no investor payloads recorded")
+    _, prices, _ = aligned_prices_and_fundamentals(data)
+    final_price = float(prices[-1])
+    initial_cash_map = per_agent_initial_cash(config)
+    initial_positions_map = per_agent_initial_position(config)
+    wealths = []
+    for pid, round_payloads in payloads.items():
+        cash = initial_cash_map.get(pid, 0.0)
+        position = initial_positions_map.get(pid, 0.0)
+        for payload in round_payloads.values():
+            buy, sell = payload_buy_sell(payload)
+            bid = float(payload.get("bid_price", final_price))
+            cash -= buy * bid
+            cash += sell * bid
+            position = position + buy - sell
+        wealths.append(cash + position * final_price)
+    wealths_arr = np.sort(np.asarray(wealths, dtype=float))
+    n = wealths_arr.size
+    if n < 2 or np.sum(wealths_arr) <= 0:
+        raise MetricUnavailable("insufficient wealth data for Gini")
+    index = np.arange(1, n + 1)
+    gini = float((2.0 * np.sum(index * wealths_arr) / (n * np.sum(wealths_arr))) - (n + 1) / n)
+    return {"value": max(0.0, gini), "n_agents": n}
+
+
+# ---------------------------------------------------------------------------
+# BEHAVIORAL_METRICS — Metric definitions for registry registration
+# ---------------------------------------------------------------------------
+
+
+BEHAVIORAL_METRICS: List[Metric] = [
+    Metric(name="agent_action_frequency", category="agent_behaviour", fn=m_agent_action_frequency,
+           output_keys=("per_agent",), references=("Glosten & Milgrom (1985)",),
+           description="Per-agent {buy, sell, hold} action counts."),
+    Metric(name="silent_agent_count", category="agent_behaviour", fn=m_silent_agent_count,
+           output_keys=("silent_agents", "silent_count", "total_agents", "silent_ratio"),
+           description="Number of agents that never traded; expected 0."),
+    Metric(name="agent_volume_buy_sell", category="agent_behaviour", fn=m_agent_volume_buy_sell,
+           output_keys=("per_agent",), references=("Black (1986)",),
+           description="Per-agent buy/sell/total volume from action-based accounting."),
+    Metric(name="agent_net_position_ts", category="agent_behaviour", fn=m_agent_net_position_ts,
+           output_keys=("per_agent",), references=("Glosten & Milgrom (1985)",),
+           description="Cumulative position over time per agent."),
+    Metric(name="agent_pnl_terminal", category="agent_behaviour", fn=m_agent_pnl_terminal,
+           output_keys=("per_agent", "final_price"), references=("De Bondt & Thaler (1985)",),
+           description="Per-agent terminal mark-to-market PnL."),
+    Metric(name="agent_sharpe_terminal", category="agent_behaviour", fn=m_agent_sharpe_terminal,
+           output_keys=("per_agent",), references=("Sharpe (1966)",),
+           description="Per-agent Sharpe ratio of round-PnL series."),
+    Metric(name="agent_wealth_terminal", category="agent_behaviour", fn=m_agent_wealth_terminal,
+           output_keys=("per_agent", "final_price"), references=("De Bondt & Thaler (1985)",),
+           description="Final portfolio value per agent."),
+    Metric(name="gini_coefficient", category="agent_behaviour", fn=m_gini_coefficient,
+           output_keys=("value", "n_agents"), references=("Gini (1912)",),
+           description="Wealth concentration index at terminal round."),
+]

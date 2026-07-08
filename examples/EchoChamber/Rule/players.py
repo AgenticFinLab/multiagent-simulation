@@ -25,7 +25,6 @@ All parameters are configured via players.yml config file.
 import logging
 import os
 import random
-import math
 from typing import Any, Dict, Optional
 
 from masim.player.general import GeneralPlayer
@@ -81,9 +80,13 @@ class OpinionEnvironment(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
 
             self.state.custom_state["polarization"] = extras["initial_polarization"]
-            self.state.custom_state["mean_opinion"] = 0.0
-            self.state.custom_state["cluster_separation"] = 0.0
-            self.state.custom_state["cross_cutting_exposure"] = 0.5
+            self.state.custom_state["mean_opinion"] = extras["initial_mean_opinion"]
+            self.state.custom_state["cluster_separation"] = extras[
+                "initial_cluster_separation"
+            ]
+            self.state.custom_state["cross_cutting_exposure"] = extras[
+                "initial_cross_cutting_exposure"
+            ]
 
             custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["polarization_history"] = HistoryBuffer(
@@ -131,7 +134,14 @@ class OpinionEnvironment(GeneralPlayer):
         # Aggregate agent actions
         polarize_actions = [a for a in actions if a["action_type"] == "polarize"]
         depolarize_actions = [a for a in actions if a["action_type"] == "depolarize"]
-        neutral_actions = [a for a in actions if a["action_type"] == "neutral"]
+        valid_action_types = {"polarize", "neutral", "depolarize"}
+        for action in actions:
+            if action["action_type"] not in valid_action_types:
+                raise ValueError(f"Invalid social action type: {action['action_type']}")
+            if not 0.0 <= action["intensity"] <= 1.0:
+                raise ValueError(f"Action intensity outside [0, 1]: {action['intensity']}")
+            if not -1.0 <= action["opinion"] <= 1.0:
+                raise ValueError(f"Opinion outside [-1, 1]: {action['opinion']}")
 
         total_polarize = sum(a["intensity"] for a in polarize_actions)
         total_depolarize = sum(a["intensity"] for a in depolarize_actions)
@@ -148,7 +158,10 @@ class OpinionEnvironment(GeneralPlayer):
         # Update polarization: agent actions push it, center-pull resists
         action_effect = polarization_impact * net_polarization
         # Centripetal force: weak pull toward moderate center
-        center_pull = centripetal_force * (0.3 - current_polarization)
+        polarization_equilibrium = extras["polarization_equilibrium"]
+        center_pull = centripetal_force * (
+            polarization_equilibrium - current_polarization
+        )
         noise = random.gauss(0, noise_std)
 
         new_polarization = max(
@@ -165,20 +178,26 @@ class OpinionEnvironment(GeneralPlayer):
         if submitted_opinions:
             left_opinions = [o for o in submitted_opinions if o < 0]
             right_opinions = [o for o in submitted_opinions if o >= 0]
-            left_mean = (
-                sum(left_opinions) / len(left_opinions) if left_opinions else 0.0
-            )
-            right_mean = (
-                sum(right_opinions) / len(right_opinions) if right_opinions else 0.0
-            )
+            left_mean = 0.0
+            if left_opinions:
+                left_mean = sum(left_opinions) / len(left_opinions)
+            right_mean = 0.0
+            if right_opinions:
+                right_mean = sum(right_opinions) / len(right_opinions)
             new_cluster_separation = right_mean - left_mean
         else:
             new_cluster_separation = self.state.custom_state["cluster_separation"]
 
         # Cross-cutting exposure: fraction of actions from agents near center
-        center_agents = sum(1 for a in actions if abs(a["opinion"] or 0) < 0.3)
-        total_agents = max(len(actions), 1)
-        new_cross_cutting = center_agents / total_agents
+        if actions:
+            moderate_opinion_threshold = extras["moderate_opinion_threshold"]
+            center_agents = sum(
+                1 for action in actions
+                if abs(action["opinion"]) < moderate_opinion_threshold
+            )
+            new_cross_cutting = center_agents / len(actions)
+        else:
+            new_cross_cutting = self.state.custom_state["cross_cutting_exposure"]
 
         # Update state
         self.state.custom_state["polarization"] = new_polarization
@@ -270,7 +289,12 @@ class BaseSocialAgent(GeneralPlayer):
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
 
-            self.state.custom_state["my_opinion"] = extras["initial_opinion"]
+            initial_opinion = extras["initial_opinion"]
+            if extras["alternate_initial_sign"] and initial_opinion != 0.0:
+                instance_number = int(self.identity.rsplit("_", 1)[1])
+                if instance_number % 2 == 0:
+                    initial_opinion = -initial_opinion
+            self.state.custom_state["my_opinion"] = initial_opinion
             self.state.custom_state["opinion_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "opinion"),
                 entry_limit=extras["custom_state_hot_limit"],
@@ -341,7 +365,7 @@ class Ideologue(BaseSocialAgent):
         self.state.custom_state["my_opinion"] = my_opinion
 
         # Polarize when opinion is strong
-        if abs(my_opinion) > 0.3:
+        if abs(my_opinion) > extras["polarize_opinion_threshold"]:
             intensity = abs(my_opinion) * spread_eagerness
             intensity = self._apply_intensity_constraints(intensity)
             action_type = "polarize"
@@ -405,9 +429,13 @@ class Conformist(BaseSocialAgent):
         local_group_mean = mean_opinion
         if my_opinion < 0 and mean_opinion >= 0:
             # Conformist leans left but mean is right: pulled toward left cluster
-            local_group_mean = mean_opinion - abs(mean_opinion) * 0.5
+            local_group_mean = mean_opinion - abs(mean_opinion) * extras[
+                "opposing_cluster_discount"
+            ]
         elif my_opinion >= 0 and mean_opinion < 0:
-            local_group_mean = mean_opinion + abs(mean_opinion) * 0.5
+            local_group_mean = mean_opinion + abs(mean_opinion) * extras[
+                "opposing_cluster_discount"
+            ]
 
         opinion_update = conformity * (local_group_mean - my_opinion)
         my_opinion += opinion_update
@@ -480,13 +508,13 @@ class CriticalThinker(BaseSocialAgent):
         evidence_signal = -my_opinion * evidence_sensitivity * polarization
         opinion_update = critical_weight * (evidence_signal - my_opinion * 0.1)
         # Small movement: critical thinkers change slowly
-        opinion_update *= 0.3
+        opinion_update *= extras["update_damping"]
         my_opinion += opinion_update
         my_opinion = self._clamp_opinion(my_opinion)
         self.state.custom_state["my_opinion"] = my_opinion
 
         # Depolarize: pull toward center when polarization is high
-        if polarization > 0.3:
+        if polarization > extras["high_polarization_threshold"]:
             intensity = abs(my_opinion - 0.0) * critical_eagerness
             intensity = self._apply_intensity_constraints(intensity)
             action_type = "depolarize"
@@ -552,12 +580,16 @@ class BridgeBuilder(BaseSocialAgent):
         self.state.custom_state["my_opinion"] = my_opinion
 
         # Depolarize more intensely when clusters are far apart
-        if cluster_separation > 0.5:
+        if cluster_separation > extras["high_cluster_separation_threshold"]:
             intensity = bridge_strength * min(cluster_separation, 1.0)
             intensity = self._apply_intensity_constraints(intensity)
             action_type = "depolarize"
-        elif cluster_separation > 0.2:
-            intensity = bridge_strength * cluster_separation * 0.5
+        elif cluster_separation > extras["elevated_cluster_separation_threshold"]:
+            intensity = (
+                bridge_strength
+                * cluster_separation
+                * extras["elevated_bridge_multiplier"]
+            )
             intensity = self._apply_intensity_constraints(intensity)
             action_type = "depolarize"
         else:
@@ -623,12 +655,15 @@ class PassiveFollower(BaseSocialAgent):
 
         # Random engagement
         if random.random() < engagement_probability:
-            if abs(my_opinion) > 0.3:
+            if abs(my_opinion) > extras["polarize_opinion_threshold"]:
                 intensity = abs(my_opinion) * alignment_strength
                 intensity = self._apply_intensity_constraints(intensity)
                 action_type = "polarize"
             else:
-                intensity = random.uniform(0.05, 0.2)
+                intensity = random.uniform(
+                    extras["neutral_intensity_min"],
+                    extras["neutral_intensity_max"],
+                )
                 action_type = "neutral"
         else:
             intensity = 0.0

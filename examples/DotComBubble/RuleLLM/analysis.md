@@ -1,56 +1,78 @@
-# DotComBubble RuleLLM Variant — analysis.md
+# DotComBubble RuleLLM — Analysis Guide
 
-## §1 Analysis Objectives
+## 1. Analysis Objectives
 
-Evaluate whether rule boundaries reduce metric variance relative to pure LLM while preserving flexibility beyond pure Rule. All metrics defined in `analysis-bases.md §2`.
+Evaluate whether explicit numerical guidance moves LLM-generated trading behavior toward the Rule baseline while retaining language-model variation. Metric definitions and interpretation gates come from `analysis-bases.md`.
 
-## §2 Metric → Function Mapping
+## 2. Metric → Function Mapping
 
-| Metric                              | Function                                                                   | analysis-bases.md ref |
-|-------------------------------------|----------------------------------------------------------------------------|-----------------------|
-| BAI (Bubble Amplitude Index)        | `bubble_amplitude_index(price_history, fundamental)`                       | §2.1                  |
-| BD (Bubble Duration)                | `bubble_duration(price_history, fundamental, bubble_threshold=0.10)`       | §2.2                  |
-| CS (Crash Severity)                 | `crash_severity(price_history)`                                            | §2.3                  |
-| MAF (Momentum Amplification Factor) | `momentum_amplification_factor(agent_volume_by_type, bubble_rounds)`       | §2.4                  |
-| SSR (Short Squeeze Resistance)      | `short_squeeze_resistance(short_seller_orders, momentum_sign_history)`     | §2.5                  |
-| RT (Recovery Time)                  | `recovery_time(price_history, fundamental, recovery_threshold=0.10)`       | §2.6                  |
-| WDI (Wealth Divergence Index)       | `wealth_divergence_index(agent_final_states, final_price, initial_wealth)` | §2.7                  |
+| Metric | Function in `analysis.py` | Basis |
+|---|---|---|
+| Bubble Amplitude Index (BAI) | `bubble_amplitude_index()` | `analysis-bases.md §2`, BAI |
+| Bubble Duration (BD) | `bubble_duration()` | `analysis-bases.md §2`, BD |
+| Crash Severity (CS) | `crash_severity()` | `analysis-bases.md §2`, CS |
+| Momentum Amplification Factor (MAF) | `momentum_amplification_factor()` | `analysis-bases.md §2`, MAF |
+| Short-Seller Resistance (SSR) | `short_seller_resistance()` | `analysis-bases.md §2`, SSR |
+| Recovery Time (RT) | `recovery_time()` | `analysis-bases.md §2`, RT |
+| API and RAG Quality (AQR) | `api_order_quality()` | `analysis-bases.md §2`, AQR |
 
-## §3 RuleLLM-Variant-Specific Notes
+`load_simulation_data()` reads market and order records. `calculate_metrics()` computes the seven outputs, and `create_visualizations()` writes the RuleLLM price/fundamental chart.
 
-- **Rule fidelity check**: Verify that `RuleLLMNewEconomyEvangelist` sells only when δ < −0.30 — LLM should not override direction boundary.
-- **Quantity variation**: LLM adjusts order quantities within rule-permitted direction; `agent_volume_by_type` will show less uniform order sizes vs. Rule.
-- **MAF comparison**: MAF should be similar to Rule; meaningful deviation indicates LLM overrode momentum signal via contextual reasoning.
-- **SSR stability**: Higher than pure LLM — embedded short threshold prevents early cover. Compare directly with LLM/analysis.md §4.
-- **BD convergence**: BD variance should be ≤ LLM variant variance; use 3-run std as convergence test.
+## 3. Analysis Dimensions
 
-## §4 Expected Ranges
+### Price lifecycle
 
-| Metric | RuleLLM-Variant Expected Range | vs. Rule Baseline                                            |
-|--------|--------------------------------|--------------------------------------------------------------|
-| BAI    | 0.5 – 1.6                      | Close to Rule; slight upside from LLM quantity amplification |
-| BD     | 20 – 52 rounds                 | Slightly wider than Rule; tighter than LLM                   |
-| CS     | 0.40 – 0.72                    | Near Rule; LLM may delay crash onset                         |
-| MAF    | 0.35 – 0.62                    | Near Rule                                                    |
-| SSR    | 0.28 – 0.60                    | Between Rule and LLM                                         |
-| RT     | 10 – 32 rounds                 | Near Rule                                                    |
-| WDI    | −0.3 – +0.35                   | Near Rule; minor LLM deviation                               |
+Use BAI, BD, CS, and RT to establish whether a visible bubble, correction, and recovery occur. Compare the path chart with Rule before attributing differences to prompt guidance.
 
-## §5 References
+### Agent contribution
 
-See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+Use MAF to measure the momentum follower's share of bubble-round buying and SSR to measure short-seller persistence during overvaluation.
 
-## §6 Cross-Variant Comparison
+### API quality
+
+AQR audits required fields, valid action values, finite positive prices, whole non-negative quantities, and non-empty reasoning. Economic metrics should not be interpreted when contract compliance is poor.
+
+## 4. Variant-Specific Observable Phenomena
+
+| Phenomenon | How to observe | Contrast |
+|---|---|---|
+| Quantitative-guidance effect | Compare BAI/BD/MAF/SSR distributions with LLM | Isolates explicit rule knowledge. |
+| Residual model variation | Repeat runs and compare metric dispersion | Rule should be less variable. |
+| Prompt adherence | Audit actions against the market state and the relevant prompt thresholds | Measures guidance quality; it is not enforced post hoc. |
+| Output-contract quality | Inspect AQR compliance rate | Malformed API behavior invalidates the sample. |
+
+## 5. Scaling and Sensitivity Analysis
+
+| Change | Expected effect |
+|---|---|
+| `--rounds 1` | Lifecycle metrics are not meaningful; suitable only for execution smoke testing. |
+| 200 rounds | Standard lifecycle comparison. |
+| Higher `price_impact` | Faster and potentially less stable price movement. |
+| Higher `momentum_threshold` | Fewer momentum activations and generally lower MAF. |
+| Larger order sizes | Greater agent influence and potentially higher BAI/CS. |
+
+Use at least three full runs for dispersion claims because market noise and LLM sampling are stochastic.
+
+## 6. Output Files Reference
+
+| File | Generated by | Contents |
+|---|---|---|
+| `summary.json` | `main()` | BAI, BD, CS, MAF, SSR, RT, and AQR |
+| `dotcombubble_rulellm_dynamics.png` | `create_visualizations()` | Price and fundamental paths by round |
+
+Both files are written to `EXPERIMENT/DotComBubble/RuleLLM/analysis/` unless `--output-dir` overrides the location.
+
+## 7. Cross-Variant Comparison Notes
 
 | Comparison | Interpretation |
 |---|---|
-| RuleLLM vs Rule | Measures LLM reasoning effects under fixed rule guidance. |
-| RuleLLM vs LLM | Measures whether explicit rules reduce narrative overreaction. |
-| RuleLLM vs Rag | Isolates the effect of retrieved bubble-history knowledge. |
+| RuleLLM vs Rule | Measures residual LLM variation when both receive the same quantitative design. |
+| RuleLLM vs LLM | Measures the effect of explicit threshold guidance. |
+| RuleLLM vs Rag | Separates quantitative guidance from retrieved historical context. |
 
-## §7 Quality Checks
+Run analysis with:
 
-- Confirm the run completed 200 configured rounds.
-- Confirm prompts contain both `== PERSONA ==` and `== DECISION RULES ==` sections.
-- Confirm parse failures fail fast after bounded retries rather than silently producing hidden hold actions.
-- Confirm accepted decisions preserve valid order payloads.
+```bash
+python -m examples.DotComBubble.RuleLLM.analysis \
+  -c configs/DotComBubble/RuleLLM/simulation.yml
+```

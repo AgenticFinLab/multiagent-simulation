@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
+import copy
 import importlib
 import logging
+import math
 import os
-import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from dotenv import load_dotenv
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
@@ -29,6 +28,34 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
+    """Validate the required LLM decision fields without hidden fallbacks."""
+    required = {"action", "bid_price", "quantity", "reasoning"}
+    missing = required.difference(decision)
+    if missing:
+        raise KeyError(f"{identity} decision missing fields: {sorted(missing)}")
+    action = str(decision["action"]).lower()
+    if action not in {"buy", "sell", "hold"}:
+        raise ValueError(f"{identity} emitted invalid action: {action}")
+    bid_price = float(decision["bid_price"])
+    quantity_value = float(decision["quantity"])
+    if not math.isfinite(bid_price) or bid_price <= 0:
+        raise ValueError(f"{identity} emitted invalid bid_price: {bid_price}")
+    if not math.isfinite(quantity_value) or quantity_value < 0:
+        raise ValueError(f"{identity} emitted invalid quantity: {quantity_value}")
+    if not quantity_value.is_integer():
+        raise ValueError(f"{identity} quantity must be a whole number: {quantity_value}")
+    reasoning = str(decision["reasoning"]).strip()
+    if not reasoning:
+        raise ValueError(f"{identity} emitted empty reasoning")
+    return {
+        "action": action,
+        "bid_price": bid_price,
+        "quantity": int(quantity_value),
+        "reasoning": reasoning,
+    }
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -68,7 +95,10 @@ class RuleLLMInvestor(GeneralPlayer):
     def __getstate__(self) -> Dict:
         state = self.__dict__.copy()
         if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            state["state"].custom_state.pop("llm_client", None)
+            player_state = copy.copy(self.state)
+            player_state.custom_state = dict(self.state.custom_state)
+            player_state.custom_state.pop("llm_client", None)
+            state["state"] = player_state
         return state
 
     def __setstate__(self, state: Dict) -> None:
@@ -90,16 +120,26 @@ class RuleLLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         portfolio_value = cash + position * price
         round_num = self.state.custom_state["round"]
+        price_history = self.state.custom_state["price_history"]
+        previous_price = price_history[-2] if len(price_history) >= 2 else price
+        if previous_price <= 0:
+            raise ValueError("Momentum context requires a positive previous price")
+        price_change = (price - previous_price) / previous_price
 
-        system_prompt = load_prompt(self._system_prompt_path)
-        user_template = load_prompt(
-            "examples.DotComBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        )
+        llm_cfg = self.config.extras["llm"]
+        if llm_cfg["sys_message"] != self._system_prompt_path:
+            raise ValueError(
+                f"{self.identity} sys_message does not match its investor class"
+            )
+        system_prompt = load_prompt(llm_cfg["sys_message"])
+        user_template = load_prompt(llm_cfg["user_message"])
         user_prompt = user_template.format(
             round=round_num,
             price=price,
             fundamental=fundamental,
             deviation=deviation,
+            previous_price=previous_price,
+            price_change=price_change,
             cash=cash,
             position=position,
             portfolio_value=portfolio_value,
@@ -108,46 +148,62 @@ class RuleLLMInvestor(GeneralPlayer):
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         decision = None
         last_error = None
-        for attempt in range(3):
+        used_fallback = False
+        max_attempts = int(llm_cfg.get("max_attempts", 3))
+        if max_attempts <= 0:
+            raise ValueError(f"{self.identity} llm.max_attempts must be positive")
+        for attempt in range(max_attempts):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"Invalid action: {decision['action']}")
-                if float(decision["bid_price"]) <= 0:
-                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
-                if not str(decision["reasoning"]).strip():
-                    raise ValueError("Missing reasoning")
+                response = result.response
+                decision = _validate_decision(
+                    parse_llm_response_with_thinking(response), self.identity
+                )
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < 2:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
+                if attempt < max_attempts - 1:
+                    logger.warning(
+                        "[%s] LLM call/parse failed (attempt %d/%d), retrying: %s",
                         self.identity,
                         attempt + 1,
+                        max_attempts,
+                        exc,
                     )
 
         if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+            failure_policy = str(llm_cfg.get("failure_policy", "hold")).lower()
+            if failure_policy == "raise":
+                raise RuntimeError(
+                    f"[{self.identity}] LLM call/parse failed after "
+                    f"{max_attempts} attempts: {last_error}"
+                )
+            if failure_policy != "hold":
+                raise ValueError(
+                    f"{self.identity} llm.failure_policy must be 'hold' or 'raise'"
+                )
+            logger.error(
+                "[%s] LLM unavailable after %d attempts; using a hold order so the "
+                "simulation can continue: %s",
+                self.identity,
+                max_attempts,
+                last_error,
             )
+            used_fallback = True
+            decision = {
+                "action": "hold",
+                "bid_price": price,
+                "quantity": 0,
+                "reasoning": f"LLM fallback hold after retries: {last_error}",
+            }
 
         action_str = decision["action"]
-        quantity = max(0, int(decision["quantity"]))
+        quantity = decision["quantity"]
         if action_str == "buy":
             quantity = min(quantity, int(cash / price) if price > 0 else 0)
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
-
-        if action_str == "buy" and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action_str == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
 
         order = _build_order(
             self,
@@ -156,12 +212,22 @@ class RuleLLMInvestor(GeneralPlayer):
             float(decision["bid_price"]),
             str(decision["reasoning"]),
         )
+        order["llm_fallback"] = used_fallback
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: Dict) -> Action:
+        action = decision_payload["action"]
+        quantity = int(decision_payload["quantity"])
+        price = self.state.custom_state["market_data"]["price"]
+        if action == "buy" and quantity > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
             action_type="order", payload=decision_payload, source_id=self.identity
         )

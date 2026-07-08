@@ -38,19 +38,19 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 | Tax-loss harvesting (Constantinides, 1983) | RAG retrieves tax-loss harvesting strategy literature and year-end patterns |
 | December effect                            | RAG case studies on year-end tax harvesting reversals                       |
 
-### §2.4 RagInstitutionalInvestor (simulation-bases.md §4.5)
+### §2.4 RagIndexHolder (simulation-bases.md §4.4)
 
-| Theory Component                           | Rag Implementation                                                         |
-|--------------------------------------------|----------------------------------------------------------------------------|
-| Professional discipline                    | RAG retrieves institutional risk management and professional trading norms |
-| Symmetric gain/loss treatment              | Prompt rules apply configured gain and loss thresholds symmetrically       |
+| Theory Component        | Rag Implementation                                                                 |
+|-------------------------|------------------------------------------------------------------------------------|
+| Passive benchmark       | `RagIndexHolder.decide()` always emits `hold` with zero quantity                    |
+| No realization timing   | Retrieval is audited through `rag_context` but cannot trigger an active order       |
 
-### §2.5 RagLossAverse (simulation-bases.md §4.1)
+### §2.5 RagInstitutionalInvestor (simulation-bases.md §4.5)
 
-| Theory Component                           | Rag Implementation                                                        |
-|--------------------------------------------|---------------------------------------------------------------------------|
-| Loss aversion                              | RAG retrieves Prospect Theory and loss-aversion context                   |
-| Disposition-effect amplification           | Prompt rules preserve quick winner selling and reluctant loser selling    |
+| Theory Component              | Rag Implementation                                                         |
+|-------------------------------|----------------------------------------------------------------------------|
+| Professional discipline       | RAG retrieves institutional risk management and professional trading norms |
+| Symmetric gain/loss treatment | Prompt rules apply configured gain and loss thresholds symmetrically        |
 
 ## §3 Prompt Variables
 
@@ -66,7 +66,8 @@ The Rag variant augments each LLM agent with a retrieval-augmented knowledge sto
 
 ## §4 Variant-Specific Features
 
-- **Five active API investor types**: Rag mirrors the active LLM/RuleLLM investor set with disposition-biased, rational, tax-aware, institutional, and extreme loss-averse agents.
+- **Five design-aligned investor types**: Rag implements every `simulation-bases.md §4.1–§4.5` agent: disposition-biased, rational, tax-aware, passive index, and institutional.
+- **Offline retrieval corpus**: agents index the local DispositionEffect Markdown documents with the cached `BAAI/bge-small-en-v1.5` model, so embedding does not require a second API key.
 - **Academic calibration**: RAG context may improve PGR/PLR calibration toward Odean empirical benchmarks.
 - **Self-awareness paradox**: RagDispositionInvestor retrieves Prospect Theory studies — it "knows" about its own bias; testing whether this awareness reduces the effect.
 - **RAG query formulation**: `_formulate_rag_query()` constructs context-specific query based on current `gain_loss` magnitude and direction.
@@ -90,8 +91,15 @@ Rag uses `configs/DispositionEffect/Rag/players.yml`. Each investor has `llm` se
 ## §7 Running Instructions
 
 ```bash
-python -m examples.DispositionEffect.Rag.run_disposition_rag
+.venv/Scripts/python.exe -m examples.DispositionEffect.Rag.run_disposition_rag
 ```
+
+The command creates a fresh timestamped directory under
+`EXPERIMENT/DispositionEffect/Rag/runs/`. Its progress bar advances only after
+each real simulation round completes and reports elapsed time plus ETA. Use
+`--output-dir <new-empty-directory>` to choose a different fresh destination;
+non-empty record directories are rejected because record-only resume cannot
+restore investor state safely.
 
 ## §8 Expected Behavior
 
@@ -99,8 +107,8 @@ python -m examples.DispositionEffect.Rag.run_disposition_rag
 - RagDispositionInvestor DC may be weaker than pure LLM (bias awareness from reading Prospect Theory)
 - RagRationalInvestor may exhibit stronger rationality (retrieves empirical evidence against reference point anchoring)
 - RagTaxAwareInvestor PLR highest (RAG reinforces tax-harvesting rationale)
+- RagIndexHolder remains a zero-trade passive benchmark
 - RagInstitutionalInvestor should remain more symmetric than retail-biased agents
-- RagLossAverse may preserve or amplify quick winner selling and loser holding
 
 ## §9 References
 

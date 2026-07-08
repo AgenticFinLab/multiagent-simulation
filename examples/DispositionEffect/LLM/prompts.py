@@ -139,8 +139,12 @@ Your Position:
 - Position: {position:.2f} shares
 - Cash: ${cash:.2f}
 - Portfolio Value: ${portfolio_value:.2f}
+- Maximum Position: {max_position:.2f} shares
+- Maximum Order: {max_order_quantity:.2f} shares per round
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <current price as POSITIVE NUMBER>, "quantity": <+buy/-sell/0 hold as NUMBER>, "reasoning": "<brief>"}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+IMPORTANT: bid_price must equal the current market Price above. Quantity must be
+numeric, must not exceed Maximum Order, and the resulting position must not
+exceed Maximum Position.
 """

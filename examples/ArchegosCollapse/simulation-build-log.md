@@ -2,24 +2,24 @@
 
 ## §0 Meta
 
-| Field | Content |
-|-------|---------|
-| Name | ArchegosCollapse |
-| Target file | examples/ArchegosCollapse/finance-archegos-collapse.md |
+| Field       | Content                                                 |
+|-------------|---------------------------------------------------------|
+| Name        | ArchegosCollapse                                        |
+| Target file | examples/ArchegosCollapse/finance-archegos-collapse.md  |
 | Target spec | masim/skills/define-simulation-scenario-skill.md (v1.2) |
-| Domain | finance |
-| Pipeline | masim/skills/create-simulation-pipeline.md |
-| Status | released |
+| Domain      | finance                                                 |
+| Pipeline    | masim/skills/create-simulation-pipeline.md              |
+| Status      | released                                                |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
 
-| Candidate archetype | Stage reached | Outcome | Pool file |
-|---------------------|---------------|---------|-----------|
-| concentrated-fund | 3 | reuse approved | examples/AGENT_POOL/finance/concentrated-fund.md |
-| prime-broker-first-mover | 3 | reuse approved | examples/AGENT_POOL/finance/prime-broker-first-mover.md |
-| prime-broker-delayed-liquidator | 3 | reuse approved | examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md |
-| block-trade-buyer | 3 | reuse approved | examples/AGENT_POOL/finance/block-trade-buyer.md |
-| information-trader | 3 | reuse approved | examples/AGENT_POOL/finance/information-trader.md |
+| Candidate archetype             | Stage reached | Outcome        | Pool file                                                      |
+|---------------------------------|---------------|----------------|----------------------------------------------------------------|
+| concentrated-fund               | 3             | reuse approved | examples/AGENT_POOL/finance/concentrated-fund.md               |
+| prime-broker-first-mover        | 3             | reuse approved | examples/AGENT_POOL/finance/prime-broker-first-mover.md        |
+| prime-broker-delayed-liquidator | 3             | reuse approved | examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md |
+| block-trade-buyer               | 3             | reuse approved | examples/AGENT_POOL/finance/block-trade-buyer.md               |
+| information-trader              | 3             | reuse approved | examples/AGENT_POOL/finance/information-trader.md              |
 
 Gate rationale: the current finance pool contains Archegos-specific standalone profiles for all five target §7 archetypes. Stage 1 matched filenames exactly, Stage 2 matched the seven-row Summary fingerprints, and Stage 3 confirmed compatible mechanisms, signal sets, parameters, and I/O contracts. No new pool file was required in this create-pipeline replay.
 
@@ -42,13 +42,13 @@ Target §6.1 is the March 22-29, 2021 Archegos Capital Management collapse. The 
 
 ### §B.4 Canonical Role Taxonomy
 
-| Candidate archetype | Theory family | Real-world counterpart | Domain role | Primary signals | Pipeline confirmation |
-|---------------------|---------------|------------------------|-------------|-----------------|-----------------------|
-| concentrated-fund | Leverage (§4.1) | family office or hedge fund with concentrated total-return-swap exposure | Destabilising | price, fundamental, deviation, position | confirmed |
-| prime-broker-first-mover | Leverage (§4.2) | Morgan Stanley-type dealer with early risk-management stance | Destabilising | price, fundamental, deviation, position | confirmed |
-| prime-broker-delayed-liquidator | Leverage (§4.2) | Credit Suisse or Nomura-type dealer with delayed reaction | Destabilising | price, fundamental, deviation, position | confirmed |
-| block-trade-buyer | Liquidity (§4.3) | opportunistic institutional buyer of distressed block trades | Stabilising | price, fundamental, deviation, cash | confirmed |
-| information-trader | Informed Trading (§4.4) | hedge fund that detects early distress via order-flow signals | Destabilising then neutral | price, prev_price, deviation, return | confirmed |
+| Candidate archetype             | Theory family           | Real-world counterpart                                                   | Domain role                | Primary signals                         | Pipeline confirmation |
+|---------------------------------|-------------------------|--------------------------------------------------------------------------|----------------------------|-----------------------------------------|-----------------------|
+| concentrated-fund               | Leverage (§4.1)         | family office or hedge fund with concentrated total-return-swap exposure | Destabilising              | price, fundamental, deviation, position | confirmed             |
+| prime-broker-first-mover        | Leverage (§4.2)         | Morgan Stanley-type dealer with early risk-management stance             | Destabilising              | price, fundamental, deviation, position | confirmed             |
+| prime-broker-delayed-liquidator | Leverage (§4.2)         | Credit Suisse or Nomura-type dealer with delayed reaction                | Destabilising              | price, fundamental, deviation, position | confirmed             |
+| block-trade-buyer               | Liquidity (§4.3)        | opportunistic institutional buyer of distressed block trades             | Stabilising                | price, fundamental, deviation, cash     | confirmed             |
+| information-trader              | Informed Trading (§4.4) | hedge fund that detects early distress via order-flow signals            | Destabilising then neutral | price, prev_price, deviation, return    | confirmed             |
 
 ### §B.5 Parameter Estimates
 
@@ -61,16 +61,10 @@ Target §9 parameter seeds are echoed in `simulation-bases.md §6` and `configs/
 
 ## §D Build Log
 
-| Phase | Date | Outcome | Reviewer | Notes |
-|-------|------|---------|----------|-------|
-| Structure check | 2026-06-30 | partial pass | Codex | Added `simulation-build-log.md`; upstream target file remains absent as legacy gap. |
-| AGENT_POOL gate | 2026-06-30 | pass | Codex | All five agents classified as `new`; pool files created in `examples/AGENT_POOL/finance/`. |
-| Root §4 normalization | 2026-06-30 | pass | Codex | Replaced legacy §4 with handbook-aligned embedded form and pool source links. |
-| Polish supersession | 2026-07-01 | superseded | QoderWork | Superseded by polish audit; polish trail lives in target §1 Meta CHANGELOG (`finance-archegos-collapse.md`) + git history. This build-log is retained for historical reference only and is not maintained by the polish pipeline. |
-| Phase 0 - Target file load | 2026-07-05 | pass | Codex | Loaded `examples/ArchegosCollapse/finance-archegos-collapse.md`; §1 has Produced By row and target §1-§10 structure is present. |
-| Phase 1 - Research | 2026-07-05 | pass | Codex | Reconciled target §4-§6 and §9 to `simulation-bases.md`, `analysis-bases.md`, and config source comments. |
-| Phase 2 - Role planning | 2026-07-05 | pass | Codex | Confirmed five target §7 archetypes, domain roles, primary signals, and diversity requirements. |
-| Phase 3 - AGENT_POOL gate | 2026-07-05 | pass | Codex | Re-ran gate against `examples/AGENT_POOL/finance/`; all five current pool files reused and approved. |
-| Phase 4 - Scenario build | 2026-07-05 | pass | Codex | Root docs, variant docs, configs, code, and analysis scripts present for Rule, LLM, RuleLLM, and Rag. |
-| Phase 5 - Scenario 3-PASS review | 2026-07-05 | pass | Codex | Python compile clean; YAML parses clean; stale scenario reference sweep clean after terminology normalization. |
-| Phase 6 - Execution and final review | 2026-07-05 | pass | Codex | Deterministic Rule smoke run executed from repository root with a fresh output path. |
+| Phase                       | Date       | Outcome      | Reviewer  | Notes                                                                                                                                                                                                                                                                                               |
+|-----------------------------|------------|--------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Structure check             | 2026-06-30 | partial pass | Codex     | Added `simulation-build-log.md`; upstream target file remains absent as legacy gap.                                                                                                                                                                                                                 |
+| AGENT_POOL gate             | 2026-06-30 | pass         | Codex     | All five agents classified as `new`; pool files created in `examples/AGENT_POOL/finance/`.                                                                                                                                                                                                          |
+| Root §4 normalization       | 2026-06-30 | pass         | Codex     | Replaced legacy §4 with handbook-aligned embedded form and pool source links.                                                                                                                                                                                                                       |
+| Polish supersession         | 2026-07-01 | superseded   | QoderWork | Superseded by polish audit; polish trail lives in target §1 Meta CHANGELOG (`finance-archegos-collapse.md`) + git history. This build-log is retained for historical reference only and is not maintained by the polish pipeline.                                                                   |
+| Round-2 polish supersession | 2026-07-06 | superseded   | QoderWork | Superseded by Round-2 polish audit under the evaluation-first baseline (`masim/evaluation/README.md`, Pass 2 Analysis Migration Rule); Round-2 trail lives in target §1 Meta CHANGELOG + git history (`polish(archegos): step {0..closeout}` commits). Build-log remains historical reference only. |

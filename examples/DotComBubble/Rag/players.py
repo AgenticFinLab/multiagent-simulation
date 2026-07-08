@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import copy
 import importlib
 import logging
+import math
 import os
 import shutil
 import sys
@@ -11,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
+from filelock import FileLock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -32,6 +35,8 @@ from examples.DotComBubble.Rule.players import Market, _build_order  # noqa: F40
 
 logger = logging.getLogger(__name__)
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt constant from 'module:VAR' path."""
@@ -42,8 +47,6 @@ def load_prompt(prompt_path: str) -> str:
 
 class RagLLMInvestor(GeneralPlayer):
     """Base RAG-augmented LLM investor for DotComBubble."""
-
-    _system_prompt_path: str = ""
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
@@ -66,47 +69,29 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["history_buffer"] = HistoryBuffer(
             folder=f"DotComBubble/Rag/{self.__class__.__name__}", entry_limit=200
         )
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).resolve().parents[3]
         load_dotenv(project_root / ".env")
         llm_cfg = extras["llm"]
         lm_name = llm_cfg["lm_name"]
         generation_config = llm_cfg["generation_config"]
         self.state.custom_state["lm_name"] = lm_name
         self.state.custom_state["generation_config"] = generation_config
+        self.state.custom_state["system_prompt_path"] = llm_cfg["sys_message"]
+        self.state.custom_state["user_prompt_path"] = llm_cfg["user_message"]
         llm_client = LangChainAPIInference(
             lm_name=lm_name, generation_config=generation_config
         )
         self.state.custom_state["llm_client"] = llm_client
         private_knowledge = extras["private_knowledge"]
         rag_cfg = private_knowledge["rag"]
-        await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
+        await self._initialize_rag(rag_cfg)
 
-    async def _initialize_rag(
-        self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
-    ) -> None:
+    async def _initialize_rag(self, rag_cfg: Dict[str, Any]) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
         knowledge_config = extras["knowledge"]
-        if not knowledge_config:
-            knowledge_config = {
-                "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
-                "preprocessing": {
-                    "parser": "mineru",
-                    "output_position": rag_cfg["mineru_output_dir"],
-                },
-                "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"]
-                },
-            }
         resource_manager = ResourceManager(knowledge_config)
         private_knowledge = extras["private_knowledge"]
-        if not private_knowledge:
-            private_knowledge = {
-                "from_global_resources": ["MinerU_processed"],
-                "local_resources": {"local_uri": "", "local_resources": []},
-                "rag": rag_cfg,
-            }
         agent_knowledge = resource_manager.resolve_agent_knowledge(
             agent_id=self.identity,
             private_knowledge=private_knowledge,
@@ -153,35 +138,43 @@ class RagLLMInvestor(GeneralPlayer):
         shared_rag_dirs = resolved_rag["shared_rag_index_dirs"]
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
-        for s_dir in shared_rag_dirs:
-            if os.path.isdir(s_dir):
-                shared_files = [f for f in os.listdir(s_dir) if not f.startswith(".")]
-                if shared_files:
-                    try:
-                        for item in shared_files:
-                            src = os.path.join(s_dir, item)
-                            dst = os.path.join(local_rag_dir, item)
-                            if os.path.isdir(src):
-                                shutil.copytree(src, dst, dirs_exist_ok=True)
-                            else:
-                                shutil.copy2(src, dst)
-                        rag_store.load(local_rag_dir)
-                        self.state.custom_state["rag_store"] = rag_store
-                        self.state.custom_state["rag_cfg"] = resolved_rag
-                        return
-                    except Exception as exc:  # pylint: disable=broad-except
-                        logger.warning(
-                            "[%s] Shared copy failed: %s", self.identity, exc
-                        )
-        loader = KnowledgeLoader()
-        if os.path.isdir(processed_dir) and os.listdir(processed_dir):
-            docs = loader.load_from_dir(processed_dir)
-        else:
-            raise RuntimeError(
-                f"[{self.identity}] No processed documents in {processed_dir}."
-            )
-        rag_store.build(docs)
-        try:
+        os.makedirs(record_path, exist_ok=True)
+        lock_name = f".{Path(shared_rag_dir).name}.lock"
+        lock_path = os.path.join(record_path, lock_name)
+        with FileLock(lock_path, timeout=900):
+            for s_dir in shared_rag_dirs:
+                if os.path.isdir(s_dir):
+                    shared_files = [
+                        item
+                        for item in os.listdir(s_dir)
+                        if not item.startswith(".")
+                    ]
+                    if shared_files:
+                        try:
+                            for item in shared_files:
+                                src = os.path.join(s_dir, item)
+                                dst = os.path.join(local_rag_dir, item)
+                                if os.path.isdir(src):
+                                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                                else:
+                                    shutil.copy2(src, dst)
+                            rag_store.load(local_rag_dir)
+                            self.state.custom_state["rag_store"] = rag_store
+                            self.state.custom_state["rag_cfg"] = resolved_rag
+                            return
+                        except Exception as exc:  # pylint: disable=broad-except
+                            logger.warning(
+                                "[%s] Shared copy failed: %s", self.identity, exc
+                            )
+            loader = KnowledgeLoader()
+            if os.path.isdir(processed_dir) and os.listdir(processed_dir):
+                docs = loader.load_from_dir(processed_dir)
+            else:
+                raise RuntimeError(
+                    f"[{self.identity}] No processed documents in {processed_dir}."
+                )
+            rag_store.build(docs)
+            os.makedirs(shared_rag_dir, exist_ok=True)
             for item in os.listdir(local_rag_dir):
                 if item.startswith("."):
                     continue
@@ -191,8 +184,6 @@ class RagLLMInvestor(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
 
@@ -202,7 +193,9 @@ class RagLLMInvestor(GeneralPlayer):
             custom = dict(self.state.custom_state)
             for key in ("llm_client", "rag_store"):
                 custom.pop(key, None)
-            state["state"].custom_state = custom
+            player_state = copy.copy(self.state)
+            player_state.custom_state = custom
+            state["state"] = player_state
         return state
 
     def __setstate__(self, state: Dict) -> None:
@@ -218,11 +211,7 @@ class RagLLMInvestor(GeneralPlayer):
                 rag_cfg = custom["rag_cfg"]
                 local_rag_dir = rag_cfg["local_index_dir"]
                 if not local_rag_dir:
-                    local_ws = rag_cfg["local_workspace_dir"]
-                    if local_ws:
-                        local_rag_dir = os.path.join(local_ws, "rag_index")
-                if not local_rag_dir:
-                    return
+                    raise ValueError("RAG local_index_dir must not be empty")
                 embed_type = rag_cfg["embed_type"]
                 embed_api_key = rag_cfg["embed_api_key"]
                 if not embed_api_key:
@@ -272,9 +261,9 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
-        template = load_prompt("examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE")
+        template = load_prompt(self.state.custom_state["user_prompt_path"])
         return template.format(
             round=round_num,
             price=price,
@@ -289,9 +278,11 @@ class RagLLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        if price <= 0:
+            raise ValueError(f"[{self.identity}] Market price must be positive")
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        system_prompt = load_prompt(self._system_prompt_path)
+        system_prompt = load_prompt(self.state.custom_state["system_prompt_path"])
         user_prompt = self._build_prompt(market_data)
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         decision = None
@@ -300,12 +291,15 @@ class RagLLMInvestor(GeneralPlayer):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
+                decision = parse_llm_response_with_thinking(result.response)
                 if decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"Invalid action: {decision['action']}")
-                if float(decision["bid_price"]) <= 0:
+                proposed_price = float(decision["bid_price"])
+                proposed_quantity = float(decision["quantity"])
+                if not math.isfinite(proposed_price) or proposed_price <= 0:
                     raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+                if not math.isfinite(proposed_quantity) or proposed_quantity < 0:
+                    raise ValueError(f"Invalid quantity: {decision['quantity']}")
                 if not str(decision["reasoning"]).strip():
                     raise ValueError("Missing reasoning")
                 break
@@ -326,7 +320,7 @@ class RagLLMInvestor(GeneralPlayer):
         action_str = decision["action"]
         quantity = max(0, int(decision["quantity"]))
         if action_str == "buy":
-            quantity = min(quantity, int(cash / price) if price > 0 else 0)
+            quantity = min(quantity, int(cash / price))
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
         if action_str == "buy" and quantity > 0:
@@ -342,6 +336,7 @@ class RagLLMInvestor(GeneralPlayer):
             float(decision["bid_price"]),
             str(decision["reasoning"]),
         )
+        order["analysis"] = str(decision["analysis"])
         rag_context = self.state.custom_state["last_rag_context"]
         return {
             **order,
@@ -356,41 +351,48 @@ class RagLLMInvestor(GeneralPlayer):
 
 
 class RagLLMNewEconomyEvangelist(RagLLMInvestor):
-    """RAG-augmented new economy evangelist — narrative-driven buyer with historical bubble context. Theory: simulation-bases.md §4.1."""
+    """Narrative buyer augmented with historical bubble context.
 
-    _system_prompt_path = (
-        "examples.DotComBubble.Rag.prompts:RAG_NEW_ECONOMY_EVANGELIST_SYS"
-    )
+    Theory: ``simulation-bases.md §4.1``.
+    """
+
 
 
 class RagLLMIPOFlipper(RagLLMInvestor):
-    """RAG-augmented IPO flipper — short-term flip strategy with historical IPO knowledge. Theory: simulation-bases.md §4.2."""
+    """Short-term flipper augmented with historical IPO knowledge.
 
-    _system_prompt_path = "examples.DotComBubble.Rag.prompts:RAG_IPO_FLIPPER_SYS"
+    Theory: ``simulation-bases.md §4.2``.
+    """
+
 
 
 class RagLLMMomentumFollower(RagLLMInvestor):
-    """RAG-augmented momentum follower — trend amplifier with historical momentum research. Theory: simulation-bases.md §4.3."""
+    """Trend amplifier augmented with historical momentum research.
 
-    _system_prompt_path = "examples.DotComBubble.Rag.prompts:RAG_MOMENTUM_FOLLOWER_SYS"
+    Theory: ``simulation-bases.md §4.3``.
+    """
+
 
 
 class RagLLMSkepticalValueInvestor(RagLLMInvestor):
-    """RAG-augmented skeptical value investor — fundamental anchor with historical crash knowledge. Theory: simulation-bases.md §4.4."""
+    """Fundamental investor augmented with historical crash knowledge.
 
-    _system_prompt_path = (
-        "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_INVESTOR_SYS"
-    )
+    Theory: ``simulation-bases.md §4.4``.
+    """
+
 
 
 class RagLLMShortSeller(RagLLMInvestor):
-    """RAG-augmented short seller — bets against bubble with historical limits-to-arbitrage knowledge. Theory: simulation-bases.md §4.5."""
+    """Short seller augmented with limits-to-arbitrage knowledge.
 
-    _system_prompt_path = "examples.DotComBubble.Rag.prompts:RAG_SHORT_SELLER_SYS"
+    Theory: ``simulation-bases.md §4.5``.
+    """
+
 
 
 __all__ = [
     "Market",
+    "_RAG_FALLBACK",
     "RagLLMInvestor",
     "RagLLMNewEconomyEvangelist",
     "RagLLMIPOFlipper",

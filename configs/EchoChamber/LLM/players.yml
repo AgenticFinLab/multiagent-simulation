@@ -26,11 +26,17 @@ environment:
     group_tags:
       - environment
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      # Source: simulation-bases.md §6 Parameter Table
       initial_polarization: 0.15
+      # Source: simulation-bases.md §6 Parameter Table
       polarization_impact: 0.12
+      # Source: simulation-bases.md §6 Parameter Table
       centripetal_force: 0.01
+      # Source: simulation-bases.md §3 Environment Mechanism (noise term)
       noise_std: 0.02
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -48,16 +54,31 @@ llm_ideologue:
     group_tags:
       - llm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      # Source: simulation-bases.md §4.1 Ideologue
       initial_opinion: 0.4
+      # Source: simulation-bases.md §4.1 Decision Process (opinion extremization)
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.1 Behavioral Framework (moderation response)
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       llm:
+        # Source: simulation-bases.md §4.1 Ideologue
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_IDEOLOGUE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: implementation reliability policy; retries do not alter behavior
+        max_retries: 3
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -75,16 +96,31 @@ llm_conformist:
     group_tags:
       - llm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      # Source: simulation-bases.md §4.2 Conformist
       initial_opinion: 0.0
+      # Source: simulation-bases.md §4.2 Decision Process (opinion extremization)
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.2 Behavioral Framework (moderation response)
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       llm:
+        # Source: simulation-bases.md §4.2 Conformist
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_CONFORMIST_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: implementation reliability policy; retries do not alter behavior
+        max_retries: 3
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -102,16 +138,31 @@ llm_critical_thinker:
     group_tags:
       - llm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      # Source: simulation-bases.md §4.3 CriticalThinker
       initial_opinion: 0.0
+      # Source: simulation-bases.md §4.3 Behavioral Framework (opinion extremization)
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.3 Decision Process (center pull)
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       llm:
+        # Source: simulation-bases.md §4.3 CriticalThinker
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_CRITICAL_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: implementation reliability policy; retries do not alter behavior
+        max_retries: 3
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -129,16 +180,31 @@ llm_bridge_builder:
     group_tags:
       - llm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      # Source: simulation-bases.md §4.4 BridgeBuilder
       initial_opinion: 0.0
+      # Source: simulation-bases.md §4.4 Behavioral Framework (opinion extremization)
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.4 Decision Process (center pull)
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       llm:
+        # Source: simulation-bases.md §4.4 BridgeBuilder
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_BRIDGE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: implementation reliability policy; retries do not alter behavior
+        max_retries: 3
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -156,15 +222,30 @@ llm_passive_bystander:
     group_tags:
       - llm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/LLM/records"
+      # Source: simulation-bases.md §4.5 PassiveFollower
       initial_opinion: 0.0
+      # Source: simulation-bases.md §4.5 Decision Process (weak opinion drift)
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.5 Behavioral Framework (moderation response)
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       llm:
+        # Source: simulation-bases.md §4.5 PassiveFollower
         sys_message: "examples.EchoChamber.LLM.prompts:LLM_BYSTANDER_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: implementation reliability policy; retries do not alter behavior
+        max_retries: 3
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml

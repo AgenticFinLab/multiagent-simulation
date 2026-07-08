@@ -25,10 +25,14 @@ setup_logging()
 logger = logging.getLogger("DispositionEffect")
 
 
-async def run_simulation(config_path: str):
+async def run_simulation(config_path: str, steps: int | None = None):
     """Run the disposition effect simulation."""
 
     yaml_config = load_config(config_path)
+    if steps is not None:
+        if steps < 1:
+            raise ValueError("steps must be at least 1")
+        yaml_config["setting"]["total_rounds"] = steps
     config = SimulationConfig(**yaml_config)
 
     # Clear stale records from any previous run
@@ -63,9 +67,14 @@ async def run_simulation(config_path: str):
 def parse_args():
     parser = argparse.ArgumentParser(description="Disposition Effect Simulation")
     parser.add_argument("-c", "--config", type=str, required=True)
+    parser.add_argument(
+        "--steps",
+        type=int,
+        help="Override total_rounds for a smoke or calibration run",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(run_simulation(args.config))
+    asyncio.run(run_simulation(args.config, args.steps))

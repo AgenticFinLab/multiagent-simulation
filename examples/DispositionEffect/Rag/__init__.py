@@ -6,6 +6,8 @@ from examples.DispositionEffect.Rag.players import (
     RagDispositionInvestor,
     RagRationalInvestor,
     RagTaxAwareInvestor,
+    RagIndexHolder,
+    RagInstitutionalInvestor,
 )
 
 __all__ = [
@@ -14,4 +16,6 @@ __all__ = [
     "RagDispositionInvestor",
     "RagRationalInvestor",
     "RagTaxAwareInvestor",
+    "RagIndexHolder",
+    "RagInstitutionalInvestor",
 ]

@@ -4,7 +4,7 @@
 Endowment effect: RAG-augmented LLM investors with research document access
 
 Usage:
-    python examples/EndowmentEffect/Rag/run_endowmenteffect_rag.py \
+    python -m examples.EndowmentEffect.Rag.run_endowmenteffect_rag \
         -c configs/EndowmentEffect/Rag/simulation.yml
 """
 
@@ -18,7 +18,7 @@ from masim.simulator.general import GeneralSimulator
 from masim.utils.config import load_config, setup_logging
 
 
-async def main():
+async def main() -> None:
     load_dotenv()
     setup_logging()
 
@@ -44,7 +44,7 @@ async def main():
 
     try:
         await simulator.setup()
-        results = await simulator.run()
+        await simulator.run()
         print("\n" + "=" * 70)
         print("Simulation Complete!")
         print("=" * 70)

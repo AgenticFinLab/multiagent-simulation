@@ -16,9 +16,9 @@ back to `analysis-bases.md`.
 | Proportion of Losses Realized (PLR) | `calculate_pgr_plr()` | §2.2 |
 | Disposition Coefficient (DC) | `generate_summary()` | §2.3 |
 | PGR/PLR Ratio | `calculate_pgr_plr()` | §2.4 |
-| Holding and sell asymmetry proxy | `plot_fig7_sell_gain_loss()` | §2.5 |
-| Performance drag proxy | `plot_fig6_portfolio_evolution()` | §2.6 |
-| Tax reversal comparison | `analyze_by_strategy()` and `generate_summary()` | §2.7 |
+| Holding Period Asymmetry (HPA) | `holding_period_asymmetry()` | §2.5 |
+| Performance Drag Index (PDI) | `calculate_extended_metrics()` and `terminal_wealth()` | §2.6 |
+| Tax Reversal Index (TRI) | `calculate_extended_metrics()` | §2.7 |
 
 ## §3 Data Loading Contract
 
@@ -31,9 +31,10 @@ than being silently replaced.
 
 - PGR/PLR are derived from the deterministic threshold behavior implemented in
   `Rule/players.py`.
-- The fixed initial purchase price of 100.0 is retained for the
-  DispositionInvestor anchor, matching `move_reference=False` behavior in the
-  player implementation.
+- Initial cash, position, purchase price, and fundamental value are loaded from
+  the expanded player configuration; analysis contains no scenario defaults.
+- DispositionInvestor keeps its configured initial purchase-price anchor,
+  matching `move_reference=False`; other buying strategies use average cost.
 - The Rule output is the comparison baseline for LLM, RuleLLM, and Rag.
 - Market stochasticity comes from news and noise; investor rules remain
   deterministic for a given observed state.
@@ -42,7 +43,7 @@ than being silently replaced.
 
 | File | Content |
 |---|---|
-| `summary.json` | Price statistics, PGR, PLR, DC, PGR/PLR ratio, validation score |
+| `summary.json` | Price statistics, PGR, PLR, DC, ratio, HPA, PDI, TRI, wealth, and validation score |
 | `fig1_price_dynamics.png` | Price path, fundamental level, returns, rolling volatility |
 | `fig2_pgr_plr_comparison.png` | PGR/PLR and DC by strategy |
 | `fig3_trading_activity.png` | Buy/sell counts and traded volume |

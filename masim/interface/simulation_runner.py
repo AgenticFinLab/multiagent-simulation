@@ -88,16 +88,19 @@ import asyncio
 import logging
 import re
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
+
+import ray
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from masim.simulator.general import GeneralSimulator
-from masim.simulator.base import SimulationConfig
+from masim.simulator.base import SimulationConfig, SimulatorStatus
 from masim.utils.config import load_config, setup_logging
 
 
@@ -208,6 +211,9 @@ class SimulationStatus:
     progress_pct: float = 0.0
     message: str = ""
     error: Optional[str] = None
+    elapsed_seconds: float = 0.0
+    eta_seconds: Optional[float] = None
+    average_round_seconds: Optional[float] = None
 
 
 class SimulationRunner:
@@ -342,53 +348,75 @@ class SimulationRunner:
                 progress_callback(self.status)
             return
 
-        total_rounds = self.config.setting.get("total_rounds", 1)
+        total_rounds = self.config.setting["total_rounds"]
+        record_path = self.config.setting["record_path"]
 
         try:
-            for round_num in range(1, total_rounds + 1):
+            # Mirror GeneralSimulator.run() resume detection, but execute the
+            # rounds here so progress updates represent completed real work.
+            completed_on_disk = self.simulator._detect_resume_round(record_path)
+            start_round = completed_on_disk + 1
+            run_started = time.monotonic()
+            completed_this_run = 0
+            self.simulator.status = SimulatorStatus.RUNNING
+
+            if start_round > total_rounds:
+                self.status = SimulationStatus(
+                    state="completed",
+                    current_round=total_rounds,
+                    total_rounds=total_rounds,
+                    progress_pct=100.0,
+                    message="All rounds already exist on disk.",
+                    elapsed_seconds=0.0,
+                    eta_seconds=0.0,
+                    average_round_seconds=0.0,
+                )
+                return
+
+            for round_num in range(start_round, total_rounds + 1):
                 if self._stop_requested:
+                    self.status.state = "stopped"
                     self.status.message = "Simulation stopped by user"
                     break
 
-                # Update status
+                await self.simulator.run_round(round_num)
+                completed_this_run += 1
+                elapsed = time.monotonic() - run_started
+                average_round_seconds = elapsed / completed_this_run
+                eta_seconds = average_round_seconds * (total_rounds - round_num)
+
+                # Update only after a real round has completed.
+                self.status.state = "running"
                 self.status.current_round = round_num
+                self.status.total_rounds = total_rounds
                 self.status.progress_pct = (round_num / total_rounds) * 100
-                self.status.message = f"Running round {round_num}/{total_rounds}..."
+                self.status.elapsed_seconds = elapsed
+                self.status.eta_seconds = eta_seconds
+                self.status.average_round_seconds = average_round_seconds
+                self.status.message = f"Completed real round {round_num}/{total_rounds}"
 
                 if progress_callback:
                     progress_callback(self.status)
 
-                # Run single round (this is a simplified version)
-                # In reality, the simulator.run() runs all rounds at once
-                # We need to hook into the simulator's round completion
-
-                # For now, yield a simple update
                 update = RoundUpdate(
                     round_num=round_num,
                     total_rounds=total_rounds,
-                    agent_actions=[],  # Would need to extract from simulator
+                    agent_actions=[],
                     market_data=None,
                     messages=[],
                 )
                 yield update
 
-                # Small delay to allow UI updates
-                await asyncio.sleep(0.01)
+            if not self._stop_requested:
+                self.simulator.status = SimulatorStatus.TERMINATED
+                self.status.state = "completed"
+                self.status.progress_pct = 100.0
+                self.status.message = "Simulation completed successfully!"
+                self.status.current_round = total_rounds
+                self.status.eta_seconds = 0.0
 
-            # Actually run the full simulation
-            self.status.message = "Executing simulation..."
-            if progress_callback:
-                progress_callback(self.status)
-
-            results = await self.simulator.run()
-
-            self.status.state = "completed"
-            self.status.progress_pct = 100.0
-            self.status.message = "Simulation completed successfully!"
-            self.status.current_round = total_rounds
-
-            if progress_callback:
-                progress_callback(self.status)
+                if progress_callback:
+                    progress_callback(self.status)
 
         except Exception as e:
             self.status = SimulationStatus(
@@ -403,6 +431,8 @@ class SimulationRunner:
         if self.simulator:
             await self.simulator.shutdown()
             self.simulator = None
+        if ray.is_initialized():
+            ray.shutdown()
 
     def stop(self):
         """Request simulation stop."""
