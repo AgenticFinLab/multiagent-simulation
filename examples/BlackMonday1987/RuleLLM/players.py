@@ -142,8 +142,8 @@ class RuleLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
+                result = llm_client.run(infer_input)
+                response = result.response
                 parsed = parse_llm_response_with_thinking(response)
                 decision = _validate_decision(parsed, self.identity)
                 break
