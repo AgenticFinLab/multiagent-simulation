@@ -111,8 +111,8 @@ class LLMInvestor(GeneralPlayer):
         for attempt in range(3):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
+                result = llm_client.run(infer_input)
+                response = result.response
                 parsed = parse_llm_response_with_thinking(response)
                 action_str = parsed["action"]
                 if action_str not in ("buy", "sell", "hold"):
