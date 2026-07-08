@@ -13,9 +13,9 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 5  | AvailabilityBias       | 🟢     | Qiqi        | Jul 6 2026  | LLM, Rule, RuleLLM, Rag |
 | 6  | BlackMonday1987        | 🟢    | Qiqi        | Jul 8 2026  | LLM, Rule, RuleLLM, Rag              |
 | 7  | CarryTradeUnwind       | 🟡     | Qiqi        | Jul 6 2026  | —                   |
-| 8  | ConfirmationBias       | ⬜      | —           | —           | —                 |
-| 9  | CreditCycle            | ⬜      | —           | —           | —                 |
-| 10 | CurrencyCrisis         | ⬜      | —           | —           | —                 |
+| 8  | ConfirmationBias       | 🟡     | Qiqi        | Jul 8 2026          | —                 |
+| 9  | CreditCycle            | 🟡      | Qiqi        | Jul 8 2026         | —                 |
+| 10 | CurrencyCrisis         | 🟡      | Qiqi          | Jul 8 2026         | —                 |
 | 11 | DispositionEffect      | 🟢     | qihang      | Jul 5 2026  | LLM, Rule          |
 | 12 | DotComBubble           | 🟢     | qihang      | Jul 6 2026  | LLM, Rule, RuleLLM |
 | 13 | EchoChamber            | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM |
