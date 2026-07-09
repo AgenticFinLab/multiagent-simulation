@@ -21,7 +21,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 13 | EchoChamber            | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM |
 | 14 | EndowmentEffect        | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM|
 | 15 | EquityPremium          | 🟡     | Wenyou      | Jul 6 2026  | LLM，Rule，RuleLLM |
-| 16 | EuropeanDebtCrisis     | 🟡     | Wenyou      | Jul 6 2026  | Rule |
+| 16 | EuropeanDebtCrisis     | 🟡     | Wenyou      | Jul 6 2026  | LLM, Rule |
 | 17 | FlashCrash             | 🟡      | Wenyou      | Jul 8 2026 | Rule |
 | 18 | FlashCrash2010         | 🟡      | Wenyou      | Jul 8 2026  | —                 |
 | 19 | FramingEffect          | 🟡      | Wenyou      | Jul 8 2026 | —                 |
