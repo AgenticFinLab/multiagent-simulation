@@ -7,15 +7,15 @@ coverage for model decisions.
 
 ## §2 Core Metrics
 
-| Metric | Function Contract | Source |
+| Metric | Implementation Trace | Source |
 |---|---|---|
-| Polarization amplification | `def compute_polarization_amplification(polarization) -> float` | `analysis-bases.md §2.1` |
-| Polarization persistence | `def compute_polarization_persistence(polarization) -> float` | `analysis-bases.md §2.2` |
-| Cluster separation | `def compute_cluster_separation(cluster_series) -> dict` | `analysis-bases.md §2.3` |
-| Polarize activity | `def compute_polarize_activity(polarize_counts) -> float` | `analysis-bases.md §2.4` |
-| Depolarize activity | `def compute_depolarize_activity(depolarize_counts) -> float` | `analysis-bases.md §2.5` |
-| Opinion dispersion | `def compute_opinion_dispersion(agent_opinions) -> float` | `analysis-bases.md §2.6` |
-| Retrieval/API quality | `def compute_api_quality(actions, rag_contexts) -> dict` | `analysis-bases.md §2.7` |
+| Polarization amplification | `analysis.py:compute_polarization_amplification` | `analysis-bases.md §2.1` |
+| Polarization persistence | `analysis.py:compute_polarization_persistence` | `analysis-bases.md §2.2` |
+| Cluster separation | `analysis.py:compute_cluster_separation` | `analysis-bases.md §2.3` |
+| Polarize activity | `analysis.py:compute_polarize_activity` | `analysis-bases.md §2.4` |
+| Depolarize activity | `analysis.py:compute_depolarize_activity` | `analysis-bases.md §2.5` |
+| Opinion dispersion | `analysis.py:compute_opinion_dispersion` | `analysis-bases.md §2.6` |
+| Retrieval/API quality | `analysis.py:compute_api_quality` and `analyze_rag_knowledge_effect` | `analysis-bases.md §2.7` |
 
 ## §3 Analysis Dimensions
 

@@ -14,8 +14,10 @@ The Rag variant reuses the shared DispositionEffect financial metrics from
 | Proportion of Losses Realized (PLR) | `Rule.analysis.calculate_pgr_plr()` | §2.2 |
 | Disposition Coefficient (DC) | `Rule.analysis.generate_summary()` | §2.3 |
 | PGR/PLR Ratio | `Rule.analysis.calculate_pgr_plr()` | §2.4 |
+| Holding Period Asymmetry (HPA) | `Rag.analysis.holding_period_asymmetry()` | §2.5 |
+| Performance Drag Index (PDI) | `Rag.analysis.terminal_wealth()` + `calculate_extended_metrics()` | §2.6 |
 | Bias-awareness effect | `summary.json` comparison against LLM and RuleLLM | §5 |
-| Tax-harvesting comparison | `Rule.analysis.analyze_by_strategy()` | §2.7 |
+| Tax Reversal Index (TRI) | `Rag.analysis.calculate_extended_metrics()` | §2.7 |
 | RAG retrieval health | `analyze_rag_knowledge_effect()` | §7 |
 
 ## §3 Data Loading Contract

@@ -44,6 +44,7 @@ import logging
 import json
 import os
 import re
+import tempfile
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -126,6 +127,22 @@ class GeneralSimulator(BaseSimulator):
 
         RemotePlayerPersona = ray.remote(PlayerPersona)
 
+        # simulation.yml exposes these settings, but they used to be ignored.
+        # Ray therefore applied its defaults (no restart and no task retry), so
+        # a single transient actor/RPC failure aborted the whole simulation.
+        actor_options = copy.deepcopy(self.config.ray.get("actor_options") or {})
+        supported_actor_options = {
+            "max_restarts",
+            "max_task_retries",
+            "max_concurrency",
+        }
+        unknown_options = set(actor_options) - supported_actor_options
+        if unknown_options:
+            raise ValueError(
+                "Unsupported ray.actor_options: %s"
+                % ", ".join(sorted(unknown_options))
+            )
+
         for player_id, player_cfg in self.config.players.items():
             player_class = load_class(player_cfg["class"])
             config_data = copy.deepcopy(player_cfg["config"])
@@ -138,6 +155,7 @@ class GeneralSimulator(BaseSimulator):
 
             actor_name = get_actor_name(self.config.setting["name"], player_id)
             handle = RemotePlayerPersona.options(
+                **actor_options,
                 name=actor_name,
                 lifetime="detached",
                 namespace=self.config.ray["namespace"],
@@ -525,6 +543,13 @@ class GeneralSimulator(BaseSimulator):
         }
         self.history.append(round_results)
 
+        # This marker is written only after every execution level and message
+        # dispatch completed.  It is intentionally simulator-owned instead of
+        # inferred from scenario-specific folders such as ``records/market``.
+        self._write_resume_checkpoint(
+            self.config.setting["record_path"], round_num
+        )
+
         return round_results
 
     async def run(self) -> List[Dict[str, Any]]:
@@ -593,6 +618,31 @@ class GeneralSimulator(BaseSimulator):
         under record_path/market/ if turns data is absent.
         Returns 0 if no data is found.
         """
+        checkpoint_path = os.path.join(record_path, ".masim-progress.json")
+        try:
+            with open(checkpoint_path, encoding="utf-8") as checkpoint_file:
+                checkpoint = json.load(checkpoint_file)
+            completed_round = int(checkpoint["completed_round"])
+            if completed_round >= 0:
+                return completed_round
+        except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError):
+            pass
+
+        # Compatibility recovery for EchoChamber runs created before the
+        # progress marker existed.  The environment receives the final-level
+        # actions; the largest persisted round is therefore the last round
+        # that made it through the simulation pipeline.
+        environment_messages = os.path.join(record_path, "environment", "messages")
+        recovered_round = GeneralSimulator._max_persisted_message_round(
+            environment_messages
+        )
+        if recovered_round:
+            logger.info(
+                "    Recovered completed round %d from environment messages",
+                recovered_round,
+            )
+            return recovered_round
+
         market_path = os.path.join(record_path, "market")
         if not os.path.isdir(market_path):
             return 0
@@ -649,19 +699,114 @@ class GeneralSimulator(BaseSimulator):
             max_round = max(max_round, total)
         return max_round
 
+    @staticmethod
+    def _max_persisted_message_round(messages_path: str) -> int:
+        """Return the largest round in persisted message blocks."""
+        if not os.path.isdir(messages_path):
+            return 0
+        max_round = 0
+        for fname in os.listdir(messages_path):
+            if not (fname.startswith("msg_block_") and fname.endswith(".json")):
+                continue
+            try:
+                with open(
+                    os.path.join(messages_path, fname), encoding="utf-8"
+                ) as message_file:
+                    block = json.load(message_file)
+                for record in block.values():
+                    if isinstance(record, dict) and record.get("round_num") is not None:
+                        max_round = max(max_round, int(record["round_num"]))
+            except (OSError, ValueError, TypeError, json.JSONDecodeError):
+                continue
+        return max_round
+
+    @staticmethod
+    def _write_resume_checkpoint(record_path: str, round_num: int) -> None:
+        """Atomically persist the latest fully completed round."""
+        os.makedirs(record_path, exist_ok=True)
+        checkpoint_path = os.path.join(record_path, ".masim-progress.json")
+        fd, temporary_path = tempfile.mkstemp(
+            prefix=".masim-progress-", suffix=".tmp", dir=record_path
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as checkpoint_file:
+                json.dump({"completed_round": int(round_num)}, checkpoint_file)
+                checkpoint_file.flush()
+                os.fsync(checkpoint_file.fileno())
+            os.replace(temporary_path, checkpoint_path)
+        finally:
+            if os.path.exists(temporary_path):
+                os.unlink(temporary_path)
+
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""
         logger.info("Shutting down simulation: %s", self.simulation_id)
 
-        # Shutdown all Persona actors
-        shutdown_futures = []
-        for handle in self.player_persona_handles.values():
-            shutdown_futures.append(handle.shutdown.remote())
+        # Personas use detached lifetime, so invoking their shutdown method does
+        # not terminate the actor process.  Always kill them afterwards; leaving
+        # detached actors around leaks workers and IPC resources across runs and
+        # is especially damaging to Ray's Plasma store on Windows.
+        handles = list(self.player_persona_handles.values())
+        ray_healthy = self._local_ray_control_plane_alive()
+        try:
+            if ray_healthy:
+                shutdown_futures = []
+                for handle in handles:
+                    try:
+                        shutdown_futures.append(handle.shutdown.remote())
+                    except Exception as exc:
+                        logger.warning("Could not request actor shutdown: %s", exc)
 
-        ray.get(shutdown_futures)
+                # Resolve independently so one unavailable actor cannot prevent
+                # healthy actors from completing their own cleanup.
+                for future in shutdown_futures:
+                    try:
+                        ray.get(future)
+                    except Exception as exc:
+                        logger.warning("Actor cleanup did not complete: %s", exc)
+        finally:
+            if ray_healthy:
+                for handle in handles:
+                    try:
+                        ray.kill(handle, no_restart=True)
+                    except Exception as exc:
+                        logger.debug("Actor was already unavailable during kill: %s", exc)
+                ray.shutdown()
+            elif ray.is_initialized():
+                # Submitting actor RPCs after the local GCS has died blocks for
+                # Ray's 60-second reconnect timeout and can end in a Windows
+                # native access violation.  At this point there is no control
+                # plane left with which to perform graceful actor cleanup.
+                logger.warning(
+                    "Ray GCS is unavailable; skipping remote cleanup to avoid "
+                    "the reconnect/access-violation failure path"
+                )
+            self.player_persona_handles.clear()
+            self.status = SimulatorStatus.TERMINATED
 
-        self.status = SimulatorStatus.TERMINATED
         logger.info("    Shutdown complete")
+
+    @staticmethod
+    def _local_ray_control_plane_alive() -> bool:
+        """Best-effort, non-RPC health check for a locally started Ray GCS."""
+        if not ray.is_initialized():
+            return False
+        try:
+            from ray._private import worker
+            from ray._private.ray_constants import PROCESS_TYPE_GCS_SERVER
+
+            node = worker._global_node
+            if node is None:
+                # A remote Ray cluster has no local GCS process to inspect.
+                return True
+            return any(
+                process_type == PROCESS_TYPE_GCS_SERVER
+                for process_type, _process in node.live_processes()
+            )
+        except Exception:
+            # Keep compatibility with Ray releases whose private process
+            # bookkeeping differs; normal graceful cleanup remains preferable.
+            return True
 
     # =========================================================================
     # Utility Methods

@@ -6,7 +6,7 @@
 # unwind positions, amplifying the move.
 #
 # Usage:
-#   python examples/CarryTradeUnwind/Rule/run_carrytrade.py \
+#   python examples/CarryTradeUnwind/Rule/run_carrytradeunwind_rule.py \
 #       -c configs/CarryTradeUnwind/Rule/simulation.yml
 # =============================================================================
 

@@ -6,7 +6,7 @@
 # derived from the rule-based EchoChamber.Rule counterpart.
 #
 # Usage:
-#   python examples/EchoChamber/RuleLLM/run_echo_chamber_rulellm.py -c configs/EchoChamber/RuleLLM/simulation.yml
+#   python -m examples.EchoChamber.RuleLLM.run_echo_chamber_rulellm -c configs/EchoChamber/RuleLLM/simulation.yml
 # =============================================================================
 
 setting:

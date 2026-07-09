@@ -7,14 +7,14 @@ drives extremity, using heterogeneous social agents.
 
 Phenomenon: Echo Chamber Polarization
     Like-minded individuals reinforce each other's views through homophilic
-    interaction, producing group polarization — where group members converge
+    interaction, producing group polarization, where group members converge
     on positions more extreme than any individual initially held.
 
 Theory: Sunstein (2001), Pariser (2011), Moscovici & Zavalloni (1969),
         Isenberg (1986)
 
 Usage:
-    python examples/EchoChamber/Rule/run_echo_chamber.py -c configs/EchoChamber/Rule/simulation.yml
+    python -m examples.EchoChamber.Rule.run_echo_chamber -c configs/EchoChamber/Rule/simulation.yml
 """
 
 import argparse
@@ -30,20 +30,24 @@ setup_logging()
 logger = logging.getLogger("EchoChamber")
 
 
-async def run_simulation(config_path: str):
+async def run_simulation(config_path: str, steps: int | None = None):
     """Run the echo chamber polarization simulation."""
 
     yaml_config = load_config(config_path)
+    if steps is not None:
+        if steps < 1:
+            raise ValueError("steps must be at least 1")
+        yaml_config["setting"]["total_rounds"] = steps
     config = SimulationConfig(**yaml_config)
 
     logger.info("=" * 70)
     logger.info("ECHO CHAMBER POLARIZATION SIMULATION")
     logger.info("=" * 70)
     logger.info(
-        "Phenomenon: Polarization by homophily — like-minded reinforcement drives extremity"
+        "Phenomenon: Polarization by homophily - like-minded reinforcement drives extremity"
     )
     logger.info(
-        "Theory: Sunstein (2001) — Echo Chambers; Pariser (2011) — Filter Bubble"
+        "Theory: Sunstein (2001) - Echo Chambers; Pariser (2011) - Filter Bubble"
     )
     logger.info("")
     logger.info("Agent Types:")
@@ -54,9 +58,9 @@ async def run_simulation(config_path: str):
     logger.info("  - PassiveFollower:    Low-engagement drifter (NEUTRAL)")
     logger.info("")
     logger.info("Expected Behavior:")
-    logger.info("  - Initial moderate opinions → some agents amplify in-group views")
-    logger.info("  - Conformists reinforce homophily → cluster formation")
-    logger.info("  - Cluster separation grows → echo chamber emerges")
+    logger.info("  - Initial moderate opinions -> some agents amplify in-group views")
+    logger.info("  - Conformists reinforce homophily -> cluster formation")
+    logger.info("  - Cluster separation grows -> echo chamber emerges")
     logger.info("  - BridgeBuilders and CriticalThinkers resist polarization")
     logger.info("=" * 70)
     logger.info("Simulation: %s", config.setting["name"])
@@ -89,7 +93,7 @@ async def run_simulation(config_path: str):
     logger.info("=" * 70)
     logger.info("Simulation Complete!")
     logger.info("Run analysis with:")
-    logger.info("  python examples/EchoChamber/Rule/analysis.py -c %s", config_path)
+    logger.info("  python -m examples.EchoChamber.Rule.analysis -c %s", config_path)
     logger.info("=" * 70)
 
     return results
@@ -108,7 +112,7 @@ Agent Types:
   - PassiveFollower:    Low-engagement drifter (baseline)
 
 Example:
-    python examples/EchoChamber/Rule/run_echo_chamber.py -c configs/EchoChamber/Rule/simulation.yml
+    python -m examples.EchoChamber.Rule.run_echo_chamber -c configs/EchoChamber/Rule/simulation.yml
 """,
     )
     parser.add_argument(
@@ -118,9 +122,14 @@ Example:
         required=True,
         help="Path to simulation configuration file (YAML)",
     )
+    parser.add_argument(
+        "--steps",
+        type=int,
+        help="Override total_rounds for a short smoke or calibration run",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(run_simulation(args.config))
+    asyncio.run(run_simulation(args.config, args.steps))

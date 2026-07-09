@@ -1,23 +1,26 @@
-"""EndowmentEffect LLM Simulation — LLM agents with investor personas."""
+"""Persona-driven investors for the EndowmentEffect LLM variant.
+
+The language model deliberates, while this module enforces the executable
+contract: valid decision fields, finite numeric values, configured order-size
+limits, and cash/inventory constraints.
+"""
 
 from __future__ import annotations
 
+import copy
 import importlib
 import logging
+import math
 import os
-import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict
 
 from dotenv import load_dotenv
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 from masim.utils.llm_utils import parse_llm_response_with_thinking
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
@@ -36,8 +39,6 @@ def load_prompt(prompt_path: str) -> str:
 class LLMInvestor(GeneralPlayer):
     """Base LLM investor for EndowmentEffect simulation."""
 
-    _system_prompt_path: str = ""
-
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
             await self._initialize_agent()
@@ -53,12 +54,15 @@ class LLMInvestor(GeneralPlayer):
         self.state.custom_state["cash"] = float(extras["initial_cash"])
         self.state.custom_state["position"] = int(extras["initial_position"])
         self.state.custom_state["market_data"] = {}
+        base_path = os.path.join(extras["record_path"], self.config.identity)
         self.state.custom_state["history_buffer"] = HistoryBuffer(
-            folder=f"EndowmentEffect/LLM/{self.__class__.__name__}", entry_limit=200
+            folder=os.path.join(base_path, "llm_history"),
+            entry_limit=int(extras["custom_state_hot_limit"]),
         )
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
+        load_dotenv()
         llm_cfg = extras["llm"]
+        if llm_cfg["lm_type"] != "api":
+            raise ValueError("EndowmentEffect LLM requires llm.lm_type: api")
         self.state.custom_state["llm_params"] = llm_cfg
         self.state.custom_state["llm_client"] = LangChainAPIInference(
             lm_name=llm_cfg["lm_name"],
@@ -68,9 +72,10 @@ class LLMInvestor(GeneralPlayer):
     def __getstate__(self) -> Dict:
         state = self.__dict__.copy()
         if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = dict(self.state.custom_state)
-            custom.pop("llm_client", None)
-            state["state"].custom_state = custom
+            player_state = copy.copy(self.state)
+            player_state.custom_state = dict(self.state.custom_state)
+            player_state.custom_state.pop("llm_client", None)
+            state["state"] = player_state
         return state
 
     def __setstate__(self, state: Dict) -> None:
@@ -93,10 +98,9 @@ class LLMInvestor(GeneralPlayer):
         position = self.state.custom_state["position"]
         round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
-        system_prompt = load_prompt(self._system_prompt_path)
-        user_template = load_prompt(
-            "examples.EndowmentEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        )
+        llm_cfg = self.config.extras["llm"]
+        system_prompt = load_prompt(llm_cfg["sys_message"])
+        user_template = load_prompt(llm_cfg["user_message"])
         user_prompt = user_template.format(
             round=round_num,
             price=price,
@@ -109,18 +113,31 @@ class LLMInvestor(GeneralPlayer):
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         decision = None
         last_error = None
-        for attempt in range(3):
+        max_retries = int(llm_cfg["max_retries"])
+        for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"Invalid action: {decision['action']}")
+                parsed = parse_llm_response_with_thinking(result.response)
+                if parsed["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {parsed['action']}")
+                bid_price = float(parsed["bid_price"])
+                quantity = float(parsed["quantity"])
+                if not math.isfinite(bid_price) or bid_price <= 0:
+                    raise ValueError(f"Invalid bid_price: {parsed['bid_price']}")
+                if not math.isclose(bid_price, price, rel_tol=1e-6, abs_tol=0.01):
+                    raise ValueError("bid_price must equal the current market price")
+                if not math.isfinite(quantity) or quantity < 0:
+                    raise ValueError(f"Invalid quantity: {parsed['quantity']}")
+                if not str(parsed["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
+                if not str(parsed["analysis"]).strip():
+                    raise ValueError("Missing <analysis> content")
+                decision = parsed
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < 2:
+                if attempt < max_retries - 1:
                     logger.debug(
                         "[%s] LLM parse failed (attempt %d), retrying...",
                         self.identity,
@@ -129,15 +146,23 @@ class LLMInvestor(GeneralPlayer):
 
         if decision is None:
             raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
 
         action_str = decision["action"]
-        quantity = max(0, int(decision["quantity"]))
+        bid_price = float(decision["bid_price"])
+        quantity = min(
+            int(float(decision["quantity"])),
+            int(self.config.extras["base_size"]),
+        )
         if action_str == "buy":
             quantity = min(quantity, int(cash / price) if price > 0 else 0)
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
+        else:
+            quantity = 0
+        if quantity == 0:
+            action_str = "hold"
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -146,7 +171,7 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["position"] -= quantity
         order = {
             "action": action_str,
-            "bid_price": price,
+            "bid_price": bid_price,
             "quantity": quantity,
             "reasoning": decision["reasoning"],
             "analysis": decision["analysis"],
@@ -154,7 +179,7 @@ class LLMInvestor(GeneralPlayer):
         }
         return {
             "action": action_str,
-            "bid_price": price,
+            "bid_price": bid_price,
             "quantity": quantity,
             "reasoning": decision["reasoning"],
             "analysis": decision["analysis"],
@@ -171,36 +196,17 @@ class LLMInvestor(GeneralPlayer):
 class LLMEndowedHolder(LLMInvestor):
     """LLM-driven endowed holder — attachment bias suppresses selling via LLM reasoning. Theory: simulation-bases.md §4.1."""
 
-    _system_prompt_path = "examples.EndowmentEffect.LLM.prompts:LLM_ENDOWED_HOLDER_SYS"
-
-
 class LLMStatusQuoSeller(LLMInvestor):
     """LLM-driven status-quo-biased seller — inertia and loss aversion modeled via LLM. Theory: simulation-bases.md §4.2."""
-
-    _system_prompt_path = (
-        "examples.EndowmentEffect.LLM.prompts:LLM_STATUS_QUO_SELLER_SYS"
-    )
-
 
 class LLMRationalArbitrageur(LLMInvestor):
     """LLM-driven rational arbitrageur — exploits endowment-bias gap via fundamental analysis. Theory: simulation-bases.md §4.3."""
 
-    _system_prompt_path = (
-        "examples.EndowmentEffect.LLM.prompts:LLM_RATIONAL_ARBITRAGEUR_SYS"
-    )
-
-
 class LLMNewBuyer(LLMInvestor):
     """LLM-driven unbiased new buyer — evaluates assets at market price, no ownership distortion. Theory: simulation-bases.md §4.4."""
 
-    _system_prompt_path = "examples.EndowmentEffect.LLM.prompts:LLM_NEW_BUYER_SYS"
-
-
 class LLMNoiseTrader(LLMInvestor):
     """LLM-driven noise trader — random uninformed trades modeled with probabilistic LLM persona. Theory: simulation-bases.md §4.5."""
-
-    _system_prompt_path = "examples.EndowmentEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
-
 
 __all__ = [
     "Market",

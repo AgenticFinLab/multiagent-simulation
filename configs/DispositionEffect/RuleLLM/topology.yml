@@ -21,5 +21,4 @@ connections:
     - rulellm_tax_aware_2
     - rulellm_institutional_1
     - rulellm_institutional_2
-    - rulellm_loss_averse_1
-    - rulellm_loss_averse_2
+    - rulellm_index_holder

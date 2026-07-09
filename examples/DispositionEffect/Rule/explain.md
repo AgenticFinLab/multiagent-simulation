@@ -18,26 +18,26 @@ The Rule variant implements DispositionEffect with deterministic threshold rules
 
 | Theory Component                                       | Implementation                                           |
 |--------------------------------------------------------|----------------------------------------------------------|
-| Prospect Theory gain domain (Kahneman & Tversky, 1979) | `if gain_loss >= 0.03: sell position × 0.50`             |
-| Prospect Theory loss domain                            | `if gain_loss <= -0.10: sell position × 0.15`            |
+| Prospect Theory gain domain (Kahneman & Tversky, 1979) | Above `gain_threshold`, sell `position × sell_fraction_gain` |
+| Prospect Theory loss domain                            | Below `loss_threshold`, sell `position × sell_fraction_loss` |
 | Reference point anchoring                              | `purchase_price` tracked per investor; updated on trades |
-| Buy at reference point                                 | `if abs(gain_loss) < 0.01: buy position × 0.10`          |
-| Loss aversion λ = 2.25                                 | Asymmetric sell fractions (50% gain, 15% loss)           |
+| Buy at reference point                                 | Buy inside `reference_buy_band`, subject to configured caps |
+| Loss aversion λ                                        | `loss_aversion` validates the sell-fraction asymmetry |
 
 ### §2.2 RationalInvestor (simulation-bases.md §4.2)
 
 | Theory Component                                          | Implementation                                                                                |
 |-----------------------------------------------------------|-----------------------------------------------------------------------------------------------|
 | Expected Utility Theory (von Neumann & Morgenstern, 1944) | `current_alloc = equity_value / total_value`                                                  |
-| Target allocation rebalancing                             | Buy when `current_alloc < target - threshold`; sell when `current_alloc > target + threshold` |
+| Target allocation rebalancing                             | Move by `rebalance_speed` when allocation leaves the target band |
 | No reference point                                        | Ignores `purchase_price`; acts on portfolio weight deviation only                             |
 
 ### §2.3 TaxAwareInvestor (simulation-bases.md §4.3)
 
 | Theory Component                           | Implementation                                        |
 |--------------------------------------------|-------------------------------------------------------|
-| Tax-loss harvesting (Constantinides, 1983) | `if gain_loss <= -0.05: sell × tax_harvest_fraction`  |
-| Capital gains deferral                     | `if gain_loss >= 0.15: action = "DEFER_GAINS"` (hold) |
+| Tax-loss harvesting (Constantinides, 1983) | Sell by `tax_harvest_fraction` below `tax_loss_threshold` |
+| Capital gains deferral                     | Hold above `capital_gains_hold` |
 
 ### §2.4 IndexHolder (simulation-bases.md §4.4)
 
@@ -49,8 +49,8 @@ The Rule variant implements DispositionEffect with deterministic threshold rules
 
 | Theory Component                                  | Implementation                                    |
 |---------------------------------------------------|---------------------------------------------------|
-| Professional discipline (Shapira & Venezia, 2001) | Same `sell_fraction` for gains and losses (0.30)  |
-| Symmetric thresholds                              | `gain_threshold = 0.08`, `loss_threshold = -0.08` |
+| Professional discipline (Shapira & Venezia, 2001) | Same configured `sell_fraction` for gains and losses |
+| Threshold discipline                              | Separate configured gain/loss thresholds with symmetric sizing |
 
 ## §3 Market Mechanism
 
@@ -87,13 +87,18 @@ Investors
 
 Config files: `configs/DispositionEffect/Rule/simulation.yml`, `players.yml`, and `topology.yml`
 
-Key extras: `initial_price`, `fundamental_value`, `price_impact`, `mean_reversion`, `noise_std`, `news_probability`, `news_impact_range`, `gain_threshold`, `loss_threshold`, `loss_aversion`, `sell_fraction_gain`, `sell_fraction_loss`, `target_allocation`, `tax_loss_threshold`.
+Key extras include all market dynamics, initial portfolio state, decision
+thresholds, sizing fractions, `reference_buy_band`, `minimum_trade_quantity`,
+and `rebalance_speed`. Every behavioral number is loaded from `players.yml`.
 
 ## §7 Running Instructions
 
 ```bash
-python -m examples.DispositionEffect.Rule.run_disposition
+python -m examples.DispositionEffect.Rule.run_disposition -c configs/DispositionEffect/Rule/simulation.yml
 ```
+
+For a five-round isolated smoke run, set `DISPOSITION_RULE_OUTPUT_DIR` and add
+`--steps 5`. Omitting `--steps` executes the configured 200 rounds.
 
 ## §8 Expected Behavior
 

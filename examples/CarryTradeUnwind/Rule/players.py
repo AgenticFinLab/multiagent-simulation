@@ -142,11 +142,14 @@ class CarryTrader(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         extras = self.config.extras
+        unwind_threshold = float(extras["unwind_threshold"])
+        carry_size = float(extras["carry_size"])
+        deviation_scale = float(extras["deviation_scale"])
         leverage = float(extras["leverage"])
 
         action, quantity = "hold", 0
-        if abs(deviation) > 0.02:
-            qty = min(int(800 * leverage), int(abs(deviation) * 5000))
+        if abs(deviation) > unwind_threshold:
+            qty = min(int(carry_size * leverage), int(abs(deviation) * deviation_scale))
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -218,15 +221,16 @@ class LeveragedCarryFund(GeneralPlayer):
         extras = self.config.extras
         leverage = float(extras["leverage"])
         stop_loss = float(extras["stop_loss"])
+        base_size = float(extras["base_size"])
 
         action, quantity = "hold", 0
         # Forced unwind when losses hit stop_loss or deviation triggers margin call
-        if deviation < -stop_loss or (abs(deviation) > 0.02 and deviation < 0):
-            qty = min(int(800 * leverage), max(position, 0))
+        if deviation < -stop_loss or (abs(deviation) > stop_loss and deviation < 0):
+            qty = min(int(base_size * leverage), max(position, 0))
             if qty > 0:
                 action, quantity = "sell", qty
-        elif deviation > 0.02:
-            buy_qty = min(int(800 * leverage), int(cash / price) if price > 0 else 0)
+        elif deviation > stop_loss:
+            buy_qty = min(int(base_size * leverage), int(cash / price) if price > 0 else 0)
             if buy_qty > 0:
                 action, quantity = "buy", buy_qty
 
@@ -366,11 +370,12 @@ class HedgedCarryTrader(GeneralPlayer):
         extras = self.config.extras
         hedge_ratio = float(extras["hedge_ratio"])
         vol_threshold = float(extras["vol_threshold"])
+        base_size = float(extras["base_size"])
 
         action, quantity = "hold", 0
         # Hedged carry: only trade when deviation exceeds vol-adjusted threshold
         if abs(deviation) > vol_threshold:
-            adj_qty = int(500 * (1 - hedge_ratio))
+            adj_qty = int(base_size * (1 - hedge_ratio))
             if deviation > 0:
                 buy_qty = min(adj_qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -440,10 +445,12 @@ class NoiseTrader(GeneralPlayer):
         position = self.state.custom_state["position"]
         extras = self.config.extras
         prob = float(extras["trade_probability"])
+        min_order = int(extras["min_order"])
+        max_order = int(extras["max_order"])
 
         action, quantity = "hold", 0
         if random.random() < prob:
-            qty = random.randint(100, 500)
+            qty = random.randint(min_order, max_order)
             side = "buy" if random.random() > 0.5 else "sell"
             if side == "buy":
                 qty = min(qty, int(cash / price) if price > 0 else 0)

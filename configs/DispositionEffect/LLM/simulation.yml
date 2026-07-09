@@ -13,7 +13,7 @@ setting:
   description: "LLM-based disposition effect with prospect theory investors"
   total_rounds: 200
   round_history_limit: 3
-  record_path: "EXPERIMENT/DispositionEffect/LLM/records"
+  record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
   save_diagram_interval: 50
 
 environment:
@@ -25,8 +25,8 @@ ray:
   namespace: "disposition_effect_llm"
   actor_prefix: null
   # null = Ray auto-detects from machine; actors use num_cpus=0 (async, I/O-bound)
-  num_cpus: null
-  num_gpus: null
+  num_cpus: 11
+  num_gpus: 0
   # Derived: 12 players, star topology -> 22 msgs/round
   #   12 TurnResult + 12 pending_info + 22 Message = 46 Ray objects
   #   46 obj x 64 KB min-alloc = 2944 KB (2.88 MB) base peak
@@ -52,6 +52,6 @@ players: !include players.yml
 topology: !include topology.yml
 
 communication:
-  storage_path: "EXPERIMENT/DispositionEffect/LLM/communication"
+  storage_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/communication"
   record_messages: true
   message_block_size: 500

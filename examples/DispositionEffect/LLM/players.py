@@ -30,8 +30,10 @@ import random
 import sys
 import importlib
 import logging
+import math
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
+import torch  # Load native DLLs before MASim/NumPy on Windows.
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
@@ -269,6 +271,8 @@ class LLMInvestor(GeneralPlayer):
             cash=cash,
             position=position,
             portfolio_value=cash + position * market_data["price"],
+            max_position=self.config.extras["max_position"],
+            max_order_quantity=self.config.extras["max_order_quantity"],
         )
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
@@ -279,13 +283,20 @@ class LLMInvestor(GeneralPlayer):
         return parse_llm_response_with_thinking(response_text)
 
     def _apply_constraints(self, bid_price: float, quantity: float) -> float:
+        """Apply solvency, inventory, and per-order safety constraints."""
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        max_position = self.config.extras["max_position"]
+        max_order_quantity = self.config.extras["max_order_quantity"]
+        if not math.isfinite(quantity):
+            raise ValueError("quantity must be finite")
+        quantity = max(-max_order_quantity, min(max_order_quantity, quantity))
         if quantity > 0:
             if bid_price <= 0:
                 raise ValueError("bid_price must be positive")
             max_affordable = cash / bid_price
-            quantity = min(quantity, max_affordable)
+            remaining_capacity = max(0.0, max_position - position)
+            quantity = min(quantity, max_affordable, remaining_capacity)
         elif quantity < 0:
             quantity = max(-position, quantity)
         return quantity
@@ -300,14 +311,14 @@ class LLMInvestor(GeneralPlayer):
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        max_retries = 3
+        max_retries = llm_config["max_retries"]
         decision = None
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             infer_output = llm_client.run([infer_input])
             try:
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                decision = self._parse_llm_response(infer_output.response)
                 if decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"invalid action: {decision['action']}")
                 if float(decision["bid_price"]) <= 0:
@@ -325,7 +336,12 @@ class LLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
 
-        bid_price = float(decision["bid_price"])
+        # The market broadcast is the execution price.  The LLM-proposed price
+        # is validated above for schema compliance but cannot mint cash through
+        # off-market trades.
+        bid_price = float(market_data["price"])
+        if not math.isfinite(bid_price) or bid_price <= 0:
+            raise ValueError(f"invalid market price: {bid_price}")
         quantity = float(decision["quantity"])
         if decision["action"] == "sell":
             quantity = -abs(quantity)
@@ -335,6 +351,13 @@ class LLMInvestor(GeneralPlayer):
             quantity = 0.0
 
         quantity = self._apply_constraints(bid_price, quantity)
+        action = decision["action"]
+        if quantity > 0:
+            action = "buy"
+        elif quantity < 0:
+            action = "sell"
+        else:
+            action = "hold"
 
         # Update purchase price if buying
         if quantity > 0:
@@ -357,7 +380,7 @@ class LLMInvestor(GeneralPlayer):
         )
 
         order = {
-            "action": decision["action"],
+            "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,

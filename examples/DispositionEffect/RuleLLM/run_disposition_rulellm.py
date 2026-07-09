@@ -21,7 +21,7 @@ import sys
 
 # Add project root to path
 project_root = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 sys.path.insert(0, project_root)
 
@@ -31,6 +31,7 @@ from masim.utils.config import load_config, setup_logging
 
 
 async def main():
+    """Parse CLI options, execute the simulation, and shut down cleanly."""
     setup_logging()
 
     parser = argparse.ArgumentParser(
@@ -71,7 +72,9 @@ async def main():
     config = SimulationConfig(**yaml_config)
 
     # Override rounds if specified
-    if args.rounds:
+    if args.rounds is not None:
+        if args.rounds <= 0:
+            parser.error("--rounds must be a positive integer")
         config.setting["total_rounds"] = args.rounds
 
     print("\n" + "=" * 60)

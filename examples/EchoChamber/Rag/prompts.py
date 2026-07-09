@@ -8,11 +8,19 @@ from examples.EchoChamber.RuleLLM.prompts import (  # noqa: F401
     RULELLM_PASSIVE_SYS,
 )
 
-RAG_IDEOLOGUE_SYS = RULELLM_IDEOLOGUE_SYS
-RAG_CONFORMIST_SYS = RULELLM_CONFORMIST_SYS
-RAG_CRITICAL_SYS = RULELLM_CRITICAL_SYS
-RAG_BRIDGE_SYS = RULELLM_BRIDGE_SYS
-RAG_PASSIVE_SYS = RULELLM_PASSIVE_SYS
+
+def _rag_system_prompt(rulellm_prompt: str) -> str:
+    """Keep RuleLLM mechanics while removing the scenario label from personas."""
+    return rulellm_prompt.replace(
+        "Echo Chamber Theory", "group-polarization research"
+    ).replace("Echo Chamber", "group polarization")
+
+
+RAG_IDEOLOGUE_SYS = _rag_system_prompt(RULELLM_IDEOLOGUE_SYS)
+RAG_CONFORMIST_SYS = _rag_system_prompt(RULELLM_CONFORMIST_SYS)
+RAG_CRITICAL_SYS = _rag_system_prompt(RULELLM_CRITICAL_SYS)
+RAG_BRIDGE_SYS = _rag_system_prompt(RULELLM_BRIDGE_SYS)
+RAG_PASSIVE_SYS = _rag_system_prompt(RULELLM_PASSIVE_SYS)
 
 RAG_USER_TEMPLATE = """== OPINION ENVIRONMENT (Round {round}) ==
 - Polarization Index:          {polarization:.3f}  (0=united, 1=fully polarized)

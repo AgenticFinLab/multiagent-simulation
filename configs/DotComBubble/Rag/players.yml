@@ -1,6 +1,7 @@
 # DotComBubble Rag Agent Configuration
 
 knowledge:
+  # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
   backend: "local"
   global_uri: "examples/document-sources"
   resource_csv:
@@ -10,11 +11,11 @@ knowledge:
     parser: "mineru"
     output_position: "MinerU_processed"
   rag:
-    output_position: "rag_index"
-    embed_type: "litellm"
-    embed_model: "openai/hunyuan-embedding"
-    embed_api_key: "{{ HUNYUAN_API_KEY }}"
-    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    output_position: "rag_index_ep_20260418161108_k2pxb"
+    embed_type: "ark_multimodal"
+    embed_model: "ep-20260418161108-k2pxb"
+    embed_api_key: "{{ ARK_API_KEY }}"
+    embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
     chunk_size: 512
     chunk_overlap: 64
     top_k: 5
@@ -30,12 +31,19 @@ market:
     group_tags:
       - market
     extras:
+      # Source: simulation-bases.md §7
       record_path: "EXPERIMENT/DotComBubble/Rag/records"
-      initial_price: 50.0
-      fundamental_value: 50.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.02
+      # Source: simulation-bases.md §3 and §6
+      initial_price: 100.0
+      # Source: simulation-bases.md §3 and §6
+      fundamental_value: 100.0
+      # Source: simulation-bases.md §3 and §6
+      price_impact: 0.01
+      # Source: simulation-bases.md §3 and §6
+      mean_reversion: 0.005
+      # Source: simulation-bases.md §3 and §6
+      noise_std: 1.0
+      # Source: simulation-bases.md §7 (recording implementation)
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -50,13 +58,15 @@ neweconomyevangelist:
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7
       record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      # Source: analysis-bases.md §5 cross-variant control (matches Rule/LLM/RuleLLM)
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.1 inventory constraint
       initial_position: 0
-      max_pf_ratio: 10.0
-      base_buy_size: 400
-      narrative_strength: 0.8
+      # Source: simulation-bases.md §7 (recording implementation)
       custom_state_hot_limit: 3
+      # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_NEW_ECONOMY_EVANGELIST_SYS"
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
@@ -65,6 +75,7 @@ neweconomyevangelist:
         generation_config:
           temperature: 0.8
           max_tokens: 512
+      # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -73,12 +84,12 @@ neweconomyevangelist:
           local_resources: []
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+            - "rag_index_ep_20260418161108_k2pxb"
+          local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          embed_type: "ark_multimodal"
+          embed_model: "ep-20260418161108-k2pxb"
+          embed_api_key: "{{ ARK_API_KEY }}"
+          embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
@@ -95,13 +106,15 @@ ipoflipper:
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7
       record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      # Source: analysis-bases.md §5 cross-variant control (matches Rule/LLM/RuleLLM)
       initial_cash: 800000.0
-      initial_position: 0
-      entry_threshold: 0.05
-      flip_return: 0.15
-      base_size: 300
+      # Source: simulation-bases.md §4.2.6 worked inventory example
+      initial_position: 500
+      # Source: simulation-bases.md §7 (recording implementation)
       custom_state_hot_limit: 3
+      # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_IPO_FLIPPER_SYS"
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
@@ -110,6 +123,7 @@ ipoflipper:
         generation_config:
           temperature: 0.7
           max_tokens: 512
+      # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -118,12 +132,12 @@ ipoflipper:
           local_resources: []
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+            - "rag_index_ep_20260418161108_k2pxb"
+          local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          embed_type: "ark_multimodal"
+          embed_model: "ep-20260418161108-k2pxb"
+          embed_api_key: "{{ ARK_API_KEY }}"
+          embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
@@ -140,12 +154,15 @@ momentumfollower:
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7
       record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      # Source: analysis-bases.md §5 cross-variant control (matches Rule/LLM/RuleLLM)
       initial_cash: 800000.0
+      # Source: simulation-bases.md §4.3 inventory constraint
       initial_position: 0
-      entry_threshold: 0.03
-      base_size: 350
+      # Source: simulation-bases.md §7 (recording implementation)
       custom_state_hot_limit: 3
+      # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_MOMENTUM_FOLLOWER_SYS"
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
@@ -154,6 +171,7 @@ momentumfollower:
         generation_config:
           temperature: 0.7
           max_tokens: 512
+      # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -162,12 +180,12 @@ momentumfollower:
           local_resources: []
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+            - "rag_index_ep_20260418161108_k2pxb"
+          local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          embed_type: "ark_multimodal"
+          embed_model: "ep-20260418161108-k2pxb"
+          embed_api_key: "{{ ARK_API_KEY }}"
+          embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
@@ -184,13 +202,15 @@ skepticalvalueinvestor:
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7
       record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      # Source: analysis-bases.md §5 cross-variant control (matches Rule/LLM/RuleLLM)
       initial_cash: 1000000.0
-      initial_position: 0
-      buy_pf: 1.2
-      max_pf: 3.0
-      base_size: 300
+      # Source: simulation-bases.md §4.4.6 worked inventory example
+      initial_position: 300
+      # Source: simulation-bases.md §7 (recording implementation)
       custom_state_hot_limit: 3
+      # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_INVESTOR_SYS"
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
@@ -199,6 +219,7 @@ skepticalvalueinvestor:
         generation_config:
           temperature: 0.4
           max_tokens: 512
+      # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -207,12 +228,12 @@ skepticalvalueinvestor:
           local_resources: []
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+            - "rag_index_ep_20260418161108_k2pxb"
+          local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          embed_type: "ark_multimodal"
+          embed_model: "ep-20260418161108-k2pxb"
+          embed_api_key: "{{ ARK_API_KEY }}"
+          embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
@@ -229,13 +250,15 @@ shortseller:
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7
       record_path: "EXPERIMENT/DotComBubble/Rag/records"
+      # Source: analysis-bases.md §5 cross-variant control (matches Rule/LLM/RuleLLM)
       initial_cash: 1000000.0
-      initial_position: 0
-      short_threshold: 5.0
-      cover_threshold: 2.5
-      base_size: 300
+      # Source: simulation-bases.md §4.5.6 worked inventory example
+      initial_position: 400
+      # Source: simulation-bases.md §7 (recording implementation)
       custom_state_hot_limit: 3
+      # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_SHORT_SELLER_SYS"
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
@@ -244,6 +267,7 @@ shortseller:
         generation_config:
           temperature: 0.5
           max_tokens: 512
+      # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -252,12 +276,12 @@ shortseller:
           local_resources: []
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+            - "rag_index_ep_20260418161108_k2pxb"
+          local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          embed_type: "ark_multimodal"
+          embed_model: "ep-20260418161108-k2pxb"
+          embed_api_key: "{{ ARK_API_KEY }}"
+          embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5

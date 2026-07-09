@@ -13,7 +13,7 @@
 #     Theory: Brunnermeier, Nagel & Pedersen (2009)
 #   - LeveragedCarryFund: High leverage with stop-loss (DESTABILIZING)
 #     Theory: Plantin & Shin (2018)
-#   - FundingCurrencyBuyer: Safe-haven demand amplifier (DESTABILIZING)
+#   - FundingCurrencyBuyer: Safe-haven demand and partial stabilization (STABILIZING)
 #     Theory: Menkhoff et al. (2012)
 #   - HedgedCarryTrader: Volatility-adjusted carry (STABILIZING)
 #     Theory: Menkhoff et al. (2012), Burnside et al. (2011)
@@ -67,7 +67,8 @@ carry_trader:
       custom_state_hot_limit: 3
       # CarryTrader specific parameters (Brunnermeier et al., 2009)
       unwind_threshold: 0.02      # Unwind when return > 2%
-      carry_size: 100.0           # Base carry units
+      carry_size: 800.0           # Source: target §9 / simulation-bases.md §4.1; base carry units before leverage cap
+      deviation_scale: 5000.0     # Source: simulation-bases.md §4.1; deviation-proportional sizing scale
       leverage: 5.0               # Leverage multiplier (Brunnermeier et al., 2009)
   persona: !include persona.yml
 
@@ -94,7 +95,7 @@ leveraged_carry_fund:
       # LeveragedCarryFund parameters (Plantin & Shin, 2018)
       stop_loss: 0.03             # Stop-loss trigger at 3% funding appreciation
       leverage: 5.0               # 5× leverage amplifier
-      base_size: 80.0             # Base units per trade
+      base_size: 800.0            # Source: target §9 / simulation-bases.md §4.2; base forced-unwind units before leverage cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -118,8 +119,8 @@ funding_currency_buyer:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # FundingCurrencyBuyer parameters (Menkhoff et al., 2012)
-      risk_threshold: 0.015       # Flight-to-safety triggered at 1.5% return
-      position_size: 60           # Fixed safe-haven buy units (Ranaldo & Söderlind, 2010)
+      risk_threshold: 0.05        # Source: target §9 / simulation-bases.md §6; safe-haven trigger at 5% funding stress
+      position_size: 500.0        # Source: target §9 / simulation-bases.md §6; bounded safe-haven buy units
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -145,6 +146,7 @@ hedged_carry_trader:
       # HedgedCarryTrader parameters (Menkhoff et al., 2012; Burnside et al., 2011)
       hedge_ratio: 0.30              # 30% of position hedged (reduces net exposure)
       vol_threshold: 0.05            # FX volatility threshold for position adjustment
+      base_size: 500.0               # Source: target §9 / simulation-bases.md §4.4; base hedged carry units
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -167,7 +169,7 @@ noise_trader:
       initial_position: 0.0
       custom_state_hot_limit: 3
       # NoiseTrader parameters (Black, 1986)
-      trade_probability: 0.05
-      min_order: 20.0
-      max_order: 100.0
+      trade_probability: 0.30     # Source: target §9 / simulation-bases.md §6; bounded FX background flow
+      min_order: 20.0             # Source: simulation-bases.md §4.5; bounded stochastic order size
+      max_order: 100.0            # Source: simulation-bases.md §4.5; bounded stochastic order size
   persona: !include persona.yml

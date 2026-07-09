@@ -14,7 +14,7 @@ setting:
   description: "RAG-augmented disposition effect: agents retrieve behavioral finance knowledge per decision"
   total_rounds: 200
   round_history_limit: 3
-  record_path: "EXPERIMENT/DispositionEffect/Rag/records"
+  record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"
   save_diagram_interval: 50
 
 environment:
@@ -41,6 +41,6 @@ players: !include players.yml
 topology: !include topology.yml
 
 communication:
-  storage_path: "EXPERIMENT/DispositionEffect/Rag/communication"
+  storage_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/communication"
   record_messages: true
   message_block_size: 500

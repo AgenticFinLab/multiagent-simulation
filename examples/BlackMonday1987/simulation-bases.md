@@ -165,10 +165,10 @@ The PortfolioInsurer is a large institutional fund manager who has adopted the L
 
 | Parameter           | Value  | Meaning                                      | Config Path                                            | Source                                 |
 |---------------------|--------|----------------------------------------------|--------------------------------------------------------|----------------------------------------|
-| rebalance_threshold | 0.02   | Deviation below which selling is triggered   | `BlackMonday1987/Rule/config.yaml → portfolio_insurer` | Leland (1980); Brady Commission (1988) |
-| hedge_ratio         | 0.5    | Fraction of position sold per unit deviation | `BlackMonday1987/Rule/config.yaml → portfolio_insurer` | Brady Commission (1988)                |
-| initial_position    | 3000   | Starting share position                      | `BlackMonday1987/Rule/config.yaml → portfolio_insurer` | Normalization                          |
-| initial_cash        | 200000 | Starting cash reserves                       | `BlackMonday1987/Rule/config.yaml → portfolio_insurer` | Normalization                          |
+| rebalance_threshold | 0.02   | Deviation below which selling is triggered   | `configs/BlackMonday1987/Rule/players.yml -> portfolio_insurer` | Leland (1980); Brady Commission (1988) |
+| hedge_ratio         | 0.5    | Fraction of position sold per unit deviation | `configs/BlackMonday1987/Rule/players.yml -> portfolio_insurer` | Brady Commission (1988)                |
+| initial_position    | 3000   | Starting share position                      | `configs/BlackMonday1987/Rule/players.yml -> portfolio_insurer` | Normalization                          |
+| initial_cash        | 200000 | Starting cash reserves                       | `configs/BlackMonday1987/Rule/players.yml -> portfolio_insurer` | Normalization                          |
 
 **4.1.4.4  Behavioral Properties**
 - Time horizon: Short-term (rebalances every round in which threshold is crossed — equivalent to continuous delta-hedging)
@@ -267,8 +267,8 @@ The IndexArbitrageur is an investment bank or hedge fund desk that exploits pric
 
 | Parameter     | Value | Meaning                                | Config Path                                            | Source                     |
 |---------------|-------|----------------------------------------|--------------------------------------------------------|----------------------------|
-| arb_threshold | 0.01  | Minimum deviation to trigger arbitrage | `BlackMonday1987/Rule/config.yaml → index_arbitrageur` | Stoll & Whaley (1990)      |
-| base_size     | 80    | Fixed shares per arbitrage trade       | `BlackMonday1987/Rule/config.yaml → index_arbitrageur` | Normalization (desk scale) |
+| arb_threshold | 0.01  | Minimum deviation to trigger arbitrage | `configs/BlackMonday1987/Rule/players.yml -> index_arbitrageur` | Stoll & Whaley (1990)      |
+| base_size     | 80    | Fixed shares per arbitrage trade       | `configs/BlackMonday1987/Rule/players.yml -> index_arbitrageur` | Normalization (desk scale) |
 
 **4.2.4.4  Behavioral Properties**
 - Time horizon: High-frequency — acts within single round of discrepancy; arbitrage is instantaneous relative to simulation round length
@@ -369,11 +369,11 @@ The ProgramTrader is an institutional investor running automated execution algor
 
 | Parameter         | Value  | Meaning                                      | Config Path                                         | Source                                                  |
 |-------------------|--------|----------------------------------------------|-----------------------------------------------------|---------------------------------------------------------|
-| trigger_threshold | 0.01   | Deviation below which sell cascade activates | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988)                                 |
-| feedback_strength | 1.2    | Amplification factor per unit deviation      | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988); Brunnermeier & Pedersen (2009) |
-| base_size         | 60     | Base lot size before amplification           | `BlackMonday1987/Rule/config.yaml → program_trader` | Brady Commission (1988) order flow data                 |
-| initial_position  | 800    | Starting share position                      | `BlackMonday1987/Rule/config.yaml → program_trader` | Normalization (larger than insurer)                     |
-| initial_cash      | 500000 | Starting cash reserves                       | `BlackMonday1987/Rule/config.yaml → program_trader` | Normalization                                           |
+| trigger_threshold | 0.01   | Deviation below which sell cascade activates | `configs/BlackMonday1987/Rule/players.yml -> program_trader` | Brady Commission (1988)                                 |
+| feedback_strength | 1.2    | Amplification factor per unit deviation      | `configs/BlackMonday1987/Rule/players.yml -> program_trader` | Brady Commission (1988); Brunnermeier & Pedersen (2009) |
+| base_size         | 60     | Base lot size before amplification           | `configs/BlackMonday1987/Rule/players.yml -> program_trader` | Brady Commission (1988) order flow data                 |
+| initial_position  | 800    | Starting share position                      | `configs/BlackMonday1987/Rule/players.yml -> program_trader` | Normalization (larger than insurer)                     |
+| initial_cash      | 500000 | Starting cash reserves                       | `configs/BlackMonday1987/Rule/players.yml -> program_trader` | Normalization                                           |
 
 **4.3.4.4  Behavioral Properties**
 - Time horizon: High-frequency — reacts immediately at each threshold trigger; equivalent to same-session automated execution
@@ -476,9 +476,9 @@ The ValueInvestor is a patient institutional buyer — modeled on Graham-style v
 
 | Parameter      | Value  | Meaning                                        | Config Path                                         | Source                              |
 |----------------|--------|------------------------------------------------|-----------------------------------------------------|-------------------------------------|
-| value_discount | 0.15   | Margin of safety threshold (deviation trigger) | `BlackMonday1987/Rule/config.yaml → value_investor` | Graham (1949); Graham & Dodd (1934) |
-| base_size     | 40     | Fixed shares per value buy/sell                | `BlackMonday1987/Rule/config.yaml → value_investor` | Normalization (institutional scale) |
-| initial_cash   | 500000 | Cash reserves for crash buying                 | `BlackMonday1987/Rule/config.yaml → value_investor` | Normalization (large reserve)       |
+| value_discount | 0.15   | Margin of safety threshold (deviation trigger) | `configs/BlackMonday1987/Rule/players.yml -> value_investor` | Graham (1949); Graham & Dodd (1934) |
+| base_size     | 40     | Fixed shares per value buy/sell                | `configs/BlackMonday1987/Rule/players.yml -> value_investor` | Normalization (institutional scale) |
+| initial_cash   | 500000 | Cash reserves for crash buying                 | `configs/BlackMonday1987/Rule/players.yml -> value_investor` | Normalization (large reserve)       |
 
 **4.4.4.4  Behavioral Properties**
 - Time horizon: Long-term — ValueInvestor is not concerned with round-to-round price moves; activates only when the margin of safety is present; patient
@@ -578,9 +578,9 @@ The NoiseTrader represents the heterogeneous mass of retail investors and smalle
 
 | Parameter         | Value | Meaning                                 | Config Path                                       | Source                       |
 |-------------------|-------|-----------------------------------------|---------------------------------------------------|------------------------------|
-| trade_probability | 0.05  | Probability of trading in a given round | `BlackMonday1987/Rule/config.yaml → noise_trader` | Black (1986); Shiller (1987) |
-| min_order         | 100   | Minimum trade quantity                  | `BlackMonday1987/Rule/config.yaml → noise_trader` | Retail lot size convention   |
-| max_order         | 500   | Maximum trade quantity                  | `BlackMonday1987/Rule/config.yaml → noise_trader` | Retail lot size convention   |
+| trade_probability | 0.05  | Probability of trading in a given round | `configs/BlackMonday1987/Rule/players.yml -> noise_trader` | Black (1986); Shiller (1987) |
+| min_order         | 100   | Minimum trade quantity                  | `configs/BlackMonday1987/Rule/players.yml -> noise_trader` | Retail lot size convention   |
+| max_order         | 500   | Maximum trade quantity                  | `configs/BlackMonday1987/Rule/players.yml -> noise_trader` | Retail lot size convention   |
 
 **4.5.4.4  Behavioral Properties**
 - Time horizon: Short-term (random; no planning horizon)
@@ -723,7 +723,7 @@ Round N:
 
 ### §8.3 Event 3: Portfolio Insurance and the Asian Financial Crisis (1997–1998) Context
 
-Though the Asian Financial Crisis is modeled separately in another simulation (AsianFinancialCrisis), the dynamic portfolio insurance mechanism contributed to the Thai baht attack and subsequent regional contagion. Currency hedgers using dynamic strategies mechanically increased USD buying (THB selling) as the baht fell, creating the same positive-feedback spiral as 1987 equity portfolio insurance. This cross-market connection demonstrates that the BlackMonday1987 feedback mechanism is not historically isolated — it is a general property of any market where a sufficient fraction of participants follow mechanical risk-reduction rules.
+Dynamic hedging and other mechanical risk-reduction rules are not limited to equity-index crashes. The lesson for this scenario is narrower: when enough participants follow similar sell-into-decline rules, price impact can turn individually defensive behavior into a market-wide positive-feedback spiral.
 
 
 ## §9 Variant Comparison Preview

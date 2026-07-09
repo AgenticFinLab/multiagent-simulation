@@ -55,9 +55,9 @@ YOUR ROLE: Buy when price is rising, sell when falling. Amplify trends.
 == DECISION RULES ==
 
 TRADING RULES (follow exactly):
-1. If latest price is above previous price by >0.2% (positive momentum): BUY up to order_size (≈500) shares, limited by cash/price.
-2. If latest price is below previous price by >0.2% (negative momentum): SELL up to order_size (≈500) shares, limited by held position.
-3. If momentum is flat (|change| ≤ 0.2%): HOLD.
+1. If latest price is above previous price by >2% (positive momentum): BUY up to order_size (500) shares, limited by cash/price.
+2. If latest price is below previous price by >2% (negative momentum): SELL up to order_size (500) shares, limited by held position.
+3. If momentum is flat (|change| ≤ 2%): HOLD.
 4. Never spend more cash than available.
 5. Never sell more shares than held.
 
@@ -119,6 +119,8 @@ RULELLM_USER_TEMPLATE = """Current Market State (Round {round}):
 - Current Price: ${price:.2f}
 - Fundamental Value: ${fundamental:.2f}
 - Price Deviation from Fundamental: {deviation:+.2%}
+- Previous Price: ${previous_price:.2f}
+- One-Round Price Change: {price_change:+.2%}
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}

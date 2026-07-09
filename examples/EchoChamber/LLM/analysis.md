@@ -1,44 +1,120 @@
-# EchoChamber LLM Analysis Plan
+# EchoChamber LLM — Analysis Documentation
 
-## §1 Objectives
+## 1. Overview
 
-The LLM analysis checks whether persona-driven social actions produce coherent
-opinion dynamics and valid special-schema decisions.
+| Item | Description |
+|---|---|
+| Implements | `../analysis-bases.md` |
+| Analysis script | `analysis.py` |
+| Shared implementation | Imports loading, aggregate calculation, and plotting from `../Rule/analysis.py` |
+| LLM-specific contracts | Seven named `compute_*` functions, including API schema quality |
+| Output | `EXPERIMENT/EchoChamber/LLM/analysis/` |
 
-## §2 Core Metrics
+## 2. Metric Implementation
 
-| Metric | Function Contract | Source |
+| Metric | Design source | Implementation | Input | Expected range / interpretation |
+|---|---|---|---|---|
+| Polarization amplification | `analysis-bases.md §2.1` | `compute_polarization_amplification()` and shared `calculate_metrics()` | Polarization series | `>= 0`; above 1 means peak amplification. |
+| Polarization persistence | `§2.2` | `compute_polarization_persistence()` | Polarization series | `[0, 1]`; mean over second half. |
+| Cluster separation | `§2.3` | `compute_cluster_separation()` | Separation series | `[0, 2]`; returns maximum, final, average. |
+| Polarize activity | `§2.4` | `compute_polarize_activity()` | Counts per round | Non-negative total action count. |
+| Depolarize activity | `§2.5` | `compute_depolarize_activity()` | Counts per round | Non-negative total action count. |
+| Opinion dispersion | `§2.6` | `compute_opinion_dispersion()` | Agent opinion histories | `[0, 1]` population standard deviation of final opinions. |
+| API quality | `§2.7` | `compute_api_quality()` | Parsed action payloads; optional RAG contexts | Rates in `[0, 1]`; retrieval coverage is 0 for this non-RAG variant. |
+
+The CLI calls shared `load_simulation_data()`, `calculate_metrics()`, and
+`create_visualizations()` with the LLM config. API quality requires action
+payloads to be supplied to `compute_api_quality()`; the current HistoryBuffer
+record set stores environment aggregates and opinions, not raw parser attempts.
+
+## 3. Dimension-by-Dimension Analysis
+
+### Dimension 1: Environment state
+
+- Function: `load_simulation_data()` → `calculate_metrics()`
+- Inputs: environment polarization and mean-opinion HistoryBuffers
+- Outputs: `summary.json` plus the dynamics plots
+- Interpretation: finite polarization in `[0, 1]` is mandatory; varying paths
+  across repeated LLM runs are expected.
+
+### Dimension 2: Action balance
+
+- Function: `compute_polarize_activity()` and `compute_depolarize_activity()`
+- Inputs: per-round environment action counts
+- Interpretation: both streams should be non-empty in a representative full
+  run; their balance explains movement in the polarization index.
+
+### Dimension 3: Opinion trajectories and clusters
+
+- Function: `compute_cluster_separation()` and `compute_opinion_dispersion()`
+- Inputs: environment separation plus final per-agent opinions
+- Interpretation: higher separation/dispersion indicates more distinct camps;
+  bridge-builder and critical-thinker activity should oppose sustained growth.
+
+### Dimension 4: API contract quality
+
+- Function: `compute_api_quality()`
+- Inputs: parsed actions collected by a caller or test harness
+- Interpretation: accepted simulation actions should yield a validity rate of
+  1.0. There is no silent parser fallback in this variant.
+
+## 4. Variant-Specific Observable Phenomena
+
+| Phenomenon | How to observe | Contrast with Rule |
 |---|---|---|
-| Polarization amplification | `def compute_polarization_amplification(polarization) -> float` | `analysis-bases.md §2.1` |
-| Polarization persistence | `def compute_polarization_persistence(polarization) -> float` | `analysis-bases.md §2.2` |
-| Cluster separation | `def compute_cluster_separation(cluster_series) -> dict` | `analysis-bases.md §2.3` |
-| Polarize activity | `def compute_polarize_activity(polarize_counts) -> float` | `analysis-bases.md §2.4` |
-| Depolarize activity | `def compute_depolarize_activity(depolarize_counts) -> float` | `analysis-bases.md §2.5` |
-| Opinion dispersion | `def compute_opinion_dispersion(agent_opinions) -> float` | `analysis-bases.md §2.6` |
-| API quality | `def compute_api_quality(actions, rag_contexts) -> dict` | `analysis-bases.md §2.7` |
+| Reasoning variability | Repeat a fixed-seed/state prompt and compare decisions. | Rule actions are formula-determined. |
+| Narrative sensitivity | Compare actions around similarly valued but differently evolving states. | Rule responds only to encoded numeric conditions. |
+| Threshold inconsistency | Compare action type/intensity near similar polarization values. | Rule thresholds are exact. |
+| Schema robustness | Run parser tests and calculate `valid_action_rate`. | Rule requires no model-output parser. |
 
-## §3 Analysis Dimensions
+## 5. Scaling and Sensitivity Analysis
 
-Analyze action validity, polarization path, opinion trajectories, parse retries,
-and final cluster separation.
+### Round scaling
 
-## §4 Phase Analysis
+| Rounds | Use |
+|---:|---|
+| 5 | Integration smoke after credentials are available. |
+| 50 | Early qualitative path inspection. |
+| 200 | Standard comparison from `analysis-bases.md §6`. |
 
-Use the same phase framework as Rule and compare whether LLM social reasoning
-amplifies or moderates polarization phases.
+### Agent scaling
 
-## §5 Cross-Variant Comparison
+| Social agents | Expected effect |
+|---:|---|
+| 5 | One of each persona; minimal role-coverage check. |
+| 20 | Configured heterogeneous population; standard run. |
 
-LLM is compared against Rule for stochastic deviations while preserving schema
-validity.
+### Parameter sensitivity
 
-## §6 Expected Results and Validation Criteria
+| Parameter | Change | Expected analytical effect |
+|---|---|---|
+| `temperature` | increase | More between-run action and path variance. |
+| `polarize_opinion_step` | +50% | Faster growth of individual extremity after polarizing actions. |
+| `depolarize_opinion_step` | +50% | Faster center movement after depolarizing actions. |
+| `polarization_impact` | +50% | Larger environment response to the same action balance. |
 
-A full LLM sample should complete 200 rounds with valid `action_type`,
-`intensity`, `opinion`, and reasoning fields.
+## 6. Output Files Reference
 
-## §7 Visualization Catalogue
+| File | Generated by | Contents |
+|---|---|---|
+| `summary.json` | `analysis.py → main()` | Aggregate metrics and LLM contract notes. |
+| `00_investor_bids.png` | shared `create_visualizations()` | Compatibility-named agent opinion/action panel. |
+| `01_echochamber_dynamics.png` | shared plotting | Polarization dynamics. |
+| `02_echochamber_analysis.png` | shared plotting | Cluster and activity analysis. |
+| `03_summary.png` | shared plotting | Summary visualization. |
 
-Required outputs are `summary.json`, `00_investor_bids.png`,
-`01_echochamber_dynamics.png`, `02_echochamber_analysis.png`, and
-`03_summary.png`.
+The legacy `00_investor_bids.png` filename is retained for cross-scenario tooling;
+its content is opinion dynamics, not financial bids.
+
+## 7. Cross-Variant Comparison Notes
+
+| Axis | Expected LLM position | Reason |
+|---|---|---|
+| Onset speed | Variable around Rule | Persona sampling replaces exact thresholds. |
+| Intensity | More variable than Rule | Returned action intensity is model-generated. |
+| Behavioral realism | Potentially richer | Agents provide contextual reasoning from social signals. |
+| Reproducibility | Lower than Rule | Model sampling and remote service behavior add variance. |
+| Schema validity | Equal after parsing | Strict parser admits only the declared social-action contract. |
+
+Compare identical population counts and environment parameters, and report model
+name, temperature, run count, and any API failures with every result.

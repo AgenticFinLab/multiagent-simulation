@@ -18,8 +18,9 @@ built-in LlamaIndex embedding backends:
    - Hunyuan: model="openai/hunyuan-embedding", api_base="https://api.hunyuan.cloud.tencent.com/v1"
    - Use HUNYUAN_API_KEY env var
 
-4. Volcengine embeddings (ByteDance/Doubao ARK) - DEPRECATED
-   - Not supported, use Hunyuan instead
+4. Ark multimodal embeddings (ByteDance/Doubao)
+   - Uses Ark's ``/embeddings/multimodal`` endpoint
+   - Supports text retrieval with Doubao embedding-vision endpoints
 
 Indexing pipeline:
     KnowledgeDocument list
@@ -49,6 +50,7 @@ import logging
 import os
 from typing import Any, List, Optional
 
+import httpx
 from llama_index.core import (
     Document,
     StorageContext,
@@ -56,8 +58,10 @@ from llama_index.core import (
     load_index_from_storage,
 )
 from llama_index.core import Settings as LlamaSettings
+from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from pydantic import SecretStr
 
 from masim.knowledge.base import (
     BaseKnowledgeStore,
@@ -70,6 +74,62 @@ logger = logging.getLogger("masim.knowledge.store")
 
 # Default HuggingFace embedding model (local, no API key required)
 DEFAULT_EMBED_MODEL = "BAAI/bge-small-en-v1.5"
+
+
+class ArkMultimodalEmbedding(BaseEmbedding):
+    """LlamaIndex adapter for Ark's multimodal vectorization API."""
+
+    api_key: SecretStr
+    api_base: str = "https://ark.cn-beijing.volces.com/api/v3"
+    timeout: float = 60.0
+
+    def _endpoint(self) -> str:
+        return f"{self.api_base.rstrip('/')}/embeddings/multimodal"
+
+    def _payload(self, text: str) -> dict[str, Any]:
+        if not text.strip():
+            raise ValueError("Ark embedding input must not be empty")
+        return {
+            "model": self.model_name,
+            "input": [{"type": "text", "text": text}],
+        }
+
+    @staticmethod
+    def _parse_response(response: httpx.Response) -> List[float]:
+        response.raise_for_status()
+        body = response.json()
+        data = body["data"]
+        embedding = data["embedding"]
+        if not isinstance(embedding, list) or not embedding:
+            raise ValueError("Ark embedding response contains no vector")
+        return [float(value) for value in embedding]
+
+    def _headers(self) -> dict[str, str]:
+        return {
+            "Authorization": f"Bearer {self.api_key.get_secret_value()}",
+            "Content-Type": "application/json",
+        }
+
+    def _get_text_embedding(self, text: str) -> List[float]:
+        response = httpx.post(
+            self._endpoint(),
+            headers=self._headers(),
+            json=self._payload(text),
+            timeout=self.timeout,
+        )
+        return self._parse_response(response)
+
+    def _get_query_embedding(self, query: str) -> List[float]:
+        return self._get_text_embedding(query)
+
+    async def _aget_query_embedding(self, query: str) -> List[float]:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            response = await client.post(
+                self._endpoint(),
+                headers=self._headers(),
+                json=self._payload(query),
+            )
+        return self._parse_response(response)
 
 
 class KnowledgeStore(BaseKnowledgeStore):
@@ -105,8 +165,9 @@ class KnowledgeStore(BaseKnowledgeStore):
        - Hunyuan: embed_model_name="openai/hunyuan-embedding", embed_api_base="https://api.hunyuan.cloud.tencent.com/v1"
        - Requires HUNYUAN_API_KEY env var
 
-    4. Volcengine (embed_type="volcengine") - DEPRECATED:
-       - Not supported, use Hunyuan instead
+    4. Ark multimodal (embed_type="ark_multimodal"):
+       - Requires ARK_API_KEY and an embedding-vision endpoint ID
+       - Uses the Ark ``/embeddings/multimodal`` API with text input
 
     Parameters
     ----------
@@ -123,7 +184,7 @@ class KnowledgeStore(BaseKnowledgeStore):
         (``"https://api.hunyuan.cloud.tencent.com/v1"``). Ignored for HuggingFace.
     embed_type:
         "huggingface" (default), "openai", "litellm" (Hunyuan only),
-        or "volcengine" (deprecated, not supported).
+        or "ark_multimodal" (Doubao embedding-vision).
         If not specified, auto-detects based on whether embed_api_key is provided.
     persist_dir:
         Optional directory to persist / reload the index. If ``None`` the
@@ -294,8 +355,28 @@ class KnowledgeStore(BaseKnowledgeStore):
                 error_msg = f"Failed to initialize LiteLLM embedding model '{embed_model_name}': {type(exc).__name__}: {exc}"
                 logger.error("[KNOWLEDGE_STORE] %s", error_msg)
                 raise RuntimeError(f"[KNOWLEDGE_STORE] {error_msg}")
+        elif embed_type == "ark_multimodal":
+            ark_key = embed_api_key or os.getenv("ARK_API_KEY", "")
+            if not ark_key:
+                error_msg = (
+                    "KnowledgeStore: embed_type='ark_multimodal' requires "
+                    "embed_api_key or ARK_API_KEY."
+                )
+                logger.error("[KNOWLEDGE_STORE] %s", error_msg)
+                raise ValueError(f"[KNOWLEDGE_STORE] {error_msg}")
+            embed_model = ArkMultimodalEmbedding(
+                model_name=embed_model_name,
+                api_key=ark_key,
+                api_base=(
+                    embed_api_base
+                    or "https://ark.cn-beijing.volces.com/api/v3"
+                ),
+            )
         else:
-            error_msg = f"KnowledgeStore: unknown embed_type={embed_type!r}. Use 'huggingface', 'openai', 'volcengine' (deprecated), or 'litellm' (recommended for Doubao)."
+            error_msg = (
+                f"KnowledgeStore: unknown embed_type={embed_type!r}. Use "
+                "'huggingface', 'openai', 'litellm', or 'ark_multimodal'."
+            )
             logger.error("[KNOWLEDGE_STORE] %s", error_msg)
             raise ValueError(f"[KNOWLEDGE_STORE] {error_msg}")
 

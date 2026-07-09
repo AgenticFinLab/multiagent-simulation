@@ -1,59 +1,79 @@
-# EndowmentEffect Rag — Analysis Documentation
+# EndowmentEffect Rag — Analysis Guide
 
-## §1 Analysis Objectives
+## 1. Analysis Objectives
 
-Measure how RAG-retrieved knowledge affects the endowment effect relative to Rule and LLM baselines. Key questions:
-- Does retrieved behavioral economics literature reinforce or moderate the holding bias?
-- Does RAG introduce more or less variability in price stickiness than pure LLM?
-- Which metric (VSR vs. MAD) best captures the RAG knowledge effect?
+The Rag variant retains the market-level contract of the Rule baseline and adds
+retrieval observability. Analysis measures price displacement, persistence,
+volume, premium capture, wealth, and turnover, while separately reporting
+whether each recorded decision contained retrieved or fallback context.
 
-## §2 Metric → Function Mapping
+## 2. Metric → Function Mapping
 
-| Metric                                | Function                                                                                          | analysis-bases.md ref |
-|---------------------------------------|---------------------------------------------------------------------------------------------------|-----------------------|
-| Price Deviation (PD)                  | `price_deviation(price_history, fundamental)`                                                     | §2.1                  |
-| Mean Absolute Deviation (MAD)         | `mean_absolute_deviation(price_history, fundamental)`                                             | §2.2                  |
-| Deviation Half-Life (DPHL)            | `deviation_half_life(price_history, fundamental)`                                                 | §2.3                  |
-| Volume Suppression Ratio (VSR)        | `volume_suppression_ratio(actual_volume, rational_volume_estimate)`                               | §2.4                  |
-| Endowment Premium Capture Rate (EPCR) | `endowment_premium_capture_rate(price_history, fundamental, endowment_premium)`                   | §2.5                  |
-| Portfolio Wealth Ratio (PWR)          | `portfolio_wealth_ratio(agent_cash_history, agent_position_history, final_price, initial_wealth)` | §2.6                  |
+| Metric from `analysis-bases.md §2` | Function in `Rag/analysis.py` |
+|---|---|
+| §2.1 Price Deviation (PD) | `price_deviation(price_history, fundamental)` |
+| §2.2 Mean Absolute Deviation (MAD) | `mean_absolute_deviation(price_history, fundamental)` |
+| §2.3 Deviation Persistence Half-Life (DPHL) | `deviation_half_life(price_history, fundamental)` |
+| §2.4 Volume Suppression Ratio (VSR) | `volume_suppression_ratio(actual_volume, rational_volume)` |
+| §2.5 Endowment Premium Capture Rate (EPCR) | `endowment_premium_capture_rate(price_history, fundamental, endowment_premium)` |
+| §2.6 Portfolio Wealth Ratio (PWR) | `portfolio_wealth_ratio(cash_history, position_history, final_price, initial_wealth)` |
+| §2.7 Turnover Rate (TR) | `turnover_rate(trades_by_agent, mean_position, total_rounds)` |
 
-## §3 Rag-Specific Notes
+`analyze_rag_knowledge_effect(trades)` additionally reports payload coverage,
+fallback count, retrieval rate, and fallback rate. `_RAG_FALLBACK` is the exact
+sentinel shared by `players.py` and this analysis module.
 
-- **RagLLMEndowedHolder (§4.1)**: Retrieved Kahneman et al. passages tend to reinforce holding — VSR likely higher than LLM variant; MAD may exceed Rule baseline due to knowledge-reinforced stubbornness
-- **RagLLMStatusQuoSeller (§4.2)**: Retrieved Samuelson & Zeckhauser passages strengthen inertia — DPHL may be longer than pure LLM; comparable to Rule
-- **RagLLMRationalArbitrageur (§4.3)**: Retrieved arbitrage literature may delay arbitrage entry (limits-to-arbitrage knowledge) — EPCR lower than Rule; correction slower
-- **RagLLMNewBuyer (§4.4)**: RAG allows LLM to retrieve historical WTP evidence; buying may be better calibrated — MAD correction slightly faster than pure LLM
-- **RagLLMNoiseTrader (§4.5)**: Retrieved noise trading literature may produce more realistic random patterns; VSR contribution from noise is smoother
-- **vs. LLM**: Expect more consistent behavior round-to-round; retrieved knowledge anchors decisions; MAD variance lower than LLM but retrieval quality creates occasional outliers
+## 3. Data Inputs and Preparation
 
-## §4 Expected Ranges
+`load_simulation_data(config)` reads coordinator price history and player order
+payloads from MASim records. Required fields are accessed directly. Empty trade
+sets, missing `rag_context` fields, invalid denominators, and insufficient
+half-life observations raise errors rather than generating synthetic defaults.
 
-| Metric              | Rag Expected Range | vs. Rule Baseline                  | vs. LLM Baseline                      |
-|---------------------|--------------------|------------------------------------|---------------------------------------|
-| MAD                 | 0.03–0.14          | ±0–15%                             | Lower variance                        |
-| DPHL                | 15–45 rounds       | Within ±15% of Rule                | Longer than LLM                       |
-| VSR                 | 0.40–0.70          | Similar or slightly higher         | Higher (knowledge reinforces holding) |
-| EPCR                | 0.35–0.65          | Slightly lower (delayed arbitrage) | Similar to LLM                        |
-| PWR (EndowedHolder) | 0.88–1.12          | Similar to Rule                    | Similar to LLM                        |
+Retrieval coverage is an operational metric: it shows that context reached the
+decision payload. It does not prove that the context was relevant or causal.
 
-## §5 References
+## 4. Rag-Specific Analysis
 
-See `analysis-bases.md §2` for full metric derivations and Python function signatures.
-See `simulation-bases.md §2` for theoretical foundations.
+Review retrieved context alongside the order's `analysis` and `reasoning`:
 
-## §6 Output Artifacts
+- endowed holders should preserve attachment and reservation-price behavior;
+- status-quo sellers should preserve inertia when evidence is mixed;
+- arbitrageurs should evaluate signed fundamental deviation symmetrically;
+- prospective buyers should avoid ownership-history arguments;
+- noise traders should remain intermittent rather than inventing a stable rule.
 
-`Rag/analysis.py` reuses the Rule analysis pipeline and adds
-`rag_knowledge_effect` metrics when RAG context is present in order payloads.
-Expected artifacts are `summary.json`, `rag_stats.json`, a structured validation
-console report, the helper plots `price_path.png` and `strategy_volume.png`, and
-the fixed PNG contract: `00_investor_bids.png`,
-`01_endowmenteffect_dynamics.png`, `02_endowmenteffect_analysis.png`, and
-`03_summary.png`.
+Compare outcomes with both LLM and RuleLLM using the same seed, model settings,
+market configuration, and corpus/index version. A high retrieval rate alone is
+not evidence that Rag improves empirical fidelity.
 
-## §7 Validation Criteria
+## 5. Expected Results and Comparisons
 
-A valid Rag analysis run must complete 200 rounds, preserve canonical trading
-fields, record `rag_context`, and report retrieval coverage so the RAG mechanism
-can be audited separately from market-price outcomes.
+Use `analysis-bases.md §§2 and 6` as calibration targets, not guaranteed
+outputs. Report repeated-run dispersion because model sampling and retrieval
+ranking are stochastic. Any claim that retrieval changed MAD, DPHL, VSR, EPCR,
+PWR, or TR requires a matched non-Rag comparison; retrieval statistics alone
+cannot identify that effect.
+
+## 6. Output Artifacts
+
+The analysis writes `summary.json`, `rag_stats.json`, and the shared Rule
+visualization set under the analysis directory next to the configured record
+path:
+
+- `00_investor_bids.png`
+- `01_endowmenteffect_dynamics.png`
+- `02_endowmenteffect_analysis.png`
+- `03_summary.png`
+
+## 7. Validation Criteria
+
+A valid full run has the configured market rounds, non-empty price and order
+records, canonical order fields, a `rag_context` field on every Rag order, and
+finite bounded core metrics. A smoke run establishes startup and round
+execution only; it does not establish the empirical targets. Run analysis with:
+
+```bash
+python -m examples.EndowmentEffect.Rag.analysis \
+  -c configs/EndowmentEffect/Rag/simulation.yml
+```
