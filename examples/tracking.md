@@ -22,8 +22,8 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 14 | EndowmentEffect        | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM|
 | 15 | EquityPremium          | 🟡     | Wenyou      | Jul 6 2026  | LLM，Rule，RuleLLM |
 | 16 | EuropeanDebtCrisis     | 🟡     | Wenyou      | Jul 6 2026  | LLM, Rule, RuleLLM |
-| 17 | FlashCrash             | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule |
-| 18 | FlashCrash2010         | 🟡      | Wenyou      | Jul 8 2026  | —                 |
+| 17 | FlashCrash             | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 18 | FlashCrash2010         | 🟡      | Wenyou      | Jul 8 2026  |LLM, Rule, RuleLLM |
 | 19 | FramingEffect          | 🟡      | Wenyou      | Jul 8 2026 | —                 |
 | 20 | GamblerFallacy         | 🟡      | Wenyou      | Jul 8 2026 | —                 |
 | 21 | GameStopShortSqueeze   | 🟡      | Wenyou      | Jul 8 2026  | —                 |
