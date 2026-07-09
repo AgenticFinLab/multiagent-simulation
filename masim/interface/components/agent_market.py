@@ -40,6 +40,16 @@ CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
 
 VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
 
+# Subtle brand-aligned tint per decision engine, used to color the Default
+# launch buttons on the variant_choice page. Each entry is
+# (background, border, text). Kept intentionally light ("a bit of color").
+VARIANT_COLORS = {
+    "Rule": ("#e7f3f0", "#b6d8d0", "#1f6157"),      # teal
+    "LLM": ("#e8f0fb", "#bcd3f0", "#2a5fa6"),        # blue
+    "RuleLLM": ("#efeafb", "#d3c7f0", "#6544a6"),    # purple
+    "Rag": ("#fdf3dd", "#f0d79a", "#97690a"),        # gold
+}
+
 # Every agent supports all decision engines by default, so the customize
 # selector always offers the full set regardless of the agent.
 ALL_ENGINES = ("Rule", "LLM", "RuleLLM", "Rag")
@@ -111,11 +121,18 @@ def render_entry_choice() -> None:
     with st.sidebar:
         st.title("MASIM")
         st.caption("Investment workflow")
+        project_name = st.session_state.get("project_name", "")
+        if project_name:
+            st.markdown(f"**Project:** {project_name}")
         st.markdown("---")
+        st.markdown("~~Stage 0. Name your project~~")
         st.markdown("**Stage 1.** Pick a scenario")
         st.caption(f"{scenario_count} scenarios available")
         st.markdown("**Stage 2.** Default agents or customize")
         st.markdown("---")
+        if st.button("← Back to welcome", use_container_width=True):
+            st.session_state.workflow_stage = "welcome"
+            st.rerun()
         st.caption("MASIM v0.1.0")
 
     st.markdown(
@@ -162,12 +179,31 @@ def render_entry_choice() -> None:
         st.rerun()
 
 
+def _inject_variant_button_styles() -> None:
+    """Tint each Default engine button (Rule/LLM/RuleLLM/RAG) with a subtle color.
+
+    Targets the Streamlit ``st-key-<key>`` wrapper class emitted for buttons
+    keyed ``stage2_default_<variant>``.
+    """
+    rules = []
+    for variant, (bg, border, text) in VARIANT_COLORS.items():
+        rules.append(
+            f".st-key-stage2_default_{variant} button {{"
+            f"background:{bg};border:1px solid {border};color:{text};"
+            f"font-weight:700;}}"
+            f".st-key-stage2_default_{variant} button:hover {{"
+            f"border-color:{text};color:{text};filter:brightness(0.97);}}"
+        )
+    st.markdown("<style>" + "".join(rules) + "</style>", unsafe_allow_html=True)
+
+
 def render_variant_choice() -> None:
     """Stage 2: choose Default or Customized (build your own market).
 
     Rendered on its own page after the user selects a scenario in Stage 1.
     """
     _inject_market_styles()
+    _inject_variant_button_styles()
 
     selected_base = st.session_state.get("selected_scenario_base", "")
     if not selected_base:
@@ -256,7 +292,7 @@ def render_variant_choice() -> None:
                 with col:
                     if st.button(
                         VARIANT_DISPLAY.get(variant, variant),
-                        key=f"stage2_default_{key}",
+                        key=f"stage2_default_{variant}",
                         use_container_width=True,
                         help=(
                             f"Run {scenario_display_name(selected_base)} "
@@ -323,6 +359,11 @@ def _launch_default_variant(scenario_key: str) -> None:
             return
 
     st.session_state.selected_scenario = launch_key
+    # Prefix with project slug so all path helpers resolve to the project-local
+    # copy (configs/{project}/{scenario}/{variant}, etc.).
+    project_slug = st.session_state.get("project_slug", "")
+    if project_slug and not launch_key.startswith(project_slug + "/"):
+        st.session_state.selected_scenario = f"{project_slug}/{launch_key}"
     st.session_state.selected_market_agents = []
     st.session_state.workflow_stage = "workspace"
     st.session_state.current_page = "Simulation"
@@ -1442,6 +1483,11 @@ def _render_scenario_card(
             use_container_width=True,
         ):
             st.session_state.selected_scenario_base = scenario_base
+            # Copy scenario into project-local dirs if a project is active.
+            project_slug = st.session_state.get("project_slug", "")
+            if project_slug:
+                from masim.interface.components.welcome import copy_scenario_to_project
+                copy_scenario_to_project(project_slug, scenario_base)
             st.session_state.workflow_stage = "variant_choice"
             st.rerun()
 

@@ -49,6 +49,9 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
     """
     with st.sidebar:
         st.title("MASIM Simulator")
+        project_name = st.session_state.get("project_name", "")
+        if project_name:
+            st.caption(f"Project: {project_name}")
         st.markdown("---")
 
         # ------------------------------------------------------------------

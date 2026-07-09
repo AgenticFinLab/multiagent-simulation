@@ -60,10 +60,16 @@ def scenario_display_name(key: str) -> str:
     """Auto-generate a display name from a scenario key by splitting CamelCase.
 
     Examples:
-        'AssetBubble/Rule'      -> 'Asset Bubble (Rule)'
-        'FlashCrash2010/LLM'    -> 'Flash Crash 2010 (LLM)'
-        'Demo'                  -> 'Demo'
+        'AssetBubble/Rule'                -> 'Asset Bubble (Rule)'
+        'FlashCrash2010/LLM'              -> 'Flash Crash 2010 (LLM)'
+        'My_Study/AnchoringEffect/Rule'   -> 'Anchoring Effect (Rule)'
+        'Demo'                            -> 'Demo'
     """
+    # Strip project prefix for 3+-part keys (project/scenario/variant).
+    parts = key.split("/")
+    if len(parts) >= 3 and not key.startswith("CUSTOMIZED_SIMULATION/"):
+        key = "/".join(parts[1:])  # drop project segment
+
     if "/" in key:
         base, variant = key.split("/", 1)
     else:
@@ -82,18 +88,23 @@ def scenario_display_name(key: str) -> str:
 
 
 def _resolve_display_key(scenario_key: str) -> str:
-    """Map a rounds-adjusted Default bundle to its source scenario key.
+    """Map special scenario keys to their source key for metadata display.
 
-    A ``CUSTOMIZED_SIMULATION/Default-{Scenario}-{Variant}-r{N}`` bundle is a
-    verbatim copy of a shipped scenario with only ``total_rounds`` changed.
-    For scenario-level *metadata* display -- name, market type / description
-    and network topology -- it must behave exactly like the original
-    ``{Scenario}/{Variant}`` scenario. Run-specific artifacts (experiment
-    records / analysis output) are intentionally NOT remapped, since the
-    bundle owns its own run outputs.
+    Handles:
+    - Project-prefixed keys: ``{project}/{scenario}/{variant}`` -> ``{scenario}/{variant}``
+    - Rounds-adjusted bundles: ``CUSTOMIZED_SIMULATION/Default-{S}-{V}-rN`` -> ``{S}/{V}``
 
-    Non-bundle keys are returned unchanged.
+    Non-special keys are returned unchanged.
     """
+    # Project-prefixed: 3+ parts where first is not a known special dir.
+    parts = scenario_key.split("/")
+    if (
+        len(parts) >= 3
+        and not scenario_key.startswith("CUSTOMIZED_SIMULATION/")
+    ):
+        # Strip project prefix for metadata lookup.
+        return "/".join(parts[1:])
+
     if scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
         bundle_id = scenario_key.split("/", 1)[1]
         if bundle_id.startswith("Default-"):

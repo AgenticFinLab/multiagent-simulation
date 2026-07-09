@@ -31,6 +31,7 @@ from masim.interface.components.agent_market import (
     render_selected_market_strip,
     render_variant_choice,
 )
+from masim.interface.components.welcome import render_welcome
 
 # Page configuration
 st.set_page_config(
@@ -81,7 +82,13 @@ if "sys_messages" not in st.session_state:
     st.session_state.sys_messages = []
 
 if "workflow_stage" not in st.session_state:
-    st.session_state.workflow_stage = "scenario_setup"
+    st.session_state.workflow_stage = "welcome"
+
+if "project_name" not in st.session_state:
+    st.session_state.project_name = ""
+
+if "project_dir" not in st.session_state:
+    st.session_state.project_dir = ""
 
 if "selected_market_agents" not in st.session_state:
     st.session_state.selected_market_agents = []
@@ -90,6 +97,9 @@ if "selected_market_agents" not in st.session_state:
 def main():
     """Main application entry point."""
     workflow_stage = st.session_state.workflow_stage
+    if workflow_stage == "welcome":
+        render_welcome()
+        return
     if workflow_stage == "scenario_setup":
         render_scenario_setup()
         return
