@@ -11,7 +11,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 3  | AsianFinancialCrisis   | 🟢     | Qiqi        | Jul 6 2026  | LLM, Rule, RuleLLM, Rag |
 | 4  | AssetBubble            | 🟡     | Qiqi        | Jul 6 2026  | Rule                |
 | 5  | AvailabilityBias       | 🟢     | Qiqi        | Jul 6 2026  | LLM, Rule, RuleLLM, Rag |
-| 6  | BlackMonday1987        | 🟢    | Qiqi        | Jul 8 2026  | LLM, Rule, RuleLLM, Rag              |
+| 6  | BlackMonday1987        | 🟢    | Qiqi        | Jul 8 2026  | LLM, Rule, RuleLLM, Rag         |
 | 7  | CarryTradeUnwind       | 🟡     | Qiqi        | Jul 6 2026  | —                   |
 | 8  | ConfirmationBias       | 🟡     | Qiqi        | Jul 8 2026          | —                 |
 | 9  | CreditCycle            | 🟡      | Qiqi        | Jul 8 2026         | —                 |
@@ -28,8 +28,8 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 20 | GamblerFallacy         | 🟡      | Wenyou      | Jul 8 2026 | —                 |
 | 21 | GameStopShortSqueeze   | 🟡      | Wenyou      | Jul 8 2026  | —                 |
 | 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 | —                 |
-| 23 | HerdEffect             | 🟡      | qihang      | Jul 8 2026           | —                 |
-| 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           | —                 |
+| 23 | HerdEffect             | 🟢      | qihang      | Jul 8 2026           | —                 |
+| 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
 | 25 | HindsightBias          | ⬜      | —           | —           | —                 |
 | 26 | LiquidityDryup         | ⬜      | —           | —           | —                 |
 | 27 | LossAversion           | ⬜      | —           | —           | —                 |
