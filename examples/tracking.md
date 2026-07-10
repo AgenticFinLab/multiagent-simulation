@@ -12,7 +12,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 4  | AssetBubble            | 🟡     | Qiqi        | Jul 6 2026  | Rule                |
 | 5  | AvailabilityBias       | 🟢     | Qiqi        | Jul 6 2026  | LLM, Rule, RuleLLM, Rag |
 | 6  | BlackMonday1987        | 🟢    | Qiqi        | Jul 8 2026  | LLM, Rule, RuleLLM, Rag         |
-| 7  | CarryTradeUnwind       | 🟡     | Qiqi        | Jul 6 2026  | —                   |
+| 7  | CarryTradeUnwind       | 🟢     | Qiqi        | Jul 8 2026  | LLM, Rule, RuleLLM, Rag                  |
 | 8  | ConfirmationBias       | 🟡     | Qiqi        | Jul 8 2026          | —                 |
 | 9  | CreditCycle            | 🟡      | Qiqi        | Jul 8 2026         | —                 |
 | 10 | CurrencyCrisis         | 🟡      | Qiqi        | Jul 8 2026         | —                 |
