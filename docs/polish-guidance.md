@@ -76,6 +76,13 @@ After a successful polish, each scenario directory should contain:
 | Target file            | Locked, validated against `define-simulation-scenario-skill.md` §11 |
 | Config files           | All parameters match agent specs; no stale defaults                 |
 
+When polishing only one variant folder, still run the scenario-level Step 2
+AGENT_POOL icon gate before declaring the variant complete. Derive expected
+pool stems from concrete agent identities (for example,
+`identity.replace("_", "-")` from `players.yml`), then verify the matching
+`{domain}/{agent-stem}.md`, `{domain}-{agent-stem}.png`, profile `Icon` row,
+and `agent_images/design.md` mapping.
+
 ## 5. Key Principles During Polish
 
 - **Audit, don't rewrite from scratch** — preserve the scenario's research

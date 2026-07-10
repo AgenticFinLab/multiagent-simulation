@@ -42,6 +42,10 @@ Invoke this skill for a pool profile in any of these cases:
 
 - The profile was just created by a `new` AGENT_POOL outcome.
 - The profile was just created by a `fork` AGENT_POOL outcome.
+- A scenario or variant polish audit discovers an agent identity from a
+  target roster, `simulation-bases.md` agent block, variant `players.yml`,
+  or implementation module, and the expected pool profile/icon pair for that
+  identity is absent.
 - A polish audit reuses an existing pool profile but its Design Provenance
   table has no `Icon` row.
 - A polish audit finds an `Icon` row whose linked PNG is missing, empty, or
@@ -54,6 +58,13 @@ Do not invent alternate filenames. The agent-to-icon relationship is always:
 `examples/AGENT_POOL/{domain}/{agent-stem}.md` maps to
 `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png`, and
 `agent_images/design.md` records that same pair.
+
+For audit mode, derive `{agent-stem}` from the concrete agent identity with
+`identity.replace("_", "-")` before checking the filesystem. Example:
+`hot_money_funder` expects `finance/hot-money-funder.md` and
+`finance-hot-money-funder.png`. Never derive an icon filename from the
+scenario name, variant name, display label, or the set of PNGs that already
+exists.
 
 ## Style Contract
 
@@ -103,6 +114,11 @@ Match the existing icon set in
    The mapping row must pair `finance/program-trader.md` with
    `finance-program-trader.png`. If a stale row points to a different
    filename for the same agent, replace it with the canonical mapping.
+   During a polish audit, first enumerate the expected identities from the
+   selected scenario/variant sources, then apply the same mapping rule to
+   each identity. A missing profile `.md` is a profile-definition gap; a
+   present profile with no PNG, broken `Icon` row, stale filename, or missing
+   `design.md` row is an icon-repair gap.
 
 2. **Derive the display label.** Choose a short Chinese label that matches
    the role, usually `<two-to-four-character role>型投资者` for finance agents.

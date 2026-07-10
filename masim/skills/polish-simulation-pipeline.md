@@ -68,9 +68,9 @@ changes go through the define skill's revise mode.
 
 ## 1. Design Philosophy
 
-Six commitments shape every step of a polish run. Four are inherited
+Seven commitments shape every step of a polish run. Four are inherited
 from `create-simulation-pipeline.md §1` (they apply equally to
-upgrades); two are polish-specific.
+upgrades); three are polish-specific.
 
 **Shared with the from-scratch pipeline.**
 
@@ -134,6 +134,18 @@ upgrades); two are polish-specific.
    target §0 CHANGELOG + git history.` This preserves the historical
    record without letting the build-log drift into a stale live
    document.
+
+7. **Variant-scoped polish still runs scenario gates.** If the user
+   asks to polish a single variant folder such as
+   `examples/{Scenario}/LLM/`, the run is still a scenario polish with
+   a narrowed downstream surface. It MUST execute Preflight, Step 0,
+   Step 1, and Step 2 before any variant-local Step 3 or Step 4 work.
+   In particular, Step 2 MUST run the AGENT_POOL match and
+   icon-resolution gate for every agent identity used by the selected
+   variant. A variant-local request must not be treated as permission
+   to skip scenario-level agent/profile/icon assets unless the user
+   explicitly says "code-only" or "skip scenario-level assets"; that
+   skip is then recorded as an accepted gap, not as a PASS.
 
 ---
 
@@ -594,6 +606,14 @@ enforcement; the actual per-agent audit logic lives in the handbook.
   from the `§4.{N}` block via a relative path to
   `examples/AGENT_POOL/{Domain}/<kebab-name>.md`; the pool file is
   audited alongside the embedded block whenever it is referenced.
+- For variant-scoped polish requests, build the expected agent identity
+  set before Step 2 closes. Sources, in priority order, are the target
+  roster, `simulation-bases.md` agent blocks, selected variant config
+  files such as `configs/{Scenario}/{Variant}/players.yml`, and the
+  selected variant's agent implementation module. For each concrete
+  identity, derive the pool stem with `identity.replace("_", "-")`; do
+  not derive icon names from the scenario name or from whichever PNG
+  files already happen to exist.
 
 ### 6.3 Procedure
 
@@ -604,6 +624,19 @@ handbook), and (B) environment-and-structure audit (root doc §3, §5,
 **Part A — Per-agent audit.**
 
 For **each** agent, in target §7 roster order, do the following:
+
+0. **Icon-completeness preflight.** Cross-check the expected agent
+   identity set against `examples/AGENT_POOL/{Domain}/`. For each
+   identity, the canonical profile is
+   `examples/AGENT_POOL/{Domain}/{identity.replace("_", "-")}.md`
+   unless the three-stage match resolves to a different existing pool
+   profile. The expected icon is always
+   `examples/AGENT_POOL/agent_images/icons/{Domain}-{agent-stem}.png`.
+   Missing `.md` profiles, missing `Icon` rows, missing PNGs, stale
+   filenames, or missing `agent_images/design.md` rows are Step 2
+   failures. Create or repair them through the AGENT_POOL match and
+   `agent-icon-generation-skill.md`; do not treat a scenario-level image
+   such as `{Domain}-{ScenarioName}.png` as satisfying an agent icon.
 
 1. **Section order and completeness (Handbook §3).** Dispatch to
    `agent-design-skill.md §3` and confirm the canonical order §3.1
