@@ -23,11 +23,11 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 15 | EquityPremium          | 🟡     | Wenyou      | Jul 6 2026  | LLM，Rule，RuleLLM |
 | 16 | EuropeanDebtCrisis     | 🟡     | Wenyou      | Jul 6 2026  | LLM, Rule, RuleLLM |
 | 17 | FlashCrash             | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
-| 18 | FlashCrash2010         | 🟡      | Wenyou      | Jul 8 2026  |LLM, Rule, RuleLLM |
-| 19 | FramingEffect          | 🟡      | Wenyou      | Jul 8 2026 | —                 |
-| 20 | GamblerFallacy         | 🟡      | Wenyou      | Jul 8 2026 | —                 |
-| 21 | GameStopShortSqueeze   | 🟡      | Wenyou      | Jul 8 2026  | —                 |
-| 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 | —                 |
+| 18 | FlashCrash2010         | 🟡      | Wenyou      | Jul 8 2026 |LLM, Rule, RuleLLM |
+| 19 | FramingEffect          | 🟡      | Wenyou      | Jul 8 2026 |LLM, Rule, RuleLLM |
+| 20 | GamblerFallacy         | 🟡      | Wenyou      | Jul 8 2026 |LLM, Rule, RuleLLM |
+| 21 | GameStopShortSqueeze   | 🟡      | Wenyou      | Jul 8 2026 |LLM,Rule,|
+| 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 |Rule|
 | 23 | HerdEffect             | 🟢      | qihang      | Jul 8 2026           | —                 |
 | 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
 | 25 | HindsightBias          | ⬜      | —           | —           | —                 |
