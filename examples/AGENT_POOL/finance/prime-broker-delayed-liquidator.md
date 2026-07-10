@@ -4,15 +4,15 @@
 
 ## Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | delayed prime-broker liquidator |
-| Theory Family         | Leverage / Risk-On-Risk-Off |
+| Field                 | Content                                                                                  |
+|-----------------------|------------------------------------------------------------------------------------------|
+| Archetype             | delayed prime-broker liquidator                                                          |
+| Theory Family         | Leverage / Risk-On-Risk-Off                                                              |
 | Market Role           | **Destabilising** - later liquidation amplifies the cascade and receives worse execution |
-| Time Horizon          | short |
-| Risk Tolerance        | medium |
-| Information Asymmetry | partial |
-| Determinism           | deterministic |
+| Time Horizon          | short                                                                                    |
+| Risk Tolerance        | medium                                                                                   |
+| Information Asymmetry | partial                                                                                  |
+| Determinism           | deterministic                                                                            |
 
 **Delta vs. first-mover:** Market Role wording emphasises *later* liquidation and *worse execution* (vs. the first-mover's *early liquidation / fire-sale acceleration*). All other Summary rows are identical.
 
@@ -80,10 +80,10 @@ Determinism contract: identical to base.
 
 Parameter symbol table (delta values in **bold**):
 
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_liq` | Liquidation deviation threshold | **-0.15** (base: -0.10) | Ref 3 |
-| `phi_liq` | Fraction of collateral sold per trigger | **0.35** (base: 0.40) | Ref 3 |
+| Symbol       | Meaning                                   | Default Value                | Source       |
+|--------------|-------------------------------------------|------------------------------|--------------|
+| `theta_liq`  | Liquidation deviation threshold           | **-0.15** (base: -0.10)      | Ref 3        |
+| `phi_liq`    | Fraction of collateral sold per trigger   | **0.35** (base: 0.40)        | Ref 3        |
 | `pi_penalty` | Execution haircut for delayed liquidation | **0.97** (new — not in base) | Ref 3; Ref 9 |
 
 #### Behavioral Properties
@@ -94,12 +94,12 @@ Identical to base — see [Behavioral Properties](./prime-broker-first-mover.md#
 
 **Delta vs. first-mover:** Threshold shifts deeper (-0.15 vs. -0.10), sell fraction is smaller (0.35 vs. 0.40), initial position is smaller (3500 vs. 4000), and one new parameter (`price_penalty`) is added.
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `liquidation_threshold` | float | **-0.15** | [-0.30, -0.03] | high | Deviation that triggers collateral liquidation. | Higher magnitude -> later liquidation. | Gorton & Metrick (2012); Archegos broker timing calibration |
-| `liquidation_sell_ratio` | float | **0.35** | [0.05, 1.00] | high | Fraction of collateral sold per activation. | Higher -> larger immediate selling pressure. | Gorton & Metrick (2012); post-event broker calibration |
-| `initial_position` | float | **3500.0** | > 0 | high | Starting collateral inventory. | Higher -> larger liquidation supply. | Scenario normalization from Archegos exposure reports |
-| `price_penalty` | float | **0.97** | [0.80, 1.00] | medium | Execution haircut for delayed liquidation (new; not in base). | Higher -> smaller first-mover payoff gap. | Archegos broker-loss comparison calibration |
+| Parameter                | Type  | Default    | Valid Range    | Sensitivity | Description                                                   | Impact                                       | Source                                                      |
+|--------------------------|-------|------------|----------------|-------------|---------------------------------------------------------------|----------------------------------------------|-------------------------------------------------------------|
+| `liquidation_threshold`  | float | **-0.15**  | [-0.30, -0.03] | high        | Deviation that triggers collateral liquidation.               | Higher magnitude -> later liquidation.       | Gorton & Metrick (2012); Archegos broker timing calibration |
+| `liquidation_sell_ratio` | float | **0.35**   | [0.05, 1.00]   | high        | Fraction of collateral sold per activation.                   | Higher -> larger immediate selling pressure. | Gorton & Metrick (2012); post-event broker calibration      |
+| `initial_position`       | float | **3500.0** | > 0            | high        | Starting collateral inventory.                                | Higher -> larger liquidation supply.         | Scenario normalization from Archegos exposure reports       |
+| `price_penalty`          | float | **0.97**   | [0.80, 1.00]   | medium      | Execution haircut for delayed liquidation (new; not in base). | Higher -> smaller first-mover payoff gap.    | Archegos broker-loss comparison calibration                 |
 
 ## Population and Heterogeneity
 
@@ -141,12 +141,12 @@ Identical to base — see [Academic References](./prime-broker-first-mover.md#ac
 
 ## Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex three-pass self-check |
-| Created | 2026-06-30 |
-| Version | 1.1.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. / 1.1.0 - Section-link + delta-callout dedup against prime-broker-first-mover.md; shared prose replaced with inline links, only deltas retained in full. |
-| Status | experimental |
-| Icon        | ![](../agent_images/icons/finance-prime-broker-delayed-liquidator.png) |
+| Field       | Content                                                                                                                                                                                                                                                                                                                                                                                                        |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                                                                                                    |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Version     | 1.1.0                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. / 1.1.0 - Section-link + delta-callout dedup against prime-broker-first-mover.md; shared prose replaced with inline links, only deltas retained in full. |
+| Status      | experimental                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Icon        | ![](../agent_images/icons/finance-prime-broker-delayed-liquidator.png)                                                                                                                                                                                                                                                                                                                                         |

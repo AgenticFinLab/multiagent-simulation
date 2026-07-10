@@ -28,21 +28,21 @@
 ### PrimeBrokerFirstMover: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.2 — PrimeBrokerFirstMover)*
 
-| Theory Component                                              | Implementation                                                                         |
-|---------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| Theory Component                                              | Implementation                                                                                    |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | First-mover competitive psychology → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER_FIRST_MOVER_SYS`: "speed is paramount"; "first to act preserves the most value" |
-| Aggressive, decisive action → sim-bases §4 LLM Persona        | "you liquidate aggressively and quickly"; "act decisively when risk thresholds breach" |
-| Sell 32%–48% of position → sim-bases §4 LLM Persona           | LLM infers quantity from persona; no formula in prompt                                 |
+| Aggressive, decisive action → sim-bases §4 LLM Persona        | "you liquidate aggressively and quickly"; "act decisively when risk thresholds breach"            |
+| Sell 32%–48% of position → sim-bases §4 LLM Persona           | LLM infers quantity from persona; no formula in prompt                                            |
 | Prompt constant                                               | `LLM_PRIME_BROKER_FIRST_MOVER_SYS` in `prompts.py`                                                |
 
 ### PrimeBrokerDelayedLiquidator: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator)*
 
-| Theory Component                                   | Implementation                                                          |
-|----------------------------------------------------|-------------------------------------------------------------------------|
+| Theory Component                                   | Implementation                                                                            |
+|----------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Second-mover reluctance → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS`: "slower decision process, reluctant initially" |
-| Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"               |
-| Amplifying role → sim-bases §4                     | "your selling extends liquidation pressure started by the first broker" |
+| Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"                                 |
+| Amplifying role → sim-bases §4                     | "your selling extends liquidation pressure started by the first broker"                   |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*

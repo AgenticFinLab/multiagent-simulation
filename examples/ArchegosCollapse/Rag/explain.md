@@ -27,19 +27,19 @@
 ### PrimeBrokerFirstMover: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.2 — PrimeBrokerFirstMover)*
 
-| Theory Component                                    | Implementation                                                                       |
-|-----------------------------------------------------|--------------------------------------------------------------------------------------|
+| Theory Component                                    | Implementation                                                                                             |
+|-----------------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | First-mover rules → sim-bases §4                    | `RAG_PRIME_BROKER_FIRST_MOVER_SYS` = `RULELLM_PRIME_BROKER_FIRST_MOVER_SYS` (deviation < −0.10 → SELL 40%) |
-| Historical precedent of broker races → sim-bases §8 | RAG may retrieve LTCM/Archegos prime broker behavior examples                        |
-| RAG augmentation modifying urgency                  | Retrieved "first-mover precedents" may reinforce faster/larger liquidation decisions |
+| Historical precedent of broker races → sim-bases §8 | RAG may retrieve LTCM/Archegos prime broker behavior examples                                              |
+| RAG augmentation modifying urgency                  | Retrieved "first-mover precedents" may reinforce faster/larger liquidation decisions                       |
 
 ### PrimeBrokerDelayedLiquidator: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator)*
 
-| Theory Component                                            | Implementation                                                                       |
-|-------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Theory Component                                            | Implementation                                                                                                           |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | Second-mover rules → sim-bases §4                           | `RAG_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS` = `RULELLM_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS` (deviation < −0.15 → SELL 35%) |
-| Learning from historical second-mover losses → sim-bases §8 | RAG may retrieve Credit Suisse/Nomura late-liquidation loss examples                 |
+| Learning from historical second-mover losses → sim-bases §8 | RAG may retrieve Credit Suisse/Nomura late-liquidation loss examples                                                     |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
