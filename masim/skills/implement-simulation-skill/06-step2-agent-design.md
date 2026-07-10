@@ -26,6 +26,7 @@ This block is the **stable I/O declaration** for Step 2. Both
 | `simulation-bases.md §2` (from Step 1)         | Theory citations per agent                                     |
 | `examples/AGENT_POOL/{domain}/*.md`            | AGENT_POOL three-stage match (§2.2.0)                          |
 | `masim/skills/agent-design-skill.md` §3, §6    | Universal Agent Design Handbook — canonical section order and Validation Checklist |
+| `masim/skills/agent-icon-generation-skill.md`  | Icon generation and registration for any pool agent whose icon is missing or broken, including new/forked and reused profiles |
 
 **Outputs (produced or extended).**
 
@@ -37,15 +38,19 @@ This block is the **stable I/O declaration** for Step 2. Both
 | `examples/{ScenarioName}/simulation-bases.md §7`     | Communication and Round Structure                              |
 | `examples/{ScenarioName}/simulation-build-log.md §A` | AGENT_POOL Reuse-or-Create Gate log — one row per candidate archetype with Stage reached, Outcome, Pool file |
 | `examples/AGENT_POOL/{domain}/{new-file}.md`         | On `new` or `fork` outcome only — the resulting agent spec is written back to the pool as a reusable archetype |
+| `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` | Matching icon generated via `agent-icon-generation-skill.md` whenever a new/forked pool profile is created or an existing reused profile has no resolving icon |
+| `examples/AGENT_POOL/agent_images/design.md`          | Icon mapping row added or updated for every pool profile whose icon is generated or repaired |
 
 **Polish Hooks (what a polish audit re-verifies against this step).**
 When `polish-simulation-pipeline.md` audits Step 2, it MUST re-run
-these four checks — no new agents are invented:
+these five checks — no new agents are invented except when the
+AGENT_POOL gate itself returns `fork` or `new`:
 
 1. **Section order per agent.** Every §4.{N} block follows `agent-design-skill.md §3.1 → §3.11` canonical order under embedded-form header levels; missing sub-sections are filled from material already in the file.
 2. **AGENT_POOL three-stage match re-run.** Even for agents originally reused, re-execute §2.2.0 Stage 1 → 2 → 3 against the current pool; the new outcome (`reuse` / `override` / `fork` / `new`) is recorded in the agent's §3.11 Design Provenance.
 3. **§3.11 Provenance updated.** Every audited agent has its §3.11 Provenance amended with a `Polish audit: YYYY-MM-DD` entry listing structural changes (or "no structural change") and the current pool file path.
-4. **Handbook §6 three-PASS.** For every agent, run `agent-design-skill.md §6` Validation Checklist three consecutive times; any FAIL resets the count.
+4. **Agent icon resolution.** Every referenced pool profile must resolve to exactly one valid icon. If the profile is `new` or `fork`, or if a reused profile has no `Icon` row, a broken link, a missing PNG, or no mapping row in `agent_images/design.md`, invoke `agent-icon-generation-skill.md` immediately. The audit is incomplete until the PNG filename is `{domain}-{agent-stem}.png`, the pool profile has the matching `Icon` row, and `agent_images/design.md` records the agent-to-icon mapping.
+5. **Handbook §6 three-PASS.** For every agent, run `agent-design-skill.md §6` Validation Checklist three consecutive times; any FAIL resets the count.
 
 ---
 
@@ -257,6 +262,26 @@ title, H2 for sections, H4 for behavioral framework sub-blocks) — NOT the
 embedded form used inside `simulation-bases.md §4`. The same content is
 then re-levelled and copied into `simulation-bases.md §4.{N}` for the
 scenario being built.
+
+**Icon requirement for every pool-backed agent.** Immediately after writing
+`examples/AGENT_POOL/<domain>/<kebab-name>.md` for a `new` or `fork`
+outcome, invoke `masim/skills/agent-icon-generation-skill.md`. For
+`reuse` and `reuse with parameter adjustment` outcomes, inspect the reused
+pool profile before closing the gate. If the profile has no `Icon` row, the
+linked PNG does not exist, the filename does not match
+`<domain>-<kebab-name>.png`, or `agent_images/design.md` has no mapping row
+for the profile, invoke the same icon skill as a repair step. The gate is
+not complete until:
+
+- `examples/AGENT_POOL/agent_images/icons/<domain>-<kebab-name>.png` exists.
+- The pool profile's Design Provenance table has exactly one `Icon` row
+  linking to `../agent_images/icons/<domain>-<kebab-name>.png`.
+- `examples/AGENT_POOL/agent_images/design.md` has a mapping row for the
+  profile, pairing `examples/AGENT_POOL/<domain>/<kebab-name>.md` with
+  `<domain>-<kebab-name>.png`.
+
+If image generation is unavailable, halt and report the missing icon as a
+blocking asset task; do not insert a broken or placeholder icon link.
 
 ### 2.2.1 Taxonomy Design Principles
 
@@ -476,6 +501,10 @@ Before moving to Step 3, verify:
       runs** required per §2.2.2 step 5 — no unchecked items
 - [ ] Every newly designed agent has been written back to
       `examples/AGENT_POOL/<domain>/<kebab-name>.md` in standalone header form
+- [ ] Every referenced pool agent has passed
+      `agent-icon-generation-skill.md` validation: PNG exists, pool `Icon`
+      row exists, and `agent_images/design.md` contains the
+      `{domain}/{agent-stem}.md` to `{domain}-{agent-stem}.png` mapping row
 
 **Conflict check**:
 - [ ] Can you describe a scenario where one agent's action opposes another's in the same round? (finance-appendix instantiation: one buys while another sells)

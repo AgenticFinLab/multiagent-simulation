@@ -60,6 +60,7 @@ changes go through the define skill's revise mode.
 | Variant document conformance                    | `implement-simulation-skill/03-variant-documents-spec.md`                   |
 | Directory / file layout                         | `implement-simulation-skill/01-mandatory-structure.md`                      |
 | AGENT_POOL three-stage match protocol           | `implement-simulation-skill/06-step2-agent-design.md §2.2.0`                |
+| AGENT_POOL icon generation protocol             | `masim/skills/agent-icon-generation-skill.md`                               |
 | Three-PASS validation discipline                | This file §3 and `agent-design-skill.md §6`                                 |
 | From-scratch pipeline (contrast)                | `masim/skills/create-simulation-pipeline.md`                                |
 
@@ -577,6 +578,9 @@ directly dispatches to:
   domain-neutral)
 - `masim/skills/agent-design-skill.md §6` (Validation Checklist,
   domain-neutral)
+- `masim/skills/agent-icon-generation-skill.md` (icon generation and
+  registration for any AGENT_POOL profile whose icon is missing or broken,
+  including new/forked profiles and reused profiles discovered during audit)
 
 The polish pipeline's role at Step 2 is orchestration and three-PASS
 enforcement; the actual per-agent audit logic lives in the handbook.
@@ -641,6 +645,24 @@ For **each** agent, in target §7 roster order, do the following:
      pool as a reusable archetype (this is the only pool write allowed
      at Step 2 during a polish run, and it is only performed after
      three consecutive Handbook §6 PASS runs on the polished agent).
+     Immediately after the pool file is written, invoke
+     `agent-icon-generation-skill.md` to generate and register the
+     matching icon. The `new` / `fork` branch is incomplete until the
+     icon PNG exists, the pool profile has an `Icon` row, and
+     `examples/AGENT_POOL/agent_images/design.md` has the mapping row.
+     If image generation is unavailable, halt and return the missing
+     icon as a blocking asset task instead of inserting a placeholder.
+   - On `reuse` or `reuse+override`, verify the referenced pool profile
+     already has a valid `Icon` row, that the linked PNG exists, that
+     the PNG filename is `{domain}-{agent-stem}.png`, and that
+     `examples/AGENT_POOL/agent_images/design.md` maps the profile to
+     that filename. If any of these checks fails, immediately invoke
+     `agent-icon-generation-skill.md` as an icon-repair step. The
+     reused branch is incomplete until the icon PNG exists, the profile
+     has the corrected `Icon` row, and the mapping row records the
+     profile-to-icon relationship. If image generation is unavailable,
+     halt and return the missing icon as a blocking asset task instead
+     of inserting a placeholder.
 3. **Update §3.11 Design Provenance.** Rewrite this section to record
    the current polish run:
 
@@ -707,6 +729,9 @@ FAIL resets the count.
 - Every affected pool file under `examples/AGENT_POOL/{Domain}/` that
   a `§4.{N}` block references (reuse / reuse-with-override / fork /
   outcome-shrink).
+- Every icon file, profile `Icon` row, and mapping row created or repaired
+  by `agent-icon-generation-skill.md` for new/forked pool files and for
+  reused pool files whose icon was missing or broken.
 
 ### 6.5 Exit Conditions
 
@@ -719,6 +744,11 @@ FAIL resets the count.
   in this scenario (unless outcome was `reuse` or the user selected
   "keep current fork" on an outcome-shrink halt, in which case the
   existing entry stands unchanged).
+- Every AGENT_POOL entry referenced by this scenario has a valid icon PNG,
+  Design Provenance `Icon` row, and `agent_images/design.md` mapping row.
+  Missing or broken icons on reused entries have been repaired through
+  `agent-icon-generation-skill.md`; unresolved icon gaps are blocking
+  asset tasks, never tolerated warnings.
 
 ---
 

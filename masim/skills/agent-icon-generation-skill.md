@@ -1,15 +1,17 @@
 ---
 name: agent-icon-generation-skill
-description: Generate and register AGENT_POOL agent icons when a new or forked reusable agent profile is added under examples/AGENT_POOL/{domain}/ during create or polish pipelines. Use this skill whenever an agent is not already covered by the pool and a new pool markdown file is written, or when auditing that every pool agent has a matching icon PNG, Design Provenance Icon row, and agent_images/design.md mapping.
+description: Generate and register AGENT_POOL agent icons when a new or forked reusable agent profile is added under examples/AGENT_POOL/{domain}/ during create or polish pipelines, or when polish discovers that any reused pool profile lacks a valid icon. Use this skill whenever an agent is not already covered by the pool and a new pool markdown file is written, or when auditing that every pool agent has a matching icon PNG, Design Provenance Icon row, and agent_images/design.md mapping.
 ---
 
 # Agent Icon Generation Skill
 
 ## Purpose
 
-Create the visual icon that belongs to a reusable AGENT_POOL agent profile.
-This skill is invoked after a new or forked pool agent markdown file is
-accepted, and before the Step 2 agent audit is closed.
+Create or repair the visual icon that belongs to a reusable AGENT_POOL agent
+profile. This skill is invoked after a new or forked pool agent markdown file
+is accepted, and before the Step 2 agent audit is closed. During polish, it is
+also invoked for a reused pool profile whenever the profile's icon is absent,
+broken, misnamed, or missing from `agent_images/design.md`.
 
 The icon is a UI/display asset, not simulation logic. It supports the Agent
 Market and reviewer-facing catalogues by giving each reusable agent a stable
@@ -33,6 +35,25 @@ visual identity.
 | Icon PNG | `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` |
 | Pool profile link | `| Icon | ![](../agent_images/icons/{domain}-{agent-stem}.png) |` in the profile's Design Provenance table |
 | Mapping row | Add one row to `examples/AGENT_POOL/agent_images/design.md` |
+
+## Invocation Rules
+
+Invoke this skill for a pool profile in any of these cases:
+
+- The profile was just created by a `new` AGENT_POOL outcome.
+- The profile was just created by a `fork` AGENT_POOL outcome.
+- A polish audit reuses an existing pool profile but its Design Provenance
+  table has no `Icon` row.
+- A polish audit finds an `Icon` row whose linked PNG is missing, empty, or
+  not named `{domain}-{agent-stem}.png`.
+- A polish audit finds that `examples/AGENT_POOL/agent_images/design.md` has
+  no row mapping `{domain}/{agent-stem}.md` to
+  `{domain}-{agent-stem}.png`.
+
+Do not invent alternate filenames. The agent-to-icon relationship is always:
+`examples/AGENT_POOL/{domain}/{agent-stem}.md` maps to
+`examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png`, and
+`agent_images/design.md` records that same pair.
 
 ## Style Contract
 
@@ -75,10 +96,13 @@ Match the existing icon set in
 
 ## Procedure
 
-1. **Derive the file name.** Use lowercase kebab-case:
+1. **Derive the file name and mapping.** Use lowercase kebab-case:
    `{domain}-{agent-stem}.png`. For example,
    `examples/AGENT_POOL/finance/program-trader.md` maps to
    `examples/AGENT_POOL/agent_images/icons/finance-program-trader.png`.
+   The mapping row must pair `finance/program-trader.md` with
+   `finance-program-trader.png`. If a stale row points to a different
+   filename for the same agent, replace it with the canonical mapping.
 
 2. **Derive the display label.** Choose a short Chinese label that matches
    the role, usually `<two-to-four-character role>型投资者` for finance agents.
@@ -132,13 +156,14 @@ Match the existing icon set in
      current AGENT_POOL icon owner before marking the icon complete.
 
 6. **Patch the pool profile.** In `## Design Provenance and Versioning`,
-   add or update exactly one table row:
+   add or update exactly one table row. If a stale or broken `Icon` row
+   exists, replace it rather than adding a second row:
 
    ```markdown
    | Icon | ![](../agent_images/icons/{domain}-{agent-stem}.png) |
    ```
 
-7. **Patch the image mapping.** Add one row to
+7. **Patch the image mapping.** Add or update one row in
    `examples/AGENT_POOL/agent_images/design.md` under the relevant domain
    mapping table with:
    - Agent path, for example `finance/program-trader.md`
@@ -146,22 +171,25 @@ Match the existing icon set in
    - Display label
    - Short match reason tying the motif to the theory or behavior
 
-8. **Record provenance.** Add the icon creation to the pool profile change log,
-   for example:
+8. **Record provenance.** Add the icon creation or repair to the pool profile
+   change log, for example:
 
    ```text
    1.0.1 - Added AGENT_POOL icon via agent-icon-generation-skill.
+   1.0.2 - Repaired AGENT_POOL icon mapping via agent-icon-generation-skill.
    ```
 
 ## Validation Checklist
 
 Run these checks three consecutive times during Step 2 closeout:
 
-- [ ] Every new or forked pool profile has one `| Icon |` row.
+- [ ] Every referenced pool profile has one `| Icon |` row.
 - [ ] The linked PNG exists under `examples/AGENT_POOL/agent_images/icons/`.
 - [ ] The PNG filename is `{domain}-{agent-stem}.png`.
-- [ ] `agent_images/design.md` has exactly one mapping row for the profile.
+- [ ] `agent_images/design.md` has exactly one mapping row pairing
+      `{domain}/{agent-stem}.md` with `{domain}-{agent-stem}.png`.
 - [ ] The mapping row's display label and match reason are consistent with the
       agent Summary and Theoretical Foundation.
-- [ ] Reused pool agents are not regenerated unless their icon is missing or
-      broken.
+- [ ] Reused pool agents are not regenerated when their existing icon resolves;
+      they are generated or repaired when the icon is missing, broken, or
+      unmapped.
