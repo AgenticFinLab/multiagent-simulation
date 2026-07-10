@@ -71,6 +71,7 @@ After a successful polish, each scenario directory should contain:
 | `simulation-bases.md`  | Conforms to `02-simulation-bases-creation.md`                       |
 | `analysis-bases.md`    | Conforms to `03-analysis-bases-creation.md`                         |
 | Agent design specs     | Each conforms to `agent-design-skill.md` §3.1–§3.11                 |
+| Agent pool icons       | New/forked AGENT_POOL agents have icons via `agent-icon-generation-skill.md` |
 | Variant subdirectories | All declared variants built and verified                            |
 | Target file            | Locked, validated against `define-simulation-scenario-skill.md` §11 |
 | Config files           | All parameters match agent specs; no stale defaults                 |
@@ -92,5 +93,6 @@ After a successful polish, each scenario directory should contain:
 | `masim/skills/polish-simulation-pipeline.md`       | The operational pipeline (Step 0–10)    |
 | `masim/skills/define-simulation-scenario-skill.md` | Target file specification               |
 | `masim/skills/agent-design-skill.md`               | Universal agent design standard         |
+| `masim/skills/agent-icon-generation-skill.md`      | Generates/registers icons for new pool agents |
 | `masim/skills/implement-simulation-skill/`         | Per-step methodology files              |
 | `examples/tracking.md`                             | Team coordination and progress tracking |
