@@ -30,10 +30,10 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 |Rule|
 | 23 | HerdEffect             | 🟢      | qihang      | Jul 8 2026           | —                 |
 | 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
-| 25 | HindsightBias          | ⬜      | —           | —           | —                 |
-| 26 | LiquidityDryup         | ⬜      | —           | —           | —                 |
-| 27 | LossAversion           | ⬜      | —           | —           | —                 |
-| 28 | LTCMCollapse           | ⬜      | —           | —           | —                 |
+| 25 | HindsightBias          | 🟡      | Wenyou      | Jul 10 2026 | —                 |
+| 26 | LiquidityDryup         | 🟡      | Wenyou      | Jul 10 2026 | —                 |
+| 27 | LossAversion           | 🟡      | Wenyou      | Jul 10 2026 | —                 |
+| 28 | LTCMCollapse           | 🟡      | Wenyou      | Jul 10 2026 | —                 |
 | 29 | LUNACollapse           | ⬜      | —           | —           | —                 |
 | 30 | MarketCrash            | ⬜      | —           | —           | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
