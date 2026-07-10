@@ -4,7 +4,7 @@
 # 1 Market (rule-based coordinator) + 5 rule-based agent types
 #
 # Scenario: March 2021 - Archegos Capital Management collapse ($20B loss)
-# Agents: ConcentratedFund (TRS leverage) + PrimeBroker1/2 (liquidation race)
+# Agents: ConcentratedFund (TRS leverage) + PrimeBrokerFirstMover/2 (liquidation race)
 #         + BlockTradeBuyer (discount buyer) + InformationTrader (front-runner)
 # =============================================================================
 
@@ -61,15 +61,15 @@ concentrated_fund:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# PrimeBroker1 — First-mover liquidator (creates cascade)
+# PrimeBrokerFirstMover — First-mover liquidator (creates cascade)
 # Theory: Prime broker liquidation race (information asymmetry)
 # -----------------------------------------------------------------------------
-prime_broker1:
-  name: "Prime Broker 1"
-  class: "examples.ArchegosCollapse.Rule.players:PrimeBroker1"
+prime_broker_first_mover:
+  name: "Prime Broker (First Mover)"
+  class: "examples.ArchegosCollapse.Rule.players:PrimeBrokerFirstMover"
   num_instances: 1
   config:
-    identity: "prime_broker1"
+    identity: "prime_broker_first_mover"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -86,15 +86,15 @@ prime_broker1:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# PrimeBroker2 — Second-mover liquidator (delayed, worse prices)
+# PrimeBrokerDelayedLiquidator — Second-mover liquidator (delayed, worse prices)
 # Theory: Prime broker competition; cascade amplification
 # -----------------------------------------------------------------------------
-prime_broker2:
-  name: "Prime Broker 2"
-  class: "examples.ArchegosCollapse.Rule.players:PrimeBroker2"
+prime_broker_delayed_liquidator:
+  name: "Prime Broker (Delayed Liquidator)"
+  class: "examples.ArchegosCollapse.Rule.players:PrimeBrokerDelayedLiquidator"
   num_instances: 1
   config:
-    identity: "prime_broker2"
+    identity: "prime_broker_delayed_liquidator"
     role: player
     steps_per_turn: 1
     group_tags:

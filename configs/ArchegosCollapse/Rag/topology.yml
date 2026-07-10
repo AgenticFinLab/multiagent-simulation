@@ -4,8 +4,8 @@
 # Star topology: Market broadcasts to all RAG agents; agents send orders to market.
 #
 #         ragllm_concentrated_fund ──────────────┐
-#         ragllm_prime_broker1 ──────────────────┤
-#         ragllm_prime_broker2 ──────────────────┼──▶ market ──▶ all agents
+#         ragllm_prime_broker_first_mover ──────┤
+#         ragllm_prime_broker_delayed_liquidator┼──▶ market ──▶ all agents
 #         ragllm_block_trade_buyer ──────────────┤
 #         ragllm_information_trader ─────────────┘
 #
@@ -23,8 +23,8 @@ connections:
   # Market → All agents (price + market data broadcast)
   market:
     - ragllm_concentrated_fund
-    - ragllm_prime_broker1
-    - ragllm_prime_broker2
+    - ragllm_prime_broker_first_mover
+    - ragllm_prime_broker_delayed_liquidator
     - ragllm_block_trade_buyer
     - ragllm_information_trader
 
@@ -32,10 +32,10 @@ connections:
   ragllm_concentrated_fund:
     - market
 
-  ragllm_prime_broker1:
+  ragllm_prime_broker_first_mover:
     - market
 
-  ragllm_prime_broker2:
+  ragllm_prime_broker_delayed_liquidator:
     - market
 
   ragllm_block_trade_buyer:

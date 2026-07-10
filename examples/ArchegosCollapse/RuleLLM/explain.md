@@ -19,14 +19,14 @@
 
 | Theory Component                                                      | Implementation                                                                                   |
 |-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| TRS leverage / margin call → sim-bases §4.N.5.4 Mathematical Model         | `RULELLM_CONCENTRATED_FUND_SYS` `== DECISION RULES ==`: Step 2 `IF deviation < -0.15 → SELL 50%` |
+| TRS leverage / margin call → sim-bases §4.N.5.4 Mathematical Model    | `RULELLM_CONCENTRATED_FUND_SYS` `== DECISION RULES ==`: Step 2 `IF deviation < -0.15 → SELL 50%` |
 | Embedded rule threshold = −0.15 → sim-bases §6                        | Hard-coded in prompt: "IF deviation < -0.15 (price dropped >15% below fundamental)"              |
 | Sell 50% base, ±20% PERSONA range → sim-bases §4 RuleLLM Hybrid Notes | "Step 3: PERSONA may adjust quantity ±20% (40%–60% of position)"                                 |
 | Denial psychology → sim-bases §4 LLM Persona                          | `== PERSONA ==`: "denial is your first response"; emotionally resistant to acknowledging margin  |
 | Prompt constant                                                       | `RULELLM_CONCENTRATED_FUND_SYS` in `prompts.py`                                                  |
 
-### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
+### PrimeBrokerFirstMover: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.2 — PrimeBrokerFirstMover)*
 
 | Theory Component                                        | Implementation                                                                     |
 |---------------------------------------------------------|------------------------------------------------------------------------------------|
@@ -34,8 +34,8 @@
 | Sell 40% base, ±20% → sim-bases §4 RuleLLM Hybrid Notes | "Step 3: PERSONA (speed urgency) may adjust quantity ±20% (32%–48%)"               |
 | Aggressive / unsentimental → sim-bases §4 LLM Persona   | `== PERSONA ==`: "decisive, competitive, unsentimental about client relationships" |
 
-### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
+### PrimeBrokerDelayedLiquidator: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator)*
 
 | Theory Component                                                   | Implementation                                                                                   |
 |--------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
@@ -46,20 +46,20 @@
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
 
-| Theory Component                                         | Implementation                                                                       |
-|----------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Buy at −10% discount → sim-bases §4.N.5.4 Mathematical Model  | `== DECISION RULES ==`: "IF deviation < -0.10 → BUY: quantity = 0.30 × cash / price" |
-| Deploy 30% cash base, ±20% → sim-bases §4 RuleLLM Hybrid | "Step 3: PERSONA (deep-pocket buyer) may adjust ±20% (24%–36%)"                      |
-| Deep-pocket patience persona → sim-bases §4 LLM Persona  | `== PERSONA ==`: "you have deep pockets and patience — wait for forced sellers"      |
+| Theory Component                                             | Implementation                                                                       |
+|--------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Buy at −10% discount → sim-bases §4.N.5.4 Mathematical Model | `== DECISION RULES ==`: "IF deviation < -0.10 → BUY: quantity = 0.30 × cash / price" |
+| Deploy 30% cash base, ±20% → sim-bases §4 RuleLLM Hybrid     | "Step 3: PERSONA (deep-pocket buyer) may adjust ±20% (24%–36%)"                      |
+| Deep-pocket patience persona → sim-bases §4 LLM Persona      | `== PERSONA ==`: "you have deep pockets and patience — wait for forced sellers"      |
 
 ### InformationTrader: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theory Component                                                  | Implementation                                                                                      |
-|-------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| Detect at −0.05, probability 0.50 → sim-bases §4 Mathematical Model       | `== DECISION RULES ==`: "IF deviation < -0.05 AND detection probability 0.50 → SELL min(1000, pos)" |
-| Cover at −0.03 → sim-bases §4                                     | `== DECISION RULES ==`: buy up to 500 shares when recovery conditions indicate prior front-run exposure should be covered |
-| Front-runner / fast analytical persona → sim-bases §4 LLM Persona | `== PERSONA ==`: "fast, analytical, and unafraid of being early"                                    |
+| Theory Component                                                    | Implementation                                                                                                            |
+|---------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| Detect at −0.05, probability 0.50 → sim-bases §4 Mathematical Model | `== DECISION RULES ==`: "IF deviation < -0.05 AND detection probability 0.50 → SELL min(1000, pos)"                       |
+| Cover at −0.03 → sim-bases §4                                       | `== DECISION RULES ==`: buy up to 500 shares when recovery conditions indicate prior front-run exposure should be covered |
+| Front-runner / fast analytical persona → sim-bases §4 LLM Persona   | `== PERSONA ==`: "fast, analytical, and unafraid of being early"                                                          |
 
 ---
 
@@ -133,14 +133,14 @@ Prompt Structure:
 
 Key Configuration Parameters (`configs/ArchegosCollapse/RuleLLM/players.yml`):
 
-| Parameter | Config Path | Value | Design Justification |
-|---|---|---|---|
-| `price_impact` | `extras.price_impact` | 0.03 | Identical to Rule — comparable market dynamics |
-| `mean_reversion` | `extras.mean_reversion` | 0.01 | Same low gamma — cascade persistence |
-| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_*_SYS` | Module path for dual-section prompts |
-| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE` | Module path for market-state user template |
-| `lm_name` | `extras.llm.lm_name` | `ark/doubao-seed-2-0-mini-260428` | ByteDance Ark Doubao model |
-| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.5 | Low temperature — closer to deterministic rule-following |
+| Parameter        | Config Path                                | Value                                                             | Design Justification                                     |
+|------------------|--------------------------------------------|-------------------------------------------------------------------|----------------------------------------------------------|
+| `price_impact`   | `extras.price_impact`                      | 0.03                                                              | Identical to Rule — comparable market dynamics           |
+| `mean_reversion` | `extras.mean_reversion`                    | 0.01                                                              | Same low gamma — cascade persistence                     |
+| `sys_message`    | `extras.llm.sys_message`                   | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_*_SYS`         | Module path for dual-section prompts                     |
+| `user_message`   | `extras.llm.user_message`                  | `examples.ArchegosCollapse.RuleLLM.prompts:RULELLM_USER_TEMPLATE` | Module path for market-state user template               |
+| `lm_name`        | `extras.llm.lm_name`                       | `ark/doubao-seed-2-0-mini-260428`                                 | ByteDance Ark Doubao model                               |
+| `temperature`    | `extras.llm.generation_config.temperature` | 0.4-0.5                                                           | Low temperature — closer to deterministic rule-following |
 
 ---
 
@@ -163,12 +163,12 @@ Output location: `EXPERIMENT/ArchegosCollapse/RuleLLM/`
 
 ## §8 Expected Behavior Patterns
 
-| Phase         | Rounds | Expected Agent Behavior                                                             | Expected Price Dynamics                                       |
-|---------------|--------|-------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| Pre-Cascade   | 1–15   | All agents hold; rules not triggered; LLM confirms hold with formula verification   | Price near 100; normal noise                                  |
-| Cascade Onset | 10–20  | ConcentratedFund triggers at −15% per rule; PrimeBroker1 at −10%; LLM ±20% quantity | Near-Rule cascade timing; slightly variable cascade magnitude |
-| Peak Cascade  | 20–35  | PrimeBroker2 triggers at −15%; quantity within 28%–42% range; BlockTradeBuyer BUYs  | Similar depth to Rule; ±20% magnitude variation               |
-| Recovery      | 35–100 | BlockTradeBuyer absorbs; InformationTrader covers per rule; mean reversion          | Comparable recovery to Rule                                   |
+| Phase         | Rounds | Expected Agent Behavior                                                                            | Expected Price Dynamics                                       |
+|---------------|--------|----------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| Pre-Cascade   | 1–15   | All agents hold; rules not triggered; LLM confirms hold with formula verification                  | Price near 100; normal noise                                  |
+| Cascade Onset | 10–20  | ConcentratedFund triggers at −15% per rule; PrimeBrokerFirstMover at −10%; LLM ±20% quantity       | Near-Rule cascade timing; slightly variable cascade magnitude |
+| Peak Cascade  | 20–35  | PrimeBrokerDelayedLiquidator triggers at −15%; quantity within 28%–42% range; BlockTradeBuyer BUYs | Similar depth to Rule; ±20% magnitude variation               |
+| Recovery      | 35–100 | BlockTradeBuyer absorbs; InformationTrader covers per rule; mean reversion                         | Comparable recovery to Rule                                   |
 
 ---
 

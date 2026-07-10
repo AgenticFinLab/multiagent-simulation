@@ -464,13 +464,13 @@ class RagLLMConcentratedFund(RagLLMInvestor):
     pass
 
 
-class RagLLMPrimeBroker1(RagLLMInvestor):
+class RagLLMPrimeBrokerFirstMover(RagLLMInvestor):
     """RAG-augmented prime broker 1 — first-mover liquidator. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
-class RagLLMPrimeBroker2(RagLLMInvestor):
+class RagLLMPrimeBrokerDelayedLiquidator(RagLLMInvestor):
     """RAG-augmented prime broker 2 — delayed liquidator at worse prices. Theory: simulation-bases.md §4.3."""
 
     pass
@@ -492,8 +492,8 @@ __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMConcentratedFund",
-    "RagLLMPrimeBroker1",
-    "RagLLMPrimeBroker2",
+    "RagLLMPrimeBrokerFirstMover",
+    "RagLLMPrimeBrokerDelayedLiquidator",
     "RagLLMBlockTradeBuyer",
     "RagLLMInformationTrader",
     "_validate_decision",

@@ -43,8 +43,8 @@
   ΔPayoff = Q × [P(t_1) − P(t_2)] = Q × λ × Q_1 > 0   for Q, Q_1 > 0
   ```
 - **Empirical Evidence**: In the Archegos event, Morgan Stanley (acting first, March 25–26) recovered significantly better than Credit Suisse (acting later, March 29), consistent with the first-mover payoff advantage. Gorton & Metrick (2012) document that repo creditors' rollover decisions follow a coordination game with Nash equilibrium in the "run" strategy when collateral quality falls below a threshold.
-- **Relevance to This Simulation**: The timing asymmetry between `PrimeBroker1` (lower threshold, acts first) and `PrimeBroker2` (higher threshold, acts later and at worse prices) directly models the first-mover advantage. The gap between their threshold values (0.10 vs 0.15) calibrates the price penalty for delayed action.
-- **Calibration Implication**: PrimeBroker1.liquidation_threshold = 0.10 < PrimeBroker2.liquidation_threshold = 0.15; the price at which PrimeBroker2 sells is approximately λ × Q₁ below PrimeBroker1's selling price.
+- **Relevance to This Simulation**: The timing asymmetry between `PrimeBrokerFirstMover` (lower threshold, acts first) and `PrimeBrokerDelayedLiquidator` (higher threshold, acts later and at worse prices) directly models the first-mover advantage. The gap between their threshold values (0.10 vs 0.15) calibrates the price penalty for delayed action.
+- **Calibration Implication**: PrimeBrokerFirstMover.liquidation_threshold = 0.10 < PrimeBrokerDelayedLiquidator.liquidation_threshold = 0.15; the price at which PrimeBrokerDelayedLiquidator sells is approximately λ × Q₁ below PrimeBrokerFirstMover's selling price.
 
 ---
 
@@ -110,7 +110,7 @@ P(t+1) = P(t) + λ · D(t) + γ · [F − P(t)] + ε(t)
 | σ         | 0.015 | 0.01–0.03       | Roll (1984), *Journal of Finance*, 39(4), 1127–1139 — bid-ask bounce model noise estimate                     | Low: affects variance of threshold crossing timing, not mean behavior                  |
 
 **Economic Rationale**:
-The high λ (0.03) reflects the market-impact amplification typical in concentrated block selling — when a single large seller (ConcentratedFund or a prime broker) submits an order representing 5–10% of daily volume, price impact is significantly larger than normal. The low γ (0.01) models the slow pull toward fundamental value characteristic of equity markets over short horizons: prices do not snap back to intrinsic value within rounds. The combination ensures that cascade-induced deviations persist long enough to trigger successive threshold crossings by PrimeBroker1 and PrimeBroker2.
+The high λ (0.03) reflects the market-impact amplification typical in concentrated block selling — when a single large seller (ConcentratedFund or a prime broker) submits an order representing 5–10% of daily volume, price impact is significantly larger than normal. The low γ (0.01) models the slow pull toward fundamental value characteristic of equity markets over short horizons: prices do not snap back to intrinsic value within rounds. The combination ensures that cascade-induced deviations persist long enough to trigger successive threshold crossings by PrimeBrokerFirstMover and PrimeBrokerDelayedLiquidator.
 
 **Dynamic Properties**:
 - When D(t) < 0 (ConcentratedFund selling): P falls; deviation increases in magnitude → may cross broker thresholds
@@ -135,13 +135,13 @@ The high λ (0.03) reflects the market-impact amplification typical in concentra
 
 Each round, the Market broadcasts to all investors:
 
-| Field         | Type  | Definition                                     | Rationale for Inclusion                                                                                    |
-|---------------|-------|------------------------------------------------|------------------------------------------------------------------------------------------------------------|
-| `price`       | float | Current market price after order clearing      | Primary signal; all agents monitor price level                                                             |
-| `prev_price`  | float | Price from the previous round                  | Enables InformationTrader to detect first signs of decline                                                 |
-| `fundamental` | float | Intrinsic fundamental value (constant = 100.0) | Required for deviation calculation and BlockTradeBuyer activation                                          |
-| `deviation`   | float | `(price − fundamental) / fundamental`          | Pre-computed; the primary trigger signal for ConcentratedFund, PrimeBroker1, PrimeBroker2, BlockTradeBuyer |
-| `round`       | int   | Current round number                           | Enables round-based frequency control if needed                                                            |
+| Field         | Type  | Definition                                     | Rationale for Inclusion                                                                                                             |
+|---------------|-------|------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `price`       | float | Current market price after order clearing      | Primary signal; all agents monitor price level                                                                                      |
+| `prev_price`  | float | Price from the previous round                  | Enables InformationTrader to detect first signs of decline                                                                          |
+| `fundamental` | float | Intrinsic fundamental value (constant = 100.0) | Required for deviation calculation and BlockTradeBuyer activation                                                                   |
+| `deviation`   | float | `(price − fundamental) / fundamental`          | Pre-computed; the primary trigger signal for ConcentratedFund, PrimeBrokerFirstMover, PrimeBrokerDelayedLiquidator, BlockTradeBuyer |
+| `round`       | int   | Current round number                           | Enables round-based frequency control if needed                                                                                     |
 
 **Design Note**: `return_pct` is NOT broadcast separately — agents that need price change compute it from `price` and `prev_price`. The central signal is `deviation` (not raw price level), consistent with how prime brokers monitor collateral quality relative to fair value.
 
@@ -158,15 +158,15 @@ This section follows `masim/skills/agent-design-skill.md` and the finance instan
 
 #### 4.1.1 Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | TRS-leveraged concentrated fund |
-| Theory Family         | Leverage / Risk-On-Risk-Off |
+| Field                 | Content                                                                               |
+|-----------------------|---------------------------------------------------------------------------------------|
+| Archetype             | TRS-leveraged concentrated fund                                                       |
+| Theory Family         | Leverage / Risk-On-Risk-Off                                                           |
 | Market Role           | **Destabilising** - forced deleveraging creates the first large negative demand shock |
-| Time Horizon          | medium |
-| Risk Tolerance        | high |
-| Information Asymmetry | partial |
-| Determinism           | deterministic |
+| Time Horizon          | medium                                                                                |
+| Risk Tolerance        | high                                                                                  |
+| Information Asymmetry | partial                                                                               |
+| Determinism           | deterministic                                                                         |
 
 #### 4.1.2 Definition and Goals
 
@@ -223,11 +223,11 @@ Deactivation Conditions:
 - Deviation recovers above threshold: hold reduced position.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Hold / latent destabilising | Large exposure is present but inactive. |
-| Liquidity stress / drought | Destabilising | Forced sale adds concentrated supply. |
-| Crash / cascade | Destabilising | Remaining exposure can continue to liquidate after repeated trigger rounds. |
+| Regime                     | Contribution                | Mechanism                                                                   |
+|----------------------------|-----------------------------|-----------------------------------------------------------------------------|
+| Calm market                | Hold / latent destabilising | Large exposure is present but inactive.                                     |
+| Liquidity stress / drought | Destabilising               | Forced sale adds concentrated supply.                                       |
+| Crash / cascade            | Destabilising               | Remaining exposure can continue to liquidate after repeated trigger rounds. |
 
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
@@ -237,24 +237,24 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 **Inputs (per decision call).**
 
-| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
-|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
-| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.1.5.1                                                                                          |
-| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.1.5.1                                                                                          |
-| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.1.5.1                                                                                          |
-| `position`              | agent state (§4.1.5.4 state variables)              | `float`      | yes                     | Persistent long exposure remaining                                                                       |
-| `cash`                  | agent state (§4.1.5.4 state variables)              | `float`      | yes                     | Populated by init from §4.1.6                                                                            |
-| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
-| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+| Input                 | Source                                 | Type / Shape | Required?        | Notes                                                                                                 |
+|-----------------------|----------------------------------------|--------------|------------------|-------------------------------------------------------------------------------------------------------|
+| `price`               | environment broadcast                  | `float`      | yes              | Row of §4.1.5.1                                                                                       |
+| `fundamental`         | environment broadcast                  | `float`      | yes              | Row of §4.1.5.1                                                                                       |
+| `deviation`           | environment broadcast                  | `float`      | yes              | Row of §4.1.5.1                                                                                       |
+| `position`            | agent state (§4.1.5.4 state variables) | `float`      | yes              | Persistent long exposure remaining                                                                    |
+| `cash`                | agent state (§4.1.5.4 state variables) | `float`      | yes              | Populated by init from §4.1.6                                                                         |
+| `round`               | round header                           | `int`        | yes              | Round number                                                                                          |
+| `retrieved_knowledge` | retrieval store (Rag variant only)     | `list[str]`  | Rag variant only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty |
 
 **Outputs (per decision call).** The agent emits exactly one decision object.
 
-| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
-|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
-| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.1.5.3 Order types)       |
-| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.1.5.3 Price level rule)                       |
-| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (§4.1.5.3 Order quantity rule)                |
-| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+| Field       | Type   | Valid Range / Enum        | Unit                       | Required? | Meaning                                                    |
+|-------------|--------|---------------------------|----------------------------|-----------|------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`   | —                          | yes       | Discrete action selected (matches §4.1.5.3 Order types)    |
+| `bid_price` | float  | > 0                       | same units as `price`      | yes       | Order price (§4.1.5.3 Price level rule)                    |
+| `quantity`  | float  | ≥ 0, ≤ available position | shares / units of position | yes       | Order magnitude (§4.1.5.3 Order quantity rule)             |
+| `reasoning` | string | 1–3 sentences             | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py` |
 
 **Content Constraints.**
 
@@ -285,12 +285,12 @@ Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `Ru
 
 ###### 4.1.5.1 Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference and portfolio valuation [Ref 9]. |
-| `fundamental` | Continuous | 1 tick | Anchor for collateral-value deviation and discount calculations [Ref 1]. |
-| `deviation` | Continuous | 1 tick | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
-| `position` | State | persistent | Remaining synthetic long exposure available to liquidate [Ref 1]. |
+| Signal        | Type       | Memory Window | Rationale                                                                               |
+|---------------|------------|---------------|-----------------------------------------------------------------------------------------|
+| `price`       | Continuous | 1 tick        | Execution reference and portfolio valuation [Ref 9].                                    |
+| `fundamental` | Continuous | 1 tick        | Anchor for collateral-value deviation and discount calculations [Ref 1].                |
+| `deviation`   | Continuous | 1 tick        | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
+| `position`    | State      | persistent    | Remaining synthetic long exposure available to liquidate [Ref 1].                       |
 
 Does NOT use: social-network topology, undocumented peer thresholds, fee schedules, latency, or matching-engine implementation details.
 
@@ -304,16 +304,16 @@ Does NOT use: social-network topology, undocumented peer thresholds, fee schedul
 
 ###### 4.1.5.3 Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Order types allowed | `buy`, `sell`, `hold` as specified by the trigger function. |
-| Price level rule | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`. |
-| Order quantity rule | `q = min(position, position * trs_sell_ratio)` for sell; otherwise zero. |
-| Order lifetime | One decision round; replace on next fresh broadcast. |
-| Cancellation policy | Cancel prior intent when the current trigger evaluates to hold or the opposite side. |
-| Inventory constraint | Never sell more than internally available long position plus declared short inventory discipline. |
+| Aspect                | Specification                                                                                                                 |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Order types allowed   | `buy`, `sell`, `hold` as specified by the trigger function.                                                                   |
+| Price level rule      | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`.                     |
+| Order quantity rule   | `q = min(position, position * trs_sell_ratio)` for sell; otherwise zero.                                                      |
+| Order lifetime        | One decision round; replace on next fresh broadcast.                                                                          |
+| Cancellation policy   | Cancel prior intent when the current trigger evaluates to hold or the opposite side.                                          |
+| Inventory constraint  | Never sell more than internally available long position plus declared short inventory discipline.                             |
 | Wealth / leverage cap | Never buy more than available cash divided by current price; leveraged liquidation agents only reduce exposure after trigger. |
-| Stop-loss / kill rule | Stop selling only when position reaches zero or deviation no longer breaches `margin_threshold`. |
+| Stop-loss / kill rule | Stop selling only when position reaches zero or deviation no longer breaches `margin_threshold`.                              |
 
 ###### 4.1.5.4 Mathematical Model
 
@@ -328,19 +328,19 @@ else:
 ```
 
 State variables:
-| State | Initial value | Update phase | Evolution |
-|-------|---------------|--------------|-----------|
-| `cash` | scenario config | post-fill | cash decreases on buy and increases on sell. |
-| `position` | scenario config | post-fill | position increases on buy and decreases on sell. |
-| `margin_triggered` | false | post-decide | true after the first margin-breach sell. |
+| State              | Initial value   | Update phase | Evolution                                        |
+|--------------------|-----------------|--------------|--------------------------------------------------|
+| `cash`             | scenario config | post-fill    | cash decreases on buy and increases on sell.     |
+| `position`         | scenario config | post-fill    | position increases on buy and decreases on sell. |
+| `margin_triggered` | false           | post-decide  | true after the first margin-breach sell.         |
 
 Determinism contract: deterministic given identical market signals and state.
 
 Parameter symbol table:
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_margin` | Margin-breach deviation threshold | -0.15 | Ref 1; Ref 2 |
-| `phi_trs` | Fraction of position liquidated per trigger | 0.50 | Ref 1; Ref 2 |
+| Symbol         | Meaning                                     | Default Value | Source       |
+|----------------|---------------------------------------------|---------------|--------------|
+| `theta_margin` | Margin-breach deviation threshold           | -0.15         | Ref 1; Ref 2 |
+| `phi_trs`      | Fraction of position liquidated per trigger | 0.50          | Ref 1; Ref 2 |
 
 ###### 4.1.5.5 Behavioral Properties
 
@@ -351,22 +351,22 @@ Parameter symbol table:
 
 #### 4.1.6 Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `margin_threshold` | float | -0.15 | [-0.25, -0.05] | high | Deviation at which margin pressure forces sale. | Higher magnitude -> fewer and later forced sales. | Becketti (2021); FSB (2022) |
-| `trs_sell_ratio` | float | 0.50 | [0.10, 1.00] | high | Fraction of current position sold per trigger. | Higher -> larger negative order flow per activation. | FSB (2022); prime-broker post-mortem calibration |
-| `initial_position` | float | 5000.0 | > 0 | high | Starting synthetic long exposure. | Higher -> larger cascade seed order. | FSB (2022) notional exposure scale, normalized |
-| `initial_cash` | float | 500000.0 | >= 0 | medium | Initial liquidity buffer. | Higher -> more ability to absorb losses before state exhaustion. | Scenario normalization from §6 |
+| Parameter          | Type  | Default  | Valid Range    | Sensitivity | Description                                     | Impact                                                           | Source                                           |
+|--------------------|-------|----------|----------------|-------------|-------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------|
+| `margin_threshold` | float | -0.15    | [-0.25, -0.05] | high        | Deviation at which margin pressure forces sale. | Higher magnitude -> fewer and later forced sales.                | Becketti (2021); FSB (2022)                      |
+| `trs_sell_ratio`   | float | 0.50     | [0.10, 1.00]   | high        | Fraction of current position sold per trigger.  | Higher -> larger negative order flow per activation.             | FSB (2022); prime-broker post-mortem calibration |
+| `initial_position` | float | 5000.0   | > 0            | high        | Starting synthetic long exposure.               | Higher -> larger cascade seed order.                             | FSB (2022) notional exposure scale, normalized   |
+| `initial_cash`     | float | 500000.0 | >= 0           | medium      | Initial liquidity buffer.                       | Higher -> more ability to absorb losses before state exhaustion. | Scenario normalization from §6                   |
 
 #### 4.1.7 Population and Heterogeneity
 
-| Dimension | Specification |
-|-----------|---------------|
-| Default population size | 2 instances in ArchegosCollapse configs. |
-| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults. |
-| Heterogeneity per parameter | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
-| Cross-agent correlation | Same archetype instances share theory and trigger sign; cash and position levels may differ. |
-| Identity persistence | Persistent identity and state across rounds; no type switching. |
+| Dimension                      | Specification                                                                                                 |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Default population size        | 2 instances in ArchegosCollapse configs.                                                                      |
+| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults.                    |
+| Heterogeneity per parameter    | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
+| Cross-agent correlation        | Same archetype instances share theory and trigger sign; cash and position levels may differ.                  |
+| Identity persistence           | Persistent identity and state across rounds; no type switching.                                               |
 
 #### 4.1.8 Worked Numerical Examples
 
@@ -416,47 +416,47 @@ State update: no state becomes negative.
 
 ###### 4.1.9.1 Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease | number of non-hold orders |
-| `size_half` | Halve the size parameter | Same timing with lower impact. | decrease | average order quantity |
+| Ablation name      | Setting                                     | Hypothesis tested                                                   | Expected direction | Metric                    |
+|--------------------|---------------------------------------------|---------------------------------------------------------------------|--------------------|---------------------------|
+| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
+| `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
 #### 4.1.10 Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
-| 1 | Becketti, S. (2021). "Hidden leverage and the Archegos collapse." *Economic Review*, Federal Reserve Bank of Kansas City, 2021-Q3, 1-12. https://doi.org/10.18651/ER/v106n3Becketti | TRS leverage and margin breach mechanism |
+| # | Citation                                                                                                                                                                                                 | Notes                                         |
+|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| 1 | Becketti, S. (2021). "Hidden leverage and the Archegos collapse." *Economic Review*, Federal Reserve Bank of Kansas City, 2021-Q3, 1-12. https://doi.org/10.18651/ER/v106n3Becketti                      | TRS leverage and margin breach mechanism      |
 | 2 | Financial Stability Board. (2022). *US dollar funding and emerging market economy vulnerabilities*. FSB non-bank financial intermediation analysis, Archegos discussion, pp. 47-51. https://www.fsb.org/ | Archegos notional exposure and leverage scale |
-| 6 | Barber, B. M., & Odean, T. (2001). Boys will be boys: Gender, overconfidence, and common stock investment. *Quarterly Journal of Economics*, 116(1), 261-292. https://doi.org/10.1162/003355301556400 | Overconfidence and concentrated risk taking |
-| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x | Price and order-flow signal relevance |
+| 6 | Barber, B. M., & Odean, T. (2001). Boys will be boys: Gender, overconfidence, and common stock investment. *Quarterly Journal of Economics*, 116(1), 261-292. https://doi.org/10.1162/003355301556400    | Overconfidence and concentrated risk taking   |
+| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x                                        | Price and order-flow signal relevance         |
 
 #### 4.1.11 Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex three-pass self-check |
-| Created | 2026-06-30 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
-| Status | experimental |
+| Field       | Content                                                                                                                                                                                                                                                                                                                    |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                      |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                 |
+| Version     | 1.0.0                                                                                                                                                                                                                                                                                                                      |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
+| Status      | experimental                                                                                                                                                                                                                                                                                                               |
 
-### §4.2 PrimeBroker1
+### §4.2 PrimeBrokerFirstMover
 
 > Agent pool source: examples/AGENT_POOL/finance/prime-broker-first-mover.md
 
 
 #### 4.2.1 Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | first-mover prime-broker liquidator |
-| Theory Family         | Leverage / Risk-On-Risk-Off |
+| Field                 | Content                                                                                            |
+|-----------------------|----------------------------------------------------------------------------------------------------|
+| Archetype             | first-mover prime-broker liquidator                                                                |
+| Theory Family         | Leverage / Risk-On-Risk-Off                                                                        |
 | Market Role           | **Destabilising** - early liquidation protects collateral value but accelerates fire-sale pressure |
-| Time Horizon          | short |
-| Risk Tolerance        | medium |
-| Information Asymmetry | partial |
-| Determinism           | deterministic |
+| Time Horizon          | short                                                                                              |
+| Risk Tolerance        | medium                                                                                             |
+| Information Asymmetry | partial                                                                                            |
+| Determinism           | deterministic                                                                                      |
 
 #### 4.2.2 Definition and Goals
 
@@ -502,11 +502,11 @@ Deactivation Conditions:
 - Deviation above threshold: hold.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Hold | No liquidation while collateral value remains inside threshold. |
-| Liquidity stress / drought | Destabilising | Sells collateral into weakening demand. |
-| Crash / cascade | Destabilising | Repeated sell decisions reinforce price impact. |
+| Regime                     | Contribution  | Mechanism                                                       |
+|----------------------------|---------------|-----------------------------------------------------------------|
+| Calm market                | Hold          | No liquidation while collateral value remains inside threshold. |
+| Liquidity stress / drought | Destabilising | Sells collateral into weakening demand.                         |
+| Crash / cascade            | Destabilising | Repeated sell decisions reinforce price impact.                 |
 
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
@@ -516,24 +516,24 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 **Inputs (per decision call).**
 
-| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
-|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
-| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.2.5.1                                                                                          |
-| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.2.5.1                                                                                          |
-| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.2.5.1                                                                                          |
-| `position`              | agent state (§4.2.5.4)                              | `float`      | yes                     | Collateral inventory available to liquidate                                                              |
-| `cash`                  | agent state (§4.2.5.4)                              | `float`      | yes                     | Populated by init from §4.2.6                                                                            |
-| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
-| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+| Input                 | Source                             | Type / Shape | Required?        | Notes                                                                                                 |
+|-----------------------|------------------------------------|--------------|------------------|-------------------------------------------------------------------------------------------------------|
+| `price`               | environment broadcast              | `float`      | yes              | Row of §4.2.5.1                                                                                       |
+| `fundamental`         | environment broadcast              | `float`      | yes              | Row of §4.2.5.1                                                                                       |
+| `deviation`           | environment broadcast              | `float`      | yes              | Row of §4.2.5.1                                                                                       |
+| `position`            | agent state (§4.2.5.4)             | `float`      | yes              | Collateral inventory available to liquidate                                                           |
+| `cash`                | agent state (§4.2.5.4)             | `float`      | yes              | Populated by init from §4.2.6                                                                         |
+| `round`               | round header                       | `int`        | yes              | Round number                                                                                          |
+| `retrieved_knowledge` | retrieval store (Rag variant only) | `list[str]`  | Rag variant only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty |
 
 **Outputs (per decision call).**
 
-| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
-|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
-| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.2.5.3 Order types)       |
-| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.2.5.3 Price level rule)                       |
-| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (§4.2.5.3 Order quantity rule)                |
-| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+| Field       | Type   | Valid Range / Enum        | Unit                       | Required? | Meaning                                                    |
+|-------------|--------|---------------------------|----------------------------|-----------|------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`   | —                          | yes       | Discrete action selected (matches §4.2.5.3 Order types)    |
+| `bid_price` | float  | > 0                       | same units as `price`      | yes       | Order price (§4.2.5.3 Price level rule)                    |
+| `quantity`  | float  | ≥ 0, ≤ available position | shares / units of position | yes       | Order magnitude (§4.2.5.3 Order quantity rule)             |
+| `reasoning` | string | 1–3 sentences             | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py` |
 
 **Content Constraints.**
 
@@ -564,12 +564,12 @@ Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `Ru
 
 ###### 4.2.5.1 Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference and portfolio valuation [Ref 9]. |
-| `fundamental` | Continuous | 1 tick | Anchor for collateral-value deviation and discount calculations [Ref 1]. |
-| `deviation` | Continuous | 1 tick | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
-| `position` | State | persistent | Collateral inventory available to liquidate [Ref 3]. |
+| Signal        | Type       | Memory Window | Rationale                                                                               |
+|---------------|------------|---------------|-----------------------------------------------------------------------------------------|
+| `price`       | Continuous | 1 tick        | Execution reference and portfolio valuation [Ref 9].                                    |
+| `fundamental` | Continuous | 1 tick        | Anchor for collateral-value deviation and discount calculations [Ref 1].                |
+| `deviation`   | Continuous | 1 tick        | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
+| `position`    | State      | persistent    | Collateral inventory available to liquidate [Ref 3].                                    |
 
 Does NOT use: social-network topology, undocumented peer thresholds, fee schedules, latency, or matching-engine implementation details.
 
@@ -583,16 +583,16 @@ Does NOT use: social-network topology, undocumented peer thresholds, fee schedul
 
 ###### 4.2.5.3 Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Order types allowed | `buy`, `sell`, `hold` as specified by the trigger function. |
-| Price level rule | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`. |
-| Order quantity rule | `q = min(position, position * liquidation_sell_ratio)` for sell; otherwise zero. |
-| Order lifetime | One decision round; replace on next fresh broadcast. |
-| Cancellation policy | Cancel prior intent when the current trigger evaluates to hold or the opposite side. |
-| Inventory constraint | Never sell more than internally available long position plus declared short inventory discipline. |
+| Aspect                | Specification                                                                                                                 |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Order types allowed   | `buy`, `sell`, `hold` as specified by the trigger function.                                                                   |
+| Price level rule      | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`.                     |
+| Order quantity rule   | `q = min(position, position * liquidation_sell_ratio)` for sell; otherwise zero.                                              |
+| Order lifetime        | One decision round; replace on next fresh broadcast.                                                                          |
+| Cancellation policy   | Cancel prior intent when the current trigger evaluates to hold or the opposite side.                                          |
+| Inventory constraint  | Never sell more than internally available long position plus declared short inventory discipline.                             |
 | Wealth / leverage cap | Never buy more than available cash divided by current price; leveraged liquidation agents only reduce exposure after trigger. |
-| Stop-loss / kill rule | Stop selling when position is exhausted or collateral deviation no longer breaches the threshold. |
+| Stop-loss / kill rule | Stop selling when position is exhausted or collateral deviation no longer breaches the threshold.                             |
 
 ###### 4.2.5.4 Mathematical Model
 
@@ -607,19 +607,19 @@ else:
 ```
 
 State variables:
-| State | Initial value | Update phase | Evolution |
-|-------|---------------|--------------|-----------|
-| `cash` | scenario config | post-fill | cash decreases on buy and increases on sell. |
-| `position` | scenario config | post-fill | position increases on buy and decreases on sell. |
-| `liquidated_once` | false | post-decide | true after first sell activation. |
+| State             | Initial value   | Update phase | Evolution                                        |
+|-------------------|-----------------|--------------|--------------------------------------------------|
+| `cash`            | scenario config | post-fill    | cash decreases on buy and increases on sell.     |
+| `position`        | scenario config | post-fill    | position increases on buy and decreases on sell. |
+| `liquidated_once` | false           | post-decide  | true after first sell activation.                |
 
 Determinism contract: deterministic given identical market signals and state.
 
 Parameter symbol table:
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_liq` | Liquidation deviation threshold | -0.10 | Ref 3 |
-| `phi_liq` | Fraction of collateral sold per trigger | 0.40 | Ref 3 |
+| Symbol      | Meaning                                 | Default Value | Source |
+|-------------|-----------------------------------------|---------------|--------|
+| `theta_liq` | Liquidation deviation threshold         | -0.10         | Ref 3  |
+| `phi_liq`   | Fraction of collateral sold per trigger | 0.40          | Ref 3  |
 
 ###### 4.2.5.5 Behavioral Properties
 
@@ -630,21 +630,21 @@ Parameter symbol table:
 
 #### 4.2.6 Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `liquidation_threshold` | float | -0.10 | [-0.30, -0.03] | high | Deviation that triggers collateral liquidation. | Higher magnitude -> later liquidation. | Gorton & Metrick (2012); Archegos broker timing calibration |
-| `liquidation_sell_ratio` | float | 0.40 | [0.05, 1.00] | high | Fraction of collateral sold per activation. | Higher -> larger immediate selling pressure. | Gorton & Metrick (2012); post-event broker calibration |
-| `initial_position` | float | 4000.0 | > 0 | high | Starting collateral inventory. | Higher -> larger liquidation supply. | Scenario normalization from Archegos exposure reports |
+| Parameter                | Type  | Default | Valid Range    | Sensitivity | Description                                     | Impact                                       | Source                                                      |
+|--------------------------|-------|---------|----------------|-------------|-------------------------------------------------|----------------------------------------------|-------------------------------------------------------------|
+| `liquidation_threshold`  | float | -0.10   | [-0.30, -0.03] | high        | Deviation that triggers collateral liquidation. | Higher magnitude -> later liquidation.       | Gorton & Metrick (2012); Archegos broker timing calibration |
+| `liquidation_sell_ratio` | float | 0.40    | [0.05, 1.00]   | high        | Fraction of collateral sold per activation.     | Higher -> larger immediate selling pressure. | Gorton & Metrick (2012); post-event broker calibration      |
+| `initial_position`       | float | 4000.0  | > 0            | high        | Starting collateral inventory.                  | Higher -> larger liquidation supply.         | Scenario normalization from Archegos exposure reports       |
 
 #### 4.2.7 Population and Heterogeneity
 
-| Dimension | Specification |
-|-----------|---------------|
-| Default population size | 1 instance in ArchegosCollapse configs. |
-| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults. |
-| Heterogeneity per parameter | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
-| Cross-agent correlation | Same archetype instances share theory and trigger sign; cash and position levels may differ. |
-| Identity persistence | Persistent identity and state across rounds; no type switching. |
+| Dimension                      | Specification                                                                                                 |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Default population size        | 1 instance in ArchegosCollapse configs.                                                                       |
+| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults.                    |
+| Heterogeneity per parameter    | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
+| Cross-agent correlation        | Same archetype instances share theory and trigger sign; cash and position levels may differ.                  |
+| Identity persistence           | Persistent identity and state across rounds; no type switching.                                               |
 
 #### 4.2.8 Worked Numerical Examples
 
@@ -666,7 +666,7 @@ State update: no cash or position change.
 System state: `price=88`, `fundamental=100`, `deviation=-0.12`, plus default parameters.
 Calculation:
   At `deviation=-0.12`, branch fires for this threshold.
-Decision: sell for PrimeBroker1-style early threshold; hold for delayed threshold until deeper stress.
+Decision: sell for PrimeBrokerFirstMover-style early threshold; hold for delayed threshold until deeper stress.
 State update: cash and position update only if the branch emits a non-hold order.
 
 ### Edge Case - Constraint clamp or missing signal
@@ -694,45 +694,45 @@ State update: no state becomes negative.
 
 ###### 4.2.9.1 Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease | number of non-hold orders |
-| `size_half` | Halve the size parameter | Same timing with lower impact. | decrease | average order quantity |
+| Ablation name      | Setting                                     | Hypothesis tested                                                   | Expected direction | Metric                    |
+|--------------------|---------------------------------------------|---------------------------------------------------------------------|--------------------|---------------------------|
+| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
+| `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
 #### 4.2.10 Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
+| # | Citation                                                                                                                                                                    | Notes                                         |
+|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | 3 | Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425-451. https://doi.org/10.1016/j.jfineco.2011.03.016 | Creditor run and first-mover liquidation race |
-| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x | Price impact and execution-price relevance |
+| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x           | Price impact and execution-price relevance    |
 
 #### 4.2.11 Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex three-pass self-check |
-| Created | 2026-06-30 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
-| Status | experimental |
+| Field       | Content                                                                                                                                                                                                                                                                                                                    |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                      |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                 |
+| Version     | 1.0.0                                                                                                                                                                                                                                                                                                                      |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
+| Status      | experimental                                                                                                                                                                                                                                                                                                               |
 
-### §4.3 PrimeBroker2
+### §4.3 PrimeBrokerDelayedLiquidator
 
 > Agent pool source: examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md
 
 
 #### 4.3.1 Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | delayed prime-broker liquidator |
-| Theory Family         | Leverage / Risk-On-Risk-Off |
+| Field                 | Content                                                                                  |
+|-----------------------|------------------------------------------------------------------------------------------|
+| Archetype             | delayed prime-broker liquidator                                                          |
+| Theory Family         | Leverage / Risk-On-Risk-Off                                                              |
 | Market Role           | **Destabilising** - later liquidation amplifies the cascade and receives worse execution |
-| Time Horizon          | short |
-| Risk Tolerance        | medium |
-| Information Asymmetry | partial |
-| Determinism           | deterministic |
+| Time Horizon          | short                                                                                    |
+| Risk Tolerance        | medium                                                                                   |
+| Information Asymmetry | partial                                                                                  |
+| Determinism           | deterministic                                                                            |
 
 #### 4.3.2 Definition and Goals
 
@@ -778,11 +778,11 @@ Deactivation Conditions:
 - Deviation above threshold: hold.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Hold | No liquidation while collateral value remains inside threshold. |
-| Liquidity stress / drought | Destabilising | Sells collateral into weakening demand. |
-| Crash / cascade | Destabilising | Repeated sell decisions reinforce price impact. |
+| Regime                     | Contribution  | Mechanism                                                       |
+|----------------------------|---------------|-----------------------------------------------------------------|
+| Calm market                | Hold          | No liquidation while collateral value remains inside threshold. |
+| Liquidity stress / drought | Destabilising | Sells collateral into weakening demand.                         |
+| Crash / cascade            | Destabilising | Repeated sell decisions reinforce price impact.                 |
 
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
@@ -792,24 +792,24 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 **Inputs (per decision call).**
 
-| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
-|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
-| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.3.5.1                                                                                          |
-| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.3.5.1                                                                                          |
-| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.3.5.1                                                                                          |
-| `position`              | agent state (§4.3.5.4 state variables)              | `float`      | yes                     | Collateral inventory remaining to liquidate                                                              |
-| `cash`                  | agent state (§4.3.5.4 state variables)              | `float`      | yes                     | Populated by init from §4.3.6                                                                            |
-| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
-| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+| Input                 | Source                                 | Type / Shape | Required?        | Notes                                                                                                 |
+|-----------------------|----------------------------------------|--------------|------------------|-------------------------------------------------------------------------------------------------------|
+| `price`               | environment broadcast                  | `float`      | yes              | Row of §4.3.5.1                                                                                       |
+| `fundamental`         | environment broadcast                  | `float`      | yes              | Row of §4.3.5.1                                                                                       |
+| `deviation`           | environment broadcast                  | `float`      | yes              | Row of §4.3.5.1                                                                                       |
+| `position`            | agent state (§4.3.5.4 state variables) | `float`      | yes              | Collateral inventory remaining to liquidate                                                           |
+| `cash`                | agent state (§4.3.5.4 state variables) | `float`      | yes              | Populated by init from §4.3.6                                                                         |
+| `round`               | round header                           | `int`        | yes              | Round number                                                                                          |
+| `retrieved_knowledge` | retrieval store (Rag variant only)     | `list[str]`  | Rag variant only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty |
 
 **Outputs (per decision call).** The agent emits exactly one decision object.
 
-| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
-|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
-| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.3.5.3 Order types)       |
-| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.3.5.3 Price level rule; sell uses `price * price_penalty`) |
-| `quantity`  | float  | ≥ 0, ≤ available position  | shares / units of position | yes       | Order magnitude (§4.3.5.3 Order quantity rule)                |
-| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+| Field       | Type   | Valid Range / Enum        | Unit                       | Required? | Meaning                                                                    |
+|-------------|--------|---------------------------|----------------------------|-----------|----------------------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`   | —                          | yes       | Discrete action selected (matches §4.3.5.3 Order types)                    |
+| `bid_price` | float  | > 0                       | same units as `price`      | yes       | Order price (§4.3.5.3 Price level rule; sell uses `price * price_penalty`) |
+| `quantity`  | float  | ≥ 0, ≤ available position | shares / units of position | yes       | Order magnitude (§4.3.5.3 Order quantity rule)                             |
+| `reasoning` | string | 1–3 sentences             | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`                 |
 
 **Content Constraints.**
 
@@ -840,12 +840,12 @@ Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `Ru
 
 ###### 4.3.5.1 Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference and portfolio valuation [Ref 9]. |
-| `fundamental` | Continuous | 1 tick | Anchor for collateral-value deviation and discount calculations [Ref 1]. |
-| `deviation` | Continuous | 1 tick | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
-| `position` | State | persistent | Collateral inventory available to liquidate [Ref 3]. |
+| Signal        | Type       | Memory Window | Rationale                                                                               |
+|---------------|------------|---------------|-----------------------------------------------------------------------------------------|
+| `price`       | Continuous | 1 tick        | Execution reference and portfolio valuation [Ref 9].                                    |
+| `fundamental` | Continuous | 1 tick        | Anchor for collateral-value deviation and discount calculations [Ref 1].                |
+| `deviation`   | Continuous | 1 tick        | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
+| `position`    | State      | persistent    | Collateral inventory available to liquidate [Ref 3].                                    |
 
 Does NOT use: social-network topology, undocumented peer thresholds, fee schedules, latency, or matching-engine implementation details.
 
@@ -859,16 +859,16 @@ Does NOT use: social-network topology, undocumented peer thresholds, fee schedul
 
 ###### 4.3.5.3 Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Order types allowed | `buy`, `sell`, `hold` as specified by the trigger function. |
-| Price level rule | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`. |
-| Order quantity rule | `q = min(position, position * liquidation_sell_ratio)` for sell; otherwise zero. |
-| Order lifetime | One decision round; replace on next fresh broadcast. |
-| Cancellation policy | Cancel prior intent when the current trigger evaluates to hold or the opposite side. |
-| Inventory constraint | Never sell more than internally available long position plus declared short inventory discipline. |
+| Aspect                | Specification                                                                                                                 |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Order types allowed   | `buy`, `sell`, `hold` as specified by the trigger function.                                                                   |
+| Price level rule      | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`.                     |
+| Order quantity rule   | `q = min(position, position * liquidation_sell_ratio)` for sell; otherwise zero.                                              |
+| Order lifetime        | One decision round; replace on next fresh broadcast.                                                                          |
+| Cancellation policy   | Cancel prior intent when the current trigger evaluates to hold or the opposite side.                                          |
+| Inventory constraint  | Never sell more than internally available long position plus declared short inventory discipline.                             |
 | Wealth / leverage cap | Never buy more than available cash divided by current price; leveraged liquidation agents only reduce exposure after trigger. |
-| Stop-loss / kill rule | Stop selling when position is exhausted or collateral deviation no longer breaches the threshold. |
+| Stop-loss / kill rule | Stop selling when position is exhausted or collateral deviation no longer breaches the threshold.                             |
 
 ###### 4.3.5.4 Mathematical Model
 
@@ -883,20 +883,20 @@ else:
 ```
 
 State variables:
-| State | Initial value | Update phase | Evolution |
-|-------|---------------|--------------|-----------|
-| `cash` | scenario config | post-fill | cash decreases on buy and increases on sell. |
-| `position` | scenario config | post-fill | position increases on buy and decreases on sell. |
-| `liquidated_once` | false | post-decide | true after first sell activation. |
+| State             | Initial value   | Update phase | Evolution                                        |
+|-------------------|-----------------|--------------|--------------------------------------------------|
+| `cash`            | scenario config | post-fill    | cash decreases on buy and increases on sell.     |
+| `position`        | scenario config | post-fill    | position increases on buy and decreases on sell. |
+| `liquidated_once` | false           | post-decide  | true after first sell activation.                |
 
 Determinism contract: deterministic given identical market signals and state.
 
 Parameter symbol table:
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_liq` | Liquidation deviation threshold | -0.15 | Ref 3 |
-| `phi_liq` | Fraction of collateral sold per trigger | 0.35 | Ref 3 |
-| `pi_penalty` | Execution haircut for delayed liquidation | 0.97 | Ref 3; Ref 9 |
+| Symbol       | Meaning                                   | Default Value | Source       |
+|--------------|-------------------------------------------|---------------|--------------|
+| `theta_liq`  | Liquidation deviation threshold           | -0.15         | Ref 3        |
+| `phi_liq`    | Fraction of collateral sold per trigger   | 0.35          | Ref 3        |
+| `pi_penalty` | Execution haircut for delayed liquidation | 0.97          | Ref 3; Ref 9 |
 
 ###### 4.3.5.5 Behavioral Properties
 
@@ -907,22 +907,22 @@ Parameter symbol table:
 
 #### 4.3.6 Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `liquidation_threshold` | float | -0.15 | [-0.30, -0.03] | high | Deviation that triggers collateral liquidation. | Higher magnitude -> later liquidation. | Gorton & Metrick (2012); Archegos broker timing calibration |
-| `liquidation_sell_ratio` | float | 0.35 | [0.05, 1.00] | high | Fraction of collateral sold per activation. | Higher -> larger immediate selling pressure. | Gorton & Metrick (2012); post-event broker calibration |
-| `initial_position` | float | 3500.0 | > 0 | high | Starting collateral inventory. | Higher -> larger liquidation supply. | Scenario normalization from Archegos exposure reports |
-| `price_penalty` | float | 0.97 | [0.80, 1.00] | medium | Execution haircut for delayed liquidation. | Higher -> smaller first-mover payoff gap. | Archegos broker-loss comparison calibration |
+| Parameter                | Type  | Default | Valid Range    | Sensitivity | Description                                     | Impact                                       | Source                                                      |
+|--------------------------|-------|---------|----------------|-------------|-------------------------------------------------|----------------------------------------------|-------------------------------------------------------------|
+| `liquidation_threshold`  | float | -0.15   | [-0.30, -0.03] | high        | Deviation that triggers collateral liquidation. | Higher magnitude -> later liquidation.       | Gorton & Metrick (2012); Archegos broker timing calibration |
+| `liquidation_sell_ratio` | float | 0.35    | [0.05, 1.00]   | high        | Fraction of collateral sold per activation.     | Higher -> larger immediate selling pressure. | Gorton & Metrick (2012); post-event broker calibration      |
+| `initial_position`       | float | 3500.0  | > 0            | high        | Starting collateral inventory.                  | Higher -> larger liquidation supply.         | Scenario normalization from Archegos exposure reports       |
+| `price_penalty`          | float | 0.97    | [0.80, 1.00]   | medium      | Execution haircut for delayed liquidation.      | Higher -> smaller first-mover payoff gap.    | Archegos broker-loss comparison calibration                 |
 
 #### 4.3.7 Population and Heterogeneity
 
-| Dimension | Specification |
-|-----------|---------------|
-| Default population size | 1 instance in ArchegosCollapse configs. |
-| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults. |
-| Heterogeneity per parameter | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
-| Cross-agent correlation | Same archetype instances share theory and trigger sign; cash and position levels may differ. |
-| Identity persistence | Persistent identity and state across rounds; no type switching. |
+| Dimension                      | Specification                                                                                                 |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Default population size        | 1 instance in ArchegosCollapse configs.                                                                       |
+| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults.                    |
+| Heterogeneity per parameter    | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
+| Cross-agent correlation        | Same archetype instances share theory and trigger sign; cash and position levels may differ.                  |
+| Identity persistence           | Persistent identity and state across rounds; no type switching.                                               |
 
 #### 4.3.8 Worked Numerical Examples
 
@@ -944,7 +944,7 @@ State update: no cash or position change.
 System state: `price=88`, `fundamental=100`, `deviation=-0.12`, plus default parameters.
 Calculation:
   At `deviation=-0.12`, branch does not fire for this threshold.
-Decision: sell for PrimeBroker1-style early threshold; hold for delayed threshold until deeper stress.
+Decision: sell for PrimeBrokerFirstMover-style early threshold; hold for delayed threshold until deeper stress.
 State update: cash and position update only if the branch emits a non-hold order.
 
 ### Edge Case - Constraint clamp or missing signal
@@ -972,28 +972,28 @@ State update: no state becomes negative.
 
 ###### 4.3.9.1 Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease | number of non-hold orders |
-| `size_half` | Halve the size parameter | Same timing with lower impact. | decrease | average order quantity |
+| Ablation name      | Setting                                     | Hypothesis tested                                                   | Expected direction | Metric                    |
+|--------------------|---------------------------------------------|---------------------------------------------------------------------|--------------------|---------------------------|
+| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
+| `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
 #### 4.3.10 Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
+| # | Citation                                                                                                                                                                    | Notes                                         |
+|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | 3 | Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425-451. https://doi.org/10.1016/j.jfineco.2011.03.016 | Creditor run and first-mover liquidation race |
-| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x | Price impact and execution-price relevance |
+| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x           | Price impact and execution-price relevance    |
 
 #### 4.3.11 Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex three-pass self-check |
-| Created | 2026-06-30 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
-| Status | experimental |
+| Field       | Content                                                                                                                                                                                                                                                                                                                    |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                      |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                 |
+| Version     | 1.0.0                                                                                                                                                                                                                                                                                                                      |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
+| Status      | experimental                                                                                                                                                                                                                                                                                                               |
 
 ### §4.4 BlockTradeBuyer
 
@@ -1002,15 +1002,15 @@ State update: no state becomes negative.
 
 #### 4.4.1 Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | opportunistic block-trade buyer |
-| Theory Family         | Liquidity / Funding |
+| Field                 | Content                                                                 |
+|-----------------------|-------------------------------------------------------------------------|
+| Archetype             | opportunistic block-trade buyer                                         |
+| Theory Family         | Liquidity / Funding                                                     |
 | Market Role           | **Stabilising** - absorbs distressed supply after a sufficient discount |
-| Time Horizon          | medium |
-| Risk Tolerance        | medium |
-| Information Asymmetry | partial |
-| Determinism           | deterministic |
+| Time Horizon          | medium                                                                  |
+| Risk Tolerance        | medium                                                                  |
+| Information Asymmetry | partial                                                                 |
+| Determinism           | deterministic                                                           |
 
 #### 4.4.2 Definition and Goals
 
@@ -1067,11 +1067,11 @@ Deactivation Conditions:
 - Deviation above discount threshold: hold.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Hold | Waits for adequate discount. |
-| Liquidity stress / drought | Stabilising | Absorbs shares that forced sellers unload. |
-| Post-shock recovery | Stabilising | Continued bids support convergence toward fundamental value. |
+| Regime                     | Contribution | Mechanism                                                    |
+|----------------------------|--------------|--------------------------------------------------------------|
+| Calm market                | Hold         | Waits for adequate discount.                                 |
+| Liquidity stress / drought | Stabilising  | Absorbs shares that forced sellers unload.                   |
+| Post-shock recovery        | Stabilising  | Continued bids support convergence toward fundamental value. |
 
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
@@ -1081,24 +1081,24 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 **Inputs (per decision call).**
 
-| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
-|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
-| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.4.5.1                                                                                          |
-| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.4.5.1                                                                                          |
-| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.4.5.1                                                                                          |
-| `cash`                  | agent state (§4.4.5.4 state variables)              | `float`      | yes                     | Capital available for distressed block absorption                                                        |
-| `position`              | agent state (§4.4.5.4 state variables)              | `float`      | yes                     | Cumulative inventory accumulated so far                                                                  |
-| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
-| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+| Input                 | Source                                 | Type / Shape | Required?        | Notes                                                                                                 |
+|-----------------------|----------------------------------------|--------------|------------------|-------------------------------------------------------------------------------------------------------|
+| `price`               | environment broadcast                  | `float`      | yes              | Row of §4.4.5.1                                                                                       |
+| `fundamental`         | environment broadcast                  | `float`      | yes              | Row of §4.4.5.1                                                                                       |
+| `deviation`           | environment broadcast                  | `float`      | yes              | Row of §4.4.5.1                                                                                       |
+| `cash`                | agent state (§4.4.5.4 state variables) | `float`      | yes              | Capital available for distressed block absorption                                                     |
+| `position`            | agent state (§4.4.5.4 state variables) | `float`      | yes              | Cumulative inventory accumulated so far                                                               |
+| `round`               | round header                           | `int`        | yes              | Round number                                                                                          |
+| `retrieved_knowledge` | retrieval store (Rag variant only)     | `list[str]`  | Rag variant only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty |
 
 **Outputs (per decision call).** The agent emits exactly one decision object.
 
-| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
-|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
-| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.4.5.3 Order types)       |
-| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.4.5.3 Price level rule; buy uses current `price`) |
-| `quantity`  | float  | ≥ 0, ≤ cash / price        | shares / units of position | yes       | Order magnitude (§4.4.5.3 Order quantity rule)                |
-| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+| Field       | Type   | Valid Range / Enum      | Unit                       | Required? | Meaning                                                           |
+|-------------|--------|-------------------------|----------------------------|-----------|-------------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}` | —                          | yes       | Discrete action selected (matches §4.4.5.3 Order types)           |
+| `bid_price` | float  | > 0                     | same units as `price`      | yes       | Order price (§4.4.5.3 Price level rule; buy uses current `price`) |
+| `quantity`  | float  | ≥ 0, ≤ cash / price     | shares / units of position | yes       | Order magnitude (§4.4.5.3 Order quantity rule)                    |
+| `reasoning` | string | 1–3 sentences           | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`        |
 
 **Content Constraints.**
 
@@ -1129,12 +1129,12 @@ Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `Ru
 
 ###### 4.4.5.1 Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference and portfolio valuation [Ref 9]. |
-| `fundamental` | Continuous | 1 tick | Anchor for collateral-value deviation and discount calculations [Ref 1]. |
-| `deviation` | Continuous | 1 tick | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
-| `cash` | State | persistent | Capital available for distressed block absorption [Ref 4]. |
+| Signal        | Type       | Memory Window | Rationale                                                                               |
+|---------------|------------|---------------|-----------------------------------------------------------------------------------------|
+| `price`       | Continuous | 1 tick        | Execution reference and portfolio valuation [Ref 9].                                    |
+| `fundamental` | Continuous | 1 tick        | Anchor for collateral-value deviation and discount calculations [Ref 1].                |
+| `deviation`   | Continuous | 1 tick        | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
+| `cash`        | State      | persistent    | Capital available for distressed block absorption [Ref 4].                              |
 
 Does NOT use: social-network topology, undocumented peer thresholds, fee schedules, latency, or matching-engine implementation details.
 
@@ -1148,16 +1148,16 @@ Does NOT use: social-network topology, undocumented peer thresholds, fee schedul
 
 ###### 4.4.5.3 Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Order types allowed | `buy`, `sell`, `hold` as specified by the trigger function. |
-| Price level rule | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`. |
-| Order quantity rule | `q = (cash * buy_ratio) / price` for buy, clamped by available cash; otherwise zero. |
-| Order lifetime | One decision round; replace on next fresh broadcast. |
-| Cancellation policy | Cancel prior intent when the current trigger evaluates to hold or the opposite side. |
-| Inventory constraint | Never sell more than internally available long position plus declared short inventory discipline. |
+| Aspect                | Specification                                                                                                                 |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Order types allowed   | `buy`, `sell`, `hold` as specified by the trigger function.                                                                   |
+| Price level rule      | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`.                     |
+| Order quantity rule   | `q = (cash * buy_ratio) / price` for buy, clamped by available cash; otherwise zero.                                          |
+| Order lifetime        | One decision round; replace on next fresh broadcast.                                                                          |
+| Cancellation policy   | Cancel prior intent when the current trigger evaluates to hold or the opposite side.                                          |
+| Inventory constraint  | Never sell more than internally available long position plus declared short inventory discipline.                             |
 | Wealth / leverage cap | Never buy more than available cash divided by current price; leveraged liquidation agents only reduce exposure after trigger. |
-| Stop-loss / kill rule | Stop buying when cash is exhausted or discount no longer exceeds threshold. |
+| Stop-loss / kill rule | Stop buying when cash is exhausted or discount no longer exceeds threshold.                                                   |
 
 ###### 4.4.5.4 Mathematical Model
 
@@ -1172,19 +1172,19 @@ else:
 ```
 
 State variables:
-| State | Initial value | Update phase | Evolution |
-|-------|---------------|--------------|-----------|
-| `cash` | scenario config | post-fill | cash decreases on buy and increases on sell. |
-| `position` | scenario config | post-fill | position increases on buy and decreases on sell. |
-| `deployed_capital` | 0.0 | post-fill | cumulative cash spent on block purchases. |
+| State              | Initial value   | Update phase | Evolution                                        |
+|--------------------|-----------------|--------------|--------------------------------------------------|
+| `cash`             | scenario config | post-fill    | cash decreases on buy and increases on sell.     |
+| `position`         | scenario config | post-fill    | position increases on buy and decreases on sell. |
+| `deployed_capital` | 0.0             | post-fill    | cumulative cash spent on block purchases.        |
 
 Determinism contract: deterministic given identical market signals and state.
 
 Parameter symbol table:
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_discount` | Required discount threshold | -0.10 | Ref 4; Ref 8 |
-| `phi_buy` | Cash deployment fraction | 0.30 | Ref 4; Ref 8 |
+| Symbol           | Meaning                     | Default Value | Source       |
+|------------------|-----------------------------|---------------|--------------|
+| `theta_discount` | Required discount threshold | -0.10         | Ref 4; Ref 8 |
+| `phi_buy`        | Cash deployment fraction    | 0.30          | Ref 4; Ref 8 |
 
 ###### 4.4.5.5 Behavioral Properties
 
@@ -1195,21 +1195,21 @@ Parameter symbol table:
 
 #### 4.4.6 Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `discount_threshold` | float | -0.10 | [-0.30, -0.01] | high | Discount from fundamental required before buying. | Higher magnitude -> fewer stabilising buys. | Grossman & Miller (1988); Shleifer & Vishny (1997) |
-| `buy_ratio` | float | 0.30 | [0.01, 1.00] | high | Fraction of cash deployed per trigger. | Higher -> larger stabilising demand. | Grossman & Miller (1988) distressed liquidity calibration |
-| `initial_cash` | float | 1000000.0 | >= 0 | high | Starting capital available for block purchases. | Higher -> stronger price floor. | Scenario normalization from block-trade capacity |
+| Parameter            | Type  | Default   | Valid Range    | Sensitivity | Description                                       | Impact                                      | Source                                                    |
+|----------------------|-------|-----------|----------------|-------------|---------------------------------------------------|---------------------------------------------|-----------------------------------------------------------|
+| `discount_threshold` | float | -0.10     | [-0.30, -0.01] | high        | Discount from fundamental required before buying. | Higher magnitude -> fewer stabilising buys. | Grossman & Miller (1988); Shleifer & Vishny (1997)        |
+| `buy_ratio`          | float | 0.30      | [0.01, 1.00]   | high        | Fraction of cash deployed per trigger.            | Higher -> larger stabilising demand.        | Grossman & Miller (1988) distressed liquidity calibration |
+| `initial_cash`       | float | 1000000.0 | >= 0           | high        | Starting capital available for block purchases.   | Higher -> stronger price floor.             | Scenario normalization from block-trade capacity          |
 
 #### 4.4.7 Population and Heterogeneity
 
-| Dimension | Specification |
-|-----------|---------------|
-| Default population size | 1 instance in ArchegosCollapse configs. |
-| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults. |
-| Heterogeneity per parameter | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
-| Cross-agent correlation | Same archetype instances share theory and trigger sign; cash and position levels may differ. |
-| Identity persistence | Persistent identity and state across rounds; no type switching. |
+| Dimension                      | Specification                                                                                                 |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Default population size        | 1 instance in ArchegosCollapse configs.                                                                       |
+| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults.                    |
+| Heterogeneity per parameter    | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
+| Cross-agent correlation        | Same archetype instances share theory and trigger sign; cash and position levels may differ.                  |
+| Identity persistence           | Persistent identity and state across rounds; no type switching.                                               |
 
 #### 4.4.8 Worked Numerical Examples
 
@@ -1259,28 +1259,28 @@ State update: no state becomes negative.
 
 ###### 4.4.9.1 Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease | number of non-hold orders |
-| `size_half` | Halve the size parameter | Same timing with lower impact. | decrease | average order quantity |
+| Ablation name      | Setting                                     | Hypothesis tested                                                   | Expected direction | Metric                    |
+|--------------------|---------------------------------------------|---------------------------------------------------------------------|--------------------|---------------------------|
+| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
+| `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
 #### 4.4.10 Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
+| # | Citation                                                                                                                                                          | Notes                                                     |
+|---|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
 | 4 | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617-633. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x | Block liquidity provision and inventory-risk compensation |
-| 8 | Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35-55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x | Limits to arbitrage and capital constraints |
+| 8 | Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35-55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x             | Limits to arbitrage and capital constraints               |
 
 #### 4.4.11 Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex three-pass self-check |
-| Created | 2026-06-30 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
-| Status | experimental |
+| Field       | Content                                                                                                                                                                                                                                                                                                                    |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                      |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                 |
+| Version     | 1.0.0                                                                                                                                                                                                                                                                                                                      |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
+| Status      | experimental                                                                                                                                                                                                                                                                                                               |
 
 ### §4.5 InformationTrader
 
@@ -1289,15 +1289,15 @@ State update: no state becomes negative.
 
 #### 4.5.1 Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | liquidation-signal information trader |
-| Theory Family         | Microstructure |
+| Field                 | Content                                                                                                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------|
+| Archetype             | liquidation-signal information trader                                                                             |
+| Theory Family         | Microstructure                                                                                                    |
 | Market Role           | **Context-dependent** - front-runs distress and later covers, amplifying early decline but aiding price discovery |
-| Time Horizon          | short |
-| Risk Tolerance        | high |
-| Information Asymmetry | partial |
-| Determinism           | stochastic-given-seed |
+| Time Horizon          | short                                                                                                             |
+| Risk Tolerance        | high                                                                                                              |
+| Information Asymmetry | partial                                                                                                           |
+| Determinism           | stochastic-given-seed                                                                                             |
 
 #### 4.5.2 Definition and Goals
 
@@ -1356,11 +1356,11 @@ Deactivation Conditions:
 - Detection draw fails: hold.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Hold | No distress signal. |
+| Regime                     | Contribution  | Mechanism                                   |
+|----------------------------|---------------|---------------------------------------------|
+| Calm market                | Hold          | No distress signal.                         |
 | Liquidity stress / drought | Destabilising | Sells ahead of expected forced liquidation. |
-| Post-shock recovery | Stabilising | Covers short exposure through buy orders. |
+| Post-shock recovery        | Stabilising   | Covers short exposure through buy orders.   |
 
 Environmental Dependencies: none beyond the declared market broadcast signals and the agent's own cash, position, and state variables.
 
@@ -1370,27 +1370,27 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 **Inputs (per decision call).**
 
-| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
-|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
-| `price`                 | environment broadcast                               | `float`      | yes                     | Row of §4.5.5.1                                                                                          |
-| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of §4.5.5.1                                                                                          |
-| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of §4.5.5.1                                                                                          |
-| `prev_price`            | environment broadcast (extended field)              | `float`      | yes                     | Supports local order-flow stress inference [Ref 5]                                                       |
-| `position`              | agent state (§4.5.5.4 state variables)              | `float`      | yes                     | Long inventory available for the sell (front-run) branch                                                 |
-| `short_position`        | agent state (§4.5.5.4 state variables)              | `float`      | yes                     | Determines whether the cover branch can activate                                                         |
-| `cash`                  | agent state (§4.5.5.4 state variables)              | `float`      | yes                     | Bounds the cover-branch buy quantity                                                                     |
-| `rng_state`             | agent state (seeded)                                | `int` / RNG  | yes                     | Detection uses Bernoulli(`p_detect`); seed-reproducible                                                  |
-| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
-| `retrieved_knowledge`   | retrieval store (Rag variant only)                  | `list[str]`  | Rag variant only        | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+| Input                 | Source                                 | Type / Shape | Required?        | Notes                                                                                                 |
+|-----------------------|----------------------------------------|--------------|------------------|-------------------------------------------------------------------------------------------------------|
+| `price`               | environment broadcast                  | `float`      | yes              | Row of §4.5.5.1                                                                                       |
+| `fundamental`         | environment broadcast                  | `float`      | yes              | Row of §4.5.5.1                                                                                       |
+| `deviation`           | environment broadcast                  | `float`      | yes              | Row of §4.5.5.1                                                                                       |
+| `prev_price`          | environment broadcast (extended field) | `float`      | yes              | Supports local order-flow stress inference [Ref 5]                                                    |
+| `position`            | agent state (§4.5.5.4 state variables) | `float`      | yes              | Long inventory available for the sell (front-run) branch                                              |
+| `short_position`      | agent state (§4.5.5.4 state variables) | `float`      | yes              | Determines whether the cover branch can activate                                                      |
+| `cash`                | agent state (§4.5.5.4 state variables) | `float`      | yes              | Bounds the cover-branch buy quantity                                                                  |
+| `rng_state`           | agent state (seeded)                   | `int` / RNG  | yes              | Detection uses Bernoulli(`p_detect`); seed-reproducible                                               |
+| `round`               | round header                           | `int`        | yes              | Round number                                                                                          |
+| `retrieved_knowledge` | retrieval store (Rag variant only)     | `list[str]`  | Rag variant only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty |
 
 **Outputs (per decision call).** The agent emits exactly one decision object.
 
-| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
-|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
-| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action selected (matches §4.5.5.3 Order types)       |
-| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (§4.5.5.3 Price level rule; both branches use current `price`) |
-| `quantity`  | float  | ≥ 0; sell ≤ position; buy ≤ min(short_position, cash / price) | shares / units of position | yes | Order magnitude (§4.5.5.3 Order quantity rule)                |
-| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+| Field       | Type   | Valid Range / Enum                                            | Unit                       | Required? | Meaning                                                                    |
+|-------------|--------|---------------------------------------------------------------|----------------------------|-----------|----------------------------------------------------------------------------|
+| `action`    | enum   | `{"buy","sell","hold"}`                                       | —                          | yes       | Discrete action selected (matches §4.5.5.3 Order types)                    |
+| `bid_price` | float  | > 0                                                           | same units as `price`      | yes       | Order price (§4.5.5.3 Price level rule; both branches use current `price`) |
+| `quantity`  | float  | ≥ 0; sell ≤ position; buy ≤ min(short_position, cash / price) | shares / units of position | yes       | Order magnitude (§4.5.5.3 Order quantity rule)                             |
+| `reasoning` | string | 1–3 sentences                                                 | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`                 |
 
 **Content Constraints.**
 
@@ -1422,14 +1422,14 @@ Every implementation variant declared `Yes` in target §10.1 (`Rule`, `LLM`, `Ru
 
 ###### 4.5.5.1 Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference and portfolio valuation [Ref 9]. |
-| `fundamental` | Continuous | 1 tick | Anchor for collateral-value deviation and discount calculations [Ref 1]. |
-| `deviation` | Continuous | 1 tick | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
-| `prev_price` | Continuous | 1 tick | Supports local order-flow stress inference [Ref 5]. |
-| `short_position` | State | persistent | Determines whether cover branch can activate [Ref 7]. |
-| `rng_state` | State | persistent | Makes partial detection stochastic but seed-reproducible. |
+| Signal           | Type       | Memory Window | Rationale                                                                               |
+|------------------|------------|---------------|-----------------------------------------------------------------------------------------|
+| `price`          | Continuous | 1 tick        | Execution reference and portfolio valuation [Ref 9].                                    |
+| `fundamental`    | Continuous | 1 tick        | Anchor for collateral-value deviation and discount calculations [Ref 1].                |
+| `deviation`      | Continuous | 1 tick        | Primary trigger signal for distress, discount, or information advantage [Ref 1; Ref 3]. |
+| `prev_price`     | Continuous | 1 tick        | Supports local order-flow stress inference [Ref 5].                                     |
+| `short_position` | State      | persistent    | Determines whether cover branch can activate [Ref 7].                                   |
+| `rng_state`      | State      | persistent    | Makes partial detection stochastic but seed-reproducible.                               |
 
 Does NOT use: social-network topology, undocumented peer thresholds, fee schedules, latency, or matching-engine implementation details.
 
@@ -1443,16 +1443,16 @@ Does NOT use: social-network topology, undocumented peer thresholds, fee schedul
 
 ###### 4.5.5.3 Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Order types allowed | `buy`, `sell`, `hold` as specified by the trigger function. |
-| Price level rule | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`. |
-| Order quantity rule | Sell `min(front_run_size, position)` on detection; buy `min(cover_size, short_position, cash / price)` on cover; otherwise zero. |
-| Order lifetime | One decision round; replace on next fresh broadcast. |
-| Cancellation policy | Cancel prior intent when the current trigger evaluates to hold or the opposite side. |
-| Inventory constraint | Never sell more than internally available long position plus declared short inventory discipline. |
-| Wealth / leverage cap | Never buy more than available cash divided by current price; leveraged liquidation agents only reduce exposure after trigger. |
-| Stop-loss / kill rule | Stop selling when no long inventory remains; stop covering when short_position reaches zero. |
+| Aspect                | Specification                                                                                                                    |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| Order types allowed   | `buy`, `sell`, `hold` as specified by the trigger function.                                                                      |
+| Price level rule      | Use current `price` unless an intrinsic haircut/penalty parameter is declared; hold uses current `price`.                        |
+| Order quantity rule   | Sell `min(front_run_size, position)` on detection; buy `min(cover_size, short_position, cash / price)` on cover; otherwise zero. |
+| Order lifetime        | One decision round; replace on next fresh broadcast.                                                                             |
+| Cancellation policy   | Cancel prior intent when the current trigger evaluates to hold or the opposite side.                                             |
+| Inventory constraint  | Never sell more than internally available long position plus declared short inventory discipline.                                |
+| Wealth / leverage cap | Never buy more than available cash divided by current price; leveraged liquidation agents only reduce exposure after trigger.    |
+| Stop-loss / kill rule | Stop selling when no long inventory remains; stop covering when short_position reaches zero.                                     |
 
 ###### 4.5.5.4 Mathematical Model
 
@@ -1469,22 +1469,22 @@ else:
 ```
 
 State variables:
-| State | Initial value | Update phase | Evolution |
-|-------|---------------|--------------|-----------|
-| `cash` | scenario config | post-fill | cash decreases on buy and increases on sell. |
-| `position` | scenario config | post-fill | position increases on buy and decreases on sell. |
-| `short_position` | 0.0 | post-fill | increases after sell branch and decreases after cover branch. |
+| State            | Initial value   | Update phase | Evolution                                                     |
+|------------------|-----------------|--------------|---------------------------------------------------------------|
+| `cash`           | scenario config | post-fill    | cash decreases on buy and increases on sell.                  |
+| `position`       | scenario config | post-fill    | position increases on buy and decreases on sell.              |
+| `short_position` | 0.0             | post-fill    | increases after sell branch and decreases after cover branch. |
 
 Determinism contract: stochastic-given-seed because detection uses a Bernoulli draw with configured probability.
 
 Parameter symbol table:
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `p_detect` | Probability of detecting liquidation signal | 0.50 | Ref 5; Ref 7 |
-| `theta_detect` | Distress-detection deviation threshold | -0.05 | Ref 5; Ref 7 |
-| `front_run_size` | Maximum sell size on detected signal | 1000 | Ref 7 |
-| `theta_cover` | Recovery threshold for cover branch | -0.03 | Ref 7 |
-| `cover_size` | Maximum buy-to-cover size | 500 | Ref 7 |
+| Symbol           | Meaning                                     | Default Value | Source       |
+|------------------|---------------------------------------------|---------------|--------------|
+| `p_detect`       | Probability of detecting liquidation signal | 0.50          | Ref 5; Ref 7 |
+| `theta_detect`   | Distress-detection deviation threshold      | -0.05         | Ref 5; Ref 7 |
+| `front_run_size` | Maximum sell size on detected signal        | 1000          | Ref 7        |
+| `theta_cover`    | Recovery threshold for cover branch         | -0.03         | Ref 7        |
+| `cover_size`     | Maximum buy-to-cover size                   | 500           | Ref 7        |
 
 ###### 4.5.5.5 Behavioral Properties
 
@@ -1495,23 +1495,23 @@ Parameter symbol table:
 
 #### 4.5.6 Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `detection_ability` | float | 0.50 | [0.00, 1.00] | high | Probability of detecting the liquidation signal. | Higher -> more early sell orders. | Kyle (1985); Brunnermeier & Pedersen (2005) |
-| `detection_threshold` | float | -0.05 | [-0.20, 0.00] | high | Deviation at which distress detection is attempted. | Higher magnitude -> later signal attempts. | Kyle (1985); predatory-trading calibration |
-| `front_run_size` | float | 1000 | >= 0 | high | Maximum sell quantity on successful detection. | Higher -> stronger early downward pressure. | Brunnermeier & Pedersen (2005), normalized |
-| `cover_threshold` | float | -0.03 | [-0.20, 0.10] | medium | Deviation above which covering is allowed. | Higher -> later covering. | Brunnermeier & Pedersen (2005) |
-| `cover_size` | float | 500 | >= 0 | medium | Maximum buy-to-cover quantity. | Higher -> faster short-position reduction. | Brunnermeier & Pedersen (2005), normalized |
+| Parameter             | Type  | Default | Valid Range   | Sensitivity | Description                                         | Impact                                      | Source                                      |
+|-----------------------|-------|---------|---------------|-------------|-----------------------------------------------------|---------------------------------------------|---------------------------------------------|
+| `detection_ability`   | float | 0.50    | [0.00, 1.00]  | high        | Probability of detecting the liquidation signal.    | Higher -> more early sell orders.           | Kyle (1985); Brunnermeier & Pedersen (2005) |
+| `detection_threshold` | float | -0.05   | [-0.20, 0.00] | high        | Deviation at which distress detection is attempted. | Higher magnitude -> later signal attempts.  | Kyle (1985); predatory-trading calibration  |
+| `front_run_size`      | float | 1000    | >= 0          | high        | Maximum sell quantity on successful detection.      | Higher -> stronger early downward pressure. | Brunnermeier & Pedersen (2005), normalized  |
+| `cover_threshold`     | float | -0.03   | [-0.20, 0.10] | medium      | Deviation above which covering is allowed.          | Higher -> later covering.                   | Brunnermeier & Pedersen (2005)              |
+| `cover_size`          | float | 500     | >= 0          | medium      | Maximum buy-to-cover quantity.                      | Higher -> faster short-position reduction.  | Brunnermeier & Pedersen (2005), normalized  |
 
 #### 4.5.7 Population and Heterogeneity
 
-| Dimension | Specification |
-|-----------|---------------|
-| Default population size | 2 instances in ArchegosCollapse configs. |
-| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults. |
-| Heterogeneity per parameter | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
-| Cross-agent correlation | Same archetype instances share theory and trigger sign; cash and position levels may differ. |
-| Identity persistence | Persistent identity and state across rounds; no type switching. |
+| Dimension                      | Specification                                                                                                 |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Default population size        | 2 instances in ArchegosCollapse configs.                                                                      |
+| Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults.                    |
+| Heterogeneity per parameter    | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
+| Cross-agent correlation        | Same archetype instances share theory and trigger sign; cash and position levels may differ.                  |
+| Identity persistence           | Persistent identity and state across rounds; no type switching.                                               |
 
 #### 4.5.8 Worked Numerical Examples
 
@@ -1561,62 +1561,62 @@ State update: no state becomes negative.
 
 ###### 4.5.9.1 Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease | number of non-hold orders |
-| `size_half` | Halve the size parameter | Same timing with lower impact. | decrease | average order quantity |
+| Ablation name      | Setting                                     | Hypothesis tested                                                   | Expected direction | Metric                    |
+|--------------------|---------------------------------------------|---------------------------------------------------------------------|--------------------|---------------------------|
+| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
+| `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
 #### 4.5.10 Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
-| 5 | Kyle, A. S. (1985). Continuous auctions and insider trading. *Econometrica*, 53(6), 1315-1335. https://doi.org/10.2307/1913210 | Informed order-flow trading |
+| # | Citation                                                                                                                                                   | Notes                                       |
+|---|------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| 5 | Kyle, A. S. (1985). Continuous auctions and insider trading. *Econometrica*, 53(6), 1315-1335. https://doi.org/10.2307/1913210                             | Informed order-flow trading                 |
 | 7 | Brunnermeier, M. K., & Pedersen, L. H. (2005). Predatory trading. *Journal of Finance*, 60(4), 1825-1863. https://doi.org/10.1111/j.1540-6261.2005.00781.x | Predatory trading around forced liquidation |
 
 #### 4.5.11 Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex three-pass self-check |
-| Created | 2026-06-30 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
-| Status | experimental |
+| Field       | Content                                                                                                                                                                                                                                                                                                                    |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                      |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                 |
+| Version     | 1.0.0                                                                                                                                                                                                                                                                                                                      |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as the first sub-block of §4.N.5 Behavioral Framework, re-verified §3.1–§3.11 section order against `agent-design-skill.md`; no structural change to other sub-blocks. |
+| Status      | experimental                                                                                                                                                                                                                                                                                                               |
 
 ## §5 Agent Diversity Verification
 
-| Diversity Criterion              | Met? | Evidence                                                                                                                                                                                                                                |
-|----------------------------------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Different time horizons          | Yes  | ConcentratedFund: medium-term position holder (months); PrimeBrokers: immediate responders (same round as threshold); BlockTradeBuyer: patient capital (holds for recovery); InformationTrader: high-frequency (front-runs then covers) |
-| Different information processing | Yes  | ConcentratedFund: level-threshold (absolute loss); PrimeBroker1/2: level-threshold at different levels; BlockTradeBuyer: discount-seeking; InformationTrader: stochastic detection with probability                                     |
-| Conflicting incentives           | Yes  | BlockTradeBuyer BUYS when all three liquidating agents are SELLING; InformationTrader COVERS when all forced sellers are exhausted                                                                                                      |
-| Mix of stabilizing/destabilizing | Yes  | 3 destabilizing (ConcentratedFund, PrimeBroker1, PrimeBroker2), 1 stabilizing (BlockTradeBuyer), 1 neutral-then-stabilizing (InformationTrader)                                                                                         |
-| Different risk tolerances        | Yes  | ConcentratedFund: Extreme (5–8x leverage); BlockTradeBuyer: High (willingness to buy distressed assets); InformationTrader: Medium; PrimeBroker1: Low (early stop-loss); PrimeBroker2: Low-Medium (delayed stop-loss)                   |
-| Different decision frequencies   | Yes  | ConcentratedFund: once (triggered once typically); PrimeBroker1: once at −10%; PrimeBroker2: once at −15%; BlockTradeBuyer: every round below −10%; InformationTrader: every round with stochastic detection                            |
+| Diversity Criterion              | Met? | Evidence                                                                                                                                                                                                                                       |
+|----------------------------------|------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Different time horizons          | Yes  | ConcentratedFund: medium-term position holder (months); PrimeBrokers: immediate responders (same round as threshold); BlockTradeBuyer: patient capital (holds for recovery); InformationTrader: high-frequency (front-runs then covers)        |
+| Different information processing | Yes  | ConcentratedFund: level-threshold (absolute loss); PrimeBrokerFirstMover/2: level-threshold at different levels; BlockTradeBuyer: discount-seeking; InformationTrader: stochastic detection with probability                                   |
+| Conflicting incentives           | Yes  | BlockTradeBuyer BUYS when all three liquidating agents are SELLING; InformationTrader COVERS when all forced sellers are exhausted                                                                                                             |
+| Mix of stabilizing/destabilizing | Yes  | 3 destabilizing (ConcentratedFund, PrimeBrokerFirstMover, PrimeBrokerDelayedLiquidator), 1 stabilizing (BlockTradeBuyer), 1 neutral-then-stabilizing (InformationTrader)                                                                       |
+| Different risk tolerances        | Yes  | ConcentratedFund: Extreme (5–8x leverage); BlockTradeBuyer: High (willingness to buy distressed assets); InformationTrader: Medium; PrimeBrokerFirstMover: Low (early stop-loss); PrimeBrokerDelayedLiquidator: Low-Medium (delayed stop-loss) |
+| Different decision frequencies   | Yes  | ConcentratedFund: once (triggered once typically); PrimeBrokerFirstMover: once at −10%; PrimeBrokerDelayedLiquidator: once at −15%; BlockTradeBuyer: every round below −10%; InformationTrader: every round with stochastic detection          |
 
 **Critical mass check**: The cascade requires: (1) ConcentratedFund to initiate, (2) at least one broker to amplify, (3) BlockTradeBuyer to eventually halt the decline. Removing ConcentratedFund → no cascade (no initiator). Removing BlockTradeBuyer → prices may collapse to floor without recovery. The 2-broker asymmetry (different thresholds) is essential to model the timing spread observed in Archegos.
 
 
 ## §6 Parameter Table
 
-| Parameter                   | Symbol | Value | Typical Range | Source Citation                                                                                                                                                                               | Description                                 | Sensitivity                                                 |
-|-----------------------------|--------|-------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|-------------------------------------------------------------|
-| initial_price               | P(0)   | 100.0 | —             | Normalization                                                                                                                                                                                 | Starting stock price                        | Low — scale only                                            |
-| fundamental_value           | F      | 100.0 | —             | Normalization                                                                                                                                                                                 | Intrinsic fair value                        | Medium — determines deviation scale                         |
-| price_impact                | λ      | 0.03  | 0.01–0.05     | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179–207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x                             | Price change per unit net demand            | High — λ=0.05 → 67% deeper cascade                          |
-| mean_reversion              | γ      | 0.01  | 0.005–0.02    | French, K. R., & Roll, R. (1986). Stock return variances. *Journal of Financial Economics*, 17(1), 5–26. https://doi.org/10.1016/0304-405X(86)90004-8                                         | Pull strength toward fundamental value      | High — γ=0.05 → too-fast recovery                           |
-| noise_std                   | σ      | 0.015 | 0.01–0.03     | Roll, R. (1984). A simple implicit measure of the effective bid-ask spread in an efficient market. *Journal of Finance*, 39(4), 1127–1139. https://doi.org/10.1111/j.1540-6261.1984.tb03897.x | Noise term standard deviation               | Low — affects timing variance only                          |
-| leverage_trigger            | θ_lev  | 0.15  | 0.10–0.20     | Becketti (2021); FSB (2022) non-bank intermediation report                                                                                                                                    | ConcentratedFund margin call threshold      | High — controls when cascade begins                         |
-| liquidation_fraction (CF)   | φ_CF   | 0.50  | 0.40–0.70     | Archegos Capital Management post-mortem; FSB (2022), p. 51                                                                                                                                    | Fraction of CF position sold at margin call | High — determines initial shock magnitude                   |
-| liquidation_threshold (PB1) | θ₁     | 0.10  | 0.08–0.15     | Gorton & Metrick (2012); prime broker risk management conventions                                                                                                                             | PrimeBroker1 stop-loss threshold            | High — controls first-mover timing                          |
-| liquidation_fraction (PB1)  | φ₁     | 0.40  | 0.30–0.50     | Standard prime broker protocol                                                                                                                                                                | PrimeBroker1 sell fraction                  | Medium                                                      |
-| liquidation_threshold (PB2) | θ₂     | 0.15  | 0.12–0.20     | Gorton & Metrick (2012); Credit Suisse post-mortem accounts                                                                                                                                   | PrimeBroker2 stop-loss threshold            | High — controls second-mover timing and payoff differential |
-| liquidation_fraction (PB2)  | φ₂     | 0.35  | 0.25–0.45     | Standard protocol                                                                                                                                                                             | PrimeBroker2 sell fraction                  | Medium                                                      |
-| discount_threshold (BT)     | θ_disc | 0.10  | 0.05–0.15     | Grossman & Miller (1988), distressed market estimate                                                                                                                                          | BlockTradeBuyer activation discount         | Medium — determines price floor level                       |
-| cash_deployment (BT)        | α      | 0.30  | 0.20–0.40     | Conservative institutional capital deployment standard                                                                                                                                        | Fraction of cash deployed per activation    | Medium                                                      |
-| detection_threshold (IT)    | θ_det  | 0.05  | 0.03–0.08     | Kyle (1985) informed trading model                                                                                                                                                            | InformationTrader early signal threshold    | Medium — controls cascade acceleration                      |
-| detection_ability (IT)      | p_det  | 0.50  | 0.30–0.70     | Boehmer et al. (2008) informed short seller frequency                                                                                                                                         | Probability of detecting distress signal     | Low — affects variance of onset timing                      |
+| Parameter                   | Symbol | Value | Typical Range | Source Citation                                                                                                                                                                               | Description                                      | Sensitivity                                                 |
+|-----------------------------|--------|-------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|-------------------------------------------------------------|
+| initial_price               | P(0)   | 100.0 | —             | Normalization                                                                                                                                                                                 | Starting stock price                             | Low — scale only                                            |
+| fundamental_value           | F      | 100.0 | —             | Normalization                                                                                                                                                                                 | Intrinsic fair value                             | Medium — determines deviation scale                         |
+| price_impact                | λ      | 0.03  | 0.01–0.05     | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179–207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x                             | Price change per unit net demand                 | High — λ=0.05 → 67% deeper cascade                          |
+| mean_reversion              | γ      | 0.01  | 0.005–0.02    | French, K. R., & Roll, R. (1986). Stock return variances. *Journal of Financial Economics*, 17(1), 5–26. https://doi.org/10.1016/0304-405X(86)90004-8                                         | Pull strength toward fundamental value           | High — γ=0.05 → too-fast recovery                           |
+| noise_std                   | σ      | 0.015 | 0.01–0.03     | Roll, R. (1984). A simple implicit measure of the effective bid-ask spread in an efficient market. *Journal of Finance*, 39(4), 1127–1139. https://doi.org/10.1111/j.1540-6261.1984.tb03897.x | Noise term standard deviation                    | Low — affects timing variance only                          |
+| leverage_trigger            | θ_lev  | 0.15  | 0.10–0.20     | Becketti (2021); FSB (2022) non-bank intermediation report                                                                                                                                    | ConcentratedFund margin call threshold           | High — controls when cascade begins                         |
+| liquidation_fraction (CF)   | φ_CF   | 0.50  | 0.40–0.70     | Archegos Capital Management post-mortem; FSB (2022), p. 51                                                                                                                                    | Fraction of CF position sold at margin call      | High — determines initial shock magnitude                   |
+| liquidation_threshold (PB1) | θ₁     | 0.10  | 0.08–0.15     | Gorton & Metrick (2012); prime broker risk management conventions                                                                                                                             | PrimeBrokerFirstMover stop-loss threshold        | High — controls first-mover timing                          |
+| liquidation_fraction (PB1)  | φ₁     | 0.40  | 0.30–0.50     | Standard prime broker protocol                                                                                                                                                                | PrimeBrokerFirstMover sell fraction              | Medium                                                      |
+| liquidation_threshold (PB2) | θ₂     | 0.15  | 0.12–0.20     | Gorton & Metrick (2012); Credit Suisse post-mortem accounts                                                                                                                                   | PrimeBrokerDelayedLiquidator stop-loss threshold | High — controls second-mover timing and payoff differential |
+| liquidation_fraction (PB2)  | φ₂     | 0.35  | 0.25–0.45     | Standard protocol                                                                                                                                                                             | PrimeBrokerDelayedLiquidator sell fraction       | Medium                                                      |
+| discount_threshold (BT)     | θ_disc | 0.10  | 0.05–0.15     | Grossman & Miller (1988), distressed market estimate                                                                                                                                          | BlockTradeBuyer activation discount              | Medium — determines price floor level                       |
+| cash_deployment (BT)        | α      | 0.30  | 0.20–0.40     | Conservative institutional capital deployment standard                                                                                                                                        | Fraction of cash deployed per activation         | Medium                                                      |
+| detection_threshold (IT)    | θ_det  | 0.05  | 0.03–0.08     | Kyle (1985) informed trading model                                                                                                                                                            | InformationTrader early signal threshold         | Medium — controls cascade acceleration                      |
+| detection_ability (IT)      | p_det  | 0.50  | 0.30–0.70     | Boehmer et al. (2008) informed short seller frequency                                                                                                                                         | Probability of detecting distress signal         | Low — affects variance of onset timing                      |
 
 
 ## §7 Communication and Round Structure
@@ -1630,8 +1630,8 @@ Round N (t = 1, 2, ..., 200):
 
   Phase 2 — Investor Decisions:
     ConcentratedFund: perceive() → check δ < −0.15 → act (sell if triggered)
-    PrimeBroker1:     perceive() → check δ < −0.10 → act (sell if triggered)
-    PrimeBroker2:     perceive() → check δ < −0.15 → act (sell if triggered, typically rounds after CF)
+    PrimeBrokerFirstMover:     perceive() → check δ < −0.10 → act (sell if triggered)
+    PrimeBrokerDelayedLiquidator:     perceive() → check δ < −0.15 → act (sell if triggered, typically rounds after CF)
     BlockTradeBuyer:  perceive() → check δ < −0.10 → act (buy if triggered and cash available)
     InformationTrader: perceive() → stochastic detection → act (short or cover)
 
@@ -1669,7 +1669,7 @@ Round N (t = 1, 2, ..., 200):
 |-------------|-----------------------------------------------------------------|---------------------------------------------|
 | March 22    | ViacomCBS announces $3B equity offering                         | VIAC falls ~12% in one day                  |
 | March 23–24 | Archegos fails to meet margin calls; notifies prime brokers     | No public disclosure (TRS not required)     |
-| March 25    | Morgan Stanley organizes block trade; sells first at ~$92/share | First public distress signal                 |
+| March 25    | Morgan Stanley organizes block trade; sells first at ~$92/share | First public distress signal                |
 | March 26    | Multiple prime brokers begin simultaneous block trades          | VIAC falls to ~$48 (−50% from week start)   |
 | March 29    | Credit Suisse, Nomura acknowledge large losses                  | VIAC at ~$40; market recognizes full extent |
 
@@ -1682,16 +1682,16 @@ Round N (t = 1, 2, ..., 200):
 
 **Agent Mappings**:
 
-| Simulation Agent  | Real-World Counterpart                                    | Mapping Justification                                                             |
-|-------------------|-----------------------------------------------------------|-----------------------------------------------------------------------------------|
-| ConcentratedFund  | Archegos Capital Management (Bill Hwang)                  | TRS leverage; hidden concentration; forced liquidation initiator                  |
-| PrimeBroker1      | Morgan Stanley                                            | First to organize block trades (March 25–26); incurred smallest loss (~$1B)       |
-| PrimeBroker2      | Credit Suisse / Nomura                                    | Later to act (March 29); incurred largest losses ($5.5B + $2.9B)                  |
-| BlockTradeBuyer   | Institutional buyers of discounted blocks                 | Various asset managers who purchased VIAC/DISCA at fire-sale prices in late March |
-| InformationTrader | Hedge funds that detected unusual TRS-related block flows | Traders who reportedly shorted these names before the public cascade              |
+| Simulation Agent             | Real-World Counterpart                                    | Mapping Justification                                                             |
+|------------------------------|-----------------------------------------------------------|-----------------------------------------------------------------------------------|
+| ConcentratedFund             | Archegos Capital Management (Bill Hwang)                  | TRS leverage; hidden concentration; forced liquidation initiator                  |
+| PrimeBrokerFirstMover        | Morgan Stanley                                            | First to organize block trades (March 25–26); incurred smallest loss (~$1B)       |
+| PrimeBrokerDelayedLiquidator | Credit Suisse / Nomura                                    | Later to act (March 29); incurred largest losses ($5.5B + $2.9B)                  |
+| BlockTradeBuyer              | Institutional buyers of discounted blocks                 | Various asset managers who purchased VIAC/DISCA at fire-sale prices in late March |
+| InformationTrader            | Hedge funds that detected unusual TRS-related block flows | Traders who reportedly shorted these names before the public cascade              |
 
 **Simulation Calibration Lessons**:
-- The 0.05 difference between PrimeBroker1 threshold (0.10) and PrimeBroker2 threshold (0.15) should produce a loss differential of approximately 3–5x, consistent with the Morgan Stanley vs. Credit Suisse outcome
+- The 0.05 difference between PrimeBrokerFirstMover threshold (0.10) and PrimeBrokerDelayedLiquidator threshold (0.15) should produce a loss differential of approximately 3–5x, consistent with the Morgan Stanley vs. Credit Suisse outcome
 - Cascade should develop over 3–5 rounds from trigger to trough, consistent with the 5 trading days in the actual event
 - Recovery should be partial, not full, within 200 rounds — ViacomCBS had not fully recovered 6 months later
 

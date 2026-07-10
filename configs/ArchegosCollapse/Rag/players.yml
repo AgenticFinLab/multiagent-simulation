@@ -106,15 +106,15 @@ ragllm_concentrated_fund:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# RAG PrimeBroker1 — first-mover liquidator + domain knowledge
+# RAG PrimeBrokerFirstMover — first-mover liquidator + domain knowledge
 # Theory: Prime broker liquidation race
 # -----------------------------------------------------------------------------
-ragllm_prime_broker1:
-  name: "RAG Prime Broker 1"
-  class: "examples.ArchegosCollapse.Rag.players:RagLLMPrimeBroker1"
+ragllm_prime_broker_first_mover:
+  name: "RAG Prime Broker (First Mover)"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMPrimeBrokerFirstMover"
   num_instances: 1
   config:
-    identity: "ragllm_prime_broker1"
+    identity: "ragllm_prime_broker_first_mover"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -144,7 +144,7 @@ ragllm_prime_broker1:
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER1_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER_FIRST_MOVER_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
@@ -154,15 +154,15 @@ ragllm_prime_broker1:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# RAG PrimeBroker2 — delayed liquidator + domain knowledge
+# RAG PrimeBrokerDelayedLiquidator — delayed liquidator + domain knowledge
 # Theory: Prime broker competition; cascade amplification
 # -----------------------------------------------------------------------------
-ragllm_prime_broker2:
-  name: "RAG Prime Broker 2"
-  class: "examples.ArchegosCollapse.Rag.players:RagLLMPrimeBroker2"
+ragllm_prime_broker_delayed_liquidator:
+  name: "RAG Prime Broker (Delayed Liquidator)"
+  class: "examples.ArchegosCollapse.Rag.players:RagLLMPrimeBrokerDelayedLiquidator"
   num_instances: 1
   config:
-    identity: "ragllm_prime_broker2"
+    identity: "ragllm_prime_broker_delayed_liquidator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -192,7 +192,7 @@ ragllm_prime_broker2:
           chunk_overlap: 64  # Source: RAG indexing configuration; 07-step3-config.md §3.7
           top_k: 5  # Source: RAG retrieval target; 07-step3-config.md §3.7
       llm:
-        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER2_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        sys_message: "examples.ArchegosCollapse.Rag.prompts:RAG_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         user_message: "examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration

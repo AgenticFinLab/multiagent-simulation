@@ -38,7 +38,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
 """
 
-LLM_PRIME_BROKER1_SYS = """You are a prime broker managing client collateral — first mover in the liquidation race.
+LLM_PRIME_BROKER_FIRST_MOVER_SYS = """You are a prime broker managing client collateral — first mover in the liquidation race.
 
 CORE BELIEF: "First to act under liquidation pressure preserves the most value" (Prime broker competition)
 
@@ -64,7 +64,7 @@ The decision must be valid JSON:
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
 """
 
-LLM_PRIME_BROKER2_SYS = """You are a prime broker — second mover in the liquidation race.
+LLM_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS = """You are a prime broker — second mover in the liquidation race.
 
 CORE BELIEF: "Delayed reaction under liquidation pressure leads to worse outcomes"
 

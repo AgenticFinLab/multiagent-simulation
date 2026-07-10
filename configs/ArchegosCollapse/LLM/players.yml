@@ -64,15 +64,15 @@ concentrated_fund:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# LLM PrimeBroker1 — First-mover liquidator (creates cascade)
+# LLM PrimeBrokerFirstMover — First-mover liquidator (creates cascade)
 # Theory: Prime broker liquidation race
 # -----------------------------------------------------------------------------
-prime_broker1:
-  name: "Prime Broker 1"
-  class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBroker1"
+prime_broker_first_mover:
+  name: "Prime Broker (First Mover)"
+  class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBrokerFirstMover"
   num_instances: 1
   config:
-    identity: "prime_broker1"
+    identity: "prime_broker_first_mover"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -83,7 +83,7 @@ prime_broker1:
       initial_position: 4000.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
       llm:
-        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER1_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER_FIRST_MOVER_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
@@ -93,15 +93,15 @@ prime_broker1:
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# LLM PrimeBroker2 — Second-mover liquidator (delayed, worse prices)
+# LLM PrimeBrokerDelayedLiquidator — Second-mover liquidator (delayed, worse prices)
 # Theory: Prime broker competition; cascade amplification
 # -----------------------------------------------------------------------------
-prime_broker2:
-  name: "Prime Broker 2"
-  class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBroker2"
+prime_broker_delayed_liquidator:
+  name: "Prime Broker (Delayed Liquidator)"
+  class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBrokerDelayedLiquidator"
   num_instances: 1
   config:
-    identity: "prime_broker2"
+    identity: "prime_broker_delayed_liquidator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -112,7 +112,7 @@ prime_broker2:
       initial_position: 3500.0  # Source: simulation-bases.md §4 Population and Heterogeneity; scenario-normalized exposure
       custom_state_hot_limit: 3  # Source: implementation storage policy; bounded hot state cache
       llm:
-        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER2_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
+        sys_message: "examples.ArchegosCollapse.LLM.prompts:LLM_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         user_message: "examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_type: "api"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration
         lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: 08-step4-implement.md §4.2 LLM wiring contract; target §10.1 variant declaration

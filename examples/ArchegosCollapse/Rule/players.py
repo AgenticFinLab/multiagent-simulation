@@ -9,8 +9,8 @@ Theoretical Foundation:
 
 Key Dynamics:
     - ConcentratedFund: Holds large positions via TRS; forced to sell on margin call
-    - PrimeBroker1: First-mover liquidator — sells quickly, receives better prices
-    - PrimeBroker2: Delayed liquidator — faces worse prices due to cascade
+    - PrimeBrokerFirstMover: First-mover liquidator — sells quickly, receives better prices
+    - PrimeBrokerDelayedLiquidator: Delayed liquidator — faces worse prices due to cascade
     - BlockTradeBuyer: Opportunistic buyer at discount during fire sale
     - InformationTrader: Detects liquidation signals and trades ahead of selling pressure
 
@@ -235,11 +235,11 @@ class ConcentratedFund(GeneralPlayer):
         )
 
 
-class PrimeBroker1(GeneralPlayer):
+class PrimeBrokerFirstMover(GeneralPlayer):
     """
     First-mover prime broker liquidator.
 
-    Theory: simulation-bases.md §4.2 — PrimeBroker1
+    Theory: simulation-bases.md §4.2 — PrimeBrokerFirstMover
     Theoretical basis: Creditor Run / Liquidation Race (Gorton & Metrick, 2012).
     Acts when price drops below liquidation_threshold.
     Sells liquidation_sell_ratio * position per round at market price.
@@ -302,7 +302,7 @@ class PrimeBroker1(GeneralPlayer):
             "bid_price": price,
             "quantity": quantity,
             "investor": self.identity,
-            "strategy": "PrimeBroker1",
+            "strategy": "PrimeBrokerFirstMover",
             "reasoning": "first-mover liquidation threshold rule",
         }
         validate_order(order)
@@ -328,13 +328,13 @@ class PrimeBroker1(GeneralPlayer):
         )
 
 
-class PrimeBroker2(GeneralPlayer):
+class PrimeBrokerDelayedLiquidator(GeneralPlayer):
     """
     Delayed second-mover prime broker.
 
-    Theory: simulation-bases.md §4.3 — PrimeBroker2
+    Theory: simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator
     Theoretical basis: Creditor Run / Liquidation Race (Gorton & Metrick, 2012).
-    Higher threshold required before acting (waits longer than PrimeBroker1).
+    Higher threshold required before acting (waits longer than PrimeBrokerFirstMover).
     Faces worse prices due to first-mover's prior liquidation selling pressure.
     Effective price = market_price * price_penalty.
     See simulation-bases.md §4.3.5.4 for mathematical model.
@@ -399,7 +399,7 @@ class PrimeBroker2(GeneralPlayer):
             "price_penalty": price_penalty,
             "effective_price": price * price_penalty,
             "investor": self.identity,
-            "strategy": "PrimeBroker2",
+            "strategy": "PrimeBrokerDelayedLiquidator",
             "reasoning": "second-mover liquidation threshold rule",
         }
         validate_order(order)
@@ -633,8 +633,8 @@ class InformationTrader(GeneralPlayer):
 __all__ = [
     "Market",
     "ConcentratedFund",
-    "PrimeBroker1",
-    "PrimeBroker2",
+    "PrimeBrokerFirstMover",
+    "PrimeBrokerDelayedLiquidator",
     "BlockTradeBuyer",
     "InformationTrader",
 ]

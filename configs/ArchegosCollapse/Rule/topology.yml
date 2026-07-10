@@ -4,8 +4,8 @@
 # Star topology: Market broadcasts to all agents; agents send orders to market.
 #
 #         concentrated_fund ──────────────┐
-#         prime_broker1 ──────────────────┤
-#         prime_broker2 ──────────────────┼──▶ market ──▶ all agents
+#         prime_broker_first_mover ──────┤
+#         prime_broker_delayed_liquidator┼──▶ market ──▶ all agents
 #         block_trade_buyer ──────────────┤        (price, deviation, volume)
 #         information_trader ─────────────┘
 #
@@ -23,8 +23,8 @@ connections:
   # Market → All agents (price + market data broadcast)
   market:
     - concentrated_fund
-    - prime_broker1
-    - prime_broker2
+    - prime_broker_first_mover
+    - prime_broker_delayed_liquidator
     - block_trade_buyer
     - information_trader
 
@@ -32,10 +32,10 @@ connections:
   concentrated_fund:
     - market
 
-  prime_broker1:
+  prime_broker_first_mover:
     - market
 
-  prime_broker2:
+  prime_broker_delayed_liquidator:
     - market
 
   block_trade_buyer:

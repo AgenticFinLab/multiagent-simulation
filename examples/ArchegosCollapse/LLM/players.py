@@ -224,13 +224,13 @@ class LLMConcentratedFund(LLMInvestor):
     pass
 
 
-class LLMPrimeBroker1(LLMInvestor):
+class LLMPrimeBrokerFirstMover(LLMInvestor):
     """LLM-driven prime broker 1 — first-mover liquidator. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
-class LLMPrimeBroker2(LLMInvestor):
+class LLMPrimeBrokerDelayedLiquidator(LLMInvestor):
     """LLM-driven prime broker 2 — delayed liquidator at worse prices. Theory: simulation-bases.md §4.3."""
 
     pass
@@ -252,8 +252,8 @@ __all__ = [
     "Market",
     "LLMInvestor",
     "LLMConcentratedFund",
-    "LLMPrimeBroker1",
-    "LLMPrimeBroker2",
+    "LLMPrimeBrokerFirstMover",
+    "LLMPrimeBrokerDelayedLiquidator",
     "LLMBlockTradeBuyer",
     "LLMInformationTrader",
     "_validate_decision",
