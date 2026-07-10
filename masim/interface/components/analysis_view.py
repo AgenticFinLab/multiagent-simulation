@@ -29,7 +29,7 @@ def render_analysis_page(scenario_name: str):
     col_back, col_title = st.columns([1, 5])
     with col_back:
         st.markdown("<div style='margin-top:18px'/>", unsafe_allow_html=True)
-        if st.button("← Back", use_container_width=True):
+        if st.button("← Back", width="stretch"):
             st.session_state.current_page = "Simulation"
             st.rerun()
     with col_title:
@@ -151,7 +151,7 @@ def _display_analysis_results(scenario_name: str, analysis_path: Path):
         desc = _chart_description(img.stem)
         if desc:
             st.caption(desc)
-        st.image(str(img), use_container_width=True)
+        st.image(str(img), width="stretch")
     else:
         cols = st.columns(2)
         for i, img_path in enumerate(images):
@@ -161,7 +161,7 @@ def _display_analysis_results(scenario_name: str, analysis_path: Path):
                 desc = _chart_description(img_path.stem)
                 if desc:
                     st.caption(desc)
-                st.image(str(img_path), use_container_width=True)
+                st.image(str(img_path), width="stretch")
 
 
 def _display_summary(summary_path: Path):

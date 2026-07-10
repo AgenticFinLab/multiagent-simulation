@@ -84,6 +84,9 @@ if "sys_messages" not in st.session_state:
 if "workflow_stage" not in st.session_state:
     st.session_state.workflow_stage = "welcome"
 
+if "mode" not in st.session_state:
+    st.session_state.mode = ""  # "experience" | "project" | "competition"
+
 if "project_name" not in st.session_state:
     st.session_state.project_name = ""
 
@@ -335,7 +338,7 @@ def _render_price_chart(rounds: list, viewed_idx: int):
             if cached is not None:
                 st.plotly_chart(
                     cached,
-                    use_container_width=True,
+                    width="stretch",
                     key="price_dynamics",
                 )
                 return
@@ -438,7 +441,7 @@ def _render_price_chart(rounds: list, viewed_idx: int):
     st.session_state["_pc_fig"] = fig
     st.session_state["_pc_last_idx"] = viewed_idx
 
-    st.plotly_chart(fig, use_container_width=True, key="price_dynamics")
+    st.plotly_chart(fig, width="stretch", key="price_dynamics")
 
 
 def _render_price_chart_fallback(round_nums, market_prices, fundamentals):
@@ -630,33 +633,33 @@ def _render_action_buttons(scenario_name: str):
         if data_exists:
             c1, c2, c3 = st.columns(3)
             with c1:
-                if st.button("⏹ Stop", type="secondary", use_container_width=True):
+                if st.button("⏹ Stop", type="secondary", width="stretch"):
                     _stop_simulation()
             with c2:
                 if st.button(
                     "📊 View Analysis",
                     type="primary",
-                    use_container_width=True,
+                    width="stretch",
                     help="Jump to analysis page while simulation continues",
                 ):
                     st.session_state.current_page = "Analysis"
                     st.rerun()
             with c3:
-                if st.button("🔄 Reset", use_container_width=True):
+                if st.button("🔄 Reset", width="stretch"):
                     _stop_simulation()
                     _reset_simulation()
         else:
-            if st.button("⏹ Stop", type="secondary", use_container_width=True):
+            if st.button("⏹ Stop", type="secondary", width="stretch"):
                 _stop_simulation()
 
     elif st.session_state.simulation_completed:
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("📊 View Analysis", type="primary", use_container_width=True):
+            if st.button("📊 View Analysis", type="primary", width="stretch"):
                 st.session_state.current_page = "Analysis"
                 st.rerun()
         with c2:
-            if st.button("🔄 Reset", use_container_width=True):
+            if st.button("🔄 Reset", width="stretch"):
                 _reset_simulation()
 
     elif data_exists:
@@ -666,7 +669,7 @@ def _render_action_buttons(scenario_name: str):
             if st.button(
                 "📂 Load Results",
                 type="primary",
-                use_container_width=True,
+                width="stretch",
                 help="Replay saved experiment data without re-running the simulation",
             ):
                 _start_replay(scenario_name, info)
@@ -674,7 +677,7 @@ def _render_action_buttons(scenario_name: str):
             if st.button(
                 "📊 View Analysis",
                 type="secondary",
-                use_container_width=True,
+                width="stretch",
                 help="Jump directly to analysis page without replay",
             ):
                 st.session_state.current_page = "Analysis"
@@ -682,13 +685,13 @@ def _render_action_buttons(scenario_name: str):
         with c3:
             if st.button(
                 "▶ Re-run",
-                use_container_width=True,
+                width="stretch",
                 help="Start a fresh simulation (overwrites existing data)",
             ):
                 _start_simulation(scenario_name, info)
 
     else:
-        if st.button("▶ Start Simulation", type="primary", use_container_width=True):
+        if st.button("▶ Start Simulation", type="primary", width="stretch"):
             _start_simulation(scenario_name, info)
 
 

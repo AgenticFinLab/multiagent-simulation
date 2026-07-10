@@ -86,7 +86,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                 )
                 if st.button(
                     "Edit roster",
-                    use_container_width=True,
+                    width="stretch",
                     key="sidebar_edit_customized",
                     help="Return to Stage 2 to modify the agent lineup.",
                 ):
@@ -199,17 +199,17 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
 
         icon_preview = _get_or_create_icon_topology_preview(selected_scenario)
         if icon_preview is not None:
-            st.image(str(icon_preview), use_container_width=True)
+            st.image(str(icon_preview), width="stretch")
         else:
             diagram_path = get_diagram_path(selected_scenario)
             if diagram_path is not None:
-                st.image(str(diagram_path), use_container_width=True)
+                st.image(str(diagram_path), width="stretch")
             else:
                 # Generate a full NetworkX topology preview from topology.yml +
                 # players.yml and cache it so repeated loads are instant.
                 preview_path = _get_or_create_topology_preview(selected_scenario)
                 if preview_path is not None:
-                    st.image(str(preview_path), use_container_width=True)
+                    st.image(str(preview_path), width="stretch")
                 else:
                     # Last-resort lightweight fallback (no topology.yml)
                     topo = get_topology_info(selected_scenario)
@@ -223,7 +223,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                         facecolor=fig.get_facecolor(),
                     )
                     buf.seek(0)
-                    st.image(buf, use_container_width=True)
+                    st.image(buf, width="stretch")
                     plt.close(fig)
 
         # ------------------------------------------------------------------
@@ -243,7 +243,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         st.markdown("")
         if st.button(
             "📖 Full Documentation",
-            use_container_width=True,
+            width="stretch",
             key="docs_btn",
             help="Read the academic background and model details for this scenario",
         ):

@@ -27,7 +27,7 @@ def render_docs_page(scenario_name: str):
     col_back, col_title = st.columns([1, 6])
     with col_back:
         st.markdown("<div style='margin-top:18px'/>", unsafe_allow_html=True)
-        if st.button("← Back", use_container_width=True, key="docs_back_btn"):
+        if st.button("← Back", width="stretch", key="docs_back_btn"):
             st.session_state.current_page = "Simulation"
             st.rerun()
     with col_title:

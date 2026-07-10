@@ -14,7 +14,9 @@ import streamlit as st
 
 from ..config_loader import (
     discover_scenario_groups,
+    get_agents_info,
     get_scenario_info,
+    get_topology_info,
     scenario_display_name,
 )
 from ..customized import (
@@ -121,16 +123,22 @@ def render_entry_choice() -> None:
     with st.sidebar:
         st.title("MASIM")
         st.caption("Investment workflow")
+        mode = st.session_state.get("mode", "")
         project_name = st.session_state.get("project_name", "")
-        if project_name:
+        if mode == "project" and project_name:
             st.markdown(f"**Project:** {project_name}")
+        elif mode == "experience":
+            st.markdown("**Mode:** Experience")
         st.markdown("---")
-        st.markdown("~~Stage 0. Name your project~~")
+        st.markdown("~~Stage 0. Choose a mode~~")
         st.markdown("**Stage 1.** Pick a scenario")
         st.caption(f"{scenario_count} scenarios available")
-        st.markdown("**Stage 2.** Default agents or customize")
+        if mode == "experience":
+            st.markdown("**Stage 2.** Select engine and run")
+        else:
+            st.markdown("**Stage 2.** Default or customize")
         st.markdown("---")
-        if st.button("← Back to welcome", use_container_width=True):
+        if st.button("\u2190 Back to welcome", width="stretch"):
             st.session_state.workflow_stage = "welcome"
             st.rerun()
         st.caption("MASIM v0.1.0")
@@ -217,11 +225,20 @@ def render_variant_choice() -> None:
     with st.sidebar:
         st.title("MASIM")
         st.caption("Investment workflow")
+        mode = st.session_state.get("mode", "")
+        project_name = st.session_state.get("project_name", "")
+        if mode == "project" and project_name:
+            st.markdown(f"**Project:** {project_name}")
+        elif mode == "experience":
+            st.markdown("**Mode:** Experience")
         st.markdown("---")
         st.markdown("~~Stage 1. Pick a scenario~~")
-        st.markdown("**Stage 2.** Default agents or customize")
+        if mode == "experience":
+            st.markdown("**Stage 2.** Select engine and run")
+        else:
+            st.markdown("**Stage 2.** Default or customize")
         st.markdown("---")
-        if st.button("← Back to scenarios", use_container_width=True):
+        if st.button("\u2190 Back to scenarios", width="stretch"):
             st.session_state.workflow_stage = "scenario_setup"
             st.session_state.pop("selected_scenario_base", None)
             st.rerun()
@@ -234,10 +251,12 @@ def render_variant_choice() -> None:
 
     # --- Selected-scenario info strip ---------------------------------
     info = get_scenario_info(_scenario_probe_key(selected_base, groups))
+    is_experience = st.session_state.get("mode") == "experience"
+    
     name_col, rounds_col, features_col = st.columns([3, 1, 2])
     with name_col:
         st.markdown(
-            f"<div class='scenario-confirm-chip'>✓ "
+            f"<div class='scenario-confirm-chip'>\u2713 "
             f"{html.escape(scenario_display_name(selected_base))}"
             f"</div>",
             unsafe_allow_html=True,
@@ -245,44 +264,203 @@ def render_variant_choice() -> None:
         if info.get("description"):
             st.caption(info["description"])
     with rounds_col:
-        # Editable round count. Keyed by scenario so each scenario keeps its
-        # own value and the widget auto-resets when the user switches
-        # scenarios. The shipped default seeds the initial value; changing
-        # it never mutates the shipped YAML (a copy is generated at launch).
         try:
             shipped_rounds = int(info.get("total_rounds") or 0)
         except (TypeError, ValueError):
             shipped_rounds = 0
-        st.number_input(
-            "Rounds",
-            min_value=1,
-            value=shipped_rounds if shipped_rounds > 0 else 1,
-            step=1,
-            key=f"variant_rounds_{selected_base}",
-            help=(
-                "Adjust the number of simulation rounds. Leaving it at the "
-                "default launches the shipped config unchanged; changing it "
-                "generates a reproducible copy with the new count."
-            ),
-        )
+        if is_experience:
+            # Read-only display in Experience mode.
+            st.metric("Rounds", shipped_rounds if shipped_rounds > 0 else "\u2014")
+        else:
+            # Editable round count in Project mode.
+            st.number_input(
+                "Rounds",
+                min_value=1,
+                value=shipped_rounds if shipped_rounds > 0 else 1,
+                step=1,
+                key=f"variant_rounds_{selected_base}",
+                help=(
+                    "Adjust the number of simulation rounds. Leaving it at the "
+                    "default launches the shipped config unchanged; changing it "
+                    "generates a reproducible copy with the new count."
+                ),
+            )
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
             "Market features",
             ", ".join(sorted(feats)) if feats else "standard",
         )
-
+    
     st.divider()
+    
+    if is_experience:
+        # Experience mode: comprehensive read-only display + engine buttons.
+        probe_key = _scenario_probe_key(selected_base, groups)
+        agents = get_agents_info(probe_key)
+        # Filter out the market coordinator for display.
+        player_agents = [a for a in agents if a["role"] != "coordinator"]
 
-    default_col, custom_col = st.columns(2, gap="large")
+        roster_col, topo_col = st.columns([3, 2], gap="medium")
 
-    with default_col:
+        with roster_col:
+            st.markdown("**Agents in this scenario**")
+            if player_agents:
+                total_instances = sum(a["instances"] for a in player_agents)
+                st.caption(
+                    f"{len(player_agents)} agent types, "
+                    f"{total_instances} total instances — click any agent name "
+                    "to view its design profile"
+                )
+                # Scoped CSS:
+                # * .masim-avatar-img / .masim-avatar-fallback: pure visual
+                #   avatar (non-interactive).
+                # * .st-key-agent_label_<pid> button: the AGENT NAME beside
+                #   the avatar is the click target, styled as a compact
+                #   text-link (transparent background, no border, hover
+                #   underline + blue).
+                st.markdown(
+                    "<style>"
+                    '.masim-avatar-img{'
+                    'width:56px;height:56px;border-radius:50%;'
+                    'border:2px solid #dde4ea;'
+                    'box-shadow:0 1px 3px rgba(0,0,0,0.08);'
+                    'object-fit:cover;display:block;background:#e8f0fb;'
+                    '}'
+                    '.masim-avatar-fallback{'
+                    'width:56px;height:56px;border-radius:50%;'
+                    'border:2px solid #dde4ea;'
+                    'box-shadow:0 1px 3px rgba(0,0,0,0.08);'
+                    'display:flex;align-items:center;justify-content:center;'
+                    'background:#e8f0fb;color:#2a5fa6;font-weight:700;'
+                    'font-size:0.85rem;'
+                    '}'
+                    # Zero out every wrapper Streamlit adds around the
+                    # label button so the box shrinks to the text glyphs.
+                    '[class*="st-key-agent_label_"],'
+                    '[class*="st-key-agent_label_"] .stElementContainer,'
+                    '[class*="st-key-agent_label_"] div[data-testid="stElementContainer"],'
+                    '[class*="st-key-agent_label_"] div[data-testid="stButton"]{'
+                    'gap:0 !important;margin:0 !important;padding:0 !important;'
+                    '}'
+                    # The button itself: pill-shaped text label with a
+                    # subtle gray background frame.
+                    '[class*="st-key-agent_label_"] button{'
+                    'background:#eef1f4 !important;'
+                    'border:1px solid #dde4ea !important;'
+                    'box-shadow:none !important;'
+                    'border-radius:6px !important;'
+                    'padding:4px 8px !important;margin:0 !important;'
+                    'min-height:0 !important;height:auto !important;'
+                    'width:auto !important;max-width:100% !important;'
+                    'color:#374955 !important;font-weight:600 !important;'
+                    'text-align:left !important;'
+                    'justify-content:flex-start !important;'
+                    'white-space:normal !important;'
+                    'word-break:break-word !important;'
+                    '}'
+                    # Universal descendant: force compact font-size and
+                    # tight line-height on EVERY inner wrapper.
+                    '[class*="st-key-agent_label_"] button,'
+                    '[class*="st-key-agent_label_"] button *{'
+                    'font-size:0.7rem !important;'
+                    'line-height:1.15 !important;'
+                    '}'
+                    '[class*="st-key-agent_label_"] button p,'
+                    '[class*="st-key-agent_label_"] button div{'
+                    'margin:0 !important;padding:0 !important;'
+                    'font-weight:600 !important;color:inherit !important;'
+                    '}'
+                    '[class*="st-key-agent_label_"] button:hover,'
+                    '[class*="st-key-agent_label_"] button:hover *{'
+                    'color:#2a5fa6 !important;'
+                    'background:#e4ecf6 !important;'
+                    'border-color:#c9d6e6 !important;'
+                    'text-decoration:none !important;'
+                    '}'
+                    "</style>",
+                    unsafe_allow_html=True,
+                )
+                # Layout: 3 chips per row (pure-image avatar + clickable
+                # text label to the right). vertical_alignment="center"
+                # re-centres the compact label against the 56 px avatar.
+                per_row = 3
+                for row_start in range(0, len(player_agents), per_row):
+                    row_agents = player_agents[row_start : row_start + per_row]
+                    cols = st.columns(per_row, gap="small")
+                    for col, a in zip(cols, row_agents):
+                        with col:
+                            player_id = a["id"]
+                            icon_path = (
+                                ICON_ROOT
+                                / f"finance-{player_id.replace('_', '-')}.png"
+                            )
+                            count = a["instances"]
+                            display_name = html.escape(a["name"])
+                            count_suffix = (
+                                f" \u00d7{count}" if count > 1 else ""
+                            )
+                            tip = (
+                                a.get("theory")
+                                or a.get("principle")
+                                or "Click to view design profile"
+                            )
+                            avatar_col, label_col = st.columns(
+                                [1, 2],
+                                gap="small",
+                                vertical_alignment="center",
+                            )
+                            with avatar_col:
+                                # Pure visual avatar (non-clickable).
+                                if icon_path.exists():
+                                    uri = _image_data_uri(icon_path)
+                                    st.markdown(
+                                        f'<img class="masim-avatar-img" '
+                                        f'src="{uri}" alt="{display_name}" />',
+                                        unsafe_allow_html=True,
+                                    )
+                                else:
+                                    initial = html.escape(
+                                        a["name"][:2].upper()
+                                        if a["name"]
+                                        else "?"
+                                    )
+                                    st.markdown(
+                                        f'<div class="masim-avatar-fallback">'
+                                        f'{initial}</div>',
+                                        unsafe_allow_html=True,
+                                    )
+                            with label_col:
+                                # Clickable text label -> opens .md profile.
+                                label_text = f"{a['name']}{count_suffix}"
+                                with st.container(
+                                    key=f"agent_label_{player_id}"
+                                ):
+                                    clicked = st.button(
+                                        label_text,
+                                        key=f"btn_agent_label_{player_id}",
+                                        help=tip,
+                                        type="tertiary",
+                                    )
+                                    if clicked:
+                                        _show_agent_profile_dialog(a)
+            else:
+                st.caption("No agent information available.")
+
+        with topo_col:
+            st.markdown("**Network topology**")
+            from .topology_d3 import render_d3_topology
+            topo = get_topology_info(probe_key)
+            if topo["nodes"]:
+                render_d3_topology(topo, agents, height=420)
+            else:
+                st.caption("No topology data available.")
+
+        st.divider()
+
+        # Engine buttons.
         variant_keys = groups.get(selected_base) or []
-        st.markdown("**Default**")
-        st.caption(
-            "Launch the pre-configured scenario directly. "
-            "Each button represents a different decision engine."
-        )
+        st.markdown("**Select a decision engine to run**")
         if not variant_keys:
             st.info("No default variants available for this scenario.")
         else:
@@ -293,29 +471,57 @@ def render_variant_choice() -> None:
                     if st.button(
                         VARIANT_DISPLAY.get(variant, variant),
                         key=f"stage2_default_{variant}",
-                        use_container_width=True,
+                        width="stretch",
                         help=(
                             f"Run {scenario_display_name(selected_base)} "
                             f"with the {variant} decision engine."
                         ),
                     ):
                         _launch_default_variant(key)
+    else:
+        # Project mode: Default + Customized side by side.
+        default_col, custom_col = st.columns(2, gap="large")
 
-    with custom_col:
-        st.markdown("**Customized**")
-        st.caption(
-            "Select agents from the pool, edit each agent's parameters, "
-            "optionally rewrite LLM prompts, then launch. The chosen "
-            "scenario stays locked while you build."
-        )
-        if st.button(
-            "Select agents for simulation →",
-            key="stage2_go_customize",
-            type="primary",
-            use_container_width=True,
-        ):
-            st.session_state.workflow_stage = "customize"
-            st.rerun()
+        with default_col:
+            variant_keys = groups.get(selected_base) or []
+            st.markdown("**Default**")
+            st.caption(
+                "Launch the pre-configured scenario directly. "
+                "Each button represents a different decision engine."
+            )
+            if not variant_keys:
+                st.info("No default variants available for this scenario.")
+            else:
+                chip_cols = st.columns(min(len(variant_keys), 4), gap="small")
+                for col, key in zip(chip_cols, variant_keys):
+                    variant = key.split("/", 1)[1] if "/" in key else key
+                    with col:
+                        if st.button(
+                            VARIANT_DISPLAY.get(variant, variant),
+                            key=f"stage2_default_{variant}",
+                            width="stretch",
+                            help=(
+                                f"Run {scenario_display_name(selected_base)} "
+                                f"with the {variant} decision engine."
+                            ),
+                        ):
+                            _launch_default_variant(key)
+
+        with custom_col:
+            st.markdown("**Customized**")
+            st.caption(
+                "Select agents from the pool, edit each agent's parameters, "
+                "optionally rewrite LLM prompts, then launch. The chosen "
+                "scenario stays locked while you build."
+            )
+            if st.button(
+                "Select agents for simulation \u2192",
+                key="stage2_go_customize",
+                type="primary",
+                width="stretch",
+            ):
+                st.session_state.workflow_stage = "customize"
+                st.rerun()
 
 
 def _launch_default_variant(scenario_key: str) -> None:
@@ -403,6 +609,38 @@ def _image_data_uri(path: Path) -> str:
     mime = "image/png" if path.suffix.lower() == ".png" else "image/svg+xml"
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"data:{mime};base64,{encoded}"
+
+
+@st.dialog("Agent design profile", width="large")
+def _show_agent_profile_dialog(agent: dict) -> None:
+    """Modal that renders the full agent .md profile.
+
+    Loads the file from ``examples/AGENT_POOL/finance/{player_id_kebab}.md``.
+    Falls back to a caption when the profile file does not exist.
+    """
+    player_id = agent["id"]
+    icon_path = ICON_ROOT / f"finance-{player_id.replace('_', '-')}.png"
+    header_cols = st.columns([1, 6], gap="small")
+    with header_cols[0]:
+        if icon_path.exists():
+            st.image(str(icon_path), width=56)
+    with header_cols[1]:
+        st.markdown(f"### {agent['name']}")
+        subtitle = agent.get("theory") or agent.get("principle") or ""
+        if subtitle:
+            st.caption(subtitle)
+        instances = agent.get("instances", 1)
+        if instances > 1:
+            st.caption(f"{instances} instances in this scenario")
+    st.divider()
+    md_stem = player_id.replace("_", "-")
+    md_path = FINANCE_ROOT / f"{md_stem}.md"
+    if md_path.exists():
+        st.markdown(md_path.read_text(encoding="utf-8"))
+    else:
+        st.caption(
+            f"No profile file found at examples/AGENT_POOL/finance/{md_stem}.md."
+        )
 
 
 def _theory_basis(markdown: str) -> str:
@@ -754,7 +992,7 @@ def render_back_to_stage1_bar(
         if st.button(
             label,
             key=f"main_back_to_stage1_{key_suffix}",
-            use_container_width=True,
+            width="stretch",
             help=help_text,
         ):
             st.session_state.workflow_stage = target_stage
@@ -783,13 +1021,13 @@ def _render_profile(agent: dict[str, Any]) -> None:
         st.markdown('<div class="market-kicker">Agent profile</div>', unsafe_allow_html=True)
         st.subheader(agent["display_name"])
     with close:
-        if st.button("Close", use_container_width=True, key="close_market_profile"):
+        if st.button("Close", width="stretch", key="close_market_profile"):
             _clear_query_agent()
             st.rerun()
 
     image_col, profile_col = st.columns([1, 2.8], gap="large")
     with image_col:
-        st.image(agent["image_file"], use_container_width=True)
+        st.image(agent["image_file"], width="stretch")
         st.caption(agent["agent_type"])
     with profile_col:
         st.markdown(
@@ -875,7 +1113,7 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
     with btn_add:
         already_in = bool(st.session_state.get(f"market_agent_{agent_type}", False))
         primary_label = "Update in market" if already_in else "Add to market"
-        if st.button(primary_label, type="primary", use_container_width=True,
+        if st.button(primary_label, type="primary", width="stretch",
                      key=f"customized_add_{agent_type}"):
             persisted.clear()
             persisted.update(edited)
@@ -883,7 +1121,7 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
             st.toast(f"{agent['display_name']} → market", icon="✅")
             st.rerun()
     with btn_reset:
-        if st.button("Reset", use_container_width=True,
+        if st.button("Reset", width="stretch",
                      key=f"customized_reset_{agent_type}"):
             persisted.clear()
             for sub_key in list(st.session_state.keys()):
@@ -891,7 +1129,7 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
                     del st.session_state[sub_key]
             st.rerun()
     with btn_close:
-        if st.button("Close", use_container_width=True,
+        if st.button("Close", width="stretch",
                      key=f"customized_close_{agent_type}"):
             st.session_state.customized_active_agent = None
             st.rerun()
@@ -1208,7 +1446,7 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
     if st.button(
         label,
         key=f"market_customize_{agent_type}",
-        use_container_width=True,
+        width="stretch",
         help=(
             "Open this agent's parameter panel on the left. "
             "Click again to collapse it."
@@ -1362,7 +1600,7 @@ def render_customize() -> None:
     with reset_col:
         if st.button(
             "Clear selection",
-            use_container_width=True,
+            width="stretch",
             disabled=not selected,
             key="customize_clear",
         ):
@@ -1374,7 +1612,7 @@ def render_customize() -> None:
         if st.button(
             "Launch simulation →",
             type="primary",
-            use_container_width=True,
+            width="stretch",
             disabled=not selected or compat_blocker is not None,
             key="customize_launch",
         ):
@@ -1450,8 +1688,17 @@ def _render_scenario_card(
     else:
         # Show the market-features tag so users see what each scenario
         # implies (e.g. ``leverage``, ``short_selling``) before picking.
+        # In Project mode we replace the plain ``standard`` fallback with
+        # ``customizable`` to signal that the scenario can be tailored
+        # (rounds, agents, params) on the following stages.
         feats = scenario_market_features(scenario_base)
-        feats_text = ", ".join(sorted(feats)) if feats else "standard"
+        if feats:
+            feats_text = ", ".join(sorted(feats))
+        else:
+            mode = st.session_state.get("mode", "experience")
+            feats_text = (
+                "customizable" if mode == "project" else "standard"
+            )
         badge = (
             f"<span class='scen-badge ok'>{html.escape(feats_text)}</span>"
         )
@@ -1480,7 +1727,7 @@ def _render_scenario_card(
             btn_label,
             key=f"scen_card_{scenario_base}",
             disabled=is_selected,
-            use_container_width=True,
+            width="stretch",
         ):
             st.session_state.selected_scenario_base = scenario_base
             # Copy scenario into project-local dirs if a project is active.
@@ -1570,7 +1817,7 @@ def render_selected_market_strip() -> None:
         st.caption("Selected market agents")
         _render_market_chips(agents)
     with action:
-        if st.button("Edit market", use_container_width=True):
+        if st.button("Edit market", width="stretch"):
             st.session_state.workflow_stage = "customize"
             st.session_state.current_page = "Simulation"
             st.rerun()

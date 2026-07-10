@@ -1,0 +1,345 @@
+"""Interactive D3.js force-directed topology graph for the Experience mode.
+
+Embeds a self-contained HTML/SVG component via ``st.components.v1.html``
+that renders agent nodes (with circular icon avatars), directed links,
+hover tooltips, and click-to-highlight interactions.
+"""
+
+from __future__ import annotations
+
+import base64
+import json
+from pathlib import Path
+from typing import Any
+
+import streamlit.components.v1 as components
+
+# ---------------------------------------------------------------------------
+# Asset paths (same constants used across the interface layer)
+# ---------------------------------------------------------------------------
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]
+_ICON_ROOT = _PROJECT_ROOT / "examples" / "AGENT_POOL" / "agent_images" / "icons"
+
+
+def _image_data_uri(path: Path) -> str:
+    """Encode a PNG file as a base64 data URI."""
+    if not path.exists():
+        return ""
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+def _resolve_icon_uri(node_id: str) -> str:
+    """Resolve a player_id (snake_case) to a base64 icon data URI, or empty.
+
+    Convention: every agent has an ``.md`` file whose stem equals its
+    player_id in kebab-case; the same stem names its icon as
+    ``finance-{kebab_id}.png``. Only a direct filename lookup is performed —
+    scenarios that need a shared archetype must ship a thin alias ``.md``
+    (and a companion icon copy) under the pool.
+    """
+    if not node_id or node_id == "market":
+        return ""
+    kebab = node_id.replace("_", "-")
+    candidate = _ICON_ROOT / f"finance-{kebab}.png"
+    if candidate.exists():
+        return _image_data_uri(candidate)
+    return ""
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def render_d3_topology(
+    topology: dict[str, Any],
+    agents: list[dict[str, Any]],
+    height: int = 420,
+) -> None:
+    """Render an interactive D3.js force-directed topology graph.
+
+    Args:
+        topology: Output of ``get_topology_info()`` — keys: nodes, connections,
+                  topology_type, sources.
+        agents: Output of ``get_agents_info()`` — list of dicts with id, name,
+                theory, instances, role.
+        height: Pixel height for the embedded HTML component.
+    """
+    # Build lookup: node_id -> agent metadata
+    agent_map: dict[str, dict] = {}
+    for a in agents:
+        agent_map[a["id"]] = a
+
+    # Build D3 graph data — expand each agent type into individual instances
+    # (e.g. anchored_trader x2 → anchored_trader_1, anchored_trader_2).
+    nodes: list[dict] = []
+    # Track base_key → list of expanded instance IDs for link expansion.
+    expansion_map: dict[str, list[str]] = {}
+
+    for node_id in topology["nodes"]:
+        meta = agent_map.get(node_id, {})
+        is_hub = node_id in topology.get("sources", [])
+        count = meta.get("instances", 1)
+        icon_uri = _resolve_icon_uri(node_id)
+        base_name = meta.get("name", node_id.replace("_", " ").title())
+        theory = meta.get("theory") or meta.get("principle") or ""
+
+        if is_hub or count <= 1:
+            # Single node (hub or singleton agent)
+            nodes.append({
+                "id": node_id,
+                "name": base_name,
+                "theory": theory,
+                "icon": icon_uri,
+                "isHub": is_hub,
+            })
+            expansion_map[node_id] = [node_id]
+        else:
+            # Expand into numbered instances
+            instance_ids = []
+            for i in range(1, count + 1):
+                inst_id = f"{node_id}_{i}"
+                instance_ids.append(inst_id)
+                nodes.append({
+                    "id": inst_id,
+                    "name": f"{base_name} #{i}",
+                    "theory": theory,
+                    "icon": icon_uri,
+                    "isHub": False,
+                })
+            expansion_map[node_id] = instance_ids
+
+    # Expand links: replace base keys with all their instances.
+    links: list[dict] = []
+    connections = topology.get("connections", {})
+    for src, targets in connections.items():
+        if not isinstance(targets, list):
+            continue
+        src_ids = expansion_map.get(src, [src])
+        for tgt in targets:
+            tgt_ids = expansion_map.get(tgt, [tgt])
+            for s in src_ids:
+                for t in tgt_ids:
+                    links.append({"source": s, "target": t})
+
+    graph_json = json.dumps({"nodes": nodes, "links": links})
+
+    html = _build_html(graph_json, height)
+    components.html(html, height=height, scrolling=False)
+
+
+# ---------------------------------------------------------------------------
+# HTML + D3 template
+# ---------------------------------------------------------------------------
+
+def _build_html(graph_json: str, height: int) -> str:
+    """Generate self-contained HTML with embedded D3.js force graph."""
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{ background: transparent; overflow: hidden; }}
+  svg {{ display: block; width: 100%; height: {height}px; }}
+  .tooltip {{
+    position: absolute; pointer-events: none;
+    background: #fff; border: 1px solid #dde4ea;
+    border-radius: 8px; padding: 8px 12px;
+    font: 12px/1.4 -apple-system, BlinkMacSystemFont, sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    opacity: 0; transition: opacity 0.15s;
+    max-width: 220px; z-index: 10;
+  }}
+  .tooltip .tt-name {{ font-weight: 700; color: #1a2633; margin-bottom: 2px; }}
+  .tooltip .tt-theory {{ font-size: 11px; color: #5a6b78; }}
+  .tooltip .tt-count {{ font-size: 10px; color: #8a9aa8; margin-top: 3px; }}
+  .link {{ stroke: #c0c8d0; stroke-width: 1.5; fill: none; }}
+  .link.highlighted {{ stroke: #2a5fa6; stroke-width: 2.5; }}
+  .link.dimmed {{ stroke: #eaeef2; stroke-width: 1; }}
+  .node-label {{
+    font: 10px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+    fill: #4a5b6a; text-anchor: middle; pointer-events: none;
+  }}
+  .node.dimmed {{ opacity: 0.25; }}
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div class="tooltip" id="tooltip"></div>
+<script>
+(function() {{
+  const data = {graph_json};
+  const width = document.body.clientWidth || 500;
+  const height = {height};
+  const hubRadius = 28, nodeRadius = 20;
+
+  const svg = d3.select("#graph").append("svg")
+    .attr("width", width).attr("height", height);
+
+  // Arrowhead marker
+  svg.append("defs").append("marker")
+    .attr("id", "arrow").attr("viewBox", "0 -5 10 10")
+    .attr("refX", 24).attr("refY", 0)
+    .attr("markerWidth", 6).attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path").attr("d", "M0,-4L8,0L0,4")
+    .attr("fill", "#c0c8d0");
+
+  // Circular clip paths for icons
+  const defs = svg.select("defs");
+  data.nodes.forEach(n => {{
+    const r = n.isHub ? hubRadius : nodeRadius;
+    defs.append("clipPath").attr("id", "clip-" + n.id)
+      .append("circle").attr("r", r).attr("cx", 0).attr("cy", 0);
+  }});
+
+  // Force simulation
+  const simulation = d3.forceSimulation(data.nodes)
+    .force("link", d3.forceLink(data.links).id(d => d.id).distance(70))
+    .force("charge", d3.forceManyBody().strength(-200))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collide", d3.forceCollide().radius(d => (d.isHub ? hubRadius : nodeRadius) + 8));
+
+  // Pin hub nodes near center
+  data.nodes.forEach(n => {{
+    if (n.isHub) {{ n.fx = width / 2; n.fy = height / 2; }}
+  }});
+
+  // Links
+  const link = svg.append("g").selectAll("line")
+    .data(data.links).enter().append("line")
+    .attr("class", "link")
+    .attr("marker-end", "url(#arrow)");
+
+  // Node groups
+  const node = svg.append("g").selectAll("g")
+    .data(data.nodes).enter().append("g")
+    .attr("class", "node")
+    .call(d3.drag()
+      .on("start", dragStart)
+      .on("drag", dragging)
+      .on("end", dragEnd));
+
+  // Node visuals
+  node.each(function(d) {{
+    const g = d3.select(this);
+    const r = d.isHub ? hubRadius : nodeRadius;
+    if (d.icon) {{
+      g.append("image")
+        .attr("href", d.icon)
+        .attr("width", r * 2).attr("height", r * 2)
+        .attr("x", -r).attr("y", -r)
+        .attr("clip-path", "url(#clip-" + d.id + ")");
+      // Border circle
+      g.append("circle").attr("r", r)
+        .attr("fill", "none").attr("stroke", "#dde4ea").attr("stroke-width", 1.5);
+    }} else if (d.isHub) {{
+      // Market hub: gold circle
+      g.append("circle").attr("r", r)
+        .attr("fill", "#fdf6e3").attr("stroke", "#d4a843").attr("stroke-width", 2);
+      g.append("text")
+        .attr("text-anchor", "middle").attr("dy", "0.35em")
+        .style("font-size", "11px").style("font-weight", "700").style("fill", "#8a6d14")
+        .text("Market");
+    }} else {{
+      // Agent without icon: neutral blue circle with initial
+      g.append("circle").attr("r", r)
+        .attr("fill", "#e8f0fb").attr("stroke", "#7baed4").attr("stroke-width", 1.5);
+      const initial = d.name ? d.name.charAt(0).toUpperCase() : "?";
+      g.append("text")
+        .attr("text-anchor", "middle").attr("dy", "0.35em")
+        .style("font-size", "12px").style("font-weight", "700").style("fill", "#2a5fa6")
+        .text(initial);
+    }}
+  }});
+
+  // Labels below nodes
+  node.filter(d => !d.isHub).append("text")
+    .attr("class", "node-label")
+    .attr("dy", d => (d.isHub ? hubRadius : nodeRadius) + 14)
+    .text(d => {{
+      const name = d.name;
+      return name.length > 14 ? name.substring(0, 12) + "..." : name;
+    }});
+
+  // Tooltip
+  const tooltip = d3.select("#tooltip");
+
+  node.on("mouseover", function(event, d) {{
+    let html = '<div class="tt-name">' + d.name + '</div>';
+    if (d.theory) html += '<div class="tt-theory">' + d.theory + '</div>';
+    if (d.instances > 1) html += '<div class="tt-count">' + d.instances + ' instances</div>';
+    tooltip.html(html).style("opacity", 1)
+      .style("left", (event.pageX + 12) + "px")
+      .style("top", (event.pageY - 10) + "px");
+  }})
+  .on("mousemove", function(event) {{
+    tooltip.style("left", (event.pageX + 12) + "px")
+      .style("top", (event.pageY - 10) + "px");
+  }})
+  .on("mouseout", function() {{
+    tooltip.style("opacity", 0);
+  }});
+
+  // Click to highlight
+  let selectedNode = null;
+  node.on("click", function(event, d) {{
+    event.stopPropagation();
+    if (selectedNode === d.id) {{
+      // Deselect
+      selectedNode = null;
+      link.attr("class", "link");
+      node.attr("class", "node");
+    }} else {{
+      selectedNode = d.id;
+      // Connected node IDs
+      const connected = new Set();
+      connected.add(d.id);
+      data.links.forEach(l => {{
+        const sid = typeof l.source === "object" ? l.source.id : l.source;
+        const tid = typeof l.target === "object" ? l.target.id : l.target;
+        if (sid === d.id) connected.add(tid);
+        if (tid === d.id) connected.add(sid);
+      }});
+      link.attr("class", l => {{
+        const sid = typeof l.source === "object" ? l.source.id : l.source;
+        const tid = typeof l.target === "object" ? l.target.id : l.target;
+        if (sid === d.id || tid === d.id) return "link highlighted";
+        return "link dimmed";
+      }});
+      node.attr("class", n => connected.has(n.id) ? "node" : "node dimmed");
+    }}
+  }});
+
+  // Click background to deselect
+  svg.on("click", function() {{
+    selectedNode = null;
+    link.attr("class", "link");
+    node.attr("class", "node");
+  }});
+
+  // Tick
+  simulation.on("tick", () => {{
+    link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+    node.attr("transform", d => "translate(" + d.x + "," + d.y + ")");
+  }});
+
+  // Drag handlers
+  function dragStart(event, d) {{
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x; d.fy = d.y;
+  }}
+  function dragging(event, d) {{
+    d.fx = event.x; d.fy = event.y;
+  }}
+  function dragEnd(event, d) {{
+    if (!event.active) simulation.alphaTarget(0);
+    if (!d.isHub) {{ d.fx = null; d.fy = null; }}
+  }}
+}})();
+</script>
+</body>
+</html>"""

@@ -159,6 +159,50 @@ def _inject_welcome_styles() -> None:
             text-transform: uppercase; letter-spacing: 0.08em;
             margin-bottom: 0.2rem;
         }
+        /* Mode cards */
+        .mode-card {
+            border: 1.5px solid #dde4ea; border-radius: 12px;
+            padding: 1.2rem 1rem; text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .mode-card:hover {
+            border-color: #287a6d;
+            box-shadow: 0 2px 12px rgba(40, 122, 109, 0.10);
+        }
+        .mode-card-disabled {
+            border: 1.5px solid #e8ecf0; border-radius: 12px;
+            padding: 1.2rem 1rem; text-align: center;
+            opacity: 0.5; cursor: not-allowed;
+        }
+        .mode-card-title {
+            font-size: 1.05rem; font-weight: 750; color: #17212b;
+            margin-bottom: 0.3rem;
+        }
+        .mode-card-desc {
+            font-size: 0.82rem; color: #5c6b78; line-height: 1.5;
+            margin-bottom: 0.7rem;
+        }
+        .mode-badge-soon {
+            display: inline-block; font-size: 0.65rem; font-weight: 700;
+            color: #8a9aab; background: #f0f3f6; border-radius: 10px;
+            padding: 0.15rem 0.55rem; text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        /* Mode button colors via st-key targeting */
+        .st-key-mode_experience button {
+            background: #e7f3f0; border: 1.5px solid #b6d8d0;
+            color: #1f6157; font-weight: 700;
+        }
+        .st-key-mode_experience button:hover {
+            border-color: #1f6157; filter: brightness(0.97);
+        }
+        .st-key-mode_project button {
+            background: #e8f0fb; border: 1.5px solid #bcd3f0;
+            color: #2a5fa6; font-weight: 700;
+        }
+        .st-key-mode_project button:hover {
+            border-color: #2a5fa6; filter: brightness(0.97);
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -171,11 +215,12 @@ def _inject_welcome_styles() -> None:
 
 
 def render_welcome() -> None:
-    """Stage 0: welcome screen + project-name capture.
+    """Stage 0: mode selection + optional project-name capture.
 
-    On submit, creates the run environment under ``examples/<slug>/``, stores
-    ``project_name`` / ``project_slug`` / ``project_dir`` in session state, and
-    advances the workflow to ``scenario_setup``.
+    Three modes:
+    - Experience: browse and run shipped scenarios directly (no project folder).
+    - Project: create an isolated project folder, then customize scenarios.
+    - Competition: placeholder (disabled).
     """
     _inject_welcome_styles()
 
@@ -183,9 +228,9 @@ def render_welcome() -> None:
         st.title("MASIM")
         st.caption("Multi-Agent Financial Simulation")
         st.markdown("---")
-        st.markdown("**Stage 0.** Name your project")
+        st.markdown("**Stage 0.** Choose a mode")
         st.markdown("Stage 1. Pick a scenario")
-        st.markdown("Stage 2. Default agents or customize")
+        st.markdown("Stage 2. Run or customize")
         st.markdown("---")
         st.caption("MASIM v0.1.0")
 
@@ -219,45 +264,111 @@ def render_welcome() -> None:
         unsafe_allow_html=True,
     )
 
-    # --- Project name capture -----------------------------------------
-    _, mid, _ = st.columns([1, 3, 1])
-    with mid:
+    # --- Mode cards -------------------------------------------------------
+    col_exp, col_proj, col_comp = st.columns(3, gap="medium")
+
+    with col_exp:
         st.markdown(
-            '<div class="welcome-card-label">Name your project</div>',
+            '<div class="mode-card">'
+            '<div class="mode-card-title">Explore Scenarios</div>'
+            '<div class="mode-card-desc">'
+            'Run pre-defined <b style="color:#1f6157">default</b> scenarios as-is. '
+            "View results without any configuration."
+            "</div></div>",
             unsafe_allow_html=True,
         )
-        default_name = st.session_state.get("project_name", "")
-        project_name = st.text_input(
-            "Project name",
-            value=default_name,
-            placeholder="e.g. My First Market Study",
-            label_visibility="collapsed",
-            key="welcome_project_name_input",
-        )
-        st.caption(
-            "This becomes the main identifier for this session. A run "
-            "environment is created at `examples/<name>/`."
-        )
-
-        slug_preview = _slugify(project_name) if project_name else ""
-        if project_name and not slug_preview:
-            st.warning(
-                "Please use at least one letter or number in the name."
-            )
-        elif slug_preview:
-            existing = (_EXAMPLES_DIR / slug_preview).exists()
-            note = "will reuse existing folder" if existing else "will be created"
-            st.caption(f"→ `examples/{slug_preview}/` ({note})")
-
         if st.button(
-            "Create & continue →",
-            type="primary",
-            use_container_width=True,
-            disabled=not slug_preview,
+            "Enter Experience mode",
+            key="mode_experience",
+            width="stretch"
         ):
-            project_dir = create_run_environment(project_name)
-            st.session_state.project_name = project_name.strip()
-            st.session_state.project_slug = slug_preview
-            st.session_state.project_dir = str(project_dir)
+            st.session_state.mode = "experience"
+            st.session_state.project_name = ""
+            st.session_state.project_slug = ""
+            st.session_state.project_dir = ""
             st.session_state.workflow_stage = "scenario_setup"
             st.rerun()
+
+    with col_proj:
+        st.markdown(
+            '<div class="mode-card">'
+            '<div class="mode-card-title">Build a Project</div>'
+            '<div class="mode-card-desc">'
+            '<b style="color:#2a5fa6">Customize</b> agents, edit configs. '
+            "All work isolated to a project folder."
+            "</div></div>",
+            unsafe_allow_html=True,
+        )
+        if st.button(
+            "Start a project",
+            key="mode_project",
+            width="stretch"
+        ):
+            st.session_state.mode = "project"
+            st.rerun()
+
+    with col_comp:
+        st.markdown(
+            '<div class="mode-card-disabled">'
+            '<div class="mode-card-title">Arena</div>'
+            '<div class="mode-card-desc">'
+            "Competitive multi-agent tournaments."
+            "</div>"
+            '<span class="mode-badge-soon">coming soon</span>'
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        st.button(
+            "Arena mode",
+            key="mode_competition",
+            disabled=True,
+            width="stretch"
+        )
+
+    # --- Project name input (shown only when Project mode is selected) ----
+    if st.session_state.get("mode") == "project":
+        st.markdown("---")
+        _, mid, _ = st.columns([1, 3, 1])
+        with mid:
+            st.markdown(
+                '<div class="welcome-card-label">Name your project</div>',
+                unsafe_allow_html=True,
+            )
+            default_name = st.session_state.get("project_name", "")
+            project_name = st.text_input(
+                "Project name",
+                value=default_name,
+                placeholder="e.g. My First Market Study",
+                label_visibility="collapsed",
+                key="welcome_project_name_input",
+            )
+            st.caption(
+                "This becomes the main identifier for this session. "
+                "A run environment is created at `examples/<name>/`."
+            )
+
+            slug_preview = _slugify(project_name) if project_name else ""
+            if project_name and not slug_preview:
+                st.warning(
+                    "Please use at least one letter or number in the name."
+                )
+            elif slug_preview:
+                existing = (_EXAMPLES_DIR / slug_preview).exists()
+                note = (
+                    "will reuse existing folder" if existing
+                    else "will be created"
+                )
+                st.caption(f"\u2192 `examples/{slug_preview}/` ({note})")
+
+            if st.button(
+                "Create & continue \u2192",
+                type="primary",
+                width="stretch",
+                disabled=not slug_preview,
+            ):
+                project_dir = create_run_environment(project_name)
+                st.session_state.project_name = project_name.strip()
+                st.session_state.project_slug = slug_preview
+                st.session_state.project_dir = str(project_dir)
+                st.session_state.workflow_stage = "scenario_setup"
+                st.rerun()
