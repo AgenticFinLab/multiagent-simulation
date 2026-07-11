@@ -1,52 +1,44 @@
-# Overconfident Trader
-
-> Status: stub. Auto-generated placeholder — please replace `TODO` fields with
-> the concrete theory family, market role, and parameters for this archetype.
+# Overconfident signal-inflating trader
 
 ## Summary
-
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | Overconfident Trader |
-| Theory Family         | TODO (behavioral / microstructure / macro / other) |
-| Market Role           | TODO (destabilising / neutral / stabilising) |
-| Time Horizon          | TODO |
-| Risk Tolerance        | TODO |
-| Information Asymmetry | TODO |
-| Determinism           | TODO |
+| Field | Content |
+|---|---|
+| Archetype | Overconfident signal-inflating trader |
+| Theory Family | Behavioral Finance (Overconfidence) |
+| Market Role | **Destabilising** - amplifies price deviations through inflated signal interpretation |
+| Time Horizon | short |
+| Risk Tolerance | high |
+| Information Asymmetry | none |
+| Determinism | deterministic |
 
 ## Definition and Goals
-
-TODO — describe the behavioral or economic hypothesis that motivates this
-archetype, and what decision it aims to represent in the simulation.
+Models an investor who overestimates the precision of private signals and trades more aggressively than fundamentals warrant. Real-world counterpart: overconfident retail investor or active day-trader. Decision goal: trade on perceived signals with inflated confidence. Non-goals: must not use fundamental value or self-attribution.
 
 ## Theoretical Foundation
-
-TODO — cite the primary paper(s) that ground this archetype. Include DOI or
-equivalent identifier and a one-sentence summary of the mechanism.
+**Investor Overconfidence**:
+- Citation: Daniel, K., Hirshleifer, D., & Subrahmanyam, A. (1998). Investor psychology and security market under- and overreactions. *Journal of Finance*, 53(6), 1839-1885. https://doi.org/10.1111/0022-1082.00077
+- Core Insight: Investors overestimate private signal precision, leading to excess trading and amplified price moves.
+- Mathematical Formulation: `perceived_signal = precision_overestimate * deviation`.
+- Relevance: The agent inflates perceived signal strength and trades larger than warranted.
+- Calibration Source: Daniel et al. (1998). Falsification: If the agent trades less than a calibrated benchmark, overconfidence is absent.
 
 ## Design Purpose and Activation Triggers
+Purpose: Amplify price moves through inflated signal interpretation.
 
-Prerequisite Signals: TODO.
+Activation Triggers: `abs(deviation) > 0`: submit larger-than-calibrated directional order. `<Default>`: hold.
 
-Activation Triggers:
-- TODO — enumerate the conditions under which this archetype trades vs. holds.
+## Behavioral Framework
+Core Behavioral Mechanism: Observe price deviation from fundamental. Multiply by overconfidence factor to produce larger order size than a calibrated trader would. Capped by max position.
 
 ## Parameters
+| Parameter | Symbol | Range | Default |
+|---|---|---|---|
+| precision_overestimate | k_prec | 1.2-3.0 | 2.0 |
+| max_position | Q_max | 30-100 | 60.0 |
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| TODO      | TODO    | TODO        |
+## Academic References
+Daniel, Hirshleifer & Subrahmanyam (1998). https://doi.org/10.1111/0022-1082.00077
 
-## Referenced Scenarios
-
-Currently instantiated in: OverconfidenceBias, ReversalEffect.
-
-## Design Provenance
-
-| Field | Content |
-|-------|---------|
-| Created | 2026-07-11 |
-| Version | 0.1.0 |
-| Status | stub |
+## Design Provenance and Versioning
+- Origin: new (2026-07-11, OverconfidenceBias/ReversalEffect polish)
 | Icon | ![](../agent_images/icons/finance-overconfident-trader.png) |

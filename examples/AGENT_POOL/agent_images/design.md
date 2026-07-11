@@ -37,16 +37,31 @@ icon in `icons/`.
 | 21 | `finance/vol-arbitrageur.md`                 | `finance-vol-arbitrageur.png`                 | 套利型投资者     | Volatility mean-reversion arb → scales motif          |
 | 22 | `finance/vol-etn-manager.md`                 | `finance-vol-etn-manager.png`                 | 结构产品型投资者 | Structured product manager → stacked-layers motif     |
 | 23 | `finance/volatility-trader.md`               | `finance-volatility-trader.png`               | 波动管理型投资者 | Vol-targeting/risk-parity → volatility-wave motif     |
+| 24 | `finance/index-fund.md`                      | `finance-index-fund.png`                      | 指数型投资者     | Passive rebalancing → balance motif                   |
+| 25 | `finance/market-maker.md`                    | `finance-market-maker.png`                    | 做市型投资者     | Inventory-control market making → book motif          |
+| 26 | `finance/overconfident-trader.md`            | `finance-overconfident-trader.png`            | 自信型投资者     | Overconfidence signal inflation → rising-arrow motif  |
+| 27 | `finance/self-attributor.md`                 | `finance-self-attributor.png`                 | 归因型投资者     | Biased self-attribution → signal motif                |
+| 28 | `finance/pattern-matcher.md`                 | `finance-pattern-matcher.png`                 | 模式型投资者     | Representativeness pattern matching → eye motif       |
+| 29 | `finance/category-overgeneralizer.md`        | `finance-category-overgeneralizer.png`        | 归类型投资者     | Base-rate neglect classification → scatter motif      |
+| 30 | `finance/index-tracker.md`                   | `finance-index-tracker.png`                   | 跟踪型投资者     | Passive index tracking → diamond motif                |
+
+## Mapping: opinion/ agents → icons/
+
+| #  | Agent                                        | Icon                                          | Display Name     | Match Reason                                          |
+|----|----------------------------------------------|-----------------------------------------------|------------------|-------------------------------------------------------|
+| 1  | `opinion/gullible-spreader.md`               | `opinion-gullible-spreader.png`               | 轻信型传播者     | Gullible rumor sharing → signal motif                 |
+| 2  | `opinion/distorting-relayer.md`              | `opinion-distorting-relayer.png`              | 扭曲型传播者     | Serial transmission distortion → reverse-arrow motif  |
+| 3  | `opinion/skeptical-evaluator.md`             | `opinion-skeptical-evaluator.png`             | 质疑型评估者     | Evidence-demanding skepticism → magnifier motif       |
+| 4  | `opinion/fact-checker.md`                    | `opinion-fact-checker.png`                    | 事实型核查者     | Authoritative fact-checking → shield motif            |
+| 5  | `opinion/uninformed-bystander.md`            | `opinion-uninformed-bystander.png`            | 旁观型沉默者     | Passive audience → scatter motif                      |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 23 total and map 1:1 to the 23 ``finance/`` agent specs.
-- Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
+- Icons are 35 total: 30 finance + 5 opinion.
+- Each `finance/*.md` and `opinion/*.md` file carries an `| Icon |` row in its Design
   Provenance table linking to its icon via relative path.
-- 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
-  (previously borrowed from the original taxonomy contact sheet). Old icons
-  backed up in the project workspace.
-- If new agents are added to `finance/`, commission a new icon in the same
-  style and name it ``finance-<agent-stem>.png``.
+- 2026-07-11: Added 7 finance icons (#24-#30) and 5 opinion icons (#1-#5) via
+  agent-icon-generation-skill for MomentumEffect, OverconfidenceBias,
+  RepresentativenessBias, ReversalEffect, and RumorSpread polish.
