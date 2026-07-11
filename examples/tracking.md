@@ -30,12 +30,12 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
 | 23 | HerdEffect             | 🟢      | qihang      | Jul 8 2026           | —                 |
 | 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
-| 25 | HindsightBias          | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
-| 26 | LiquidityDryup         | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
-| 27 | LossAversion           | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
-| 28 | LTCMCollapse           | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
-| 29 | LUNACollapse           | 🟡      | Wenyou      | Jul 11 2026 | —                 |
-| 30 | MarketCrash            | 🟡      | Wenyou      | Jul 11 2026 | —                 |
+| 25 | HindsightBias          | 🟡      |              |             |                    |
+| 26 | LiquidityDryup         | 🟡      |              |            |                    |
+| 27 | LossAversion           | 🟡      |             | Jul 10 2026 | LLM, Rule, RuleLLM |
+| 28 | LTCMCollapse           | 🟡      |             | Jul 10 2026 | LLM, Rule, RuleLLM |
+| 29 | LUNACollapse           | 🟡      |             | Jul 11 2026 | —                 |
+| 30 | MarketCrash            | 🟡      |              | Jul 11 2026 | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
 | 32 | MomentumEffect         | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
 | 33 | OverconfidenceBias     | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |

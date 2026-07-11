@@ -1,52 +1,58 @@
-# Category Overgeneralizer
-
-> Status: stub. Auto-generated placeholder — please replace `TODO` fields with
-> the concrete theory family, market role, and parameters for this archetype.
+# Category-overgeneralizing classifier
 
 ## Summary
 
 | Field                 | Content |
 |-----------------------|---------|
-| Archetype             | Category Overgeneralizer |
-| Theory Family         | TODO (behavioral / microstructure / macro / other) |
-| Market Role           | TODO (destabilising / neutral / stabilising) |
-| Time Horizon          | TODO |
-| Risk Tolerance        | TODO |
-| Information Asymmetry | TODO |
-| Determinism           | TODO |
+| Archetype             | Category-overgeneralizing classifier |
+| Theory Family         | Behavioral Finance (Representativeness) |
+| Market Role         | **Destabilising** |
+| Time Horizon          | medium |
+| Risk Tolerance        | moderate |
+| Information Asymmetry | none |
+| Determinism           | deterministic |
 
 ## Definition and Goals
 
-TODO — describe the behavioral or economic hypothesis that motivates this
-archetype, and what decision it aims to represent in the simulation.
+Models an investor who classifies assets into good or bad categories based on recent performance, ignoring base rates. Decision goal: buy 'winners', sell 'losers'. Non-goals: must not update beliefs with Bayesian reasoning.
 
 ## Theoretical Foundation
 
-TODO — cite the primary paper(s) that ground this archetype. Include DOI or
-equivalent identifier and a one-sentence summary of the mechanism.
+**Grether**:
+- Theory / Study: Grether, D. M. (1980). https://doi.org/10.2307/1885092
+- Core Insight: People systematically neglect prior probabilities when individuating evidence is presented.
+- Mathematical Formulation: `Classify as winner when recent_return > threshold; loser when below.`
+- Relevance to This Agent: The agent operationalises this mechanism as its primary decision rule.
+- Falsification Conditions: If the agent behaves contrary to the described mechanism, the design is invalid.
 
 ## Design Purpose and Activation Triggers
 
-Prerequisite Signals: TODO.
+Purpose: Classify assets into winner/loser categories based on recent returns, ignoring statistical base rates of regime persistence. Activation: when recent return exceeds a threshold, classify as 'winner' and buy; when below, classify as 'loser' and sell.
 
-Activation Triggers:
-- TODO — enumerate the conditions under which this archetype trades vs. holds.
+Call Frequency: every-tick.
+
+Activation Triggers: Classify assets into winner/loser categories based on recent returns, ignoring statistical base rates of regime persistence. `<Default>`: hold.
+
+## Behavioral Framework
+
+Track recent N-period cumulative return. If positive beyond threshold, classify asset as winner and buy. If negative beyond threshold, classify as loser and sell.
+
+Action Space: Buy / Sell / Hold based on signal thresholds. Quantity clamped to cash and position constraints.
 
 ## Parameters
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| TODO      | TODO    | TODO        |
+| Parameter | Symbol | Range | Default |
+|-----------|--------|-------|---------|
+| eta_switch | 0.05-0.25 | 0.12 |
+| pi_trend | 0.05-0.25 | 0.10 |
 
-## Referenced Scenarios
+## Academic References
 
-Currently instantiated in: RepresentativenessBias.
+Grether, D. M. (1980). https://doi.org/10.2307/1885092
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Created | 2026-07-11 |
-| Version | 0.1.0 |
-| Status | stub |
+- Origin: new (2026-07-11, RepresentativenessBias polish)
+- Polish audit: 2026-07-11 against agent-design-skill.md
+- Pool reference: `examples/AGENT_POOL/finance/category-overgeneralizer.md`
 | Icon | ![](../agent_images/icons/finance-category-overgeneralizer.png) |
