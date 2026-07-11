@@ -36,11 +36,9 @@ from examples.AnchoringEffect.Rule.analysis import (
     _load_data,
     analyze_anchoring,
 )
+from examples.AnchoringEffect.Rag.players import _RAG_FALLBACK
 
 VARIANT = "Rag"
-
-# Fallback string used when no documents are retrieved (Rag/players.py).
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def analyze_rag_knowledge_effect(

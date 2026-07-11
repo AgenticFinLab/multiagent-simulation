@@ -42,6 +42,13 @@ from examples.AnchoringEffect.Rule.players import Market
 
 logger = logging.getLogger("AnchoringEffect.Rag")
 
+# Module-level sentinel returned when the RAG retrieval yields no documents.
+# Rag/analysis.py imports this constant to detect Retrieval-Failure rounds,
+# so the string MUST match verbatim between producer (perceive) and consumer
+# (analyze_rag_knowledge_effect). See analysis-bases.md §3 (Knowledge-Effect
+# diagnostics) and finance-anchoring-effect.md §0 Meta CHANGELOG.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt string from a module path (module:VARIABLE)."""
@@ -378,7 +385,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])

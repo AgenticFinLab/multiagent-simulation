@@ -20,14 +20,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       # Market dynamics parameters (identical to Rule variant)
-      fundamental_value: 100.0
-      initial_price: 105.0
+      fundamental_value: 100.0  # Source: target §9 F; simulation-bases.md §3.1 (normalization, 100-scale index)
+      initial_price: 105.0  # Source: target §9 P0; simulation-bases.md §3.1 (5% above F, IPO-anchor seed)
       price_impact: 0.01        # Low: anchoring effect slows price discovery
       mean_reversion: 0.01      # Low: sustains anchoring persistence
       noise_std: 0.5            # Moderate price noise
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -46,19 +46,19 @@ llm_anchored_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      adjustment_factor: 0.3
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      adjustment_factor: 0.3  # Source: target §9 alpha; Tversky & Kahneman (1974) https://doi.org/10.1126/science.185.4157.1124
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -77,18 +77,18 @@ llm_historical_anchor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_HISTORICAL_ANCHOR_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_HISTORICAL_ANCHOR_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -105,18 +105,18 @@ llm_rational_updater:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_RATIONAL_UPDATER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_RATIONAL_UPDATER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.5
-          max_tokens: 512
+          temperature: 0.5  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -135,18 +135,18 @@ llm_momentum_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_MOMENTUM_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_MOMENTUM_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -165,18 +165,18 @@ llm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.9
-          max_tokens: 512
+          temperature: 0.9  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -195,18 +195,18 @@ llm_disposition_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_DISPOSITION_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_DISPOSITION_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -224,18 +224,18 @@ llm_contrarian_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_CONTRARIAN_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_CONTRARIAN_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -253,18 +253,18 @@ llm_fundamental_analyst:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_FUNDAMENTAL_ANALYST_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_FUNDAMENTAL_ANALYST_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.5
-          max_tokens: 512
+          temperature: 0.5  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -282,16 +282,16 @@ llm_liquidity_provider:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
-      initial_cash: 15000.0
-      initial_position: 150.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 15000.0  # Source: simulation-bases.md §4.9.7 (LP inventory buffer, 1.5x normalization)
+      initial_position: 150.0  # Source: simulation-bases.md §4.9.7 (LP inventory, 1.5x share-normalization)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       llm:
-        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_LIQUIDITY_PROVIDER_SYS"
-        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.LLM.prompts:LLM_LIQUIDITY_PROVIDER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.5
-          max_tokens: 512
+          temperature: 0.5  # Source: LLM wiring — sampling temperature (persona-dependent)
+          max_tokens: 512  # Source: LLM wiring — max response tokens
   persona: !include persona.yml

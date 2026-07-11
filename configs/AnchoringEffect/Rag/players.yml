@@ -82,14 +82,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       # Market dynamics parameters (identical to Rule variant)
-      fundamental_value: 100.0
-      initial_price: 105.0
+      fundamental_value: 100.0  # Source: target §9 F; simulation-bases.md §3.1 (normalization, 100-scale index)
+      initial_price: 105.0  # Source: target §9 P0; simulation-bases.md §3.1 (5% above F, IPO-anchor seed)
       price_impact: 0.01        # Low: anchoring effect slows price discovery
       mean_reversion: 0.01      # Low: sustains anchoring persistence
       noise_std: 0.5            # Moderate price noise
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -108,10 +108,10 @@ ragllm_anchored_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect AnchoredTrader)
       # ------------------------------------------------------------------
@@ -142,12 +142,12 @@ ragllm_anchored_trader:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_ANCHORED_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_ANCHORED_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -167,17 +167,17 @@ ragllm_historical_anchor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect HistoricalAnchor)
       # ------------------------------------------------------------------
       anchor_weight: 0.5                # Dampens perceived deviation
       lookback: 60                      # Rolling average window for historical anchor
       trade_threshold: 0.03             # |deviation| > 3% triggers trade
-      base_position_size: 20.0
+      base_position_size: 20.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, mid-range)
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------
@@ -202,12 +202,12 @@ ragllm_historical_anchor:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_HISTORICAL_ANCHOR_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_HISTORICAL_ANCHOR_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -226,15 +226,15 @@ ragllm_rational_updater:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect RationalUpdater)
       # ------------------------------------------------------------------
       trade_threshold: 0.02             # |deviation| > 2% triggers trade
-      base_position_size: 25.0
+      base_position_size: 25.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, higher for corrective force)
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------
@@ -259,12 +259,12 @@ ragllm_rational_updater:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_RATIONAL_UPDATER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_RATIONAL_UPDATER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -284,15 +284,15 @@ ragllm_momentum_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect MomentumTrader)
       # ------------------------------------------------------------------
       entry_threshold: 0.02             # |return| > 2% triggers momentum trade
-      base_position_size: 20.0
+      base_position_size: 20.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, mid-range)
       # ------------------------------------------------------------------
       # Private Knowledge
       # ------------------------------------------------------------------
@@ -317,12 +317,12 @@ ragllm_momentum_trader:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_MOMENTUM_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_MOMENTUM_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.5
+          temperature: 0.5  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -342,10 +342,10 @@ ragllm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # ------------------------------------------------------------------
       # Rule parameters (from AnchoringEffect NoiseTrader)
       # ------------------------------------------------------------------
@@ -376,12 +376,12 @@ ragllm_noise_trader:
       # LLM Configuration
       # ------------------------------------------------------------------
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.9
+          temperature: 0.9  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -404,14 +404,14 @@ ragllm_disposition_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # Rule parameters (from AnchoringEffect DispositionTrader)
-      gain_threshold: 0.04
-      loss_aversion_mult: 2.5
-      base_position_size: 15.0
+      gain_threshold: 0.04  # Source: target §9 g; Odean (1998) https://doi.org/10.1111/0022-1082.00072
+      loss_aversion_mult: 2.5  # Source: target §9 lambda_LA; Kahneman & Tversky (1979) https://doi.org/10.2307/1914185
+      base_position_size: 15.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, lower for asymmetric agent)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -430,12 +430,12 @@ ragllm_disposition_trader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_DISPOSITION_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_DISPOSITION_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.5
+          temperature: 0.5  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -457,14 +457,14 @@ ragllm_contrarian_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # Rule parameters (from AnchoringEffect ContrarianTrader)
-      lookback_window: 10
-      entry_threshold: 0.05
-      base_position_size: 20.0
+      lookback_window: 10  # Source: target §9 L_CT; Jegadeesh (1990) https://doi.org/10.1111/j.1540-6261.1990.tb03723.x
+      entry_threshold: 0.05  # Source: target §9 tau_CT; De Bondt & Thaler (1985) https://doi.org/10.1111/j.1540-6261.1985.tb05004.x
+      base_position_size: 20.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, mid-range)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -483,12 +483,12 @@ ragllm_contrarian_trader:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_CONTRARIAN_TRADER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_CONTRARIAN_TRADER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.5
+          temperature: 0.5  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -510,13 +510,13 @@ ragllm_fundamental_analyst:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 10000.0  # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0  # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # Rule parameters (from AnchoringEffect FundamentalAnalyst)
-      learning_rate: 0.05
-      base_position_size: 25.0
+      learning_rate: 0.05  # Source: target §9 eta; Barberis, Shleifer & Vishny (1998) https://doi.org/10.1016/S0304-405X(98)00027-0
+      base_position_size: 25.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, higher for corrective force)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -535,12 +535,12 @@ ragllm_fundamental_analyst:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_FUNDAMENTAL_ANALYST_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_FUNDAMENTAL_ANALYST_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
 
@@ -562,14 +562,14 @@ ragllm_liquidity_provider:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
-      initial_cash: 15000.0
-      initial_position: 150.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AnchoringEffect/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      initial_cash: 15000.0  # Source: simulation-bases.md §4.9.7 (LP inventory buffer, 1.5x normalization)
+      initial_position: 150.0  # Source: simulation-bases.md §4.9.7 (LP inventory, 1.5x share-normalization)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
       # Rule parameters (from AnchoringEffect LiquidityProvider)
-      ema_window: 20
-      half_spread: 0.015
-      base_position_size: 30.0
+      ema_window: 20  # Source: target §9 L_EMA; Hendershott, Jones & Menkveld (2011) https://doi.org/10.1111/j.1540-6261.2010.01624.x
+      half_spread: 0.015  # Source: target §9 h; Huang & Stoll (1997) https://doi.org/10.1093/rfs/10.4.995
+      base_position_size: 30.0  # Source: target §9 b; simulation-bases.md §6 (base-size normalization, highest for LP)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -588,11 +588,11 @@ ragllm_liquidity_provider:
           chunk_overlap: 64
           top_k: 5
       llm:
-        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_LIQUIDITY_PROVIDER_SYS"
-        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AnchoringEffect.Rag.prompts:RAG_LIQUIDITY_PROVIDER_SYS"  # Source: LLM wiring — persona system prompt (prompts.py)
+        user_message: "examples.AnchoringEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: LLM wiring — user-message template (prompts.py)
+        lm_type: "api"  # Source: LLM wiring — OpenAI-style API adapter (masim.utils.llm_utils)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — ByteDance Doubao mini model endpoint
         generation_config:
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature (persona-dependent)
           max_new_tokens: 600
   persona: !include persona.yml
