@@ -32,10 +32,10 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
 | 25 | HindsightBias          | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
 | 26 | LiquidityDryup         | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
-| 27 | LossAversion           | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, |
+| 27 | LossAversion           | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
 | 28 | LTCMCollapse           | 🟡      | Wenyou      | Jul 10 2026 | LLM, Rule, RuleLLM |
-| 29 | LUNACollapse           | ⬜      | —           | —           | —                 |
-| 30 | MarketCrash            | ⬜      | —           | —           | —                 |
+| 29 | LUNACollapse           | 🟡      | Wenyou      | Jul 11 2026 | —                 |
+| 30 | MarketCrash            | 🟡      | Wenyou      | Jul 11 2026 | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
 | 32 | MomentumEffect         | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
 | 33 | OverconfidenceBias     | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
