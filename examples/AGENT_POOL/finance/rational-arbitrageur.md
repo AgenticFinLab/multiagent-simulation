@@ -50,3 +50,8 @@ Currently instantiated in: AssetBubble, EndowmentEffect.
 | Version | 0.1.0 |
 | Status | stub |
 | Icon | ![](../agent_images/icons/finance-rational-arbitrageur.png) |
+
+## Change Log
+
+- 0.1.0 (2026-07-11): Stub profile created for AssetBubble scenario.
+- 0.1.1 (2026-07-11): AGENT_POOL icon `finance-rational-arbitrageur.png` generated via agent-icon-generation-skill (balance-scale motif, 套利修正型投资者). Closes Step 2 icon-resolution gate for the AssetBubble polish run.

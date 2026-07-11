@@ -37,16 +37,26 @@ icon in `icons/`.
 | 21 | `finance/vol-arbitrageur.md`                 | `finance-vol-arbitrageur.png`                 | 套利型投资者     | Volatility mean-reversion arb → scales motif          |
 | 22 | `finance/vol-etn-manager.md`                 | `finance-vol-etn-manager.png`                 | 结构产品型投资者 | Structured product manager → stacked-layers motif     |
 | 23 | `finance/volatility-trader.md`               | `finance-volatility-trader.png`               | 波动管理型投资者 | Vol-targeting/risk-parity → volatility-wave motif     |
+| 24 | `finance/momentum-speculator.md`             | `finance-momentum-speculator.png`             | 追涨型投资者     | Aggressive trend chaser (bubble driver) → rising-arrow trend motif |
+| 25 | `finance/rational-arbitrageur.md`            | `finance-rational-arbitrageur.png`            | 套利修正型投资者 | Value-based short-seller correcting mispricing → balance-scale motif |
+| 26 | `finance/fundamental-investor.md`            | `finance-fundamental-investor.png`            | 基本面型投资者   | Slow value anchor → magnifier + diamond motif         |
+| 27 | `finance/leveraged-buyer.md`                 | `finance-leveraged-buyer.png`                 | 杠杆型投资者     | Margin-amplified positions → lever motif              |
+| 28 | `finance/conservative-holder.md`             | `finance-conservative-holder.png`             | 长持型投资者     | Long-term stability holder → pillar/anchor motif      |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 23 total and map 1:1 to the 23 ``finance/`` agent specs.
+- Icons are 28 total and map 1:1 to the 28 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
   (previously borrowed from the original taxonomy contact sheet). Old icons
   backed up in the project workspace.
+- 2026-07-11: Icons #24–#28 added for the AssetBubble scenario archetypes
+  (momentum-speculator, rational-arbitrageur, fundamental-investor,
+  leveraged-buyer, conservative-holder) via agent-icon-generation-skill.
+  This closes the Step 2 AGENT_POOL icon-resolution gate that the initial
+  polish run of `examples/AssetBubble` had missed.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.

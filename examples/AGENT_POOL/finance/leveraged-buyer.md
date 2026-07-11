@@ -50,3 +50,8 @@ Currently instantiated in: AssetBubble.
 | Version | 0.1.0 |
 | Status | stub |
 | Icon | ![](../agent_images/icons/finance-leveraged-buyer.png) |
+
+## Change Log
+
+- 0.1.0 (2026-07-11): Stub profile created for AssetBubble scenario.
+- 0.1.1 (2026-07-11): AGENT_POOL icon `finance-leveraged-buyer.png` generated via agent-icon-generation-skill (lever motif, 杠杆型投资者). Closes Step 2 icon-resolution gate for the AssetBubble polish run.
