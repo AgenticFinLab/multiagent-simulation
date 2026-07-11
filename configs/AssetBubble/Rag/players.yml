@@ -35,9 +35,9 @@
 # =============================================================================
 knowledge:
   # Backend type: "local" = local filesystem, "shared" = network mount, "remote" = cloud
-  backend: "local"
+  backend: "local"  # Source: RAG wiring — knowledge storage backend type
   # Base directory for all shared documents (PDFs, MinerU output, RAG index, etc.)
-  global_uri: "examples/document-sources"
+  global_uri: "examples/document-sources"  # Source: RAG wiring — base directory for all shared documents
   # List of resource descriptors shared globally across all agents
   # - CSV files: each has an agent_type column; code filters rows by agent identity at runtime
   # - Directories: code auto-discovers PDF files inside for preprocessing
@@ -48,13 +48,13 @@ knowledge:
     - "examples/document-sources/source"
   preprocessing:
     # PDF parser engine; currently only "mineru" is supported
-    parser: "mineru"
+    parser: "mineru"  # Source: RAG wiring — PDF parser engine
     # Seconds allowed per page for MinerU API call (adjusts dynamically for large PDFs)
-    timeout_per_page: 30
+    timeout_per_page: 30  # Source: RAG wiring — MinerU per-page timeout
     # Maximum page count per PDF; PDFs exceeding this are split before parsing
-    max_pages: 250
+    max_pages: 250  # Source: RAG wiring — MinerU maximum page count per PDF
     # Subdirectory name for MinerU output, relative to global_uri/
-    output_position: "MinerU_processed"
+    output_position: "MinerU_processed"  # Source: RAG wiring — subdirectory for shared RAG index storage
   # -----------------------------------------------------------------
   # RAG Configuration (shared defaults for all agents)
   # -----------------------------------------------------------------
@@ -65,19 +65,19 @@ knowledge:
     # Subdirectory for shared RAG index storage, relative to global_uri/
     # All agents share this index; each agent also has a local copy
     # at <local_uri>/rag_index/ for read/write isolation
-    output_position: "rag_index"
+    output_position: "rag_index"  # Source: RAG wiring — subdirectory for shared RAG index storage
     # Embedding provider type: "litellm" for LiteLLM-based embedding
-    embed_type: "litellm"
+    embed_type: "litellm"  # Source: RAG wiring — embedding provider type
     # Embedding model name; "openai/hunyuan-embedding" = Hunyuan via OpenAI-compatible API
-    embed_model: "openai/hunyuan-embedding"
+    embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
     # API key for embedding service; resolved from environment variable
-    embed_api_key: "{{ HUNYUAN_API_KEY }}"
+    embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
     # API base URL for Hunyuan embedding (OpenAI-compatible endpoint)
-    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+    embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
     # Chunk size in tokens for document splitting
-    chunk_size: 512
+    chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
     # Overlap in tokens between consecutive chunks
-    chunk_overlap: 64
+    chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
 
 # =============================================================================
 # Market (rule-based, identical to AssetBubble)
@@ -86,35 +86,35 @@ knowledge:
 # book, computes price updates, and manages trading mechanics.
 # =============================================================================
 market:
-  name: "Market"
-  class: "examples.AssetBubble.Rag.players:Market"
-  num_instances: 1
+  name: "Market"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:Market"  # Source: implementation infrastructure (fully-qualified class path)
+  num_instances: 1  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "market"
-    role: coordinator
-    steps_per_turn: 1
+    identity: "market"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: coordinator  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - market
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Fundamental value of the asset (baseline for price mean-reversion)
-      fundamental_value: 100.0
+      fundamental_value: 100.0  # Source: target §9 / simulation-bases.md §3.1 (normalization, 100-scale index)
       # Starting price at the beginning of the simulation
-      initial_price: 100.0
+      initial_price: 100.0  # Source: target §9 / simulation-bases.md §3.1 (normalization, starts at fair value)
       # Price impact coefficient: how much a unit of net demand moves price
-      price_impact: 0.15
+      price_impact: 0.15  # Source: target §9 lambda; De Long et al. (1990) https://doi.org/10.1086/261703
       # Mean-reversion strength: rate at which price reverts to fundamental
-      mean_reversion: 0.005
+      mean_reversion: 0.005  # Source: target §9 gamma; Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
       # Fundamental value growth rate per period
-      fundamental_growth: 0.001
+      fundamental_growth: 0.001  # Source: target §9 g; Shiller (2000) Irrational Exuberance
       # Standard deviation of exogenous noise added to price each period
-      noise_std: 0.3
+      noise_std: 0.3  # Source: target §9 sigma; De Long et al. (1990) https://doi.org/10.1086/261703
       # Annualized cost rate for holding short positions
-      short_cost_rate: 0.02
+      short_cost_rate: 0.02  # Source: target §9 c_short; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
-  persona: !include persona.yml
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
 
 # =============================================================================
 # RAG Momentum Speculator (Greater Fool Theory + LLM + RAG)
@@ -123,36 +123,36 @@ market:
 # RAG knowledge: Momentum investing, speculation, Keynesian beauty contest
 # =============================================================================
 ragllm_momentum_speculator:
-  name: "RAG Momentum Speculator"
-  class: "examples.AssetBubble.Rag.players:RagLLMMomentumSpeculator"
+  name: "RAG Momentum Speculator"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:RagLLMMomentumSpeculator"  # Source: implementation infrastructure (fully-qualified class path)
   # Number of agent instances (expanded to ragllm_momentum_1 .. ragllm_momentum_5)
-  num_instances: 5
+  num_instances: 5  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "ragllm_momentum_speculator"
-    role: player
-    steps_per_turn: 1
+    identity: "ragllm_momentum_speculator"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: player  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - ragllm_investors
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Starting cash endowment
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: target §9 initial_equity (portfolio normalization)
       # Starting position (shares held); 0 = flat
-      initial_position: 0.0
+      initial_position: 0.0  # Source: target §7 Intent line (zero-position start)
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       # -----------------------------------------------------------------
       # Rule parameters (from AssetBubble MomentumSpeculator)
       # -----------------------------------------------------------------
       # Lookback window for short-term momentum signal (in periods)
-      lookback_short: 5
+      lookback_short: 5  # Source: target §9 k; Jegadeesh & Titman (1993) https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
       # Aggressiveness multiplier for position sizing on momentum signals
-      aggressiveness: 2.0
+      aggressiveness: 2.0  # Source: target §9 alpha; De Long et al. (1990) https://doi.org/10.1111/j.1540-6261.1990.tb03695.x
       # Base number of shares per trade order
-      base_position_size: 20.0
+      base_position_size: 20.0  # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       # Leverage multiplier applied to position size when momentum is strong
-      leverage_multiplier: 2.0
+      leverage_multiplier: 2.0  # Source: target §9 ell_m; Adrian & Shin (2010) https://doi.org/10.1016/j.jfineco.2009.12.002
       # -----------------------------------------------------------------
       # Private Knowledge: agent-specific resources and RAG configuration
       # -----------------------------------------------------------------
@@ -172,7 +172,7 @@ ragllm_momentum_speculator:
           - "MinerU_processed"
         local_resources:
           # Per-agent local directory; auto-generated if empty
-          local_uri: ""
+          local_uri: ""  # Source: RAG wiring — per-agent local directory (auto-generated if empty)
           # Agent-specific local resource paths (files, URLs not in global CSV)
           local_resources: []
         # -----------------------------------------------------------------
@@ -186,39 +186,39 @@ ragllm_momentum_speculator:
           from_global_index_dir:
             - "rag_index"
           # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
-          local_index_dir: ""
+          local_index_dir: ""  # Source: RAG wiring — per-agent local index directory (auto-generated if empty)
           # Embedding provider type: "litellm" for LiteLLM-based embedding
-          embed_type: "litellm"
+          embed_type: "litellm"  # Source: RAG wiring — embedding provider type
           # Embedding model name; "openai/hunyuan-embedding" = Hunyuan via OpenAI-compatible API
-          embed_model: "openai/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
           # API key for embedding service; resolved from environment variable
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
           # API base URL for Hunyuan embedding (OpenAI-compatible endpoint)
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
           # Chunk size in tokens for document splitting
-          chunk_size: 512
+          chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
           # Overlap in tokens between consecutive chunks
-          chunk_overlap: 64
+          chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
           # Number of top-k chunks to retrieve per query
-          top_k: 5
+          top_k: 5  # Source: RAG wiring — number of top-k chunks retrieved per query
       # -----------------------------------------------------------------
       # LLM Configuration: inference model for agent decision-making
       # -----------------------------------------------------------------
       llm:
         # System prompt module:path:variable
-        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_MOMENTUM_SYS"
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_MOMENTUM_SYS"  # Source: RagLLM wiring — persona prompt for archetype
         # User message template module:path:variable
-        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: RagLLM wiring — shared user prompt template
         # Language model type: "api" = remote API call
-        lm_type: "api"
+        lm_type: "api"  # Source: LLM wiring — inference mode
         # Model identifier for Doubao via ARK (VolcEngine)
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
           # Sampling temperature; lower = more deterministic
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature
           # Maximum number of new tokens in generated response
-          max_new_tokens: 600
-  persona: !include persona.yml
+          max_new_tokens: 600  # Source: LLM wiring — response length cap
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
 
 # =============================================================================
 # RAG Rational Arbitrageur (Limits to Arbitrage + LLM + RAG)
@@ -227,36 +227,36 @@ ragllm_momentum_speculator:
 # RAG knowledge: Limits to arbitrage, market efficiency, short selling
 # =============================================================================
 ragllm_rational_arbitrageur:
-  name: "RAG Rational Arbitrageur"
-  class: "examples.AssetBubble.Rag.players:RagLLMRationalArbitrageur"
+  name: "RAG Rational Arbitrageur"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:RagLLMRationalArbitrageur"  # Source: implementation infrastructure (fully-qualified class path)
   # Number of agent instances (expanded to ragllm_arbitrageur_1 .. ragllm_arbitrageur_3)
-  num_instances: 3
+  num_instances: 3  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "ragllm_rational_arbitrageur"
-    role: player
-    steps_per_turn: 1
+    identity: "ragllm_rational_arbitrageur"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: player  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - ragllm_investors
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Starting cash endowment
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: target §9 initial_equity (portfolio normalization)
       # Starting position (shares held); 0 = flat
-      initial_position: 0.0
+      initial_position: 0.0  # Source: target §7 Intent line (zero-position start)
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       # -----------------------------------------------------------------
       # Rule parameters (from AssetBubble RationalArbitrageur)
       # -----------------------------------------------------------------
       # Minimum deviation from fundamental value to trigger arbitrage trade
-      deviation_threshold: 0.05
+      deviation_threshold: 0.05  # Source: target §9 theta_dev; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
       # Base number of shares per trade order
-      base_position_size: 20.0
+      base_position_size: 20.0  # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       # Maximum short position size (in shares)
-      max_short_position: 30.0
+      max_short_position: 30.0  # Source: target §9 q_short_max; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
       # Sensitivity to short-selling costs; higher = more reluctant to short
-      short_cost_sensitivity: 2.0
+      short_cost_sensitivity: 2.0  # Source: target §9 c_s; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
       # -----------------------------------------------------------------
       # Private Knowledge: agent-specific resources and RAG configuration
       # -----------------------------------------------------------------
@@ -268,7 +268,7 @@ ragllm_rational_arbitrageur:
           - "MinerU_processed"
         local_resources:
           # Per-agent local directory; auto-generated if empty
-          local_uri: ""
+          local_uri: ""  # Source: RAG wiring — per-agent local directory (auto-generated if empty)
           # Agent-specific local resource paths (files, URLs not in global CSV)
           local_resources: []
         # -----------------------------------------------------------------
@@ -279,39 +279,39 @@ ragllm_rational_arbitrageur:
           from_global_index_dir:
             - "rag_index"
           # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
-          local_index_dir: ""
+          local_index_dir: ""  # Source: RAG wiring — per-agent local index directory (auto-generated if empty)
           # Embedding provider type: "litellm" for LiteLLM-based embedding
-          embed_type: "litellm"
+          embed_type: "litellm"  # Source: RAG wiring — embedding provider type
           # Embedding model name; Hunyuan via OpenAI-compatible API
-          embed_model: "openai/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
           # API key for embedding service; resolved from environment variable
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
           # API base URL for Hunyuan embedding
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
           # Chunk size in tokens for document splitting
-          chunk_size: 512
+          chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
           # Overlap in tokens between consecutive chunks
-          chunk_overlap: 64
+          chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
           # Number of top-k chunks to retrieve per query
-          top_k: 5
+          top_k: 5  # Source: RAG wiring — number of top-k chunks retrieved per query
       # -----------------------------------------------------------------
       # LLM Configuration
       # -----------------------------------------------------------------
       llm:
         # System prompt for Rational Arbitrageur persona
-        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_ARBITRAGEUR_SYS"  # Source: RagLLM wiring — persona prompt for archetype
         # User message template
-        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: RagLLM wiring — shared user prompt template
         # Language model type: "api" = remote API call
-        lm_type: "api"
+        lm_type: "api"  # Source: LLM wiring — inference mode
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
           # Sampling temperature; lower = more deterministic
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature
           # Maximum number of new tokens in generated response
-          max_new_tokens: 600
-  persona: !include persona.yml
+          max_new_tokens: 600  # Source: LLM wiring — response length cap
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
 
 # =============================================================================
 # RAG Noise Trader (Sentiment herding + LLM + RAG)
@@ -320,34 +320,34 @@ ragllm_rational_arbitrageur:
 # RAG knowledge: Noise trader risk, behavioral finance, herd behavior
 # =============================================================================
 ragllm_noise_trader:
-  name: "RAG Noise Trader"
-  class: "examples.AssetBubble.Rag.players:RagLLMNoiseTrader"
+  name: "RAG Noise Trader"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:RagLLMNoiseTrader"  # Source: implementation infrastructure (fully-qualified class path)
   # Number of agent instances (expanded to ragllm_noise_1, ragllm_noise_2)
-  num_instances: 2
+  num_instances: 2  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "ragllm_noise_trader"
-    role: player
-    steps_per_turn: 1
+    identity: "ragllm_noise_trader"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: player  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - ragllm_investors
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Starting cash endowment
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: target §9 initial_equity (portfolio normalization)
       # Starting position (shares held); 0 = flat
-      initial_position: 0.0
+      initial_position: 0.0  # Source: target §7 Intent line (zero-position start)
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       # -----------------------------------------------------------------
       # Rule parameters (from AssetBubble NoiseTrader)
       # -----------------------------------------------------------------
       # Volatility of sentiment signal; higher = more random sentiment swings
-      sentiment_volatility: 0.3
+      sentiment_volatility: 0.3  # Source: target §9 sigma_s; De Long et al. (1990) https://doi.org/10.1086/261703
       # Weight of herding signal vs private sentiment (0-1); higher = more herding
-      herding_weight: 0.7
+      herding_weight: 0.7  # Source: target §9 h; Barber & Odean (2008) https://doi.org/10.1093/rfs/hhm079
       # Base number of shares per trade order
-      base_position_size: 15.0
+      base_position_size: 15.0  # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       # -----------------------------------------------------------------
       # Private Knowledge: agent-specific resources and RAG configuration
       # -----------------------------------------------------------------
@@ -359,7 +359,7 @@ ragllm_noise_trader:
           - "MinerU_processed"
         local_resources:
           # Per-agent local directory; auto-generated if empty
-          local_uri: ""
+          local_uri: ""  # Source: RAG wiring — per-agent local directory (auto-generated if empty)
           # Agent-specific local resource paths (files, URLs not in global CSV)
           local_resources: []
         # -----------------------------------------------------------------
@@ -370,39 +370,39 @@ ragllm_noise_trader:
           from_global_index_dir:
             - "rag_index"
           # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
-          local_index_dir: ""
+          local_index_dir: ""  # Source: RAG wiring — per-agent local index directory (auto-generated if empty)
           # Embedding provider type: "litellm" for LiteLLM-based embedding
-          embed_type: "litellm"
+          embed_type: "litellm"  # Source: RAG wiring — embedding provider type
           # Embedding model name; Hunyuan via OpenAI-compatible API
-          embed_model: "openai/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
           # API key for embedding service; resolved from environment variable
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
           # API base URL for Hunyuan embedding
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
           # Chunk size in tokens for document splitting
-          chunk_size: 512
+          chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
           # Overlap in tokens between consecutive chunks
-          chunk_overlap: 64
+          chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
           # Number of top-k chunks to retrieve per query
-          top_k: 5
+          top_k: 5  # Source: RAG wiring — number of top-k chunks retrieved per query
       # -----------------------------------------------------------------
       # LLM Configuration
       # -----------------------------------------------------------------
       llm:
         # System prompt for Noise Trader persona
-        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_NOISE_SYS"
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_NOISE_SYS"  # Source: RagLLM wiring — persona prompt for archetype
         # User message template
-        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: RagLLM wiring — shared user prompt template
         # Language model type: "api" = remote API call
-        lm_type: "api"
+        lm_type: "api"  # Source: LLM wiring — inference mode
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
           # Sampling temperature; slightly higher for noisier, more varied output
-          temperature: 0.5
+          temperature: 0.5  # Source: LLM wiring — sampling temperature
           # Maximum number of new tokens in generated response
-          max_new_tokens: 600
-  persona: !include persona.yml
+          max_new_tokens: 600  # Source: LLM wiring — response length cap
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
 
 # =============================================================================
 # RAG Value Investor (Fundamental value + LLM + RAG)
@@ -411,34 +411,34 @@ ragllm_noise_trader:
 # RAG knowledge: Value investing, fundamental analysis, Graham/Buffett methods
 # =============================================================================
 ragllm_fundamental_investor:
-  name: "RAG Value Investor"
-  class: "examples.AssetBubble.Rag.players:RagLLMFundamentalInvestor"
+  name: "RAG Value Investor"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:RagLLMFundamentalInvestor"  # Source: implementation infrastructure (fully-qualified class path)
   # Number of agent instances (expanded to ragllm_value_1 .. ragllm_value_4)
-  num_instances: 4
+  num_instances: 4  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "ragllm_fundamental_investor"
-    role: player
-    steps_per_turn: 1
+    identity: "ragllm_fundamental_investor"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: player  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - ragllm_investors
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Starting cash endowment
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: target §9 initial_equity (portfolio normalization)
       # Starting position (shares held); 0 = flat
-      initial_position: 0.0
+      initial_position: 0.0  # Source: target §7 Intent line (zero-position start)
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       # -----------------------------------------------------------------
       # Rule parameters (from AssetBubble FundamentalInvestor)
       # -----------------------------------------------------------------
       # How often (in periods) this investor places a trade; higher = less frequent
-      trade_frequency: 5
+      trade_frequency: 5  # Source: target §9 tau; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
       # Sensitivity to deviation from fundamental value; higher = stronger reaction
-      value_sensitivity: 1.5
+      value_sensitivity: 1.5  # Source: target §9 beta_v; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
       # Base number of shares per trade order
-      base_position_size: 10.0
+      base_position_size: 10.0  # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       # -----------------------------------------------------------------
       # Private Knowledge: agent-specific resources and RAG configuration
       # -----------------------------------------------------------------
@@ -450,7 +450,7 @@ ragllm_fundamental_investor:
           - "MinerU_processed"
         local_resources:
           # Per-agent local directory; auto-generated if empty
-          local_uri: ""
+          local_uri: ""  # Source: RAG wiring — per-agent local directory (auto-generated if empty)
           # Agent-specific local resource paths (files, URLs not in global CSV)
           local_resources: []
         # -----------------------------------------------------------------
@@ -461,39 +461,39 @@ ragllm_fundamental_investor:
           from_global_index_dir:
             - "rag_index"
           # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
-          local_index_dir: ""
+          local_index_dir: ""  # Source: RAG wiring — per-agent local index directory (auto-generated if empty)
           # Embedding provider type: "litellm" for LiteLLM-based embedding
-          embed_type: "litellm"
+          embed_type: "litellm"  # Source: RAG wiring — embedding provider type
           # Embedding model name; Hunyuan via OpenAI-compatible API
-          embed_model: "openai/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
           # API key for embedding service; resolved from environment variable
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
           # API base URL for Hunyuan embedding
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
           # Chunk size in tokens for document splitting
-          chunk_size: 512
+          chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
           # Overlap in tokens between consecutive chunks
-          chunk_overlap: 64
+          chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
           # Number of top-k chunks to retrieve per query
-          top_k: 5
+          top_k: 5  # Source: RAG wiring — number of top-k chunks retrieved per query
       # -----------------------------------------------------------------
       # LLM Configuration
       # -----------------------------------------------------------------
       llm:
         # System prompt for Value Investor persona
-        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_VALUE_SYS"
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_VALUE_SYS"  # Source: RagLLM wiring — persona prompt for archetype
         # User message template
-        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: RagLLM wiring — shared user prompt template
         # Language model type: "api" = remote API call
-        lm_type: "api"
+        lm_type: "api"  # Source: LLM wiring — inference mode
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
           # Sampling temperature; lower = more deterministic, disciplined output
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature
           # Maximum number of new tokens in generated response
-          max_new_tokens: 600
-  persona: !include persona.yml
+          max_new_tokens: 600  # Source: LLM wiring — response length cap
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
 
 # =============================================================================
 # RAG Leveraged Buyer (Margin amplification + LLM + RAG)
@@ -502,36 +502,36 @@ ragllm_fundamental_investor:
 # RAG knowledge: Leverage cycles, margin trading, financial crises
 # =============================================================================
 ragllm_leveraged_buyer:
-  name: "RAG Leveraged Buyer"
-  class: "examples.AssetBubble.Rag.players:RagLLMLeveragedBuyer"
+  name: "RAG Leveraged Buyer"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:RagLLMLeveragedBuyer"  # Source: implementation infrastructure (fully-qualified class path)
   # Number of agent instances (expanded to ragllm_leveraged_1 .. ragllm_leveraged_3)
-  num_instances: 3
+  num_instances: 3  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "ragllm_leveraged_buyer"
-    role: player
-    steps_per_turn: 1
+    identity: "ragllm_leveraged_buyer"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: player  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - ragllm_investors
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Starting cash endowment
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: target §9 initial_equity (portfolio normalization)
       # Starting position (shares held); 0 = flat
-      initial_position: 0.0
+      initial_position: 0.0  # Source: target §7 Intent line (zero-position start)
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       # -----------------------------------------------------------------
       # Rule parameters (from AssetBubble LeveragedBuyer)
       # -----------------------------------------------------------------
       # Leverage ratio applied to position size (e.g., 3x = borrow 2x equity)
-      leverage_ratio: 3.0
+      leverage_ratio: 3.0  # Source: target §9 ell; Adrian & Shin (2010) https://doi.org/10.1016/j.jfineco.2009.12.002
       # Equity ratio threshold that triggers a margin call (0.7 = 70% equity)
-      margin_call_threshold: 0.7
+      margin_call_threshold: 0.7  # Source: target §9 m; Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
       # Base number of shares per trade order
-      base_position_size: 20.0
+      base_position_size: 20.0  # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       # Initial equity for margin calculations
-      initial_equity: 10000.0
+      initial_equity: 10000.0  # Source: target §9 E0; portfolio normalization (10000-scale)
       # -----------------------------------------------------------------
       # Private Knowledge: agent-specific resources and RAG configuration
       # -----------------------------------------------------------------
@@ -543,7 +543,7 @@ ragllm_leveraged_buyer:
           - "MinerU_processed"
         local_resources:
           # Per-agent local directory; auto-generated if empty
-          local_uri: ""
+          local_uri: ""  # Source: RAG wiring — per-agent local directory (auto-generated if empty)
           # Agent-specific local resource paths (files, URLs not in global CSV)
           local_resources: []
         # -----------------------------------------------------------------
@@ -554,39 +554,39 @@ ragllm_leveraged_buyer:
           from_global_index_dir:
             - "rag_index"
           # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
-          local_index_dir: ""
+          local_index_dir: ""  # Source: RAG wiring — per-agent local index directory (auto-generated if empty)
           # Embedding provider type: "litellm" for LiteLLM-based embedding
-          embed_type: "litellm"
+          embed_type: "litellm"  # Source: RAG wiring — embedding provider type
           # Embedding model name; Hunyuan via OpenAI-compatible API
-          embed_model: "openai/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
           # API key for embedding service; resolved from environment variable
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
           # API base URL for Hunyuan embedding
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
           # Chunk size in tokens for document splitting
-          chunk_size: 512
+          chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
           # Overlap in tokens between consecutive chunks
-          chunk_overlap: 64
+          chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
           # Number of top-k chunks to retrieve per query
-          top_k: 5
+          top_k: 5  # Source: RAG wiring — number of top-k chunks retrieved per query
       # -----------------------------------------------------------------
       # LLM Configuration
       # -----------------------------------------------------------------
       llm:
         # System prompt for Leveraged Buyer persona
-        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_LEVERAGED_SYS"
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_LEVERAGED_SYS"  # Source: RagLLM wiring — persona prompt for archetype
         # User message template
-        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: RagLLM wiring — shared user prompt template
         # Language model type: "api" = remote API call
-        lm_type: "api"
+        lm_type: "api"  # Source: LLM wiring — inference mode
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
           # Sampling temperature; lower = more deterministic
-          temperature: 0.3
+          temperature: 0.3  # Source: LLM wiring — sampling temperature
           # Maximum number of new tokens in generated response
-          max_new_tokens: 600
-  persona: !include persona.yml
+          max_new_tokens: 600  # Source: LLM wiring — response length cap
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
 
 # =============================================================================
 # RAG Conservative Holder (Strategic allocation + LLM + RAG)
@@ -595,34 +595,34 @@ ragllm_leveraged_buyer:
 # RAG knowledge: Long-horizon allocation, portfolio discipline, stabilizing demand
 # =============================================================================
 ragllm_conservative_holder:
-  name: "RAG Conservative Holder"
-  class: "examples.AssetBubble.Rag.players:RagLLMConservativeHolder"
+  name: "RAG Conservative Holder"  # Source: implementation infrastructure (human-readable label)
+  class: "examples.AssetBubble.Rag.players:RagLLMConservativeHolder"  # Source: implementation infrastructure (fully-qualified class path)
   # Number of agent instances (expanded to ragllm_conservative_1 .. ragllm_conservative_2)
-  num_instances: 2
+  num_instances: 2  # Source: implementation infrastructure (agent expander count)
   config:
-    identity: "ragllm_conservative_holder"
-    role: player
-    steps_per_turn: 1
+    identity: "ragllm_conservative_holder"  # Source: implementation infrastructure (identity key matches players.yml top key)
+    role: player  # Source: implementation infrastructure (player vs coordinator role)
+    steps_per_turn: 1  # Source: implementation infrastructure (turn granularity)
     group_tags:
       - ragllm_investors
     extras:
       # Output directory for experiment records
-      record_path: "EXPERIMENT/AssetBubble/Rag/records"
+      record_path: "EXPERIMENT/AssetBubble/Rag/records"  # Source: implementation infrastructure (record path)
       # Starting cash endowment
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: target §9 initial_equity (portfolio normalization)
       # Starting position (shares held); 0 = flat
-      initial_position: 0.0
+      initial_position: 0.0  # Source: target §7 Intent line (zero-position start)
       # Maximum number of consecutive periods a state variable is "hot"
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       # -----------------------------------------------------------------
       # Rule parameters (from AssetBubble ConservativeHolder)
       # -----------------------------------------------------------------
       # Target strategic long holding
-      target_position: 20.0
+      target_position: 20.0  # Source: target §9 q_target; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
       # How often (in periods) this investor rebalances toward target
-      rebalance_frequency: 10
+      rebalance_frequency: 10  # Source: target §9 tau_reb; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
       # Fraction of position gap closed on each rebalance date
-      rebalance_rate: 0.2
+      rebalance_rate: 0.2  # Source: target §9 rho; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
       # -----------------------------------------------------------------
       # Private Knowledge: agent-specific resources and RAG configuration
       # -----------------------------------------------------------------
@@ -632,7 +632,7 @@ ragllm_conservative_holder:
           - "MinerU_processed"
         local_resources:
           # Per-agent local directory; auto-generated if empty
-          local_uri: ""
+          local_uri: ""  # Source: RAG wiring — per-agent local directory (auto-generated if empty)
           # Agent-specific local resource paths (files, URLs not in global CSV)
           local_resources: []
         # -----------------------------------------------------------------
@@ -643,36 +643,36 @@ ragllm_conservative_holder:
           from_global_index_dir:
             - "rag_index"
           # Per-agent local index directory; auto-generated if empty: <local_uri>/rag_index/
-          local_index_dir: ""
+          local_index_dir: ""  # Source: RAG wiring — per-agent local index directory (auto-generated if empty)
           # Embedding provider type: "litellm" for LiteLLM-based embedding
-          embed_type: "litellm"
+          embed_type: "litellm"  # Source: RAG wiring — embedding provider type
           # Embedding model name; Hunyuan via OpenAI-compatible API
-          embed_model: "openai/hunyuan-embedding"
+          embed_model: "openai/hunyuan-embedding"  # Source: RAG wiring — Hunyuan embedding model identifier
           # API key for embedding service; resolved from environment variable
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: RAG wiring — embedding API key (env-var resolved)
           # API base URL for Hunyuan embedding
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: RAG wiring — Hunyuan embedding API base URL
           # Chunk size in tokens for document splitting
-          chunk_size: 512
+          chunk_size: 512  # Source: RAG wiring — chunk size in tokens for document splitting
           # Overlap in tokens between consecutive chunks
-          chunk_overlap: 64
+          chunk_overlap: 64  # Source: RAG wiring — overlap in tokens between consecutive chunks
           # Number of top-k chunks to retrieve per query
-          top_k: 5
+          top_k: 5  # Source: RAG wiring — number of top-k chunks retrieved per query
       # -----------------------------------------------------------------
       # LLM Configuration
       # -----------------------------------------------------------------
       llm:
         # System prompt for Conservative Holder persona
-        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_CONSERVATIVE_SYS"
+        sys_message: "examples.AssetBubble.Rag.prompts:RAGLLM_CONSERVATIVE_SYS"  # Source: RagLLM wiring — persona prompt for archetype
         # User message template
-        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        user_message: "examples.AssetBubble.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: RagLLM wiring — shared user prompt template
         # Language model type: "api" = remote API call
-        lm_type: "api"
+        lm_type: "api"  # Source: LLM wiring — inference mode
         # Model identifier for Doubao via ARK
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
           # Sampling temperature; lower = more stable allocation decisions
-          temperature: 0.2
+          temperature: 0.2  # Source: LLM wiring — sampling temperature
           # Maximum number of new tokens in generated response
-          max_new_tokens: 600
-  persona: !include persona.yml
+          max_new_tokens: 600  # Source: LLM wiring — response length cap
+  persona: !include persona.yml  # Source: implementation infrastructure (persona include)
