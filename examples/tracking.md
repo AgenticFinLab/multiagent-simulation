@@ -37,11 +37,11 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 29 | LUNACollapse           | 🟡      | Wenyou      | Jul 11 2026 | —                 |
 | 30 | MarketCrash            | 🟡      | Wenyou      | Jul 11 2026 | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
-| 32 | MomentumEffect         | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 33 | OverconfidenceBias     | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 34 | RepresentativenessBias | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 35 | ReversalEffect         | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
-| 36 | RumorSpread            | 🟢     | chabingcha  | Jul 7 2026  | Rule, LLM, RuleLLM, Rag |
+| 32 | MomentumEffect         | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
+| 33 | OverconfidenceBias     | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
+| 34 | RepresentativenessBias | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
+| 35 | ReversalEffect         | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
+| 36 | RumorSpread            | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
 | 37 | ShortSqueeze           | 🟡     | Sijia       | Jun 11 2026 | —                 |
 | 38 | SorosPound             | 🟡     | Sijia       | Jun 11 2026 | —                 |
 | 39 | SouthSeaBubble         | 🟡     | Sijia       | Jun 11 2026 | —                 |

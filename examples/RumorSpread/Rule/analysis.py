@@ -30,14 +30,15 @@ from masim.utils.config import load_config
 def load_simulation_data(config: dict) -> dict:
     """Load simulation data from experiment records.
 
-    Reads the environment agent's batch stores for belief, distortion,
+    Reads the environment agent's turn records for belief, distortion,
     spread_count, and correction_count time series.
 
     Returns:
         dict with keys: belief, distortion, spread_count, correction_count,
         agent_beliefs (dict mapping agent_id -> belief list)
     """
-    record_path = config["setting"]["record_path"]
+    from masim.utils.result_loader import load_results
+
     data = {
         "belief": [],
         "distortion": [],
@@ -46,24 +47,30 @@ def load_simulation_data(config: dict) -> dict:
         "agent_beliefs": {},
     }
 
-    env_path = os.path.join(record_path, "environment")
-    if os.path.exists(env_path):
-        for metric in ["belief", "distortion", "spread_count", "correction_count"]:
-            metric_path = os.path.join(env_path, metric)
-            if os.path.exists(metric_path):
-                values = _load_metric_values(metric_path)
-                data[metric] = values
-
-    agent_dirs = [
-        d
-        for d in os.listdir(record_path)
-        if os.path.isdir(os.path.join(record_path, d)) and d != "environment"
-    ]
-    for agent_id in sorted(agent_dirs):
-        belief_path = os.path.join(record_path, agent_id, "belief")
-        if os.path.exists(belief_path):
-            values = _load_metric_values(belief_path)
-            data["agent_beliefs"][agent_id] = values
+    results = load_results(config)
+    for pid, player in results.players.items():
+        if pid == "environment":
+            payloads = player.turns.payloads()
+            for r in sorted(payloads.keys()):
+                env_data = payloads[r].get("env_data", {})
+                if "belief" in env_data:
+                    data["belief"].append(float(env_data["belief"]))
+                if "distortion" in env_data:
+                    data["distortion"].append(float(env_data["distortion"]))
+                sp = int(env_data.get("num_spreaders", 0))
+                co = int(env_data.get("num_correctors", 0))
+                data["spread_count"].append(sp)
+                data["correction_count"].append(co)
+        elif pid != "environment":
+            payloads = player.turns.payloads()
+            beliefs = []
+            for r in sorted(payloads.keys()):
+                turn_data = payloads[r]
+                belief = turn_data.get("belief", turn_data.get("current_belief"))
+                if belief is not None:
+                    beliefs.append(float(belief))
+            if beliefs:
+                data["agent_beliefs"][pid] = beliefs
 
     return data
 
