@@ -24,8 +24,7 @@ import numpy as np
 from masim.utils import load_config, load_results
 
 from examples.AssetBubble.Rule.analysis import analyze_bubble, _load_data
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.AssetBubble.Rag.players import _RAG_FALLBACK
 
 
 def _load_rag_payloads(results) -> Dict[str, Dict[int, Dict[str, Any]]]:

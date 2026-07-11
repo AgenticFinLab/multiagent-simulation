@@ -62,7 +62,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -76,6 +76,12 @@ from masim.utils.history import HistoryBuffer
 from masim.format.order import validate_order
 
 logger = logging.getLogger("AssetBubbleRag")
+
+# Sentinel string injected into the LLM prompt when the RAG query returns no
+# relevant chunks. Defined here (players.py) as the source of truth and
+# imported by analysis.py so downstream diagnostics can identify fallback rounds
+# without duplicating the literal in multiple files.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -706,7 +712,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         llm_config = self.config.extras["llm"]
