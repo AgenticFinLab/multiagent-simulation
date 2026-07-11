@@ -3,9 +3,29 @@
 agent_pool .md coverage, and icon PNG coverage.
 
 Read-only. Prints a structured report. Exit code non-zero if issues found.
+
+Invocation modes (backing the Contract Polish Hooks in
+`masim/skills/implement-simulation-skill/06-step2-agent-design.md`,
+`.../07-step3-config.md`, and `.../09-step5-to-10-review.md`):
+
+    # Repo-wide sweep (Closeout hook in 09-step5-to-10-review.md)
+    python scripts/audit_agent_naming.py
+
+    # Scenario-scoped invocation (Step 2 Hook 6 + Step 3 Hooks 5–6–7)
+    python scripts/audit_agent_naming.py --scenario AnchoringEffect
+
+    # Restrict to a single check family
+    python scripts/audit_agent_naming.py --check identity   # Step 3 Hooks 5–6
+    python scripts/audit_agent_naming.py --check topology   # Step 3 Hook 7
+    python scripts/audit_agent_naming.py --check parity     # Step 2 Hook 6
+    python scripts/audit_agent_naming.py --check coverage   # .md + icon coverage
+    python scripts/audit_agent_naming.py --check orphans    # Closeout orphans
+
+Exit code = number of check-family buckets that failed (0 = green).
 """
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from collections import defaultdict
@@ -88,11 +108,67 @@ def canonical_archetype(identity: str) -> str:
     return identity
 
 
-def main() -> int:
-    scenarios = sorted(
+CHECK_FAMILIES = ("identity", "topology", "parity", "coverage", "orphans", "all")
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Audit agent identity naming, cross-variant parity, agent_pool .md "
+            "coverage, and icon PNG coverage. Backs the Contract Polish Hooks in "
+            "implement-simulation-skill/{06,07,09}-*.md."
+        )
+    )
+    parser.add_argument(
+        "--scenario",
+        default=None,
+        help=(
+            "Restrict the audit to one scenario folder under configs/. "
+            "When omitted, sweeps every non-scratch scenario (Closeout mode)."
+        ),
+    )
+    parser.add_argument(
+        "--check",
+        default="all",
+        choices=CHECK_FAMILIES,
+        help=(
+            "Restrict the report and exit-code contribution to one check family. "
+            "'orphans' is only meaningful in repo-wide mode (no --scenario)."
+        ),
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+
+    all_scenarios = sorted(
         d.name for d in CONFIGS.iterdir()
         if d.is_dir() and d.name not in SKIP_SCENARIOS
     )
+    if args.scenario:
+        if args.scenario not in all_scenarios:
+            print(
+                f"ERROR: scenario '{args.scenario}' not found under configs/ "
+                f"(or is in SKIP_SCENARIOS). Available: {', '.join(all_scenarios)}",
+                file=sys.stderr,
+            )
+            return 2
+        scenarios = [args.scenario]
+        scoped = True
+    else:
+        scenarios = all_scenarios
+        scoped = False
+
+    check = args.check
+    want = {c: (check in ("all", c)) for c in CHECK_FAMILIES if c != "all"}
+    if scoped and want["orphans"] and check == "orphans":
+        print(
+            "WARNING: 'orphans' check is a repo-wide invariant; "
+            "scenario-scoped orphan reports are meaningless. Ignoring --check.",
+            file=sys.stderr,
+        )
+        want["orphans"] = False
 
     # Collect per-scenario, per-variant identities.
     # data[scenario][variant] = set(identities)
@@ -208,64 +284,78 @@ def main() -> int:
         print()
 
     _dump("MISSING FILES", files_missing)
-    _dump("NON-PREFIXED IDENTITIES", non_prefixed)
-    _dump("NUMERIC-SUFFIX IDENTITIES", numeric_suffix)
-    _dump("TOPOLOGY IDENTITIES NOT IN PLAYERS", top_orphans)
+    if want["identity"]:
+        _dump("NON-PREFIXED IDENTITIES", non_prefixed)
+        _dump("NUMERIC-SUFFIX IDENTITIES", numeric_suffix)
+    if want["topology"]:
+        _dump("TOPOLOGY IDENTITIES NOT IN PLAYERS", top_orphans)
 
-    print(f"[CROSS-VARIANT PARITY ISSUES] scenarios with mismatch = {len(parity_issues)}")
-    for scen, arch, details in parity_issues[:20]:
-        variants_have = sorted(v for v, arches in details.items() if arch in arches)
-        variants_miss = sorted(v for v, arches in details.items() if arch not in arches)
-        print(f"    {scen}: archetype '{arch}' present in {variants_have}, MISSING in {variants_miss}")
-    if len(parity_issues) > 20:
-        print(f"    ... and {len(parity_issues) - 20} more scenarios")
-    print()
+    if want["parity"]:
+        print(f"[CROSS-VARIANT PARITY ISSUES] scenarios with mismatch = {len(parity_issues)}")
+        for scen, arch, details in parity_issues[:20]:
+            variants_have = sorted(v for v, arches in details.items() if arch in arches)
+            variants_miss = sorted(v for v, arches in details.items() if arch not in arches)
+            print(f"    {scen}: archetype '{arch}' present in {variants_have}, MISSING in {variants_miss}")
+        if len(parity_issues) > 20:
+            print(f"    ... and {len(parity_issues) - 20} more scenarios")
+        print()
 
-    print(f"[MISSING .md FILES] count = {len(missing_md)}")
-    for a in missing_md[:60]:
-        print(f"    {to_kebab(a)}.md   (used in: {', '.join(sorted(arch_to_scenarios[a])[:5])}"
-              + (f", +{len(arch_to_scenarios[a]) - 5} more" if len(arch_to_scenarios[a]) > 5 else "") + ")")
-    if len(missing_md) > 60:
-        print(f"    ... and {len(missing_md) - 60} more")
-    print()
+    if want["coverage"]:
+        print(f"[MISSING .md FILES] count = {len(missing_md)}")
+        for a in missing_md[:60]:
+            print(f"    {to_kebab(a)}.md   (used in: {', '.join(sorted(arch_to_scenarios[a])[:5])}"
+                  + (f", +{len(arch_to_scenarios[a]) - 5} more" if len(arch_to_scenarios[a]) > 5 else "") + ")")
+        if len(missing_md) > 60:
+            print(f"    ... and {len(missing_md) - 60} more")
+        print()
 
-    print(f"[MISSING icons] count = {len(missing_icons)}")
-    for a in missing_icons[:60]:
-        print(f"    finance-{to_kebab(a)}.png   (used in: {', '.join(sorted(arch_to_scenarios[a])[:3])}"
-              + (f", +{len(arch_to_scenarios[a]) - 3} more" if len(arch_to_scenarios[a]) > 3 else "") + ")")
-    if len(missing_icons) > 60:
-        print(f"    ... and {len(missing_icons) - 60} more")
-    print()
+        print(f"[MISSING icons] count = {len(missing_icons)}")
+        for a in missing_icons[:60]:
+            print(f"    finance-{to_kebab(a)}.png   (used in: {', '.join(sorted(arch_to_scenarios[a])[:3])}"
+                  + (f", +{len(arch_to_scenarios[a]) - 3} more" if len(arch_to_scenarios[a]) > 3 else "") + ")")
+        if len(missing_icons) > 60:
+            print(f"    ... and {len(missing_icons) - 60} more")
+        print()
 
-    # Extra archetypes: .md files that no scenario uses (orphans)
-    orphan_md = sorted(set(existing_md) - {to_kebab(a) for a in all_archetypes})
-    orphan_icons = sorted(set(existing_icons) - {to_kebab(a) for a in all_archetypes})
-    print(f"[ORPHAN .md FILES] count = {len(orphan_md)}  (present but unused)")
-    for a in orphan_md[:30]:
-        print(f"    {a}.md")
-    if len(orphan_md) > 30:
-        print(f"    ... and {len(orphan_md) - 30} more")
-    print()
-    print(f"[ORPHAN icons] count = {len(orphan_icons)}  (present but unused)")
-    for a in orphan_icons[:30]:
-        print(f"    finance-{a}.png")
-    if len(orphan_icons) > 30:
-        print(f"    ... and {len(orphan_icons) - 30} more")
-    print()
+    # Orphan detection is only meaningful in repo-wide mode.
+    orphan_md: list[str] = []
+    orphan_icons: list[str] = []
+    if not scoped and want["orphans"]:
+        orphan_md = sorted(set(existing_md) - {to_kebab(a) for a in all_archetypes})
+        orphan_icons = sorted(set(existing_icons) - {to_kebab(a) for a in all_archetypes})
+        print(f"[ORPHAN .md FILES] count = {len(orphan_md)}  (present but unused)")
+        for a in orphan_md[:30]:
+            print(f"    {a}.md")
+        if len(orphan_md) > 30:
+            print(f"    ... and {len(orphan_md) - 30} more")
+        print()
+        print(f"[ORPHAN icons] count = {len(orphan_icons)}  (present but unused)")
+        for a in orphan_icons[:30]:
+            print(f"    finance-{a}.png")
+        if len(orphan_icons) > 30:
+            print(f"    ... and {len(orphan_icons) - 30} more")
+        print()
 
-    total_issues = (
-        len(files_missing)
-        + len(non_prefixed)
-        + len(numeric_suffix)
-        + len(top_orphans)
-        + len(parity_issues)
-        + len(missing_md)
-        + len(missing_icons)
+    # Exit-code accounting: only count buckets in the selected check family.
+    counted = len(files_missing)
+    if want["identity"]:
+        counted += len(non_prefixed) + len(numeric_suffix)
+    if want["topology"]:
+        counted += len(top_orphans)
+    if want["parity"]:
+        counted += len(parity_issues)
+    if want["coverage"]:
+        counted += len(missing_md) + len(missing_icons)
+    if not scoped and want["orphans"]:
+        counted += len(orphan_md) + len(orphan_icons)
+
+    print("=" * 78)
+    print(
+        f"TOTAL ISSUES (scope={'repo-wide' if not scoped else args.scenario}, "
+        f"check={check}): {counted}"
     )
     print("=" * 78)
-    print(f"TOTAL ISSUES: {total_issues}")
-    print("=" * 78)
-    return 0 if total_issues == 0 else 1
+    return 0 if counted == 0 else 1
 
 
 if __name__ == "__main__":

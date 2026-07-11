@@ -15,28 +15,57 @@ This block is the **stable I/O declaration** for Steps 5 — 10. Both
 
 **Outputs (produced or extended).**
 
-| Artefact                                         | Written when                                                          |
-|--------------------------------------------------|-----------------------------------------------------------------------|
-| Analysis figures + tables                         | Step 9 execution — one figure set per built variant                    |
-| `simulation-build-log.md §D`                      | one row per Step 5 — 9 review pass (`pass` / `fail` / `defect-raised`) |
-| `simulation-build-log.md §C`                      | any newly surfaced open question or risk                               |
-| Target file `Status: locked → released`           | Step 10 final-review closeout                                          |
-| Target §0 Meta CHANGELOG                          | one line summarising the run                                           |
+| Artefact                                | Written when                                                           |
+|-----------------------------------------|------------------------------------------------------------------------|
+| Analysis figures + tables               | Step 9 execution — one figure set per built variant                    |
+| `simulation-build-log.md §D`            | one row per Step 5 — 9 review pass (`pass` / `fail` / `defect-raised`) |
+| `simulation-build-log.md §C`            | any newly surfaced open question or risk                               |
+| Target file `Status: locked → released` | Step 10 final-review closeout                                          |
+| Target §0 Meta CHANGELOG                | one line summarising the run                                           |
 
 **Polish Hooks (what a polish audit re-verifies against Steps 5 — 10).**
 When `polish-simulation-pipeline.md` audits Steps 5 — 10, it re-runs
 the checklists **three consecutive times** with the perspective split
 below. Any FAIL in any pass resets the count.
 
-| Pass | Perspective                            | Anchors in this file            |
-|------|----------------------------------------|---------------------------------|
-| 1    | Theory–code alignment                  | §5.1, §5.2, §5.3, §5.4          |
-| 2    | Code quality + analysis tools          | §6.1, §6.2, §6.3, §7.1          |
-| 3    | Documentation + final cross-check      | §8, §9                          |
+| Pass | Perspective                       | Anchors in this file   |
+|------|-----------------------------------|------------------------|
+| 1    | Theory–code alignment             | §5.1, §5.2, §5.3, §5.4 |
+| 2    | Code quality + analysis tools     | §6.1, §6.2, §6.3, §7.1 |
+| 3    | Documentation + final cross-check | §8, §9                 |
 
 Additionally the polish audit re-runs Step 10.1 Complete Completion
 Checklist as a whole and re-executes Step 9.1 Execution Sequence at
 smoke-test scale for every variant marked `Yes` in target §10.1.
+
+**Closeout hook — repo-wide invariant sweep (MANDATORY).** Before the
+target-file Status transitions to `released`, run one repo-wide sweep
+that covers invariants no scenario-scoped Step 2/Step 3 audit can
+reach. This sweep is domain- and variant-neutral (it reads the
+variant prefix list from target §10.1 of each scenario) and MUST
+report zero issues, or halt via `AskUserQuestion` with per-issue
+options before Status transition. Backing tool:
+`scripts/audit_agent_naming.py` (no arguments → full repo scan).
+Coverage:
+
+- **Orphan pool assets.** Any `examples/AGENT_POOL/{Domain}/*.md` or
+  `examples/AGENT_POOL/agent_images/icons/{Domain}-*.png` not
+  referenced by any active scenario's `players.yml` → flag for
+  deletion or reuse. Do NOT auto-delete; propose deletion via
+  `AskUserQuestion`.
+- **Repo-wide identity form.** Aggregate Step 3 Hooks 5–6–7 across
+  every scenario in `configs/` (excluding scratch folders such as
+  `CUSTOMIZED_SIMULATION`, `Demo`, `TEMPLATES`, `MYTest`) and confirm
+  zero remaining violations after per-scenario polish runs — catches
+  drift introduced by a later scenario after an earlier one was
+  polished.
+- **Cross-scenario parity aggregation.** Aggregate Step 2 Hook 6
+  results and confirm no scenario has an unresolved parity gap.
+- **Archetype-set summary.** Emit the total unique archetype count,
+  total pool `.md` count, total icon PNG count, and the three
+  differences (unused pool files, unused icons, archetypes lacking an
+  icon). All three differences MUST be zero or explicitly accepted in
+  the polish run's target §0 Meta CHANGELOG.
 
 ---
 
@@ -291,14 +320,14 @@ python examples/{Sim}/Rag/run_{name}_rag.py -c configs/{Sim}/Rag/simulation.yml
 
 ### 9.2 Common Issues
 
-| Issue                       | Diagnosis                  | Solution                                           |
-|-----------------------------|----------------------------|----------------------------------------------------|
-| ImportError on run          | sys.path not set up        | Verify project root in sys.path; check __init__.py |
-| No agent actions generated (finance appendix: no orders) | Trigger threshold too strict | Relax trigger threshold in players.yml           |
-| Environment state collapses to a degenerate value early (finance appendix: price goes to 0 immediately) | Coordinator response coefficient too high (finance-appendix example: λ too high) | Reduce the coordinator response coefficient (finance-appendix example: reduce `price_impact`) |
-| LLM returns invalid JSON    | Prompt unclear             | Strengthen OUTPUT FORMAT section; add example      |
-| Phenomenon not appearing    | Restoring/mean-reversion coefficient too high (finance-appendix example: γ too high, fast recovery) | Reduce the restoring coefficient (finance-appendix example: reduce `mean_reversion`) |
-| Rag index fails to build    | docs_dir empty             | Add documents to docs_dir                          |
+| Issue                                                                                                   | Diagnosis                                                                                           | Solution                                                                                      |
+|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| ImportError on run                                                                                      | sys.path not set up                                                                                 | Verify project root in sys.path; check __init__.py                                            |
+| No agent actions generated (finance appendix: no orders)                                                | Trigger threshold too strict                                                                        | Relax trigger threshold in players.yml                                                        |
+| Environment state collapses to a degenerate value early (finance appendix: price goes to 0 immediately) | Coordinator response coefficient too high (finance-appendix example: λ too high)                    | Reduce the coordinator response coefficient (finance-appendix example: reduce `price_impact`) |
+| LLM returns invalid JSON                                                                                | Prompt unclear                                                                                      | Strengthen OUTPUT FORMAT section; add example                                                 |
+| Phenomenon not appearing                                                                                | Restoring/mean-reversion coefficient too high (finance-appendix example: γ too high, fast recovery) | Reduce the restoring coefficient (finance-appendix example: reduce `mean_reversion`)          |
+| Rag index fails to build                                                                                | docs_dir empty                                                                                      | Add documents to docs_dir                                                                     |
 
 ### 9.3 Phenomenon Verification
 

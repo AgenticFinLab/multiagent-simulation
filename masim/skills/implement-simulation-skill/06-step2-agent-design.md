@@ -17,33 +17,33 @@ This block is the **stable I/O declaration** for Step 2. Both
 
 **Inputs (consumed).**
 
-| Source                                         | Used for                                                       |
-|------------------------------------------------|----------------------------------------------------------------|
-| Target §7 Agent Roster (rows)                  | one-to-one seed for each `simulation-bases.md §4.{N}` block    |
-| Target §8 Environment Specification            | seeds `simulation-bases.md §3` (price formation, info broadcast, constraints, round granularity) |
-| Target §4 Theoretical Anchors                  | each agent's `Theoretical Foundation` sub-block                |
-| Target §9 Parameter Seeds                      | each agent's `Parameters` table + `simulation-bases.md §6`     |
-| `simulation-bases.md §2` (from Step 1)         | Theory citations per agent                                     |
-| `examples/AGENT_POOL/{domain}/*.md`            | AGENT_POOL three-stage match (§2.2.0)                          |
-| `masim/skills/agent-design-skill.md` §3, §6    | Universal Agent Design Handbook — canonical section order and Validation Checklist |
-| `masim/skills/agent-icon-generation-skill.md`  | Icon generation and registration for any pool agent whose icon is missing or broken, including new/forked and reused profiles |
+| Source                                        | Used for                                                                                                                      |
+|-----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Target §7 Agent Roster (rows)                 | one-to-one seed for each `simulation-bases.md §4.{N}` block                                                                   |
+| Target §8 Environment Specification           | seeds `simulation-bases.md §3` (price formation, info broadcast, constraints, round granularity)                              |
+| Target §4 Theoretical Anchors                 | each agent's `Theoretical Foundation` sub-block                                                                               |
+| Target §9 Parameter Seeds                     | each agent's `Parameters` table + `simulation-bases.md §6`                                                                    |
+| `simulation-bases.md §2` (from Step 1)        | Theory citations per agent                                                                                                    |
+| `examples/AGENT_POOL/{domain}/*.md`           | AGENT_POOL three-stage match (§2.2.0)                                                                                         |
+| `masim/skills/agent-design-skill.md` §3, §6   | Universal Agent Design Handbook — canonical section order and Validation Checklist                                            |
+| `masim/skills/agent-icon-generation-skill.md` | Icon generation and registration for any pool agent whose icon is missing or broken, including new/forked and reused profiles |
 
 **Outputs (produced or extended).**
 
-| Artefact                                             | Extent of write                                                |
-|------------------------------------------------------|----------------------------------------------------------------|
-| `examples/{ScenarioName}/simulation-bases.md §3`     | Environment design — State Dynamics Model, Additional Mechanisms, Information Broadcast (finance appendix: Market design — Price Formation Model, …) |
-| `examples/{ScenarioName}/simulation-bases.md §4`     | Agent Taxonomy — one §4.{N} block per target §7 row, each conforming to `agent-design-skill.md §3.1 — §3.11` under embedded-form header levels (see `02-root-documents-spec.md §4.0`); finance appendix relabels this as "Investor Taxonomy" |
-| `examples/{ScenarioName}/simulation-bases.md §5`     | Agent Diversity Verification                                   |
-| `examples/{ScenarioName}/simulation-bases.md §7`     | Communication and Round Structure                              |
-| `examples/{ScenarioName}/simulation-build-log.md §A` | AGENT_POOL Reuse-or-Create Gate log — one row per candidate archetype with Stage reached, Outcome, Pool file |
-| `examples/AGENT_POOL/{domain}/{new-file}.md`         | On `new` or `fork` outcome only — the resulting agent spec is written back to the pool as a reusable archetype |
-| `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` | Matching icon generated via `agent-icon-generation-skill.md` whenever a new/forked pool profile is created or an existing reused profile has no resolving icon |
-| `examples/AGENT_POOL/agent_images/design.md`          | Icon mapping row added or updated for every pool profile whose icon is generated or repaired |
+| Artefact                                                           | Extent of write                                                                                                                                                                                                                              |
+|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `examples/{ScenarioName}/simulation-bases.md §3`                   | Environment design — State Dynamics Model, Additional Mechanisms, Information Broadcast (finance appendix: Market design — Price Formation Model, …)                                                                                         |
+| `examples/{ScenarioName}/simulation-bases.md §4`                   | Agent Taxonomy — one §4.{N} block per target §7 row, each conforming to `agent-design-skill.md §3.1 — §3.11` under embedded-form header levels (see `02-root-documents-spec.md §4.0`); finance appendix relabels this as "Investor Taxonomy" |
+| `examples/{ScenarioName}/simulation-bases.md §5`                   | Agent Diversity Verification                                                                                                                                                                                                                 |
+| `examples/{ScenarioName}/simulation-bases.md §7`                   | Communication and Round Structure                                                                                                                                                                                                            |
+| `examples/{ScenarioName}/simulation-build-log.md §A`               | AGENT_POOL Reuse-or-Create Gate log — one row per candidate archetype with Stage reached, Outcome, Pool file                                                                                                                                 |
+| `examples/AGENT_POOL/{domain}/{new-file}.md`                       | On `new` or `fork` outcome only — the resulting agent spec is written back to the pool as a reusable archetype                                                                                                                               |
+| `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` | Matching icon generated via `agent-icon-generation-skill.md` whenever a new/forked pool profile is created or an existing reused profile has no resolving icon                                                                               |
+| `examples/AGENT_POOL/agent_images/design.md`                       | Icon mapping row added or updated for every pool profile whose icon is generated or repaired                                                                                                                                                 |
 
 **Polish Hooks (what a polish audit re-verifies against this step).**
 When `polish-simulation-pipeline.md` audits Step 2, it MUST re-run
-these five checks — no new agents are invented except when the
+these six checks — no new agents are invented except when the
 AGENT_POOL gate itself returns `fork` or `new`:
 
 1. **Section order per agent.** Every §4.{N} block follows `agent-design-skill.md §3.1 → §3.11` canonical order under embedded-form header levels; missing sub-sections are filled from material already in the file.
@@ -51,6 +51,7 @@ AGENT_POOL gate itself returns `fork` or `new`:
 3. **§3.11 Provenance updated.** Every audited agent has its §3.11 Provenance amended with a `Polish audit: YYYY-MM-DD` entry listing structural changes (or "no structural change") and the current pool file path.
 4. **Agent icon resolution.** Every referenced pool profile must resolve to exactly one valid icon. "Referenced" includes profiles named in `simulation-bases.md §4`, profiles resolved by the AGENT_POOL match, and profiles implied by variant-local identities such as `configs/{Scenario}/{Variant}/players.yml` values where `identity.replace("_", "-")` yields the expected pool stem. If the profile is `new` or `fork`, or if a reused profile has no `Icon` row, a broken link, a missing PNG, or no mapping row in `agent_images/design.md`, invoke `agent-icon-generation-skill.md` immediately. The audit is incomplete until the PNG filename is `{domain}-{agent-stem}.png`, the pool profile has the matching `Icon` row, and `agent_images/design.md` records the agent-to-icon mapping. Do not satisfy this hook with a scenario-level image or any filename that is not tied to a concrete agent stem.
 5. **Handbook §6 three-PASS.** For every agent, run `agent-design-skill.md §6` Validation Checklist three consecutive times; any FAIL resets the count.
+6. **Cross-variant archetype-set parity.** For every scenario with more than one built variant (target §10.1), compute the archetype set per variant as `{ _canonical_archetype(identity) : identity ∈ configs/{Scenario}/{V}/players.yml top-level keys, excluding reserved keys such as `environment` / `market` / `knowledge` }`. All built variants of the same scenario MUST have equal archetype sets — the pool profiles and icons are archetype-level assets and are shared across variants (the variant prefix is stripped by `_canonical_archetype()` before asset lookup). On mismatch, halt via `AskUserQuestion` with three canonical options: (a) align the outlier variant to the majority archetype set; (b) align the majority to the outlier; (c) accept the divergence and record it as an intentional per-variant design choice in `simulation-bases.md §4` and target §7 via define-skill revise mode. Never silently paper over parity gaps by generating extra assets. Backing tool: `scripts/audit_agent_naming.py --scenario {ScenarioName}`.
 
 ---
 
@@ -249,9 +250,9 @@ Information Set, Core Behavioral Mechanism, Parameters). Decide one of:
 `04-step0-load-target.md §0.3`) as a small table:
 
 ```markdown
-| Candidate archetype | Stage reached | Outcome           | Pool file (if reused) |
-|---------------------|---------------|-------------------|-----------------------|
-| <name>              | 1 / 2 / 3     | reuse / fork / new| <relative path>       |
+| Candidate archetype | Stage reached | Outcome            | Pool file (if reused) |
+|---------------------|---------------|--------------------|-----------------------|
+| <name>              | 1 / 2 / 3     | reuse / fork / new | <relative path>       |
 ```
 
 **Where to store new designs.** Every newly designed agent that survives
@@ -358,18 +359,18 @@ For each agent type, the author MUST:
 following inputs are available from Step 1 (research) and §2.1 (environment
 design) of this guide; the handbook fields cannot be filled without them.
 
-| Input                          | Drives handbook section                      |
-|--------------------------------|----------------------------------------------|
-| Real-world counterpart class   | §3.3 Definition and Goals (paragraph 1)      |
-| Primary theory + DOI citation  | §3.4 Theoretical Foundation                  |
-| Calibration source per knob    | §3.4 Calibration Source / §3.7 Source column |
-| Activation · deactivation rule | §3.5 Activation Triggers / Deactivation      |
-| Decision signals + rationale   | §3.6.1 Decision Information Set              |
-| Trigger and sizing formulas    | §3.6.4 Mathematical Model                    |
-| Self-imposed risk discipline   | §3.6.3 Action Space                          |
-| Per-knob default + range       | §3.7 Parameters                              |
-| ≥3 worked cases + 1 edge case  | §3.8 Worked Numerical Examples               |
-| Expected stylized facts        | §3.9 Behavioral Verification and Calibration |
+| Input                          | Drives handbook section                                                 |
+|--------------------------------|-------------------------------------------------------------------------|
+| Real-world counterpart class   | §3.3 Definition and Goals (paragraph 1)                                 |
+| Primary theory + DOI citation  | §3.4 Theoretical Foundation                                             |
+| Calibration source per knob    | §3.4 Calibration Source / §3.7 Source column                            |
+| Activation · deactivation rule | §3.5 Activation Triggers / Deactivation                                 |
+| Decision signals + rationale   | §3.6.1 Decision Information Set                                         |
+| Trigger and sizing formulas    | §3.6.4 Mathematical Model                                               |
+| Self-imposed risk discipline   | §3.6.3 Action Space                                                     |
+| Per-knob default + range       | §3.7 Parameters                                                         |
+| ≥3 worked cases + 1 edge case  | §3.8 Worked Numerical Examples                                          |
+| Expected stylized facts        | §3.9 Behavioral Verification and Calibration                            |
 | Heterogeneity policy           | Embedded-form extension §4.{N}.7 (see `02-root-documents-spec.md §4.0`) |
 
 If any input above is unavailable, return to Step 1 (research) before
@@ -379,14 +380,14 @@ proceeding — do not invent values to fill the handbook.
 
 After designing all agent types, verify diversity:
 
-| Criterion              | Required                      | How to Verify                                         |
-|------------------------|-------------------------------|-------------------------------------------------------|
-| Time horizons          | ≥2 distinct                   | E.g., "high-frequency" vs "long-horizon" agent        |
-| Information signals    | ≥2 distinct primary signals   | Different agents key on different broadcast fields (finance: some use deviation, others use return or volume) |
-| Risk / sensitivity tolerances | Range from Low to Extreme | At least one Low and one High/Extreme                 |
-| Conflicting incentives | ≥1 pair whose actions oppose in the same round | Finance appendix example: BlockTradeBuyer buys when PrimeBrokers sell |
-| Stabilizing agents     | ≥1                            | System state would diverge to a degenerate value without one (finance instantiation: price would go to zero or infinity) |
-| Destabilizing agents   | ≥2                            | Needed for cascade / self-reinforcing dynamics        |
+| Criterion                     | Required                                       | How to Verify                                                                                                            |
+|-------------------------------|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| Time horizons                 | ≥2 distinct                                    | E.g., "high-frequency" vs "long-horizon" agent                                                                           |
+| Information signals           | ≥2 distinct primary signals                    | Different agents key on different broadcast fields (finance: some use deviation, others use return or volume)            |
+| Risk / sensitivity tolerances | Range from Low to Extreme                      | At least one Low and one High/Extreme                                                                                    |
+| Conflicting incentives        | ≥1 pair whose actions oppose in the same round | Finance appendix example: BlockTradeBuyer buys when PrimeBrokers sell                                                    |
+| Stabilizing agents            | ≥1                                             | System state would diverge to a degenerate value without one (finance instantiation: price would go to zero or infinity) |
+| Destabilizing agents          | ≥2                                             | Needed for cascade / self-reinforcing dynamics                                                                           |
 
 ---
 
