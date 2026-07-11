@@ -127,13 +127,13 @@ rulellm_noise_trader:
   persona: !include persona.yml
 
 # Hybrid Value Investor (Fundamental value + LLM reasoning)
-rulellm_value_investor:
+rulellm_fundamental_investor:
   name: "RuleLLM Value Investor"
-  class: "examples.AssetBubble.RuleLLM.players:RuleLLMValueInvestor"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMFundamentalInvestor"
   # Expander → rulellm_value_1, rulellm_value_2, rulellm_value_3, rulellm_value_4
   num_instances: 4
   config:
-    identity: "rulellm_value_investor"
+    identity: "rulellm_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:

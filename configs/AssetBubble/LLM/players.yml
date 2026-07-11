@@ -29,13 +29,13 @@ market:
   persona: !include persona.yml
 
 # LLM Greater Fool Speculator
-llm_greater_fool_speculator:
+llm_momentum_speculator:
   name: "LLM Greater Fool Speculator"
-  class: "examples.AssetBubble.LLM.players:LLMGreaterFoolSpeculator"
+  class: "examples.AssetBubble.LLM.players:LLMMomentumSpeculator"
   # Expander → llm_greater_fool_1 .. llm_greater_fool_5
   num_instances: 5
   config:
-    identity: "llm_greater_fool_speculator"
+    identity: "llm_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -83,13 +83,13 @@ llm_rational_arbitrageur:
   persona: !include persona.yml
 
 # LLM Sentiment Trader
-llm_sentiment_trader:
+llm_noise_trader:
   name: "LLM Sentiment Trader"
-  class: "examples.AssetBubble.LLM.players:LLMSentimentTrader"
+  class: "examples.AssetBubble.LLM.players:LLMNoiseTrader"
   # Expander → llm_sentiment_1, llm_sentiment_2
   num_instances: 2
   config:
-    identity: "llm_sentiment_trader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -110,13 +110,13 @@ llm_sentiment_trader:
   persona: !include persona.yml
 
 # LLM Value Investor
-llm_value_investor:
+llm_fundamental_investor:
   name: "LLM Value Investor"
-  class: "examples.AssetBubble.LLM.players:LLMValueInvestor"
+  class: "examples.AssetBubble.LLM.players:LLMFundamentalInvestor"
   # Expander → llm_value_1, llm_value_2, llm_value_3, llm_value_4
   num_instances: 4
   config:
-    identity: "llm_value_investor"
+    identity: "llm_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -137,13 +137,13 @@ llm_value_investor:
   persona: !include persona.yml
 
 # LLM Leveraged Speculator
-llm_leveraged_speculator:
+llm_leveraged_buyer:
   name: "LLM Leveraged Speculator"
-  class: "examples.AssetBubble.LLM.players:LLMLeveragedSpeculator"
+  class: "examples.AssetBubble.LLM.players:LLMLeveragedBuyer"
   # Expander → llm_leveraged_1, llm_leveraged_2, llm_leveraged_3
   num_instances: 3
   config:
-    identity: "llm_leveraged_speculator"
+    identity: "llm_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:

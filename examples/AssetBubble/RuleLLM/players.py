@@ -542,7 +542,7 @@ class RuleLLMNoiseTrader(RuleLLMInvestor):
     pass
 
 
-class RuleLLMValueInvestor(RuleLLMInvestor):
+class RuleLLMFundamentalInvestor(RuleLLMInvestor):
     """Hybrid value rules with LLM reasoning. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass

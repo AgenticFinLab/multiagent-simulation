@@ -410,13 +410,13 @@ ragllm_noise_trader:
 # Trading style: Patient, fundamentals-driven, margin of safety discipline
 # RAG knowledge: Value investing, fundamental analysis, Graham/Buffett methods
 # =============================================================================
-ragllm_value_investor:
+ragllm_fundamental_investor:
   name: "RAG Value Investor"
-  class: "examples.AssetBubble.Rag.players:RagLLMValueInvestor"
+  class: "examples.AssetBubble.Rag.players:RagLLMFundamentalInvestor"
   # Number of agent instances (expanded to ragllm_value_1 .. ragllm_value_4)
   num_instances: 4
   config:
-    identity: "ragllm_value_investor"
+    identity: "ragllm_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:

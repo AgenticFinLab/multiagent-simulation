@@ -14,7 +14,7 @@ connections:
     - rulellm_momentum_speculator
     - rulellm_rational_arbitrageur
     - rulellm_noise_trader
-    - rulellm_value_investor
+    - rulellm_fundamental_investor
     - rulellm_leveraged_buyer
     - rulellm_conservative_holder
 
@@ -27,7 +27,7 @@ connections:
   rulellm_noise_trader:
     - market
 
-  rulellm_value_investor:
+  rulellm_fundamental_investor:
     - market
 
   rulellm_leveraged_buyer:

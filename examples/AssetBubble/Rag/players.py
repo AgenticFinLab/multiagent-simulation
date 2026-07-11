@@ -877,7 +877,7 @@ class RagLLMNoiseTrader(RagLLMInvestor):
     pass
 
 
-class RagLLMValueInvestor(RagLLMInvestor):
+class RagLLMFundamentalInvestor(RagLLMInvestor):
     """RAG-augmented value rules with retrieved knowledge. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass
