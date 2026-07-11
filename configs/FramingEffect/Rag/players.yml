@@ -39,12 +39,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-gainframefollower:
+ragllm_gain_frame_follower:
   name: "GainFrameFollower"
   class: "examples.FramingEffect.Rag.players:RagLLMGainFrameFollower"
   num_instances: 2
   config:
-    identity: "gainframefollower"
+    identity: "ragllm_gain_frame_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -83,12 +83,12 @@ gainframefollower:
           top_k: 5
   persona: !include persona.yml
 
-lossframereactor:
+ragllm_loss_frame_reactor:
   name: "LossFrameReactor"
   class: "examples.FramingEffect.Rag.players:RagLLMLossFrameReactor"
   num_instances: 2
   config:
-    identity: "lossframereactor"
+    identity: "ragllm_loss_frame_reactor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -127,12 +127,12 @@ lossframereactor:
           top_k: 5
   persona: !include persona.yml
 
-frameinvarianttrader:
+ragllm_frame_invariant_trader:
   name: "FrameInvariantTrader"
   class: "examples.FramingEffect.Rag.players:RagLLMFrameInvariantTrader"
   num_instances: 1
   config:
-    identity: "frameinvarianttrader"
+    identity: "ragllm_frame_invariant_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -171,12 +171,12 @@ frameinvarianttrader:
           top_k: 5
   persona: !include persona.yml
 
-arbitrageframer:
+ragllm_arbitrage_framer:
   name: "ArbitrageFramer"
   class: "examples.FramingEffect.Rag.players:RagLLMArbitrageFramer"
   num_instances: 1
   config:
-    identity: "arbitrageframer"
+    identity: "ragllm_arbitrage_framer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -215,12 +215,12 @@ arbitrageframer:
           top_k: 5
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.FramingEffect.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

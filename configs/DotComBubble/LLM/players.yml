@@ -27,12 +27,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-neweconomyevangelist:
+llm_new_economy_evangelist:
   name: "NewEconomyEvangelist"
   class: "examples.DotComBubble.LLM.players:LLMNewEconomyEvangelist"
   num_instances: 2
   config:
-    identity: "neweconomyevangelist"
+    identity: "llm_new_economy_evangelist"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,12 +66,12 @@ neweconomyevangelist:
           max_tokens: 512
   persona: !include persona.yml
 
-ipoflipper:
+llm_ipo_flipper:
   name: "IPOFlipper"
   class: "examples.DotComBubble.LLM.players:LLMIPOFlipper"
   num_instances: 2
   config:
-    identity: "ipoflipper"
+    identity: "llm_ipo_flipper"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -105,12 +105,12 @@ ipoflipper:
           max_tokens: 512
   persona: !include persona.yml
 
-momentumfollower:
+llm_momentum_follower:
   name: "MomentumFollower"
   class: "examples.DotComBubble.LLM.players:LLMMomentumFollower"
   num_instances: 2
   config:
-    identity: "momentumfollower"
+    identity: "llm_momentum_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -144,12 +144,12 @@ momentumfollower:
           max_tokens: 512
   persona: !include persona.yml
 
-skepticalvalueinvestor:
+llm_skeptical_value_investor:
   name: "SkepticalValueInvestor"
   class: "examples.DotComBubble.LLM.players:LLMSkepticalValueInvestor"
   num_instances: 1
   config:
-    identity: "skepticalvalueinvestor"
+    identity: "llm_skeptical_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -183,12 +183,12 @@ skepticalvalueinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-shortseller:
+llm_short_seller:
   name: "ShortSeller"
   class: "examples.DotComBubble.LLM.players:LLMShortSeller"
   num_instances: 1
   config:
-    identity: "shortseller"
+    identity: "llm_short_seller"
     role: player
     steps_per_turn: 1
     group_tags:

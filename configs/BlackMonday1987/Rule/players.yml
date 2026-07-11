@@ -52,13 +52,13 @@ market:
 # Theory: Leland & Rubinstein (1976) — Dynamic delta hedging
 #         Brady Commission (1988) — Portfolio insurance as key amplifier
 # -----------------------------------------------------------------------------
-portfolio_insurer:
+rule_portfolio_insurer:
   name: "Portfolio Insurer"
   class: "examples.BlackMonday1987.Rule.players:PortfolioInsurer"
   # Expander → portfolio_insurer_1, portfolio_insurer_2
   num_instances: 2
   config:
-    identity: "portfolio_insurer"
+    identity: "rule_portfolio_insurer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -79,13 +79,13 @@ portfolio_insurer:
 # Index Arbitrageurs (Cross-Market Amplifiers)
 # Theory: Brady Commission (1988) — Index arbitrage transmits futures selling
 # -----------------------------------------------------------------------------
-index_arbitrageur:
+rule_index_arbitrageur:
   name: "Index Arbitrageur"
   class: "examples.BlackMonday1987.Rule.players:IndexArbitrageur"
   # Expander → index_arbitrageur_1, index_arbitrageur_2
   num_instances: 2
   config:
-    identity: "index_arbitrageur"
+    identity: "rule_index_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -106,13 +106,13 @@ index_arbitrageur:
 # Program Traders (Automated Sell Programs)
 # Theory: Brady Commission (1988) — Program trading amplifies momentum
 # -----------------------------------------------------------------------------
-program_trader:
+rule_program_trader:
   name: "Program Trader"
   class: "examples.BlackMonday1987.Rule.players:ProgramTrader"
   # Expander → program_trader_1, program_trader_2
   num_instances: 2
   config:
-    identity: "program_trader"
+    identity: "rule_program_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -133,12 +133,12 @@ program_trader:
 # Value Investors (Stabilizers — Graham 1949)
 # Theory: Graham (1949) — Margin of safety, buy below intrinsic value
 # -----------------------------------------------------------------------------
-value_investor:
+rule_value_investor:
   name: "Value Investor"
   class: "examples.BlackMonday1987.Rule.players:ValueInvestor"
   num_instances: 1
   config:
-    identity: "value_investor"
+    identity: "rule_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -158,13 +158,13 @@ value_investor:
 # Noise Traders (Background Liquidity — Black 1986)
 # Theory: Black (1986) — Noise traders provide background random trades
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.BlackMonday1987.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -10,18 +10,18 @@ sources:
 connections:
   market:
     - ragllm_short_seller
-    - ragllm_retail_coord
-    - ragllm_momentum
-    - ragllm_value
-    - ragllm_institutional
+    - ragllm_retail_coordinator
+    - ragllm_momentum_buyer
+    - ragllm_value_investor
+    - ragllm_institutional_holder
 
   ragllm_short_seller:
     - market
-  ragllm_retail_coord:
+  ragllm_retail_coordinator:
     - market
-  ragllm_momentum:
+  ragllm_momentum_buyer:
     - market
-  ragllm_value:
+  ragllm_value_investor:
     - market
-  ragllm_institutional:
+  ragllm_institutional_holder:
     - market

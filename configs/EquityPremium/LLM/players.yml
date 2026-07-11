@@ -24,13 +24,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-llm_myopic:
+llm_myopic_loss_averse:
   name: "LLM Myopic Loss-Averse"
   class: "examples.EquityPremium.LLM.players:LLMMyopicLossAverse"
   # Expander → llm_myopic_1, llm_myopic_2, llm_myopic_3, llm_myopic_4, llm_myopic_5
   num_instances: 5
   config:
-    identity: "llm_myopic"
+    identity: "llm_myopic_loss_averse"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -54,13 +54,13 @@ llm_myopic:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_long_term:
+llm_long_term_investor:
   name: "LLM Long-Term Investor"
   class: "examples.EquityPremium.LLM.players:LLMLongTermInvestor"
   # Expander → llm_long_term_1, llm_long_term_2
   num_instances: 2
   config:
-    identity: "llm_long_term"
+    identity: "llm_long_term_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -82,12 +82,12 @@ llm_long_term:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_institutional:
+llm_institutional_investor:
   name: "LLM Institutional Investor"
   class: "examples.EquityPremium.LLM.players:LLMInstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "llm_institutional"
+    identity: "llm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -109,13 +109,13 @@ llm_institutional:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_risk_averse:
+llm_risk_averse_saver:
   name: "LLM Risk-Averse Saver"
   class: "examples.EquityPremium.LLM.players:LLMRiskAverseSaver"
   # Expander → llm_risk_averse_1, llm_risk_averse_2, llm_risk_averse_3
   num_instances: 3
   config:
-    identity: "llm_risk_averse"
+    identity: "llm_risk_averse_saver"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -137,13 +137,13 @@ llm_risk_averse:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_rational:
+llm_rational_optimizer:
   name: "LLM Rational Optimizer"
   class: "examples.EquityPremium.LLM.players:LLMRationalOptimizer"
   # Expander → llm_rational_1, llm_rational_2
   num_instances: 2
   config:
-    identity: "llm_rational"
+    identity: "llm_rational_optimizer"
     role: player
     steps_per_turn: 1
     group_tags:

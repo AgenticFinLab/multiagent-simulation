@@ -32,13 +32,13 @@ market:
 # Portfolio Insurers — RuleLLM with explicit hedge rules
 # Theory: Leland & Rubinstein (1976), Brady Commission (1988)
 # -----------------------------------------------------------------------------
-portfolio_insurer:
+rulellm_portfolio_insurer:
   name: "Portfolio Insurer"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMPortfolioInsurer"
   # Expander → portfolio_insurer_1, portfolio_insurer_2
   num_instances: 2
   config:
-    identity: "portfolio_insurer"
+    identity: "rulellm_portfolio_insurer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,13 +66,13 @@ portfolio_insurer:
 # Index Arbitrageurs — RuleLLM with explicit arb spread rules
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-index_arbitrageur:
+rulellm_index_arbitrageur:
   name: "Index Arbitrageur"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMIndexArbitrageur"
   # Expander → index_arbitrageur_1, index_arbitrageur_2
   num_instances: 2
   config:
-    identity: "index_arbitrageur"
+    identity: "rulellm_index_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -99,13 +99,13 @@ index_arbitrageur:
 # Program Traders — RuleLLM with explicit trigger rules
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-program_trader:
+rulellm_program_trader:
   name: "Program Trader"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMProgramTrader"
   # Expander → program_trader_1, program_trader_2
   num_instances: 2
   config:
-    identity: "program_trader"
+    identity: "rulellm_program_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -132,12 +132,12 @@ program_trader:
 # Value Investors — RuleLLM with explicit value thresholds
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-value_investor:
+rulellm_value_investor:
   name: "Value Investor"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMValueInvestor"
   num_instances: 1
   config:
-    identity: "value_investor"
+    identity: "rulellm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -163,13 +163,13 @@ value_investor:
 # Noise Traders — RuleLLM with random-trader persona
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+rulellm_noise_trader:
   name: "Noise Trader"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMNoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

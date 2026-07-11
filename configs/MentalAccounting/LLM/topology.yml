@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - mentalaccountant
-    - housemoneytrader
-    - rationalportfoliomanager
-    - sunkcostholder
-    - noisetrader
+    - llm_mental_accountant
+    - llm_house_money_trader
+    - llm_rational_portfolio_manager
+    - llm_sunk_cost_holder
+    - llm_noise_trader
 
-  mentalaccountant:
+  llm_mental_accountant:
     - market
 
-  housemoneytrader:
+  llm_house_money_trader:
     - market
 
-  rationalportfoliomanager:
+  llm_rational_portfolio_manager:
     - market
 
-  sunkcostholder:
+  llm_sunk_cost_holder:
     - market
 
-  noisetrader:
+  llm_noise_trader:
     - market

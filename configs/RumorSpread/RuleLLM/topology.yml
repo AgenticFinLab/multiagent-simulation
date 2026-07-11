@@ -7,10 +7,10 @@
 type: "star"
 
 sources:
-  - environment
+  - rulellm_information_environment
 
 connections:
-  environment:
+  rulellm_information_environment:
     - rulellm_gullible_spreader
     - rulellm_distorting_relayer
     - rulellm_skeptical_evaluator
@@ -18,16 +18,16 @@ connections:
     - rulellm_uninformed_bystander
 
   rulellm_gullible_spreader:
-    - environment
+    - rulellm_information_environment
 
   rulellm_distorting_relayer:
-    - environment
+    - rulellm_information_environment
 
   rulellm_skeptical_evaluator:
-    - environment
+    - rulellm_information_environment
 
   rulellm_fact_checker:
-    - environment
+    - rulellm_information_environment
 
   rulellm_uninformed_bystander:
-    - environment
+    - rulellm_information_environment

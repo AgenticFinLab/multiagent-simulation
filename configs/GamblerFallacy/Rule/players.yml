@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-streakreversaltrader:
+rule_streak_reversal_trader:
   name: "StreakReversalTrader"
   class: "examples.GamblerFallacy.Rule.players:StreakReversalTrader"
   num_instances: 2
   config:
-    identity: "streakreversaltrader"
+    identity: "rule_streak_reversal_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -42,12 +42,12 @@ streakreversaltrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hothandtrader:
+rule_hot_hand_trader:
   name: "HotHandTrader"
   class: "examples.GamblerFallacy.Rule.players:HotHandTrader"
   num_instances: 2
   config:
-    identity: "hothandtrader"
+    identity: "rule_hot_hand_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -64,12 +64,12 @@ hothandtrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-independentassessor:
+rule_independent_assessor:
   name: "IndependentAssessor"
   class: "examples.GamblerFallacy.Rule.players:IndependentAssessor"
   num_instances: 1
   config:
-    identity: "independentassessor"
+    identity: "rule_independent_assessor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -86,12 +86,12 @@ independentassessor:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-arbitrageur:
+rule_arbitrageur:
   name: "Arbitrageur"
   class: "examples.GamblerFallacy.Rule.players:Arbitrageur"
   num_instances: 1
   config:
-    identity: "arbitrageur"
+    identity: "rule_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -108,12 +108,12 @@ arbitrageur:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.GamblerFallacy.Rule.players:NoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

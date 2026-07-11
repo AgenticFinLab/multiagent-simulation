@@ -37,13 +37,13 @@ market:
 # Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
 # Rule: perceived = anchor + (F - anchor) * 0.3
 # -----------------------------------------------------------------------------
-rulellm_anchored:
+rulellm_anchored_trader:
   name: "RuleLLM Anchored Trader"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMAnchoredTrader"
-  # Expander → rulellm_anchored_1, rulellm_anchored_2
+  # Expander → rulellm_anchored_trader_1, rulellm_anchored_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_anchored"
+    identity: "rulellm_anchored_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -71,13 +71,13 @@ rulellm_anchored:
 # Theory: Northcraft & Neale (1987) — Experts anchor to past prices
 # Rule: perceived_dev = (price - hist_avg) / hist_avg * (1 - 0.5)
 # -----------------------------------------------------------------------------
-rulellm_historical:
+rulellm_historical_anchor:
   name: "RuleLLM Historical Anchor"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMHistoricalAnchor"
-  # Expander → rulellm_historical_1, rulellm_historical_2
+  # Expander → rulellm_historical_anchor_1, rulellm_historical_anchor_2
   num_instances: 2
   config:
-    identity: "rulellm_historical"
+    identity: "rulellm_historical_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -105,12 +105,12 @@ rulellm_historical:
 # Hybrid Rational Updater (Rational persona + full Bayesian adjustment rule)
 # Rule: deviation = (price - F) / F; trade when |dev| > 2%
 # -----------------------------------------------------------------------------
-rulellm_rational:
+rulellm_rational_updater:
   name: "RuleLLM Rational Updater"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMRationalUpdater"
   num_instances: 1
   config:
-    identity: "rulellm_rational"
+    identity: "rulellm_rational_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,13 +136,13 @@ rulellm_rational:
 # Hybrid Momentum Traders (Momentum persona + trend rule)
 # Rule: if |return| > 2%: quantity = base_size * return * 10
 # -----------------------------------------------------------------------------
-rulellm_momentum:
+rulellm_momentum_trader:
   name: "RuleLLM Momentum Trader"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMMomentumTrader"
-  # Expander → rulellm_momentum_1, rulellm_momentum_2
+  # Expander → rulellm_momentum_trader_1, rulellm_momentum_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_momentum"
+    identity: "rulellm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -169,13 +169,13 @@ rulellm_momentum:
 # Hybrid Noise Traders (Random trader persona + random trade rule)
 # Rule: trade prob=5%, random buy/sell in [100, 500]
 # -----------------------------------------------------------------------------
-rulellm_noise:
+rulellm_noise_trader:
   name: "RuleLLM Noise Trader"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMNoiseTrader"
-  # Expander → rulellm_noise_1, rulellm_noise_2
+  # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_noise"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -206,13 +206,13 @@ rulellm_noise:
 #       sell if gain_pct > 0.04, buy if gain_pct < -0.016;
 #       quantity = min(15, abs(gain_pct) * 500)
 # -----------------------------------------------------------------------------
-rulellm_disposition:
+rulellm_disposition_trader:
   name: "RuleLLM Disposition Trader"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMDispositionTrader"
-  # Expander → rulellm_disposition_1, rulellm_disposition_2
+  # Expander → rulellm_disposition_trader_1, rulellm_disposition_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_disposition"
+    identity: "rulellm_disposition_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -243,12 +243,12 @@ rulellm_disposition:
 #       sell if cum_return > 0.05, buy if cum_return < -0.05;
 #       quantity = min(20, abs(cum_return) * 400)
 # -----------------------------------------------------------------------------
-rulellm_contrarian:
+rulellm_contrarian_trader:
   name: "RuleLLM Contrarian Trader"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMContrarianTrader"
   num_instances: 1
   config:
-    identity: "rulellm_contrarian"
+    identity: "rulellm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -279,12 +279,12 @@ rulellm_contrarian:
 #       dev = (P - belief) / belief; trade when |dev| > 0.02;
 #       quantity = min(25, abs(dev) * 1000)
 # -----------------------------------------------------------------------------
-rulellm_fundamental:
+rulellm_fundamental_analyst:
   name: "RuleLLM Fundamental Analyst"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMFundamentalAnalyst"
   num_instances: 1
   config:
-    identity: "rulellm_fundamental"
+    identity: "rulellm_fundamental_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -314,12 +314,12 @@ rulellm_fundamental:
 #       fair_quote = 0.5*(P + ema); band = 0.015 * fair_quote;
 #       quantity = min(30, dev * 2000)
 # -----------------------------------------------------------------------------
-rulellm_liquidity:
+rulellm_liquidity_provider:
   name: "RuleLLM Liquidity Provider"
   class: "examples.AnchoringEffect.RuleLLM.players:RuleLLMLiquidityProvider"
   num_instances: 1
   config:
-    identity: "rulellm_liquidity"
+    identity: "rulellm_liquidity_provider"
     role: player
     steps_per_turn: 1
     group_tags:

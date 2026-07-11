@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-retailcoordinated:
+rulellm_retail_coordinated:
   name: "RetailCoordinated"
   class: "examples.GameStopShortSqueeze.RuleLLM.players:RuleLLMRetailCoordinated"
   num_instances: 3
   config:
-    identity: "retailcoordinated"
+    identity: "rulellm_retail_coordinated"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -48,12 +48,12 @@ retailcoordinated:
           max_tokens: 512
   persona: !include persona.yml
 
-shortsellerhf:
+rulellm_short_seller_hf:
   name: "ShortSellerHF"
   class: "examples.GameStopShortSqueeze.RuleLLM.players:RuleLLMShortSellerHF"
   num_instances: 2
   config:
-    identity: "shortsellerhf"
+    identity: "rulellm_short_seller_hf"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -75,12 +75,12 @@ shortsellerhf:
           max_tokens: 512
   persona: !include persona.yml
 
-marketmakergamma:
+rulellm_market_maker_gamma:
   name: "MarketMakerGamma"
   class: "examples.GameStopShortSqueeze.RuleLLM.players:RuleLLMMarketMakerGamma"
   num_instances: 1
   config:
-    identity: "marketmakergamma"
+    identity: "rulellm_market_maker_gamma"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -102,12 +102,12 @@ marketmakergamma:
           max_tokens: 512
   persona: !include persona.yml
 
-institutionalvalue:
+rulellm_institutional_value:
   name: "InstitutionalValue"
   class: "examples.GameStopShortSqueeze.RuleLLM.players:RuleLLMInstitutionalValue"
   num_instances: 1
   config:
-    identity: "institutionalvalue"
+    identity: "rulellm_institutional_value"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -129,12 +129,12 @@ institutionalvalue:
           max_tokens: 512
   persona: !include persona.yml
 
-momentumretail:
+rulellm_momentum_retail:
   name: "NoiseTrader"
   class: "examples.GameStopShortSqueeze.RuleLLM.players:RuleLLMMomentumRetail"
   num_instances: 2
   config:
-    identity: "momentumretail"
+    identity: "rulellm_momentum_retail"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -7,10 +7,10 @@
 type: "star"
 
 sources:
-  - environment
+  - ragllm_opinion_environment
 
 connections:
-  environment:
+  ragllm_opinion_environment:
     - ragllm_ideologue
     - ragllm_conformist
     - ragllm_critical_thinker
@@ -18,16 +18,16 @@ connections:
     - ragllm_passive_follower
 
   ragllm_ideologue:
-    - environment
+    - ragllm_opinion_environment
 
   ragllm_conformist:
-    - environment
+    - ragllm_opinion_environment
 
   ragllm_critical_thinker:
-    - environment
+    - ragllm_opinion_environment
 
   ragllm_bridge_builder:
-    - environment
+    - ragllm_opinion_environment
 
   ragllm_passive_follower:
-    - environment
+    - ragllm_opinion_environment

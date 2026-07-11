@@ -38,13 +38,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-momentum_trader:
+rule_momentum_trader:
   name: "Momentum Trader"
   class: "examples.MomentumEffect.Rule.players:MomentumTrader"
   # Expander → momentum_trader_1, momentum_trader_2, momentum_trader_3
   num_instances: 3
   config:
-    identity: "momentum_trader"
+    identity: "rule_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -64,13 +64,13 @@ momentum_trader:
       max_position: 100.0
   persona: !include persona.yml
 
-contrarian_trader:
+rule_contrarian_trader:
   name: "Contrarian Trader"
   class: "examples.MomentumEffect.Rule.players:ContrarianTrader"
   # Expander → contrarian_trader_1, contrarian_trader_2
   num_instances: 2
   config:
-    identity: "contrarian_trader"
+    identity: "rule_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -88,12 +88,12 @@ contrarian_trader:
       max_position: 80.0
   persona: !include persona.yml
 
-index_fund:
+rule_index_fund:
   name: "Index Fund"
   class: "examples.MomentumEffect.Rule.players:IndexFund"
   num_instances: 1
   config:
-    identity: "index_fund"
+    identity: "rule_index_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -111,12 +111,12 @@ index_fund:
       rebalance_threshold: 0.05
   persona: !include persona.yml
 
-market_maker:
+rule_market_maker:
   name: "Market Maker"
   class: "examples.MomentumEffect.Rule.players:MarketMaker"
   num_instances: 1
   config:
-    identity: "market_maker"
+    identity: "rule_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -132,13 +132,13 @@ market_maker:
       reversion_speed: 0.2
   persona: !include persona.yml
 
-technical_trader:
+rule_technical_trader:
   name: "Technical Trader"
   class: "examples.MomentumEffect.Rule.players:TechnicalTrader"
   # Expander → technical_trader_1, technical_trader_2
   num_instances: 2
   config:
-    identity: "technical_trader"
+    identity: "rule_technical_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -157,13 +157,13 @@ technical_trader:
       max_position: 60.0
   persona: !include persona.yml
 
-fundamental_trader:
+rule_fundamental_trader:
   name: "Fundamental Trader"
   class: "examples.MomentumEffect.Rule.players:FundamentalTrader"
   # Expander → fundamental_trader_1, fundamental_trader_2
   num_instances: 2
   config:
-    identity: "fundamental_trader"
+    identity: "rule_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:

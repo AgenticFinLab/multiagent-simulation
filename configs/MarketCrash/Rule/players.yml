@@ -44,13 +44,13 @@ market:
 # -----------------------------------------------------------------------------
 # Risk Parity Fund - Vol Targeting
 # -----------------------------------------------------------------------------
-risk_parity_fund:
+rule_risk_parity_fund:
   name: "Risk Parity Fund"
   class: "examples.MarketCrash.Rule.players:RiskParityFund"
   # Expander → risk_parity_fund_1, risk_parity_fund_2
   num_instances: 2
   config:
-    identity: "risk_parity_fund"
+    identity: "rule_risk_parity_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -71,13 +71,13 @@ risk_parity_fund:
 # -----------------------------------------------------------------------------
 # Leveraged Hedge Funds
 # -----------------------------------------------------------------------------
-leveraged_hedge_fund:
+rule_leveraged_hedge_fund:
   name: "Leveraged Hedge Fund"
   class: "examples.MarketCrash.Rule.players:LeveragedHedgeFund"
   # Expander → leveraged_hedge_fund_1, leveraged_hedge_fund_2, leveraged_hedge_fund_3
   num_instances: 3
   config:
-    identity: "leveraged_hedge_fund"
+    identity: "rule_leveraged_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -98,13 +98,13 @@ leveraged_hedge_fund:
 # -----------------------------------------------------------------------------
 # Market Maker
 # -----------------------------------------------------------------------------
-market_maker:
+rule_market_maker:
   name: "Market Maker"
   class: "examples.MarketCrash.Rule.players:MarketMaker"
   # Expander → market_maker_1, market_maker_2
   num_instances: 2
   config:
-    identity: "market_maker"
+    identity: "rule_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -124,12 +124,12 @@ market_maker:
 # -----------------------------------------------------------------------------
 # Passive Investor
 # -----------------------------------------------------------------------------
-passive_investor:
+rule_passive_investor:
   name: "Passive Investor"
   class: "examples.MarketCrash.Rule.players:PassiveInvestor"
   num_instances: 1
   config:
-    identity: "passive_investor"
+    identity: "rule_passive_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -147,13 +147,13 @@ passive_investor:
 # -----------------------------------------------------------------------------
 # Panic Sellers
 # -----------------------------------------------------------------------------
-panic_seller:
+rule_panic_seller:
   name: "Panic Seller"
   class: "examples.MarketCrash.Rule.players:PanicSeller"
   # Expander → panic_seller_1, panic_seller_2, panic_seller_3
   num_instances: 3
   config:
-    identity: "panic_seller"
+    identity: "rule_panic_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -174,12 +174,12 @@ panic_seller:
 # -----------------------------------------------------------------------------
 # Bottom Fisher
 # -----------------------------------------------------------------------------
-bottom_fisher:
+rule_bottom_fisher:
   name: "Bottom Fisher"
   class: "examples.MarketCrash.Rule.players:BottomFisher"
   num_instances: 1
   config:
-    identity: "bottom_fisher"
+    identity: "rule_bottom_fisher"
     role: player
     steps_per_turn: 1
     group_tags:

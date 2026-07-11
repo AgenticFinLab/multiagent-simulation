@@ -11,12 +11,12 @@
 # -----------------------------------------------------------------------------
 # InformationEnvironment (Coordinator) — imported from Rule variant
 # -----------------------------------------------------------------------------
-environment:
+rulellm_information_environment:
   name: "InformationEnvironment"
   class: "examples.RumorSpread.RuleLLM.players:InformationEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "rulellm_information_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:

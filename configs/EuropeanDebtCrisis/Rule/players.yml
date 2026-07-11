@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-peripherybondseller:
+rule_periphery_bond_seller:
   name: "PeripheryBondSeller"
   class: "examples.EuropeanDebtCrisis.Rule.players:PeripheryBondSeller"
   num_instances: 2
   config:
-    identity: "peripherybondseller"
+    identity: "rule_periphery_bond_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -40,12 +40,12 @@ peripherybondseller:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-creditorpanicker:
+rule_creditor_panicker:
   name: "CreditorPanicker"
   class: "examples.EuropeanDebtCrisis.Rule.players:CreditorPanicker"
   num_instances: 2
   config:
-    identity: "creditorpanicker"
+    identity: "rule_creditor_panicker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -59,12 +59,12 @@ creditorpanicker:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-corebondbuyer:
+rule_core_bond_buyer:
   name: "CoreBondBuyer"
   class: "examples.EuropeanDebtCrisis.Rule.players:CoreBondBuyer"
   num_instances: 1
   config:
-    identity: "corebondbuyer"
+    identity: "rule_core_bond_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ corebondbuyer:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-ecbintervenor:
+rule_ecb_intervenor:
   name: "ECBIntervenor"
   class: "examples.EuropeanDebtCrisis.Rule.players:ECBIntervenor"
   num_instances: 1
   config:
-    identity: "ecbintervenor"
+    identity: "rule_ecb_intervenor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -97,12 +97,12 @@ ecbintervenor:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hedgedfund:
+rule_hedged_fund:
   name: "HedgedFund"
   class: "examples.EuropeanDebtCrisis.Rule.players:HedgedFund"
   num_instances: 1
   config:
-    identity: "hedgedfund"
+    identity: "rule_hedged_fund"
     role: player
     steps_per_turn: 1
     group_tags:

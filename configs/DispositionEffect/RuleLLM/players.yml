@@ -32,12 +32,12 @@ market:
   persona: !include persona.yml
 
 # RuleLLM Disposition Biased (Prospect Theory)
-rulellm_disposition_biased:
+rulellm_disposition_investor:
   name: "RuleLLM Disposition Biased"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMDispositionBiased"
   num_instances: 3
   config:
-    identity: "rulellm_disposition_biased"
+    identity: "rulellm_disposition_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -70,12 +70,12 @@ rulellm_disposition_biased:
   persona: !include persona.yml
 
 # RuleLLM Rational Investor (Expected Utility)
-rulellm_rational:
+rulellm_rational_investor:
   name: "RuleLLM Rational Investor"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMRationalInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_rational"
+    identity: "rulellm_rational_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -101,12 +101,12 @@ rulellm_rational:
   persona: !include persona.yml
 
 # RuleLLM Tax Aware Investor
-rulellm_tax_aware:
+rulellm_tax_aware_investor:
   name: "RuleLLM Tax Aware Investor"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMTaxAwareInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_tax_aware"
+    identity: "rulellm_tax_aware_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -132,12 +132,12 @@ rulellm_tax_aware:
   persona: !include persona.yml
 
 # RuleLLM Institutional Investor
-rulellm_institutional:
+rulellm_institutional_investor:
   name: "RuleLLM Institutional Investor"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMInstitutionalInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_institutional"
+    identity: "rulellm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:

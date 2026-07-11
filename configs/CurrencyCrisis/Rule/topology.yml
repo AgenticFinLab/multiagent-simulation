@@ -7,18 +7,18 @@ sources:
 
 connections:
   market:
-    - speculativeattacker
-    - selffulfillingtrader
-    - centralbankdefender
-    - fundamentalhedger
-    - noisetrader
-  centralbankdefender:
+    - rule_speculative_attacker
+    - rule_self_fulfilling_trader
+    - rule_central_bank_defender
+    - rule_fundamental_hedger
+    - rule_noise_trader
+  rule_central_bank_defender:
     - market
-  fundamentalhedger:
+  rule_fundamental_hedger:
     - market
-  noisetrader:
+  rule_noise_trader:
     - market
-  selffulfillingtrader:
+  rule_self_fulfilling_trader:
     - market
-  speculativeattacker:
+  rule_speculative_attacker:
     - market

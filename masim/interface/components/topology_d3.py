@@ -20,6 +20,24 @@ import streamlit.components.v1 as components
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _ICON_ROOT = _PROJECT_ROOT / "examples" / "AGENT_POOL" / "agent_images" / "icons"
 
+# Variant prefixes that may appear on identity strings in scenario configs.
+# Every non-Rule variant identity is expected to follow ``{variant}_{archetype}``
+# (Rule identities also carry the ``rule_`` prefix). Assets (icons, .md profiles)
+# are keyed by the pure archetype stem, so the prefix is stripped before lookup.
+_VARIANT_PREFIXES: tuple[str, ...] = ("rule_", "llm_", "rulellm_", "ragllm_")
+
+
+def _canonical_archetype(player_id: str) -> str:
+    """Strip a known ``{variant}_`` prefix, returning the pure archetype stem.
+
+    Used for asset resolution (icon PNG, profile ``.md``). Falls through
+    unchanged when no known prefix matches (e.g. ``market``).
+    """
+    for prefix in _VARIANT_PREFIXES:
+        if player_id.startswith(prefix):
+            return player_id[len(prefix):]
+    return player_id
+
 
 def _image_data_uri(path: Path) -> str:
     """Encode a PNG file as a base64 data URI."""
@@ -40,7 +58,8 @@ def _resolve_icon_uri(node_id: str) -> str:
     """
     if not node_id or node_id == "market":
         return ""
-    kebab = node_id.replace("_", "-")
+    archetype = _canonical_archetype(node_id)
+    kebab = archetype.replace("_", "-")
     candidate = _ICON_ROOT / f"finance-{kebab}.png"
     if candidate.exists():
         return _image_data_uri(candidate)
@@ -81,7 +100,9 @@ def render_d3_topology(
         is_hub = node_id in topology.get("sources", [])
         count = meta.get("instances", 1)
         icon_uri = _resolve_icon_uri(node_id)
-        base_name = meta.get("name", node_id.replace("_", " ").title())
+        base_name = meta.get(
+            "name", _canonical_archetype(node_id).replace("_", " ").title()
+        )
         theory = meta.get("theory") or meta.get("principle") or ""
 
         if is_hub or count <= 1:

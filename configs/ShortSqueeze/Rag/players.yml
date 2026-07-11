@@ -100,13 +100,13 @@ ragllm_short_seller:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_retail_coord:
+ragllm_retail_coordinator:
   name: "RAG Retail Coordinator"
   class: "examples.ShortSqueeze.Rag.players:RagLLMRetailCoordinator"
   # Expander → ragllm_retail_coord_1, ragllm_retail_coord_2, ragllm_retail_coord_3
   num_instances: 3
   config:
-    identity: "ragllm_retail_coord"
+    identity: "ragllm_retail_coordinator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -143,13 +143,13 @@ ragllm_retail_coord:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_momentum:
+ragllm_momentum_buyer:
   name: "RAG Momentum Buyer"
   class: "examples.ShortSqueeze.Rag.players:RagLLMMomentumBuyer"
   # Expander → ragllm_momentum_1, ragllm_momentum_2, ragllm_momentum_3
   num_instances: 3
   config:
-    identity: "ragllm_momentum"
+    identity: "ragllm_momentum_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -186,13 +186,13 @@ ragllm_momentum:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_value:
+ragllm_value_investor:
   name: "RAG Value Investor"
   class: "examples.ShortSqueeze.Rag.players:RagLLMValueInvestor"
   # Expander → ragllm_value_1, ragllm_value_2
   num_instances: 2
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -229,12 +229,12 @@ ragllm_value:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_institutional:
+ragllm_institutional_holder:
   name: "RAG Institutional Holder"
   class: "examples.ShortSqueeze.Rag.players:RagLLMInstitutionalHolder"
   num_instances: 1
   config:
-    identity: "ragllm_institutional"
+    identity: "ragllm_institutional_holder"
     role: player
     steps_per_turn: 1
     group_tags:

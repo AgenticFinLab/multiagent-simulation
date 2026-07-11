@@ -6,18 +6,18 @@ sources:
 connections:
   market:
     - llm_momentum_trader
-    - llm_contrarian
-    - llm_technical
+    - llm_contrarian_trader
+    - llm_technical_trader
     - llm_trend_follower
-    - llm_fundamental
+    - llm_fundamental_anchor
 
   llm_momentum_trader:
     - market
-  llm_contrarian:
+  llm_contrarian_trader:
     - market
-  llm_technical:
+  llm_technical_trader:
     - market
   llm_trend_follower:
     - market
-  llm_fundamental:
+  llm_fundamental_anchor:
     - market

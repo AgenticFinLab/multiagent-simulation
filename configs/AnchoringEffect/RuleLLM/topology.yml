@@ -7,11 +7,11 @@
 # The simulator expander resolves them to foo_1, foo_2, ... before building
 # the TopologyGraph, so all edge rules apply to every instance automatically.
 #
-#         rulellm_anchored ─────────────┐
-#         rulellm_historical ───────────┤
-#         rulellm_rational ─────────────┼──▶ market ──▶ all investors
-#         rulellm_momentum ─────────────┤             (market data: price, deviation)
-#         rulellm_noise ────────────────┘
+#         rulellm_anchored_trader ──────────────┐
+#         rulellm_historical_anchor ────────────┤
+#         rulellm_rational_updater ─────────────┼──▶ market ──▶ all investors
+#         rulellm_momentum_trader ──────────────┤             (market data: price, deviation)
+#         rulellm_noise_trader ─────────────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + deviation metrics)
@@ -26,24 +26,24 @@ sources:
 connections:
   # Market → All investors (price + deviation data broadcast)
   market:
-    - rulellm_anchored
-    - rulellm_historical
-    - rulellm_rational
-    - rulellm_momentum
-    - rulellm_noise
+    - rulellm_anchored_trader
+    - rulellm_historical_anchor
+    - rulellm_rational_updater
+    - rulellm_momentum_trader
+    - rulellm_noise_trader
 
   # Each investor → Market only (order submission)
-  rulellm_anchored:
+  rulellm_anchored_trader:
     - market
 
-  rulellm_historical:
+  rulellm_historical_anchor:
     - market
 
-  rulellm_rational:
+  rulellm_rational_updater:
     - market
 
-  rulellm_momentum:
+  rulellm_momentum_trader:
     - market
 
-  rulellm_noise:
+  rulellm_noise_trader:
     - market

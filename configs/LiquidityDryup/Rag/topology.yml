@@ -12,7 +12,7 @@ connections:
     - ragllm_market_maker
     - ragllm_liquidity_demander
     - ragllm_arbitrageur
-    - ragllm_value
+    - ragllm_value_investor
     - ragllm_forced_seller
 
   ragllm_market_maker:
@@ -21,7 +21,7 @@ connections:
     - market
   ragllm_arbitrageur:
     - market
-  ragllm_value:
+  ragllm_value_investor:
     - market
   ragllm_forced_seller:
     - market

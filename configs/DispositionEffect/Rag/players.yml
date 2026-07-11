@@ -45,12 +45,12 @@ market:
       custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
-rag_disposition:
+ragllm_disposition_investor:
   name: "RAG Disposition Investor"
   class: "examples.DispositionEffect.Rag.players:RagDispositionInvestor"
   num_instances: 3
   config:
-    identity: "rag_disposition"
+    identity: "ragllm_disposition_investor"
     role: player
     steps_per_turn: 1
     group_tags: [rag_investors]
@@ -76,15 +76,15 @@ rag_disposition:
         generation_config: *llm_generation
       rag:
         <<: *rag_defaults
-        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/rag_disposition"  # Source: explain.md §6
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_disposition_investor"  # Source: explain.md §6
   persona: !include persona.yml
 
-rag_rational:
+ragllm_rational_investor:
   name: "RAG Rational Investor"
   class: "examples.DispositionEffect.Rag.players:RagRationalInvestor"
   num_instances: 2
   config:
-    identity: "rag_rational"
+    identity: "ragllm_rational_investor"
     role: player
     steps_per_turn: 1
     group_tags: [rag_investors]
@@ -105,15 +105,15 @@ rag_rational:
         generation_config: *llm_generation
       rag:
         <<: *rag_defaults
-        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/rag_rational"  # Source: explain.md §6
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_rational_investor"  # Source: explain.md §6
   persona: !include persona.yml
 
-rag_tax_aware:
+ragllm_tax_aware_investor:
   name: "RAG Tax Aware Investor"
   class: "examples.DispositionEffect.Rag.players:RagTaxAwareInvestor"
   num_instances: 2
   config:
-    identity: "rag_tax_aware"
+    identity: "ragllm_tax_aware_investor"
     role: player
     steps_per_turn: 1
     group_tags: [rag_investors]
@@ -135,15 +135,15 @@ rag_tax_aware:
         generation_config: *llm_generation
       rag:
         <<: *rag_defaults
-        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/rag_tax_aware"  # Source: explain.md §6
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_tax_aware_investor"  # Source: explain.md §6
   persona: !include persona.yml
 
-rag_index_holder:
+ragllm_index_holder:
   name: "RAG Index Holder"
   class: "examples.DispositionEffect.Rag.players:RagIndexHolder"
   num_instances: 1
   config:
-    identity: "rag_index_holder"
+    identity: "ragllm_index_holder"
     role: player
     steps_per_turn: 1
     group_tags: [rag_investors]
@@ -162,15 +162,15 @@ rag_index_holder:
         generation_config: *llm_generation
       rag:
         <<: *rag_defaults
-        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/rag_index_holder"  # Source: explain.md §6
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_index_holder"  # Source: explain.md §6
   persona: !include persona.yml
 
-rag_institutional:
+ragllm_institutional_investor:
   name: "RAG Institutional Investor"
   class: "examples.DispositionEffect.Rag.players:RagInstitutionalInvestor"
   num_instances: 2
   config:
-    identity: "rag_institutional"
+    identity: "ragllm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags: [rag_investors]
@@ -192,5 +192,5 @@ rag_institutional:
         generation_config: *llm_generation
       rag:
         <<: *rag_defaults
-        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/rag_institutional"  # Source: explain.md §6
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_institutional_investor"  # Source: explain.md §6
   persona: !include persona.yml

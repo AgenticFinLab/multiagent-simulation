@@ -5,19 +5,19 @@ sources:
 
 connections:
   market:
-    - llm_contrarian
-    - llm_overconfident
-    - llm_value
+    - llm_contrarian_investor
+    - llm_overconfident_trader
+    - llm_value_investor
     - llm_momentum_chaser
-    - llm_noise
+    - llm_noise_trader
 
-  llm_contrarian:
+  llm_contrarian_investor:
     - market
-  llm_overconfident:
+  llm_overconfident_trader:
     - market
-  llm_value:
+  llm_value_investor:
     - market
   llm_momentum_chaser:
     - market
-  llm_noise:
+  llm_noise_trader:
     - market

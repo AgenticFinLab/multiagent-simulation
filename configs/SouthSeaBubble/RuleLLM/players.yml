@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-insideradvantaged:
+rulellm_insider_advantaged:
   name: "InsiderAdvantaged"
   class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMInsiderAdvantaged"
   num_instances: 2  # Source: target §9 insideradvantaged.num_instances row
   config:
-    identity: "insideradvantaged"
+    identity: "rulellm_insider_advantaged"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -51,12 +51,12 @@ insideradvantaged:
           max_tokens: 512
   persona: !include persona.yml
 
-narrativebeliever:
+rulellm_narrative_believer:
   name: "NarrativeBeliever"
   class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMNarrativeBeliever"
   num_instances: 3  # Source: target §9 narrativebeliever.num_instances row
   config:
-    identity: "narrativebeliever"
+    identity: "rulellm_narrative_believer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -81,12 +81,12 @@ narrativebeliever:
           max_tokens: 512
   persona: !include persona.yml
 
-skepticalanalyst:
+rulellm_skeptical_analyst:
   name: "SkepticalAnalyst"
   class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMSkepticalAnalyst"
   num_instances: 2  # Source: target §9 skepticalanalyst.num_instances row
   config:
-    identity: "skepticalanalyst"
+    identity: "rulellm_skeptical_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -111,12 +111,12 @@ skepticalanalyst:
           max_tokens: 512
   persona: !include persona.yml
 
-arbitrageur:
+rulellm_arbitrageur:
   name: "Arbitrageur"
   class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMArbitrageur"
   num_instances: 2  # Source: target §9 arbitrageur.num_instances row
   config:
-    identity: "arbitrageur"
+    identity: "rulellm_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -141,12 +141,12 @@ arbitrageur:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SouthSeaBubble.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances row
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

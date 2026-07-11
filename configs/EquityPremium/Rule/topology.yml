@@ -15,26 +15,26 @@ connections:
   # Market → All investors
   # num_instances: 3 → mla_1/2/3; num_instances: 2 → conservative_1/2
   market:
-    - mla
-    - long_horizon
-    - risk_neutral
-    - conservative
-    - noise_trader
+    - rule_myopic_loss_averse_investor
+    - rule_long_horizon_investor
+    - rule_risk_neutral_investor
+    - rule_conservative_investor
+    - rule_noise_trader
 
   # Each investor → Market only
   # num_instances: 3 → expands to mla_1/2/3 → market
-  mla:
+  rule_myopic_loss_averse_investor:
     - market
 
-  long_horizon:
+  rule_long_horizon_investor:
     - market
 
-  risk_neutral:
+  rule_risk_neutral_investor:
     - market
 
   # num_instances: 2 → expands to conservative_1/2 → market
-  conservative:
+  rule_conservative_investor:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market

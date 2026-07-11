@@ -40,12 +40,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hftmarketmaker:
+ragllm_hft_market_maker:
   name: "HFTMarketMaker"
   class: "examples.FlashCrash2010.Rag.players:RagLLMHFTMarketMaker"
   num_instances: 3
   config:
-    identity: "hftmarketmaker"
+    identity: "ragllm_hft_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -89,12 +89,12 @@ hftmarketmaker:
           top_k: 5
   persona: !include persona.yml
 
-momentumchaser:
+ragllm_momentum_chaser:
   name: "MomentumChaser"
   class: "examples.FlashCrash2010.Rag.players:RagLLMMomentumChaser"
   num_instances: 2
   config:
-    identity: "momentumchaser"
+    identity: "ragllm_momentum_chaser"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ momentumchaser:
           top_k: 5
   persona: !include persona.yml
 
-fundamentaltrader:
+ragllm_fundamental_trader:
   name: "FundamentalTrader"
   class: "examples.FlashCrash2010.Rag.players:RagLLMFundamentalTrader"
   num_instances: 2
   config:
-    identity: "fundamentaltrader"
+    identity: "ragllm_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -182,12 +182,12 @@ fundamentaltrader:
           top_k: 5
   persona: !include persona.yml
 
-stoplosstrader:
+ragllm_stop_loss_trader:
   name: "StopLossTrader"
   class: "examples.FlashCrash2010.Rag.players:RagLLMStopLossTrader"
   num_instances: 3
   config:
-    identity: "stoplosstrader"
+    identity: "ragllm_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -229,12 +229,12 @@ stoplosstrader:
           top_k: 5
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.FlashCrash2010.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

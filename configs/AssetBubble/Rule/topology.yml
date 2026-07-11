@@ -7,12 +7,12 @@
 # The simulator expander resolves them to foo_1, foo_2, ... before building
 # the TopologyGraph, so all edge rules apply to every instance automatically.
 #
-#         momentum_speculator ─────────┐
-#         rational_arbitrageur ────────┤
-#         noise_trader ────────────────┼──▶ market ──▶ all investors
-#         fundamental_investor ────────┤             (market data: price, bubble_ratio)
-#         leveraged_buyer ─────────────┤
-#         conservative_holder ─────────┘
+#         rule_momentum_speculator ─────────┐
+#         rule_rational_arbitrageur ────────┤
+#         rule_noise_trader ────────────────┼──▶ market ──▶ all investors
+#         rule_fundamental_investor ────────┤             (market data: price, bubble_ratio)
+#         rule_leveraged_buyer ─────────────┤
+#         rule_conservative_holder ─────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + bubble metrics)
@@ -28,30 +28,30 @@ connections:
   # Market → All investors (price + bubble data broadcast)
   # num_instances: 2 → momentum_speculator_1/2, noise_trader_1/2
   market:
-    - momentum_speculator
-    - rational_arbitrageur
-    - noise_trader
-    - fundamental_investor
-    - leveraged_buyer
-    - conservative_holder
+    - rule_momentum_speculator
+    - rule_rational_arbitrageur
+    - rule_noise_trader
+    - rule_fundamental_investor
+    - rule_leveraged_buyer
+    - rule_conservative_holder
 
   # Each investor → Market only (order submission)
   # num_instances: 2 → expands to momentum_speculator_1/2 → market
-  momentum_speculator:
+  rule_momentum_speculator:
     - market
 
-  rational_arbitrageur:
+  rule_rational_arbitrageur:
     - market
 
   # num_instances: 2 → expands to noise_trader_1/2 → market
-  noise_trader:
+  rule_noise_trader:
     - market
 
-  fundamental_investor:
+  rule_fundamental_investor:
     - market
 
-  leveraged_buyer:
+  rule_leveraged_buyer:
     - market
 
-  conservative_holder:
+  rule_conservative_holder:
     - market

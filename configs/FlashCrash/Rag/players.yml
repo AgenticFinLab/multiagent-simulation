@@ -61,12 +61,12 @@ market:
 # =============================================================================
 # RAG HFT (Momentum detection + LLM + RAG)
 # =============================================================================
-ragllm_hft:
+ragllm_high_frequency_trader:
   name: "RAG HFT"
   class: "examples.FlashCrash.Rag.players:RagLLMHighFrequencyTrader"
   num_instances: 3
   config:
-    identity: "ragllm_hft"
+    identity: "ragllm_high_frequency_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -158,12 +158,12 @@ ragllm_market_maker:
 # =============================================================================
 # RAG Algorithmic Trader (Trend-following + LLM + RAG)
 # =============================================================================
-ragllm_algo:
+ragllm_algorithmic_trader:
   name: "RAG Algorithmic Trader"
   class: "examples.FlashCrash.Rag.players:RagLLMAlgorithmicTrader"
   num_instances: 2
   config:
-    identity: "ragllm_algo"
+    identity: "ragllm_algorithmic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -207,12 +207,12 @@ ragllm_algo:
 # =============================================================================
 # RAG Stop-Loss Trader (Cascade rules + LLM + RAG)
 # =============================================================================
-ragllm_stop_loss:
+ragllm_stop_loss_trader:
   name: "RAG Stop-Loss Trader"
   class: "examples.FlashCrash.Rag.players:RagLLMStopLossTrader"
   num_instances: 3
   config:
-    identity: "ragllm_stop_loss"
+    identity: "ragllm_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -254,12 +254,12 @@ ragllm_stop_loss:
 # =============================================================================
 # RAG Fundamental Trader (Value deviation + LLM + RAG)
 # =============================================================================
-ragllm_fundamental:
+ragllm_fundamental_trader:
   name: "RAG Fundamental Trader"
   class: "examples.FlashCrash.Rag.players:RagLLMFundamentalTrader"
   num_instances: 2
   config:
-    identity: "ragllm_fundamental"
+    identity: "ragllm_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:

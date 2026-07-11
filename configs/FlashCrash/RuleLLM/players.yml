@@ -32,12 +32,12 @@ market:
   persona: !include persona.yml
 
 # Hybrid HFT (Momentum detection + LLM rapid reasoning)
-rulellm_hft:
+rulellm_high_frequency_trader:
   name: "RuleLLM HFT"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMHighFrequencyTrader"
   num_instances: 3
   config:
-    identity: "rulellm_hft"
+    identity: "rulellm_high_frequency_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -91,12 +91,12 @@ rulellm_market_maker:
   persona: !include persona.yml
 
 # Hybrid Algorithmic Trader (Trend-following + LLM systematic reasoning)
-rulellm_algo:
+rulellm_algorithmic_trader:
   name: "RuleLLM Algorithmic Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMAlgorithmicTrader"
   num_instances: 2
   config:
-    identity: "rulellm_algo"
+    identity: "rulellm_algorithmic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -121,12 +121,12 @@ rulellm_algo:
   persona: !include persona.yml
 
 # Hybrid Stop-Loss Trader (Cascade rules + LLM risk management reasoning)
-rulellm_stop_loss:
+rulellm_stop_loss_trader:
   name: "RuleLLM Stop-Loss Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMStopLossTrader"
   num_instances: 3
   config:
-    identity: "rulellm_stop_loss"
+    identity: "rulellm_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -149,12 +149,12 @@ rulellm_stop_loss:
   persona: !include persona.yml
 
 # Hybrid Fundamental Trader (Value deviation + LLM analytical reasoning)
-rulellm_fundamental:
+rulellm_fundamental_trader:
   name: "RuleLLM Fundamental Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMFundamentalTrader"
   num_instances: 2
   config:
-    identity: "rulellm_fundamental"
+    identity: "rulellm_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:

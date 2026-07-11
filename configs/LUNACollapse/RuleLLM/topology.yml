@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - stablecoinholder
-    - arbitrageur
-    - defilender
-    - anchordepositor
-    - valuebuyer
+    - rulellm_stablecoin_holder
+    - rulellm_arbitrageur
+    - rulellm_de_fi_lender
+    - rulellm_anchor_depositor
+    - rulellm_value_buyer
 
-  stablecoinholder:
+  rulellm_stablecoin_holder:
     - market
 
-  arbitrageur:
+  rulellm_arbitrageur:
     - market
 
-  defilender:
+  rulellm_de_fi_lender:
     - market
 
-  anchordepositor:
+  rulellm_anchor_depositor:
     - market
 
-  valuebuyer:
+  rulellm_value_buyer:
     - market

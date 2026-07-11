@@ -10,18 +10,18 @@ sources:
 connections:
   market:
     - rulellm_short_seller
-    - rulellm_retail_coord
-    - rulellm_momentum
-    - rulellm_value
-    - rulellm_institutional
+    - rulellm_retail_coordinator
+    - rulellm_momentum_buyer
+    - rulellm_value_investor
+    - rulellm_institutional_holder
 
   rulellm_short_seller:
     - market
-  rulellm_retail_coord:
+  rulellm_retail_coordinator:
     - market
-  rulellm_momentum:
+  rulellm_momentum_buyer:
     - market
-  rulellm_value:
+  rulellm_value_investor:
     - market
-  rulellm_institutional:
+  rulellm_institutional_holder:
     - market

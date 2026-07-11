@@ -35,13 +35,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-mla:
+rule_myopic_loss_averse_investor:
   name: "Myopic Loss Averse"
   class: "examples.EquityPremium.Rule.players:MyopicLossAverseInvestor"
   # Expander → mla_1, mla_2, mla_3, mla_4, mla_5
   num_instances: 5
   config:
-    identity: "mla"
+    identity: "rule_myopic_loss_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -57,13 +57,13 @@ mla:
       risk_aversion: 2.0
   persona: !include persona.yml
 
-long_horizon:
+rule_long_horizon_investor:
   name: "Long Horizon Investor"
   class: "examples.EquityPremium.Rule.players:LongHorizonInvestor"
   # Expander → long_horizon_1, long_horizon_2
   num_instances: 2
   config:
-    identity: "long_horizon"
+    identity: "rule_long_horizon_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ long_horizon:
       target_stock_pct: 0.6
   persona: !include persona.yml
 
-risk_neutral:
+rule_risk_neutral_investor:
   name: "Risk Neutral Investor"
   class: "examples.EquityPremium.Rule.players:RiskNeutralInvestor"
   num_instances: 1
   config:
-    identity: "risk_neutral"
+    identity: "rule_risk_neutral_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -97,13 +97,13 @@ risk_neutral:
       excess_return_multiplier: 500
   persona: !include persona.yml
 
-conservative:
+rule_conservative_investor:
   name: "Conservative Investor"
   class: "examples.EquityPremium.Rule.players:ConservativeInvestor"
   # Expander → conservative_1, conservative_2, conservative_3
   num_instances: 3
   config:
-    identity: "conservative"
+    identity: "rule_conservative_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -117,13 +117,13 @@ conservative:
       target_stock_pct: 0.2
   persona: !include persona.yml
 
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.EquityPremium.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

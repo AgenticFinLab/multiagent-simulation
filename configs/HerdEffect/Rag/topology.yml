@@ -9,19 +9,19 @@ sources:
 
 connections:
   market:
-    - ragllm_momentum
-    - ragllm_contrarian
-    - ragllm_risk_averse
-    - ragllm_aggressive
-    - ragllm_noise
+    - ragllm_momentum_investor
+    - ragllm_contrarian_investor
+    - ragllm_risk_averse_investor
+    - ragllm_aggressive_investor
+    - ragllm_noise_trader
 
-  ragllm_momentum:
+  ragllm_momentum_investor:
     - market
-  ragllm_contrarian:
+  ragllm_contrarian_investor:
     - market
-  ragllm_risk_averse:
+  ragllm_risk_averse_investor:
     - market
-  ragllm_aggressive:
+  ragllm_aggressive_investor:
     - market
-  ragllm_noise:
+  ragllm_noise_trader:
     - market

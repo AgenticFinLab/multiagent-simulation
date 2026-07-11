@@ -37,13 +37,13 @@ market:
 # LLM ConcentratedFund — TRS-leveraged position holder
 # Theory: Total Return Swap Leverage (Becketti, 2021)
 # -----------------------------------------------------------------------------
-concentrated_fund:
+llm_concentrated_fund:
   name: "Concentrated Fund"
   class: "examples.ArchegosCollapse.LLM.players:LLMConcentratedFund"
   # Expander → concentrated_fund_1, concentrated_fund_2
   num_instances: 2
   config:
-    identity: "concentrated_fund"
+    identity: "llm_concentrated_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -67,12 +67,12 @@ concentrated_fund:
 # LLM PrimeBrokerFirstMover — First-mover liquidator (creates cascade)
 # Theory: Prime broker liquidation race
 # -----------------------------------------------------------------------------
-prime_broker_first_mover:
+llm_prime_broker_first_mover:
   name: "Prime Broker (First Mover)"
   class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBrokerFirstMover"
   num_instances: 1
   config:
-    identity: "prime_broker_first_mover"
+    identity: "llm_prime_broker_first_mover"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -96,12 +96,12 @@ prime_broker_first_mover:
 # LLM PrimeBrokerDelayedLiquidator — Second-mover liquidator (delayed, worse prices)
 # Theory: Prime broker competition; cascade amplification
 # -----------------------------------------------------------------------------
-prime_broker_delayed_liquidator:
+llm_prime_broker_delayed_liquidator:
   name: "Prime Broker (Delayed Liquidator)"
   class: "examples.ArchegosCollapse.LLM.players:LLMPrimeBrokerDelayedLiquidator"
   num_instances: 1
   config:
-    identity: "prime_broker_delayed_liquidator"
+    identity: "llm_prime_broker_delayed_liquidator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -125,12 +125,12 @@ prime_broker_delayed_liquidator:
 # LLM BlockTradeBuyer — Opportunistic discount buyer
 # Theory: Opportunistic block trading; stabilizing force
 # -----------------------------------------------------------------------------
-block_trade_buyer:
+llm_block_trade_buyer:
   name: "Block Trade Buyer"
   class: "examples.ArchegosCollapse.LLM.players:LLMBlockTradeBuyer"
   num_instances: 1
   config:
-    identity: "block_trade_buyer"
+    identity: "llm_block_trade_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -154,13 +154,13 @@ block_trade_buyer:
 # LLM InformationTrader — Front-runner detecting liquidation signals
 # Theory: Information-based trading; detection of order flow
 # -----------------------------------------------------------------------------
-information_trader:
+llm_information_trader:
   name: "Information Trader"
   class: "examples.ArchegosCollapse.LLM.players:LLMInformationTrader"
   # Expander → information_trader_1, information_trader_2
   num_instances: 2
   config:
-    identity: "information_trader"
+    identity: "llm_information_trader"
     role: player
     steps_per_turn: 1
     group_tags:

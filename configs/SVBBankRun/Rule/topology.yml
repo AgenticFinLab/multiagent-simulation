@@ -4,18 +4,18 @@ sources:
 
 connections:
   market:
-    - depositor
-    - socialmediainfluencer
-    - bankmanager
-    - regulator
-    - bondtrader
-  depositor:
+    - rule_depositor
+    - rule_social_media_influencer
+    - rule_bank_manager
+    - rule_regulator
+    - rule_bond_trader
+  rule_depositor:
     - market
-  socialmediainfluencer:
+  rule_social_media_influencer:
     - market
-  bankmanager:
+  rule_bank_manager:
     - market
-  regulator:
+  rule_regulator:
     - market
-  bondtrader:
+  rule_bond_trader:
     - market

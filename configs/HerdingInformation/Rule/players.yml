@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-cascadefollower:
+rule_cascade_follower:
   name: "CascadeFollower"
   class: "examples.HerdingInformation.Rule.players:CascadeFollower"
   num_instances: 3
   config:
-    identity: "cascadefollower"
+    identity: "rule_cascade_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -42,12 +42,12 @@ cascadefollower:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-reputationherder:
+rule_reputation_herder:
   name: "ReputationHerder"
   class: "examples.HerdingInformation.Rule.players:ReputationHerder"
   num_instances: 3
   config:
-    identity: "reputationherder"
+    identity: "rule_reputation_herder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -63,12 +63,12 @@ reputationherder:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-independentthinker:
+rule_independent_thinker:
   name: "IndependentThinker"
   class: "examples.HerdingInformation.Rule.players:IndependentThinker"
   num_instances: 2
   config:
-    identity: "independentthinker"
+    identity: "rule_independent_thinker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -84,12 +84,12 @@ independentthinker:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-contrarian:
+rule_contrarian:
   name: "Contrarian"
   class: "examples.HerdingInformation.Rule.players:Contrarian"
   num_instances: 1
   config:
-    identity: "contrarian"
+    identity: "rule_contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -105,12 +105,12 @@ contrarian:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.HerdingInformation.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

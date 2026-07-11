@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-stablecoinholder:
+rule_stablecoin_holder:
   name: "StablecoinHolder"
   class: "examples.LUNACollapse.Rule.players:StablecoinHolder"
   num_instances: 3
   config:
-    identity: "stablecoinholder"
+    identity: "rule_stablecoin_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -41,12 +41,12 @@ stablecoinholder:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-arbitrageur:
+rule_arbitrageur:
   name: "Arbitrageur"
   class: "examples.LUNACollapse.Rule.players:Arbitrageur"
   num_instances: 2
   config:
-    identity: "arbitrageur"
+    identity: "rule_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -62,12 +62,12 @@ arbitrageur:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-defilender:
+rule_de_fi_lender:
   name: "DeFiLender"
   class: "examples.LUNACollapse.Rule.players:DeFiLender"
   num_instances: 2
   config:
-    identity: "defilender"
+    identity: "rule_de_fi_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -83,12 +83,12 @@ defilender:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-anchordepositor:
+rule_anchor_depositor:
   name: "AnchorDepositor"
   class: "examples.LUNACollapse.Rule.players:AnchorDepositor"
   num_instances: 2
   config:
-    identity: "anchordepositor"
+    identity: "rule_anchor_depositor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -104,12 +104,12 @@ anchordepositor:
       yield_threshold: 0.05
   persona: !include persona.yml
 
-valuebuyer:
+rule_value_buyer:
   name: "ValueBuyer"
   class: "examples.LUNACollapse.Rule.players:ValueBuyer"
   num_instances: 1
   config:
-    identity: "valuebuyer"
+    identity: "rule_value_buyer"
     role: player
     steps_per_turn: 1
     group_tags:

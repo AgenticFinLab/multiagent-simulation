@@ -40,13 +40,13 @@ market:
       custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
-disposition_investor:
+rule_disposition_investor:
   name: "Disposition Investor"
   class: "examples.DispositionEffect.Rule.players:DispositionInvestor"
-  # Expander → disposition_investor_1, disposition_investor_2
+  # Expander → rule_disposition_investor_1, rule_disposition_investor_2
   num_instances: 50
   config:
-    identity: "disposition_investor"
+    identity: "rule_disposition_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,13 +78,13 @@ disposition_investor:
       minimum_trade_quantity: 0.5  # Source: implementation granularity constraint
   persona: !include persona.yml
 
-rational_investor:
+rule_rational_investor:
   name: "Rational Investor"
   class: "examples.DispositionEffect.Rule.players:RationalInvestor"
-  # Expander → rational_investor_1, rational_investor_2
+  # Expander → rule_rational_investor_1, rule_rational_investor_2
   num_instances: 2
   config:
-    identity: "rational_investor"
+    identity: "rule_rational_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -102,13 +102,13 @@ rational_investor:
       rebalance_speed: 0.5  # Source: simulation-bases.md §4.2.4
   persona: !include persona.yml
 
-tax_aware_investor:
+rule_tax_aware_investor:
   name: "Tax Aware Investor"
   class: "examples.DispositionEffect.Rule.players:TaxAwareInvestor"
-  # Expander → tax_aware_investor_1, tax_aware_investor_2
+  # Expander → rule_tax_aware_investor_1, rule_tax_aware_investor_2
   num_instances: 2
   config:
-    identity: "tax_aware_investor"
+    identity: "rule_tax_aware_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -129,12 +129,12 @@ tax_aware_investor:
       tax_harvest_fraction: 0.5  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
-index_holder:
+rule_index_holder:
   name: "Index Holder"
   class: "examples.DispositionEffect.Rule.players:IndexHolder"
   num_instances: 1
   config:
-    identity: "index_holder"
+    identity: "rule_index_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -149,12 +149,12 @@ index_holder:
       custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
-institutional_investor:
+rule_institutional_investor:
   name: "Institutional Investor"
   class: "examples.DispositionEffect.Rule.players:InstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "institutional_investor"
+    identity: "rule_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:

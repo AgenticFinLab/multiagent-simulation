@@ -42,12 +42,12 @@ market:
       custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-macrohedgefund:
+ragllm_macro_hedge_fund:
   name: "MacroHedgeFund"
   class: "examples.SorosPound.Rag.players:RagLLMMacroHedgeFund"
   num_instances: 2                                                # Source: target §7 MacroHedgeFund population
   config:
-    identity: "macrohedgefund"
+    identity: "ragllm_macro_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -89,12 +89,12 @@ macrohedgefund:
           max_tokens: 600
   persona: !include persona.yml
 
-pegdefender:
+ragllm_peg_defender:
   name: "PegDefender"
   class: "examples.SorosPound.Rag.players:RagLLMPegDefender"
   num_instances: 1                                                # Source: target §7 PegDefender population
   config:
-    identity: "pegdefender"
+    identity: "ragllm_peg_defender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ pegdefender:
           max_tokens: 600
   persona: !include persona.yml
 
-convergencetrader:
+ragllm_convergence_trader:
   name: "ConvergenceTrader"
   class: "examples.SorosPound.Rag.players:RagLLMConvergenceTrader"
   num_instances: 2                                                # Source: target §7 ConvergenceTrader population
   config:
-    identity: "convergencetrader"
+    identity: "ragllm_convergence_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -183,12 +183,12 @@ convergencetrader:
           max_tokens: 600
   persona: !include persona.yml
 
-opportunistictrader:
+ragllm_opportunistic_trader:
   name: "OpportunisticTrader"
   class: "examples.SorosPound.Rag.players:RagLLMOpportunisticTrader"
   num_instances: 2                                                # Source: target §7 OpportunisticTrader population
   config:
-    identity: "opportunistictrader"
+    identity: "ragllm_opportunistic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -230,12 +230,12 @@ opportunistictrader:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SorosPound.Rag.players:RagLLMNoiseTrader"
   num_instances: 2                                                # Source: target §7 NoiseTrader population
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -29,12 +29,12 @@ market:
   persona: !include persona.yml
 
 # RuleLLM Momentum Investor (Trend Following)
-rulellm_momentum:
+rulellm_momentum_investor:
   name: "RuleLLM Momentum Investor"
   class: "examples.HerdEffect.RuleLLM.players:RuleLLMMomentumInvestor"
   num_instances: 3
   config:
-    identity: "rulellm_momentum"
+    identity: "rulellm_momentum_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -56,12 +56,12 @@ rulellm_momentum:
   persona: !include persona.yml
 
 # RuleLLM Contrarian Investor (Value/Mean Reversion)
-rulellm_contrarian:
+rulellm_contrarian_investor:
   name: "RuleLLM Contrarian Investor"
   class: "examples.HerdEffect.RuleLLM.players:RuleLLMContrarianInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_contrarian"
+    identity: "rulellm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -83,12 +83,12 @@ rulellm_contrarian:
   persona: !include persona.yml
 
 # RuleLLM Risk Averse Investor (Variance Sensitive)
-rulellm_risk_averse:
+rulellm_risk_averse_investor:
   name: "RuleLLM Risk Averse Investor"
   class: "examples.HerdEffect.RuleLLM.players:RuleLLMRiskAverseInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_risk_averse"
+    identity: "rulellm_risk_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -110,12 +110,12 @@ rulellm_risk_averse:
   persona: !include persona.yml
 
 # RuleLLM Aggressive Investor (Acceleration Momentum)
-rulellm_aggressive:
+rulellm_aggressive_investor:
   name: "RuleLLM Aggressive Investor"
   class: "examples.HerdEffect.RuleLLM.players:RuleLLMAggressiveInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_aggressive"
+    identity: "rulellm_aggressive_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -137,12 +137,12 @@ rulellm_aggressive:
   persona: !include persona.yml
 
 # RuleLLM Noise Trader (Random Trading)
-rulellm_noise:
+rulellm_noise_trader:
   name: "RuleLLM Noise Trader"
   class: "examples.HerdEffect.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "rulellm_noise"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

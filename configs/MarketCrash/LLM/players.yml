@@ -51,13 +51,13 @@ llm_panic_seller:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_risk_parity:
+llm_risk_parity_fund:
   name: "LLM Risk Parity Fund"
   class: "examples.MarketCrash.LLM.players:LLMRiskParityFund"
   # Expander → llm_risk_parity_1, llm_risk_parity_2
   num_instances: 2
   config:
-    identity: "llm_risk_parity"
+    identity: "llm_risk_parity_fund"
     role: player
     steps_per_turn: 1
     group_tags:

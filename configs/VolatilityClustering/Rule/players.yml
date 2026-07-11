@@ -44,13 +44,13 @@ market:
 # -----------------------------------------------------------------------------
 # Fundamentalist - Slow Mean Reversion
 # -----------------------------------------------------------------------------
-fundamentalist:
+rule_fundamentalist:
   name: "Fundamentalist Investor"
   class: "examples.VolatilityClustering.Rule.players:Fundamentalist"
   # Expander → fundamentalist_1, fundamentalist_2
   num_instances: 2
   config:
-    identity: "fundamentalist"
+    identity: "rule_fundamentalist"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -70,13 +70,13 @@ fundamentalist:
 # -----------------------------------------------------------------------------
 # Trend Followers (Multiple for stronger effect)
 # -----------------------------------------------------------------------------
-trend_follower:
+rule_trend_follower:
   name: "Trend Follower"
   class: "examples.VolatilityClustering.Rule.players:TrendFollower"
   # Expander → trend_follower_1, trend_follower_2, trend_follower_3
   num_instances: 3
   config:
-    identity: "trend_follower"
+    identity: "rule_trend_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -97,13 +97,13 @@ trend_follower:
 # -----------------------------------------------------------------------------
 # Noise Traders
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.VolatilityClustering.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2, noise_trader_3
   num_instances: 3
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -121,12 +121,12 @@ noise_trader:
 # -----------------------------------------------------------------------------
 # Slow Adapter
 # -----------------------------------------------------------------------------
-slow_adapter:
+rule_slow_adapter:
   name: "Slow Adapter"
   class: "examples.VolatilityClustering.Rule.players:SlowAdapter"
   num_instances: 1
   config:
-    identity: "slow_adapter"
+    identity: "rule_slow_adapter"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -145,12 +145,12 @@ slow_adapter:
 # -----------------------------------------------------------------------------
 # Volatility Trader
 # -----------------------------------------------------------------------------
-volatility_trader:
+rule_volatility_trader:
   name: "Volatility Trader"
   class: "examples.VolatilityClustering.Rule.players:VolatilityTrader"
   num_instances: 1
   config:
-    identity: "volatility_trader"
+    identity: "rule_volatility_trader"
     role: player
     steps_per_turn: 1
     group_tags:

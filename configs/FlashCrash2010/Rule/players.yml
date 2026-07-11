@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hftmarketmaker:
+rule_hft_market_maker:
   name: "HFTMarketMaker"
   class: "examples.FlashCrash2010.Rule.players:HFTMarketMaker"
   num_instances: 3
   config:
-    identity: "hftmarketmaker"
+    identity: "rule_hft_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -45,12 +45,12 @@ hftmarketmaker:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-momentumchaser:
+rule_momentum_chaser:
   name: "MomentumChaser"
   class: "examples.FlashCrash2010.Rule.players:MomentumChaser"
   num_instances: 2
   config:
-    identity: "momentumchaser"
+    identity: "rule_momentum_chaser"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -68,12 +68,12 @@ momentumchaser:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-fundamentaltrader:
+rule_fundamental_trader:
   name: "FundamentalTrader"
   class: "examples.FlashCrash2010.Rule.players:FundamentalTrader"
   num_instances: 2
   config:
-    identity: "fundamentaltrader"
+    identity: "rule_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -89,12 +89,12 @@ fundamentaltrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-stoplosstrader:
+rule_stop_loss_trader:
   name: "StopLossTrader"
   class: "examples.FlashCrash2010.Rule.players:StopLossTrader"
   num_instances: 3
   config:
-    identity: "stoplosstrader"
+    identity: "rule_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -111,12 +111,12 @@ stoplosstrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.FlashCrash2010.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

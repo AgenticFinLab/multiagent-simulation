@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-patternmatcher:
+rule_pattern_matcher:
   name: "PatternMatcher"
   class: "examples.RepresentativenessBias.Rule.players:PatternMatcher"
   num_instances: 2
   config:
-    identity: "patternmatcher"
+    identity: "rule_pattern_matcher"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -43,12 +43,12 @@ patternmatcher:
       pattern_sensitivity: 1.0
   persona: !include persona.yml
 
-categoryovergeneralizer:
+rule_category_overgeneralizer:
   name: "CategoryOvergeneralizer"
   class: "examples.RepresentativenessBias.Rule.players:CategoryOvergeneralizer"
   num_instances: 2
   config:
-    identity: "categoryovergeneralizer"
+    identity: "rule_category_overgeneralizer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,12 +66,12 @@ categoryovergeneralizer:
       sample_bias: 0.7
   persona: !include persona.yml
 
-bayesianupdater:
+rule_bayesian_updater:
   name: "BayesianUpdater"
   class: "examples.RepresentativenessBias.Rule.players:BayesianUpdater"
   num_instances: 1
   config:
-    identity: "bayesianupdater"
+    identity: "rule_bayesian_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -88,12 +88,12 @@ bayesianupdater:
       evidence_weight: 0.4
   persona: !include persona.yml
 
-contrarianstatistical:
+rule_contrarian_statistical:
   name: "ContrarianStatistical"
   class: "examples.RepresentativenessBias.Rule.players:ContrarianStatistical"
   num_instances: 1
   config:
-    identity: "contrarianstatistical"
+    identity: "rule_contrarian_statistical"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -110,12 +110,12 @@ contrarianstatistical:
       position_size: 500
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.RepresentativenessBias.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

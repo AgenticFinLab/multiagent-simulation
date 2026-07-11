@@ -22,12 +22,12 @@ market:
       custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row; runtime hot-state cap
   persona: !include persona.yml
 
-macrohedgefund:
+rule_macro_hedge_fund:
   name: "MacroHedgeFund"
   class: "examples.SorosPound.Rule.players:MacroHedgeFund"
   num_instances: 2                                                # Source: target §7 MacroHedgeFund population
   config:
-    identity: "macrohedgefund"
+    identity: "rule_macro_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -43,12 +43,12 @@ macrohedgefund:
       custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-pegdefender:
+rule_peg_defender:
   name: "PegDefender"
   class: "examples.SorosPound.Rule.players:PegDefender"
   num_instances: 1                                                # Source: target §7 PegDefender population
   config:
-    identity: "pegdefender"
+    identity: "rule_peg_defender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -64,12 +64,12 @@ pegdefender:
       custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-convergencetrader:
+rule_convergence_trader:
   name: "ConvergenceTrader"
   class: "examples.SorosPound.Rule.players:ConvergenceTrader"
   num_instances: 2                                                # Source: target §7 ConvergenceTrader population
   config:
-    identity: "convergencetrader"
+    identity: "rule_convergence_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -85,12 +85,12 @@ convergencetrader:
       custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-opportunistictrader:
+rule_opportunistic_trader:
   name: "OpportunisticTrader"
   class: "examples.SorosPound.Rule.players:OpportunisticTrader"
   num_instances: 2                                                # Source: target §7 OpportunisticTrader population
   config:
-    identity: "opportunistictrader"
+    identity: "rule_opportunistic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -106,12 +106,12 @@ opportunistictrader:
       custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.SorosPound.Rule.players:NoiseTrader"
   num_instances: 2                                                # Source: target §7 NoiseTrader population
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

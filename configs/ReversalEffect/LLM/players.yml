@@ -22,13 +22,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-llm_contrarian:
+llm_contrarian_investor:
   name: "LLM Contrarian Investor"
   class: "examples.ReversalEffect.LLM.players:LLMContrarianInvestor"
   # Expander → llm_contrarian_1, llm_contrarian_2, llm_contrarian_3
   num_instances: 3
   config:
-    identity: "llm_contrarian"
+    identity: "llm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -48,13 +48,13 @@ llm_contrarian:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_overconfident:
+llm_overconfident_trader:
   name: "LLM Overconfident Trader"
   class: "examples.ReversalEffect.LLM.players:LLMOverconfidentTrader"
   # Expander → llm_overconfident_1, llm_overconfident_2, llm_overconfident_3
   num_instances: 3
   config:
-    identity: "llm_overconfident"
+    identity: "llm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -74,13 +74,13 @@ llm_overconfident:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_value:
+llm_value_investor:
   name: "LLM Value Investor"
   class: "examples.ReversalEffect.LLM.players:LLMValueInvestor"
   # Expander → llm_value_1, llm_value_2
   num_instances: 2
   config:
-    identity: "llm_value"
+    identity: "llm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -126,13 +126,13 @@ llm_momentum_chaser:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_noise:
+llm_noise_trader:
   name: "LLM Noise Trader"
   class: "examples.ReversalEffect.LLM.players:LLMNoiseTrader"
   # Expander → llm_noise_1, llm_noise_2
   num_instances: 2
   config:
-    identity: "llm_noise"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

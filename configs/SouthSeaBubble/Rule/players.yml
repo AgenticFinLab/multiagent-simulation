@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-insideradvantaged:
+rule_insider_advantaged:
   name: "InsiderAdvantaged"
   class: "examples.SouthSeaBubble.Rule.players:InsiderAdvantaged"
   num_instances: 2  # Source: target §9 insideradvantaged.num_instances row
   config:
-    identity: "insideradvantaged"
+    identity: "rule_insider_advantaged"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -42,12 +42,12 @@ insideradvantaged:
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-narrativebeliever:
+rule_narrative_believer:
   name: "NarrativeBeliever"
   class: "examples.SouthSeaBubble.Rule.players:NarrativeBeliever"
   num_instances: 3  # Source: target §9 narrativebeliever.num_instances row
   config:
-    identity: "narrativebeliever"
+    identity: "rule_narrative_believer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -63,12 +63,12 @@ narrativebeliever:
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-skepticalanalyst:
+rule_skeptical_analyst:
   name: "SkepticalAnalyst"
   class: "examples.SouthSeaBubble.Rule.players:SkepticalAnalyst"
   num_instances: 2  # Source: target §9 skepticalanalyst.num_instances row
   config:
-    identity: "skepticalanalyst"
+    identity: "rule_skeptical_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -84,12 +84,12 @@ skepticalanalyst:
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-arbitrageur:
+rule_arbitrageur:
   name: "Arbitrageur"
   class: "examples.SouthSeaBubble.Rule.players:Arbitrageur"
   num_instances: 2  # Source: target §9 arbitrageur.num_instances row
   config:
-    identity: "arbitrageur"
+    identity: "rule_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -105,12 +105,12 @@ arbitrageur:
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.SouthSeaBubble.Rule.players:NoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances row
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

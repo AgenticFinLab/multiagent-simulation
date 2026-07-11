@@ -33,12 +33,12 @@ market:
 # Pro-Cyclical Lenders — amplify credit expansion and contraction
 # Theory: Adrian & Shin (2010) — VaR-based pro-cyclical leverage
 # -----------------------------------------------------------------------------
-procyclicallender:
+rule_pro_cyclical_lender:
   name: "ProCyclicalLender"
   class: "examples.CreditCycle.Rule.players:ProCyclicalLender"
   num_instances: 2
   config:
-    identity: "procyclicallender"
+    identity: "rule_pro_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -61,12 +61,12 @@ procyclicallender:
 # Minsky Borrowers — cycle through hedge→speculative→Ponzi financing
 # Theory: Minsky (1986) — Financial Instability Hypothesis
 # -----------------------------------------------------------------------------
-minskyborrower:
+rule_minsky_borrower:
   name: "MinskyBorrower"
   class: "examples.CreditCycle.Rule.players:MinskyBorrower"
   num_instances: 2
   config:
-    identity: "minskyborrower"
+    identity: "rule_minsky_borrower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -92,12 +92,12 @@ minskyborrower:
 # Counter-Cyclical Lenders — provide stabilizing credit in downturns
 # Theory: Geanakoplos (2010) — Leverage Cycle / counter-cyclical capital
 # -----------------------------------------------------------------------------
-countercyclicallender:
+rule_counter_cyclical_lender:
   name: "CounterCyclicalLender"
   class: "examples.CreditCycle.Rule.players:CounterCyclicalLender"
   num_instances: 1
   config:
-    identity: "countercyclicallender"
+    identity: "rule_counter_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -119,12 +119,12 @@ countercyclicallender:
 # Value Investors — fundamental anchors
 # Theory: Graham (1949) — The Intelligent Investor
 # -----------------------------------------------------------------------------
-valueinvestor:
+rule_value_investor:
   name: "ValueInvestor"
   class: "examples.CreditCycle.Rule.players:ValueInvestor"
   num_instances: 1
   config:
-    identity: "valueinvestor"
+    identity: "rule_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -144,12 +144,12 @@ valueinvestor:
 # Noise Traders — random background liquidity
 # Theory: Black (1986) — Noise
 # -----------------------------------------------------------------------------
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.CreditCycle.Rule.players:NoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

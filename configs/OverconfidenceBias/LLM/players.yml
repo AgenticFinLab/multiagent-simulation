@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-overconfidenttrader:
+llm_overconfident_trader:
   name: "OverconfidentTrader"
   class: "examples.OverconfidenceBias.LLM.players:LLMOverconfidentTrader"
   num_instances: 2
   config:
-    identity: "overconfidenttrader"
+    identity: "llm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ overconfidenttrader:
           max_tokens: 512
   persona: !include persona.yml
 
-selfattributor:
+llm_self_attributor:
   name: "SelfAttributor"
   class: "examples.OverconfidenceBias.LLM.players:LLMSelfAttributor"
   num_instances: 2
   config:
-    identity: "selfattributor"
+    identity: "llm_self_attributor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ selfattributor:
           max_tokens: 512
   persona: !include persona.yml
 
-calibratedtrader:
+llm_calibrated_trader:
   name: "CalibratedTrader"
   class: "examples.OverconfidenceBias.LLM.players:LLMCalibratedTrader"
   num_instances: 1
   config:
-    identity: "calibratedtrader"
+    identity: "llm_calibrated_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ calibratedtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarianinvestor:
+llm_contrarian_investor:
   name: "ContrarianInvestor"
   class: "examples.OverconfidenceBias.LLM.players:LLMContrarianInvestor"
   num_instances: 1
   config:
-    identity: "contrarianinvestor"
+    identity: "llm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ contrarianinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.OverconfidenceBias.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

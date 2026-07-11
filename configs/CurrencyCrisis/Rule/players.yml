@@ -22,12 +22,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-speculativeattacker:
+rule_speculative_attacker:
   name: "SpeculativeAttacker"
   class: "examples.CurrencyCrisis.Rule.players:SpeculativeAttacker"
   num_instances: 2
   config:
-    identity: "speculativeattacker"
+    identity: "rule_speculative_attacker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -42,12 +42,12 @@ speculativeattacker:
       order_size: 600
   persona: !include persona.yml
 
-selffulfillingtrader:
+rule_self_fulfilling_trader:
   name: "SelfFulfillingTrader"
   class: "examples.CurrencyCrisis.Rule.players:SelfFulfillingTrader"
   num_instances: 2
   config:
-    identity: "selffulfillingtrader"
+    identity: "rule_self_fulfilling_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -63,12 +63,12 @@ selffulfillingtrader:
       order_size: 700
   persona: !include persona.yml
 
-centralbankdefender:
+rule_central_bank_defender:
   name: "CentralBankDefender"
   class: "examples.CurrencyCrisis.Rule.players:CentralBankDefender"
   num_instances: 1
   config:
-    identity: "centralbankdefender"
+    identity: "rule_central_bank_defender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -83,12 +83,12 @@ centralbankdefender:
       order_size: 500
   persona: !include persona.yml
 
-fundamentalhedger:
+rule_fundamental_hedger:
   name: "FundamentalHedger"
   class: "examples.CurrencyCrisis.Rule.players:FundamentalHedger"
   num_instances: 1
   config:
-    identity: "fundamentalhedger"
+    identity: "rule_fundamental_hedger"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -103,12 +103,12 @@ fundamentalhedger:
       order_size: 400
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.CurrencyCrisis.Rule.players:NoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

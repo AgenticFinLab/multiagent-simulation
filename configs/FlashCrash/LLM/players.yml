@@ -25,13 +25,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-llm_hft:
+llm_high_frequency_trader:
   name: "LLM High-Frequency Trader"
   class: "examples.FlashCrash.LLM.players:LLMHighFrequencyTrader"
   # Expander → llm_hft_1, llm_hft_2, llm_hft_3
   num_instances: 3
   config:
-    identity: "llm_hft"
+    identity: "llm_high_frequency_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -51,13 +51,13 @@ llm_hft:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_market_maker:
+llm_flash_market_maker:
   name: "LLM Market Maker"
   class: "examples.FlashCrash.LLM.players:LLMFlashMarketMaker"
   # Expander → llm_market_maker_1, llm_market_maker_2, llm_market_maker_3
   num_instances: 3
   config:
-    identity: "llm_market_maker"
+    identity: "llm_flash_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -77,13 +77,13 @@ llm_market_maker:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_stop_loss:
+llm_stop_loss_trader:
   name: "LLM Stop-Loss Trader"
   class: "examples.FlashCrash.LLM.players:LLMStopLossTrader"
   # Expander → llm_stop_loss_1, llm_stop_loss_2, llm_stop_loss_3
   num_instances: 3
   config:
-    identity: "llm_stop_loss"
+    identity: "llm_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -103,13 +103,13 @@ llm_stop_loss:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_fundamental:
+llm_fundamental_trader:
   name: "LLM Fundamental Trader"
   class: "examples.FlashCrash.LLM.players:LLMFundamentalTrader"
   # Expander → llm_fundamental_1, llm_fundamental_2
   num_instances: 2
   config:
-    identity: "llm_fundamental"
+    identity: "llm_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -129,13 +129,13 @@ llm_fundamental:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_algo:
+llm_algorithmic_trader:
   name: "LLM Algorithmic Trader"
   class: "examples.FlashCrash.LLM.players:LLMAlgorithmicTrader"
   # Expander → llm_algo_1, llm_algo_2
   num_instances: 2
   config:
-    identity: "llm_algo"
+    identity: "llm_algorithmic_trader"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -4,18 +4,18 @@ sources:
 
 connections:
   market:
-    - sunkcostholder
-    - commitmentescalator
-    - rationalcutter
-    - opportunitycosttrader
-    - noisetrader
-  sunkcostholder:
+    - ragllm_sunk_cost_holder
+    - ragllm_commitment_escalator
+    - ragllm_rational_cutter
+    - ragllm_opportunity_cost_trader
+    - ragllm_noise_trader
+  ragllm_sunk_cost_holder:
     - market
-  commitmentescalator:
+  ragllm_commitment_escalator:
     - market
-  rationalcutter:
+  ragllm_rational_cutter:
     - market
-  opportunitycosttrader:
+  ragllm_opportunity_cost_trader:
     - market
-  noisetrader:
+  ragllm_noise_trader:
     - market

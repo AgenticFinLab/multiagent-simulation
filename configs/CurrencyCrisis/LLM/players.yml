@@ -22,12 +22,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-speculativeattacker:
+llm_speculative_attacker:
   name: "SpeculativeAttacker"
   class: "examples.CurrencyCrisis.LLM.players:LLMSpeculativeAttacker"
   num_instances: 2
   config:
-    identity: "speculativeattacker"
+    identity: "llm_speculative_attacker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ speculativeattacker:
           max_tokens: 512
   persona: !include persona.yml
 
-selffulfillingtrader:
+llm_self_fulfilling_trader:
   name: "SelfFulfillingTrader"
   class: "examples.CurrencyCrisis.LLM.players:LLMSelfFulfillingTrader"
   num_instances: 2
   config:
-    identity: "selffulfillingtrader"
+    identity: "llm_self_fulfilling_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -77,12 +77,12 @@ selffulfillingtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-centralbankdefender:
+llm_central_bank_defender:
   name: "CentralBankDefender"
   class: "examples.CurrencyCrisis.LLM.players:LLMCentralBankDefender"
   num_instances: 1
   config:
-    identity: "centralbankdefender"
+    identity: "llm_central_bank_defender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -104,12 +104,12 @@ centralbankdefender:
           max_tokens: 512
   persona: !include persona.yml
 
-fundamentalhedger:
+llm_fundamental_hedger:
   name: "FundamentalHedger"
   class: "examples.CurrencyCrisis.LLM.players:LLMFundamentalHedger"
   num_instances: 1
   config:
-    identity: "fundamentalhedger"
+    identity: "llm_fundamental_hedger"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -131,12 +131,12 @@ fundamentalhedger:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CurrencyCrisis.LLM.players:LLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

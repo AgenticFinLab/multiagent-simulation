@@ -15,13 +15,13 @@ market:
       mean_reversion: 0.01  # Source: target §9 market.extras.mean_reversion row; Bagehot (1873) via Freixas et al. (2000), 10.1023/A:1026527607455
       noise_std: 0.015  # Source: target §9 market.extras.noise_std row; Rule/players.py Market.perceive
 
-depositor:
+rule_depositor:
   name: "Depositor"
   class: "examples.SVBBankRun.Rule.players:Depositor"
   num_instances: 4  # Source: target §9 depositor.num_instances row
   persona: !include persona.yml
   config:
-    identity: "depositor"
+    identity: "rule_depositor"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -35,13 +35,13 @@ depositor:
       base_size: 300  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-socialmediainfluencer:
+rule_social_media_influencer:
   name: "SocialMediaInfluencer"
   class: "examples.SVBBankRun.Rule.players:SocialMediaInfluencer"
   num_instances: 2  # Source: target §9 socialmediainfluencer.num_instances row
   persona: !include persona.yml
   config:
-    identity: "socialmediainfluencer"
+    identity: "rule_social_media_influencer"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -54,13 +54,13 @@ socialmediainfluencer:
       base_size: 500  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-bankmanager:
+rule_bank_manager:
   name: "BankManager"
   class: "examples.SVBBankRun.Rule.players:BankManager"
   num_instances: 2  # Source: target §9 bankmanager.num_instances row
   persona: !include persona.yml
   config:
-    identity: "bankmanager"
+    identity: "rule_bank_manager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -73,13 +73,13 @@ bankmanager:
       stabilize_size: 400  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-regulator:
+rule_regulator:
   name: "Regulator"
   class: "examples.SVBBankRun.Rule.players:Regulator"
   num_instances: 1  # Source: target §9 regulator.num_instances row
   persona: !include persona.yml
   config:
-    identity: "regulator"
+    identity: "rule_regulator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -93,13 +93,13 @@ regulator:
       intervention_size: 2000  # Source: target §9 regulator.extras.intervention_size row (config extra; runtime code uses literal 2000)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-bondtrader:
+rule_bond_trader:
   name: "BondTrader"
   class: "examples.SVBBankRun.Rule.players:BondTrader"
   num_instances: 2  # Source: target §9 bondtrader.num_instances row
   persona: !include persona.yml
   config:
-    identity: "bondtrader"
+    identity: "rule_bond_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

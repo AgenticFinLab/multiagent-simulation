@@ -11,27 +11,27 @@ sources:
 
 connections:
   market:
-    - rulellm_momentum
-    - rulellm_arbitrageur
-    - rulellm_noise
-    - rulellm_value
-    - rulellm_leveraged
-    - rulellm_conservative
+    - rulellm_momentum_speculator
+    - rulellm_rational_arbitrageur
+    - rulellm_noise_trader
+    - rulellm_value_investor
+    - rulellm_leveraged_buyer
+    - rulellm_conservative_holder
 
-  rulellm_momentum:
+  rulellm_momentum_speculator:
     - market
 
-  rulellm_arbitrageur:
+  rulellm_rational_arbitrageur:
     - market
 
-  rulellm_noise:
+  rulellm_noise_trader:
     - market
 
-  rulellm_value:
+  rulellm_value_investor:
     - market
 
-  rulellm_leveraged:
+  rulellm_leveraged_buyer:
     - market
 
-  rulellm_conservative:
+  rulellm_conservative_holder:
     - market

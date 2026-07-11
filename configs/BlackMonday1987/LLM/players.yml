@@ -33,13 +33,13 @@ market:
 # Portfolio Insurers — LLM with mechanical hedger persona
 # Theory: Leland & Rubinstein (1976), Brady Commission (1988)
 # -----------------------------------------------------------------------------
-portfolio_insurer:
+llm_portfolio_insurer:
   name: "Portfolio Insurer"
   class: "examples.BlackMonday1987.LLM.players:LLMPortfolioInsurer"
   # Expander → portfolio_insurer_1, portfolio_insurer_2
   num_instances: 2
   config:
-    identity: "portfolio_insurer"
+    identity: "llm_portfolio_insurer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -63,13 +63,13 @@ portfolio_insurer:
 # Index Arbitrageurs — LLM with futures-spot spread persona
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-index_arbitrageur:
+llm_index_arbitrageur:
   name: "Index Arbitrageur"
   class: "examples.BlackMonday1987.LLM.players:LLMIndexArbitrageur"
   # Expander → index_arbitrageur_1, index_arbitrageur_2
   num_instances: 2
   config:
-    identity: "index_arbitrageur"
+    identity: "llm_index_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -93,13 +93,13 @@ index_arbitrageur:
 # Program Traders — LLM with automated sell program persona
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-program_trader:
+llm_program_trader:
   name: "Program Trader"
   class: "examples.BlackMonday1987.LLM.players:LLMProgramTrader"
   # Expander → program_trader_1, program_trader_2
   num_instances: 2
   config:
-    identity: "program_trader"
+    identity: "llm_program_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -123,12 +123,12 @@ program_trader:
 # Value Investors — LLM with fundamental analysis persona (benchmark)
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-value_investor:
+llm_value_investor:
   name: "Value Investor"
   class: "examples.BlackMonday1987.LLM.players:LLMValueInvestor"
   num_instances: 1
   config:
-    identity: "value_investor"
+    identity: "llm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -152,13 +152,13 @@ value_investor:
 # Noise Traders — LLM with casual random-trader persona
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+llm_noise_trader:
   name: "Noise Trader"
   class: "examples.BlackMonday1987.LLM.players:LLMNoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

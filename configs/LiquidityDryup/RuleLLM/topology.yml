@@ -12,7 +12,7 @@ connections:
     - rulellm_market_maker
     - rulellm_liquidity_demander
     - rulellm_arbitrageur
-    - rulellm_value
+    - rulellm_value_investor
     - rulellm_forced_seller
 
   rulellm_market_maker:
@@ -21,7 +21,7 @@ connections:
     - market
   rulellm_arbitrageur:
     - market
-  rulellm_value:
+  rulellm_value_investor:
     - market
   rulellm_forced_seller:
     - market

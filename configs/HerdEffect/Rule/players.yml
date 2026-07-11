@@ -46,13 +46,13 @@ market:
 # Investors (5 types - NO HerdingInvestor for emergent model)
 # -----------------------------------------------------------------------------
 
-investor_momentum:
+rule_momentum_investor:
   name: "Momentum Investor"
   class: "examples.HerdEffect.Rule.players:MomentumInvestor"
   # Expander → investor_momentum_1, investor_momentum_2
   num_instances: 2
   config:
-    identity: "investor_momentum"
+    identity: "rule_momentum_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -70,13 +70,13 @@ investor_momentum:
       beta: 0.3
   persona: !include persona.yml
 
-investor_contrarian:
+rule_contrarian_investor:
   name: "Contrarian Investor"
   class: "examples.HerdEffect.Rule.players:ContrarianInvestor"
   # Expander → investor_contrarian_1, investor_contrarian_2
   num_instances: 2
   config:
-    identity: "investor_contrarian"
+    identity: "rule_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -98,13 +98,13 @@ investor_contrarian:
 # NOTE: HerdingInvestor REMOVED for Emergent Herding Model
 # Herding behavior now emerges from Momentum + Aggressive interaction
 
-investor_risk_averse:
+rule_risk_averse_investor:
   name: "Risk Averse Investor"
   class: "examples.HerdEffect.Rule.players:RiskAverseInvestor"
   # Expander → investor_risk_averse_1, investor_risk_averse_2
   num_instances: 2
   config:
-    identity: "investor_risk_averse"
+    identity: "rule_risk_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -122,13 +122,13 @@ investor_risk_averse:
       lookback: 5
   persona: !include persona.yml
 
-investor_aggressive:
+rule_aggressive_investor:
   name: "Aggressive Investor"
   class: "examples.HerdEffect.Rule.players:AggressiveInvestor"
   # Expander → investor_aggressive_1, investor_aggressive_2
   num_instances: 2
   config:
-    identity: "investor_aggressive"
+    identity: "rule_aggressive_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -148,13 +148,13 @@ investor_aggressive:
       accel_bonus: 0.3
   persona: !include persona.yml
 
-investor_noise:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.HerdEffect.Rule.players:NoiseTrader"
   # Expander → investor_noise_1, investor_noise_2
   num_instances: 2
   config:
-    identity: "investor_noise"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

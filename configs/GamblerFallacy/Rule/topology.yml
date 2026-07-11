@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - streakreversaltrader
-    - hothandtrader
-    - independentassessor
-    - arbitrageur
-    - noisetrader
+    - rule_streak_reversal_trader
+    - rule_hot_hand_trader
+    - rule_independent_assessor
+    - rule_arbitrageur
+    - rule_noise_trader
 
-  streakreversaltrader:
+  rule_streak_reversal_trader:
     - market
 
-  hothandtrader:
+  rule_hot_hand_trader:
     - market
 
-  independentassessor:
+  rule_independent_assessor:
     - market
 
-  arbitrageur:
+  rule_arbitrageur:
     - market
 
-  noisetrader:
+  rule_noise_trader:
     - market

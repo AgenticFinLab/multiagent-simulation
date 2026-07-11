@@ -16,13 +16,13 @@ market:
       mean_reversion: 0.008  # Source: target §9 market.extras.mean_reversion; Garber (1990), 10.1257/jep.4.2.35
       noise_std: 0.015  # Source: target §9 market.extras.noise_std; Rule/players.py Market.perceive
 
-trendchaser:
+rulellm_trend_chaser:
   name: "TrendChaser"
   class: "examples.TulipMania.RuleLLM.players:RuleLLMTrendChaser"
   num_instances: 4  # Source: target §9 trendchaser.num_instances; §7 Agent Roster
   persona: !include ../RuleLLM/persona.yml
   config:
-    identity: "trendchaser"
+    identity: "rulellm_trend_chaser"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -44,13 +44,13 @@ trendchaser:
           temperature: 0.7
           max_tokens: 512
 
-socialprooffollower:
+rulellm_social_proof_follower:
   name: "SocialProofFollower"
   class: "examples.TulipMania.RuleLLM.players:RuleLLMSocialProofFollower"
   num_instances: 3  # Source: target §9 socialprooffollower.num_instances; §7 Agent Roster
   persona: !include ../RuleLLM/persona.yml
   config:
-    identity: "socialprooffollower"
+    identity: "rulellm_social_proof_follower"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -72,13 +72,13 @@ socialprooffollower:
           temperature: 0.7
           max_tokens: 512
 
-intrinsicvaluetrader:
+rulellm_intrinsic_value_trader:
   name: "IntrinsicValueTrader"
   class: "examples.TulipMania.RuleLLM.players:RuleLLMIntrinsicValueTrader"
   num_instances: 2  # Source: target §9 intrinsicvaluetrader.num_instances; §7 Agent Roster
   persona: !include ../RuleLLM/persona.yml
   config:
-    identity: "intrinsicvaluetrader"
+    identity: "rulellm_intrinsic_value_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -100,13 +100,13 @@ intrinsicvaluetrader:
           temperature: 0.7
           max_tokens: 512
 
-earlyexittrader:
+rulellm_early_exit_trader:
   name: "EarlyExitTrader"
   class: "examples.TulipMania.RuleLLM.players:RuleLLMEarlyExitTrader"
   num_instances: 2  # Source: target §9 earlyexittrader.num_instances; §7 Agent Roster
   persona: !include ../RuleLLM/persona.yml
   config:
-    identity: "earlyexittrader"
+    identity: "rulellm_early_exit_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -128,13 +128,13 @@ earlyexittrader:
           temperature: 0.7
           max_tokens: 512
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.TulipMania.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances; §7 Agent Roster
   persona: !include ../RuleLLM/persona.yml
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

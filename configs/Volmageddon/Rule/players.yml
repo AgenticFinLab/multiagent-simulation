@@ -17,13 +17,13 @@ market:
       mean_reversion: 0.03       # Source: target §6 mean_reversion row; Culp, Nozawa & Veronesi (2018) 10.3905/jai.2018.21.2.001
       noise_std: 0.05            # Source: target §6 noise_std row; Engle (1982) 10.2307/1912773
 
-short_vol_trader_1:
+rule_short_vol_trader:
   name: "ShortVolTrader 1"
   class: "examples.Volmageddon.Rule.players:ShortVolTrader"
   num_instances: 2
   persona: !include persona.yml
   config:
-    identity: "short_vol_trader_1"
+    identity: "rule_short_vol_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -34,13 +34,13 @@ short_vol_trader_1:
       fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
       stop_loss: 0.15            # Source: target §6 stop_loss row; Bollerslev (1986) 10.1016/0304-4076(86)90063-1
 
-vol_e_t_n_manager_2:
+rule_vol_etn_manager:
   name: "VolETNManager 2"
   class: "examples.Volmageddon.Rule.players:VolETNManager"
   num_instances: 2
   persona: !include persona.yml
   config:
-    identity: "vol_e_t_n_manager_2"
+    identity: "rule_vol_etn_manager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -52,13 +52,13 @@ vol_e_t_n_manager_2:
       rebalance_size: 10000      # Source: target §6 rebalance_size row; Culp, Nozawa & Veronesi (2018) 10.3905/jai.2018.21.2.001
       rebalance_threshold: 0.05  # Source: target §6 rebalance_threshold row; Brunnermeier & Pedersen (2009) 10.1093/rfs/hhn098
 
-long_vol_hedger_3:
+rule_long_vol_hedger:
   name: "LongVolHedger 3"
   class: "examples.Volmageddon.Rule.players:LongVolHedger"
   num_instances: 1
   persona: !include persona.yml
   config:
-    identity: "long_vol_hedger_3"
+    identity: "rule_long_vol_hedger"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -69,13 +69,13 @@ long_vol_hedger_3:
       fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
       hedge_ratio: 0.1           # Source: target §6 hedge_ratio row; Moreira & Muir (2017) 10.1111/jofi.12575
 
-vol_arbitrageur_4:
+rule_vol_arbitrageur:
   name: "VolArbitrageur 4"
   class: "examples.Volmageddon.Rule.players:VolArbitrageur"
   num_instances: 2
   persona: !include persona.yml
   config:
-    identity: "vol_arbitrageur_4"
+    identity: "rule_vol_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -86,13 +86,13 @@ vol_arbitrageur_4:
       fundamental_value: 15.0    # Source: target §6 fundamental_value row; normalization (scale-only)
       entry_threshold: 0.05      # Source: target §6 entry_threshold row; Shleifer & Vishny (1997) 10.1111/j.1540-6261.1997.tb03807.x
 
-equity_trader_5:
+rule_equity_trader:
   name: "EquityTrader 5"
   class: "examples.Volmageddon.Rule.players:EquityTrader"
   num_instances: 2
   persona: !include persona.yml
   config:
-    identity: "equity_trader_5"
+    identity: "rule_equity_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

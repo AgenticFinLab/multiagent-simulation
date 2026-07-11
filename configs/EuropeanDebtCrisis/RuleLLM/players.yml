@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-peripherybondseller:
+rulellm_periphery_bond_seller:
   name: "PeripheryBondSeller"
   class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMPeripheryBondSeller"
   num_instances: 2
   config:
-    identity: "peripherybondseller"
+    identity: "rulellm_periphery_bond_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -51,12 +51,12 @@ peripherybondseller:
           max_tokens: 512
   persona: !include persona.yml
 
-creditorpanicker:
+rulellm_creditor_panicker:
   name: "CreditorPanicker"
   class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMCreditorPanicker"
   num_instances: 2
   config:
-    identity: "creditorpanicker"
+    identity: "rulellm_creditor_panicker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -81,12 +81,12 @@ creditorpanicker:
           max_tokens: 512
   persona: !include persona.yml
 
-corebondbuyer:
+rulellm_core_bond_buyer:
   name: "CoreBondBuyer"
   class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMCoreBondBuyer"
   num_instances: 1
   config:
-    identity: "corebondbuyer"
+    identity: "rulellm_core_bond_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -111,12 +111,12 @@ corebondbuyer:
           max_tokens: 512
   persona: !include persona.yml
 
-ecbintervenor:
+rulellm_ecb_intervenor:
   name: "ECBIntervenor"
   class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMECBIntervenor"
   num_instances: 1
   config:
-    identity: "ecbintervenor"
+    identity: "rulellm_ecb_intervenor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -141,12 +141,12 @@ ecbintervenor:
           max_tokens: 512
   persona: !include persona.yml
 
-hedgedfund:
+rulellm_hedged_fund:
   name: "HedgedFund"
   class: "examples.EuropeanDebtCrisis.RuleLLM.players:RuleLLMHedgedFund"
   num_instances: 1
   config:
-    identity: "hedgedfund"
+    identity: "rulellm_hedged_fund"
     role: player
     steps_per_turn: 1
     group_tags:

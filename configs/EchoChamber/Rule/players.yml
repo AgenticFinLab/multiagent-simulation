@@ -15,12 +15,12 @@
 # -----------------------------------------------------------------------------
 # OpinionEnvironment (Coordinator)
 # -----------------------------------------------------------------------------
-environment:
+rule_opinion_environment:
   name: "OpinionEnvironment"
   class: "examples.EchoChamber.Rule.players:OpinionEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "rule_opinion_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:
@@ -54,12 +54,12 @@ environment:
 # Ideologues (Primary Polarization Drivers)
 # Split: 3 left-leaning, 3 right-leaning (initial_opinion sign determines lean)
 # -----------------------------------------------------------------------------
-ideologue:
+rule_ideologue:
   name: "Ideologue"
   class: "examples.EchoChamber.Rule.players:Ideologue"
   num_instances: 6
   config:
-    identity: "ideologue"
+    identity: "rule_ideologue"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -88,12 +88,12 @@ ideologue:
 # -----------------------------------------------------------------------------
 # Conformists (Homophily Reinforcers)
 # -----------------------------------------------------------------------------
-conformist:
+rule_conformist:
   name: "Conformist"
   class: "examples.EchoChamber.Rule.players:Conformist"
   num_instances: 5
   config:
-    identity: "conformist"
+    identity: "rule_conformist"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -120,12 +120,12 @@ conformist:
 # -----------------------------------------------------------------------------
 # Critical Thinkers (Evidence Evaluators)
 # -----------------------------------------------------------------------------
-critical_thinker:
+rule_critical_thinker:
   name: "Critical Thinker"
   class: "examples.EchoChamber.Rule.players:CriticalThinker"
   num_instances: 3
   config:
-    identity: "critical_thinker"
+    identity: "rule_critical_thinker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -154,12 +154,12 @@ critical_thinker:
 # -----------------------------------------------------------------------------
 # Bridge Builders (Cross-Group Engagers)
 # -----------------------------------------------------------------------------
-bridge_builder:
+rule_bridge_builder:
   name: "Bridge Builder"
   class: "examples.EchoChamber.Rule.players:BridgeBuilder"
   num_instances: 2
   config:
-    identity: "bridge_builder"
+    identity: "rule_bridge_builder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -190,12 +190,12 @@ bridge_builder:
 # -----------------------------------------------------------------------------
 # Passive Followers (Baseline)
 # -----------------------------------------------------------------------------
-passive_follower:
+rule_passive_follower:
   name: "Passive Follower"
   class: "examples.EchoChamber.Rule.players:PassiveFollower"
   num_instances: 4
   config:
-    identity: "passive_follower"
+    identity: "rule_passive_follower"
     role: player
     steps_per_turn: 1
     group_tags:

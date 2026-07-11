@@ -39,13 +39,13 @@ market:
 # ConcentratedFund — TRS-leveraged position holder (TRS-based)
 # Theory: Total Return Swap Leverage (Becketti, 2021)
 # -----------------------------------------------------------------------------
-concentrated_fund:
+rule_concentrated_fund:
   name: "Concentrated Fund"
   class: "examples.ArchegosCollapse.Rule.players:ConcentratedFund"
   # Expander → concentrated_fund_1, concentrated_fund_2
   num_instances: 2
   config:
-    identity: "concentrated_fund"
+    identity: "rule_concentrated_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -64,12 +64,12 @@ concentrated_fund:
 # PrimeBrokerFirstMover — First-mover liquidator (creates cascade)
 # Theory: Prime broker liquidation race (information asymmetry)
 # -----------------------------------------------------------------------------
-prime_broker_first_mover:
+rule_prime_broker_first_mover:
   name: "Prime Broker (First Mover)"
   class: "examples.ArchegosCollapse.Rule.players:PrimeBrokerFirstMover"
   num_instances: 1
   config:
-    identity: "prime_broker_first_mover"
+    identity: "rule_prime_broker_first_mover"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -89,12 +89,12 @@ prime_broker_first_mover:
 # PrimeBrokerDelayedLiquidator — Second-mover liquidator (delayed, worse prices)
 # Theory: Prime broker competition; cascade amplification
 # -----------------------------------------------------------------------------
-prime_broker_delayed_liquidator:
+rule_prime_broker_delayed_liquidator:
   name: "Prime Broker (Delayed Liquidator)"
   class: "examples.ArchegosCollapse.Rule.players:PrimeBrokerDelayedLiquidator"
   num_instances: 1
   config:
-    identity: "prime_broker_delayed_liquidator"
+    identity: "rule_prime_broker_delayed_liquidator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -114,12 +114,12 @@ prime_broker_delayed_liquidator:
 # BlockTradeBuyer — Opportunistic discount buyer
 # Theory: Opportunistic block trading; stabilizing force
 # -----------------------------------------------------------------------------
-block_trade_buyer:
+rule_block_trade_buyer:
   name: "Block Trade Buyer"
   class: "examples.ArchegosCollapse.Rule.players:BlockTradeBuyer"
   num_instances: 1
   config:
-    identity: "block_trade_buyer"
+    identity: "rule_block_trade_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -138,13 +138,13 @@ block_trade_buyer:
 # InformationTrader — Front-runner detecting liquidation signals
 # Theory: Information-based trading; detection of order flow
 # -----------------------------------------------------------------------------
-information_trader:
+rule_information_trader:
   name: "Information Trader"
   class: "examples.ArchegosCollapse.Rule.players:InformationTrader"
   # Expander → information_trader_1, information_trader_2
   num_instances: 2
   config:
-    identity: "information_trader"
+    identity: "rule_information_trader"
     role: player
     steps_per_turn: 1
     group_tags:

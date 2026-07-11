@@ -39,12 +39,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-mbsoriginator:
+ragllm_mbs_originator:
   name: "MBSOriginator"
   class: "examples.GFC2008.Rag.players:RagLLMMBSOriginator"
   num_instances: 2
   config:
-    identity: "mbsoriginator"
+    identity: "ragllm_mbs_originator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -85,12 +85,12 @@ mbsoriginator:
           max_tokens: 600
   persona: !include persona.yml
 
-leveragedinvestor:
+ragllm_leveraged_investor:
   name: "LeveragedInvestor"
   class: "examples.GFC2008.Rag.players:RagLLMLeveragedInvestor"
   num_instances: 2
   config:
-    identity: "leveragedinvestor"
+    identity: "ragllm_leveraged_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -133,12 +133,12 @@ leveragedinvestor:
           max_tokens: 600
   persona: !include persona.yml
 
-ratingagency:
+ragllm_rating_agency:
   name: "RatingAgency"
   class: "examples.GFC2008.Rag.players:RagLLMRatingAgency"
   num_instances: 2
   config:
-    identity: "ratingagency"
+    identity: "ragllm_rating_agency"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -179,12 +179,12 @@ ratingagency:
           max_tokens: 600
   persona: !include persona.yml
 
-distressedbuyer:
+ragllm_distressed_buyer:
   name: "DistressedBuyer"
   class: "examples.GFC2008.Rag.players:RagLLMDistressedBuyer"
   num_instances: 1
   config:
-    identity: "distressedbuyer"
+    identity: "ragllm_distressed_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -225,12 +225,12 @@ distressedbuyer:
           max_tokens: 600
   persona: !include persona.yml
 
-regulator:
+ragllm_regulator:
   name: "Regulator"
   class: "examples.GFC2008.Rag.players:RagLLMRegulator"
   num_instances: 1
   config:
-    identity: "regulator"
+    identity: "ragllm_regulator"
     role: player
     steps_per_turn: 1
     group_tags:

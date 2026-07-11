@@ -54,12 +54,12 @@ market:
 # RAG Pro-Cyclical Lenders
 # Theory: Adrian & Shin (2010)
 # -----------------------------------------------------------------------------
-procyclicallender:
+ragllm_pro_cyclical_lender:
   name: "ProCyclicalLender"
   class: "examples.CreditCycle.Rag.players:RagLLMProCyclicalLender"
   num_instances: 2
   config:
-    identity: "procyclicallender"
+    identity: "ragllm_pro_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -105,12 +105,12 @@ procyclicallender:
 # RAG Minsky Borrowers
 # Theory: Minsky (1986)
 # -----------------------------------------------------------------------------
-minskyborrower:
+ragllm_minsky_borrower:
   name: "MinskyBorrower"
   class: "examples.CreditCycle.Rag.players:RagLLMMinskyBorrower"
   num_instances: 2
   config:
-    identity: "minskyborrower"
+    identity: "ragllm_minsky_borrower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -157,12 +157,12 @@ minskyborrower:
 # RAG Counter-Cyclical Lenders
 # Theory: Geanakoplos (2010)
 # -----------------------------------------------------------------------------
-countercyclicallender:
+ragllm_counter_cyclical_lender:
   name: "CounterCyclicalLender"
   class: "examples.CreditCycle.Rag.players:RagLLMCounterCyclicalLender"
   num_instances: 1
   config:
-    identity: "countercyclicallender"
+    identity: "ragllm_counter_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -206,12 +206,12 @@ countercyclicallender:
 # RAG Value Investors
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-valueinvestor:
+ragllm_value_investor:
   name: "ValueInvestor"
   class: "examples.CreditCycle.Rag.players:RagLLMValueInvestor"
   num_instances: 1
   config:
-    identity: "valueinvestor"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -255,12 +255,12 @@ valueinvestor:
 # RAG Noise Traders
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CreditCycle.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

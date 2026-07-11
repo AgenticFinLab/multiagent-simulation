@@ -4,18 +4,18 @@ sources:
 
 connections:
   market:
-    - trendchaser
-    - socialprooffollower
-    - intrinsicvaluetrader
-    - earlyexittrader
-    - noisetrader
-  trendchaser:
+    - ragllm_trend_chaser
+    - ragllm_social_proof_follower
+    - ragllm_intrinsic_value_trader
+    - ragllm_early_exit_trader
+    - ragllm_noise_trader
+  ragllm_trend_chaser:
     - market
-  socialprooffollower:
+  ragllm_social_proof_follower:
     - market
-  intrinsicvaluetrader:
+  ragllm_intrinsic_value_trader:
     - market
-  earlyexittrader:
+  ragllm_early_exit_trader:
     - market
-  noisetrader:
+  ragllm_noise_trader:
     - market

@@ -23,12 +23,12 @@ market:
       custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-inertialholder:
+rule_inertial_holder:
   name: "InertialHolder"
   class: "examples.StatusQuoBias.Rule.players:InertialHolder"
   num_instances: 3                                          # Source: target §9 inertialholder.num_instances row; agent roster §7
   config:
-    identity: "inertialholder"
+    identity: "rule_inertial_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -45,12 +45,12 @@ inertialholder:
       custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-defaultfollower:
+rule_default_follower:
   name: "DefaultFollower"
   class: "examples.StatusQuoBias.Rule.players:DefaultFollower"
   num_instances: 3                                          # Source: target §9 defaultfollower.num_instances row; agent roster §7
   config:
-    identity: "defaultfollower"
+    identity: "rule_default_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -67,12 +67,12 @@ defaultfollower:
       custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-activerebalancer:
+rule_active_rebalancer:
   name: "ActiveRebalancer"
   class: "examples.StatusQuoBias.Rule.players:ActiveRebalancer"
   num_instances: 2                                          # Source: target §9 activerebalancer.num_instances row; agent roster §7
   config:
-    identity: "activerebalancer"
+    identity: "rule_active_rebalancer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -88,12 +88,12 @@ activerebalancer:
       custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-momentumtrader:
+rule_momentum_trader:
   name: "MomentumTrader"
   class: "examples.StatusQuoBias.Rule.players:MomentumTrader"
   num_instances: 2                                          # Source: target §9 momentumtrader.num_instances row; agent roster §7
   config:
-    identity: "momentumtrader"
+    identity: "rule_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -109,12 +109,12 @@ momentumtrader:
       custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.StatusQuoBias.Rule.players:NoiseTrader"
   num_instances: 2                                          # Source: target §9 noisetrader.num_instances row; agent roster §7
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

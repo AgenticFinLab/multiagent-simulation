@@ -61,13 +61,13 @@ rulellm_short_seller:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_retail_coord:
+rulellm_retail_coordinator:
   name: "RuleLLM Retail Coordinator"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMRetailCoordinator"
   # Expander → rulellm_retail_coord_1, rulellm_retail_coord_2, rulellm_retail_coord_3
   num_instances: 3
   config:
-    identity: "rulellm_retail_coord"
+    identity: "rulellm_retail_coordinator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -87,13 +87,13 @@ rulellm_retail_coord:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_momentum:
+rulellm_momentum_buyer:
   name: "RuleLLM Momentum Buyer"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMMomentumBuyer"
   # Expander → rulellm_momentum_1, rulellm_momentum_2, rulellm_momentum_3
   num_instances: 3
   config:
-    identity: "rulellm_momentum"
+    identity: "rulellm_momentum_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -113,13 +113,13 @@ rulellm_momentum:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_value:
+rulellm_value_investor:
   name: "RuleLLM Value Investor"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMValueInvestor"
   # Expander → rulellm_value_1, rulellm_value_2
   num_instances: 2
   config:
-    identity: "rulellm_value"
+    identity: "rulellm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -139,12 +139,12 @@ rulellm_value:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_institutional:
+rulellm_institutional_holder:
   name: "RuleLLM Institutional Holder"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMInstitutionalHolder"
   num_instances: 1
   config:
-    identity: "rulellm_institutional"
+    identity: "rulellm_institutional_holder"
     role: player
     steps_per_turn: 1
     group_tags:

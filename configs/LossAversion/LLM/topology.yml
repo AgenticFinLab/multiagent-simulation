@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - lossaverseinvestor
-    - breakeventrader
-    - rationaltrader
-    - momentumtrader
-    - marketmaker
+    - llm_loss_averse_investor
+    - llm_break_even_trader
+    - llm_rational_trader
+    - llm_momentum_trader
+    - llm_market_maker
 
-  lossaverseinvestor:
+  llm_loss_averse_investor:
     - market
 
-  breakeventrader:
+  llm_break_even_trader:
     - market
 
-  rationaltrader:
+  llm_rational_trader:
     - market
 
-  momentumtrader:
+  llm_momentum_trader:
     - market
 
-  marketmaker:
+  llm_market_maker:
     - market

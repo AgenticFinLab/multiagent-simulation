@@ -8,23 +8,23 @@ sources:
 
 connections:
   market:
-    - hot_money_funder
-    - contagion_trader
-    - imf_rescuer
-    - value_contrarian
-    - noise_trader
+    - rulellm_hot_money_funder
+    - rulellm_contagion_trader
+    - rulellm_imf_rescuer
+    - rulellm_value_contrarian
+    - rulellm_noise_trader
 
-  hot_money_funder:
+  rulellm_hot_money_funder:
     - market
 
-  contagion_trader:
+  rulellm_contagion_trader:
     - market
 
-  imf_rescuer:
+  rulellm_imf_rescuer:
     - market
 
-  value_contrarian:
+  rulellm_value_contrarian:
     - market
 
-  noise_trader:
+  rulellm_noise_trader:
     - market

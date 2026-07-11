@@ -11,27 +11,27 @@ sources:
 
 connections:
   market:
-    - llm_greater_fool
-    - llm_arbitrageur
-    - llm_sentiment
-    - llm_value
-    - llm_leveraged
-    - llm_conservative
+    - llm_greater_fool_speculator
+    - llm_rational_arbitrageur
+    - llm_sentiment_trader
+    - llm_value_investor
+    - llm_leveraged_speculator
+    - llm_conservative_holder
 
-  llm_greater_fool:
+  llm_greater_fool_speculator:
     - market
 
-  llm_arbitrageur:
+  llm_rational_arbitrageur:
     - market
 
-  llm_sentiment:
+  llm_sentiment_trader:
     - market
 
-  llm_value:
+  llm_value_investor:
     - market
 
-  llm_leveraged:
+  llm_leveraged_speculator:
     - market
 
-  llm_conservative:
+  llm_conservative_holder:
     - market

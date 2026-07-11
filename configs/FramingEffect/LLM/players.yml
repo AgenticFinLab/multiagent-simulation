@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-gainframefollower:
+llm_gain_frame_follower:
   name: "GainFrameFollower"
   class: "examples.FramingEffect.LLM.players:LLMGainFrameFollower"
   num_instances: 2
   config:
-    identity: "gainframefollower"
+    identity: "llm_gain_frame_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -47,12 +47,12 @@ gainframefollower:
           max_tokens: 512
   persona: !include persona.yml
 
-lossframereactor:
+llm_loss_frame_reactor:
   name: "LossFrameReactor"
   class: "examples.FramingEffect.LLM.players:LLMLossFrameReactor"
   num_instances: 2
   config:
-    identity: "lossframereactor"
+    identity: "llm_loss_frame_reactor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -74,12 +74,12 @@ lossframereactor:
           max_tokens: 512
   persona: !include persona.yml
 
-frameinvarianttrader:
+llm_frame_invariant_trader:
   name: "FrameInvariantTrader"
   class: "examples.FramingEffect.LLM.players:LLMFrameInvariantTrader"
   num_instances: 1
   config:
-    identity: "frameinvarianttrader"
+    identity: "llm_frame_invariant_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -101,12 +101,12 @@ frameinvarianttrader:
           max_tokens: 512
   persona: !include persona.yml
 
-arbitrageframer:
+llm_arbitrage_framer:
   name: "ArbitrageFramer"
   class: "examples.FramingEffect.LLM.players:LLMArbitrageFramer"
   num_instances: 1
   config:
-    identity: "arbitrageframer"
+    identity: "llm_arbitrage_framer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -128,12 +128,12 @@ arbitrageframer:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.FramingEffect.LLM.players:LLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -32,13 +32,13 @@ market:
   persona: !include persona.yml
 
 # Hybrid Momentum Speculator (Greater Fool Theory + LLM reasoning)
-rulellm_momentum:
+rulellm_momentum_speculator:
   name: "RuleLLM Momentum Speculator"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMMomentumSpeculator"
   # Expander → rulellm_momentum_1 .. rulellm_momentum_5
   num_instances: 5
   config:
-    identity: "rulellm_momentum"
+    identity: "rulellm_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -64,13 +64,13 @@ rulellm_momentum:
   persona: !include persona.yml
 
 # Hybrid Rational Arbitrageur (Limits to Arbitrage + LLM reasoning)
-rulellm_arbitrageur:
+rulellm_rational_arbitrageur:
   name: "RuleLLM Rational Arbitrageur"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMRationalArbitrageur"
   # Expander → rulellm_arbitrageur_1, rulellm_arbitrageur_2, rulellm_arbitrageur_3
   num_instances: 3
   config:
-    identity: "rulellm_arbitrageur"
+    identity: "rulellm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -96,13 +96,13 @@ rulellm_arbitrageur:
   persona: !include persona.yml
 
 # Hybrid Noise Trader (Sentiment herding + LLM reasoning)
-rulellm_noise:
+rulellm_noise_trader:
   name: "RuleLLM Noise Trader"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMNoiseTrader"
   # Expander → rulellm_noise_1, rulellm_noise_2
   num_instances: 2
   config:
-    identity: "rulellm_noise"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -127,13 +127,13 @@ rulellm_noise:
   persona: !include persona.yml
 
 # Hybrid Value Investor (Fundamental value + LLM reasoning)
-rulellm_value:
+rulellm_value_investor:
   name: "RuleLLM Value Investor"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMValueInvestor"
   # Expander → rulellm_value_1, rulellm_value_2, rulellm_value_3, rulellm_value_4
   num_instances: 4
   config:
-    identity: "rulellm_value"
+    identity: "rulellm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -158,13 +158,13 @@ rulellm_value:
   persona: !include persona.yml
 
 # Hybrid Leveraged Buyer (Margin amplification + LLM reasoning)
-rulellm_leveraged:
+rulellm_leveraged_buyer:
   name: "RuleLLM Leveraged Buyer"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMLeveragedBuyer"
   # Expander → rulellm_leveraged_1, rulellm_leveraged_2, rulellm_leveraged_3
   num_instances: 3
   config:
-    identity: "rulellm_leveraged"
+    identity: "rulellm_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -190,13 +190,13 @@ rulellm_leveraged:
   persona: !include persona.yml
 
 # Hybrid Conservative Holder (Strategic allocation + LLM reasoning)
-rulellm_conservative:
+rulellm_conservative_holder:
   name: "RuleLLM Conservative Holder"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMConservativeHolder"
   # Expander -> rulellm_conservative_1, rulellm_conservative_2
   num_instances: 2
   config:
-    identity: "rulellm_conservative"
+    identity: "rulellm_conservative_holder"
     role: player
     steps_per_turn: 1
     group_tags:

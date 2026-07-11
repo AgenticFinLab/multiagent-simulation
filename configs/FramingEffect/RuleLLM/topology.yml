@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - gainframefollower
-    - lossframereactor
-    - frameinvarianttrader
-    - arbitrageframer
-    - noisetrader
+    - rulellm_gain_frame_follower
+    - rulellm_loss_frame_reactor
+    - rulellm_frame_invariant_trader
+    - rulellm_arbitrage_framer
+    - rulellm_noise_trader
 
-  gainframefollower:
+  rulellm_gain_frame_follower:
     - market
 
-  lossframereactor:
+  rulellm_loss_frame_reactor:
     - market
 
-  frameinvarianttrader:
+  rulellm_frame_invariant_trader:
     - market
 
-  arbitrageframer:
+  rulellm_arbitrage_framer:
     - market
 
-  noisetrader:
+  rulellm_noise_trader:
     - market

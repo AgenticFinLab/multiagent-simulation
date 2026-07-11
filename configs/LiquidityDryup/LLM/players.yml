@@ -101,13 +101,13 @@ llm_arbitrageur:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_value:
+llm_value_investor:
   name: "LLM Value Investor"
   class: "examples.LiquidityDryup.LLM.players:LLMValueInvestor"
   # Expander → llm_value_1, llm_value_2
   num_instances: 2
   config:
-    identity: "llm_value"
+    identity: "llm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:

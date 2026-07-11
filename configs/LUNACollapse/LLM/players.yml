@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-stablecoinholder:
+llm_stablecoin_holder:
   name: "StablecoinHolder"
   class: "examples.LUNACollapse.LLM.players:LLMStablecoinHolder"
   num_instances: 3
   config:
-    identity: "stablecoinholder"
+    identity: "llm_stablecoin_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ stablecoinholder:
           max_tokens: 600
   persona: !include persona.yml
 
-arbitrageur:
+llm_arbitrageur:
   name: "Arbitrageur"
   class: "examples.LUNACollapse.LLM.players:LLMArbitrageur"
   num_instances: 2
   config:
-    identity: "arbitrageur"
+    identity: "llm_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ arbitrageur:
           max_tokens: 600
   persona: !include persona.yml
 
-defilender:
+llm_de_fi_lender:
   name: "DeFiLender"
   class: "examples.LUNACollapse.LLM.players:LLMDeFiLender"
   num_instances: 2
   config:
-    identity: "defilender"
+    identity: "llm_de_fi_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ defilender:
           max_tokens: 600
   persona: !include persona.yml
 
-anchordepositor:
+llm_anchor_depositor:
   name: "AnchorDepositor"
   class: "examples.LUNACollapse.LLM.players:LLMAnchorDepositor"
   num_instances: 2
   config:
-    identity: "anchordepositor"
+    identity: "llm_anchor_depositor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ anchordepositor:
           max_tokens: 600
   persona: !include persona.yml
 
-valuebuyer:
+llm_value_buyer:
   name: "ValueBuyer"
   class: "examples.LUNACollapse.LLM.players:LLMValueBuyer"
   num_instances: 1
   config:
-    identity: "valuebuyer"
+    identity: "llm_value_buyer"
     role: player
     steps_per_turn: 1
     group_tags:

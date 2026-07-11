@@ -39,12 +39,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-overconfidenttrader:
+ragllm_overconfident_trader:
   name: "OverconfidentTrader"
   class: "examples.OverconfidenceBias.Rag.players:RagLLMOverconfidentTrader"
   num_instances: 2
   config:
-    identity: "overconfidenttrader"
+    identity: "ragllm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -85,12 +85,12 @@ overconfidenttrader:
           max_tokens: 600
   persona: !include persona.yml
 
-selfattributor:
+ragllm_self_attributor:
   name: "SelfAttributor"
   class: "examples.OverconfidenceBias.Rag.players:RagLLMSelfAttributor"
   num_instances: 2
   config:
-    identity: "selfattributor"
+    identity: "ragllm_self_attributor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -131,12 +131,12 @@ selfattributor:
           max_tokens: 600
   persona: !include persona.yml
 
-calibratedtrader:
+ragllm_calibrated_trader:
   name: "CalibratedTrader"
   class: "examples.OverconfidenceBias.Rag.players:RagLLMCalibratedTrader"
   num_instances: 1
   config:
-    identity: "calibratedtrader"
+    identity: "ragllm_calibrated_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -177,12 +177,12 @@ calibratedtrader:
           max_tokens: 600
   persona: !include persona.yml
 
-contrarianinvestor:
+ragllm_contrarian_investor:
   name: "ContrarianInvestor"
   class: "examples.OverconfidenceBias.Rag.players:RagLLMContrarianInvestor"
   num_instances: 1
   config:
-    identity: "contrarianinvestor"
+    identity: "ragllm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -223,12 +223,12 @@ contrarianinvestor:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.OverconfidenceBias.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

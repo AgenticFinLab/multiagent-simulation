@@ -24,13 +24,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-rulellm_myopic:
+rulellm_myopic_loss_averse:
   name: "RuleLLM Myopic Loss-Averse"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMMyopicLossAverse"
   # Expander → rulellm_myopic_1, rulellm_myopic_2, rulellm_myopic_3, rulellm_myopic_4, rulellm_myopic_5
   num_instances: 5
   config:
-    identity: "rulellm_myopic"
+    identity: "rulellm_myopic_loss_averse"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -54,13 +54,13 @@ rulellm_myopic:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_long_term:
+rulellm_long_term_investor:
   name: "RuleLLM Long-Term Investor"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMLongTermInvestor"
   # Expander → rulellm_long_term_1, rulellm_long_term_2
   num_instances: 2
   config:
-    identity: "rulellm_long_term"
+    identity: "rulellm_long_term_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -82,12 +82,12 @@ rulellm_long_term:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_institutional:
+rulellm_institutional_investor:
   name: "RuleLLM Institutional Investor"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMInstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "rulellm_institutional"
+    identity: "rulellm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -109,13 +109,13 @@ rulellm_institutional:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_risk_averse:
+rulellm_risk_averse_saver:
   name: "RuleLLM Risk-Averse Saver"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMRiskAverseSaver"
   # Expander → rulellm_risk_averse_1, rulellm_risk_averse_2, rulellm_risk_averse_3
   num_instances: 3
   config:
-    identity: "rulellm_risk_averse"
+    identity: "rulellm_risk_averse_saver"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -137,13 +137,13 @@ rulellm_risk_averse:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_rational:
+rulellm_rational_optimizer:
   name: "RuleLLM Rational Optimizer"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMRationalOptimizer"
   # Expander → rulellm_rational_1, rulellm_rational_2
   num_instances: 2
   config:
-    identity: "rulellm_rational"
+    identity: "rulellm_rational_optimizer"
     role: player
     steps_per_turn: 1
     group_tags:

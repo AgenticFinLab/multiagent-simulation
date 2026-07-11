@@ -9,19 +9,19 @@ sources:
 
 connections:
   market:
-    - ragllm_contrarian
-    - ragllm_overconfident
-    - ragllm_value
+    - ragllm_contrarian_investor
+    - ragllm_overconfident_trader
+    - ragllm_value_investor
     - ragllm_momentum_chaser
-    - ragllm_noise
+    - ragllm_noise_trader
 
-  ragllm_contrarian:
+  ragllm_contrarian_investor:
     - market
-  ragllm_overconfident:
+  ragllm_overconfident_trader:
     - market
-  ragllm_value:
+  ragllm_value_investor:
     - market
   ragllm_momentum_chaser:
     - market
-  ragllm_noise:
+  ragllm_noise_trader:
     - market

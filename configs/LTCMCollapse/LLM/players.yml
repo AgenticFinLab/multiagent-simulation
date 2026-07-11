@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-convergencearbitrageur:
+llm_convergence_arbitrageur:
   name: "ConvergenceArbitrageur"
   class: "examples.LTCMCollapse.LLM.players:LLMConvergenceArbitrageur"
   num_instances: 2
   config:
-    identity: "convergencearbitrageur"
+    identity: "llm_convergence_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -51,12 +51,12 @@ convergencearbitrageur:
           max_tokens: 600
   persona: !include persona.yml
 
-leveragetrader:
+llm_leverage_trader:
   name: "LeverageTrader"
   class: "examples.LTCMCollapse.LLM.players:LLMLeverageTrader"
   num_instances: 2
   config:
-    identity: "leveragetrader"
+    identity: "llm_leverage_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -81,12 +81,12 @@ leveragetrader:
           max_tokens: 600
   persona: !include persona.yml
 
-riskmanager:
+llm_risk_manager:
   name: "RiskManager"
   class: "examples.LTCMCollapse.LLM.players:LLMRiskManager"
   num_instances: 2
   config:
-    identity: "riskmanager"
+    identity: "llm_risk_manager"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -110,12 +110,12 @@ riskmanager:
           max_tokens: 600
   persona: !include persona.yml
 
-liquidityprovider:
+llm_liquidity_provider:
   name: "LiquidityProvider"
   class: "examples.LTCMCollapse.LLM.players:LLMLiquidityProvider"
   num_instances: 2
   config:
-    identity: "liquidityprovider"
+    identity: "llm_liquidity_provider"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -140,12 +140,12 @@ liquidityprovider:
           max_tokens: 600
   persona: !include persona.yml
 
-centralbank:
+llm_central_bank:
   name: "CentralBank"
   class: "examples.LTCMCollapse.LLM.players:LLMCentralBank"
   num_instances: 2
   config:
-    identity: "centralbank"
+    identity: "llm_central_bank"
     role: player
     steps_per_turn: 1
     group_tags:

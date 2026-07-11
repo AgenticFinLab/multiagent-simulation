@@ -14,21 +14,21 @@ This block is the **stable I/O declaration** for Step 3. Both
 
 **Inputs (consumed).**
 
-| Source                                                | Used for                                                        |
-|-------------------------------------------------------|-----------------------------------------------------------------|
-| Target §9 Parameter Seeds                             | authoritative default values for every extras key               |
-| Target §10.1 Variants to Build                        | determines which `configs/{ScenarioName}/{V}/` folders are created |
-| `simulation-bases.md §4.{N}.7 Parameters` (per agent) | any per-agent override of the target §9 default                 |
+| Source                                                | Used for                                                                          |
+|-------------------------------------------------------|-----------------------------------------------------------------------------------|
+| Target §9 Parameter Seeds                             | authoritative default values for every extras key                                 |
+| Target §10.1 Variants to Build                        | determines which `configs/{ScenarioName}/{V}/` folders are created                |
+| `simulation-bases.md §4.{N}.7 Parameters` (per agent) | any per-agent override of the target §9 default                                   |
 | `simulation-bases.md §6 Parameter Table`              | scenario-wide environment-level parameter values (finance appendix: market-level) |
 
 **Outputs (produced).**
 
-| Artefact                                                            | Extent of write                                       |
-|---------------------------------------------------------------------|-------------------------------------------------------|
-| `configs/{ScenarioName}/{V}/simulation.yml`                          | scenario-level config (rounds, agents, output paths) |
-| `configs/{ScenarioName}/{V}/players.yml`                             | one entry per agent; each `extras.*` key echoes target §9 verbatim, with `# Source: target §9 / §4.{N}.7 / §6` comment |
-| `configs/{ScenarioName}/{V}/topology.yml`                            | communication topology per §8.2 broadcast fields     |
-| `configs/{ScenarioName}/{V}/persona.yml` (LLM-based variants only)  | persona seed — pointer to `{V}/prompts.py` (finance-default LLM-based variants: LLM / RuleLLM / Rag) |
+| Artefact                                                           | Extent of write                                                                                                        |
+|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `configs/{ScenarioName}/{V}/simulation.yml`                        | scenario-level config (rounds, agents, output paths)                                                                   |
+| `configs/{ScenarioName}/{V}/players.yml`                           | one entry per agent; each `extras.*` key echoes target §9 verbatim, with `# Source: target §9 / §4.{N}.7 / §6` comment |
+| `configs/{ScenarioName}/{V}/topology.yml`                          | communication topology per §8.2 broadcast fields                                                                       |
+| `configs/{ScenarioName}/{V}/persona.yml` (LLM-based variants only) | persona seed — pointer to `{V}/prompts.py` (finance-default LLM-based variants: LLM / RuleLLM / Rag)                   |
 
 **Polish Hooks (what a polish audit re-verifies against this step).**
 When `polish-simulation-pipeline.md` audits Step 3, it MUST re-run
@@ -175,6 +175,36 @@ environment:
 - Every numeric `extras` value must have a `# Source: ...` comment linking to simulation-bases.md §6
 - `num_instances` controls how many copies of each agent run; typically 1-3 per type
 - `identity` is used in records to identify agent type; keep it consistent
+
+### Identity naming rule (MUST follow)
+
+The YAML identity key (both the top-level block key and the `config.identity`
+string) is a **template name for the archetype**, not an instance ID. The
+simulator's `expand_player_instances` helper (masim/interface/config_loader.py)
+automatically appends `_1`, `_2`, ... `_N` when `num_instances > 1`, so the
+template must NEVER carry a numeric suffix of its own.
+
+- The template identity key MUST be a clear, semantic archetype name in
+  `snake_case` (e.g. `short_vol_trader`, `insider_advantaged`, `noise_trader`,
+  `disposition_investor`).
+- The identity MUST NOT contain any numeric suffix (`_1`, `_2`, `_5`, ...).
+  Instance indices are appended automatically by the runtime.
+- Wrong: `short_vol_trader_1:` with `num_instances: 2` → runtime expands to
+  `short_vol_trader_1_1` and `short_vol_trader_1_2` (double-suffixed; breaks UI
+  icon and profile-`.md` lookups).
+- Right: `short_vol_trader:` with `num_instances: 2` → runtime expands to
+  `short_vol_trader_1` and `short_vol_trader_2`.
+- For variant configs, the identity MUST also carry the variant prefix:
+  `rule_short_vol_trader`, `llm_short_vol_trader`, `rulellm_short_vol_trader`,
+  `ragllm_short_vol_trader`. The archetype-level assets (`.md` profile in
+  `examples/AGENT_POOL/finance/` and icon in
+  `examples/AGENT_POOL/agent_images/icons/`) are shared across variants; the
+  UI resolver strips the variant prefix via `_canonical_archetype()` in
+  `masim/interface/components/agent_market.py`.
+- Concatenated identities without underscores are FORBIDDEN (`insideradvantaged`
+  is wrong; use `insider_advantaged`). Snake_case boundaries must be preserved
+  so kebab-case file lookups (`finance-insider-advantaged.png`,
+  `insider-advantaged.md`) work.
 
 ---
 

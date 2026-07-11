@@ -26,12 +26,12 @@ market:
       custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-inertialholder:
+llm_inertial_holder:
   name: "InertialHolder"
   class: "examples.StatusQuoBias.LLM.players:LLMInertialHolder"
   num_instances: 3                                          # Source: target §9 inertialholder.num_instances row; agent roster §7
   config:
-    identity: "inertialholder"
+    identity: "llm_inertial_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -57,12 +57,12 @@ inertialholder:
           max_tokens: 512
   persona: !include persona.yml
 
-defaultfollower:
+llm_default_follower:
   name: "DefaultFollower"
   class: "examples.StatusQuoBias.LLM.players:LLMDefaultFollower"
   num_instances: 3                                          # Source: target §9 defaultfollower.num_instances row; agent roster §7
   config:
-    identity: "defaultfollower"
+    identity: "llm_default_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -88,12 +88,12 @@ defaultfollower:
           max_tokens: 512
   persona: !include persona.yml
 
-activerebalancer:
+llm_active_rebalancer:
   name: "ActiveRebalancer"
   class: "examples.StatusQuoBias.LLM.players:LLMActiveRebalancer"
   num_instances: 2                                          # Source: target §9 activerebalancer.num_instances row; agent roster §7
   config:
-    identity: "activerebalancer"
+    identity: "llm_active_rebalancer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -118,12 +118,12 @@ activerebalancer:
           max_tokens: 512
   persona: !include persona.yml
 
-momentumtrader:
+llm_momentum_trader:
   name: "MomentumTrader"
   class: "examples.StatusQuoBias.LLM.players:LLMMomentumTrader"
   num_instances: 2                                          # Source: target §9 momentumtrader.num_instances row; agent roster §7
   config:
-    identity: "momentumtrader"
+    identity: "llm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -148,12 +148,12 @@ momentumtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.StatusQuoBias.LLM.players:LLMNoiseTrader"
   num_instances: 2                                          # Source: target §9 noisetrader.num_instances row; agent roster §7
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

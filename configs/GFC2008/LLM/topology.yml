@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - mbsoriginator
-    - leveragedinvestor
-    - ratingagency
-    - distressedbuyer
-    - regulator
+    - llm_mbs_originator
+    - llm_leveraged_investor
+    - llm_rating_agency
+    - llm_distressed_buyer
+    - llm_regulator
 
-  mbsoriginator:
+  llm_mbs_originator:
     - market
 
-  leveragedinvestor:
+  llm_leveraged_investor:
     - market
 
-  ratingagency:
+  llm_rating_agency:
     - market
 
-  distressedbuyer:
+  llm_distressed_buyer:
     - market
 
-  regulator:
+  llm_regulator:
     - market

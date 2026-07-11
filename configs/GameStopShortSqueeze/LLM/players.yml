@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-retailcoordinated:
+llm_retail_coordinated:
   name: "RetailCoordinated"
   class: "examples.GameStopShortSqueeze.LLM.players:LLMRetailCoordinated"
   num_instances: 3
   config:
-    identity: "retailcoordinated"
+    identity: "llm_retail_coordinated"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -48,12 +48,12 @@ retailcoordinated:
           max_tokens: 512
   persona: !include persona.yml
 
-shortsellerhf:
+llm_short_seller_hf:
   name: "ShortSellerHF"
   class: "examples.GameStopShortSqueeze.LLM.players:LLMShortSellerHF"
   num_instances: 2
   config:
-    identity: "shortsellerhf"
+    identity: "llm_short_seller_hf"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -75,12 +75,12 @@ shortsellerhf:
           max_tokens: 512
   persona: !include persona.yml
 
-marketmakergamma:
+llm_market_maker_gamma:
   name: "MarketMakerGamma"
   class: "examples.GameStopShortSqueeze.LLM.players:LLMMarketMakerGamma"
   num_instances: 1
   config:
-    identity: "marketmakergamma"
+    identity: "llm_market_maker_gamma"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -102,12 +102,12 @@ marketmakergamma:
           max_tokens: 512
   persona: !include persona.yml
 
-institutionalvalue:
+llm_institutional_value:
   name: "InstitutionalValue"
   class: "examples.GameStopShortSqueeze.LLM.players:LLMInstitutionalValue"
   num_instances: 1
   config:
-    identity: "institutionalvalue"
+    identity: "llm_institutional_value"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -129,12 +129,12 @@ institutionalvalue:
           max_tokens: 512
   persona: !include persona.yml
 
-momentumretail:
+llm_momentum_retail:
   name: "NoiseTrader"
   class: "examples.GameStopShortSqueeze.LLM.players:LLMMomentumRetail"
   num_instances: 2
   config:
-    identity: "momentumretail"
+    identity: "llm_momentum_retail"
     role: player
     steps_per_turn: 1
     group_tags:

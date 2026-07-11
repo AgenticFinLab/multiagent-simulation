@@ -16,13 +16,13 @@ market:
       mean_reversion: 0.015  # Source: target §9 market.extras.mean_reversion row; simulation-bases.md §3.1
       noise_std: 0.01  # Source: target §9 market.extras.noise_std row; simulation-bases.md §3.1
 
-sunkcostholder:
+llm_sunk_cost_holder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.LLM.players:LLMSunkCostHolder"
   num_instances: 3  # Source: target §9 sunkcostholder.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "sunkcostholder"
+    identity: "llm_sunk_cost_holder"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -44,13 +44,13 @@ sunkcostholder:
           temperature: 0.7
           max_tokens: 512
 
-commitmentescalator:
+llm_commitment_escalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.LLM.players:LLMCommitmentEscalator"
   num_instances: 3  # Source: target §9 commitmentescalator.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "commitmentescalator"
+    identity: "llm_commitment_escalator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -72,13 +72,13 @@ commitmentescalator:
           temperature: 0.7
           max_tokens: 512
 
-rationalcutter:
+llm_rational_cutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.LLM.players:LLMRationalCutter"
   num_instances: 2  # Source: target §9 rationalcutter.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "rationalcutter"
+    identity: "llm_rational_cutter"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -100,13 +100,13 @@ rationalcutter:
           temperature: 0.7
           max_tokens: 512
 
-opportunitycosttrader:
+llm_opportunity_cost_trader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.LLM.players:LLMOpportunityCostTrader"
   num_instances: 2  # Source: target §9 opportunitycosttrader.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "opportunitycosttrader"
+    identity: "llm_opportunity_cost_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -128,13 +128,13 @@ opportunitycosttrader:
           temperature: 0.7
           max_tokens: 512
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.LLM.players:LLMNoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

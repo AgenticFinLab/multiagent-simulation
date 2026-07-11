@@ -40,12 +40,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-insideradvantaged:
+ragllm_insider_advantaged:
   name: "InsiderAdvantaged"
   class: "examples.SouthSeaBubble.Rag.players:RagLLMInsiderAdvantaged"
   num_instances: 2  # Source: target §9 insideradvantaged.num_instances row
   config:
-    identity: "insideradvantaged"
+    identity: "ragllm_insider_advantaged"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -87,12 +87,12 @@ insideradvantaged:
           max_tokens: 600
   persona: !include persona.yml
 
-narrativebeliever:
+ragllm_narrative_believer:
   name: "NarrativeBeliever"
   class: "examples.SouthSeaBubble.Rag.players:RagLLMNarrativeBeliever"
   num_instances: 3  # Source: target §9 narrativebeliever.num_instances row
   config:
-    identity: "narrativebeliever"
+    identity: "ragllm_narrative_believer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -134,12 +134,12 @@ narrativebeliever:
           max_tokens: 600
   persona: !include persona.yml
 
-skepticalanalyst:
+ragllm_skeptical_analyst:
   name: "SkepticalAnalyst"
   class: "examples.SouthSeaBubble.Rag.players:RagLLMSkepticalAnalyst"
   num_instances: 2  # Source: target §9 skepticalanalyst.num_instances row
   config:
-    identity: "skepticalanalyst"
+    identity: "ragllm_skeptical_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -181,12 +181,12 @@ skepticalanalyst:
           max_tokens: 600
   persona: !include persona.yml
 
-arbitrageur:
+ragllm_arbitrageur:
   name: "Arbitrageur"
   class: "examples.SouthSeaBubble.Rag.players:RagLLMArbitrageur"
   num_instances: 2  # Source: target §9 arbitrageur.num_instances row
   config:
-    identity: "arbitrageur"
+    identity: "ragllm_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -228,12 +228,12 @@ arbitrageur:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SouthSeaBubble.Rag.players:RagLLMNoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances row
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -93,13 +93,13 @@ ragllm_momentum_trader:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_contrarian:
+ragllm_contrarian_trader:
   name: "RAG Contrarian Trader"
   class: "examples.MomentumEffect.Rag.players:RagLLMContrarianTrader"
   # Expander → ragllm_contrarian_1, ragllm_contrarian_2
   num_instances: 2
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,13 +136,13 @@ ragllm_contrarian:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_technical:
+ragllm_technical_trader:
   name: "RAG Technical Trader"
   class: "examples.MomentumEffect.Rag.players:RagLLMTechnicalTrader"
   # Expander → ragllm_technical_1, ragllm_technical_2
   num_instances: 2
   config:
-    identity: "ragllm_technical"
+    identity: "ragllm_technical_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -222,13 +222,13 @@ ragllm_trend_follower:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_fundamental:
+ragllm_fundamental_anchor:
   name: "RAG Fundamental Anchor"
   class: "examples.MomentumEffect.Rag.players:RagLLMFundamentalAnchor"
   # Expander → ragllm_fundamental_1, ragllm_fundamental_2
   num_instances: 2
   config:
-    identity: "ragllm_fundamental"
+    identity: "ragllm_fundamental_anchor"
     role: player
     steps_per_turn: 1
     group_tags:

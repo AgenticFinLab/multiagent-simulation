@@ -15,13 +15,13 @@ market:
       mean_reversion: 0.015  # Source: target §9 market.extras.mean_reversion row; simulation-bases.md §3.1
       noise_std: 0.01  # Source: target §9 market.extras.noise_std row; simulation-bases.md §3.1
 
-sunkcostholder:
+rule_sunk_cost_holder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.Rule.players:SunkCostHolder"
   num_instances: 3  # Source: target §9 sunkcostholder.num_instances row
   persona: !include persona.yml
   config:
-    identity: "sunkcostholder"
+    identity: "rule_sunk_cost_holder"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -34,13 +34,13 @@ sunkcostholder:
       base_size: 200  # Source: target §9 sunkcostholder.extras.base_size row
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-commitmentescalator:
+rule_commitment_escalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.Rule.players:CommitmentEscalator"
   num_instances: 3  # Source: target §9 commitmentescalator.num_instances row
   persona: !include persona.yml
   config:
-    identity: "commitmentescalator"
+    identity: "rule_commitment_escalator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -53,13 +53,13 @@ commitmentescalator:
       escalation_size: 400  # Source: target §9 commitmentescalator.extras.escalation_size row
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-rationalcutter:
+rule_rational_cutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.Rule.players:RationalCutter"
   num_instances: 2  # Source: target §9 rationalcutter.num_instances row
   persona: !include persona.yml
   config:
-    identity: "rationalcutter"
+    identity: "rule_rational_cutter"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -72,13 +72,13 @@ rationalcutter:
       position_size: 350  # Source: target §9 rationalcutter.extras.position_size row
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-opportunitycosttrader:
+rule_opportunity_cost_trader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.Rule.players:OpportunityCostTrader"
   num_instances: 2  # Source: target §9 opportunitycosttrader.num_instances row
   persona: !include persona.yml
   config:
-    identity: "opportunitycosttrader"
+    identity: "rule_opportunity_cost_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -91,13 +91,13 @@ opportunitycosttrader:
       position_size: 300  # Source: target §9 opportunitycosttrader.extras.position_size row
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.Rule.players:NoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances row
   persona: !include persona.yml
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

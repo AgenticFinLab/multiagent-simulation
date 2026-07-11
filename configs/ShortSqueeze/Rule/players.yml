@@ -32,13 +32,13 @@ market:
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row; runtime hot-state cap.
   persona: !include persona.yml
 
-short_seller:
+rule_short_seller:
   name: "Short Seller"
   class: "examples.ShortSqueeze.Rule.players:ShortSeller"
   # Expander → short_seller_1, short_seller_2, short_seller_3
   num_instances: 3
   config:
-    identity: "short_seller"
+    identity: "rule_short_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -53,13 +53,13 @@ short_seller:
       cover_threshold: 0.20  # Source: target §9 cover_threshold row; §4.1 forced-cover trigger (Miller 1977, DOI 10.1111/j.1540-6261.1977.tb03317.x).
   persona: !include persona.yml
 
-momentum_buyer:
+rule_momentum_buyer:
   name: "Momentum Buyer"
   class: "examples.ShortSqueeze.Rule.players:MomentumBuyer"
   # Expander → momentum_buyer_1, momentum_buyer_2, momentum_buyer_3
   num_instances: 3
   config:
-    identity: "momentum_buyer"
+    identity: "rule_momentum_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -76,13 +76,13 @@ momentum_buyer:
       max_quantity: 40.0  # Source: target §9 max_quantity (momentum) row; §4.2 order cap.
   persona: !include persona.yml
 
-retail:
+rule_retail_trader:
   name: "Retail Trader"
   class: "examples.ShortSqueeze.Rule.players:RetailTrader"
   # Expander → retail_1, retail_2, retail_3
   num_instances: 3
   config:
-    identity: "retail"
+    identity: "rule_retail_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -98,13 +98,13 @@ retail:
       max_quantity: 25.0  # Source: target §9 max_quantity (retail) row; §4.3 upper clamp.
   persona: !include persona.yml
 
-value_investor:
+rule_value_investor:
   name: "Value Investor"
   class: "examples.ShortSqueeze.Rule.players:ValueInvestor"
   # Expander → value_investor_1, value_investor_2
   num_instances: 2
   config:
-    identity: "value_investor"
+    identity: "rule_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -120,12 +120,12 @@ value_investor:
       max_quantity: 30.0  # Source: target §9 max_quantity (value) row.
   persona: !include persona.yml
 
-institutional:
+rule_institutional_holder:
   name: "Institutional Holder"
   class: "examples.ShortSqueeze.Rule.players:InstitutionalHolder"
   num_instances: 1
   config:
-    identity: "institutional"
+    identity: "rule_institutional_holder"
     role: player
     steps_per_turn: 1
     group_tags:

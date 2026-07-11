@@ -39,12 +39,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-mentalaccountant:
+ragllm_mental_accountant:
   name: "MentalAccountant"
   class: "examples.MentalAccounting.Rag.players:RagLLMMentalAccountant"
   num_instances: 2
   config:
-    identity: "mentalaccountant"
+    identity: "ragllm_mental_accountant"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -86,12 +86,12 @@ mentalaccountant:
           max_tokens: 600
   persona: !include persona.yml
 
-housemoneytrader:
+ragllm_house_money_trader:
   name: "HouseMoneyTrader"
   class: "examples.MentalAccounting.Rag.players:RagLLMHouseMoneyTrader"
   num_instances: 2
   config:
-    identity: "housemoneytrader"
+    identity: "ragllm_house_money_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -134,12 +134,12 @@ housemoneytrader:
           max_tokens: 600
   persona: !include persona.yml
 
-rationalportfoliomanager:
+ragllm_rational_portfolio_manager:
   name: "RationalPortfolioManager"
   class: "examples.MentalAccounting.Rag.players:RagLLMRationalPortfolioManager"
   num_instances: 1
   config:
-    identity: "rationalportfoliomanager"
+    identity: "ragllm_rational_portfolio_manager"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -182,12 +182,12 @@ rationalportfoliomanager:
           max_tokens: 600
   persona: !include persona.yml
 
-sunkcostholder:
+ragllm_sunk_cost_holder:
   name: "SunkCostHolder"
   class: "examples.MentalAccounting.Rag.players:RagLLMSunkCostHolder"
   num_instances: 2
   config:
-    identity: "sunkcostholder"
+    identity: "ragllm_sunk_cost_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -228,12 +228,12 @@ sunkcostholder:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.MentalAccounting.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

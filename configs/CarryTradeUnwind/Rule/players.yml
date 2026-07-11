@@ -49,13 +49,13 @@ market:
 # Carry Traders (Primary Destabilizers)
 # Theory: Brunnermeier, Nagel & Pedersen (2009) — UIP deviation / carry crash
 # -----------------------------------------------------------------------------
-carry_trader:
+rule_carry_trader:
   name: "Carry Trader"
   class: "examples.CarryTradeUnwind.Rule.players:CarryTrader"
   # Expander → carry_trader_1, carry_trader_2
   num_instances: 2
   config:
-    identity: "carry_trader"
+    identity: "rule_carry_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -76,13 +76,13 @@ carry_trader:
 # Leveraged Carry Funds (High-Leverage Destabilizers)
 # Theory: Plantin & Shin (2018) — Leverage and forced liquidation
 # -----------------------------------------------------------------------------
-leveraged_carry_fund:
+rule_leveraged_carry_fund:
   name: "Leveraged Carry Fund"
   class: "examples.CarryTradeUnwind.Rule.players:LeveragedCarryFund"
   # Expander → leveraged_carry_fund_1, leveraged_carry_fund_2
   num_instances: 2
   config:
-    identity: "leveraged_carry_fund"
+    identity: "rule_leveraged_carry_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -102,13 +102,13 @@ leveraged_carry_fund:
 # Funding Currency Buyers (Safe-Haven Amplifiers)
 # Theory: Menkhoff et al. (2012) — Safe-haven demand during FX volatility
 # -----------------------------------------------------------------------------
-funding_currency_buyer:
+rule_funding_currency_buyer:
   name: "Funding Currency Buyer"
   class: "examples.CarryTradeUnwind.Rule.players:FundingCurrencyBuyer"
   # Expander → funding_currency_buyer_1, funding_currency_buyer_2
   num_instances: 2
   config:
-    identity: "funding_currency_buyer"
+    identity: "rule_funding_currency_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -128,12 +128,12 @@ funding_currency_buyer:
 # Theory: Menkhoff et al. (2012) — Volatility-adjusted carry
 #         Burnside et al. (2011) — Hedged carry trade strategies
 # -----------------------------------------------------------------------------
-hedged_carry_trader:
+rule_hedged_carry_trader:
   name: "Hedged Carry Trader"
   class: "examples.CarryTradeUnwind.Rule.players:HedgedCarryTrader"
   num_instances: 1
   config:
-    identity: "hedged_carry_trader"
+    identity: "rule_hedged_carry_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -152,13 +152,13 @@ hedged_carry_trader:
 # -----------------------------------------------------------------------------
 # Noise Traders (Background Liquidity — Black 1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.CarryTradeUnwind.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

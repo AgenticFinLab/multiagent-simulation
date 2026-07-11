@@ -37,13 +37,13 @@ market:
 # RuleLLM ConcentratedFund — TRS leverage + explicit margin rules in prompt
 # Theory: Total Return Swap Leverage (Becketti, 2021)
 # -----------------------------------------------------------------------------
-concentrated_fund:
+rulellm_concentrated_fund:
   name: "Concentrated Fund"
   class: "examples.ArchegosCollapse.RuleLLM.players:RuleLLMConcentratedFund"
   # Expander → concentrated_fund_1, concentrated_fund_2
   num_instances: 2
   config:
-    identity: "concentrated_fund"
+    identity: "rulellm_concentrated_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -69,12 +69,12 @@ concentrated_fund:
 # RuleLLM PrimeBrokerFirstMover — first-mover liquidation rules in prompt
 # Theory: Prime broker liquidation race
 # -----------------------------------------------------------------------------
-prime_broker_first_mover:
+rulellm_prime_broker_first_mover:
   name: "Prime Broker (First Mover)"
   class: "examples.ArchegosCollapse.RuleLLM.players:RuleLLMPrimeBrokerFirstMover"
   num_instances: 1
   config:
-    identity: "prime_broker_first_mover"
+    identity: "rulellm_prime_broker_first_mover"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -100,12 +100,12 @@ prime_broker_first_mover:
 # RuleLLM PrimeBrokerDelayedLiquidator — delayed liquidation + worse price rules in prompt
 # Theory: Prime broker competition; cascade amplification
 # -----------------------------------------------------------------------------
-prime_broker_delayed_liquidator:
+rulellm_prime_broker_delayed_liquidator:
   name: "Prime Broker (Delayed Liquidator)"
   class: "examples.ArchegosCollapse.RuleLLM.players:RuleLLMPrimeBrokerDelayedLiquidator"
   num_instances: 1
   config:
-    identity: "prime_broker_delayed_liquidator"
+    identity: "rulellm_prime_broker_delayed_liquidator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -131,12 +131,12 @@ prime_broker_delayed_liquidator:
 # RuleLLM BlockTradeBuyer — discount-buy rules in prompt
 # Theory: Opportunistic block trading; stabilizing force
 # -----------------------------------------------------------------------------
-block_trade_buyer:
+rulellm_block_trade_buyer:
   name: "Block Trade Buyer"
   class: "examples.ArchegosCollapse.RuleLLM.players:RuleLLMBlockTradeBuyer"
   num_instances: 1
   config:
-    identity: "block_trade_buyer"
+    identity: "rulellm_block_trade_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -162,13 +162,13 @@ block_trade_buyer:
 # RuleLLM InformationTrader — front-running detection rules in prompt
 # Theory: Information-based trading; detection of order flow
 # -----------------------------------------------------------------------------
-information_trader:
+rulellm_information_trader:
   name: "Information Trader"
   class: "examples.ArchegosCollapse.RuleLLM.players:RuleLLMInformationTrader"
   # Expander → information_trader_1, information_trader_2
   num_instances: 2
   config:
-    identity: "information_trader"
+    identity: "rulellm_information_trader"
     role: player
     steps_per_turn: 1
     group_tags:

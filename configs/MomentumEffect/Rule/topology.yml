@@ -16,28 +16,28 @@ sources:
 connections:
   # num_instances: 2 → momentum_trader_1/2
   market:
-    - momentum_trader
-    - contrarian_trader
-    - index_fund
-    - market_maker
-    - technical_trader
-    - fundamental_trader
+    - rule_momentum_trader
+    - rule_contrarian_trader
+    - rule_index_fund
+    - rule_market_maker
+    - rule_technical_trader
+    - rule_fundamental_trader
 
   # num_instances: 2 → expands to momentum_trader_1/2 → market
-  momentum_trader:
+  rule_momentum_trader:
     - market
 
-  contrarian_trader:
+  rule_contrarian_trader:
     - market
 
-  index_fund:
+  rule_index_fund:
     - market
 
-  market_maker:
+  rule_market_maker:
     - market
 
-  technical_trader:
+  rule_technical_trader:
     - market
 
-  fundamental_trader:
+  rule_fundamental_trader:
     - market

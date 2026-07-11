@@ -96,13 +96,13 @@ market:
 # RAG Anchored Traders — rules + persona + RAG knowledge retrieval
 # Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
 # -----------------------------------------------------------------------------
-ragllm_anchored:
+ragllm_anchored_trader:
   name: "RAG Anchored Trader"
   class: "examples.AnchoringEffect.Rag.players:RagLLMAnchoredTrader"
-  # Expander → ragllm_anchored_1, ragllm_anchored_2
+  # Expander → ragllm_anchored_trader_1, ragllm_anchored_trader_2
   num_instances: 2
   config:
-    identity: "ragllm_anchored"
+    identity: "ragllm_anchored_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -155,13 +155,13 @@ ragllm_anchored:
 # RAG Historical Anchors — historical-price fixation + RAG
 # Theory: Northcraft & Neale (1987) — Experts anchor to listing prices
 # -----------------------------------------------------------------------------
-ragllm_historical:
+ragllm_historical_anchor:
   name: "RAG Historical Anchor"
   class: "examples.AnchoringEffect.Rag.players:RagLLMHistoricalAnchor"
-  # Expander → ragllm_historical_1, ragllm_historical_2
+  # Expander → ragllm_historical_anchor_1, ragllm_historical_anchor_2
   num_instances: 2
   config:
-    identity: "ragllm_historical"
+    identity: "ragllm_historical_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -215,12 +215,12 @@ ragllm_historical:
 # RAG Rational Updater — Bayesian updating benchmark + RAG
 # Theory: Rational expectations (Muth, 1961)
 # -----------------------------------------------------------------------------
-ragllm_rational:
+ragllm_rational_updater:
   name: "RAG Rational Updater"
   class: "examples.AnchoringEffect.Rag.players:RagLLMRationalUpdater"
   num_instances: 1
   config:
-    identity: "ragllm_rational"
+    identity: "ragllm_rational_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -272,13 +272,13 @@ ragllm_rational:
 # RAG Momentum Traders — trend following + RAG
 # Theory: Jegadeesh & Titman (1993) — Momentum effect
 # -----------------------------------------------------------------------------
-ragllm_momentum:
+ragllm_momentum_trader:
   name: "RAG Momentum Trader"
   class: "examples.AnchoringEffect.Rag.players:RagLLMMomentumTrader"
-  # Expander → ragllm_momentum_1, ragllm_momentum_2
+  # Expander → ragllm_momentum_trader_1, ragllm_momentum_trader_2
   num_instances: 2
   config:
-    identity: "ragllm_momentum"
+    identity: "ragllm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -330,13 +330,13 @@ ragllm_momentum:
 # RAG Noise Traders — random background trading + RAG (mostly ignored)
 # Theory: Black (1986) — Noise traders provide background liquidity
 # -----------------------------------------------------------------------------
-ragllm_noise:
+ragllm_noise_trader:
   name: "RAG Noise Trader"
   class: "examples.AnchoringEffect.Rag.players:RagLLMNoiseTrader"
-  # Expander → ragllm_noise_1, ragllm_noise_2
+  # Expander → ragllm_noise_trader_1, ragllm_noise_trader_2
   num_instances: 2
   config:
-    identity: "ragllm_noise"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -392,13 +392,13 @@ ragllm_noise:
 #       sell if gain_pct > 0.04, buy if gain_pct < -0.016;
 #       quantity = min(15, abs(gain_pct) * 500)
 # -----------------------------------------------------------------------------
-ragllm_disposition:
+ragllm_disposition_trader:
   name: "RAG Disposition Trader"
   class: "examples.AnchoringEffect.Rag.players:RagLLMDispositionTrader"
-  # Expander → ragllm_disposition_1, ragllm_disposition_2
+  # Expander → ragllm_disposition_trader_1, ragllm_disposition_trader_2
   num_instances: 2
   config:
-    identity: "ragllm_disposition"
+    identity: "ragllm_disposition_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -446,12 +446,12 @@ ragllm_disposition:
 #       sell if cum_return > 0.05, buy if cum_return < -0.05;
 #       quantity = min(20, abs(cum_return) * 400)
 # -----------------------------------------------------------------------------
-ragllm_contrarian:
+ragllm_contrarian_trader:
   name: "RAG Contrarian Trader"
   class: "examples.AnchoringEffect.Rag.players:RagLLMContrarianTrader"
   num_instances: 1
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -499,12 +499,12 @@ ragllm_contrarian:
 #       dev = (P - belief) / belief; trade when |dev| > 0.02;
 #       quantity = min(25, abs(dev) * 1000)
 # -----------------------------------------------------------------------------
-ragllm_fundamental:
+ragllm_fundamental_analyst:
   name: "RAG Fundamental Analyst"
   class: "examples.AnchoringEffect.Rag.players:RagLLMFundamentalAnalyst"
   num_instances: 1
   config:
-    identity: "ragllm_fundamental"
+    identity: "ragllm_fundamental_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -551,12 +551,12 @@ ragllm_fundamental:
 #       fair_quote = 0.5*(P + ema); band = 0.015 * fair_quote;
 #       quantity = min(30, dev * 2000)
 # -----------------------------------------------------------------------------
-ragllm_liquidity:
+ragllm_liquidity_provider:
   name: "RAG Liquidity Provider"
   class: "examples.AnchoringEffect.Rag.players:RagLLMLiquidityProvider"
   num_instances: 1
   config:
-    identity: "ragllm_liquidity"
+    identity: "ragllm_liquidity_provider"
     role: player
     steps_per_turn: 1
     group_tags:

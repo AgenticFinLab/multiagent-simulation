@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-overconfidenttrader:
+rulellm_overconfident_trader:
   name: "OverconfidentTrader"
   class: "examples.OverconfidenceBias.RuleLLM.players:RuleLLMOverconfidentTrader"
   num_instances: 2
   config:
-    identity: "overconfidenttrader"
+    identity: "rulellm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ overconfidenttrader:
           max_tokens: 512
   persona: !include persona.yml
 
-selfattributor:
+rulellm_self_attributor:
   name: "SelfAttributor"
   class: "examples.OverconfidenceBias.RuleLLM.players:RuleLLMSelfAttributor"
   num_instances: 2
   config:
-    identity: "selfattributor"
+    identity: "rulellm_self_attributor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ selfattributor:
           max_tokens: 512
   persona: !include persona.yml
 
-calibratedtrader:
+rulellm_calibrated_trader:
   name: "CalibratedTrader"
   class: "examples.OverconfidenceBias.RuleLLM.players:RuleLLMCalibratedTrader"
   num_instances: 1
   config:
-    identity: "calibratedtrader"
+    identity: "rulellm_calibrated_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ calibratedtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarianinvestor:
+rulellm_contrarian_investor:
   name: "ContrarianInvestor"
   class: "examples.OverconfidenceBias.RuleLLM.players:RuleLLMContrarianInvestor"
   num_instances: 1
   config:
-    identity: "contrarianinvestor"
+    identity: "rulellm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ contrarianinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.OverconfidenceBias.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

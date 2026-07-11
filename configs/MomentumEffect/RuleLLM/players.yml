@@ -53,13 +53,13 @@ rulellm_momentum_trader:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_contrarian:
+rulellm_contrarian_trader:
   name: "RuleLLM Contrarian Trader"
   class: "examples.MomentumEffect.RuleLLM.players:RuleLLMContrarianTrader"
   # Expander → rulellm_contrarian_1, rulellm_contrarian_2
   num_instances: 2
   config:
-    identity: "rulellm_contrarian"
+    identity: "rulellm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -79,13 +79,13 @@ rulellm_contrarian:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_technical:
+rulellm_technical_trader:
   name: "RuleLLM Technical Trader"
   class: "examples.MomentumEffect.RuleLLM.players:RuleLLMTechnicalTrader"
   # Expander → rulellm_technical_1, rulellm_technical_2
   num_instances: 2
   config:
-    identity: "rulellm_technical"
+    identity: "rulellm_technical_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -131,13 +131,13 @@ rulellm_trend_follower:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_fundamental:
+rulellm_fundamental_anchor:
   name: "RuleLLM Fundamental Anchor"
   class: "examples.MomentumEffect.RuleLLM.players:RuleLLMFundamentalAnchor"
   # Expander → rulellm_fundamental_1, rulellm_fundamental_2
   num_instances: 2
   config:
-    identity: "rulellm_fundamental"
+    identity: "rulellm_fundamental_anchor"
     role: player
     steps_per_turn: 1
     group_tags:

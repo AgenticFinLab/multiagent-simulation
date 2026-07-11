@@ -107,19 +107,19 @@ sections, in this order. Additional sections MAY be appended after §11
 if deeper coverage is warranted. Every section listed here is
 **required** unless explicitly marked *conditional*.
 
-| #  | Section                                 | Header | Notes                                 |
-|----|-----------------------------------------|--------|---------------------------------------|
-| 1  | Title — agent role description          | `#`    |                                       |
-| 2  | Summary                                 | `##`   | >=7 rows (minimum set below)          |
-| 3  | Definition and Goals                    | `##`   | Includes non-goals                    |
-| 4  | Theoretical Foundation                  | `##`   | >=1 theory sub-block                  |
-| 5  | Design Purpose and Activation Triggers  | `##`   | Includes deactivation                 |
+| #  | Section                                 | Header | Notes                                                |
+|----|-----------------------------------------|--------|------------------------------------------------------|
+| 1  | Title — agent role description          | `#`    |                                                      |
+| 2  | Summary                                 | `##`   | >=7 rows (minimum set below)                         |
+| 3  | Definition and Goals                    | `##`   | Includes non-goals                                   |
+| 4  | Theoretical Foundation                  | `##`   | >=1 theory sub-block                                 |
+| 5  | Design Purpose and Activation Triggers  | `##`   | Includes deactivation                                |
 | 6  | Behavioral Framework                    | `##`   | >=6 H4 sub-blocks (I/O Contract + minimum set below) |
-| 7  | Parameters                              | `##`   | >=8-column table                      |
-| 8  | Worked Numerical Examples               | `##`   | >=3 cases + 1 edge case               |
-| 9  | Behavioral Verification and Calibration | `##`   | Includes Ablation Hooks sub-block     |
-| 10 | Academic References                     | `##`   |                                       |
-| 11 | Design Provenance and Versioning        | `##`   | Footer block                          |
+| 7  | Parameters                              | `##`   | >=8-column table                                     |
+| 8  | Worked Numerical Examples               | `##`   | >=3 cases + 1 edge case                              |
+| 9  | Behavioral Verification and Calibration | `##`   | Includes Ablation Hooks sub-block                    |
+| 10 | Academic References                     | `##`   |                                                      |
+| 11 | Design Provenance and Versioning        | `##`   | Footer block                                         |
 
 Environment rules — matching mechanics, fee / latency models,
 message-routing policy, content-moderation rules, and peer-network
@@ -346,12 +346,12 @@ in one sentence.
 ```markdown
 ##### Inputs (per decision call)
 
-| Input                   | Source                  | Type / Shape             | Required? | Notes                                       |
-|-------------------------|-------------------------|--------------------------|-----------|---------------------------------------------|
-| `<signal_name>`         | environment / peer feed | `float` / `int` / `enum` | yes / no  | maps to a row in §3.6.1                     |
-| `<state_variable>`      | agent's own persisted state | as declared in §3.6.4 | yes       | populated on first call by §3.6.4 init      |
-| `<context_metadata>`    | scheduler / round header | e.g. `round: int`, `identity: str` | yes | round number, agent identity, seed if any |
-| `<retrieved_knowledge>` | retrieval store (retrieval-augmented variants only) | `list[str]` | retrieval variants only | required only for any variant that performs external retrieval (the finance-default `Rag` is one such variant, but any target-declared retrieval variant qualifies); falls back to a declared sentinel if empty |
+| Input                   | Source                                              | Type / Shape                       | Required?               | Notes                                                                                                                                                                                                                             |
+|-------------------------|-----------------------------------------------------|------------------------------------|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<signal_name>`         | environment / peer feed                             | `float` / `int` / `enum`           | yes / no                | maps to a row in §3.6.1                                                                                                                                                                                                           |
+| `<state_variable>`      | agent's own persisted state                         | as declared in §3.6.4              | yes                     | populated on first call by §3.6.4 init                                                                                                                                                                                            |
+| `<context_metadata>`    | scheduler / round header                            | e.g. `round: int`, `identity: str` | yes                     | round number, agent identity, seed if any (identity naming rule: see implement-simulation-skill/07-step3-config.md §"Identity naming rule" — template identity MUST be `{variant}_{archetype_snake_case}` with NO numeric suffix) |
+| `<retrieved_knowledge>` | retrieval store (retrieval-augmented variants only) | `list[str]`                        | retrieval variants only | required only for any variant that performs external retrieval (the finance-default `Rag` is one such variant, but any target-declared retrieval variant qualifies); falls back to a declared sentinel if empty                   |
 
 Every row MUST appear either in §3.6.1 Decision Information Set
 (signals) or in §3.6.4 Mathematical Model (state variables). No
@@ -364,12 +364,12 @@ object's schema (all required fields, their types, their valid
 ranges, and their units) is declared here and MUST be honoured by
 every implementation variant.
 
-| Field           | Type    | Valid Range / Enum                                         | Unit     | Required? | Meaning                                                        |
-|-----------------|---------|------------------------------------------------------------|----------|-----------|----------------------------------------------------------------|
-| `action`        | enum    | `{"<action_A>", "<action_B>", "hold"}` (from §3.6.3)       | —        | yes       | discrete action selected this call                             |
-| `<param_1>`     | float   | matches §3.6.3 Action parameter rule                       | as declared | conditional | continuous parameter of the action (e.g. bid price)         |
-| `<sizing_var>`  | float   | matches §3.6.3 Sizing rule                                 | as declared | yes    | action magnitude / quantity                                    |
-| `reasoning`     | string  | length declared by author (default: 1–3 sentences; MAY be tightened, loosened, or replaced with a token cap) | —        | yes       | audit trail explaining WHY (also consumed by analysis skills)  |
+| Field          | Type   | Valid Range / Enum                                                                                           | Unit        | Required?   | Meaning                                                       |
+|----------------|--------|--------------------------------------------------------------------------------------------------------------|-------------|-------------|---------------------------------------------------------------|
+| `action`       | enum   | `{"<action_A>", "<action_B>", "hold"}` (from §3.6.3)                                                         | —           | yes         | discrete action selected this call                            |
+| `<param_1>`    | float  | matches §3.6.3 Action parameter rule                                                                         | as declared | conditional | continuous parameter of the action (e.g. bid price)           |
+| `<sizing_var>` | float  | matches §3.6.3 Sizing rule                                                                                   | as declared | yes         | action magnitude / quantity                                   |
+| `reasoning`    | string | length declared by author (default: 1–3 sentences; MAY be tightened, loosened, or replaced with a token cap) | —           | yes         | audit trail explaining WHY (also consumed by analysis skills) |
 
 The enum of `action` values MUST exactly match the "Action types
 allowed" row in §3.6.3. The valid range of every other field MUST
@@ -1033,10 +1033,10 @@ blocker.
 
 ## 7. Status
 
-| Field   | Content                                                                 |
-|---------|-------------------------------------------------------------------------|
-| Version | 2.3.1                                                                   |
-| Created | 2025-06-11 (v1.0.0); last minor bump 2026-07-01 (v2.3.1)                |
-| Status  | canonical                                                               |
-| Domains | Domain-agnostic (all simulation domains)                                |
+| Field      | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Version    | 2.3.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Created    | 2025-06-11 (v1.0.0); last minor bump 2026-07-01 (v2.3.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Status     | canonical                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Domains    | Domain-agnostic (all simulation domains)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Change log | 2026-07-01 v2.3.1: de-hardcoded the variant scheme throughout §3.6.0, §5, and §6. Literal `Rule / LLM / RuleLLM / RAG` enumerations replaced with references to the target's §10.1 Variant Build Matrix and with capability-class terminology (rule-driven / model-driven / retrieval-augmented) so any subset, superset, or renaming stays contract-conformant. Retrieval-fallback rule generalised to "any retrieval-augmented variant". <br> 2026-07-01 v2.3.0: added mandatory §3.6.0 I/O Contract (Inputs, Outputs, Content Constraints, Serialization Format `<analysis>...</analysis><decision>{JSON}</decision>`, Implementer Contract Reminder); tightened §5 consistency rules and §6 validation checklist accordingly. |

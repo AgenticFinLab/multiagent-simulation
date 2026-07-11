@@ -15,12 +15,12 @@
 # -----------------------------------------------------------------------------
 # InformationEnvironment (Coordinator) — identical to Rule variant
 # -----------------------------------------------------------------------------
-environment:
+llm_information_environment:
   name: "InformationEnvironment"
   class: "examples.RumorSpread.LLM.players:InformationEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "llm_information_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:

@@ -7,18 +7,18 @@ sources:
 
 connections:
   market:
-    - patternmatcher
-    - categoryovergeneralizer
-    - bayesianupdater
-    - contrarianstatistical
-    - noisetrader
-  patternmatcher:
+    - rulellm_pattern_matcher
+    - rulellm_category_overgeneralizer
+    - rulellm_bayesian_updater
+    - rulellm_contrarian_statistical
+    - rulellm_noise_trader
+  rulellm_pattern_matcher:
     - market
-  categoryovergeneralizer:
+  rulellm_category_overgeneralizer:
     - market
-  bayesianupdater:
+  rulellm_bayesian_updater:
     - market
-  contrarianstatistical:
+  rulellm_contrarian_statistical:
     - market
-  noisetrader:
+  rulellm_noise_trader:
     - market

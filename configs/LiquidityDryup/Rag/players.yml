@@ -177,13 +177,13 @@ ragllm_arbitrageur:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_value:
+ragllm_value_investor:
   name: "RAG Value Investor"
   class: "examples.LiquidityDryup.Rag.players:RagLLMValueInvestor"
   # Expander → ragllm_value_1, ragllm_value_2
   num_instances: 2
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:

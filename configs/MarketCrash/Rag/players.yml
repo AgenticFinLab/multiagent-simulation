@@ -94,13 +94,13 @@ ragllm_panic_seller:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_risk_parity:
+ragllm_risk_parity_fund:
   name: "RAG Risk Parity Fund"
   class: "examples.MarketCrash.Rag.players:RagLLMRiskParityFund"
   # Expander → ragllm_risk_parity_1, ragllm_risk_parity_2
   num_instances: 2
   config:
-    identity: "ragllm_risk_parity"
+    identity: "ragllm_risk_parity_fund"
     role: player
     steps_per_turn: 1
     group_tags:

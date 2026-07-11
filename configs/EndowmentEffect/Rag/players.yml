@@ -39,12 +39,12 @@ market:
       custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
   persona: !include persona.yml
 
-endowedholder:
+ragllm_endowed_holder:
   name: "EndowedHolder"
   class: "examples.EndowmentEffect.Rag.players:RagLLMEndowedHolder"
   num_instances: 2
   config:
-    identity: "endowedholder"
+    identity: "ragllm_endowed_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -84,12 +84,12 @@ endowedholder:
           top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-statusquoseller:
+ragllm_status_quo_seller:
   name: "StatusQuoSeller"
   class: "examples.EndowmentEffect.Rag.players:RagLLMStatusQuoSeller"
   num_instances: 2
   config:
-    identity: "statusquoseller"
+    identity: "ragllm_status_quo_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -129,12 +129,12 @@ statusquoseller:
           top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-rationalarbitrageur:
+ragllm_rational_arbitrageur:
   name: "RationalArbitrageur"
   class: "examples.EndowmentEffect.Rag.players:RagLLMRationalArbitrageur"
   num_instances: 2
   config:
-    identity: "rationalarbitrageur"
+    identity: "ragllm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -174,12 +174,12 @@ rationalarbitrageur:
           top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-newbuyer:
+ragllm_new_buyer:
   name: "NewBuyer"
   class: "examples.EndowmentEffect.Rag.players:RagLLMNewBuyer"
   num_instances: 2
   config:
-    identity: "newbuyer"
+    identity: "ragllm_new_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -219,12 +219,12 @@ newbuyer:
           top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.EndowmentEffect.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

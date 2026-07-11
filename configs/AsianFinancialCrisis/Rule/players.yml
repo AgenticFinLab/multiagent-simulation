@@ -37,13 +37,13 @@ market:
 # HotMoneyFunder — short-term capital reversal
 # Theory: Radelet & Sachs (1998): hot money reversal mechanics
 # -----------------------------------------------------------------------------
-hot_money_funder:
+rule_hot_money_funder:
   name: "Hot Money Funder"
   class: "examples.AsianFinancialCrisis.Rule.players:HotMoneyFunder"
-  # Expander → hot_money_funder_1, hot_money_funder_2
+  # Expander → rule_hot_money_funder_1, rule_hot_money_funder_2
   num_instances: 2
   config:
-    identity: "hot_money_funder"
+    identity: "rule_hot_money_funder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -63,13 +63,13 @@ hot_money_funder:
 # ContagionTrader — cross-border correlated seller
 # Theory: Kaminsky & Reinhart (1999): contagion transmission across markets
 # -----------------------------------------------------------------------------
-contagion_trader:
+rule_contagion_trader:
   name: "Contagion Trader"
   class: "examples.AsianFinancialCrisis.Rule.players:ContagionTrader"
-  # Expander → contagion_trader_1, contagion_trader_2
+  # Expander → rule_contagion_trader_1, rule_contagion_trader_2
   num_instances: 2
   config:
-    identity: "contagion_trader"
+    identity: "rule_contagion_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -90,12 +90,12 @@ contagion_trader:
 # IMFRescuer — conditional emergency liquidity provider
 # Theory: Corsetti, Pesenti & Roubini (1999): IMF conditionality effects
 # -----------------------------------------------------------------------------
-imf_rescuer:
+rule_imf_rescuer:
   name: "IMF Rescuer"
   class: "examples.AsianFinancialCrisis.Rule.players:IMFRescuer"
   num_instances: 1
   config:
-    identity: "imf_rescuer"
+    identity: "rule_imf_rescuer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -114,13 +114,13 @@ imf_rescuer:
 # ValueContrarian — crisis-driven mispricing buyer
 # Theory: Fundamental value investing; long-run mean reversion
 # -----------------------------------------------------------------------------
-value_contrarian:
+rule_value_contrarian:
   name: "Value Contrarian"
   class: "examples.AsianFinancialCrisis.Rule.players:ValueContrarian"
-  # Expander → value_contrarian_1, value_contrarian_2
+  # Expander → rule_value_contrarian_1, rule_value_contrarian_2
   num_instances: 2
   config:
-    identity: "value_contrarian"
+    identity: "rule_value_contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -141,13 +141,13 @@ value_contrarian:
 # NoiseTrader — background liquidity provider
 # Theory: Noise trader model (Black, 1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.AsianFinancialCrisis.Rule.players:NoiseTrader"
-  # Expander → noise_trader_1, noise_trader_2, noise_trader_3
+  # Expander → rule_noise_trader_1, rule_noise_trader_2, rule_noise_trader_3
   num_instances: 3
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

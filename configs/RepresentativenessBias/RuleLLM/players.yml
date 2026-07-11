@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-patternmatcher:
+rulellm_pattern_matcher:
   name: "PatternMatcher"
   class: "examples.RepresentativenessBias.RuleLLM.players:RuleLLMPatternMatcher"
   num_instances: 2
   config:
-    identity: "patternmatcher"
+    identity: "rulellm_pattern_matcher"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ patternmatcher:
           max_tokens: 512
   persona: !include persona.yml
 
-categoryovergeneralizer:
+rulellm_category_overgeneralizer:
   name: "CategoryOvergeneralizer"
   class: "examples.RepresentativenessBias.RuleLLM.players:RuleLLMCategoryOvergeneralizer"
   num_instances: 2
   config:
-    identity: "categoryovergeneralizer"
+    identity: "rulellm_category_overgeneralizer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ categoryovergeneralizer:
           max_tokens: 512
   persona: !include persona.yml
 
-bayesianupdater:
+rulellm_bayesian_updater:
   name: "BayesianUpdater"
   class: "examples.RepresentativenessBias.RuleLLM.players:RuleLLMBayesianUpdater"
   num_instances: 1
   config:
-    identity: "bayesianupdater"
+    identity: "rulellm_bayesian_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ bayesianupdater:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarianstatistical:
+rulellm_contrarian_statistical:
   name: "ContrarianStatistical"
   class: "examples.RepresentativenessBias.RuleLLM.players:RuleLLMContrarianStatistical"
   num_instances: 1
   config:
-    identity: "contrarianstatistical"
+    identity: "rulellm_contrarian_statistical"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ contrarianstatistical:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.RepresentativenessBias.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

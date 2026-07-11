@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - neweconomyevangelist
-    - ipoflipper
-    - momentumfollower
-    - skepticalvalueinvestor
-    - shortseller
+    - ragllm_new_economy_evangelist
+    - ragllm_ipo_flipper
+    - ragllm_momentum_follower
+    - ragllm_skeptical_value_investor
+    - ragllm_short_seller
 
-  neweconomyevangelist:
+  ragllm_new_economy_evangelist:
     - market
 
-  ipoflipper:
+  ragllm_ipo_flipper:
     - market
 
-  momentumfollower:
+  ragllm_momentum_follower:
     - market
 
-  skepticalvalueinvestor:
+  ragllm_skeptical_value_investor:
     - market
 
-  shortseller:
+  ragllm_short_seller:
     - market

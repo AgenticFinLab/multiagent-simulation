@@ -122,13 +122,13 @@ market:
 # Trading style: Chases price trends, believes in Greater Fool Theory
 # RAG knowledge: Momentum investing, speculation, Keynesian beauty contest
 # =============================================================================
-ragllm_momentum:
+ragllm_momentum_speculator:
   name: "RAG Momentum Speculator"
   class: "examples.AssetBubble.Rag.players:RagLLMMomentumSpeculator"
   # Number of agent instances (expanded to ragllm_momentum_1 .. ragllm_momentum_5)
   num_instances: 5
   config:
-    identity: "ragllm_momentum"
+    identity: "ragllm_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -226,13 +226,13 @@ ragllm_momentum:
 # Trading style: Trades against mispricing, constrained by short costs
 # RAG knowledge: Limits to arbitrage, market efficiency, short selling
 # =============================================================================
-ragllm_arbitrageur:
+ragllm_rational_arbitrageur:
   name: "RAG Rational Arbitrageur"
   class: "examples.AssetBubble.Rag.players:RagLLMRationalArbitrageur"
   # Number of agent instances (expanded to ragllm_arbitrageur_1 .. ragllm_arbitrageur_3)
   num_instances: 3
   config:
-    identity: "ragllm_arbitrageur"
+    identity: "ragllm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -319,13 +319,13 @@ ragllm_arbitrageur:
 # Trading style: Follows market sentiment, prone to herding behavior
 # RAG knowledge: Noise trader risk, behavioral finance, herd behavior
 # =============================================================================
-ragllm_noise:
+ragllm_noise_trader:
   name: "RAG Noise Trader"
   class: "examples.AssetBubble.Rag.players:RagLLMNoiseTrader"
   # Number of agent instances (expanded to ragllm_noise_1, ragllm_noise_2)
   num_instances: 2
   config:
-    identity: "ragllm_noise"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -410,13 +410,13 @@ ragllm_noise:
 # Trading style: Patient, fundamentals-driven, margin of safety discipline
 # RAG knowledge: Value investing, fundamental analysis, Graham/Buffett methods
 # =============================================================================
-ragllm_value:
+ragllm_value_investor:
   name: "RAG Value Investor"
   class: "examples.AssetBubble.Rag.players:RagLLMValueInvestor"
   # Number of agent instances (expanded to ragllm_value_1 .. ragllm_value_4)
   num_instances: 4
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -501,13 +501,13 @@ ragllm_value:
 # Trading style: Uses leverage to amplify gains, subject to margin calls
 # RAG knowledge: Leverage cycles, margin trading, financial crises
 # =============================================================================
-ragllm_leveraged:
+ragllm_leveraged_buyer:
   name: "RAG Leveraged Buyer"
   class: "examples.AssetBubble.Rag.players:RagLLMLeveragedBuyer"
   # Number of agent instances (expanded to ragllm_leveraged_1 .. ragllm_leveraged_3)
   num_instances: 3
   config:
-    identity: "ragllm_leveraged"
+    identity: "ragllm_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -594,13 +594,13 @@ ragllm_leveraged:
 # Trading style: Maintains stable allocation and rebalances slowly
 # RAG knowledge: Long-horizon allocation, portfolio discipline, stabilizing demand
 # =============================================================================
-ragllm_conservative:
+ragllm_conservative_holder:
   name: "RAG Conservative Holder"
   class: "examples.AssetBubble.Rag.players:RagLLMConservativeHolder"
   # Number of agent instances (expanded to ragllm_conservative_1 .. ragllm_conservative_2)
   num_instances: 2
   config:
-    identity: "ragllm_conservative"
+    identity: "ragllm_conservative_holder"
     role: player
     steps_per_turn: 1
     group_tags:

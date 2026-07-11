@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-cascadefollower:
+rulellm_cascade_follower:
   name: "CascadeFollower"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMCascadeFollower"
   num_instances: 3
   config:
-    identity: "cascadefollower"
+    identity: "rulellm_cascade_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -50,12 +50,12 @@ cascadefollower:
           max_tokens: 512
   persona: !include persona.yml
 
-reputationherder:
+rulellm_reputation_herder:
   name: "ReputationHerder"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMReputationHerder"
   num_instances: 3
   config:
-    identity: "reputationherder"
+    identity: "rulellm_reputation_herder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -79,12 +79,12 @@ reputationherder:
           max_tokens: 512
   persona: !include persona.yml
 
-independentthinker:
+rulellm_independent_thinker:
   name: "IndependentThinker"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMIndependentThinker"
   num_instances: 2
   config:
-    identity: "independentthinker"
+    identity: "rulellm_independent_thinker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -108,12 +108,12 @@ independentthinker:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarian:
+rulellm_contrarian:
   name: "Contrarian"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMContrarian"
   num_instances: 1
   config:
-    identity: "contrarian"
+    identity: "rulellm_contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -137,12 +137,12 @@ contrarian:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

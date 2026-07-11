@@ -15,12 +15,12 @@
 # -----------------------------------------------------------------------------
 # InformationEnvironment (Coordinator)
 # -----------------------------------------------------------------------------
-environment:
+rule_information_environment:
   name: "InformationEnvironment"
   class: "examples.RumorSpread.Rule.players:InformationEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "rule_information_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:
@@ -41,12 +41,12 @@ environment:
 # -----------------------------------------------------------------------------
 # Gullible Spreaders (Primary Rumor Amplifiers)
 # -----------------------------------------------------------------------------
-gullible_spreader:
+rule_gullible_spreader:
   name: "Gullible Spreader"
   class: "examples.RumorSpread.Rule.players:GullibleSpreader"
   num_instances: 5
   config:
-    identity: "gullible_spreader"
+    identity: "rule_gullible_spreader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,12 +66,12 @@ gullible_spreader:
 # -----------------------------------------------------------------------------
 # Distorting Relayers (Serial Distortion)
 # -----------------------------------------------------------------------------
-distorting_relayer:
+rule_distorting_relayer:
   name: "Distorting Relayer"
   class: "examples.RumorSpread.Rule.players:DistortingRelayer"
   num_instances: 3
   config:
-    identity: "distorting_relayer"
+    identity: "rule_distorting_relayer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -92,12 +92,12 @@ distorting_relayer:
 # -----------------------------------------------------------------------------
 # Skeptical Evaluators (Critical Assessors)
 # -----------------------------------------------------------------------------
-skeptical_evaluator:
+rule_skeptical_evaluator:
   name: "Skeptical Evaluator"
   class: "examples.RumorSpread.Rule.players:SkepticalEvaluator"
   num_instances: 3
   config:
-    identity: "skeptical_evaluator"
+    identity: "rule_skeptical_evaluator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -117,12 +117,12 @@ skeptical_evaluator:
 # -----------------------------------------------------------------------------
 # Fact Checkers (Active Debunkers)
 # -----------------------------------------------------------------------------
-fact_checker:
+rule_fact_checker:
   name: "Fact Checker"
   class: "examples.RumorSpread.Rule.players:FactChecker"
   num_instances: 2
   config:
-    identity: "fact_checker"
+    identity: "rule_fact_checker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -142,12 +142,12 @@ fact_checker:
 # -----------------------------------------------------------------------------
 # Uninformed Bystanders (Baseline)
 # -----------------------------------------------------------------------------
-uninformed_bystander:
+rule_uninformed_bystander:
   name: "Uninformed Bystander"
   class: "examples.RumorSpread.Rule.players:UninformedBystander"
   num_instances: 4
   config:
-    identity: "uninformed_bystander"
+    identity: "rule_uninformed_bystander"
     role: player
     steps_per_turn: 1
     group_tags:

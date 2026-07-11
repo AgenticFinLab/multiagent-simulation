@@ -45,13 +45,13 @@ market:
 # Belief Anchors (Primary Destabilizers)
 # Theory: Nickerson (1998)
 # -----------------------------------------------------------------------------
-belief_anchor:
+rule_belief_anchor:
   name: "Belief Anchor"
   class: "examples.ConfirmationBias.Rule.players:BeliefAnchor"
   # Expander → belief_anchor_1, belief_anchor_2
   num_instances: 2
   config:
-    identity: "belief_anchor"
+    identity: "rule_belief_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -74,13 +74,13 @@ belief_anchor:
 # Selective Scanners (Secondary Destabilizers)
 # Theory: Lord, Ross & Lepper (1979)
 # -----------------------------------------------------------------------------
-selective_scanner:
+rule_selective_scanner:
   name: "Selective Scanner"
   class: "examples.ConfirmationBias.Rule.players:SelectiveScanner"
   # Expander → selective_scanner_1, selective_scanner_2
   num_instances: 2
   config:
-    identity: "selective_scanner"
+    identity: "rule_selective_scanner"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -101,12 +101,12 @@ selective_scanner:
 # Balanced Analyst (Stabilizer)
 # Theory: Rabin & Schrag (1999) rational baseline
 # -----------------------------------------------------------------------------
-balanced_analyst:
+rule_balanced_analyst:
   name: "Balanced Analyst"
   class: "examples.ConfirmationBias.Rule.players:BalancedAnalyst"
   num_instances: 1
   config:
-    identity: "balanced_analyst"
+    identity: "rule_balanced_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -125,12 +125,12 @@ balanced_analyst:
 # -----------------------------------------------------------------------------
 # Contrarian Trader (Stabilizer)
 # -----------------------------------------------------------------------------
-contrarian_trader:
+rule_contrarian_trader:
   name: "Contrarian Trader"
   class: "examples.ConfirmationBias.Rule.players:ContrarianTrader"
   num_instances: 1
   config:
-    identity: "contrarian_trader"
+    identity: "rule_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -148,13 +148,13 @@ contrarian_trader:
 # -----------------------------------------------------------------------------
 # Noise Traders (Black, 1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.ConfirmationBias.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

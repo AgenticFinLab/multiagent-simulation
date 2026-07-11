@@ -39,12 +39,12 @@ market:
 # -----------------------------------------------------------------------------
 # Recent Event Overweighter (Primary Bias Driver)
 # -----------------------------------------------------------------------------
-recent_event_overweighter:
+rule_recent_event_overweighter:
   name: "Recent Event Overweighter"
   class: "examples.AvailabilityBias.Rule.players:RecentEventOverweighter"
   num_instances: 2
   config:
-    identity: "recent_event_overweighter"
+    identity: "rule_recent_event_overweighter"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -64,12 +64,12 @@ recent_event_overweighter:
 # -----------------------------------------------------------------------------
 # Media Influenced Trader
 # -----------------------------------------------------------------------------
-media_influenced_trader:
+rule_media_influenced_trader:
   name: "Media Influenced Trader"
   class: "examples.AvailabilityBias.Rule.players:MediaInfluencedTrader"
   num_instances: 2
   config:
-    identity: "media_influenced_trader"
+    identity: "rule_media_influenced_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -90,12 +90,12 @@ media_influenced_trader:
 # -----------------------------------------------------------------------------
 # Systematic Analyst (Stabilizing Force)
 # -----------------------------------------------------------------------------
-systematic_analyst:
+rule_systematic_analyst:
   name: "Systematic Analyst"
   class: "examples.AvailabilityBias.Rule.players:SystematicAnalyst"
   num_instances: 1
   config:
-    identity: "systematic_analyst"
+    identity: "rule_systematic_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -115,12 +115,12 @@ systematic_analyst:
 # -----------------------------------------------------------------------------
 # Value Trader (Stabilizing Force)
 # -----------------------------------------------------------------------------
-value_trader:
+rule_value_trader:
   name: "Value Trader"
   class: "examples.AvailabilityBias.Rule.players:ValueTrader"
   num_instances: 2
   config:
-    identity: "value_trader"
+    identity: "rule_value_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -138,12 +138,12 @@ value_trader:
 # -----------------------------------------------------------------------------
 # Noise Trader (Background Liquidity)
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.AvailabilityBias.Rule.players:NoiseTrader"
   num_instances: 3
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

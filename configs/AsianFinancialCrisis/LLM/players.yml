@@ -34,13 +34,13 @@ market:
 # LLM HotMoneyFunder — short-term capital reversal
 # Theory: Radelet & Sachs (1998): hot money reversal mechanics
 # -----------------------------------------------------------------------------
-hot_money_funder:
+llm_hot_money_funder:
   name: "Hot Money Funder"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMHotMoneyFunder"
-  # Expander → hot_money_funder_1, hot_money_funder_2
+  # Expander → llm_hot_money_funder_1, llm_hot_money_funder_2
   num_instances: 2
   config:
-    identity: "hot_money_funder"
+    identity: "llm_hot_money_funder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,13 +66,13 @@ hot_money_funder:
 # LLM ContagionTrader — cross-border correlated seller
 # Theory: Kaminsky & Reinhart (1999): contagion mechanics
 # -----------------------------------------------------------------------------
-contagion_trader:
+llm_contagion_trader:
   name: "Contagion Trader"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMContagionTrader"
-  # Expander → contagion_trader_1, contagion_trader_2
+  # Expander → llm_contagion_trader_1, llm_contagion_trader_2
   num_instances: 2
   config:
-    identity: "contagion_trader"
+    identity: "llm_contagion_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -98,12 +98,12 @@ contagion_trader:
 # LLM IMFRescuer — conditional emergency liquidity provider
 # Theory: Corsetti, Pesenti & Roubini (1999): IMF conditionality
 # -----------------------------------------------------------------------------
-imf_rescuer:
+llm_imf_rescuer:
   name: "IMF Rescuer"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMIMFRescuer"
   num_instances: 1
   config:
-    identity: "imf_rescuer"
+    identity: "llm_imf_rescuer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -129,13 +129,13 @@ imf_rescuer:
 # LLM ValueContrarian — fundamental value crisis buyer
 # Theory: Fundamental value investing; long-run mean reversion
 # -----------------------------------------------------------------------------
-value_contrarian:
+llm_value_contrarian:
   name: "Value Contrarian"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMValueContrarian"
-  # Expander → value_contrarian_1, value_contrarian_2
+  # Expander → llm_value_contrarian_1, llm_value_contrarian_2
   num_instances: 2
   config:
-    identity: "value_contrarian"
+    identity: "llm_value_contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -161,13 +161,13 @@ value_contrarian:
 # LLM NoiseTrader — background liquidity provider
 # Theory: Noise trader model (Black, 1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+llm_noise_trader:
   name: "Noise Trader"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMNoiseTrader"
-  # Expander → noise_trader_1, noise_trader_2, noise_trader_3
+  # Expander → llm_noise_trader_1, llm_noise_trader_2, llm_noise_trader_3
   num_instances: 3
   config:
-    identity: "noise_trader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

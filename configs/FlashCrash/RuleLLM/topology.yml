@@ -11,23 +11,23 @@ sources:
 
 connections:
   market:
-    - rulellm_hft
+    - rulellm_high_frequency_trader
     - rulellm_market_maker
-    - rulellm_algo
-    - rulellm_stop_loss
-    - rulellm_fundamental
+    - rulellm_algorithmic_trader
+    - rulellm_stop_loss_trader
+    - rulellm_fundamental_trader
 
-  rulellm_hft:
+  rulellm_high_frequency_trader:
     - market
 
   rulellm_market_maker:
     - market
 
-  rulellm_algo:
+  rulellm_algorithmic_trader:
     - market
 
-  rulellm_stop_loss:
+  rulellm_stop_loss_trader:
     - market
 
-  rulellm_fundamental:
+  rulellm_fundamental_trader:
     - market

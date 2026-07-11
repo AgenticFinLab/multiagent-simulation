@@ -32,12 +32,12 @@ market:
 # Pro-Cyclical Lenders — LLM with leveraged credit investor persona
 # Theory: Adrian & Shin (2010)
 # -----------------------------------------------------------------------------
-procyclicallender:
+llm_pro_cyclical_lender:
   name: "ProCyclicalLender"
   class: "examples.CreditCycle.LLM.players:LLMProCyclicalLender"
   num_instances: 2
   config:
-    identity: "procyclicallender"
+    identity: "llm_pro_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,12 +66,12 @@ procyclicallender:
 # Minsky Borrowers — LLM with aggressive borrower persona
 # Theory: Minsky (1986)
 # -----------------------------------------------------------------------------
-minskyborrower:
+llm_minsky_borrower:
   name: "MinskyBorrower"
   class: "examples.CreditCycle.LLM.players:LLMMinskyBorrower"
   num_instances: 2
   config:
-    identity: "minskyborrower"
+    identity: "llm_minsky_borrower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -101,12 +101,12 @@ minskyborrower:
 # Counter-Cyclical Lenders — LLM with deep-pockets patient investor persona
 # Theory: Geanakoplos (2010)
 # -----------------------------------------------------------------------------
-countercyclicallender:
+llm_counter_cyclical_lender:
   name: "CounterCyclicalLender"
   class: "examples.CreditCycle.LLM.players:LLMCounterCyclicalLender"
   num_instances: 1
   config:
-    identity: "countercyclicallender"
+    identity: "llm_counter_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -133,12 +133,12 @@ countercyclicallender:
 # Value Investors — LLM with fundamental value persona
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-valueinvestor:
+llm_value_investor:
   name: "ValueInvestor"
   class: "examples.CreditCycle.LLM.players:LLMValueInvestor"
   num_instances: 1
   config:
-    identity: "valueinvestor"
+    identity: "llm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -165,12 +165,12 @@ valueinvestor:
 # Noise Traders — LLM with casual random trader persona
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CreditCycle.LLM.players:LLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

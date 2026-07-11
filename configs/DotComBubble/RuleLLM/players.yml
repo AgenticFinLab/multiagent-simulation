@@ -27,12 +27,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-neweconomyevangelist:
+rulellm_new_economy_evangelist:
   name: "NewEconomyEvangelist"
   class: "examples.DotComBubble.RuleLLM.players:RuleLLMNewEconomyEvangelist"
   num_instances: 2
   config:
-    identity: "neweconomyevangelist"
+    identity: "rulellm_new_economy_evangelist"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -59,12 +59,12 @@ neweconomyevangelist:
           max_tokens: 512
   persona: !include persona.yml
 
-ipoflipper:
+rulellm_ipo_flipper:
   name: "IPOFlipper"
   class: "examples.DotComBubble.RuleLLM.players:RuleLLMIPOFlipper"
   num_instances: 2
   config:
-    identity: "ipoflipper"
+    identity: "rulellm_ipo_flipper"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -93,12 +93,12 @@ ipoflipper:
           max_tokens: 512
   persona: !include persona.yml
 
-momentumfollower:
+rulellm_momentum_follower:
   name: "MomentumFollower"
   class: "examples.DotComBubble.RuleLLM.players:RuleLLMMomentumFollower"
   num_instances: 2
   config:
-    identity: "momentumfollower"
+    identity: "rulellm_momentum_follower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -127,12 +127,12 @@ momentumfollower:
           max_tokens: 512
   persona: !include persona.yml
 
-skepticalvalueinvestor:
+rulellm_skeptical_value_investor:
   name: "SkepticalValueInvestor"
   class: "examples.DotComBubble.RuleLLM.players:RuleLLMSkepticalValueInvestor"
   num_instances: 1
   config:
-    identity: "skepticalvalueinvestor"
+    identity: "rulellm_skeptical_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -163,12 +163,12 @@ skepticalvalueinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-shortseller:
+rulellm_short_seller:
   name: "ShortSeller"
   class: "examples.DotComBubble.RuleLLM.players:RuleLLMShortSeller"
   num_instances: 1
   config:
-    identity: "shortseller"
+    identity: "rulellm_short_seller"
     role: player
     steps_per_turn: 1
     group_tags:

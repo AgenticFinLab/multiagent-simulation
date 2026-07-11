@@ -7,18 +7,18 @@ sources:
 
 connections:
   market:
-    - insideradvantaged
-    - narrativebeliever
-    - skepticalanalyst
-    - arbitrageur
-    - noisetrader
-  insideradvantaged:
+    - llm_insider_advantaged
+    - llm_narrative_believer
+    - llm_skeptical_analyst
+    - llm_arbitrageur
+    - llm_noise_trader
+  llm_insider_advantaged:
     - market
-  narrativebeliever:
+  llm_narrative_believer:
     - market
-  skepticalanalyst:
+  llm_skeptical_analyst:
     - market
-  arbitrageur:
+  llm_arbitrageur:
     - market
-  noisetrader:
+  llm_noise_trader:
     - market

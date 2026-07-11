@@ -391,9 +391,10 @@ def render_variant_choice() -> None:
                     for col, a in zip(cols, row_agents):
                         with col:
                             player_id = a["id"]
+                            archetype = _canonical_archetype(player_id)
                             icon_path = (
                                 ICON_ROOT
-                                / f"finance-{player_id.replace('_', '-')}.png"
+                                / f"finance-{archetype.replace('_', '-')}.png"
                             )
                             count = a["instances"]
                             display_name = html.escape(a["name"])
@@ -611,6 +612,20 @@ def _image_data_uri(path: Path) -> str:
     return f"data:{mime};base64,{encoded}"
 
 
+# Variant prefixes attached to identity strings in scenario configs.
+# Assets (icons, .md profiles) are keyed by the pure archetype stem, so the
+# prefix is stripped before path resolution.
+_VARIANT_PREFIXES: tuple[str, ...] = ("rule_", "llm_", "rulellm_", "ragllm_")
+
+
+def _canonical_archetype(player_id: str) -> str:
+    """Strip a known ``{variant}_`` prefix, returning the pure archetype stem."""
+    for prefix in _VARIANT_PREFIXES:
+        if player_id.startswith(prefix):
+            return player_id[len(prefix):]
+    return player_id
+
+
 @st.dialog("Agent design profile", width="large")
 def _show_agent_profile_dialog(agent: dict) -> None:
     """Modal that renders the full agent .md profile.
@@ -619,7 +634,8 @@ def _show_agent_profile_dialog(agent: dict) -> None:
     Falls back to a caption when the profile file does not exist.
     """
     player_id = agent["id"]
-    icon_path = ICON_ROOT / f"finance-{player_id.replace('_', '-')}.png"
+    archetype = _canonical_archetype(player_id)
+    icon_path = ICON_ROOT / f"finance-{archetype.replace('_', '-')}.png"
     header_cols = st.columns([1, 6], gap="small")
     with header_cols[0]:
         if icon_path.exists():
@@ -633,7 +649,7 @@ def _show_agent_profile_dialog(agent: dict) -> None:
         if instances > 1:
             st.caption(f"{instances} instances in this scenario")
     st.divider()
-    md_stem = player_id.replace("_", "-")
+    md_stem = archetype.replace("_", "-")
     md_path = FINANCE_ROOT / f"{md_stem}.md"
     if md_path.exists():
         st.markdown(md_path.read_text(encoding="utf-8"))

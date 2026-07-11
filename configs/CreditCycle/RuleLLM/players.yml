@@ -25,12 +25,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-procyclicallender:
+rulellm_pro_cyclical_lender:
   name: "ProCyclicalLender"
   class: "examples.CreditCycle.RuleLLM.players:RuleLLMProCyclicalLender"
   num_instances: 2
   config:
-    identity: "procyclicallender"
+    identity: "rulellm_pro_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -55,12 +55,12 @@ procyclicallender:
           max_tokens: 512
   persona: !include persona.yml
 
-minskyborrower:
+rulellm_minsky_borrower:
   name: "MinskyBorrower"
   class: "examples.CreditCycle.RuleLLM.players:RuleLLMMinskyBorrower"
   num_instances: 2
   config:
-    identity: "minskyborrower"
+    identity: "rulellm_minsky_borrower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -86,12 +86,12 @@ minskyborrower:
           max_tokens: 512
   persona: !include persona.yml
 
-countercyclicallender:
+rulellm_counter_cyclical_lender:
   name: "CounterCyclicalLender"
   class: "examples.CreditCycle.RuleLLM.players:RuleLLMCounterCyclicalLender"
   num_instances: 1
   config:
-    identity: "countercyclicallender"
+    identity: "rulellm_counter_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -114,12 +114,12 @@ countercyclicallender:
           max_tokens: 512
   persona: !include persona.yml
 
-valueinvestor:
+rulellm_value_investor:
   name: "ValueInvestor"
   class: "examples.CreditCycle.RuleLLM.players:RuleLLMValueInvestor"
   num_instances: 1
   config:
-    identity: "valueinvestor"
+    identity: "rulellm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -142,12 +142,12 @@ valueinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CreditCycle.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

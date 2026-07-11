@@ -7,18 +7,18 @@ sources:
 
 connections:
   market:
-    - macrohedgefund
-    - pegdefender
-    - convergencetrader
-    - opportunistictrader
-    - noisetrader
-  macrohedgefund:
+    - rule_macro_hedge_fund
+    - rule_peg_defender
+    - rule_convergence_trader
+    - rule_opportunistic_trader
+    - rule_noise_trader
+  rule_macro_hedge_fund:
     - market
-  pegdefender:
+  rule_peg_defender:
     - market
-  convergencetrader:
+  rule_convergence_trader:
     - market
-  opportunistictrader:
+  rule_opportunistic_trader:
     - market
-  noisetrader:
+  rule_noise_trader:
     - market

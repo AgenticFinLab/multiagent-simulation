@@ -3,11 +3,11 @@
 # =============================================================================
 # Star topology: Market broadcasts to all RuleLLM agents; agents send orders to market.
 #
-#         concentrated_fund ──────────────┐
-#         prime_broker_first_mover ──────┤
-#         prime_broker_delayed_liquidator┼──▶ market ──▶ all agents
-#         block_trade_buyer ──────────────┤        (price, deviation, volume)
-#         information_trader ─────────────┘
+#         rulellm_concentrated_fund ──────────────┐
+#         rulellm_prime_broker_first_mover ──────┤
+#         rulellm_prime_broker_delayed_liquidator┼──▶ market ──▶ all agents
+#         rulellm_block_trade_buyer ──────────────┤        (price, deviation, volume)
+#         rulellm_information_trader ─────────────┘
 #
 # Execution flow per round:
 #   Level 0: market broadcasts current price + market data
@@ -22,24 +22,24 @@ sources:
 connections:
   # Market → All agents (price + market data broadcast)
   market:
-    - concentrated_fund
-    - prime_broker_first_mover
-    - prime_broker_delayed_liquidator
-    - block_trade_buyer
-    - information_trader
+    - rulellm_concentrated_fund
+    - rulellm_prime_broker_first_mover
+    - rulellm_prime_broker_delayed_liquidator
+    - rulellm_block_trade_buyer
+    - rulellm_information_trader
 
   # Each agent → Market only (order submission)
-  concentrated_fund:
+  rulellm_concentrated_fund:
     - market
 
-  prime_broker_first_mover:
+  rulellm_prime_broker_first_mover:
     - market
 
-  prime_broker_delayed_liquidator:
+  rulellm_prime_broker_delayed_liquidator:
     - market
 
-  block_trade_buyer:
+  rulellm_block_trade_buyer:
     - market
 
-  information_trader:
+  rulellm_information_trader:
     - market

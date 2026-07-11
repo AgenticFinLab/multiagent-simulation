@@ -9,23 +9,23 @@ sources:
 
 connections:
   market:
-    - portfolio_insurer
-    - index_arbitrageur
-    - program_trader
-    - value_investor
-    - noise_trader
+    - rulellm_portfolio_insurer
+    - rulellm_index_arbitrageur
+    - rulellm_program_trader
+    - rulellm_value_investor
+    - rulellm_noise_trader
 
-  portfolio_insurer:
+  rulellm_portfolio_insurer:
     - market
 
-  index_arbitrageur:
+  rulellm_index_arbitrageur:
     - market
 
-  program_trader:
+  rulellm_program_trader:
     - market
 
-  value_investor:
+  rulellm_value_investor:
     - market
 
-  noise_trader:
+  rulellm_noise_trader:
     - market

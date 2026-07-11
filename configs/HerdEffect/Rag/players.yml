@@ -56,12 +56,12 @@ market:
   persona: !include persona.yml
 
 # RuleLLM Momentum Investor (Trend Following)
-ragllm_momentum:
+ragllm_momentum_investor:
   name: "RAG Momentum Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMMomentumInvestor"
   num_instances: 3
   config:
-    identity: "ragllm_momentum"
+    identity: "ragllm_momentum_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -100,12 +100,12 @@ ragllm_momentum:
   persona: !include persona.yml
 
 # RuleLLM Contrarian Investor (Value/Mean Reversion)
-ragllm_contrarian:
+ragllm_contrarian_investor:
   name: "RAG Contrarian Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMContrarianInvestor"
   num_instances: 2
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -144,12 +144,12 @@ ragllm_contrarian:
   persona: !include persona.yml
 
 # RuleLLM Risk Averse Investor (Variance Sensitive)
-ragllm_risk_averse:
+ragllm_risk_averse_investor:
   name: "RAG Risk Averse Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMRiskAverseInvestor"
   num_instances: 2
   config:
-    identity: "ragllm_risk_averse"
+    identity: "ragllm_risk_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -188,12 +188,12 @@ ragllm_risk_averse:
   persona: !include persona.yml
 
 # RuleLLM Aggressive Investor (Acceleration Momentum)
-ragllm_aggressive:
+ragllm_aggressive_investor:
   name: "RAG Aggressive Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMAggressiveInvestor"
   num_instances: 2
   config:
-    identity: "ragllm_aggressive"
+    identity: "ragllm_aggressive_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -232,12 +232,12 @@ ragllm_aggressive:
   persona: !include persona.yml
 
 # RuleLLM Noise Trader (Random Trading)
-ragllm_noise:
+ragllm_noise_trader:
   name: "RAG Noise Trader"
   class: "examples.HerdEffect.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "ragllm_noise"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

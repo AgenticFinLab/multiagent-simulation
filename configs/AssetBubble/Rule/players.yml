@@ -42,13 +42,13 @@ market:
 # -----------------------------------------------------------------------------
 # Momentum Speculators (Primary Bubble Drivers)
 # -----------------------------------------------------------------------------
-momentum_speculator:
+rule_momentum_speculator:
   name: "Momentum Speculator"
   class: "examples.AssetBubble.Rule.players:MomentumSpeculator"
   # Expander → momentum_speculator_1, momentum_speculator_2
   num_instances: 5
   config:
-    identity: "momentum_speculator"
+    identity: "rule_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -72,12 +72,12 @@ momentum_speculator:
 # -----------------------------------------------------------------------------
 # Rational Arbitrageur (Limited Corrective Force)
 # -----------------------------------------------------------------------------
-rational_arbitrageur:
+rule_rational_arbitrageur:
   name: "Rational Arbitrageur"
   class: "examples.AssetBubble.Rule.players:RationalArbitrageur"
   num_instances: 3
   config:
-    identity: "rational_arbitrageur"
+    identity: "rule_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -98,13 +98,13 @@ rational_arbitrageur:
 # -----------------------------------------------------------------------------
 # Noise Traders (Herd Followers)
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.AssetBubble.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -125,12 +125,12 @@ noise_trader:
 # -----------------------------------------------------------------------------
 # Fundamental Investor (Weak Anchor)
 # -----------------------------------------------------------------------------
-fundamental_investor:
+rule_fundamental_investor:
   name: "Fundamental Investor"
   class: "examples.AssetBubble.Rule.players:FundamentalInvestor"
   num_instances: 4
   config:
-    identity: "fundamental_investor"
+    identity: "rule_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -150,12 +150,12 @@ fundamental_investor:
 # -----------------------------------------------------------------------------
 # Leveraged Buyer (Amplifier)
 # -----------------------------------------------------------------------------
-leveraged_buyer:
+rule_leveraged_buyer:
   name: "Leveraged Buyer"
   class: "examples.AssetBubble.Rule.players:LeveragedBuyer"
   num_instances: 3
   config:
-    identity: "leveraged_buyer"
+    identity: "rule_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -176,12 +176,12 @@ leveraged_buyer:
 # -----------------------------------------------------------------------------
 # Conservative Holder (Stability)
 # -----------------------------------------------------------------------------
-conservative_holder:
+rule_conservative_holder:
   name: "Conservative Holder"
   class: "examples.AssetBubble.Rule.players:ConservativeHolder"
   num_instances: 2
   config:
-    identity: "conservative_holder"
+    identity: "rule_conservative_holder"
     role: player
     steps_per_turn: 1
     group_tags:

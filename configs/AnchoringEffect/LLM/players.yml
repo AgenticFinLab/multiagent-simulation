@@ -34,13 +34,13 @@ market:
 # Anchored Traders — LLM with anchoring persona
 # Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
 # -----------------------------------------------------------------------------
-anchored_trader:
+llm_anchored_trader:
   name: "Anchored Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMAnchoredTrader"
-  # Expander → anchored_trader_1, anchored_trader_2
+  # Expander → llm_anchored_trader_1, llm_anchored_trader_2
   num_instances: 2
   config:
-    identity: "anchored_trader"
+    identity: "llm_anchored_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -65,13 +65,13 @@ anchored_trader:
 # Historical Anchors — LLM with historical-price fixation persona
 # Theory: Northcraft & Neale (1987) — Experts anchor to past prices
 # -----------------------------------------------------------------------------
-historical_anchor:
+llm_historical_anchor:
   name: "Historical Anchor"
   class: "examples.AnchoringEffect.LLM.players:LLMHistoricalAnchor"
-  # Expander → historical_anchor_1, historical_anchor_2
+  # Expander → llm_historical_anchor_1, llm_historical_anchor_2
   num_instances: 2
   config:
-    identity: "historical_anchor"
+    identity: "llm_historical_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -94,12 +94,12 @@ historical_anchor:
 # -----------------------------------------------------------------------------
 # Rational Updater — LLM with Bayesian-updating persona (benchmark)
 # -----------------------------------------------------------------------------
-rational_updater:
+llm_rational_updater:
   name: "Rational Updater"
   class: "examples.AnchoringEffect.LLM.players:LLMRationalUpdater"
   num_instances: 1
   config:
-    identity: "rational_updater"
+    identity: "llm_rational_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -123,13 +123,13 @@ rational_updater:
 # Momentum Traders — LLM with trend-following persona
 # Theory: Jegadeesh & Titman (1993) — Momentum effect
 # -----------------------------------------------------------------------------
-momentum_trader:
+llm_momentum_trader:
   name: "Momentum Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMMomentumTrader"
-  # Expander → momentum_trader_1, momentum_trader_2
+  # Expander → llm_momentum_trader_1, llm_momentum_trader_2
   num_instances: 2
   config:
-    identity: "momentum_trader"
+    identity: "llm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -153,13 +153,13 @@ momentum_trader:
 # Noise Traders — LLM with random-trader persona
 # Theory: Black (1986) — Noise
 # -----------------------------------------------------------------------------
-noise_trader:
+llm_noise_trader:
   name: "Noise Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMNoiseTrader"
-  # Expander → noise_trader_1, noise_trader_2
+  # Expander → llm_noise_trader_1, llm_noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -183,13 +183,13 @@ noise_trader:
 # Disposition Traders — LLM with Prospect-Theory asymmetric-reference persona
 # Theory: Shefrin & Statman (1985); Kahneman & Tversky (1979)
 # -----------------------------------------------------------------------------
-disposition_trader:
+llm_disposition_trader:
   name: "Disposition Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMDispositionTrader"
-  # Expander → disposition_trader_1, disposition_trader_2
+  # Expander → llm_disposition_trader_1, llm_disposition_trader_2
   num_instances: 2
   config:
-    identity: "disposition_trader"
+    identity: "llm_disposition_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -213,12 +213,12 @@ disposition_trader:
 # Contrarian Trader — LLM with short-horizon mean-reversion persona
 # Theory: De Bondt & Thaler (1985); Jegadeesh (1990)
 # -----------------------------------------------------------------------------
-contrarian_trader:
+llm_contrarian_trader:
   name: "Contrarian Trader"
   class: "examples.AnchoringEffect.LLM.players:LLMContrarianTrader"
   num_instances: 1
   config:
-    identity: "contrarian_trader"
+    identity: "llm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -242,12 +242,12 @@ contrarian_trader:
 # Fundamental Analyst — LLM with slow-updating conservatism-bias persona
 # Theory: Barberis, Shleifer & Vishny (1998); Shleifer & Vishny (1997)
 # -----------------------------------------------------------------------------
-fundamental_analyst:
+llm_fundamental_analyst:
   name: "Fundamental Analyst"
   class: "examples.AnchoringEffect.LLM.players:LLMFundamentalAnalyst"
   num_instances: 1
   config:
-    identity: "fundamental_analyst"
+    identity: "llm_fundamental_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -271,12 +271,12 @@ fundamental_analyst:
 # Liquidity Provider — LLM with passive two-sided market-making persona
 # Theory: Glosten & Milgrom (1985); Hendershott et al. (2011)
 # -----------------------------------------------------------------------------
-liquidity_provider:
+llm_liquidity_provider:
   name: "Liquidity Provider"
   class: "examples.AnchoringEffect.LLM.players:LLMLiquidityProvider"
   num_instances: 1
   config:
-    identity: "liquidity_provider"
+    identity: "llm_liquidity_provider"
     role: player
     steps_per_turn: 1
     group_tags:

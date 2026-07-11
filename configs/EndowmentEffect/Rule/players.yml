@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-endowedholder:
+rule_endowed_holder:
   name: "EndowedHolder"
   class: "examples.EndowmentEffect.Rule.players:EndowedHolder"
   num_instances: 2
   config:
-    identity: "endowedholder"
+    identity: "rule_endowed_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -40,12 +40,12 @@ endowedholder:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-statusquoseller:
+rule_status_quo_seller:
   name: "StatusQuoSeller"
   class: "examples.EndowmentEffect.Rule.players:StatusQuoSeller"
   num_instances: 2
   config:
-    identity: "statusquoseller"
+    identity: "rule_status_quo_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -59,12 +59,12 @@ statusquoseller:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-rationalarbitrageur:
+rule_rational_arbitrageur:
   name: "RationalArbitrageur"
   class: "examples.EndowmentEffect.Rule.players:RationalArbitrageur"
   num_instances: 2
   config:
-    identity: "rationalarbitrageur"
+    identity: "rule_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ rationalarbitrageur:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-newbuyer:
+rule_new_buyer:
   name: "NewBuyer"
   class: "examples.EndowmentEffect.Rule.players:NewBuyer"
   num_instances: 2
   config:
-    identity: "newbuyer"
+    identity: "rule_new_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -97,12 +97,12 @@ newbuyer:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.EndowmentEffect.Rule.players:NoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

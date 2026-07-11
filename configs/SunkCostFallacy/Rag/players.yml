@@ -24,13 +24,13 @@ market:
       mean_reversion: 0.015           # Source: target §9 mean_reversion row; slow correction preserves behavioral persistence
       noise_std: 0.01                 # Source: target §9 noise_std row; Black (1986) low background volatility
 
-sunkcostholder:
+ragllm_sunk_cost_holder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMSunkCostHolder"
   num_instances: 3                    # Source: target §7 SunkCostHolder row; 3 instances represent core sunk-cost inertia mass
   persona: !include ../Rag/persona.yml
   config:
-    identity: "sunkcostholder"
+    identity: "ragllm_sunk_cost_holder"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -63,13 +63,13 @@ sunkcostholder:
           temperature: 0.7
           max_tokens: 600
 
-commitmentescalator:
+ragllm_commitment_escalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMCommitmentEscalator"
   num_instances: 3                    # Source: target §7 CommitmentEscalator row; 3 instances amplify escalation pressure
   persona: !include ../Rag/persona.yml
   config:
-    identity: "commitmentescalator"
+    identity: "ragllm_commitment_escalator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -102,13 +102,13 @@ commitmentescalator:
           temperature: 0.7
           max_tokens: 600
 
-rationalcutter:
+ragllm_rational_cutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMRationalCutter"
   num_instances: 2                    # Source: target §7 RationalCutter row; 2 instances provide rational counter-flow
   persona: !include ../Rag/persona.yml
   config:
-    identity: "rationalcutter"
+    identity: "ragllm_rational_cutter"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -141,13 +141,13 @@ rationalcutter:
           temperature: 0.7
           max_tokens: 600
 
-opportunitycosttrader:
+ragllm_opportunity_cost_trader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMOpportunityCostTrader"
   num_instances: 2                    # Source: target §7 OpportunityCostTrader row; 2 instances model reallocation discipline
   persona: !include ../Rag/persona.yml
   config:
-    identity: "opportunitycosttrader"
+    identity: "ragllm_opportunity_cost_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -180,13 +180,13 @@ opportunitycosttrader:
           temperature: 0.7
           max_tokens: 600
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.Rag.players:RagLLMNoiseTrader"
   num_instances: 2                    # Source: target §7 NoiseTrader row; 2 instances provide baseline liquidity
   persona: !include ../Rag/persona.yml
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

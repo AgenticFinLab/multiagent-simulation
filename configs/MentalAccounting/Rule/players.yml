@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-mentalaccountant:
+rule_mental_accountant:
   name: "MentalAccountant"
   class: "examples.MentalAccounting.Rule.players:MentalAccountant"
   num_instances: 2
   config:
-    identity: "mentalaccountant"
+    identity: "rule_mental_accountant"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -42,12 +42,12 @@ mentalaccountant:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-housemoneytrader:
+rule_house_money_trader:
   name: "HouseMoneyTrader"
   class: "examples.MentalAccounting.Rule.players:HouseMoneyTrader"
   num_instances: 2
   config:
-    identity: "housemoneytrader"
+    identity: "rule_house_money_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -65,12 +65,12 @@ housemoneytrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-rationalportfoliomanager:
+rule_rational_portfolio_manager:
   name: "RationalPortfolioManager"
   class: "examples.MentalAccounting.Rule.players:RationalPortfolioManager"
   num_instances: 1
   config:
-    identity: "rationalportfoliomanager"
+    identity: "rule_rational_portfolio_manager"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -88,12 +88,12 @@ rationalportfoliomanager:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-sunkcostholder:
+rule_sunk_cost_holder:
   name: "SunkCostHolder"
   class: "examples.MentalAccounting.Rule.players:SunkCostHolder"
   num_instances: 2
   config:
-    identity: "sunkcostholder"
+    identity: "rule_sunk_cost_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -109,12 +109,12 @@ sunkcostholder:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.MentalAccounting.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

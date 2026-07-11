@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hindsightoverconfident:
+rulellm_hindsight_overconfident:
   name: "HindsightOverconfident"
   class: "examples.HindsightBias.RuleLLM.players:RuleLLMHindsightOverconfident"
   num_instances: 3
   config:
-    identity: "hindsightoverconfident"
+    identity: "rulellm_hindsight_overconfident"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ hindsightoverconfident:
           max_tokens: 600
   persona: !include persona.yml
 
-outcomelearner:
+rulellm_outcome_learner:
   name: "OutcomeLearner"
   class: "examples.HindsightBias.RuleLLM.players:RuleLLMOutcomeLearner"
   num_instances: 3
   config:
-    identity: "outcomelearner"
+    identity: "rulellm_outcome_learner"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ outcomelearner:
           max_tokens: 600
   persona: !include persona.yml
 
-processevaluator:
+rulellm_process_evaluator:
   name: "ProcessEvaluator"
   class: "examples.HindsightBias.RuleLLM.players:RuleLLMProcessEvaluator"
   num_instances: 2
   config:
-    identity: "processevaluator"
+    identity: "rulellm_process_evaluator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ processevaluator:
           max_tokens: 600
   persona: !include persona.yml
 
-contrarianskeptic:
+rulellm_contrarian_skeptic:
   name: "ContrarianSkeptic"
   class: "examples.HindsightBias.RuleLLM.players:RuleLLMContrarianSkeptic"
   num_instances: 1
   config:
-    identity: "contrarianskeptic"
+    identity: "rulellm_contrarian_skeptic"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ contrarianskeptic:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.HindsightBias.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -24,13 +24,13 @@ market:
       mean_reversion: 0.01  # Source: target §9 market.extras.mean_reversion row; Bagehot (1873) via Freixas et al. (2000), 10.1023/A:1026527607455
       noise_std: 0.015  # Source: target §9 market.extras.noise_std row; Rule/players.py Market.perceive
 
-depositor:
+ragllm_depositor:
   name: "Depositor"
   class: "examples.SVBBankRun.Rag.players:RagLLMDepositor"
   num_instances: 4  # Source: target §9 depositor.num_instances row
   persona: !include ../Rag/persona.yml
   config:
-    identity: "depositor"
+    identity: "ragllm_depositor"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -64,13 +64,13 @@ depositor:
           temperature: 0.7
           max_tokens: 600
 
-socialmediainfluencer:
+ragllm_social_media_influencer:
   name: "SocialMediaInfluencer"
   class: "examples.SVBBankRun.Rag.players:RagLLMSocialMediaInfluencer"
   num_instances: 2  # Source: target §9 socialmediainfluencer.num_instances row
   persona: !include ../Rag/persona.yml
   config:
-    identity: "socialmediainfluencer"
+    identity: "ragllm_social_media_influencer"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -103,13 +103,13 @@ socialmediainfluencer:
           temperature: 0.7
           max_tokens: 600
 
-bankmanager:
+ragllm_bank_manager:
   name: "BankManager"
   class: "examples.SVBBankRun.Rag.players:RagLLMBankManager"
   num_instances: 2  # Source: target §9 bankmanager.num_instances row
   persona: !include ../Rag/persona.yml
   config:
-    identity: "bankmanager"
+    identity: "ragllm_bank_manager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -142,13 +142,13 @@ bankmanager:
           temperature: 0.7
           max_tokens: 600
 
-regulator:
+ragllm_regulator:
   name: "Regulator"
   class: "examples.SVBBankRun.Rag.players:RagLLMRegulator"
   num_instances: 1  # Source: target §9 regulator.num_instances row
   persona: !include ../Rag/persona.yml
   config:
-    identity: "regulator"
+    identity: "ragllm_regulator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -182,13 +182,13 @@ regulator:
           temperature: 0.7
           max_tokens: 600
 
-bondtrader:
+ragllm_bond_trader:
   name: "BondTrader"
   class: "examples.SVBBankRun.Rag.players:RagLLMBondTrader"
   num_instances: 2  # Source: target §9 bondtrader.num_instances row
   persona: !include ../Rag/persona.yml
   config:
-    identity: "bondtrader"
+    identity: "ragllm_bond_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

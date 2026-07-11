@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-endowedholder:
+rulellm_endowed_holder:
   name: "EndowedHolder"
   class: "examples.EndowmentEffect.RuleLLM.players:RuleLLMEndowedHolder"
   num_instances: 2
   config:
-    identity: "endowedholder"
+    identity: "rulellm_endowed_holder"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -47,12 +47,12 @@ endowedholder:
           max_tokens: 512
   persona: !include persona.yml
 
-statusquoseller:
+rulellm_status_quo_seller:
   name: "StatusQuoSeller"
   class: "examples.EndowmentEffect.RuleLLM.players:RuleLLMStatusQuoSeller"
   num_instances: 2
   config:
-    identity: "statusquoseller"
+    identity: "rulellm_status_quo_seller"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -74,12 +74,12 @@ statusquoseller:
           max_tokens: 512
   persona: !include persona.yml
 
-rationalarbitrageur:
+rulellm_rational_arbitrageur:
   name: "RationalArbitrageur"
   class: "examples.EndowmentEffect.RuleLLM.players:RuleLLMRationalArbitrageur"
   num_instances: 2
   config:
-    identity: "rationalarbitrageur"
+    identity: "rulellm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -101,12 +101,12 @@ rationalarbitrageur:
           max_tokens: 512
   persona: !include persona.yml
 
-newbuyer:
+rulellm_new_buyer:
   name: "NewBuyer"
   class: "examples.EndowmentEffect.RuleLLM.players:RuleLLMNewBuyer"
   num_instances: 2
   config:
-    identity: "newbuyer"
+    identity: "rulellm_new_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -128,12 +128,12 @@ newbuyer:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.EndowmentEffect.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

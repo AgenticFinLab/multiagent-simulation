@@ -21,12 +21,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-retailcoordinated:
+rule_retail_coordinated:
   name: "RetailCoordinated"
   class: "examples.GameStopShortSqueeze.Rule.players:RetailCoordinated"
   num_instances: 3
   config:
-    identity: "retailcoordinated"
+    identity: "rule_retail_coordinated"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -42,12 +42,12 @@ retailcoordinated:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-shortsellerhf:
+rule_short_seller_hf:
   name: "ShortSellerHF"
   class: "examples.GameStopShortSqueeze.Rule.players:ShortSellerHF"
   num_instances: 2
   config:
-    identity: "shortsellerhf"
+    identity: "rule_short_seller_hf"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -65,12 +65,12 @@ shortsellerhf:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-marketmakergamma:
+rule_market_maker_gamma:
   name: "MarketMakerGamma"
   class: "examples.GameStopShortSqueeze.Rule.players:MarketMakerGamma"
   num_instances: 1
   config:
-    identity: "marketmakergamma"
+    identity: "rule_market_maker_gamma"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -85,12 +85,12 @@ marketmakergamma:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-institutionalvalue:
+rule_institutional_value:
   name: "InstitutionalValue"
   class: "examples.GameStopShortSqueeze.Rule.players:InstitutionalValue"
   num_instances: 1
   config:
-    identity: "institutionalvalue"
+    identity: "rule_institutional_value"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ institutionalvalue:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-momentumretail:
+rule_momentum_retail:
   name: "MomentumRetail"
   class: "examples.GameStopShortSqueeze.Rule.players:MomentumRetail"
   num_instances: 2
   config:
-    identity: "momentumretail"
+    identity: "rule_momentum_retail"
     role: player
     steps_per_turn: 1
     group_tags:

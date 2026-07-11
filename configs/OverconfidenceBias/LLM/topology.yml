@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - overconfidenttrader
-    - selfattributor
-    - calibratedtrader
-    - contrarianinvestor
-    - noisetrader
+    - llm_overconfident_trader
+    - llm_self_attributor
+    - llm_calibrated_trader
+    - llm_contrarian_investor
+    - llm_noise_trader
 
-  overconfidenttrader:
+  llm_overconfident_trader:
     - market
 
-  selfattributor:
+  llm_self_attributor:
     - market
 
-  calibratedtrader:
+  llm_calibrated_trader:
     - market
 
-  contrarianinvestor:
+  llm_contrarian_investor:
     - market
 
-  noisetrader:
+  llm_noise_trader:
     - market

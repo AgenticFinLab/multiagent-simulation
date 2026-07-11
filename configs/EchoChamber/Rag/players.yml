@@ -25,12 +25,12 @@ knowledge: &shared_knowledge
     chunk_overlap: 64  # Source: retrieval configuration; analysis-bases.md §2.7
     top_k: 5  # Source: retrieval coverage design; analysis-bases.md §2.7
 
-environment:
+ragllm_opinion_environment:
   name: "OpinionEnvironment"
   class: "examples.EchoChamber.Rag.players:OpinionEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "ragllm_opinion_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:

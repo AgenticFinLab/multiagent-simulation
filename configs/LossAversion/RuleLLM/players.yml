@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-lossaverseinvestor:
+rulellm_loss_averse_investor:
   name: "LossAverseInvestor"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMLossAverseInvestor"
   num_instances: 3
   config:
-    identity: "lossaverseinvestor"
+    identity: "rulellm_loss_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -50,12 +50,12 @@ lossaverseinvestor:
           max_tokens: 600
   persona: !include persona.yml
 
-breakeventrader:
+rulellm_break_even_trader:
   name: "BreakEvenTrader"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMBreakEvenTrader"
   num_instances: 2
   config:
-    identity: "breakeventrader"
+    identity: "rulellm_break_even_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -79,12 +79,12 @@ breakeventrader:
           max_tokens: 600
   persona: !include persona.yml
 
-rationaltrader:
+rulellm_rational_trader:
   name: "RationalTrader"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMRationalTrader"
   num_instances: 2
   config:
-    identity: "rationaltrader"
+    identity: "rulellm_rational_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -108,12 +108,12 @@ rationaltrader:
           max_tokens: 600
   persona: !include persona.yml
 
-momentumtrader:
+rulellm_momentum_trader:
   name: "MomentumTrader"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMMomentumTrader"
   num_instances: 2
   config:
-    identity: "momentumtrader"
+    identity: "rulellm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -137,12 +137,12 @@ momentumtrader:
           max_tokens: 600
   persona: !include persona.yml
 
-marketmaker:
+rulellm_market_maker:
   name: "MarketMaker"
   class: "examples.LossAversion.RuleLLM.players:RuleLLMMarketMaker"
   num_instances: 2
   config:
-    identity: "marketmaker"
+    identity: "rulellm_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:

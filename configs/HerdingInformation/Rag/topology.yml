@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - cascadefollower
-    - reputationherder
-    - independentthinker
-    - contrarian
-    - noisetrader
+    - ragllm_cascade_follower
+    - ragllm_reputation_herder
+    - ragllm_independent_thinker
+    - ragllm_contrarian
+    - ragllm_noise_trader
 
-  cascadefollower:
+  ragllm_cascade_follower:
     - market
 
-  reputationherder:
+  ragllm_reputation_herder:
     - market
 
-  independentthinker:
+  ragllm_independent_thinker:
     - market
 
-  contrarian:
+  ragllm_contrarian:
     - market
 
-  noisetrader:
+  ragllm_noise_trader:
     - market

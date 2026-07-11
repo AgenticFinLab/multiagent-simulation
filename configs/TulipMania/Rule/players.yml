@@ -15,13 +15,13 @@ market:
       mean_reversion: 0.008  # Source: target §9 market.extras.mean_reversion; Garber (1990), 10.1257/jep.4.2.35; simulation-bases.md §6
       noise_std: 0.015  # Source: target §9 market.extras.noise_std; Rule/players.py Market.perceive
 
-trendchaser:
+rule_trend_chaser:
   name: "TrendChaser"
   class: "examples.TulipMania.Rule.players:TrendChaser"
   num_instances: 4  # Source: target §9 trendchaser.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 4)
   persona: !include persona.yml
   config:
-    identity: "trendchaser"
+    identity: "rule_trend_chaser"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -34,13 +34,13 @@ trendchaser:
       chase_size: 400  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses TrendChaser quantity cap 800 / slope 5000)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-socialprooffollower:
+rule_social_proof_follower:
   name: "SocialProofFollower"
   class: "examples.TulipMania.Rule.players:SocialProofFollower"
   num_instances: 3  # Source: target §9 socialprooffollower.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 3)
   persona: !include persona.yml
   config:
-    identity: "socialprooffollower"
+    identity: "rule_social_proof_follower"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -53,13 +53,13 @@ socialprooffollower:
       follow_size: 350  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses SocialProofFollower quantity cap 800 / slope 5000)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-intrinsicvaluetrader:
+rule_intrinsic_value_trader:
   name: "IntrinsicValueTrader"
   class: "examples.TulipMania.Rule.players:IntrinsicValueTrader"
   num_instances: 2  # Source: target §9 intrinsicvaluetrader.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 2)
   persona: !include persona.yml
   config:
-    identity: "intrinsicvaluetrader"
+    identity: "rule_intrinsic_value_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -72,13 +72,13 @@ intrinsicvaluetrader:
       position_size: 350  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses IntrinsicValueTrader quantity cap 500 / slope 3000)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-earlyexittrader:
+rule_early_exit_trader:
   name: "EarlyExitTrader"
   class: "examples.TulipMania.Rule.players:EarlyExitTrader"
   num_instances: 2  # Source: target §9 earlyexittrader.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 2)
   persona: !include persona.yml
   config:
-    identity: "earlyexittrader"
+    identity: "rule_early_exit_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
@@ -91,13 +91,13 @@ earlyexittrader:
       exit_size: 400  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses EarlyExitTrader quantity cap 500 / slope 3000)
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.TulipMania.Rule.players:NoiseTrader"
   num_instances: 2  # Source: target §9 noisetrader.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 2)
   persona: !include persona.yml
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]

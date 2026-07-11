@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-overconfidenttrader:
+rule_overconfident_trader:
   name: "OverconfidentTrader"
   class: "examples.OverconfidenceBias.Rule.players:OverconfidentTrader"
   num_instances: 2
   config:
-    identity: "overconfidenttrader"
+    identity: "rule_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -41,12 +41,12 @@ overconfidenttrader:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-selfattributor:
+rule_self_attributor:
   name: "SelfAttributor"
   class: "examples.OverconfidenceBias.Rule.players:SelfAttributor"
   num_instances: 2
   config:
-    identity: "selfattributor"
+    identity: "rule_self_attributor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -62,12 +62,12 @@ selfattributor:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-calibratedtrader:
+rule_calibrated_trader:
   name: "CalibratedTrader"
   class: "examples.OverconfidenceBias.Rule.players:CalibratedTrader"
   num_instances: 1
   config:
-    identity: "calibratedtrader"
+    identity: "rule_calibrated_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -84,12 +84,12 @@ calibratedtrader:
       signal_precision: 1.0
   persona: !include persona.yml
 
-contrarianinvestor:
+rule_contrarian_investor:
   name: "ContrarianInvestor"
   class: "examples.OverconfidenceBias.Rule.players:ContrarianInvestor"
   num_instances: 1
   config:
-    identity: "contrarianinvestor"
+    identity: "rule_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -105,12 +105,12 @@ contrarianinvestor:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.OverconfidenceBias.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

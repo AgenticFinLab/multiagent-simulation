@@ -5,19 +5,19 @@ sources:
 
 connections:
   market:
-    - llm_disposition_biased
-    - llm_rational
-    - llm_tax_aware
-    - llm_institutional
+    - llm_disposition_investor
+    - llm_rational_investor
+    - llm_tax_aware_investor
+    - llm_institutional_investor
     - llm_loss_averse
 
-  llm_disposition_biased:
+  llm_disposition_investor:
     - market
-  llm_rational:
+  llm_rational_investor:
     - market
-  llm_tax_aware:
+  llm_tax_aware_investor:
     - market
-  llm_institutional:
+  llm_institutional_investor:
     - market
   llm_loss_averse:
     - market

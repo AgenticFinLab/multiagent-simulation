@@ -5,23 +5,23 @@
 #
 #         rulellm_ideologue ──────────────┐
 #         rulellm_conformist ─────────────┤
-#         rulellm_critical_thinker ───────┼──▶ environment ──▶ all agents
+#         rulellm_critical_thinker ───────┼──▶ rulellm_opinion_environment ──▶ all agents
 #         rulellm_bridge_builder ─────────┤             (polarization, opinion, cluster data)
 #         rulellm_passive_follower ───────┘
 #
 # Execution flow per round:
-#   Level 0: environment executes (broadcasts polarization + opinion metrics)
+#   Level 0: rulellm_opinion_environment executes (broadcasts polarization + opinion metrics)
 #   Level 1: all agents execute in parallel (submit polarize/depolarize/neutral actions)
 # =============================================================================
 
 type: "star"
 
 sources:
-  - environment
+  - rulellm_opinion_environment
 
 connections:
   # Environment → All agents (polarization + opinion data broadcast)
-  environment:
+  rulellm_opinion_environment:
     - rulellm_ideologue
     - rulellm_conformist
     - rulellm_critical_thinker
@@ -30,16 +30,16 @@ connections:
 
   # Each agent → Environment only (action submission)
   rulellm_ideologue:
-    - environment
+    - rulellm_opinion_environment
 
   rulellm_conformist:
-    - environment
+    - rulellm_opinion_environment
 
   rulellm_critical_thinker:
-    - environment
+    - rulellm_opinion_environment
 
   rulellm_bridge_builder:
-    - environment
+    - rulellm_opinion_environment
 
   rulellm_passive_follower:
-    - environment
+    - rulellm_opinion_environment

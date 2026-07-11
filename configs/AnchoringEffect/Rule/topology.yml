@@ -7,15 +7,15 @@
 # The simulator expander resolves them to foo_1, foo_2, ... before building
 # the TopologyGraph, so all edge rules apply to every instance automatically.
 #
-#         anchored_trader ────────────┐
-#         historical_anchor ──────────┤
-#         rational_updater ───────────┤
-#         momentum_trader ────────────┤
-#         noise_trader ───────────────┼──▶ market ──▶ all investors
-#         disposition_trader ──────────┤             (market data: price, deviation)
-#         contrarian_trader ───────────┤
-#         fundamental_analyst ─────────┤
-#         liquidity_provider ──────────┘
+#         rule_anchored_trader ────────────┐
+#         rule_historical_anchor ──────────┤
+#         rule_rational_updater ───────────┤
+#         rule_momentum_trader ────────────┤
+#         rule_noise_trader ───────────────┼──▶ market ──▶ all investors
+#         rule_disposition_trader ──────────┤             (market data: price, deviation)
+#         rule_contrarian_trader ───────────┤
+#         rule_fundamental_analyst ─────────┤
+#         rule_liquidity_provider ──────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + deviation metrics)
@@ -32,40 +32,40 @@ sources:
 connections:
   # Market → All investors (price + deviation data broadcast)
   market:
-    - anchored_trader
-    - historical_anchor
-    - rational_updater
-    - momentum_trader
-    - noise_trader
-    - disposition_trader
-    - contrarian_trader
-    - fundamental_analyst
-    - liquidity_provider
+    - rule_anchored_trader
+    - rule_historical_anchor
+    - rule_rational_updater
+    - rule_momentum_trader
+    - rule_noise_trader
+    - rule_disposition_trader
+    - rule_contrarian_trader
+    - rule_fundamental_analyst
+    - rule_liquidity_provider
 
   # Each investor → Market only (order submission)
-  anchored_trader:
+  rule_anchored_trader:
     - market
 
-  historical_anchor:
+  rule_historical_anchor:
     - market
 
-  rational_updater:
+  rule_rational_updater:
     - market
 
-  momentum_trader:
+  rule_momentum_trader:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market
 
-  disposition_trader:
+  rule_disposition_trader:
     - market
 
-  contrarian_trader:
+  rule_contrarian_trader:
     - market
 
-  fundamental_analyst:
+  rule_fundamental_analyst:
     - market
 
-  liquidity_provider:
+  rule_liquidity_provider:
     - market

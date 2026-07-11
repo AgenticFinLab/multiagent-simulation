@@ -1,45 +1,45 @@
 # =============================================================================
 # EchoChamber Topology - Star Pattern
 # =============================================================================
-# OpinionEnvironment as hub, all agents communicate through environment.
+# OpinionEnvironment as hub, all agents communicate through rule_opinion_environment.
 #
-#         ideologue ────────────────┐
-#         conformist ──────────────┤
-#         critical_thinker ────────┼──▶ environment ──▶ all agents
-#         bridge_builder ──────────┤             (polarization, opinion, cluster data)
-#         passive_follower ────────┘
+#         rule_ideologue ────────────────┐
+#         rule_conformist ──────────────┤
+#         rule_critical_thinker ────────┼──▶ rule_opinion_environment ──▶ all agents
+#         rule_bridge_builder ──────────┤             (polarization, opinion, cluster data)
+#         rule_passive_follower ────────┘
 #
 # Execution flow per round:
-#   Level 0: environment executes (broadcasts polarization + opinion metrics)
+#   Level 0: rule_opinion_environment executes (broadcasts polarization + opinion metrics)
 #   Level 1: all agents execute in parallel (submit polarize/depolarize/neutral actions)
 # =============================================================================
 
 type: "star"
 
 sources:
-  - environment
+  - rule_opinion_environment
 
 connections:
   # Environment → All agents (polarization + opinion data broadcast)
-  environment:
-    - ideologue
-    - conformist
-    - critical_thinker
-    - bridge_builder
-    - passive_follower
+  rule_opinion_environment:
+    - rule_ideologue
+    - rule_conformist
+    - rule_critical_thinker
+    - rule_bridge_builder
+    - rule_passive_follower
 
   # Each agent → Environment only (action submission)
-  ideologue:
-    - environment
+  rule_ideologue:
+    - rule_opinion_environment
 
-  conformist:
-    - environment
+  rule_conformist:
+    - rule_opinion_environment
 
-  critical_thinker:
-    - environment
+  rule_critical_thinker:
+    - rule_opinion_environment
 
-  bridge_builder:
-    - environment
+  rule_bridge_builder:
+    - rule_opinion_environment
 
-  passive_follower:
-    - environment
+  rule_passive_follower:
+    - rule_opinion_environment

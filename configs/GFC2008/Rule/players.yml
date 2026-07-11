@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-mbsoriginator:
+rule_mbs_originator:
   name: "MBSOriginator"
   class: "examples.GFC2008.Rule.players:MBSOriginator"
   num_instances: 2
   config:
-    identity: "mbsoriginator"
+    identity: "rule_mbs_originator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -41,12 +41,12 @@ mbsoriginator:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-leveragedinvestor:
+rule_leveraged_investor:
   name: "LeveragedInvestor"
   class: "examples.GFC2008.Rule.players:LeveragedInvestor"
   num_instances: 2
   config:
-    identity: "leveragedinvestor"
+    identity: "rule_leveraged_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -65,12 +65,12 @@ leveragedinvestor:
       margin_call_trigger: 0.1
   persona: !include persona.yml
 
-ratingagency:
+rule_rating_agency:
   name: "RatingAgency"
   class: "examples.GFC2008.Rule.players:RatingAgency"
   num_instances: 2
   config:
-    identity: "ratingagency"
+    identity: "rule_rating_agency"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -86,12 +86,12 @@ ratingagency:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-distressedbuyer:
+rule_distressed_buyer:
   name: "DistressedBuyer"
   class: "examples.GFC2008.Rule.players:DistressedBuyer"
   num_instances: 1
   config:
-    identity: "distressedbuyer"
+    identity: "rule_distressed_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ distressedbuyer:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-regulator:
+rule_regulator:
   name: "Regulator"
   class: "examples.GFC2008.Rule.players:Regulator"
   num_instances: 1
   config:
-    identity: "regulator"
+    identity: "rule_regulator"
     role: player
     steps_per_turn: 1
     group_tags:

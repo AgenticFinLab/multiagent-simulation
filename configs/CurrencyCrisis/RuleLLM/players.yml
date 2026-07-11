@@ -22,12 +22,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-speculativeattacker:
+rulellm_speculative_attacker:
   name: "SpeculativeAttacker"
   class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMSpeculativeAttacker"
   num_instances: 2
   config:
-    identity: "speculativeattacker"
+    identity: "rulellm_speculative_attacker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ speculativeattacker:
           max_tokens: 512
   persona: !include persona.yml
 
-selffulfillingtrader:
+rulellm_self_fulfilling_trader:
   name: "SelfFulfillingTrader"
   class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMSelfFulfillingTrader"
   num_instances: 2
   config:
-    identity: "selffulfillingtrader"
+    identity: "rulellm_self_fulfilling_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -77,12 +77,12 @@ selffulfillingtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-centralbankdefender:
+rulellm_central_bank_defender:
   name: "CentralBankDefender"
   class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMCentralBankDefender"
   num_instances: 1
   config:
-    identity: "centralbankdefender"
+    identity: "rulellm_central_bank_defender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -104,12 +104,12 @@ centralbankdefender:
           max_tokens: 512
   persona: !include persona.yml
 
-fundamentalhedger:
+rulellm_fundamental_hedger:
   name: "FundamentalHedger"
   class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMFundamentalHedger"
   num_instances: 1
   config:
-    identity: "fundamentalhedger"
+    identity: "rulellm_fundamental_hedger"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -131,12 +131,12 @@ fundamentalhedger:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CurrencyCrisis.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

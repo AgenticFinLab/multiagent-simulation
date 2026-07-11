@@ -40,13 +40,13 @@ market:
 # Anchored Traders (Primary Anchoring Bias Agents)
 # Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
 # -----------------------------------------------------------------------------
-anchored_trader:
+rule_anchored_trader:
   name: "Anchored Trader"
   class: "examples.AnchoringEffect.Rule.players:AnchoredTrader"
-  # Expander → anchored_trader_1, anchored_trader_2
+  # Expander → rule_anchored_trader_1, rule_anchored_trader_2
   num_instances: 2
   config:
-    identity: "anchored_trader"
+    identity: "rule_anchored_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -66,13 +66,13 @@ anchored_trader:
 # Historical Anchors (Historical Price Fixation)
 # Theory: Northcraft & Neale (1987) — Experts anchor to past prices
 # -----------------------------------------------------------------------------
-historical_anchor:
+rule_historical_anchor:
   name: "Historical Anchor"
   class: "examples.AnchoringEffect.Rule.players:HistoricalAnchor"
-  # Expander → historical_anchor_1, historical_anchor_2
+  # Expander → rule_historical_anchor_1, rule_historical_anchor_2
   num_instances: 2
   config:
-    identity: "historical_anchor"
+    identity: "rule_historical_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -92,12 +92,12 @@ historical_anchor:
 # -----------------------------------------------------------------------------
 # Rational Updater (Benchmark — Correct Bayesian Updating)
 # -----------------------------------------------------------------------------
-rational_updater:
+rule_rational_updater:
   name: "Rational Updater"
   class: "examples.AnchoringEffect.Rule.players:RationalUpdater"
   num_instances: 1
   config:
-    identity: "rational_updater"
+    identity: "rule_rational_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -116,13 +116,13 @@ rational_updater:
 # Momentum Traders (Trend Amplifiers)
 # Theory: Jegadeesh & Titman (1993) — Momentum effect
 # -----------------------------------------------------------------------------
-momentum_trader:
+rule_momentum_trader:
   name: "Momentum Trader"
   class: "examples.AnchoringEffect.Rule.players:MomentumTrader"
-  # Expander → momentum_trader_1, momentum_trader_2
+  # Expander → rule_momentum_trader_1, rule_momentum_trader_2
   num_instances: 2
   config:
-    identity: "momentum_trader"
+    identity: "rule_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -142,13 +142,13 @@ momentum_trader:
 # Noise Traders (Background Liquidity)
 # Theory: Black (1986) — Noise
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.AnchoringEffect.Rule.players:NoiseTrader"
-  # Expander → noise_trader_1, noise_trader_2
+  # Expander → rule_noise_trader_1, rule_noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -169,13 +169,13 @@ noise_trader:
 # Disposition Traders (Prospect Theory Asymmetric)
 # Theory: Shefrin & Statman (1985) — Disposition Effect; Kahneman & Tversky (1979)
 # -----------------------------------------------------------------------------
-disposition_trader:
+rule_disposition_trader:
   name: "Disposition Trader"
   class: "examples.AnchoringEffect.Rule.players:DispositionTrader"
-  # Expander → disposition_trader_1, disposition_trader_2
+  # Expander → rule_disposition_trader_1, rule_disposition_trader_2
   num_instances: 2
   config:
-    identity: "disposition_trader"
+    identity: "rule_disposition_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -196,12 +196,12 @@ disposition_trader:
 # Contrarian Trader (Statistical Mean Reversion)
 # Theory: De Bondt & Thaler (1985) — Market Overreaction; Jegadeesh (1990)
 # -----------------------------------------------------------------------------
-contrarian_trader:
+rule_contrarian_trader:
   name: "Contrarian Trader"
   class: "examples.AnchoringEffect.Rule.players:ContrarianTrader"
   num_instances: 1
   config:
-    identity: "contrarian_trader"
+    identity: "rule_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -222,12 +222,12 @@ contrarian_trader:
 # Fundamental Analyst (Conservative Institutional Updater)
 # Theory: Barberis, Shleifer & Vishny (1998) — Conservatism Bias
 # -----------------------------------------------------------------------------
-fundamental_analyst:
+rule_fundamental_analyst:
   name: "Fundamental Analyst"
   class: "examples.AnchoringEffect.Rule.players:FundamentalAnalyst"
   num_instances: 1
   config:
-    identity: "fundamental_analyst"
+    identity: "rule_fundamental_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -247,12 +247,12 @@ fundamental_analyst:
 # Liquidity Provider (Passive Market Maker)
 # Theory: Glosten & Milgrom (1985); Hendershott et al. (2011)
 # -----------------------------------------------------------------------------
-liquidity_provider:
+rule_liquidity_provider:
   name: "Liquidity Provider"
   class: "examples.AnchoringEffect.Rule.players:LiquidityProvider"
   num_instances: 1
   config:
-    identity: "liquidity_provider"
+    identity: "rule_liquidity_provider"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-streakreversaltrader:
+llm_streak_reversal_trader:
   name: "StreakReversalTrader"
   class: "examples.GamblerFallacy.LLM.players:LLMStreakReversalTrader"
   num_instances: 2
   config:
-    identity: "streakreversaltrader"
+    identity: "llm_streak_reversal_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -48,12 +48,12 @@ streakreversaltrader:
           max_tokens: 512
   persona: !include persona.yml
 
-hothandtrader:
+llm_hot_hand_trader:
   name: "HotHandTrader"
   class: "examples.GamblerFallacy.LLM.players:LLMHotHandTrader"
   num_instances: 2
   config:
-    identity: "hothandtrader"
+    identity: "llm_hot_hand_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -76,12 +76,12 @@ hothandtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-independentassessor:
+llm_independent_assessor:
   name: "IndependentAssessor"
   class: "examples.GamblerFallacy.LLM.players:LLMIndependentAssessor"
   num_instances: 1
   config:
-    identity: "independentassessor"
+    identity: "llm_independent_assessor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -104,12 +104,12 @@ independentassessor:
           max_tokens: 512
   persona: !include persona.yml
 
-arbitrageur:
+llm_arbitrageur:
   name: "Arbitrageur"
   class: "examples.GamblerFallacy.LLM.players:LLMArbitrageur"
   num_instances: 1
   config:
-    identity: "arbitrageur"
+    identity: "llm_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -132,12 +132,12 @@ arbitrageur:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.GamblerFallacy.LLM.players:LLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

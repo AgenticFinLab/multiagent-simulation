@@ -9,19 +9,19 @@ sources:
 
 connections:
   market:
-    - rulellm_myopic
-    - rulellm_long_term
-    - rulellm_institutional
-    - rulellm_risk_averse
-    - rulellm_rational
+    - rulellm_myopic_loss_averse
+    - rulellm_long_term_investor
+    - rulellm_institutional_investor
+    - rulellm_risk_averse_saver
+    - rulellm_rational_optimizer
 
-  rulellm_myopic:
+  rulellm_myopic_loss_averse:
     - market
-  rulellm_long_term:
+  rulellm_long_term_investor:
     - market
-  rulellm_institutional:
+  rulellm_institutional_investor:
     - market
-  rulellm_risk_averse:
+  rulellm_risk_averse_saver:
     - market
-  rulellm_rational:
+  rulellm_rational_optimizer:
     - market

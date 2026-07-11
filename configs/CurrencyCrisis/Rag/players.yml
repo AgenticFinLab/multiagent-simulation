@@ -41,12 +41,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-speculativeattacker:
+ragllm_speculative_attacker:
   name: "SpeculativeAttacker"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMSpeculativeAttacker"
   num_instances: 2
   config:
-    identity: "speculativeattacker"
+    identity: "ragllm_speculative_attacker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -85,12 +85,12 @@ speculativeattacker:
           max_tokens: 600
   persona: !include persona.yml
 
-selffulfillingtrader:
+ragllm_self_fulfilling_trader:
   name: "SelfFulfillingTrader"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMSelfFulfillingTrader"
   num_instances: 2
   config:
-    identity: "selffulfillingtrader"
+    identity: "ragllm_self_fulfilling_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -130,12 +130,12 @@ selffulfillingtrader:
           max_tokens: 600
   persona: !include persona.yml
 
-centralbankdefender:
+ragllm_central_bank_defender:
   name: "CentralBankDefender"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMCentralBankDefender"
   num_instances: 1
   config:
-    identity: "centralbankdefender"
+    identity: "ragllm_central_bank_defender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -174,12 +174,12 @@ centralbankdefender:
           max_tokens: 600
   persona: !include persona.yml
 
-fundamentalhedger:
+ragllm_fundamental_hedger:
   name: "FundamentalHedger"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMFundamentalHedger"
   num_instances: 1
   config:
-    identity: "fundamentalhedger"
+    identity: "ragllm_fundamental_hedger"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -218,12 +218,12 @@ fundamentalhedger:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

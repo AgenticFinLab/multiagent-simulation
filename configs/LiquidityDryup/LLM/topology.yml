@@ -8,7 +8,7 @@ connections:
     - llm_market_maker
     - llm_liquidity_demander
     - llm_arbitrageur
-    - llm_value
+    - llm_value_investor
     - llm_forced_seller
 
   llm_market_maker:
@@ -17,7 +17,7 @@ connections:
     - market
   llm_arbitrageur:
     - market
-  llm_value:
+  llm_value_investor:
     - market
   llm_forced_seller:
     - market

@@ -47,13 +47,13 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-ragllm_myopic:
+ragllm_myopic_loss_averse:
   name: "RAG Myopic Loss-Averse"
   class: "examples.EquityPremium.Rag.players:RagLLMMyopicLossAverse"
   # Expander → ragllm_myopic_1, ragllm_myopic_2, ragllm_myopic_3, ragllm_myopic_4, ragllm_myopic_5
   num_instances: 5
   config:
-    identity: "ragllm_myopic"
+    identity: "ragllm_myopic_loss_averse"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -94,13 +94,13 @@ ragllm_myopic:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_long_term:
+ragllm_long_term_investor:
   name: "RAG Long-Term Investor"
   class: "examples.EquityPremium.Rag.players:RagLLMLongTermInvestor"
   # Expander → ragllm_long_term_1, ragllm_long_term_2
   num_instances: 2
   config:
-    identity: "ragllm_long_term"
+    identity: "ragllm_long_term_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -139,12 +139,12 @@ ragllm_long_term:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_institutional:
+ragllm_institutional_investor:
   name: "RAG Institutional Investor"
   class: "examples.EquityPremium.Rag.players:RagLLMInstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "ragllm_institutional"
+    identity: "ragllm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -183,13 +183,13 @@ ragllm_institutional:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_risk_averse:
+ragllm_risk_averse_saver:
   name: "RAG Risk-Averse Saver"
   class: "examples.EquityPremium.Rag.players:RagLLMRiskAverseSaver"
   # Expander → ragllm_risk_averse_1, ragllm_risk_averse_2, ragllm_risk_averse_3
   num_instances: 3
   config:
-    identity: "ragllm_risk_averse"
+    identity: "ragllm_risk_averse_saver"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -228,13 +228,13 @@ ragllm_risk_averse:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_rational:
+ragllm_rational_optimizer:
   name: "RAG Rational Optimizer"
   class: "examples.EquityPremium.Rag.players:RagLLMRationalOptimizer"
   # Expander → ragllm_rational_1, ragllm_rational_2
   num_instances: 2
   config:
-    identity: "ragllm_rational"
+    identity: "ragllm_rational_optimizer"
     role: player
     steps_per_turn: 1
     group_tags:

@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hindsightoverconfident:
+rule_hindsight_overconfident:
   name: "HindsightOverconfident"
   class: "examples.HindsightBias.Rule.players:HindsightOverconfident"
   num_instances: 3
   config:
-    identity: "hindsightoverconfident"
+    identity: "rule_hindsight_overconfident"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -44,12 +44,12 @@ hindsightoverconfident:
       prediction_overweight: 1.0
   persona: !include persona.yml
 
-outcomelearner:
+rule_outcome_learner:
   name: "OutcomeLearner"
   class: "examples.HindsightBias.Rule.players:OutcomeLearner"
   num_instances: 3
   config:
-    identity: "outcomelearner"
+    identity: "rule_outcome_learner"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -68,12 +68,12 @@ outcomelearner:
       failure_discount: 1.0
   persona: !include persona.yml
 
-processevaluator:
+rule_process_evaluator:
   name: "ProcessEvaluator"
   class: "examples.HindsightBias.Rule.players:ProcessEvaluator"
   num_instances: 2
   config:
-    identity: "processevaluator"
+    identity: "rule_process_evaluator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -92,12 +92,12 @@ processevaluator:
       outcome_weight: 1.0
   persona: !include persona.yml
 
-contrarianskeptic:
+rule_contrarian_skeptic:
   name: "ContrarianSkeptic"
   class: "examples.HindsightBias.Rule.players:ContrarianSkeptic"
   num_instances: 1
   config:
-    identity: "contrarianskeptic"
+    identity: "rule_contrarian_skeptic"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -115,12 +115,12 @@ contrarianskeptic:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.HindsightBias.Rule.players:NoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

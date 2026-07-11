@@ -20,12 +20,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-hindsightoverconfident:
+llm_hindsight_overconfident:
   name: "HindsightOverconfident"
   class: "examples.HindsightBias.LLM.players:LLMHindsightOverconfident"
   num_instances: 3
   config:
-    identity: "hindsightoverconfident"
+    identity: "llm_hindsight_overconfident"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -49,12 +49,12 @@ hindsightoverconfident:
           max_tokens: 600
   persona: !include persona.yml
 
-outcomelearner:
+llm_outcome_learner:
   name: "OutcomeLearner"
   class: "examples.HindsightBias.LLM.players:LLMOutcomeLearner"
   num_instances: 3
   config:
-    identity: "outcomelearner"
+    identity: "llm_outcome_learner"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,12 +78,12 @@ outcomelearner:
           max_tokens: 600
   persona: !include persona.yml
 
-processevaluator:
+llm_process_evaluator:
   name: "ProcessEvaluator"
   class: "examples.HindsightBias.LLM.players:LLMProcessEvaluator"
   num_instances: 2
   config:
-    identity: "processevaluator"
+    identity: "llm_process_evaluator"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -107,12 +107,12 @@ processevaluator:
           max_tokens: 600
   persona: !include persona.yml
 
-contrarianskeptic:
+llm_contrarian_skeptic:
   name: "ContrarianSkeptic"
   class: "examples.HindsightBias.LLM.players:LLMContrarianSkeptic"
   num_instances: 1
   config:
-    identity: "contrarianskeptic"
+    identity: "llm_contrarian_skeptic"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -136,12 +136,12 @@ contrarianskeptic:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.HindsightBias.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

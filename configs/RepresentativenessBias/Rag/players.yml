@@ -39,12 +39,12 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-patternmatcher:
+ragllm_pattern_matcher:
   name: "PatternMatcher"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMPatternMatcher"
   num_instances: 2
   config:
-    identity: "patternmatcher"
+    identity: "ragllm_pattern_matcher"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -85,12 +85,12 @@ patternmatcher:
           max_tokens: 600
   persona: !include persona.yml
 
-categoryovergeneralizer:
+ragllm_category_overgeneralizer:
   name: "CategoryOvergeneralizer"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMCategoryOvergeneralizer"
   num_instances: 2
   config:
-    identity: "categoryovergeneralizer"
+    identity: "ragllm_category_overgeneralizer"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -131,12 +131,12 @@ categoryovergeneralizer:
           max_tokens: 600
   persona: !include persona.yml
 
-bayesianupdater:
+ragllm_bayesian_updater:
   name: "BayesianUpdater"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMBayesianUpdater"
   num_instances: 1
   config:
-    identity: "bayesianupdater"
+    identity: "ragllm_bayesian_updater"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -177,12 +177,12 @@ bayesianupdater:
           max_tokens: 600
   persona: !include persona.yml
 
-contrarianstatistical:
+ragllm_contrarian_statistical:
   name: "ContrarianStatistical"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMContrarianStatistical"
   num_instances: 1
   config:
-    identity: "contrarianstatistical"
+    identity: "ragllm_contrarian_statistical"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -223,12 +223,12 @@ contrarianstatistical:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

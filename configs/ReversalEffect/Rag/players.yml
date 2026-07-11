@@ -48,13 +48,13 @@ market:
       low_liquidity_threshold: 30.0
   persona: !include persona.yml
 
-ragllm_contrarian:
+ragllm_contrarian_investor:
   name: "RAG Contrarian Investor"
   class: "examples.ReversalEffect.Rag.players:RagLLMContrarianInvestor"
   # Expander → ragllm_contrarian_1, ragllm_contrarian_2, ragllm_contrarian_3
   num_instances: 3
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -91,13 +91,13 @@ ragllm_contrarian:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_overconfident:
+ragllm_overconfident_trader:
   name: "RAG Overconfident Trader"
   class: "examples.ReversalEffect.Rag.players:RagLLMOverconfidentTrader"
   # Expander → ragllm_overconfident_1, ragllm_overconfident_2, ragllm_overconfident_3
   num_instances: 3
   config:
-    identity: "ragllm_overconfident"
+    identity: "ragllm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -134,13 +134,13 @@ ragllm_overconfident:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_value:
+ragllm_value_investor:
   name: "RAG Value Investor"
   class: "examples.ReversalEffect.Rag.players:RagLLMValueInvestor"
   # Expander → ragllm_value_1, ragllm_value_2
   num_instances: 2
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -220,13 +220,13 @@ ragllm_momentum_chaser:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_noise:
+ragllm_noise_trader:
   name: "RAG Noise Trader"
   class: "examples.ReversalEffect.Rag.players:RagLLMNoiseTrader"
   # Expander → ragllm_noise_1, ragllm_noise_2
   num_instances: 2
   config:
-    identity: "ragllm_noise"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
