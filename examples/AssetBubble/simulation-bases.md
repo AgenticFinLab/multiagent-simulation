@@ -127,6 +127,26 @@ amplification, and `ConservativeHolder` supplies weak stabilizing allocation.
 - **Relevance to This Simulation**: `LeveragedBuyer` agents with `margin_call_threshold = 0.70` are forced sellers when their equity falls to 70% of initial, modelling the synchronised forced-deleveraging mechanism. Their forced selling amplifies the initial price decline and triggers the crash phase.
 - **Calibration Implication**: `leverage_ratio = 3.0` (3× leverage) and `margin_call_threshold = 0.70` are consistent with typical margin trading requirements; at 3× leverage, a 10% price decline produces a ~20–25% equity decline, quickly approaching the maintenance threshold.
 
+---
+
+### Theory 5: Fundamental Valuation and Value Anchoring
+
+- **Citation**: Fama, E. F., & French, K. R. (1992). The cross-section of expected stock returns. *Journal of Finance*, 47(2), 427–465. https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
+- **Core Insight**: Value-oriented investors compare current price to a slow-moving fundamental anchor (earnings power, book value, discounted cash flows) and provide slow but persistent corrective demand: buying when price falls below fundamentals and resisting overvaluation as price rises above fundamentals. Unlike arbitrageurs, they do not short the mispricing; instead they refuse to chase momentum and rebalance towards a long-horizon target. The value channel is therefore a stabilising but bounded force whose strength depends on how far price has drifted from fundamentals and on the investor's rebalancing cadence.
+- **Mathematical Formulation**:
+  ```
+  Fundamental deviation d(t) = (F(t) − P(t)) / F(t)
+  Value demand:   Q_value(t) = value_sensitivity × base_size × d(t)
+  Rebalance leg:  Q_reb(t)   = rebalance_rate  × (q_target − position(t))
+
+  Trade only every `trade_frequency` (or `rebalance_frequency`) rounds
+  Buy signal:  d(t) > 0   (price below fundamental)
+  Sell signal: d(t) < 0   (price above fundamental)
+  ```
+- **Empirical Evidence**: Fama & French (1992) show that book-to-market ratios and other fundamental-value proxies predict subsequent stock returns, evidence that price systematically reverts toward fundamental anchors on multi-month horizons. Barber & Odean (2000) further document that low-turnover value-style investors trade far less frequently than momentum-style investors, consistent with a rebalance-cadence formulation rather than a per-round decision.
+- **Relevance to This Simulation**: `FundamentalInvestor` agents implement the deviation-scaled demand `Q_value = value_sensitivity · base_size · (F − P) / F` and trade only every `trade_frequency` rounds; `ConservativeHolder` agents implement the target-position rebalance leg `Q_reb = rebalance_rate · (q_target − position)` every `rebalance_frequency` rounds. Together they supply the stabilising but slow value-anchor force that bounds how far the momentum + noise + leverage stack can push price away from fundamentals.
+- **Calibration Implication**: `value_sensitivity = 0.3` (low-conviction) or `1.5` (high-conviction) span the empirical range from index-style value tilts to concentrated value funds; `trade_frequency = 5` and `rebalance_frequency = 10` implement the Barber & Odean (2000) low-turnover cadence; `rebalance_rate = 0.2` scales each rebalance to 20% of the gap toward `q_target`, so a fully drifted portfolio converges over ≈5 rebalance windows.
+
 
 ## §3 Market Design Principles
 
