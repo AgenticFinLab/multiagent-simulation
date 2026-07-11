@@ -51,18 +51,34 @@ for (a) the single Status transition performed at Step 0 and Closeout,
 and (b) appending CHANGELOG lines to §0 Meta. All other target-file
 changes go through the define skill's revise mode.
 
-| Concern                                        | Owner                                                                       |
-|------------------------------------------------|-----------------------------------------------------------------------------|
-| Target-file specification we align to           | `masim/skills/define-simulation-scenario-skill.md` (§11 checklist, §9.3 revise mode) |
-| Universal Agent Design Handbook                 | `masim/skills/agent-design-skill.md` (§3 canonical order, §6 checklist)     |
-| Per-step audit contract                         | `masim/skills/implement-simulation-skill/{04..09}-*.md` `## Contract`       |
-| Root document conformance                       | `implement-simulation-skill/02-root-documents-spec.md`                      |
-| Variant document conformance                    | `implement-simulation-skill/03-variant-documents-spec.md`                   |
-| Directory / file layout                         | `implement-simulation-skill/01-mandatory-structure.md`                      |
-| AGENT_POOL three-stage match protocol           | `implement-simulation-skill/06-step2-agent-design.md §2.2.0`                |
-| AGENT_POOL icon generation protocol             | `masim/skills/agent-icon-generation-skill.md`                               |
-| Three-PASS validation discipline                | This file §3 and `agent-design-skill.md §6`                                 |
-| From-scratch pipeline (contrast)                | `masim/skills/create-simulation-pipeline.md`                                |
+| Concern                               | Owner                                                                                |
+|---------------------------------------|--------------------------------------------------------------------------------------|
+| Target-file specification we align to | `masim/skills/define-simulation-scenario-skill.md` (§11 checklist, §9.3 revise mode) |
+| Universal Agent Design Handbook       | `masim/skills/agent-design-skill.md` (§3 canonical order, §6 checklist)              |
+| Per-step audit contract               | `masim/skills/implement-simulation-skill/{04..09}-*.md` `## Contract`                |
+| Root document conformance             | `implement-simulation-skill/02-root-documents-spec.md`                               |
+| Variant document conformance          | `implement-simulation-skill/03-variant-documents-spec.md`                            |
+| Directory / file layout               | `implement-simulation-skill/01-mandatory-structure.md`                               |
+| AGENT_POOL three-stage match protocol | `implement-simulation-skill/06-step2-agent-design.md §2.2.0`                         |
+| AGENT_POOL icon generation protocol   | `masim/skills/agent-icon-generation-skill.md`                                        |
+| Three-PASS validation discipline      | This file §3 and `agent-design-skill.md §6`                                          |
+| From-scratch pipeline (contrast)      | `masim/skills/create-simulation-pipeline.md`                                         |
+
+### 0.1 Anchor Precedence (polish flow)
+
+For any conformance question during a polish run (agent naming, archetype identity, roster completeness, parameter provenance, theory citation), the authoritative source order is fixed. When two sources disagree, the higher-numbered rule loses and MUST be patched through the mechanism named in the winner's row.
+
+| Rank | Authoritative source                                                 | What it authorises                                                                                                                                                       | On disagreement                                                                                                                                              |
+|------|----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1    | `examples/{Scenario}/simulation-bases.md §4.N` block headers         | Theoretical archetype names (kebab-normalized). Persona-only relabellings (e.g. `GreaterFoolSpeculator` for a `MomentumSpeculator` archetype) are NOT alternative names. | Winner. Never override during polish. Substantive changes to §4 archetype names go through the define skill's §9.3 revise mode with a new §0 CHANGELOG line. |
+| 2    | Target file §7 Agent Roster rows                                     | Deliverable roster — one row per §4.N block, using the same kebab-normalized name.                                                                                       | Loses to rank 1. During polish, §7 rows that disagree with §4 headers are patched via `define-simulation-scenario-skill.md §9.3 revise mode`.                |
+| 3    | Implementation (`configs/{Scenario}/{V}/players.yml` + `players.py`) | Every top-level identity MUST satisfy `_canonical_archetype(identity)` ∈ { kebab-normalized §4.N header }.                                                               | Loses to ranks 1 and 2. Identity/class renames are the standard fix. See `06-step2-agent-design.md` Hook 6a.                                                 |
+
+**Why this hierarchy exists.** In a `create-simulation-pipeline.md` run the target file is drafted first and seeds `simulation-bases.md §4`; the arrow points target → bases. In a `polish-simulation-pipeline.md` run the scenario already has a populated `simulation-bases.md §4` (with theory blocks, citations, formulas, empirical evidence). §4 is where a scenario's archetype identity actually lives; §7 is a derived summary. A polish run therefore inverts the create-flow seed arrow: bases §4 → target §7 → implementation. Steps that ambiguously reference "target §7 seeds §4" language inherited from the create pipeline MUST be read under this rank order in polish mode.
+
+**Halt path when rank-1 and rank-2 conflict.** If a polish audit finds `simulation-bases.md §4.N` header names disagree with target §7 rows, halt via `AskUserQuestion` with two canonical options: (i) patch target §7 via revise mode to match §4 (default — no theory change); (ii) patch §4 via revise mode to match §7 (requires new theory citations and evidence update, since §4.N block bodies must remain internally consistent with their header). Option (ii) is a substantive change and MUST NOT be silently applied by the polish run.
+
+**Halt path when rank-2 and rank-3 conflict.** If implementation identities disagree with target §7 (and by transitivity with §4), the polish run renames identities/classes in-place to match §4. This is the standard Hook 6a fix and does not require revise mode.
 
 ---
 
@@ -275,13 +291,13 @@ already completed are re-run.
    `configs/{ScenarioName}/`. Classify each against the layout in
    `implement-simulation-skill/01-mandatory-structure.md §1`:
 
-   | Class                        | Meaning                                                                                  |
-   |------------------------------|------------------------------------------------------------------------------------------|
-   | Present, conforming          | File exists at the expected path with the expected name (structure only; content audited later). |
-   | Present, non-conforming      | File exists but has a stale name, wrong header levels, or missing sections.              |
-   | Missing (required)           | File is missing but the current spec requires it (e.g., the target file itself).         |
-   | Missing (conditional)        | File is missing, but its variant is not marked `Yes` in target §10.1 — no action needed. |
-   | Present, deprecated          | File exists under an old name (e.g., `simulation-define.md`) and must be renamed / merged. |
+   | Class                   | Meaning                                                                                          |
+   |-------------------------|--------------------------------------------------------------------------------------------------|
+   | Present, conforming     | File exists at the expected path with the expected name (structure only; content audited later). |
+   | Present, non-conforming | File exists but has a stale name, wrong header levels, or missing sections.                      |
+   | Missing (required)      | File is missing but the current spec requires it (e.g., the target file itself).                 |
+   | Missing (conditional)   | File is missing, but its variant is not marked `Yes` in target §10.1 — no action needed.         |
+   | Present, deprecated     | File exists under an old name (e.g., `simulation-define.md`) and must be renamed / merged.       |
 
 2. **Built-variant list.** Determine the set of variants declared
    `Yes` in target §10.1 Variants to Build. Cross-check that the
@@ -438,19 +454,19 @@ it is unsafe as a default.
 3. **Reverse-reconstruction seed mapping** (used only when the user
    selects the reverse-reconstruct option):
 
-   | Target section              | Source of content in existing scenario                                                    |
-   |-----------------------------|-------------------------------------------------------------------------------------------|
-   | §1 Meta                     | folder name (PascalCase → phrases); `Status: draft`.                                       |
-   | §2 Phenomenon Statement     | `simulation-bases.md §1` narrative + `analysis-bases.md §1` framing.                        |
-   | §3 Research Goals           | `analysis-bases.md §1` (hypotheses reverse-mapped to research questions).                  |
-   | §4 Theoretical Anchors      | Union of every `§4.{N}.4` (`Theoretical Foundation`) block in `simulation-bases.md`; one target §4.{k} per unique theory. |
-   | §5 Stylized Facts           | `simulation-bases.md §1.1.2 / §1.1.3` (empirical regularities) + `analysis-bases.md §6.1`. |
-   | §6 Historical / Empirical Anchors | `simulation-bases.md §1` narrative + `simulation-bases.md §8` case studies.           |
-   | §7 Agent Roster             | One row per `§4.{N}` block in `simulation-bases.md`.                                        |
-   | §8 Environment Specification| `simulation-bases.md §3` Environment Design + any domain-specific §3 subsections.           |
-   | §9 Parameter Seeds          | Union of every `Parameters` table across per-agent specs + `configs/{ScenarioName}/*/players.yml` extras + `simulation-bases.md §6`. |
-   | §10.1 Variants to Build     | For each built variant subdirectory that exists in the scenario folder: `Yes`; for every variant subdirectory whose name is on any earlier scenario's roster but is absent here: `No`. |
-   | §10.2 Pass / Fail Criteria  | `analysis-bases.md §2` metrics + §6.2 calibration targets.                                  |
+   | Target section                    | Source of content in existing scenario                                                                                                                                                 |
+   |-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+   | §1 Meta                           | folder name (PascalCase → phrases); `Status: draft`.                                                                                                                                   |
+   | §2 Phenomenon Statement           | `simulation-bases.md §1` narrative + `analysis-bases.md §1` framing.                                                                                                                   |
+   | §3 Research Goals                 | `analysis-bases.md §1` (hypotheses reverse-mapped to research questions).                                                                                                              |
+   | §4 Theoretical Anchors            | Union of every `§4.{N}.4` (`Theoretical Foundation`) block in `simulation-bases.md`; one target §4.{k} per unique theory.                                                              |
+   | §5 Stylized Facts                 | `simulation-bases.md §1.1.2 / §1.1.3` (empirical regularities) + `analysis-bases.md §6.1`.                                                                                             |
+   | §6 Historical / Empirical Anchors | `simulation-bases.md §1` narrative + `simulation-bases.md §8` case studies.                                                                                                            |
+   | §7 Agent Roster                   | One row per `§4.{N}` block in `simulation-bases.md`.                                                                                                                                   |
+   | §8 Environment Specification      | `simulation-bases.md §3` Environment Design + any domain-specific §3 subsections.                                                                                                      |
+   | §9 Parameter Seeds                | Union of every `Parameters` table across per-agent specs + `configs/{ScenarioName}/*/players.yml` extras + `simulation-bases.md §6`.                                                   |
+   | §10.1 Variants to Build           | For each built variant subdirectory that exists in the scenario folder: `Yes`; for every variant subdirectory whose name is on any earlier scenario's roster but is absent here: `No`. |
+   | §10.2 Pass / Fail Criteria        | `analysis-bases.md §2` metrics + §6.2 calibration targets.                                                                                                                             |
 
    Any target section with no upstream source (typically §3 Research
    Goals and §10.2 Pass / Fail Criteria) is left as a placeholder that
@@ -1016,11 +1032,11 @@ of every built variant.
 
 **Three-pass review.**
 
-| Pass | Perspective                            | Anchors in `09-step5-to-10-review.md`                       |
-|------|----------------------------------------|-------------------------------------------------------------|
-| 1    | Theory–code alignment                   | §5.1 Theory-Code Alignment; §5.2 Prompt Fidelity; §5.3 Configuration Validation; §5.4 Diversity |
-| 2    | Code quality + analysis tools           | §6.1 Required Documentation; §6.2 Correctness; §6.3 Style; §7.1 Baseline-variant analysis-module Requirements; `10-evaluation-architecture.md` import compliance (all reusable code from `masim/evaluation/`) |
-| 3    | Documentation + final cross-check       | §8 Create Documentation; §9 Execute and Debug (dry-run only) |
+| Pass | Perspective                       | Anchors in `09-step5-to-10-review.md`                                                                                                                                                                         |
+|------|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1    | Theory–code alignment             | §5.1 Theory-Code Alignment; §5.2 Prompt Fidelity; §5.3 Configuration Validation; §5.4 Diversity                                                                                                               |
+| 2    | Code quality + analysis tools     | §6.1 Required Documentation; §6.2 Correctness; §6.3 Style; §7.1 Baseline-variant analysis-module Requirements; `10-evaluation-architecture.md` import compliance (all reusable code from `masim/evaluation/`) |
+| 3    | Documentation + final cross-check | §8 Create Documentation; §9 Execute and Debug (dry-run only)                                                                                                                                                  |
 
 Any unchecked item in any pass resets the count for that pass. All
 three passes MUST reach three consecutive PASSes; failure to reach
@@ -1088,24 +1104,24 @@ equivalent of `create-simulation-pipeline.md §10`, with the
 build-log column absent (a polish run has no build log). A polish
 run MUST NOT close if any row cannot be resolved.
 
-| Downstream artefact                                                 | Upstream anchor in target file                     |
-|---------------------------------------------------------------------|----------------------------------------------------|
-| `simulation-bases.md §1` Phenomenon Definition                      | target §2 + §6                                     |
-| `simulation-bases.md §2` Theoretical Foundation                     | target §4                                          |
-| `simulation-bases.md §3` Environment Design                         | target §5 + §8                                     |
-| `simulation-bases.md §4.{N}` Agent blocks                           | target §7 row + target §4 for each theory          |
-| `simulation-bases.md §5` Diversity Verification                     | target §7 (roster diversity)                       |
-| `simulation-bases.md §6` Parameter Table                            | target §9                                          |
-| `simulation-bases.md §7` Communication and Round Structure          | target §8                                          |
-| `simulation-bases.md §8` Historical / Empirical Case Studies        | target §6                                          |
-| `analysis-bases.md §1` Analysis Objectives                          | target §3                                          |
-| `analysis-bases.md §2` Core Metrics Catalogue                       | target §10.2                                       |
-| `analysis-bases.md §6` Expected Results                             | target §5 + §6 + §10.2                             |
-| `configs/{ScenarioName}/{V}/players.yml` extras                     | target §9 (via `# Source:` comments)               |
-| Variant `{V}`'s agent-implementation module classes                 | `simulation-bases.md §4.{N}` (via `explain.md §2`) |
-| Variant `{V}`'s analysis module functions                           | `analysis-bases.md §2` (via `analysis.md §2`)      |
-| `examples/AGENT_POOL/{Domain}/<file>.md` (touched)                  | target §7 row + agent §3.11 Provenance             |
-| Variant subdirectories present                                      | target §10.1                                       |
+| Downstream artefact                                          | Upstream anchor in target file                     |
+|--------------------------------------------------------------|----------------------------------------------------|
+| `simulation-bases.md §1` Phenomenon Definition               | target §2 + §6                                     |
+| `simulation-bases.md §2` Theoretical Foundation              | target §4                                          |
+| `simulation-bases.md §3` Environment Design                  | target §5 + §8                                     |
+| `simulation-bases.md §4.{N}` Agent blocks                    | target §7 row + target §4 for each theory          |
+| `simulation-bases.md §5` Diversity Verification              | target §7 (roster diversity)                       |
+| `simulation-bases.md §6` Parameter Table                     | target §9                                          |
+| `simulation-bases.md §7` Communication and Round Structure   | target §8                                          |
+| `simulation-bases.md §8` Historical / Empirical Case Studies | target §6                                          |
+| `analysis-bases.md §1` Analysis Objectives                   | target §3                                          |
+| `analysis-bases.md §2` Core Metrics Catalogue                | target §10.2                                       |
+| `analysis-bases.md §6` Expected Results                      | target §5 + §6 + §10.2                             |
+| `configs/{ScenarioName}/{V}/players.yml` extras              | target §9 (via `# Source:` comments)               |
+| Variant `{V}`'s agent-implementation module classes          | `simulation-bases.md §4.{N}` (via `explain.md §2`) |
+| Variant `{V}`'s analysis module functions                    | `analysis-bases.md §2` (via `analysis.md §2`)      |
+| `examples/AGENT_POOL/{Domain}/<file>.md` (touched)           | target §7 row + agent §3.11 Provenance             |
+| Variant subdirectories present                               | target §10.1                                       |
 
 Any unanchored downstream artefact is a defect and MUST be repaired
 before Status transition (or halted via `AskUserQuestion` if it
@@ -1274,24 +1290,24 @@ If any item is unchecked, fix it before starting Preflight.
 
 ## 14. Skill References (Quick Index)
 
-| Topic                                                | File                                                                        |
-|------------------------------------------------------|-----------------------------------------------------------------------------|
+| Topic                                                       | File                                                                   |
+|-------------------------------------------------------------|------------------------------------------------------------------------|
 | Scenario target-file spec (§11 checklist, §9.3 revise mode) | `masim/skills/define-simulation-scenario-skill.md`                     |
-| Universal Agent Design Handbook (§3, §6)             | `masim/skills/agent-design-skill.md`                                        |
-| From-scratch pipeline (contrast)                     | `masim/skills/create-simulation-pipeline.md`                                |
-| Methodology overview                                 | `masim/skills/implement-simulation-skill/00-overview.md`                    |
-| Directory layout                                     | `masim/skills/implement-simulation-skill/01-mandatory-structure.md`         |
-| Root document specs (bases.md files)                 | `masim/skills/implement-simulation-skill/02-root-documents-spec.md`         |
-| Variant document specs                               | `masim/skills/implement-simulation-skill/03-variant-documents-spec.md`      |
-| Step 0 (Load target)  — Contract                     | `masim/skills/implement-simulation-skill/04-step0-load-target.md`           |
-| Step 1 (Research)     — Contract                     | `masim/skills/implement-simulation-skill/05-step1-research.md`              |
-| Step 2 (Agent + env design + Pool gate) — Contract   | `masim/skills/implement-simulation-skill/06-step2-agent-design.md`          |
-| Step 3 (Config)       — Contract                     | `masim/skills/implement-simulation-skill/07-step3-config.md`                |
-| Step 4 (Implement)    — Contract                     | `masim/skills/implement-simulation-skill/08-step4-implement.md`             |
-| Steps 5 — 10 (Validate, review, run) — Contract      | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`          |
-| AssetBubble reference implementation (finance domain)| `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`       |
-| AGENT_POOL directory                                 | `examples/AGENT_POOL/`                                                      |
-| Project structure overview                           | `docs/structure.md`                                                         |
+| Universal Agent Design Handbook (§3, §6)                    | `masim/skills/agent-design-skill.md`                                   |
+| From-scratch pipeline (contrast)                            | `masim/skills/create-simulation-pipeline.md`                           |
+| Methodology overview                                        | `masim/skills/implement-simulation-skill/00-overview.md`               |
+| Directory layout                                            | `masim/skills/implement-simulation-skill/01-mandatory-structure.md`    |
+| Root document specs (bases.md files)                        | `masim/skills/implement-simulation-skill/02-root-documents-spec.md`    |
+| Variant document specs                                      | `masim/skills/implement-simulation-skill/03-variant-documents-spec.md` |
+| Step 0 (Load target)  — Contract                            | `masim/skills/implement-simulation-skill/04-step0-load-target.md`      |
+| Step 1 (Research)     — Contract                            | `masim/skills/implement-simulation-skill/05-step1-research.md`         |
+| Step 2 (Agent + env design + Pool gate) — Contract          | `masim/skills/implement-simulation-skill/06-step2-agent-design.md`     |
+| Step 3 (Config)       — Contract                            | `masim/skills/implement-simulation-skill/07-step3-config.md`           |
+| Step 4 (Implement)    — Contract                            | `masim/skills/implement-simulation-skill/08-step4-implement.md`        |
+| Steps 5 — 10 (Validate, review, run) — Contract             | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`     |
+| AssetBubble reference implementation (finance domain)       | `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`  |
+| AGENT_POOL directory                                        | `examples/AGENT_POOL/`                                                 |
+| Project structure overview                                  | `docs/structure.md`                                                    |
 
 ---
 

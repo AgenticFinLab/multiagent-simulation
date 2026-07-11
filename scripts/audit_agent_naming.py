@@ -14,6 +14,10 @@ Invocation modes (backing the Contract Polish Hooks in
     # Scenario-scoped invocation (Step 2 Hook 6 + Step 3 Hooks 5–6–7)
     python scripts/audit_agent_naming.py --scenario AnchoringEffect
 
+    # Polish-flow parity check (Hook 6a + 6b) anchored to simulation-bases.md §4
+    python scripts/audit_agent_naming.py --scenario AssetBubble \
+        --check parity --anchor simulation-bases
+
     # Restrict to a single check family
     python scripts/audit_agent_naming.py --check identity   # Step 3 Hooks 5–6
     python scripts/audit_agent_naming.py --check topology   # Step 3 Hook 7
@@ -33,6 +37,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGS = ROOT / "configs"
+EXAMPLES = ROOT / "examples"
 FINANCE_MD = ROOT / "examples" / "AGENT_POOL" / "finance"
 ICONS = ROOT / "examples" / "AGENT_POOL" / "agent_images" / "icons"
 
@@ -55,6 +60,15 @@ PLAYERS_KEY_RE = re.compile(r"^([a-z][a-z0-9_]*)\s*:\s*$", re.MULTILINE)
 # Fallback: any top-level snake_case key followed by nested `class:` line
 BLOCK_RE = re.compile(
     r"^([a-z][a-z0-9_]*)\s*:\s*\n(?:[^\n]*\n){0,8}?\s+class\s*:\s*[\"']?[^\n\"']+[\"']?",
+    re.MULTILINE,
+)
+
+# simulation-bases.md §4.N block header:
+#     ### §4.1 MomentumSpeculator
+#     ### §4.2 RationalArbitrageur
+# Optional trailing punctuation (colon, em-dash, etc.) is stripped.
+BASES_H4_RE = re.compile(
+    r"^#{2,4}\s*§\s*4\.\d+\s+([A-Za-z][A-Za-z0-9]*)\b",
     re.MULTILINE,
 )
 
@@ -108,6 +122,38 @@ def canonical_archetype(identity: str) -> str:
     return identity
 
 
+def camel_to_kebab(camel: str) -> str:
+    """Convert a CamelCase archetype header (e.g. `MomentumSpeculator`) to
+    kebab-case (`momentum-speculator`). Consecutive capitals are treated as
+    a single acronym followed by a lowercase transition.
+    """
+    # Insert '-' between lowercase→uppercase transitions
+    s = re.sub(r"(.)([A-Z][a-z])", r"\1-\2", camel)
+    # Insert '-' between letter→digit or digit→letter transitions if needed
+    s = re.sub(r"([a-z])([A-Z])", r"\1-\2", s)
+    return s.lower()
+
+
+def extract_bases_archetypes(scenario: str) -> tuple[list[str], Path | None]:
+    """Read `examples/{scenario}/simulation-bases.md` and return the ordered
+    list of kebab-normalized §4.N archetype header names, plus the file path
+    (or None if the file is missing).
+    """
+    bases = EXAMPLES / scenario / "simulation-bases.md"
+    if not bases.is_file():
+        return [], None
+    text = load_text(bases)
+    names: list[str] = []
+    seen: set[str] = set()
+    for m in BASES_H4_RE.finditer(text):
+        kebab = camel_to_kebab(m.group(1))
+        if kebab in seen:
+            continue
+        seen.add(kebab)
+        names.append(kebab)
+    return names, bases
+
+
 CHECK_FAMILIES = ("identity", "topology", "parity", "coverage", "orphans", "all")
 
 
@@ -134,6 +180,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "Restrict the report and exit-code contribution to one check family. "
             "'orphans' is only meaningful in repo-wide mode (no --scenario)."
+        ),
+    )
+    parser.add_argument(
+        "--anchor",
+        default="players",
+        choices=("players", "simulation-bases"),
+        help=(
+            "Canonical archetype-set source for the parity check family (Hook 6). "
+            "'players' (default, create-flow contract): canonical set is the union of "
+            "per-variant archetype sets; parity check reports variants that disagree "
+            "with each other (Hook 6b only). "
+            "'simulation-bases' (polish-flow contract per polish-simulation-pipeline.md §0.1): "
+            "canonical set is the kebab-normalized §4.N block headers of "
+            "examples/{scenario}/simulation-bases.md; parity check reports every variant "
+            "identity whose _canonical_archetype does not appear in that set (Hook 6a), "
+            "then runs Hook 6b for cross-variant equality."
         ),
     )
     return parser.parse_args(argv)
@@ -241,6 +303,31 @@ def main(argv: list[str] | None = None) -> int:
                 parity_issues.append((scen, arch, {v: sorted(arch_by_variant[v]) for v in arch_by_variant}))
                 break  # only need first-issue per scenario for report brevity
 
+    # Hook 6a: simulation-bases.md §4 anchor mode.
+    # Only populated when --anchor simulation-bases is selected.
+    # bases_anchor_data[scenario] = (bases_kebab_archetypes, bases_path_or_None)
+    # bases_anchor_violations: (scenario, variant, identity, canonical_kebab, bases_set)
+    bases_anchor_data: dict[str, tuple[list[str], Path | None]] = {}
+    bases_anchor_missing_file: list[tuple[str, str]] = []          # scenario, expected_path
+    bases_anchor_empty: list[str] = []                             # scenario (file present, 0 headers)
+    bases_anchor_violations: list[tuple[str, str, str, str]] = []  # scenario, variant, ident, canonical_kebab
+    if args.anchor == "simulation-bases":
+        for scen in scenarios:
+            bases_names, bases_path = extract_bases_archetypes(scen)
+            bases_anchor_data[scen] = (bases_names, bases_path)
+            if bases_path is None:
+                bases_anchor_missing_file.append((scen, str(EXAMPLES / scen / "simulation-bases.md")))
+                continue
+            if not bases_names:
+                bases_anchor_empty.append(scen)
+                continue
+            bases_set = set(bases_names)
+            for variant in VARIANTS:
+                for ident in sorted(data[scen][variant]):
+                    canon_kebab = canonical_archetype(ident).replace("_", "-")
+                    if canon_kebab not in bases_set:
+                        bases_anchor_violations.append((scen, variant, ident, canon_kebab))
+
     # .md coverage
     existing_md = {p.stem for p in FINANCE_MD.glob("*.md")}
     existing_icons = {p.stem[len("finance-"):] for p in ICONS.glob("finance-*.png")}
@@ -270,6 +357,7 @@ def main(argv: list[str] | None = None) -> int:
     print("=" * 78)
     print(f"Scenarios scanned : {len(scenarios)}")
     print(f"Variants          : {', '.join(VARIANTS)}")
+    print(f"Anchor mode       : {args.anchor}")
     print(f"Unique archetypes : {len(all_archetypes)}")
     print(f"Existing .md      : {len(existing_md)}")
     print(f"Existing icons    : {len(existing_icons)}")
@@ -299,6 +387,34 @@ def main(argv: list[str] | None = None) -> int:
         if len(parity_issues) > 20:
             print(f"    ... and {len(parity_issues) - 20} more scenarios")
         print()
+
+        if args.anchor == "simulation-bases":
+            print(
+                f"[Hook 6a: simulation-bases.md §4 anchor] missing-file scenarios = "
+                f"{len(bases_anchor_missing_file)}, empty-§4 scenarios = "
+                f"{len(bases_anchor_empty)}, identity violations = "
+                f"{len(bases_anchor_violations)}"
+            )
+            for scen, path in bases_anchor_missing_file[:20]:
+                print(f"    MISSING simulation-bases.md for scenario '{scen}': {path}")
+            if len(bases_anchor_missing_file) > 20:
+                print(f"    ... and {len(bases_anchor_missing_file) - 20} more")
+            for scen in bases_anchor_empty[:20]:
+                print(f"    EMPTY §4 headers in simulation-bases.md for scenario '{scen}'")
+            if len(bases_anchor_empty) > 20:
+                print(f"    ... and {len(bases_anchor_empty) - 20} more")
+            # Group violations by scenario for readability
+            by_scen: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
+            for scen, variant, ident, canon in bases_anchor_violations:
+                by_scen[scen].append((variant, ident, canon))
+            for scen in sorted(by_scen):
+                bases_names, _ = bases_anchor_data.get(scen, ([], None))
+                print(f"    {scen}: canonical §4 set = {bases_names}")
+                for variant, ident, canon in by_scen[scen][:20]:
+                    print(f"        {variant}: '{ident}' → canonical '{canon}' NOT in §4 set")
+                if len(by_scen[scen]) > 20:
+                    print(f"        ... and {len(by_scen[scen]) - 20} more identities in {scen}")
+            print()
 
     if want["coverage"]:
         print(f"[MISSING .md FILES] count = {len(missing_md)}")
@@ -344,6 +460,12 @@ def main(argv: list[str] | None = None) -> int:
         counted += len(top_orphans)
     if want["parity"]:
         counted += len(parity_issues)
+        if args.anchor == "simulation-bases":
+            counted += (
+                len(bases_anchor_missing_file)
+                + len(bases_anchor_empty)
+                + len(bases_anchor_violations)
+            )
     if want["coverage"]:
         counted += len(missing_md) + len(missing_icons)
     if not scoped and want["orphans"]:
