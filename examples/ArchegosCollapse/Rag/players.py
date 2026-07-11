@@ -37,6 +37,11 @@ from examples.ArchegosCollapse.Rule.players import Market
 
 logger = logging.getLogger("ArchegosCollapse.Rag")
 
+# Module-level fallback string injected when no documents are retrieved.
+# Single source of truth for the retrieval failure sentinel; imported by
+# examples.ArchegosCollapse.Rag.analysis as `_RAG_FALLBACK`.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt string from a module path (module:VARIABLE)."""
@@ -354,7 +359,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
