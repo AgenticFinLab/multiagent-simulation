@@ -11,15 +11,15 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"
-      initial_price: 100.0
-      peg_rate: 100.0
-      fundamental_value: 100.0
-      reserve_level: 500000.0
-      price_impact: 0.01
-      mean_reversion: 0.02
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"  # Source: implementation-infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6 — peg level
+      peg_rate: 100.0  # Source: simulation-bases.md §3 — F(t) = 100.0
+      fundamental_value: 100.0  # Source: simulation-bases.md §3 — F(t)
+      reserve_level: 500000.0  # Source: simulation-bases.md §4.3 — initial_cash
+      price_impact: 0.01  # Source: simulation-bases.md §3 — λ = 0.01
+      mean_reversion: 0.02  # Source: simulation-bases.md §3 — γ = 0.02
+      noise_std: 0.5  # Source: simulation-bases.md §3 — σ = 0.5
+      custom_state_hot_limit: 3  # Source: implementation-infrastructure
   persona: !include persona.yml
 
 rule_speculative_attacker:
@@ -33,13 +33,13 @@ rule_speculative_attacker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 5000
-      attack_threshold: 0.03
-      position_size: 800
-      custom_state_hot_limit: 3
-      order_size: 600
+      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"  # Source: implementation-infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §4.1 — speculator capital
+      initial_position: 5000  # Source: simulation-bases.md §4.1 — initial_position = 5000
+      attack_threshold: 0.03  # Source: simulation-bases.md §4.1 — attack_threshold = 0.03; Krugman (1979)
+      position_size: 800  # Source: calibration — attack scaling
+      custom_state_hot_limit: 3  # Source: implementation-infrastructure
+      order_size: 600  # Source: simulation-bases.md §4.1 — order_size = 600
   persona: !include persona.yml
 
 rule_self_fulfilling_trader:
@@ -53,14 +53,14 @@ rule_self_fulfilling_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"
-      initial_cash: 800000.0
-      initial_position: 5000
-      contagion_sensitivity: 0.01
-      exit_threshold: 0.03
-      position_size: 500
-      custom_state_hot_limit: 3
-      order_size: 700
+      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"  # Source: implementation-infrastructure
+      initial_cash: 800000.0  # Source: simulation-bases.md §4.2 — speculator capital
+      initial_position: 5000  # Source: simulation-bases.md §4.2 — initial_position = 5000
+      contagion_sensitivity: 0.01  # Source: simulation-bases.md §4.2 — contagion_sensitivity = 0.01; Obstfeld (1996)
+      exit_threshold: 0.03  # Source: calibration — recovery signal
+      position_size: 500  # Source: calibration — coordinated sell sizing
+      custom_state_hot_limit: 3  # Source: implementation-infrastructure
+      order_size: 700  # Source: simulation-bases.md §4.2 — order_size = 700
   persona: !include persona.yml
 
 rule_central_bank_defender:
@@ -74,13 +74,13 @@ rule_central_bank_defender:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"
-      initial_cash: 5000000.0
-      initial_position: 3000
-      defense_size: 600
-      defense_threshold: 0.05
-      custom_state_hot_limit: 3
-      order_size: 500
+      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"  # Source: implementation-infrastructure
+      initial_cash: 5000000.0  # Source: simulation-bases.md §4.3 — initial_cash = 5,000,000
+      initial_position: 3000  # Source: simulation-bases.md §4.3 — initial_position = 3000
+      defense_size: 600  # Source: calibration — defense scaling
+      defense_threshold: 0.05  # Source: simulation-bases.md §4.3 — defense_threshold = 0.05
+      custom_state_hot_limit: 3  # Source: implementation-infrastructure
+      order_size: 500  # Source: simulation-bases.md §4.3 — order_size = 500
   persona: !include persona.yml
 
 rule_fundamental_hedger:
@@ -94,13 +94,13 @@ rule_fundamental_hedger:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 2000
-      hedge_ratio: 0.05
-      position_size: 400
-      custom_state_hot_limit: 3
-      order_size: 400
+      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"  # Source: implementation-infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §4.4 — hedger capital
+      initial_position: 2000  # Source: simulation-bases.md §4.4 — initial_position = 2000
+      hedge_ratio: 0.05  # Source: simulation-bases.md §4.4 — hedge_ratio = 0.05; Morris & Shin (1998)
+      position_size: 400  # Source: simulation-bases.md §4.4 — order_size = 400
+      custom_state_hot_limit: 3  # Source: implementation-infrastructure
+      order_size: 400  # Source: simulation-bases.md §4.4 — order_size = 400
   persona: !include persona.yml
 
 rule_noise_trader:
@@ -114,10 +114,10 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 500
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rule/records"  # Source: implementation-infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §4.5 — noise capital
+      initial_position: 500  # Source: simulation-bases.md §4.5 — initial_position = 500
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5 — trade_probability = 0.3; Black (1986)
+      noise_size: 100  # Source: calibration — noise sizing
+      custom_state_hot_limit: 3  # Source: implementation-infrastructure
   persona: !include persona.yml

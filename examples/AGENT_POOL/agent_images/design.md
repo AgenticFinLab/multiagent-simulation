@@ -58,12 +58,25 @@ icon in `icons/`.
 | 42 | `finance/belief-anchor.md`                   | `finance-belief-anchor.png`                   | 信念锚定型投资者 | Belief-state compounding under confirming signals → self-reinforcing "+" motif |
 | 43 | `finance/selective-scanner.md`               | `finance-selective-scanner.png`               | 选择型投资者     | Selective information search / myside bias → magnifier-with-highlight motif |
 | 44 | `finance/balanced-analyst.md`                | `finance-balanced-analyst.png`                | 均衡分析型投资者 | Rational Bayesian evidence weighing → equal-armed balance-scale motif |
+| 45 | `finance/speculative-attacker.md`            | `finance-speculative-attacker.png`            | 投机攻击型投资者 | Reserve-depletion currency attacker → downward sword + currency motif |
+| 46 | `finance/self-fulfilling-trader.md`          | `finance-self-fulfilling-trader.png`          | 自我实现型投资者 | Expectation-coordination herding seller → converging arrows motif |
+| 47 | `finance/central-bank-defender.md`           | `finance-central-bank-defender.png`           | 央行防御型投资者 | Reserve-financed peg defender → shield + currency pillar motif |
+| 48 | `finance/fundamental-hedger.md`              | `finance-fundamental-hedger.png`              | 基本面对冲型投资者 | Fundamental-value mean-reversion anchor → anchor + balance-scale motif |
+| 49 | `finance/new-economy-evangelist.md`          | `finance-new-economy-evangelist.png`          | 新经济布道者     | Narrative tech-belief buyer → laptop/circuit-board motif |
+| 50 | `finance/ipo-flipper.md`                     | `finance-ipo-flipper.png`                     | 打新型投资者     | Short-horizon IPO flip trader → coin-flip motif |
+| 51 | `finance/momentum-follower.md`               | `finance-momentum-follower.png`               | 跟风型投资者     | Trend-following amplifier → rising-momentum-arrow motif |
+| 52 | `finance/skeptical-value-investor.md`        | `finance-skeptical-value-investor.png`        | 价值怀疑型投资者 | Cautious fundamental analyst → magnifier + diamond motif |
+| 53 | `finance/short-seller.md`                    | `finance-short-seller.png`                    | 做空型投资者     | Bearish arbitrage pressure → descending-arrow motif |
+| 54 | `finance/pro-cyclical-lender.md`             | `finance-pro-cyclical-lender.png`             | 顺周期贷方       | Pro-cyclical credit expansion → upward-arrow + coins motif |
+| 55 | `finance/minsky-borrower.md`                 | `finance-minsky-borrower.png`                 | 明斯基借方       | Hedge-speculative-Ponzi fragility → collapsing-staircase motif |
+| 56 | `finance/counter-cyclical-lender.md`         | `finance-counter-cyclical-lender.png`         | 逆周期贷方       | Counter-cyclical stabilization → shield + dampened-wave motif |
+| 57 | `finance/value-investor.md`                  | `finance-value-investor.png`                  | 价值型投资者     | Fundamental value anchor → magnifier + diamond motif |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 44 total and map 1:1 to the 44 ``finance/`` agent specs.
+- Icons are 57 total and map 1:1 to the 57 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -95,5 +108,20 @@ icon in `icons/`.
   archetypes (belief-anchor, selective-scanner, balanced-analyst). PNGs
   generated fresh; mapping-row gap closed as part of the
   polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-13: Mapping rows #45–#48 added for the CurrencyCrisis scenario
+  archetypes (speculative-attacker, self-fulfilling-trader, central-bank-defender,
+  fundamental-hedger). PNGs generated via ImageGen; mapping-row and
+  profile-Icon-row gaps closed as part of the polish-simulation-pipeline
+  Step 2 icon-resolution sub-gate.
+- 2026-07-13: Mapping rows #49–#53 added for the DotComBubble scenario
+  archetypes (new-economy-evangelist, ipo-flipper, momentum-follower,
+  skeptical-value-investor, short-seller). PNGs generated via ImageGen;
+  mapping-row gaps closed as part of the polish-simulation-pipeline
+  Step 2 icon-resolution sub-gate.
+- 2026-07-13: Mapping rows #54–#57 added for the CreditCycle scenario
+  archetypes (pro-cyclical-lender, minsky-borrower, counter-cyclical-lender,
+  value-investor). PNGs generated via ImageGen; mapping-row and
+  profile-Icon-row gaps closed as part of the polish-simulation-pipeline
+  Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
