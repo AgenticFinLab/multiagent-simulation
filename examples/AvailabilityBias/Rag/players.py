@@ -28,6 +28,11 @@ from masim.knowledge import (
     KnowledgeStore,
     ResourceManager,
 )
+
+# Single source of truth for the "no relevant knowledge retrieved" fallback
+# string. Also imported by Rag/analysis.py so the retrieval-failure-rate metric
+# uses the identical marker as the runtime path.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -353,7 +358,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])

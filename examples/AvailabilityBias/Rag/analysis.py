@@ -32,9 +32,7 @@ from examples.AvailabilityBias.Rule.analysis import (
     _build_interpretation,
     analyze_availability_bias,
 )
-
-# Fallback string injected when no documents are retrieved (Rag/players.py)
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.AvailabilityBias.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(

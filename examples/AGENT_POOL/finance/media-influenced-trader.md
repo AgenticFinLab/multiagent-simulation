@@ -250,3 +250,4 @@ State update: no portfolio change.
 | Version | 1.0.0 |
 | Change log | 1.0.0 initial fork from information-trader for AvailabilityBias |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-media-influenced-trader.png) |

@@ -26,14 +26,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
-      # Market dynamics parameters
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.02        # Moderate: availability distortions persist
-      mean_reversion: 0.03      # Moderate: eventual correction
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      # Market dynamics parameters (price formula P(t+1) = P(t) + lambda*D(t) + gamma*[F - P(t)] + epsilon)
+      fundamental_value: 100.0                # Source: target §9 P0/F normalization; simulation-bases.md §3.1 constant F baseline
+      initial_price: 100.0                    # Source: target §9 P0 normalization; simulation-bases.md §3.1 starts at fair value
+      price_impact: 0.02                      # Source: target §9 lambda; Hasbrouck (1991) https://doi.org/10.1111/j.1540-6261.1991.tb03749.x; simulation-bases.md §3.1 moderate liquid-market impact
+      mean_reversion: 0.03                    # Source: target §9 gamma; Baker & Wurgler (2007) https://doi.org/10.1257/jep.21.2.129 sentiment-persistence calibration
+      noise_std: 0.5                          # Source: simulation-bases.md §6 standard-calibration noise floor for bias-effect distinguishability
+      custom_state_hot_limit: 3               # Source: implementation infrastructure (hot-state ring-buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -50,15 +50,15 @@ rule_recent_event_overweighter:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # Availability bias: heavily overweight recent salient events
-      recency_weight: 0.70      # 70% weight on recent returns vs fundamental
-      salience_threshold: 0.02  # 2% threshold to trigger availability response
-      quantity_scale: 5000.0
-      max_order: 300.0
+      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0                   # Source: portfolio normalization (10000-scale, shared across variants and scenarios)
+      initial_position: 0.0                   # Source: target §7 recent-event-overweighter Intent line (zero-position start)
+      custom_state_hot_limit: 3               # Source: implementation infrastructure (hot-state ring buffer)
+      # RecentEventOverweighter specific parameters (§4.1 anchor: Tversky & Kahneman 1973)
+      recency_weight: 0.70                    # Source: target §9 rho; Tversky & Kahneman (1973) https://doi.org/10.1016/0010-0285(73)90033-9 availability heuristic
+      salience_threshold: 0.02                # Source: target §9 theta_s; De Bondt & Thaler (1985) https://doi.org/10.2307/2327804 overreaction calibration
+      quantity_scale: 5000.0                  # Source: portfolio normalization (order-quantity scale relative to 10000 initial_cash)
+      max_order: 300.0                        # Source: simulation-bases.md §3 order-book cap (matches ValueTrader position_size for volume comparability)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -75,16 +75,16 @@ rule_media_influenced_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # Media amplification: widely reported events feel more likely
-      media_weight: 0.80          # 80% reliance on media-highlighted deviation
-      social_amplification: 1.50  # 1.5x amplification from social reinforcement
-      media_threshold: 0.03
-      quantity_scale: 5000.0
-      max_order: 300.0
+      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0                   # Source: portfolio normalization (10000-scale)
+      initial_position: 0.0                   # Source: target §7 media-influenced-trader Intent line
+      custom_state_hot_limit: 3               # Source: implementation infrastructure (hot-state ring buffer)
+      # MediaInfluencedTrader specific parameters (§4.2 anchor: Schwarz et al. 1991; Tetlock 2007)
+      media_weight: 0.80                      # Source: target §9 mu_m; Tetlock (2007) https://doi.org/10.1111/j.1540-6261.2007.01232.x media-sentiment calibration
+      social_amplification: 1.50              # Source: target §9 a_m; Schwarz et al. (1991) https://doi.org/10.1037/0022-3514.61.2.195 ease-of-retrieval amplification
+      media_threshold: 0.03                   # Source: simulation-bases.md §5 activation threshold (|deviation|>2.5% band, rounded to 3% for stability)
+      quantity_scale: 5000.0                  # Source: portfolio normalization (order-quantity scale)
+      max_order: 300.0                        # Source: simulation-bases.md §3 order-book cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -101,15 +101,15 @@ rule_systematic_analyst:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # Bayesian evidence weighting
-      weight_decay: 0.80         # Recency decay factor (not used in base version)
-      evidence_threshold: 0.03   # 3% deviation required before acting
-      quantity_scale: 5000.0
-      max_order: 300.0
+      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0                   # Source: portfolio normalization (10000-scale)
+      initial_position: 0.0                   # Source: target §7 systematic-analyst Intent line
+      custom_state_hot_limit: 3               # Source: implementation infrastructure (hot-state ring buffer)
+      # SystematicAnalyst specific parameters (§4.3 anchor: Mullainathan 2002)
+      weight_decay: 0.80                      # Source: simulation-bases.md §4.3 rational-benchmark recency-decay hyperparameter (Bayesian weighting)
+      evidence_threshold: 0.03                # Source: target §9 theta_e; Mullainathan (2002) https://doi.org/10.1162/003355302760193887 memory-based bounded rationality
+      quantity_scale: 5000.0                  # Source: portfolio normalization (order-quantity scale)
+      max_order: 300.0                        # Source: simulation-bases.md §3 order-book cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -126,13 +126,13 @@ rule_value_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # Pure value: fixed position against mispricings
-      deviation_threshold: 0.05  # 5% deviation triggers value trade
-      position_size: 300.0       # Fixed trade size
+      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0                   # Source: portfolio normalization (10000-scale)
+      initial_position: 0.0                   # Source: target §7 value-trader Intent line
+      custom_state_hot_limit: 3               # Source: implementation infrastructure (hot-state ring buffer)
+      # ValueTrader specific parameters (§4.4 anchor: Baker & Wurgler 2007; Shleifer & Vishny 1997)
+      deviation_threshold: 0.05               # Source: target §9 theta_v; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x limits-of-arbitrage margin-of-safety
+      position_size: 300.0                    # Source: target §9 position_size; Graham (1949) The Intelligent Investor discipline (fixed value-trader block size)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -149,12 +149,12 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # Random noise: 30% probability of random 100-500 share trade
-      trade_probability: 0.30
-      min_order: 100.0
-      max_order: 500.0
+      record_path: "EXPERIMENT/AvailabilityBias/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0                   # Source: portfolio normalization (10000-scale)
+      initial_position: 0.0                   # Source: target §7 noise-trader Intent line
+      custom_state_hot_limit: 3               # Source: implementation infrastructure (hot-state ring buffer)
+      # NoiseTrader specific parameters (§4.5 anchor: Black 1986)
+      trade_probability: 0.30                 # Source: target §9 p_n; Black (1986) https://doi.org/10.1111/j.1540-6261.1986.tb04513.x noise-trader activation rate
+      min_order: 100.0                        # Source: simulation-bases.md §4.5 uniform-random order-size lower bound (per-round liquidity floor)
+      max_order: 500.0                        # Source: simulation-bases.md §4.5 uniform-random order-size upper bound (bounded uninformed flow)
   persona: !include persona.yml

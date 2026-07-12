@@ -19,13 +19,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AvailabilityBias/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.03
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AvailabilityBias/RuleLLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      fundamental_value: 100.0     # Source: target §9 P0/F normalization; simulation-bases.md §3.1 constant F baseline
+      initial_price: 100.0         # Source: target §9 P0 normalization; simulation-bases.md §3.1 starts at fair value
+      price_impact: 0.02           # Source: target §9 lambda; Hasbrouck (1991) https://doi.org/10.1111/j.1540-6261.1991.tb03749.x
+      mean_reversion: 0.03         # Source: target §9 gamma; Baker & Wurgler (2007) https://doi.org/10.1257/jep.21.2.129
+      noise_std: 0.5               # Source: simulation-bases.md §6 standard-calibration noise floor
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------

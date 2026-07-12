@@ -247,3 +247,4 @@ State update: no portfolio change.
 | Version | 1.0.0 |
 | Change log | 1.0.0 initial fork from momentum-trader for AvailabilityBias |
 | Status | experimental |
+| Icon        | ![](../agent_images/icons/finance-recent-event-overweighter.png) |
