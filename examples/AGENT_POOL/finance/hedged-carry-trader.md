@@ -204,6 +204,7 @@ State update: unchanged.
 |-------|---------|
 | Author | Codex |
 | Created | 2026-07-08 |
-| Version | 1.0.0 |
-| Change log | Initial CarryTradeUnwind fork from volatility-managed hedging family |
+| Version | 1.0.1 |
+| Icon | ![](../agent_images/icons/finance-hedged-carry-trader.png) |
+| Change log | Initial CarryTradeUnwind fork from volatility-managed hedging family; 1.0.1 — Added Icon row via polish-simulation-pipeline Step 2 icon-repair |
 | Status | draft |

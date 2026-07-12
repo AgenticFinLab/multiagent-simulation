@@ -46,12 +46,24 @@ icon in `icons/`.
 | 30 | `finance/contagion-trader.md`                | `finance-contagion-trader.png`                | 传染型投资者     | Cross-border regional-stress seller → contagion / linked-nodes motif |
 | 31 | `finance/imf-rescuer.md`                     | `finance-imf-rescuer.png`                     | 救援型投资者     | Delayed official crisis lender → shield / rescue-flag motif          |
 | 32 | `finance/value-contrarian.md`                | `finance-value-contrarian.png`                | 逆向价值型投资者 | Deep-discount patient buyer / crisis contrarian → magnifier + reverse-arrow motif |
+| 33 | `finance/recent-event-overweighter.md`       | `finance-recent-event-overweighter.png`       | 近期事件偏好投资者 | Recency salience / overweighted latest bar → dumbbell-on-recent-bar motif |
+| 34 | `finance/media-influenced-trader.md`         | `finance-media-influenced-trader.png`         | 媒体影响投资者   | Media narrative amplification → megaphone-to-price-arrow motif           |
+| 35 | `finance/portfolio-insurer.md`               | `finance-portfolio-insurer.png`               | 组合保险型投资者 | Delta-hedged sell-into-decline insurance → descending-staircase + shield motif |
+| 36 | `finance/index-arbitrageur.md`               | `finance-index-arbitrageur.png`               | 指数套利型投资者 | Futures-cash arbitrage transmission → parallel-lines + double-arrow motif |
+| 37 | `finance/program-trader.md`                  | `finance-program-trader.png`                  | 程式交易型投资者 | Threshold-based feedback selling with convex amplification → cascade-bars + lightning motif |
+| 38 | `finance/carry-trader.md`                    | `finance-carry-trader.png`                    | 套息型投资者     | Leveraged FX carry accumulator / crash-risk exposure → currency-arrow motif |
+| 39 | `finance/leveraged-carry-fund.md`            | `finance-leveraged-carry-fund.png`            | 杠杆套息基金型投资者 | Stop-loss-triggered forced-liquidation hedge fund → lever + stop-loss + margin-call bell motif |
+| 40 | `finance/funding-currency-buyer.md`          | `finance-funding-currency-buyer.png`          | 避险货币买入型投资者 | Safe-haven / repatriation JPY-CHF buyer → shield + inward arrows + anchor motif |
+| 41 | `finance/hedged-carry-trader.md`             | `finance-hedged-carry-trader.png`             | 对冲型套息投资者 | Volatility-managed macro fund with options overlay → carry-arrow + umbrella + volatility waveform motif |
+| 42 | `finance/belief-anchor.md`                   | `finance-belief-anchor.png`                   | 信念锚定型投资者 | Belief-state compounding under confirming signals → self-reinforcing "+" motif |
+| 43 | `finance/selective-scanner.md`               | `finance-selective-scanner.png`               | 选择型投资者     | Selective information search / myside bias → magnifier-with-highlight motif |
+| 44 | `finance/balanced-analyst.md`                | `finance-balanced-analyst.png`                | 均衡分析型投资者 | Rational Bayesian evidence weighing → equal-armed balance-scale motif |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 32 total and map 1:1 to the 32 ``finance/`` agent specs.
+- Icons are 44 total and map 1:1 to the 44 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -66,6 +78,22 @@ icon in `icons/`.
   scenario archetypes (hot-money-funder, contagion-trader, imf-rescuer,
   value-contrarian). Icons were already present in `agent_images/icons/`
   from an earlier session; the mapping-row gap was closed as part of the
+  polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-12: Mapping rows #33–#34 added for the AvailabilityBias scenario
+  archetypes (recent-event-overweighter, media-influenced-trader). PNGs
+  generated fresh via ImageGen; mapping-row gap closed as part of the
+  polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-12: Mapping rows #35–#37 added for the BlackMonday1987 scenario
+  archetypes (portfolio-insurer, index-arbitrageur, program-trader). PNGs
+  generated via agent-icon-generation-skill; profile Icon rows and design.md
+  mapping were the missing links.
+- 2026-07-12: Mapping rows #38–#41 added for the CarryTradeUnwind scenario
+  archetypes (carry-trader, leveraged-carry-fund, funding-currency-buyer,
+  hedged-carry-trader). Icons generated in-session via ImageGen; mapping-row
+  and profile-Icon-row gaps closed together.
+- 2026-07-12: Mapping rows #42–#44 added for the ConfirmationBias scenario
+  archetypes (belief-anchor, selective-scanner, balanced-analyst). PNGs
+  generated fresh; mapping-row gap closed as part of the
   polish-simulation-pipeline Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
