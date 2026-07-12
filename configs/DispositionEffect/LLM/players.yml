@@ -15,16 +15,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
+      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"  # Source: implementation infrastructure
       # Market parameters
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.08
-      mean_reversion: 0.05
-      noise_std: 0.6
-      news_probability: 0.15
-      news_impact_range: 4.0
-      custom_state_hot_limit: 3
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.05  # Source: simulation-bases.md §6
+      noise_std: 0.6  # Source: simulation-bases.md §6
+      news_probability: 0.15  # Source: simulation-bases.md §6
+      news_impact_range: 4.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
 llm_disposition_investor:
@@ -39,22 +39,22 @@ llm_disposition_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      max_position: 60.0
-      max_order_quantity: 15.0
-      custom_state_hot_limit: 3
+      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"  # Source: implementation infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.1.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.1.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 60.0  # Source: simulation-bases.md §4.1.4 scaled for LLM
+      max_order_quantity: 15.0  # Source: implementation constraint
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       llm:
-        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_DISPOSITION_BIASED_SYS"
-        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        max_retries: 3
+        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_DISPOSITION_BIASED_SYS"  # Source: LLM-wiring
+        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        max_retries: 3  # Source: LLM-wiring
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 500
+          temperature: 0.4  # Source: LLM-wiring
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_rational_investor:
@@ -69,22 +69,22 @@ llm_rational_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      max_position: 60.0
-      max_order_quantity: 15.0
-      custom_state_hot_limit: 3
+      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"  # Source: implementation infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.2.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.2.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 60.0  # Source: simulation-bases.md §4.2.4 scaled for LLM
+      max_order_quantity: 15.0  # Source: implementation constraint
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       llm:
-        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_RATIONAL_SYS"
-        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        max_retries: 3
+        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_RATIONAL_SYS"  # Source: LLM-wiring
+        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        max_retries: 3  # Source: LLM-wiring
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: LLM-wiring
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_tax_aware_investor:
@@ -99,22 +99,22 @@ llm_tax_aware_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      max_position: 60.0
-      max_order_quantity: 15.0
-      custom_state_hot_limit: 3
+      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"  # Source: implementation infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.3.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.3.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 60.0  # Source: simulation-bases.md §4.3 scaled for LLM
+      max_order_quantity: 15.0  # Source: implementation constraint
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       llm:
-        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_TAX_AWARE_SYS"
-        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        max_retries: 3
+        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_TAX_AWARE_SYS"  # Source: LLM-wiring
+        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        max_retries: 3  # Source: LLM-wiring
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: LLM-wiring
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_institutional_investor:
@@ -129,22 +129,22 @@ llm_institutional_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      max_position: 60.0
-      max_order_quantity: 15.0
-      custom_state_hot_limit: 3
+      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"  # Source: implementation infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.5.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.5.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 60.0  # Source: simulation-bases.md §4.5 scaled for LLM
+      max_order_quantity: 15.0  # Source: implementation constraint
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       llm:
-        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_INSTITUTIONAL_SYS"
-        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        max_retries: 3
+        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_INSTITUTIONAL_SYS"  # Source: LLM-wiring
+        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        max_retries: 3  # Source: LLM-wiring
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: LLM-wiring
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_loss_averse:
@@ -159,20 +159,20 @@ llm_loss_averse:
     group_tags:
       - llm_investors
     extras:
-      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      max_position: 60.0
-      max_order_quantity: 15.0
-      custom_state_hot_limit: 3
+      record_path: "${DISPOSITION_LLM_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/LLM}/records"  # Source: implementation infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.1 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.1
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 60.0  # Source: simulation-bases.md §4.1 scaled for LLM
+      max_order_quantity: 15.0  # Source: implementation constraint
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       llm:
-        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_LOSS_AVERSE_SYS"
-        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        max_retries: 3
+        sys_message: "examples.DispositionEffect.LLM.prompts:LLM_LOSS_AVERSE_SYS"  # Source: LLM-wiring
+        user_message: "examples.DispositionEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        max_retries: 3  # Source: LLM-wiring
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 500
+          temperature: 0.4  # Source: LLM-wiring
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml

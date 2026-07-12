@@ -58,4 +58,4 @@ Decision: sell 0.5 * position (winner realization).
 | Created | 2026-06-11                                                |
 | Version | 1.0.0                                                     |
 | Status  | draft                                                     |
-| Icon    | ![](../agent_images/icons/finance-disposition-trader.png) |
+| Icon    | ![](../agent_images/icons/finance-disposition-investor.png) |

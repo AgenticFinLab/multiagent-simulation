@@ -55,4 +55,4 @@ Decision: buy 0.5 * (0.10 * 10000)/price shares.
 | Created | 2026-06-11                                              |
 | Version | 1.0.0                                                   |
 | Status  | draft                                                   |
-| Icon    | ![](../agent_images/icons/finance-rational-updater.png) |
+| Icon    | ![](../agent_images/icons/finance-rational-investor.png) |

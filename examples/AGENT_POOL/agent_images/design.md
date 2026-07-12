@@ -72,11 +72,17 @@ icon in `icons/`.
 | 56 | `finance/counter-cyclical-lender.md`         | `finance-counter-cyclical-lender.png`         | 逆周期贷方       | Counter-cyclical stabilization → shield + dampened-wave motif |
 | 57 | `finance/value-investor.md`                  | `finance-value-investor.png`                  | 价值型投资者     | Fundamental value anchor → magnifier + diamond motif |
 
+| 58 | `finance/disposition-investor.md`          | `finance-disposition-investor.png`          | 处置效应型投资者   | Prospect-theory disposition bias → S-curve / loss-curve motif                    |
+| 59 | `finance/rational-investor.md`             | `finance-rational-investor.png`             | 理性型投资者       | Expected-utility rebalancer → balanced-scale motif                               |
+| 60 | `finance/tax-aware-investor.md`            | `finance-tax-aware-investor.png`            | 税务优化型投资者   | Tax-loss harvester / anti-disposition → tax-receipt motif                         |
+| 61 | `finance/index-holder.md`                  | `finance-index-holder.png`                  | 被动指数型投资者   | Passive buy-and-hold baseline → flat-line motif                                  |
+| 62 | `finance/institutional-investor.md`        | `finance-institutional-investor.png`        | 机构型投资者       | Professional symmetric discipline → threshold-gauge motif                        |
+
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 57 total and map 1:1 to the 57 ``finance/`` agent specs.
+- Icons are 62 total and map 1:1 to the 62 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -123,5 +129,13 @@ icon in `icons/`.
   value-investor). PNGs generated via ImageGen; mapping-row and
   profile-Icon-row gaps closed as part of the polish-simulation-pipeline
   Step 2 icon-resolution sub-gate.
+- 2026-07-14: Mapping rows #58–#62 added for the DispositionEffect scenario
+  archetypes (disposition-investor, rational-investor, tax-aware-investor,
+  index-holder, institutional-investor). PNGs generated via ImageGen;
+  disposition-investor and rational-investor profile Icon rows corrected
+  (previously pointed to wrong filenames disposition-trader.png and
+  rational-updater.png respectively). Mapping-row and profile-Icon-row
+  gaps closed as part of the polish-simulation-pipeline Step 2
+  icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
