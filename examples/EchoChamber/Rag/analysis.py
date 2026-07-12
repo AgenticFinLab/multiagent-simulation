@@ -19,8 +19,7 @@ from examples.EchoChamber.Rule.analysis import (
     create_visualizations,
     load_simulation_data,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.EchoChamber.Rag.players import _RAG_FALLBACK
 
 
 def compute_polarization_amplification(polarization: Sequence[float]) -> float:
