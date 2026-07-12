@@ -24,14 +24,15 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
-      # Market parameters (daily basis)
-      # ~6% annual / 252
+      # Source: target §9 — ~6% annual / 252 (Mehra & Prescott 1985)
       stock_expected_return: 0.000238
-      # ~1% annual / 252
+      # Source: target §9 — ~1% annual / 252
       bond_return: 0.0000397
-      # ~15% annual / sqrt(252)
+      # Source: target §9 — ~15% annual / sqrt(252)
       stock_volatility: 0.00945
+      # Source: target §9 — normalization
       initial_stock_price: 100.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -48,12 +49,17 @@ rule_myopic_loss_averse_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: target §9 — normalization
       initial_stock: 0.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
-      # MLA specific
+      # Source: target §9 — Benartzi & Thaler (1995) DOI: 10.2307/2118511
       loss_aversion: 2.25
+      # Source: target §9 — Benartzi & Thaler (1995) DOI: 10.2307/2118511
       evaluation_window: 5
+      # Source: target §9 — standard CRRA range
       risk_aversion: 2.0
   persona: !include persona.yml
 
@@ -70,11 +76,15 @@ rule_long_horizon_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: target §9 — normalization
       initial_stock: 0.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
-      # Long horizon specific
+      # Source: simulation-bases.md §4.2 — long evaluation window
       evaluation_window: 50
+      # Source: target §9 — Samuelson (1969) DOI: 10.2307/1926559
       target_stock_pct: 0.6
   persona: !include persona.yml
 
@@ -90,10 +100,13 @@ rule_risk_neutral_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: target §9 — normalization
       initial_stock: 0.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
-      # Risk neutral specific
+      # Source: target §9 — calibration to match rational benchmark
       excess_return_multiplier: 500
   persona: !include persona.yml
 
@@ -110,10 +123,13 @@ rule_conservative_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: target §9 — normalization
       initial_stock: 0.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
-      # Conservative specific
+      # Source: target §9 — Kahneman & Tversky (1979) DOI: 10.2307/1914185
       target_stock_pct: 0.2
   persona: !include persona.yml
 
@@ -130,9 +146,12 @@ rule_noise_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: target §9 — normalization
       initial_stock: 0.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
-      # Noise specific
+      # Source: target §9 — Black (1986) DOI: 10.1111/j.1540-6261.1986.tb04513.x
       noise_std: 8.0
   persona: !include persona.yml

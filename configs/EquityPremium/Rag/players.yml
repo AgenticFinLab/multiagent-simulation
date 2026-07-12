@@ -1,5 +1,5 @@
 # =============================================================================
-# EquityPremiumLLM Players Configuration
+# EquityPremium Rag Players Configuration
 # =============================================================================
 
 # =============================================================================
@@ -37,13 +37,15 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
-      # ~6% annual / 252 days
+      # Source: target §9 — ~6% annual / 252 (Mehra & Prescott 1985)
       stock_expected_return: 0.000238
-      # ~1% annual / 252 days
+      # Source: target §9 — ~1% annual / 252
       bond_return: 0.0000397
-      # ~15% annual vol / sqrt(252)
+      # Source: target §9 — ~15% annual vol / sqrt(252)
       stock_volatility: 0.00945
+      # Source: target §9 — normalization
       initial_stock_price: 100.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -60,13 +62,17 @@ ragllm_myopic_loss_averse:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
-      # 50% cash
+      # Source: simulation-bases.md §4.1 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.1 — initial stock position
       initial_stock_shares: 50.0
-      # 25% bonds
+      # Source: simulation-bases.md §4.1 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -84,6 +90,7 @@ ragllm_myopic_loss_averse:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_MYOPIC_LOSS_AVERSE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -107,11 +114,17 @@ ragllm_long_term_investor:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.2 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.2 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.2 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -129,6 +142,7 @@ ragllm_long_term_investor:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_LONG_HORIZON_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -151,11 +165,17 @@ ragllm_institutional_investor:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.3 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.3 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.3 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -173,6 +193,7 @@ ragllm_institutional_investor:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_RISK_NEUTRAL_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -196,11 +217,17 @@ ragllm_risk_averse_saver:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.4 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.4 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.4 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -218,6 +245,7 @@ ragllm_risk_averse_saver:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_CONSERVATIVE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -241,11 +269,17 @@ ragllm_rational_optimizer:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.5 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.5 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.5 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -263,6 +297,7 @@ ragllm_rational_optimizer:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
