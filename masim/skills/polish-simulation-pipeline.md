@@ -61,6 +61,8 @@ changes go through the define skill's revise mode.
 | Directory / file layout               | `implement-simulation-skill/01-mandatory-structure.md`                               |
 | AGENT_POOL three-stage match protocol | `implement-simulation-skill/06-step2-agent-design.md §2.2.0`                         |
 | AGENT_POOL icon generation protocol   | `masim/skills/agent-icon-generation-skill.md`                                        |
+| Agent handbook structural audit       | `scripts/audit_agent_handbook.py` (backs `06-step2-agent-design.md` Hook 5a)         |
+| Agent naming / parity / coverage audit| `scripts/audit_agent_naming.py` (backs Hooks 4, 6, 7)                                |
 | Three-PASS validation discipline      | This file §3 and `agent-design-skill.md §6`                                          |
 | From-scratch pipeline (contrast)      | `masim/skills/create-simulation-pipeline.md`                                         |
 
@@ -206,8 +208,12 @@ commit".
     ┌────────────────────────────────────────────────────────────┐
     │ Step 2 — Agent + Environment Design Audit                  │
     │   File: 06-step2-agent-design.md ## Contract → Polish Hooks│
-    │   Dispatches per-agent audit into agent-design-skill.md    │
-    │   (§3 canonical order, §6 checklist 3-PASS).               │
+    │   Hook 5a: `scripts/audit_agent_handbook.py` structural    │
+    │   gate (exit 0 required before proceeding).                │
+    │   Hook 5b: agent-design-skill.md §6 three-PASS semantic    │
+    │   checklist.                                               │
+    │   Hook 6: `scripts/audit_agent_naming.py --anchor          │
+    │   simulation-bases` parity gate.                           │
     │   AGENT_POOL three-stage match rerun (handles reuse/       │
     │   fork/new AND outcome-shrink new→reuse).                  │
     │   Also audits root doc §3 Environment Design, §5 Diversity │
