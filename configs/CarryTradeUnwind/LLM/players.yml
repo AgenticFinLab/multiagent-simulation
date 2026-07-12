@@ -19,13 +19,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"
-      fundamental_value: 1.0
-      initial_price: 1.0
-      price_impact: 0.003
-      mean_reversion: 0.02
-      noise_std: 0.005
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"  # Source: implementation infrastructure (record path convention per polish-simulation-pipeline.md §6.4)
+      fundamental_value: 1.0      # Source: target §9 F; PPP normalization anchor
+      initial_price: 1.0          # Source: target §9 / simulation-bases.md §3 (starts at fundamental)
+      price_impact: 0.003         # Source: target §9 lambda; Brunnermeier & Pedersen (2009) https://doi.org/10.1093/rfs/hhn098
+      mean_reversion: 0.02        # Source: target §9 gamma; Rogoff (1996) PPP-reversion https://www.jstor.org/stable/2729217
+      noise_std: 0.005            # Source: simulation-bases.md §3.1 (low-noise FX environment)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -44,18 +44,18 @@ llm_carry_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 500.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 500000.0                                  # Source: target §7 carry-trader Intent line; simulation-bases.md §4.1
+      initial_position: 500.0                                 # Source: target §7 carry-trader Intent line (starts with open carry position)
+      custom_state_hot_limit: 3                               # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_CARRY_TRADER_SYS"
-        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_CARRY_TRADER_SYS"  # Source: LLM wiring — persona prompt for carry-trader archetype
+        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"    # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode (remote API)
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7                         # Source: LLM wiring — persona-driven exploration
+          max_tokens: 512                          # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -74,23 +74,23 @@ llm_leveraged_carry_fund:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 800.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 500000.0                                  # Source: target §7 leveraged-carry-fund Intent line; simulation-bases.md §4.2
+      initial_position: 800.0                                 # Source: target §7 leveraged-carry-fund Intent line (large open carry position)
+      custom_state_hot_limit: 3                               # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_LEVERAGED_CARRY_FUND_SYS"
-        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_LEVERAGED_CARRY_FUND_SYS"  # Source: LLM wiring — persona prompt for leveraged-carry-fund archetype
+        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"            # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.7
-          max_tokens: 512
+          temperature: 0.7                         # Source: LLM wiring — persona-driven exploration
+          max_tokens: 512                          # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Funding Currency Buyers — LLM with safe-haven demand persona
-# Theory: Menkhoff et al. (2012) — safe-haven demand during FX volatility
+# Theory: Ranaldo & Söderlind (2010) / Menkhoff et al. (2012) — safe-haven demand during FX volatility
 # -----------------------------------------------------------------------------
 llm_funding_currency_buyer:
   name: "LLM Funding Currency Buyer"
@@ -104,23 +104,23 @@ llm_funding_currency_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"
-      initial_cash: 300000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 300000.0                                  # Source: target §7 funding-currency-buyer Intent line; simulation-bases.md §4.3
+      initial_position: 0.0                                   # Source: target §7 funding-currency-buyer Intent line (safe-haven starts flat)
+      custom_state_hot_limit: 3                               # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_FUNDING_CURRENCY_BUYER_SYS"
-        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_FUNDING_CURRENCY_BUYER_SYS"  # Source: LLM wiring — persona prompt for funding-currency-buyer archetype
+        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"              # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.5
-          max_tokens: 512
+          temperature: 0.5                         # Source: LLM wiring — moderate exploration (safe-haven trigger discipline)
+          max_tokens: 512                          # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Hedged Carry Trader — LLM with FX stability mandate persona
-# Theory: Menkhoff et al. (2012) — FX intervention effectiveness
+# Theory: Menkhoff et al. (2012) — FX volatility-adjusted carry
 # -----------------------------------------------------------------------------
 llm_hedged_carry_trader:
   name: "LLM Hedged Carry Trader"
@@ -133,18 +133,18 @@ llm_hedged_carry_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"
-      initial_cash: 2000000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 2000000.0                                 # Source: target §7 hedged-carry-trader Intent line; simulation-bases.md §4.4
+      initial_position: 0.0                                   # Source: target §7 hedged-carry-trader Intent line (starts flat, hedge-aware entry)
+      custom_state_hot_limit: 3                               # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_HEDGED_CARRY_TRADER_SYS"
-        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_HEDGED_CARRY_TRADER_SYS"  # Source: LLM wiring — persona prompt for hedged-carry-trader archetype
+        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"           # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_tokens: 512
+          temperature: 0.3                         # Source: LLM wiring — low temperature for hedge discipline
+          max_tokens: 512                          # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -163,16 +163,16 @@ llm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"
-      initial_cash: 100000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 100000.0                                  # Source: target §7 noise-trader Intent line; simulation-bases.md §4.5
+      initial_position: 0.0                                   # Source: target §7 noise-trader Intent line (background flow starts flat)
+      custom_state_hot_limit: 3                               # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_NOISE_TRADER_SYS"
-        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_NOISE_TRADER_SYS"  # Source: LLM wiring — persona prompt for noise-trader archetype
+        user_message: "examples.CarryTradeUnwind.LLM.prompts:LLM_USER_TEMPLATE"    # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.9
-          max_tokens: 512
+          temperature: 0.9                         # Source: LLM wiring — high temperature for background stochastic flow
+          max_tokens: 512                          # Source: LLM wiring — response length cap
   persona: !include persona.yml

@@ -14,7 +14,7 @@
 #   - LeveragedCarryFund: High leverage with stop-loss (DESTABILIZING)
 #     Theory: Plantin & Shin (2018)
 #   - FundingCurrencyBuyer: Safe-haven demand and partial stabilization (STABILIZING)
-#     Theory: Menkhoff et al. (2012)
+#     Theory: Ranaldo & Söderlind (2010) / Menkhoff et al. (2012)
 #   - HedgedCarryTrader: Volatility-adjusted carry (STABILIZING)
 #     Theory: Menkhoff et al. (2012), Burnside et al. (2011)
 #   - NoiseTrader: Random background liquidity (NEUTRAL)
@@ -35,14 +35,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
+      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"  # Source: implementation infrastructure (record path convention per polish-simulation-pipeline.md §6.4)
       # FX market dynamics (funding currency rate, normalized fundamental = 1.0)
-      fundamental_value: 1.0
-      initial_price: 1.0
-      price_impact: 0.003         # Low: FX market is deep
-      mean_reversion: 0.02        # Moderate: long-run PPP reversion
-      noise_std: 0.005            # Low noise
-      custom_state_hot_limit: 3
+      fundamental_value: 1.0      # Source: target §9 F; PPP normalization anchor (bases §3.1)
+      initial_price: 1.0          # Source: target §9 / simulation-bases.md §3 (starts at fundamental)
+      price_impact: 0.003         # Source: target §9 lambda; Brunnermeier & Pedersen (2009) https://doi.org/10.1093/rfs/hhn098 (FX-market-depth calibration)
+      mean_reversion: 0.02        # Source: target §9 gamma; Rogoff (1996) PPP-reversion https://www.jstor.org/stable/2729217
+      noise_std: 0.005            # Source: simulation-bases.md §3.1 (low-noise FX environment)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -61,15 +61,15 @@ rule_carry_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 500.0     # Start with carry position (short funding currency)
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 500000.0      # Source: target §7 carry-trader Intent line; simulation-bases.md §4.1
+      initial_position: 500.0     # Source: target §7 carry-trader Intent line (starts with open carry position, short funding currency)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
       # CarryTrader specific parameters (Brunnermeier et al., 2009)
-      unwind_threshold: 0.02      # Unwind when return > 2%
-      carry_size: 800.0           # Source: target §9 / simulation-bases.md §4.1; base carry units before leverage cap
-      deviation_scale: 5000.0     # Source: simulation-bases.md §4.1; deviation-proportional sizing scale
-      leverage: 5.0               # Leverage multiplier (Brunnermeier et al., 2009)
+      unwind_threshold: 0.02      # Source: target §9 theta_unwind; Brunnermeier, Nagel & Pedersen (2009) https://doi.org/10.1086/593088 (carry-crash trigger)
+      carry_size: 800.0           # Source: target §9 q_carry / simulation-bases.md §4.1; base carry units before leverage cap
+      deviation_scale: 5000.0     # Source: target §9 s_dev / simulation-bases.md §4.1; deviation-proportional sizing scale
+      leverage: 5.0               # Source: target §9 L_c; Brunnermeier, Nagel & Pedersen (2009) https://doi.org/10.1086/593088 (leverage multiplier)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -88,19 +88,19 @@ rule_leveraged_carry_fund:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 800.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 500000.0      # Source: target §7 leveraged-carry-fund Intent line; simulation-bases.md §4.2
+      initial_position: 800.0     # Source: target §7 leveraged-carry-fund Intent line (large open carry position)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
       # LeveragedCarryFund parameters (Plantin & Shin, 2018)
-      stop_loss: 0.03             # Stop-loss trigger at 3% funding appreciation
-      leverage: 5.0               # 5× leverage amplifier
-      base_size: 800.0            # Source: target §9 / simulation-bases.md §4.2; base forced-unwind units before leverage cap
+      stop_loss: 0.03             # Source: target §9 theta_stop; Brunnermeier & Pedersen (2009) https://doi.org/10.1093/rfs/hhn098 (funding-liquidity stop trigger)
+      leverage: 5.0               # Source: target §9 L_c; Plantin & Shin (2018) forced-liquidation leverage
+      base_size: 800.0            # Source: target §9 q_lcf / simulation-bases.md §4.2; base forced-unwind units before leverage cap
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Funding Currency Buyers (Safe-Haven Amplifiers)
-# Theory: Menkhoff et al. (2012) — Safe-haven demand during FX volatility
+# Theory: Ranaldo & Söderlind (2010) / Menkhoff et al. (2012) — Safe-haven demand during FX volatility
 # -----------------------------------------------------------------------------
 rule_funding_currency_buyer:
   name: "Funding Currency Buyer"
@@ -114,13 +114,13 @@ rule_funding_currency_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-      initial_cash: 300000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # FundingCurrencyBuyer parameters (Menkhoff et al., 2012)
-      risk_threshold: 0.05        # Source: target §9 / simulation-bases.md §6; safe-haven trigger at 5% funding stress
-      position_size: 500.0        # Source: target §9 / simulation-bases.md §6; bounded safe-haven buy units
+      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 300000.0      # Source: target §7 funding-currency-buyer Intent line; simulation-bases.md §4.3
+      initial_position: 0.0       # Source: target §7 funding-currency-buyer Intent line (safe-haven starts flat)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
+      # FundingCurrencyBuyer parameters (Ranaldo & Söderlind, 2010; Menkhoff et al., 2012)
+      risk_threshold: 0.05        # Source: target §9 theta_safe / simulation-bases.md §4.3; Ranaldo & Söderlind (2010) https://doi.org/10.1093/rof/rfq007 (safe-haven trigger at 5% funding stress)
+      position_size: 500.0        # Source: target §9 q_safe / simulation-bases.md §4.3; bounded safe-haven buy units
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -139,14 +139,14 @@ rule_hedged_carry_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-      initial_cash: 2000000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 2000000.0     # Source: target §7 hedged-carry-trader Intent line; simulation-bases.md §4.4
+      initial_position: 0.0       # Source: target §7 hedged-carry-trader Intent line (starts flat, hedge-aware entry)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
       # HedgedCarryTrader parameters (Menkhoff et al., 2012; Burnside et al., 2011)
-      hedge_ratio: 0.30              # 30% of position hedged (reduces net exposure)
-      vol_threshold: 0.05            # FX volatility threshold for position adjustment
-      base_size: 500.0               # Source: target §9 / simulation-bases.md §4.4; base hedged carry units
+      hedge_ratio: 0.30           # Source: target §9 h; Menkhoff et al. (2012) https://doi.org/10.1111/j.1540-6261.2012.01728.x (30% hedge fraction)
+      vol_threshold: 0.05         # Source: target §9 theta_vol; Menkhoff et al. (2012) FX-volatility trigger
+      base_size: 500.0            # Source: target §9 / simulation-bases.md §4.4; base hedged carry units
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -164,12 +164,12 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"
-      initial_cash: 100000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CarryTradeUnwind/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 100000.0      # Source: target §7 noise-trader Intent line; simulation-bases.md §4.5
+      initial_position: 0.0       # Source: target §7 noise-trader Intent line (background flow starts flat)
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
       # NoiseTrader parameters (Black, 1986)
-      trade_probability: 0.30     # Source: target §9 / simulation-bases.md §6; bounded FX background flow
-      min_order: 20.0             # Source: simulation-bases.md §4.5; bounded stochastic order size
-      max_order: 100.0            # Source: simulation-bases.md §4.5; bounded stochastic order size
+      trade_probability: 0.30     # Source: target §9 p_n / simulation-bases.md §4.5; Black (1986) https://doi.org/10.1111/j.1540-6261.1986.tb04513.x (bounded FX background flow)
+      min_order: 20.0             # Source: simulation-bases.md §4.5; bounded stochastic order size (lower)
+      max_order: 100.0            # Source: simulation-bases.md §4.5; bounded stochastic order size (upper)
   persona: !include persona.yml

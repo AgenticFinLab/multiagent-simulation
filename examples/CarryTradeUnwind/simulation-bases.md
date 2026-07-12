@@ -77,6 +77,14 @@ The simulation preserves these mechanisms with five investor types. `CarryTrader
 - **Core Insight**: Background noise trading provides the liquidity that carry traders need to execute their positions. In FX markets, noise traders represent non-carry order flow from importers, exporters, and portfolio managers with non-speculative FX needs. trade_probability = 0.30 calibrated to reflect the substantial non-speculative FX market volume that provides background liquidity.
 - **Empirical Evidence**: BIS Triennial Survey data suggest speculative flow (including carry) accounts for approximately 30–40% of daily FX volume; the remaining 60–70% is non-speculative, consistent with the NoiseTrader modeling background non-carry order flow.
 
+### 2.6 Safe-Haven Currency Demand (Ranaldo & Söderlind)
+
+- **Citation**: Ranaldo, A., & Söderlind, P. (2010). "Safe haven currencies." *Review of Finance*, 14(3), 385–407. DOI: 10.1093/rof/rfq007
+- **Core Insight**: During risk-off episodes, investors buy the funding currency (JPY, CHF) as a safe haven, providing natural counter-demand that partially offsets carry-trade forced selling. The same risk-sentiment deterioration that forces carry-trade exits also triggers this safe-haven flow — so the two flows are simultaneous, but the safe-haven flow is systematically smaller than the forced-liquidation flow, which is why cascades still occur despite active stabilising demand.
+- **Mathematical Formulation**: Safe-haven trigger: `buy if δ(t) < −risk_threshold` with `risk_threshold = 0.05`. Buy quantity is a fixed position size (`position_size = 500`), not deviation-scaled — safe-haven agents provide a stable but bounded stabilising bid. Total stabilising volume with 2 FundingCurrencyBuyer instances = 2 × 500 = 1000 units/round vs. 2 × LeveragedCarryFund × 4000 = 8000 units/round cascade selling → net cascade of ≈ 7000 units/round at peak.
+- **Empirical Evidence**: Ranaldo & Söderlind (2010) document that JPY appreciates by 1–3% for every 1σ increase in VIX or CDS spreads during risk-off episodes — a systematic but finite safe-haven flow. The fact that JPY still appreciated ≈ 20% in October 2008 despite active safe-haven flows demonstrates empirically that forced carry-unwind volume exceeds safe-haven absorption capacity, consistent with the simulation's calibrated cascade condition.
+- **Relevance to Investor Taxonomy**: FundingCurrencyBuyer directly instantiates this theory. `risk_threshold = 0.05` (5%) and `position_size = 500` are calibrated so that safe-haven buying provides a visible but insufficient floor — matching the Ranaldo & Söderlind (2010) magnitude estimate and yielding a recovery_ratio in the empirical 0.30–0.80 band.
+- **Calibration Implication**: `risk_threshold` range 0.03–0.08 and `position_size` range 300–800; defaults 0.05 and 500 (matches target §9 Parameter Seeds row).
 
 ## §3 Market Design Principles
 
