@@ -17,12 +17,9 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 
-from examples.standard_rule_analysis import (
-    _load_data,
-    analyze_standard_scenario,
-)
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from masim.evaluation.data_loader import load_data as _load_data
+from masim.evaluation.pipeline import analyze_standard_scenario
+from examples.FlashCrash2010.Rag.players import _RAG_FALLBACK
 
 
 def _load_rag_payloads(results: Any) -> Dict[str, Dict[int, Dict[str, Any]]]:

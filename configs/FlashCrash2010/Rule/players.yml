@@ -11,14 +11,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-      initial_price: 40.0
-      fundamental_value: 40.0
-      base_depth: 10000
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"  # Source: infrastructure
+      initial_price: 40.0        # Source: target §9 row 1 (normalization)
+      fundamental_value: 40.0    # Source: target §9 row 2 (normalization)
+      base_depth: 10000          # Source: target §9 row 3; CFTC-SEC (2010)
+      price_impact: 0.05         # Source: target §9 row 4; Kirilenko et al. (2017)
+      mean_reversion: 0.02       # Source: target §9 row 5; Shiller (1981)
+      noise_std: 0.01            # Source: target §9 row 6 (calibration)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_hft_market_maker:
@@ -32,17 +32,17 @@ rule_hft_market_maker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      normal_spread: 0.0001
-      stress_spread: 0.005
-      inventory_limit: 1000
-      withdrawal_threshold: 0.02
-      mm_qty: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0    # Source: infrastructure
+      initial_position: 0        # Source: infrastructure
+      initial_price: 40.0        # Source: target §9 row 1 (normalization)
+      fundamental_value: 40.0    # Source: target §9 row 2 (normalization)
+      normal_spread: 0.0001      # Source: target §9 row 8; Biais et al. (2015)
+      stress_spread: 0.005       # Source: target §9 row 9; Biais et al. (2015)
+      inventory_limit: 1000      # Source: target §9 row 10 (calibration)
+      withdrawal_threshold: 0.02 # Source: target §9 row 7; Kirilenko et al. (2017)
+      mm_qty: 500                # Source: simulation-bases.md §4.1 (normal liquidity provision)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_momentum_chaser:
@@ -56,16 +56,16 @@ rule_momentum_chaser:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      entry_threshold: 0.001
-      lookback_window: 5          # Lookback window for velocity calc (§4.2)
-      position_multiplier: 10000
-      max_size: 1000
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"  # Source: infrastructure
+      initial_cash: 500000.0     # Source: infrastructure
+      initial_position: 0        # Source: infrastructure
+      initial_price: 40.0        # Source: target §9 row 1 (normalization)
+      fundamental_value: 40.0    # Source: target §9 row 2 (normalization)
+      entry_threshold: 0.001     # Source: target §9 row 12; De Long et al. (1990)
+      lookback_window: 5         # Source: target §9 row 11; De Long et al. (1990)
+      position_multiplier: 10000 # Source: target §9 row 13 (calibration)
+      max_size: 1000             # Source: simulation-bases.md §4.2 (position cap)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_fundamental_trader:
@@ -79,14 +79,14 @@ rule_fundamental_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-      initial_cash: 2000000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      value_trigger: 0.05
-      order_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"  # Source: infrastructure
+      initial_cash: 2000000.0    # Source: infrastructure
+      initial_position: 0        # Source: infrastructure
+      initial_price: 40.0        # Source: target §9 row 1 (normalization)
+      fundamental_value: 40.0    # Source: target §9 row 2 (normalization)
+      value_trigger: 0.05        # Source: target §9 row 14; Shiller (1981)
+      order_size: 500            # Source: target §9 row 15 (calibration)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_stop_loss_trader:
@@ -100,15 +100,15 @@ rule_stop_loss_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 1000
-      initial_price: 40.0
-      fundamental_value: 40.0
-      entry_price: 40.0
-      stop_percentage: 0.03
-      position_size: 1000
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0    # Source: infrastructure
+      initial_position: 1000     # Source: infrastructure
+      initial_price: 40.0        # Source: target §9 row 1 (normalization)
+      fundamental_value: 40.0    # Source: target §9 row 2 (normalization)
+      entry_price: 40.0          # Source: target §9 row 17 (normalization)
+      stop_percentage: 0.03      # Source: target §9 row 16; Brunnermeier & Pedersen (2005)
+      position_size: 1000        # Source: simulation-bases.md §4.4 (initial_position)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_noise_trader:
@@ -122,13 +122,13 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      trade_probability: 0.05
-      min_order: 100
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/Rule/records"  # Source: infrastructure
+      initial_cash: 500000.0     # Source: infrastructure
+      initial_position: 0        # Source: infrastructure
+      initial_price: 40.0        # Source: target §9 row 1 (normalization)
+      fundamental_value: 40.0    # Source: target §9 row 2 (normalization)
+      trade_probability: 0.05    # Source: target §9 row 18; Black (1986)
+      min_order: 100             # Source: target §9 row 19 (calibration)
+      max_order: 500             # Source: target §9 row 20 (calibration)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
