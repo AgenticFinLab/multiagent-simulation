@@ -11,13 +11,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FramingEffect/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/LLM/records"  # Source: infrastructure
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      price_impact: 0.05  # Source: target §9 row 3 — LeBaron (2006) ABM calibration
+      mean_reversion: 0.02  # Source: target §9 row 4 — Summers (1986) variance bounds
+      noise_std: 0.01  # Source: target §9 row 5 — Shiller (1981) excess volatility
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 llm_gain_frame_follower:
@@ -31,13 +31,13 @@ llm_gain_frame_follower:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/LLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.LLM.prompts:LLM_GAIN_FRAME_FOLLOWER_SYS"
         user_message: "examples.FramingEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -58,13 +58,13 @@ llm_loss_frame_reactor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/LLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.LLM.prompts:LLM_LOSS_FRAME_REACTOR_SYS"
         user_message: "examples.FramingEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -85,13 +85,13 @@ llm_frame_invariant_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/LLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.LLM.prompts:LLM_FRAME_INVARIANT_TRADER_SYS"
         user_message: "examples.FramingEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -112,13 +112,13 @@ llm_arbitrage_framer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/LLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.LLM.prompts:LLM_ARBITRAGE_FRAMER_SYS"
         user_message: "examples.FramingEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -139,13 +139,13 @@ llm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/LLM/records"  # Source: infrastructure
+      initial_cash: 500000.0  # Source: target §9 row 6 — normalization (reduced for noise role)
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.FramingEffect.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"

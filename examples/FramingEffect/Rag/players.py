@@ -32,6 +32,8 @@ from examples.FramingEffect.Rag.prompts import RAG_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt constant from 'module:VAR' path."""
@@ -297,7 +299,7 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         return RAG_USER_TEMPLATE.format(

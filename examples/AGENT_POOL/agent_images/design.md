@@ -94,12 +94,24 @@ icon in `icons/`.
 | 77 | `finance/critical-thinker.md`              | `finance-critical-thinker.png`              | 批判型思考者       | Evidence evaluator / group-pressure resister → magnifier + lightbulb motif       |
 | 78 | `finance/bridge-builder.md`                | `finance-bridge-builder.png`                | 桥梁型参与者       | Cross-group engager / depolarizer → bridge + handshake motif                     |
 | 79 | `finance/passive-follower.md`              | `finance-passive-follower.png`              | 被动型参与者       | Low-engagement drifter / occasional participant → cloud + drift motif            |
+| 80 | `finance/gain-frame-follower.md`           | `finance-gain-frame-follower.png`           | 追涨型投资者       | Gain-frame risk-averse buyer → upward gain-arrow motif                           |
+| 81 | `finance/loss-frame-reactor.md`            | `finance-loss-frame-reactor.png`            | 恐慌抛售型投资者   | Loss-frame risk-seeking seller → downward loss-arrow motif                       |
+| 82 | `finance/frame-invariant-trader.md`        | `finance-frame-invariant-trader.png`        | 理性不变型投资者   | Frame-invariant rational value trader → balanced-scale + lens motif              |
+| 83 | `finance/arbitrage-framer.md`              | `finance-arbitrage-framer.png`              | 框架套利型投资者   | Framing-mispricing exploiter → converging-arrows + diamond motif                 |
+| 84 | `finance/high-frequency-trader.md`         | `finance-high-frequency-trader.png`         | 高频交易型投资者   | Ultra-fast HFT momentum amplifier → lightning + candlestick motif                |
+| 85 | `finance/market-maker.md`                  | `finance-market-maker.png`                  | 做市型投资者       | Liquidity provider / stress-withdrawal → bid-ask motif                           |
+| 86 | `finance/algorithmic-trader.md`            | `finance-algorithmic-trader.png`            | 算法趋势型投资者   | Systematic trend-follower → trend-arrow + code-bracket motif                     |
+| 87 | `finance/stop-loss-trader.md`              | `finance-stop-loss-trader.png`              | 止损级联型投资者   | Forced cascade seller at stop levels → descending-staircase + stop-sign motif    |
+| 88 | `finance/fundamental-trader.md`            | `finance-fundamental-trader.png`            | 基本面交易型投资者 | Value buyer / recovery force → magnifier + recovery-arrow motif                  |
+| 89 | `finance/retail-trader.md`                 | `finance-retail-trader.png`                 | 散户型投资者       | Uninformed noise participant → random-dots motif                                 |
+| 90 | `finance/hft-market-maker.md`              | `finance-hft-market-maker.png`              | 高频做市型投资者   | Ultra-fast liquidity provider / stress-withdrawal → lightning + order-book motif  |
+| 91 | `finance/momentum-chaser.md`               | `finance-momentum-chaser.png`               | 动量追涨型投资者   | Trend-following momentum amplifier → rising-momentum-arrow motif                 |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 79 total and map 1:1 to the 79 ``finance/`` agent specs.
+- Icons are 91 total and map 1:1 to the 91 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -172,5 +184,20 @@ icon in `icons/`.
   archetypes (ideologue, conformist, critical-thinker, bridge-builder,
   passive-follower). PNGs generated via ImageGen; mapping-row gaps closed
   as part of the polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-17: Mapping rows #80–#83 added for the FramingEffect scenario
+  archetypes (gain-frame-follower, loss-frame-reactor, frame-invariant-trader,
+  arbitrage-framer). PNGs generated via ImageGen; mapping-row and
+  profile-Icon-row gaps closed as part of the polish-simulation-pipeline
+  Step 2 icon-resolution sub-gate.
+- 2025-07-18: Mapping rows #84–#89 added for the FlashCrash scenario
+  archetypes (high-frequency-trader, market-maker, algorithmic-trader,
+  stop-loss-trader, fundamental-trader, retail-trader). PNGs generated via
+  ImageGen (market-maker already existed); mapping-row gaps closed as part
+  of the polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2025-07-18: Mapping rows #90–#91 added for the FlashCrash2010 scenario
+  archetypes (hft-market-maker, momentum-chaser). PNGs generated via ImageGen;
+  fundamental-trader and stop-loss-trader already covered by rows #87–#88;
+  noise-trader already covered by row #14. Mapping-row gaps closed as part
+  of the polish-simulation-pipeline Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
