@@ -11,14 +11,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"  # Source: infrastructure
+      initial_price: 95.0        # Source: simulation-bases.md §3 (starts below fundamental)
+      fundamental_value: 100.0   # Source: simulation-bases.md §3 (normalized sustainable bond price)
+      core_price: 100.0          # Source: simulation-bases.md §3 (core market reference)
+      price_impact: 0.05         # Source: simulation-bases.md §6 (sovereign bond market sensitivity)
+      mean_reversion: 0.02       # Source: simulation-bases.md §6 (slow fiscal-fundamental reversion)
+      noise_std: 0.01            # Source: simulation-bases.md §6 (low market noise)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_periphery_bond_seller:
@@ -32,12 +32,12 @@ rule_periphery_bond_seller:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      sell_threshold: -0.10       # Deviation threshold to sell (§4.1)
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0    # Source: simulation-bases.md §6 (normalization)
+      initial_position: 500      # Source: simulation-bases.md §4.1 (initial periphery bond holdings)
+      sell_threshold: -0.10      # Source: simulation-bases.md §4.1.4 (self-fulfilling sell trigger)
+      base_size: 300             # Source: simulation-bases.md §4.1.4 (sell volume cap parameter)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_creditor_panicker:
@@ -51,12 +51,12 @@ rule_creditor_panicker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 400
-      panic_threshold: -0.15      # Deviation threshold for panic (§4.2)
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0    # Source: simulation-bases.md §6 (normalization)
+      initial_position: 400      # Source: simulation-bases.md §4.2 (creditor funding exposure)
+      panic_threshold: -0.15     # Source: simulation-bases.md §4.2.4 (deeper stress threshold)
+      base_size: 350             # Source: simulation-bases.md §4.2.4 (panic sell volume)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_core_bond_buyer:
@@ -70,12 +70,12 @@ rule_core_bond_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      flight_threshold: -0.08     # Deviation threshold for flight-to-quality (§4.3)
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0    # Source: simulation-bases.md §6 (normalization)
+      initial_position: 0        # Source: simulation-bases.md §4.3 (starts with no peripheral holdings)
+      flight_threshold: -0.08    # Source: simulation-bases.md §4.3.4 (flight-to-quality activation)
+      base_size: 300             # Source: simulation-bases.md §4.3.4 (buy volume cap)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_ecb_intervenor:
@@ -89,12 +89,12 @@ rule_ecb_intervenor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
-      initial_cash: 5000000.0
-      initial_position: 0
-      intervention_threshold: -0.20  # Deviation threshold for ECB intervention (§4.4)
-      intervention_size: 600
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"  # Source: infrastructure
+      initial_cash: 5000000.0    # Source: simulation-bases.md §4.4 (large central-bank firepower)
+      initial_position: 0        # Source: simulation-bases.md §4.4 (starts without bond holdings)
+      intervention_threshold: -0.20  # Source: simulation-bases.md §4.4.4 (severe stress threshold)
+      intervention_size: 600     # Source: simulation-bases.md §4.4.4 (large backstop order size)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 rule_hedged_fund:
@@ -108,10 +108,10 @@ rule_hedged_fund:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      entry_threshold: 0.07       # Deviation threshold for entry (§4.5)
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0    # Source: simulation-bases.md §6 (normalization)
+      initial_position: 0        # Source: simulation-bases.md §4.5 (starts flat for relative-value)
+      entry_threshold: 0.07      # Source: simulation-bases.md §4.5.4 (spread entry threshold)
+      base_size: 400             # Source: simulation-bases.md §4.5.4 (position size cap)
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml

@@ -77,12 +77,29 @@ icon in `icons/`.
 | 60 | `finance/tax-aware-investor.md`            | `finance-tax-aware-investor.png`            | 税务优化型投资者   | Tax-loss harvester / anti-disposition → tax-receipt motif                         |
 | 61 | `finance/index-holder.md`                  | `finance-index-holder.png`                  | 被动指数型投资者   | Passive buy-and-hold baseline → flat-line motif                                  |
 | 62 | `finance/institutional-investor.md`        | `finance-institutional-investor.png`        | 机构型投资者       | Professional symmetric discipline → threshold-gauge motif                        |
+| 63 | `finance/periphery-bond-seller.md`         | `finance-periphery-bond-seller.png`         | 主权债抛售型投资者 | Self-fulfilling sovereign crisis seller → descending yield-curve + red sell-arrow motif |
+| 64 | `finance/creditor-panicker.md`             | `finance-creditor-panicker.png`             | 恐慌撤资型投资者   | Sovereign-bank doom-loop funding withdrawal → breaking-chain + alarm-bell motif  |
+| 65 | `finance/core-bond-buyer.md`               | `finance-core-bond-buyer.png`               | 核心债避险型投资者 | Flight-to-quality safe-haven buyer → shield + upward-arrow motif                 |
+| 66 | `finance/ecb-intervenor.md`                | `finance-ecb-intervenor.png`                | 央行干预型投资者   | Central-bank backstop buyer → institutional-pillar + euro-shield motif           |
+| 67 | `finance/hedged-fund.md`                   | `finance-hedged-fund.png`                   | 对冲套利型投资者   | Relative-value spread arbitrageur → balance-scale + opposing-arrows motif        |
+| 68 | `finance/endowed-holder.md`                | `finance-endowed-holder.png`                | 禀赋型投资者       | Ownership-attachment endowment holder → treasure-chest + heart motif             |
+| 69 | `finance/status-quo-seller.md`             | `finance-status-quo-seller.png`             | 惯性型投资者       | Status-quo-biased inertia seller → pedestal + pause motif                        |
+| 70 | `finance/new-buyer.md`                     | `finance-new-buyer.png`                     | 新进型投资者       | Unbiased new market entrant → cart + sparkle motif                               |
+| 71 | `finance/myopic-loss-averse-investor.md`   | `finance-myopic-loss-averse-investor.png`   | 短视损失型投资者   | Myopic loss-averse frequent evaluator → declining-chart + broken-magnifier motif |
+| 72 | `finance/long-horizon-investor.md`         | `finance-long-horizon-investor.png`         | 长期型投资者       | Patient long-horizon rational rebalancer → extended-upward-timeline motif        |
+| 73 | `finance/risk-neutral-investor.md`         | `finance-risk-neutral-investor.png`         | 风险中性型投资者   | Rational excess-return responder → balanced-scale + equation motif               |
+| 74 | `finance/conservative-investor.md`         | `finance-conservative-investor.png`         | 保守型投资者       | Loss-averse bond-preferring saver → shield + lock motif                          |
+| 75 | `finance/ideologue.md`                     | `finance-ideologue.png`                     | 意见领袖           | Strong opinion holder / in-group amplifier → megaphone + raised-fist motif       |
+| 76 | `finance/conformist.md`                    | `finance-conformist.png`                    | 从众型参与者       | Social conformist / group opinion adopter → following-arrows motif               |
+| 77 | `finance/critical-thinker.md`              | `finance-critical-thinker.png`              | 批判型思考者       | Evidence evaluator / group-pressure resister → magnifier + lightbulb motif       |
+| 78 | `finance/bridge-builder.md`                | `finance-bridge-builder.png`                | 桥梁型参与者       | Cross-group engager / depolarizer → bridge + handshake motif                     |
+| 79 | `finance/passive-follower.md`              | `finance-passive-follower.png`              | 被动型参与者       | Low-engagement drifter / occasional participant → cloud + drift motif            |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 62 total and map 1:1 to the 62 ``finance/`` agent specs.
+- Icons are 79 total and map 1:1 to the 79 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -137,5 +154,23 @@ icon in `icons/`.
   rational-updater.png respectively). Mapping-row and profile-Icon-row
   gaps closed as part of the polish-simulation-pipeline Step 2
   icon-resolution sub-gate.
+- 2026-07-15: Mapping rows #63–#67 added for the EuropeanDebtCrisis scenario
+  archetypes (periphery-bond-seller, creditor-panicker, core-bond-buyer,
+  ecb-intervenor, hedged-fund). PNGs generated via ImageGen; mapping-row
+  gaps closed as part of the polish-simulation-pipeline Step 2
+  icon-resolution sub-gate.
+- 2026-07-15: Mapping rows #68–#70 added for the EndowmentEffect scenario
+  archetypes (endowed-holder, status-quo-seller, new-buyer). PNGs generated
+  via ImageGen; mapping-row and profile-Icon-row gaps closed as part of the
+  polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-16: Mapping rows #71–#74 added for the EquityPremium scenario
+  archetypes (myopic-loss-averse-investor, long-horizon-investor,
+  risk-neutral-investor, conservative-investor). PNGs generated via ImageGen;
+  mapping-row gaps closed as part of the polish-simulation-pipeline Step 2
+  icon-resolution sub-gate.
+- 2026-07-16: Mapping rows #75–#79 added for the EchoChamber scenario
+  archetypes (ideologue, conformist, critical-thinker, bridge-builder,
+  passive-follower). PNGs generated via ImageGen; mapping-row gaps closed
+  as part of the polish-simulation-pipeline Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
