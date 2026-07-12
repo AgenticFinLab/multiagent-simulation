@@ -231,3 +231,4 @@ State update: none.
 | Version | 1.0.0 |
 | Change log | 1.0.0 initial design for BlackMonday1987 |
 | Status | experimental |
+| Icon | ![](../agent_images/icons/finance-portfolio-insurer.png) |

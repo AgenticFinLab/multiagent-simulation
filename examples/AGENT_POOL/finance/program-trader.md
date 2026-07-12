@@ -241,3 +241,4 @@ State update: none.
 | Version | 1.0.0 |
 | Change log | 1.0.0 fork from momentum-trader for BlackMonday1987 |
 | Status | experimental |
+| Icon | ![](../agent_images/icons/finance-program-trader.png) |

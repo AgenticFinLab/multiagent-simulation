@@ -42,6 +42,12 @@ from examples.BlackMonday1987.Rule.players import Market  # noqa: F401
 logger = logging.getLogger(__name__)
 
 
+# Single-source-of-truth fallback string injected when RAG retrieval returns
+# no documents. Imported by examples/BlackMonday1987/Rag/analysis.py so both
+# the runtime path and the post-hoc analyzer agree on the exact sentinel value.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
+
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt constant from 'module:VAR' path."""
     module_path, var_name = prompt_path.rsplit(":", 1)
@@ -368,7 +374,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
 
         self.state.custom_state["last_rag_context"] = rag_context
 

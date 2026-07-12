@@ -21,10 +21,15 @@ market:
     extras:
       record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
       # Market dynamics parameters (identical to Rule variant)
+      # Source: target §9 `fundamental value` row (normalization)
       fundamental_value: 250.0
+      # Source: target §8.1 (initial index price, normalization)
       initial_price: 250.0
+      # Source: target §9 `price impact` row (Kyle 1985; Brady 1988)
       price_impact: 0.05
+      # Source: target §9 `mean reversion` row (Shleifer & Vishny 1997)
       mean_reversion: 0.01
+      # Source: simulation-bases.md §3.1 σ row (Roll 1984)
       noise_std: 0.02
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -46,7 +51,9 @@ llm_portfolio_insurer:
       - investors
     extras:
       record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 1000.0
       custom_state_hot_limit: 3
       llm:
@@ -76,7 +83,9 @@ llm_index_arbitrageur:
       - investors
     extras:
       record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 500.0
       custom_state_hot_limit: 3
       llm:
@@ -106,7 +115,9 @@ llm_program_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 800.0
       custom_state_hot_limit: 3
       llm:
@@ -135,7 +146,9 @@ llm_value_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:
@@ -165,7 +178,9 @@ llm_noise_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 100000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
       custom_state_hot_limit: 3
       llm:

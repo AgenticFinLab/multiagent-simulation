@@ -32,8 +32,9 @@ from examples.BlackMonday1987.Rule.analysis import (
     analyze_black_monday,
 )
 
-# Fallback string injected when no documents are retrieved (Rag/players.py)
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+# Fallback string injected when no documents are retrieved. Imported from
+# players.py to preserve a single source of truth per polish-simulation-pipeline.
+from examples.BlackMonday1987.Rag.players import _RAG_FALLBACK  # noqa: E402
 
 
 def analyze_rag_knowledge_effect(
