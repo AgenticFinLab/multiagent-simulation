@@ -17,12 +17,12 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/CreditCycle/RuleLLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      initial_price: 100.0            # Source: target §9 row 1 (normalization)
+      fundamental_value: 100.0        # Source: target §9 row 2 (normalization)
+      price_impact: 0.05              # Source: target §9 row 3; simulation-bases.md §3
+      mean_reversion: 0.02            # Source: target §9 row 4; simulation-bases.md §3
+      noise_std: 0.02                 # Source: target §9 row 5; simulation-bases.md §3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
   persona: !include persona.yml
 
 rulellm_pro_cyclical_lender:
@@ -37,15 +37,15 @@ rulellm_pro_cyclical_lender:
       - investors
     extras:
       record_path: "EXPERIMENT/CreditCycle/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      leverage_expansion_rate: 0.3
-      leverage_contraction_rate: 0.4
-      expansion_threshold: 0.01
-      contraction_threshold: -0.015
-      base_size: 500
-      custom_state_hot_limit: 3
-      llm:
+      initial_cash: 1000000.0         # Source: implementation-infrastructure
+      initial_position: 0             # Source: implementation-infrastructure
+      leverage_expansion_rate: 0.3    # Source: simulation-bases.md §4.1.3
+      leverage_contraction_rate: 0.4  # Source: simulation-bases.md §4.1.3
+      expansion_threshold: 0.01       # Source: target §9 row 6; simulation-bases.md §4.1.3
+      contraction_threshold: -0.015   # Source: target §9 row 7; simulation-bases.md §4.1.3
+      base_size: 500                  # Source: simulation-bases.md §4.1.3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
+      llm:                            # Source: LLM-wiring (RuleLLM dual-section)
         sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_PRO_CYCLICAL_LENDER_SYS"
         user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -67,16 +67,16 @@ rulellm_minsky_borrower:
       - investors
     extras:
       record_path: "EXPERIMENT/CreditCycle/RuleLLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      hedge_rounds: 20
-      speculative_rounds: 40
-      ponzi_rounds: 80
-      hedge_size: 100
-      speculative_size: 300
-      ponzi_size: 600
-      custom_state_hot_limit: 3
-      llm:
+      initial_cash: 500000.0          # Source: implementation-infrastructure
+      initial_position: 0             # Source: implementation-infrastructure
+      hedge_rounds: 20                # Source: simulation-bases.md §4.2.3 (phase sizing)
+      speculative_rounds: 40          # Source: simulation-bases.md §4.2.3 (phase sizing)
+      ponzi_rounds: 80                # Source: simulation-bases.md §4.2.3 (phase sizing)
+      hedge_size: 100                 # Source: simulation-bases.md §4.2.3
+      speculative_size: 300           # Source: simulation-bases.md §4.2.3
+      ponzi_size: 600                 # Source: simulation-bases.md §4.2.3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
+      llm:                            # Source: LLM-wiring (RuleLLM dual-section)
         sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_MINSKY_BORROWER_SYS"
         user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -98,13 +98,13 @@ rulellm_counter_cyclical_lender:
       - investors
     extras:
       record_path: "EXPERIMENT/CreditCycle/RuleLLM/records"
-      initial_cash: 2000000.0
-      initial_position: 0
-      buy_threshold: -0.05
-      sell_threshold: 0.10
-      counter_cycle_size: 400
-      custom_state_hot_limit: 3
-      llm:
+      initial_cash: 2000000.0         # Source: implementation-infrastructure
+      initial_position: 0             # Source: implementation-infrastructure
+      buy_threshold: -0.05            # Source: simulation-bases.md §4.3.3 (alias)
+      sell_threshold: 0.10            # Source: simulation-bases.md §4.3.3 (alias)
+      counter_cycle_size: 400         # Source: simulation-bases.md §4.3.3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
+      llm:                            # Source: LLM-wiring (RuleLLM dual-section)
         sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_COUNTER_CYCLICAL_LENDER_SYS"
         user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -126,13 +126,13 @@ rulellm_value_investor:
       - investors
     extras:
       record_path: "EXPERIMENT/CreditCycle/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      value_discount: 0.10
-      value_premium: 0.10
-      value_size: 300
-      custom_state_hot_limit: 3
-      llm:
+      initial_cash: 1000000.0         # Source: implementation-infrastructure
+      initial_position: 0             # Source: implementation-infrastructure
+      value_discount: 0.10            # Source: target §9 row 16; Graham (1949)
+      value_premium: 0.10             # Source: target §9 row 16 (symmetric)
+      value_size: 300                 # Source: simulation-bases.md §4.4.3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
+      llm:                            # Source: LLM-wiring (RuleLLM dual-section)
         sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
         user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -154,12 +154,12 @@ rulellm_noise_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/CreditCycle/RuleLLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
-      llm:
+      initial_cash: 500000.0          # Source: implementation-infrastructure
+      initial_position: 0             # Source: implementation-infrastructure
+      trade_probability: 0.3          # Source: target §9 row 18; Black (1986)
+      noise_size: 100                 # Source: simulation-bases.md §4.5.3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
+      llm:                            # Source: LLM-wiring (RuleLLM dual-section)
         sys_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.CreditCycle.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
