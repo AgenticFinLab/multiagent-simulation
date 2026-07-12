@@ -46,16 +46,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FlashCrash/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.3
-      low_liquidity_threshold: 50.0
-      high_impact_multiplier: 3.0
-      base_liquidity: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash/Rag/records"  # Source: infrastructure
+      fundamental_value: 100.0  # Source: target §9 — normalization
+      initial_price: 100.0  # Source: target §9 — normalization
+      base_price_impact: 0.05  # Source: target §9 — simulation-bases.md §3
+      mean_reversion: 0.02  # Source: target §9 — simulation-bases.md §3
+      noise_std: 0.3  # Source: target §9 — simulation-bases.md §3
+      low_liquidity_threshold: 50.0  # Source: target §9 — simulation-bases.md §3
+      high_impact_multiplier: 3.0  # Source: target §9 — simulation-bases.md §3
+      base_liquidity: 50.0  # Source: target §9 — simulation-bases.md §3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 # =============================================================================
@@ -72,15 +72,15 @@ ragllm_high_frequency_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      lookback: 2
-      momentum_sensitivity: 3.0
-      base_position_size: 40.0
-      speed_advantage: 1.5
-      private_knowledge:
+      record_path: "EXPERIMENT/FlashCrash/Rag/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      lookback: 2  # Source: target §9 — simulation-bases.md §4.1; range [2, 5]
+      momentum_sensitivity: 3.0  # Source: target §9 — Kirilenko et al. (2017); range [0.5, 3.0]
+      base_position_size: 40.0  # Source: target §9 — simulation-bases.md §4.1; range [20, 60]
+      speed_advantage: 1.5  # Source: target §9 — simulation-bases.md §4.1; range [1.2, 2.0]
+      private_knowledge:  # Source: RAG-wiring
         from_global_resources:
           - "MinerU_processed"
         local_resources:
@@ -121,14 +121,14 @@ ragllm_market_maker:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      volatility_threshold: 0.02
-      base_liquidity: 30.0
-      spread_sensitivity: 0.5
-      private_knowledge:
+      record_path: "EXPERIMENT/FlashCrash/Rag/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      volatility_threshold: 0.02  # Source: target §9 — Grossman & Miller (1988); range [0.005, 0.02]
+      base_liquidity: 30.0  # Source: target §9 — simulation-bases.md §3; range [30, 100]
+      spread_sensitivity: 0.5  # Source: simulation-bases.md §4.2 — market-maker inventory sizing
+      private_knowledge:  # Source: RAG-wiring
         from_global_resources:
           - "MinerU_processed"
         local_resources:
@@ -169,15 +169,15 @@ ragllm_algorithmic_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      lookback: 3
-      trend_sensitivity: 2.0
-      base_position_size: 25.0
-      trend_multiplier: 10
-      private_knowledge:
+      record_path: "EXPERIMENT/FlashCrash/Rag/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      lookback: 3  # Source: target §9 — simulation-bases.md §4.3; range [3, 10]
+      trend_sensitivity: 2.0  # Source: target §9 — De Long et al. (1990); range [0.5, 2.0]
+      base_position_size: 25.0  # Source: target §9 — simulation-bases.md §4.3
+      trend_multiplier: 10  # Source: target §9 — simulation-bases.md §4.3; range [5, 15]
+      private_knowledge:  # Source: RAG-wiring
         from_global_resources:
           - "MinerU_processed"
         local_resources:
@@ -218,13 +218,13 @@ ragllm_stop_loss_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
-      stop_loss_percent: 0.05
-      initial_buy_price: 100.0
-      private_knowledge:
+      record_path: "EXPERIMENT/FlashCrash/Rag/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 50.0  # Source: target §9 — simulation-bases.md §4.4; range [20, 100]
+      custom_state_hot_limit: 3  # Source: infrastructure
+      stop_loss_percent: 0.05  # Source: target §9 — Brunnermeier & Pedersen (2005); range [0.02, 0.10]
+      initial_buy_price: 100.0  # Source: target §9 — normalization (entry price = initial_price)
+      private_knowledge:  # Source: RAG-wiring
         from_global_resources:
           - "MinerU_processed"
         local_resources:
@@ -265,15 +265,15 @@ ragllm_fundamental_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      value_threshold: 0.10
-      base_position_size: 30.0
-      value_sensitivity: 1.0
-      value_multiplier: 10
-      private_knowledge:
+      record_path: "EXPERIMENT/FlashCrash/Rag/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      value_threshold: 0.10  # Source: target §9 — Shiller (1981); range [0.03, 0.10]
+      base_position_size: 30.0  # Source: target §9 — simulation-bases.md §4.5
+      value_sensitivity: 1.0  # Source: target §9 — simulation-bases.md §4.5; range [0.5, 2.0]
+      value_multiplier: 10  # Source: target §9 — simulation-bases.md §4.5; range [5, 15]
+      private_knowledge:  # Source: RAG-wiring
         from_global_resources:
           - "MinerU_processed"
         local_resources:

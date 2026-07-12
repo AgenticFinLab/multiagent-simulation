@@ -22,7 +22,7 @@ from examples.standard_rule_analysis import (
     analyze_standard_scenario,
 )
 
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.FlashCrash.Rag.players import _RAG_FALLBACK
 
 
 def _load_rag_payloads(results: Any) -> Dict[str, Dict[int, Dict[str, Any]]]:

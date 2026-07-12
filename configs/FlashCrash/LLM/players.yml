@@ -13,16 +13,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FlashCrash/LLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.3
-      low_liquidity_threshold: 50.0
-      high_impact_multiplier: 3.0
-      base_liquidity: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"  # Source: infrastructure
+      fundamental_value: 100.0  # Source: target §9 — normalization
+      initial_price: 100.0  # Source: target §9 — normalization
+      base_price_impact: 0.05  # Source: target §9 — simulation-bases.md §3
+      mean_reversion: 0.02  # Source: target §9 — simulation-bases.md §3
+      noise_std: 0.3  # Source: target §9 — simulation-bases.md §3
+      low_liquidity_threshold: 50.0  # Source: target §9 — simulation-bases.md §3
+      high_impact_multiplier: 3.0  # Source: target §9 — simulation-bases.md §3
+      base_liquidity: 50.0  # Source: target §9 — simulation-bases.md §3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 llm_high_frequency_trader:
@@ -37,18 +37,18 @@ llm_high_frequency_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      llm:
-        sys_message: "examples.FlashCrash.LLM.prompts:LLM_HFT_SYS"
-        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_HFT_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.3  # Source: LLM-wiring — HFT moderate creativity
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_flash_market_maker:
@@ -63,18 +63,18 @@ llm_flash_market_maker:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      llm:
-        sys_message: "examples.FlashCrash.LLM.prompts:LLM_MARKET_MAKER_SYS"
-        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_MARKET_MAKER_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.3  # Source: LLM-wiring — MM moderate creativity
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_stop_loss_trader:
@@ -89,18 +89,18 @@ llm_stop_loss_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
-      llm:
-        sys_message: "examples.FlashCrash.LLM.prompts:LLM_STOP_LOSS_SYS"
-        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.2
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 50.0  # Source: target §9 — simulation-bases.md §4.4; range [20, 100]
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_STOP_LOSS_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.2  # Source: LLM-wiring — SL conservative
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_fundamental_trader:
@@ -115,18 +115,18 @@ llm_fundamental_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      llm:
-        sys_message: "examples.FlashCrash.LLM.prompts:LLM_FUNDAMENTAL_SYS"
-        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_FUNDAMENTAL_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.3  # Source: LLM-wiring — FT moderate
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 llm_algorithmic_trader:
@@ -141,16 +141,16 @@ llm_algorithmic_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      llm:
-        sys_message: "examples.FlashCrash.LLM.prompts:LLM_ALGO_SYS"
-        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.2
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/LLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.LLM.prompts:LLM_ALGO_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.LLM.prompts:LLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.2  # Source: LLM-wiring — Algo conservative
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
