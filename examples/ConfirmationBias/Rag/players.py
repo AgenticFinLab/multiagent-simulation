@@ -32,6 +32,11 @@ from examples.ConfirmationBias.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
+# Canonical fallback message emitted when a RAG query returns no hits. This is
+# imported by analysis.py so that per-round retrieval-failure counting stays in
+# lock-step with the runtime string (single-source-of-truth invariant).
+_RAG_FALLBACK: str = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt constant from 'module:VAR' path."""
@@ -299,7 +304,7 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
         template = load_prompt(
             "examples.ConfirmationBias.Rag.prompts:RAG_USER_TEMPLATE"
