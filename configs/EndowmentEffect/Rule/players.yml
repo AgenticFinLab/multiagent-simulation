@@ -11,13 +11,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.05
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"  # Source: infrastructure
+      initial_price: 100.0        # Source: simulation-bases.md §6 — normalized fundamental
+      fundamental_value: 100.0    # Source: simulation-bases.md §6 — Muth (1961) normalization
+      price_impact: 0.02          # Source: simulation-bases.md §6 — calibration
+      mean_reversion: 0.05        # Source: simulation-bases.md §6 — calibration
+      noise_std: 0.01             # Source: simulation-bases.md §6 — calibration
+      custom_state_hot_limit: 3   # Source: infrastructure
   persona: !include persona.yml
 
 rule_endowed_holder:
@@ -31,13 +31,13 @@ rule_endowed_holder:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
-      initial_cash: 800000.0
-      initial_position: 500
-      endowment_premium: 0.15
-      sell_reluctance: 0.30       # Fraction of position sold per trade (§4.1.6)
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 800000.0      # Source: simulation-bases.md §4.1 — endowed holder capitalization
+      initial_position: 500       # Source: simulation-bases.md §4.1 — initial endowment
+      endowment_premium: 0.15     # Source: simulation-bases.md §6 — Kahneman et al. (1990) WTA/WTP gap
+      sell_reluctance: 0.30       # Source: simulation-bases.md §6 — Shefrin & Statman (1985) disposition reluctance
+      base_size: 300              # Source: simulation-bases.md §4.1 — order size cap
+      custom_state_hot_limit: 3   # Source: infrastructure
   persona: !include persona.yml
 
 rule_status_quo_seller:
@@ -51,12 +51,12 @@ rule_status_quo_seller:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
-      initial_cash: 800000.0
-      initial_position: 500
-      status_quo_threshold: 0.20  # Deviation threshold to sell (§4.2.4)
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 800000.0      # Source: simulation-bases.md §4.2 — status quo seller capitalization
+      initial_position: 500       # Source: simulation-bases.md §4.2 — initial endowment
+      status_quo_threshold: 0.20  # Source: simulation-bases.md §6 — Samuelson & Zeckhauser (1988) switching cost
+      base_size: 300              # Source: simulation-bases.md §4.2 — order size cap
+      custom_state_hot_limit: 3   # Source: infrastructure
   persona: !include persona.yml
 
 rule_rational_arbitrageur:
@@ -70,12 +70,12 @@ rule_rational_arbitrageur:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      arb_threshold: 0.05
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0     # Source: simulation-bases.md §4.3 — arbitrageur capitalization
+      initial_position: 0         # Source: simulation-bases.md §4.3 — enters unendowed
+      arb_threshold: 0.05         # Source: simulation-bases.md §6 — Muth (1961) rational threshold
+      base_size: 400              # Source: simulation-bases.md §4.3 — proportional order cap
+      custom_state_hot_limit: 3   # Source: infrastructure
   persona: !include persona.yml
 
 rule_new_buyer:
@@ -89,12 +89,12 @@ rule_new_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      buy_threshold: 0.03
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0     # Source: simulation-bases.md §4.4 — new buyer capitalization
+      initial_position: 0         # Source: simulation-bases.md §4.4 — enters unendowed
+      buy_threshold: 0.03         # Source: simulation-bases.md §6 — Kahneman et al. (1990) WTP at fundamental
+      base_size: 300              # Source: simulation-bases.md §4.4 — order size cap
+      custom_state_hot_limit: 3   # Source: infrastructure
   persona: !include persona.yml
 
 rule_noise_trader:
@@ -108,10 +108,10 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EndowmentEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 500000.0      # Source: simulation-bases.md §4.5 — noise trader capitalization
+      initial_position: 0         # Source: simulation-bases.md §4.5 — enters unendowed
+      trade_probability: 0.3      # Source: simulation-bases.md §6 — Black (1986) 30% per-round
+      noise_size: 150             # Source: simulation-bases.md §4.5 — random order size bound
+      custom_state_hot_limit: 3   # Source: infrastructure
   persona: !include persona.yml
