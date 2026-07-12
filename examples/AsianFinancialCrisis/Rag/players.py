@@ -55,6 +55,11 @@ from examples.AsianFinancialCrisis.Rule.players import Market
 
 logger = logging.getLogger("AsianFinancialCrisis.Rag")
 
+# Sentinel used when a per-round RAG query returns no chunks; analysis.py
+# imports this constant to count retrieval-failure rounds without duplicating
+# the string (aligns with examples/AssetBubble/Rag/players.py convention).
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def load_prompt(prompt_path: str) -> str:
     """Load a prompt string from a module path (module:VARIABLE)."""
@@ -479,7 +484,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         llm_config = self.config.extras["llm"]

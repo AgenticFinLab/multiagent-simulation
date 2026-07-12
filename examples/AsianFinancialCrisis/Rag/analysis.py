@@ -39,8 +39,10 @@ from examples.AsianFinancialCrisis.Rule.analysis import (
     analyze_asian_financial_crisis,
 )
 
-# Retrieval-miss marker injected when no documents are retrieved (Rag/players.py)
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+# Retrieval-miss marker injected when no documents are retrieved.
+# Single source of truth lives in Rag/players.py; imported here so analysis
+# can count retrieval-failure rounds without duplicating the string.
+from examples.AsianFinancialCrisis.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(

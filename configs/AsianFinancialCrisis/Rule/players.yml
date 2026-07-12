@@ -23,14 +23,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       # Price formation: P(t+1) = P(t) + λ×NetDemand + γ×(F-P(t)) + ε
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04         # Higher: emerging market with thinner liquidity
-      mean_reversion: 0.02       # Low: crisis overwhelms reversion forces
-      noise_std: 0.02            # Background FX noise
-      custom_state_hot_limit: 3
+      fundamental_value: 100.0   # Source: target §9 F (normalization, 100-scale crisis index; Source: normalization row)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation)
+      price_impact: 0.04         # Source: target §9 lambda; Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (crisis thin-liquidity calibration)
+      mean_reversion: 0.02       # Source: target §9 gamma; Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098
+      noise_std: 0.02            # Source: target §9 sigma; Black (1986), https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring-buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -49,14 +49,14 @@ rule_hot_money_funder:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"
-      initial_cash: 800000.0
-      initial_position: 3000.0     # Carries a position via short-term loans
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 800000.0       # Source: target §7 hot-money-funder Intent line + §6.1 quantitative arc (leveraged foreign creditor scale)
+      initial_position: 3000.0     # Source: target §7 hot-money-funder Intent line (carries a short-term-loan funded position at simulation start)
       # Rule parameters
-      reversal_threshold: 0.02     # Reverses when deviation < -2%
-      sell_ratio: 0.60             # Sells 60% of position on reversal
-      buy_ratio: 0.30              # Deploys 30% of cash when rising
-      custom_state_hot_limit: 3
+      reversal_threshold: 0.02     # Source: target §9 theta_reversal; Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009
+      sell_ratio: 0.60             # Source: target §9 phi_hm_sell; Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009
+      buy_ratio: 0.30              # Source: target §9 phi_hm_buy; Calvo (1998), https://www.ucema.edu.ar/publicaciones/download/volume1/calvo.pdf
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -75,15 +75,15 @@ rule_contagion_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"
-      initial_cash: 600000.0
-      initial_position: 4000.0     # Large cross-border position
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 600000.0       # Source: target §7 contagion-trader Intent line + §6.1 quantitative arc (cross-border fund scale)
+      initial_position: 4000.0     # Source: target §7 contagion-trader Intent line (carries a large cross-border position at simulation start)
       # Rule parameters
-      contagion_weight: 0.60       # Weight on price deviation in signal
-      cross_border_sensitivity: 0.40  # Weight on return momentum
-      contagion_threshold: -0.025  # Signal threshold for contagion sell
-      sell_ratio: 0.50             # Sells 50% on mild contagion
-      custom_state_hot_limit: 3
+      contagion_weight: 0.60       # Source: target §9 w_dev; Kaminsky & Reinhart (1999), https://doi.org/10.1257/aer.89.3.473
+      cross_border_sensitivity: 0.40  # Source: target §9 w_ret; Kaminsky & Reinhart (1999), https://doi.org/10.1257/aer.89.3.473
+      contagion_threshold: -0.025  # Source: target §9 theta_contagion; Kaminsky & Reinhart (1999), https://doi.org/10.1257/aer.89.3.473
+      sell_ratio: 0.50             # Source: target §9 phi_ct_sell; Kaminsky & Reinhart (1999), https://doi.org/10.1257/aer.89.3.473
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -101,13 +101,13 @@ rule_imf_rescuer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"
-      initial_cash: 5000000.0      # Deep pockets for rescue packages
-      initial_position: 0.0
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 5000000.0      # Source: target §7 imf-rescuer Intent line + §6.1 quantitative arc (official-sector deep pockets, >100bn USD IMF package scale)
+      initial_position: 0.0        # Source: target §7 imf-rescuer Intent line (official rescuer starts with zero market exposure)
       # Rule parameters
-      rescue_threshold: -0.05      # Intervenes when deviation < -5%
-      buy_ratio: 0.25              # Deploys 25% of cash per rescue round
-      custom_state_hot_limit: 3
+      rescue_threshold: -0.05      # Source: target §9 theta_rescue; Corsetti, Pesenti & Roubini (1999), https://doi.org/10.1016/S0014-2921(98)00111-0
+      buy_ratio: 0.25              # Source: target §9 phi_rescue; Corsetti, Pesenti & Roubini (1999), https://doi.org/10.1016/S0014-2921(98)00111-0
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -126,15 +126,15 @@ rule_value_contrarian:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 500.0
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 1000000.0      # Source: target §7 value-contrarian Intent line + §2.4 (patient capital scale, distressed-asset investor)
+      initial_position: 500.0      # Source: target §7 value-contrarian Intent line (small pre-crisis holding as anchor position)
       # Rule parameters
-      oversold_threshold: -0.08    # Buys when deviation < -8% (severely oversold)
-      overbought_threshold: 0.10   # Sells when deviation > +10%
-      buy_ratio: 0.20              # Deploys 20% of cash per round
-      sell_ratio: 0.20             # Sells 20% of position when overbought
-      custom_state_hot_limit: 3
+      oversold_threshold: -0.08    # Source: target §9 theta_value; Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098
+      overbought_threshold: 0.10   # Source: simulation-bases.md §4.4.4.3 (theta_recovery, recovery-side symmetric exit; implementation extension of target §4.4 key equation)
+      buy_ratio: 0.20              # Source: target §9 phi_value_buy; Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098
+      sell_ratio: 0.20             # Source: target §9 phi_value_sell; Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -153,10 +153,10 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"
-      initial_cash: 200000.0
-      initial_position: 1000.0
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rule/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 200000.0       # Source: target §7 noise-trader Intent line + §4.5 (retail/liquidity-motivated scale, small vs. crisis-driver agents)
+      initial_position: 1000.0     # Source: target §7 noise-trader Intent line (small background inventory)
       # Rule parameters
-      trade_probability: 0.30      # 30% chance of trading per round
-      custom_state_hot_limit: 3
+      trade_probability: 0.30      # Source: target §9 p_noise; Black (1986), https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml

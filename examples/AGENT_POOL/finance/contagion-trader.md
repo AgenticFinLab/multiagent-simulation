@@ -216,6 +216,7 @@ State update: unchanged.
 | Author | Codex |
 | Reviewed by | Codex |
 | Created | 2026-07-05 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - Created for AsianFinancialCrisis create-pipeline replay. |
+| Version | 1.0.1 |
+| Icon | ![](../agent_images/icons/finance-contagion-trader.png) |
+| Change log | 1.0.0 - Created for AsianFinancialCrisis create-pipeline replay.<br>1.0.1 - Added AGENT_POOL Icon row via polish-simulation-pipeline Step 2 icon-repair (icon PNG was already present under agent_images/icons/; profile row and design.md mapping were the missing links). |
 | Status | experimental |
