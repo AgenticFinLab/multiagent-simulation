@@ -42,12 +42,16 @@ icon in `icons/`.
 | 26 | `finance/fundamental-investor.md`            | `finance-fundamental-investor.png`            | 基本面型投资者   | Slow value anchor → magnifier + diamond motif                        |
 | 27 | `finance/leveraged-buyer.md`                 | `finance-leveraged-buyer.png`                 | 杠杆型投资者     | Margin-amplified positions → lever motif                             |
 | 28 | `finance/conservative-holder.md`             | `finance-conservative-holder.png`             | 长持型投资者     | Long-term stability holder → pillar/anchor motif                     |
+| 29 | `finance/hot-money-funder.md`                | `finance-hot-money-funder.png`                | 热钱型投资者     | Short-term foreign creditor / sudden-stop exit → hot-money / capital-flight motif |
+| 30 | `finance/contagion-trader.md`                | `finance-contagion-trader.png`                | 传染型投资者     | Cross-border regional-stress seller → contagion / linked-nodes motif |
+| 31 | `finance/imf-rescuer.md`                     | `finance-imf-rescuer.png`                     | 救援型投资者     | Delayed official crisis lender → shield / rescue-flag motif          |
+| 32 | `finance/value-contrarian.md`                | `finance-value-contrarian.png`                | 逆向价值型投资者 | Deep-discount patient buyer / crisis contrarian → magnifier + reverse-arrow motif |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 28 total and map 1:1 to the 28 ``finance/`` agent specs.
+- Icons are 32 total and map 1:1 to the 32 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -58,5 +62,10 @@ icon in `icons/`.
   leveraged-buyer, conservative-holder) via agent-icon-generation-skill.
   This closes the Step 2 AGENT_POOL icon-resolution gate that the initial
   polish run of `examples/AssetBubble` had missed.
+- 2026-07-12: Mapping rows #29–#32 added for the AsianFinancialCrisis
+  scenario archetypes (hot-money-funder, contagion-trader, imf-rescuer,
+  value-contrarian). Icons were already present in `agent_images/icons/`
+  from an earlier session; the mapping-row gap was closed as part of the
+  polish-simulation-pipeline Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
