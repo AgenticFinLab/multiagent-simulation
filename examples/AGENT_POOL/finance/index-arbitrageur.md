@@ -2,15 +2,16 @@
 
 ## Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | Index arbitrageur |
-| Theory Family         | Microstructure |
-| Market Role           | **Context-dependent** - transmits futures-cash dislocations and can stabilize mispricing |
-| Time Horizon          | short |
-| Risk Tolerance        | medium |
-| Information Asymmetry | partial |
-| Determinism           | deterministic |
+| Field                 | Content                                                                                                                       |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Archetype             | Index arbitrageur                                                                                                             |
+| Theory Family         | Microstructure                                                                                                                |
+| Behavioral Tendency   | **Converging — enforces spot-futures parity by buying undervalued spot and selling overvalued spot; converges on fair value** |
+| Market Role           | **Context-dependent** - transmits futures-cash dislocations and can stabilize mispricing                                      |
+| Time Horizon          | short                                                                                                                         |
+| Risk Tolerance        | medium                                                                                                                        |
+| Information Asymmetry | partial                                                                                                                       |
+| Determinism           | deterministic                                                                                                                 |
 
 ## Definition and Goals
 
@@ -58,11 +59,17 @@ Deactivation Conditions:
 - Absolute deviation falls inside arbitrage band.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Stabilising | Enforces fair-value band. |
+| Regime             | Contribution  | Mechanism                                           |
+|--------------------|---------------|-----------------------------------------------------|
+| Calm market        | Stabilising   | Enforces fair-value band.                           |
 | Futures-led stress | Destabilising | Sells spot into already falling futures-led market. |
-| Recovery | Stabilising | Buys underpriced spot basket. |
+| Recovery           | Stabilising   | Buys underpriced spot basket.                       |
+
+Behavioral Adaptation by Condition:
+| Condition                      | Behavioral change        | Mechanism                                            |
+|--------------------------------|--------------------------|------------------------------------------------------|
+| Futures premium to fair value  | Sells spot, buys futures | Arbitrage linkage transmits futures pressure to spot |
+| Futures discount to fair value | Buys spot, sells futures | Stabilising — buys undervalued spot                  |
 
 Environmental Dependencies: requires the market-level deviation proxy; no social topology or private news.
 
@@ -72,22 +79,22 @@ Environmental Dependencies: requires the market-level deviation proxy; no social
 
 ##### Inputs (per decision call)
 
-| Input | Source | Type / Shape | Required? | Notes |
-|-------|--------|--------------|-----------|-------|
-| `price` | environment broadcast | `float` | yes | execution reference |
-| `fundamental` | environment broadcast | `float` | yes | fair-value proxy |
-| `deviation` | environment broadcast | `float` | yes | arbitrage band signal |
-| `cash` | agent state | `float` | yes | buy constraint |
-| `position` | agent state | `float` | yes | sell constraint |
+| Input         | Source                | Type / Shape | Required? | Notes                 |
+|---------------|-----------------------|--------------|-----------|-----------------------|
+| `price`       | environment broadcast | `float`      | yes       | execution reference   |
+| `fundamental` | environment broadcast | `float`      | yes       | fair-value proxy      |
+| `deviation`   | environment broadcast | `float`      | yes       | arbitrage band signal |
+| `cash`        | agent state           | `float`      | yes       | buy constraint        |
+| `position`    | agent state           | `float`      | yes       | sell constraint       |
 
 ##### Outputs (per decision call)
 
-| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
-|-------|------|--------------------|------|-----------|---------|
-| `action` | enum | `{"buy", "sell", "hold"}` | - | yes | order direction |
-| `bid_price` | float | `> 0` | index points | yes | execution price reference |
-| `quantity` | float | `>= 0` | shares/contracts | yes | order size |
-| `reasoning` | string | 1-3 sentences | - | yes | audit trail |
+| Field       | Type   | Valid Range / Enum        | Unit             | Required? | Meaning                   |
+|-------------|--------|---------------------------|------------------|-----------|---------------------------|
+| `action`    | enum   | `{"buy", "sell", "hold"}` | -                | yes       | order direction           |
+| `bid_price` | float  | `> 0`                     | index points     | yes       | execution price reference |
+| `quantity`  | float  | `>= 0`                    | shares/contracts | yes       | order size                |
+| `reasoning` | string | 1-3 sentences             | -                | yes       | audit trail               |
 
 ##### Content Constraints
 
@@ -103,13 +110,13 @@ Implementation must use the arbitrage band as the activation gate and keep outpu
 
 #### Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference. |
-| `fundamental` | Continuous | 1 tick | Fair-value proxy. |
-| `deviation` | Continuous | 1 tick | Arbitrage trigger. |
-| `cash` | State | persistent | Buy constraint. |
-| `position` | State | persistent | Sell constraint. |
+| Signal        | Type       | Memory Window | Rationale            |
+|---------------|------------|---------------|----------------------|
+| `price`       | Continuous | 1 tick        | Execution reference. |
+| `fundamental` | Continuous | 1 tick        | Fair-value proxy.    |
+| `deviation`   | Continuous | 1 tick        | Arbitrage trigger.   |
+| `cash`        | State      | persistent    | Buy constraint.      |
+| `position`    | State      | persistent    | Sell constraint.     |
 
 Does NOT use: sentiment, discretionary forecasts, peer topology, long-run value model.
 
@@ -123,16 +130,16 @@ Does NOT use: sentiment, discretionary forecasts, peer topology, long-run value 
 
 #### Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Action types allowed | `buy`, `sell`, `hold` |
-| Action parameter rule | `bid_price = price` |
-| Sizing rule | `quantity = base_size`, clamped by cash or position |
-| Action lifetime | one decision interval |
-| Revision policy | replaces prior arbitrage intent each tick |
-| State constraint | `position >= 0` unless scenario explicitly permits shorts |
-| Resource cap | buy quantity cannot exceed `cash / price` |
-| Exit rule | hold inside arbitrage band |
+| Aspect                | Specification                                             |
+|-----------------------|-----------------------------------------------------------|
+| Action types allowed  | `buy`, `sell`, `hold`                                     |
+| Action parameter rule | `bid_price = price`                                       |
+| Sizing rule           | `quantity = base_size`, clamped by cash or position       |
+| Action lifetime       | one decision interval                                     |
+| Revision policy       | replaces prior arbitrage intent each tick                 |
+| State constraint      | `position >= 0` unless scenario explicitly permits shorts |
+| Resource cap          | buy quantity cannot exceed `cash / price`                 |
+| Exit rule             | hold inside arbitrage band                                |
 
 #### Mathematical Model
 
@@ -140,9 +147,9 @@ If `deviation > theta_arb`, action is sell; if `deviation < -theta_arb`, action 
 
 State variables are `cash` and `position`, updated after execution. Determinism contract: deterministic given identical inputs and state.
 
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_arb` | arbitrage threshold | 0.01 | Stoll & Whaley (1990) |
+| Symbol      | Meaning             | Default Value    | Source                 |
+|-------------|---------------------|------------------|------------------------|
+| `theta_arb` | arbitrage threshold | 0.01             | Stoll & Whaley (1990)  |
 | `base_size` | fixed arbitrage lot | scenario-defined | scenario normalization |
 
 #### Behavioral Properties
@@ -154,12 +161,12 @@ State variables are `cash` and `position`, updated after execution. Determinism 
 
 ## Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `arb_threshold` | float | 0.01 | `[0, 0.10]` | high | No-arbitrage band. | Higher -> fewer arbitrage trades. | Stoll & Whaley (1990) |
-| `base_size` | float | 80.0 | `> 0` | medium | Order size when arbitrage triggers. | Higher -> stronger futures-cash transmission. | Scenario normalization |
-| `initial_cash` | float | scenario-defined | `>= 0` | medium | Buy-side capital. | Higher -> more buy capacity. | Scenario normalization |
-| `initial_position` | float | scenario-defined | `>= 0` | medium | Sell-side inventory. | Higher -> more sell capacity. | Scenario normalization |
+| Parameter          | Type  | Default          | Valid Range | Sensitivity | Description                         | Impact                                        | Source                 |
+|--------------------|-------|------------------|-------------|-------------|-------------------------------------|-----------------------------------------------|------------------------|
+| `arb_threshold`    | float | 0.01             | `[0, 0.10]` | high        | No-arbitrage band.                  | Higher -> fewer arbitrage trades.             | Stoll & Whaley (1990)  |
+| `base_size`        | float | 80.0             | `> 0`       | medium      | Order size when arbitrage triggers. | Higher -> stronger futures-cash transmission. | Scenario normalization |
+| `initial_cash`     | float | scenario-defined | `>= 0`      | medium      | Buy-side capital.                   | Higher -> more buy capacity.                  | Scenario normalization |
+| `initial_position` | float | scenario-defined | `>= 0`      | medium      | Sell-side inventory.                | Higher -> more sell capacity.                 | Scenario normalization |
 
 ## Worked Numerical Examples
 
@@ -205,25 +212,25 @@ State update: position becomes zero after execution.
 
 #### Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| no-index-arbitrage | `num_instances = 0` | Futures-cash linkage affects crash transmission. | decrease | sell volume and crash velocity |
-| wide-arbitrage-band | `arb_threshold = 0.05` | Narrow no-arbitrage band drives activity. | decrease | arbitrage trades |
+| Ablation name       | Setting                | Hypothesis tested                                | Expected direction | Metric                         |
+|---------------------|------------------------|--------------------------------------------------|--------------------|--------------------------------|
+| no-index-arbitrage  | `num_instances = 0`    | Futures-cash linkage affects crash transmission. | decrease           | sell volume and crash velocity |
+| wide-arbitrage-band | `arb_threshold = 0.05` | Narrow no-arbitrage band drives activity.        | decrease           | arbitrage trades               |
 
 ## Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
+| # | Citation                                                                                                                                                                                             | Notes                |
+|---|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|
 | 1 | Stoll, H. R., & Whaley, R. E. (1990). The dynamics of stock index and stock index futures returns. *Journal of Financial and Quantitative Analysis*, 25(4), 441-468. https://doi.org/10.2307/2331010 | Futures-cash linkage |
 
 ## Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex static three-pass review |
-| Created | 2026-07-06 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 initial design for BlackMonday1987 |
-| Status | experimental |
-| Icon | ![](../agent_images/icons/finance-index-arbitrageur.png) |
+| Field       | Content                                                  |
+|-------------|----------------------------------------------------------|
+| Author      | Codex                                                    |
+| Reviewed by | Codex static three-pass review                           |
+| Created     | 2026-07-06                                               |
+| Version     | 1.0.0                                                    |
+| Change log  | 1.0.0 initial design for BlackMonday1987                 |
+| Status      | experimental                                             |
+| Icon        | ![](../agent_images/icons/finance-index-arbitrageur.png) |

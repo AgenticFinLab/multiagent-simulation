@@ -2,15 +2,16 @@
 
 ## Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | Portfolio insurer |
-| Theory Family         | Liquidity / Funding |
-| Market Role           | **Destabilising** - sells mechanically as prices fall to reduce risky exposure |
-| Time Horizon          | short |
-| Risk Tolerance        | low |
-| Information Asymmetry | none |
-| Determinism           | deterministic |
+| Field                 | Content                                                                                                                                      |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| Archetype             | Portfolio insurer                                                                                                                            |
+| Theory Family         | Liquidity / Funding                                                                                                                          |
+| Behavioral Tendency   | **Diverging — sells mechanically as prices fall, amplifying the downward move; diverges from fundamental value and destabilises the market** |
+| Market Role           | **Destabilising** - sells mechanically as prices fall to reduce risky exposure                                                               |
+| Time Horizon          | short                                                                                                                                        |
+| Risk Tolerance        | low                                                                                                                                          |
+| Information Asymmetry | none                                                                                                                                         |
+| Determinism           | deterministic                                                                                                                                |
 
 ## Definition and Goals
 
@@ -58,11 +59,17 @@ Deactivation Conditions:
 - Cash floor breached: hibernate buy side.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Mixed | Holds inside tolerance band. |
-| Crash / cascade | Destabilising | Sells more as deviation deepens. |
-| Post-shock recovery | Stabilising | Rebuilds exposure after recovery signals. |
+| Regime              | Contribution  | Mechanism                                 |
+|---------------------|---------------|-------------------------------------------|
+| Calm market         | Mixed         | Holds inside tolerance band.              |
+| Crash / cascade     | Destabilising | Sells more as deviation deepens.          |
+| Post-shock recovery | Stabilising   | Rebuilds exposure after recovery signals. |
+
+Behavioral Adaptation by Condition:
+| Condition             | Behavioral change                                   | Mechanism                                            |
+|-----------------------|-----------------------------------------------------|------------------------------------------------------|
+| Price below reference | Increases sell quantity proportionally to deviation | `sell_qty = hedge_ratio * abs(deviation) * position` |
+| Price above reference | Rebuilds exposure gradually                         | Buy when deviation exceeds positive threshold        |
 
 Environmental Dependencies: none beyond market broadcast signals and the agent's own cash and position.
 
@@ -72,22 +79,22 @@ Environmental Dependencies: none beyond market broadcast signals and the agent's
 
 ##### Inputs (per decision call)
 
-| Input | Source | Type / Shape | Required? | Notes |
-|-------|--------|--------------|-----------|-------|
-| `price` | environment broadcast | `float` | yes | execution reference |
-| `fundamental` | environment broadcast | `float` | yes | reference value |
-| `deviation` | environment broadcast | `float` | yes | trigger and sizing signal |
-| `cash` | agent state | `float` | yes | buy constraint |
-| `position` | agent state | `float` | yes | sell constraint |
+| Input         | Source                | Type / Shape | Required? | Notes                     |
+|---------------|-----------------------|--------------|-----------|---------------------------|
+| `price`       | environment broadcast | `float`      | yes       | execution reference       |
+| `fundamental` | environment broadcast | `float`      | yes       | reference value           |
+| `deviation`   | environment broadcast | `float`      | yes       | trigger and sizing signal |
+| `cash`        | agent state           | `float`      | yes       | buy constraint            |
+| `position`    | agent state           | `float`      | yes       | sell constraint           |
 
 ##### Outputs (per decision call)
 
-| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
-|-------|------|--------------------|------|-----------|---------|
-| `action` | enum | `{"buy", "sell", "hold"}` | - | yes | selected order direction |
-| `bid_price` | float | `> 0` | index points | yes | current price reference |
-| `quantity` | float | `>= 0` | shares/contracts | yes | bounded order size |
-| `reasoning` | string | 1-3 sentences | - | yes | audit trail |
+| Field       | Type   | Valid Range / Enum        | Unit             | Required? | Meaning                  |
+|-------------|--------|---------------------------|------------------|-----------|--------------------------|
+| `action`    | enum   | `{"buy", "sell", "hold"}` | -                | yes       | selected order direction |
+| `bid_price` | float  | `> 0`                     | index points     | yes       | current price reference  |
+| `quantity`  | float  | `>= 0`                    | shares/contracts | yes       | bounded order size       |
+| `reasoning` | string | 1-3 sentences             | -                | yes       | audit trail              |
 
 ##### Content Constraints
 
@@ -103,13 +110,13 @@ Implementation must map every input to a real market/state read, emit the same o
 
 #### Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference. |
-| `fundamental` | Continuous | 1 tick | Protected-level proxy. |
-| `deviation` | Continuous | 1 tick | Trigger and sizing signal. |
-| `cash` | State | persistent | Buy constraint. |
-| `position` | State | persistent | Sell constraint. |
+| Signal        | Type       | Memory Window | Rationale                  |
+|---------------|------------|---------------|----------------------------|
+| `price`       | Continuous | 1 tick        | Execution reference.       |
+| `fundamental` | Continuous | 1 tick        | Protected-level proxy.     |
+| `deviation`   | Continuous | 1 tick        | Trigger and sizing signal. |
+| `cash`        | State      | persistent    | Buy constraint.            |
+| `position`    | State      | persistent    | Sell constraint.           |
 
 Does NOT use: private information, order book depth, peer topology, discretionary news interpretation.
 
@@ -124,16 +131,16 @@ Does NOT use: private information, order book depth, peer topology, discretionar
 
 #### Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Action types allowed | `buy`, `sell`, `hold` |
-| Action parameter rule | `bid_price = price` |
-| Sizing rule | sell `hedge_ratio * abs(deviation) * position`; buy from cash exposure rule |
-| Action lifetime | one decision interval |
-| Revision policy | replaces prior rebalance intent each tick |
-| State constraint | `position >= 0` unless scenario explicitly permits shorts |
-| Resource cap | buy quantity cannot exceed `cash / price` |
-| Exit rule | hold when required data are unavailable or portfolio caps bind |
+| Aspect                | Specification                                                               |
+|-----------------------|-----------------------------------------------------------------------------|
+| Action types allowed  | `buy`, `sell`, `hold`                                                       |
+| Action parameter rule | `bid_price = price`                                                         |
+| Sizing rule           | sell `hedge_ratio * abs(deviation) * position`; buy from cash exposure rule |
+| Action lifetime       | one decision interval                                                       |
+| Revision policy       | replaces prior rebalance intent each tick                                   |
+| State constraint      | `position >= 0` unless scenario explicitly permits shorts                   |
+| Resource cap          | buy quantity cannot exceed `cash / price`                                   |
+| Exit rule             | hold when required data are unavailable or portfolio caps bind              |
 
 #### Mathematical Model
 
@@ -143,11 +150,11 @@ Does NOT use: private information, order book depth, peer topology, discretionar
 
 State variables are `cash` and `position`, updated after execution. Determinism contract: deterministic given identical inputs and state.
 
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_pi` | rebalance threshold | 0.02 | Leland (1980); Brady Commission (1988) |
-| `hedge_ratio` | exposure-reduction intensity | 0.50 | Brady Commission (1988) |
-| `buy_cap` | maximum rebuild order | scenario-defined | scenario normalization |
+| Symbol        | Meaning                      | Default Value    | Source                                 |
+|---------------|------------------------------|------------------|----------------------------------------|
+| `theta_pi`    | rebalance threshold          | 0.02             | Leland (1980); Brady Commission (1988) |
+| `hedge_ratio` | exposure-reduction intensity | 0.50             | Brady Commission (1988)                |
+| `buy_cap`     | maximum rebuild order        | scenario-defined | scenario normalization                 |
 
 #### Behavioral Properties
 
@@ -158,12 +165,12 @@ State variables are `cash` and `position`, updated after execution. Determinism 
 
 ## Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `rebalance_threshold` | float | 0.02 | `[0, 0.20]` | high | Deviation band before hedging activates. | Higher -> fewer sell triggers. | Leland (1980); Brady Commission (1988) |
-| `hedge_ratio` | float | 0.50 | `[0, 1]` | high | Fractional exposure reduction per unit deviation. | Higher -> larger crash sell pressure. | Brady Commission (1988) |
-| `initial_position` | float | scenario-defined | `>= 0` | medium | Starting exposure. | Higher -> more available sell supply. | Scenario normalization |
-| `initial_cash` | float | scenario-defined | `>= 0` | medium | Starting cash reserve. | Higher -> more recovery buying capacity. | Scenario normalization |
+| Parameter             | Type  | Default          | Valid Range | Sensitivity | Description                                       | Impact                                   | Source                                 |
+|-----------------------|-------|------------------|-------------|-------------|---------------------------------------------------|------------------------------------------|----------------------------------------|
+| `rebalance_threshold` | float | 0.02             | `[0, 0.20]` | high        | Deviation band before hedging activates.          | Higher -> fewer sell triggers.           | Leland (1980); Brady Commission (1988) |
+| `hedge_ratio`         | float | 0.50             | `[0, 1]`    | high        | Fractional exposure reduction per unit deviation. | Higher -> larger crash sell pressure.    | Brady Commission (1988)                |
+| `initial_position`    | float | scenario-defined | `>= 0`      | medium      | Starting exposure.                                | Higher -> more available sell supply.    | Scenario normalization                 |
+| `initial_cash`        | float | scenario-defined | `>= 0`      | medium      | Starting cash reserve.                            | Higher -> more recovery buying capacity. | Scenario normalization                 |
 
 ## Worked Numerical Examples
 
@@ -209,26 +216,26 @@ State update: none.
 
 #### Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| no-portfolio-insurance | `num_instances = 0` | Dynamic hedging drives cascade depth. | decrease | max drawdown |
-| low-hedge-ratio | `hedge_ratio = 0.10` | Sell intensity controls feedback. | decrease | crash velocity |
+| Ablation name          | Setting              | Hypothesis tested                     | Expected direction | Metric         |
+|------------------------|----------------------|---------------------------------------|--------------------|----------------|
+| no-portfolio-insurance | `num_instances = 0`  | Dynamic hedging drives cascade depth. | decrease           | max drawdown   |
+| low-hedge-ratio        | `hedge_ratio = 0.10` | Sell intensity controls feedback.     | decrease           | crash velocity |
 
 ## Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
+| # | Citation                                                                                                                                           | Notes           |
+|---|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|
 | 1 | Leland, H. E. (1980). Who should buy portfolio insurance? *Journal of Finance*, 35(2), 581-594. https://doi.org/10.1111/j.1540-6261.1980.tb02190.x | Dynamic hedging |
-| 2 | Presidential Task Force on Market Mechanisms. (1988). *Report of the Presidential Task Force on Market Mechanisms*. | Crash evidence |
+| 2 | Presidential Task Force on Market Mechanisms. (1988). *Report of the Presidential Task Force on Market Mechanisms*.                                | Crash evidence  |
 
 ## Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex static three-pass review |
-| Created | 2026-07-06 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 initial design for BlackMonday1987 |
-| Status | experimental |
-| Icon | ![](../agent_images/icons/finance-portfolio-insurer.png) |
+| Field       | Content                                                  |
+|-------------|----------------------------------------------------------|
+| Author      | Codex                                                    |
+| Reviewed by | Codex static three-pass review                           |
+| Created     | 2026-07-06                                               |
+| Version     | 1.0.0                                                    |
+| Change log  | 1.0.0 initial design for BlackMonday1987                 |
+| Status      | experimental                                             |
+| Icon        | ![](../agent_images/icons/finance-portfolio-insurer.png) |

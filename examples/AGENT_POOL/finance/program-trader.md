@@ -2,15 +2,16 @@
 
 ## Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | Program trader |
-| Theory Family         | Behavioral Finance |
-| Market Role           | **Destabilising** - amplifies downward moves through threshold-based sell programs |
-| Time Horizon          | short |
-| Risk Tolerance        | high |
-| Information Asymmetry | none |
-| Determinism           | deterministic |
+| Field                 | Content                                                                                                                                                     |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Archetype             | Program trader                                                                                                                                              |
+| Theory Family         | Behavioral Finance                                                                                                                                          |
+| Behavioral Tendency   | **Diverging — executes increasingly large sell orders as prices fall, amplifying the cascade; diverges from fundamental value and destabilises the market** |
+| Market Role           | **Destabilising** - amplifies downward moves through threshold-based sell programs                                                                          |
+| Time Horizon          | short                                                                                                                                                       |
+| Risk Tolerance        | high                                                                                                                                                        |
+| Information Asymmetry | none                                                                                                                                                        |
+| Determinism           | deterministic                                                                                                                                               |
 
 ## Definition and Goals
 
@@ -69,11 +70,17 @@ Deactivation Conditions:
 - Cash floor breached: no buy-side recovery.
 
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm market | Mixed | Holds inside threshold. |
-| Cascade escalation | Destabilising | Sell size grows with drawdown magnitude. |
-| Recovery | Mixed | May buy small recovery quantities if configured. |
+| Regime             | Contribution  | Mechanism                                        |
+|--------------------|---------------|--------------------------------------------------|
+| Calm market        | Mixed         | Holds inside threshold.                          |
+| Cascade escalation | Destabilising | Sell size grows with drawdown magnitude.         |
+| Recovery           | Mixed         | May buy small recovery quantities if configured. |
+
+Behavioral Adaptation by Condition:
+| Condition          | Behavioral change                       | Mechanism                                                       |
+|--------------------|-----------------------------------------|-----------------------------------------------------------------|
+| Deepening drawdown | Sell size grows convexly with deviation | `Q = base_size * (1 + feedback_strength * abs(deviation) * 10)` |
+| Mild decline       | Sells base size at threshold trigger    | Binary trigger at `trigger_threshold`                           |
 
 Environmental Dependencies: uses only market broadcast and internal portfolio state.
 
@@ -83,22 +90,22 @@ Environmental Dependencies: uses only market broadcast and internal portfolio st
 
 ##### Inputs (per decision call)
 
-| Input | Source | Type / Shape | Required? | Notes |
-|-------|--------|--------------|-----------|-------|
-| `price` | environment broadcast | `float` | yes | execution reference |
-| `deviation` | environment broadcast | `float` | yes | trigger and sizing signal |
-| `round` | environment broadcast | `int` | yes | audit and phase context |
-| `cash` | agent state | `float` | yes | buy constraint |
-| `position` | agent state | `float` | yes | sell constraint |
+| Input       | Source                | Type / Shape | Required? | Notes                     |
+|-------------|-----------------------|--------------|-----------|---------------------------|
+| `price`     | environment broadcast | `float`      | yes       | execution reference       |
+| `deviation` | environment broadcast | `float`      | yes       | trigger and sizing signal |
+| `round`     | environment broadcast | `int`        | yes       | audit and phase context   |
+| `cash`      | agent state           | `float`      | yes       | buy constraint            |
+| `position`  | agent state           | `float`      | yes       | sell constraint           |
 
 ##### Outputs (per decision call)
 
-| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
-|-------|------|--------------------|------|-----------|---------|
-| `action` | enum | `{"buy", "sell", "hold"}` | - | yes | order direction |
-| `bid_price` | float | `> 0` | index points | yes | execution price reference |
-| `quantity` | float | `>= 0` | shares/contracts | yes | order size |
-| `reasoning` | string | 1-3 sentences | - | yes | audit trail |
+| Field       | Type   | Valid Range / Enum        | Unit             | Required? | Meaning                   |
+|-------------|--------|---------------------------|------------------|-----------|---------------------------|
+| `action`    | enum   | `{"buy", "sell", "hold"}` | -                | yes       | order direction           |
+| `bid_price` | float  | `> 0`                     | index points     | yes       | execution price reference |
+| `quantity`  | float  | `>= 0`                    | shares/contracts | yes       | order size                |
+| `reasoning` | string | 1-3 sentences             | -                | yes       | audit trail               |
 
 ##### Content Constraints
 
@@ -114,13 +121,13 @@ Implementation must preserve output parity across variants and use the threshold
 
 #### Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference. |
-| `deviation` | Continuous | 1 tick | Trigger and feedback magnitude. |
-| `round` | Integer | 1 tick | Audit and phase context. |
-| `cash` | State | persistent | Buy constraint. |
-| `position` | State | persistent | Sell constraint. |
+| Signal      | Type       | Memory Window | Rationale                       |
+|-------------|------------|---------------|---------------------------------|
+| `price`     | Continuous | 1 tick        | Execution reference.            |
+| `deviation` | Continuous | 1 tick        | Trigger and feedback magnitude. |
+| `round`     | Integer    | 1 tick        | Audit and phase context.        |
+| `cash`      | State      | persistent    | Buy constraint.                 |
+| `position`  | State      | persistent    | Sell constraint.                |
 
 Does NOT use: long-run fundamentals beyond deviation, private information, order book depth, social sentiment.
 
@@ -135,16 +142,16 @@ Does NOT use: long-run fundamentals beyond deviation, private information, order
 
 #### Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Action types allowed | `buy`, `sell`, `hold` |
-| Action parameter rule | `bid_price = price` |
-| Sizing rule | `base_size * (1 + feedback_strength * abs(deviation) * 10)` for sell trigger |
-| Action lifetime | one decision interval |
-| Revision policy | replaces prior program intent each tick |
-| State constraint | `position >= 0` unless scenario explicitly permits shorts |
-| Resource cap | sell quantity cannot exceed position; buy cannot exceed cash / price |
-| Exit rule | hold inside threshold or when caps bind |
+| Aspect                | Specification                                                                |
+|-----------------------|------------------------------------------------------------------------------|
+| Action types allowed  | `buy`, `sell`, `hold`                                                        |
+| Action parameter rule | `bid_price = price`                                                          |
+| Sizing rule           | `base_size * (1 + feedback_strength * abs(deviation) * 10)` for sell trigger |
+| Action lifetime       | one decision interval                                                        |
+| Revision policy       | replaces prior program intent each tick                                      |
+| State constraint      | `position >= 0` unless scenario explicitly permits shorts                    |
+| Resource cap          | sell quantity cannot exceed position; buy cannot exceed cash / price         |
+| Exit rule             | hold inside threshold or when caps bind                                      |
 
 #### Mathematical Model
 
@@ -152,11 +159,11 @@ If `deviation < -theta_prog`, action is sell and `q = min(position, base_size * 
 
 State variables are `cash` and `position`, updated after execution. Determinism contract: deterministic given identical inputs and state.
 
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `theta_prog` | trigger threshold | 0.01 | Brady Commission (1988) |
-| `phi` | feedback strength | 1.20 | De Long et al. (1990) |
-| `base_size` | base program lot | 60.0 | Brady Commission (1988), scenario normalization |
+| Symbol       | Meaning           | Default Value | Source                                          |
+|--------------|-------------------|---------------|-------------------------------------------------|
+| `theta_prog` | trigger threshold | 0.01          | Brady Commission (1988)                         |
+| `phi`        | feedback strength | 1.20          | De Long et al. (1990)                           |
+| `base_size`  | base program lot  | 60.0          | Brady Commission (1988), scenario normalization |
 
 #### Behavioral Properties
 
@@ -167,12 +174,12 @@ State variables are `cash` and `position`, updated after execution. Determinism 
 
 ## Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `trigger_threshold` | float | 0.01 | `[0, 0.20]` | high | Deviation threshold for program activation. | Higher -> fewer sell programs. | Brady Commission (1988) |
-| `feedback_strength` | float | 1.20 | `>= 0` | high | Convex amplification intensity. | Higher -> larger crash sell pressure. | De Long et al. (1990) |
-| `base_size` | float | 60.0 | `> 0` | medium | Base order size before amplification. | Higher -> larger volume. | Brady Commission (1988), normalized |
-| `initial_position` | float | scenario-defined | `>= 0` | medium | Sell-side inventory. | Higher -> more available sell pressure. | Scenario normalization |
+| Parameter           | Type  | Default          | Valid Range | Sensitivity | Description                                 | Impact                                  | Source                              |
+|---------------------|-------|------------------|-------------|-------------|---------------------------------------------|-----------------------------------------|-------------------------------------|
+| `trigger_threshold` | float | 0.01             | `[0, 0.20]` | high        | Deviation threshold for program activation. | Higher -> fewer sell programs.          | Brady Commission (1988)             |
+| `feedback_strength` | float | 1.20             | `>= 0`      | high        | Convex amplification intensity.             | Higher -> larger crash sell pressure.   | De Long et al. (1990)               |
+| `base_size`         | float | 60.0             | `> 0`       | medium      | Base order size before amplification.       | Higher -> larger volume.                | Brady Commission (1988), normalized |
+| `initial_position`  | float | scenario-defined | `>= 0`      | medium      | Sell-side inventory.                        | Higher -> more available sell pressure. | Scenario normalization              |
 
 ## Worked Numerical Examples
 
@@ -218,27 +225,27 @@ State update: none.
 
 #### Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
-|---------------|---------|-------------------|--------------------|--------|
-| no-program-trading | `num_instances = 0` | Program trading dominates crash acceleration. | decrease | crash velocity |
-| low-feedback | `feedback_strength = 0.2` | Convex amplification drives severity. | decrease | max drawdown |
+| Ablation name      | Setting                   | Hypothesis tested                             | Expected direction | Metric         |
+|--------------------|---------------------------|-----------------------------------------------|--------------------|----------------|
+| no-program-trading | `num_instances = 0`       | Program trading dominates crash acceleration. | decrease           | crash velocity |
+| low-feedback       | `feedback_strength = 0.2` | Convex amplification drives severity.         | decrease           | max drawdown   |
 
 ## Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
-| 1 | De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). Positive feedback investment strategies and destabilizing rational speculation. *Journal of Finance*, 45(2), 379-395. https://doi.org/10.1111/j.1540-6261.1990.tb03695.x | Positive feedback |
-| 2 | Presidential Task Force on Market Mechanisms. (1988). *Report of the Presidential Task Force on Market Mechanisms*. | Program-trading crash evidence |
-| 3 | Jegadeesh, N., & Titman, S. (1993). Returns to buying winners and selling losers. *Journal of Finance*, 48(1), 65-91. https://doi.org/10.1111/j.1540-6261.1993.tb04702.x | Parent momentum family |
+| # | Citation                                                                                                                                                                                                                                         | Notes                          |
+|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| 1 | De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). Positive feedback investment strategies and destabilizing rational speculation. *Journal of Finance*, 45(2), 379-395. https://doi.org/10.1111/j.1540-6261.1990.tb03695.x | Positive feedback              |
+| 2 | Presidential Task Force on Market Mechanisms. (1988). *Report of the Presidential Task Force on Market Mechanisms*.                                                                                                                              | Program-trading crash evidence |
+| 3 | Jegadeesh, N., & Titman, S. (1993). Returns to buying winners and selling losers. *Journal of Finance*, 48(1), 65-91. https://doi.org/10.1111/j.1540-6261.1993.tb04702.x                                                                         | Parent momentum family         |
 
 ## Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author | Codex |
-| Reviewed by | Codex static three-pass review |
-| Created | 2026-07-06 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 fork from momentum-trader for BlackMonday1987 |
-| Status | experimental |
-| Icon | ![](../agent_images/icons/finance-program-trader.png) |
+| Field       | Content                                               |
+|-------------|-------------------------------------------------------|
+| Author      | Codex                                                 |
+| Reviewed by | Codex static three-pass review                        |
+| Created     | 2026-07-06                                            |
+| Version     | 1.0.0                                                 |
+| Change log  | 1.0.0 fork from momentum-trader for BlackMonday1987   |
+| Status      | experimental                                          |
+| Icon        | ![](../agent_images/icons/finance-program-trader.png) |
