@@ -6,12 +6,12 @@
 |-----------------------|---------|
 | Archetype             | liquidation-signal information trader |
 | Theory Family         | Microstructure |
+| Behavioral Tendency   | **Converging — trades on fundamental information about the crisis; converges on the post-crisis fair value** |
 | Market Role           | **Context-dependent** - front-runs distress and later covers, amplifying early decline but aiding price discovery |
 | Time Horizon          | short |
 | Risk Tolerance        | high |
 | Information Asymmetry | partial |
 | Determinism           | stochastic-given-seed |
-
 ## Definition and Goals
 
 This agent models a proprietary trading desk or informed hedge fund reading order-flow stress in a finance liquidation setting, using the market-trading domain palette from `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1`. It is intentionally intrinsic: it defines the participant's signals, decision discipline, state, and self-imposed trading constraints, not matching-engine rules or message topology. The real-world counterpart and role are evidenced by the references in the theoretical foundation.
@@ -68,6 +68,15 @@ Deactivation Conditions:
 - No long position and no short inventory: hold.
 - Detection draw fails: hold.
 
+
+Behavioral Adaptation by Condition:
+| Condition | Behavioral change | Mechanism |
+|---|---|---|
+| Fundamental signal indicates post-crisis value | Trades toward the new fundamental | Signal-driven order |
+| No information update | Holds | No-trade default |
+
+Environmental Dependencies: Requires a per-tick `price` and `fundamental` feed. None beyond §3.6.1 signals.
+
 Market Contribution by Regime:
 | Regime | Contribution | Mechanism |
 |--------|--------------|-----------|
@@ -81,57 +90,54 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 #### I/O Contract
 
-**Inputs (per decision call).**
+##### Inputs (per decision call)
 
-| Input                   | Source                                              | Type / Shape | Required?               | Notes                                                                                                    |
-|-------------------------|-----------------------------------------------------|--------------|-------------------------|----------------------------------------------------------------------------------------------------------|
-| `price`                 | environment broadcast                               | `float`      | yes                     | Row of Decision Information Set                                                                          |
-| `fundamental`           | environment broadcast                               | `float`      | yes                     | Row of Decision Information Set                                                                          |
-| `deviation`             | environment broadcast                               | `float`      | yes                     | Row of Decision Information Set                                                                          |
-| `prev_price`            | environment broadcast (extended field)              | `float`      | yes                     | Supports local order-flow stress inference [Ref 5]                                                       |
-| `position`              | agent state (Mathematical Model state variables)    | `float`      | yes                     | Long inventory available for the sell (front-run) branch                                                 |
-| `short_position`        | agent state (Mathematical Model state variables)    | `float`      | yes                     | Determines whether the cover branch can activate                                                         |
-| `cash`                  | agent state (Mathematical Model state variables)    | `float`      | yes                     | Bounds the cover-branch buy quantity                                                                     |
-| `rng_state`             | agent state (seeded)                                | `int` / RNG  | yes                     | Detection uses Bernoulli(`p_detect`); seed-reproducible                                                  |
-| `round`                 | round header                                        | `int`        | yes                     | Round number                                                                                             |
-| `retrieved_knowledge`   | retrieval store (retrieval-augmented variants only) | `list[str]`  | retrieval variants only | Falls back to sentinel `"(No relevant knowledge retrieved this round.)"` when retrieval returns empty    |
+| Input | Source | Type / Shape | Required? | Notes |
+|---|---|---|---|---|
+| `price` | environment | `float` | yes | Maps to §3.6.1 `price`. |
+| `fundamental` | environment | `float` | yes | Maps to §3.6.1 `fundamental`. |
+| `deviation` | environment | `float` | yes | Maps to §3.6.1 `deviation`. |
+| `prev_price` | environment | `float` | yes | Maps to §3.6.1 `prev_price`. |
+| `short_position` | environment | `float` | yes | Maps to §3.6.1 `short_position`. |
+| `rng_state` | agent state | `float` | yes | Persistent state; see §3.6.4. |
+| `identity`, `round` | round header | `str`, `int` | yes | Scheduler metadata; identity naming rule per implement-simulation-skill/07-step3-config.md. |
 
-**Outputs (per decision call).** The agent emits exactly one decision object.
+##### Outputs (per decision call)
 
-| Field       | Type   | Valid Range / Enum         | Unit                       | Required? | Meaning                                                       |
-|-------------|--------|----------------------------|----------------------------|-----------|---------------------------------------------------------------|
-| `action`    | enum   | `{"buy","sell","hold"}`    | —                          | yes       | Discrete action (matches Action Space Order types)            |
-| `bid_price` | float  | > 0                        | same units as `price`      | yes       | Order price (Action Space Price level rule; both branches use current `price`) |
-| `quantity`  | float  | ≥ 0; sell ≤ position; buy ≤ min(short_position, cash / price) | shares / units of position | yes | Order magnitude (Action Space Order quantity rule)            |
-| `reasoning` | string | 1–3 sentences              | —                          | yes       | Audit trail explaining WHY; also consumed by `analysis.py`    |
+| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
+|---|---|---|---|---|---|
+| `action` | enum | {"buy", "sell", "hold", "as", "specified", "by", "the", "trigger", "function"} | — | yes | Discrete action selected this call. |
+| `quantity` | float | `[0, base_position_size]` | shares | conditional | Order magnitude; 0 when `action = hold`. |
+| `price_level` | float | `= price` (market order) | currency | conditional | Execution reference; equals observed `price` for market orders. |
+| `reasoning` | string | 1–3 sentences | — | yes | Audit trail explaining WHY. |
 
-**Content Constraints.**
+##### Content Constraints
 
-- Every `Required? = yes` field MUST be present on every call.
-- Extra fields not in the Outputs table MUST NOT be emitted.
-- Sell branch `quantity` MUST be clamped to `[0, min(front_run_size, position)]`.
-- Cover branch `quantity` MUST be clamped to `[0, min(cover_size, short_position, cash / price)]`.
-- `bid_price` MUST be strictly positive; if computed non-positive, floor to `price`.
-- Sign convention: `action = "sell"` corresponds to negative net demand and increases `short_position`; `action = "buy"` corresponds to positive net demand and reduces `short_position`; `quantity` is always non-negative.
-- Determinism marker: stochastic-given-seed — the emitted `<decision>` object MUST allow the round's Bernoulli draw to be reproduced from the declared `rng_state` seed (the implementation MUST log the seed deterministically per round).
+- Required fields: every row marked `Required? = yes` in the Outputs table MUST be present on every call.
+- Forbidden fields: fields not declared in the Outputs table MUST NOT be emitted.
+- Value ranges: `quantity` MUST fall inside `[0, base_position_size]`; out-of-range values MUST be clamped by the implementer before emission.
+- Units and sign conventions: `quantity` is unsigned; direction is carried by `action`. `price_level` uses the same currency unit as `fundamental` and `price`.
+- Determinism markers: the decision determinism class is declared in §3.2 Summary; no seed is emitted unless the decision is `stochastic-given-seed`.
 
-**Serialization Format.**
+##### Serialization Format
 
-```
-<analysis>...free-form reasoning, 1–3 sentences...</analysis>
-<decision>{"action": "sell", "bid_price": 84.0, "quantity": 1000.0, "reasoning": "Deviation -0.16 crossed detection_threshold=-0.05 and Bernoulli(p_detect=0.5) fired; front-running expected forced flow."}</decision>
-```
+    <analysis>...free-form reasoning, 1–3 sentences...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "quantity": <float>,
+                "price_level": <float>,
+                "reasoning": "<audit-trail explanation>"}</decision>
 
-Every implementation variant declared for this agent (rule-driven, model-driven, hybrid, retrieval-augmented) MUST honour this tag pattern. Rule-driven variants MAY populate `<analysis>` from a deterministic template. Model-driven variants MUST include this tag + JSON schema literally in the system or user prompt. Retrieval-augmented variants MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
+Rules:
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT optional.
+2. The `<decision>` block MUST contain a single valid JSON object whose keys exactly match the Outputs table.
+3. Rule-driven variants MAY generate `<analysis>` from a deterministic template, but the tags and JSON schema MUST still be present.
+4. Model-driven variants MUST include this exact tag+JSON requirement in the system or user prompt.
+5. Retrieval-augmented variants MUST declare a fallback sentinel for `retrieved_knowledge` (e.g. `"(No relevant knowledge retrieved this round.)"`) and inject it verbatim when retrieval returns empty.
 
-**Implementer Contract Reminder.**
+##### Implementer Contract Reminder
 
-1. **Signal wiring** — every Input row MUST resolve to a real read of the environment broadcast, the agent's persisted state, the seeded RNG, or the round header; `prev_price` MUST be added to the environment broadcast payload for this agent.
-2. **Decision emission** — every `Required? = yes` field MUST be populated; sell and cover quantities MUST be clamped per the Action Space rule.
-3. **Prompt drafting** — every model-driven variant's prompt MUST spell out the tag pattern and JSON schema verbatim with a worked example covering both the front-run sell and the cover buy branches, and MUST expose the Bernoulli detection semantics.
-4. **Parser tests** — implementation MUST include a smoke test that (i) verifies both tags present, (ii) parses `<decision>` JSON, (iii) asserts every required field is present and inside its valid range, and (iv) verifies seed reproducibility of the detection branch.
-5. **Variant parity** — every declared variant MUST produce the same field set; do not add variant-only fields without extending this contract first.
-6. **Contract-versus-prose** — on any conflict with Core Behavioral Mechanism, Action Space, or Mathematical Model, this I/O Contract wins.
+Implementers of this agent MUST re-open this §3.6.0 I/O Contract during every coding pass and use it as the single source of truth for signal wiring, decision emission, prompt drafting, parser tests, variant parity, and contract-versus-prose conflict resolution.
+
 
 #### Decision Information Set
 
@@ -293,7 +299,7 @@ State update: no state becomes negative.
 | Author | Codex |
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. |
-| Status | experimental |
+| Version | 1.0.3 |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0.; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-information-trader.png) |

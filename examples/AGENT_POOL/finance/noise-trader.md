@@ -2,15 +2,16 @@
 
 ## Summary
 
-| Field                 | Content |
-|-----------------------|---------|
-| Archetype             | Random noise trader |
-| Theory Family         | Behavioral Finance |
-| Market Role           | **Context-dependent** - supplies liquidity and volatility with zero-mean order flow |
-| Time Horizon          | short |
-| Risk Tolerance        | high |
-| Information Asymmetry | none |
-| Determinism           | stochastic-given-seed |
+| Field                 | Content                                                                                                                        |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| Archetype             | Random noise trader                                                                                                            |
+| Theory Family         | Behavioral Finance                                                                                                             |
+| Behavioral Tendency   | **Context-dependent — supplies zero-mean random order flow; neither converges nor diverges from fundamental value on average** |
+| Market Role           | **Context-dependent** - supplies liquidity and volatility with zero-mean order flow                                            |
+| Time Horizon          | short                                                                                                                          |
+| Risk Tolerance        | high                                                                                                                           |
+| Information Asymmetry | none                                                                                                                           |
+| Determinism           | stochastic-given-seed                                                                                                          |
 
 ## Definition and Goals
 
@@ -54,22 +55,76 @@ Deactivation Conditions:
 - Cash floor breached: hibernate buy side.
 - Inventory cap reached: hibernate constrained side.
 
+Behavioral Adaptation by Condition:
+| Condition               | Behavioral change                                  | Mechanism                                                     |
+|-------------------------|----------------------------------------------------|---------------------------------------------------------------|
+| High volatility regime  | Order size distribution unchanged but impact rises | `Uniform(min_order, max_order)` is independent of price state |
+| Extended one-sided flow | No adaptation; orders remain iid                   | No memory or state-dependent rule                             |
+
+Environmental Dependencies: Requires a per-tick `price` feed and a seeded random source. None beyond §3.6.1 signals.
+
 Market Contribution by Regime:
-| Regime | Contribution | Mechanism |
-|--------|--------------|-----------|
-| Calm | Stabilising | Supplies two-sided random liquidity on average. |
-| Stress | Destabilising | Large random orders can amplify volatility. |
+| Regime | Contribution  | Mechanism                                       |
+|--------|---------------|-------------------------------------------------|
+| Calm   | Stabilising   | Supplies two-sided random liquidity on average. |
+| Stress | Destabilising | Large random orders can amplify volatility.     |
 
 Interaction with other agents: Provides liquidity and noise that informed traders trade against.
 
 ## Behavioral Framework
 
+#### I/O Contract
+
+##### Inputs (per decision call)
+
+| Input               | Source       | Type / Shape | Required? | Notes                                                                                       |
+|---------------------|--------------|--------------|-----------|---------------------------------------------------------------------------------------------|
+| `price`             | environment  | `float`      | yes       | Execution reference.                                                                        |
+| `rng_state`         | agent state  | `int`        | yes       | Persistent state; see §3.6.4.                                                               |
+| `identity`, `round` | round header | `str`, `int` | yes       | Scheduler metadata; identity naming rule per implement-simulation-skill/07-step3-config.md. |
+
+##### Outputs (per decision call)
+
+| Field         | Type   | Valid Range / Enum       | Unit     | Required?   | Meaning                                                         |
+|---------------|--------|--------------------------|----------|-------------|-----------------------------------------------------------------|
+| `action`      | enum   | {"buy", "sell", "hold"}  | —        | yes         | Discrete action selected this call.                             |
+| `quantity`    | float  | `[0, max_order]`         | shares   | conditional | Order magnitude; 0 when `action = hold`.                        |
+| `price_level` | float  | `= price` (market order) | currency | conditional | Execution reference; equals observed `price` for market orders. |
+| `reasoning`   | string | 1–3 sentences            | —        | yes         | Audit trail explaining WHY.                                     |
+
+##### Content Constraints
+
+- Required fields: every row marked `Required? = yes` in the Outputs table MUST be present on every call.
+- Forbidden fields: fields not declared in the Outputs table MUST NOT be emitted.
+- Value ranges: `quantity` MUST fall inside `[0, max_order]`; out-of-range values MUST be clamped by the implementer before emission.
+- Units and sign conventions: `quantity` is unsigned; direction is carried by `action`. `price_level` uses the same currency unit as `price`.
+- Determinism markers: the decision determinism class is declared in §3.2 Summary; no seed is emitted unless the decision is `stochastic-given-seed`.
+
+##### Serialization Format
+
+    <analysis>...free-form reasoning, 1–3 sentences...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "quantity": <float>,
+                "price_level": <float>,
+                "reasoning": "<audit-trail explanation>"}</decision>
+
+Rules:
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT optional.
+2. The `<decision>` block MUST contain a single valid JSON object whose keys exactly match the Outputs table.
+3. Rule-driven variants MAY generate `<analysis>` from a deterministic template, but the tags and JSON schema MUST still be present.
+4. Model-driven variants MUST include this exact tag+JSON requirement in the system or user prompt.
+5. Retrieval-augmented variants MUST declare a fallback sentinel for `retrieved_knowledge` (e.g. `"(No relevant knowledge retrieved this round.)"`) and inject it verbatim when retrieval returns empty.
+
+##### Implementer Contract Reminder
+
+Implementers of this agent MUST re-open this §3.6.0 I/O Contract during every coding pass and use it as the single source of truth for signal wiring, decision emission, prompt drafting, parser tests, variant parity, and contract-versus-prose conflict resolution.
+
 #### Decision Information Set
 
-| Signal | Type | Memory Window | Rationale |
-|--------|------|---------------|-----------|
-| `price` | Continuous | 1 tick | Execution reference |
-| `rng_state` | State | persistent | Reproducible random activation |
+| Signal      | Type       | Memory Window | Rationale                      |
+|-------------|------------|---------------|--------------------------------|
+| `price`     | Continuous | 1 tick        | Execution reference            |
+| `rng_state` | State      | persistent    | Reproducible random activation |
 
 Does NOT use: `fundamental`, `anchor`, `momentum`, `cost_basis`, peer flow.
 
@@ -85,16 +140,16 @@ Does NOT use: `fundamental`, `anchor`, `momentum`, `cost_basis`, peer flow.
 
 #### Action Space
 
-| Aspect | Specification |
-|--------|---------------|
-| Order types allowed | market, hold-no-op |
-| Price level rule | market order at current price |
-| Order quantity rule | `Q ~ Uniform(min_order, max_order)` conditional on activation |
-| Order lifetime | 1 tick |
-| Cancellation policy | unfilled orders expire at end of tick |
-| Inventory constraint | inventory bounded by `inventory_max` |
-| Wealth / leverage cap | cash >= 0; no margin |
-| Stop-loss / kill rule | none |
+| Aspect                | Specification                                                 |
+|-----------------------|---------------------------------------------------------------|
+| Order types allowed   | market, hold-no-op                                            |
+| Price level rule      | market order at current price                                 |
+| Order quantity rule   | `Q ~ Uniform(min_order, max_order)` conditional on activation |
+| Order lifetime        | 1 tick                                                        |
+| Cancellation policy   | unfilled orders expire at end of tick                         |
+| Inventory constraint  | inventory bounded by `inventory_max`                          |
+| Wealth / leverage cap | cash >= 0; no margin                                          |
+| Stop-loss / kill rule | none                                                          |
 
 #### Mathematical Model
 
@@ -114,10 +169,10 @@ Does NOT use: `fundamental`, `anchor`, `momentum`, `cost_basis`, peer flow.
 - State-update rule: update RNG state pre-decision; update position and cash post-fill.
 - Determinism contract: stochastic-given-seed.
 
-| Symbol | Meaning | Default Value | Source |
-|--------|---------|---------------|--------|
-| `p` | activation probability | 0.05 | Black (1986) |
-| `Q` | random order size | Uniform(100, 500) | Standardised |
+| Symbol | Meaning                | Default Value     | Source       |
+|--------|------------------------|-------------------|--------------|
+| `p`    | activation probability | 0.05              | Black (1986) |
+| `Q`    | random order size      | Uniform(100, 500) | Standardised |
 
 #### Behavioral Properties
 
@@ -128,23 +183,23 @@ Does NOT use: `fundamental`, `anchor`, `momentum`, `cost_basis`, peer flow.
 
 ## Parameters
 
-| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
-|-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `trade_probability` | float | 0.05 | [0, 1] | high | Per-tick activation probability. | Higher -> more volume and volatility. | Black (1986) |
-| `min_order` | float | 100.0 | > 0 | medium | Minimum random order quantity. | Higher -> larger volatility floor. | Standardised |
-| `max_order` | float | 500.0 | > `min_order` | high | Maximum random order quantity. | Higher -> fatter return tails. | Standardised |
-| `inventory_max` | float | 1000.0 | > 0 | medium | Inventory cap. | Higher -> fewer clipped sell/buy decisions. | Standardised |
-| `seed` | int | 1 | int >= 0 | low | Random seed. | Higher -> changes path, not distribution. | Standardised |
+| Parameter           | Type  | Default | Valid Range   | Sensitivity | Description                      | Impact                                      | Source       |
+|---------------------|-------|---------|---------------|-------------|----------------------------------|---------------------------------------------|--------------|
+| `trade_probability` | float | 0.05    | [0, 1]        | high        | Per-tick activation probability. | Higher -> more volume and volatility.       | Black (1986) |
+| `min_order`         | float | 100.0   | > 0           | medium      | Minimum random order quantity.   | Higher -> larger volatility floor.          | Standardised |
+| `max_order`         | float | 500.0   | > `min_order` | high        | Maximum random order quantity.   | Higher -> fatter return tails.              | Standardised |
+| `inventory_max`     | float | 1000.0  | > 0           | medium      | Inventory cap.                   | Higher -> fewer clipped sell/buy decisions. | Standardised |
+| `seed`              | int   | 1       | int >= 0      | low         | Random seed.                     | Higher -> changes path, not distribution.   | Standardised |
 
 ## Population and Heterogeneity
 
-| Aspect | Specification |
-|--------|---------------|
-| Default population size | scenario-dependent |
-| Parameter heterogeneity policy | iid seeded draws |
-| Heterogeneity per parameter | `trade_probability -> Uniform(0.03, 0.08)` |
-| Cross-agent correlation | none unless scenario shares seed streams |
-| Identity persistence | re-drawn every episode when seed changes |
+| Aspect                         | Specification                              |
+|--------------------------------|--------------------------------------------|
+| Default population size        | scenario-dependent                         |
+| Parameter heterogeneity policy | iid seeded draws                           |
+| Heterogeneity per parameter    | `trade_probability -> Uniform(0.03, 0.08)` |
+| Cross-agent correlation        | none unless scenario shares seed streams   |
+| Identity persistence           | re-drawn every episode when seed changes   |
 
 ## Worked Numerical Examples
 
@@ -192,33 +247,33 @@ State update: unchanged.
 - Volatility without fundamental information.
 
 **Sanity bounds (red flags during simulation)**:
-- Mean signed demand is persistently one-sided under iid mode.
-- Direction depends on `fundamental`.
-- Orders exceed the declared size support.
+- IF mean signed demand is persistently one-sided under iid mode THEN the random direction draw is broken because noise must be zero-mean.
+- IF order direction depends on `fundamental` THEN the agent is contaminated because noise must not use fundamentals.
+- IF emitted `quantity > max_order` THEN the size support contract is broken because orders must be clamped before emission.
 
 #### Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested |
-|---------------|---------|-------------------|
-| `no_noise` | `trade_probability = 0` | Removing noise makes prices overly deterministic. |
-| `large_noise` | `max_order = 2000` | Larger random orders increase tail thickness. |
+| Ablation name | Setting                 | Hypothesis tested                                 |
+|---------------|-------------------------|---------------------------------------------------|
+| `no_noise`    | `trade_probability = 0` | Removing noise makes prices overly deterministic. |
+| `large_noise` | `max_order = 2000`      | Larger random orders increase tail thickness.     |
 
 ## Academic References
 
-| # | Citation | Notes |
-|---|----------|-------|
-| 1 | Black, F. (1986). Noise. *Journal of Finance*, 41(3), 529-543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x | Noise trading |
-| 2 | DeLong et al. (1990) | Noise-trader risk; only short citation available in source file |
+| # | Citation                                                                                                                                                                                                                             | Notes                                                                       |
+|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| 1 | Black, F. (1986). Noise. *Journal of Finance*, 41(3), 529-543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x                                                                                                                    | Noise trading                                                               |
+| 2 | DeLong et al. (1990)                                                                                                                                                                                                                 | Noise-trader risk; only short citation available in source file             |
 | 3 | Glosten, L. R., & Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. *Journal of Financial Economics*, 14(1), 71-100. https://doi.org/10.1016/0304-405X(85)90044-3 | Source scenario cites this for informed vs. uninformed order flow fractions |
 
 ## Design Provenance and Versioning
 
-| Field | Content |
-|-------|---------|
-| Author |  |
-| Reviewed by |  |
-| Created | 2026-06-27 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.5 |
-| Status | draft |
-| Icon        | ![](../agent_images/icons/finance-noise-trader.png) |
+| Field       | Content                                                                                                                                                                                                                                                                 |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | AGenticFinLab                                                                                                                                                                                                                                                           |
+| Reviewed by | audit_agent_handbook.py v1                                                                                                                                                                                                                                              |
+| Created     | 2026-06-27                                                                                                                                                                                                                                                              |
+| Version     | 1.1.0                                                                                                                                                                                                                                                                   |
+| Change log  | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.5; 1.1.0 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status      | conformant                                                                                                                                                                                                                                                              |
+| Icon        | ![](../agent_images/icons/finance-noise-trader.png)                                                                                                                                                                                                                     |

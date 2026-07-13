@@ -51,20 +51,20 @@ for (a) the single Status transition performed at Step 0 and Closeout,
 and (b) appending CHANGELOG lines to §0 Meta. All other target-file
 changes go through the define skill's revise mode.
 
-| Concern                               | Owner                                                                                |
-|---------------------------------------|--------------------------------------------------------------------------------------|
-| Target-file specification we align to | `masim/skills/define-simulation-scenario-skill.md` (§11 checklist, §9.3 revise mode) |
-| Universal Agent Design Handbook       | `masim/skills/agent-design-skill.md` (§3 canonical order, §6 checklist)              |
-| Per-step audit contract               | `masim/skills/implement-simulation-skill/{04..09}-*.md` `## Contract`                |
-| Root document conformance             | `implement-simulation-skill/02-root-documents-spec.md`                               |
-| Variant document conformance          | `implement-simulation-skill/03-variant-documents-spec.md`                            |
-| Directory / file layout               | `implement-simulation-skill/01-mandatory-structure.md`                               |
-| AGENT_POOL three-stage match protocol | `implement-simulation-skill/06-step2-agent-design.md §2.2.0`                         |
-| AGENT_POOL icon generation protocol   | `masim/skills/agent-icon-generation-skill.md`                                        |
-| Agent handbook structural audit       | `scripts/audit_agent_handbook.py` (backs `06-step2-agent-design.md` Hook 5a)         |
-| Agent naming / parity / coverage audit| `scripts/audit_agent_naming.py` (backs Hooks 4, 6, 7)                                |
-| Three-PASS validation discipline      | This file §3 and `agent-design-skill.md §6`                                          |
-| From-scratch pipeline (contrast)      | `masim/skills/create-simulation-pipeline.md`                                         |
+| Concern                                | Owner                                                                                                                                                                                                                                                                                                                  |
+|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Target-file specification we align to  | `masim/skills/define-simulation-scenario-skill.md` (§11 checklist, §9.3 revise mode)                                                                                                                                                                                                                                   |
+| Universal Agent Design Handbook        | `masim/skills/agent-design-skill.md` (§3 canonical order, §6 checklist)                                                                                                                                                                                                                                                |
+| Per-step audit contract                | `masim/skills/implement-simulation-skill/{04..09}-*.md` `## Contract`                                                                                                                                                                                                                                                  |
+| Root document conformance              | `implement-simulation-skill/02-root-documents-spec.md`                                                                                                                                                                                                                                                                 |
+| Variant document conformance           | `implement-simulation-skill/03-variant-documents-spec.md`                                                                                                                                                                                                                                                              |
+| Directory / file layout                | `implement-simulation-skill/01-mandatory-structure.md`                                                                                                                                                                                                                                                                 |
+| AGENT_POOL three-stage match protocol  | `implement-simulation-skill/06-step2-agent-design.md §2.2.0`                                                                                                                                                                                                                                                           |
+| AGENT_POOL icon generation protocol    | `masim/skills/agent-icon-generation-skill.md`                                                                                                                                                                                                                                                                          |
+| Agent handbook structural audit        | `scripts/audit_agent_handbook.py` (backs `06-step2-agent-design.md` Hook 5a); includes `--check todo` whole-file placeholder scan — any TODO / TBD / FIXME / XXX / PLACEHOLDER / `Status: stub` / `auto-generated placeholder` / `fill this section` / `insert here` marker outside a fenced code block is a hard FAIL |
+| Agent naming / parity / coverage audit | `scripts/audit_agent_naming.py` (backs Hooks 4, 6, 7)                                                                                                                                                                                                                                                                  |
+| Three-PASS validation discipline       | This file §3 and `agent-design-skill.md §6`                                                                                                                                                                                                                                                                            |
+| From-scratch pipeline (contrast)       | `masim/skills/create-simulation-pipeline.md`                                                                                                                                                                                                                                                                           |
 
 ### 0.1 Anchor Precedence (polish flow)
 
@@ -209,7 +209,15 @@ commit".
     │ Step 2 — Agent + Environment Design Audit                  │
     │   File: 06-step2-agent-design.md ## Contract → Polish Hooks│
     │   Hook 5a: `scripts/audit_agent_handbook.py` structural    │
-    │   gate (exit 0 required before proceeding).                │
+    │   gate (exit 0 required before proceeding). Covers §2      │
+    │   section order, §3 section-by-section requirements,       │
+    │   §3.6.0 I/O Contract presence, and a whole-file           │
+    │   placeholder scan (`--check todo`) that rejects any       │
+    │   TODO / TBD / FIXME / XXX / PLACEHOLDER / Status: stub /  │
+    │   auto-generated-placeholder / fill-this-section /         │
+    │   insert-here marker outside a fenced code block. No form  │
+    │   of TODO or placeholder content is permitted in a         │
+    │   conformant profile.                                      │
     │   Hook 5b: agent-design-skill.md §6 three-PASS semantic    │
     │   checklist.                                               │
     │   Hook 6: `scripts/audit_agent_naming.py --anchor          │

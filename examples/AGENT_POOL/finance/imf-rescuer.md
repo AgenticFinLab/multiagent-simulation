@@ -210,7 +210,7 @@ State update: unchanged.
 | Author | Codex |
 | Reviewed by | Codex |
 | Created | 2026-07-05 |
-| Version | 1.0.1 |
+| Version | 1.0.4 |
 | Icon | ![](../agent_images/icons/finance-imf-rescuer.png) |
-| Change log | 1.0.0 - Created for AsianFinancialCrisis create-pipeline replay.<br>1.0.1 - Added AGENT_POOL icon via agent-icon-generation-skill. |
-| Status | experimental |
+| Change log  | 1.0.0 - Created for AsianFinancialCrisis create-pipeline replay.<br>1.0.1 - Added AGENT_POOL icon via agent-icon-generation-skill.; 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.4 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |

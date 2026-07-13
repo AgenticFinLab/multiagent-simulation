@@ -4,44 +4,94 @@
 
 ## Summary
 
-| Field                 | Content                                                                                  |
-|-----------------------|------------------------------------------------------------------------------------------|
-| Archetype             | delayed prime-broker liquidator                                                          |
-| Theory Family         | Leverage / Risk-On-Risk-Off                                                              |
-| Market Role           | **Destabilising** - later liquidation amplifies the cascade and receives worse execution |
-| Time Horizon          | short                                                                                    |
-| Risk Tolerance        | medium                                                                                   |
-| Information Asymmetry | partial                                                                                  |
-| Determinism           | deterministic                                                                            |
+| Field                 | Content                                                                                                                   |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------|
+| Archetype             | delayed prime-broker liquidator                                                                                           |
+| Theory Family         | Leverage / Risk-On-Risk-Off                                                                                               |
+| Behavioral Tendency   | **Diverging — lags the liquidation wave and then dumps into an already-thin book; diverges from orderly price discovery** |
+| Market Role           | **Destabilising** - later liquidation amplifies the cascade and receives worse execution                                  |
+| Time Horizon          | short                                                                                                                     |
+| Risk Tolerance        | medium                                                                                                                    |
+| Information Asymmetry | partial                                                                                                                   |
+| Determinism           | deterministic                                                                                                             |
 
 **Delta vs. first-mover:** Market Role wording emphasises *later* liquidation and *worse execution* (vs. the first-mover's *early liquidation / fire-sale acceleration*). All other Summary rows are identical.
-
 ## Definition and Goals
 
 Identical to base — see [Definition and Goals](./prime-broker-first-mover.md#definition-and-goals). The same three paragraphs apply: intrinsic prime-broker liquidator, single decision object per call, transmits borrower distress into market-wide selling via creditor-run incentives.
 
 ## Theoretical Foundation
 
-Identical to base — see [Theoretical Foundation](./prime-broker-first-mover.md#theoretical-foundation) (Gorton & Metrick 2012, creditor run and first-mover liquidation). Both archetypes are two positions in the *same* run game — the base file's Theoretical Foundation applies verbatim.
+**Creditor run and delayed liquidation**:
+- Theory / Study: Run incentives among collateralised creditors; delayed liquidation amplifies price impact.
+- Citation: Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425-451. https://doi.org/10.1016/j.jfineco.2011.03.016
+- Core Insight: When several creditors can liquidate similar collateral, earlier sellers receive better prices because later sellers face price impact from prior liquidation. The delayed liquidator arrives after the first-mover cascade and receives worse execution.
+- Mathematical Formulation: `payoff_i = q_i * P(t_i) * pi_penalty`, with `pi_penalty < 1` for the delayed archetype.
+- Empirical Evidence: Gorton & Metrick (2012) document run-like rollover behaviour; Archegos post-mortems show late movers lost significantly more than first movers.
+- Relevance to This Agent: The `price_penalty` parameter encodes the execution haircut for arriving late to the liquidation cascade.
+- Calibration Source: Gorton & Metrick (2012); Archegos broker-loss comparisons reported in regulatory and bank post-mortems.
+- Falsification Conditions: If the delayed archetype receives the same execution price as the first-mover, the penalty mechanism is absent.
+- Alternative Theories: coordinated workout; patient liquidation.
 
 ## Design Purpose and Activation Triggers
 
 Identical to base — see [Design Purpose and Activation Triggers](./prime-broker-first-mover.md#design-purpose-and-activation-triggers). Purpose, Call Frequency, Prerequisite Signals, Missing-Signal Policy, Activation Triggers, Deactivation Conditions, Market Contribution by Regime, and Environmental Dependencies are all unchanged; only the numeric value of `liquidation_threshold` differs (see Parameters below).
 
+Behavioral Adaptation by Condition:
+| Condition                    | Behavioral change                          | Mechanism                                        |
+|------------------------------|--------------------------------------------|--------------------------------------------------|
+| First-mover has already sold | Dumps remaining inventory into a thin book | Delay parameter `delay_ticks` defers liquidation |
+| Post-crisis normalisation    | Returns to normal prime-broker behaviour   | Liquidation flag resets                          |
+
+Environmental Dependencies: Requires a per-tick `price` feed and a first-mover liquidation indicator. None beyond §3.6.1 signals.
 ## Behavioral Framework
 
 #### I/O Contract
 
-Identical to base — see [I/O Contract](./prime-broker-first-mover.md#io-contract).
+##### Inputs (per decision call)
 
-**Delta vs. first-mover:**
+| Input               | Source       | Type / Shape | Required? | Notes                                                                                       |
+|---------------------|--------------|--------------|-----------|---------------------------------------------------------------------------------------------|
+| `price`             | environment  | `float`      | yes       | Maps to §3.6.1 `price`.                                                                     |
+| `fundamental`       | environment  | `float`      | yes       | Maps to §3.6.1 `fundamental`.                                                               |
+| `identity`, `round` | round header | `str`, `int` | yes       | Scheduler metadata; identity naming rule per implement-simulation-skill/07-step3-config.md. |
 
-- `bid_price` valid-range Meaning: `sell uses price * price_penalty` (base uses `price` directly).
-- Content Constraint: "if the haircut product `price * price_penalty` is non-positive, floor to `price`" (base floors non-positive raw `price` computations).
-- Serialization example uses the delayed calibration: `{"action": "sell", "bid_price": 82.45, "quantity": 1225.0, "reasoning": "Deviation crossed liquidation_threshold=-0.15 after first-mover selling; liquidating 35% of collateral at delayed haircut."}`
-- Implementer Contract Reminder item 3 reads *"…with a worked example using the later `liquidation_threshold=-0.15` calibration."*
+##### Outputs (per decision call)
 
-Inputs table, Outputs table columns/enum, and Reminder items 1/2/4/5/6 are unchanged.
+| Field         | Type   | Valid Range / Enum        | Unit     | Required?   | Meaning                                                         |
+|---------------|--------|---------------------------|----------|-------------|-----------------------------------------------------------------|
+| `action`      | enum   | {"buy", "sell", "hold"}   | —        | yes         | Discrete action selected this call.                             |
+| `quantity`    | float  | `[0, base_position_size]` | shares   | conditional | Order magnitude; 0 when `action = hold`.                        |
+| `price_level` | float  | `= price` (market order)  | currency | conditional | Execution reference; equals observed `price` for market orders. |
+| `reasoning`   | string | 1–3 sentences             | —        | yes         | Audit trail explaining WHY.                                     |
+
+##### Content Constraints
+
+- Required fields: every row marked `Required? = yes` in the Outputs table MUST be present on every call.
+- Forbidden fields: fields not declared in the Outputs table MUST NOT be emitted.
+- Value ranges: `quantity` MUST fall inside `[0, base_position_size]`; out-of-range values MUST be clamped by the implementer before emission.
+- Units and sign conventions: `quantity` is unsigned; direction is carried by `action`. `price_level` uses the same currency unit as `fundamental` and `price`.
+- Determinism markers: the decision determinism class is declared in §3.2 Summary; no seed is emitted unless the decision is `stochastic-given-seed`.
+
+##### Serialization Format
+
+    <analysis>...free-form reasoning, 1–3 sentences...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "quantity": <float>,
+                "price_level": <float>,
+                "reasoning": "<audit-trail explanation>"}</decision>
+
+Rules:
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT optional.
+2. The `<decision>` block MUST contain a single valid JSON object whose keys exactly match the Outputs table.
+3. Rule-driven variants MAY generate `<analysis>` from a deterministic template, but the tags and JSON schema MUST still be present.
+4. Model-driven variants MUST include this exact tag+JSON requirement in the system or user prompt.
+5. Retrieval-augmented variants MUST declare a fallback sentinel for `retrieved_knowledge` (e.g. `"(No relevant knowledge retrieved this round.)"`) and inject it verbatim when retrieval returns empty.
+
+##### Implementer Contract Reminder
+
+Implementers of this agent MUST re-open this §3.6.0 I/O Contract during every coding pass and use it as the single source of truth for signal wiring, decision emission, prompt drafting, parser tests, variant parity, and contract-versus-prose conflict resolution.
+
 
 #### Decision Information Set
 
@@ -129,24 +179,43 @@ Identical to base — see [Edge Case](./prime-broker-first-mover.md#edge-case---
 
 ## Validation and Calibration
 
-Identical to base — see [Validation and Calibration](./prime-broker-first-mover.md#validation-and-calibration). Calibration sources, expected individual behaviour bullets, and sanity bounds all apply verbatim.
+**Calibration data sources**:
+- `liquidation_threshold` <- Gorton & Metrick (2012) run threshold logic and Archegos broker timing.
+- `liquidation_sell_ratio` <- liquidation-race payoff calibration from scenario §2 and §8.
+- `price_penalty` <- Archegos broker-loss comparison between first-mover and delayed-liquidator execution prices.
+
+**Expected individual behaviour**:
+- Given deviation below -0.15 (the delayed threshold), agent MUST sell with positive quantity.
+- Given deviation above -0.15, agent MUST hold.
+- Given position is zero, agent MUST hold with zero quantity.
+
+**Sanity bounds (red flags indicating broken implementation)**:
+- IF the agent emits the opposite sign from its trigger branch THEN the mechanism is inverted.
+- IF quantity exceeds declared position discipline THEN the implementation violates Action Space.
+- IF `price_penalty` has no effect on execution price THEN the delayed-liquidator penalty is absent.
 
 #### Ablation Hooks
 
-Identical to base — see [Ablation Hooks](./prime-broker-first-mover.md#ablation-hooks). Both `threshold_strict` and `size_half` ablations apply to this archetype's parameter set as well.
+| Ablation name      | Setting                                     | Hypothesis tested                                                   | Expected direction | Metric                    |
+|--------------------|---------------------------------------------|---------------------------------------------------------------------|--------------------|---------------------------|
+| `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
+| `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
 ## Academic References
 
-Identical to base — see [Academic References](./prime-broker-first-mover.md#academic-references) (Ref 3 Gorton & Metrick 2012; Ref 9 Hasbrouck 1991).
+| # | Citation                                                                                                                                                                    | Notes                                         |
+|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| 3 | Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425-451. https://doi.org/10.1016/j.jfineco.2011.03.016 | Creditor run and first-mover liquidation race |
+| 9 | Hasbrouck, J. (1991). Measuring the information content of stock trades. *Journal of Finance*, 46(1), 179-207. https://doi.org/10.1111/j.1540-6261.1991.tb03749.x           | Price impact and execution-price relevance    |
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                                                                                                                                                                                                                                                                                                                                                                        |
-|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Author      | Codex                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                                                                                                    |
-| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Version     | 1.1.0                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. / 1.1.0 - Section-link + delta-callout dedup against prime-broker-first-mover.md; shared prose replaced with inline links, only deltas retained in full. |
-| Status      | experimental                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Icon        | ![](../agent_images/icons/finance-prime-broker-delayed-liquidator.png)                                                                                                                                                                                                                                                                                                                                         |
+| Field       | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Author      | Codex                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Created     | 2026-06-30                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Version     | 1.1.3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Change log  | 1.0.0 - normalized existing ArchegosCollapse agent into standalone AGENT_POOL form. / 1.0.1 - Polish audit 2026-07-01: inserted §3.6.0 I/O Contract as first sub-block of Behavioral Framework, verified against agent-design-skill.md v2.3.1 §3.6.0. / 1.1.0 - Section-link + delta-callout dedup against prime-broker-first-mover.md; shared prose replaced with inline links, only deltas retained in full.; 1.1.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.1.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.1.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status      | conformant                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Icon        | ![](../agent_images/icons/finance-prime-broker-delayed-liquidator.png)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |

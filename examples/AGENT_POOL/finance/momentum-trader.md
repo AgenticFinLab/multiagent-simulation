@@ -6,12 +6,12 @@
 |-----------------------|---------|
 | Archetype             | Short-term momentum trader |
 | Theory Family         | Behavioral Finance |
+| Behavioral Tendency   | **Diverging — chases recent price trends and amplifies short-run moves; diverges from fundamental value during trending episodes** |
 | Market Role           | **Context-dependent** - amplifies prevailing short-term trends |
 | Time Horizon          | short |
 | Risk Tolerance        | high |
 | Information Asymmetry | none |
 | Determinism           | deterministic |
-
 ## Definition and Goals
 
 This agent models a trend follower or momentum trader who extrapolates recent price movement. The real-world counterpart is a momentum trader, technical trader, or short-horizon trend follower.
@@ -65,6 +65,15 @@ Deactivation Conditions:
 - Inventory cap reached: hibernate constrained side.
 - Missing prior price: hold.
 
+
+Behavioral Adaptation by Condition:
+| Condition | Behavioral change | Mechanism |
+|---|---|---|
+| Trend reversal | Continues to trade in the prior trend direction until the signal explicitly flips | `momentum` is a backward-looking rolling mean; sign change lags the reversal |
+| Low-volatility regime | Reduces order size as `abs(momentum)` falls below `threshold` | Sizing is proportional to signal magnitude |
+
+Environmental Dependencies: Requires a per-tick `price` feed and a `price_history` series of at least `lookback` observations for a fully warm signal. None beyond §3.6.1 signals.
+
 Market Contribution by Regime:
 | Regime | Contribution | Mechanism |
 |--------|--------------|-----------|
@@ -74,6 +83,52 @@ Market Contribution by Regime:
 Interaction with other agents: Amplifies AnchoredTrader when price drifts upward and directly opposes ContrarianTrader.
 
 ## Behavioral Framework
+
+#### I/O Contract
+
+##### Inputs (per decision call)
+
+| Input | Source | Type / Shape | Required? | Notes |
+|---|---|---|---|---|
+| `price` | environment | `float` | yes | Maps to §3.6.1 `price`. |
+| `prev_price` | environment | `float` | yes | Maps to §3.6.1 `prev_price`. |
+| `identity`, `round` | round header | `str`, `int` | yes | Scheduler metadata; identity naming rule per implement-simulation-skill/07-step3-config.md. |
+
+##### Outputs (per decision call)
+
+| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
+|---|---|---|---|---|---|
+| `action` | enum | {"market", "hold-no-op"} | — | yes | Discrete action selected this call. |
+| `quantity` | float | `[0, base_position_size]` | shares | conditional | Order magnitude; 0 when `action = hold`. |
+| `price_level` | float | `= price` (market order) | currency | conditional | Execution reference; equals observed `price` for market orders. |
+| `reasoning` | string | 1–3 sentences | — | yes | Audit trail explaining WHY. |
+
+##### Content Constraints
+
+- Required fields: every row marked `Required? = yes` in the Outputs table MUST be present on every call.
+- Forbidden fields: fields not declared in the Outputs table MUST NOT be emitted.
+- Value ranges: `quantity` MUST fall inside `[0, base_position_size]`; out-of-range values MUST be clamped by the implementer before emission.
+- Units and sign conventions: `quantity` is unsigned; direction is carried by `action`. `price_level` uses the same currency unit as `fundamental` and `price`.
+- Determinism markers: the decision determinism class is declared in §3.2 Summary; no seed is emitted unless the decision is `stochastic-given-seed`.
+
+##### Serialization Format
+
+    <analysis>...free-form reasoning, 1–3 sentences...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "quantity": <float>,
+                "price_level": <float>,
+                "reasoning": "<audit-trail explanation>"}</decision>
+
+Rules:
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT optional.
+2. The `<decision>` block MUST contain a single valid JSON object whose keys exactly match the Outputs table.
+3. Rule-driven variants MAY generate `<analysis>` from a deterministic template, but the tags and JSON schema MUST still be present.
+4. Model-driven variants MUST include this exact tag+JSON requirement in the system or user prompt.
+5. Retrieval-augmented variants MUST declare a fallback sentinel for `retrieved_knowledge` (e.g. `"(No relevant knowledge retrieved this round.)"`) and inject it verbatim when retrieval returns empty.
+
+##### Implementer Contract Reminder
+
+Implementers of this agent MUST re-open this §3.6.0 I/O Contract during every coding pass and use it as the single source of truth for signal wiring, decision emission, prompt drafting, parser tests, variant parity, and contract-versus-prose conflict resolution.
 
 #### Decision Information Set
 
@@ -200,9 +255,9 @@ State update: set prev_price=100 for next tick.
 - Bubble or crash amplification in one-sided regimes.
 
 **Sanity bounds (red flags during simulation)**:
-- Agent buys after negative returns.
-- Agent uses `fundamental` in the trigger.
-- Agent trades without a previous price.
+- IF the agent exhibits the behaviour described (Agent buys after negative returns) THEN the implementation is broken because agent buys after negative returns.
+- IF the agent exhibits the behaviour described (Agent uses `fundamental` in the trigger) THEN the implementation is broken because agent uses `fundamental` in the trigger.
+- IF the agent exhibits the behaviour described (Agent trades without a previous price) THEN the implementation is broken because agent trades without a previous price.
 
 #### Ablation Hooks
 
@@ -222,10 +277,10 @@ State update: set prev_price=100 for next tick.
 
 | Field | Content |
 |-------|---------|
-| Author |  |
-| Reviewed by |  |
+| Author | AGenticFinLab |
+| Reviewed by | audit_agent_handbook.py v1 |
 | Created | 2026-06-27 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.4 |
-| Status | draft |
+| Version | 1.0.3 |
+| Change log  | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.4; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-momentum-trader.png) |

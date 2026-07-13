@@ -63,7 +63,7 @@ CANONICAL_SECTIONS: list[tuple[str, str]] = [
     ("behavior",         r"(?m)^##\s+" + _NUM + r"Behavioral Framework\s*$"),  # §3.6
     ("params",           r"(?m)^##\s+" + _NUM + r"Parameters\s*$"),        # §3.7
     ("examples",         r"(?m)^##\s+" + _NUM + r"Worked Numerical Examples?\s*$"),  # §3.8
-    ("verify",           r"(?m)^##\s+" + _NUM + r"(?:Behavioral )?Validation and Calibration\s*$"),  # §3.9 (also accepts "Validation and Calibration")
+    ("verify",           r"(?m)^##\s+" + _NUM + r"(?:Behavioral )?(?:Validation|Verification) and Calibration\s*$"),  # §3.9 (accepts Validation/Verification, with or without Behavioral prefix)
     ("refs",             r"(?m)^##\s+" + _NUM + r"Academic References\s*$"),  # §3.10
     ("provenance",       r"(?m)^##\s+" + _NUM + r"Design Provenance(?: and Versioning)?\s*$"),  # §3.11
 ]
@@ -118,9 +118,27 @@ PROVENANCE_REQUIRED_ROWS = [
     "Author", "Created", "Version", "Change log", "Status",
 ]
 
+# Placeholder / stub markers that indicate incomplete authoring.
+# Any match on a non-code-fence line is a FAIL. The polish pipeline treats
+# any TODO / placeholder as a blocking defect — conformant profiles must
+# be fully authored.
+PLACEHOLDER_PATTERNS: list[tuple[str, re.Pattern]] = [
+    ("TODO",        re.compile(r"(?m)^[^`\n]*\bTODO\b")),
+    ("TBD",         re.compile(r"(?m)^[^`\n]*\bTBD\b")),
+    ("FIXME",       re.compile(r"(?m)^[^`\n]*\bFIXME\b")),
+    ("XXX",         re.compile(r"(?m)^[^`\n]*\bXXX\b")),
+    ("PLACEHOLDER", re.compile(r"(?m)^[^`\n]*\bPLACEHOLDER\b")),
+    ("stub status", re.compile(r"(?mi)^\|\s*Status\s*\|\s*stub\s*\|")),
+    ("stub marker", re.compile(r"(?mi)^>\s*Status:\s*stub\b")),
+    ("auto-generated placeholder",
+                    re.compile(r"(?mi)auto-generated placeholder")),
+    ("fill this",   re.compile(r"(?mi)\bfill\s+(this|the)\s+.*\s+(section|field|row|block)\b")),
+    ("insert here", re.compile(r"(?mi)\binsert\s+.*\s+here\b")),
+]
+
 CHECK_FAMILIES = (
     "sections", "summary", "theory", "purpose", "behavior", "io",
-    "params", "examples", "verify", "refs", "provenance", "all",
+    "params", "examples", "verify", "refs", "provenance", "todo", "all",
 )
 
 
@@ -491,6 +509,30 @@ def check_provenance(text: str) -> Findings:
     return f
 
 
+def check_todo(text: str) -> Findings:
+    """Scan the whole profile for placeholder / TODO markers.
+
+    Lines inside fenced code blocks (``` ... ```) are excluded, because
+    worked-example cases sometimes show literal placeholder tokens as
+    part of the demonstration. Everything outside a code fence that
+    matches any PLACEHOLDER_PATTERNS is a FAIL.
+    """
+    f = Findings()
+    in_fence = False
+    for line_no, raw in enumerate(text.splitlines(), start=1):
+        stripped = raw.strip()
+        if stripped.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        for label, pat in PLACEHOLDER_PATTERNS:
+            if pat.search(raw):
+                snippet = raw.strip()[:80]
+                f.fail(f"placeholder marker [{label}] at line {line_no}: {snippet!r}")
+    return f
+
+
 CHECK_DISPATCH = {
     "sections":   check_sections,
     "summary":    check_summary,
@@ -503,6 +545,7 @@ CHECK_DISPATCH = {
     "verify":     check_verify,
     "refs":       check_refs,
     "provenance": check_provenance,
+    "todo":       check_todo,
 }
 
 

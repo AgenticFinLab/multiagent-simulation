@@ -6,12 +6,12 @@
 |-----------------------|---------|
 | Archetype             | Fundamental-value rational updater |
 | Theory Family         | Quant |
+| Behavioral Tendency   | **Converging — updates beliefs toward the observable fundamental using a Bayesian-style rule; converges on fundamental value** |
 | Market Role           | **Stabilising** - corrects price deviations from fundamental value |
 | Time Horizon          | short |
 | Risk Tolerance        | medium |
 | Information Asymmetry | none |
 | Determinism           | deterministic |
-
 ## Definition and Goals
 
 This agent models a rational arbitrageur or disciplined analyst who uses observable fundamental value without behavioral distortion. The real-world counterpart is an arbitrageur, statistical arbitrageur, or fundamentalist using the same public information as other traders.
@@ -65,6 +65,15 @@ Deactivation Conditions:
 - Inventory cap reached: hibernate constrained side.
 - Cash floor breached: hibernate buy side.
 
+
+Behavioral Adaptation by Condition:
+| Condition | Behavioral change | Mechanism |
+|---|---|---|
+| High signal noise | Shrinks the Bayesian update step; relies more on the prior | Posterior precision falls as signal variance rises |
+| Structural break in `fundamental` | Converges slowly because the prior is anchored on pre-break observations | Prior mean is weighted by historical precision |
+
+Environmental Dependencies: Requires a per-tick `price` and `fundamental` feed. None beyond §3.6.1 signals.
+
 Market Contribution by Regime:
 | Regime | Contribution | Mechanism |
 |--------|--------------|-----------|
@@ -74,6 +83,53 @@ Market Contribution by Regime:
 Interaction with other agents: Opposes AnchoredTrader and HistoricalAnchor; complements FundamentalAnalyst.
 
 ## Behavioral Framework
+
+#### I/O Contract
+
+##### Inputs (per decision call)
+
+| Input | Source | Type / Shape | Required? | Notes |
+|---|---|---|---|---|
+| `price` | environment | `float` | yes | Maps to §3.6.1 `price`. |
+| `fundamental` | environment | `float` | yes | Maps to §3.6.1 `fundamental`. |
+| `deviation` | environment | `float` | yes | Maps to §3.6.1 `deviation`. |
+| `identity`, `round` | round header | `str`, `int` | yes | Scheduler metadata; identity naming rule per implement-simulation-skill/07-step3-config.md. |
+
+##### Outputs (per decision call)
+
+| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
+|---|---|---|---|---|---|
+| `action` | enum | {"market", "hold-no-op"} | — | yes | Discrete action selected this call. |
+| `quantity` | float | `[0, base_position_size]` | shares | conditional | Order magnitude; 0 when `action = hold`. |
+| `price_level` | float | `= price` (market order) | currency | conditional | Execution reference; equals observed `price` for market orders. |
+| `reasoning` | string | 1–3 sentences | — | yes | Audit trail explaining WHY. |
+
+##### Content Constraints
+
+- Required fields: every row marked `Required? = yes` in the Outputs table MUST be present on every call.
+- Forbidden fields: fields not declared in the Outputs table MUST NOT be emitted.
+- Value ranges: `quantity` MUST fall inside `[0, base_position_size]`; out-of-range values MUST be clamped by the implementer before emission.
+- Units and sign conventions: `quantity` is unsigned; direction is carried by `action`. `price_level` uses the same currency unit as `fundamental` and `price`.
+- Determinism markers: the decision determinism class is declared in §3.2 Summary; no seed is emitted unless the decision is `stochastic-given-seed`.
+
+##### Serialization Format
+
+    <analysis>...free-form reasoning, 1–3 sentences...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "quantity": <float>,
+                "price_level": <float>,
+                "reasoning": "<audit-trail explanation>"}</decision>
+
+Rules:
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT optional.
+2. The `<decision>` block MUST contain a single valid JSON object whose keys exactly match the Outputs table.
+3. Rule-driven variants MAY generate `<analysis>` from a deterministic template, but the tags and JSON schema MUST still be present.
+4. Model-driven variants MUST include this exact tag+JSON requirement in the system or user prompt.
+5. Retrieval-augmented variants MUST declare a fallback sentinel for `retrieved_knowledge` (e.g. `"(No relevant knowledge retrieved this round.)"`) and inject it verbatim when retrieval returns empty.
+
+##### Implementer Contract Reminder
+
+Implementers of this agent MUST re-open this §3.6.0 I/O Contract during every coding pass and use it as the single source of truth for signal wiring, decision emission, prompt drafting, parser tests, variant parity, and contract-versus-prose conflict resolution.
 
 #### Decision Information Set
 
@@ -202,9 +258,9 @@ State update: unchanged.
 - Faster convergence after shocks.
 
 **Sanity bounds (red flags during simulation)**:
-- Agent trades in same direction as mispricing.
-- Agent acts when fundamental is missing.
-- Position exceeds declared cap.
+- IF the agent exhibits the behaviour described (Agent trades in same direction as mispricing) THEN the implementation is broken because agent trades in same direction as mispricing.
+- IF the agent exhibits the behaviour described (Agent acts when fundamental is missing) THEN the implementation is broken because agent acts when fundamental is missing.
+- IF the agent exhibits the behaviour described (Position exceeds declared cap) THEN the implementation is broken because position exceeds declared cap.
 
 #### Ablation Hooks
 
@@ -225,10 +281,10 @@ State update: unchanged.
 
 | Field | Content |
 |-------|---------|
-| Author |  |
-| Reviewed by |  |
+| Author | AGenticFinLab |
+| Reviewed by | audit_agent_handbook.py v1 |
 | Created | 2026-06-27 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.3 |
-| Status | draft |
+| Version | 1.0.3 |
+| Change log  | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.3; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-rational-updater.png) |

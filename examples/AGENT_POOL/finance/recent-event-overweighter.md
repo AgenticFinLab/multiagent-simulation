@@ -6,12 +6,12 @@
 |-----------------------|---------|
 | Archetype             | Recent-event overweighter |
 | Theory Family         | Behavioral Finance |
+| Behavioral Tendency   | **Diverging — overweightssalient recent returns and amplifies short-run overreaction; diverges from fundamental value** |
 | Market Role           | **Destabilising** - converts vivid recent returns into directional order flow |
 | Time Horizon          | short |
 | Risk Tolerance        | high |
 | Information Asymmetry | none |
 | Determinism           | deterministic |
-
 ## Definition and Goals
 
 This agent models an active retail trader or short-horizon discretionary investor who treats the most recent price move as disproportionately informative. The real-world counterpart is a salient-news or recent-return chasing trader whose attention is captured by the latest vivid market event.
@@ -66,6 +66,15 @@ Activation Triggers:
 Deactivation Conditions:
 - Cash floor breached: hibernate buy side.
 - Inventory cap reached: hibernate sell side.
+
+
+Behavioral Adaptation by Condition:
+| Condition | Behavioral change | Mechanism |
+|---|---|---|
+| Large recent return | Overweights the recent return in signal weighting | `perceived_signal = recency_weight * return_pct + (1 - recency_weight) * deviation` |
+| No salient recent event | Relies more on the objective deviation | `return_pct` near zero |
+
+Environmental Dependencies: Requires a per-tick `price`, `fundamental`, and `return_pct` feed. None beyond §3.6.1 signals.
 
 Market Contribution by Regime:
 | Regime | Contribution | Mechanism |
@@ -244,7 +253,7 @@ State update: no portfolio change.
 | Author | Codex |
 | Reviewed by | Codex static three-pass review |
 | Created | 2026-07-06 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 initial fork from momentum-trader for AvailabilityBias |
-| Status | experimental |
+| Version | 1.0.3 |
+| Change log  | 1.0.0 initial fork from momentum-trader for AvailabilityBias; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-recent-event-overweighter.png) |

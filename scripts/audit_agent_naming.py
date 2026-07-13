@@ -67,10 +67,19 @@ BLOCK_RE = re.compile(
 #     ### §4.1 MomentumSpeculator
 #     ### §4.2 RationalArbitrageur
 # Optional trailing punctuation (colon, em-dash, etc.) is stripped.
+# Also tolerates the variant form used by a few scenarios:
+#     ### Investor: RecentEventOverweighter
+#     ### Agent: FooTrader
 BASES_H4_RE = re.compile(
-    r"^#{2,4}\s*§\s*4\.\d+\s+([A-Za-z][A-Za-z0-9]*)\b",
+    r"(?:^#{2,4}\s*§\s*4\.\d+\s+([A-Za-z][A-Za-z0-9]*)\b)"
+    r"|(?:^#{2,4}\s+(?:Investor|Agent|Persona)\s*:\s*([A-Za-z][A-Za-z0-9]*)\b)",
     re.MULTILINE,
 )
+
+
+def _bases_h4_match_name(m: "re.Match[str]") -> str:
+    """Return the archetype name from either canonical or variant form."""
+    return m.group(1) or m.group(2)
 
 
 def load_text(p: Path) -> str:
@@ -146,7 +155,7 @@ def extract_bases_archetypes(scenario: str) -> tuple[list[str], Path | None]:
     names: list[str] = []
     seen: set[str] = set()
     for m in BASES_H4_RE.finditer(text):
-        kebab = camel_to_kebab(m.group(1))
+        kebab = camel_to_kebab(_bases_h4_match_name(m))
         if kebab in seen:
             continue
         seen.add(kebab)

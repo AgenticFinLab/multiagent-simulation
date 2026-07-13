@@ -6,12 +6,12 @@
 |-----------------------|---------|
 | Archetype             | Two-sided liquidity provider |
 | Theory Family         | Market Microstructure |
+| Behavioral Tendency   | **Converging — supplies two-sided quotes and absorbs order flow; converges on fair value by earning the spread** |
 | Market Role           | **Stabilising** - supplies two-sided quotes and absorbs transitory order flow |
 | Time Horizon          | short |
 | Risk Tolerance        | low |
 | Information Asymmetry | partial |
 | Determinism           | deterministic |
-
 ## Definition and Goals
 
 This agent models a market maker or dealer that provides bid and ask liquidity around a short-horizon fair quote. The real-world counterpart is a market maker / dealer or liquidity provider.
@@ -67,6 +67,15 @@ Deactivation Conditions:
 - Inventory hard cap breached: quote only inventory-reducing side.
 - Cash floor breached: hibernate bid side.
 
+
+Behavioral Adaptation by Condition:
+| Condition | Behavioral change | Mechanism |
+|---|---|---|
+| High inventory skew | Shifts quotes toward the side that reduces the skew | Quote offset is proportional to `position / inventory_max` |
+| High short-term volatility | Widens the quoted spread to compensate for adverse selection | `spread = base_spread + vol_adj` |
+
+Environmental Dependencies: Requires a per-tick `price` feed and the ability to post two-sided quotes. None beyond §3.6.1 signals.
+
 Market Contribution by Regime:
 | Regime | Contribution | Mechanism |
 |--------|--------------|-----------|
@@ -76,6 +85,54 @@ Market Contribution by Regime:
 Interaction with other agents: Absorbs NoiseTrader flow and provides execution depth for informed traders.
 
 ## Behavioral Framework
+
+#### I/O Contract
+
+##### Inputs (per decision call)
+
+| Input | Source | Type / Shape | Required? | Notes |
+|---|---|---|---|---|
+| `price` | environment | `float` | yes | Maps to §3.6.1 `price`. |
+| `fair_quote` | environment | `float` | yes | Maps to §3.6.1 `fair_quote`. |
+| `inventory` | environment | `float` | yes | Maps to §3.6.1 `inventory`. |
+| `cash` | agent state | `float` | yes | Persistent state; see §3.6.4. |
+| `identity`, `round` | round header | `str`, `int` | yes | Scheduler metadata; identity naming rule per implement-simulation-skill/07-step3-config.md. |
+
+##### Outputs (per decision call)
+
+| Field | Type | Valid Range / Enum | Unit | Required? | Meaning |
+|---|---|---|---|---|---|
+| `action` | enum | {"limit", "hold-no-op"} | — | yes | Discrete action selected this call. |
+| `quantity` | float | `[0, base_position_size]` | shares | conditional | Order magnitude; 0 when `action = hold`. |
+| `price_level` | float | `= price` (market order) | currency | conditional | Execution reference; equals observed `price` for market orders. |
+| `reasoning` | string | 1–3 sentences | — | yes | Audit trail explaining WHY. |
+
+##### Content Constraints
+
+- Required fields: every row marked `Required? = yes` in the Outputs table MUST be present on every call.
+- Forbidden fields: fields not declared in the Outputs table MUST NOT be emitted.
+- Value ranges: `quantity` MUST fall inside `[0, base_position_size]`; out-of-range values MUST be clamped by the implementer before emission.
+- Units and sign conventions: `quantity` is unsigned; direction is carried by `action`. `price_level` uses the same currency unit as `fundamental` and `price`.
+- Determinism markers: the decision determinism class is declared in §3.2 Summary; no seed is emitted unless the decision is `stochastic-given-seed`.
+
+##### Serialization Format
+
+    <analysis>...free-form reasoning, 1–3 sentences...</analysis>
+    <decision>{"action": "<one of the declared enum values>",
+                "quantity": <float>,
+                "price_level": <float>,
+                "reasoning": "<audit-trail explanation>"}</decision>
+
+Rules:
+1. The `<analysis>` and `<decision>` tags are literal ASCII, NOT optional.
+2. The `<decision>` block MUST contain a single valid JSON object whose keys exactly match the Outputs table.
+3. Rule-driven variants MAY generate `<analysis>` from a deterministic template, but the tags and JSON schema MUST still be present.
+4. Model-driven variants MUST include this exact tag+JSON requirement in the system or user prompt.
+5. Retrieval-augmented variants MUST declare a fallback sentinel for `retrieved_knowledge` (e.g. `"(No relevant knowledge retrieved this round.)"`) and inject it verbatim when retrieval returns empty.
+
+##### Implementer Contract Reminder
+
+Implementers of this agent MUST re-open this §3.6.0 I/O Contract during every coding pass and use it as the single source of truth for signal wiring, decision emission, prompt drafting, parser tests, variant parity, and contract-versus-prose conflict resolution.
 
 #### Decision Information Set
 
@@ -210,9 +267,9 @@ State update: unchanged.
 - Inventory mean reversion after one-sided flow.
 
 **Sanity bounds (red flags during simulation)**:
-- Bid is greater than ask.
-- Quotes ignore inventory caps.
-- Agent trades directionally on `fundamental`.
+- IF the agent exhibits the behaviour described (Bid is greater than ask) THEN the implementation is broken because bid is greater than ask.
+- IF the agent exhibits the behaviour described (Quotes ignore inventory caps) THEN the implementation is broken because quotes ignore inventory caps.
+- IF the agent exhibits the behaviour described (Agent trades directionally on `fundamental`) THEN the implementation is broken because agent trades directionally on `fundamental`.
 
 #### Ablation Hooks
 
@@ -232,10 +289,10 @@ State update: unchanged.
 
 | Field | Content |
 |-------|---------|
-| Author |  |
-| Reviewed by |  |
+| Author | AGenticFinLab |
+| Reviewed by | audit_agent_handbook.py v1 |
 | Created | 2026-06-27 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.9 |
-| Status | draft |
+| Version | 1.0.3 |
+| Change log  | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.9; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-liquidity-provider.png) |

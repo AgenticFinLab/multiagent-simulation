@@ -6,12 +6,12 @@
 |-----------------------|---------|
 | Archetype             | Media-influenced trader |
 | Theory Family         | Behavioral Finance / Media Sentiment |
+| Behavioral Tendency   | **Diverging — trades on media/social salience rather than fundamentals; diverges from fundamental value when coverage is intense** |
 | Market Role           | **Destabilising** - amplifies public narratives into directional trading |
 | Time Horizon          | short |
 | Risk Tolerance        | high |
 | Information Asymmetry | none |
 | Determinism           | deterministic |
-
 ## Definition and Goals
 
 This agent models a retail or discretionary trader whose belief formation is shaped by repeated public narratives, headlines, and social amplification. The real-world counterpart is an attention-sensitive investor who treats heavily publicized information as more likely or more important than a low-coverage base-rate signal.
@@ -66,6 +66,15 @@ Activation Triggers:
 Deactivation Conditions:
 - Cash floor breached: hibernate buy side.
 - Inventory cap reached: hibernate sell side.
+
+
+Behavioral Adaptation by Condition:
+| Condition | Behavioral change | Mechanism |
+|---|---|---|
+| Intense media coverage | Overweights the media-narrative signal | `media_weight` scales with coverage intensity |
+| Low coverage | Relies more on the objective deviation | `media_weight` falls toward zero |
+
+Environmental Dependencies: Requires a per-tick `price`, `fundamental`, and `media_sentiment` feed. None beyond §3.6.1 signals.
 
 Market Contribution by Regime:
 | Regime | Contribution | Mechanism |
@@ -247,7 +256,7 @@ State update: no portfolio change.
 | Author | Codex |
 | Reviewed by | Codex static three-pass review |
 | Created | 2026-07-06 |
-| Version | 1.0.0 |
-| Change log | 1.0.0 initial fork from information-trader for AvailabilityBias |
-| Status | experimental |
+| Version | 1.0.3 |
+| Change log  | 1.0.0 initial fork from information-trader for AvailabilityBias; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
+| Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-media-influenced-trader.png) |
