@@ -2,16 +2,16 @@
 
 ## §1 Meta
 
-| Field         | Content                                                |
-|---------------|--------------------------------------------------------|
-| Name          | EquityPremium                                          |
-| Domain        | finance                                                |
-| Requested By  | a77                                                    |
-| Produced By   | polish-simulation-pipeline.md (reverse-reconstruction) |
-| Created       | 2026-07-13                                             |
-| Pipeline      | masim/skills/polish-simulation-pipeline.md             |
-| Target Spec   | masim/skills/define-simulation-scenario-skill.md       |
-| Status        | released                                               |
+| Field        | Content                                                |
+|--------------|--------------------------------------------------------|
+| Name         | EquityPremium                                          |
+| Domain       | finance                                                |
+| Requested By | a77                                                    |
+| Produced By  | polish-simulation-pipeline.md (reverse-reconstruction) |
+| Created      | 2026-07-13                                             |
+| Pipeline     | masim/skills/polish-simulation-pipeline.md             |
+| Target Spec  | masim/skills/define-simulation-scenario-skill.md       |
+| Status       | released                                               |
 
 ## §2 Phenomenon Statement
 
@@ -43,63 +43,63 @@ The equilibrium equity premium emerges from the tension between myopic loss-aver
 
 ### §4.1 Equity Premium Puzzle
 
-| Field | Content |
-|-------|---------|
-| Full citation | Mehra, R., & Prescott, E. C. (1985). The equity premium: A puzzle. *Journal of Monetary Economics*, 15(2), 145-161. https://doi.org/10.1016/0304-3932(85)90061-3 |
-| Key mechanism | Standard expected utility with power utility yields equity premium of 0.35%, far below observed 6.18%. |
-| Key equation | `E[R_equity] - R_f = gamma * sigma^2_c` where gamma must exceed 30 to match data. |
-| Motivates agent | risk-neutral-investor (rational benchmark) |
-| Parameter implication | `excess_return_multiplier` in [200, 1000] scales rational response to excess return signal. |
+| Field                 | Content                                                                                                                                                          |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Mehra, R., & Prescott, E. C. (1985). The equity premium: A puzzle. *Journal of Monetary Economics*, 15(2), 145-161. https://doi.org/10.1016/0304-3932(85)90061-3 |
+| Key mechanism         | Standard expected utility with power utility yields equity premium of 0.35%, far below observed 6.18%.                                                           |
+| Key equation          | `E[R_equity] - R_f = gamma * sigma^2_c` where gamma must exceed 30 to match data.                                                                                |
+| Motivates agent       | risk-neutral-investor (rational benchmark)                                                                                                                       |
+| Parameter implication | `excess_return_multiplier` in [200, 1000] scales rational response to excess return signal.                                                                      |
 
 ### §4.2 Myopic Loss Aversion
 
-| Field | Content |
-|-------|---------|
-| Full citation | Benartzi, S., & Thaler, R. H. (1995). Myopic loss aversion and the equity premium puzzle. *Quarterly Journal of Economics*, 110(1), 73-92. https://doi.org/10.2307/2118511 |
-| Key mechanism | Loss-averse investors evaluating annually demand ~6% premium; longer horizons reduce demanded premium. |
-| Key equation | `perceived_risk = vol * (1 + lambda * loss_prob)`; `target_pct = max(0.1, 0.5 - gamma * perceived_risk)` |
-| Motivates agent | myopic-loss-averse-investor |
-| Parameter implication | `loss_aversion` in [1.5, 3.0], `evaluation_window` in [3, 20] rounds. |
+| Field                 | Content                                                                                                                                                                    |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Benartzi, S., & Thaler, R. H. (1995). Myopic loss aversion and the equity premium puzzle. *Quarterly Journal of Economics*, 110(1), 73-92. https://doi.org/10.2307/2118511 |
+| Key mechanism         | Loss-averse investors evaluating annually demand ~6% premium; longer horizons reduce demanded premium.                                                                     |
+| Key equation          | `perceived_risk = vol * (1 + lambda * loss_prob)`; `target_pct = max(0.1, 0.5 - gamma * perceived_risk)`                                                                   |
+| Motivates agent       | myopic-loss-averse-investor                                                                                                                                                |
+| Parameter implication | `loss_aversion` in [1.5, 3.0], `evaluation_window` in [3, 20] rounds.                                                                                                      |
 
 ### §4.3 Prospect Theory and Loss Aversion
 
-| Field | Content |
-|-------|---------|
-| Full citation | Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. *Econometrica*, 47(2), 263-291. https://doi.org/10.2307/1914185 |
-| Key mechanism | Value function concave over gains, convex over losses; losses weighted ~2.25x more than equivalent gains. |
-| Key equation | `v(x) = x^alpha for x >= 0; -lambda * (-x)^beta for x < 0` with lambda ~ 2.25 |
-| Motivates agent | conservative-investor |
-| Parameter implication | `target_stock_pct` in [0.15, 0.35] reflects persistent bond preference from loss aversion. |
+| Field                 | Content                                                                                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. *Econometrica*, 47(2), 263-291. https://doi.org/10.2307/1914185 |
+| Key mechanism         | Value function concave over gains, convex over losses; losses weighted ~2.25x more than equivalent gains.                                                |
+| Key equation          | `v(x) = x^alpha for x >= 0; -lambda * (-x)^beta for x < 0` with lambda ~ 2.25                                                                            |
+| Motivates agent       | conservative-investor                                                                                                                                    |
+| Parameter implication | `target_stock_pct` in [0.15, 0.35] reflects persistent bond preference from loss aversion.                                                               |
 
 ### §4.4 Intertemporal Portfolio Choice
 
-| Field | Content |
-|-------|---------|
-| Full citation | Samuelson, P. A. (1969). Lifetime portfolio selection by dynamic stochastic programming. *Review of Economics and Statistics*, 51(3), 239-246. https://doi.org/10.2307/1926559 |
-| Key mechanism | Under i.i.d. returns and power utility, optimal equity allocation is horizon-independent (benchmark). |
-| Key equation | `target_allocation = constant` regardless of investment horizon for i.i.d. returns. |
-| Motivates agent | long-horizon-investor |
-| Parameter implication | `target_stock_pct` in [0.50, 0.80] for long-horizon rational benchmark. |
+| Field                 | Content                                                                                                                                                                        |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Samuelson, P. A. (1969). Lifetime portfolio selection by dynamic stochastic programming. *Review of Economics and Statistics*, 51(3), 239-246. https://doi.org/10.2307/1926559 |
+| Key mechanism         | Under i.i.d. returns and power utility, optimal equity allocation is horizon-independent (benchmark).                                                                          |
+| Key equation          | `target_allocation = constant` regardless of investment horizon for i.i.d. returns.                                                                                            |
+| Motivates agent       | long-horizon-investor                                                                                                                                                          |
+| Parameter implication | `target_stock_pct` in [0.50, 0.80] for long-horizon rational benchmark.                                                                                                        |
 
 ### §4.5 Noise Trading and Excess Volatility
 
-| Field | Content |
-|-------|---------|
-| Full citation | Black, F. (1986). Noise. *Journal of Finance*, 41(3), 528-543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x |
-| Key mechanism | Uninformed noise traders generate excess volatility above fundamental levels, amplifying perceived equity risk. |
-| Key equation | `stock_qty ~ N(0, noise_std)` — zero-mean random demand. |
-| Motivates agent | noise-trader |
-| Parameter implication | `noise_std` in [2.0, 12.0] controls excess volatility contribution. |
+| Field                 | Content                                                                                                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Black, F. (1986). Noise. *Journal of Finance*, 41(3), 528-543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x |
+| Key mechanism         | Uninformed noise traders generate excess volatility above fundamental levels, amplifying perceived equity risk.   |
+| Key equation          | `stock_qty ~ N(0, noise_std)` — zero-mean random demand.                                                          |
+| Motivates agent       | noise-trader                                                                                                      |
+| Parameter implication | `noise_std` in [2.0, 12.0] controls excess volatility contribution.                                               |
 
 ## §5 Stylized Facts
 
-| # | Fact | Numeric range | Acceptance metric | Primary source |
-|---|------|---------------|-------------------|----------------|
-| F1 | U.S. equity premium 1889-1978 averaged ~6.18% annualized | 4-8% | `simulated_equity_premium` in [0.04, 0.08] | Mehra & Prescott (1985) DOI: 10.1016/0304-3932(85)90061-3 |
-| F2 | Loss-averse investors with 1-year evaluation are indifferent at historical premium | lambda ~ 2.25, window ~ 12 | `loss_probability_index` in [0.40, 0.55] | Benartzi & Thaler (1995) DOI: 10.2307/2118511 |
-| F3 | Longer evaluation horizons reduce demanded equity premium | Positive correlation horizon-allocation | `evaluation_frequency_sensitivity` > 0.5 | Benartzi & Thaler (1995) DOI: 10.2307/2118511 |
-| F4 | Institutional investors allocate more to equities than retail | 60% vs 30% typical | `equity_allocation_deviation` shows separation | Samuelson (1969) DOI: 10.2307/1926559 |
-| F5 | Noise trading creates excess volatility above fundamental | Stock vol 15-20% vs bond ~0 | `stock_return_volatility_ratio` > 3 | Black (1986) DOI: 10.1111/j.1540-6261.1986.tb04513.x |
+| #  | Fact                                                                               | Numeric range                           | Acceptance metric                              | Primary source                                            |
+|----|------------------------------------------------------------------------------------|-----------------------------------------|------------------------------------------------|-----------------------------------------------------------|
+| F1 | U.S. equity premium 1889-1978 averaged ~6.18% annualized                           | 4-8%                                    | `simulated_equity_premium` in [0.04, 0.08]     | Mehra & Prescott (1985) DOI: 10.1016/0304-3932(85)90061-3 |
+| F2 | Loss-averse investors with 1-year evaluation are indifferent at historical premium | lambda ~ 2.25, window ~ 12              | `loss_probability_index` in [0.40, 0.55]       | Benartzi & Thaler (1995) DOI: 10.2307/2118511             |
+| F3 | Longer evaluation horizons reduce demanded equity premium                          | Positive correlation horizon-allocation | `evaluation_frequency_sensitivity` > 0.5       | Benartzi & Thaler (1995) DOI: 10.2307/2118511             |
+| F4 | Institutional investors allocate more to equities than retail                      | 60% vs 30% typical                      | `equity_allocation_deviation` shows separation | Samuelson (1969) DOI: 10.2307/1926559                     |
+| F5 | Noise trading creates excess volatility above fundamental                          | Stock vol 15-20% vs bond ~0             | `stock_return_volatility_ratio` > 3            | Black (1986) DOI: 10.1111/j.1540-6261.1986.tb04513.x      |
 
 ## §6 Historical / Empirical Anchors
 
@@ -117,13 +117,13 @@ The equity premium has persisted at 5-8% across multiple sub-periods and interna
 
 ## §7 Agent Roster
 
-| Agent | Kebab name | Theory family | Market role | Time horizon | Risk tolerance | Primary signals |
-|-------|-----------|---------------|-------------|--------------|----------------|-----------------|
-| MyopicLossAverseInvestor | myopic-loss-averse-investor | behavioral | destabilising | short (5 rounds) | low | stock_price, stock_history, stock_return |
-| LongHorizonInvestor | long-horizon-investor | rational | stabilising | long (50+ rounds) | moderate-high | stock_price |
-| RiskNeutralInvestor | risk-neutral-investor | rational | stabilising | medium | moderate | stock_return, bond_return |
-| ConservativeInvestor | conservative-investor | behavioral | destabilising | medium | very low | stock_price |
-| NoiseTrader | noise-trader | noise | neutral | none | n/a | stock_price (constraint only) |
+| Agent                    | Kebab name                  | Theory family | Market role   | Time horizon      | Risk tolerance | Primary signals                          |
+|--------------------------|-----------------------------|---------------|---------------|-------------------|----------------|------------------------------------------|
+| MyopicLossAverseInvestor | myopic-loss-averse-investor | behavioral    | destabilising | short (5 rounds)  | low            | stock_price, stock_history, stock_return |
+| LongHorizonInvestor      | long-horizon-investor       | rational      | stabilising   | long (50+ rounds) | moderate-high  | stock_price                              |
+| RiskNeutralInvestor      | risk-neutral-investor       | rational      | stabilising   | medium            | moderate       | stock_return, bond_return                |
+| ConservativeInvestor     | conservative-investor       | behavioral    | destabilising | medium            | very low       | stock_price                              |
+| NoiseTrader              | noise-trader                | noise         | neutral       | none              | n/a            | stock_price (constraint only)            |
 
 ## §8 Environment Specification
 
@@ -152,32 +152,32 @@ Each round represents approximately one trading day. Market broadcasts first, th
 
 ## §9 Parameter Seeds
 
-| Parameter | Belongs to | Type | Default | Empirical range | Source citation |
-|-----------|-----------|------|---------|-----------------|----------------|
-| stock_expected_return | Market | float | 0.000238 | [0.0001, 0.0004] | ~6% annual / 252 days (Mehra & Prescott 1985) |
-| bond_return | Market | float | 0.0000397 | [0.00002, 0.0001] | ~1% annual / 252 days |
-| stock_volatility | Market | float | 0.00945 | [0.005, 0.015] | ~15% annual / sqrt(252) |
-| initial_stock_price | Market | float | 100.0 | [50, 200] | Source: normalization |
-| loss_aversion | myopic-loss-averse-investor | float | 2.25 | [1.5, 3.0] | Benartzi & Thaler (1995) DOI: 10.2307/2118511 |
-| evaluation_window | myopic-loss-averse-investor | int | 5 | [3, 20] | Benartzi & Thaler (1995) DOI: 10.2307/2118511 |
-| risk_aversion | myopic-loss-averse-investor | float | 2.0 | [1.0, 5.0] | Standard CRRA range |
-| target_stock_pct | long-horizon-investor | float | 0.60 | [0.50, 0.80] | Samuelson (1969) DOI: 10.2307/1926559 |
-| target_stock_pct | conservative-investor | float | 0.20 | [0.15, 0.35] | Kahneman & Tversky (1979) DOI: 10.2307/1914185 |
-| excess_return_multiplier | risk-neutral-investor | float | 500 | [200, 1000] | Calibration to match rational benchmark allocation |
-| noise_std | noise-trader | float | 8.0 | [2.0, 12.0] | Black (1986) DOI: 10.1111/j.1540-6261.1986.tb04513.x |
-| initial_cash | All investors | float | 10000.0 | [5000, 50000] | Source: normalization |
-| initial_stock | All investors | float | 0.0 | [0, 100] | Source: normalization |
+| Parameter                | Belongs to                  | Type  | Default   | Empirical range   | Source citation                                      |
+|--------------------------|-----------------------------|-------|-----------|-------------------|------------------------------------------------------|
+| stock_expected_return    | Market                      | float | 0.000238  | [0.0001, 0.0004]  | ~6% annual / 252 days (Mehra & Prescott 1985)        |
+| bond_return              | Market                      | float | 0.0000397 | [0.00002, 0.0001] | ~1% annual / 252 days                                |
+| stock_volatility         | Market                      | float | 0.00945   | [0.005, 0.015]    | ~15% annual / sqrt(252)                              |
+| initial_stock_price      | Market                      | float | 100.0     | [50, 200]         | Source: normalization                                |
+| loss_aversion            | myopic-loss-averse-investor | float | 2.25      | [1.5, 3.0]        | Benartzi & Thaler (1995) DOI: 10.2307/2118511        |
+| evaluation_window        | myopic-loss-averse-investor | int   | 5         | [3, 20]           | Benartzi & Thaler (1995) DOI: 10.2307/2118511        |
+| risk_aversion            | myopic-loss-averse-investor | float | 2.0       | [1.0, 5.0]        | Standard CRRA range                                  |
+| target_stock_pct         | long-horizon-investor       | float | 0.60      | [0.50, 0.80]      | Samuelson (1969) DOI: 10.2307/1926559                |
+| target_stock_pct         | conservative-investor       | float | 0.20      | [0.15, 0.35]      | Kahneman & Tversky (1979) DOI: 10.2307/1914185       |
+| excess_return_multiplier | risk-neutral-investor       | float | 500       | [200, 1000]       | Calibration to match rational benchmark allocation   |
+| noise_std                | noise-trader                | float | 8.0       | [2.0, 12.0]       | Black (1986) DOI: 10.1111/j.1540-6261.1986.tb04513.x |
+| initial_cash             | All investors               | float | 10000.0   | [5000, 50000]     | Source: normalization                                |
+| initial_stock            | All investors               | float | 0.0       | [0, 100]          | Source: normalization                                |
 
 ## §10 Variants and Success Criteria
 
 ### §10.1 Variants to Build
 
-| Variant | Build? | Notes |
-|---------|--------|-------|
-| Rule | Yes | Deterministic baseline; pure formula-driven allocation |
-| LLM | Yes | LLM persona per investor type; free-form reasoning |
-| RuleLLM | Yes | Embedded rules + LLM reasoning within bounds |
-| Rag | Yes | RAG-retrieved evidence augments LLM allocation |
+| Variant | Build? | Notes                                                  |
+|---------|--------|--------------------------------------------------------|
+| Rule    | Yes    | Deterministic baseline; pure formula-driven allocation |
+| LLM     | Yes    | LLM persona per investor type; free-form reasoning     |
+| RuleLLM | Yes    | Embedded rules + LLM reasoning within bounds           |
+| Rag     | Yes    | RAG-retrieved evidence augments LLM allocation         |
 
 ### §10.2 Pass / Fail Criteria
 

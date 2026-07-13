@@ -2,16 +2,16 @@
 
 ## §1 Meta
 
-| Field         | Content                                                           |
-|---------------|-------------------------------------------------------------------|
-| Name          | DotComBubble                                                      |
-| Domain        | finance                                                           |
-| Requested By  | a77                                                               |
-| Produced By   | polish-simulation-pipeline.md (reverse-reconstruction from existing artefacts) |
-| Created       | 2026-07-13                                                        |
-| Pipeline      | masim/skills/polish-simulation-pipeline.md                        |
-| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.0)           |
-| Status        | released                                                          |
+| Field        | Content                                                                        |
+|--------------|--------------------------------------------------------------------------------|
+| Name         | DotComBubble                                                                   |
+| Domain       | finance                                                                        |
+| Requested By | a77                                                                            |
+| Produced By  | polish-simulation-pipeline.md (reverse-reconstruction from existing artefacts) |
+| Created      | 2026-07-13                                                                     |
+| Pipeline     | masim/skills/polish-simulation-pipeline.md                                     |
+| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                        |
+| Status       | released                                                                       |
 
 ## §2 Phenomenon Statement
 
@@ -43,63 +43,63 @@ The bubble resolves when narrative demand exhausts and stabilising pressure accu
 
 ### §4.1 Narrative Economics and Irrational Exuberance
 
-| Field | Content |
-|-------|---------|
-| Full citation | Shiller, R. J. (2000). *Irrational Exuberance*. Princeton University Press. https://doi.org/10.1515/9781400865536; Shiller, R. J. (2017). Narrative economics. *American Economic Review*, 107(4), 967-1004. https://doi.org/10.1257/aer.107.4.967 |
-| Key mechanism | A compelling new-economy story relaxes valuation discipline and attracts persistent buying above fundamental value. |
-| Key equation | `buy when deviation(t) > -theta_capitulation; deviation(t) = (P(t) - F) / F` |
-| Motivates agent | new-economy-evangelist |
-| Parameter implication | `order_size` in [400, 800], capitulation threshold around -0.20 to -0.30. |
+| Field                 | Content                                                                                                                                                                                                                                            |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Shiller, R. J. (2000). *Irrational Exuberance*. Princeton University Press. https://doi.org/10.1515/9781400865536; Shiller, R. J. (2017). Narrative economics. *American Economic Review*, 107(4), 967-1004. https://doi.org/10.1257/aer.107.4.967 |
+| Key mechanism         | A compelling new-economy story relaxes valuation discipline and attracts persistent buying above fundamental value.                                                                                                                                |
+| Key equation          | `buy when deviation(t) > -theta_capitulation; deviation(t) = (P(t) - F) / F`                                                                                                                                                                       |
+| Motivates agent       | new-economy-evangelist                                                                                                                                                                                                                             |
+| Parameter implication | `order_size` in [400, 800], capitulation threshold around -0.20 to -0.30.                                                                                                                                                                          |
 
 ### §4.2 IPO Underpricing and Flipping
 
-| Field | Content |
-|-------|---------|
-| Full citation | Ofek, E., & Richardson, M. (2003). DotCom mania: The rise and fall of internet stock prices. *Journal of Finance*, 58(3), 1113-1137. https://doi.org/10.1111/1540-6261.00530 |
-| Key mechanism | Hot IPO markets create first-day demand, rapid turnover, and predictable selling by short-horizon holders. |
-| Key equation | `sell when deviation(t) > theta_flip; buy when deviation(t) < 0` |
-| Motivates agent | ipo-flipper |
-| Parameter implication | `flip_threshold` in [0.03, 0.10], `order_size` in [500, 900]. |
+| Field                 | Content                                                                                                                                                                      |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Ofek, E., & Richardson, M. (2003). DotCom mania: The rise and fall of internet stock prices. *Journal of Finance*, 58(3), 1113-1137. https://doi.org/10.1111/1540-6261.00530 |
+| Key mechanism         | Hot IPO markets create first-day demand, rapid turnover, and predictable selling by short-horizon holders.                                                                   |
+| Key equation          | `sell when deviation(t) > theta_flip; buy when deviation(t) < 0`                                                                                                             |
+| Motivates agent       | ipo-flipper                                                                                                                                                                  |
+| Parameter implication | `flip_threshold` in [0.03, 0.10], `order_size` in [500, 900].                                                                                                                |
 
 ### §4.3 Momentum Trading
 
-| Field | Content |
-|-------|---------|
-| Full citation | Jegadeesh, N., & Titman, S. (1993). Returns to buying winners and selling losers: Implications for stock market efficiency. *Journal of Finance*, 48(1), 65-91. https://doi.org/10.1111/j.1540-6261.1993.tb04702.x |
-| Key mechanism | Recent price increases attract trend-following demand; recent decreases attract selling. |
-| Key equation | `momentum(t) = (P(t) - P(t-1)) / P(t-1); buy when momentum > theta; sell when momentum < -theta` |
-| Motivates agent | momentum-follower |
-| Parameter implication | `momentum_threshold` in [0.01, 0.05], `order_size` in [300, 700]. |
+| Field                 | Content                                                                                                                                                                                                            |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Jegadeesh, N., & Titman, S. (1993). Returns to buying winners and selling losers: Implications for stock market efficiency. *Journal of Finance*, 48(1), 65-91. https://doi.org/10.1111/j.1540-6261.1993.tb04702.x |
+| Key mechanism         | Recent price increases attract trend-following demand; recent decreases attract selling.                                                                                                                           |
+| Key equation          | `momentum(t) = (P(t) - P(t-1)) / P(t-1); buy when momentum > theta; sell when momentum < -theta`                                                                                                                   |
+| Motivates agent       | momentum-follower                                                                                                                                                                                                  |
+| Parameter implication | `momentum_threshold` in [0.01, 0.05], `order_size` in [300, 700].                                                                                                                                                  |
 
 ### §4.4 Value Investing and Fundamental Anchoring
 
-| Field | Content |
-|-------|---------|
-| Full citation | Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers. |
-| Key mechanism | Value investors buy below intrinsic value and sell above it, providing a valuation anchor. |
-| Key equation | `buy when deviation < theta_buy; sell when deviation > theta_sell` |
-| Motivates agent | skeptical-value-investor |
-| Parameter implication | `value_buy_threshold` in [-0.15, -0.05], `value_sell_threshold` in [0.15, 0.30]. |
+| Field                 | Content                                                                                    |
+|-----------------------|--------------------------------------------------------------------------------------------|
+| Full citation         | Graham, B. (1949). *The Intelligent Investor*. Harper & Brothers.                          |
+| Key mechanism         | Value investors buy below intrinsic value and sell above it, providing a valuation anchor. |
+| Key equation          | `buy when deviation < theta_buy; sell when deviation > theta_sell`                         |
+| Motivates agent       | skeptical-value-investor                                                                   |
+| Parameter implication | `value_buy_threshold` in [-0.15, -0.05], `value_sell_threshold` in [0.15, 0.30].           |
 
 ### §4.5 Limits to Arbitrage and Synchronization Risk
 
-| Field | Content |
-|-------|---------|
-| Full citation | Abreu, D., & Brunnermeier, M. K. (2003). Bubbles and crashes. *Econometrica*, 71(1), 173-204. https://doi.org/10.1111/1468-0262.00401 |
-| Key mechanism | Short sellers who know a bubble exists can still lose money if they attack too early due to coordination failure. |
-| Key equation | `short when deviation > theta_short; cover when deviation < theta_cover` |
-| Motivates agent | short-seller |
-| Parameter implication | `short_threshold` in [0.10, 0.25], `cover_threshold` in [-0.10, 0.00]. |
+| Field                 | Content                                                                                                                               |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| Full citation         | Abreu, D., & Brunnermeier, M. K. (2003). Bubbles and crashes. *Econometrica*, 71(1), 173-204. https://doi.org/10.1111/1468-0262.00401 |
+| Key mechanism         | Short sellers who know a bubble exists can still lose money if they attack too early due to coordination failure.                     |
+| Key equation          | `short when deviation > theta_short; cover when deviation < theta_cover`                                                              |
+| Motivates agent       | short-seller                                                                                                                          |
+| Parameter implication | `short_threshold` in [0.10, 0.25], `cover_threshold` in [-0.10, 0.00].                                                                |
 
 ## §5 Stylized Facts
 
-| # | Fact | Source | Acceptance Metric |
-|---|------|--------|-------------------|
-| F1 | NASDAQ rose from ~750 to ~5,048 (1995-2000), a multi-hundred-percent overvaluation | Shiller (2000); NASDAQ historical data | `bubble_amplitude_index` > 0.10 |
-| F2 | The bubble persisted for several years before crashing | Abreu & Brunnermeier (2003) | `bubble_duration` > 15 rounds |
-| F3 | Post-peak decline was roughly 78% | Ofek & Richardson (2003) | `crash_severity` in [0.30, 0.80] |
-| F4 | Momentum and trend-following amplified the run-up | Jegadeesh & Titman (1993) | `momentum_amplification_factor` in [0.20, 0.50] |
-| F5 | Value investors and short sellers were correct but early | Abreu & Brunnermeier (2003) | `short_seller_resistance` > 0 |
+| #  | Fact                                                                               | Source                                 | Acceptance Metric                               |
+|----|------------------------------------------------------------------------------------|----------------------------------------|-------------------------------------------------|
+| F1 | NASDAQ rose from ~750 to ~5,048 (1995-2000), a multi-hundred-percent overvaluation | Shiller (2000); NASDAQ historical data | `bubble_amplitude_index` > 0.10                 |
+| F2 | The bubble persisted for several years before crashing                             | Abreu & Brunnermeier (2003)            | `bubble_duration` > 15 rounds                   |
+| F3 | Post-peak decline was roughly 78%                                                  | Ofek & Richardson (2003)               | `crash_severity` in [0.30, 0.80]                |
+| F4 | Momentum and trend-following amplified the run-up                                  | Jegadeesh & Titman (1993)              | `momentum_amplification_factor` in [0.20, 0.50] |
+| F5 | Value investors and short sellers were correct but early                           | Abreu & Brunnermeier (2003)            | `short_seller_resistance` > 0                   |
 
 ## §6 Historical / Empirical Anchors
 
@@ -117,13 +117,13 @@ Julian Robertson's Tiger Management suffered underperformance before the crash d
 
 ## §7 Agent Roster
 
-| # | Agent (kebab) | Theory Family | Market Role | Time Horizon | Risk Tolerance | Primary Signals |
-|---|---------------|---------------|-------------|--------------|----------------|-----------------|
-| 1 | new-economy-evangelist | Narrative Economics (§4.1) | destabilising | medium | high | deviation |
-| 2 | ipo-flipper | IPO Underpricing (§4.2) | mixed | short | medium | deviation |
-| 3 | momentum-follower | Momentum Trading (§4.3) | destabilising | short | high | momentum (1-period return) |
-| 4 | skeptical-value-investor | Value Investing (§4.4) | stabilising | long | low | deviation |
-| 5 | short-seller | Limits to Arbitrage (§4.5) | stabilising (constrained) | medium | high | deviation |
+| # | Agent (kebab)            | Theory Family              | Market Role               | Time Horizon | Risk Tolerance | Primary Signals            |
+|---|--------------------------|----------------------------|---------------------------|--------------|----------------|----------------------------|
+| 1 | new-economy-evangelist   | Narrative Economics (§4.1) | destabilising             | medium       | high           | deviation                  |
+| 2 | ipo-flipper              | IPO Underpricing (§4.2)    | mixed                     | short        | medium         | deviation                  |
+| 3 | momentum-follower        | Momentum Trading (§4.3)    | destabilising             | short        | high           | momentum (1-period return) |
+| 4 | skeptical-value-investor | Value Investing (§4.4)     | stabilising               | long         | low            | deviation                  |
+| 5 | short-seller             | Limits to Arbitrage (§4.5) | stabilising (constrained) | medium       | high           | deviation                  |
 
 ## §8 Environment Specification
 
@@ -153,41 +153,41 @@ Each round represents one trading period. Full experiments use 200 rounds. Each 
 
 ## §9 Parameter Seeds
 
-| # | Parameter | Baseline | Belongs to | Empirical Range | Source |
-|---|-----------|----------|------------|-----------------|--------|
-| 1 | initial_price | 100.0 | environment | normalization | normalization |
-| 2 | fundamental_value | 100.0 | environment | normalization | normalization |
-| 3 | price_impact | 0.01 | environment | [0.005, 0.05] | simulation-bases.md §3 |
-| 4 | mean_reversion | 0.005 | environment | [0.001, 0.01] | simulation-bases.md §3 |
-| 5 | noise_std | 1.0 | environment | [0.5, 2.0] | simulation-bases.md §3 |
-| 6 | order_size | 600 | new-economy-evangelist | [400, 800] | simulation-bases.md §6 |
-| 7 | order_size | 700 | ipo-flipper | [500, 900] | simulation-bases.md §6 |
-| 8 | flip_threshold | 0.05 | ipo-flipper | [0.03, 0.10] | Ofek & Richardson (2003) |
-| 9 | order_size | 500 | momentum-follower | [300, 700] | simulation-bases.md §6 |
-| 10 | momentum_threshold | 0.02 | momentum-follower | [0.01, 0.05] | Jegadeesh & Titman (1993) |
-| 11 | order_size | 400 | skeptical-value-investor | [200, 600] | simulation-bases.md §6 |
-| 12 | value_buy_threshold | -0.10 | skeptical-value-investor | [-0.15, -0.05] | Graham (1949) |
-| 13 | value_sell_threshold | 0.20 | skeptical-value-investor | [0.15, 0.30] | Graham (1949) |
-| 14 | order_size | 400 | short-seller | [200, 600] | simulation-bases.md §6 |
-| 15 | short_threshold | 0.15 | short-seller | [0.10, 0.25] | Abreu & Brunnermeier (2003) |
-| 16 | cover_threshold | -0.05 | short-seller | [-0.10, 0.00] | Abreu & Brunnermeier (2003) |
+| #  | Parameter            | Baseline | Belongs to               | Empirical Range | Source                      |
+|----|----------------------|----------|--------------------------|-----------------|-----------------------------|
+| 1  | initial_price        | 100.0    | environment              | normalization   | normalization               |
+| 2  | fundamental_value    | 100.0    | environment              | normalization   | normalization               |
+| 3  | price_impact         | 0.01     | environment              | [0.005, 0.05]   | simulation-bases.md §3      |
+| 4  | mean_reversion       | 0.005    | environment              | [0.001, 0.01]   | simulation-bases.md §3      |
+| 5  | noise_std            | 1.0      | environment              | [0.5, 2.0]      | simulation-bases.md §3      |
+| 6  | order_size           | 600      | new-economy-evangelist   | [400, 800]      | simulation-bases.md §6      |
+| 7  | order_size           | 700      | ipo-flipper              | [500, 900]      | simulation-bases.md §6      |
+| 8  | flip_threshold       | 0.05     | ipo-flipper              | [0.03, 0.10]    | Ofek & Richardson (2003)    |
+| 9  | order_size           | 500      | momentum-follower        | [300, 700]      | simulation-bases.md §6      |
+| 10 | momentum_threshold   | 0.02     | momentum-follower        | [0.01, 0.05]    | Jegadeesh & Titman (1993)   |
+| 11 | order_size           | 400      | skeptical-value-investor | [200, 600]      | simulation-bases.md §6      |
+| 12 | value_buy_threshold  | -0.10    | skeptical-value-investor | [-0.15, -0.05]  | Graham (1949)               |
+| 13 | value_sell_threshold | 0.20     | skeptical-value-investor | [0.15, 0.30]    | Graham (1949)               |
+| 14 | order_size           | 400      | short-seller             | [200, 600]      | simulation-bases.md §6      |
+| 15 | short_threshold      | 0.15     | short-seller             | [0.10, 0.25]    | Abreu & Brunnermeier (2003) |
+| 16 | cover_threshold      | -0.05    | short-seller             | [-0.10, 0.00]   | Abreu & Brunnermeier (2003) |
 
 ## §10 Variants and Success Criteria
 
 ### §10.1 Variants to Build
 
-| Variant | Build? | Decision Mechanism |
-|---------|--------|--------------------|
-| Rule | Yes | Deterministic thresholds from §4 |
-| LLM | Yes | Persona-only language reasoning |
-| RuleLLM | Yes | Persona plus explicit threshold rules |
-| Rag | Yes | RuleLLM-style reasoning with retrieved historical context |
+| Variant | Build? | Decision Mechanism                                        |
+|---------|--------|-----------------------------------------------------------|
+| Rule    | Yes    | Deterministic thresholds from §4                          |
+| LLM     | Yes    | Persona-only language reasoning                           |
+| RuleLLM | Yes    | Persona plus explicit threshold rules                     |
+| Rag     | Yes    | RuleLLM-style reasoning with retrieved historical context |
 
 ### §10.2 Pass / Fail Criteria
 
-| # | Criterion | Metric | Threshold |
-|---|-----------|--------|-----------|
-| 1 | Bubble forms | BAI | > 0.10 |
-| 2 | Bubble persists | BD | > 15 rounds |
-| 3 | Crash occurs | CS | in [0.30, 0.80] |
-| 4 | Momentum amplifies | MAF | in [0.20, 0.50] |
+| # | Criterion          | Metric | Threshold       |
+|---|--------------------|--------|-----------------|
+| 1 | Bubble forms       | BAI    | > 0.10          |
+| 2 | Bubble persists    | BD     | > 15 rounds     |
+| 3 | Crash occurs       | CS     | in [0.30, 0.80] |
+| 4 | Momentum amplifies | MAF    | in [0.20, 0.50] |

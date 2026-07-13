@@ -52,13 +52,13 @@ the upstream target stays as the canonical statement of user intent.
 
 ## 1. Authority and Scope
 
-| Concern                                          | Owner                                                  |
-|--------------------------------------------------|--------------------------------------------------------|
-| **Target file production, format, and validation** | **This skill** (`define-simulation-scenario-skill.md`)   |
-| Pipeline orchestration                           | `masim/skills/create-simulation-pipeline.md`              |
-| Per-step methodology (research → review → run)   | `masim/skills/implement-simulation-skill/`                   |
-| Universal per-agent specification                | `masim/skills/agent-design-skill.md`                   |
-| Domain-instantiation rules (finance reference)   | `implement-simulation-skill/02-root-documents-spec.md §4.1`  |
+| Concern                                            | Owner                                                       |
+|----------------------------------------------------|-------------------------------------------------------------|
+| **Target file production, format, and validation** | **This skill** (`define-simulation-scenario-skill.md`)      |
+| Pipeline orchestration                             | `masim/skills/create-simulation-pipeline.md`                |
+| Per-step methodology (research → review → run)     | `masim/skills/implement-simulation-skill/`                  |
+| Universal per-agent specification                  | `masim/skills/agent-design-skill.md`                        |
+| Domain-instantiation rules (finance reference)     | `implement-simulation-skill/02-root-documents-spec.md §4.1` |
 
 This file is the **single source of truth** for what a target file
 must contain and how it is produced. The pipeline and the per-step
@@ -76,15 +76,15 @@ section. Downstream skills MUST NOT invent missing content.
 
 ## 2. File Naming and Location
 
-| Rule                            | Value                                                                              |
-|---------------------------------|------------------------------------------------------------------------------------|
-| Path                            | `examples/{ScenarioName}/{domain}-{scenario}.md`                                   |
-| `{ScenarioName}` (folder)       | PascalCase noun phrase, 2 — 4 tokens (e.g., `FlashCrash`, `CarryTradeUnwind`)      |
-| `{domain}` (filename prefix)    | lowercase, kebab-case, one token (e.g., `finance`, `opinion`, `epidemics`, `sociology`) |
-| `{scenario}` (filename suffix)  | lowercase, kebab-case, matches the PascalCase folder (e.g., `flash-crash`)         |
-| Example                         | `examples/FlashCrash/finance-flash-crash.md`                                       |
-| Example                         | `examples/EchoChamber/opinion-echo-chamber.md`                                     |
-| Example                         | `examples/SuperSpreader/epidemics-super-spreader.md`                               |
+| Rule                           | Value                                                                                   |
+|--------------------------------|-----------------------------------------------------------------------------------------|
+| Path                           | `examples/{ScenarioName}/{domain}-{scenario}.md`                                        |
+| `{ScenarioName}` (folder)      | PascalCase noun phrase, 2 — 4 tokens (e.g., `FlashCrash`, `CarryTradeUnwind`)           |
+| `{domain}` (filename prefix)   | lowercase, kebab-case, one token (e.g., `finance`, `opinion`, `epidemics`, `sociology`) |
+| `{scenario}` (filename suffix) | lowercase, kebab-case, matches the PascalCase folder (e.g., `flash-crash`)              |
+| Example                        | `examples/FlashCrash/finance-flash-crash.md`                                            |
+| Example                        | `examples/EchoChamber/opinion-echo-chamber.md`                                          |
+| Example                        | `examples/SuperSpreader/epidemics-super-spreader.md`                                    |
 
 If multiple target files attempt to share the same folder, the
 pipeline halts and asks the user to merge or rename (via a fresh
@@ -99,6 +99,13 @@ A conforming target file MUST contain **exactly the following ten
 sections in this order**, with the exact headings shown. The invoking
 agent MAY extend a section with additional sub-headings, but MUST NOT
 delete a section or change its number.
+
+The file MUST NOT introduce any top-level `## §N` heading other than
+§1 — §10. No `§0`, no `§11`, no unnumbered `##` headings. Auxiliary
+content (changelogs, traceability matrices, build audit trails) MUST
+be recorded in the sibling `simulation-build-log.md`, never inside the
+target file itself (see §6 "The Target File vs. the Pipeline
+Contract").
 
 ```
 §1  Meta
@@ -129,16 +136,16 @@ A single table identifying the file:
 ```markdown
 ## §1 Meta
 
-| Field         | Content                                                |
-|---------------|--------------------------------------------------------|
-| Name          | {PascalCase scenario name}                             |
-| Domain        | finance / opinion / epidemics / sociology / ...        |
-| Requested By  | {human user's full name or organisation}               |
-| Produced By   | define-simulation-scenario-skill.md v{X.Y.Z} (invoking agent: {model / harness label}) |
-| Created       | {YYYY-MM-DD}                                           |
-| Pipeline      | masim/skills/create-simulation-pipeline.md                |
-| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.0)  |
-| Status        | draft / locked / released                              |
+| Field        | Content                                                                                |
+|--------------|----------------------------------------------------------------------------------------|
+| Name         | {PascalCase scenario name}                                                             |
+| Domain       | finance / opinion / epidemics / sociology / ...                                        |
+| Requested By | {human user's full name or organisation}                                               |
+| Produced By  | define-simulation-scenario-skill.md v{X.Y.Z} (invoking agent: {model / harness label}) |
+| Created      | {YYYY-MM-DD}                                                                           |
+| Pipeline     | masim/skills/create-simulation-pipeline.md                                             |
+| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                                |
+| Status       | draft / locked / released                                                              |
 ```
 
 - **MUST** match `{ScenarioName}` exactly in `Name`.
@@ -223,13 +230,13 @@ later in §10.
 ```markdown
 ### §4.{k} {Theory short name}
 
-| Field                | Content                                                 |
-|----------------------|---------------------------------------------------------|
-| Full citation        | Author, A., & Author, B. ({year}). Title. *Journal*, vol(iss), pages. https://doi.org/... |
-| Key mechanism (≤30 words) | [The single sentence summary of what the theory predicts.] |
-| Key equation         | [LaTeX or plain-text form of the central formula, with all symbols defined inline.] |
-| Motivates agent      | [Name of the agent in §7 that this theory primarily justifies.] |
-| Parameter implication| [Which §9 knob this theory pins down, with a numeric range from the cited work.] |
+| Field                     | Content                                                                                   |
+|---------------------------|-------------------------------------------------------------------------------------------|
+| Full citation             | Author, A., & Author, B. ({year}). Title. *Journal*, vol(iss), pages. https://doi.org/... |
+| Key mechanism (≤30 words) | [The single sentence summary of what the theory predicts.]                                |
+| Key equation              | [LaTeX or plain-text form of the central formula, with all symbols defined inline.]       |
+| Motivates agent           | [Name of the agent in §7 that this theory primarily justifies.]                           |
+| Parameter implication     | [Which §9 knob this theory pins down, with a numeric range from the cited work.]          |
 ```
 
 - **MUST** cite a DOI or stable URL for every entry; preprint arXiv
@@ -250,10 +257,10 @@ Each fact is one row in the following table:
 ```markdown
 ## §5 Stylized Facts
 
-| #  | Fact (one sentence)                                                                           | Quantitative range            | Citation                                  | Acceptance metric                                   |
-|----|-----------------------------------------------------------------------------------------------|-------------------------------|-------------------------------------------|-----------------------------------------------------|
-| F1 | (finance-appendix example) "Bubble peak exceeds fundamental by 40 — 80 %."                    | 1.4 ≤ peak/fundamental ≤ 1.8  | Smith (2018, JoF, 10.xxx/yyy)             | `analysis.py: bubble_peak_ratio()` ∈ [1.4, 1.8]     |
-| F2 | ...                                                                                           | ...                           | ...                                       | ...                                                 |
+| #  | Fact (one sentence)                                                        | Quantitative range           | Citation                      | Acceptance metric                               |
+|----|----------------------------------------------------------------------------|------------------------------|-------------------------------|-------------------------------------------------|
+| F1 | (finance-appendix example) "Bubble peak exceeds fundamental by 40 — 80 %." | 1.4 ≤ peak/fundamental ≤ 1.8 | Smith (2018, JoF, 10.xxx/yyy) | `analysis.py: bubble_peak_ratio()` ∈ [1.4, 1.8] |
+| F2 | ...                                                                        | ...                          | ...                           | ...                                             |
 ```
 
 <!--
@@ -288,13 +295,13 @@ simulation is calibrated against. Each entry uses:
 ```markdown
 ### §6.{k} {Event or experiment name}
 
-| Field             | Content                                                          |
-|-------------------|------------------------------------------------------------------|
-| Name + dates      | [e.g., "1987 Black Monday — 1987-10-19"]                         |
-| Trigger           | [What initiated this real event?]                                |
-| Quantitative arc  | [Key numeric points: initial level, peak, trough, duration in real units.] |
+| Field             | Content                                                                      |
+|-------------------|------------------------------------------------------------------------------|
+| Name + dates      | [e.g., "1987 Black Monday — 1987-10-19"]                                     |
+| Trigger           | [What initiated this real event?]                                            |
+| Quantitative arc  | [Key numeric points: initial level, peak, trough, duration in real units.]   |
 | Agent mapping     | [Which real-world participants map to which §7 agent? One row per §7 agent.] |
-| Primary source(s) | [Citations with DOIs.]                                            |
+| Primary source(s) | [Citations with DOIs.]                                                       |
 ```
 
 - **MUST** include at least one event that is *not* already used as a
@@ -312,11 +319,11 @@ A single table with **4 — 7 rows**, one per agent archetype:
 ```markdown
 ## §7 Agent Roster
 
-| Agent name (kebab) | Real-world counterpart | Theory family (§4 anchor) | Domain role                    | Primary signals                          | Intent line                                                 | Expected pool match              |
-|--------------------|------------------------|---------------------------|--------------------------------|------------------------------------------|-------------------------------------------------------------|----------------------------------|
-| trend-follower     | active retail trader   | Quant / Statistical (§4.2)| Destabilising                  | price, return, deviation                 | "Exists to amplify ongoing directional moves."              | examples/AGENT_POOL/finance/momentum-trader.md |
-| fundamental-anchor | mutual fund            | Fundamental / Value (§4.1)| Stabilising                    | price, fundamental, deviation            | "Exists to pull price back toward intrinsic value."         | examples/AGENT_POOL/finance/fundamental-analyst.md |
-| ...                | ...                    | ...                       | ...                            | ...                                      | ...                                                         | ...                              |
+| Agent name (kebab) | Real-world counterpart | Theory family (§4 anchor)  | Domain role   | Primary signals               | Intent line                                         | Expected pool match                                |
+|--------------------|------------------------|----------------------------|---------------|-------------------------------|-----------------------------------------------------|----------------------------------------------------|
+| trend-follower     | active retail trader   | Quant / Statistical (§4.2) | Destabilising | price, return, deviation      | "Exists to amplify ongoing directional moves."      | examples/AGENT_POOL/finance/momentum-trader.md     |
+| fundamental-anchor | mutual fund            | Fundamental / Value (§4.1) | Stabilising   | price, fundamental, deviation | "Exists to pull price back toward intrinsic value." | examples/AGENT_POOL/finance/fundamental-analyst.md |
+| ...                | ...                    | ...                        | ...           | ...                           | ...                                                 | ...                                                |
 ```
 
 <!--
@@ -467,11 +474,11 @@ default for. Each row is one knob:
 ```markdown
 ## §9 Parameter Seeds
 
-| Parameter                     | Symbol | Belongs to (agent / environment) | Empirical range          | Candidate default | Source citation                       |
-|-------------------------------|--------|----------------------------------|--------------------------|-------------------|---------------------------------------|
-| price impact (finance ex.)    | λ      | environment (§8.1)               | 0.01 — 0.05              | 0.03              | Hasbrouck (1991), JoF, 10.xxx/yyy     |
-| momentum gain (finance ex.)   | α      | trend-follower (§7)              | 0.2 — 0.4 per round      | 0.30              | Jegadeesh & Titman (1993), JoF, 10... |
-| ...                           | ...    | ...                              | ...                      | ...               | ...                                   |
+| Parameter                   | Symbol | Belongs to (agent / environment) | Empirical range     | Candidate default | Source citation                       |
+|-----------------------------|--------|----------------------------------|---------------------|-------------------|---------------------------------------|
+| price impact (finance ex.)  | λ      | environment (§8.1)               | 0.01 — 0.05         | 0.03              | Hasbrouck (1991), JoF, 10.xxx/yyy     |
+| momentum gain (finance ex.) | α      | trend-follower (§7)              | 0.2 — 0.4 per round | 0.30              | Jegadeesh & Titman (1993), JoF, 10... |
+| ...                         | ...    | ...                              | ...                 | ...               | ...                                   |
 ```
 
 <!--
@@ -518,22 +525,22 @@ palette contains four rows (`Rule` / `LLM` / `RuleLLM` / `Rag`); other
 domains MAY drop, rename, or add rows so long as at least one
 deterministic-baseline variant remains marked `Yes`.
 
-| Variant           | Build?  | Rationale (≤1 sentence)                                              |
-|-------------------|---------|----------------------------------------------------------------------|
-| {V1 baseline}     | Yes     | Required deterministic baseline (finance-default: Rule).             |
-| {V2 LLM-based}    | Yes / No | [Why, citing a §3 research goal that needs an LLM-based variant.]   |
-| {V3 hybrid}       | Yes / No | [Why, citing a §3 research goal that needs the hybrid.]             |
-| {V4 retrieval}    | Yes / No | [Why, citing §6 historical anchors as the retrieval corpus.]        |
+| Variant        | Build?   | Rationale (≤1 sentence)                                           |
+|----------------|----------|-------------------------------------------------------------------|
+| {V1 baseline}  | Yes      | Required deterministic baseline (finance-default: Rule).          |
+| {V2 LLM-based} | Yes / No | [Why, citing a §3 research goal that needs an LLM-based variant.] |
+| {V3 hybrid}    | Yes / No | [Why, citing a §3 research goal that needs the hybrid.]           |
+| {V4 retrieval} | Yes / No | [Why, citing §6 historical anchors as the retrieval corpus.]      |
 
 <details>
 <summary>Finance-appendix (§4.1.F) instantiation — default four-variant scheme</summary>
 
-| Variant   | Build? | Rationale (≤1 sentence)                                 |
-|-----------|--------|---------------------------------------------------------|
-| Rule      | Yes    | Required baseline                                        |
-| LLM       | Yes / No | [Why, citing a research goal from §3 that needs LLM.]  |
-| RuleLLM   | Yes / No | [Why, citing a research goal that needs the hybrid.]   |
-| Rag       | Yes / No | [Why, citing the §6 historical anchors as the corpus.] |
+| Variant | Build?   | Rationale (≤1 sentence)                                |
+|---------|----------|--------------------------------------------------------|
+| Rule    | Yes      | Required baseline                                      |
+| LLM     | Yes / No | [Why, citing a research goal from §3 that needs LLM.]  |
+| RuleLLM | Yes / No | [Why, citing a research goal that needs the hybrid.]   |
+| Rag     | Yes / No | [Why, citing the §6 historical anchors as the corpus.] |
 
 </details>
 
@@ -549,12 +556,12 @@ Non-finance instantiations of §10.1 (illustrative — the invoking agent choose
 
 ### §10.2 Pass / Fail Criteria
 
-| Criterion                                              | Status when satisfied                                 |
-|--------------------------------------------------------|-------------------------------------------------------|
-| All §5 stylized facts reproduced within their ranges   | green                                                 |
-| Every §3 research question answerable from analysis    | green                                                 |
-| Ablating any §7 agent produces a measurable change     | green                                                 |
-| All variants marked `Yes` in §10.1 build without uncaught exceptions | green                                                 |
+| Criterion                                                            | Status when satisfied |
+|----------------------------------------------------------------------|-----------------------|
+| All §5 stylized facts reproduced within their ranges                 | green                 |
+| Every §3 research question answerable from analysis                  | green                 |
+| Ablating any §7 agent produces a measurable change                   | green                 |
+| All variants marked `Yes` in §10.1 build without uncaught exceptions | green                 |
 ```
 
 - **MUST** mark at least one variant as `Yes`. Building only the
@@ -572,12 +579,12 @@ Non-finance instantiations of §10.1 (illustrative — the invoking agent choose
 The target file's §7, §8, §9 require domain-specific value palettes.
 The invoking agent MUST pick palettes from the per-domain registry:
 
-| Domain     | Theory family palette                          | Real-world counterpart palette                | Environment template     |
-|------------|------------------------------------------------|-----------------------------------------------|--------------------------|
-| finance    | `02-root-documents-spec.md §4.1.1`             | `02-root-documents-spec.md §4.1.2`            | §8 — Finance sub-template above |
-| opinion    | *(to be defined in a sibling appendix)*        | *(to be defined)*                              | §8 — Opinion sub-template above |
-| epidemics  | *(to be defined in a sibling appendix)*        | *(to be defined)*                              | §8 — Epidemics sub-template above |
-| sociology  | *(to be defined; may extend `opinion`)*        | *(to be defined)*                              | §8 — Opinion sub-template above |
+| Domain    | Theory family palette                   | Real-world counterpart palette     | Environment template              |
+|-----------|-----------------------------------------|------------------------------------|-----------------------------------|
+| finance   | `02-root-documents-spec.md §4.1.1`      | `02-root-documents-spec.md §4.1.2` | §8 — Finance sub-template above   |
+| opinion   | *(to be defined in a sibling appendix)* | *(to be defined)*                  | §8 — Opinion sub-template above   |
+| epidemics | *(to be defined in a sibling appendix)* | *(to be defined)*                  | §8 — Epidemics sub-template above |
+| sociology | *(to be defined; may extend `opinion`)* | *(to be defined)*                  | §8 — Opinion sub-template above   |
 
 For any domain whose palette has not been written yet, the invoking
 agent MUST include an **§A Domain Palette Appendix** in the produced
@@ -665,16 +672,16 @@ omitted.
 
 ## §1 Meta
 
-| Field         | Content                                                |
-|---------------|--------------------------------------------------------|
-| Name          | CarryTradeUnwind                                       |
-| Domain        | finance                                                |
-| Requested By  | Sijia Chen                                             |
-| Produced By   | define-simulation-scenario-skill.md v1.0.0 (invoking agent: QoderWork) |
-| Created       | 2026-06-29                                             |
-| Pipeline      | masim/skills/create-simulation-pipeline.md                |
-| Target Spec   | masim/skills/define-simulation-scenario-skill.md (v1.0)  |
-| Status        | draft                                                  |
+| Field        | Content                                                                |
+|--------------|------------------------------------------------------------------------|
+| Name         | CarryTradeUnwind                                                       |
+| Domain       | finance                                                                |
+| Requested By | Sijia Chen                                                             |
+| Produced By  | define-simulation-scenario-skill.md v1.0.0 (invoking agent: QoderWork) |
+| Created      | 2026-06-29                                                             |
+| Pipeline     | masim/skills/create-simulation-pipeline.md                             |
+| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
+| Status       | draft                                                                  |
 
 ## §2 Phenomenon Statement
 
@@ -777,13 +784,13 @@ Before the invoking agent begins production, it MUST collect exactly
 the following inputs from the user (via `AskUserQuestion` or
 equivalent). Nothing else is required from the user:
 
-| # | Input                        | Format / Example                                                       |
-|---|------------------------------|------------------------------------------------------------------------|
-| 1 | `{ScenarioName}`             | PascalCase, 2 — 4 tokens (e.g., `CarryTradeUnwind`).                   |
-| 2 | `{Domain}`                   | One of `finance / opinion / epidemics / sociology / ...`.              |
+| # | Input                        | Format / Example                                                                                                                                           |
+|---|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | `{ScenarioName}`             | PascalCase, 2 — 4 tokens (e.g., `CarryTradeUnwind`).                                                                                                       |
+| 2 | `{Domain}`                   | One of `finance / opinion / epidemics / sociology / ...`.                                                                                                  |
 | 3 | Phenomenon sketch            | 3 — 10 sentences of plain English describing what the phenomenon is, why it matters, and roughly which participants are involved. This is the seed for §2. |
-| 4 | Optional: variant preference | Any subset of `Rule / LLM / RuleLLM / Rag`. If omitted, the agent decides based on §3 research goals it derives from the sketch. |
-| 5 | Optional: fixed anchor event | A specific historical/laboratory event the user wants pinned into §6. If omitted, the agent picks candidates and confirms at checkpoint C-3 below. |
+| 4 | Optional: variant preference | Any subset of `Rule / LLM / RuleLLM / Rag`. If omitted, the agent decides based on §3 research goals it derives from the sketch.                           |
+| 5 | Optional: fixed anchor event | A specific historical/laboratory event the user wants pinned into §6. If omitted, the agent picks candidates and confirms at checkpoint C-3 below.         |
 
 The invoking agent MUST NOT ask the user to write any of §1 — §10
 directly. If the user offers hand-written §-content, the agent SHOULD
@@ -914,10 +921,14 @@ are required, in the style of `agent-design-skill.md §6` and
 **Structural completeness**
 
 - [ ] All ten sections §1 — §10 are present in order.
+- [ ] No top-level `## §N` heading exists outside §1 — §10 (no §0,
+      no §11, no unnumbered `##` headings). Auxiliary content belongs
+      in `simulation-build-log.md`.
 - [ ] §1 Meta has every row filled, including both `Requested By` and
       `Produced By`; `Status` is `draft`.
 - [ ] §2 has all four sub-headings (Trigger, Mechanism, Participants,
-      Resolution), each with at least three sentences.
+      Resolution), each with 3 — 6 sentences (minimum three, maximum
+      six).
 - [ ] §3 lists 3 — 5 numbered research questions; one is an ablation,
       one is a sweep.
 - [ ] §4 has 3 — 6 theory entries, each with the five-row table.
@@ -988,24 +999,24 @@ status thereafter.
 
 ## 12. Skill References
 
-| Topic                                       | File                                                              |
-|---------------------------------------------|-------------------------------------------------------------------|
-| Top-level pipeline (consumes this file)     | `masim/skills/create-simulation-pipeline.md`                         |
-| Per-step methodology                        | `masim/skills/implement-simulation-skill/`                              |
-| Universal Agent Design Handbook             | `masim/skills/agent-design-skill.md`                              |
-| Domain-instantiation rules (finance)        | `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1` |
-| Step 0 contract template                    | `masim/skills/implement-simulation-skill/04-step0-load-target.md`            |
-| AGENT_POOL directory                        | `examples/AGENT_POOL/`                                            |
-| Project structure overview                  | `docs/structure.md`                                               |
+| Topic                                   | File                                                                     |
+|-----------------------------------------|--------------------------------------------------------------------------|
+| Top-level pipeline (consumes this file) | `masim/skills/create-simulation-pipeline.md`                             |
+| Per-step methodology                    | `masim/skills/implement-simulation-skill/`                               |
+| Universal Agent Design Handbook         | `masim/skills/agent-design-skill.md`                                     |
+| Domain-instantiation rules (finance)    | `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1` |
+| Step 0 contract template                | `masim/skills/implement-simulation-skill/04-step0-load-target.md`        |
+| AGENT_POOL directory                    | `examples/AGENT_POOL/`                                                   |
+| Project structure overview              | `docs/structure.md`                                                      |
 
 ---
 
 ## 13. Status
 
-| Field   | Content                                            |
-|---------|----------------------------------------------------|
-| Version | 1.2.0                                              |
-| Created | 2026-06-29                                         |
-| Revised | 2026-07-01 (reframed as executable skill: user supplies minimal inputs; the invoking agent produces the target file end-to-end. See §0, §9). |
+| Field   | Content                                                                                                                                                                                                                                                                                                                                                                                             |
+|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Version | 1.2.0                                                                                                                                                                                                                                                                                                                                                                                               |
+| Created | 2026-06-29                                                                                                                                                                                                                                                                                                                                                                                          |
+| Revised | 2026-07-01 (reframed as executable skill: user supplies minimal inputs; the invoking agent produces the target file end-to-end. See §0, §9).                                                                                                                                                                                                                                                        |
 | Revised | 2026-07-01 (domain-neutralization pass: §7 column renamed 'Market / domain role' → 'Domain role'; §5, §9, §10.1 example rows marked as finance-appendix instantiations with parallel opinion / epidemics / sociology examples added in HTML comments; §10.1 variant scheme is now configurable per domain; §11 validation reworded to require a deterministic-baseline variant rather than 'Rule'.) |
-| Status  | canonical                                          |
+| Status  | canonical                                                                                                                                                                                                                                                                                                                                                                                           |
