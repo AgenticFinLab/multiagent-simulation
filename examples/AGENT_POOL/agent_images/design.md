@@ -106,12 +106,14 @@ icon in `icons/`.
 | 89 | `finance/retail-trader.md`                 | `finance-retail-trader.png`                 | 散户型投资者       | Uninformed noise participant → random-dots motif                                 |
 | 90 | `finance/hft-market-maker.md`              | `finance-hft-market-maker.png`              | 高频做市型投资者   | Ultra-fast liquidity provider / stress-withdrawal → lightning + order-book motif  |
 | 91 | `finance/momentum-chaser.md`               | `finance-momentum-chaser.png`               | 动量追涨型投资者   | Trend-following momentum amplifier → rising-momentum-arrow motif                 |
+| 92 | `finance/systematic-analyst.md`            | `finance-systematic-analyst.png`            | 系统分析型投资者  | Rational Bayesian evidence weighting → balance-scale + fundamental-diamond motif |
+| 93 | `finance/value-trader.md`                  | `finance-value-trader.png`                  | 价值型投资者      | Margin-of-safety value discipline → magnifier + intrinsic-value diamond motif    |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 91 total and map 1:1 to the 91 ``finance/`` agent specs.
+- Icons are 93 total and map 1:1 to the 93 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -199,5 +201,13 @@ icon in `icons/`.
   fundamental-trader and stop-loss-trader already covered by rows #87–#88;
   noise-trader already covered by row #14. Mapping-row gaps closed as part
   of the polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-13: Mapping row #92 added for the systematic-analyst archetype.
+  PNG generated via ImageGen from `finance/systematic-analyst.md`; mapping-row
+  gap closed as part of the polish-simulation-pipeline Step 2
+  icon-resolution sub-gate.
+- 2026-07-13: Mapping row #93 added for the value-trader archetype.
+  PNG generated via ImageGen from `finance/value-trader.md`; missing PNG and
+  mapping-row gaps closed as part of the polish-simulation-pipeline Step 2
+  icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
