@@ -390,6 +390,124 @@ def get_docs_content(scenario_name: str) -> Optional[str]:
         return None
 
 
+def _scenario_base(scenario_key: str) -> str:
+    """Return the base scenario name for a scenario key.
+
+    Examples:
+        'AssetBubble/Rule' -> 'AssetBubble'
+        'AssetBubble'      -> 'AssetBubble'
+        'myproj/AssetBubble/Rule' -> 'AssetBubble' (project-prefixed key)
+    """
+    if not scenario_key:
+        return scenario_key
+    parts = scenario_key.split("/")
+    # Strip trailing variant if present (Rule/LLM/RuleLLM/Rag)
+    if parts[-1] in ("Rule", "LLM", "RuleLLM", "Rag"):
+        parts = parts[:-1]
+    return parts[-1] if parts else scenario_key
+
+
+def get_simulation_bases_path(scenario_key: str) -> Optional[Path]:
+    """Return the path to a scenario's simulation-bases.md, or None.
+
+    Every scenario ships one canonical basis at
+    ``examples/{ScenarioBase}/simulation-bases.md``. The lookup is
+    variant-agnostic and project-agnostic: only the base scenario name
+    is used to resolve the file.
+    """
+    base = _scenario_base(scenario_key)
+    candidate = EXAMPLES_DIR / base / "simulation-bases.md"
+    return candidate if candidate.exists() else None
+
+
+def get_simulation_bases_content(scenario_key: str) -> Optional[str]:
+    """Return the full markdown text of ``simulation-bases.md`` or None."""
+    path = get_simulation_bases_path(scenario_key)
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
+def get_phenomenon_description(scenario_key: str) -> str:
+    """Extract the ``Phenomenon Name`` cell from ``simulation-bases.md``.
+
+    The canonical simulation-bases.md opens with a table whose first row
+    is ``| Phenomenon Name | <bold-name> \u2014 <clear description> |``.
+    This function returns just the value cell, stripped of markdown
+    formatting, so callers can render a brief, human-readable scenario
+    description. Returns an empty string when the field is not found.
+    """
+    content = get_simulation_bases_content(scenario_key)
+    if not content:
+        return ""
+    # Match the row: |  Phenomenon Name  |  <value>  |
+    match = re.search(
+        r"^\|\s*Phenomenon\s+Name\s*\|\s*(.+?)\s*\|\s*$",
+        content,
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+    if not match:
+        return ""
+    text = match.group(1).strip()
+    # Strip bold markdown (**text**) and stray backticks.
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = text.replace("`", "")
+    return text.strip()
+
+
+def get_finance_scenario_path(scenario_key: str) -> Optional[Path]:
+    """Return the path to a scenario's ``finance-{name}.md``, or None.
+
+    The finance file lives at
+    ``examples/{ScenarioBase}/finance-{name}.md`` and is the target-spec
+    / reverse-reconstructed scenario definition (produced by
+    ``polish-simulation-pipeline`` / ``define-simulation-scenario-skill``).
+    Filename casing is inconsistent across scenarios, so this helper tries
+    a few variants in order:
+
+    1. Kebab-case from CamelCase (e.g. ``AnchoringEffect`` \u2192
+       ``finance-anchoring-effect.md``).
+    2. All-lowercase with no hyphens (e.g. ``ShortSqueeze`` \u2192
+       ``finance-shortsqueeze.md``).
+    3. Any ``finance-*.md`` file found in the scenario directory
+       (first match, alphabetically) as a defensive fallback.
+    """
+    base = _scenario_base(scenario_key)
+    scenario_dir = EXAMPLES_DIR / base
+    if not scenario_dir.exists():
+        return None
+    # Kebab-case: split CamelCase and letter-digit boundaries with '-'.
+    kebab = re.sub(
+        r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[A-Za-z])(?=[0-9])",
+        "-",
+        base,
+    ).lower()
+    candidate = scenario_dir / f"finance-{kebab}.md"
+    if candidate.exists():
+        return candidate
+    # All-lowercase fallback (e.g. finance-shortsqueeze.md).
+    lower_candidate = scenario_dir / f"finance-{base.lower()}.md"
+    if lower_candidate.exists():
+        return lower_candidate
+    # Last-resort glob (picks up any unforeseen naming variant).
+    matches = sorted(scenario_dir.glob("finance-*.md"))
+    return matches[0] if matches else None
+
+
+def get_finance_scenario_content(scenario_key: str) -> Optional[str]:
+    """Return the full markdown text of ``finance-{scenario}.md`` or None."""
+    path = get_finance_scenario_path(scenario_key)
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------------------
 # Agent principle descriptions (keyed by class name suffix after ':')
 # Covers all rule-based and LLM variants across every scenario

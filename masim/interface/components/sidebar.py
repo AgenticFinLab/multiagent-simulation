@@ -191,40 +191,44 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         )
 
         # ------------------------------------------------------------------
-        # Network Topology — render nodes as agent icons when possible;
-        # otherwise use the simulator's saved diagram, then a plain preview.
+        # Network Topology — dynamic D3 force-directed diagram matching the
+        # Experience-mode preview and the Project-mode Default preview.
+        # Falls back to the legacy static preview only when no topology is
+        # available for the scenario.
         # ------------------------------------------------------------------
         st.markdown("---")
         st.markdown("**Network Topology**")
 
-        icon_preview = _get_or_create_icon_topology_preview(selected_scenario)
-        if icon_preview is not None:
-            st.image(str(icon_preview), width="stretch")
+        topo = get_topology_info(selected_scenario)
+        agents_for_topo = get_agents_info(selected_scenario)
+        if topo.get("nodes"):
+            from .topology_d3 import render_d3_topology
+            render_d3_topology(topo, agents_for_topo, height=320)
         else:
-            diagram_path = get_diagram_path(selected_scenario)
-            if diagram_path is not None:
-                st.image(str(diagram_path), width="stretch")
+            icon_preview = _get_or_create_icon_topology_preview(selected_scenario)
+            if icon_preview is not None:
+                st.image(str(icon_preview), width="stretch")
             else:
-                # Generate a full NetworkX topology preview from topology.yml +
-                # players.yml and cache it so repeated loads are instant.
-                preview_path = _get_or_create_topology_preview(selected_scenario)
-                if preview_path is not None:
-                    st.image(str(preview_path), width="stretch")
+                diagram_path = get_diagram_path(selected_scenario)
+                if diagram_path is not None:
+                    st.image(str(diagram_path), width="stretch")
                 else:
-                    # Last-resort lightweight fallback (no topology.yml)
-                    topo = get_topology_info(selected_scenario)
-                    fig = _render_topology_figure(topo)
-                    buf = io.BytesIO()
-                    fig.savefig(
-                        buf,
-                        format="png",
-                        bbox_inches="tight",
-                        dpi=110,
-                        facecolor=fig.get_facecolor(),
-                    )
-                    buf.seek(0)
-                    st.image(buf, width="stretch")
-                    plt.close(fig)
+                    preview_path = _get_or_create_topology_preview(selected_scenario)
+                    if preview_path is not None:
+                        st.image(str(preview_path), width="stretch")
+                    else:
+                        fig = _render_topology_figure(topo)
+                        buf = io.BytesIO()
+                        fig.savefig(
+                            buf,
+                            format="png",
+                            bbox_inches="tight",
+                            dpi=110,
+                            facecolor=fig.get_facecolor(),
+                        )
+                        buf.seek(0)
+                        st.image(buf, width="stretch")
+                        plt.close(fig)
 
         # ------------------------------------------------------------------
         # Agent cards — show Principle + Instances + Key Params only

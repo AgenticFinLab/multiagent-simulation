@@ -1,18 +1,5 @@
 # EuropeanDebtCrisis — Scenario Target
 
-## §0 Meta CHANGELOG
-
-- 2026-07-15  Polish target-file gate (Case B): target file generated from existing downstream artefacts by polish-simulation-pipeline. Pre-consistency check PASS: 5 simulation-bases.md §4.N blocks (PeripheryBondSeller, CreditorPanicker, CoreBondBuyer, ECBIntervenor, HedgedFund) all have matching Rule/LLM/RuleLLM/Rag players.py classes and configs/EuropeanDebtCrisis/{V}/players.yml entries. Status set to `locked`.
-- 2026-07-15  Polish run against skill baseline (define/agent-design/implement) — Round 1 Closeout.
-             - Step 0 (target-file gate): Case B, reverse-reconstructed from existing artefacts, locked.
-             - Step 1 (research audit): DOI-resolution PASS on 5 §4 anchors (De Grauwe 2011 10.2139/ssrn.1930063, Acharya et al. 2014 10.1111/jofi.12206, De Grauwe & Ji 2013 10.1016/j.jimonfin.2012.11.003, Krishnamurthy & Vissing-Jorgensen 2012 10.1257/aer.102.6.2332, Shleifer & Vishny 1997 10.1111/j.1540-6261.1997.tb03807.x, Brunnermeier & Pedersen 2009 10.1093/rfs/hhn098). Six-field completeness PASS on all 5 simulation-bases.md §2 Theory blocks. Bidirectional coverage PASS: 5 target §4 anchors maps 5 simulation-bases.md §2 Theory blocks.
-             - Step 2 (agent + env): 5 archetypes polished; AGENT_POOL three-stage match outcome `reuse` for all 5 (profiles exist as stubs at finance/{stem}.md); icon-completeness §6.3 HARD GATE PASS (5 PNGs generated, 5 design.md mapping rows #63-#67 added, 5 profile Icon rows verified). Root doc §3/§5/§7 structural audit PASS.
-             - Step 3 (config audit): all 4 variants polished; YAML parse PASS (16/16 files); `# Source:` traceability added to Rule/players.yml (30 annotations, from 0).
-             - Step 4 (impl audit): py_compile PASS (4 variants); import smoke PASS (4 variants); no-defaults rule PASS; RuleLLM dual-section prompt invariant PASS (5 == PERSONA == + 5 == DECISION RULES == pairs); _RAG_FALLBACK define+reference PASS (added module-level constant + replaced inline string).
-             - Steps 5-10 (review + smoke): Rule 5-round e2e PASS; LLM/RuleLLM/Rag setup-only PASS. explain.md §2 bidirectional PASS (5 theory-impl mapping rows in Rule). analysis.md §2 bidirectional PASS (6 metric-function rows in Rule).
-             Status: locked -> released.
-- 2026-07-15  Polish Round 2 re-audit — full re-verification PASS. Step 0: target file exists, Case A. Step 1: 5 target §4 anchors bidirectional with 5 simulation-bases.md §2 Theory blocks; 8 DOI references present. Step 2: AGENT_POOL three-stage match `reuse` x5; §6.3 icon-completeness 20/20 checks PASS (profile+Icon row+PNG+design.md mapping). Step 3: YAML parse 16/16 PASS; `# Source:` 38 annotations in Rule/players.yml; variant folders 4/4 match §10.1. Step 4: py_compile PASS x4; import smoke PASS x4; no-defaults 0 violations; RuleLLM dual-section 5 pairs PASS; _RAG_FALLBACK define+reference PASS. Steps 5-10: Rule 5-round e2e PASS; LLM/RuleLLM/Rag setup-only PASS. Status confirmed: `released`.
-
 ## §1 Meta
 
 | Field         | Content                                                |

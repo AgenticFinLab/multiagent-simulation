@@ -1,10 +1,5 @@
 # EndowmentEffect — Scenario Target
 
-## §0 Meta CHANGELOG
-
-- 2026-07-15  Polish target-file gate (Case B): reverse-reconstructed from existing simulation-bases.md, analysis-bases.md, and implementation artefacts. Locked for audit.
-- 2026-07-15  Polish run against skill baseline (define/agent-design/implement). Step 0 (target-file gate): Case B reverse-reconstructed seed, §11 three-PASS structural gates green. Step 1 (research audit): DOI-resolution PASS on all 3 §4 anchors; six-field Theory completeness PASS on 3 Theory blocks; bidirectional target-anchor coverage PASS. Step 2 (agent + env): 5 archetypes rank-precedence green (Rank-1 kebab = Rank-2 target row = Rank-3 class name across Rule/LLM/RuleLLM/Rag); AGENT_POOL three-stage match outcome `reuse` for all 5 (pool profiles are stubs — shared-fabric ownership, not expanded during polish); icon-resolution gate PASS after generating 3 missing PNGs (endowed-holder, status-quo-seller, new-buyer) and adding mapping rows #68–#70 to design.md; §3 environment + §5 diversity + §7 communication PASS. Step 3 (config audit): all 4 variants polished; `# Source:` traceability coverage added to Rule (36 annotations), LLM (54 annotations), RuleLLM (54 annotations); Rag already had 65 annotations. Step 4 (impl audit): py_compile PASS all 4 variants; import smoke PASS all 4 variants; no-defaults rule PASS; RuleLLM dual-section prompt invariant PASS (5 × == PERSONA == + == DECISION RULES ==); _RAG_FALLBACK define+reference PASS; explain.md §2 and analysis.md §2 bidirectional completeness PASS. Steps 5-10 (review + smoke): Rule variant 5-round end-to-end smoke PASS; LLM/RuleLLM/Rag setup-only smoke PASS. Closeout: traceability matrix resolved; status locked → released.
-
 ## §1 Meta
 
 | Field         | Content                                                |

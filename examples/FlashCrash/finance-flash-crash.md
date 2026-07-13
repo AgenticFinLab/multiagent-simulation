@@ -1,19 +1,5 @@
 # FlashCrash — Scenario Target
 
-## §0 Meta CHANGELOG
-
-- 2025-07-18  Polish target-file gate (Case B): reverse-constructed seed from existing downstream artefacts (simulation-bases.md, analysis-bases.md, configs/FlashCrash/, implementation modules). Validated via §11 three-PASS discipline. Status set to `locked`.
-- 2025-07-18  Polish target-file gate (Case A, three-PASS §11). All structural gates green: 10 top-level `## §` sections in order, §1 Meta filled (Name/Domain/Status/Pipeline), §2 has 4 sub-headings (Trigger/Mechanism/Participants/Resolution), §3 lists 5 research questions (one ablation-style Q2, one sweep-style Q3), §4 has 6 theory entries with the required five-row table, §5 has 5 stylized-fact rows with numeric ranges and acceptance metrics, §6 has 3 historical anchors, §7 has 6 agent rows with the seven required columns, §8 has 4 sub-sections (Price Formation, Information Broadcast, Constraints and Frictions, Round Granularity), §9 has 23 parameter rows, §10.1 marks all four variants `Yes`, §10.2 lists 4 success criteria. Cross-section consistency verified: every §7 theory-family references an existing §4.k; every §4 theory motivates at least one §7 agent; every §9 parameter `Belongs to` resolves to a §7 agent or §8 environment sub-section. Status remains `locked`.
-- 2025-07-18  Polish run against skill baseline (define/agent-design/implement) — Round 1 Closeout.
-             - Step 0 (target-file gate): Case A three-PASS §11 with existing target file.
-             - Step 1 (research audit):   DOI-resolution PASS on all 6 §4 anchors; bidirectional coverage §4↔§2 verified (7 §2 rows cover 6 §4 theories + 1 §6 historical reference).
-             - Step 2 (agent + env):      6 archetypes AGENT_POOL three-stage match `reuse` (all existing profiles); icon-resolution gate closed — 5 PNGs generated (high-frequency-trader, algorithmic-trader, stop-loss-trader, fundamental-trader, retail-trader), 6 design.md mapping rows added (#84–#89). Environment §3/§5/§7 audit PASS.
-             - Step 3 (config audit):     4 variants polished; `# Source:` traceability lifted from 0→70 (LLM) / 0→87 (RuleLLM) / 0→52 (Rag); Rule already had 54. All YAML parses.
-             - Step 4 (impl audit):       4 variants py_compile PASS, import smoke PASS; no `.get()` violations (Rag `decision.get("provides_liquidity")` is documented LLM-parse exception); RuleLLM dual-section PASS (5×PERSONA + 5×DECISION RULES); `_RAG_FALLBACK` defined+referenced PASS.
-             - Steps 5-10 (review+smoke): Rule setup+shutdown PASS; LLM/RuleLLM/Rag setup-only PASS. Theory-code alignment, analysis migration, docs cross-check all green.
-             Status transitions: `locked` → `released`.
-- 2025-07-18  Round 2 re-audit PASS. All gates re-verified: §11 structural (10 sections, cross-section consistency), DOI-resolution (6 anchors), icon-gate 4-check (6/6 agents: profile+Icon row+PNG+design.md row), YAML parse (16 files), `# Source:` traceability (54+70+87+52 annotations), py_compile (8 files), import smoke (4 variants), setup-only smoke (4 variants). No new defects found. Status confirmed `released`.
-
 ## §1 Meta
 
 | Field         | Content                                                |

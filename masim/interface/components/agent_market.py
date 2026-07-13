@@ -15,7 +15,14 @@ import streamlit as st
 from ..config_loader import (
     discover_scenario_groups,
     get_agents_info,
+    get_finance_scenario_content,
+    get_finance_scenario_path,
+    get_market_description,
+    get_market_type,
+    get_phenomenon_description,
     get_scenario_info,
+    get_simulation_bases_content,
+    get_simulation_bases_path,
     get_topology_info,
     scenario_display_name,
 )
@@ -261,8 +268,6 @@ def render_variant_choice() -> None:
             f"</div>",
             unsafe_allow_html=True,
         )
-        if info.get("description"):
-            st.caption(info["description"])
     with rounds_col:
         try:
             shipped_rounds = int(info.get("total_rounds") or 0)
@@ -291,7 +296,105 @@ def render_variant_choice() -> None:
             "Market features",
             ", ".join(sorted(feats)) if feats else "standard",
         )
-    
+
+    # --- Simulation scenario description ------------------------------
+    # Explicitly spell out (1) what phenomenon this scenario simulates,
+    # (2) what market is being modeled and (3) how the market dynamic is
+    # modeled, so users understand the simulation before picking a
+    # decision engine. The scenario brief comes from the canonical
+    # ``examples/{Scenario}/simulation-bases.md`` (Phenomenon Name row),
+    # and a click-through opens the full ``finance-{scenario}.md``
+    # target-spec definition file in a dialog.
+    market_type = get_market_type(selected_base)
+    market_desc = get_market_description(selected_base)
+    scenario_desc = info.get("description", "")
+    phenomenon_desc = get_phenomenon_description(selected_base)
+    finance_path = get_finance_scenario_path(selected_base)
+
+    if (
+        market_type
+        or market_desc
+        or scenario_desc
+        or phenomenon_desc
+    ):
+        st.markdown(
+            "<div style='margin-top:12px;padding:14px 16px;"
+            "background:#f7f9fc;border:1px solid #dde4ea;border-radius:8px;'>"
+            "<div style='font-size:13px;font-weight:700;color:#1a2633;"
+            "margin-bottom:8px;'>Simulation scenario</div>"
+            + (
+                f"<div style='font-size:13px;line-height:1.65;color:#374955;"
+                f"margin-bottom:6px;'>"
+                f"<b>Phenomenon:</b> {html.escape(phenomenon_desc)}"
+                f"</div>"
+                if phenomenon_desc
+                else ""
+            )
+            + (
+                f"<div style='font-size:13px;line-height:1.65;color:#374955;"
+                f"margin-bottom:6px;'>"
+                f"<b>Market modeled:</b> {html.escape(market_type)}"
+                f"</div>"
+                if market_type
+                else ""
+            )
+            + (
+                f"<div style='font-size:13px;line-height:1.65;color:#374955;"
+                f"margin-bottom:6px;'>"
+                f"<b>Market dynamics:</b> {html.escape(market_desc)}"
+                f"</div>"
+                if market_desc
+                else ""
+            )
+            + (
+                f"<div style='font-size:13px;line-height:1.65;color:#374955;'>"
+                f"<b>Simulation focus:</b> {html.escape(scenario_desc)}"
+                f"</div>"
+                if scenario_desc
+                else ""
+            )
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+        # Click-through to the canonical finance-{scenario}.md definition.
+        # Rendered as a scoped text-link button beneath the info card so
+        # users can drill into the full target-spec scenario definition
+        # (meta, phenomenon statement, anchors, stylized facts, historical
+        # anchors, roster, environment, parameters, variants, references).
+        if finance_path is not None:
+            st.markdown(
+                "<style>"
+                '[class*="st-key-view_bases_"] button{'
+                'background:transparent !important;'
+                'border:none !important;box-shadow:none !important;'
+                'padding:2px 0 !important;margin:2px 0 6px 2px !important;'
+                'min-height:0 !important;height:auto !important;'
+                'color:#2a5fa6 !important;font-weight:600 !important;'
+                'font-size:12.5px !important;text-align:left !important;'
+                'justify-content:flex-start !important;'
+                '}'
+                '[class*="st-key-view_bases_"] button:hover{'
+                'color:#1a4a8f !important;text-decoration:underline !important;'
+                'background:transparent !important;'
+                '}'
+                "</style>",
+                unsafe_allow_html=True,
+            )
+            finance_rel = finance_path.name
+            with st.container(key=f"view_bases_{selected_base}"):
+                if st.button(
+                    f"\U0001f4d6  View the full scenario definition ({finance_rel}) \u2192",
+                    key=f"btn_view_bases_{selected_base}",
+                    help=(
+                        f"Open examples/{selected_base}/{finance_rel} "
+                        "\u2014 phenomenon statement, anchors, stylized facts, "
+                        "roster, environment, parameters, and references."
+                    ),
+                    type="tertiary",
+                ):
+                    _show_finance_scenario_dialog(selected_base)
+
     st.divider()
     
     if is_experience:
@@ -488,8 +591,23 @@ def render_variant_choice() -> None:
             st.markdown("**Default**")
             st.caption(
                 "Launch the pre-configured scenario directly. "
-                "Each button represents a different decision engine."
+                "The diagram below previews the shipped agent lineup and "
+                "network topology; each button below launches a decision "
+                "engine."
             )
+
+            # Dynamic topology preview mirroring Experience mode. It gives
+            # the user an at-a-glance sense of the shipped agent roster and
+            # how the agents connect before they commit to a decision engine.
+            probe_key = _scenario_probe_key(selected_base, groups)
+            default_agents = get_agents_info(probe_key)
+            default_topo = get_topology_info(probe_key)
+            if default_topo.get("nodes"):
+                from .topology_d3 import render_d3_topology
+                render_d3_topology(default_topo, default_agents, height=340)
+            else:
+                st.caption("No topology data available for this scenario.")
+
             if not variant_keys:
                 st.info("No default variants available for this scenario.")
             else:
@@ -657,6 +775,38 @@ def _show_agent_profile_dialog(agent: dict) -> None:
         st.caption(
             f"No profile file found at examples/AGENT_POOL/finance/{md_stem}.md."
         )
+
+
+@st.dialog("Scenario simulation definition", width="large")
+def _show_finance_scenario_dialog(scenario_base: str) -> None:
+    """Modal that renders the ``finance-{scenario}.md`` target spec.
+
+    The file lives at ``examples/{scenario_base}/finance-{name}.md`` and
+    is the reverse-reconstructed / target-spec scenario definition
+    (meta, phenomenon statement, anchors, stylized facts, historical
+    anchors, roster, environment, parameters, variants, references).
+    Rendering it in a dialog lets users drill into the full definition
+    without leaving the ``Choose how to run it`` page.
+    """
+    display = scenario_display_name(scenario_base)
+    st.markdown(f"### \U0001f4d6 {html.escape(display)} \u2014 scenario definition")
+    path = get_finance_scenario_path(scenario_base)
+    if path is None:
+        st.warning(
+            f"No `finance-*.md` scenario definition found for **{display}**."
+        )
+        st.info(
+            f"Expected at: `examples/{scenario_base}/finance-<name>.md`"
+        )
+        return
+    st.caption(f"Source: `examples/{scenario_base}/{path.name}`")
+    st.divider()
+    content = get_finance_scenario_content(scenario_base) or ""
+    # Strip the leading H1 title \u2014 we already show a header above.
+    lines = content.split("\n")
+    if lines and lines[0].startswith("# "):
+        lines = lines[1:]
+    st.markdown("\n".join(lines).lstrip("\n"))
 
 
 def _theory_basis(markdown: str) -> str:

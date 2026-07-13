@@ -1,17 +1,5 @@
 # CurrencyCrisis — Scenario Target
 
-## §0 Meta CHANGELOG
-
-- 2026-07-13  Polish target-file gate: reverse-reconstructed from existing artefacts (simulation-bases.md, analysis-bases.md, 4 variant implementations, configs); Status set to `locked`.
-- 2026-07-13  Polish run against skill baseline (define/agent-design/implement) — Round 1.
-             - Step 0 (target-file gate): Case B, reverse-reconstructed seed; Status `locked`.
-             - Step 1 (research audit):   5 DOIs verified resolvable; 5 Theory rows six-field complete; bidirectional target §4 ↔ bases §2 coverage green.
-             - Step 2 (agent + env):      5 archetypes rank-precedence green (Rank-1 = Rank-2 = Rank-3); AGENT_POOL three-stage match `reuse` for all 5; 4 icon PNGs generated (speculative-attacker, self-fulfilling-trader, central-bank-defender, fundamental-hedger); noise-trader icon pre-existing; design.md rows #45–#48 added; §3 environment + §5 diversity + §7 communication PASS.
-             - Step 3 (config audit):     4 variants polished; `# Source:` traceability added to Rule/players.yml (all extras annotated); YAML parse PASS all 16 files; variant-folder set matches §10.1.
-             - Step 4 (impl audit):       py_compile PASS all 11 .py files; import smoke PASS all 4 variants; _RAG_FALLBACK added to Rag/players.py (module-level constant, referenced in _build_prompt); RuleLLM dual-section `== PERSONA ==` / `== DECISION RULES ==` PASS (5 prompts); explain.md §2 + analysis.md §2 bidirectional completeness PASS.
-             - Steps 5-10 (review+smoke): Rule 5-round e2e PASS; LLM/RuleLLM/Rag setup-only PASS; three-pass review green.
-- 2026-07-13  Polish Round 2 re-audit — all gates green. Step 0: target file present, Status `released`. Step 1: 5 DOIs in simulation-bases.md. Step 2: 20/20 icon-completeness checks PASS. Step 3: 16/16 YAML parse PASS; 44 `# Source:` annotations in Rule/players.yml. Step 4: 11/11 py_compile PASS; 4/4 import PASS; _RAG_FALLBACK defined+referenced; 5 RuleLLM dual-section prompts PASS. Steps 5-10: Rule 5-round e2e PASS; variant folders {Rule,LLM,RuleLLM,Rag} present. Status: `released`.
-
 ## §1 Meta
 
 | Field         | Content                                                |

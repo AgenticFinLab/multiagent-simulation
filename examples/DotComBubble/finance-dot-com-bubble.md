@@ -1,11 +1,5 @@
 # DotComBubble — Scenario Target
 
-## §0 Meta CHANGELOG
-
-- 2026-07-13  Polish target-file gate (Case B): reverse-reconstructed from existing artefacts (simulation-bases.md, analysis-bases.md, configs/DotComBubble/, variant implementations). Locked for audit.
-- 2026-07-13  Polish run Round 1 against skill baseline (define/agent-design/implement). Step 0 (target-file gate): Case B reverse-reconstructed and locked. Step 1 (research audit): DOI-resolution PASS on all 5 §4 theory anchors; six-field completeness PASS on all 5 simulation-bases.md §2 Theory blocks; bidirectional coverage 5 target §4 anchors to 5 bases §2 Theory blocks green. Step 2 (agent + env): 5 archetypes rank-precedence green (Rank-1 kebab = Rank-2 target §7 = Rank-3 class names across Rule/LLM/RuleLLM/Rag); AGENT_POOL three-stage match outcome `reuse` for all 5 (stub profiles); icon-completeness gate closed: 5 PNGs generated, 5 mapping rows (#49-#53) added to design.md, all Icon rows verified in pool profiles. §3 environment + §5 diversity + §7 communication PASS. Step 3 (config audit): 4 variants polished; YAML parse PASS (16 files); # Source: traceability PASS (Rule 28, LLM 67, RuleLLM 43, Rag 38); variant-folder set matches §10.1. Step 4 (impl audit): py_compile PASS all variants; import smoke PASS all variants; RuleLLM dual-section prompt invariant PASS (5 PERSONA + 5 DECISION RULES pairs); _RAG_FALLBACK define+reference PASS; no-defaults rule PASS (2 legitimate LLM-wiring .get() exceptions in RuleLLM). Steps 5-10 (review + smoke): Rule 5-round e2e PASS; LLM/RuleLLM/Rag setup-only PASS. Status: locked to released.
-- 2026-07-13  Polish run Round 2 full re-audit. All gates re-verified green: target file present (Case A); §4 5 DOI-bearing theory anchors resolve; §2 five Theory blocks six-field complete; icon-completeness 4-check PASS on all 5 archetypes (profile YES, Icon-row YES, PNG YES, design.md-row YES); YAML parse 16/16 PASS; py_compile 4/4 PASS; import smoke 4/4 PASS; RuleLLM dual-section 5+5 PASS; _RAG_FALLBACK define+use PASS; Rule 5-round e2e PASS; LLM/RuleLLM/Rag setup-only PASS. No new defects found. Status confirmed: released.
-
 ## §1 Meta
 
 | Field         | Content                                                           |
