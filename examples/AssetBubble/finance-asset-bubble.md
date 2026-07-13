@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                            |
-|--------------|--------------------------------------------------------------------|
-| Name         | AssetBubble                                                        |
-| Domain       | finance                                                            |
-| Requested By | a77                                                                |
-| Produced By  | define-simulation-scenario-skill.md v1.0.0 (invoking agent: Codex) |
-| Created      | 2026-07-03                                                         |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                         |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)            |
-| Status       | released                                                           |
+| Field       | Content                                                            |
+|-------------|--------------------------------------------------------------------|
+| Name        | AssetBubble                                                        |
+| Domain      | finance                                                            |
+| Produced By | define-simulation-scenario-skill.md v1.0.0 (invoking agent: Codex) |
+| Created     | 2026-07-03                                                         |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                         |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)            |
 
 ## §2 Phenomenon Statement
 

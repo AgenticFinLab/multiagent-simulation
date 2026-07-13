@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                     |
-|--------------|-------------------------------------------------------------|
-| Name         | DispositionEffect                                           |
-| Domain       | finance                                                     |
-| Requested By | a77                                                         |
-| Produced By  | polish-simulation-pipeline.md (reverse-reconstruction seed) |
-| Created      | 2026-07-14                                                  |
-| Pipeline     | masim/skills/polish-simulation-pipeline.md                  |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)     |
-| Status       | released                                                    |
+| Field       | Content                                                     |
+|-------------|-------------------------------------------------------------|
+| Name        | DispositionEffect                                           |
+| Domain      | finance                                                     |
+| Produced By | polish-simulation-pipeline.md (reverse-reconstruction seed) |
+| Created     | 2026-07-14                                                  |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                  |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)     |
 
 ## §2 Phenomenon Statement
 

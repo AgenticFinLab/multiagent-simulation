@@ -4,7 +4,7 @@ purpose: An **executable skill** that produces the upstream target file `{domain
 status: canonical
 audience: The invoking LLM agent that runs this skill on the user's behalf; the user who supplies the minimal inputs; reviewers that re-validate the produced file before the pipeline consumes it.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
-invocation: An LLM agent runs this skill by (a) collecting minimal inputs from the user (see §9 Skill Invocation Workflow), (b) generating every §1 — §10 section per the spec below, (c) running §11 validation three consecutive times, and (d) writing the final file to `examples/{ScenarioName}/{domain}-{scenario}.md` with `Status: draft`. Downstream skills MUST NOT begin scenario construction until the produced file passes §11 validation.
+invocation: An LLM agent runs this skill by (a) collecting minimal inputs from the user (see §9 Skill Invocation Workflow), (b) generating every §1 — §10 section per the spec below, (c) running §11 validation three consecutive times, and (d) writing the final file to `examples/{ScenarioName}/{domain}-{scenario}.md`. Downstream skills MUST NOT begin scenario construction until the produced file passes §11 validation. Lifecycle status (draft / locked / released) is tracked in the sibling `simulation-build-log.md`, not inside the target file.
 ---
 
 # Define-Simulation-Scenario-Skill — Executable Skill for Producing the Scenario Target File
@@ -136,26 +136,24 @@ A single table identifying the file:
 ```markdown
 ## §1 Meta
 
-| Field        | Content                                                                                |
-|--------------|----------------------------------------------------------------------------------------|
-| Name         | {PascalCase scenario name}                                                             |
-| Domain       | finance / opinion / epidemics / sociology / ...                                        |
-| Requested By | {human user's full name or organisation}                                               |
-| Produced By  | define-simulation-scenario-skill.md v{X.Y.Z} (invoking agent: {model / harness label}) |
-| Created      | {YYYY-MM-DD}                                                                           |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                                             |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                                |
-| Status       | draft / locked / released                                                              |
+| Field       | Content                                                                                |
+|-------------|----------------------------------------------------------------------------------------|
+| Name        | {PascalCase scenario name}                                                             |
+| Domain      | finance / opinion / epidemics / sociology / ...                                        |
+| Produced By | define-simulation-scenario-skill.md v{X.Y.Z} (invoking agent: {model / harness label}) |
+| Created     | {YYYY-MM-DD}                                                                           |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                             |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                |
 ```
 
 - **MUST** match `{ScenarioName}` exactly in `Name`.
 - **MUST** declare a `Domain` value that has (or will have) a
   corresponding `examples/AGENT_POOL/{domain}/` folder.
-- **MUST** record the human user in `Requested By` and the invoking
-  skill + agent in `Produced By`. The user does NOT hand-author the
-  file.
-- **MUST** start with `Status: draft`; the pipeline upgrades to
-  `locked` only after §11 validation passes.
+- **MUST** record the invoking skill + agent in `Produced By`. The user
+  does NOT hand-author the file.
+- `Requested By` and `Status` (lifecycle: draft / locked / released)
+  are tracked in the sibling `simulation-build-log.md`, not inside the
+  target file.
 
 ---
 
@@ -455,8 +453,8 @@ For a domain whose sub-template is not listed above, the invoking
 agent MUST first extend this skill with a new domain sub-template (in
 a follow-up revision) before it can produce a valid target file for
 that domain. Until then, the invoking agent MUST NOT emit the target
-file with `Status: draft` — it MUST halt and ask the user to authorise
-the palette extension.
+file — it MUST halt and ask the user to authorise the palette
+extension.
 
 - **MUST** justify each environment element with a citation or a
   pointer to a §4 theory.
@@ -566,9 +564,9 @@ Non-finance instantiations of §10.1 (illustrative — the invoking agent choose
 
 - **MUST** mark at least one variant as `Yes`. Building only the
   deterministic-baseline variant (finance-default: `Rule`) is allowed
-  for prototypes; the invoking agent records the scenario as
-  `prototype` in `Status` rather than allowing it to progress to
-  `released`.
+  for prototypes; the invoking agent records `prototype` in the
+  `simulation-build-log.md` Status field rather than allowing it to
+  progress to `released`.
 - **MUST** specify all four success criteria; the invoking agent MAY
   add more when the user's phenomenon sketch demands them.
 
@@ -589,8 +587,8 @@ The invoking agent MUST pick palettes from the per-domain registry:
 For any domain whose palette has not been written yet, the invoking
 agent MUST include an **§A Domain Palette Appendix** in the produced
 target file that supplies the three palettes (theory family list,
-counterpart enumeration, stylized fact catalogue) before `Status` can
-move from `draft` to `locked`. The appendix becomes a candidate for
+counterpart enumeration, stylized fact catalogue) before the build-log
+Status can move from `draft` to `locked`. The appendix becomes a candidate for
 promotion into `02-root-documents-spec.md` as the project's domain
 catalogue grows.
 
@@ -642,22 +640,21 @@ re-validates.
 
 ## 7. Versioning Rules
 
-- The invoking agent MUST write the first version of a target file
-  with `Status: draft`. The agent runs §11 validation three
-  consecutive times **inside the skill** before writing the file to
-  disk; only then does it hand the file to the pipeline.
-- The pipeline upgrades `Status: draft → locked` only after §11
-  validation passes inside the pipeline (the pipeline re-runs the
-  check; trust but verify).
-- After `Status: locked`, any change to the target file requires the
-  user to authorise a re-run of this skill in **revise mode** (§9.3);
-  the invoking agent then re-emits the file with `Status: draft` and
-  adds a `Revised: YYYY-MM-DD` field beneath `Created` in §1. Users
-  MUST NOT edit the file by hand, even to fix a typo — every change
-  is skill-mediated and audit-trailed.
-- The pipeline upgrades `Status: locked → released` only when Phase 6
-  of `create-simulation-pipeline.md` completes the smoke test
-  successfully.
+- The invoking agent MUST run §11 validation three consecutive times
+  **inside the skill** before writing the file to disk; only then does
+  it hand the file to the pipeline.
+- Lifecycle status (`draft → locked → released`) is recorded in the
+  sibling `simulation-build-log.md`, never inside the target file.
+  The pipeline writes `Status: draft` to the build log upon first
+  acceptance, upgrades to `locked` after its own §11 re-validation
+  passes, and to `released` only when Phase 6 of
+  `create-simulation-pipeline.md` completes the smoke test.
+- After `locked`, any change to the target file requires the user to
+  authorise a re-run of this skill in **revise mode** (§9.3); the
+  invoking agent then re-emits the file and the build log resets to
+  `Status: draft` with a `Revised: YYYY-MM-DD` field added to §1.
+  Users MUST NOT edit the file by hand, even to fix a typo — every
+  change is skill-mediated and audit-trailed.
 
 ---
 
@@ -672,16 +669,14 @@ omitted.
 
 ## §1 Meta
 
-| Field        | Content                                                                |
-|--------------|------------------------------------------------------------------------|
-| Name         | CarryTradeUnwind                                                       |
-| Domain       | finance                                                                |
-| Requested By | Sijia Chen                                                             |
-| Produced By  | define-simulation-scenario-skill.md v1.0.0 (invoking agent: QoderWork) |
-| Created      | 2026-06-29                                                             |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                             |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
-| Status       | draft                                                                  |
+| Field       | Content                                                                |
+|-------------|------------------------------------------------------------------------|
+| Name        | CarryTradeUnwind                                                       |
+| Domain      | finance                                                                |
+| Produced By | define-simulation-scenario-skill.md v1.0.0 (invoking agent: QoderWork) |
+| Created     | 2026-06-29                                                             |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                             |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
 
 ## §2 Phenomenon Statement
 
@@ -846,18 +841,18 @@ confirmations, not co-authoring sessions.
 14. **Run §11 Validation — three consecutive PASS runs.** Any FAIL
     resets the count. The agent MUST NOT skip a checkbox.
 15. **Write the file to disk.** Path
-    `examples/{ScenarioName}/{domain}-{scenario}.md`, with
-    `Status: draft`. Report the file path back to the user; do not
-    attempt to invoke the pipeline in the same turn.
+    `examples/{ScenarioName}/{domain}-{scenario}.md`. Report the file
+    path back to the user; do not attempt to invoke the pipeline in
+    the same turn.
 
 The pipeline `create-simulation-pipeline.md` never starts before
 step 15.
 
 ### 9.3 Revise Mode (Post-Lock Updates)
 
-After the pipeline has upgraded `Status: draft → locked`, any change
-to the target file MUST also go through this skill, in **revise
-mode**:
+After the pipeline has upgraded `Status: draft → locked` in the build
+log, any change to the target file MUST also go through this skill, in
+**revise mode**:
 
 1. The pipeline (or the user) lists the required change (e.g., a
    citation must be replaced; a §7 row must be added because AGENT_POOL
@@ -866,14 +861,14 @@ mode**:
    and the change list.
 3. The invoking agent re-loads the current target file, applies only
    the requested changes, re-runs §11 validation three consecutive
-   times, sets `Status: draft` and adds `Revised: YYYY-MM-DD` to §1,
-   and writes the file back.
+   times, adds `Revised: YYYY-MM-DD` to §1, and writes the file back.
+   The build log resets `Status: draft`.
 4. The pipeline re-validates and re-locks.
 
 Users MUST NOT hand-edit the target file to apply the change, even
 when the change is a one-line typo. Every write to the target file
 after step 15 above is skill-mediated so that the audit trail
-(`Produced By`, `Revised`, and the pipeline's build log) stays
+(`Produced By`, `Revised`, and the pipeline’s build log) stays
 consistent.
 
 ---
@@ -924,8 +919,8 @@ are required, in the style of `agent-design-skill.md §6` and
 - [ ] No top-level `## §N` heading exists outside §1 — §10 (no §0,
       no §11, no unnumbered `##` headings). Auxiliary content belongs
       in `simulation-build-log.md`.
-- [ ] §1 Meta has every row filled, including both `Requested By` and
-      `Produced By`; `Status` is `draft`.
+- [ ] §1 Meta has every row filled (Name, Domain, Produced By,
+      Created, Pipeline, Target Spec).
 - [ ] §2 has all four sub-headings (Trigger, Mechanism, Participants,
       Resolution), each with 3 — 6 sentences (minimum three, maximum
       six).

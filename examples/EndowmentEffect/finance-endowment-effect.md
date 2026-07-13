@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                |
-|--------------|--------------------------------------------------------|
-| Name         | EndowmentEffect                                        |
-| Domain       | finance                                                |
-| Requested By | a77                                                    |
-| Produced By  | polish-simulation-pipeline.md (reverse-reconstruction) |
-| Created      | 2026-07-11                                             |
-| Pipeline     | masim/skills/polish-simulation-pipeline.md             |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md       |
-| Status       | released                                               |
+| Field       | Content                                                |
+|-------------|--------------------------------------------------------|
+| Name        | EndowmentEffect                                        |
+| Domain      | finance                                                |
+| Produced By | polish-simulation-pipeline.md (reverse-reconstruction) |
+| Created     | 2026-07-11                                             |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md             |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md       |
 
 ## §2 Phenomenon Statement
 

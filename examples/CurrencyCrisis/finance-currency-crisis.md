@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                             |
-|--------------|-----------------------------------------------------|
-| Name         | CurrencyCrisis                                      |
-| Domain       | finance                                             |
-| Requested By | a77                                                 |
-| Produced By  | polish-simulation-pipeline.md (reverse-reconstruct) |
-| Created      | 2026-07-13                                          |
-| Pipeline     | masim/skills/polish-simulation-pipeline.md          |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md    |
-| Status       | released                                            |
+| Field       | Content                                             |
+|-------------|-----------------------------------------------------|
+| Name        | CurrencyCrisis                                      |
+| Domain      | finance                                             |
+| Produced By | polish-simulation-pipeline.md (reverse-reconstruct) |
+| Created     | 2026-07-13                                          |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md          |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md    |
 
 ## §2 Phenomenon Statement
 

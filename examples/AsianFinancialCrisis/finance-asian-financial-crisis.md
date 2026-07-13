@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                            |
-|--------------|--------------------------------------------------------------------|
-| Name         | AsianFinancialCrisis                                               |
-| Domain       | finance                                                            |
-| Requested By | Sijia Chen                                                         |
-| Produced By  | define-simulation-scenario-skill.md v1.2.0 (invoking agent: Codex) |
-| Created      | 2026-07-05                                                         |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                         |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.2)            |
-| Status       | released                                                           |
+| Field       | Content                                                            |
+|-------------|--------------------------------------------------------------------|
+| Name        | AsianFinancialCrisis                                               |
+| Domain      | finance                                                            |
+| Produced By | define-simulation-scenario-skill.md v1.2.0 (invoking agent: Codex) |
+| Created     | 2026-07-05                                                         |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                         |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)            |
 
 ## §2 Phenomenon Statement
 

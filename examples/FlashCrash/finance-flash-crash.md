@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                 |
-|--------------|---------------------------------------------------------|
-| Name         | FlashCrash                                              |
-| Domain       | finance                                                 |
-| Requested By | a77                                                     |
-| Produced By  | polish-simulation-pipeline.md (Case B reverse-seed)     |
-| Created      | 2025-07-18                                              |
-| Pipeline     | masim/skills/polish-simulation-pipeline.md              |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.0) |
-| Status       | released                                                |
+| Field       | Content                                                 |
+|-------------|---------------------------------------------------------|
+| Name        | FlashCrash                                              |
+| Domain      | finance                                                 |
+| Produced By | polish-simulation-pipeline.md (Case B reverse-seed)     |
+| Created     | 2025-07-18                                              |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md              |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0) |
 
 ## §2 Phenomenon Statement
 

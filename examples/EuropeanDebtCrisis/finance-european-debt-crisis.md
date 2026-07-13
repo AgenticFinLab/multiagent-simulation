@@ -2,16 +2,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                                  |
-|--------------|--------------------------------------------------------------------------|
-| Name         | EuropeanDebtCrisis                                                       |
-| Domain       | finance                                                                  |
-| Requested By | a77                                                                      |
-| Produced By  | polish-simulation-pipeline (reverse-reconstruct from existing artefacts) |
-| Created      | 2026-07-15                                                               |
-| Pipeline     | masim/skills/polish-simulation-pipeline.md                               |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md                         |
-| Status       | released                                                                 |
+| Field       | Content                                                                  |
+|-------------|--------------------------------------------------------------------------|
+| Name        | EuropeanDebtCrisis                                                       |
+| Domain      | finance                                                                  |
+| Produced By | polish-simulation-pipeline (reverse-reconstruct from existing artefacts) |
+| Created     | 2026-07-15                                                               |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                               |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md                         |
 
 ## §2 Phenomenon Statement
 

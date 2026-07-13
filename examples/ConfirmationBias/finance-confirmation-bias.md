@@ -21,16 +21,14 @@
 
 ## §1 Meta
 
-| Field        | Content                                                                                    |
-|--------------|--------------------------------------------------------------------------------------------|
-| Name         | ConfirmationBias                                                                           |
-| Domain       | finance                                                                                    |
-| Requested By | Sijia Chen                                                                                 |
-| Produced By  | polish-simulation-pipeline.md v2 Case B reverse-reconstruction (invoking agent: QoderWork) |
-| Created      | 2026-07-12                                                                                 |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                                                 |
-| Target Spec  | masim/skills/define-simulation-scenario-skill.md (v1.2)                                    |
-| Status       | released                                                                                   |
+| Field       | Content                                                                                    |
+|-------------|--------------------------------------------------------------------------------------------|
+| Name        | ConfirmationBias                                                                           |
+| Domain      | finance                                                                                    |
+| Produced By | polish-simulation-pipeline.md v2 Case B reverse-reconstruction (invoking agent: QoderWork) |
+| Created     | 2026-07-12                                                                                 |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                 |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                    |
 
 ## §2 Phenomenon Statement
 
