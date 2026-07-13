@@ -24,7 +24,7 @@ Before writing or modifying any code in this step, **open the agent's design spe
 4. **Serialization format** — the canonical tag pattern `<analysis>...</analysis><decision>{JSON}</decision>` (see this file's `OUTPUT FORMAT` blocks below) is mandated by the contract, NOT invented here. The JSON keys MUST match the contract's Outputs table verbatim.
 5. **Variant parity** — each of the four canonical variants `Rule`, `LLM`, `RuleLLM`, `Rag` that is declared `Yes` in target §10.1 MUST emit the same output field set. Every variant is implemented independently and MUST pass a smoke run before Step 5. If a target scenario needs a fifth variant, the `implement-simulation-skill` docs MUST be upgraded first (see `01-mandatory-structure.md § Canonical Variant Set — Introducing a new variant`); no variant may be added silently. If any canonical variant needs a new output field, extend the design's §3.6.0 FIRST, then propagate to every one of `Rule`, `LLM`, `RuleLLM`, `Rag`.
 
-**Conflict resolution rule:** on any conflict between the agent's §3.6.0 I/O Contract and prose elsewhere (§3.6.2 mechanism, §3.6.3 action space, or target §4.1.X appendix), the §3.6.0 contract wins. Reconcile the other section in the same commit.
+**Conflict resolution rule:** on any conflict between the agent's §3.6.0 I/O Contract and prose elsewhere (§3.6.2 mechanism, §3.6.3 action space, or target §4.1.X appendix), the §3.6.0 contract wins. Reconcile the other section in the same editing pass.
 
 **Canonical variant set:** the four variants named across this file — `Rule`, `LLM`, `RuleLLM`, `Rag` — are the *only* variants supported by the current version of `implement-simulation-skill`. Each MUST be implemented completely and independently for every scenario that declares it `Yes` in target §10.1. If a scenario needs a variant outside this set, follow the upgrade procedure in `01-mandatory-structure.md § Canonical Variant Set — Introducing a new variant` BEFORE writing code (add named coverage in every implement-* doc, then implement).
 
@@ -40,24 +40,24 @@ This block is the **stable I/O declaration** for Step 4. Both
 
 **Inputs (consumed).**
 
-| Source                                              | Used for                                                    |
-|-----------------------------------------------------|-------------------------------------------------------------|
-| Target §10.1 (variants marked `Yes`)                | which `{V}/` folders to implement, and in what order         |
-| `simulation-bases.md §3` Environment Design (finance appendix: Market Design)         | Coordinator class implementation                                |
-| `simulation-bases.md §4.{N}` Agent blocks (finance appendix: Investor blocks)          | one Player class per agent, one prompt per agent (LLM-based variants) |
-| `configs/{ScenarioName}/{V}/*.yml`                  | runtime `extras` values (fail-fast access — no defaults)    |
-| `masim/skills/implement-simulation-skill/03-variant-documents-spec.md` | `explain.md` and `analysis.md` layout          |
+| Source                                                                        | Used for                                                              |
+|-------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| Target §10.1 (variants marked `Yes`)                                          | which `{V}/` folders to implement, and in what order                  |
+| `simulation-bases.md §3` Environment Design (finance appendix: Market Design) | Coordinator class implementation                                      |
+| `simulation-bases.md §4.{N}` Agent blocks (finance appendix: Investor blocks) | one Player class per agent, one prompt per agent (LLM-based variants) |
+| `configs/{ScenarioName}/{V}/*.yml`                                            | runtime `extras` values (fail-fast access — no defaults)              |
+| `masim/skills/implement-simulation-skill/03-variant-documents-spec.md`        | `explain.md` and `analysis.md` layout                                 |
 
 **Outputs (produced).**
 
-| Artefact per built `V`                                     | Extent of write                                                |
-|------------------------------------------------------------|----------------------------------------------------------------|
-| `examples/{ScenarioName}/{V}/players.py`                   | Coordinator class + one Player class per §4.{N} block (finance appendix: `Market` + investor players); **fail-fast** — no `extras.get(key, default)`, no `decision.get("action", fallback)` |
-| `examples/{ScenarioName}/{V}/analysis.py`                  | metric functions per `analysis-bases.md §2` (LLM-based: also decision-field extractors per §4.2.3) |
-| `examples/{ScenarioName}/{V}/run_{name}.py`                | orchestration entry point                                      |
-| `examples/{ScenarioName}/{V}/prompts.py` (LLM-based variants only) | system prompt + user prompt template + parser                  |
-| `examples/{ScenarioName}/{V}/explain.md`                   | 9-section implementation guide per `03-variant-documents-spec.md` — traces every §4.{N} back to the class/method that implements it |
-| `examples/{ScenarioName}/{V}/analysis.md`                  | 7-section analysis guide per `03-variant-documents-spec.md` — traces every `analysis-bases.md §2` metric to a function |
+| Artefact per built `V`                                             | Extent of write                                                                                                                                                                             |
+|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `examples/{ScenarioName}/{V}/players.py`                           | Coordinator class + one Player class per §4.{N} block (finance appendix: `Market` + investor players); **fail-fast** — no `extras.get(key, default)`, no `decision.get("action", fallback)` |
+| `examples/{ScenarioName}/{V}/analysis.py`                          | metric functions per `analysis-bases.md §2` (LLM-based: also decision-field extractors per §4.2.3)                                                                                          |
+| `examples/{ScenarioName}/{V}/run_{name}.py`                        | orchestration entry point                                                                                                                                                                   |
+| `examples/{ScenarioName}/{V}/prompts.py` (LLM-based variants only) | system prompt + user prompt template + parser                                                                                                                                               |
+| `examples/{ScenarioName}/{V}/explain.md`                           | 9-section implementation guide per `03-variant-documents-spec.md` — traces every §4.{N} back to the class/method that implements it                                                         |
+| `examples/{ScenarioName}/{V}/analysis.md`                          | 7-section analysis guide per `03-variant-documents-spec.md` — traces every `analysis-bases.md §2` metric to a function                                                                      |
 
 **Polish Hooks (what a polish audit re-verifies against this step).**
 When `polish-simulation-pipeline.md` audits Step 4, it MUST re-run
@@ -246,12 +246,12 @@ The within-scenario DRY hierarchy (`LLM/analysis.py` imports scenario-specific o
 
 #### Required top-level functions
 
-| Function                                       | Purpose                                                                                                                                                 |
-|------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `_load_data(results)` (from `masim.evaluation.data_loader.load_data`) | Load all coordinator batch stores + agent turn payloads from `SimulationResults`                                                                     |
-| `_validate_{scenario}(...)`                    | Validate results against `analysis-bases.md §6` calibration targets; returns a result object with `.score`, `.is_valid`, `.criteria`, `.interpretation` |
-| `analyze_{scenario}(data, config, output_dir)` | Orchestrates metrics → validation → plots → `summary.json`; prints structured report                                                                    |
-| `main()`                                       | `load_config` → `load_results` → `_load_data` → `analyze_{scenario}`                                                                                    |
+| Function                                                              | Purpose                                                                                                                                                 |
+|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `_load_data(results)` (from `masim.evaluation.data_loader.load_data`) | Load all coordinator batch stores + agent turn payloads from `SimulationResults`                                                                        |
+| `_validate_{scenario}(...)`                                           | Validate results against `analysis-bases.md §6` calibration targets; returns a result object with `.score`, `.is_valid`, `.criteria`, `.interpretation` |
+| `analyze_{scenario}(data, config, output_dir)`                        | Orchestrates metrics → validation → plots → `summary.json`; prints structured report                                                                    |
+| `main()`                                                              | `load_config` → `load_results` → `_load_data` → `analyze_{scenario}`                                                                                    |
 
 #### Output standard: structured validation report
 
@@ -388,12 +388,12 @@ def _build_interpretation(
 
 Every `Rule/analysis.py` must produce the following PNG files in `{base_dir}/analysis/`:
 
-| Filename                     | Contents                                        | Primary metrics shown                       |
-|------------------------------|-------------------------------------------------|---------------------------------------------|
-| `00_agent_actions.png`       | Environment state trajectory + each agent's action-price/level curves | Headline overview — agent behaviour vs environment state (finance appendix: agent bids vs market price) |
-| `01_{scenario}_dynamics.png` | Environment state vs. Anchor/Reference time-series + Deviation % (finance appendix: Price vs. Fundamental)     | Main phenomenon trajectory                  |
-| `02_{scenario}_analysis.png` | Phenomenon-specific deep-dive                   | Scenario-specific metric(s)                 |
-| `03_summary.png`             | Agent volume/participation bar + Persistence/Residual chart   | Agent behavior + convergence                |
+| Filename                     | Contents                                                                                                   | Primary metrics shown                                                                                   |
+|------------------------------|------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| `00_agent_actions.png`       | Environment state trajectory + each agent's action-price/level curves                                      | Headline overview — agent behaviour vs environment state (finance appendix: agent bids vs market price) |
+| `01_{scenario}_dynamics.png` | Environment state vs. Anchor/Reference time-series + Deviation % (finance appendix: Price vs. Fundamental) | Main phenomenon trajectory                                                                              |
+| `02_{scenario}_analysis.png` | Phenomenon-specific deep-dive                                                                              | Scenario-specific metric(s)                                                                             |
+| `03_summary.png`             | Agent volume/participation bar + Persistence/Residual chart                                                | Agent behavior + convergence                                                                            |
 
 **Plot 0 specification** (`00_agent_actions.png`):
 - Layout: single-panel, `figsize=(16, 8)` — the "headline" chart.

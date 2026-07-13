@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                     |
-|-------------|-------------------------------------------------------------|
-| Name        | DispositionEffect                                           |
-| Domain      | finance                                                     |
-| Produced By | polish-simulation-pipeline.md (reverse-reconstruction seed) |
-| Created     | 2026-07-14                                                  |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md                  |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)     |
+| Field       | Content                                                                                                                  |
+|-------------|--------------------------------------------------------------------------------------------------------------------------|
+| Name        | DispositionEffect                                                                                                        |
+| Domain      | finance                                                                                                                  |
+| Phenomenon  | Loss aversion causes investors to sell winners too early and hold losers too long, distorting volume and price dynamics. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                               |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                  |
 
 ## §2 Phenomenon Statement
 

@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                |
-|-------------|--------------------------------------------------------|
-| Name        | FlashCrash2010                                         |
-| Domain      | finance                                                |
-| Produced By | polish-simulation-pipeline.md (reverse-reconstruction) |
-| Created     | 2025-07-17                                             |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md             |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md       |
+| Field       | Content                                                                                                                              |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | FlashCrash2010                                                                                                                       |
+| Domain      | finance                                                                                                                              |
+| Phenomenon  | HFT market-maker withdrawal and order-book depth collapse amplify a single large sell programme into a system-wide liquidity vacuum. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                           |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md                                                                                     |
 
 ## §2 Phenomenon Statement
 

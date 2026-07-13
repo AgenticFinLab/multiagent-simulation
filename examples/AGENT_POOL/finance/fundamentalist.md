@@ -180,6 +180,5 @@ Decision: hold.
 | Author | AgenticFinLab |
 | Created | 2025-07-14 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 - Initial creation based on Brock-Hommes fundamentalist archetype |
 | Status | draft |
 | Icon        | ![](../agent_images/icons/finance-fundamentalist.png) |

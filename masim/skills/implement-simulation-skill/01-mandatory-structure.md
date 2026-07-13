@@ -12,9 +12,9 @@ The `implement-simulation-skill/*.md` documents are written against a **fixed, e
 
 **Current canonical variant set (v-current):**
 
-| Variant   | Capability class            | Required per-variant files                                                                     |
-|-----------|-----------------------------|------------------------------------------------------------------------------------------------|
-| `Rule`    | rule-driven (deterministic) | `__init__.py`, `players.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md`            |
+| Variant   | Capability class            | Required per-variant files                                                                        |
+|-----------|-----------------------------|---------------------------------------------------------------------------------------------------|
+| `Rule`    | rule-driven (deterministic) | `__init__.py`, `players.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md`               |
 | `LLM`     | model-driven                | `__init__.py`, `players.py`, `prompts.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md` |
 | `RuleLLM` | hybrid (rule + model)       | `__init__.py`, `players.py`, `prompts.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md` |
 | `Rag`     | retrieval-augmented         | `__init__.py`, `players.py`, `prompts.py`, `run_*.py`, `analysis.py`, `explain.md`, `analysis.md` |
@@ -28,12 +28,12 @@ The `implement-simulation-skill/*.md` documents are written against a **fixed, e
 
 No variant may be silently skipped or partially implemented. If target §10.1 declares only a subset (e.g. `Rule` and `LLM` for a prototype), the *unbuilt* variants MUST NOT have folders, and the scenario MUST be recorded as `prototype` in `simulation-build-log.md`.
 
-**Introducing a new variant.** If a scenario needs a variant outside the canonical set (e.g. `Behavioural`, `EvolutionaryRule`, `MultiModelEnsemble`), the implement-* docs MUST be upgraded in the same commit:
+**Introducing a new variant.** If a scenario needs a variant outside the canonical set (e.g. `Behavioural`, `EvolutionaryRule`, `MultiModelEnsemble`), the implement-* docs MUST be upgraded in the same editing pass:
 
 1. Add the new variant as a named row in this table.
 2. Extend every checklist and template in `01-mandatory-structure.md`, `03-variant-documents-spec.md`, `07-step3-config.md`, `08-step4-implement.md`, and `09-step5-to-10-review.md` to name the new variant explicitly and describe its required per-variant files, implementation obligations, and per-variant tests.
 3. Extend `agent-design-skill.md §3.6.0` if the new variant introduces a new input surface or output field.
-4. Bump the version of every touched skill doc and record the addition in its change log.
+4. Bump the version of every touched skill doc.
 
 Renaming or removing a canonical variant follows the same rule — no implicit inheritance from a generic capability class is permitted at the implementation layer. The class labels (rule-driven / model-driven / hybrid / retrieval-augmented) are pedagogical categories only; they clarify *why* a variant has certain files, but they do NOT stand in for explicit enumeration.
 
@@ -108,24 +108,24 @@ examples/{SimulationName}/
 
 ## 2. File Roles at a Glance
 
-| File                       | Scope               | Purpose                                                                                                                                    |
-|----------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `{domain}-{scenario}.md`   | Root (all variants) | UPSTREAM INPUT — scenario target file, produced by invoking `masim/skills/define-simulation-scenario-skill.md`. Users MUST NOT hand-author this file. |
-| `simulation-build-log.md`     | Root (all variants) | PIPELINE LOG — AGENT_POOL gate decisions (§A), research notes (§B), open questions (§C), per-phase build log (§D).                         |
-| `simulation-bases.md`      | Root (all variants) | Single source of truth: phenomenon theory, environment design, agent taxonomy (behavioral archetypes), model parameters (finance appendix relabels agent → investor, environment → market)                        |
-| `analysis-bases.md`        | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale                                              |
-| `{Variant}/explain.md`     | Per variant         | How this variant concretely implements the design in `simulation-bases.md` — every element traces to a `simulation-bases.md §N.M` citation |
-| `{Variant}/analysis.md`    | Per variant         | How this variant concretely executes the analysis defined in `analysis-bases.md` — every metric traces to a function in `analysis.py`      |
-| `{Variant}/players.py`     | Per variant         | All agent class implementations                                                                                                            |
-| `{Variant}/prompts.py`     | LLM/RuleLLM/Rag     | System and user prompt constants                                                                                                           |
-| `{Variant}/run_*.py`       | Per variant         | Simulation entry point using `SimulationRunner`                                                                                            |
-| `{Variant}/analysis.py`    | Per variant         | Analysis script generating plots and reports                                                                                               |
+| File                      | Scope               | Purpose                                                                                                                                                                                    |
+|---------------------------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `{domain}-{scenario}.md`  | Root (all variants) | UPSTREAM INPUT — scenario target file, produced by invoking `masim/skills/define-simulation-scenario-skill.md`. Users MUST NOT hand-author this file.                                      |
+| `simulation-build-log.md` | Root (all variants) | PIPELINE LOG — AGENT_POOL gate decisions (§A), research notes (§B), open questions (§C), per-phase build log (§D).                                                                         |
+| `simulation-bases.md`     | Root (all variants) | Single source of truth: phenomenon theory, environment design, agent taxonomy (behavioral archetypes), model parameters (finance appendix relabels agent → investor, environment → market) |
+| `analysis-bases.md`       | Root (all variants) | Single source of truth: analysis dimensions, metrics, expected outcomes, evaluation rationale                                                                                              |
+| `{Variant}/explain.md`    | Per variant         | How this variant concretely implements the design in `simulation-bases.md` — every element traces to a `simulation-bases.md §N.M` citation                                                 |
+| `{Variant}/analysis.md`   | Per variant         | How this variant concretely executes the analysis defined in `analysis-bases.md` — every metric traces to a function in `analysis.py`                                                      |
+| `{Variant}/players.py`    | Per variant         | All agent class implementations                                                                                                                                                            |
+| `{Variant}/prompts.py`    | LLM/RuleLLM/Rag     | System and user prompt constants                                                                                                                                                           |
+| `{Variant}/run_*.py`      | Per variant         | Simulation entry point using `SimulationRunner`                                                                                                                                            |
+| `{Variant}/analysis.py`   | Per variant         | Analysis script generating plots and reports                                                                                                                                               |
 
 ### Architecturally Valid Optional Files
 
-| File          | Scope                     | When Warranted                                                        | Purpose                                                                                                        |
-|---------------|---------------------------|-----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| `metrics.py`  | Per scenario (root level) | Scenario defines ≥20 domain-specific metrics with unique behavioral logic | Metric catalogue for the registry; computation delegates to `masim/evaluation/`, error adaptation via wrapper pattern |
+| File         | Scope                     | When Warranted                                                            | Purpose                                                                                                               |
+|--------------|---------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| `metrics.py` | Per scenario (root level) | Scenario defines ≥20 domain-specific metrics with unique behavioral logic | Metric catalogue for the registry; computation delegates to `masim/evaluation/`, error adaptation via wrapper pattern |
 
 These files are not required for structural compliance but are the recognized extension point for large-catalogue scenarios. They MUST import all computation primitives from `masim/evaluation/` and MUST NOT reimplement functions that exist there. Scenario-specific helpers (config parsing, payload accounting, phase detection) may remain local with documenting comments.
 

@@ -21,7 +21,6 @@ This block is the **stable I/O declaration** for Steps 5 — 10. Both
 | `simulation-build-log.md §D`            | one row per Step 5 — 9 review pass (`pass` / `fail` / `defect-raised`) |
 | `simulation-build-log.md §C`            | any newly surfaced open question or risk                               |
 | Target file `Status: locked → released` | Step 10 final-review closeout                                          |
-| Target §0 Meta CHANGELOG                | one line summarising the run                                           |
 
 **Polish Hooks (what a polish audit re-verifies against Steps 5 — 10).**
 When `polish-simulation-pipeline.md` audits Steps 5 — 10, it re-runs
@@ -65,7 +64,7 @@ Coverage:
   total pool `.md` count, total icon PNG count, and the three
   differences (unused pool files, unused icons, archetypes lacking an
   icon). All three differences MUST be zero or explicitly accepted in
-  the polish run's target §0 Meta CHANGELOG.
+  the polish run's local log (`tmpl/polish-log.md`).
 
 ---
 

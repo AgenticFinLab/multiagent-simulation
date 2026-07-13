@@ -17,14 +17,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                                                    |
-|-------------|--------------------------------------------------------------------------------------------|
-| Name        | AnchoringEffect                                                                            |
-| Domain      | finance                                                                                    |
-| Produced By | polish-simulation-pipeline.md v2 Case B reverse-reconstruction (invoking agent: QoderWork) |
-| Created     | 2026-07-01                                                                                 |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                                                 |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                    |
+| Field       | Content                                                                                                                                     |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | AnchoringEffect                                                                                                                             |
+| Domain      | finance                                                                                                                                     |
+| Phenomenon  | Traders anchor to stale reference prices and under-adjust to new information, creating persistent mispricing relative to fundamental value. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                                  |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                     |
 
 ## §2 Phenomenon Statement
 

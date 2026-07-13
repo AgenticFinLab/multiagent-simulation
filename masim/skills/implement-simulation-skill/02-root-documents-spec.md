@@ -233,14 +233,14 @@ domain appendix invoked in §4.1 for the canonical formulation.]
 
 **Variable Definitions**:
 
-| Symbol | Name           | Definition                                  | Role in Phenomenon            |
-|--------|----------------|---------------------------------------------|-------------------------------|
-| [sym]  | [State var]    | [What it represents]                        | State variable                |
-| [sym]  | [Aggregate]    | [Aggregation of agent actions]              | Drives state change           |
-| [sym]  | [Anchor]       | [Reference / equilibrium / target level]    | Reversion anchor              |
-| [sym]  | [Sensitivity]  | [Coupling parameter]                        | [Calibrated value and source] |
-| [sym]  | [Reversion]    | [Speed of return to anchor]                 | [Calibrated value and source] |
-| [sym]  | [Noise]        | [Distribution]                              | Background randomness         |
+| Symbol | Name          | Definition                               | Role in Phenomenon            |
+|--------|---------------|------------------------------------------|-------------------------------|
+| [sym]  | [State var]   | [What it represents]                     | State variable                |
+| [sym]  | [Aggregate]   | [Aggregation of agent actions]           | Drives state change           |
+| [sym]  | [Anchor]      | [Reference / equilibrium / target level] | Reversion anchor              |
+| [sym]  | [Sensitivity] | [Coupling parameter]                     | [Calibrated value and source] |
+| [sym]  | [Reversion]   | [Speed of return to anchor]              | [Calibrated value and source] |
+| [sym]  | [Noise]       | [Distribution]                           | Background randomness         |
 
 **Calibration Rationale**:
 For EACH parameter of the update law:
@@ -290,13 +290,13 @@ enforcement, etc.):
 
 Each round, the environment broadcasts to all agents:
 
-| Field           | Type   | Definition                                       | Rationale for Inclusion               |
-|-----------------|--------|--------------------------------------------------|---------------------------------------|
-| [state]         | float  | [Primary state variable — e.g., price, mean opinion, prevalence] | Primary signal for all agents |
-| [anchor]        | float  | [Reference / equilibrium / target — e.g., fundamental, prior belief] | Required by anchor-sensitive agents |
-| [deviation]     | float  | (state − anchor) / anchor                        | Pre-computed; used by most agents     |
-| `round`         | int    | Current round number                             | Needed for frequency-controlled agents |
-| [field]         | [type] | [definition]                                     | [why included, which agents use it]   |
+| Field       | Type   | Definition                                                           | Rationale for Inclusion                |
+|-------------|--------|----------------------------------------------------------------------|----------------------------------------|
+| [state]     | float  | [Primary state variable — e.g., price, mean opinion, prevalence]     | Primary signal for all agents          |
+| [anchor]    | float  | [Reference / equilibrium / target — e.g., fundamental, prior belief] | Required by anchor-sensitive agents    |
+| [deviation] | float  | (state − anchor) / anchor                                            | Pre-computed; used by most agents      |
+| `round`     | int    | Current round number                                                 | Needed for frequency-controlled agents |
+| [field]     | [type] | [definition]                                                         | [why included, which agents use it]    |
 
 **Design Notes**:
 [Explain any deliberate exclusions — e.g., "return_pct is NOT broadcast; all
@@ -350,20 +350,20 @@ sub-blocks land at `######`. All other content — field schemas, table
 column names, validation requirements, RFC-2119 modal verbs — applies
 unchanged.
 
-| Inside this file (embedded)                           | Handbook canonical level (standalone)       | Handbook section name                 |
-|-------------------------------------------------------|---------------------------------------------|---------------------------------------|
-| `### Agent: {ClassName}`                              | `# <agent role description>`                | Title                                 |
-| `#### 4.{N}.1 Summary`                                | `## Summary`                                | Summary (7 fixed rows)                |
-| `#### 4.{N}.2 Definition and Goals`                   | `## Definition and Goals`                   | Definition and Goals (3 paragraphs)   |
-| `#### 4.{N}.3 Theoretical Foundation`                 | `## Theoretical Foundation`                 | Theoretical Foundation (≥1 sub-block) |
-| `#### 4.{N}.4 Design Purpose and Activation Triggers` | `## Design Purpose and Activation Triggers` | Activation / Deactivation / Regime    |
-| `#### 4.{N}.5 Behavioral Framework`                   | `## Behavioral Framework`                   | 5 H4 sub-blocks (see below)           |
-| `#### 4.{N}.6 Parameters`                             | `## Parameters`                             | 8-column parameter table              |
-| `#### 4.{N}.7 Population and Heterogeneity`           | *(domain-instantiation extension — not in handbook §3 canonical order; supplied by the domain appendix invoked in §4.1)* | 5-row population table |
-| `#### 4.{N}.8 Worked Numerical Examples`              | `## Worked Numerical Examples`              | ≥3 cases + 1 edge case                |
-| `#### 4.{N}.9 Validation and Calibration`             | `## Behavioral Verification and Calibration` | Includes Ablation Hooks               |
-| `#### 4.{N}.10 Academic References`                   | `## Academic References`                    | Numbered citation table               |
-| `#### 4.{N}.11 Design Provenance and Versioning`      | `## Design Provenance and Versioning`       | 6-row provenance footer               |
+| Inside this file (embedded)                           | Handbook canonical level (standalone)                                                                                    | Handbook section name                 |
+|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
+| `### Agent: {ClassName}`                              | `# <agent role description>`                                                                                             | Title                                 |
+| `#### 4.{N}.1 Summary`                                | `## Summary`                                                                                                             | Summary (7 fixed rows)                |
+| `#### 4.{N}.2 Definition and Goals`                   | `## Definition and Goals`                                                                                                | Definition and Goals (3 paragraphs)   |
+| `#### 4.{N}.3 Theoretical Foundation`                 | `## Theoretical Foundation`                                                                                              | Theoretical Foundation (≥1 sub-block) |
+| `#### 4.{N}.4 Design Purpose and Activation Triggers` | `## Design Purpose and Activation Triggers`                                                                              | Activation / Deactivation / Regime    |
+| `#### 4.{N}.5 Behavioral Framework`                   | `## Behavioral Framework`                                                                                                | 5 H4 sub-blocks (see below)           |
+| `#### 4.{N}.6 Parameters`                             | `## Parameters`                                                                                                          | 8-column parameter table              |
+| `#### 4.{N}.7 Population and Heterogeneity`           | *(domain-instantiation extension — not in handbook §3 canonical order; supplied by the domain appendix invoked in §4.1)* | 5-row population table                |
+| `#### 4.{N}.8 Worked Numerical Examples`              | `## Worked Numerical Examples`                                                                                           | ≥3 cases + 1 edge case                |
+| `#### 4.{N}.9 Validation and Calibration`             | `## Behavioral Verification and Calibration`                                                                             | Includes Ablation Hooks               |
+| `#### 4.{N}.10 Academic References`                   | `## Academic References`                                                                                                 | Numbered citation table               |
+| `#### 4.{N}.11 Design Provenance and Versioning`      | `## Design Provenance and Versioning`                                                                                    | 6-row provenance footer               |
 
 The Behavioral Framework's five sub-blocks are placed at `######` in the
 embedded form: `4.{N}.5.1 Decision Information Set`, `4.{N}.5.2 Core
@@ -381,13 +381,13 @@ specific vocabulary, palettes, and label substitutions are quarantined into
 **per-domain appendices** attached to this section. Each appendix is
 identified by a suffix letter and MUST be named canonically:
 
-| Appendix ID | Domain               | Status        |
-|-------------|----------------------|---------------|
-| §4.1.F      | Finance / market-trading | Complete (below) |
-| §4.1.O      | Opinion Dynamics     | Sibling slot — add when first opinion-dynamics scenario is authored |
-| §4.1.E      | Epidemics            | Sibling slot — add when first epidemics scenario is authored |
-| §4.1.S      | Sociology / norms    | Sibling slot — add when first sociology scenario is authored |
-| §4.1.X      | Any future domain    | Reserved for extension                                     |
+| Appendix ID | Domain                   | Status                                                              |
+|-------------|--------------------------|---------------------------------------------------------------------|
+| §4.1.F      | Finance / market-trading | Complete (below)                                                    |
+| §4.1.O      | Opinion Dynamics         | Sibling slot — add when first opinion-dynamics scenario is authored |
+| §4.1.E      | Epidemics                | Sibling slot — add when first epidemics scenario is authored        |
+| §4.1.S      | Sociology / norms        | Sibling slot — add when first sociology scenario is authored        |
+| §4.1.X      | Any future domain        | Reserved for extension                                              |
 
 **Selection rule.** Every scenario invokes exactly one appendix from the
 list above (matching target §1 `Domain`). If no appendix exists for the
@@ -492,16 +492,16 @@ Also: the handbook Summary row labelled `Behavioral Tendency` is
 The handbook §3.6.3 row labels are substituted as follows. Row order is
 preserved; only the labels change:
 
-| Handbook generic label   | Market-trading label         |
-|--------------------------|------------------------------|
-| Action types allowed     | Order types allowed          |
-| Action parameter rule    | Price level rule             |
-| Sizing rule              | Order quantity rule          |
-| Action lifetime          | Order lifetime               |
-| Revision policy          | Cancellation policy          |
-| State constraint         | Inventory constraint         |
-| Resource cap             | Wealth / leverage cap        |
-| Exit rule                | Stop-loss / kill rule        |
+| Handbook generic label | Market-trading label  |
+|------------------------|-----------------------|
+| Action types allowed   | Order types allowed   |
+| Action parameter rule  | Price level rule      |
+| Sizing rule            | Order quantity rule   |
+| Action lifetime        | Order lifetime        |
+| Revision policy        | Cancellation policy   |
+| State constraint       | Inventory constraint  |
+| Resource cap           | Wealth / leverage cap |
+| Exit rule              | Stop-loss / kill rule |
 
 Environment-imposed limits (matching engine, tick grid, fee schedule,
 latency, regulator-imposed caps) MUST NOT appear in this table — they
@@ -537,15 +537,15 @@ The block layout for one agent in `simulation-bases.md` is:
 
 #### 4.{N}.1 Summary
 
-| Field                 | Content                                                                  |
-|-----------------------|--------------------------------------------------------------------------|
-| Archetype             | <one-line role phrase, matches the H3>                                   |
-| Theory Family         | <from the Theory Family palette in the domain appendix invoked in §4.1> |
+| Field                 | Content                                                                                                                                                                                                    |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Archetype             | <one-line role phrase, matches the H3>                                                                                                                                                                     |
+| Theory Family         | <from the Theory Family palette in the domain appendix invoked in §4.1>                                                                                                                                    |
 | Domain Role           | **Destabilising** / **Stabilising** / **Context-dependent** — <one-line> (Finance appendix relabels this row to `Market Role`; sibling appendices relabel analogously — see §4.1.F.4 and its equivalents.) |
-| Time Horizon          | <short / medium / long>                                                  |
-| Risk Tolerance        | <low / medium / high>                                                    |
-| Information Asymmetry | <none / partial / full>                                                  |
-| Determinism           | <deterministic / stochastic-given-seed / non-deterministic>              |
+| Time Horizon          | <short / medium / long>                                                                                                                                                                                    |
+| Risk Tolerance        | <low / medium / high>                                                                                                                                                                                      |
+| Information Asymmetry | <none / partial / full>                                                                                                                                                                                    |
+| Determinism           | <deterministic / stochastic-given-seed / non-deterministic>                                                                                                                                                |
 
 #### 4.{N}.2 Definition and Goals
 <3 short paragraphs (8–14 sentences total) per handbook §3.3:
@@ -630,8 +630,8 @@ at least one Ablation Hook with hypothesis.>
 the entry MUST appear here.>
 
 #### 4.{N}.11 Design Provenance and Versioning
-<6-row footer per handbook §3.11: Author, Reviewed by (optional), Created,
-Version (semver), Change log, Status.>
+<5-row footer per handbook §3.11: Author, Reviewed by (optional), Created,
+Version (semver), Status.>
 ```
 
 ---
@@ -674,14 +674,14 @@ What is the minimum subset of agents needed? What would break if one type were r
 ```markdown
 ## 6. Parameter Table
 
-| Parameter         | Symbol | Value | Typical Range    | Source Citation | Description                                          | Sensitivity      |
-|-------------------|--------|-------|------------------|-----------------|------------------------------------------------------|------------------|
-| [state_init]      | [sym]  | [val] | [range]          | [Full citation] | Starting value of the primary state variable        | Low — scale only |
-| [anchor]          | [sym]  | [val] | [range]          | [Full citation] | Reference / equilibrium level                       | Medium           |
-| [coupling]        | [sym]  | [val] | [range from lit] | [Full citation] | Sensitivity of state to aggregate agent action      | High             |
-| [reversion]       | [sym]  | [val] | [range from lit] | [Full citation] | Attraction speed toward the anchor                  | High             |
-| [noise_std]       | [sym]  | [val] | [range]          | [Full citation] | Noise term standard deviation                       | Low              |
-| [agent param]     | [sym]  | [val] | [range]          | [Full citation] | [Meaning]                                           | [High/Med/Low]   |
+| Parameter     | Symbol | Value | Typical Range    | Source Citation | Description                                    | Sensitivity      |
+|---------------|--------|-------|------------------|-----------------|------------------------------------------------|------------------|
+| [state_init]  | [sym]  | [val] | [range]          | [Full citation] | Starting value of the primary state variable   | Low — scale only |
+| [anchor]      | [sym]  | [val] | [range]          | [Full citation] | Reference / equilibrium level                  | Medium           |
+| [coupling]    | [sym]  | [val] | [range from lit] | [Full citation] | Sensitivity of state to aggregate agent action | High             |
+| [reversion]   | [sym]  | [val] | [range from lit] | [Full citation] | Attraction speed toward the anchor             | High             |
+| [noise_std]   | [sym]  | [val] | [range]          | [Full citation] | Noise term standard deviation                  | Low              |
+| [agent param] | [sym]  | [val] | [range]          | [Full citation] | [Meaning]                                      | [High/Med/Low]   |
 
 <!-- Finance-appendix example row set (from §4.1.F.0):
      initial_price P(0), fundamental_value F, price_impact λ,
@@ -759,23 +759,23 @@ For EACH real-world event:
 
 #### N.1 Event Profile
 
-| Item             | Detail                                                                                                                                     |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| Date Range       | [Specific dates or period, e.g., "March 24–29, 2021"; "August–October 1987"]                                                               |
+| Item             | Detail                                                                                                                                                                                |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Date Range       | [Specific dates or period, e.g., "March 24–29, 2021"; "August–October 1987"]                                                                                                          |
 | Domain / Setting | [Domain-appropriate identifier — e.g., "US equity markets, NYSE + NASDAQ" (finance); "Twitter early 2020" (opinion); "Wuhan Dec 2019" (epidemics); "one US organisation" (sociology)] |
-| Trigger          | [The specific catalyst — precise and verifiable, not generic]                                                                              |
-| Duration         | [From onset to resolution; in hours, days, weeks, or months]                                                                               |
-| Magnitude        | [Key quantitative data — units and dimensions vary by domain: peak decline % / opinion polarisation index / peak prevalence / adoption rate] |
-| Resolution       | [How the episode ended: policy intervention, natural correction, bankruptcy, herd immunity, norm collapse, etc.]                            |
-| Sources          | [Primary sources for this section: regulatory reports, academic papers, articles]                                                          |
+| Trigger          | [The specific catalyst — precise and verifiable, not generic]                                                                                                                         |
+| Duration         | [From onset to resolution; in hours, days, weeks, or months]                                                                                                                          |
+| Magnitude        | [Key quantitative data — units and dimensions vary by domain: peak decline % / opinion polarisation index / peak prevalence / adoption rate]                                          |
+| Resolution       | [How the episode ended: policy intervention, natural correction, bankruptcy, herd immunity, norm collapse, etc.]                                                                      |
+| Sources          | [Primary sources for this section: regulatory reports, academic papers, articles]                                                                                                     |
 
 #### N.2 Chronological Dynamics
 
-| Date / Period | Event                                             | Environment Effect                    | Quantitative Measure           |
-|---------------|---------------------------------------------------|---------------------------------------|--------------------------------|
+| Date / Period | Event                                             | Environment Effect                      | Quantitative Measure           |
+|---------------|---------------------------------------------------|-----------------------------------------|--------------------------------|
 | [Date]        | [What happened — specific action or announcement] | [State-variable effect for this domain] | [Number with units and source] |
-| [Date]        | [Event]                                           | [Effect]                              | [Measure]                      |
-| [Date]        | ...                                               | ...                                   | ...                            |
+| [Date]        | [Event]                                           | [Effect]                                | [Measure]                      |
+| [Date]        | ...                                               | ...                                     | ...                            |
 
 **Narrative**: [3–5 sentences describing the episode's progression in plain language, tying together the timeline entries above. What made this event escalate? What eventually halted it?]
 
@@ -840,13 +840,13 @@ first requires the explicit upgrade procedure in `01-mandatory-structure.md
 ```markdown
 ## 9. Variant Comparison Preview
 
-| Aspect                        | {V1 — baseline}                                | {V2}                                | {V3}                             | {V4}                                          |
-|-------------------------------|------------------------------------------------|-------------------------------------|----------------------------------|-----------------------------------------------|
-| Decision Logic                | [e.g., Fixed formulas]                         | [e.g., Persona + LLM reasoning]     | [e.g., Formula-anchored LLM]     | [e.g., Retrieval-augmented LLM]               |
-| Determinism                   | [Fully deterministic / Stochastic / Semi-...]  | [...]                               | [...]                            | [...]                                         |
-| Expected Phenomenon Intensity | [Calibration target]                           | [Expected range; direction vs V1]   | [Direction vs V1]                | [Direction vs V3]                             |
-| Key Behavioral Difference     | Baseline reference                             | [Specific behavioural difference]   | [Specific difference]            | [Specific difference]                         |
-| Research Question             | Does the phenomenon emerge from V1 alone?      | [V2-specific question]              | [V3-specific question]           | [V4-specific question]                        |
+| Aspect                        | {V1 — baseline}                               | {V2}                              | {V3}                         | {V4}                            |
+|-------------------------------|-----------------------------------------------|-----------------------------------|------------------------------|---------------------------------|
+| Decision Logic                | [e.g., Fixed formulas]                        | [e.g., Persona + LLM reasoning]   | [e.g., Formula-anchored LLM] | [e.g., Retrieval-augmented LLM] |
+| Determinism                   | [Fully deterministic / Stochastic / Semi-...] | [...]                             | [...]                        | [...]                           |
+| Expected Phenomenon Intensity | [Calibration target]                          | [Expected range; direction vs V1] | [Direction vs V1]            | [Direction vs V3]               |
+| Key Behavioral Difference     | Baseline reference                            | [Specific behavioural difference] | [Specific difference]        | [Specific difference]           |
+| Research Question             | Does the phenomenon emerge from V1 alone?     | [V2-specific question]            | [V3-specific question]       | [V4-specific question]          |
 
 **Predicted Ordering**: [E.g., "Expected phenomenon intensity: {V1} ≥ {V3} > {V2} > {V4} because ..."]
 ```
@@ -935,10 +935,10 @@ written above, or is there an adaptation?]
 
 **Supporting studies**:
 
-| Study                                     | Context                     | Finding               | Relevance to This Metric                            |
-|-------------------------------------------|-----------------------------|-----------------------|-----------------------------------------------------|
+| Study                                     | Context                      | Finding               | Relevance to This Metric                            |
+|-------------------------------------------|------------------------------|-----------------------|-----------------------------------------------------|
 | [Author(s), Year. "Title." Journal. DOI.] | [Setting, period, geography] | [Quantitative result] | [Why this validates the metric for this simulation] |
-| [Study 2]                                 | ...                         | ...                   | ...                                                 |
+| [Study 2]                                 | ...                          | ...                   | ...                                                 |
 
 #### Normal Range (from literature)
 [Typical values for this metric type in the relevant phenomenon literature. Be specific to the
@@ -967,14 +967,14 @@ action_history); return type and units.]
 
 **Mandatory metrics** (must appear in every simulation's `analysis-bases.md`):
 
-| # | Metric Type                                       | Rationale                                                             |
-|---|---------------------------------------------------|-----------------------------------------------------------------------|
-| 1 | State deviation from anchor / reference           | Primary phenomenon detection metric                                   |
-| 2 | Phenomenon intensity measure                      | Phenomenon-specific (e.g., bubble ratio, crash depth, bias magnitude) |
-| 3 | Volatility metric                                 | Rolling std of state changes or similar; required for risk assessment |
-| 4 | Portfolio / wealth / outcome metric               | Tracks agent performance; enables cross-variant comparison            |
-| 5 | Activity / volume metric                          | Interaction-intensity proxy; detects silent periods                   |
-| 6 | ≥1 phenomenon-specific metric                     | Unique to this simulation — not present in generic phenomenon sims    |
+| # | Metric Type                             | Rationale                                                             |
+|---|-----------------------------------------|-----------------------------------------------------------------------|
+| 1 | State deviation from anchor / reference | Primary phenomenon detection metric                                   |
+| 2 | Phenomenon intensity measure            | Phenomenon-specific (e.g., bubble ratio, crash depth, bias magnitude) |
+| 3 | Volatility metric                       | Rolling std of state changes or similar; required for risk assessment |
+| 4 | Portfolio / wealth / outcome metric     | Tracks agent performance; enables cross-variant comparison            |
+| 5 | Activity / volume metric                | Interaction-intensity proxy; detects silent periods                   |
+| 6 | ≥1 phenomenon-specific metric           | Unique to this simulation — not present in generic phenomenon sims    |
 
 <!-- Domain-appendix instantiation examples for Metric #1 and #5.
      Finance appendix (§4.1.F): #1 = "Price deviation from fundamental"; #5 = "Trading volume /
@@ -1143,11 +1143,11 @@ appear in the fixed canonical order `Rule → LLM → RuleLLM → Rag`, omitting
 
 ### 6.4 Validation Failure Signs
 
-| Symptom                                                                                                                             | Diagnosis                    | Root Cause                                       | Corrective Action                                           |
-|-------------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------------------------------------------|-------------------------------------------------------------|
+| Symptom                                                                                                                                      | Diagnosis                    | Root Cause                                       | Corrective Action                                           |
+|----------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------------------------------------------|-------------------------------------------------------------|
 | [Observable problem — e.g., "State never deviates > 10% from anchor" (finance instantiation: "Price never deviates > 10% from fundamental")] | [What this symptom tells us] | [Which parameter or mechanism is the root cause] | [Specific adjustment: parameter name, direction, magnitude] |
-| [Symptom 2]                                                                                                                         | [Diagnosis]                  | [Root cause]                                     | [Action]                                                    |
-| [Symptom 3]                                                                                                                         | ...                          | ...                                              | ...                                                         |
+| [Symptom 2]                                                                                                                                  | [Diagnosis]                  | [Root cause]                                     | [Action]                                                    |
+| [Symptom 3]                                                                                                                                  | ...                          | ...                                              | ...                                                         |
 ```
 
 ---

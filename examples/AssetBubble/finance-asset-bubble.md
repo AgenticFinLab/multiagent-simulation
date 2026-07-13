@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                            |
-|-------------|--------------------------------------------------------------------|
-| Name        | AssetBubble                                                        |
-| Domain      | finance                                                            |
-| Produced By | define-simulation-scenario-skill.md v1.0.0 (invoking agent: Codex) |
-| Created     | 2026-07-03                                                         |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                         |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)            |
+| Field       | Content                                                                                                                              |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | AssetBubble                                                                                                                          |
+| Domain      | finance                                                                                                                              |
+| Phenomenon  | Positive-feedback trading and limits to arbitrage drive prices far above fundamental value until demand exhaustion triggers a crash. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                           |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                              |
 
 ## §2 Phenomenon Statement
 

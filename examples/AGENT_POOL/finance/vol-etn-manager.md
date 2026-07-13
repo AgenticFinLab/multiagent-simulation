@@ -258,6 +258,5 @@ Decision: hold.
 | Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-07-01 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 — normalized VolETNManager into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A. |
 | Status | experimental |
 | Icon        | ![](../agent_images/icons/finance-vol-etn-manager.png) |

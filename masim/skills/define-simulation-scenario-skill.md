@@ -136,24 +136,24 @@ A single table identifying the file:
 ```markdown
 ## §1 Meta
 
-| Field       | Content                                                                                |
-|-------------|----------------------------------------------------------------------------------------|
-| Name        | {PascalCase scenario name}                                                             |
-| Domain      | finance / opinion / epidemics / sociology / ...                                        |
-| Produced By | define-simulation-scenario-skill.md v{X.Y.Z} (invoking agent: {model / harness label}) |
-| Created     | {YYYY-MM-DD}                                                                           |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                                             |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                |
+| Field       | Content                                                      |
+|-------------|--------------------------------------------------------------|
+| Name        | {PascalCase scenario name}                                   |
+| Domain      | finance / opinion / epidemics / sociology / ...              |
+| Phenomenon  | {Single sentence, 15–30 words, summarizing the core dynamic} |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                   |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)      |
 ```
 
 - **MUST** match `{ScenarioName}` exactly in `Name`.
 - **MUST** declare a `Domain` value that has (or will have) a
   corresponding `examples/AGENT_POOL/{domain}/` folder.
-- **MUST** record the invoking skill + agent in `Produced By`. The user
-  does NOT hand-author the file.
-- `Requested By` and `Status` (lifecycle: draft / locked / released)
-  are tracked in the sibling `simulation-build-log.md`, not inside the
-  target file.
+- **MUST** provide a `Phenomenon` field: one sentence (15–30 words)
+  that captures the scenario’s core dynamic at a glance. This sentence
+  should distill what §2 Phenomenon Statement describes in detail.
+- `Requested By`, `Status`, `Produced By`, and `Created` are tracked
+  in the sibling `simulation-build-log.md` or `tmpl/polish-log.md`, not inside
+  the target file.
 
 ---
 
@@ -632,9 +632,8 @@ The pipeline MUST NOT alter the target file. If during research the
 pipeline discovers a defect in the target file (e.g., a citation does
 not resolve), it raises the defect via `AskUserQuestion`; the user
 authorises a re-run of this skill in **revise mode** (§9.3), the
-invoking agent produces an updated target file, increments its
-`Created` date to `Created / Revised`, and re-locks. The pipeline then
-re-validates.
+invoking agent produces an updated target file and re-locks. The
+pipeline then re-validates.
 
 ---
 
@@ -669,14 +668,13 @@ omitted.
 
 ## §1 Meta
 
-| Field       | Content                                                                |
-|-------------|------------------------------------------------------------------------|
-| Name        | CarryTradeUnwind                                                       |
-| Domain      | finance                                                                |
-| Produced By | define-simulation-scenario-skill.md v1.0.0 (invoking agent: QoderWork) |
-| Created     | 2026-06-29                                                             |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                             |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
+| Field       | Content                                                                                       |
+|-------------|-----------------------------------------------------------------------------------------------|
+| Name        | CarryTradeUnwind                                                                              |
+| Domain      | finance                                                                                       |
+| Phenomenon  | Interest-rate-differential positions unwind violently when funding currencies spike suddenly. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                    |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                       |
 
 ## §2 Phenomenon Statement
 
@@ -861,15 +859,14 @@ log, any change to the target file MUST also go through this skill, in
    and the change list.
 3. The invoking agent re-loads the current target file, applies only
    the requested changes, re-runs §11 validation three consecutive
-   times, adds `Revised: YYYY-MM-DD` to §1, and writes the file back.
-   The build log resets `Status: draft`.
+   times, and writes the file back. The build log resets
+   `Status: draft`.
 4. The pipeline re-validates and re-locks.
 
 Users MUST NOT hand-edit the target file to apply the change, even
 when the change is a one-line typo. Every write to the target file
 after step 15 above is skill-mediated so that the audit trail
-(`Produced By`, `Revised`, and the pipeline’s build log) stays
-consistent.
+(`tmpl/polish-log.md` and the pipeline's build log) stays consistent.
 
 ---
 
@@ -898,12 +895,11 @@ consistent.
   without the article title. → Replace with a verified citation.
 - **Locked-without-validation.** Setting `Status: locked` manually
   without running §11. → Only the pipeline upgrades the status.
-- **Hand-authored target file.** A `{domain}-{scenario}.md` whose §1
-  Meta lacks a `Produced By` row, or whose sections show evidence of
-  manual editing outside a skill invocation (e.g., mid-run partial
-  writes, inconsistent numbering, formatting drift from the §8 worked
-  example). → Reject and re-run this skill from scratch (fresh mode)
-  or in revise mode, per §9.
+- **Hand-authored target file.** A `{domain}-{scenario}.md` whose
+  sections show evidence of manual editing outside a skill invocation
+  (e.g., mid-run partial writes, inconsistent numbering, formatting
+  drift from the §8 worked example). → Reject and re-run this skill
+  from scratch (fresh mode) or in revise mode, per §9.
 
 ---
 
@@ -919,8 +915,9 @@ are required, in the style of `agent-design-skill.md §6` and
 - [ ] No top-level `## §N` heading exists outside §1 — §10 (no §0,
       no §11, no unnumbered `##` headings). Auxiliary content belongs
       in `simulation-build-log.md`.
-- [ ] §1 Meta has every row filled (Name, Domain, Produced By,
-      Created, Pipeline, Target Spec).
+- [ ] §1 Meta has every row filled (Name, Domain, Phenomenon,
+      Pipeline, Target Spec). Phenomenon is a single sentence
+      (15–30 words).
 - [ ] §2 has all four sub-headings (Trigger, Mechanism, Participants,
       Resolution), each with 3 — 6 sentences (minimum three, maximum
       six).
@@ -1012,6 +1009,6 @@ status thereafter.
 |---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Version | 1.2.0                                                                                                                                                                                                                                                                                                                                                                                               |
 | Created | 2026-06-29                                                                                                                                                                                                                                                                                                                                                                                          |
-| Revised | 2026-07-01 (reframed as executable skill: user supplies minimal inputs; the invoking agent produces the target file end-to-end. See §0, §9).                                                                                                                                                                                                                                                        |
+| Revised | 2026-07-01 (reframed as executable skill: user supplies minimal inputs; the invoking agent produces the target file end-to-end. See frontmatter, §9).                                                                                                                                                                                                                                               |
 | Revised | 2026-07-01 (domain-neutralization pass: §7 column renamed 'Market / domain role' → 'Domain role'; §5, §9, §10.1 example rows marked as finance-appendix instantiations with parallel opinion / epidemics / sociology examples added in HTML comments; §10.1 variant scheme is now configurable per domain; §11 validation reworded to require a deterministic-baseline variant rather than 'Rule'.) |
 | Status  | canonical                                                                                                                                                                                                                                                                                                                                                                                           |

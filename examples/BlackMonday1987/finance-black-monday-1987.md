@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                            |
-|-------------|--------------------------------------------------------------------|
-| Name        | BlackMonday1987                                                    |
-| Domain      | finance                                                            |
-| Produced By | define-simulation-scenario-skill.md v1.0.0 (invoking agent: Codex) |
-| Created     | 2026-07-06                                                         |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                         |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)            |
+| Field       | Content                                                                                                                              |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | BlackMonday1987                                                                                                                      |
+| Domain      | finance                                                                                                                              |
+| Phenomenon  | Portfolio insurance and program trading create a dynamic-hedging feedback loop that amplifies an initial price decline into a crash. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                           |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                              |
 
 ## §2 Phenomenon Statement
 

@@ -486,7 +486,7 @@ section wins.
    in §3.6.2, the action space in §3.6.3, or the mathematical model
    in §3.6.4 seems to contradict this contract, the contract wins.
    Open a design revision and reconcile the other section in the
-   same commit.
+   same editing pass.
 
 Cross-references:
 - Every Input row here MUST also appear in §3.6.1 (signals) or
@@ -801,9 +801,11 @@ Footer block. Required.
 | Reviewed by | <name or handle> (optional)                     |
 | Created     | <YYYY-MM-DD>                                    |
 | Version     | <semver, e.g. 1.0.0>                            |
-| Change log  | one line per version (latest first)             |
 | Status      | <draft / experimental / canonical / deprecated> |
 ```
+
+Version history is tracked externally (in `tmpl/polish-log.md` or the
+pipeline's build log). No `Change log` row is stored inside agent files.
 
 ---
 
@@ -1033,10 +1035,9 @@ blocker.
 
 ## 7. Status
 
-| Field      | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Version    | 2.3.1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Created    | 2025-06-11 (v1.0.0); last minor bump 2026-07-01 (v2.3.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Status     | canonical                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Domains    | Domain-agnostic (all simulation domains)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| Change log | 2026-07-01 v2.3.1: de-hardcoded the variant scheme throughout §3.6.0, §5, and §6. Literal `Rule / LLM / RuleLLM / RAG` enumerations replaced with references to the target's §10.1 Variant Build Matrix and with capability-class terminology (rule-driven / model-driven / retrieval-augmented) so any subset, superset, or renaming stays contract-conformant. Retrieval-fallback rule generalised to "any retrieval-augmented variant". <br> 2026-07-01 v2.3.0: added mandatory §3.6.0 I/O Contract (Inputs, Outputs, Content Constraints, Serialization Format `<analysis>...</analysis><decision>{JSON}</decision>`, Implementer Contract Reminder); tightened §5 consistency rules and §6 validation checklist accordingly. |
+| Field   | Content                                                  |
+|---------|----------------------------------------------------------|
+| Version | 2.3.1                                                    |
+| Created | 2025-06-11 (v1.0.0); last minor bump 2026-07-01 (v2.3.1) |
+| Status  | canonical                                                |
+| Domains | Domain-agnostic (all simulation domains)                 |

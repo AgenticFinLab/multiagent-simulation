@@ -21,14 +21,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                                                    |
-|-------------|--------------------------------------------------------------------------------------------|
-| Name        | ConfirmationBias                                                                           |
-| Domain      | finance                                                                                    |
-| Produced By | polish-simulation-pipeline.md v2 Case B reverse-reconstruction (invoking agent: QoderWork) |
-| Created     | 2026-07-12                                                                                 |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                                                 |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                    |
+| Field       | Content                                                                                                                        |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------|
+| Name        | ConfirmationBias                                                                                                               |
+| Domain      | finance                                                                                                                        |
+| Phenomenon  | Investors selectively weight belief-confirming signals and discount contradictory evidence, amplifying directional mispricing. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                     |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                        |
 
 ## §2 Phenomenon Statement
 

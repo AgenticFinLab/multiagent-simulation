@@ -215,6 +215,9 @@ __marimo__/
 third-part/
 .qoder/
 
+# Local pipeline logs (never committed)
+tmpl/
+
 *TEST*
 
 

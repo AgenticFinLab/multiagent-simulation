@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                                  |
-|-------------|--------------------------------------------------------------------------|
-| Name        | EuropeanDebtCrisis                                                       |
-| Domain      | finance                                                                  |
-| Produced By | polish-simulation-pipeline (reverse-reconstruct from existing artefacts) |
-| Created     | 2026-07-15                                                               |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md                               |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md                         |
+| Field       | Content                                                                                                                    |
+|-------------|----------------------------------------------------------------------------------------------------------------------------|
+| Name        | EuropeanDebtCrisis                                                                                                         |
+| Domain      | finance                                                                                                                    |
+| Phenomenon  | Self-fulfilling creditor panic creates a sovereign doom loop where falling bond prices worsen debt sustainability metrics. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                 |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md                                                                           |
 
 ## §2 Phenomenon Statement
 

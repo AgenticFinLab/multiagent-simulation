@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                            |
-|-------------|--------------------------------------------------------------------|
-| Name        | CarryTradeUnwind                                                   |
-| Domain      | finance                                                            |
-| Produced By | define-simulation-scenario-skill.md v1.0.0 (invoking agent: Codex) |
-| Created     | 2026-07-08                                                         |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                         |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)            |
+| Field       | Content                                                                                                                           |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| Name        | CarryTradeUnwind                                                                                                                  |
+| Domain      | finance                                                                                                                           |
+| Phenomenon  | Funding-currency appreciation triggers forced deleveraging of crowded carry positions, creating a self-reinforcing unwind spiral. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                        |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                           |
 
 ## §2 Phenomenon Statement
 

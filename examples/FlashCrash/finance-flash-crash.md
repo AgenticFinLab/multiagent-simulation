@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                 |
-|-------------|---------------------------------------------------------|
-| Name        | FlashCrash                                              |
-| Domain      | finance                                                 |
-| Produced By | polish-simulation-pipeline.md (Case B reverse-seed)     |
-| Created     | 2025-07-18                                              |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md              |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0) |
+| Field       | Content                                                                                                                           |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| Name        | FlashCrash                                                                                                                        |
+| Domain      | finance                                                                                                                           |
+| Phenomenon  | A large directional order depletes standing liquidity, triggering market-maker withdrawal and a positive-feedback price collapse. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                        |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                           |
 
 ## §2 Phenomenon Statement
 

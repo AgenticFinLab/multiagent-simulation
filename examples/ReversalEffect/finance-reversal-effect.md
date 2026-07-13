@@ -2,18 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                                  |
-|-------------|--------------------------------------------------------------------------|
-| Name        | ReversalEffect                                                           |
-| Domain      | finance                                                                  |
-| Produced By | define-simulation-scenario-skill.md v1.2.0 (invoking agent: Claude Code) |
-| Created     | 2026-07-07                                                               |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md                               |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                  |
-
-| CHANGELOG  |                                                                                                                                                                                                                                                                                                                                          |
-|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2026-07-07 | Polish Step 0: target file produced from `simulation-bases.md` and `analysis-bases.md` downstream artefacts via define-skill end-to-end invocation (Case B, pre-filled from existing). DOI gaps noted in §2.2 (Contrarian Trading) and §2.4 (Overconfidence and Noise) of simulation-bases.md — to be resolved in Step 1 research audit. |
+| Field       | Content                                                                                                                                         |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | ReversalEffect                                                                                                                                  |
+| Domain      | finance                                                                                                                                         |
+| Phenomenon  | Extended overreaction driven by momentum and overconfidence eventually reverses as contrarian value investors enter with increasing conviction. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                                      |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                         |
 
 ## §2 Phenomenon Statement
 

@@ -291,6 +291,5 @@ State update: no cost basis until a buy fill occurs.
 | Reviewed by | audit_agent_handbook.py v1 |
 | Created | 2026-06-27 |
 | Version | 1.0.3 |
-| Change log  | 1.0.0 - Created from AnchoringEffect Agent Design Summary row 4.6; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
 | Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-disposition-trader.png) |

@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                |
-|-------------|--------------------------------------------------------|
-| Name        | EndowmentEffect                                        |
-| Domain      | finance                                                |
-| Produced By | polish-simulation-pipeline.md (reverse-reconstruction) |
-| Created     | 2026-07-11                                             |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md             |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md       |
+| Field       | Content                                                                                                                                           |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | EndowmentEffect                                                                                                                                   |
+| Domain      | finance                                                                                                                                           |
+| Phenomenon  | Ownership-induced loss aversion raises willingness-to-accept above willingness-to-pay, suppressing trade volume and inflating transaction prices. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                                        |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md                                                                                                  |
 
 ## §2 Phenomenon Statement
 

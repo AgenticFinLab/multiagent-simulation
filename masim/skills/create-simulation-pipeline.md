@@ -39,14 +39,14 @@ clarifications* raised against the target file (which the user
 resolves via a revise-mode re-invocation of the upstream skill), not
 for collecting fresh content.
 
-| Concern                                       | Owner                                                      |
-|-----------------------------------------------|------------------------------------------------------------|
-| **Upstream scenario target file format**      | **`masim/skills/define-simulation-scenario-skill.md`**       |
-| Per-agent intrinsic specification             | `masim/skills/agent-design-skill.md` (Universal Handbook)  |
-| Scenario package layout, root + variant specs | `masim/skills/implement-simulation-skill/` (files 01 — 09)       |
-| Domain-instantiation rules for finance        | `implement-simulation-skill/02-root-documents-spec.md §4.1`      |
-| AGENT_POOL three-stage match protocol         | This file §3 and `implement-simulation-skill/06 §2.2.0`          |
-| Three-PASS validation discipline              | This file §6 and `agent-design-skill.md §6`                |
+| Concern                                       | Owner                                                       |
+|-----------------------------------------------|-------------------------------------------------------------|
+| **Upstream scenario target file format**      | **`masim/skills/define-simulation-scenario-skill.md`**      |
+| Per-agent intrinsic specification             | `masim/skills/agent-design-skill.md` (Universal Handbook)   |
+| Scenario package layout, root + variant specs | `masim/skills/implement-simulation-skill/` (files 01 — 09)  |
+| Domain-instantiation rules for finance        | `implement-simulation-skill/02-root-documents-spec.md §4.1` |
+| AGENT_POOL three-stage match protocol         | This file §3 and `implement-simulation-skill/06 §2.2.0`     |
+| Three-PASS validation discipline              | This file §6 and `agent-design-skill.md §6`                 |
 
 When this file and any of the above overlap, **this file decides the
 order and the orchestration**, but the substantive content is governed
@@ -219,14 +219,14 @@ its exit conditions hold.
 
 ## §0 Meta
 
-| Field        | Content                                                              |
-|--------------|----------------------------------------------------------------------|
-| Name         | {ScenarioName}                                                       |
-| Target file  | examples/{ScenarioName}/{domain}-{scenario}.md                       |
-| Target spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
-| Domain       | {Domain from target §1}                                              |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                              |
-| Status       | draft                                                                |
+| Field       | Content                                                 |
+|-------------|---------------------------------------------------------|
+| Name        | {ScenarioName}                                          |
+| Target file | examples/{ScenarioName}/{domain}-{scenario}.md          |
+| Target spec | masim/skills/define-simulation-scenario-skill.md (v1.0) |
+| Domain      | {Domain from target §1}                                 |
+| Pipeline    | masim/skills/create-simulation-pipeline.md              |
+| Status      | draft                                                   |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
 (Empty. Populated by Phase 3.)
@@ -404,11 +404,11 @@ For each candidate from §B.4, run stages 1 → 2 → 3 in order. The
 result of each candidate's run is appended to §A as a single row:
 
 ```markdown
-| Candidate archetype | Stage reached | Outcome             | Pool file                                |
-|---------------------|---------------|---------------------|------------------------------------------|
-| trend-follower      | 3             | reuse               | examples/AGENT_POOL/finance/momentum-trader.md |
-| panic-leveraged-LP  | 2             | new                 | (to be created)                          |
-| fundamentalist      | 3             | fork (calibration)  | examples/AGENT_POOL/finance/fundamental-analyst.md (parent) |
+| Candidate archetype | Stage reached | Outcome            | Pool file                                                   |
+|---------------------|---------------|--------------------|-------------------------------------------------------------|
+| trend-follower      | 3             | reuse              | examples/AGENT_POOL/finance/momentum-trader.md              |
+| panic-leveraged-LP  | 2             | new                | (to be created)                                             |
+| fundamentalist      | 3             | fork (calibration) | examples/AGENT_POOL/finance/fundamental-analyst.md (parent) |
 ```
 
 **Stage 1 — Filename scan.** List every `*.md` in the domain folder.
@@ -438,12 +438,12 @@ file: Definition and Goals, Theoretical Foundation, Decision
 Information Set, Core Behavioral Mechanism, Parameters. Decide one
 of:
 
-| Outcome                       | Trigger                                                                                        | Action                                                                                                                                                  |
-|-------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Reuse as-is**               | Mechanism, signal set, parameters all compatible.                                              | Reference the pool file from `simulation-bases.md §4.{N}`; embed only population/instance count. **No new file** in the pool.                            |
-| **Reuse + scenario override** | Mechanism + signals match; only parameter defaults differ.                                     | Reference the pool file; add a "Scenario calibration override" sub-heading under §4.{N}.6 with per-parameter deltas. **No new file** in the pool.        |
-| **Fork**                      | Theory family matches; a substantive mechanism (signals, math, activation) genuinely differs.  | Treat as new design (§6.3), file a sibling in the pool whose Theoretical Foundation cites the parent and explicitly states the mechanism difference.    |
-| **Design new**                | None of the above.                                                                             | Treat as new design (§6.3), file a fresh entry in the pool.                                                                                             |
+| Outcome                       | Trigger                                                                                       | Action                                                                                                                                               |
+|-------------------------------|-----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Reuse as-is**               | Mechanism, signal set, parameters all compatible.                                             | Reference the pool file from `simulation-bases.md §4.{N}`; embed only population/instance count. **No new file** in the pool.                        |
+| **Reuse + scenario override** | Mechanism + signals match; only parameter defaults differ.                                    | Reference the pool file; add a "Scenario calibration override" sub-heading under §4.{N}.6 with per-parameter deltas. **No new file** in the pool.    |
+| **Fork**                      | Theory family matches; a substantive mechanism (signals, math, activation) genuinely differs. | Treat as new design (§6.3), file a sibling in the pool whose Theoretical Foundation cites the parent and explicitly states the mechanism difference. |
+| **Design new**                | None of the above.                                                                            | Treat as new design (§6.3), file a fresh entry in the pool.                                                                                          |
 
 All decisions update §A. The §A table is the single auditable record
 of why each agent was reused, forked, or invented.
@@ -481,11 +481,11 @@ Every newly authored agent (in both the pool file and the re-levelled
 Checklist** at `agent-design-skill.md §6` **three consecutive times**
 before it is accepted.
 
-| Pass # | Reviewer perspective                         | What to look for                                                                                                |
-|--------|----------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| 1      | Structural completeness                      | Section presence and order; required tables / fields; header levels; canonical naming.                          |
-| 2      | Cross-section consistency (handbook §5)      | Every §3.7 parameter appears in §3.6.4; every §3.6.1 signal consumed in §3.6.2; every §3.5 trigger has a branch.|
-| 3      | Evidence provenance + scenario-portability   | Every substantive choice cites Type 1 — 4 evidence; ≤20 % Type 6; no scenario names, fixed rounds, or topology. |
+| Pass # | Reviewer perspective                       | What to look for                                                                                                 |
+|--------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| 1      | Structural completeness                    | Section presence and order; required tables / fields; header levels; canonical naming.                           |
+| 2      | Cross-section consistency (handbook §5)    | Every §3.7 parameter appears in §3.6.4; every §3.6.1 signal consumed in §3.6.2; every §3.5 trigger has a branch. |
+| 3      | Evidence provenance + scenario-portability | Every substantive choice cites Type 1 — 4 evidence; ≤20 % Type 6; no scenario names, fixed rounds, or topology.  |
 
 **The same checklist runs in all three passes.** What differs is the
 reviewer's attentional emphasis. Any single unchecked item in any of
@@ -494,8 +494,8 @@ defect and the three-pass cycle restarts from Pass 1.
 
 Three consecutive PASS runs are required before the candidate is
 accepted. The §A row is updated to mark the candidate as
-*approved*. The pool file is committed; the re-levelled block is
-committed into `simulation-bases.md §4`.
+*approved*. The pool file is saved; the re-levelled block is
+written into `simulation-bases.md §4`.
 
 ### 6.5 Exit Conditions
 
@@ -570,11 +570,11 @@ Run `implement-simulation-skill/09-step5-to-10-review.md` Steps 5 — 9 as a
 single review batch. Then run the same batch **three times in a row**.
 Three consecutive PASS runs are required before Phase 6 may start.
 
-| Pass # | Reviewer perspective                         | Anchors in `09-step5-to-10-review.md` |
-|--------|----------------------------------------------|----------------------------------------|
-| 1      | Theory-code alignment (Step 5)               | §5.1, §5.2, §5.3, §5.4                 |
-| 2      | Code quality + analysis tools (Steps 6 — 7)  | §6.1, §6.2, §6.3, §7.1; `10-evaluation-architecture.md` import compliance |
-| 3      | Documentation + final cross-check (Steps 8 — 9) | §8 documentation hooks, §9 readiness |
+| Pass # | Reviewer perspective                            | Anchors in `09-step5-to-10-review.md`                                     |
+|--------|-------------------------------------------------|---------------------------------------------------------------------------|
+| 1      | Theory-code alignment (Step 5)                  | §5.1, §5.2, §5.3, §5.4                                                    |
+| 2      | Code quality + analysis tools (Steps 6 — 7)     | §6.1, §6.2, §6.3, §7.1; `10-evaluation-architecture.md` import compliance |
+| 3      | Documentation + final cross-check (Steps 8 — 9) | §8 documentation hooks, §9 readiness                                      |
 
 As in §6.4, any unchecked item in any pass resets the count. The
 three-PASS rule is non-negotiable; partial approvals are not
@@ -624,17 +624,17 @@ produced by any later phase MUST trace back, through
 `{domain}-{scenario}.md`:
 
 | Downstream artefact                                    | Anchor in `simulation-build-log.md` | Original anchor in target file |
-|--------------------------------------------------------|----------------------------------|--------------------------------|
-| `simulation-bases.md §1` (Phenomenon Definition)       | §B.3 historical events           | target §2 + §6                 |
-| `simulation-bases.md §2` (Theoretical Foundation)      | §B.1 theories                    | target §4                       |
-| `simulation-bases.md §3` (market mechanism choices)    | §B.2 stylized facts              | target §5 + §8                  |
-| `simulation-bases.md §4.{N}` block                     | §A row + §B.4 taxonomy entry     | target §7                       |
-| `simulation-bases.md §6` parameter rows                | §B.5 estimates                   | target §9                       |
-| `examples/AGENT_POOL/<domain>/<file>.md` (new entries) | §A row with outcome ∈ {new, fork}| target §7 row marked as new     |
-| `players.yml` extras with `# Source:` comment          | §B.5 (or override in §4.{N}.6)   | target §9                       |
-| Any prompt persona trait in `LLM/prompts.py`           | A handbook §3.4 or §3.6.5 line   | target §4 + §7                  |
-| Any analysis metric in `analysis-bases.md §2`          | §B.2 stylized fact / §B.3 event  | target §5 + §6 + §10.2          |
-| Variant build choices                                  | — (pipeline records phase)       | target §10.1                    |
+|--------------------------------------------------------|-------------------------------------|--------------------------------|
+| `simulation-bases.md §1` (Phenomenon Definition)       | §B.3 historical events              | target §2 + §6                 |
+| `simulation-bases.md §2` (Theoretical Foundation)      | §B.1 theories                       | target §4                      |
+| `simulation-bases.md §3` (market mechanism choices)    | §B.2 stylized facts                 | target §5 + §8                 |
+| `simulation-bases.md §4.{N}` block                     | §A row + §B.4 taxonomy entry        | target §7                      |
+| `simulation-bases.md §6` parameter rows                | §B.5 estimates                      | target §9                      |
+| `examples/AGENT_POOL/<domain>/<file>.md` (new entries) | §A row with outcome ∈ {new, fork}   | target §7 row marked as new    |
+| `players.yml` extras with `# Source:` comment          | §B.5 (or override in §4.{N}.6)      | target §9                      |
+| Any prompt persona trait in `LLM/prompts.py`           | A handbook §3.4 or §3.6.5 line      | target §4 + §7                 |
+| Any analysis metric in `analysis-bases.md §2`          | §B.2 stylized fact / §B.3 event     | target §5 + §6 + §10.2         |
+| Variant build choices                                  | — (pipeline records phase)          | target §10.1                   |
 
 Before Phase 6 closes, run a top-down sweep: open
 `simulation-build-log.md`, walk each table row, and confirm the
@@ -678,7 +678,7 @@ Run this checklist once before invoking Phase 0:
       must include `§A Domain Palette Appendix`.
 - [ ] You have access to academic sources sufficient to *verify*
       every citation in target §4, §5, §6, §9.
-- [ ] Repository is clean (`git status` shows no unrelated diffs).
+- [ ] Working tree is clean (no unrelated local modifications).
 - [ ] You have read this file end-to-end at least once.
 
 If any item is unchecked, fix it before starting Phase 0.
@@ -687,20 +687,20 @@ If any item is unchecked, fix it before starting Phase 0.
 
 ## 13. Skill References (Quick Index)
 
-| Topic                                | File                                                                       |
-|--------------------------------------|----------------------------------------------------------------------------|
-| **Scenario target file spec**        | `masim/skills/define-simulation-scenario-skill.md`                           |
-| Universal Agent Design Handbook       | `masim/skills/agent-design-skill.md`                                       |
-| Methodology overview                  | `masim/skills/implement-simulation-skill/00-overview.md`                         |
-| Directory layout                      | `masim/skills/implement-simulation-skill/01-mandatory-structure.md`              |
-| Root document specs + §4.1 finance    | `masim/skills/implement-simulation-skill/02-root-documents-spec.md`              |
-| Variant document specs                | `masim/skills/implement-simulation-skill/03-variant-documents-spec.md`           |
-| Step 0 (Define) and contract template | `masim/skills/implement-simulation-skill/04-step0-load-target.md`                     |
-| Step 1 (Research)                     | `masim/skills/implement-simulation-skill/05-step1-research.md`                   |
-| Step 2 (Agent design + Pool gate)     | `masim/skills/implement-simulation-skill/06-step2-agent-design.md`               |
-| Step 3 (Config)                       | `masim/skills/implement-simulation-skill/07-step3-config.md`                     |
-| Step 4 (Implement)                    | `masim/skills/implement-simulation-skill/08-step4-implement.md`                  |
-| Steps 5 — 10 (Validate, review, run)  | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`               |
-| AssetBubble reference                 | `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`            |
-| AGENT_POOL directory                  | `examples/AGENT_POOL/`                                                     |
-| Project structure overview            | `docs/structure.md`                                                        |
+| Topic                                 | File                                                                   |
+|---------------------------------------|------------------------------------------------------------------------|
+| **Scenario target file spec**         | `masim/skills/define-simulation-scenario-skill.md`                     |
+| Universal Agent Design Handbook       | `masim/skills/agent-design-skill.md`                                   |
+| Methodology overview                  | `masim/skills/implement-simulation-skill/00-overview.md`               |
+| Directory layout                      | `masim/skills/implement-simulation-skill/01-mandatory-structure.md`    |
+| Root document specs + §4.1 finance    | `masim/skills/implement-simulation-skill/02-root-documents-spec.md`    |
+| Variant document specs                | `masim/skills/implement-simulation-skill/03-variant-documents-spec.md` |
+| Step 0 (Define) and contract template | `masim/skills/implement-simulation-skill/04-step0-load-target.md`      |
+| Step 1 (Research)                     | `masim/skills/implement-simulation-skill/05-step1-research.md`         |
+| Step 2 (Agent design + Pool gate)     | `masim/skills/implement-simulation-skill/06-step2-agent-design.md`     |
+| Step 3 (Config)                       | `masim/skills/implement-simulation-skill/07-step3-config.md`           |
+| Step 4 (Implement)                    | `masim/skills/implement-simulation-skill/08-step4-implement.md`        |
+| Steps 5 — 10 (Validate, review, run)  | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`     |
+| AssetBubble reference                 | `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`  |
+| AGENT_POOL directory                  | `examples/AGENT_POOL/`                                                 |
+| Project structure overview            | `docs/structure.md`                                                    |

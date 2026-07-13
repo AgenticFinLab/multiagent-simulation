@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                            |
-|-------------|--------------------------------------------------------------------|
-| Name        | AsianFinancialCrisis                                               |
-| Domain      | finance                                                            |
-| Produced By | define-simulation-scenario-skill.md v1.2.0 (invoking agent: Codex) |
-| Created     | 2026-07-05                                                         |
-| Pipeline    | masim/skills/create-simulation-pipeline.md                         |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)            |
+| Field       | Content                                                                                                                                    |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | AsianFinancialCrisis                                                                                                                       |
+| Domain      | finance                                                                                                                                    |
+| Phenomenon  | Short-term foreign capital reversal and cross-border contagion create a self-reinforcing currency depreciation spiral in emerging markets. |
+| Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                                 |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                    |
 
 ## §2 Phenomenon Statement
 

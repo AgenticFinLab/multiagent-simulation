@@ -27,18 +27,18 @@ This block is the **stable I/O declaration** for Step 0. Both
 
 **Inputs (consumed).**
 
-| Source                                                  | Used for                                     |
-|---------------------------------------------------------|----------------------------------------------|
-| `examples/{ScenarioName}/{domain}-{scenario}.md`        | scenario target file, produced upstream by invoking `masim/skills/define-simulation-scenario-skill.md` (only input)       |
-| `masim/skills/define-simulation-scenario-skill.md §11`  | validation checklist re-run inside the pipeline |
+| Source                                                 | Used for                                                                                                            |
+|--------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `examples/{ScenarioName}/{domain}-{scenario}.md`       | scenario target file, produced upstream by invoking `masim/skills/define-simulation-scenario-skill.md` (only input) |
+| `masim/skills/define-simulation-scenario-skill.md §11` | validation checklist re-run inside the pipeline                                                                     |
 
 **Outputs (produced).**
 
-| Artefact                                                        | Extent of write                                                 |
-|-----------------------------------------------------------------|-----------------------------------------------------------------|
-| `examples/{ScenarioName}/simulation-build-log.md`               | fresh file with the §0.3 skeleton; §0 Meta populated with pointers to the target file (create pipeline only) |
-| Target file `Status: draft → locked`                            | the pipeline's single permitted edit to the target file        |
-| `examples/AGENT_POOL/{Domain}/`                                 | folder created if missing (empty)                              |
+| Artefact                                          | Extent of write                                                                                              |
+|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
+| `examples/{ScenarioName}/simulation-build-log.md` | fresh file with the §0.3 skeleton; §0 Meta populated with pointers to the target file (create pipeline only) |
+| Target file `Status: draft → locked`              | the pipeline's single permitted edit to the target file                                                      |
+| `examples/AGENT_POOL/{Domain}/`                   | folder created if missing (empty)                                                                            |
 
 **Polish Hooks (what a polish audit does at Step 0).**
 For `polish-simulation-pipeline.md`, Step 0 has two variants:
@@ -46,8 +46,7 @@ For `polish-simulation-pipeline.md`, Step 0 has two variants:
 - **Case A: target file already present.** Only re-run
   `define-simulation-scenario-skill.md §11` three consecutive times.
   Do not seed a new build-log; the polish pipeline does not maintain
-  one. Update target §0 Meta CHANGELOG with a single line
-  `YYYY-MM-DD  Polish target-file gate: existing`.
+  one. Record the outcome in `tmpl/polish-log.md`.
 - **Case B: target file absent.** Halt to `AskUserQuestion` and offer
   the user two options: (i) invoke
   `masim/skills/define-simulation-scenario-skill.md` to produce the
@@ -59,8 +58,7 @@ For `polish-simulation-pipeline.md`, Step 0 has two variants:
   (Research Question, Success Criteria) is filled by re-invoking
   `define-simulation-scenario-skill.md` in *revise mode* on the
   reconstructed draft. Then run §11 three consecutive times and lock.
-  Record the outcome in target §0 Meta CHANGELOG as
-  `YYYY-MM-DD  Polish target-file gate: reconstructed`.
+  Record the outcome in `tmpl/polish-log.md`.
 
 ---
 
@@ -140,20 +138,20 @@ are filled progressively across Phases 0 — 6 of
 
 ## §0 Meta
 
-| Field        | Content                                                              |
-|--------------|----------------------------------------------------------------------|
-| Name         | {ScenarioName}                                                       |
-| Target file  | examples/{ScenarioName}/{domain}-{scenario}.md                       |
-| Target spec  | masim/skills/define-simulation-scenario-skill.md (v1.0)                |
-| Domain       | {Domain from target §1}                                              |
-| Pipeline     | masim/skills/create-simulation-pipeline.md                              |
-| Status       | draft  (upgraded to `released` on Phase 6 closeout)                  |
+| Field       | Content                                                 |
+|-------------|---------------------------------------------------------|
+| Name        | {ScenarioName}                                          |
+| Target file | examples/{ScenarioName}/{domain}-{scenario}.md          |
+| Target spec | masim/skills/define-simulation-scenario-skill.md (v1.0) |
+| Domain      | {Domain from target §1}                                 |
+| Pipeline    | masim/skills/create-simulation-pipeline.md              |
+| Status      | draft  (upgraded to `released` on Phase 6 closeout)     |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
 
-| Candidate archetype | Stage reached | Outcome            | Pool file (if reused / created)                |
-|---------------------|---------------|--------------------|------------------------------------------------|
-| {populated by Phase 3} |             |                    |                                                |
+| Candidate archetype    | Stage reached | Outcome | Pool file (if reused / created) |
+|------------------------|---------------|---------|---------------------------------|
+| {populated by Phase 3} |               |         |                                 |
 
 ## §B Research Notes (extends target §4 — §6)
 
@@ -177,7 +175,7 @@ Every target §9 row, expanded with cross-references from research.
 ## §C Open Questions and Risks
 
 | Issue | First raised in phase | Status (`open` / `deferred: <reason>` / `resolved`) |
-|-------|-----------------------|------------------------------------------------------|
+|-------|-----------------------|-----------------------------------------------------|
 
 ## §D Build Log
 
@@ -195,16 +193,16 @@ which is fully populated.
 To avoid duplicating effort with `define-simulation-scenario-skill.md`,
 the following are explicitly **out of scope** for Step 0:
 
-| Concern                                            | Owned by                                                       |
-|----------------------------------------------------|----------------------------------------------------------------|
+| Concern                                           | Owned by                                                         |
+|---------------------------------------------------|------------------------------------------------------------------|
 | Authoring phenomenon description, agent roster, … | `define-simulation-scenario-skill.md` (the target file's author) |
-| Choosing simulation name                           | `define-simulation-scenario-skill.md §2`                          |
-| Identifying theory anchors                         | `define-simulation-scenario-skill.md §4`                          |
-| Choosing real-world events                         | `define-simulation-scenario-skill.md §6`                          |
-| Choosing agent archetypes                          | `define-simulation-scenario-skill.md §7`                          |
-| Choosing variants to build                         | `define-simulation-scenario-skill.md §10.1`                       |
-| Expanding theories with research notes             | `05-step1-research.md` (Step 1)                                 |
-| Running the AGENT_POOL gate                        | `06-step2-agent-design.md §2.2.0` (Step 2)                      |
+| Choosing simulation name                          | `define-simulation-scenario-skill.md §2`                         |
+| Identifying theory anchors                        | `define-simulation-scenario-skill.md §4`                         |
+| Choosing real-world events                        | `define-simulation-scenario-skill.md §6`                         |
+| Choosing agent archetypes                         | `define-simulation-scenario-skill.md §7`                         |
+| Choosing variants to build                        | `define-simulation-scenario-skill.md §10.1`                      |
+| Expanding theories with research notes            | `05-step1-research.md` (Step 1)                                  |
+| Running the AGENT_POOL gate                       | `06-step2-agent-design.md §2.2.0` (Step 2)                       |
 
 If a downstream step finds that the target file is missing one of
 the items the user owns, the step halts and the pipeline raises a

@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                |
-|-------------|--------------------------------------------------------|
-| Name        | EquityPremium                                          |
-| Domain      | finance                                                |
-| Produced By | polish-simulation-pipeline.md (reverse-reconstruction) |
-| Created     | 2026-07-13                                             |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md             |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md       |
+| Field       | Content                                                                                                                   |
+|-------------|---------------------------------------------------------------------------------------------------------------------------|
+| Name        | EquityPremium                                                                                                             |
+| Domain      | finance                                                                                                                   |
+| Phenomenon  | Myopic loss aversion causes investors to demand an equity risk premium far exceeding consumption-based model predictions. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md                                                                          |
 
 ## §2 Phenomenon Statement
 

@@ -200,5 +200,4 @@ State update: unchanged.
 | Created | 2026-07-08 |
 | Version | 1.0.1 |
 | Icon | ![](../agent_images/icons/finance-leveraged-carry-fund.png) |
-| Change log | Initial CarryTradeUnwind fork from leverage/funding-stress family; 1.0.1 — Added Icon row via polish-simulation-pipeline Step 2 icon-repair |
 | Status | draft |

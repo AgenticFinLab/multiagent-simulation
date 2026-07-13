@@ -1,6 +1,6 @@
 ---
 name: polish-simulation-pipeline
-purpose: Top-level pipeline for **auditing and standardising an existing MASim simulation scenario** (already present under `examples/{ScenarioName}/`) so that every artefact conforms to the current versions of the reusable, domain-neutral skill suite (`define-simulation-scenario-skill.md`, `agent-design-skill.md`, `implement-simulation-skill/`). This pipeline follows the same Step 0 — Step 10 spine as `create-simulation-pipeline.md`, but at every step the action is **audit + patch**, not "produce from scratch". Each step in this pipeline anchors to the corresponding step file's `## Contract (Inputs / Outputs / Polish Hooks)` block; the actual audit work is dispatched to `agent-design-skill.md` and to the individual `implement-simulation-skill/{04..09}-*.md` files. When an audit uncovers a defect, the pipeline patches locally, re-runs the step's Polish Hooks three consecutive times, and commits.
+purpose: Top-level pipeline for **auditing and standardising an existing MASim simulation scenario** (already present under `examples/{ScenarioName}/`) so that every artefact conforms to the current versions of the reusable, domain-neutral skill suite (`define-simulation-scenario-skill.md`, `agent-design-skill.md`, `implement-simulation-skill/`). This pipeline follows the same Step 0 — Step 10 spine as `create-simulation-pipeline.md`, but at every step the action is **audit + patch**, not "produce from scratch". Each step in this pipeline anchors to the corresponding step file's `## Contract (Inputs / Outputs / Polish Hooks)` block; the actual audit work is dispatched to `agent-design-skill.md` and to the individual `implement-simulation-skill/{04..09}-*.md` files. When an audit uncovers a defect, the pipeline patches locally and re-runs the step's Polish Hooks three consecutive times.
 status: canonical
 audience: Users and reviewers bringing a pre-existing scenario in `examples/` up to the current skill baseline. The pipeline is domain-neutral — it applies to finance, opinion dynamics, epidemics, sociology, or any other domain whose scenario target file conforms to `define-simulation-scenario-skill.md`.
 rfc2119: This document uses MUST / MUST NOT / SHOULD / MAY in the RFC-2119 sense.
@@ -42,14 +42,13 @@ returns** via `AskUserQuestion`. The user must then either:
   then resume the polish run at the halted step (with three-PASS
   reset), or
 - Explicitly scope the deficit out of the polish run and record it in
-  the target §0 Meta CHANGELOG as an accepted gap.
+  `tmpl/polish-log.md` as an accepted gap.
 
 A polish run MUST NOT silently invent missing evidence and MUST NOT
 fabricate citations, DOIs, parameter values, or theoretical
 mechanisms. A polish run MUST NOT hand-edit the target file except
-for (a) the single Status transition performed at Step 0 and Closeout,
-and (b) appending CHANGELOG lines to §0 Meta. All other target-file
-changes go through the define skill's revise mode.
+for the single Status transition performed at Step 0 and Closeout.
+All other target-file changes go through the define skill's revise mode.
 
 | Concern                                | Owner                                                                                                                                                                                                                                                                                                                  |
 |----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -70,11 +69,11 @@ changes go through the define skill's revise mode.
 
 For any conformance question during a polish run (agent naming, archetype identity, roster completeness, parameter provenance, theory citation), the authoritative source order is fixed. When two sources disagree, the higher-numbered rule loses and MUST be patched through the mechanism named in the winner's row.
 
-| Rank | Authoritative source                                                 | What it authorises                                                                                                                                                       | On disagreement                                                                                                                                              |
-|------|----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1    | `examples/{Scenario}/simulation-bases.md §4.N` block headers         | Theoretical archetype names (kebab-normalized). Persona-only relabellings (e.g. `GreaterFoolSpeculator` for a `MomentumSpeculator` archetype) are NOT alternative names. | Winner. Never override during polish. Substantive changes to §4 archetype names go through the define skill's §9.3 revise mode with a new §0 CHANGELOG line. |
-| 2    | Target file §7 Agent Roster rows                                     | Deliverable roster — one row per §4.N block, using the same kebab-normalized name.                                                                                       | Loses to rank 1. During polish, §7 rows that disagree with §4 headers are patched via `define-simulation-scenario-skill.md §9.3 revise mode`.                |
-| 3    | Implementation (`configs/{Scenario}/{V}/players.yml` + `players.py`) | Every top-level identity MUST satisfy `_canonical_archetype(identity)` ∈ { kebab-normalized §4.N header }.                                                               | Loses to ranks 1 and 2. Identity/class renames are the standard fix. See `06-step2-agent-design.md` Hook 6a.                                                 |
+| Rank | Authoritative source                                                 | What it authorises                                                                                                                                                       | On disagreement                                                                                                                               |
+|------|----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| 1    | `examples/{Scenario}/simulation-bases.md §4.N` block headers         | Theoretical archetype names (kebab-normalized). Persona-only relabellings (e.g. `GreaterFoolSpeculator` for a `MomentumSpeculator` archetype) are NOT alternative names. | Winner. Never override during polish. Substantive changes to §4 archetype names go through the define skill's §9.3 revise mode.               |
+| 2    | Target file §7 Agent Roster rows                                     | Deliverable roster — one row per §4.N block, using the same kebab-normalized name.                                                                                       | Loses to rank 1. During polish, §7 rows that disagree with §4 headers are patched via `define-simulation-scenario-skill.md §9.3 revise mode`. |
+| 3    | Implementation (`configs/{Scenario}/{V}/players.yml` + `players.py`) | Every top-level identity MUST satisfy `_canonical_archetype(identity)` ∈ { kebab-normalized §4.N header }.                                                               | Loses to ranks 1 and 2. Identity/class renames are the standard fix. See `06-step2-agent-design.md` Hook 6a.                                  |
 
 **Why this hierarchy exists.** In a `create-simulation-pipeline.md` run the target file is drafted first and seeds `simulation-bases.md §4`; the arrow points target → bases. In a `polish-simulation-pipeline.md` run the scenario already has a populated `simulation-bases.md §4` (with theory blocks, citations, formulas, empirical evidence). §4 is where a scenario's archetype identity actually lives; §7 is a derived summary. A polish run therefore inverts the create-flow seed arrow: bases §4 → target §7 → implementation. Steps that ambiguously reference "target §7 seeds §4" language inherited from the create pipeline MUST be read under this rank order in polish mode.
 
@@ -135,23 +134,27 @@ upgrades); three are polish-specific.
 6. **No `simulation-build-log.md`.** A polish run is a bounded audit,
    not a long-running build. The build-log contract used by
    `create-simulation-pipeline.md` is **skipped**. Audit trail is
-   distributed across three places, in priority order:
-   - **Target file §0 Meta CHANGELOG** — one line per step that
-     produced a patch, summarising what was standardised.
+   distributed across two places, in priority order:
+   - **Local log (`tmpl/polish-log.md`)** — one entry per completed
+     step. This local file is the polish run's primary process log.
+     It is never committed to version control.
    - **Per-agent §3.11 Design Provenance** — updated in place to
      record that this agent's specification was audited on this date
      against the handbook, and to list any structural changes.
-   - **Git commit history** — one commit per completed step (Step 2
-     may produce multiple commits, one per audited agent; Step 4 may
-     produce one commit per audited variant). The commit history is
-     the polish run's primary process log.
+
+   The target file itself MUST NOT contain any changelog, audit trail,
+   or §0 section (see `define-simulation-scenario-skill.md` §3).
+
+   **No git commits.** The polish pipeline MUST NOT execute any `git
+   commit` commands. All changes remain local (unstaged). The user
+   decides when and how to commit after the run completes.
+
    If a legacy `simulation-build-log.md` exists in the scenario folder
    from a previous from-scratch build, it is NOT deleted. Instead, on
    Closeout the pipeline appends a single line to its §D Phase Log:
    `YYYY-MM-DD  Superseded by polish audit; polish trail lives in
-   target §0 CHANGELOG + git history.` This preserves the historical
-   record without letting the build-log drift into a stale live
-   document.
+   tmpl/polish-log.md.` This preserves the historical record without letting
+   the build-log drift into a stale live document.
 
 7. **Variant-scoped polish still runs scenario gates.** If the user
    asks to polish a single variant folder such as
@@ -174,7 +177,7 @@ closeout. Each step maps 1-to-1 to a file in
 `implement-simulation-skill/` (with Step 0 additionally anchoring to
 `define-simulation-scenario-skill.md`). The action at every step is
 "read Contract, dispatch audit, patch, three-PASS Polish Hooks,
-commit".
+log to tmpl/".
 
 ```text
     ┌────────────────────────────────────────────────────────────┐
@@ -260,10 +263,10 @@ commit".
                                 │
                                 ▼
     ┌────────────────────────────────────────────────────────────┐
-    │ Closeout — Traceability + CHANGELOG + Status               │
-    │   Every downstream artefact traces to a target §; write    │
-    │   §0 Meta CHANGELOG summary; supersede any legacy build-   │
-    │   log; Status: locked → released.                          │
+    │ Closeout — Traceability + Status                         │
+    │   Every downstream artefact traces to a target §;           │
+    │   summary in tmpl/polish-log.md; supersede any legacy build-log; │
+    │   Status: locked → released.                              │
     └────────────────────────────────────────────────────────────┘
 ```
 
@@ -277,8 +280,7 @@ Polish Hooks have three consecutive PASS runs.
 **Halt recovery path.** Whenever a step halts via `AskUserQuestion`
 and the user selects the "re-invoke define skill in revise mode"
 option, the polish run is paused. Once the revise-mode invocation
-returns and the target file has been updated (with a new §0 Meta
-CHANGELOG line recorded by the define skill), the polish run resumes
+returns and the target file has been updated, the polish run resumes
 at the halted step with the three-PASS count reset to zero. No steps
 already completed are re-run.
 
@@ -294,7 +296,7 @@ already completed are re-run.
   §10.1, or a matching folder under `configs/{ScenarioName}/`. If the
   folder is empty, this pipeline is the wrong tool — invoke
   `create-simulation-pipeline.md` instead.
-- Working tree is clean (`git status` shows no unrelated diffs).
+- Working tree is clean (no unrelated local modifications exist).
 - The reader has read this file end-to-end, plus the `## Contract`
   block of every file listed in §14.
 
@@ -383,16 +385,15 @@ Polish Hooks branch on whether the target file already exists.
      revise mode** to patch the missing content upstream. Once the
      define skill returns, resume this step with the §11 three-PASS
      count reset to zero.
-   - Scope the deficit out of this polish run and record it in the
-     target §0 Meta CHANGELOG as an accepted gap (the scenario stays
+   - Scope the deficit out of this polish run and record it in
+     `tmpl/polish-log.md` as an accepted gap (the scenario stays
      `locked` but marked with the gap).
    - Abort the polish run.
 5. After three consecutive PASS runs, ensure the target §1 `Status`
    is `locked` (upgrade `draft → locked` if necessary — this is the
    only edit to the Status field the polish pipeline is authorised
    to make at Step 0).
-6. Append one line to §0 Meta CHANGELOG:
-   `YYYY-MM-DD  Polish target-file gate: existing (§11 3-PASS).`
+6. Append a summary of the Step 0 outcome to `tmpl/polish-log.md`.
 
 **Case B — target file absent.**
 
@@ -491,13 +492,10 @@ it is unsafe as a default.
    written, invoke `define-simulation-scenario-skill.md §9.3 revise
    mode` on the seed. The define skill runs its three checkpoints
    (C-1 / C-2 / C-3), performs §11 three-PASS validation, sets
-   `Status: locked`, and appends its own §0 Meta CHANGELOG line. The
-   polish pipeline does NOT independently run §11 in Case B — that is
-   the define skill's authority.
-5. Once control returns from the define skill, append one additional
-   line to §0 Meta CHANGELOG:
-   `YYYY-MM-DD  Polish target-file gate: reverse-reconstructed seed
-   handed to define-skill revise mode.`
+   `Status: locked`. The polish pipeline does NOT independently run
+   §11 in Case B — that is the define skill's authority.
+5. Once control returns from the define skill, append a summary of
+   the reverse-reconstruction outcome to `tmpl/polish-log.md`.
 
 **Both cases.** No `simulation-build-log.md` is created — the polish
 pipeline does not maintain one. If a legacy build-log already exists,
@@ -507,13 +505,12 @@ supersession line to its §D Phase Log at Closeout (see §10.3).
 ### 4.4 Artefacts Changed
 
 - `examples/{ScenarioName}/{domain}-{scenario}.md`:
-  - §0 Meta CHANGELOG (one line appended, plus any lines the define
-    skill adds during revise-mode invocation).
   - §1 Status upgraded to `locked` (Case A) or set to `locked` by the
     define skill (Case B).
   - Structural fixes in place (Case A only). Substantive changes go
     through the define skill in revise mode; the polish pipeline
     itself never edits target-file substance.
+  - No changelog or audit trail is written into the target file.
 
 ### 4.5 Exit Conditions
 
@@ -521,11 +518,8 @@ supersession line to its §D Phase Log at Closeout (see §10.3).
 - §11 has three consecutive PASS runs (either performed here in
   Case A or performed by the define skill in Case B).
 - Target §1 Status is `locked`.
-- §0 Meta CHANGELOG records this Step 0 audit.
+- Step 0 outcome is appended to `tmpl/polish-log.md`.
 - Pre-consistency check (Case B) passed.
-
-Commit at end of step:
-`polish({ScenarioName}): step0 target-file gate — <case A|B, existing|reverse-seeded>`.
 
 ---
 
@@ -597,8 +591,7 @@ the count.
 - `examples/{ScenarioName}/analysis-bases.md` — §1 patched if a
   hypothesis row lost its target-§3 back-link.
 
-Commit at end of step:
-`polish({ScenarioName}): step1 research audit — <one-line summary>`.
+Append step summary to `tmpl/polish-log.md`.
 
 ### 5.5 Exit Conditions
 
@@ -747,8 +740,7 @@ For **each** agent, in target §7 roster order, do the following:
    count. Only after three consecutive PASS runs is the agent
    accepted.
 
-Commit at end of each agent audit:
-`polish({ScenarioName}): step2 agent audit — <role-name>`.
+Append per-agent audit summary to `tmpl/polish-log.md`.
 
 **Part B — Environment and structure audit.**
 
@@ -853,7 +845,7 @@ the Step 3 Contract:
    - **Push through define skill revise mode** to update target §9
      itself (halts polish; upstream user fixes target via revise mode;
      polish resumes at Step 0 Case A with three-PASS reset).
-   - Record the divergence in target §0 Meta CHANGELOG as an
+   - Record the divergence in `tmpl/polish-log.md` as an
      intentional override (with rationale) and add a matching
      `# Override:` comment in the config.
 4. **Variant-folder presence.** Every variant marked `Yes` in target
@@ -866,7 +858,7 @@ the Step 3 Contract:
    extras). Every variant marked `No` MUST NOT have a config folder.
    Missing folders → halt (there is code without config, or config
    without code, either way the scenario is inconsistent). Extra
-   folders → the user must delete them via a separate commit (this
+   folders → the user must delete them separately (this
    pipeline does not delete config folders on its own; deletion is
    discussed with the user via `AskUserQuestion`).
 
@@ -878,8 +870,7 @@ FAIL resets that variant's count.
 - `configs/{ScenarioName}/{V}/*.yml` — `# Source:` comments added,
   values realigned only when the user selected option 1 in Hook 3.
 
-Commit at end of step:
-`polish({ScenarioName}): step3 config audit — variants {list}`.
+Append step summary to `tmpl/polish-log.md`.
 
 ### 7.5 Exit Conditions
 
@@ -1010,8 +1001,7 @@ FAIL resets that variant's count.
 - `examples/{ScenarioName}/{V}/analysis.md` — §2 bidirectional
   completeness fills / removals.
 
-Commit at end of step (per variant):
-`polish({ScenarioName}): step4 implementation audit — {V}`.
+Append per-variant audit summary to `tmpl/polish-log.md`.
 
 ### 8.5 Exit Conditions
 
@@ -1096,8 +1086,7 @@ times.
   surfaces a substantive issue, halt and cycle back to the earliest
   step whose Contract owns that issue.
 
-Commit at end of step:
-`polish({ScenarioName}): steps 5-10 scenario-level review + smoke`.
+Append step summary to `tmpl/polish-log.md`.
 
 ### 9.5 Exit Conditions
 
@@ -1142,20 +1131,20 @@ before Status transition (or halted via `AskUserQuestion` if it
 requires substantive input, in which case the fix is pushed through
 define skill revise mode).
 
-### 10.2 Meta CHANGELOG Summary Line
+### 10.2 Run Summary (local log)
 
-Append a summary line to target §0 Meta CHANGELOG covering the whole
-polish run:
+At closeout, append a full-run summary block to `tmpl/polish-log.md`:
 
 ```
-YYYY-MM-DD  Polish run against skill baseline (define/agent-design/implement).
-             - Step 0 (target-file gate): <case A|B, existing|reverse-seeded>
-             - Step 1 (research audit):   <one-line summary>
-             - Step 2 (agent + env):      <count agents polished, pool writes,
-                                            root doc §3/§5/§7 patches>
-             - Step 3 (config audit):     <variants polished>
-             - Step 4 (impl audit):       <variants polished>
-             - Steps 5-10 (review+smoke): <all-green | notes>
+polish({ScenarioName}): closeout — status released
+
+- Step 0 (target-file gate): <case A|B, existing|reverse-seeded>
+- Step 1 (research audit):   <one-line summary>
+- Step 2 (agent + env):      <count agents polished, pool writes,
+                               root doc §3/§5/§7 patches>
+- Step 3 (config audit):     <variants polished>
+- Step 4 (impl audit):       <variants polished>
+- Steps 5-10 (review+smoke): <all-green | notes>
 ```
 
 ### 10.3 Legacy Build-Log Supersession
@@ -1164,8 +1153,8 @@ If a `simulation-build-log.md` file exists in the scenario folder from
 a previous from-scratch build, append one line to its §D Phase Log:
 
 ```
-YYYY-MM-DD  Superseded by polish audit; polish trail lives in target
-            §0 CHANGELOG + git history. This build-log is retained for
+YYYY-MM-DD  Superseded by polish audit; polish trail lives in
+            tmpl/polish-log.md. This build-log is retained for
             historical reference only and is not maintained by the
             polish pipeline.
 ```
@@ -1180,20 +1169,14 @@ only Step-10-time edit to the target file. `simulation-build-log.md`
 is NOT written afresh (it does not exist in a polish run's authored
 outputs).
 
-### 10.5 Final Commit
-
-Commit:
-`polish({ScenarioName}): closeout — status released, changelog updated`.
-
-### 10.6 Exit Conditions and Closeout
+### 10.5 Exit Conditions and Closeout
 
 - Traceability matrix fully resolved.
-- Target §0 Meta CHANGELOG summary line present.
 - Target §1 Status: `released`.
 - Legacy build-log (if any) has a supersession line in §D.
 - Every step (Preflight → Step 0 → Step 1 → Step 2 → Step 3 → Step 4
-  → Steps 5 — 10 → Closeout) has at least one corresponding git
-  commit whose message clearly identifies the step and scope.
+  → Steps 5 — 10 → Closeout) has a corresponding entry in
+  `tmpl/polish-log.md`.
 
 ---
 
@@ -1231,8 +1214,7 @@ proceed silently. Never fabricate.
 
 **Recovery path after revise-mode invocation.** The polish run pauses
 at the halted step. The user invokes the define skill in revise mode,
-which produces the corrected target file (with a new §0 Meta
-CHANGELOG line recorded by the define skill). Once the define skill
+which produces the corrected target file. Once the define skill
 returns, the polish run resumes at the halted step with the
 three-PASS count reset to zero. No steps already completed are
 re-run.
@@ -1251,27 +1233,36 @@ re-run.
   Preflight → Step 0 → Step 1 → Step 2 → Step 3 → Step 4 →
   Steps 5 — 10 → Closeout → Traceability Matrix. Update on step
   boundaries; do not micro-track inside a step.
-- **Git discipline**: one commit per completed step (Step 2 may
-  produce one commit per audited agent; Step 4 may produce one commit
-  per audited variant). Commit messages MUST identify the step and
-  the artefact scope. This git history is the polish run's primary
-  audit trail (no build log is written).
+- **Local-log discipline**: append one entry to `tmpl/polish-log.md`
+  per completed step. The log file is created at Preflight if absent.
+  This local file is the polish run's primary audit trail (no build
+  log is written; no git commits are made by the pipeline).
+- **No git commits**: the polish pipeline MUST NOT execute `git add`,
+  `git commit`, or any version-control command. All file changes
+  remain local and unstaged. The user decides post-run when to commit.
 - **Workspace throwaway**: the Preflight inventory lives in the
   runtime workspace directory (see the runtime environment for the
   concrete path) and MUST NOT be committed to the repository.
 - **Contract-block edits**: if audit uncovers a gap in one of the
-  Contract blocks (a step's Inputs / Outputs / Polish Hooks are
+  Contract blocks (a step’s Inputs / Outputs / Polish Hooks are
   incomplete or ambiguous), the pipeline MAY non-destructively edit
   the Contract block *of that step file only*. Substantive rewrites
-  of adjacent prose are out of scope. Contract-block edits count as
-  skill-file changes and are committed under
-  `polish(skills): step <N> contract clarification`.
+  of adjacent prose are out of scope.
 - **Target-file edits**: the polish pipeline MUST NOT hand-edit the
-  target file except for (a) appending to §0 Meta CHANGELOG, (b) the
-  single Status transitions at Step 0 (`draft → locked`) and Closeout
-  (`locked → released`), and (c) Case B seed writes handed off to
-  the define skill's revise mode. All other target-file changes go
-  through the define skill.
+  target file except for (a) the single Status transitions at Step 0
+  (`draft → locked`) and Closeout (`locked → released`), and
+  (b) Case B seed writes handed off to the define skill's revise mode.
+  All other target-file changes go through the define skill. No
+  changelog, audit trail, or §0 section may be written into the
+  target file.
+- **Non-spec content removal**: any field, row, section, or block
+  found in a downstream artefact that is NOT defined in the governing
+  skill spec MUST be deleted during the polish audit. Examples:
+  `Change log` rows in agent §3.11 tables (removed from
+  `agent-design-skill.md` spec), `CHANGELOG` tables, `§0` sections,
+  `Produced By` / `Created` / `Status` rows in scenario §1 Meta.
+  The pipeline does not preserve legacy content that violates the
+  current spec — delete it outright.
 
 ---
 
@@ -1283,7 +1274,7 @@ Run this checklist once before invoking Preflight:
       least one downstream artefact (`simulation-bases.md`,
       `analysis-bases.md`, or a variant subdirectory declared in
       target §10.1).
-- [ ] Repository is clean (`git status` shows no unrelated diffs).
+- [ ] Working tree is clean (no unrelated local modifications).
 - [ ] The reader has read the `## Contract` block of every step file
       listed in §14 (this is the audit-facing surface — read it
       first).
@@ -1292,8 +1283,9 @@ Run this checklist once before invoking Preflight:
 - [ ] The reader has read this file (`polish-simulation-pipeline.md`)
       end-to-end at least once.
 - [ ] The reader is aware that this pipeline **does not** produce a
-      `simulation-build-log.md`; audit trail is CHANGELOG + §3.11
-      Provenance + git history.
+      `simulation-build-log.md`; audit trail is §3.11 Provenance +
+      `tmpl/polish-log.md` (no content is written into the target file
+      itself).
 - [ ] The reader is aware that all substantive target-file changes go
       through `define-simulation-scenario-skill.md §9.3 revise mode`,
       never through direct hand-editing of the target file.

@@ -199,5 +199,4 @@ State update: unchanged.
 | Created | 2026-07-08 |
 | Version | 1.0.1 |
 | Icon | ![](../agent_images/icons/finance-funding-currency-buyer.png) |
-| Change log | Initial CarryTradeUnwind AGENT_POOL design; 1.0.1 — Added Icon row via polish-simulation-pipeline Step 2 icon-repair |
 | Status | draft |

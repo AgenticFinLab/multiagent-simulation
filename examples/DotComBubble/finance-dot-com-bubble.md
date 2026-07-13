@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                                        |
-|-------------|--------------------------------------------------------------------------------|
-| Name        | DotComBubble                                                                   |
-| Domain      | finance                                                                        |
-| Produced By | polish-simulation-pipeline.md (reverse-reconstruction from existing artefacts) |
-| Created     | 2026-07-13                                                                     |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md                                     |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                        |
+| Field       | Content                                                                                                                         |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------|
+| Name        | DotComBubble                                                                                                                    |
+| Domain      | finance                                                                                                                         |
+| Phenomenon  | Narrative-driven demand and limits to arbitrage inflate technology valuations until belief synchronization triggers a collapse. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                      |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                         |
 
 ## §2 Phenomenon Statement
 

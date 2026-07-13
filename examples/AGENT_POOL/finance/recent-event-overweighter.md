@@ -254,6 +254,5 @@ State update: no portfolio change.
 | Reviewed by | Codex static three-pass review |
 | Created | 2026-07-06 |
 | Version | 1.0.3 |
-| Change log  | 1.0.0 initial fork from momentum-trader for AvailabilityBias; 1.0.1 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
 | Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-recent-event-overweighter.png) |

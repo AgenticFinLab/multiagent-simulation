@@ -19,22 +19,22 @@ visual identity.
 
 ## Required Inputs
 
-| Input | Source |
-|-------|--------|
-| Domain | `examples/AGENT_POOL/{domain}/<agent>.md` parent folder |
-| Agent stem | pool markdown filename without `.md` |
-| Agent summary | pool file `§3.2 Summary` / Summary table |
-| Theory family | pool file Summary + Theoretical Foundation |
-| Behavioral role | pool file Summary + Design Purpose |
+| Input                    | Source                                                                            |
+|--------------------------|-----------------------------------------------------------------------------------|
+| Domain                   | `examples/AGENT_POOL/{domain}/<agent>.md` parent folder                           |
+| Agent stem               | pool markdown filename without `.md`                                              |
+| Agent summary            | pool file `§3.2 Summary` / Summary table                                          |
+| Theory family            | pool file Summary + Theoretical Foundation                                        |
+| Behavioral role          | pool file Summary + Design Purpose                                                |
 | Existing style reference | `examples/AGENT_POOL/agent_images/design.md` and `icon_focused_contact_sheet.jpg` |
 
 ## Outputs
 
-| Artefact | Required path / change |
-|----------|------------------------|
-| Icon PNG | `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` |
-| Pool profile link | `| Icon | ![](../agent_images/icons/{domain}-{agent-stem}.png) |` in the profile's Design Provenance table |
-| Mapping row | Add one row to `examples/AGENT_POOL/agent_images/design.md` |
+| Artefact          | Required path / change                                             |
+|-------------------|--------------------------------------------------------------------|
+| Icon PNG          | `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` |
+| Pool profile link | `                                                                  |
+| Mapping row       | Add one row to `examples/AGENT_POOL/agent_images/design.md`        |
 
 ## Invocation Rules
 
@@ -130,16 +130,16 @@ Match the existing icon set in
 3. **Choose a motif.** Pick one visible motif that explains the agent at a
    glance. Examples:
 
-   | Role / theory | Motif |
-   |---------------|-------|
-   | Momentum / trend following | rising arrow, trend line |
-   | Contrarian / reversal | reverse arrow |
-   | Fundamental value | diamond, balance, magnifier |
-   | Liquidity / market making | bid-ask book |
-   | Risk control / deleveraging | shield, gauge, alert |
-   | Information advantage | eye, network, signal |
-   | Anchoring / slow belief update | anchor, hourglass |
-   | Noise / random behavior | scattered dots |
+   | Role / theory                  | Motif                       |
+   |--------------------------------|-----------------------------|
+   | Momentum / trend following     | rising arrow, trend line    |
+   | Contrarian / reversal          | reverse arrow               |
+   | Fundamental value              | diamond, balance, magnifier |
+   | Liquidity / market making      | bid-ask book                |
+   | Risk control / deleveraging    | shield, gauge, alert        |
+   | Information advantage          | eye, network, signal        |
+   | Anchoring / slow belief update | anchor, hourglass           |
+   | Noise / random behavior        | scattered dots              |
 
 4. **Generate the image.** Use the available image-generation capability with
    this prompt shape:
@@ -187,13 +187,7 @@ Match the existing icon set in
    - Display label
    - Short match reason tying the motif to the theory or behavior
 
-8. **Record provenance.** Add the icon creation or repair to the pool profile
-   change log, for example:
-
-   ```text
-   1.0.1 - Added AGENT_POOL icon via agent-icon-generation-skill.
-   1.0.2 - Repaired AGENT_POOL icon mapping via agent-icon-generation-skill.
-   ```
+8. **Record provenance.** Bump the pool profile's `Version` field.
 
 ## Validation Checklist
 

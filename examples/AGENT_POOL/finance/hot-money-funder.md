@@ -218,5 +218,4 @@ State update: unchanged.
 | Created | 2026-07-05 |
 | Version | 1.0.4 |
 | Icon | ![](../agent_images/icons/finance-hot-money-funder.png) |
-| Change log  | 1.0.0 - Created for AsianFinancialCrisis create-pipeline replay.<br>1.0.1 - Added AGENT_POOL Icon row via polish-simulation-pipeline Step 2 icon-repair (icon PNG was already present under agent_images/icons/; profile row and design.md mapping were the missing links).; 1.0.2 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.3 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows); 1.0.4 - Structural conformance upgrade (added Behavioral Tendency, Behavioral Adaptation, Environmental Dependencies, §3.6.0 I/O Contract, IF-THEN sanity bounds, Author/Change log provenance rows) |
 | Status | conformant |

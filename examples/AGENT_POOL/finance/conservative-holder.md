@@ -239,6 +239,5 @@ Decision: hold (no capacity).
 | Reviewed by | audit_agent_handbook.py v1                                                       |
 | Created     | 2026-07-11                                                                       |
 | Version     | 1.1.0                                                                            |
-| Change log  | 0.1.0 - Stub created for AssetBubble; 1.1.0 - Full §3 conformance authoring pass |
 | Status      | conformant                                                                       |
 | Icon        | ![](../agent_images/icons/finance-conservative-holder.png)                       |

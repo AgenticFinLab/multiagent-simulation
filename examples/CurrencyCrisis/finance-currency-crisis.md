@@ -2,14 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                             |
-|-------------|-----------------------------------------------------|
-| Name        | CurrencyCrisis                                      |
-| Domain      | finance                                             |
-| Produced By | polish-simulation-pipeline.md (reverse-reconstruct) |
-| Created     | 2026-07-13                                          |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md          |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md    |
+| Field       | Content                                                                                                               |
+|-------------|-----------------------------------------------------------------------------------------------------------------------|
+| Name        | CurrencyCrisis                                                                                                        |
+| Domain      | finance                                                                                                               |
+| Phenomenon  | Self-fulfilling speculative attacks deplete central-bank reserves and force abandonment of a fixed exchange-rate peg. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                            |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md                                                                      |
 
 ## §2 Phenomenon Statement
 

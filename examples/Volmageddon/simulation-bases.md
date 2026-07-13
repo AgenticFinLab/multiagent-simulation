@@ -595,7 +595,6 @@ State update: no state becomes negative.
 | Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-07-01 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 — normalized ShortVolTrader into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A; inserted §4.1.5.0 I/O Contract per agent-design-skill.md §3.6.0. |
 | Status | experimental |
 
 ### §4.2 VolETNManager
@@ -884,7 +883,6 @@ State update: no state becomes negative.
 | Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-07-01 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 — normalized VolETNManager into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A; inserted §4.2.5.0 I/O Contract per agent-design-skill.md §3.6.0. |
 | Status | experimental |
 
 ### §4.3 LongVolHedger
@@ -1178,7 +1176,6 @@ State update: no state becomes negative.
 | Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-07-01 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 — normalized LongVolHedger into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A; inserted §4.3.5.0 I/O Contract per agent-design-skill.md §3.6.0. |
 | Status | experimental |
 
 ### §4.4 VolArbitrageur
@@ -1475,7 +1472,6 @@ State update: cash increases by `5000 * price`; position falls to zero.
 | Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-07-01 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 — normalized VolArbitrageur into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A; inserted §4.4.5.0 I/O Contract per agent-design-skill.md §3.6.0. |
 | Status | experimental |
 
 ### §4.5 EquityTrader
@@ -1773,7 +1769,6 @@ State update: cash increases by `1000 * price`; position falls by 1000.
 | Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-07-01 |
 | Version | 1.0.0 |
-| Change log | 1.0.0 — normalized EquityTrader into standalone AGENT_POOL form under polish-simulation-pipeline.md Step 2 Part A; inserted §4.5.5.0 I/O Contract per agent-design-skill.md §3.6.0. |
 | Status | experimental |
 
 ## §5 Agent Diversity Verification

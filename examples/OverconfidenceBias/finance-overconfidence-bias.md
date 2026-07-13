@@ -2,18 +2,13 @@
 
 ## §1 Meta
 
-| Field       | Content                                                                  |
-|-------------|--------------------------------------------------------------------------|
-| Name        | OverconfidenceBias                                                       |
-| Domain      | finance                                                                  |
-| Produced By | define-simulation-scenario-skill.md v1.2.0 (invoking agent: Claude Code) |
-| Created     | 2026-07-07                                                               |
-| Pipeline    | masim/skills/polish-simulation-pipeline.md                               |
-| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                  |
-
-| CHANGELOG  |                                                                                                                                                                                        |
-|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2026-07-07 | Polish Step 0: target file produced from `simulation-bases.md` and `analysis-bases.md` downstream artefacts via define-skill end-to-end invocation (Case B, pre-filled from existing). |
+| Field       | Content                                                                                                                        |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------|
+| Name        | OverconfidenceBias                                                                                                             |
+| Domain      | finance                                                                                                                        |
+| Phenomenon  | Signal-precision inflation causes overconfident traders to trade too aggressively, pushing prices away from fundamental value. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                     |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                        |
 
 ## §2 Phenomenon Statement
 

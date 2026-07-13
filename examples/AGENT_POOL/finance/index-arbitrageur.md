@@ -231,6 +231,5 @@ State update: position becomes zero after execution.
 | Reviewed by | Codex static three-pass review                           |
 | Created     | 2026-07-06                                               |
 | Version     | 1.0.0                                                    |
-| Change log  | 1.0.0 initial design for BlackMonday1987                 |
 | Status      | experimental                                             |
 | Icon        | ![](../agent_images/icons/finance-index-arbitrageur.png) |
