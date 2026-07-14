@@ -8,7 +8,7 @@ import json
 import re
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote  # noqa: F401 – kept for potential external use
 
 import streamlit as st
 
@@ -44,8 +44,15 @@ AGENT_POOL_ROOT = PROJECT_ROOT / "examples" / "AGENT_POOL"
 IMAGE_ROOT = AGENT_POOL_ROOT / "agent_images"
 ICON_ROOT = IMAGE_ROOT / "icons"
 FINANCE_ROOT = AGENT_POOL_ROOT / "finance"
+OPINION_ROOT = AGENT_POOL_ROOT / "opinion"
 PROFILE_ROOT = FINANCE_ROOT
 CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
+
+# All domain directories to scan for agent profiles.
+_DOMAIN_ROOTS: list[tuple[str, Path]] = [
+    ("finance", FINANCE_ROOT),
+    ("opinion", OPINION_ROOT),
+]
 
 VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
 
@@ -66,13 +73,14 @@ ALL_ENGINES = ("Rule", "LLM", "RuleLLM", "Rag")
 
 def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
     """Return a lightweight cache key for avatar metadata and PNG changes."""
-    paths = []
+    paths: list[Path] = []
     if CATALOG_PATH.exists():
         paths.append(CATALOG_PATH)
     if ICON_ROOT.exists():
         paths.extend(sorted(ICON_ROOT.glob("*.png")))
-    if FINANCE_ROOT.exists():
-        paths.extend(sorted(FINANCE_ROOT.glob("*.md")))
+    for _domain, root in _DOMAIN_ROOTS:
+        if root.exists():
+            paths.extend(sorted(root.glob("*.md")))
     return tuple((str(path), path.stat().st_mtime_ns) for path in paths)
 
 
@@ -748,12 +756,24 @@ def _canonical_archetype(player_id: str) -> str:
 def _show_agent_profile_dialog(agent: dict) -> None:
     """Modal that renders the full agent .md profile.
 
-    Loads the file from ``examples/AGENT_POOL/finance/{player_id_kebab}.md``.
+    Loads the file from ``examples/AGENT_POOL/{domain}/{player_id_kebab}.md``.
+    Supports both finance/ and opinion/ domains.
     Falls back to a caption when the profile file does not exist.
     """
     player_id = agent["id"]
     archetype = _canonical_archetype(player_id)
-    icon_path = ICON_ROOT / f"finance-{archetype.replace('_', '-')}.png"
+    md_stem = archetype.replace("_", "-")
+
+    # Resolve icon from the correct domain.
+    icon_path: Path | None = None
+    for domain, _root in _DOMAIN_ROOTS:
+        candidate = ICON_ROOT / f"{domain}-{md_stem}.png"
+        if candidate.exists():
+            icon_path = candidate
+            break
+    if icon_path is None:
+        icon_path = ICON_ROOT / f"finance-{md_stem}.png"
+
     header_cols = st.columns([1, 6], gap="small")
     with header_cols[0]:
         if icon_path.exists():
@@ -767,13 +787,19 @@ def _show_agent_profile_dialog(agent: dict) -> None:
         if instances > 1:
             st.caption(f"{instances} instances in this scenario")
     st.divider()
-    md_stem = archetype.replace("_", "-")
-    md_path = FINANCE_ROOT / f"{md_stem}.md"
-    if md_path.exists():
+
+    # Resolve profile .md from the correct domain directory.
+    md_path: Path | None = None
+    for _domain, root in _DOMAIN_ROOTS:
+        candidate = root / f"{md_stem}.md"
+        if candidate.exists():
+            md_path = candidate
+            break
+    if md_path and md_path.exists():
         st.markdown(md_path.read_text(encoding="utf-8"))
     else:
         st.caption(
-            f"No profile file found at examples/AGENT_POOL/finance/{md_stem}.md."
+            f"No profile file found at examples/AGENT_POOL/*/{ md_stem}.md."
         )
 
 
@@ -859,39 +885,47 @@ def _kebab_to_title(stem: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = None) -> list[dict[str, Any]]:
-    """Load agent metadata and profiles from finance/ + icons/.
+    """Load agent metadata and profiles from all domain directories + icons/.
 
-    The canonical agent pool is the set of ``finance/*.md`` specs that
-    have a matching ``agent_images/icons/finance-<stem>.png`` icon (the
-    ``finance-`` prefix encodes the agent's domain). When an explicit
-    ``agent_avatar_map.json`` exists it takes precedence.
+    The canonical agent pool is the set of ``{domain}/*.md`` specs that
+    have a matching ``agent_images/icons/{domain}-<stem>.png`` icon.
+    When an explicit ``agent_avatar_map.json`` exists it takes precedence.
     """
     if CATALOG_PATH.exists():
         raw_items = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
     else:
-        raw_items = [
-            {
-                "agent_type": md_path.stem,
-                "display_name": _kebab_to_title(md_path.stem),
-                "image_path": f"icons/finance-{md_path.stem}.png",
-                "source_profile": str(md_path),
-            }
-            for md_path in sorted(FINANCE_ROOT.glob("*.md"))
-            if (ICON_ROOT / f"finance-{md_path.stem}.png").exists()
-        ]
+        raw_items = []
+        for domain, root in _DOMAIN_ROOTS:
+            if not root.exists():
+                continue
+            for md_path in sorted(root.glob("*.md")):
+                icon_name = f"{domain}-{md_path.stem}.png"
+                if (ICON_ROOT / icon_name).exists():
+                    raw_items.append(
+                        {
+                            "agent_type": md_path.stem,
+                            "display_name": _kebab_to_title(md_path.stem),
+                            "image_path": f"icons/{icon_name}",
+                            "source_profile": str(md_path),
+                            "domain": domain,
+                        }
+                    )
 
     catalog: list[dict[str, Any]] = []
     for item in raw_items:
         agent_type = item["agent_type"]
         display_name = item.get("display_name", agent_type)
         image_path = IMAGE_ROOT / item.get("image_path", f"png/{agent_type}.png")
+        domain = item.get("domain", "finance")
 
         source_value = item.get("source_profile", "")
         source_path = Path(source_value)
         if not source_path.is_absolute():
             source_path = (IMAGE_ROOT / source_path).resolve()
         if not source_path.exists():
-            source_path = PROFILE_ROOT / f"{agent_type}.md"
+            # Fallback: look in the domain-specific directory
+            domain_root = AGENT_POOL_ROOT / domain
+            source_path = domain_root / f"{agent_type}.md"
 
         markdown = source_path.read_text(encoding="utf-8") if source_path.exists() else ""
         catalog.append(
@@ -1193,7 +1227,8 @@ def _render_profile(agent: dict[str, Any]) -> None:
 
     image_col, profile_col = st.columns([1, 2.8], gap="large")
     with image_col:
-        st.image(agent["image_file"], width="stretch")
+        if Path(agent["image_file"]).exists():
+            st.image(agent["image_file"], width=200)
         st.caption(agent["agent_type"])
     with profile_col:
         st.markdown(
@@ -1202,6 +1237,27 @@ def _render_profile(agent: dict[str, Any]) -> None:
         )
         st.markdown(agent["profile_markdown"] or "Profile content is unavailable.")
     st.divider()
+
+
+@st.dialog("Agent design profile", width="large")
+def _show_catalog_agent_profile_dialog(agent: dict[str, Any]) -> None:
+    """Modal that renders a full agent .md profile from the catalog dict.
+
+    This is the customize-page variant of the dialog. It receives a
+    catalog entry (with keys ``agent_type``, ``display_name``,
+    ``image_file``, ``profile_markdown``, ``domain``, ``intro``) and
+    renders the profile in a dialog overlay — preserving session state.
+    """
+    header_cols = st.columns([1, 6], gap="small")
+    with header_cols[0]:
+        img = Path(agent["image_file"])
+        if img.exists():
+            st.image(str(img), width=56)
+    with header_cols[1]:
+        st.markdown(f"### {agent['display_name']}")
+        st.caption(agent.get("archetype", agent["agent_type"]))
+    st.divider()
+    st.markdown(agent.get("profile_markdown") or "Profile content is unavailable.")
 
 
 def _load_param_specs(agent: dict[str, Any]) -> list[ParamSpec]:
@@ -1576,39 +1632,45 @@ def _compose_help(spec: ParamSpec) -> str:
 def _render_agent_card(agent: dict[str, Any]) -> None:
     """Render one card in the agent grid.
 
-    The card image links to the read-only profile (existing behaviour).
-    A small "Customize" button below the avatar promotes the agent to
-    the active slot in the parameter panel on the left, and a "Selected"
-    badge shows when the agent is already part of the market.
+    The card image is purely visual (non-interactive). Clicking the agent
+    name opens the profile in a dialog overlay, preserving session state.
+    A small "Customize" button below promotes the agent to the active
+    parameter panel on the left.
     """
     agent_type = agent["agent_type"]
-    href = f"?agent={quote(agent_type)}#agent-profile"
     selected = bool(st.session_state.get(f"market_agent_{agent_type}", False))
     is_active = st.session_state.get("customized_active_agent") == agent_type
     badge = (
-        "<span class='agent-status-chip selected'>✓ in market</span>"
+        "<span class='agent-status-chip selected'>\u2713 in market</span>"
         if selected else "<span class='agent-status-chip muted'>not selected</span>"
     )
     card = f"""
     <div class="agent-card{(' active' if is_active else '')}">
-      <a class="agent-image-link" href="{href}" target="_self"
-         title="{html.escape(agent['intro'], quote=True)}"
-         aria-label="Open {html.escape(agent['display_name'])} profile">
+      <div class="agent-image-link"
+           title="{html.escape(agent['intro'], quote=True)}">
         <img src="{agent['image_uri']}" alt="{html.escape(agent.get('alt_text', agent['display_name']))}">
         <span class="agent-hover">{html.escape(agent['intro'])}</span>
-      </a>
+      </div>
       <div class="agent-card-copy">
-        <div class="agent-card-name">{html.escape(agent['display_name'])}</div>
         {badge}
       </div>
     </div>
     """
     st.markdown(card, unsafe_allow_html=True)
 
+    # Agent name as clickable text button -> opens profile dialog.
+    if st.button(
+        agent["display_name"],
+        key=f"market_profile_{agent_type}",
+        type="tertiary",
+        help="View this agent's design profile",
+    ):
+        _show_catalog_agent_profile_dialog(agent)
+
     # "Customize" promotes this agent to the active slot in the
     # left-side parameter panel.  A second click on an already-active
     # agent collapses the panel (toggle behaviour).
-    label = "Editing…" if is_active else "Customize"
+    label = "Editing\u2026" if is_active else "Customize"
     if st.button(
         label,
         key=f"market_customize_{agent_type}",
@@ -1682,11 +1744,12 @@ def render_customize() -> None:
 
     st.write(
         "Select the agents you want in the simulation. Click an agent's "
-        "icon to view its profile, use **Customize** to edit its "
+        "**name** to view its profile, use **Customize** to edit its "
         "parameters, and (for LLM engines) tweak the persona / per-round "
         "prompt. Each agent's decision engine is set per-card."
     )
 
+    # Legacy inline profile (query-param based) kept for bookmarked URLs.
     requested_agent = _query_agent()
     by_type = {agent["agent_type"]: agent for agent in catalog}
     if requested_agent in by_type:

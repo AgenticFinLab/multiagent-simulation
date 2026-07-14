@@ -7,70 +7,70 @@ All agent icons follow the **icon-focused** style shown in
 character, domain-specific visual motif, and Chinese label tag. Individual
 icon files are stored in `icons/`.
 
-## Mapping: finance/ agents → icons/
+## Mapping: finance/ & opinion/ agents → icons/
 
-The table below maps each agent design spec in `finance/` to its corresponding
-icon in `icons/`.
+The table below maps each agent design spec in `finance/` and `opinion/` to its
+corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk.
 
-| #  | Agent                                        | Icon                                          | Display Name     | Match Reason                                                         |
-|----|----------------------------------------------|-----------------------------------------------|------------------|----------------------------------------------------------------------|
-| 1  | `finance/anchored-trader.md`                 | `finance-anchored-trader.png`                 | 固守型投资者     | Anchoring bias → anchor motif                                        |
-| 2  | `finance/block-trade-buyer.md`               | `finance-block-trade-buyer.png`               | 信息型投资者     | Opportunistic block buyer → eye motif                                |
-| 3  | `finance/concentrated-fund.md`               | `finance-concentrated-fund.png`               | 激进型投资者     | TRS-leveraged fund → lever motif                                     |
-| 4  | `finance/contrarian-trader.md`               | `finance-contrarian-trader.png`               | 逆向型投资者     | Mean-reversion contrarian → reverse-arrow motif                      |
-| 5  | `finance/disposition-trader.md`              | `finance-disposition-trader.png`              | 保守型投资者     | Disposition effect → loss-curve motif                                |
-| 6  | `finance/equity-trader.md`                   | `finance-equity-trader.png`                   | 量化型投资者     | Volatility-managed algo equity → code-grid motif                     |
-| 7  | `finance/fundamental-analyst.md`             | `finance-fundamental-analyst.png`             | 研究型投资者     | Conservative analyst → magnifier motif                               |
-| 8  | `finance/fundamentalist.md`                  | `finance-fundamentalist.png`                  | 价值型投资者     | Brock-Hommes fundamentalist → diamond motif                          |
-| 9  | `finance/historical-anchor.md`               | `finance-historical-anchor.png`               | 历史锚定型投资者 | Historical-price anchoring → anchor+hourglass motif                  |
-| 10 | `finance/information-trader.md`              | `finance-information-trader.png`              | 社交型投资者     | Liquidation-signal information → network-chat motif                  |
-| 11 | `finance/liquidity-provider.md`              | `finance-liquidity-provider.png`              | 做市型投资者     | Two-sided LP → bid-ask motif                                         |
-| 12 | `finance/long-vol-hedger.md`                 | `finance-long-vol-hedger.png`                 | 波动型投资者     | Long-vol crash insurance → wave motif                                |
-| 13 | `finance/momentum-trader.md`                 | `finance-momentum-trader.png`                 | 趋势型投资者     | Short-term momentum → trend motif                                    |
-| 14 | `finance/noise-trader.md`                    | `finance-noise-trader.png`                    | 随性型投资者     | Random noise → random-dots motif                                     |
-| 15 | `finance/prime-broker-delayed-liquidator.md` | `finance-prime-broker-delayed-liquidator.png` | 风控型投资者     | Risk-driven liquidation → gauge motif                                |
-| 16 | `finance/prime-broker-first-mover.md`        | `finance-prime-broker-first-mover.png`        | 恐慌型投资者     | First-mover forced selling → down-alert motif                        |
-| 17 | `finance/rational-updater.md`                | `finance-rational-updater.png`                | 防御型投资者     | Rational fundamental updater → shield/stability motif                |
-| 18 | `finance/short-vol-trader.md`                | `finance-short-vol-trader.png`                | 空头型投资者     | Short-vol carry → short-arrow motif                                  |
-| 19 | `finance/slow-adapter.md`                    | `finance-slow-adapter.png`                    | 稳健型投资者     | Slow belief update → pillar/stability motif                          |
-| 20 | `finance/trend-follower.md`                  | `finance-trend-follower.png`                  | 跟风型投资者     | CTA/momentum following → nodes/cascade motif                         |
-| 21 | `finance/vol-arbitrageur.md`                 | `finance-vol-arbitrageur.png`                 | 套利型投资者     | Volatility mean-reversion arb → scales motif                         |
-| 22 | `finance/vol-etn-manager.md`                 | `finance-vol-etn-manager.png`                 | 结构产品型投资者 | Structured product manager → stacked-layers motif                    |
-| 23 | `finance/volatility-trader.md`               | `finance-volatility-trader.png`               | 波动管理型投资者 | Vol-targeting/risk-parity → volatility-wave motif                    |
-| 24 | `finance/momentum-speculator.md`             | `finance-momentum-speculator.png`             | 追涨型投资者     | Aggressive trend chaser (bubble driver) → rising-arrow trend motif   |
-| 25 | `finance/rational-arbitrageur.md`            | `finance-rational-arbitrageur.png`            | 套利修正型投资者 | Value-based short-seller correcting mispricing → balance-scale motif |
-| 26 | `finance/fundamental-investor.md`            | `finance-fundamental-investor.png`            | 基本面型投资者   | Slow value anchor → magnifier + diamond motif                        |
-| 27 | `finance/leveraged-buyer.md`                 | `finance-leveraged-buyer.png`                 | 杠杆型投资者     | Margin-amplified positions → lever motif                             |
-| 28 | `finance/conservative-holder.md`             | `finance-conservative-holder.png`             | 长持型投资者     | Long-term stability holder → pillar/anchor motif                     |
-| 29 | `finance/hot-money-funder.md`                | `finance-hot-money-funder.png`                | 热钱型投资者     | Short-term foreign creditor / sudden-stop exit → hot-money / capital-flight motif |
-| 30 | `finance/contagion-trader.md`                | `finance-contagion-trader.png`                | 传染型投资者     | Cross-border regional-stress seller → contagion / linked-nodes motif |
-| 31 | `finance/imf-rescuer.md`                     | `finance-imf-rescuer.png`                     | 救援型投资者     | Delayed official crisis lender → shield / rescue-flag motif          |
-| 32 | `finance/value-contrarian.md`                | `finance-value-contrarian.png`                | 逆向价值型投资者 | Deep-discount patient buyer / crisis contrarian → magnifier + reverse-arrow motif |
-| 33 | `finance/recent-event-overweighter.md`       | `finance-recent-event-overweighter.png`       | 近期事件偏好投资者 | Recency salience / overweighted latest bar → dumbbell-on-recent-bar motif |
-| 34 | `finance/media-influenced-trader.md`         | `finance-media-influenced-trader.png`         | 媒体影响投资者   | Media narrative amplification → megaphone-to-price-arrow motif           |
-| 35 | `finance/portfolio-insurer.md`               | `finance-portfolio-insurer.png`               | 组合保险型投资者 | Delta-hedged sell-into-decline insurance → descending-staircase + shield motif |
-| 36 | `finance/index-arbitrageur.md`               | `finance-index-arbitrageur.png`               | 指数套利型投资者 | Futures-cash arbitrage transmission → parallel-lines + double-arrow motif |
-| 37 | `finance/program-trader.md`                  | `finance-program-trader.png`                  | 程式交易型投资者 | Threshold-based feedback selling with convex amplification → cascade-bars + lightning motif |
-| 38 | `finance/carry-trader.md`                    | `finance-carry-trader.png`                    | 套息型投资者     | Leveraged FX carry accumulator / crash-risk exposure → currency-arrow motif |
-| 39 | `finance/leveraged-carry-fund.md`            | `finance-leveraged-carry-fund.png`            | 杠杆套息基金型投资者 | Stop-loss-triggered forced-liquidation hedge fund → lever + stop-loss + margin-call bell motif |
-| 40 | `finance/funding-currency-buyer.md`          | `finance-funding-currency-buyer.png`          | 避险货币买入型投资者 | Safe-haven / repatriation JPY-CHF buyer → shield + inward arrows + anchor motif |
-| 41 | `finance/hedged-carry-trader.md`             | `finance-hedged-carry-trader.png`             | 对冲型套息投资者 | Volatility-managed macro fund with options overlay → carry-arrow + umbrella + volatility waveform motif |
-| 42 | `finance/belief-anchor.md`                   | `finance-belief-anchor.png`                   | 信念锚定型投资者 | Belief-state compounding under confirming signals → self-reinforcing "+" motif |
-| 43 | `finance/selective-scanner.md`               | `finance-selective-scanner.png`               | 选择型投资者     | Selective information search / myside bias → magnifier-with-highlight motif |
-| 44 | `finance/balanced-analyst.md`                | `finance-balanced-analyst.png`                | 均衡分析型投资者 | Rational Bayesian evidence weighing → equal-armed balance-scale motif |
-| 45 | `finance/speculative-attacker.md`            | `finance-speculative-attacker.png`            | 投机攻击型投资者 | Reserve-depletion currency attacker → downward sword + currency motif |
-| 46 | `finance/self-fulfilling-trader.md`          | `finance-self-fulfilling-trader.png`          | 自我实现型投资者 | Expectation-coordination herding seller → converging arrows motif |
-| 47 | `finance/central-bank-defender.md`           | `finance-central-bank-defender.png`           | 央行防御型投资者 | Reserve-financed peg defender → shield + currency pillar motif |
-| 48 | `finance/fundamental-hedger.md`              | `finance-fundamental-hedger.png`              | 基本面对冲型投资者 | Fundamental-value mean-reversion anchor → anchor + balance-scale motif |
-| 49 | `finance/new-economy-evangelist.md`          | `finance-new-economy-evangelist.png`          | 新经济布道者     | Narrative tech-belief buyer → laptop/circuit-board motif |
-| 50 | `finance/ipo-flipper.md`                     | `finance-ipo-flipper.png`                     | 打新型投资者     | Short-horizon IPO flip trader → coin-flip motif |
-| 51 | `finance/momentum-follower.md`               | `finance-momentum-follower.png`               | 跟风型投资者     | Trend-following amplifier → rising-momentum-arrow motif |
-| 52 | `finance/skeptical-value-investor.md`        | `finance-skeptical-value-investor.png`        | 价值怀疑型投资者 | Cautious fundamental analyst → magnifier + diamond motif |
-| 53 | `finance/short-seller.md`                    | `finance-short-seller.png`                    | 做空型投资者     | Bearish arbitrage pressure → descending-arrow motif |
-| 54 | `finance/pro-cyclical-lender.md`             | `finance-pro-cyclical-lender.png`             | 顺周期贷方       | Pro-cyclical credit expansion → upward-arrow + coins motif |
-| 55 | `finance/minsky-borrower.md`                 | `finance-minsky-borrower.png`                 | 明斯基借方       | Hedge-speculative-Ponzi fragility → collapsing-staircase motif |
-| 56 | `finance/counter-cyclical-lender.md`         | `finance-counter-cyclical-lender.png`         | 逆周期贷方       | Counter-cyclical stabilization → shield + dampened-wave motif |
-| 57 | `finance/value-investor.md`                  | `finance-value-investor.png`                  | 价值型投资者     | Fundamental value anchor → magnifier + diamond motif |
+| #  | Agent                                        | Icon                                          | Display Name         | Match Reason                                                                                            |
+|----|----------------------------------------------|-----------------------------------------------|----------------------|---------------------------------------------------------------------------------------------------------|
+| 1  | `finance/anchored-trader.md`                 | `finance-anchored-trader.png`                 | 固守型投资者         | Anchoring bias → anchor motif                                                                           |
+| 2  | `finance/block-trade-buyer.md`               | `finance-block-trade-buyer.png`               | 信息型投资者         | Opportunistic block buyer → eye motif                                                                   |
+| 3  | `finance/concentrated-fund.md`               | `finance-concentrated-fund.png`               | 激进型投资者         | TRS-leveraged fund → lever motif                                                                        |
+| 4  | `finance/contrarian-trader.md`               | `finance-contrarian-trader.png`               | 逆向型投资者         | Mean-reversion contrarian → reverse-arrow motif                                                         |
+| 5  | `finance/disposition-trader.md`              | `finance-disposition-trader.png`              | 保守型投资者         | Disposition effect → loss-curve motif                                                                   |
+| 6  | `finance/equity-trader.md`                   | `finance-equity-trader.png`                   | 量化型投资者         | Volatility-managed algo equity → code-grid motif                                                        |
+| 7  | `finance/fundamental-analyst.md`             | `finance-fundamental-analyst.png`             | 研究型投资者         | Conservative analyst → magnifier motif                                                                  |
+| 8  | `finance/fundamentalist.md`                  | `finance-fundamentalist.png`                  | 价值型投资者         | Brock-Hommes fundamentalist → diamond motif                                                             |
+| 9  | `finance/historical-anchor.md`               | `finance-historical-anchor.png`               | 历史锚定型投资者     | Historical-price anchoring → anchor+hourglass motif                                                     |
+| 10 | `finance/information-trader.md`              | `finance-information-trader.png`              | 社交型投资者         | Liquidation-signal information → network-chat motif                                                     |
+| 11 | `finance/liquidity-provider.md`              | `finance-liquidity-provider.png`              | 做市型投资者         | Two-sided LP → bid-ask motif                                                                            |
+| 12 | `finance/long-vol-hedger.md`                 | `finance-long-vol-hedger.png`                 | 波动型投资者         | Long-vol crash insurance → wave motif                                                                   |
+| 13 | `finance/momentum-trader.md`                 | `finance-momentum-trader.png`                 | 趋势型投资者         | Short-term momentum → trend motif                                                                       |
+| 14 | `finance/noise-trader.md`                    | `finance-noise-trader.png`                    | 随性型投资者         | Random noise → random-dots motif                                                                        |
+| 15 | `finance/prime-broker-delayed-liquidator.md` | `finance-prime-broker-delayed-liquidator.png` | 风控型投资者         | Risk-driven liquidation → gauge motif                                                                   |
+| 16 | `finance/prime-broker-first-mover.md`        | `finance-prime-broker-first-mover.png`        | 恐慌型投资者         | First-mover forced selling → down-alert motif                                                           |
+| 17 | `finance/rational-updater.md`                | `finance-rational-updater.png`                | 防御型投资者         | Rational fundamental updater → shield/stability motif                                                   |
+| 18 | `finance/short-vol-trader.md`                | `finance-short-vol-trader.png`                | 空头型投资者         | Short-vol carry → short-arrow motif                                                                     |
+| 19 | `finance/slow-adapter.md`                    | `finance-slow-adapter.png`                    | 稳健型投资者         | Slow belief update → pillar/stability motif                                                             |
+| 20 | `finance/trend-follower.md`                  | `finance-trend-follower.png`                  | 跟风型投资者         | CTA/momentum following → nodes/cascade motif                                                            |
+| 21 | `finance/vol-arbitrageur.md`                 | `finance-vol-arbitrageur.png`                 | 套利型投资者         | Volatility mean-reversion arb → scales motif                                                            |
+| 22 | `finance/vol-etn-manager.md`                 | `finance-vol-etn-manager.png`                 | 结构产品型投资者     | Structured product manager → stacked-layers motif                                                       |
+| 23 | `finance/volatility-trader.md`               | `finance-volatility-trader.png`               | 波动管理型投资者     | Vol-targeting/risk-parity → volatility-wave motif                                                       |
+| 24 | `finance/momentum-speculator.md`             | `finance-momentum-speculator.png`             | 追涨型投资者         | Aggressive trend chaser (bubble driver) → rising-arrow trend motif                                      |
+| 25 | `finance/rational-arbitrageur.md`            | `finance-rational-arbitrageur.png`            | 套利修正型投资者     | Value-based short-seller correcting mispricing → balance-scale motif                                    |
+| 26 | `finance/fundamental-investor.md`            | `finance-fundamental-investor.png`            | 基本面型投资者       | Slow value anchor → magnifier + diamond motif                                                           |
+| 27 | `finance/leveraged-buyer.md`                 | `finance-leveraged-buyer.png`                 | 杠杆型投资者         | Margin-amplified positions → lever motif                                                                |
+| 28 | `finance/conservative-holder.md`             | `finance-conservative-holder.png`             | 长持型投资者         | Long-term stability holder → pillar/anchor motif                                                        |
+| 29 | `finance/hot-money-funder.md`                | `finance-hot-money-funder.png`                | 热钱型投资者         | Short-term foreign creditor / sudden-stop exit → hot-money / capital-flight motif                       |
+| 30 | `finance/contagion-trader.md`                | `finance-contagion-trader.png`                | 传染型投资者         | Cross-border regional-stress seller → contagion / linked-nodes motif                                    |
+| 31 | `finance/imf-rescuer.md`                     | `finance-imf-rescuer.png`                     | 救援型投资者         | Delayed official crisis lender → shield / rescue-flag motif                                             |
+| 32 | `finance/value-contrarian.md`                | `finance-value-contrarian.png`                | 逆向价值型投资者     | Deep-discount patient buyer / crisis contrarian → magnifier + reverse-arrow motif                       |
+| 33 | `finance/recent-event-overweighter.md`       | `finance-recent-event-overweighter.png`       | 近期事件偏好投资者   | Recency salience / overweighted latest bar → dumbbell-on-recent-bar motif                               |
+| 34 | `finance/media-influenced-trader.md`         | `finance-media-influenced-trader.png`         | 媒体影响投资者       | Media narrative amplification → megaphone-to-price-arrow motif                                          |
+| 35 | `finance/portfolio-insurer.md`               | `finance-portfolio-insurer.png`               | 组合保险型投资者     | Delta-hedged sell-into-decline insurance → descending-staircase + shield motif                          |
+| 36 | `finance/index-arbitrageur.md`               | `finance-index-arbitrageur.png`               | 指数套利型投资者     | Futures-cash arbitrage transmission → parallel-lines + double-arrow motif                               |
+| 37 | `finance/program-trader.md`                  | `finance-program-trader.png`                  | 程式交易型投资者     | Threshold-based feedback selling with convex amplification → cascade-bars + lightning motif             |
+| 38 | `finance/carry-trader.md`                    | `finance-carry-trader.png`                    | 套息型投资者         | Leveraged FX carry accumulator / crash-risk exposure → currency-arrow motif                             |
+| 39 | `finance/leveraged-carry-fund.md`            | `finance-leveraged-carry-fund.png`            | 杠杆套息基金型投资者 | Stop-loss-triggered forced-liquidation hedge fund → lever + stop-loss + margin-call bell motif          |
+| 40 | `finance/funding-currency-buyer.md`          | `finance-funding-currency-buyer.png`          | 避险货币买入型投资者 | Safe-haven / repatriation JPY-CHF buyer → shield + inward arrows + anchor motif                         |
+| 41 | `finance/hedged-carry-trader.md`             | `finance-hedged-carry-trader.png`             | 对冲型套息投资者     | Volatility-managed macro fund with options overlay → carry-arrow + umbrella + volatility waveform motif |
+| 42 | `finance/belief-anchor.md`                   | `finance-belief-anchor.png`                   | 信念锚定型投资者     | Belief-state compounding under confirming signals → self-reinforcing "+" motif                          |
+| 43 | `finance/selective-scanner.md`               | `finance-selective-scanner.png`               | 选择型投资者         | Selective information search / myside bias → magnifier-with-highlight motif                             |
+| 44 | `finance/balanced-analyst.md`                | `finance-balanced-analyst.png`                | 均衡分析型投资者     | Rational Bayesian evidence weighing → equal-armed balance-scale motif                                   |
+| 45 | `finance/speculative-attacker.md`            | `finance-speculative-attacker.png`            | 投机攻击型投资者     | Reserve-depletion currency attacker → downward sword + currency motif                                   |
+| 46 | `finance/self-fulfilling-trader.md`          | `finance-self-fulfilling-trader.png`          | 自我实现型投资者     | Expectation-coordination herding seller → converging arrows motif                                       |
+| 47 | `finance/central-bank-defender.md`           | `finance-central-bank-defender.png`           | 央行防御型投资者     | Reserve-financed peg defender → shield + currency pillar motif                                          |
+| 48 | `finance/fundamental-hedger.md`              | `finance-fundamental-hedger.png`              | 基本面对冲型投资者   | Fundamental-value mean-reversion anchor → anchor + balance-scale motif                                  |
+| 49 | `finance/new-economy-evangelist.md`          | `finance-new-economy-evangelist.png`          | 新经济布道者         | Narrative tech-belief buyer → laptop/circuit-board motif                                                |
+| 50 | `finance/ipo-flipper.md`                     | `finance-ipo-flipper.png`                     | 打新型投资者         | Short-horizon IPO flip trader → coin-flip motif                                                         |
+| 51 | `finance/momentum-follower.md`               | `finance-momentum-follower.png`               | 跟风型投资者         | Trend-following amplifier → rising-momentum-arrow motif                                                 |
+| 52 | `finance/skeptical-value-investor.md`        | `finance-skeptical-value-investor.png`        | 价值怀疑型投资者     | Cautious fundamental analyst → magnifier + diamond motif                                                |
+| 53 | `finance/short-seller.md`                    | `finance-short-seller.png`                    | 做空型投资者         | Bearish arbitrage pressure → descending-arrow motif                                                     |
+| 54 | `finance/pro-cyclical-lender.md`             | `finance-pro-cyclical-lender.png`             | 顺周期贷方           | Pro-cyclical credit expansion → upward-arrow + coins motif                                              |
+| 55 | `finance/minsky-borrower.md`                 | `finance-minsky-borrower.png`                 | 明斯基借方           | Hedge-speculative-Ponzi fragility → collapsing-staircase motif                                          |
+| 56 | `finance/counter-cyclical-lender.md`         | `finance-counter-cyclical-lender.png`         | 逆周期贷方           | Counter-cyclical stabilization → shield + dampened-wave motif                                           |
+| 57 | `finance/value-investor.md`                  | `finance-value-investor.png`                  | 价值型投资者         | Fundamental value anchor → magnifier + diamond motif                                                    |
 
 | 58 | `finance/disposition-investor.md`          | `finance-disposition-investor.png`          | 处置效应型投资者   | Prospect-theory disposition bias → S-curve / loss-curve motif                    |
 | 59 | `finance/rational-investor.md`             | `finance-rational-investor.png`             | 理性型投资者       | Expected-utility rebalancer → balanced-scale motif                               |
@@ -122,14 +122,111 @@ icon in `icons/`.
 | 105 | `finance/hot-hand-trader.md`              | `finance-hot-hand-trader.png`              | 热手型投资者      | Hot-hand continuation belief → flame + rising-trend motif                       |
 | 106 | `finance/independent-assessor.md`         | `finance-independent-assessor.png`         | 独立评估型投资者  | Rational streak-independent assessment → balance-scale + magnifier motif        |
 | 107 | `finance/arbitrageur.md`                  | `finance-arbitrageur.png`                  | 套利型投资者      | Streak-mispricing exploiter → converging-lines + balance-scale motif            |
+| 108 | `finance/category-overgeneralizer.md` | `finance-category-overgeneralizer.png` | — | — |
+| 109 | `finance/index-fund.md` | `finance-index-fund.png` | — | — |
+| 110 | `finance/index-tracker.md` | `finance-index-tracker.png` | — | — |
+| 111 | `finance/overconfident-trader.md` | `finance-overconfident-trader.png` | — | — |
+| 112 | `finance/pattern-matcher.md` | `finance-pattern-matcher.png` | — | — |
+| 113 | `finance/self-attributor.md` | `finance-self-attributor.png` | — | — |
+| 114 | `opinion/distorting-relayer.md` | `opinion-distorting-relayer.png` | — | — |
+| 115 | `opinion/fact-checker.md` | `opinion-fact-checker.png` | — | — |
+| 116 | `opinion/gullible-spreader.md` | `opinion-gullible-spreader.png` | — | — |
+| 117 | `opinion/skeptical-evaluator.md` | `opinion-skeptical-evaluator.png` | — | — |
+| 118 | `opinion/uninformed-bystander.md` | `opinion-uninformed-bystander.png` | — | — |
+| 119 | `finance/active-rebalancer.md` | MISSING | — | — |
+| 120 | `finance/aggressive-investor.md` | MISSING | — | — |
+| 121 | `finance/anchor-depositor.md` | MISSING | — | — |
+| 122 | `finance/bank-manager.md` | MISSING | — | — |
+| 123 | `finance/bayesian-updater.md` | MISSING | — | — |
+| 124 | `finance/bond-trader.md` | MISSING | — | — |
+| 125 | `finance/bottom-fisher.md` | MISSING | — | — |
+| 126 | `finance/break-even-trader.md` | MISSING | — | — |
+| 127 | `finance/calibrated-trader.md` | MISSING | — | — |
+| 128 | `finance/cascade-follower.md` | MISSING | — | — |
+| 129 | `finance/central-bank.md` | MISSING | — | — |
+| 130 | `finance/commitment-escalator.md` | MISSING | — | — |
+| 131 | `finance/contrarian.md` | MISSING | — | — |
+| 132 | `finance/contrarian-investor.md` | MISSING | — | — |
+| 133 | `finance/contrarian-skeptic.md` | MISSING | — | — |
+| 134 | `finance/contrarian-statistical.md` | MISSING | — | — |
+| 135 | `finance/convergence-arbitrageur.md` | MISSING | — | — |
+| 136 | `finance/convergence-trader.md` | MISSING | — | — |
+| 137 | `finance/de-fi-lender.md` | MISSING | — | — |
+| 138 | `finance/default-follower.md` | MISSING | — | — |
+| 139 | `finance/depositor.md` | MISSING | — | — |
+| 140 | `finance/distorting-relayer.md` | MISSING | — | — |
+| 141 | `finance/early-exit-trader.md` | MISSING | — | — |
+| 142 | `finance/fact-checker.md` | MISSING | — | — |
+| 143 | `finance/flash-market-maker.md` | MISSING | — | — |
+| 144 | `finance/forced-seller.md` | MISSING | — | — |
+| 145 | `finance/fundamental-anchor.md` | MISSING | — | — |
+| 146 | `finance/greater-fool-speculator.md` | MISSING | — | — |
+| 147 | `finance/gullible-spreader.md` | MISSING | — | — |
+| 148 | `finance/hindsight-overconfident.md` | MISSING | — | — |
+| 149 | `finance/house-money-trader.md` | MISSING | — | — |
+| 150 | `finance/independent-thinker.md` | MISSING | — | — |
+| 151 | `finance/inertial-holder.md` | MISSING | — | — |
+| 152 | `finance/information-environment.md` | MISSING | — | — |
+| 153 | `finance/insider-advantaged.md` | MISSING | — | — |
+| 154 | `finance/institutional-holder.md` | MISSING | — | — |
+| 155 | `finance/intrinsic-value-trader.md` | MISSING | — | — |
+| 156 | `finance/leverage-trader.md` | MISSING | — | — |
+| 157 | `finance/leveraged-fund.md` | MISSING | — | — |
+| 158 | `finance/leveraged-hedge-fund.md` | MISSING | — | — |
+| 159 | `finance/leveraged-speculator.md` | MISSING | — | — |
+| 160 | `finance/liquidity-demander.md` | MISSING | — | — |
+| 161 | `finance/liquidity-seeker.md` | MISSING | — | — |
+| 162 | `finance/long-term-investor.md` | MISSING | — | — |
+| 163 | `finance/loss-averse.md` | MISSING | — | — |
+| 164 | `finance/loss-averse-investor.md` | MISSING | — | — |
+| 165 | `finance/macro-hedge-fund.md` | MISSING | — | — |
+| 166 | `finance/mental-accountant.md` | MISSING | — | — |
+| 167 | `finance/momentum-buyer.md` | MISSING | — | — |
+| 168 | `finance/momentum-investor.md` | MISSING | — | — |
+| 169 | `finance/myopic-loss-averse.md` | MISSING | — | — |
+| 170 | `finance/narrative-believer.md` | MISSING | — | — |
+| 171 | `finance/opinion-environment.md` | MISSING | — | — |
+| 172 | `finance/opportunistic-trader.md` | MISSING | — | — |
+| 173 | `finance/opportunity-cost-trader.md` | MISSING | — | — |
+| 174 | `finance/outcome-learner.md` | MISSING | — | — |
+| 175 | `finance/panic-seller.md` | MISSING | — | — |
+| 176 | `finance/passive-bystander.md` | MISSING | — | — |
+| 177 | `finance/passive-investor.md` | MISSING | — | — |
+| 178 | `finance/peg-defender.md` | MISSING | — | — |
+| 179 | `finance/process-evaluator.md` | MISSING | — | — |
+| 180 | `finance/rational-cutter.md` | MISSING | — | — |
+| 181 | `finance/rational-optimizer.md` | MISSING | — | — |
+| 182 | `finance/rational-portfolio-manager.md` | MISSING | — | — |
+| 183 | `finance/rational-trader.md` | MISSING | — | — |
+| 184 | `finance/reputation-herder.md` | MISSING | — | — |
+| 185 | `finance/retail-coordinator.md` | MISSING | — | — |
+| 186 | `finance/risk-averse-investor.md` | MISSING | — | — |
+| 187 | `finance/risk-averse-saver.md` | MISSING | — | — |
+| 188 | `finance/risk-manager.md` | MISSING | — | — |
+| 189 | `finance/risk-parity-fund.md` | MISSING | — | — |
+| 190 | `finance/sentiment-trader.md` | MISSING | — | — |
+| 191 | `finance/skeptical-analyst.md` | MISSING | — | — |
+| 192 | `finance/skeptical-evaluator.md` | MISSING | — | — |
+| 193 | `finance/social-media-influencer.md` | MISSING | — | — |
+| 194 | `finance/social-proof-follower.md` | MISSING | — | — |
+| 195 | `finance/stablecoin-holder.md` | MISSING | — | — |
+| 196 | `finance/sunk-cost-holder.md` | MISSING | — | — |
+| 197 | `finance/technical-trader.md` | MISSING | — | — |
+| 198 | `finance/trend-chaser.md` | MISSING | — | — |
+| 199 | `finance/uninformed-bystander.md` | MISSING | — | — |
+| 200 | `finance/value-buyer.md` | MISSING | — | — |
 
 ## Notes
 
-- Icon file names carry a ``finance-`` domain prefix so the filename encodes
-  both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 107 total and map 1:1 to the 107 ``finance/`` agent specs.
-- Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
-  Provenance table linking to its icon via relative path.
+- Icon file names carry a domain prefix so the filename encodes both the
+  domain and the agent (e.g. ``finance-anchored-trader.png``,
+  ``opinion-distorting-relayer.png``).
+- Rows 1–118: icon exists on disk (118 total: 113 finance + 5 opinion).
+- Rows 119–200: icon **MISSING** (82 agents, all stubs awaiting authoring).
+- Total agent .md files: 200 (195 finance + 5 opinion).
+- Each authored ``finance/*.md`` or ``opinion/*.md`` file carries an
+  ``| Icon |`` row in its Design Provenance table linking to its icon via
+  relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
   (previously borrowed from the original taxonomy contact sheet). Old icons
   backed up in the project workspace.
