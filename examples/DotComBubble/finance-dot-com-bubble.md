@@ -1,4 +1,4 @@
-# DotComBubble — Scenario Target
+# DotComBubble
 
 ## §1 Meta
 

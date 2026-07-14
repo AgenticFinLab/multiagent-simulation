@@ -1,19 +1,4 @@
-# AnchoringEffect — Scenario Target File (Reverse-Reconstructed)
-
-<!--
-  Produced By polish-simulation-pipeline.md Step 0 Case B reverse-reconstruction
-  (2026-07-01). The scenario existed as `simulation-bases.md` + variant folders
-  before the define skill was introduced; this target file was seeded from the
-  §4.3 mapping table (§1 Meta ← folder name, §2 Phenomenon ← bases §1, §4
-  Anchors ← union of bases §2 theories, §5 Stylized Facts ← analysis-bases §1
-  + §6 metrics, §6 Historical Anchors ← bases §8 case studies, §7 Roster ←
-  bases §4.1 – §4.9, §8 Environment ← bases §3, §9 Parameters ← bases §6,
-  §10.1 Variants ← existing subdirectories).
-
-  Post-reconstruction, this file MUST be handed to define-simulation-scenario-skill.md
-  §9.3 revise mode for §11 three-PASS validation and Status transition
-  draft → locked.
--->
+# AnchoringEffect
 
 ## §1 Meta
 

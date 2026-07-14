@@ -1,4 +1,4 @@
-# EuropeanDebtCrisis — Scenario Target
+# EuropeanDebtCrisis
 
 ## §1 Meta
 

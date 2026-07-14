@@ -1,4 +1,4 @@
-# CurrencyCrisis — Scenario Target
+# CurrencyCrisis
 
 ## §1 Meta
 

@@ -1,4 +1,4 @@
-# EndowmentEffect — Scenario Target
+# EndowmentEffect
 
 ## §1 Meta
 

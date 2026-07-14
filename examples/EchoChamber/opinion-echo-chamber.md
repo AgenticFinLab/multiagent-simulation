@@ -1,4 +1,4 @@
-# EchoChamber — Scenario Target
+# EchoChamber
 
 ## §1 Meta
 

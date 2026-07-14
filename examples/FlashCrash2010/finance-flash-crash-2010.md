@@ -1,4 +1,4 @@
-# FlashCrash2010 — Scenario Target
+# FlashCrash2010
 
 ## §1 Meta
 

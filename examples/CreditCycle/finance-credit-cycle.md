@@ -1,4 +1,4 @@
-# CreditCycle — Scenario Target
+# CreditCycle
 
 ## §1 Meta
 

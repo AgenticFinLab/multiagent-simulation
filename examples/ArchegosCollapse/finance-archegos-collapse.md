@@ -1,4 +1,4 @@
-# ArchegosCollapse — Scenario Target
+# ArchegosCollapse
 
 ## §1 Meta
 
@@ -44,7 +44,7 @@ The cascade halts when the price discount from fundamental exceeds the block-tra
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Full citation             | Becketti, S. (2021). Hidden leverage and the Archegos collapse. *Economic Review*, Federal Reserve Bank of Kansas City, 2021-Q3, 1–12. https://doi.org/10.18651/ER/v106n3Becketti |
 | Key mechanism (≤30 words) | TRS exposure accumulates outside public equity filings; when reference-asset price falls, maintenance-margin breach converts discretionary holding into forced close-out.         |
-| Key equation              | `equity_ratio_t = equity_t / (                                                                                                                                                    |
+| Key equation              | `equity_ratio_t = equity_t / (position × price_t)`; forced sell triggers when `deviation < θ_margin`; sell quantity = `φ_trs × position`.                                         |
 | Motivates agent           | `concentrated-fund` (§7).                                                                                                                                                         |
 | Parameter implication     | `θ_margin` empirical range −0.25 to −0.05, default −0.15; `φ_trs` (sell fraction per trigger) empirical range 0.10 to 1.00, default 0.50 (see §9).                                |
 
@@ -64,7 +64,7 @@ The cascade halts when the price discount from fundamental exceeds the block-tra
 |---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Full citation             | Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x |
 | Key mechanism (≤30 words) | Liquidity providers absorb forced supply only when the discount from fundamental compensates for inventory risk during the holding period until resale.           |
-| Key equation              | Activation: `                                                                                                                                                     |
+| Key equation              | Activation: `deviation < −θ_disc`; buy quantity = `α × cash / price`; provides stabilising floor once discount compensates inventory risk.                        |
 | Motivates agent           | `block-trade-buyer` (§7).                                                                                                                                         |
 | Parameter implication     | `θ_disc` empirical range 0.05 to 0.15 in distressed markets, default 0.10; capital deployment fraction `α` empirical range 0.20 to 0.40, default 0.30 (see §9).   |
 

@@ -1,4 +1,4 @@
-# AvailabilityBias — Scenario Target
+# AvailabilityBias
 
 ## §1 Meta
 

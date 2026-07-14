@@ -1,4 +1,4 @@
-# FramingEffect — Scenario Target
+# FramingEffect
 
 ## §1 Meta
 

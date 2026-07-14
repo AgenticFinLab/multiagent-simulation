@@ -1649,7 +1649,7 @@ This section derives the theoretical steady-state price P* given the 9 agent dem
 P(t+1) = P(t) + λ×D(t) + γ×[F − P(t)] + ε(t)
 ```
 
-where D(t) = Σ_i demand_i(t) is aggregate net demand, λ = 0.4 (price impact), γ = 0.01 (mean-reversion), F = 100, ε ~ N(0, σ²).
+where D(t) = Σ_i demand_i(t) is aggregate net demand, λ = 0.01 (price impact), γ = 0.01 (mean-reversion), F = 100, ε ~ N(0, σ²).
 
 ### 10.2 Agent Demand Functions (Linearised)
 
@@ -1786,7 +1786,7 @@ This section explicitly acknowledges simplifying assumptions, model boundaries, 
 | Parameter Region          | Behaviour                                                 | Resolution                                            |
 |---------------------------|-----------------------------------------------------------|-------------------------------------------------------|
 | γ > 0.05                  | Mean-reversion dominates; anchoring effect negligible     | Keep γ ≤ 0.02 for meaningful anchoring demonstration  |
-| λ > 1.0                   | Price overshoots wildly; possible divergence              | λ = 0.4 is calibrated; do not exceed 0.8              |
+| λ > 0.05                  | Price overshoots wildly; possible divergence              | λ = 0.01 is calibrated; do not exceed 0.05            |
 | noise_std > 2.0           | Noise overwhelms all signals; metrics meaningless         | Keep noise_std ≤ 1.0 for clean anchoring signal       |
 | α > 0.8                   | Near-rational; anchoring effect below detection threshold | α ≤ 0.5 for observable effect; α = 0.3 is the default |
 | n_RU > n_AT + n_HA + n_DT | Corrective agents overwhelm biased; instant correction    | Maintain biased/corrective ratio ≥ 1.5                |

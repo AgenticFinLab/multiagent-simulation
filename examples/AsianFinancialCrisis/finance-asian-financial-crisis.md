@@ -1,4 +1,4 @@
-# AsianFinancialCrisis — Scenario Target
+# AsianFinancialCrisis
 
 ## §1 Meta
 

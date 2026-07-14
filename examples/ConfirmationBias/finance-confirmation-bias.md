@@ -1,4 +1,4 @@
-# ConfirmationBias — Scenario Target File (Reverse-Reconstructed)
+# ConfirmationBias
 
 <!--
   Produced By polish-simulation-pipeline.md Step 0 Case B reverse-reconstruction

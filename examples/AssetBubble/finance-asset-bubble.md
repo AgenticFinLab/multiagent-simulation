@@ -1,4 +1,4 @@
-# AssetBubble — Scenario Target
+# AssetBubble
 
 ## §1 Meta
 

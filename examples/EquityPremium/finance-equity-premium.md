@@ -1,4 +1,4 @@
-# EquityPremium — Scenario Target
+# EquityPremium
 
 ## §1 Meta
 

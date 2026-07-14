@@ -1,4 +1,4 @@
-# DispositionEffect — Scenario Target
+# DispositionEffect
 
 ## §1 Meta
 

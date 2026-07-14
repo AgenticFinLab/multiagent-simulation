@@ -1,4 +1,4 @@
-# CarryTradeUnwind - Scenario Target
+# CarryTradeUnwind
 
 ## §1 Meta
 

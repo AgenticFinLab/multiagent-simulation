@@ -1,4 +1,4 @@
-# BlackMonday1987 - Scenario Target
+# BlackMonday1987
 
 ## §1 Meta
 
