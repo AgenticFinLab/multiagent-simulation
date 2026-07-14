@@ -108,12 +108,26 @@ icon in `icons/`.
 | 91 | `finance/momentum-chaser.md`               | `finance-momentum-chaser.png`               | 动量追涨型投资者   | Trend-following momentum amplifier → rising-momentum-arrow motif                 |
 | 92 | `finance/systematic-analyst.md`            | `finance-systematic-analyst.png`            | 系统分析型投资者  | Rational Bayesian evidence weighting → balance-scale + fundamental-diamond motif |
 | 93 | `finance/value-trader.md`                  | `finance-value-trader.png`                  | 价值型投资者      | Margin-of-safety value discipline → magnifier + intrinsic-value diamond motif    |
+| 94 | `finance/retail-coordinated.md`            | `finance-retail-coordinated.png`            | 协调散户型投资者  | WSB-style social-coordination buyer → smartphone + crowd motif                   |
+| 95 | `finance/short-seller-hf.md`               | `finance-short-seller-hf.png`               | 空头基金型投资者  | Forced-cover short-squeeze victim → down-arrow + squeeze motif                   |
+| 96 | `finance/market-maker-gamma.md`            | `finance-market-maker-gamma.png`            | 伽马做市型投资者  | Delta-neutral gamma hedger → gamma-symbol + balance motif                        |
+| 97 | `finance/institutional-value.md`           | `finance-institutional-value.png`           | 机构价值型投资者  | Finite-inventory fundamental seller → diamond + institution motif                |
+| 98 | `finance/momentum-retail.md`               | `finance-momentum-retail.png`               | 追涨散户型投资者  | FOMO attention-driven late buyer → rocket + notification motif                   |
+| 99 | `finance/mbs-originator.md`                | `finance-mbs-originator.png`                | 证券化型投资者    | Fee-income securitization distributor → document + dollar motif                   |
+| 100 | `finance/rating-agency.md`                | `finance-rating-agency.png`                | 评级型投资者      | Issuer-pays inflated-rating buyer → AAA + star motif                             |
+| 101 | `finance/leveraged-investor.md`           | `finance-leveraged-investor.png`           | 杠杆型投资者      | Margin-spiral fire-sale seller → lever + red-arrow motif                         |
+| 102 | `finance/distressed-buyer.md`             | `finance-distressed-buyer.png`             | 抄底型投资者      | Deep-discount distressed capital → cart + cracked-diamond motif                  |
+| 103 | `finance/regulator.md`                    | `finance-regulator.png`                    | 监管型投资者      | Probabilistic lender-of-last-resort → pillar + shield motif                     |
+| 104 | `finance/streak-reversal-trader.md`       | `finance-streak-reversal-trader.png`       | 反转型投资者      | Gambler's-fallacy reversal belief → U-turn arrow + streak motif                 |
+| 105 | `finance/hot-hand-trader.md`              | `finance-hot-hand-trader.png`              | 热手型投资者      | Hot-hand continuation belief → flame + rising-trend motif                       |
+| 106 | `finance/independent-assessor.md`         | `finance-independent-assessor.png`         | 独立评估型投资者  | Rational streak-independent assessment → balance-scale + magnifier motif        |
+| 107 | `finance/arbitrageur.md`                  | `finance-arbitrageur.png`                  | 套利型投资者      | Streak-mispricing exploiter → converging-lines + balance-scale motif            |
 
 ## Notes
 
 - Icon file names carry a ``finance-`` domain prefix so the filename encodes
   both the domain (finance) and the agent (e.g. ``finance-anchored-trader.png``).
-- Icons are 93 total and map 1:1 to the 93 ``finance/`` agent specs.
+- Icons are 107 total and map 1:1 to the 107 ``finance/`` agent specs.
 - Each ``finance/*.md`` file carries an ``| Icon |`` row in its Design
   Provenance table linking to its icon via relative path.
 - 2026-07-05: Icons #9, #22, #23 were regenerated with dedicated motifs
@@ -209,5 +223,19 @@ icon in `icons/`.
   PNG generated via ImageGen from `finance/value-trader.md`; missing PNG and
   mapping-row gaps closed as part of the polish-simulation-pipeline Step 2
   icon-resolution sub-gate.
+- 2026-07-20: Mapping rows #94–#98 added for the GameStopShortSqueeze scenario
+  archetypes (retail-coordinated, short-seller-hf, market-maker-gamma,
+  institutional-value, momentum-retail). PNGs generated via ImageGen;
+  mapping-row gaps closed as part of the polish-simulation-pipeline Step 2
+  icon-resolution sub-gate.
+- 2026-07-21: Mapping rows #99–#103 added for the GFC2008 scenario archetypes
+  (mbs-originator, rating-agency, leveraged-investor, distressed-buyer,
+  regulator). PNGs generated via ImageGen; mapping-row gaps closed as part
+  of the polish-simulation-pipeline Step 2 icon-resolution sub-gate.
+- 2026-07-22: Mapping rows #104–#107 added for the GamblerFallacy scenario
+  archetypes (streak-reversal-trader, hot-hand-trader, independent-assessor,
+  arbitrageur). PNGs generated via ImageGen; noise-trader already covered by
+  row #14. Mapping-row gaps closed as part of the polish-simulation-pipeline
+  Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
