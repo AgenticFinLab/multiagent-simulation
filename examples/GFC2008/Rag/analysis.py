@@ -19,9 +19,9 @@ from examples.GFC2008.Rule.analysis import (
     load_simulation_data as load_rule_simulation_data,
 )
 from masim.utils import load_config, load_results
+from examples.GFC2008.Rag.players import _RAG_FALLBACK
 
 DEFAULT_CONFIG = "configs/GFC2008/Rag/simulation.yml"
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
