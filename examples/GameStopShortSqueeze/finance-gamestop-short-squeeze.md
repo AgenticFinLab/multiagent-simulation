@@ -1,22 +1,11 @@
 # GameStopShortSqueeze
 
-## §0 Meta CHANGELOG
-
-| Date | Step | Evidence |
-|------|------|----------|
-| 2026-07-20 | Step 2 icon-completeness | Generated 5 PNGs (`finance-retail-coordinated.png`, `finance-short-seller-hf.png`, `finance-market-maker-gamma.png`, `finance-institutional-value.png`, `finance-momentum-retail.png`); added mapping rows #94–#98 to `agent_images/design.md`; verified Icon rows in all 5 pool profiles (`retail-coordinated.md`, `short-seller-hf.md`, `market-maker-gamma.md`, `institutional-value.md`, `momentum-retail.md`). |
-| 2026-07-20 | Step 4 py_compile+import | `py_compile` clean on `Rule/players.py`, `LLM/players.py`, `RuleLLM/players.py`, `Rag/players.py` plus all `analysis.py`; `import examples.GameStopShortSqueeze.{Rule,LLM,RuleLLM,Rag}.players` all pass. |
-| 2026-07-20 | Steps 5-10 smoke | Rule: `GeneralSimulator.setup()+run()+shutdown()` with `total_rounds=5` — PASS (no uncaught exceptions). LLM/RuleLLM/Rag: `setup()+shutdown()` — PASS. |
-| 2026-07-20 | Closeout | Status `locked → released`. Traceability matrix resolved; 5 agents × 4 icon checks = 20 checks green. |
-| 2026-07-20 | Round 2 re-audit | Icon-completeness 20/20 green; py_compile 8/8 (4 players + 4 analysis); import smoke 4/4; Rule 5-round e2e PASS; LLM/RuleLLM/Rag setup-only PASS. No defects found. |
-
 ## §1 Meta
 
 | Field       | Content                                                                                                                                                                              |
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Name        | GameStopShortSqueeze                                                                                                                                                                 |
 | Domain      | finance                                                                                                                                                                              |
-| Status      | released                                                                                                                                                                             |
 | Phenomenon  | Coordinated retail buying combined with forced short covering and options-driven gamma hedging generates a three-way self-reinforcing squeeze that overwhelms institutional selling. |
 | Pipeline    | masim/skills/create-simulation-pipeline.md                                                                                                                                           |
 | Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.0)                                                                                                                              |
