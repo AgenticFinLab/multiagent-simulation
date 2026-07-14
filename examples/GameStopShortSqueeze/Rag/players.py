@@ -28,6 +28,8 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.GameStopShortSqueeze.Rule.players import Market, _build_order
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 from examples.GameStopShortSqueeze.Rag.prompts import RAG_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)

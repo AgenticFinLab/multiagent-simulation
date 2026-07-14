@@ -26,8 +26,7 @@ from examples.CarryTradeUnwind.Rule.analysis import (
     _build_interpretation,
     analyze_carry_trade_unwind,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.CarryTradeUnwind.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(

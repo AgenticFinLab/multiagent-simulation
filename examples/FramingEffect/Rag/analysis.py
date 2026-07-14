@@ -24,8 +24,7 @@ from examples.standard_rule_analysis import (
     _load_data,
     analyze_standard_scenario as _analyze_standard_scenario,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.FramingEffect.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(records: List[Dict[str, Any]]) -> Dict[str, float]:

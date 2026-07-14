@@ -26,8 +26,7 @@ from examples.CurrencyCrisis.Rule.analysis import (
     _build_interpretation,
     analyze_currency_crisis,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.CurrencyCrisis.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(

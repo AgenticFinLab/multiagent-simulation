@@ -18,8 +18,7 @@ from examples.DispositionEffect.Rule.analysis import (
     create_visualizations,
     load_simulation_data,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.DispositionEffect.Rag.players import _RAG_FALLBACK
 
 
 def write_standard_artifacts(output_dir: str, summary: Dict[str, Any]) -> None:

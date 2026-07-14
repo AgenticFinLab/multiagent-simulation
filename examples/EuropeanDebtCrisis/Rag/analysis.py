@@ -21,7 +21,7 @@ from examples.EuropeanDebtCrisis.Rule.analysis import (
 from masim.utils import load_config, load_results
 
 DEFAULT_CONFIG = "configs/EuropeanDebtCrisis/Rag/simulation.yml"
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.EuropeanDebtCrisis.Rag.players import _RAG_FALLBACK
 
 
 def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:

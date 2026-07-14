@@ -28,6 +28,8 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.GamblerFallacy.Rule.players import Market
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 from examples.GamblerFallacy.Rag.prompts import RAG_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)

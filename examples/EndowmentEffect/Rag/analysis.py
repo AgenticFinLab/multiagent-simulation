@@ -19,8 +19,7 @@ from examples.EndowmentEffect.Rule.analysis import (
     validate_endowment_effect,
     volume_suppression_ratio,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.EndowmentEffect.Rag.players import _RAG_FALLBACK
 
 
 def deviation_half_life(price_history: List[float], fundamental: float) -> float:
