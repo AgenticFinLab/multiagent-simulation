@@ -81,7 +81,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 ## Behavioral Framework
 
-### I/O Contract
+#### I/O Contract
 
 **Inputs (per decision call).**
 
@@ -130,7 +130,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 5. **Variant parity** — all four variants MUST produce the same field set.
 6. **Contract-versus-prose** — on any conflict with subsequent sections, the I/O Contract wins.
 
-### Decision Information Set
+#### Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
 |--------|------|---------------|-----------|
@@ -142,7 +142,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 
 Does NOT use: social-network topology, order-book depth, or matching-engine implementation details.
 
-### Core Behavioral Mechanism
+#### Core Behavioral Mechanism
 
 1. Read: `price`, `fundamental`, `deviation`, `cash`, `position`; Write: no state before decision.
 2. If `deviation < -0.05`, compute `q = min(500, hedge_ratio * cash / price)` [Ref 1]; emit `buy` if `q > 0`.
@@ -150,7 +150,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 4. Else emit `hold` with `q = 0`.
 5. Post-fill, update `cash` and `position` per Action Space.
 
-### Action Space
+#### Action Space
 
 | Aspect | Specification |
 |--------|---------------|
@@ -163,7 +163,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 | Wealth / leverage cap | Buy budget scaled by `hedge_ratio` (no leverage). |
 | Stop-loss / kill rule | Stop take-profit only when `position` reaches zero or deviation falls below the take-profit threshold. |
 
-### Mathematical Model
+#### Mathematical Model
 
 Decision output: `a_t in {buy, sell, hold}`, `q_t >= 0`.
 
@@ -195,7 +195,7 @@ Parameter symbol table:
 | `0.10` | Take-profit deviation threshold | 0.10 | Ref 2 |
 | `500` | Per-round scenario order cap | 500 units | Scenario normalisation |
 
-### Behavioral Properties
+#### Behavioral Properties
 
 - Time horizon: medium — hedge holding periods span weeks to months.
 - Risk tolerance: low — pays a persistent hedge cost to cap tail loss.
@@ -266,7 +266,7 @@ State update: no state becomes negative.
 - IF the agent's hedge budget is invariant to `hedge_ratio` THEN parameter is orphan.
 - IF `position` exceeds cumulative buys minus sells THEN state accounting is broken.
 
-### Ablation Hooks
+#### Ablation Hooks
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|

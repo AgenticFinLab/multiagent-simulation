@@ -23,15 +23,15 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/market.md §6
       # Market parameters
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.08
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      price_impact: 0.08  # Source: AGENT_POOL/finance/market.md §6
       # Slow reversion to fundamental
-      mean_reversion: 0.01
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      mean_reversion: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
 rule_contrarian_investor:
@@ -46,18 +46,18 @@ rule_contrarian_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_position: 0.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       # Contrarian specific (long-term reversal)
       # Long-term horizon
-      lookback_window: 30
+      lookback_window: 30  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       # 15% deviation triggers trade
-      reversal_threshold: 0.15
-      base_position_size: 25.0
-      value_sensitivity: 0.6
+      reversal_threshold: 0.15  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      base_position_size: 25.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      value_sensitivity: 0.6  # Source: AGENT_POOL/finance/contrarian-investor.md §6
   persona: !include persona.yml
 
 rule_momentum_investor:
@@ -72,15 +72,15 @@ rule_momentum_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/momentum-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/momentum-investor.md §6
+      initial_position: 0.0  # Source: AGENT_POOL/finance/momentum-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/momentum-investor.md §6
       # Momentum specific (short-term)
-      lookback_window: 5
-      momentum_threshold: 0.02
-      base_position_size: 20.0
-      momentum_multiplier: 10
+      lookback_window: 5  # Source: AGENT_POOL/finance/momentum-investor.md §6
+      momentum_threshold: 0.02  # Source: AGENT_POOL/finance/momentum-investor.md §6
+      base_position_size: 20.0  # Source: AGENT_POOL/finance/momentum-investor.md §6
+      momentum_multiplier: 10  # Source: AGENT_POOL/finance/momentum-investor.md §6
   persona: !include persona.yml
 
 rule_overconfident_trader:
@@ -95,16 +95,16 @@ rule_overconfident_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_position: 0.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/overconfident-trader.md §6
       # Overconfident specific
       # Overweights signals by 2.5x
-      overconfidence_factor: 2.5
-      reaction_threshold: 0.01
-      base_position_size: 30.0
-      overconfidence_multiplier: 10
+      overconfidence_factor: 2.5  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      reaction_threshold: 0.01  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      base_position_size: 30.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      overconfidence_multiplier: 10  # Source: AGENT_POOL/finance/overconfident-trader.md §6
   persona: !include persona.yml
 
 rule_noise_trader:
@@ -119,13 +119,13 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_position: 0.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
       # Noise specific
-      position_volatility: 10.0
-      mean_reversion: 0.1
+      position_volatility: 10.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      mean_reversion: 0.1  # Source: AGENT_POOL/finance/noise-trader.md §6
   persona: !include persona.yml
 
 rule_value_investor:
@@ -140,15 +140,15 @@ rule_value_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_position: 0.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/value-investor.md §6
       # Value specific
-      value_sensitivity: 0.4
-      base_position_size: 15.0
-      value_noise: 2.0
-      value_threshold: 0.03
+      value_sensitivity: 0.4  # Source: AGENT_POOL/finance/value-investor.md §6
+      base_position_size: 15.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      value_noise: 2.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      value_threshold: 0.03  # Source: AGENT_POOL/finance/value-investor.md §6
   persona: !include persona.yml
 
 rule_index_tracker:
@@ -162,11 +162,11 @@ rule_index_tracker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffect/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffect/Rule/records"  # Source: AGENT_POOL/finance/index-tracker.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/index-tracker.md §6
+      initial_position: 0.0  # Source: AGENT_POOL/finance/index-tracker.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/index-tracker.md §6
       # Index specific
-      target_position: 50.0
-      rebalance_threshold: 0.1
+      target_position: 50.0  # Source: AGENT_POOL/finance/index-tracker.md §6
+      rebalance_threshold: 0.1  # Source: AGENT_POOL/finance/index-tracker.md §6
   persona: !include persona.yml

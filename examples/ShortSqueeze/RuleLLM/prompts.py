@@ -28,7 +28,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from ShortSeller) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the ShortSeller strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -57,7 +57,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from MomentumBuyer) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the MomentumBuyer strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -86,7 +86,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from RetailTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the RetailTrader strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -115,7 +115,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from ValueInvestor) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the ValueInvestor strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -144,7 +144,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from InstitutionalHolder) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the InstitutionalHolder strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant

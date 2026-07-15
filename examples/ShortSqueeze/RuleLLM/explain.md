@@ -30,7 +30,7 @@ the liquidity-aware market extension, so each order must include
 | Positive-feedback demand | `RuleLLMMomentumBuyer` applies momentum buyer rules with bounded LLM judgment. |
 | API contract | Explicit rules constrain sign and magnitude. |
 
-### §2.3 RetailTrader (simulation-bases.md §4.3)
+### §2.3 RetailCoordinator (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|

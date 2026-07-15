@@ -22,7 +22,7 @@ provides passive liquidity.
 | Contrarian reversal pressure | `RuleLLMContrarianInvestor` maps to the contrarian rule prompt. |
 | API contract | Emits `action`, `bid_price`, `quantity`, `reasoning`, and `provides_liquidity`. |
 
-### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+### §2.2 MomentumChaser (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|

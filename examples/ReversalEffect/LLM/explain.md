@@ -22,7 +22,7 @@ structured JSON decisions.
 | Contrarian reversal pressure | `LLMContrarianInvestor` uses the mean-reversion persona and a structured order parser. |
 | API contract | Emits `action`, `bid_price`, `quantity`, and `reasoning`. |
 
-### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+### §2.2 MomentumChaser (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|

@@ -80,7 +80,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 ## Behavioral Framework
 
-### I/O Contract
+#### I/O Contract
 
 **Inputs (per decision call).**
 
@@ -120,7 +120,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rule` variant MAY populate `<analysis>` from a deterministic template. The `LLM`, `RuleLLM`, and `Rag` variants MUST include this tag + JSON schema literally in the system or user prompt. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
 
-### Decision Information Set
+#### Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
 |--------|------|---------------|-----------|
@@ -132,7 +132,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 
 Does NOT use: social-network topology, order-book depth, latency, or matching-engine implementation details.
 
-### Core Behavioral Mechanism
+#### Core Behavioral Mechanism
 
 1. Read: `price`, `fundamental`, `deviation`, `position`, `cash`; Write: no state before decision.
 2. If `deviation > stop_loss` and `position < 0`, compute `q = min(abs(position), 0.8 * abs(position))`; emit `buy`.
@@ -140,7 +140,7 @@ Does NOT use: social-network topology, order-book depth, latency, or matching-en
 4. Else emit `hold` with `q = 0`.
 5. Post-fill, update `cash` and `position` per Action Space.
 
-### Action Space
+#### Action Space
 
 | Aspect | Specification |
 |--------|---------------|
@@ -153,7 +153,7 @@ Does NOT use: social-network topology, order-book depth, latency, or matching-en
 | Wealth / leverage cap | Never buy more than `cash / price`. |
 | Stop-loss / kill rule | Stop covering only when short position reaches zero or `deviation` falls back below `stop_loss`. |
 
-### Mathematical Model
+#### Mathematical Model
 
 Decision output: `a_t in {buy, sell, hold}`, `q_t >= 0`.
 
@@ -177,7 +177,7 @@ Parameter symbol table:
 
 Determinism contract: deterministic given identical market signals and state.
 
-### Behavioral Properties
+#### Behavioral Properties
 
 - Time horizon: short — carry cycles are days to weeks and stop-loss covering is immediate.
 - Risk tolerance: medium — accepts modest carry loss but caps the tail.
@@ -240,7 +240,7 @@ Decision: hold or clamped order.
 - IF quantity exceeds `abs(position)` on cover or `cash / price` on carry-sell THEN Action Space is violated.
 - IF `stop_loss` has no effect on cover timing THEN the parameter is orphan.
 
-### Ablation Hooks
+#### Ablation Hooks
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|

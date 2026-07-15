@@ -30,7 +30,7 @@ decisions.
 | Positive-feedback demand | `LLMMomentumBuyer` follows price trends through prompt reasoning. |
 | API contract | Parser validates canonical trading fields and records analysis text. |
 
-### §2.3 RetailTrader (simulation-bases.md §4.3)
+### §2.3 RetailCoordinator (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|

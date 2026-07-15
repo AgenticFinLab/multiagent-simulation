@@ -13,16 +13,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.5
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"  # Source: AGENT_POOL/finance/market.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      base_price_impact: 0.08  # Source: AGENT_POOL/finance/market.md §6
+      mean_reversion: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
+      base_liquidity: 50.0  # Source: AGENT_POOL/finance/market.md §6
+      high_impact_multiplier: 3.0  # Source: AGENT_POOL/finance/market.md §6
+      low_liquidity_threshold: 30.0  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
 rulellm_contrarian_investor:
@@ -37,18 +37,18 @@ rulellm_contrarian_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_INVESTOR_SYS"
-        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_INVESTOR_SYS"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/contrarian-investor.md §6
   persona: !include persona.yml
 
 rulellm_overconfident_trader:
@@ -63,18 +63,18 @@ rulellm_overconfident_trader:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/overconfident-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_OVERCONFIDENT_TRADER_SYS"
-        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_OVERCONFIDENT_TRADER_SYS"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
         generation_config:
-          temperature: 0.5
-          max_new_tokens: 500
+          temperature: 0.5  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/overconfident-trader.md §6
   persona: !include persona.yml
 
 rulellm_value_investor:
@@ -89,18 +89,18 @@ rulellm_value_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/value-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
-        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"  # Source: AGENT_POOL/finance/value-investor.md §6
+        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/value-investor.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/value-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/value-investor.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/finance/value-investor.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/value-investor.md §6
   persona: !include persona.yml
 
 rulellm_momentum_chaser:
@@ -115,18 +115,18 @@ rulellm_momentum_chaser:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/momentum-chaser.md §6
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_MOMENTUM_INVESTOR_SYS"
-        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_MOMENTUM_INVESTOR_SYS"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 500
+          temperature: 0.4  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/momentum-chaser.md §6
   persona: !include persona.yml
 
 rulellm_noise_trader:
@@ -141,16 +141,16 @@ rulellm_noise_trader:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRuleLLM/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
-        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        user_message: "examples.ReversalEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/noise-trader.md §6
         generation_config:
-          temperature: 0.7
-          max_new_tokens: 500
+          temperature: 0.7  # Source: AGENT_POOL/finance/noise-trader.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/noise-trader.md §6
   persona: !include persona.yml

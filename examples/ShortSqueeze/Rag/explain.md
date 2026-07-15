@@ -30,7 +30,7 @@ analysis.
 | Positive-feedback demand | `RagLLMMomentumBuyer` uses momentum rules plus retrieved context. |
 | RAG contract | Retrieved context may affect timing and urgency but not schema. |
 
-### §2.3 RetailTrader (simulation-bases.md §4.3)
+### §2.3 RetailCoordinator (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|

@@ -81,7 +81,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 ## Behavioral Framework
 
-### I/O Contract
+#### I/O Contract
 
 **Inputs (per decision call).**
 
@@ -130,7 +130,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 5. **Variant parity** — all four variants MUST produce the same field set.
 6. **Contract-versus-prose** — on any conflict with subsequent sections, the I/O Contract wins.
 
-### Decision Information Set
+#### Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
 |--------|------|---------------|-----------|
@@ -142,7 +142,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 
 Does NOT use: social-network topology, order-book depth, or matching-engine implementation details.
 
-### Core Behavioral Mechanism
+#### Core Behavioral Mechanism
 
 1. Read: `price`, `fundamental`, `deviation`, `cash`, `position`; Write: no state before decision.
 2. Compute `gate = 2 * risk_limit`. If `abs(deviation) ≤ gate`, emit `hold` with `q = 0` [Ref 1].
@@ -151,7 +151,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 5. If `deviation < -gate`, emit `buy` with `q = min(q_raw, int(cash / price))`.
 6. Post-fill, update `cash` and `position` per Action Space.
 
-### Action Space
+#### Action Space
 
 | Aspect | Specification |
 |--------|---------------|
@@ -164,7 +164,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 | Wealth / leverage cap | Per-round cap of 1000 units enforces the risk-controlled desk discipline. |
 | Stop-loss / kill rule | Stop de-risking / rebuilding when the two-band gate is no longer breached or inventory / cash is exhausted. |
 
-### Mathematical Model
+#### Mathematical Model
 
 Decision output: `a_t in {buy, sell, hold}`, `q_t >= 0`.
 
@@ -200,7 +200,7 @@ Parameter symbol table:
 | `K_eq` | Linear size coefficient in deviation magnitude | 3 000 | Ref 2; scenario normalisation |
 | `1000` | Per-round scenario cap (units) | 1 000 | Ref 1; scenario normalisation |
 
-### Behavioral Properties
+#### Behavioral Properties
 
 - Time horizon: short — risk-controlled desks reallocate at daily or intra-daily frequency.
 - Risk tolerance: low — de-risks aggressively when the gate fires.
@@ -271,7 +271,7 @@ State update: cash increases by `1000 * price`; position falls by 1000.
 - IF `quantity` ever exceeds 1000 THEN the per-round cap is not enforced.
 - IF sell fires with `position = 0` THEN the inventory clamp is broken.
 
-### Ablation Hooks
+#### Ablation Hooks
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|

@@ -81,7 +81,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 ## Behavioral Framework
 
-### I/O Contract
+#### I/O Contract
 
 **Inputs (per decision call).**
 
@@ -130,7 +130,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 5. **Variant parity** — all four variants MUST produce the same field set.
 6. **Contract-versus-prose** — on any conflict with subsequent sections, the I/O Contract wins.
 
-### Decision Information Set
+#### Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
 |--------|------|---------------|-----------|
@@ -142,7 +142,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 
 Does NOT use: social-network topology, order-book depth, or matching-engine implementation details.
 
-### Core Behavioral Mechanism
+#### Core Behavioral Mechanism
 
 1. Read: `price`, `fundamental`, `deviation`, `cash`, `position`; Write: no state before decision.
 2. If `abs(deviation) ≤ entry_threshold`, emit `hold` with `q = 0` [Ref 1].
@@ -151,7 +151,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 5. If `deviation < -entry_threshold`, emit `buy` with `q = min(q_raw, int(cash / price))`.
 6. Post-fill, update `cash` and `position` per Action Space.
 
-### Action Space
+#### Action Space
 
 | Aspect | Specification |
 |--------|---------------|
@@ -164,7 +164,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 | Wealth / leverage cap | Per-round cap of 5000 units enforces the limits-to-arbitrage discipline. |
 | Stop-loss / kill rule | Stop counter-flow only when the activation gate no longer fires or cash/position is exhausted. |
 
-### Mathematical Model
+#### Mathematical Model
 
 Decision output: `a_t in {buy, sell, hold}`, `q_t >= 0`.
 
@@ -199,7 +199,7 @@ Parameter symbol table:
 | `K_arb` | Linear size coefficient in deviation magnitude | 20 000 | Ref 2; scenario normalisation |
 | `5000` | Per-round arbitrage cap (units) | 5 000 | Ref 1; scenario normalisation |
 
-### Behavioral Properties
+#### Behavioral Properties
 
 - Time horizon: short-to-medium — arb positions may span several rounds until deviation reverts.
 - Risk tolerance: medium — bounded by the per-round cap and cash/inventory discipline.
@@ -270,7 +270,7 @@ State update: cash increases by `5000 * price`; position falls to zero.
 - IF `quantity` ever exceeds 5000 THEN the per-round cap is not enforced.
 - IF the sell branch fires while `position = 0` THEN the inventory clamp is broken.
 
-### Ablation Hooks
+#### Ablation Hooks
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|

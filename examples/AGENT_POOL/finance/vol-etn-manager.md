@@ -77,7 +77,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 ## Behavioral Framework
 
-### I/O Contract
+#### I/O Contract
 
 **Inputs (per decision call).**
 
@@ -117,7 +117,7 @@ Environmental Dependencies: none beyond the declared market broadcast signals an
 
 Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this tag pattern. The `Rag` variant MUST inject `"(No relevant knowledge retrieved this round.)"` verbatim into `retrieved_knowledge` when retrieval returns empty.
 
-### Decision Information Set
+#### Decision Information Set
 
 | Signal | Type | Memory Window | Rationale |
 |--------|------|---------------|-----------|
@@ -129,7 +129,7 @@ Every implementation variant (`Rule`, `LLM`, `RuleLLM`, `Rag`) MUST honour this 
 
 Does NOT use: social-network topology, order-book depth, or matching-engine implementation details.
 
-### Core Behavioral Mechanism
+#### Core Behavioral Mechanism
 
 1. Read: `price`, `fundamental`, `deviation`, `cash`, `position`; Write: no state before decision.
 2. If `deviation > rebalance_threshold`, compute `q_raw = int(deviation * rebalance_size)`.
@@ -137,7 +137,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 4. Else emit `hold` with `q = 0`.
 5. Post-fill, update `cash` and `position`.
 
-### Action Space
+#### Action Space
 
 | Aspect | Specification |
 |--------|---------------|
@@ -150,7 +150,7 @@ Does NOT use: social-network topology, order-book depth, or matching-engine impl
 | Wealth / leverage cap | Never buy more than `int(cash / price)`. |
 | Stop-loss / kill rule | Stop buying only when cash reaches zero or `deviation` falls back below `rebalance_threshold`. |
 
-### Mathematical Model
+#### Mathematical Model
 
 Decision output: `a_t in {buy, hold}`, `q_t >= 0`.
 
@@ -172,7 +172,7 @@ Parameter symbol table:
 
 Determinism contract: deterministic given identical market signals and state.
 
-### Behavioral Properties
+#### Behavioral Properties
 
 - Time horizon: short — intraday rebalance cycle.
 - Risk tolerance: rule-bound — no discretion beyond the disclosed rebalance formula.
@@ -235,7 +235,7 @@ Decision: hold.
 - IF quantity exceeds `int(cash / price)` THEN Action Space is violated.
 - IF `rebalance_size` has no effect on order magnitude THEN the parameter is orphan.
 
-### Ablation Hooks
+#### Ablation Hooks
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|
