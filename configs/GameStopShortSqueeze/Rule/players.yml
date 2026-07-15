@@ -11,14 +11,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
-      initial_price: 20.0
-      fundamental_value: 20.0
-      price_impact: 0.04
-      mean_reversion: 0.01
-      noise_std: 0.02
-      initial_short_interest: 1.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"  # Source: framework infrastructure
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      price_impact: 0.04  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.02  # Source: simulation-bases.md §6
+      initial_short_interest: 1.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 rule_retail_coordinated:
@@ -32,14 +32,14 @@ rule_retail_coordinated:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 100
-      initial_price: 20.0
-      fundamental_value: 20.0
-      buy_pressure: 0.12
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 100  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      buy_pressure: 0.12  # Source: simulation-bases.md §4.1.7
+      base_size: 300  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 rule_short_seller_hf:
@@ -53,16 +53,16 @@ rule_short_seller_hf:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
-      initial_cash: 2000000.0
-      initial_position: -1000
-      initial_price: 20.0
-      fundamental_value: 20.0
-      cover_threshold: 0.05
-      cover_fraction: 0.15
-      cover_size: 200
-      short_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: -1000  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      cover_threshold: 0.05  # Source: simulation-bases.md §4.2.7
+      cover_fraction: 0.15  # Source: simulation-bases.md §4.2.7
+      cover_size: 200  # Source: simulation-bases.md §4.2.7
+      short_size: 150  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 rule_market_maker_gamma:
@@ -76,13 +76,13 @@ rule_market_maker_gamma:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
-      initial_cash: 3000000.0
-      initial_position: 0
-      initial_price: 20.0
-      fundamental_value: 20.0
-      gamma_exposure: 0.3
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"  # Source: framework infrastructure
+      initial_cash: 3000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      gamma_exposure: 0.3  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 rule_institutional_value:
@@ -96,15 +96,15 @@ rule_institutional_value:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
-      initial_cash: 2000000.0
-      initial_position: 2000
-      initial_price: 20.0
-      fundamental_value: 20.0
-      sell_threshold: 0.30
-      buy_threshold: -0.10
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 2000  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      sell_threshold: 0.30  # Source: simulation-bases.md §4.4.7
+      buy_threshold: -0.10  # Source: simulation-bases.md §4.4.7
+      base_size: 400  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 rule_momentum_retail:
@@ -118,14 +118,14 @@ rule_momentum_retail:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"
-      initial_cash: 300000.0
-      initial_position: 0
-      initial_price: 20.0
-      fundamental_value: 20.0
-      trade_probability: 0.3
-      fomo_threshold: 0.05        # FOMO activation deviation threshold (§4.5)
-      min_order: 50
-      max_order: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rule/records"  # Source: framework infrastructure
+      initial_cash: 300000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
+      fomo_threshold: 0.05  # Source: simulation-bases.md §4.5.7
+      min_order: 50  # Source: simulation-bases.md §4.5.7
+      max_order: 300  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml

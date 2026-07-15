@@ -30,14 +30,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_price: 20.0
-      fundamental_value: 20.0
-      price_impact: 0.04
-      mean_reversion: 0.01
-      noise_std: 0.02
-      initial_short_interest: 1.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      price_impact: 0.04  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.02  # Source: simulation-bases.md §6
+      initial_short_interest: 1.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 ragllm_retail_coordinated:
@@ -51,12 +51,12 @@ ragllm_retail_coordinated:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 100
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 100  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_RETAIL_COORDINATED_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -95,12 +95,12 @@ ragllm_short_seller_hf:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: -1000
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: -1000  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_SHORT_SELLER_HF_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -139,12 +139,12 @@ ragllm_market_maker_gamma:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 3000000.0
-      initial_position: 0
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 3000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_MARKET_MAKER_GAMMA_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -183,12 +183,12 @@ ragllm_institutional_value:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: 2000
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 2000  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_INSTITUTIONAL_VALUE_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -227,12 +227,12 @@ ragllm_momentum_retail:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 300000.0
-      initial_position: 0
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 300000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_MOMENTUM_RETAIL_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"

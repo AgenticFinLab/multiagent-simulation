@@ -73,6 +73,8 @@ from .prompts import (
 
 logger = logging.getLogger("MomentumEffectRag")
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 # =============================================================================
 # Market — Rule-Based Coordinator (identical to MomentumEffectRuleLLM.Market)
@@ -601,7 +603,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = RAGLLM_USER_TEMPLATE

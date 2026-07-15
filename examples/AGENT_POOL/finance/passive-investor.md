@@ -280,3 +280,4 @@ Decision: buy 10 shares (capped at max_quantity).
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-passive-investor.png)         |

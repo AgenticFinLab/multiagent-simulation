@@ -372,3 +372,4 @@ State update: `cash`: 5,000 → 5,000 - 535 * 70.0 = -32,450; `position`: 0 → 
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-leverage-trader.png)         |

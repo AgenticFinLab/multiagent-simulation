@@ -339,3 +339,4 @@ State update: `previous_price`: None -> 100.0.
 | Created     | 2026-07-14                 |
 | Version     | 1.0.0                      |
 | Status      | canonical                  |
+| Icon        | ![](../agent_images/icons/finance-momentum-investor.png)         |

@@ -30,13 +30,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/GFC2008/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.005
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/Rag/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.04  # Source: simulation-bases.md §6
+      mean_reversion: 0.005  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 ragllm_mbs_originator:
@@ -50,14 +50,14 @@ ragllm_mbs_originator:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 3000
-      initial_price: 100.0
-      fundamental_value: 100.0
-      origination_rate: 0.08
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/Rag/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 3000  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      origination_rate: 0.08  # Source: simulation-bases.md §4.1.7
+      base_size: 300  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -96,16 +96,16 @@ ragllm_leveraged_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: 1500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      margin_trigger: 0.30
-      fire_sale_fraction: 0.25
-      buy_threshold: -0.03
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/Rag/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 1500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      margin_trigger: 0.30  # Source: simulation-bases.md §4.3.7
+      fire_sale_fraction: 0.25  # Source: simulation-bases.md §4.3.7
+      buy_threshold: -0.03  # Source: simulation-bases.md §4.3.7
+      base_size: 350  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -144,14 +144,14 @@ ragllm_rating_agency:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/Rag/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      overrating_bias: 0.20
-      base_size: 250
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/Rag/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      overrating_bias: 0.20  # Source: simulation-bases.md §4.2.7
+      base_size: 250  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -190,14 +190,14 @@ ragllm_distressed_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/Rag/records"
-      initial_cash: 5000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      discount_threshold: 0.20
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/Rag/records"  # Source: framework infrastructure
+      initial_cash: 5000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      discount_threshold: 0.20  # Source: simulation-bases.md §4.4.7
+      base_size: 400  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -236,15 +236,15 @@ ragllm_regulator:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/Rag/records"
-      initial_cash: 10000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      intervention_threshold: 0.50
-      rescue_size: 500
-      rescue_probability: 0.6
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      intervention_threshold: 0.50  # Source: simulation-bases.md §4.5.7
+      rescue_size: 500  # Source: simulation-bases.md §4.5.7
+      rescue_probability: 0.6  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

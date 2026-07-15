@@ -32,14 +32,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rule/records"
+      record_path: "EXPERIMENT/HerdEffect/Rule/records"  # Source: framework infrastructure
       # Market parameters
-      initial_price: 100.0
-      fundamental_value: 100.0
-      supply_elasticity: 0.1
-      mean_reversion: 0.02
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      supply_elasticity: 0.1  # Source: simulation-bases.md §6
+      mean_reversion: 0.02  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -58,16 +58,16 @@ rule_momentum_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rule/records"
+      record_path: "EXPERIMENT/HerdEffect/Rule/records"  # Source: framework infrastructure
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # Momentum specific parameters
       # Price aggressiveness
-      lambda_price: 0.5
+      lambda_price: 0.5  # Source: simulation-bases.md §4.1.7
       # Capital allocation ratio
-      beta: 0.3
+      beta: 0.3  # Source: simulation-bases.md §4.1.7
   persona: !include persona.yml
 
 rule_contrarian_investor:
@@ -82,17 +82,17 @@ rule_contrarian_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rule/records"
+      record_path: "EXPERIMENT/HerdEffect/Rule/records"  # Source: framework infrastructure
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # Contrarian specific parameters
-      fundamental: 100.0
+      fundamental: 100.0  # Source: simulation-bases.md §4.2.7
       # Value deviation sensitivity
-      beta: 0.5
+      beta: 0.5  # Source: simulation-bases.md §4.2.7
       # Bid noise
-      noise_std: 0.5
+      noise_std: 0.5  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 # NOTE: HerdingInvestor REMOVED for Emergent Herding Model
@@ -110,16 +110,16 @@ rule_risk_averse_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rule/records"
+      record_path: "EXPERIMENT/HerdEffect/Rule/records"  # Source: framework infrastructure
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # RiskAverse specific parameters
       # Risk tolerance coefficient
-      k: 0.5
+      k: 0.5  # Source: simulation-bases.md §4.3.7
       # Periods for volatility calculation
-      lookback: 5
+      lookback: 5  # Source: simulation-bases.md §4.3.7
   persona: !include persona.yml
 
 rule_aggressive_investor:
@@ -134,18 +134,18 @@ rule_aggressive_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rule/records"
+      record_path: "EXPERIMENT/HerdEffect/Rule/records"  # Source: framework infrastructure
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # Aggressive specific parameters
       # Aggressive price factor
-      kappa: 1.0
+      kappa: 1.0  # Source: simulation-bases.md §4.5.7
       # Aggressive capital allocation
-      beta: 0.5
+      beta: 0.5  # Source: simulation-bases.md §4.5.7
       # Acceleration trading bonus
-      accel_bonus: 0.3
+      accel_bonus: 0.3  # Source: simulation-bases.md §4.5.7
   persona: !include persona.yml
 
 rule_noise_trader:
@@ -160,13 +160,13 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rule/records"
+      record_path: "EXPERIMENT/HerdEffect/Rule/records"  # Source: framework infrastructure
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # Noise specific parameters
-      price_noise_std: 2.0
-      qty_noise_std: 5.0
-      position_mean_reversion: 0.1
+      price_noise_std: 2.0  # Source: simulation-bases.md §4.4.7
+      qty_noise_std: 5.0  # Source: simulation-bases.md §4.4.7
+      position_mean_reversion: 0.1  # Source: simulation-bases.md §4.4.7
   persona: !include persona.yml

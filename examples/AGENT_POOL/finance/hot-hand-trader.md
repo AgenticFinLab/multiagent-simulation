@@ -357,3 +357,4 @@ State update: `cash`: 50,000 → 50,000 - 454 * 110.0 = 60; `position`: 500 → 
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-hot-hand-trader.png)         |

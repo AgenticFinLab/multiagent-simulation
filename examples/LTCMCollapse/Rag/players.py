@@ -141,14 +141,14 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = extras.get("rag") or private_knowledge.get("rag", {})
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = extras["rag"] if "rag" in extras else private_knowledge["rag"]
         await self._initialize_rag(rag_cfg)
 
     async def _initialize_rag(self, rag_cfg: Dict[str, Any]) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -165,7 +165,7 @@ class RagLLMInvestor(GeneralPlayer):
             }
 
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = dict(extras.get("private_knowledge", {}))
+        private_knowledge = dict(extras["private_knowledge"])
         if "rag" not in private_knowledge:
             private_knowledge["rag"] = rag_cfg
         agent_knowledge = resource_manager.resolve_agent_knowledge(

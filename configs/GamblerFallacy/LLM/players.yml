@@ -11,13 +11,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.05  # Source: simulation-bases.md §6
+      mean_reversion: 0.02  # Source: simulation-bases.md §6
+      noise_std: 0.01  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 llm_streak_reversal_trader:
@@ -31,13 +31,13 @@ llm_streak_reversal_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      max_order: 800
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      max_order: 800  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GamblerFallacy.LLM.prompts:LLM_STREAK_REVERSAL_TRADER_SYS"
         user_message: "examples.GamblerFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -59,13 +59,13 @@ llm_hot_hand_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      max_order: 800
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      max_order: 800  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GamblerFallacy.LLM.prompts:LLM_HOT_HAND_TRADER_SYS"
         user_message: "examples.GamblerFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -87,13 +87,13 @@ llm_independent_assessor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      max_order: 500  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GamblerFallacy.LLM.prompts:LLM_INDEPENDENT_ASSESSOR_SYS"
         user_message: "examples.GamblerFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -115,13 +115,13 @@ llm_arbitrageur:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      max_order: 500  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GamblerFallacy.LLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.GamblerFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -143,13 +143,13 @@ llm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GamblerFallacy/LLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      max_order: 500  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GamblerFallacy.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.GamblerFallacy.LLM.prompts:LLM_USER_TEMPLATE"

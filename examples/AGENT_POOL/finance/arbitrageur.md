@@ -357,3 +357,4 @@ State update: `cash`: 800,000 → 800,000 + 100 * 109.0 = 810,900; `position`: 1
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-arbitrageur.png)         |

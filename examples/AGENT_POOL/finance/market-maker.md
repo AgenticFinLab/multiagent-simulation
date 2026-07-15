@@ -312,3 +312,4 @@ State update: no change. Market maker ceases activity until stress subsides.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon | ![](../agent_images/icons/finance-market-maker.png) |

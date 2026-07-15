@@ -74,6 +74,8 @@ from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("LiquidityDryupRag")
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 # =============================================================================
 # Market — Rule-Based Coordinator (identical to LiquidityDryupRuleLLM.Market)
@@ -620,7 +622,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
 
         llm_config = self.config.extras["llm"]  # noqa: F841
         self.state.custom_state["last_rag_context"] = rag_context

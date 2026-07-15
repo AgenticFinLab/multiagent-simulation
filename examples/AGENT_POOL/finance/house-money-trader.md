@@ -307,3 +307,4 @@ State update: position increases by 200.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-house-money-trader.png)         |

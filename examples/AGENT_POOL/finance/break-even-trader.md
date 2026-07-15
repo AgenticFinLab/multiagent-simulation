@@ -319,3 +319,4 @@ State update: position: 2278 (unchanged); cash: 50 (unchanged). Agent inactive a
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-break-even-trader.png)         |

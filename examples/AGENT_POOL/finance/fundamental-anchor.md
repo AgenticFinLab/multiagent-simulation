@@ -309,3 +309,4 @@ State update: no change. Buy side hibernated.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-fundamental-anchor.png)         |

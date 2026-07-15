@@ -134,24 +134,24 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
 | 117 | `opinion/skeptical-evaluator.md` | `opinion-skeptical-evaluator.png` | — | — |
 | 118 | `opinion/uninformed-bystander.md` | `opinion-uninformed-bystander.png` | — | — |
 | 119 | `finance/active-rebalancer.md` | MISSING | — | — |
-| 120 | `finance/aggressive-investor.md` | MISSING | — | — |
-| 121 | `finance/anchor-depositor.md` | MISSING | — | — |
+| 120 | `finance/aggressive-investor.md` | `finance-aggressive-investor.png` | 激进型投资者 | Aggressive high-risk → lightning motif |
+| 121 | `finance/anchor-depositor.md` | `finance-anchor-depositor.png` | 锚定存款者 | Yield protocol depositor → vault+anchor motif |
 | 122 | `finance/bank-manager.md` | MISSING | — | — |
 | 123 | `finance/bayesian-updater.md` | MISSING | — | — |
 | 124 | `finance/bond-trader.md` | MISSING | — | — |
-| 125 | `finance/bottom-fisher.md` | MISSING | — | — |
-| 126 | `finance/break-even-trader.md` | MISSING | — | — |
-| 127 | `finance/calibrated-trader.md` | MISSING | — | — |
-| 128 | `finance/cascade-follower.md` | MISSING | — | — |
-| 129 | `finance/central-bank.md` | MISSING | — | — |
+| 125 | `finance/bottom-fisher.md` | `finance-bottom-fisher.png` | 抄底型投资者 | Bottom fishing → hook-at-valley motif |
+| 126 | `finance/break-even-trader.md` | `finance-break-even-trader.png` | 保本型投资者 | Break-even reference point → zero-line motif |
+| 127 | `finance/calibrated-trader.md` | `finance-calibrated-trader.png` | 校准型投资者 | Well-calibrated trading → precision-dial motif |
+| 128 | `finance/cascade-follower.md` | `finance-cascade-follower.png` | 跟风型投资者 | Information cascade follower → dominoes motif |
+| 129 | `finance/central-bank.md` | `finance-central-bank.png` | 央行干预者 | Central bank intervention → bank-facade motif |
 | 130 | `finance/commitment-escalator.md` | MISSING | — | — |
-| 131 | `finance/contrarian.md` | MISSING | — | — |
-| 132 | `finance/contrarian-investor.md` | MISSING | — | — |
-| 133 | `finance/contrarian-skeptic.md` | MISSING | — | — |
+| 131 | `finance/contrarian.md` | `finance-contrarian.png` | 逆势型投资者 | Pure contrarian behavior → opposite-arrow motif |
+| 132 | `finance/contrarian-investor.md` | `finance-contrarian-investor.png` | 逆向型投资者 | Contrarian against herd → reverse-arrow motif |
+| 133 | `finance/contrarian-skeptic.md` | `finance-contrarian-skeptic.png` | 怀疑型投资者 | Skeptical contrarian thinking → question-mark motif |
 | 134 | `finance/contrarian-statistical.md` | MISSING | — | — |
-| 135 | `finance/convergence-arbitrageur.md` | MISSING | — | — |
+| 135 | `finance/convergence-arbitrageur.md` | `finance-convergence-arbitrageur.png` | 收敛套利型投资者 | LTCM convergence arbitrage → converging-lines motif |
 | 136 | `finance/convergence-trader.md` | MISSING | — | — |
-| 137 | `finance/de-fi-lender.md` | MISSING | — | — |
+| 137 | `finance/de-fi-lender.md` | `finance-de-fi-lender.png` | 借贷型投资者 | DeFi lending → chain-links motif |
 | 138 | `finance/default-follower.md` | MISSING | — | — |
 | 139 | `finance/depositor.md` | MISSING | — | — |
 | 140 | `finance/distorting-relayer.md` | MISSING | — | — |
@@ -159,62 +159,62 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
 | 142 | `finance/fact-checker.md` | MISSING | — | — |
 | 143 | `finance/flash-market-maker.md` | MISSING | — | — |
 | 144 | `finance/forced-seller.md` | MISSING | — | — |
-| 145 | `finance/fundamental-anchor.md` | MISSING | — | — |
+| 145 | `finance/fundamental-anchor.md` | `finance-fundamental-anchor.png` | 基本面锚定型投资者 | Fundamental anchoring → anchor+diamond motif |
 | 146 | `finance/greater-fool-speculator.md` | MISSING | — | — |
 | 147 | `finance/gullible-spreader.md` | MISSING | — | — |
-| 148 | `finance/hindsight-overconfident.md` | MISSING | — | — |
-| 149 | `finance/house-money-trader.md` | MISSING | — | — |
-| 150 | `finance/independent-thinker.md` | MISSING | — | — |
+| 148 | `finance/hindsight-overconfident.md` | `finance-hindsight-overconfident.png` | 后见之明型投资者 | Hindsight bias overconfidence → rearview motif |
+| 149 | `finance/house-money-trader.md` | `finance-house-money-trader.png` | 赌资效应型投资者 | House money effect → stacked-coins motif |
+| 150 | `finance/independent-thinker.md` | `finance-independent-thinker.png` | 独立型投资者 | Independent thinking against crowd → lightbulb motif |
 | 151 | `finance/inertial-holder.md` | MISSING | — | — |
 | 152 | `finance/information-environment.md` | MISSING | — | — |
 | 153 | `finance/insider-advantaged.md` | MISSING | — | — |
 | 154 | `finance/institutional-holder.md` | MISSING | — | — |
 | 155 | `finance/intrinsic-value-trader.md` | MISSING | — | — |
-| 156 | `finance/leverage-trader.md` | MISSING | — | — |
+| 156 | `finance/leverage-trader.md` | `finance-leverage-trader.png` | 杠杆型投资者 | Leveraged trading → lever/fulcrum motif |
 | 157 | `finance/leveraged-fund.md` | MISSING | — | — |
-| 158 | `finance/leveraged-hedge-fund.md` | MISSING | — | — |
+| 158 | `finance/leveraged-hedge-fund.md` | `finance-leveraged-hedge-fund.png` | 杠杆基金型投资者 | Leveraged hedge fund → lever+gauge motif |
 | 159 | `finance/leveraged-speculator.md` | MISSING | — | — |
 | 160 | `finance/liquidity-demander.md` | MISSING | — | — |
-| 161 | `finance/liquidity-seeker.md` | MISSING | — | — |
+| 161 | `finance/liquidity-seeker.md` | `finance-liquidity-seeker.png` | 流动性需求型投资者 | Liquidity seeking → water-droplet motif |
 | 162 | `finance/long-term-investor.md` | MISSING | — | — |
 | 163 | `finance/loss-averse.md` | MISSING | — | — |
-| 164 | `finance/loss-averse-investor.md` | MISSING | — | — |
+| 164 | `finance/loss-averse-investor.md` | `finance-loss-averse-investor.png` | 损失厌恶型投资者 | Prospect theory loss aversion → loss-curve motif |
 | 165 | `finance/macro-hedge-fund.md` | MISSING | — | — |
-| 166 | `finance/mental-accountant.md` | MISSING | — | — |
+| 166 | `finance/mental-accountant.md` | `finance-mental-accountant.png` | 心理账户型投资者 | Mental accounting → compartment-boxes motif |
 | 167 | `finance/momentum-buyer.md` | MISSING | — | — |
-| 168 | `finance/momentum-investor.md` | MISSING | — | — |
+| 168 | `finance/momentum-investor.md` | `finance-momentum-investor.png` | 动量型投资者 | Herd momentum following → trend+crowd motif |
 | 169 | `finance/myopic-loss-averse.md` | MISSING | — | — |
 | 170 | `finance/narrative-believer.md` | MISSING | — | — |
 | 171 | `finance/opinion-environment.md` | MISSING | — | — |
 | 172 | `finance/opportunistic-trader.md` | MISSING | — | — |
 | 173 | `finance/opportunity-cost-trader.md` | MISSING | — | — |
-| 174 | `finance/outcome-learner.md` | MISSING | — | — |
-| 175 | `finance/panic-seller.md` | MISSING | — | — |
+| 174 | `finance/outcome-learner.md` | `finance-outcome-learner.png` | 结果导向型投资者 | Outcome-based learning → checkmark-chart motif |
+| 175 | `finance/panic-seller.md` | `finance-panic-seller.png` | 恐慌抛售型投资者 | Panic selling → down-arrow+alert motif |
 | 176 | `finance/passive-bystander.md` | MISSING | — | — |
-| 177 | `finance/passive-investor.md` | MISSING | — | — |
+| 177 | `finance/passive-investor.md` | `finance-passive-investor.png` | 被动型投资者 | Passive buy-and-hold → flat-line+clock motif |
 | 178 | `finance/peg-defender.md` | MISSING | — | — |
-| 179 | `finance/process-evaluator.md` | MISSING | — | — |
+| 179 | `finance/process-evaluator.md` | `finance-process-evaluator.png` | 过程评估型投资者 | Process evaluation → flowchart motif |
 | 180 | `finance/rational-cutter.md` | MISSING | — | — |
 | 181 | `finance/rational-optimizer.md` | MISSING | — | — |
-| 182 | `finance/rational-portfolio-manager.md` | MISSING | — | — |
-| 183 | `finance/rational-trader.md` | MISSING | — | — |
-| 184 | `finance/reputation-herder.md` | MISSING | — | — |
+| 182 | `finance/rational-portfolio-manager.md` | `finance-rational-portfolio-manager.png` | 理性组合管理者 | Rational diversification → pie-chart+checkmark motif |
+| 183 | `finance/rational-trader.md` | `finance-rational-trader.png` | 理性型投资者 | Rational utility maximization → balance-scale motif |
+| 184 | `finance/reputation-herder.md` | `finance-reputation-herder.png` | 声誉跟随型投资者 | Reputation-driven herding → star+crowd motif |
 | 185 | `finance/retail-coordinator.md` | MISSING | — | — |
-| 186 | `finance/risk-averse-investor.md` | MISSING | — | — |
+| 186 | `finance/risk-averse-investor.md` | `finance-risk-averse-investor.png` | 风险规避型投资者 | Risk-averse cautious investor → shield motif |
 | 187 | `finance/risk-averse-saver.md` | MISSING | — | — |
-| 188 | `finance/risk-manager.md` | MISSING | — | — |
-| 189 | `finance/risk-parity-fund.md` | MISSING | — | — |
+| 188 | `finance/risk-manager.md` | `finance-risk-manager.png` | 风控型投资者 | Risk management → gauge+shield motif |
+| 189 | `finance/risk-parity-fund.md` | `finance-risk-parity-fund.png` | 风险平价型投资者 | Risk parity allocation → equal-pie motif |
 | 190 | `finance/sentiment-trader.md` | MISSING | — | — |
 | 191 | `finance/skeptical-analyst.md` | MISSING | — | — |
 | 192 | `finance/skeptical-evaluator.md` | MISSING | — | — |
 | 193 | `finance/social-media-influencer.md` | MISSING | — | — |
 | 194 | `finance/social-proof-follower.md` | MISSING | — | — |
-| 195 | `finance/stablecoin-holder.md` | MISSING | — | — |
-| 196 | `finance/sunk-cost-holder.md` | MISSING | — | — |
-| 197 | `finance/technical-trader.md` | MISSING | — | — |
+| 195 | `finance/stablecoin-holder.md` | `finance-stablecoin-holder.png` | 稳定币持有者 | Stablecoin holder → coin+flat-line motif |
+| 196 | `finance/sunk-cost-holder.md` | `finance-sunk-cost-holder.png` | 沉没成本型投资者 | Sunk cost fallacy → anchor-chain motif |
+| 197 | `finance/technical-trader.md` | `finance-technical-trader.png` | 技术分析型投资者 | Technical analysis → candlestick-chart motif |
 | 198 | `finance/trend-chaser.md` | MISSING | — | — |
 | 199 | `finance/uninformed-bystander.md` | MISSING | — | — |
-| 200 | `finance/value-buyer.md` | MISSING | — | — |
+| 200 | `finance/value-buyer.md` | `finance-value-buyer.png` | 价值抄底型投资者 | Value buying at lows → diamond+discount motif |
 
 ## Notes
 
@@ -333,6 +333,18 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
   archetypes (streak-reversal-trader, hot-hand-trader, independent-assessor,
   arbitrageur). PNGs generated via ImageGen; noise-trader already covered by
   row #14. Mapping-row gaps closed as part of the polish-simulation-pipeline
+  Step 2 icon-resolution sub-gate.
+- 2026-07-15: Mapping rows updated for H-O scenario archetypes (momentum-investor,
+  contrarian-investor, risk-averse-investor, aggressive-investor, cascade-follower,
+  reputation-herder, independent-thinker, contrarian, hindsight-overconfident,
+  outcome-learner, process-evaluator, contrarian-skeptic, convergence-arbitrageur,
+  leverage-trader, risk-manager, central-bank, stablecoin-holder, de-fi-lender,
+  anchor-depositor, value-buyer, liquidity-seeker, loss-averse-investor,
+  break-even-trader, rational-trader, risk-parity-fund, leveraged-hedge-fund,
+  passive-investor, panic-seller, bottom-fisher, mental-accountant,
+  house-money-trader, rational-portfolio-manager, sunk-cost-holder,
+  technical-trader, fundamental-anchor, calibrated-trader). PNGs generated via
+  ImageGen; mapping-row gaps closed as part of the polish-simulation-pipeline
   Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.

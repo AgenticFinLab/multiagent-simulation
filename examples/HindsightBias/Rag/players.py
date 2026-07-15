@@ -35,6 +35,8 @@ from examples.HindsightBias.Rule.players import Market
 
 logger = logging.getLogger(__name__)
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 class RagLLMInvestor(GeneralPlayer):
     """Base RAG-augmented LLM investor for HindsightBias."""
@@ -83,7 +85,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -280,7 +282,7 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         user_msg = RAG_USER_TEMPLATE.format(

@@ -300,3 +300,4 @@ State update: position: 6000 (unchanged); cash: 0.30 (unchanged). Agent inactive
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-value-buyer.png)         |

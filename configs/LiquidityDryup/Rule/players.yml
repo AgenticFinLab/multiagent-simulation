@@ -27,15 +27,15 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"
+      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
       # Market parameters
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.08
-      mean_reversion: 0.015
-      noise_std: 0.4
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.015  # Source: simulation-bases.md §6
+      noise_std: 0.4  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 rule_market_maker:
@@ -50,15 +50,15 @@ rule_market_maker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # MarketMaker specific
-      volatility_threshold: 0.02
-      base_liquidity: 30.0
-      withdraw_rebalance: 0.3
-      normal_rebalance: 0.2
+      volatility_threshold: 0.02  # Source: simulation-bases.md §4.1.7
+      base_liquidity: 30.0  # Source: simulation-bases.md §4.1.7
+      withdraw_rebalance: 0.3  # Source: simulation-bases.md §4.1.7
+      normal_rebalance: 0.2  # Source: simulation-bases.md §4.1.7
   persona: !include persona.yml
 
 rule_liquidity_seeker:
@@ -73,13 +73,13 @@ rule_liquidity_seeker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # LiquiditySeeker specific
-      target_volatility: 15.0
-      liquidity_base: 100.0
+      target_volatility: 15.0  # Source: simulation-bases.md §4.2.7
+      liquidity_base: 100.0  # Source: simulation-bases.md §4.2.7
   persona: !include persona.yml
 
 rule_value_trader:
@@ -94,15 +94,15 @@ rule_value_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # ValueTrader specific
-      liquidity_threshold: 0.05
-      trade_threshold: 0.03
-      base_liquidity_provision: 20
-      value_multiplier: 30
+      liquidity_threshold: 0.05  # Source: simulation-bases.md §4.3.7
+      trade_threshold: 0.03  # Source: simulation-bases.md §4.3.7
+      base_liquidity_provision: 20  # Source: simulation-bases.md §4.3.7
+      value_multiplier: 30  # Source: simulation-bases.md §4.3.7
   persona: !include persona.yml
 
 rule_momentum_trader:
@@ -117,13 +117,13 @@ rule_momentum_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # MomentumTrader specific
-      momentum_threshold: 0.01
-      momentum_multiplier: 200
+      momentum_threshold: 0.01  # Source: simulation-bases.md §4.4.7
+      momentum_multiplier: 200  # Source: simulation-bases.md §4.4.7
   persona: !include persona.yml
 
 rule_noise_trader:
@@ -138,10 +138,10 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       # NoiseTrader specific
-      noise_volatility: 10.0
+      noise_volatility: 10.0  # Source: simulation-bases.md §4.5.7
   persona: !include persona.yml

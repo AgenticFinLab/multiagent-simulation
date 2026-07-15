@@ -327,3 +327,4 @@ State update: position: 0 -> 20; cash: 1000000 -> 1000000 - 20×1.0 = 999980.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-liquidity-seeker.png)         |

@@ -11,13 +11,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LossAversion/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LossAversion/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.03  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 llm_loss_averse_investor:
@@ -31,15 +31,15 @@ llm_loss_averse_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LossAversion/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      loss_aversion_lambda: 2.25
-      sell_gain_threshold: 0.05
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LossAversion/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      loss_aversion_lambda: 2.25  # Source: simulation-bases.md §4.1.7
+      sell_gain_threshold: 0.05  # Source: simulation-bases.md §4.1.7
+      base_size: 400  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_LOSS_AVERSE_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
@@ -61,14 +61,14 @@ llm_break_even_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LossAversion/LLM/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      risk_increase_factor: 2.0
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LossAversion/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1200000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      risk_increase_factor: 2.0  # Source: simulation-bases.md §4.2.7
+      base_size: 350  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_BREAK_EVEN_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
@@ -90,14 +90,14 @@ llm_rational_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LossAversion/LLM/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      risk_aversion: 0.7
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LossAversion/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      risk_aversion: 0.7  # Source: simulation-bases.md §4.3.7
+      base_size: 300  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_RATIONAL_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
@@ -119,14 +119,14 @@ llm_momentum_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LossAversion/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      entry_threshold: 0.03
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LossAversion/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      entry_threshold: 0.03  # Source: simulation-bases.md §4.4.7
+      base_size: 300  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_MOMENTUM_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"
@@ -148,13 +148,13 @@ llm_market_maker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LossAversion/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      inventory_limit: 2000
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LossAversion/LLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 200  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      inventory_limit: 2000  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LossAversion.LLM.prompts:LLM_MARKET_MAKER_PROMPT"
         user_message: "examples.LossAversion.LLM.prompts:LLM_USER_TEMPLATE"

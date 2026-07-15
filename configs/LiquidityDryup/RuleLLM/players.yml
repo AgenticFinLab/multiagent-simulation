@@ -13,16 +13,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.015
-      noise_std: 0.4
-      custom_state_hot_limit: 3
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
-      base_liquidity: 50.0
+      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.015  # Source: simulation-bases.md §6
+      noise_std: 0.4  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 rulellm_market_maker:
@@ -37,10 +37,10 @@ rulellm_market_maker:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -63,10 +63,10 @@ rulellm_liquidity_demander:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_LIQUIDITY_SEEKER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -89,10 +89,10 @@ rulellm_arbitrageur:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_VALUE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -115,10 +115,10 @@ rulellm_value_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -141,10 +141,10 @@ rulellm_forced_seller:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

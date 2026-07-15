@@ -44,6 +44,8 @@ from examples.MentalAccounting.Rule.players import (  # noqa: F401
 
 logger = logging.getLogger("MentalAccounting.Rag")
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def safe_max_affordable(cash: float, price: float) -> int:
     """Return a finite affordable quantity for API-driven portfolio updates."""
@@ -148,7 +150,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -365,7 +367,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         user_msg = RAG_USER_TEMPLATE.format(

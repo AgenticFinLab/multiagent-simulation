@@ -28,14 +28,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/HerdEffect/LLM/records"
+      record_path: "EXPERIMENT/HerdEffect/LLM/records"  # Source: framework infrastructure
       # Market parameters
-      initial_price: 100.0
-      fundamental_value: 100.0
-      supply_elasticity: 0.1
-      mean_reversion: 0.02
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      supply_elasticity: 0.1  # Source: simulation-bases.md §6
+      mean_reversion: 0.02  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -55,10 +55,10 @@ llm_momentum_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.LLM.prompts:LLM_MOMENTUM_SYS"
         user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -81,10 +81,10 @@ llm_contrarian_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.LLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -107,10 +107,10 @@ llm_risk_averse_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.LLM.prompts:LLM_RISK_AVERSE_SYS"
         user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -133,10 +133,10 @@ llm_aggressive_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.LLM.prompts:LLM_AGGRESSIVE_SYS"
         user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -159,10 +159,10 @@ llm_noise_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.LLM.prompts:LLM_NOISE_SYS"
         user_message: "examples.HerdEffect.LLM.prompts:LLM_USER_TEMPLATE"

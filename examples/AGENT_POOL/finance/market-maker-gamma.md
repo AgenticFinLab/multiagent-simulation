@@ -342,3 +342,4 @@ State update: `cash`: 100000 → 100000 - 208 × 480.0 = 160; `position`: 5000 �
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-market-maker-gamma.png)         |

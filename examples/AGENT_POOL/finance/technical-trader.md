@@ -315,3 +315,4 @@ State update: price_history grows to [105, 106, next_price] on next tick.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-technical-trader.png)         |

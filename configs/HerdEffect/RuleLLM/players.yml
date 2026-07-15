@@ -19,13 +19,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      supply_elasticity: 0.1
-      mean_reversion: 0.02
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      supply_elasticity: 0.1  # Source: simulation-bases.md §6
+      mean_reversion: 0.02  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 # RuleLLM Momentum Investor (Trend Following)
@@ -40,11 +40,11 @@ rulellm_momentum_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -67,11 +67,11 @@ rulellm_contrarian_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -94,11 +94,11 @@ rulellm_risk_averse_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_RISK_AVERSE_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -121,11 +121,11 @@ rulellm_aggressive_investor:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_AGGRESSIVE_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -148,11 +148,11 @@ rulellm_noise_trader:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_NOISE_SYS"
         user_message: "examples.HerdEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

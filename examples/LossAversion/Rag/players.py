@@ -41,7 +41,7 @@ from examples.LossAversion.Rag.prompts import RAG_USER_TEMPLATE
 from examples.LossAversion.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger("LossAversion.Rag")
-RAG_FALLBACK_CONTEXT = "(No relevant knowledge retrieved this round.)"
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def _decision_parameters_text(extras: Dict[str, Any], agent_class: str) -> str:
@@ -255,7 +255,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = RAG_FALLBACK_CONTEXT
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         user_msg = RAG_USER_TEMPLATE.format(

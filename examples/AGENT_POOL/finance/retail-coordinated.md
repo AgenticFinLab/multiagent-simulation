@@ -332,3 +332,4 @@ State update: No change. Agent is permanently deactivated at this price level â€
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-retail-coordinated.png)         |

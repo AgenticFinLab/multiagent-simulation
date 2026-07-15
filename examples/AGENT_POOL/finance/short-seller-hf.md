@@ -362,3 +362,4 @@ State update: No change. Agent is permanently deactivated — position can never
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-short-seller-hf.png)         |

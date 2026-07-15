@@ -310,3 +310,4 @@ State update: position: 0 (unchanged); cash: 802500 (unchanged). Agent is inert.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-de-fi-lender.png)         |

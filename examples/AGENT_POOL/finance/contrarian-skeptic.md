@@ -353,3 +353,4 @@ State update: `cash`: 500,000 → 557,500; `position`: 600 → 100
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-contrarian-skeptic.png)         |

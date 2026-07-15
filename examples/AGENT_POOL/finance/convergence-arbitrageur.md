@@ -363,3 +363,4 @@ Note: In implementation, cash deducted is actual cash spent (not leveraged), so:
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-convergence-arbitrageur.png)         |

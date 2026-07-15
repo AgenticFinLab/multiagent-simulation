@@ -311,3 +311,4 @@ State update: position: 0 -> 55; cash: 5000 -> 50.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-calibrated-trader.png)         |

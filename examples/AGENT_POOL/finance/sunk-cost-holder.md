@@ -291,3 +291,4 @@ State update: position: 3 -> 2.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-sunk-cost-holder.png)         |

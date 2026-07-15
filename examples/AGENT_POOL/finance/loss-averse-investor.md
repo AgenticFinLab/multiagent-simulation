@@ -325,3 +325,4 @@ State update: position: 0 (unchanged); cash: 52000 (unchanged). Agent is inert.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-loss-averse-investor.png)         |

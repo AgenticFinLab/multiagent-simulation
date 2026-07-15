@@ -13,16 +13,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MarketCrash/LLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.5
-      liquidity_decay: 0.1
-      liquidity_recovery: 0.05
-      min_liquidity: 0.1
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      liquidity_decay: 0.1  # Source: simulation-bases.md §6
+      liquidity_recovery: 0.05  # Source: simulation-bases.md §6
+      min_liquidity: 0.1  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 llm_panic_seller:
@@ -37,10 +37,10 @@ llm_panic_seller:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.LLM.prompts:LLM_PANIC_SELLER_SYS"
         user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
@@ -63,10 +63,10 @@ llm_risk_parity_fund:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.LLM.prompts:LLM_RISK_PARITY_SYS"
         user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
@@ -89,10 +89,10 @@ llm_leveraged_fund:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 80.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 80.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.LLM.prompts:LLM_LEVERAGED_FUND_SYS"
         user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
@@ -115,10 +115,10 @@ llm_market_maker:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 30.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.LLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
@@ -140,10 +140,10 @@ llm_bottom_fisher:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 10.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 10.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.LLM.prompts:LLM_BOTTOM_FISHER_SYS"
         user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"

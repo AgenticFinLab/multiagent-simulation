@@ -353,3 +353,4 @@ State update: `cash`: 200,000 → 200,000 + 100 * 90.0 = 209,000; `position`: 10
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-streak-reversal-trader.png)         |

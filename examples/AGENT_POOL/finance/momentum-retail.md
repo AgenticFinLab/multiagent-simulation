@@ -346,3 +346,4 @@ State update: No change. Agent is effectively deactivated — cannot afford even
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-momentum-retail.png)         |

@@ -36,16 +36,16 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.015
-      noise_std: 0.4
-      custom_state_hot_limit: 3
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
-      base_liquidity: 50.0
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.015  # Source: simulation-bases.md §6
+      noise_std: 0.4  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 ragllm_market_maker:
@@ -60,10 +60,10 @@ ragllm_market_maker:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -103,10 +103,10 @@ ragllm_liquidity_demander:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -146,10 +146,10 @@ ragllm_arbitrageur:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -189,10 +189,10 @@ ragllm_value_investor:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -232,10 +232,10 @@ ragllm_forced_seller:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

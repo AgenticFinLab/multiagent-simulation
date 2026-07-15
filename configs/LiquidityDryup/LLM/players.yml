@@ -13,14 +13,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.08
-      mean_reversion: 0.015
-      noise_std: 0.4
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
+      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.015  # Source: simulation-bases.md §6
+      noise_std: 0.4  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 llm_market_maker:
@@ -35,10 +35,10 @@ llm_market_maker:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_MARKET_MAKER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
@@ -61,10 +61,10 @@ llm_liquidity_demander:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_LIQUIDITY_DEMANDER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
@@ -87,10 +87,10 @@ llm_arbitrageur:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_ARBITRAGEUR_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
@@ -113,10 +113,10 @@ llm_value_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_VALUE_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
@@ -139,10 +139,10 @@ llm_forced_seller:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_FORCED_SELLER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"

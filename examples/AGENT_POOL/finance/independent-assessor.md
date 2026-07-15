@@ -356,3 +356,4 @@ State update: No change. Note: a biased agent (activation_threshold = 0.02) WOUL
 | Created     | 2026-07-14                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-independent-assessor.png)         |

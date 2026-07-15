@@ -313,3 +313,4 @@ State update: position: 400 -> 733; cash: 30000 -> 30.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon | ![](../agent_images/icons/finance-self-attributor.png) |

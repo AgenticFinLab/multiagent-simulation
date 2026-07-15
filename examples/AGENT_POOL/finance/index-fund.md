@@ -326,3 +326,4 @@ State update: position: 600 -> 620; cash: 400000 -> 398000.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon | ![](../agent_images/icons/finance-index-fund.png) |

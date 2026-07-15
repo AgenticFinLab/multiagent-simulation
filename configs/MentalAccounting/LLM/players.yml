@@ -11,13 +11,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.01
-      noise_std: 0.012
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.02  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.012  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 llm_mental_accountant:
@@ -31,15 +31,15 @@ llm_mental_accountant:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      loss_aversion_per_account: 2.25
-      num_accounts: 3
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      loss_aversion_per_account: 2.25  # Source: simulation-bases.md §4.1.7
+      num_accounts: 3  # Source: simulation-bases.md §4.1.7
+      base_size: 400  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MentalAccounting.LLM.prompts:LLM_MENTAL_ACCOUNTANT_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
@@ -61,16 +61,16 @@ llm_house_money_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      gain_risk_multiplier: 2.0
-      loss_risk_multiplier: 0.5
-      deviation_threshold: 0.02
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1200000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      gain_risk_multiplier: 2.0  # Source: simulation-bases.md §4.2.7
+      loss_risk_multiplier: 0.5  # Source: simulation-bases.md §4.2.7
+      deviation_threshold: 0.02  # Source: simulation-bases.md §4.2.7
+      base_size: 400  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MentalAccounting.LLM.prompts:LLM_HOUSE_MONEY_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
@@ -92,16 +92,16 @@ llm_rational_portfolio_manager:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      risk_aversion: 0.7
-      deviation_threshold: 0.02
-      quantity_scale: 3000
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      risk_aversion: 0.7  # Source: simulation-bases.md §4.3.7
+      deviation_threshold: 0.02  # Source: simulation-bases.md §4.3.7
+      quantity_scale: 3000  # Source: simulation-bases.md §4.3.7
+      base_size: 300  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MentalAccounting.LLM.prompts:LLM_RATIONAL_PORTFOLIO_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
@@ -123,14 +123,14 @@ llm_sunk_cost_holder:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      sunk_cost_weight: 0.6
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      sunk_cost_weight: 0.6  # Source: simulation-bases.md §4.4.7
+      base_size: 350  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MentalAccounting.LLM.prompts:LLM_SUNK_COST_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"
@@ -152,14 +152,14 @@ llm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/MentalAccounting/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MentalAccounting/LLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 200  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
+      noise_size: 150  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MentalAccounting.LLM.prompts:LLM_NOISE_TRADER_PROMPT"
         user_message: "examples.MentalAccounting.LLM.prompts:LLM_USER_TEMPLATE"

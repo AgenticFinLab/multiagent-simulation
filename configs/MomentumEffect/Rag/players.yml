@@ -36,18 +36,18 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.3
-      drift_persistence: 0.95
-      drift_volatility: 0.5
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.3  # Source: simulation-bases.md §6
+      drift_persistence: 0.95  # Source: simulation-bases.md §6
+      drift_volatility: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 ragllm_momentum_trader:
@@ -62,10 +62,10 @@ ragllm_momentum_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -105,10 +105,10 @@ ragllm_contrarian_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -148,10 +148,10 @@ ragllm_technical_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -191,10 +191,10 @@ ragllm_trend_follower:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -234,10 +234,10 @@ ragllm_fundamental_anchor:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

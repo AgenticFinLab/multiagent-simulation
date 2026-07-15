@@ -298,3 +298,4 @@ Extreme: deviation=-0.50, raw=int(0.5*0.7*3000)=1050, capped to 500.
 | Created | 2026-07-14 |
 | Version | 1.0.0 |
 | Status | canonical |
+| Icon        | ![](../agent_images/icons/finance-rational-portfolio-manager.png)         |

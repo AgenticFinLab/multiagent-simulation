@@ -28,7 +28,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from RiskParityFund) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the RiskParityFund strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -57,7 +57,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from LeveragedHedgeFund) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the LeveragedHedgeFund strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -86,7 +86,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from MarketMaker) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the MarketMaker strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -115,7 +115,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from BottomFisher) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the BottomFisher strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -144,7 +144,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from PanicSeller) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the PanicSeller strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
