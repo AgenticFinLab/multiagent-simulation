@@ -50,12 +50,19 @@ rulellm_new_economy_evangelist:
       custom_state_hot_limit: 3
       # Source: simulation-bases.md §9 RuleLLM variant definition
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_NEW_ECONOMY_EVANGELIST_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.6
+          # Source: infrastructure
           max_tokens: 512
   persona: !include persona.yml
 
@@ -84,12 +91,19 @@ rulellm_ipo_flipper:
       custom_state_hot_limit: 3
       # Source: simulation-bases.md §9 RuleLLM variant definition
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_IPO_FLIPPER_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.5
+          # Source: infrastructure
           max_tokens: 512
   persona: !include persona.yml
 
@@ -118,12 +132,19 @@ rulellm_momentum_follower:
       custom_state_hot_limit: 3
       # Source: simulation-bases.md §9 RuleLLM variant definition
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_MOMENTUM_FOLLOWER_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.5
+          # Source: infrastructure
           max_tokens: 512
   persona: !include persona.yml
 
@@ -154,12 +175,19 @@ rulellm_skeptical_value_investor:
       custom_state_hot_limit: 3
       # Source: simulation-bases.md §9 RuleLLM variant definition
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_SKEPTICAL_VALUE_INVESTOR_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.3
+          # Source: infrastructure
           max_tokens: 512
   persona: !include persona.yml
 
@@ -190,11 +218,18 @@ rulellm_short_seller:
       custom_state_hot_limit: 3
       # Source: simulation-bases.md §9 RuleLLM variant definition
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_SHORT_SELLER_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.4
+          # Source: infrastructure
           max_tokens: 512
   persona: !include persona.yml

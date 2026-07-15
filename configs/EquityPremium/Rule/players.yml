@@ -23,6 +23,7 @@ market:
     group_tags:
       - market
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
       # Source: target §9 — ~6% annual / 252 (Mehra & Prescott 1985)
       stock_expected_return: 0.000238
@@ -48,6 +49,7 @@ rule_myopic_loss_averse_investor:
     group_tags:
       - investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -75,6 +77,7 @@ rule_long_horizon_investor:
     group_tags:
       - investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -99,6 +102,7 @@ rule_risk_neutral_investor:
     group_tags:
       - investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -122,6 +126,7 @@ rule_conservative_investor:
     group_tags:
       - investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -145,6 +150,7 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rule/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0

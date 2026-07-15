@@ -37,7 +37,7 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"  # Source: infrastructure
       # Market dynamics parameters (calibrated to Black Monday 1987)
       # Source: target §9 `fundamental value` row (normalization)
       fundamental_value: 250.0
@@ -49,7 +49,7 @@ market:
       mean_reversion: 0.01      # Weak: crash dynamics override mean reversion
       # Source: simulation-bases.md §3.1 σ row (Roll 1984)
       noise_std: 0.02           # Moderate noise
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -69,13 +69,13 @@ rule_portfolio_insurer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"  # Source: infrastructure
       # Investor base parameters
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 1000.0   # Start with large position to insure
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # PortfolioInsurer specific parameters (Leland & Rubinstein, 1976)
       # Source: target §9 `rebalance threshold` row (Leland 1980; Brady 1988)
       rebalance_threshold: 0.02   # Hedge triggered when return < -2%
@@ -101,13 +101,13 @@ rule_index_arbitrageur:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"  # Source: infrastructure
       # Investor base parameters
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 500.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # IndexArbitrageur specific parameters (Brady Commission, 1988)
       # Source: target §9 `arbitrage threshold` row (Stoll & Whaley 1990)
       arb_threshold: 0.01         # Act when |return| > 1%
@@ -133,13 +133,13 @@ rule_program_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"  # Source: infrastructure
       # Investor base parameters
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 800.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # ProgramTrader specific parameters (Brady Commission, 1988)
       # Source: target §9 `program trigger threshold` row (Brady 1988; De Long et al 1990)
       trigger_threshold: 0.01     # Sell program triggered at -1%
@@ -164,13 +164,13 @@ rule_value_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"  # Source: infrastructure
       # Investor base parameters
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 1000000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # ValueInvestor specific parameters (Graham, 1949)
       # Source: target §9 `value discount` row (Shleifer & Vishny 1997)
       value_discount: 0.15        # Buy when price < 85% of fundamental
@@ -194,13 +194,13 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rule/records"  # Source: infrastructure
       # Investor base parameters
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 100000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # NoiseTrader specific parameters (Black, 1986)
       # Source: target §9 `trade probability` row (Black 1986)
       trade_probability: 0.05     # 5% chance of trading per round

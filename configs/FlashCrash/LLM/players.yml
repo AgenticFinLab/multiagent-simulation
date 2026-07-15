@@ -80,8 +80,8 @@ llm_flash_market_maker:
 llm_stop_loss_trader:
   name: "LLM Stop-Loss Trader"
   class: "examples.FlashCrash.LLM.players:LLMStopLossTrader"
-  # Expander → llm_stop_loss_1, llm_stop_loss_2, llm_stop_loss_3
-  num_instances: 3
+  # Expander → llm_stop_loss_1 .. llm_stop_loss_5
+  num_instances: 5
   config:
     identity: "llm_stop_loss_trader"
     role: player

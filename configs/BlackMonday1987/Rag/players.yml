@@ -50,7 +50,7 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"  # Source: infrastructure
       # Source: target §9 `fundamental value` row (normalization)
       fundamental_value: 250.0
       # Source: target §8.1 (initial index price, normalization)
@@ -61,7 +61,7 @@ market:
       mean_reversion: 0.01
       # Source: simulation-bases.md §3.1 σ row (Roll 1984)
       noise_std: 0.02
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -80,12 +80,12 @@ ragllm_portfolio_insurer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"  # Source: infrastructure
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 1000.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # Rule parameters
       # Source: target §9 `rebalance threshold` row (Leland 1980; Brady 1988)
       rebalance_threshold: 0.02
@@ -138,12 +138,12 @@ ragllm_index_arbitrageur:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"  # Source: infrastructure
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 500.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # Source: target §9 `arbitrage threshold` row (Stoll & Whaley 1990)
       arb_threshold: 0.01
       # Source: simulation-bases.md §4.2 IndexArbitrageur behavioral spec
@@ -193,12 +193,12 @@ ragllm_program_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"  # Source: infrastructure
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 800.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # Source: target §9 `program trigger threshold` row (Brady 1988; De Long et al 1990)
       trigger_threshold: 0.01
       # Source: target §9 `feedback strength` row (De Long et al 1990)
@@ -247,12 +247,12 @@ ragllm_value_investor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"  # Source: infrastructure
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 1000000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # Source: target §9 `value discount` row (Shleifer & Vishny 1997)
       value_discount: 0.15
       # Source: simulation-bases.md §4.x agent base_size spec
@@ -300,12 +300,12 @@ ragllm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"
+      record_path: "EXPERIMENT/BlackMonday1987/Rag/records"  # Source: infrastructure
       # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 100000.0
       # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # Source: target §9 `trade probability` row (Black 1986)
       trade_probability: 0.05
       # Source: simulation-bases.md §4.5 NoiseTrader min_order spec

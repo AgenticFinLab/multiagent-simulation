@@ -3,21 +3,35 @@
 knowledge:
   # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
   backend: "local"
+  # Source: infrastructure
   global_uri: "examples/document-sources"
+  # Source: infrastructure
   resource_csv:
     - "examples/document-sources/books.csv"
     - "examples/document-sources/source"
+  # Source: infrastructure
   preprocessing:
+    # Source: infrastructure
     parser: "mineru"
+    # Source: infrastructure
     output_position: "MinerU_processed"
+  # Source: infrastructure
   rag:
+    # Source: infrastructure
     output_position: "rag_index_ep_20260418161108_k2pxb"
+    # Source: infrastructure
     embed_type: "ark_multimodal"
+    # Source: infrastructure
     embed_model: "ep-20260418161108-k2pxb"
+    # Source: infrastructure
     embed_api_key: "{{ ARK_API_KEY }}"
+    # Source: infrastructure
     embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+    # Source: infrastructure
     chunk_size: 512
+    # Source: infrastructure
     chunk_overlap: 64
+    # Source: infrastructure
     top_k: 5
 
 market:
@@ -68,30 +82,51 @@ ragllm_new_economy_evangelist:
       custom_state_hot_limit: 3
       # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_NEW_ECONOMY_EVANGELIST_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.8
+          # Source: infrastructure
           max_tokens: 512
       # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
+        # Source: infrastructure
         from_global_resources:
           - "MinerU_processed"
+        # Source: infrastructure
         local_resources:
+          # Source: infrastructure
           local_uri: ""
+          # Source: infrastructure
           local_resources: []
+        # Source: infrastructure
         rag:
+          # Source: infrastructure
           from_global_index_dir:
             - "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           embed_type: "ark_multimodal"
+          # Source: infrastructure
           embed_model: "ep-20260418161108-k2pxb"
+          # Source: infrastructure
           embed_api_key: "{{ ARK_API_KEY }}"
+          # Source: infrastructure
           embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+          # Source: infrastructure
           chunk_size: 512
+          # Source: infrastructure
           chunk_overlap: 64
+          # Source: infrastructure
           top_k: 5
   persona: !include persona.yml
 
@@ -116,30 +151,51 @@ ragllm_ipo_flipper:
       custom_state_hot_limit: 3
       # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_IPO_FLIPPER_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.7
+          # Source: infrastructure
           max_tokens: 512
       # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
+        # Source: infrastructure
         from_global_resources:
           - "MinerU_processed"
+        # Source: infrastructure
         local_resources:
+          # Source: infrastructure
           local_uri: ""
+          # Source: infrastructure
           local_resources: []
+        # Source: infrastructure
         rag:
+          # Source: infrastructure
           from_global_index_dir:
             - "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           embed_type: "ark_multimodal"
+          # Source: infrastructure
           embed_model: "ep-20260418161108-k2pxb"
+          # Source: infrastructure
           embed_api_key: "{{ ARK_API_KEY }}"
+          # Source: infrastructure
           embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+          # Source: infrastructure
           chunk_size: 512
+          # Source: infrastructure
           chunk_overlap: 64
+          # Source: infrastructure
           top_k: 5
   persona: !include persona.yml
 
@@ -164,30 +220,51 @@ ragllm_momentum_follower:
       custom_state_hot_limit: 3
       # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_MOMENTUM_FOLLOWER_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.7
+          # Source: infrastructure
           max_tokens: 512
       # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
+        # Source: infrastructure
         from_global_resources:
           - "MinerU_processed"
+        # Source: infrastructure
         local_resources:
+          # Source: infrastructure
           local_uri: ""
+          # Source: infrastructure
           local_resources: []
+        # Source: infrastructure
         rag:
+          # Source: infrastructure
           from_global_index_dir:
             - "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           embed_type: "ark_multimodal"
+          # Source: infrastructure
           embed_model: "ep-20260418161108-k2pxb"
+          # Source: infrastructure
           embed_api_key: "{{ ARK_API_KEY }}"
+          # Source: infrastructure
           embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+          # Source: infrastructure
           chunk_size: 512
+          # Source: infrastructure
           chunk_overlap: 64
+          # Source: infrastructure
           top_k: 5
   persona: !include persona.yml
 
@@ -212,30 +289,51 @@ ragllm_skeptical_value_investor:
       custom_state_hot_limit: 3
       # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_SKEPTICAL_VALUE_INVESTOR_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.4
+          # Source: infrastructure
           max_tokens: 512
       # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
+        # Source: infrastructure
         from_global_resources:
           - "MinerU_processed"
+        # Source: infrastructure
         local_resources:
+          # Source: infrastructure
           local_uri: ""
+          # Source: infrastructure
           local_resources: []
+        # Source: infrastructure
         rag:
+          # Source: infrastructure
           from_global_index_dir:
             - "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           embed_type: "ark_multimodal"
+          # Source: infrastructure
           embed_model: "ep-20260418161108-k2pxb"
+          # Source: infrastructure
           embed_api_key: "{{ ARK_API_KEY }}"
+          # Source: infrastructure
           embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+          # Source: infrastructure
           chunk_size: 512
+          # Source: infrastructure
           chunk_overlap: 64
+          # Source: infrastructure
           top_k: 5
   persona: !include persona.yml
 
@@ -260,29 +358,50 @@ ragllm_short_seller:
       custom_state_hot_limit: 3
       # Source: Rag/prompts.py and Rag/explain.md §4
       llm:
+        # Source: infrastructure
         sys_message: "examples.DotComBubble.Rag.prompts:RAG_SHORT_SELLER_SYS"
+        # Source: infrastructure
         user_message: "examples.DotComBubble.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: infrastructure
         lm_type: "api"
+        # Source: infrastructure
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: infrastructure
         generation_config:
+          # Source: infrastructure
           temperature: 0.5
+          # Source: infrastructure
           max_tokens: 512
       # Source: Rag/explain.md §4; analysis-bases.md §2 AQR
       private_knowledge:
+        # Source: infrastructure
         from_global_resources:
           - "MinerU_processed"
+        # Source: infrastructure
         local_resources:
+          # Source: infrastructure
           local_uri: ""
+          # Source: infrastructure
           local_resources: []
+        # Source: infrastructure
         rag:
+          # Source: infrastructure
           from_global_index_dir:
             - "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           local_index_dir: "rag_index_ep_20260418161108_k2pxb"
+          # Source: infrastructure
           embed_type: "ark_multimodal"
+          # Source: infrastructure
           embed_model: "ep-20260418161108-k2pxb"
+          # Source: infrastructure
           embed_api_key: "{{ ARK_API_KEY }}"
+          # Source: infrastructure
           embed_api_base: "https://ark.cn-beijing.volces.com/api/v3"
+          # Source: infrastructure
           chunk_size: 512
+          # Source: infrastructure
           chunk_overlap: 64
+          # Source: infrastructure
           top_k: 5
   persona: !include persona.yml

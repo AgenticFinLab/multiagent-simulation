@@ -108,8 +108,8 @@ rule_algorithmic_trader:
 rule_stop_loss_trader:
   name: "Stop Loss Trader"
   class: "examples.FlashCrash.Rule.players:StopLossTrader"
-  # Expander → stop_loss_1, stop_loss_2, stop_loss_3
-  num_instances: 3
+  # Expander → stop_loss_1 .. stop_loss_5
+  num_instances: 5
   config:
     identity: "rule_stop_loss_trader"
     role: player
@@ -153,8 +153,8 @@ rule_fundamental_trader:
 rule_retail_trader:
   name: "Retail Trader"
   class: "examples.FlashCrash.Rule.players:RetailTrader"
-  # Expander → retail_trader_1, retail_trader_2
-  num_instances: 2
+  # Expander → retail_trader_1 .. retail_trader_5
+  num_instances: 5
   config:
     identity: "rule_retail_trader"
     role: player

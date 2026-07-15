@@ -124,7 +124,7 @@ rulellm_algorithmic_trader:
 rulellm_stop_loss_trader:
   name: "RuleLLM Stop-Loss Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMStopLossTrader"
-  num_instances: 3
+  num_instances: 5
   config:
     identity: "rulellm_stop_loss_trader"
     role: player

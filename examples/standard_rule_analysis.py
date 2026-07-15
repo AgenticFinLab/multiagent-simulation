@@ -285,7 +285,7 @@ def _ensure_fundamentals_from_config(
         return
 
     base_value = float(extras["fundamental_value"])
-    growth = float(extras.get("fundamental_growth", 0.0))
+    growth = float(extras["fundamental_growth"]) if "fundamental_growth" in extras else 0.0
     data["fundamentals"] = {
         round_num: base_value * ((1.0 + growth) ** round_num)
         for round_num in sorted(data["market_prices"])

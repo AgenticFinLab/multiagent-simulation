@@ -210,7 +210,7 @@ ragllm_algorithmic_trader:
 ragllm_stop_loss_trader:
   name: "RAG Stop-Loss Trader"
   class: "examples.FlashCrash.Rag.players:RagLLMStopLossTrader"
-  num_instances: 3
+  num_instances: 5
   config:
     identity: "ragllm_stop_loss_trader"
     role: player

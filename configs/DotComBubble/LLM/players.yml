@@ -48,6 +48,7 @@ llm_new_economy_evangelist:
       order_size: 600
       # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
         # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_NEW_ECONOMY_EVANGELIST_SYS"
@@ -59,6 +60,7 @@ llm_new_economy_evangelist:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         # Source: analysis-bases.md §2 AQR quality gate
         max_retries: 3
+        # Source: infrastructure
         generation_config:
           # Source: LLM variant stochastic-deliberation design
           temperature: 0.8
@@ -87,6 +89,7 @@ llm_ipo_flipper:
       order_size: 700
       # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
         # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_IPO_FLIPPER_SYS"
@@ -98,6 +101,7 @@ llm_ipo_flipper:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         # Source: analysis-bases.md §2 AQR quality gate
         max_retries: 3
+        # Source: infrastructure
         generation_config:
           # Source: LLM variant stochastic-deliberation design
           temperature: 0.7
@@ -126,6 +130,7 @@ llm_momentum_follower:
       order_size: 500
       # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
         # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_MOMENTUM_FOLLOWER_SYS"
@@ -137,6 +142,7 @@ llm_momentum_follower:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         # Source: analysis-bases.md §2 AQR quality gate
         max_retries: 3
+        # Source: infrastructure
         generation_config:
           # Source: LLM variant stochastic-deliberation design
           temperature: 0.7
@@ -165,6 +171,7 @@ llm_skeptical_value_investor:
       order_size: 400
       # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
         # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_SKEPTICAL_VALUE_INVESTOR_SYS"
@@ -176,6 +183,7 @@ llm_skeptical_value_investor:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         # Source: analysis-bases.md §2 AQR quality gate
         max_retries: 3
+        # Source: infrastructure
         generation_config:
           # Source: LLM variant low-temperature valuation discipline
           temperature: 0.4
@@ -204,6 +212,7 @@ llm_short_seller:
       order_size: 400
       # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
         # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_SHORT_SELLER_SYS"
@@ -215,6 +224,7 @@ llm_short_seller:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         # Source: analysis-bases.md §2 AQR quality gate
         max_retries: 3
+        # Source: infrastructure
         generation_config:
           # Source: LLM variant moderate-temperature constrained-arbitrage design
           temperature: 0.5

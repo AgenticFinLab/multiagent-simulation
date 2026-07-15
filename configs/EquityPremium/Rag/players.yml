@@ -36,6 +36,7 @@ market:
     group_tags:
       - market
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       # Source: target §9 — ~6% annual / 252 (Mehra & Prescott 1985)
       stock_expected_return: 0.000238
@@ -61,6 +62,7 @@ ragllm_myopic_loss_averse:
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -113,6 +115,7 @@ ragllm_long_term_investor:
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -164,6 +167,7 @@ ragllm_institutional_investor:
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -216,6 +220,7 @@ ragllm_risk_averse_saver:
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0
@@ -268,6 +273,7 @@ ragllm_rational_optimizer:
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
       # Source: target §9 — normalization
       initial_cash: 10000.0

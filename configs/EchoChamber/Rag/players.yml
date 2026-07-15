@@ -36,6 +36,7 @@ ragllm_opinion_environment:
     group_tags:
       - environment
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EchoChamber/Rag/records"
       initial_polarization: 0.15  # Source: simulation-bases.md §6
       initial_mean_opinion: 0.0  # Source: simulation-bases.md §3
@@ -60,6 +61,7 @@ ragllm_ideologue:
     group_tags:
       - ragllm_agents
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EchoChamber/Rag/records"
       initial_opinion: 0.4  # Source: simulation-bases.md §4.1
       custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
@@ -88,9 +90,13 @@ ragllm_ideologue:
           chunk_overlap: 64  # Source: analysis-bases.md §2.7
           top_k: 5  # Source: analysis-bases.md §2.7
       llm:
+        # Source: simulation-bases.md §4.1 Ideologue
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_IDEOLOGUE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3  # Source: low-variance role deliberation; simulation-bases.md §4.1
@@ -109,6 +115,7 @@ ragllm_conformist:
     group_tags:
       - ragllm_agents
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EchoChamber/Rag/records"
       initial_opinion: 0.0  # Source: simulation-bases.md §4.2
       custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
@@ -136,9 +143,13 @@ ragllm_conformist:
           chunk_overlap: 64  # Source: analysis-bases.md §2.7
           top_k: 5  # Source: analysis-bases.md §2.7
       llm:
+        # Source: simulation-bases.md §4.2 Conformist
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_CONFORMIST_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3  # Source: low-variance role deliberation; simulation-bases.md §4.2
@@ -157,6 +168,7 @@ ragllm_critical_thinker:
     group_tags:
       - ragllm_agents
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EchoChamber/Rag/records"
       initial_opinion: 0.0  # Source: simulation-bases.md §4.3
       custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
@@ -184,9 +196,13 @@ ragllm_critical_thinker:
           chunk_overlap: 64  # Source: analysis-bases.md §2.7
           top_k: 5  # Source: analysis-bases.md §2.7
       llm:
+        # Source: simulation-bases.md §4.3 CriticalThinker
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_CRITICAL_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3  # Source: low-variance role deliberation; simulation-bases.md §4.3
@@ -205,6 +221,7 @@ ragllm_bridge_builder:
     group_tags:
       - ragllm_agents
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EchoChamber/Rag/records"
       initial_opinion: 0.0  # Source: simulation-bases.md §4.4
       custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
@@ -232,9 +249,13 @@ ragllm_bridge_builder:
           chunk_overlap: 64  # Source: analysis-bases.md §2.7
           top_k: 5  # Source: analysis-bases.md §2.7
       llm:
+        # Source: simulation-bases.md §4.4 BridgeBuilder
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_BRIDGE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3  # Source: low-variance role deliberation; simulation-bases.md §4.4
@@ -253,6 +274,7 @@ ragllm_passive_follower:
     group_tags:
       - ragllm_agents
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EchoChamber/Rag/records"
       initial_opinion: 0.0  # Source: simulation-bases.md §4.5
       custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
@@ -280,9 +302,13 @@ ragllm_passive_follower:
           chunk_overlap: 64  # Source: analysis-bases.md §2.7
           top_k: 5  # Source: analysis-bases.md §2.7
       llm:
+        # Source: simulation-bases.md §4.5 PassiveFollower
         sys_message: "examples.EchoChamber.Rag.prompts:RAG_PASSIVE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.5  # Source: stochastic low-engagement persona; simulation-bases.md §4.5
