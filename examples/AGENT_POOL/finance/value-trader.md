@@ -119,6 +119,8 @@ Interaction with other agents: Trades against availability-biased agents (recent
 
 Rules: Tags are literal ASCII; JSON keys match Outputs table; rule variants may template analysis; model variants MUST include in prompt; retrieval variants MUST declare fallback sentinel.
 
+Retrieval fallback sentinel (for retrieval-augmented variants): `"(No relevant knowledge retrieved this round.)"` — injected verbatim into the `<analysis>` block when retrieval returns empty.
+
 ##### Implementer Contract Reminder
 
 Implementers MUST re-open this §3.6.0 I/O Contract during every coding pass as the single source of truth.
