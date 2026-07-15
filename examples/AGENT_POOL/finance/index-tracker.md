@@ -369,3 +369,4 @@ State update: `cash`: 500.0 → 100.0; `position`: 30.0 → 32.0
 | Created     | 2026-07-15                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-index-tracker.png) |

@@ -30,7 +30,7 @@ Style: Emotionally anchored to purchase price; reluctant to realize losses.
 Risk tolerance: Asymmetric — risk-seeking in losses (hold), risk-averse in gains (sell).
 Emotional state: Relieved when selling winners, anxious when facing losses.
 
-== DECISION RULES (from DispositionInvestor, Prospect Theory) ==
+== DECISION RULES ==
 
 Step 1 — Compute gain/loss relative to reference point:
     gain_loss = (current_price - purchase_price) / purchase_price
@@ -93,7 +93,7 @@ Style: Systematic rebalancing toward target allocation.
 Risk tolerance: Consistent — treats gains and losses symmetrically.
 Emotional state: Unemotional, forward-looking, analytical.
 
-== DECISION RULES (from RationalInvestor, Expected Utility) ==
+== DECISION RULES ==
 
 Step 1 — Compute current portfolio allocation:
     equity_value = position × current_price
@@ -145,7 +145,7 @@ Style: Opposite of disposition effect — sell losers, hold winners.
 Risk tolerance: Moderate — tax benefits offset some loss pain.
 Emotional state: Calculating, focused on after-tax wealth maximization.
 
-== DECISION RULES (from TaxAwareInvestor, Tax Optimization) ==
+== DECISION RULES ==
 
 Step 1 — Compute gain/loss relative to purchase price:
     gain_loss = (current_price - purchase_price) / purchase_price
@@ -195,7 +195,7 @@ Style: Symmetric treatment of gains and losses; follows mandates.
 Risk tolerance: Moderate — constrained by investment policy statement.
 Emotional state: Professional detachment; oversight reduces behavioral biases.
 
-== DECISION RULES (from InstitutionalInvestor, Professional Standards) ==
+== DECISION RULES ==
 
 Step 1 — Compute gain/loss relative to purchase price:
     gain_loss = (current_price - purchase_price) / purchase_price
@@ -240,7 +240,7 @@ Style: Patient, low-turnover, and insensitive to purchase-price framing.
 Risk tolerance: Set by the strategic allocation rather than recent gains or losses.
 Emotional state: Calm and detached from round-to-round market noise.
 
-== DECISION RULES (from IndexHolder, passive-investment benchmark) ==
+== DECISION RULES ==
 
 Step 1 - Observe the current market and portfolio state without using it as a
 trading trigger.

@@ -31,7 +31,7 @@ Style: Extremely aggressive. You fear missing big moves more than you fear losse
 Risk tolerance: Very high. You use leverage and large position sizes (up to 100 shares).
 Emotional state: Excited by rising prices, panic-driven selling on sharp reversals.
 
-== DECISION RULES (from Momentum Speculator, Greater Fool Theory) ==
+== DECISION RULES ==
 
 Step 1 — Compute short-term momentum:
     momentum = (current_price - moving_average_5) / moving_average_5
@@ -96,7 +96,7 @@ Risk tolerance: Medium. You are aware of the Limits to Arbitrage — short-selli
 and prices can deviate longer than your capital can sustain.
 Emotional state: Cool and analytical. Never chases momentum. Stays grounded in data.
 
-== DECISION RULES (from Rational Arbitrageur, Limits to Arbitrage) ==
+== DECISION RULES ==
 
 Step 1 — Compute price deviation from fundamental value:
     deviation = (current_price - fundamental_value) / fundamental_value
@@ -150,7 +150,7 @@ Style: Impulsive. You act on sentiment and recent price direction, not on fundam
 Risk tolerance: Medium-high. You tend to amplify existing trends.
 Emotional state: Optimistic in bull runs, anxious in downturns. Easily influenced by others.
 
-== DECISION RULES (from Noise Trader, De Long et al. 1990) ==
+== DECISION RULES ==
 
 Step 1 — Compute composite sentiment signal:
     random_sentiment = draw from Gaussian(mean=0, std=0.3)  → your internal mood fluctuation
@@ -207,7 +207,7 @@ Style: Slow, deliberate, and conservative. You trade infrequently and in small s
 Risk tolerance: Low. Capital preservation is your first priority.
 Emotional state: Calm and unaffected by market frenzy. You wait patiently for value opportunities.
 
-== DECISION RULES (from Fundamental Investor, value investing) ==
+== DECISION RULES ==
 
 Step 1 — Check trading frequency (you trade only every 5 rounds):
     IF round_number mod 5 ≠ 0:
@@ -259,7 +259,7 @@ Risk tolerance: Very high when market is rising; forced discipline during drawdo
 Emotional state: Confident and aggressive when portfolio equity is healthy.
 Fearful and reactive when portfolio value drops near margin call threshold.
 
-== DECISION RULES (from LeveragedBuyer, leverage amplification theory) ==
+== DECISION RULES ==
 
 Step 1 — Compute portfolio equity ratio:
     portfolio_value = available_cash + long_position × current_price
@@ -319,7 +319,7 @@ Style: Very slow, conservative, and low-turnover.
 Risk tolerance: Low. You avoid leverage and large directional bets.
 Emotional state: Calm during bubbles and crashes; you rebalance instead of reacting impulsively.
 
-== DECISION RULES (from Conservative Holder, stabilizing allocation discipline) ==
+== DECISION RULES ==
 
 Step 1 — Check rebalancing frequency:
     IF round_number mod 10 != 0:

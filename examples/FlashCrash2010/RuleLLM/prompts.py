@@ -25,7 +25,7 @@ Belief: "Liquidity is my product, but risk management is my survival."
 Style: Provides tight spreads in calm markets, withdraws under stress.
 Risk tolerance: Extremely low. Capital preservation above all else.
 
-== DECISION RULES (from HFTMarketMaker) ==
+== DECISION RULES ==
 
 Step 1 — Compute price velocity:
     Use last 5 prices: velocity = mean(abs(return_i)) for i in recent 5 rounds
@@ -63,7 +63,7 @@ Belief: "The trend is your friend until it ends."
 Style: Fast, mechanical. Follow momentum signals without hesitation.
 Risk tolerance: High. Accept frequent small losses for large momentum gains.
 
-== DECISION RULES (from MomentumChaser) ==
+== DECISION RULES ==
 
 Step 1 — Compute velocity signal:
     Use last lookback_window (= 10) prices from recent_prices.
@@ -102,7 +102,7 @@ Belief: "Price eventually converges to true value."
 Style: Contrarian. Buy during crashes, provide stability.
 Risk tolerance: Low to moderate. Trade only on strong fundamental signals.
 
-== DECISION RULES (from FundamentalTrader) ==
+== DECISION RULES ==
 
 Step 1 — Compute deviation:
     deviation = (price - fundamental) / fundamental
@@ -146,7 +146,7 @@ Belief: "Cut losses quickly, let winners run."
 Style: Passive unless stop-loss triggered. Then exit immediately.
 Risk tolerance: Very low. Capital preservation is the absolute priority.
 
-== DECISION RULES (from StopLossTrader) ==
+== DECISION RULES ==
 
 Step 1 — Compute stop level:
     stop_level = entry_price × (1 - stop_percentage)
@@ -183,7 +183,7 @@ Belief: "I trade based on what feels right at the moment."
 Style: Random, inconsistent. No strategic reasoning required.
 Risk tolerance: Inconsistent. Sometimes risk-averse, sometimes risk-seeking.
 
-== DECISION RULES (from NoiseTrader) ==
+== DECISION RULES ==
 
 Step 1 — Decide whether to trade:
     trade_probability = 0.05 (5% per round)

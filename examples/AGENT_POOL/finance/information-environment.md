@@ -442,3 +442,4 @@ State update: belief: 0.0 → 0.0, distortion: 0.0 → 0.0
 | Created     | 2026-07-15                   |
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
+| Icon        | ![](../agent_images/icons/finance-information-environment.png) |

@@ -1035,71 +1035,23 @@ def _inject_market_styles() -> None:
             text-transform: uppercase; letter-spacing: 0;
             margin-bottom: 0.35rem;
         }
-        .agent-card {
-            border: 1px solid #dce2e8; border-radius: 8px;
-            background: #ffffff; overflow: hidden; min-height: 220px;
-            box-shadow: 0 1px 2px rgba(20, 32, 44, 0.06);
+        /* Agent-grid card buttons: compact sizing to match full-width icons. */
+        [class*="st-key-market_profile_"] button {
+            font-size: 0.72rem !important;
+            padding: 3px 6px !important;
+            min-height: 0 !important;
+            height: auto !important;
+            line-height: 1.25 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
-        .agent-image-link {
-            display: block; position: relative; aspect-ratio: 1 / 1;
-            overflow: hidden; background: #eef3f6;
-        }
-        .agent-image-link img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-            transition: transform 160ms ease;
-        }
-        .agent-image-link:hover img {transform: scale(1.025);}
-        .agent-hover {
-            position: absolute; inset: auto 0 0 0; padding: 0.75rem;
-            background: rgba(17, 25, 35, 0.92); color: #f7fafc;
-            font-size: 0.74rem; line-height: 1.42;
-            opacity: 0; transform: translateY(6px);
-            transition: opacity 150ms ease, transform 150ms ease;
-        }
-        .agent-image-link:hover .agent-hover,
-        .agent-image-link:focus .agent-hover {opacity: 1; transform: translateY(0);}
-        .agent-card-copy {padding: 0.55rem 0.6rem 0.6rem;}
-        .agent-card-name {font-size: 0.8rem; font-weight: 700; color: #17212b; line-height: 1.2;}
-        .agent-card-meta {
-            font-size: 0.66rem; color: #68737d; margin-top: 0.18rem;
-            line-height: 1.25;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; text-overflow: ellipsis;
-        }
-        .agent-variants {
-            display: flex; gap: 0.2rem; flex-wrap: wrap;
-            margin-top: 0.32rem;
-        }
-        .agent-variant-chip {
-            font-size: 0.56rem; font-weight: 700; line-height: 1.4;
-            padding: 0.04rem 0.34rem;
-            border-radius: 8px;
-            background: #eef3f6; color: #41525f;
-            border: 1px solid #dde4ea;
-            letter-spacing: 0.03em;
-        }
-        .agent-variants-label {
-            font-size: 0.56rem; color: #8a96a3; letter-spacing: 0.04em;
-            text-transform: uppercase; margin-top: 0.32rem;
-            display: block;
-        }
-        .agent-status-chip {
-            display: inline-block; margin-top: 0.32rem;
-            font-size: 0.6rem; font-weight: 700; line-height: 1.4;
-            padding: 0.06rem 0.4rem; border-radius: 8px;
-            letter-spacing: 0.02em;
-        }
-        .agent-status-chip.selected {
-            background: #e7f3f0; color: #1f6157;
-            border: 1px solid #b6d8d0;
-        }
-        .agent-status-chip.muted {
-            background: #f3f5f7; color: #8a96a3;
-            border: 1px solid #e1e6ea;
-        }
-        .agent-card.active {
-            border-color: #287a6d;
-            box-shadow: 0 0 0 2px rgba(40, 122, 109, 0.18);
+        [class*="st-key-market_customize_"] button {
+            font-size: 0.7rem !important;
+            padding: 4px 8px !important;
+            min-height: 0 !important;
+            height: auto !important;
         }
         .profile-banner {
             border-left: 4px solid #287a6d; background: #f3f7f6;
@@ -1134,7 +1086,6 @@ def _inject_market_styles() -> None:
         }
         @media (max-width: 700px) {
             .block-container {padding-top: 3.75rem;}
-            .agent-card {min-height: 230px;}
         }
         /* Step-2 scenario cards. Compatibility is conveyed by border
            colour and the inline status badge. Disabled cards are
@@ -1333,8 +1284,21 @@ def _load_param_specs(agent: dict[str, Any]) -> list[ParamSpec]:
     return parse_parameters_file(profile_path)
 
 
+@st.dialog("Customize Agent", width="large")
+def _show_customize_dialog(agent: dict[str, Any]) -> None:
+    """Dialog overlay for agent customization.
+
+    Opened by the Customize button on each agent card. Replaces the
+    previous layout-reshuffling approach (panel_col + grid_col) with a
+    lightweight modal that doesn't force a full grid re-render.
+    """
+    _render_param_panel(agent)
+
+
 def _render_param_panel(agent: dict[str, Any]) -> None:
-    """Render the left-side editable parameter panel for an active agent.
+    """Render the editable parameter panel for an agent.
+
+    Can be called standalone (inside a dialog, container, or column).
 
     Behaviour:
     - Engine selector (segmented control) at the top.
@@ -1418,7 +1382,6 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
     with btn_close:
         if st.button("Close", width="stretch",
                      key=f"customized_close_{agent_type}"):
-            st.session_state.customized_active_agent = None
             st.rerun()
 
 
@@ -1697,58 +1660,64 @@ def _compose_help(spec: ParamSpec) -> str:
 def _render_agent_card(agent: dict[str, Any]) -> None:
     """Render one card in the agent grid.
 
-    The card image is purely visual (non-interactive). Clicking the agent
-    name opens the profile in a dialog overlay, preserving session state.
-    A small "Customize" button below promotes the agent to the active
-    parameter panel on the left.
+    Performance-critical: rendered ~200 times per page load.
+
+    Image uses ``st.image(path, use_container_width=True)`` so Streamlit
+    deduplicates the binary across reruns (browser-cached) and renders
+    at full column width, preserving source resolution on Retina
+    displays.
+
+    Clicking the agent name opens the profile in a dialog overlay.
+    The Customize button opens the parameter dialog — no grid
+    reshuffling required.
     """
     agent_type = agent["agent_type"]
     selected = bool(st.session_state.get(f"market_agent_{agent_type}", False))
-    is_active = st.session_state.get("customized_active_agent") == agent_type
-    badge = (
-        "<span class='agent-status-chip selected'>\u2713 in market</span>"
-        if selected else "<span class='agent-status-chip muted'>not selected</span>"
-    )
-    card = f"""
-    <div class="agent-card{(' active' if is_active else '')}">
-      <div class="agent-image-link"
-           title="{html.escape(agent['intro'], quote=True)}">
-        <img src="{agent['image_uri']}" alt="{html.escape(agent.get('alt_text', agent['display_name']))}">
-        <span class="agent-hover">{html.escape(agent['intro'])}</span>
-      </div>
-      <div class="agent-card-copy">
-        {badge}
-      </div>
-    </div>
-    """
-    st.markdown(card, unsafe_allow_html=True)
 
-    # Agent name as clickable text button -> opens profile dialog.
+    # --- Image (browser-cached, full-column width) -------------------
+    img_path = Path(agent["image_file"])
+    if img_path.exists():
+        st.image(str(img_path), use_container_width=True)
+    else:
+        st.markdown(
+            "<div style='width:100%;aspect-ratio:1/1;border-radius:8px;"
+            "background:#e8f0fb;display:flex;align-items:center;"
+            "justify-content:center;color:#2a5fa6;font-weight:700;"
+            f"font-size:1.4rem;'>{agent['display_name'][0]}</div>",
+            unsafe_allow_html=True,
+        )
+
+    # --- Selection badge (compact pill beneath image) ----------------
+    badge = (
+        "<div style='text-align:center;margin:4px 0 2px;'>"
+        "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
+        "border-radius:10px;background:#d4edda;color:#155724;font-weight:600;'>"
+        "\u2713 in market</span></div>"
+        if selected
+        else "<div style='text-align:center;margin:4px 0 2px;'>"
+        "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
+        "border-radius:10px;background:#f0f2f4;color:#6c757d;'>"
+        "not selected</span></div>"
+    )
+    st.markdown(badge, unsafe_allow_html=True)
+
+    # --- Agent name: clickable text button -> opens profile dialog ---
     if st.button(
         agent["display_name"],
         key=f"market_profile_{agent_type}",
         type="tertiary",
-        help="View this agent's design profile",
+        help=agent.get("intro", "View this agent's design profile"),
     ):
         _show_catalog_agent_profile_dialog(agent)
 
-    # "Customize" promotes this agent to the active slot in the
-    # left-side parameter panel.  A second click on an already-active
-    # agent collapses the panel (toggle behaviour).
-    label = "Editing\u2026" if is_active else "Customize"
+    # --- Customize: opens the parameter dialog (no grid reshuffle) ---
     if st.button(
-        label,
+        "Customize",
         key=f"market_customize_{agent_type}",
         width="stretch",
-        help=(
-            "Open this agent's parameter panel on the left. "
-            "Click again to collapse it."
-        ),
+        help="Open this agent's parameter and engine editor.",
     ):
-        st.session_state.customized_active_agent = (
-            None if is_active else agent_type
-        )
-        st.rerun()
+        _show_customize_dialog(agent)
 
 
 def _class_to_agent_type(class_name: str) -> str:
@@ -1960,43 +1929,38 @@ def render_customize() -> None:
         _render_profile(by_type[requested_agent])
 
     selected_before = _selected_types(catalog)
-    controls, count = st.columns([4, 1])
-    with controls:
-        search = st.text_input(
-            "Search agents",
-            placeholder="Search by name, role, or scenario",
-            label_visibility="collapsed",
-        )
-    with count:
-        st.metric("Selected", len(selected_before))
 
-    query = search.strip().lower()
-    filtered = [
-        agent
-        for agent in catalog
-        if not query
-        or query in agent["display_name"].lower()
-        or query in agent["agent_type"].lower()
-        or query in agent["archetype"].lower()
-        or query in agent["scenarios"].lower()
-    ]
+    # ---- Agent grid: wrapped in @st.fragment for scoped reruns ------
+    # Only search / grid widgets trigger fragment-local reruns.
+    # Full-page reruns (sidebar preview, Load default, Clear, Launch)
+    # still happen through their own buttons outside this scope.
+    @st.fragment
+    def _agent_grid_fragment() -> None:
+        controls, count = st.columns([4, 1])
+        with controls:
+            search = st.text_input(
+                "Search agents",
+                placeholder="Search by name, role, or scenario",
+                label_visibility="collapsed",
+            )
+        with count:
+            st.metric("Selected", len(_selected_types(catalog)))
 
-    if not filtered:
-        st.info("No agents match this search.")
-    else:
-        active_agent_type = st.session_state.get("customized_active_agent")
-        active_agent = by_type.get(active_agent_type) if active_agent_type else None
-        if active_agent is not None:
-            panel_col, grid_col = st.columns([5, 7], gap="large")
-            grid_columns_per_row = 4
-            with panel_col:
-                _render_param_panel(active_agent)
-            grid_container = grid_col
+        query = search.strip().lower()
+        filtered = [
+            agent
+            for agent in catalog
+            if not query
+            or query in agent["display_name"].lower()
+            or query in agent["agent_type"].lower()
+            or query in agent["archetype"].lower()
+            or query in agent["scenarios"].lower()
+        ]
+
+        if not filtered:
+            st.info("No agents match this search.")
         else:
             grid_columns_per_row = 6
-            grid_container = st.container()
-
-        with grid_container:
             for start in range(0, len(filtered), grid_columns_per_row):
                 columns = st.columns(grid_columns_per_row, gap="small")
                 for column, agent in zip(
@@ -2004,6 +1968,8 @@ def render_customize() -> None:
                 ):
                     with column:
                         _render_agent_card(agent)
+
+    _agent_grid_fragment()
 
     selected = _selected_types(catalog)
     st.session_state.selected_market_agents = selected

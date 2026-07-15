@@ -91,7 +91,7 @@ class RagLLMInvestor(GeneralPlayer):
     ) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",

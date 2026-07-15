@@ -166,7 +166,7 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
 | 149 | `finance/house-money-trader.md` | `finance-house-money-trader.png` | 赌资效应型投资者 | House money effect → stacked-coins motif |
 | 150 | `finance/independent-thinker.md` | `finance-independent-thinker.png` | 独立型投资者 | Independent thinking against crowd → lightbulb motif |
 | 151 | `finance/inertial-holder.md` | `finance-inertial-holder.png` | 惯性型/投资者 | Status-quo inertia holding → pedestal + pause motif |
-| 152 | `finance/information-environment.md` | MISSING | — | — |
+| 152 | `finance/information-environment.md` | `finance-information-environment.png` | 信息型/环境 | Network info coordinator for rumor propagation |
 | 153 | `finance/insider-advantaged.md` | `finance-insider-advantaged.png` | 信息型/投资者 | Information-advantaged insider → eye + key motif |
 | 154 | `finance/institutional-holder.md` | `finance-institutional-holder.png` | 机构型/投资者 | Institutional long-term holder → institution-pillar motif |
 | 155 | `finance/intrinsic-value-trader.md` | `finance-intrinsic-value-trader.png` | 价值型/投资者 | Intrinsic-value fundamental trading → diamond + magnifier motif |
@@ -177,7 +177,7 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
 | 160 | `finance/liquidity-demander.md` | MISSING | — | — |
 | 161 | `finance/liquidity-seeker.md` | `finance-liquidity-seeker.png` | 流动性需求型投资者 | Liquidity seeking → water-droplet motif |
 | 162 | `finance/long-term-investor.md` | MISSING | — | — |
-| 163 | `finance/loss-averse.md` | MISSING | — | — |
+| 163 | `finance/loss-averse.md` | `finance-loss-averse.png` | 损失型/投资者 | Myopic loss aversion drives premature exits |
 | 164 | `finance/loss-averse-investor.md` | `finance-loss-averse-investor.png` | 损失厌恶型投资者 | Prospect theory loss aversion → loss-curve motif |
 | 165 | `finance/macro-hedge-fund.md` | `finance-macro-hedge-fund.png` | 宏观型/投资者 | Macro hedge fund strategy → globe + trend-arrow motif |
 | 166 | `finance/mental-accountant.md` | `finance-mental-accountant.png` | 心理账户型投资者 | Mental accounting → compartment-boxes motif |
