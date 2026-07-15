@@ -74,6 +74,7 @@ def render_d3_topology(
     topology: dict[str, Any],
     agents: list[dict[str, Any]],
     height: int = 420,
+    icon_uris: dict[str, str] | None = None,
 ) -> None:
     """Render an interactive D3.js force-directed topology graph.
 
@@ -83,6 +84,10 @@ def render_d3_topology(
         agents: Output of ``get_agents_info()`` — list of dicts with id, name,
                 theory, instances, role.
         height: Pixel height for the embedded HTML component.
+        icon_uris: Optional mapping ``node_id -> data URI`` that takes
+                   precedence over the built-in ``finance-{stem}.png`` resolver.
+                   Used by the customize preview to display icons for
+                   non-finance domains (e.g., ``opinion/``).
     """
     # Build lookup: node_id -> agent metadata
     agent_map: dict[str, dict] = {}
@@ -99,7 +104,7 @@ def render_d3_topology(
         meta = agent_map.get(node_id, {})
         is_hub = node_id in topology.get("sources", [])
         count = meta.get("instances", 1)
-        icon_uri = _resolve_icon_uri(node_id)
+        icon_uri = (icon_uris or {}).get(node_id) or _resolve_icon_uri(node_id)
         base_name = meta.get(
             "name", _canonical_archetype(node_id).replace("_", " ").title()
         )

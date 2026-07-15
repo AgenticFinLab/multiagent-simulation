@@ -267,7 +267,7 @@ def render_variant_choice() -> None:
     # --- Selected-scenario info strip ---------------------------------
     info = get_scenario_info(_scenario_probe_key(selected_base, groups))
     is_experience = st.session_state.get("mode") == "experience"
-    
+
     name_col, rounds_col, features_col = st.columns([3, 1, 2])
     with name_col:
         st.markdown(
@@ -281,29 +281,84 @@ def render_variant_choice() -> None:
             shipped_rounds = int(info.get("total_rounds") or 0)
         except (TypeError, ValueError):
             shipped_rounds = 0
-        if is_experience:
-            # Read-only display in Experience mode.
-            st.metric("Rounds", shipped_rounds if shipped_rounds > 0 else "\u2014")
-        else:
-            # Editable round count in Project mode.
-            st.number_input(
-                "Rounds",
-                min_value=1,
-                value=shipped_rounds if shipped_rounds > 0 else 1,
-                step=1,
-                key=f"variant_rounds_{selected_base}",
-                help=(
-                    "Adjust the number of simulation rounds. Leaving it at the "
-                    "default launches the shipped config unchanged; changing it "
-                    "generates a reproducible copy with the new count."
-                ),
-            )
+        # Rounds are locked to the value shipped with the scenario —
+        # the user picks the market, not the schedule length.
+        st.metric("Rounds", shipped_rounds if shipped_rounds > 0 else "\u2014")
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
             "Market features",
             ", ".join(sorted(feats)) if feats else "standard",
         )
+
+    # --- Market situation explainer -----------------------------------
+    # Spell out what the "Market features" metric above means so users
+    # understand what the simulated market looks like before picking an
+    # engine. "standard" is the baseline state every scenario ships;
+    # anything extra is listed as additional feature streams.
+    feats_now = scenario_market_features(selected_base)
+    _STANDARD_MARKET = (
+        "<b>standard</b> — every agent sees the baseline market state: "
+        "<code>price</code>, <code>prev_price</code>, <code>fundamental</code>, "
+        "<code>deviation</code>, <code>round</code>. No extra data feeds are "
+        "broadcast; agents trade a single asset on price signals alone."
+    )
+    _FEATURE_DOCS = {
+        "credit_spread": (
+            "broadcasts a credit-spread series alongside price, letting "
+            "agents react to funding stress and default risk."
+        ),
+        "multi_asset": (
+            "exposes two or more correlated assets, so agents can rotate "
+            "between markets instead of trading a single instrument."
+        ),
+        "microstructure_book": (
+            "streams limit-order-book depth (bids / asks / imbalance) so "
+            "agents can react to liquidity and short-horizon flow."
+        ),
+        "tranche_metrics": (
+            "publishes structured-credit tranche metrics (attachment, "
+            "detachment, expected loss) for securitization scenarios."
+        ),
+        "defi_protocol": (
+            "exposes on-chain protocol state (peg, reserves, redemption "
+            "queue) so agents can react to DeFi-specific dynamics."
+        ),
+        "vol_surface": (
+            "streams a volatility surface (ATM vol, skew, term structure) "
+            "so agents can trade options / vol products."
+        ),
+    }
+    if feats_now:
+        rows = "".join(
+            f"<li style='margin:2px 0;'><code>{html.escape(f)}</code> — "
+            f"{_FEATURE_DOCS.get(f, 'extra feature stream exposed to agents.')}"
+            f"</li>"
+            for f in sorted(feats_now)
+        )
+        situation_body = (
+            f"<div style='font-size:12.5px;line-height:1.6;color:#374955;'>"
+            f"{_STANDARD_MARKET}<br/>"
+            f"<span style='color:#1a2633;font-weight:600;'>Plus:</span>"
+            f"<ul style='margin:4px 0 0 20px;padding:0;'>{rows}</ul>"
+            f"</div>"
+        )
+    else:
+        situation_body = (
+            f"<div style='font-size:12.5px;line-height:1.6;color:#374955;'>"
+            f"{_STANDARD_MARKET}"
+            f"</div>"
+        )
+    st.markdown(
+        "<div style='margin-top:6px;padding:10px 14px;"
+        "background:#fbfcfd;border:1px dashed #dde4ea;border-radius:8px;'>"
+        "<div style='font-size:12px;font-weight:700;color:#1a2633;"
+        "letter-spacing:0.03em;text-transform:uppercase;margin-bottom:6px;'>"
+        "Market situation</div>"
+        + situation_body
+        + "</div>",
+        unsafe_allow_html=True,
+    )
 
     # --- Simulation scenario description ------------------------------
     # Explicitly spell out (1) what phenomenon this scenario simulates,
@@ -1144,12 +1199,19 @@ def _inject_market_styles() -> None:
     )
 
 
-def _render_customize_sidebar(scenario_base: str, selected_count: int) -> None:
+def _render_customize_sidebar(
+    scenario_base: str,
+    selected_agents: list[dict[str, Any]],
+) -> None:
     """Sidebar shown during the Stage-2 customize flow.
 
     Surfaces the locked scenario at the top so the user always knows
     which simulation they are building agents for; the only navigation
     out of this stage is the back button rendered in the main column.
+
+    A compact **Live market preview** panel is embedded here so the user
+    can see the current market topology while scrolling the agent grid.
+    It re-renders on every checkbox toggle in the main column.
     """
     with st.sidebar:
         st.title("MASIM")
@@ -1158,7 +1220,10 @@ def _render_customize_sidebar(scenario_base: str, selected_count: int) -> None:
         st.markdown("**✓ Stage 1.** Scenario")
         st.caption(scenario_display_name(scenario_base) if scenario_base else "—")
         st.markdown("**Stage 2.** Select agents")
-        st.caption(f"{selected_count} agents in market")
+        st.caption(f"{len(selected_agents)} agents in market")
+        st.markdown("---")
+        st.markdown("**Live market preview**")
+        _render_live_market_preview(selected_agents, height=280)
         st.markdown("---")
         st.caption("MASIM v0.1.0")
 
@@ -1686,6 +1751,100 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
         st.rerun()
 
 
+def _class_to_agent_type(class_name: str) -> str:
+    """Convert a PascalCase player class name to a kebab-case md stem.
+
+    Examples:
+        ``AnchoredTrader`` -> ``anchored-trader``
+        ``LLMAnchoredTrader`` -> ``anchored-trader`` (leading LLM prefix
+        stripped so both Rule and LLM variants map to the same profile).
+    """
+    name = class_name.split(":")[-1]
+    if name.startswith("LLM") and len(name) > 3 and name[3].isupper():
+        name = name[3:]
+    # Insert hyphens between lowercase/digit and uppercase boundaries.
+    kebab = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "-", name)
+    return kebab.lower()
+
+
+def _default_agent_types_for_scenario(
+    scenario_base: str,
+    catalog: list[dict[str, Any]],
+) -> tuple[list[str], list[str]]:
+    """Return (available, missing) agent_types for the scenario's Rule default.
+
+    ``available`` are catalog agent_types that map to a default player class
+    and can be checked in the market grid. ``missing`` are class names whose
+    kebab form has no matching entry in the AGENT_POOL catalog (usually
+    because the icon has not been authored yet).
+    """
+    probe_key = _scenario_probe_key(scenario_base, discover_scenario_groups())
+    agents = get_agents_info(probe_key)
+    catalog_types = {agent["agent_type"] for agent in catalog}
+
+    available: list[str] = []
+    missing: list[str] = []
+    seen: set[str] = set()
+    for info in agents:
+        if info.get("role") == "coordinator":
+            continue
+        class_str = info.get("class", "") or ""
+        if not class_str:
+            continue
+        kebab = _class_to_agent_type(class_str)
+        if not kebab or kebab in seen:
+            continue
+        seen.add(kebab)
+        if kebab in catalog_types:
+            available.append(kebab)
+        else:
+            missing.append(class_str.split(":")[-1] or kebab)
+    return available, missing
+
+
+def _render_live_market_preview(
+    selected_agents: list[dict[str, Any]],
+    height: int = 260,
+) -> None:
+    """Render a compact star topology of the currently selected agents.
+
+    Uses the same D3 renderer that powers the Experience mode topology,
+    fed a synthetic ``market`` hub with a spoke to each selected agent.
+    Icons are supplied via the ``icon_uris`` override so opinion-domain
+    agents (whose icons are ``opinion-*.png``) render correctly too.
+    """
+    from .topology_d3 import render_d3_topology
+
+    if not selected_agents:
+        st.caption(
+            "No agents selected yet. Click **Load default agents** or pick "
+            "agents from the grid to preview the market topology here."
+        )
+        return
+
+    node_ids = [a["agent_type"] for a in selected_agents]
+    topology = {
+        "topology_type": "star",
+        "sources": ["market"],
+        "nodes": ["market"] + node_ids,
+        "connections": {"market": node_ids},
+    }
+    agent_records = [
+        {
+            "id": a["agent_type"],
+            "name": a["display_name"],
+            "theory": a.get("archetype", ""),
+            "instances": 1,
+            "role": "player",
+        }
+        for a in selected_agents
+    ]
+    icon_uris = {
+        a["agent_type"]: a.get("image_uri", "") for a in selected_agents
+    }
+    render_d3_topology(topology, agent_records, height=height, icon_uris=icon_uris)
+
+
 def render_customize() -> None:
     """Stage 2 (Customized): select agents for the locked scenario.
 
@@ -1714,7 +1873,16 @@ def render_customize() -> None:
         if key not in st.session_state:
             st.session_state[key] = agent["agent_type"] in saved_selection
 
-    _render_customize_sidebar(scenario_base, len(_selected_types(catalog)))
+    # Compute the current selection ONCE up front so the sidebar preview and
+    # the main-column grid share a single source of truth. The preview lives
+    # in the sidebar (see _render_customize_sidebar) and re-renders on every
+    # rerun triggered by a checkbox toggle in the grid.
+    selected_types_now = _selected_types(catalog)
+    selected_agents_now = [
+        a for a in catalog if a["agent_type"] in set(selected_types_now)
+    ]
+
+    _render_customize_sidebar(scenario_base, selected_agents_now)
 
     render_back_to_stage1_bar(
         key_suffix="customize",
@@ -1742,11 +1910,47 @@ def render_customize() -> None:
             unsafe_allow_html=True,
         )
 
+    # Pre-compute the Default preset targets. The selection snapshot
+    # (selected_agents_now / selected_types_now) was already computed above,
+    # before the sidebar preview was rendered.
+    default_available, default_missing = _default_agent_types_for_scenario(
+        scenario_base, catalog
+    )
+
+    # Compact row directly beneath the chip: just the Default preset button.
+    # The live topology preview lives in the left sidebar and updates every
+    # time an agent is toggled in the grid below.
+    default_btn_col, _spacer = st.columns([1, 3])
+    with default_btn_col:
+        default_help = (
+            "Auto-select the agents shipped with this scenario's Default "
+            "configuration (" + str(len(default_available)) + " available)."
+        )
+        if default_missing:
+            default_help += (
+                " Not in pool yet: " + ", ".join(default_missing) + "."
+            )
+        if st.button(
+            "Load default agents",
+            width="stretch",
+            disabled=not default_available,
+            key="customize_load_default_top",
+            help=default_help,
+        ):
+            wanted = set(default_available)
+            for agent in catalog:
+                st.session_state[f"market_agent_{agent['agent_type']}"] = (
+                    agent["agent_type"] in wanted
+                )
+            st.session_state.selected_market_agents = list(default_available)
+            st.rerun()
+
     st.write(
         "Select the agents you want in the simulation. Click an agent's "
         "**name** to view its profile, use **Customize** to edit its "
         "parameters, and (for LLM engines) tweak the persona / per-round "
-        "prompt. Each agent's decision engine is set per-card."
+        "prompt. Each agent's decision engine is set per-card. The "
+        "**Live market preview** in the left sidebar updates automatically."
     )
 
     # Legacy inline profile (query-param based) kept for bookmarked URLs.
