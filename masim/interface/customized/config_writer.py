@@ -149,6 +149,215 @@ def next_customized_id(*roots: Path, width: int = 3) -> str:
     return f"Customized-{next_index:0{width}d}"
 
 
+def initialize_customized_folder(
+    *,
+    bundle_name: str,
+    scenario_name: str,
+    project_root: Path,
+) -> CustomizedBundleResult:
+    """Create the bundle folder with a full copy of the base scenario config.
+
+    Called when the user enters the Customize flow (clicks "Select agents
+    for simulation"). The folder is a complete copy of the scenario's
+    Rule variant so that the user can preview/edit files before launch.
+
+    At launch time, :func:`apply_customized_modifications` overlays the
+    user's agent selections onto this pre-existing folder.
+
+    Args:
+        bundle_name: folder name, e.g. ``"MyProject-AnchoringEffect-a3b9c1d2"``.
+        scenario_name: scenario base name (e.g. ``"AnchoringEffect"``).
+        project_root: the repo root (parent of ``configs/`` and ``examples/``).
+
+    Returns:
+        :class:`CustomizedBundleResult` with absolute paths.
+
+    Raises:
+        FileNotFoundError: the chosen scenario lacks a base ``simulation.yml``.
+    """
+    project_root = Path(project_root).resolve()
+    configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
+    examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
+    config_dir = configs_parent / bundle_name
+    example_dir = examples_parent / bundle_name
+    config_dir.mkdir(parents=True, exist_ok=True)
+    example_dir.mkdir(parents=True, exist_ok=True)
+
+    # Source: every scenario ships a Rule variant as the canonical base.
+    base_path = project_root / "configs" / scenario_name / "Rule"
+    base_simulation = base_path / "simulation.yml"
+    if not base_simulation.exists():
+        raise FileNotFoundError(
+            "Scenario simulation file is missing for "
+            f"'{scenario_name}': {base_simulation}"
+        )
+
+    # Copy all *.yml from configs/{scenario}/Rule/ and retarget record paths.
+    for yml in sorted(base_path.glob("*.yml")):
+        text = yml.read_text(encoding="utf-8")
+        text = _retarget_record_paths(text, bundle_name)
+        (config_dir / yml.name).write_text(text, encoding="utf-8")
+
+    # --- runner script
+    runner_text = _render_runner_script(cid=bundle_name, scenario_name=scenario_name)
+    runner_out = example_dir / "run_customized.py"
+    runner_out.write_text(runner_text, encoding="utf-8")
+
+    # --- __init__.py package marker
+    init_path = example_dir / "__init__.py"
+    if not init_path.exists():
+        init_path.write_text("", encoding="utf-8")
+
+    # --- README.md provenance placeholder
+    readme_text = (
+        f"# {bundle_name}\n\n"
+        f"Customized simulation bundle (scenario: `{scenario_name}`).\n\n"
+        f"- **Initialized**: {_dt.datetime.now().isoformat(timespec='seconds')}\n"
+        f"- **Status**: awaiting agent selections (launch will finalize)\n\n"
+        f"## Run\n\n"
+        f"```bash\n"
+        f"python examples/CUSTOMIZED_SIMULATION/{bundle_name}/run_customized.py \\\n"
+        f"    -c configs/CUSTOMIZED_SIMULATION/{bundle_name}/simulation.yml\n"
+        f"```\n"
+    )
+    (example_dir / "README.md").write_text(readme_text, encoding="utf-8")
+
+    return CustomizedBundleResult(
+        customized_id=bundle_name,
+        config_dir=config_dir,
+        example_dir=example_dir,
+        simulation_yaml=config_dir / "simulation.yml",
+        players_yaml=config_dir / "players.yml",
+        topology_yaml=config_dir / "topology.yml",
+        persona_yaml=config_dir / "persona.yml",
+        runner_path=runner_out,
+        scenario_name=scenario_name,
+        prompts_path=None,
+    )
+
+
+def apply_customized_modifications(
+    *,
+    bundle_name: str,
+    selections: list[CustomizedAgentSelection],
+    scenario_name: str,
+    project_root: Path,
+    total_rounds: Optional[int] = None,
+) -> CustomizedBundleResult:
+    """Apply user's agent selections and params to an existing bundle folder.
+
+    Called at launch time. The folder must already exist (created by
+    :func:`initialize_customized_folder`). This function regenerates
+    ``players.yml``, ``topology.yml``, and optionally ``prompts.py``
+    from the user's selections. It does NOT re-copy ``simulation.yml``
+    or ``persona.yml`` (already present from initialization).
+
+    Args:
+        bundle_name: the existing folder name.
+        selections: user's agent selections with edited params.
+        scenario_name: scenario base name.
+        project_root: repo root.
+        total_rounds: optional round count override baked into simulation.yml.
+
+    Returns:
+        :class:`CustomizedBundleResult` with absolute paths.
+
+    Raises:
+        ValueError: roster is incompatible or an archetype has no class path.
+        FileNotFoundError: the bundle folder does not exist.
+    """
+    # --- compatibility gate ---
+    roster = [s.archetype for s in selections]
+    compatible, reasons = is_scenario_compatible(scenario_name, roster)
+    if not compatible:
+        raise ValueError(
+            "Roster is not compatible with scenario "
+            f"'{scenario_name}': " + "; ".join(reasons)
+        )
+
+    # --- resolve canonical class paths ---
+    class_paths: list[str] = []
+    for sel in selections:
+        path = get_canonical_class_path(sel.archetype, sel.engine)
+        if not path:
+            raise ValueError(
+                f"Canonical class for archetype '{sel.archetype}' with "
+                f"engine '{sel.engine}' is not implemented yet. "
+                "Pick a different engine or remove the agent from the "
+                "roster."
+            )
+        class_paths.append(path)
+
+    project_root = Path(project_root).resolve()
+    config_dir = project_root / "configs" / "CUSTOMIZED_SIMULATION" / bundle_name
+    example_dir = project_root / "examples" / "CUSTOMIZED_SIMULATION" / bundle_name
+
+    if not config_dir.exists():
+        raise FileNotFoundError(
+            f"Bundle folder does not exist: {config_dir}. "
+            "Call initialize_customized_folder() first."
+        )
+
+    # --- optionally update total_rounds in simulation.yml ---
+    if total_rounds is not None:
+        sim_path = config_dir / "simulation.yml"
+        if sim_path.exists():
+            sim_text = sim_path.read_text(encoding="utf-8")
+            sim_text = _set_total_rounds(sim_text, int(total_rounds))
+            sim_path.write_text(sim_text, encoding="utf-8")
+
+    # --- prompts.py ---
+    prompts_path: Optional[Path] = _maybe_write_prompts_module(
+        example_dir=example_dir,
+        cid=bundle_name,
+        selections=selections,
+    )
+
+    # --- players.yml ---
+    base_players = project_root / "configs" / scenario_name / "Rule" / "players.yml"
+    market_block, market_key = _extract_market_block(base_players, bundle_name)
+    players_yaml_text = _render_players_yaml(
+        market_block=market_block,
+        market_key=market_key,
+        selections=selections,
+        class_paths=class_paths,
+        cid=bundle_name,
+        has_prompts_module=prompts_path is not None,
+    )
+    players_out = config_dir / "players.yml"
+    players_out.write_text(players_yaml_text, encoding="utf-8")
+
+    # --- topology.yml ---
+    topology_text = _render_topology_yaml(
+        market_key=market_key,
+        selections=selections,
+    )
+    topology_out = config_dir / "topology.yml"
+    topology_out.write_text(topology_text, encoding="utf-8")
+
+    # --- Update README.md with final provenance ---
+    readme_text = _render_readme(
+        cid=bundle_name,
+        scenario_name=scenario_name,
+        selections=selections,
+        timestamp=_dt.datetime.now(),
+    )
+    (example_dir / "README.md").write_text(readme_text, encoding="utf-8")
+
+    return CustomizedBundleResult(
+        customized_id=bundle_name,
+        config_dir=config_dir,
+        example_dir=example_dir,
+        simulation_yaml=config_dir / "simulation.yml",
+        players_yaml=players_out,
+        topology_yaml=topology_out,
+        persona_yaml=config_dir / "persona.yml",
+        runner_path=example_dir / "run_customized.py",
+        scenario_name=scenario_name,
+        prompts_path=prompts_path,
+    )
+
+
 def write_customized_bundle(
     *,
     selections: list[CustomizedAgentSelection],

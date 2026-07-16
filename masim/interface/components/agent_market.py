@@ -28,7 +28,9 @@ from ..config_loader import (
 )
 from ..customized import (
     CustomizedAgentSelection,
+    apply_customized_modifications,
     get_default_prompts,
+    initialize_customized_folder,
     is_archetype_supported,
     is_scenario_compatible,
     parse_parameters_file,
@@ -140,8 +142,12 @@ def render_entry_choice() -> None:
         st.caption("Investment workflow")
         mode = st.session_state.get("mode", "")
         project_name = st.session_state.get("project_name", "")
+        project_id = st.session_state.get("project_id", "")
         if mode == "project" and project_name:
-            st.markdown(f"**Project:** {project_name}")
+            label = (
+                f"{project_name}-{project_id}" if project_id else project_name
+            )
+            st.markdown(f"**Project:** {label}")
         elif mode == "experience":
             st.markdown("**Mode:** Experience")
         st.markdown("---")
@@ -242,8 +248,12 @@ def render_variant_choice() -> None:
         st.caption("Investment workflow")
         mode = st.session_state.get("mode", "")
         project_name = st.session_state.get("project_name", "")
+        project_id = st.session_state.get("project_id", "")
         if mode == "project" and project_name:
-            st.markdown(f"**Project:** {project_name}")
+            label = (
+                f"{project_name}-{project_id}" if project_id else project_name
+            )
+            st.markdown(f"**Project:** {label}")
         elif mode == "experience":
             st.markdown("**Mode:** Experience")
         st.markdown("---")
@@ -615,12 +625,19 @@ def render_variant_choice() -> None:
                 st.caption("No agent information available.")
 
         with topo_col:
-            st.markdown("**Network topology**")
-            from .topology_d3 import render_d3_topology
+            from .topology_d3 import render_d3_topology_with_expand
             topo = get_topology_info(probe_key)
             if topo["nodes"]:
-                render_d3_topology(topo, agents, height=420)
+                render_d3_topology_with_expand(
+                    topo,
+                    agents,
+                    height=420,
+                    key=f"experience_stage2_{selected_base}",
+                    title="Network topology",
+                    dialog_caption=scenario_display_name(selected_base),
+                )
             else:
+                st.markdown("**Network topology**")
                 st.caption("No topology data available.")
 
         st.divider()
@@ -666,8 +683,15 @@ def render_variant_choice() -> None:
             default_agents = get_agents_info(probe_key)
             default_topo = get_topology_info(probe_key)
             if default_topo.get("nodes"):
-                from .topology_d3 import render_d3_topology
-                render_d3_topology(default_topo, default_agents, height=340)
+                from .topology_d3 import render_d3_topology_with_expand
+                render_d3_topology_with_expand(
+                    default_topo,
+                    default_agents,
+                    height=340,
+                    key=f"project_default_{selected_base}",
+                    title=None,
+                    dialog_caption=scenario_display_name(selected_base),
+                )
             else:
                 st.caption("No topology data available for this scenario.")
 
@@ -702,8 +726,45 @@ def render_variant_choice() -> None:
                 type="primary",
                 width="stretch",
             ):
+                # --- Initialize bundle folder on Customize entry ---
+                _initialize_bundle_on_entry(selected_base)
                 st.session_state.workflow_stage = "customize"
                 st.rerun()
+
+
+def _initialize_bundle_on_entry(scenario_base: str) -> None:
+    """Create the customized bundle folder for the picked scenario.
+
+    Called immediately after the user picks a scenario in Stage 1 (only
+    in Project mode). Naming: ``{project_slug}-{project_id}-{scenario_base}``.
+    If the bundle already exists for the same project + scenario, skip.
+    """
+    # Only Project mode gets a customized bundle folder — Experience
+    # mode is read-only and has no Customize flow.
+    project_slug = st.session_state.get("project_slug", "")
+    if not project_slug:
+        return
+
+    project_id = st.session_state.get("project_id", "0000")
+    bundle_name = f"{project_slug}-{project_id}-{scenario_base}"
+
+    # Re-entry guard: same project + same scenario → reuse existing folder.
+    existing_bundle = st.session_state.get("customized_bundle_name", "")
+    if existing_bundle == bundle_name:
+        return  # Already initialized for this project + scenario.
+
+    # Different scenario? Generate a new bundle (old folder stays on disk).
+    try:
+        initialize_customized_folder(
+            bundle_name=bundle_name,
+            scenario_name=scenario_base,
+            project_root=PROJECT_ROOT,
+        )
+    except (FileNotFoundError, OSError) as exc:
+        st.error(f"Could not initialize customized folder: {exc}")
+        return
+
+    st.session_state["customized_bundle_name"] = bundle_name
 
 
 def _launch_default_variant(scenario_key: str) -> None:
@@ -1173,7 +1234,6 @@ def _render_customize_sidebar(
         st.markdown("**Stage 2.** Select agents")
         st.caption(f"{len(selected_agents)} agents in market")
         st.markdown("---")
-        st.markdown("**Live market preview**")
         _render_live_market_preview(selected_agents, height=280)
         st.markdown("---")
         st.caption("MASIM v0.1.0")
@@ -1771,9 +1831,28 @@ def _default_agent_types_for_scenario(
     return available, missing
 
 
+@st.dialog("Live market preview", width="large")
+def _show_market_preview_dialog(selected_agents: list[dict[str, Any]]) -> None:
+    """Deprecated stand-alone dialog kept only for backwards compatibility.
+
+    The live-market-preview expand affordance now flows through the shared
+    ``render_d3_topology_with_expand`` helper in ``topology_d3.py``.
+    """
+    if not selected_agents:
+        st.caption(
+            "No agents selected yet. Pick agents from the grid to preview "
+            "the market topology here."
+        )
+        return
+    st.caption(f"{len(selected_agents)} agents connected to the market hub")
+    _render_live_market_preview(selected_agents, height=620, with_expand=False)
+
+
 def _render_live_market_preview(
     selected_agents: list[dict[str, Any]],
     height: int = 260,
+    *,
+    with_expand: bool = True,
 ) -> None:
     """Render a compact star topology of the currently selected agents.
 
@@ -1782,9 +1861,10 @@ def _render_live_market_preview(
     Icons are supplied via the ``icon_uris`` override so opinion-domain
     agents (whose icons are ``opinion-*.png``) render correctly too.
     """
-    from .topology_d3 import render_d3_topology
+    from .topology_d3 import render_d3_topology, render_d3_topology_with_expand
 
     if not selected_agents:
+        st.markdown("**Live market preview**")
         st.caption(
             "No agents selected yet. Click **Load default agents** or pick "
             "agents from the grid to preview the market topology here."
@@ -1811,7 +1891,20 @@ def _render_live_market_preview(
     icon_uris = {
         a["agent_type"]: a.get("image_uri", "") for a in selected_agents
     }
-    render_d3_topology(topology, agent_records, height=height, icon_uris=icon_uris)
+    if with_expand:
+        render_d3_topology_with_expand(
+            topology,
+            agent_records,
+            height=height,
+            icon_uris=icon_uris,
+            key="live_market_preview",
+            title="Live market preview",
+            dialog_caption=(
+                f"{len(selected_agents)} agents connected to the market hub"
+            ),
+        )
+    else:
+        render_d3_topology(topology, agent_records, height=height, icon_uris=icon_uris)
 
 
 def render_customize() -> None:
@@ -2134,6 +2227,9 @@ def _render_scenario_card(
             if project_slug:
                 from masim.interface.components.welcome import copy_scenario_to_project
                 copy_scenario_to_project(project_slug, scenario_base)
+                # Also materialise the customized bundle folder immediately
+                # so the user can see it on disk before entering Stage 2.
+                _initialize_bundle_on_entry(scenario_base)
             st.session_state.workflow_stage = "variant_choice"
             st.rerun()
 
@@ -2143,12 +2239,31 @@ def _write_customized_bundle(
     selected_agents: list[dict[str, Any]],
     scenario_base: str,
 ) -> str | None:
-    """Always materialise a customized bundle from the user's roster.
+    """Apply user's customization to the pre-existing bundle folder.
 
-    Returns the new scenario key (e.g. ``CUSTOMIZED_SIMULATION/Customized-007``)
-    or ``None`` on failure. Defense-in-depth: re-validates compatibility
-    before invoking the writer (the Stage-2 inline check already gates this).
+    Returns the new scenario key (e.g. ``CUSTOMIZED_SIMULATION/MyProject-Scenario-abc12345``)
+    or ``None`` on failure. The bundle folder was created when the user entered
+    the Customize flow; this function regenerates players/topology/prompts.
     """
+    # Read bundle name from session state (set during initialize_bundle_on_entry).
+    bundle_name = st.session_state.get("customized_bundle_name", "")
+    if not bundle_name:
+        # Fallback: if somehow no bundle was initialized (e.g. Experience mode),
+        # create one now using the legacy path.
+        project_slug = st.session_state.get("project_slug", "project")
+        project_id = st.session_state.get("project_id", "0000")
+        bundle_name = f"{project_slug}-{project_id}-{scenario_base}"
+        try:
+            initialize_customized_folder(
+                bundle_name=bundle_name,
+                scenario_name=scenario_base,
+                project_root=PROJECT_ROOT,
+            )
+            st.session_state["customized_bundle_name"] = bundle_name
+        except (FileNotFoundError, OSError) as exc:
+            st.error(f"Could not initialize customized folder: {exc}")
+            return None
+
     roster_archetypes = [a["agent_type"] for a in selected_agents]
     compatible, reasons = is_scenario_compatible(scenario_base, roster_archetypes)
     if not compatible:
@@ -2181,7 +2296,8 @@ def _write_customized_bundle(
         # Carry any user-adjusted round count from the variant_choice page
         # into the generated bundle (None => keep the shipped count).
         edited_rounds = st.session_state.get(f"variant_rounds_{scenario_base}")
-        result = write_customized_bundle(
+        result = apply_customized_modifications(
+            bundle_name=bundle_name,
             selections=selections,
             scenario_name=scenario_base,
             project_root=PROJECT_ROOT,
@@ -2197,7 +2313,7 @@ def _write_customized_bundle(
     st.toast(
         f"Customized bundle written: {result.customized_id} "
         f"(scenario {scenario_base})",
-        icon="✨",
+        icon="\u2728",
     )
     return f"CUSTOMIZED_SIMULATION/{result.customized_id}"
 

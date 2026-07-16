@@ -50,8 +50,12 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
     with st.sidebar:
         st.title("MASIM Simulator")
         project_name = st.session_state.get("project_name", "")
+        project_id = st.session_state.get("project_id", "")
         if project_name:
-            st.caption(f"Project: {project_name}")
+            label = (
+                f"{project_name}-{project_id}" if project_id else project_name
+            )
+            st.caption(f"Project: {label}")
         st.markdown("---")
 
         # ------------------------------------------------------------------
@@ -197,14 +201,21 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         # available for the scenario.
         # ------------------------------------------------------------------
         st.markdown("---")
-        st.markdown("**Network Topology**")
 
         topo = get_topology_info(selected_scenario)
         agents_for_topo = get_agents_info(selected_scenario)
         if topo.get("nodes"):
-            from .topology_d3 import render_d3_topology
-            render_d3_topology(topo, agents_for_topo, height=320)
+            from .topology_d3 import render_d3_topology_with_expand
+            render_d3_topology_with_expand(
+                topo,
+                agents_for_topo,
+                height=320,
+                key=f"workspace_{selected_scenario}",
+                title="Network Topology",
+                dialog_caption=selected_scenario,
+            )
         else:
+            st.markdown("**Network Topology**")
             icon_preview = _get_or_create_icon_topology_preview(selected_scenario)
             if icon_preview is not None:
                 st.image(str(icon_preview), width="stretch")

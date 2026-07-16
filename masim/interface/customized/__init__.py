@@ -40,6 +40,8 @@ from .scenario_features import (
 from .config_writer import (
     CustomizedAgentSelection,
     CustomizedBundleResult,
+    apply_customized_modifications,
+    initialize_customized_folder,
     next_customized_id,
     write_customized_bundle,
     write_default_scenario_bundle,
@@ -67,6 +69,8 @@ __all__ = [
     # bundle writer
     "CustomizedAgentSelection",
     "CustomizedBundleResult",
+    "apply_customized_modifications",
+    "initialize_customized_folder",
     "next_customized_id",
     "write_customized_bundle",
     "write_default_scenario_bundle",

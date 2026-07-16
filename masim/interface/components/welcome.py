@@ -13,6 +13,7 @@ import base64
 import json
 import re
 import shutil
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -51,6 +52,41 @@ def _logo_data_uri() -> Optional[str]:
     b64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii")
     # The file carries a .jpg extension but is PNG-encoded content.
     return f"data:image/png;base64,{b64}"
+
+
+def _list_existing_projects() -> list[dict[str, str]]:
+    """Return metadata for every existing project under ``examples/``.
+
+    A directory is treated as a project iff it contains a
+    ``project_meta.json`` file. The list is sorted by ``created_at``
+    descending (most recent first) with a slug fallback for entries
+    that lack a timestamp.
+
+    Returns:
+        List of dicts with keys ``display_name``, ``slug``, ``created_at``.
+    """
+    if not _EXAMPLES_DIR.exists():
+        return []
+    projects: list[dict[str, str]] = []
+    for entry in _EXAMPLES_DIR.iterdir():
+        if not entry.is_dir():
+            continue
+        meta_path = entry / "project_meta.json"
+        if not meta_path.exists():
+            continue
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        projects.append(
+            {
+                "display_name": str(meta.get("project_name") or entry.name),
+                "slug": str(meta.get("slug") or entry.name),
+                "created_at": str(meta.get("created_at", "")),
+            }
+        )
+    projects.sort(key=lambda p: p["created_at"], reverse=True)
+    return projects
 
 
 def create_run_environment(display_name: str) -> Path:
@@ -158,6 +194,30 @@ def _inject_welcome_styles() -> None:
             font-size: 0.78rem; font-weight: 750; color: #287a6d;
             text-transform: uppercase; letter-spacing: 0.08em;
             margin-bottom: 0.2rem;
+        }
+        /* Existing-projects picker (chips below the name input) */
+        .welcome-projects-hint {
+            font-size: 0.72rem; color: #7a8794;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            font-weight: 700; margin: 0.35rem 0 0.15rem 0;
+        }
+        [class*="st-key-welcome_pick_project_"] button {
+            font-size: 0.78rem !important;
+            padding: 3px 10px !important;
+            min-height: 0 !important;
+            height: auto !important;
+            line-height: 1.4 !important;
+            border-radius: 999px !important;
+            border: 1px solid #d5dde5 !important;
+            background: #f6f8fa !important;
+            color: #2a3742 !important;
+            box-shadow: none !important;
+            white-space: nowrap;
+        }
+        [class*="st-key-welcome_pick_project_"] button:hover {
+            border-color: #2a5fa6 !important;
+            background: #eaf0f8 !important;
+            color: #17212b !important;
         }
         /* Mode cards */
         .mode-card {
@@ -334,6 +394,13 @@ def render_welcome() -> None:
                 '<div class="welcome-card-label">Name your project</div>',
                 unsafe_allow_html=True,
             )
+            # A chip-click on an existing project stashes its display name
+            # into this pending slot; we apply it to the widget's session_state
+            # key BEFORE the text_input is instantiated so Streamlit picks up
+            # the new value on the current run.
+            pending = st.session_state.pop("_welcome_pending_name", None)
+            if pending is not None:
+                st.session_state["welcome_project_name_input"] = pending
             default_name = st.session_state.get("project_name", "")
             project_name = st.text_input(
                 "Project name",
@@ -346,6 +413,58 @@ def render_welcome() -> None:
                 "This becomes the main identifier for this session. "
                 "A run environment is created at `examples/<name>/`."
             )
+
+            # --- Existing projects picker (live filter as user types) ---
+            existing_projects = _list_existing_projects()
+            if existing_projects:
+                query = (project_name or "").strip().casefold()
+                if query:
+                    matches = [
+                        p for p in existing_projects
+                        if query in p["display_name"].casefold()
+                        or query in p["slug"].casefold()
+                    ]
+                else:
+                    matches = existing_projects
+                hint_label = (
+                    f"Existing projects matching \u201c{project_name}\u201d"
+                    if query else "Existing projects"
+                )
+                st.markdown(
+                    f'<div class="welcome-projects-hint">{hint_label} '
+                    f'\u00b7 {len(matches)} of {len(existing_projects)}</div>',
+                    unsafe_allow_html=True,
+                )
+                if not matches:
+                    st.caption(
+                        "No existing project matches \u2014 keep typing to "
+                        "create a new one."
+                    )
+                else:
+                    # Show up to 8 matches as clickable chips, most recent first.
+                    visible = matches[:8]
+                    chip_cols = st.columns(min(len(visible), 4), gap="small")
+                    for idx, proj in enumerate(visible):
+                        col = chip_cols[idx % len(chip_cols)]
+                        with col:
+                            if st.button(
+                                proj["display_name"],
+                                key=f"welcome_pick_project_{proj['slug']}",
+                                help=f"Reuse project '{proj['display_name']}' (examples/{proj['slug']}/)",
+                                width="stretch",
+                            ):
+                                # Stash the pick and rerun; the pending slot
+                                # will be applied to the text_input on the
+                                # next run before the widget is re-created.
+                                st.session_state["_welcome_pending_name"] = (
+                                    proj["display_name"]
+                                )
+                                st.rerun()
+                    if len(matches) > len(visible):
+                        st.caption(
+                            f"\u2026 {len(matches) - len(visible)} more "
+                            "hidden \u2014 refine the name to narrow down."
+                        )
 
             slug_preview = _slugify(project_name) if project_name else ""
             if project_name and not slug_preview:
@@ -370,5 +489,10 @@ def render_welcome() -> None:
                 st.session_state.project_name = project_name.strip()
                 st.session_state.project_slug = slug_preview
                 st.session_state.project_dir = str(project_dir)
+                # Generate a short unique ID for this project session.
+                # Used to name customized bundle folders:
+                # {project_name}-{scenario}-{project_id}
+                if not st.session_state.get("project_id"):
+                    st.session_state["project_id"] = uuid.uuid4().hex[:8]
                 st.session_state.workflow_stage = "scenario_setup"
                 st.rerun()

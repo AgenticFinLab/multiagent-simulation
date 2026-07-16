@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import streamlit.components.v1 as components
+import streamlit as st
 
 # ---------------------------------------------------------------------------
 # Asset paths (same constants used across the interface layer)
@@ -152,6 +153,116 @@ def render_d3_topology(
 
     html = _build_html(graph_json, height)
     components.html(html, height=height, scrolling=False)
+
+
+# ---------------------------------------------------------------------------
+# Expand-to-modal wrapper
+# ---------------------------------------------------------------------------
+
+_EXPAND_CSS_FLAG = "_topology_expand_css_injected"
+
+
+def _inject_expand_css() -> None:
+    """Inject scoped CSS for the topology expand button once per session."""
+    if st.session_state.get(_EXPAND_CSS_FLAG):
+        return
+    st.markdown(
+        """
+        <style>
+        [class*="st-key-topology_expand_"] button {
+            font-size: 2.9rem !important;
+            font-weight: 900 !important;
+            padding: 0 8px !important;
+            min-height: 0 !important;
+            height: auto !important;
+            line-height: 1.0 !important;
+            color: #17212b !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            text-shadow: 0 0 0.6px currentColor, 0 0 0.6px currentColor;
+            float: right;
+        }
+        [class*="st-key-topology_expand_"] button:hover {
+            color: #000000 !important;
+            background: rgba(23, 33, 43, 0.10) !important;
+            border-radius: 6px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.session_state[_EXPAND_CSS_FLAG] = True
+
+
+@st.dialog("Network topology", width="large")
+def _topology_dialog(
+    topology: dict[str, Any],
+    agents: list[dict[str, Any]],
+    icon_uris: dict[str, str] | None,
+    caption: str | None,
+) -> None:
+    """Modal that re-renders the same topology at a much larger canvas."""
+    if caption:
+        st.caption(caption)
+    if not topology or not topology.get("nodes"):
+        st.caption("No topology data available.")
+        return
+    render_d3_topology(topology, agents, height=620, icon_uris=icon_uris)
+
+
+def render_d3_topology_with_expand(
+    topology: dict[str, Any],
+    agents: list[dict[str, Any]],
+    *,
+    height: int = 340,
+    icon_uris: dict[str, str] | None = None,
+    key: str,
+    title: str | None = "Network topology",
+    dialog_caption: str | None = None,
+) -> None:
+    """Render a D3 topology with a compact expand icon that opens a modal.
+
+    The expand button (⤢) appears in the top-right corner adjacent to
+    the ``title``. Clicking it opens a large modal that re-renders the
+    exact same topology data at height=620 for detailed inspection.
+
+    Args:
+        topology: Same shape as ``render_d3_topology``.
+        agents: Same shape as ``render_d3_topology``.
+        height: Compact-view height in px.
+        icon_uris: Optional icon overrides forwarded to both the compact
+            renderer and the modal.
+        key: Suffix used to uniqueness-scope the expand button widget key.
+            Must be unique per topology on the same page.
+        title: Section header rendered above the compact view. Pass
+            ``None`` to suppress (useful when the caller already rendered
+            a matching header).
+        dialog_caption: Optional caption line shown inside the modal.
+    """
+    _inject_expand_css()
+    if title is not None:
+        title_col, expand_col = st.columns([4, 1])
+        with title_col:
+            st.markdown(f"**{title}**")
+        with expand_col:
+            if st.button(
+                "⤢",
+                key=f"topology_expand_{key}",
+                help=f"Expand the {title.lower()}",
+                type="tertiary",
+            ):
+                _topology_dialog(topology, agents, icon_uris, dialog_caption)
+    else:
+        # No title: still expose an expand button on its own row.
+        if st.button(
+            "⤢",
+            key=f"topology_expand_{key}",
+            help="Expand the network topology",
+            type="tertiary",
+        ):
+            _topology_dialog(topology, agents, icon_uris, dialog_caption)
+    render_d3_topology(topology, agents, height=height, icon_uris=icon_uris)
 
 
 # ---------------------------------------------------------------------------
