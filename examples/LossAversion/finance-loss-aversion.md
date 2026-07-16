@@ -4,6 +4,8 @@
 
 - 2026-07-16  Polish target-file gate (Case B): reconstructed this canonical target solely from the existing LossAversion scenario documents, configurations, and implementation. Five-agent roster and four-variant build matrix confirmed; status set to `locked`.
 - 2026-07-16  Research audit: the Prospect Theory, Cumulative Prospect Theory, disposition-effect, momentum, and dealer-inventory DOI anchors were resolved against publisher or primary-paper records. Unsupported historical-market numbers were excluded from the canonical target.
+- 2026-07-16  Polish Step 1 audit: `simulation-bases.md §2` rewritten as five complete six-field Theory blocks; Ho–Stoll DOI corrected to `10.1016/0304-405X(81)90020-9`; Odean sample and date range verified; scenario calibration values explicitly separated from empirical estimates.
+- 2026-07-16  Polish Step 2 audit: five profile matches reuse existing canonical identities. Four incomplete handbooks were upgraded to conformant specifications; three missing canonical 512×512 PNGs were generated and registered as mapping rows #103–#105. Three consecutive handbook/icon checks and naming/parity audit PASS.
 
 ## §1 Meta
 
