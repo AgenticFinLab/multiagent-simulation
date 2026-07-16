@@ -28,4 +28,7 @@ Theory determines parameter direction and valid sensitivity ranges. Scenario-nor
 - Resolved: Ho–Stoll DOI had an incorrect terminal digit in the old pool profile.
 - Resolved: three pool profiles were stubs and market-maker was structurally incomplete.
 - Resolved: three canonical agent icons and image mapping rows were absent.
-- Open for Step 4: Rule analysis imports the absent module `examples.standard_rule_analysis`; replace it with the supported evaluation pipeline and scenario metrics.
+- Resolved: Rule analysis imported absent module `examples.standard_rule_analysis`; replaced with supported evaluation components plus scenario-specific behavioral metrics.
+- Resolved: `price_impact=0.03` contradicted the documented `0.0002` calibration and caused 87.7% mean absolute deviation; restored `0.0002` and added seeded gain/loss identification stimuli.
+- Resolved: repeated same-domain realization exhausted inventory; decisions now trigger once per threshold crossing and re-arm in the neutral band.
+- Result: formal Rule run completed 200 rounds; all five scenario acceptance metrics and five output files passed.

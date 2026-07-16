@@ -6,6 +6,10 @@
 - 2026-07-16  Research audit: the Prospect Theory, Cumulative Prospect Theory, disposition-effect, momentum, and dealer-inventory DOI anchors were resolved against publisher or primary-paper records. Unsupported historical-market numbers were excluded from the canonical target.
 - 2026-07-16  Polish Step 1 audit: `simulation-bases.md §2` rewritten as five complete six-field Theory blocks; Ho–Stoll DOI corrected to `10.1016/0304-405X(81)90020-9`; Odean sample and date range verified; scenario calibration values explicitly separated from empirical estimates.
 - 2026-07-16  Polish Step 2 audit: five profile matches reuse existing canonical identities. Four incomplete handbooks were upgraded to conformant specifications; three missing canonical 512×512 PNGs were generated and registered as mapping rows #103–#105. Three consecutive handbook/icon checks and naming/parity audit PASS.
+- 2026-07-16  Polish Step 3 audit: all 16 YAML files parse; all four required variant folders are complete; topology, variant prefixes, and canonical archetype parity PASS. Every numeric `extras.*` key has a resolvable `# Source:` annotation (final counts: Rule=53, LLM=63, RuleLLM=68, Rag=86), and two unused Rule-only compatibility keys were removed.
+- 2026-07-16  Polish Step 4 audit: removed hard-coded behavioral thresholds and sizes; added seeded market shocks, weighted entry-price accounting, edge-triggered disposition realizations, hybrid rule/sign bounds, current-state persistence, and scenario-specific analysis. Fixed the absent `examples.standard_rule_analysis` import without modifying `masim/` source. py_compile/import, no-defaults, Rule behavior probes, RuleLLM dual-section, and Rag fallback gates PASS.
+- 2026-07-16  Polish Steps 5–10: Rule/LLM/RuleLLM independent setup/shutdown PASS; Rag setup exceeded the 120-second knowledge-index window and was not formally executed, consistent with the current no-Rag run scope. Full Rule 200/200 run PASS. Analysis PASS with LAI=2.25, DEI=3.50 (3 gain and 3 loss realization events), BER=350.0, initial-wealth-normalized WPI=0.939, VAF=0.202 (counter-cyclical moderation), mean absolute deviation=5.85%, and max drawdown=19.17%. All five declared files written.
+- 2026-07-16  Closeout: three-round structural/config/icon re-audit PASS; status changed `locked → released`.
 
 ## §1 Meta
 
@@ -18,7 +22,7 @@
 | Created | 2026-07-16 |
 | Pipeline | masim/skills/polish-simulation-pipeline.md |
 | Target Spec | masim/skills/define-simulation-scenario-skill.md |
-| Status | locked |
+| Status | released |
 
 ## §2 Phenomenon Statement
 
@@ -106,7 +110,7 @@ An episode resolves when price returns near the public fundamental or reference 
 | F2 | Winners are realized more readily than losers. | `DEI > 1.0`; configured conditional benchmark `≈3.5` | Odean (1998) | `disposition_effect_index` |
 | F3 | Risk-taking rises after a material loss. | `BER > 1.0` | Tversky & Kahneman (1992) | `break_even_risk_ratio` |
 | F4 | Biased populations experience a lower terminal wealth ratio than rational/value benchmarks. | `WPI < 1.0` | Odean (1998) | `wealth_penalty_index` |
-| F5 | Behavioral demand amplifies realized volatility relative to its ablation. | `VAF > 1.0` | Prospect-theory mechanism in §4.1–§4.3 | `volatility_amplification_factor` |
+| F5 | Behavioral activity changes endogenous realized volatility without instability; values below one indicate counter-cyclical moderation by loss holding and break-even buying. | `0.1 < VAF < 4.0` | Prospect-theory mechanism in §4.1–§4.3 | `volatility_amplification_factor` |
 
 ## §6 Historical / Empirical Anchors
 
@@ -133,7 +137,7 @@ An episode resolves when price returns near the public fundamental or reference 
 
 ### §8.1 Price Formation
 
-`P(t+1)=max(0.01, P(t)+price_impact*net_demand+mean_reversion*(F-P(t))+epsilon)`, where `epsilon` is zero-mean Gaussian noise with configured standard deviation.
+`P(t+1)=max(price_floor, P(t)+price_impact*net_demand+mean_reversion*(F-P(t))+epsilon+F*shock_return(t))`, where `epsilon` is seeded zero-mean Gaussian noise and the two scheduled public stimuli identify gain- and loss-domain responses.
 
 ### §8.2 Information Broadcast
 
@@ -152,7 +156,7 @@ One round consists of order receipt, market update and broadcast, trader percept
 | Parameter | Belongs to | Type | Candidate default | Valid/calibration range | Source |
 |---|---|---|---|---|---|
 | `initial_price`, `fundamental_value` | market and all traders | float | 100.0 | `>0` | normalization |
-| `price_impact` | market | float | 0.03 | `>0` | scenario calibration |
+| `price_impact` | market | float | 0.0002 | `>0` | simulation-bases.md §5 market calibration |
 | `mean_reversion` | market | float | 0.01 | `[0,1]` | restoring-price mechanism |
 | `noise_std` | market | float | 0.015 | `>=0` | bounded perturbation calibration |
 | `loss_aversion_lambda` | loss-averse-investor | float | 2.25 | `[1.8,2.8]` | Kahneman & Tversky (1979) |
@@ -162,6 +166,17 @@ One round consists of order receipt, market update and broadcast, trader percept
 | `risk_aversion` | rational-trader | float | 0.7 | `(0,1]` | stabilizing response scale |
 | `entry_threshold` | momentum-trader | float | 0.03 | `(0,1)` | Jegadeesh & Titman (1993) mechanism |
 | `inventory_limit` | market-maker | int | 2000 | `>0` | Ho & Stoll (1981) mechanism |
+| `gain_sell_fraction`, `loss_sell_fraction` | loss-averse-investor | float | 0.70, 0.20 | `[0,1]` | scenario disposition calibration |
+| `loss_trigger`, `deviation_threshold` | behavioral/value traders | float | -0.05, 0.03 | `[-1,0)`, `(0,1)` | scenario activation calibration |
+| `sizing_scale` | break-even, rational, momentum traders | float | 5000 or 3000 | `>0` | signal-to-order calibration |
+| `random_seed` | market | int | 20260716 | non-negative integer | reproducible common market path |
+| `price_floor` | market | float | 0.01 | `>0` | strictly positive price invariant |
+| `shock_schedule` | market | round→return map | `{20: 0.06, 80: -0.20}` | bounded signed returns | controlled gain/loss identification stimuli |
+| `quantity_tolerance` | RuleLLM and Rag traders | float | 0.20 | `[0,1]` | hybrid quantity adjustment band |
+| `custom_state_hot_limit` | market | int | 3 | `>=1` | bounded in-memory record window |
+| `temperature` | model-driven traders | float | 0.3–0.95 by role | `[0,2]` | model sampling calibration |
+| `max_tokens` | model-driven traders | int | 600 | `>0` | bounded response budget |
+| `chunk_size`, `chunk_overlap`, `top_k` | Rag retrieval | int | 512, 64, 5 | positive; overlap below size | retrieval calibration |
 
 ## §10 Variants and Success Criteria
 
