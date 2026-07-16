@@ -167,7 +167,7 @@ Output files written to `records/LossAversion/Rule/`:
 | LAI (Loss Aversion Index)      | 2.0–2.8        | Directly set by `loss_aversion_lambda = 2.25`            |
 | DEI (Disposition Effect Index) | 1.5–2.5        | 70%/20% sell ratio → PGR ≫ PLR                           |
 | BER (Break-Even Escalation)    | 1.5–3.5        | Escalating buys at pnl < –5%                             |
-| VAF (Volatility Amplification) | 1.5–2.5        | Both loss-holding and break-even buying amplify variance |
+| VAF (Volatility Impact Ratio)  | 0.1–2.5        | Values below one show counter-cyclical moderation; values above one show amplification |
 | WPI (Wealth Penalty Index)     | 0.75–0.90      | Biased agents underperform rational by 10–25%            |
 | SRR (Sell Rate Ratio)          | 1.5–2.5        | Sell rate 1.5–2.5× higher in gain rounds                 |
 

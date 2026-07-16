@@ -39,13 +39,20 @@ def _decision_parameters_text(extras: Dict[str, Any], agent_class: str) -> str:
         "RuleLLMLossAverseInvestor": (
             "loss_aversion_lambda",
             "sell_gain_threshold",
+            "gain_sell_fraction",
+            "loss_sell_fraction",
+            "base_size",
         ),
-        "RuleLLMBreakEvenTrader": ("risk_increase_factor",),
-        "RuleLLMRationalTrader": ("risk_aversion",),
-        "RuleLLMMomentumTrader": ("entry_threshold",),
-        "RuleLLMMarketMaker": ("inventory_limit",),
+        "RuleLLMBreakEvenTrader": (
+            "risk_increase_factor", "loss_trigger", "sizing_scale", "base_size",
+        ),
+        "RuleLLMRationalTrader": (
+            "risk_aversion", "deviation_threshold", "sizing_scale", "base_size",
+        ),
+        "RuleLLMMomentumTrader": ("entry_threshold", "sizing_scale", "base_size"),
+        "RuleLLMMarketMaker": ("inventory_limit", "base_size"),
     }
-    keys = parameter_keys[agent_class]
+    keys = parameter_keys[agent_class] + ("quantity_tolerance",)
     return "\n".join(f"- {key}: {extras[key]}" for key in keys)
 
 
@@ -59,6 +66,48 @@ def _validate_decision(decision: Dict[str, Any]) -> None:
         raise ValueError(f"Invalid quantity: {decision['quantity']}")
     if not str(decision["reasoning"]).strip():
         raise ValueError("Missing reasoning")
+
+
+def _rule_decision(
+    agent_class: str,
+    extras: Dict[str, Any],
+    price: float,
+    fundamental: float,
+    cash: float,
+    position: int,
+    entry_price: float,
+) -> tuple[str, int]:
+    """Return the authoritative Rule sign and quantity for hybrid bounds."""
+    deviation = (price - fundamental) / fundamental
+    pnl = (price - entry_price) / entry_price
+    if agent_class == "RuleLLMLossAverseInvestor":
+        if pnl > extras["sell_gain_threshold"]:
+            return "sell", min(position, int(position * extras["gain_sell_fraction"]), extras["base_size"])
+        if pnl < -extras["sell_gain_threshold"] * extras["loss_aversion_lambda"]:
+            return "sell", min(position, int(position * extras["loss_sell_fraction"]), extras["base_size"])
+    elif agent_class == "RuleLLMBreakEvenTrader" and pnl < extras["loss_trigger"]:
+        return "buy", min(
+            int(abs(pnl) * extras["risk_increase_factor"] * extras["sizing_scale"]),
+            int(cash / price), extras["base_size"],
+        )
+    elif agent_class == "RuleLLMRationalTrader" and abs(deviation) > extras["deviation_threshold"]:
+        quantity = min(
+            int(abs(deviation) * extras["risk_aversion"] * extras["sizing_scale"]),
+            extras["base_size"],
+        )
+        return ("buy", min(quantity, int(cash / price))) if deviation < 0 else ("sell", min(quantity, position))
+    elif agent_class == "RuleLLMMomentumTrader" and abs(deviation) > extras["entry_threshold"]:
+        quantity = min(int(abs(deviation) * extras["sizing_scale"]), extras["base_size"])
+        return ("buy", min(quantity, int(cash / price))) if deviation > 0 else ("sell", min(quantity, position))
+    elif agent_class == "RuleLLMMarketMaker" and abs(position) < extras["inventory_limit"]:
+        if deviation > 0:
+            return "sell", min(extras["base_size"], position)
+        if deviation < 0:
+            return "buy", min(
+                extras["base_size"], int(cash / price),
+                max(extras["inventory_limit"] - position, 0),
+            )
+    return "hold", 0
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -94,7 +143,7 @@ class RuleLLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload if hasattr(inb, "payload") else inb
-                if isinstance(payload, dict) and payload["type"] == "market_update":
+                if isinstance(payload, dict) and payload.get("type") == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -155,18 +204,56 @@ class RuleLLMInvestor(GeneralPlayer):
         action = decision["action"]
         quantity = int(decision["quantity"])
 
+        rule_action, rule_quantity = _rule_decision(
+            self.__class__.__name__, self.config.extras, price, fundamental,
+            cash, position, self.state.custom_state["entry_price"],
+        )
+        if self.__class__.__name__ == "RuleLLMLossAverseInvestor":
+            if "last_realization_domain" not in self.state.custom_state:
+                self.state.custom_state["last_realization_domain"] = None
+            pnl = (price - self.state.custom_state["entry_price"]) / self.state.custom_state["entry_price"]
+            active_domain = None
+            if pnl > self.config.extras["sell_gain_threshold"]:
+                active_domain = "gain"
+            elif pnl < -self.config.extras["sell_gain_threshold"] * self.config.extras["loss_aversion_lambda"]:
+                active_domain = "loss"
+            if active_domain is None:
+                self.state.custom_state["last_realization_domain"] = None
+            elif self.state.custom_state["last_realization_domain"] == active_domain:
+                rule_action, rule_quantity = "hold", 0
+            elif rule_action == "sell":
+                self.state.custom_state["last_realization_domain"] = active_domain
+        action = rule_action
+        if rule_action == "hold" or rule_quantity <= 0:
+            quantity = 0
+        else:
+            tolerance = float(self.config.extras["quantity_tolerance"])
+            lower = max(1, int(rule_quantity * (1 - tolerance)))
+            upper = max(lower, int(rule_quantity * (1 + tolerance)))
+            quantity = min(max(quantity, lower), upper, int(self.config.extras["base_size"]))
+
         if action == "buy":
             max_qty = int(cash / price) if price > 0 else 0
             quantity = min(quantity, max_qty)
+            if self.__class__.__name__ == "RuleLLMMarketMaker":
+                quantity = min(
+                    quantity,
+                    max(int(self.config.extras["inventory_limit"]) - position, 0),
+                )
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
         else:
             quantity = 0
 
         if action == "buy" and quantity > 0:
+            old_position = self.state.custom_state["position"]
+            old_entry = self.state.custom_state["entry_price"]
+            new_position = old_position + quantity
             self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-            self.state.custom_state["entry_price"] = price
+            self.state.custom_state["position"] = new_position
+            self.state.custom_state["entry_price"] = (
+                old_entry * old_position + price * quantity
+            ) / new_position
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
@@ -174,10 +261,13 @@ class RuleLLMInvestor(GeneralPlayer):
         order = {
             "type": "order",
             "action": action,
-            "bid_price": float(decision["bid_price"]),
+            "bid_price": price,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
             "reasoning": decision["reasoning"][:120],
+            "cash": self.state.custom_state["cash"],
+            "position": self.state.custom_state["position"],
+            "entry_price": self.state.custom_state["entry_price"],
         }
         return {
             **order,

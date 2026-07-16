@@ -30,7 +30,7 @@ The Rule variant provides the maximum-strength expression of loss aversion — a
 - **Maximum bias expression**: Rule is the deterministic upper bound for LAI, DEI, and BER. All other variants should show lower values.
 - **No LLM variance**: All results are reproducible given the same random seed (noise only from `random.gauss`). Re-run 5 times for stable mean estimates.
 - **Break-even timing**: `BreakEvenTrader` activates only when `pnl_pct < –0.05`. Ensure `noise_std` is high enough to generate sufficient loss events — recommend `noise_std ≥ 0.3`.
-- **RationalTrader benchmark**: The terminal wealth of `RationalTrader` is the denominator of WPI. Verify `risk_aversion = 0.5` and deviation threshold 0.03 in config.
+- **RationalTrader benchmark**: Normalized terminal wealth of `RationalTrader` is the denominator of WPI. Verify `risk_aversion = 0.7` and deviation threshold 0.03 in config.
 - **LAI vs. config lambda**: A well-calibrated Rule run should produce LAI ≈ 2.0–2.5. If LAI ≠ `loss_aversion_lambda`, investigate entry-price update logic and sell-fraction settings.
 
 ---
@@ -42,7 +42,7 @@ The Rule variant provides the maximum-strength expression of loss aversion — a
 | LAI    | 2.0–2.8        | < 1.5 or > 3.5  |
 | DEI    | 1.5–2.5        | < 1.0 or > 3.5  |
 | BER    | 1.5–3.5        | < 1.0 or > 6.0  |
-| VAF    | 1.5–2.5        | < 1.0 or > 4.0  |
+| VAF    | 0.1–2.5        | ≤ 0.1 or ≥ 4.0  |
 | WPI    | 0.75–0.90      | > 1.0 or < 0.60 |
 | SRR    | 1.5–2.5        | < 1.0 or > 4.0  |
 

@@ -309,7 +309,7 @@ Key `extras` fields in `players.yml`:
 | `loss_aversion_lambda` | LossAverseInvestor | Loss multiplier (default 2.25)                  |
 | `sell_gain_threshold`  | LossAverseInvestor | Gain threshold for winner sell (default 0.05)   |
 | `risk_increase_factor` | BreakEvenTrader    | Loss-escalation multiplier (default 2.0)        |
-| `risk_aversion`        | RationalTrader     | Expected-utility risk weight (default 0.5)      |
+| `risk_aversion`        | RationalTrader     | Expected-utility response weight (default 0.7)  |
 | `entry_threshold`      | MomentumTrader     | Minimum deviation to enter trend (default 0.03) |
 | `inventory_limit`      | MarketMaker        | Max absolute position (default 2000)            |
 | `initial_cash`         | All investors      | Starting cash endowment                         |
@@ -318,6 +318,16 @@ Key `extras` fields in `players.yml`:
 | `price_impact`         | Market             | λ coefficient                                   |
 | `mean_reversion`       | Market             | γ coefficient                                   |
 | `noise_std`            | Market             | ε standard deviation                            |
+| `gain_sell_fraction`   | LossAverseInvestor | Eligible winner fraction (default 0.70)         |
+| `loss_sell_fraction`   | LossAverseInvestor | Eligible loser fraction (default 0.20)          |
+| `loss_trigger`         | BreakEvenTrader    | Loss-domain trigger (default -0.05)             |
+| `deviation_threshold`  | RationalTrader     | Symmetric value gap trigger (default 0.03)      |
+| `sizing_scale`         | Three traders      | Signal-to-order conversion (3000 or 5000)       |
+| `base_size`            | All traders        | Per-round feasible order cap                    |
+| `random_seed`          | Market             | Reproducible market-noise seed                  |
+| `price_floor`          | Market             | Strictly positive price lower bound (0.01)      |
+| `shock_schedule`       | Market             | Controlled +6% / -20% identification stimuli    |
+| `quantity_tolerance`   | RuleLLM and Rag    | Hybrid adjustment band (default 0.20)           |
 
 ---
 

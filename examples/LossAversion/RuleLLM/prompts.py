@@ -28,8 +28,8 @@ You sell winners too early and hold losers too long.
 == DECISION RULES ==
 Rule-based counterpart: LossAverseInvestor.
 Let entry_price = your purchase price, pnl_pct = (price - entry_price) / entry_price.
-- If pnl_pct > sell_gain_threshold: SELL 70% of position
-- If pnl_pct < -sell_gain_threshold * loss_aversion_lambda: SELL 20% of position
+- If pnl_pct > sell_gain_threshold: SELL gain_sell_fraction of position, capped by base_size
+- If pnl_pct < -sell_gain_threshold * loss_aversion_lambda: SELL loss_sell_fraction of position, capped by base_size
 - Otherwise: HOLD
 
 Use LLM reasoning to interpret market context; adjust quantity within ±20% of rule output.
@@ -53,7 +53,7 @@ You are driven by the break-even effect: when losing, you increase risk to get b
 == DECISION RULES ==
 Rule-based counterpart: BreakEvenTrader.
 Let entry_price = your purchase price, pnl_pct = (price - entry_price) / entry_price.
-- If pnl_pct < -0.05: BUY min(abs(pnl_pct) * risk_increase * 5000, max_affordable) shares
+- If pnl_pct < loss_trigger: BUY min(abs(pnl_pct) * risk_increase_factor * sizing_scale, max_affordable, base_size) shares
 - Otherwise: HOLD
 
 Use LLM reasoning to interpret market context; adjust quantity within ±20% of rule output.
@@ -77,9 +77,9 @@ No psychological biases. Treat gains and losses symmetrically.
 == DECISION RULES ==
 Rule-based counterpart: RationalTrader.
 Let deviation = (price - fundamental) / fundamental.
-- If abs(deviation) > 0.03:
-    - If deviation < 0: BUY min(500, abs(deviation) * risk_aversion * 3000) shares
-    - If deviation > 0: SELL min(500, abs(deviation) * risk_aversion * 3000) shares
+- If abs(deviation) > deviation_threshold:
+    - If deviation < 0: BUY min(base_size, abs(deviation) * risk_aversion * sizing_scale) shares
+    - If deviation > 0: SELL min(base_size, abs(deviation) * risk_aversion * sizing_scale) shares
 - Otherwise: HOLD
 
 Use LLM reasoning to interpret market context; adjust quantity within ±20% of rule output.
@@ -104,8 +104,8 @@ Trend follower. Buy when momentum is positive, sell when negative.
 Rule-based counterpart: MomentumTrader.
 Let deviation = (price - fundamental) / fundamental.
 - If abs(deviation) > entry_threshold:
-    - If deviation > 0: BUY min(500, abs(deviation) * 3000) shares
-    - If deviation < 0: SELL min(500, abs(deviation) * 3000) shares
+    - If deviation > 0: BUY min(base_size, abs(deviation) * sizing_scale) shares
+    - If deviation < 0: SELL min(base_size, abs(deviation) * sizing_scale) shares
 - Otherwise: HOLD
 
 Use LLM reasoning to interpret market context; adjust quantity within ±20% of rule output.
@@ -130,8 +130,8 @@ Liquidity provider. Buy low, sell high relative to fundamental. Respect inventor
 Rule-based counterpart: MarketMaker.
 Let deviation = (price - fundamental) / fundamental.
 - If abs(position) < inventory_limit:
-    - If deviation > 0: SELL min(300, position) shares
-    - If deviation < 0: BUY min(300, max_affordable) shares
+    - If deviation > 0: SELL min(base_size, position) shares
+    - If deviation < 0: BUY min(base_size, max_affordable, inventory_limit - position) shares
 - Otherwise: HOLD
 
 Use LLM reasoning to interpret market context; adjust quantity within ±20% of rule output.

@@ -33,6 +33,27 @@ from examples.LossAversion.Rule.players import Market  # noqa: F401
 logger = logging.getLogger("LossAversion.LLM")
 
 
+def _decision_parameters_text(extras: Dict[str, Any], agent_class: str) -> str:
+    """Expose each archetype's configured behavioral parameters to the model."""
+    parameter_keys = {
+        "LLMLossAverseInvestor": (
+            "loss_aversion_lambda", "sell_gain_threshold",
+            "gain_sell_fraction", "loss_sell_fraction", "base_size",
+        ),
+        "LLMBreakEvenTrader": (
+            "risk_increase_factor", "loss_trigger", "sizing_scale", "base_size",
+        ),
+        "LLMRationalTrader": (
+            "risk_aversion", "deviation_threshold", "sizing_scale", "base_size",
+        ),
+        "LLMMomentumTrader": ("entry_threshold", "sizing_scale", "base_size"),
+        "LLMMarketMaker": ("inventory_limit", "base_size"),
+    }
+    return "\n".join(
+        f"- {key}: {extras[key]}" for key in parameter_keys[agent_class]
+    )
+
+
 def _validate_decision(decision: Dict[str, Any]) -> None:
     """Validate the canonical trading decision contract."""
     if decision["action"] not in ("buy", "sell", "hold"):
@@ -78,7 +99,7 @@ class LLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload if hasattr(inb, "payload") else inb
-                if isinstance(payload, dict) and payload["type"] == "market_update":
+                if isinstance(payload, dict) and payload.get("type") == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -106,6 +127,9 @@ class LLMInvestor(GeneralPlayer):
             position=position,
             entry_price=self.state.custom_state["entry_price"],
             portfolio_value=cash + position * price,
+            decision_parameters=_decision_parameters_text(
+                self.config.extras, self.__class__.__name__
+            ),
         )
 
         decision = None
@@ -134,20 +158,31 @@ class LLMInvestor(GeneralPlayer):
 
         action = decision["action"]
         quantity = int(decision["quantity"])
+        quantity = min(quantity, int(self.config.extras["base_size"]))
 
         # Enforce constraints
         if action == "buy":
             max_qty = int(cash / price) if price > 0 else 0
             quantity = min(quantity, max_qty)
+            if self.__class__.__name__ == "LLMMarketMaker":
+                quantity = min(
+                    quantity,
+                    max(int(self.config.extras["inventory_limit"]) - position, 0),
+                )
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
         else:
             quantity = 0
 
         if action == "buy" and quantity > 0:
+            old_position = self.state.custom_state["position"]
+            old_entry = self.state.custom_state["entry_price"]
+            new_position = old_position + quantity
             self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-            self.state.custom_state["entry_price"] = price
+            self.state.custom_state["position"] = new_position
+            self.state.custom_state["entry_price"] = (
+                old_entry * old_position + price * quantity
+            ) / new_position
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
@@ -155,10 +190,13 @@ class LLMInvestor(GeneralPlayer):
         order = {
             "type": "order",
             "action": action,
-            "bid_price": float(decision["bid_price"]),
+            "bid_price": price,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
             "reasoning": decision["reasoning"][:120],
+            "cash": self.state.custom_state["cash"],
+            "position": self.state.custom_state["position"],
+            "entry_price": self.state.custom_state["entry_price"],
         }
         return {
             **order,

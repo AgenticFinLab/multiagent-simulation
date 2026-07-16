@@ -37,6 +37,7 @@ from examples.LossAversion.RuleLLM.prompts import (
     RULELLM_MOMENTUM_PROMPT,
     RULELLM_MARKET_MAKER_PROMPT,
 )
+from examples.LossAversion.RuleLLM.players import _rule_decision
 from examples.LossAversion.Rag.prompts import RAG_USER_TEMPLATE
 from examples.LossAversion.Rule.players import Market  # noqa: F401
 
@@ -50,13 +51,20 @@ def _decision_parameters_text(extras: Dict[str, Any], agent_class: str) -> str:
         "RagLLMLossAverseInvestor": (
             "loss_aversion_lambda",
             "sell_gain_threshold",
+            "gain_sell_fraction",
+            "loss_sell_fraction",
+            "base_size",
         ),
-        "RagLLMBreakEvenTrader": ("risk_increase_factor",),
-        "RagLLMRationalTrader": ("risk_aversion",),
-        "RagLLMMomentumTrader": ("entry_threshold",),
-        "RagLLMMarketMaker": ("inventory_limit",),
+        "RagLLMBreakEvenTrader": (
+            "risk_increase_factor", "loss_trigger", "sizing_scale", "base_size",
+        ),
+        "RagLLMRationalTrader": (
+            "risk_aversion", "deviation_threshold", "sizing_scale", "base_size",
+        ),
+        "RagLLMMomentumTrader": ("entry_threshold", "sizing_scale", "base_size"),
+        "RagLLMMarketMaker": ("inventory_limit", "base_size"),
     }
-    keys = parameter_keys[agent_class]
+    keys = parameter_keys[agent_class] + ("quantity_tolerance",)
     return "\n".join(f"- {key}: {extras[key]}" for key in keys)
 
 
@@ -112,7 +120,7 @@ class RagLLMInvestor(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload if hasattr(inb, "payload") else inb
-                if isinstance(payload, dict) and payload["type"] == "market_update":
+                if isinstance(payload, dict) and payload.get("type") == "market_update":
                     self.state.custom_state["price"] = payload["price"]
                     self.state.custom_state["fundamental"] = payload["fundamental"]
                     self.state.custom_state["deviation"] = payload["deviation"]
@@ -301,18 +309,57 @@ class RagLLMInvestor(GeneralPlayer):
         action = decision["action"]
         quantity = int(decision["quantity"])
 
+        rule_class = self.__class__.__name__.replace("RagLLM", "RuleLLM")
+        rule_action, rule_quantity = _rule_decision(
+            rule_class, self.config.extras, price, fundamental, cash, position,
+            self.state.custom_state["entry_price"],
+        )
+        if self.__class__.__name__ == "RagLLMLossAverseInvestor":
+            if "last_realization_domain" not in self.state.custom_state:
+                self.state.custom_state["last_realization_domain"] = None
+            pnl = (price - self.state.custom_state["entry_price"]) / self.state.custom_state["entry_price"]
+            active_domain = None
+            if pnl > self.config.extras["sell_gain_threshold"]:
+                active_domain = "gain"
+            elif pnl < -self.config.extras["sell_gain_threshold"] * self.config.extras["loss_aversion_lambda"]:
+                active_domain = "loss"
+            if active_domain is None:
+                self.state.custom_state["last_realization_domain"] = None
+            elif self.state.custom_state["last_realization_domain"] == active_domain:
+                rule_action, rule_quantity = "hold", 0
+            elif rule_action == "sell":
+                self.state.custom_state["last_realization_domain"] = active_domain
+        action = rule_action
+        if rule_action == "hold" or rule_quantity <= 0:
+            quantity = 0
+        else:
+            tolerance = float(self.config.extras["quantity_tolerance"])
+            lower = max(1, int(rule_quantity * (1 - tolerance)))
+            upper = max(lower, int(rule_quantity * (1 + tolerance)))
+            quantity = min(max(quantity, lower), upper, int(self.config.extras["base_size"]))
+
         if action == "buy":
             max_qty = int(cash / price) if price > 0 else 0
             quantity = min(quantity, max_qty)
+            if self.__class__.__name__ == "RagLLMMarketMaker":
+                quantity = min(
+                    quantity,
+                    max(int(self.config.extras["inventory_limit"]) - position, 0),
+                )
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
         else:
             quantity = 0
 
         if action == "buy" and quantity > 0:
+            old_position = self.state.custom_state["position"]
+            old_entry = self.state.custom_state["entry_price"]
+            new_position = old_position + quantity
             self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-            self.state.custom_state["entry_price"] = price
+            self.state.custom_state["position"] = new_position
+            self.state.custom_state["entry_price"] = (
+                old_entry * old_position + price * quantity
+            ) / new_position
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
@@ -320,11 +367,14 @@ class RagLLMInvestor(GeneralPlayer):
         order = {
             "type": "order",
             "action": action,
-            "bid_price": float(decision["bid_price"]),
+            "bid_price": price,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
             "reasoning": decision["reasoning"][:120],
             "rag_context": self.state.custom_state["last_rag_context"],
+            "cash": self.state.custom_state["cash"],
+            "position": self.state.custom_state["position"],
+            "entry_price": self.state.custom_state["entry_price"],
         }
         return {
             **order,
@@ -370,6 +420,7 @@ class RagLLMMarketMaker(RagLLMInvestor):
 
 
 __all__ = [
+    "_RAG_FALLBACK",
     "Market",
     "RagLLMInvestor",
     "RagLLMLossAverseInvestor",

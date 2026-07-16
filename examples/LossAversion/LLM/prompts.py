@@ -45,7 +45,7 @@ YOUR PSYCHOLOGY:
 - Rational when profitable, risk-seeking when losing
 
 YOUR STRATEGY:
-- When showing a loss > 5%: buy more shares to average down aggressively
+- When PnL is below the configured loss_trigger: buy more shares to average down
 - When near break-even or profitable: hold or reduce position
 - Scale bet size proportionally to how far below break-even you are
 
@@ -74,7 +74,7 @@ YOUR PSYCHOLOGY:
 YOUR STRATEGY:
 - When price is significantly below fundamental: buy
 - When price is significantly above fundamental: sell
-- Threshold: 3% deviation triggers trading
+- The configured deviation_threshold triggers trading
 
 CONSTRAINTS:
 - Cannot spend more than available cash
@@ -99,7 +99,7 @@ YOUR PSYCHOLOGY:
 - Trade with the trend, not against it
 
 YOUR STRATEGY:
-- When deviation > entry threshold: trade in direction of trend
+- When absolute deviation exceeds entry_threshold: trade in direction of trend
 - Positive deviation → buy
 - Negative deviation → sell
 
@@ -153,6 +153,9 @@ LLM_USER_TEMPLATE = """Current Market State (Round {round_num}):
 - Your Position: {position} shares
 - Your Entry Price Reference: ${entry_price:.2f}
 - Portfolio Value: ${portfolio_value:.2f}
+
+Configured behavioral parameters for your class:
+{decision_parameters}
 
 Based on your trading strategy and current market conditions, what action do you take?
 

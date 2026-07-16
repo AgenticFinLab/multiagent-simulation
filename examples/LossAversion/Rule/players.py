@@ -66,7 +66,7 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if isinstance(payload, dict) and payload["type"] == "order":
+                if isinstance(payload, dict) and payload.get("type") == "order":
                     orders.append(
                         {
                             "agent_id": inb.sender_id,
@@ -96,9 +96,17 @@ class Market(GeneralPlayer):
 
         price_change = price_impact * net_demand
         reversion = mean_reversion * (fundamental - price)
-        noise = random.gauss(0, noise_std)
+        rng = random.Random(int(extras["random_seed"]) + int(round_num))
+        noise = rng.gauss(0, noise_std)
+        shock_schedule = extras["shock_schedule"]
+        shock_return = (
+            float(shock_schedule[round_num]) if round_num in shock_schedule else 0.0
+        )
 
-        new_price = max(price + price_change + reversion + noise, 0.01)
+        new_price = max(
+            price + price_change + reversion + noise + fundamental * shock_return,
+            extras["price_floor"],
+        )
         deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
 
         self.state.custom_state["price"] = new_price
@@ -167,9 +175,14 @@ class BaseInvestor(GeneralPlayer):
     def _execute_trade(self, action: str, quantity: int) -> None:
         price = self.state.custom_state["price"]
         if action == "buy" and quantity > 0:
+            old_position = self.state.custom_state["position"]
+            old_entry = self.state.custom_state["entry_price"]
+            new_position = old_position + quantity
             self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-            self.state.custom_state["entry_price"] = price
+            self.state.custom_state["position"] = new_position
+            self.state.custom_state["entry_price"] = (
+                old_entry * old_position + price * quantity
+            ) / new_position
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
@@ -181,15 +194,28 @@ class BaseInvestor(GeneralPlayer):
 
         decision = self._make_decision(price, fundamental, deviation)
         action = decision["action"]
-        quantity = decision["quantity"]
+        quantity = max(0, int(decision["quantity"]))
+
+        if action == "buy":
+            quantity = min(quantity, int(self.state.custom_state["cash"] / price))
+        elif action == "sell":
+            quantity = min(quantity, max(self.state.custom_state["position"], 0))
+        else:
+            action = "hold"
+            quantity = 0
 
         self._execute_trade(action, quantity)
 
         order = {
             "type": "order",
             "action": action,
+            "bid_price": price,
             "quantity": quantity,
             "agent_type": self.__class__.__name__,
+            "reasoning": f"{self.__class__.__name__} configured rule",
+            "cash": self.state.custom_state["cash"],
+            "position": self.state.custom_state["position"],
+            "entry_price": self.state.custom_state["entry_price"],
         }
         return {
             **order,
@@ -225,17 +251,37 @@ class LossAverseInvestor(BaseInvestor):
         position = self.state.custom_state["position"]
         loss_lambda = extras["loss_aversion_lambda"]
         sell_gain = extras["sell_gain_threshold"]
+        gain_fraction = extras["gain_sell_fraction"]
+        loss_fraction = extras["loss_sell_fraction"]
+        base_size = extras["base_size"]
 
         entry_price = self.state.custom_state["entry_price"]
         pnl_pct = (price - entry_price) / entry_price if entry_price > 0 else 0.0
 
+        if "last_realization_domain" not in self.state.custom_state:
+            self.state.custom_state["last_realization_domain"] = None
+
+        active_domain = None
         if pnl_pct > sell_gain:
-            sell_qty = min(max(position, 0), int(position * 0.7))
-            if sell_qty > 0:
-                return {"action": "sell", "quantity": sell_qty}
+            active_domain = "gain"
         elif pnl_pct < -sell_gain * loss_lambda:
-            sell_qty = min(max(position, 0), int(position * 0.2))
+            active_domain = "loss"
+
+        if active_domain is None:
+            self.state.custom_state["last_realization_domain"] = None
+            return {"action": "hold", "quantity": 0}
+        if self.state.custom_state["last_realization_domain"] == active_domain:
+            return {"action": "hold", "quantity": 0}
+
+        if active_domain == "gain":
+            sell_qty = min(max(position, 0), int(position * gain_fraction), base_size)
             if sell_qty > 0:
+                self.state.custom_state["last_realization_domain"] = active_domain
+                return {"action": "sell", "quantity": sell_qty}
+        else:
+            sell_qty = min(max(position, 0), int(position * loss_fraction), base_size)
+            if sell_qty > 0:
+                self.state.custom_state["last_realization_domain"] = active_domain
                 return {"action": "sell", "quantity": sell_qty}
         return {"action": "hold", "quantity": 0}
 
@@ -256,14 +302,18 @@ class BreakEvenTrader(BaseInvestor):
         extras = self.config.extras
         cash = self.state.custom_state["cash"]
         risk_increase = extras["risk_increase_factor"]
+        loss_trigger = extras["loss_trigger"]
+        sizing_scale = extras["sizing_scale"]
+        base_size = extras["base_size"]
 
         entry_price = self.state.custom_state["entry_price"]
         pnl_pct = (price - entry_price) / entry_price if entry_price > 0 else 0.0
 
-        if pnl_pct < -0.05:
+        if pnl_pct < loss_trigger:
             risky_qty = min(
-                int(abs(pnl_pct) * risk_increase * 5000),
+                int(abs(pnl_pct) * risk_increase * sizing_scale),
                 int(cash / price) if price > 0 else 0,
+                base_size,
             )
             if risky_qty > 0:
                 return {"action": "buy", "quantity": risky_qty}
@@ -286,9 +336,12 @@ class RationalTrader(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         risk_aversion = extras["risk_aversion"]
+        threshold = extras["deviation_threshold"]
+        sizing_scale = extras["sizing_scale"]
+        base_size = extras["base_size"]
 
-        if abs(deviation) > 0.03:
-            qty = min(500, int(abs(deviation) * risk_aversion * 3000))
+        if abs(deviation) > threshold:
+            qty = min(base_size, int(abs(deviation) * risk_aversion * sizing_scale))
             if deviation < 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -316,9 +369,11 @@ class MomentumTrader(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         entry_threshold = extras["entry_threshold"]
+        sizing_scale = extras["sizing_scale"]
+        base_size = extras["base_size"]
 
         if abs(deviation) > entry_threshold:
-            qty = min(500, int(abs(deviation) * 3000))
+            qty = min(base_size, int(abs(deviation) * sizing_scale))
             if deviation > 0:
                 buy_qty = min(qty, int(cash / price) if price > 0 else 0)
                 if buy_qty > 0:
@@ -347,15 +402,20 @@ class MarketMaker(BaseInvestor):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         inventory_limit = extras["inventory_limit"]
+        base_size = extras["base_size"]
 
         if abs(position) < inventory_limit:
-            qty = 300
+            qty = base_size
             if deviation > 0:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
                     return {"action": "sell", "quantity": sell_qty}
             else:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
+                buy_qty = min(
+                    qty,
+                    int(cash / price) if price > 0 else 0,
+                    max(inventory_limit - position, 0),
+                )
                 if buy_qty > 0:
                     return {"action": "buy", "quantity": buy_qty}
         return {"action": "hold", "quantity": 0}
