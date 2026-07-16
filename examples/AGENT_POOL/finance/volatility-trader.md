@@ -348,6 +348,21 @@ State update: no change.
 | `wide_thresholds`    | high=2.0, low=0.5                  | Wider bands reduce intervention, letting vol clusters persist    |
 | `large_position`     | `base_position_size = 30.0`        | Stronger vol-flow feedback may over-dampen clustering            |
 
+## Behavioral Verification and Calibration
+
+- Given vol_ratio > high_vol_threshold (1.5) with positive position, agent must emit a sell order with quantity proportional to (vol_ratio - 1.0) * base_position_size, clamped to 20.
+- Given vol_ratio < low_vol_threshold (0.7) with available cash, agent must emit a buy order with quantity proportional to (1.0 - vol_ratio) * base_position_size, clamped to 20.
+- Given vol_ratio between 0.7 and 1.5 (inclusive), agent must hold with zero quantity regardless of price movement or other market signals.
+- Given insufficient volatility history (fewer than vol_lookback entries), agent must use current volatility as the average proxy, yielding vol_ratio = 1.0 and holding.
+- Given avg_vol = 0 (degenerate case), agent must set vol_ratio = 1.0 and hold rather than dividing by zero.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| tight-thresholds | `high_vol_threshold = 1.2, low_vol_threshold = 0.85` | Tighter regime bands increase trading frequency, strengthening vol-dampening feedback. | decrease | peak volatility during stress episodes |
+| large-base-size | `base_position_size = 30.0` | Stronger per-trade flow amplifies the vol-to-order-flow feedback, potentially over-dampening clustering. | decrease | autocorrelation of squared returns (vol persistence) |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                                                      | Notes                                                             |

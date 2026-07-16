@@ -331,12 +331,12 @@ State update: `previous_price`: None -> 100.0.
 | 3 | De Long, J. B., Shleifer, A., Summers, L. H., & Waldmann, R. J. (1990). Positive feedback investment strategies. *Journal of Finance*, 45(2), 379-395. https://doi.org/10.1111/j.1540-6261.1990.tb03695.x | Noise trader positive feedback model |
 | 4 | De Bondt, W. F. M., & Thaler, R. (1985). Does the stock market overreact? *Journal of Finance*, 40(3), 793-805. https://doi.org/10.1111/j.1540-6261.1985.tb05004.x         | Alternative: overreaction hypothesis   |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                    |
-|-------------|----------------------------|
-| Author      | polish-simulation-pipeline |
-| Created     | 2026-07-14                 |
-| Version     | 1.0.0                      |
-| Status      | canonical                  |
-| Icon        | ![](../agent_images/icons/finance-momentum-investor.png)         |
+| Field   | Content                                                        |
+|---------|----------------------------------------------------------------|
+| Author  | Codex                                                          |
+| Created | 2026-07-16                                                     |
+| Version | 1.0.0                                                          |
+| Icon    | ![](../agent_images/icons/finance-momentum-investor.png)       |
+| Status  | draft                                                          |

@@ -324,12 +324,12 @@ State update: No change. Agent is permanently deactivated at this price level â€
 | 3 | Hasso, T., Muller, D., Pelster, M., & Warkulat, S. (2022). Who participated in the GameStop frenzy? Evidence from brokerage accounts. *Finance Research Letters*, 45, 102359. https://doi.org/10.1016/j.frl.2021.102359 | Retail investor characteristics in squeeze |
 | 4 | SEC (2021). Staff Report on Equity and Options Market Structure Conditions in Early 2021. U.S. Securities and Exchange Commission.                                                           | Empirical data on retail order sizes       |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-retail-coordinated.png)         |
+| Field   | Content                                                      |
+|---------|--------------------------------------------------------------|
+| Author  | Codex                                                        |
+| Created | 2026-07-16                                                   |
+| Version | 1.0.0                                                        |
+| Icon    | ![](../agent_images/icons/finance-retail-coordinated.png)    |
+| Status  | draft                                                        |

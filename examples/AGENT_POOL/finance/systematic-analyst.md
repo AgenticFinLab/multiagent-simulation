@@ -247,6 +247,21 @@ Decision: hold.
 | no-rational-counter | `buy_threshold = 999`  | Removing rational pressure allows availability-bias mispricing to persist. | larger mispricing  | mean absolute deviation from F |
 | tight-threshold     | `buy_threshold = 0.01` | Faster rational response reduces mispricing duration.                      | shorter mispricing | half-life of price deviation   |
 
+## Behavioral Verification and Calibration
+
+- Given price 3% or more below the Bayesian posterior (fundamental), agent must emit a buy order with quantity proportional to the deviation magnitude.
+- Given price 5% or more above the Bayesian posterior with positive position, agent must emit a sell order capped at base_position_size.
+- Given price within the no-trade band (deviation < buy_threshold and deviation > -sell_threshold), agent must hold with zero quantity regardless of cash or position levels.
+- Given a missing or NaN fundamental signal, agent must hold and emit no order.
+- Given two signals of differing precision, agent must weight them by inverse variance without overweighting the more recent signal.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| wide-band | `buy_threshold = 0.08, sell_threshold = 0.12` | Wider no-trade band reduces rational correction frequency, allowing mispricing to persist longer. | increase | mean absolute price-fundamental deviation |
+| high-sizing-scale | `sizing_scale = 6000` | Doubling sizing aggressiveness accelerates convergence toward fundamental. | decrease | half-life of price deviation from fundamental |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                           | Notes                                                  |

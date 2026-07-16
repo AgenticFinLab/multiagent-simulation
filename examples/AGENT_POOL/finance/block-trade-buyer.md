@@ -249,7 +249,7 @@ Calculation:
 Decision: hold or clamped order according to Action Space.
 State update: no state becomes negative.
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
 **Calibration data sources**:
 - `discount_threshold` <- Grossman & Miller (1988), block liquidity premium; stressed-market calibration in scenario §2.

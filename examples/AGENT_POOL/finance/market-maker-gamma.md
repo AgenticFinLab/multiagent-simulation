@@ -334,12 +334,12 @@ State update: `cash`: 100000 → 100000 - 208 × 480.0 = 160; `position`: 5000 �
 | 3 | SEC (2021). Staff Report on Equity and Options Market Structure Conditions in Early 2021. U.S. Securities and Exchange Commission.                                                  | Empirical gamma exposure data            |
 | 4 | Ni, S. X., Pearson, N. D., & Poteshman, A. M. (2005). Stock price clustering on option expiration dates. *Journal of Financial Economics*, 78(1), 49–87. https://doi.org/10.1016/j.jfineco.2004.08.005 | Options-underlying price interaction     |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-market-maker-gamma.png)         |
+| Field   | Content                                                        |
+|---------|----------------------------------------------------------------|
+| Author  | Codex                                                          |
+| Created | 2026-07-16                                                     |
+| Version | 1.0.0                                                          |
+| Icon    | ![](../agent_images/icons/finance-market-maker-gamma.png)      |
+| Status  | draft                                                          |

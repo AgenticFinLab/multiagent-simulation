@@ -320,12 +320,12 @@ State update: No change.
 | 4 | Acharya, V. V., Schnabl, P., & Suarez, G. (2013). Securitization without risk transfer. *Journal of Financial Economics*, 107(3), 515–536. https://doi.org/10.1016/j.jfineco.2012.09.004 | Regulatory arbitrage in securitization |
 | 5 | Mian, A., & Sufi, A. (2009). The consequences of mortgage credit expansion: Evidence from the US mortgage default crisis. *Quarterly Journal of Economics*, 124(4), 1449–1496. https://doi.org/10.1162/qjec.2009.124.4.1449 | Empirical mortgage origination patterns |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                                                       |
-|-------------|---------------------------------------------------------------|
-| Author      | polish-simulation-pipeline                                    |
-| Created     | 2026-07-14                                                    |
-| Version     | 1.0.0                                                         |
-| Status      | canonical                                                     |
-| Icon        | ![](../agent_images/icons/finance-mbs-originator.png)         |
+| Field   | Content                                                       |
+|---------|---------------------------------------------------------------|
+| Author  | Codex                                                         |
+| Created | 2026-07-16                                                    |
+| Version | 1.0.0                                                         |
+| Icon    | ![](../agent_images/icons/finance-mbs-originator.png)         |
+| Status  | draft                                                         |

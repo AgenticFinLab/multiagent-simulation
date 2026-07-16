@@ -321,12 +321,12 @@ State update: No change.
 | 3 | Lakonishok, J., Shleifer, A., & Vishny, R. W. (1992). The impact of institutional trading on stock prices. *JFE*, 32(1), 23-43. https://doi.org/10.1016/0304-405X(92)90023-5 | Institutional herding measurement |
 | 4 | Hong, H., Kubik, J. D., & Solomon, A. (2000). Security analysts' career concerns and herding of earnings forecasts. *RAND Journal of Economics*, 31(1), 121-144. | Analyst herding due to career concerns |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                    |
-|-------------|----------------------------|
-| Author      | polish-simulation-pipeline |
-| Created     | 2026-07-14                 |
-| Version     | 1.0.0                      |
-| Status      | canonical                  |
-| Icon        | ![](../agent_images/icons/finance-reputation-herder.png)         |
+| Field   | Content                                                    |
+|---------|------------------------------------------------------------|
+| Author  | Codex                                                      |
+| Created | 2026-07-16                                                 |
+| Version | 1.0.0                                                      |
+| Icon    | ![](../agent_images/icons/finance-reputation-herder.png)   |
+| Status  | draft                                                      |

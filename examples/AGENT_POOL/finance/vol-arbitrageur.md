@@ -277,6 +277,21 @@ State update: cash increases by `5000 * price`; position falls to zero.
 | `no_arb` | Remove agent from roster | Amplifiers face weaker counter-flow; peak deviation widens. | increase | `compute_vol_spike_magnitude()` |
 | `cap_half` | Halve per-round cap to 2500 | Stabilisation weaker at large deviations. | decrease | arb-side trade volume above the gate |
 
+## Behavioral Verification and Calibration
+
+- Given abs(deviation) > entry_threshold (0.05) with available position, agent must emit a sell order when deviation is positive, sized linearly in abs(deviation) and capped at 5000 units.
+- Given abs(deviation) > entry_threshold with available cash and negative deviation, agent must emit a buy order sized linearly in abs(deviation) and capped at 5000 units.
+- Given abs(deviation) <= entry_threshold, agent must hold with zero quantity regardless of cash or position levels.
+- Given deviation = 0.30 and position = 5000, agent must clamp quantity to 5000 (per-round cap binds before linear formula output of 6000).
+- Given position = 0 and positive deviation exceeding entry_threshold, agent must hold because sell-side inventory is exhausted.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| high-gate | `entry_threshold = 0.10` | Higher activation gate delays counter-flow, allowing larger peak deviations before stabilisation. | increase | peak absolute deviation from fundamental |
+| uncapped-sizing | per-round cap raised to 50000 | Removing effective cap tests whether unlimited arbitrage fully eliminates spikes. | decrease | spike magnitude and duration |
+
 ## Academic References
 
 | # | Citation | Notes |

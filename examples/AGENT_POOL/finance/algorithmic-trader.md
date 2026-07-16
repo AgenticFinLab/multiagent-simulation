@@ -217,6 +217,36 @@ State variables:
 - Raw `quantity` = -0.70 × 1.0 × 10.0 × 10.0 = -70.0 → clamped to -40
 - Reasoning: "Trend-following: -70.00% over 3 rounds. Clamped to -40."
 
+### Case 4 - Strong uptrend with high sensitivity parameters
+System state: `price_history[-7:]` = [80.0, 82.0, 85.0, 89.0, 93.0, 97.0, 102.0]; `lookback` = 7; `trend_sensitivity` = 2.0; `base_position_size` = 15.0; `trend_multiplier` = 12.0; `max_quantity` = 40; current `price` = 102.0; `position` = 5; `cash` = 4000.0.
+Calculation: `trend` = (102.0 − 80.0) / 80.0 = 0.275; `raw_quantity` = 0.275 × 2.0 × 15.0 × 12.0 = 99.0; `quantity` = clamp(99.0, −40, 40) = 40.0.
+Decision: action = "buy"; bid_price = 102.0; quantity = 40.0; reasoning = "Trend-following: +27.50% over 7 rounds. Clamped to 40."
+State update: `position` = 5 + 40 = 45; `cash` = 4000.0 − 40 × 102.0 = −80.0 (resource constraint may further reduce quantity in Step 6).
+
+### Case 5 - Mild downtrend with short lookback and low sensitivity
+System state: `price_history[-3:]` = [50.0, 49.0, 48.5]; `lookback` = 3; `trend_sensitivity` = 0.5; `base_position_size` = 8.0; `trend_multiplier` = 5.0; `max_quantity` = 40; current `price` = 48.5; `position` = 0; `cash` = 5000.0.
+Calculation: `trend` = (48.5 − 50.0) / 50.0 = −0.03; `raw_quantity` = −0.03 × 0.5 × 8.0 × 5.0 = −0.6; `quantity` = clamp(−0.6, −40, 40) = −0.6.
+Decision: action = "sell"; bid_price = 48.5; quantity = −0.6; reasoning = "Trend-following: −3.00% over 3 rounds."
+State update: `position` = 0 + (−0.6) = −0.6; `cash` = 5000.0 − (−0.6) × 48.5 = 5029.1.
+
+### Case 6 - Recovery bounce after prior sell-off
+System state: `price_history[-10:]` = [100.0, 92.0, 85.0, 78.0, 74.0, 72.0, 73.0, 76.0, 80.0, 84.0]; `lookback` = 10; `trend_sensitivity` = 1.0; `base_position_size` = 10.0; `trend_multiplier` = 10.0; `max_quantity` = 40; current `price` = 84.0; `position` = −20; `cash` = 7000.0.
+Calculation: `trend` = (84.0 − 100.0) / 100.0 = −0.16; `raw_quantity` = −0.16 × 1.0 × 10.0 × 10.0 = −16.0; `quantity` = clamp(−16.0, −40, 40) = −16.0.
+Decision: action = "sell"; bid_price = 84.0; quantity = −16.0; reasoning = "Trend-following: −16.00% over 10 rounds."
+State update: `position` = −20 + (−16) = −36; `cash` = 7000.0 − (−16) × 84.0 = 8344.0.
+
+### Edge Case 2 - Insufficient price history (cold start)
+System state: `price_history` = [100.0, 101.0]; `lookback` = 5; `trend_sensitivity` = 1.0; `base_position_size` = 10.0; `trend_multiplier` = 10.0; `max_quantity` = 40; current `price` = 101.0; `position` = 0; `cash` = 10000.0.
+Calculation: len(price_history) = 2 < lookback = 5 → insufficient history; skip trend computation; `quantity` = 0.
+Decision: action = "hold"; bid_price = 0.0; quantity = 0; reasoning = "Insufficient history (2 < 5 required). Holding."
+State update: No change — `position` = 0; `cash` = 10000.0.
+
+### Edge Case 3 - Extreme rally hitting positive clamp with maximum parameters
+System state: `price_history[-3:]` = [20.0, 35.0, 50.0]; `lookback` = 3; `trend_sensitivity` = 2.0; `base_position_size` = 20.0; `trend_multiplier` = 15.0; `max_quantity` = 40; current `price` = 50.0; `position` = 30; `cash` = 2000.0.
+Calculation: `trend` = (50.0 − 20.0) / 20.0 = 1.5; `raw_quantity` = 1.5 × 2.0 × 20.0 × 15.0 = 900.0; `quantity` = clamp(900.0, −40, 40) = 40.0.
+Decision: action = "buy"; bid_price = 50.0; quantity = 40.0; reasoning = "Trend-following: +150.00% over 3 rounds. Clamped to 40."
+State update: `position` = 30 + 40 = 70; `cash` = 2000.0 − 40 × 50.0 = 0.0 (resource constraint in Step 6 may cap quantity if cash insufficient).
+
 ## Behavioral Verification and Calibration
 
 **Verification criteria:**

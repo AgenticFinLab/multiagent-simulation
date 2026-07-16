@@ -364,12 +364,12 @@ State update: `cash`: 5,000 → 5,000 - 535 * 70.0 = -32,450; `position`: 0 → 
 | 2 | Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. https://doi.org/10.1093/rfs/hhn098                                           | Margin spirals; liquidity dynamics         |
 | 3 | Adrian, T., & Shin, H. S. (2010). Liquidity and leverage. *Journal of Financial Intermediation*, 19(3), 418–437. https://doi.org/10.1016/j.jfi.2008.12.002                                                          | Leverage targeting; margin calibration     |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-leverage-trader.png)         |
+| Field   | Content                                                    |
+|---------|------------------------------------------------------------|
+| Author  | Codex                                                      |
+| Created | 2026-07-16                                                 |
+| Version | 1.0.0                                                      |
+| Icon    | ![](../agent_images/icons/finance-leverage-trader.png)     |
+| Status  | draft                                                      |

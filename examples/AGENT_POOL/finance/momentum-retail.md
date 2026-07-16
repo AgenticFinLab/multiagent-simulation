@@ -338,12 +338,12 @@ State update: No change. Agent is effectively deactivated — cannot afford even
 | 3 | SEC (2021). Staff Report on Equity and Options Market Structure Conditions in Early 2021. U.S. Securities and Exchange Commission.                                                  | Retail order size empirics              |
 | 4 | Robinhood Markets, Inc. (2021). S-1 Registration Statement. U.S. Securities and Exchange Commission.                                                                               | Account size and new-account data       |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-momentum-retail.png)         |
+| Field   | Content                                                    |
+|---------|------------------------------------------------------------|
+| Author  | Codex                                                      |
+| Created | 2026-07-16                                                 |
+| Version | 1.0.0                                                      |
+| Icon    | ![](../agent_images/icons/finance-momentum-retail.png)     |
+| Status  | draft                                                      |

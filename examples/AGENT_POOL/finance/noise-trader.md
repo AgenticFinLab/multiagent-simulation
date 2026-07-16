@@ -258,6 +258,21 @@ State update: unchanged.
 | `no_noise`    | `trade_probability = 0` | Removing noise makes prices overly deterministic. |
 | `large_noise` | `max_order = 2000`      | Larger random orders increase tail thickness.     |
 
+## Behavioral Verification and Calibration
+
+- Given `Bernoulli(trade_probability)` draws activation = 1 and direction = buy, agent must emit a buy order with quantity drawn from `Uniform(min_order, max_order)`.
+- Given `Bernoulli(trade_probability)` draws activation = 0, agent must hold with zero quantity regardless of price state.
+- Given a large sample of trades, the mean signed order flow must converge to zero (equal probability buy/sell).
+- Given inventory at `inventory_max`, agent must clip sell orders to zero on the constrained side.
+- Given `rng_state` unavailable or seed missing, agent must hold and not generate random draws.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_noise` | `trade_probability = 0` | Removing noise makes price paths overly deterministic and reduces volume | decrease | per-tick volume and return kurtosis |
+| `large_noise` | `max_order = 2000` | Larger random orders increase return tail thickness | increase | return kurtosis (4th moment) |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                                                                             | Notes                                                                       |
@@ -268,11 +283,10 @@ State update: unchanged.
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                                                                                                                                                                                                                                 |
-|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Author      | AGenticFinLab                                                                                                                                                                                                                                                           |
-| Reviewed by | audit_agent_handbook.py v1                                                                                                                                                                                                                                              |
-| Created     | 2026-06-27                                                                                                                                                                                                                                                              |
-| Version     | 1.1.0                                                                                                                                                                                                                                                                   |
-| Status      | conformant                                                                                                                                                                                                                                                              |
-| Icon        | ![](../agent_images/icons/finance-noise-trader.png)                                                                                                                                                                                                                     |
+| Field   | Content                                             |
+|---------|-----------------------------------------------------|
+| Author  | Codex                                               |
+| Created | 2026-07-16                                          |
+| Version | 1.0.0                                               |
+| Icon    | ![](../agent_images/icons/finance-noise-trader.png) |
+| Status  | draft                                               |

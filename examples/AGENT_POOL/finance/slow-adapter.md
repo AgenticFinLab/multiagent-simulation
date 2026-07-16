@@ -336,6 +336,21 @@ Decision: buy 3.64 units at price 70.0.
 | `very_slow`         | `update_weight = 0.01`   | Extremely slow adaptation creates multi-episode persistence      |
 | `wide_window`       | `lookback_window = 50`   | Wider MA window further delays response to regime shifts         |
 
+## Behavioral Verification and Calibration
+
+- Given a sudden fundamental jump (F from 100 to 110), agent must NOT adjust perceived value to 110 within a single round; perceived value must lag by multiple rounds due to low `update_weight`.
+- Given deviation from perceived value exceeds materiality threshold (abs > 0.02), agent must emit a trade with quantity proportional to deviation magnitude.
+- Given deviation from perceived value is below materiality threshold (abs <= 0.02), agent must hold with zero quantity.
+- Given insufficient price history (fewer than `lookback_window` observations), agent must use current price as the moving average proxy and still apply the materiality filter.
+- Given position = 0 and a sell signal, agent must hold because short selling is not permitted.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_slow_adapter` | population = 0 | Removing slow adapter shortens volatility cluster duration | decrease | autocorrelation decay half-life of squared returns |
+| `fast_adapter` | `update_weight = 0.9` | High update weight eliminates institutional lag, making agent behave like fundamentalist | decrease | number of rounds for perceived value to converge post-shock |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                                                                          | Notes                                                               |

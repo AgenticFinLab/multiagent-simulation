@@ -316,10 +316,10 @@ State update: position: -1000 -> -1800; cash adjusted accordingly
 
 ## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-15                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-macro-hedge-fund.png) |
+| Field   | Content                                                     |
+|---------|-------------------------------------------------------------|
+| Author  | Codex                                                       |
+| Created | 2026-07-16                                                  |
+| Version | 1.0.0                                                       |
+| Icon    | ![](../agent_images/icons/finance-macro-hedge-fund.png)     |
+| Status  | draft                                                       |

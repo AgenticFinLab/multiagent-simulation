@@ -269,6 +269,21 @@ State update: unchanged.
 | no-momentum   | `buy_threshold = 999` (never triggers) | Momentum demand drives bubble formation. | no bubble          | peak price deviation |
 | no-leverage   | `leverage = 1.0`                       | Leverage amplifies the bubble.           | smaller bubble     | peak price deviation |
 
+## Behavioral Verification and Calibration
+
+- Given positive momentum above buy_threshold with sufficient cash, agent must buy with leverage-amplified quantity.
+- Given negative momentum below sell_threshold with positive position, agent must sell.
+- Given momentum inside the band [sell_threshold, buy_threshold], agent must hold.
+- Given insufficient price_history (fewer than lookback observations), agent must hold without error.
+- Given positive momentum but zero cash, agent must hold (cash constraint binds).
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_feedback` | `buy_threshold = 999` | Disabling momentum buying eliminates bubble formation | decrease | peak price-to-fundamental ratio |
+| `short_lookback` | `lookback = 2` | Shorter window increases signal noise and trade frequency | increase | buy-sell reversals per episode |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                                                  | Notes                             |
@@ -279,11 +294,10 @@ State update: unchanged.
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                                          |
-|-------------|----------------------------------------------------------------------------------|
-| Author      | AGenticFinLab                                                                    |
-| Reviewed by | audit_agent_handbook.py v1                                                       |
-| Created     | 2026-07-11                                                                       |
-| Version     | 1.1.0                                                                            |
-| Status      | conformant                                                                       |
-| Icon        | ![](../agent_images/icons/finance-momentum-speculator.png)                       |
+| Field   | Content                                                        |
+|---------|----------------------------------------------------------------|
+| Author  | Codex                                                          |
+| Created | 2026-07-16                                                     |
+| Version | 1.0.0                                                          |
+| Icon    | ![](../agent_images/icons/finance-momentum-speculator.png)     |
+| Status  | draft                                                          |

@@ -230,11 +230,10 @@ State update: none.
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                  |
-|-------------|----------------------------------------------------------|
-| Author      | Codex                                                    |
-| Reviewed by | Codex static three-pass review                           |
-| Created     | 2026-07-06                                               |
-| Version     | 1.0.0                                                    |
-| Status      | experimental                                             |
-| Icon        | ![](../agent_images/icons/finance-portfolio-insurer.png) |
+| Field   | Content                                                  |
+|---------|----------------------------------------------------------|
+| Author  | Codex                                                    |
+| Created | 2026-07-16                                               |
+| Version | 1.0.0                                                    |
+| Icon    | ![](../agent_images/icons/finance-portfolio-insurer.png) |
+| Status  | draft                                                    |

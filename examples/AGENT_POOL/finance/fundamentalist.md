@@ -329,6 +329,21 @@ State update: cash -= 5.0, position += 0.05.
 | `high_frequency`     | `trade_frequency = 1`      | Frequent fundamentalist trading eliminates momentum profit |
 | `aggressive_sizing`  | `value_sensitivity = 2.0`  | Stronger value demand dampens volatility clustering        |
 
+## Behavioral Verification and Calibration
+
+- Given a non-trading round (round_num % trade_frequency != 0), agent must hold with zero quantity and zero bid_price.
+- Given price significantly below fundamental on a trading round with sufficient cash, agent must buy with positive quantity proportional to deviation.
+- Given price significantly above fundamental on a trading round with positive position, agent must sell.
+- Given cash constraint binding (cash < price), agent must clamp buy quantity to the affordable amount.
+- Given zero position and overvalued price, agent must not sell (no short-selling enforced).
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `zero_noise` | `value_noise_std = 0` | Removing estimation noise produces perfectly correlated orders across instances | increase | cross-agent order correlation |
+| `high_sensitivity` | `value_sensitivity = 2.0` | Stronger value demand dampens price-fundamental deviation persistence | decrease | mean absolute deviation from fundamental |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                                            | Notes                                                                        |

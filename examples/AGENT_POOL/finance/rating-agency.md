@@ -336,12 +336,12 @@ State update: `cash` = 5000 - 104 × 48.00 = 8.00; `position` += 104.
 | 4 | Coval, J. D., Jurek, J. W., & Stafford, E. (2009). The economics of structured finance. *Journal of Economic Perspectives*, 23(1), 3–25. https://doi.org/10.1257/jep.23.1.3 | Structured finance complexity and mispricing |
 | 5 | Skreta, V., & Veldkamp, L. (2009). Ratings shopping and asset complexity: A theory of ratings inflation. *Journal of Monetary Economics*, 56(5), 678–695. https://doi.org/10.1016/j.jmoneco.2009.04.006 | Ratings shopping mechanism |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                                                       |
-|-------------|---------------------------------------------------------------|
-| Author      | polish-simulation-pipeline                                    |
-| Created     | 2026-07-14                                                    |
-| Version     | 1.0.0                                                         |
-| Status      | canonical                                                     |
-| Icon        | ![](../agent_images/icons/finance-rating-agency.png)          |
+| Field   | Content                                                    |
+|---------|------------------------------------------------------------|
+| Author  | Codex                                                      |
+| Created | 2026-07-16                                                 |
+| Version | 1.0.0                                                      |
+| Icon    | ![](../agent_images/icons/finance-rating-agency.png)       |
+| Status  | draft                                                      |

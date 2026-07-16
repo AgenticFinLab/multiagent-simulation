@@ -243,6 +243,21 @@ Decision: hold.
 | no-leverage   | `leverage_max = 1.0` | Leverage amplifies the bubble.            | smaller bubble     | peak price deviation |
 | early-margin  | `margin_call = 500`  | Earlier margin calls limit bubble height. | smaller bubble     | peak price deviation |
 
+## Behavioral Verification and Calibration
+
+- Given positive momentum above buy_threshold with positive equity, agent must buy with quantity amplified by leverage.
+- Given equity below margin_call threshold, agent must de-leverage by selling a fraction of position regardless of momentum.
+- Given zero or negative momentum with adequate equity, agent must hold.
+- Given zero equity (cash = 0, position = 0), agent must hold without error.
+- Given leverage_max = 1.0, agent must not amplify buy quantity beyond base_position_size.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_margin_call` | `margin_call = 0` | Removing forced de-leverage prevents crash-phase fire-sale acceleration | decrease | crash-phase sell volume |
+| `max_leverage` | `leverage_max = 5.0` | Higher leverage amplifies both bubble peak and crash severity | increase | peak price deviation from fundamental |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                   | Notes                            |
@@ -251,11 +266,10 @@ Decision: hold.
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                                          |
-|-------------|----------------------------------------------------------------------------------|
-| Author      | AGenticFinLab                                                                    |
-| Reviewed by | audit_agent_handbook.py v1                                                       |
-| Created     | 2026-07-11                                                                       |
-| Version     | 1.1.0                                                                            |
-| Status      | conformant                                                                       |
-| Icon        | ![](../agent_images/icons/finance-leveraged-buyer.png)                           |
+| Field   | Content                                                |
+|---------|--------------------------------------------------------|
+| Author  | Codex                                                  |
+| Created | 2026-07-16                                             |
+| Version | 1.0.0                                                  |
+| Icon    | ![](../agent_images/icons/finance-leveraged-buyer.png) |
+| Status  | draft                                                  |

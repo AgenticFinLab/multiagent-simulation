@@ -361,12 +361,12 @@ State update: `cash`: 500.0 → 100.0; `position`: 30.0 → 32.0
 | 2 | Sharpe, W. F. (1991). The arithmetic of active management. *Financial Analysts Journal*, 47(1), 7–9. https://doi.org/10.2469/faj.v47.n1.7       | Index tracking superiority argument                |
 | 3 | Bogle, J. C. (1999). *Common Sense on Mutual Funds: New Imperatives for the Intelligent Investor*. New York: Wiley.                              | Index fund philosophy                              |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-15                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-index-tracker.png) |
+| Field   | Content                                                |
+|---------|--------------------------------------------------------|
+| Author  | Codex                                                  |
+| Created | 2026-07-16                                             |
+| Version | 1.0.0                                                  |
+| Icon    | ![](../agent_images/icons/finance-index-tracker.png)   |
+| Status  | draft                                                  |

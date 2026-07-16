@@ -266,6 +266,21 @@ State update: set prev_price=100 for next tick.
 | `no_momentum` | `entry_threshold = 1.0` | Removing momentum reduces trend persistence. |
 | `aggressive_momentum` | `base_position_size = 100` | Higher capacity amplifies price runs. |
 
+## Behavioral Verification and Calibration
+
+- Given a one-period return above `entry_threshold` (e.g., r = 0.03 > 0.02), agent must emit a buy order with positive quantity.
+- Given a one-period return below negative `entry_threshold` (e.g., r = -0.03 < -0.02), agent must emit a sell order with positive quantity.
+- Given a one-period return inside the threshold band (e.g., |r| = 0.01 < 0.02), agent must hold with zero quantity.
+- Given `prev_price` is missing or unavailable, agent must hold and not compute a return signal.
+- Given inventory at `inventory_max`, agent must not increase position further on the constrained side.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_momentum` | `entry_threshold = 1.0` | Removing momentum trading reduces short-run return autocorrelation | decrease | lag-1 return autocorrelation |
+| `aggressive_momentum` | `base_position_size = 100` | Higher capacity amplifies trend persistence and bubble magnitude | increase | peak-to-trough price swing |
+
 ## Academic References
 
 | # | Citation | Notes |

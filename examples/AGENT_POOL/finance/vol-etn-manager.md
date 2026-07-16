@@ -242,6 +242,21 @@ Decision: hold.
 | `disable_amplifier` | Remove agent from roster | Feedback loop weakens materially; spike magnitude shrinks. | decrease | `compute_vol_spike_magnitude()` |
 | `size_half` | Halve `rebalance_size` | Same timing, halved order magnitude. | decrease | rebalance pressure |
 
+## Behavioral Verification and Calibration
+
+- Given deviation > rebalance_threshold (0.05) with available cash, agent must emit a buy order with quantity = min(int(deviation * rebalance_size), int(cash / price)).
+- Given deviation <= rebalance_threshold, agent must hold with zero quantity regardless of cash or position state.
+- Given any market condition, agent must never emit a sell order because the inverse-vol product rebalance is one-sided (buy only).
+- Given cash = 0 and deviation exceeding threshold, agent must hold because the cash constraint clamps quantity to zero.
+- Given deviation = 0.12 and rebalance_size = 10000, agent must compute q_raw = 1200 and emit buy for exactly 1200 units (assuming sufficient cash).
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| low-threshold | `rebalance_threshold = 0.03` | Earlier activation amplifies the feedback loop sooner, increasing spike onset speed. | increase | spike onset round (earlier) |
+| double-size | `rebalance_size = 20000` | Doubling rebalance coefficient increases per-round procyclical pressure, amplifying peak spike magnitude. | increase | compute_vol_spike_magnitude() |
+
 ## Academic References
 
 | # | Citation | Notes |

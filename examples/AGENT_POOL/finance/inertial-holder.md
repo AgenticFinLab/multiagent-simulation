@@ -335,12 +335,12 @@ State update: No change
 | 3 | Sims, C. A. (2003). Implications of rational inattention. *Journal of Monetary Economics*, 50(3), 665–690. https://doi.org/10.1016/S0304-3932(03)00029-1 | Alternative theory (rational inattention) |
 | 4 | Tversky, A. & Kahneman, D. (1992). Advances in prospect theory: Cumulative representation of uncertainty. *Journal of Risk and Uncertainty*, 5(4), 297–323. https://doi.org/10.1007/BF00122574 | Loss aversion foundation |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-15                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-inertial-holder.png) |
+| Field   | Content                                                  |
+|---------|----------------------------------------------------------|
+| Author  | Codex                                                    |
+| Created | 2026-07-16                                               |
+| Version | 1.0.0                                                    |
+| Icon    | ![](../agent_images/icons/finance-inertial-holder.png)   |
+| Status  | draft                                                    |

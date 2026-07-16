@@ -354,12 +354,12 @@ State update: No change. Agent is permanently deactivated — position can never
 | 4 | Boehmer, E., Jones, C. M., & Zhang, X. (2008). Which shorts are informed? *Journal of Finance*, 63(2), 491–527. https://doi.org/10.1111/j.1540-6261.2008.01324.x                          | Institutional covering behaviour patterns |
 | 5 | Lamont, O. A. (2012). Go down fighting: Short sellers vs. firms. *Review of Asset Pricing Studies*, 2(1), 1–30. https://doi.org/10.1016/j.jfineco.2012.03.006                              | Squeeze abnormal returns evidence      |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-short-seller-hf.png)         |
+| Field   | Content                                                  |
+|---------|----------------------------------------------------------|
+| Author  | Codex                                                    |
+| Created | 2026-07-16                                               |
+| Version | 1.0.0                                                    |
+| Icon    | ![](../agent_images/icons/finance-short-seller-hf.png)   |
+| Status  | draft                                                    |

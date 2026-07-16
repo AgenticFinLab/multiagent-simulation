@@ -322,12 +322,12 @@ State update: no change
 | 2 | Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. https://doi.org/10.1093/rfs/hhn098                                           | Liquidity spirals; cut fraction calibration|
 | 3 | Danielsson, J., Shin, H. S., & Zigrand, J.-P. (2001). Asset price dynamics with value-at-risk constrained traders. Working Paper, LSE.                                                                               | VaR constraints; 3x escalation trigger     |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-risk-manager.png)         |
+| Field   | Content                                              |
+|---------|------------------------------------------------------|
+| Author  | Codex                                                |
+| Created | 2026-07-16                                           |
+| Version | 1.0.0                                                |
+| Icon    | ![](../agent_images/icons/finance-risk-manager.png)  |
+| Status  | draft                                                |

@@ -359,12 +359,12 @@ State update: `cash` = 100000 + 50 × 32.00 = 101600; `position` = 50 - 50 = 0. 
 | 4 | CFTC & SEC (2010). Findings regarding the market events of May 6, 2010. Joint Advisory Committee Report. | Official event reconstruction                  |
 | 5 | Brunnermeier, M. K., & Pedersen, L. H. (2005). Predatory trading. *Journal of Finance*, 60(4), 1825–1863. https://doi.org/10.1111/j.1540-6261.2005.00781.x | Predatory exploitation of momentum dynamics    |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                                                       |
-|-------------|---------------------------------------------------------------|
-| Author      | polish-simulation-pipeline                                    |
-| Created     | 2026-07-11                                                    |
-| Version     | 1.0.0                                                         |
-| Status      | canonical                                                     |
-| Icon        | ![](../agent_images/icons/finance-momentum-chaser.png)        |
+| Field   | Content                                                       |
+|---------|---------------------------------------------------------------|
+| Author  | Codex                                                         |
+| Created | 2026-07-16                                                    |
+| Version | 1.0.0                                                         |
+| Icon    | ![](../agent_images/icons/finance-momentum-chaser.png)        |
+| Status  | draft                                                         |

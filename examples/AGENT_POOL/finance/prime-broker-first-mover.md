@@ -261,6 +261,21 @@ State update: no state becomes negative.
 | `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease           | number of non-hold orders |
 | `size_half`        | Halve the size parameter                    | Same timing with lower impact.                                      | decrease           | average order quantity    |
 
+## Behavioral Verification and Calibration
+
+- Given deviation = -0.16 (below `liquidation_threshold` of -0.10), agent must emit a sell order with quantity = position * 0.40.
+- Given deviation = -0.04 (above `liquidation_threshold` of -0.10), agent must hold with zero quantity.
+- Given position is zero (collateral exhausted), agent must hold regardless of deviation magnitude.
+- Given a sell is triggered, agent must execute at current price without penalty (distinguishing it from the delayed archetype).
+- Given any prerequisite signal is missing or NaN, agent must hold and emit zero quantity without inferring unavailable values.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `threshold_strict` | `liquidation_threshold = -0.15` (50% deeper) | Fewer activations weaken first-mover cascade initiation | decrease | number of non-hold orders per episode |
+| `size_half` | `liquidation_sell_ratio = 0.20` | Same timing with lower per-activation impact | decrease | average sell quantity per activation |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                    | Notes                                         |
@@ -270,11 +285,10 @@ State update: no state becomes negative.
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                                                                                                                                                                                                               |
-|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Author      | Codex                                                                                                                                                                                                                                                 |
-| Reviewed by | Codex three-pass self-check                                                                                                                                                                                                                           |
-| Created     | 2026-06-30                                                                                                                                                                                                                                            |
-| Version     | 1.0.3 |
-| Status      | conformant |
-| Icon        | ![](../agent_images/icons/finance-prime-broker-first-mover.png)                                                                                                                                                                                       |
+| Field   | Content                                                             |
+|---------|---------------------------------------------------------------------|
+| Author  | Codex                                                               |
+| Created | 2026-07-16                                                          |
+| Version | 1.0.0                                                               |
+| Icon    | ![](../agent_images/icons/finance-prime-broker-first-mover.png)     |
+| Status  | draft                                                               |

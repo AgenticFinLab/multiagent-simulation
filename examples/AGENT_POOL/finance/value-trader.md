@@ -247,6 +247,21 @@ Decision: hold.
 | no-value-trader | `buy_threshold = 999`   | Removing value-trader demand allows availability-bias mispricing to persist. | larger mispricing            | mean absolute deviation from F |
 | patient-value   | `sell_threshold = 0.50` | More patient holding stabilises post-crash recovery.                         | slower but steadier recovery | recovery time                  |
 
+## Behavioral Verification and Calibration
+
+- Given price more than 5% below fundamental (deviation > buy_threshold), agent must emit a buy order with quantity proportional to deviation * sizing_scale, capped at base_position_size.
+- Given price more than 10% above fundamental (deviation < -sell_threshold) with positive position, agent must emit a sell order capped at min(position, base_position_size).
+- Given price near fundamental (deviation inside the no-trade band), agent must hold with zero quantity regardless of recent event salience or media signals.
+- Given identical price-fundamental deviations but differing recent-event histories, agent must produce byte-identical outputs because it ignores availability cues.
+- Given missing fundamental signal, agent must hold and emit no order.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| tight-entry | `buy_threshold = 0.02` | Lower buy threshold increases value-demand frequency, reducing availability-bias mispricing duration. | decrease | mean absolute deviation from fundamental |
+| low-sizing | `sizing_scale = 1000` | Reducing sizing aggressiveness weakens fundamental-anchored demand, allowing mispricing to persist. | increase | half-life of price-fundamental deviation |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                                 | Notes                                |

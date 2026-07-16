@@ -247,6 +247,21 @@ Decision: hold or clamped order.
 | `stop_loss_strict` | Increase `stop_loss` to 0.25 | Later covering weakens F3 covering pressure. | decrease | `compute_short_vol_covering()` |
 | `cover_half` | Halve cover fraction to 0.4 | Same timing with lower magnitude. | decrease | average buy quantity during activation rounds |
 
+## Behavioral Verification and Calibration
+
+- Given deviation = 0.20 (above `stop_loss` of 0.15) and position = -1000 (short exposure), agent must emit a buy order covering 80% of short position (quantity = 800).
+- Given deviation = -0.03 (below -0.02 carry-entry floor) and sufficient cash, agent must emit a sell order to add short-vol exposure.
+- Given deviation = 0.05 (between -0.02 and `stop_loss`), agent must hold with zero quantity.
+- Given short position is zero and deviation exceeds `stop_loss`, agent must hold because there is nothing to cover.
+- Given any prerequisite signal is missing or cash is insufficient, agent must hold or clamp quantity to available resources.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `stop_loss_strict` | `stop_loss = 0.25` | Later covering weakens procyclical amplification during spike | decrease | cumulative buy volume during spike rounds |
+| `cover_half` | Cover fraction = 0.40 (halved from 0.80) | Same timing with lower covering magnitude per round | decrease | average buy quantity during activation rounds |
+
 ## Academic References
 
 | # | Citation | Notes |

@@ -335,12 +335,12 @@ State update: `price_history` continues to accumulate; will evaluate normally on
 | 3 | Brinson, G. P., Hood, L. R., & Beebower, G. L. (1986). Determinants of portfolio performance. *Financial Analysts Journal*, 42(4), 39-48. https://doi.org/10.2469/faj.v42.n4.39 | Empirical: allocation explains 93.6% of returns |
 | 4 | Canner, N., Mankiw, N. G., & Weil, D. N. (1997). An asset allocation puzzle. *American Economic Review*, 87(1), 181-191.                                                | Separation theorem empirical validation  |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                    |
-|-------------|----------------------------|
-| Author      | polish-simulation-pipeline |
-| Created     | 2026-07-14                 |
-| Version     | 1.0.0                      |
-| Status      | canonical                  |
-| Icon        | ![](../agent_images/icons/finance-risk-averse-investor.png)         |
+| Field   | Content                                                        |
+|---------|----------------------------------------------------------------|
+| Author  | Codex                                                          |
+| Created | 2026-07-16                                                     |
+| Version | 1.0.0                                                          |
+| Icon    | ![](../agent_images/icons/finance-risk-averse-investor.png)    |
+| Status  | draft                                                          |

@@ -336,12 +336,12 @@ State update: No change. Agent is permanently deactivated — no shares to sell 
 | 4 | Mitchell, M., Pulvino, T., & Stafford, E. (2002). Limited arbitrage in equity markets. *Journal of Finance*, 57(2), 551–584. https://doi.org/10.1111/1540-6261.00453               | Arbitrage capital retreat during mispricing |
 | 5 | Campbell, J. Y., Ramadorai, T., & Schwartz, A. (2009). Caught on tape: Institutional trading, stock returns, and earnings announcements. *Journal of Financial Economics*, 92(1), 66–91. https://doi.org/10.1016/j.jfineco.2008.03.006 | Institutional block trade patterns       |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-institutional-value.png)         |
+| Field   | Content                                                        |
+|---------|----------------------------------------------------------------|
+| Author  | Codex                                                          |
+| Created | 2026-07-16                                                     |
+| Version | 1.0.0                                                          |
+| Icon    | ![](../agent_images/icons/finance-institutional-value.png)     |
+| Status  | draft                                                          |

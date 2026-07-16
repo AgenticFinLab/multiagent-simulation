@@ -272,6 +272,21 @@ State update: append P=105.
 | `short_memory` | `lookback = 5` | Short history reduces persistence. |
 | `no_dampening` | `anchor_weight = 0` | Removing dampening makes the agent more reactive. |
 
+## Behavioral Verification and Calibration
+
+- Given price equal to hist_avg, agent must hold (perceived deviation is zero, inside threshold).
+- Given price well above hist_avg such that damped deviation exceeds threshold, agent must sell.
+- Given a regime shift in fundamental with stale hist_avg, agent must lag in adaptation until the rolling window catches up.
+- Given price_history with fewer observations than lookback, agent must use available history without error.
+- Given anchor_weight = 1.0, agent must perceive zero deviation and always hold (full dampening).
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_anchoring` | `anchor_weight = 0` | Removing anchoring makes agent fully reactive to raw deviation | increase | regime-transition speed |
+| `very_long_memory` | `lookback = 200` | Longer memory strengthens price persistence around stale levels | increase | time-to-convergence after fundamental shift |
+
 ## Academic References
 
 | # | Citation | Notes |

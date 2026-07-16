@@ -285,6 +285,21 @@ State update: no state becomes negative.
 | `threshold_strict` | Increase trigger threshold magnitude by 50% | Fewer activations weaken this agent's individual trading intensity. | decrease | number of non-hold orders |
 | `size_half` | Halve the size parameter | Same timing with lower impact. | decrease | average order quantity |
 
+## Behavioral Verification and Calibration
+
+- Given deviation above detection_threshold (no distress signal), agent must hold regardless of Bernoulli draw outcome.
+- Given deviation below detection_threshold with successful detection draw and positive position, agent must sell up to front_run_size.
+- Given deviation above cover_threshold with positive short_position, agent must buy to cover up to cover_size.
+- Given zero position and zero short_position with no active trigger, agent must hold.
+- Given missing price or deviation signal, agent must hold with zero quantity.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `perfect_detection` | `detection_ability = 1.0` | Certain detection maximises early selling pressure before liquidation | increase | front-run sell volume |
+| `no_cover` | `cover_threshold = 999` | Disabling cover removes post-crash stabilising buy flow | increase | recovery time after liquidation event |
+
 ## Academic References
 
 | # | Citation | Notes |

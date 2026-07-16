@@ -269,6 +269,21 @@ State update: unchanged.
 | `wide_band` | `threshold = 0.10` | Arbitrage bands allow larger persistent deviations. |
 | `high_capacity` | `base_position_size = 100` | More arbitrage capacity reduces mispricing half-life. |
 
+## Behavioral Verification and Calibration
+
+- Given deviation = -0.04 (price below fundamental beyond `threshold` of 0.02), agent must emit a buy order with positive quantity.
+- Given deviation = +0.05 (price above fundamental beyond `threshold`), agent must emit a sell order with positive quantity.
+- Given deviation = 0.01 (inside the no-trade band), agent must hold with zero quantity.
+- Given `fundamental` signal is missing or unavailable, agent must hold without attempting to infer the value.
+- Given position at `inventory_max`, agent must not increase exposure on the constrained side.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `wide_band` | `threshold = 0.10` | Wider no-trade band allows larger persistent deviations from fundamental | increase | mean absolute price-fundamental deviation |
+| `high_capacity` | `base_position_size = 100` | More arbitrage capacity reduces mispricing half-life | decrease | half-life of deviation shocks |
+
 ## Academic References
 
 | # | Citation | Notes |

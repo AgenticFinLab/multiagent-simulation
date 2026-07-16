@@ -331,12 +331,12 @@ State update: `position` = 1 - 1 = 0; `cash` += 1 × 40.00 = +40.00.
 | 4 | Gorton, G. B., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016 | Repo market haircut spirals |
 | 5 | Greenwood, R., Landier, A., & Thesmar, D. (2015). Vulnerable banks. *Journal of Financial Economics*, 115(3), 471–485. https://doi.org/10.1016/j.jfineco.2014.11.006 | Fire-sale contagion across institutions |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                                                       |
-|-------------|---------------------------------------------------------------|
-| Author      | polish-simulation-pipeline                                    |
-| Created     | 2026-07-14                                                    |
-| Version     | 1.0.0                                                         |
-| Status      | canonical                                                     |
-| Icon        | ![](../agent_images/icons/finance-leveraged-investor.png)     |
+| Field   | Content                                                       |
+|---------|---------------------------------------------------------------|
+| Author  | Codex                                                         |
+| Created | 2026-07-16                                                    |
+| Version | 1.0.0                                                         |
+| Icon    | ![](../agent_images/icons/finance-leveraged-investor.png)     |
+| Status  | draft                                                         |

@@ -270,6 +270,21 @@ State update: unchanged.
 | no-contrarian-buy | `oversold_threshold = 999` (never triggers) | Contrarian buying provides price floor.  | deeper drawdown    | max drawdown  |
 | aggressive-sizing | `sizing_scale = 5000`                       | Larger orders accelerate price recovery. | faster recovery    | recovery time |
 
+## Behavioral Verification and Calibration
+
+- Given deviation below -0.08 (oversold_threshold) with sufficient cash, agent must emit a buy order with quantity scaled by abs(deviation) * sizing_scale, capped at base_position_size.
+- Given deviation above +0.10 (overbought_threshold) with positive position, agent must emit a sell order capped at min(position, base_position_size).
+- Given deviation inside the no-trade band (-0.08 to +0.10), agent must hold with zero quantity regardless of portfolio state.
+- Given missing fundamental signal, agent must hold and not attempt any trade.
+- Given cash fully exhausted during a contagion selloff, agent must hold on the buy side even if deviation exceeds the oversold threshold.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| deep-entry | `oversold_threshold = 0.15` | Deeper entry requirement delays contrarian buying, reducing price-floor support. | increase | max drawdown during contagion episode |
+| narrow-band | `overbought_threshold = 0.05` | Earlier profit-taking reduces stabilisation during recovery overshoot. | decrease | peak overshoot above fundamental |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                  | Notes                                      |

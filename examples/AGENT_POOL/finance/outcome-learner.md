@@ -367,12 +367,12 @@ State update: no change
 | 2 | Odean, T. (1998). Volume, volatility, price, and profit when all traders are above average. *Journal of Finance*, 53(6), 1887–1934. https://doi.org/10.1111/0022-1082.00259                                           | Overconfident trading model               |
 | 3 | Barber, B. M., & Odean, T. (2000). Trading is hazardous to your wealth. *Journal of Finance*, 55(2), 773–806. https://doi.org/10.1111/0022-1082.00226                                                               | Empirical calibration; active traders     |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-outcome-learner.png)         |
+| Field   | Content                                                    |
+|---------|------------------------------------------------------------|
+| Author  | Codex                                                      |
+| Created | 2026-07-16                                                 |
+| Version | 1.0.0                                                      |
+| Icon    | ![](../agent_images/icons/finance-outcome-learner.png)     |
+| Status  | draft                                                      |

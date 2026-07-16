@@ -249,7 +249,7 @@ Decision: hold because the signal is inside the band.
 State update: anchor becomes persistent state for later ticks.
 ```
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
 **Calibration data sources** (per parameter, where applicable):
 - `alpha` <- Tversky & Kahneman (1974).

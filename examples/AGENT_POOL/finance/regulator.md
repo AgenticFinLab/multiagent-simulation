@@ -352,12 +352,12 @@ State update: No change.
 | 4 | Stiglitz, J. E. (2010). *Freefall: America, Free Markets, and the Sinking of the World Economy*. W. W. Norton & Company. | Alternative perspective on intervention timing and scale |
 | 5 | Gorton, G. B., & Metrick, A. (2013). The Federal Reserve and panic prevention: The roles of financial regulation and lender of last resort. *Journal of Economic Perspectives*, 27(4), 45–64. https://doi.org/10.1257/jep.27.4.45 | Fed's role in panic prevention |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                                                       |
-|-------------|---------------------------------------------------------------|
-| Author      | polish-simulation-pipeline                                    |
-| Created     | 2026-07-14                                                    |
-| Version     | 1.0.0                                                         |
-| Status      | canonical                                                     |
-| Icon        | ![](../agent_images/icons/finance-regulator.png)              |
+| Field   | Content                                            |
+|---------|----------------------------------------------------|
+| Author  | Codex                                              |
+| Created | 2026-07-16                                         |
+| Version | 1.0.0                                              |
+| Icon    | ![](../agent_images/icons/finance-regulator.png)   |
+| Status  | draft                                              |

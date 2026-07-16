@@ -250,7 +250,7 @@ Calculation:
 Decision: hold or clamped order according to Action Space.
 State update: no state becomes negative.
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
 **Calibration data sources**:
 - `margin_threshold` <- Becketti (2021) and FSB (2022), 10-25% margin range.

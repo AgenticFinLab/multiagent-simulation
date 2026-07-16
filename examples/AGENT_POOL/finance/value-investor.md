@@ -248,6 +248,21 @@ Decision: hold (no buy capacity).
 | no-value-floor | `value_discount = 999`  | Removing value buying eliminates the price floor. | deeper crash       | max drawdown       |
 | patient-value  | `value_discount = 0.33` | Higher threshold delays floor activation.         | later floor        | round of first buy |
 
+## Behavioral Verification and Calibration
+
+- Given deviation exceeding 0.15 (value_discount) with available cash, agent must buy exactly base_position_size shares (or remaining cash capacity if less).
+- Given deviation below -0.15 with positive position, agent must sell exactly base_position_size shares (or remaining position if less).
+- Given abs(deviation) < 0.15, agent must hold with zero quantity regardless of price trajectory or market conditions.
+- Given cash fully exhausted during a crash, agent must hold on the buy side even if the discount exceeds 0.15.
+- Given both price and fundamental available but deviation = 0, agent must hold with no trade activity.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| shallow-discount | `value_discount = 0.08` | Lower margin-of-safety threshold activates buying earlier, providing stronger price floor. | decrease | max drawdown in crash episode |
+| large-orders | `base_position_size = 80` | Doubling fixed order size strengthens per-round absorption capacity during cascades. | decrease | rounds to price stabilisation |
+
 ## Academic References
 
 | # | Citation                                                                                                                           | Notes                                                      |

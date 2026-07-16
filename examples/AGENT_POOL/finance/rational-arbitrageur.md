@@ -265,6 +265,21 @@ State update: unchanged.
 | no-arbitrage    | `short_threshold = 999`   | Arbitrage constrains bubble height.        | larger bubble      | peak price deviation |
 | tight-short-cap | `max_short_position = 50` | Short capacity limits corrective pressure. | larger bubble      | peak price deviation |
 
+## Behavioral Verification and Calibration
+
+- Given deviation = 0.10 (above `short_threshold` of 0.05) and available capital, agent must emit a sell (short) order with positive quantity.
+- Given deviation = 0.005 (below `cover_threshold` of 0.01) and existing short position, agent must emit a buy (cover) order.
+- Given deviation = 0.03 (inside the no-trade band between cover and short thresholds), agent must hold with zero quantity.
+- Given `abs(position)` at `max_short_position`, agent must not increase short exposure further.
+- Given `fundamental` signal is missing or unavailable, agent must hold and not compute deviation.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_arbitrage` | `short_threshold = 999` | Removing arbitrage allows unconstrained bubble growth | increase | peak price deviation from fundamental |
+| `tight_short_cap` | `max_short_position = 50` | Short capacity limits corrective selling pressure | increase | peak price deviation from fundamental |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                  | Notes                                        |
@@ -274,11 +289,10 @@ State update: unchanged.
 
 ## Design Provenance and Versioning
 
-| Field       | Content                                                                          |
-|-------------|----------------------------------------------------------------------------------|
-| Author      | AGenticFinLab                                                                    |
-| Reviewed by | audit_agent_handbook.py v1                                                       |
-| Created     | 2026-07-11                                                                       |
-| Version     | 1.1.0                                                                            |
-| Status      | conformant                                                                       |
-| Icon        | ![](../agent_images/icons/finance-rational-arbitrageur.png)                      |
+| Field   | Content                                                         |
+|---------|-----------------------------------------------------------------|
+| Author  | Codex                                                           |
+| Created | 2026-07-16                                                      |
+| Version | 1.0.0                                                           |
+| Icon    | ![](../agent_images/icons/finance-rational-arbitrageur.png)     |
+| Status  | draft                                                           |

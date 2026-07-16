@@ -345,12 +345,12 @@ State update: `cash`: 200,000 → 200,000 + 100 * 90.0 = 209,000; `position`: 10
 | 2 | Rabin, M. (2002). Inference by believers in the law of small numbers. *Quarterly Journal of Economics*, 117(3), 775–816. https://doi.org/10.1111/1468-0262.00296                       | Formal belief distortion model; scaling prediction |
 | 3 | Croson, R., & Sundali, J. (2005). The gambler's fallacy and the hot hand: Empirical data from casinos. *Journal of Risk and Uncertainty*, 30(3), 195–209. https://doi.org/10.1016/j.jebo.2003.10.011 | Field validation; bet-size calibration             |
 
-## Design Provenance
+## Design Provenance and Versioning
 
-| Field       | Content                      |
-|-------------|------------------------------|
-| Author      | polish-simulation-pipeline   |
-| Created     | 2026-07-14                   |
-| Version     | 1.0.0                        |
-| Status      | canonical                    |
-| Icon        | ![](../agent_images/icons/finance-streak-reversal-trader.png)         |
+| Field   | Content                                                          |
+|---------|------------------------------------------------------------------|
+| Author  | Codex                                                            |
+| Created | 2026-07-16                                                       |
+| Version | 1.0.0                                                            |
+| Icon    | ![](../agent_images/icons/finance-streak-reversal-trader.png)    |
+| Status  | draft                                                            |

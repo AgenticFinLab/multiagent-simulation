@@ -255,7 +255,7 @@ Calculation:
 Decision: `sell`, `quantity=1000`, `agent_type="equity-trader"`.
 State update: cash increases by `1000 * price`; position falls by 1000.
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
 **Calibration data sources**:
 - `risk_limit` ← Moreira and Muir (2017) empirical range.

@@ -234,6 +234,21 @@ Decision: hold.
 | no-fundamental-buy | `buy_threshold = 999`   | Fundamental buying provides price floor. | deeper crash       | max drawdown  |
 | patient-holder     | `sell_threshold = 0.50` | Patient holding stabilises post-bubble.  | slower recovery    | recovery time |
 
+## Behavioral Verification and Calibration
+
+- Given price exactly at fundamental (discount = 0), agent must hold with zero quantity.
+- Given price 10% below fundamental with sufficient cash, agent must buy with quantity proportional to the discount magnitude.
+- Given price 15% above fundamental with non-zero position, agent must sell up to base_position_size.
+- Given zero cash and discount exceeding buy_threshold, agent must hold despite the buy signal (cash constraint binds).
+- Given missing fundamental signal, agent must hold without error.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `wide_band` | `buy_threshold = 0.15, sell_threshold = 0.30` | Wider no-trade band reduces stabilising trade frequency | decrease | trades per episode |
+| `aggressive_sizing` | `sizing_scale = 8000` | Larger orders strengthen the fundamental-anchored price floor | decrease | max drawdown from fundamental |
+
 ## Academic References
 
 | # | Citation                                                                                                                                                                   | Notes                                |

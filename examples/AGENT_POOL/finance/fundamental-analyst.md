@@ -250,27 +250,20 @@ Decision: hold.
 State update: belief persists as 100.
 ```
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
-**Calibration data sources** (per parameter, where applicable):
-- `learning_rate` <- Barberis, Shleifer & Vishny (1998).
-
-**Expected stylized facts** when this agent dominates the population:
-- Gradual price correction toward fundamentals.
-- Slower response than RationalUpdater.
-- Bounded sustained mispricing.
-
-**Sanity bounds (red flags during simulation)**:
-- IF the agent exhibits the behaviour described (Belief ignores fundamental forever) THEN the implementation is broken because belief ignores fundamental forever.
-- IF the agent exhibits the behaviour described (Belief jumps instantly when `learning_rate < 1`) THEN the implementation is broken because belief jumps instantly when `learning_rate < 1`.
-- IF the agent exhibits the behaviour described (Agent trades on momentum rather than belief deviation) THEN the implementation is broken because agent trades on momentum rather than belief deviation.
+- Given price is below the smoothed belief by more than `threshold`, agent must emit a buy order.
+- Given price is above the smoothed belief by more than `threshold`, agent must emit a sell order.
+- Given price is within the no-trade band around belief, agent must hold.
+- Given `learning_rate < 1`, belief must lag behind the true fundamental value (never jump instantaneously to F).
+- Given belief is uninitialized, agent must initialize belief from the first valid fundamental and hold on that tick.
 
 #### Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested |
-|---------------|---------|-------------------|
-| `instant_learning` | `learning_rate = 1.0` | Turns the agent into a rational updater. |
-| `very_slow_learning` | `learning_rate = 0.02` | Strong conservatism increases deviation persistence. |
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `instant_learning` | `learning_rate = 1.0` | Turns the agent into a rational updater. | decrease | half-life of price deviation from fundamental |
+| `very_slow_learning` | `learning_rate = 0.02` | Strong conservatism increases deviation persistence. | increase | half-life of price deviation from fundamental |
 
 ## Academic References
 

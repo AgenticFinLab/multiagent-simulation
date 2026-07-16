@@ -278,6 +278,21 @@ State update: unchanged.
 | `no_inventory_skew` | `inventory_aversion = 0` | Inventory risk accumulates without skew. |
 | `wide_spread` | `spread = 0.05` | Wider quotes reduce liquidity and fill rate. |
 
+## Behavioral Verification and Calibration
+
+- Given zero inventory, agent must quote symmetric bid and ask around fair_quote (no skew).
+- Given inventory at inventory_max, agent must suppress bid-side quotes and offer ask-side only.
+- Given inventory at negative inventory_max, agent must suppress ask-side quotes and offer bid-side only.
+- Given non-zero inventory, agent must skew quotes toward the side that reduces inventory exposure.
+- Given missing fair_quote signal, agent must hold with zero-size quotes.
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_skew` | `inventory_aversion = 0` | Without skew, inventory accumulates toward caps more frequently | increase | inventory variance per episode |
+| `zero_spread` | `spread = 0.001` | Near-zero spread maximises fill rate but exposes agent to adverse selection | increase | adverse-selection loss |
+
 ## Academic References
 
 | # | Citation | Notes |

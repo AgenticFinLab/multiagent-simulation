@@ -251,28 +251,20 @@ Decision: hold.
 State update: no cost basis until a buy fill occurs.
 ```
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
-**Calibration data sources** (per parameter, where applicable):
-- `gain_threshold` <- disposition-effect calibration.
-- `loss_threshold` <- loss-aversion asymmetry calibration.
-
-**Expected stylized facts** when this agent dominates the population:
-- Higher sell propensity for gains than losses.
-- Asymmetric liquidity across rallies and selloffs.
-- Reference-point-dependent trading.
-
-**Sanity bounds (red flags during simulation)**:
-- IF the agent exhibits the behaviour described (Agent sells losers as readily as winners) THEN the implementation is broken because agent sells losers as readily as winners.
-- IF the agent exhibits the behaviour described (Cost basis updates after sells) THEN the implementation is broken because cost basis updates after sells.
-- IF the agent exhibits the behaviour described (Agent uses fundamental value in trigger) THEN the implementation is broken because agent uses fundamental value in trigger.
+- Given unrealized gain exceeds `gain_threshold`, agent must emit a sell order to realize the profit.
+- Given unrealized loss exceeds `loss_threshold`, agent must emit a buy order to average down (if cash permits).
+- Given unrealized P&L within the asymmetric inaction band (gain < threshold, loss < threshold), agent must hold.
+- Given no position and no cost basis, agent must hold until a buy fill establishes a reference point.
+- Given the sell threshold is lower than the loss threshold (in magnitude), agent must sell winners more readily than losers, demonstrating disposition asymmetry.
 
 #### Ablation Hooks
 
-| Ablation name | Setting | Hypothesis tested |
-|---------------|---------|-------------------|
-| `symmetric_thresholds` | `loss_threshold = gain_threshold` | Symmetry removes disposition asymmetry. |
-| `no_average_down` | disable loss buy branch | Loss-domain demand supports price less. |
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `symmetric_thresholds` | `loss_threshold = gain_threshold` | Symmetry removes disposition asymmetry. | decrease | ratio of gain-realizations to loss-realizations |
+| `no_average_down` | disable loss buy branch | Loss-domain demand supports price less. | increase | max drawdown during selloffs |
 
 ## Academic References
 

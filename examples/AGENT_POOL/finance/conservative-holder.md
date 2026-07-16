@@ -203,7 +203,7 @@ Decision: hold.
 System state: `cash=0`, `price=90`, `fundamental=100`.
 Decision: hold (no capacity).
 
-## Validation and Calibration
+## Behavioral Verification and Calibration
 
 **Calibration data sources**:
 - `buy_threshold` <- Fama (1970) efficient-market discount ranges.

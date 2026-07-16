@@ -273,6 +273,21 @@ State update: no state becomes negative.
 | `no_hedger` | Remove agent from roster | Amplification is unopposed; peak deviation should widen. | increase | `compute_vol_spike_magnitude()` |
 | `hedge_ratio_half` | Halve `hedge_ratio` | Weaker accumulation, similar take-profit; net stabilisation falls. | decrease | long-vol take-profit volume |
 
+## Behavioral Verification and Calibration
+
+- Given deviation below -0.05 with sufficient cash, agent must buy hedge inventory capped at 500 units.
+- Given deviation above 0.10 with positive position, agent must sell (take profit) capped at min(500, position).
+- Given deviation between -0.05 and 0.10, agent must hold regardless of cash or position levels.
+- Given cash = 0 in a cheap-vol regime (deviation < -0.05), agent must hold (budget exhausted).
+- Given position = 0 in an expensive-vol regime (deviation > 0.10), agent must hold (nothing to monetise).
+
+#### Ablation Hooks
+
+| Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
+|---------------|---------|-------------------|--------------------|--------|
+| `no_take_profit` | take-profit threshold = 999 | Disabling monetisation removes stabilising sell flow during vol spikes | increase | peak vol-proxy deviation |
+| `large_hedge_budget` | `hedge_ratio = 0.20` | Doubling accumulation budget strengthens pre-spike liquidity supply | decrease | pre-spike price decline rate |
+
 ## Academic References
 
 | # | Citation | Notes |
