@@ -348,3 +348,20 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
   Step 2 icon-resolution sub-gate.
 - If new agents are added to `finance/`, commission a new icon in the same
   style and name it ``finance-<agent-stem>.png``.
+
+## Mapping: market/ coordinators → icons/market/
+
+Market coordinators live under `examples/AGENT_POOL/market/{market-type}-{stem}.md`
+and their icons under `agent_images/icons/market/{market-type}-{stem}.png`.
+They follow the same overall visual shell as participant icons, with three
+coordinator-specific overrides declared in `masim/skills/market-icon-generation-skill.md`:
+(1) a small hub / broadcast-dish / network accent floating above the robot head
+signalling *"I coordinate"*, (2) a **compound lower motif** combining the
+Market-Type element with the mechanism motif, and (3) a Chinese label tag
+ending in `协调器 / 场 / 系统` (never `投资者`).
+
+| # | Coordinator                                          | Icon                                              | Display Label       | Match Reason                                                                                                                                             |
+|---|------------------------------------------------------|---------------------------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | `market/stock-standard-price-impact.md`              | `market/stock-standard-price-impact.png`          | 股票市场 / 协调器    | Stock (candlestick chart) + Standard price-impact + mean-reversion (anchor motif); blue-cyan palette; label uses 协调器 for matching-engine-like clearing |
+| 2 | `market/opinion-echo-chamber-clustering.md`          | `market/opinion-echo-chamber-clustering.png`      | 舆论场 / 回声室型    | Opinion (diverging speech bubbles) + Echo-chamber clustering (converging within-cluster arrows on two clusters); violet-cyan palette; label uses 场 for diffuse environmental field |
+| 3 | `market/information-sis-contagion.md`                | `market/information-sis-contagion.png`            | 信息场 / 谣言传播型  | Information (megaphone + propagation-node network) + SIS-style contagion (central node with radiating wave arcs); coral-cyan palette; label uses 场       |

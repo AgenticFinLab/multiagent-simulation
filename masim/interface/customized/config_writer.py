@@ -155,17 +155,20 @@ def initialize_customized_folder(
     scenario_name: str,
     project_root: Path,
 ) -> CustomizedBundleResult:
-    """Create the bundle folder with a full copy of the base scenario config.
+    """Create the bundle folder with a FULL copy of all scenario variants.
 
     Called when the user enters the Customize flow (clicks "Select agents
-    for simulation"). The folder is a complete copy of the scenario's
-    Rule variant so that the user can preview/edit files before launch.
+    for simulation"). The folder is a complete snapshot of the scenario —
+    all variant subdirectories (Rule, LLM, RuleLLM, Rag) are copied into
+    both ``configs/CUSTOMIZED_SIMULATION/{bundle}/`` and
+    ``examples/CUSTOMIZED_SIMULATION/{bundle}/``, preserving their
+    subdirectory structure.
 
     At launch time, :func:`apply_customized_modifications` overlays the
     user's agent selections onto this pre-existing folder.
 
     Args:
-        bundle_name: folder name, e.g. ``"MyProject-AnchoringEffect-a3b9c1d2"``.
+        bundle_name: folder name, e.g. ``"MyProject-a3b9c1d2-AnchoringEffect"``.
         scenario_name: scenario base name (e.g. ``"AnchoringEffect"``).
         project_root: the repo root (parent of ``configs/`` and ``examples/``).
 
@@ -175,6 +178,8 @@ def initialize_customized_folder(
     Raises:
         FileNotFoundError: the chosen scenario lacks a base ``simulation.yml``.
     """
+    import shutil
+
     project_root = Path(project_root).resolve()
     configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
     examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
@@ -183,37 +188,71 @@ def initialize_customized_folder(
     config_dir.mkdir(parents=True, exist_ok=True)
     example_dir.mkdir(parents=True, exist_ok=True)
 
-    # Source: every scenario ships a Rule variant as the canonical base.
-    base_path = project_root / "configs" / scenario_name / "Rule"
-    base_simulation = base_path / "simulation.yml"
+    # Validate that at least the Rule variant exists.
+    base_rule_path = project_root / "configs" / scenario_name / "Rule"
+    base_simulation = base_rule_path / "simulation.yml"
     if not base_simulation.exists():
         raise FileNotFoundError(
             "Scenario simulation file is missing for "
             f"'{scenario_name}': {base_simulation}"
         )
 
-    # Copy all *.yml from configs/{scenario}/Rule/ and retarget record paths.
-    for yml in sorted(base_path.glob("*.yml")):
-        text = yml.read_text(encoding="utf-8")
-        text = _retarget_record_paths(text, bundle_name)
-        (config_dir / yml.name).write_text(text, encoding="utf-8")
+    def _ignore_pycache(directory: str, contents: list[str]) -> list[str]:
+        return [c for c in contents if c == "__pycache__"]
 
-    # --- runner script
+    # --- Copy ALL variant subdirectories from configs/{scenario}/ ---
+    src_configs = project_root / "configs" / scenario_name
+    for variant_dir in sorted(src_configs.iterdir()):
+        if not variant_dir.is_dir() or variant_dir.name.startswith("_"):
+            continue
+        dst_variant = config_dir / variant_dir.name
+        shutil.copytree(
+            variant_dir, dst_variant,
+            ignore=_ignore_pycache, dirs_exist_ok=True,
+        )
+        # Retarget record/storage paths in all yml files to point to the
+        # bundle's own EXPERIMENT directory.
+        for yml in dst_variant.glob("*.yml"):
+            text = yml.read_text(encoding="utf-8")
+            text = _retarget_record_paths(text, bundle_name)
+            yml.write_text(text, encoding="utf-8")
+
+    # --- Copy ALL variant subdirectories from examples/{scenario}/ ---
+    src_examples = project_root / "examples" / scenario_name
+    if src_examples.exists():
+        for item in sorted(src_examples.iterdir()):
+            if item.name.startswith("_") and item.name != "__init__.py":
+                continue
+            if item.is_dir():
+                shutil.copytree(
+                    item, example_dir / item.name,
+                    ignore=_ignore_pycache, dirs_exist_ok=True,
+                )
+            else:
+                # Copy top-level files (e.g. __init__.py, metrics.py,
+                # analysis-bases.md, finance-*.md, simulation-bases.md)
+                shutil.copy2(item, example_dir / item.name)
+
+    # --- Bundle-level runner script ---
     runner_text = _render_runner_script(cid=bundle_name, scenario_name=scenario_name)
     runner_out = example_dir / "run_customized.py"
     runner_out.write_text(runner_text, encoding="utf-8")
 
-    # --- __init__.py package marker
+    # --- __init__.py package marker at bundle root ---
     init_path = example_dir / "__init__.py"
     if not init_path.exists():
         init_path.write_text("", encoding="utf-8")
 
-    # --- README.md provenance placeholder
+    # --- README.md provenance placeholder ---
     readme_text = (
         f"# {bundle_name}\n\n"
         f"Customized simulation bundle (scenario: `{scenario_name}`).\n\n"
         f"- **Initialized**: {_dt.datetime.now().isoformat(timespec='seconds')}\n"
         f"- **Status**: awaiting agent selections (launch will finalize)\n\n"
+        f"## Structure\n\n"
+        f"All 4 variants (Rule, LLM, RuleLLM, Rag) are copied from the\n"
+        f"shipped scenario as a full snapshot. The Customize flow reads\n"
+        f"prompts from the variant matching the user's engine choice.\n\n"
         f"## Run\n\n"
         f"```bash\n"
         f"python examples/CUSTOMIZED_SIMULATION/{bundle_name}/run_customized.py \\\n"
@@ -226,10 +265,10 @@ def initialize_customized_folder(
         customized_id=bundle_name,
         config_dir=config_dir,
         example_dir=example_dir,
-        simulation_yaml=config_dir / "simulation.yml",
-        players_yaml=config_dir / "players.yml",
-        topology_yaml=config_dir / "topology.yml",
-        persona_yaml=config_dir / "persona.yml",
+        simulation_yaml=config_dir / "Rule" / "simulation.yml",
+        players_yaml=config_dir / "Rule" / "players.yml",
+        topology_yaml=config_dir / "Rule" / "topology.yml",
+        persona_yaml=config_dir / "Rule" / "persona.yml",
         runner_path=runner_out,
         scenario_name=scenario_name,
         prompts_path=None,
@@ -243,6 +282,7 @@ def apply_customized_modifications(
     scenario_name: str,
     project_root: Path,
     total_rounds: Optional[int] = None,
+    market_extras_override: Optional[dict[str, Any]] = None,
 ) -> CustomizedBundleResult:
     """Apply user's agent selections and params to an existing bundle folder.
 
@@ -299,12 +339,31 @@ def apply_customized_modifications(
         )
 
     # --- optionally update total_rounds in simulation.yml ---
+    # Write a root-level simulation.yml (copied from the bundle's Rule/ copy)
+    # so the runner can find it at a predictable path.
+    rule_sim = config_dir / "Rule" / "simulation.yml"
+    if rule_sim.exists():
+        sim_text = rule_sim.read_text(encoding="utf-8")
+    else:
+        # Legacy fallback: flat structure from before the multi-variant change.
+        flat_sim = config_dir / "simulation.yml"
+        if flat_sim.exists():
+            sim_text = flat_sim.read_text(encoding="utf-8")
+        else:
+            raise FileNotFoundError(
+                f"Cannot find simulation.yml in bundle: {config_dir}"
+            )
     if total_rounds is not None:
-        sim_path = config_dir / "simulation.yml"
-        if sim_path.exists():
-            sim_text = sim_path.read_text(encoding="utf-8")
-            sim_text = _set_total_rounds(sim_text, int(total_rounds))
-            sim_path.write_text(sim_text, encoding="utf-8")
+        sim_text = _set_total_rounds(sim_text, int(total_rounds))
+    sim_out = config_dir / "simulation.yml"
+    sim_out.write_text(sim_text, encoding="utf-8")
+
+    # --- persona.yml at root level (from Rule/ copy) ---
+    rule_persona = config_dir / "Rule" / "persona.yml"
+    persona_out = config_dir / "persona.yml"
+    if rule_persona.exists():
+        persona_text = rule_persona.read_text(encoding="utf-8")
+        persona_out.write_text(persona_text, encoding="utf-8")
 
     # --- prompts.py ---
     prompts_path: Optional[Path] = _maybe_write_prompts_module(
@@ -314,8 +373,16 @@ def apply_customized_modifications(
     )
 
     # --- players.yml ---
-    base_players = project_root / "configs" / scenario_name / "Rule" / "players.yml"
-    market_block, market_key = _extract_market_block(base_players, bundle_name)
+    # Source the market block from the bundle's own Rule/ copy.
+    bundle_rule_players = config_dir / "Rule" / "players.yml"
+    if not bundle_rule_players.exists():
+        # Fallback to shipped scenario if bundle copy is missing.
+        bundle_rule_players = (
+            project_root / "configs" / scenario_name / "Rule" / "players.yml"
+        )
+    market_block, market_key = _extract_market_block(
+        bundle_rule_players, bundle_name
+    )
     players_yaml_text = _render_players_yaml(
         market_block=market_block,
         market_key=market_key,
@@ -323,6 +390,7 @@ def apply_customized_modifications(
         class_paths=class_paths,
         cid=bundle_name,
         has_prompts_module=prompts_path is not None,
+        market_extras_override=market_extras_override,
     )
     players_out = config_dir / "players.yml"
     players_out.write_text(players_yaml_text, encoding="utf-8")
@@ -634,6 +702,66 @@ def write_default_scenario_bundle(
     )
 
 
+def extract_market_extras(
+    *,
+    bundle_name: str,
+    scenario_name: str,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Extract the editable market extras from a bundle's Rule/players.yml.
+
+    Returns the ``extras`` dict from the market (first top-level) block,
+    excluding infrastructure keys (``record_path``, ``custom_state_hot_limit``)
+    that users should not edit.
+
+    Used by the Customize UI to populate the Market Parameters editor.
+    """
+    project_root = Path(project_root).resolve()
+    # Try bundle-local copy first.
+    players_path = (
+        project_root / "configs" / "CUSTOMIZED_SIMULATION" / bundle_name
+        / "Rule" / "players.yml"
+    )
+    if not players_path.exists():
+        # Fallback to shipped scenario.
+        players_path = (
+            project_root / "configs" / scenario_name / "Rule" / "players.yml"
+        )
+    if not players_path.exists():
+        return {}
+
+    text = players_path.read_text(encoding="utf-8")
+    market_key = _first_top_level_key(text)
+    if not market_key:
+        return {}
+
+    # Parse with !include support.
+    import yaml as _yaml
+
+    class _IncludeLoader(_yaml.SafeLoader):
+        pass
+
+    _IncludeLoader.add_constructor(
+        "!include",
+        lambda loader, node: loader.construct_scalar(node),
+    )
+
+    try:
+        data = _yaml.load(text, Loader=_IncludeLoader)
+    except _yaml.YAMLError:
+        return {}
+
+    if not isinstance(data, dict) or market_key not in data:
+        return {}
+
+    market_block = data[market_key]
+    extras = (market_block.get("config") or {}).get("extras") or {}
+
+    # Filter out non-editable infrastructure keys.
+    _INFRA_KEYS = {"record_path", "custom_state_hot_limit"}
+    return {k: v for k, v in extras.items() if k not in _INFRA_KEYS}
+
+
 # ----------------------------------------------------------------------
 # Helpers — players.yml
 # ----------------------------------------------------------------------
@@ -684,12 +812,20 @@ def _render_players_yaml(
     class_paths: list[str],
     cid: str,
     has_prompts_module: bool,
+    market_extras_override: Optional[dict[str, Any]] = None,
 ) -> str:
     """Compose the customized ``players.yml`` text."""
     record_path = f"EXPERIMENT/CUSTOMIZED_SIMULATION/{cid}/records"
     blocks: list[str] = []
     blocks.append(_HEADER_PLAYERS.format(cid=cid))
-    blocks.append(market_block.rstrip() + "\n")
+
+    # Apply market extras override if provided.
+    final_market_block = market_block
+    if market_extras_override:
+        final_market_block = _apply_market_extras_override(
+            market_block, market_extras_override
+        )
+    blocks.append(final_market_block.rstrip() + "\n")
 
     used_keys: set[str] = {market_key}
     for selection, class_path in zip(selections, class_paths):
@@ -703,6 +839,37 @@ def _render_players_yaml(
         )
         blocks.append(block)
     return "\n".join(blocks).rstrip() + "\n"
+
+
+def _apply_market_extras_override(
+    market_block: str, overrides: dict[str, Any]
+) -> str:
+    """Patch market extras values in the raw YAML text block.
+
+    For each key in ``overrides``, finds the corresponding line in the
+    market block (matching ``<key>: <value>``) and rewrites its value.
+    This preserves comments, indentation, and ordering of the original.
+    """
+    lines = market_block.splitlines()
+    for key, new_value in overrides.items():
+        pattern = re.compile(
+            rf"^(\s+{re.escape(key)}\s*:\s*)(.+)$"
+        )
+        for i, line in enumerate(lines):
+            m = pattern.match(line)
+            if m:
+                # Format the value appropriately.
+                if isinstance(new_value, float):
+                    formatted = f"{new_value}"
+                elif isinstance(new_value, int):
+                    formatted = str(new_value)
+                elif isinstance(new_value, bool):
+                    formatted = "true" if new_value else "false"
+                else:
+                    formatted = str(new_value)
+                lines[i] = f"{m.group(1)}{formatted}"
+                break
+    return "\n".join(lines)
 
 
 _HEADER_PLAYERS = """\

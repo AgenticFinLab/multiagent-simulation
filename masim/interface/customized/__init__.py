@@ -41,10 +41,18 @@ from .config_writer import (
     CustomizedAgentSelection,
     CustomizedBundleResult,
     apply_customized_modifications,
+    extract_market_extras,
     initialize_customized_folder,
     next_customized_id,
     write_customized_bundle,
     write_default_scenario_bundle,
+)
+from .selection_state import (
+    delete_selection_state,
+    load_selection_state,
+    restore_state_to_session,
+    save_selection_state,
+    save_state_from_session,
 )
 
 __all__ = [
@@ -70,8 +78,15 @@ __all__ = [
     "CustomizedAgentSelection",
     "CustomizedBundleResult",
     "apply_customized_modifications",
+    "extract_market_extras",
     "initialize_customized_folder",
     "next_customized_id",
     "write_customized_bundle",
     "write_default_scenario_bundle",
+    # selection state persistence
+    "delete_selection_state",
+    "load_selection_state",
+    "restore_state_to_session",
+    "save_selection_state",
+    "save_state_from_session",
 ]

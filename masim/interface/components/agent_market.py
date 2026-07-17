@@ -29,11 +29,14 @@ from ..config_loader import (
 from ..customized import (
     CustomizedAgentSelection,
     apply_customized_modifications,
+    extract_market_extras,
     get_default_prompts,
     initialize_customized_folder,
     is_archetype_supported,
     is_scenario_compatible,
     parse_parameters_file,
+    restore_state_to_session,
+    save_state_from_session,
     scenario_market_features,
     write_customized_bundle,
     write_default_scenario_bundle,
@@ -359,6 +362,28 @@ def render_variant_choice() -> None:
             f"{_STANDARD_MARKET}"
             f"</div>"
         )
+
+    # Append actual market parameter values from the scenario config.
+    _market_params = extract_market_extras(
+        bundle_name="",  # no bundle yet; will fall back to shipped scenario
+        scenario_name=selected_base,
+        project_root=PROJECT_ROOT,
+    )
+    if _market_params:
+        _param_chips = "  ".join(
+            f"<code style='font-size:11px;background:#eef3f6;"
+            f"padding:1px 5px;border-radius:3px;'>"
+            f"{html.escape(k)}={v}</code>"
+            for k, v in _market_params.items()
+        )
+        situation_body += (
+            f"<div style='margin-top:8px;padding-top:7px;"
+            f"border-top:1px solid #e8ecf0;font-size:11.5px;"
+            f"color:#46535f;line-height:1.8;'>"
+            f"<span style='font-weight:600;color:#1a2633;'>"
+            f"Initial parameters:</span> {_param_chips}</div>"
+        )
+
     st.markdown(
         "<div style='margin-top:6px;padding:10px 14px;"
         "background:#fbfcfd;border:1px dashed #dde4ea;border-radius:8px;'>"
@@ -1429,6 +1454,7 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
             persisted.clear()
             persisted.update(edited)
             st.session_state[f"market_agent_{agent_type}"] = True
+            save_state_from_session(project_root=PROJECT_ROOT)
             st.toast(f"{agent['display_name']} → market", icon="✅")
             st.rerun()
     with btn_reset:
@@ -1923,6 +1949,15 @@ def render_customize() -> None:
         st.session_state.workflow_stage = "scenario_setup"
         st.rerun()
 
+    # --- Restore persisted selection state on fresh session entry ---
+    # If a bundle exists but no agents are loaded in memory (e.g. after
+    # a page refresh or app restart), attempt to recover from disk.
+    bundle_name = st.session_state.get("customized_bundle_name", "")
+    if bundle_name and not st.session_state.get("selected_market_agents"):
+        restore_state_to_session(
+            bundle_name=bundle_name, project_root=PROJECT_ROOT
+        )
+
     _inject_market_styles()
     catalog = load_agent_catalog(_agent_catalog_signature())
 
@@ -2005,6 +2040,7 @@ def render_customize() -> None:
                     agent["agent_type"] in wanted
                 )
             st.session_state.selected_market_agents = list(default_available)
+            save_state_from_session(project_root=PROJECT_ROOT)
             st.rerun()
 
     st.write(
@@ -2068,6 +2104,10 @@ def render_customize() -> None:
     st.session_state.selected_market_agents = selected
     selected_agents = [a for a in catalog if a["agent_type"] in set(selected)]
 
+    # Auto-save when grid selection changed (agent toggled via checkbox).
+    if set(selected) != saved_selection:
+        save_state_from_session(project_root=PROJECT_ROOT)
+
     # Inline compatibility warning: surface incompatible archetypes
     # before the user attempts to launch.
     compat_blocker = None
@@ -2088,6 +2128,57 @@ def render_customize() -> None:
                 + "\n".join(f"- {r}" for r in compat_blocker)
             )
 
+    # --- Market Parameters Editor ---
+    bundle_name = st.session_state.get("customized_bundle_name", "")
+    if bundle_name:
+        with st.expander("Market Parameters", expanded=False):
+            st.caption(
+                "Edit the market coordinator's parameters. These control "
+                "price dynamics, impact coefficients, and noise in the "
+                "simulation."
+            )
+            # Load defaults from the bundle's Rule/players.yml.
+            default_extras = extract_market_extras(
+                bundle_name=bundle_name,
+                scenario_name=scenario_base,
+                project_root=PROJECT_ROOT,
+            )
+            if default_extras:
+                # Initialize persisted overrides from session state or disk.
+                persisted_market = st.session_state.setdefault(
+                    "customized_market_extras", {}
+                )
+                edited_market: dict = {}
+                cols_per_row = 3
+                keys = list(default_extras.keys())
+                for row_start in range(0, len(keys), cols_per_row):
+                    row_keys = keys[row_start : row_start + cols_per_row]
+                    cols = st.columns(len(row_keys))
+                    for col, param_key in zip(cols, row_keys):
+                        with col:
+                            default_val = default_extras[param_key]
+                            current_val = persisted_market.get(
+                                param_key, default_val
+                            )
+                            # Render as float input.
+                            label = param_key.replace("_", " ").title()
+                            widget_key = f"market_extra_{param_key}"
+                            new_val = st.number_input(
+                                label,
+                                value=float(current_val),
+                                format="%.6g",
+                                key=widget_key,
+                                help=f"Default: {default_val}",
+                            )
+                            edited_market[param_key] = new_val
+
+                # Update session state if user changed anything.
+                if edited_market != persisted_market:
+                    st.session_state["customized_market_extras"] = edited_market
+                    save_state_from_session(project_root=PROJECT_ROOT)
+            else:
+                st.info("No editable market parameters found for this scenario.")
+
     reset_col, launch_col = st.columns([1, 3])
     with reset_col:
         if st.button(
@@ -2099,6 +2190,7 @@ def render_customize() -> None:
             for agent in catalog:
                 st.session_state[f"market_agent_{agent['agent_type']}"] = False
             st.session_state.selected_market_agents = []
+            save_state_from_session(project_root=PROJECT_ROOT)
             st.rerun()
     with launch_col:
         if st.button(
@@ -2108,6 +2200,7 @@ def render_customize() -> None:
             disabled=not selected or compat_blocker is not None,
             key="customize_launch",
         ):
+            save_state_from_session(project_root=PROJECT_ROOT)
             target = _write_customized_bundle(
                 selected_agents=selected_agents,
                 scenario_base=scenario_base,
@@ -2296,6 +2389,8 @@ def _write_customized_bundle(
         # Carry any user-adjusted round count from the variant_choice page
         # into the generated bundle (None => keep the shipped count).
         edited_rounds = st.session_state.get(f"variant_rounds_{scenario_base}")
+        # Carry market parameter overrides from the Market Parameters editor.
+        market_extras = st.session_state.get("customized_market_extras") or None
         result = apply_customized_modifications(
             bundle_name=bundle_name,
             selections=selections,
@@ -2304,6 +2399,7 @@ def _write_customized_bundle(
             total_rounds=(
                 int(edited_rounds) if edited_rounds is not None else None
             ),
+            market_extras_override=market_extras,
         )
     except Exception as exc:
         st.error(f"Failed to materialise customized bundle: {exc}")
