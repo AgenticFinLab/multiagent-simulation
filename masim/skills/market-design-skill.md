@@ -814,6 +814,21 @@ A conformant profile MUST satisfy ALL of the following:
   `../agent_images/icons/market/{market-type}-{stem}.png` — see the
   sibling handbook `market-icon-generation-skill.md`.
 
+**Scenario binding (`archetype:` field, expanded in §8):**
+
+- Every shipped scenario under `configs/` (excluding
+  `CUSTOMIZED_SIMULATION/`, `TEMPLATES/`, `Demo/`) MUST declare
+  `archetype: {stem}` as the first child of its coordinator top-level
+  YAML key in every variant's `players.yml`. `_ARCHETYPE_FALLBACK`
+  in `config_loader.py` SHOULD be empty in a fully-migrated repo
+  (kept only as a safety net for un-materialised customized copies).
+- The `archetype:` value MUST exactly match a file stem in
+  `examples/AGENT_POOL/market/` — see §8.2 for the canonical set.
+- The `Scenario Portability` row in every archetype profile (§4.2)
+  MUST enumerate all scenarios whose `players.yml → archetype:`
+  binds to that profile, with **Full ✅** or **Approximated ⚠**
+  markers per the legend in §8.5.
+
 ## 7. Validation Checklist (Self-Check)
 
 **Structural completeness:**
@@ -898,13 +913,185 @@ A conformant profile MUST satisfy ALL of the following:
 - [ ] `examples/AGENT_POOL/agent_images/design.md` has a mapping row
       for `market/{market-type}-{stem}.md` → `market/{market-type}-{stem}.png`
 
-## 8. Status
+## 8. Scenario Binding — the `archetype:` field **(MANDATORY)**
+
+Scenarios reference market coordinator profiles the same way they
+reference participant profiles: through an explicit `archetype:` key
+inside the coordinator's YAML block in
+`configs/{scenario}/{variant}/players.yml`. This binding is what
+lets the runtime, the UI sidebar, the topology preview, the market
+profile dialog, and the analysis modules all agree on **which of the
+nine canonical market coordinators governs this scenario**.
+
+### 8.1 Where the field lives
+
+The `archetype:` key is a direct child of the **coordinator's
+top-level YAML key** in `players.yml`. Three coordinator key
+patterns exist in the codebase — the field is placed identically
+in all three:
+
+```yaml
+# Pattern 1 — standard scenarios (single canonical coordinator key)
+market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  scale: ...
+  price_impact: ...
+
+# Pattern 2 — opinion-domain scenarios (EchoChamber family)
+# Coordinator key follows the pattern `{variant}_opinion_environment:`
+# where {variant} is one of: rule, llm, ragllm, rulellm. The four
+# variants exist because participant reasoning depth changes per
+# variant, but the archetype binding is identical in every variant.
+rule_opinion_environment:      # (or llm_opinion_environment:, etc.)
+  archetype: opinion-echo-chamber-clustering  # -> AGENT_POOL/market/opinion-echo-chamber-clustering.md
+  ...
+
+# Pattern 3 — information-domain scenarios (RumorSpread family)
+# Same variant convention: `{variant}_information_environment:`.
+rule_information_environment:  # (or llm_information_environment:, etc.)
+  archetype: information-sis-contagion  # -> AGENT_POOL/market/information-sis-contagion.md
+  ...
+```
+
+Note on variant-prefixed keys: the loader recognises any top-level
+key that literally equals `market:` OR ends in `_opinion_environment`
+OR `_information_environment`. This lets participant-variant
+scaffolding evolve without requiring changes to the archetype
+binding contract. See `_find_coordinator_block()` in
+`config_loader.py`.
+
+The trailing comment `# -> AGENT_POOL/market/{stem}.md` is
+**recommended, not required**; the loader ignores it. It exists so
+that a reader scanning `players.yml` can jump to the profile
+without opening the config loader.
+
+### 8.2 Field format rules
+
+- **Value type**: string, MUST equal the archetype file stem — the
+  file name at `examples/AGENT_POOL/market/{value}.md` without the
+  `.md` extension.
+- **Canonical set** (9 archetypes as of 2026-07-17):
+  `stock-standard-price-impact`,
+  `opinion-echo-chamber-clustering`,
+  `information-sis-contagion`,
+  `fx-currency-peg-and-attack`,
+  `bond-yield-spread-inverse`,
+  `crypto-algostable-depeg`,
+  `derivatives-vol-feedback`,
+  `deposit-bank-run-diamond-dybvig`,
+  `credit-minsky-cycle`.
+- **No inline overrides**: if a scenario needs a different
+  mechanism, add a **new** archetype profile — do not fork the
+  field into `archetype-plus-patch` style.
+- **One archetype per coordinator**: multi-coordinator scenarios
+  (each of which has its own top-level YAML key) declare the field
+  once per coordinator block. Standard scenarios have exactly one
+  coordinator, so exactly one `archetype:` key.
+
+### 8.3 Resolution semantics (implemented in `masim/interface/config_loader.py`)
+
+The runtime resolves an archetype in three tiers, in order:
+
+1. **Explicit** — parse `players.yml` for the scenario's default
+   variant, locate the coordinator block, read `archetype:`. This is
+   the authoritative source.
+2. **Fallback table** — if the `players.yml` is missing the field
+   (legacy scenarios, config still being migrated), the
+   `_ARCHETYPE_FALLBACK` dict in `config_loader.py` maps the
+   scenario key to the intended archetype. This is a
+   migration/bridge mechanism and SHOULD be empty in a fully
+   migrated repo.
+3. **Default** — if neither the field nor the fallback table
+   resolves, return `stock-standard-price-impact`. This preserves
+   backward compatibility with older workflows.
+
+The exposed loader functions are:
+
+- `get_market_archetype(scenario_name) -> Optional[str]` — returns
+  the resolved stem, or `None` if the scenario itself does not
+  exist.
+- `get_market_icon_path(scenario_name) -> Optional[Path]` — returns
+  the absolute path to the icon PNG (or `None` if the PNG has not
+  yet been generated).
+- `get_market_type(scenario_name) -> str` — returns the
+  human-readable label ("Stock Market", "FX Market", "Bond
+  Market", "Crypto Market", "Derivatives Market", "Deposit Market",
+  "Credit Market", "Opinion Field", "Information Field") derived
+  from the archetype stem via `_ARCHETYPE_MARKET_TYPE`.
+
+### 8.4 UI consumption
+
+- **`masim/interface/components/sidebar.py`** — topology preview
+  renders the archetype icon as the hub node (falls back to a gold
+  FancyBboxPatch if the PNG is absent).
+- **`masim/interface/components/agent_market.py`** — the "View the
+  market coordinator archetype" button opens
+  `_show_market_archetype_dialog()`, which renders
+  `AGENT_POOL/market/{stem}.md` in a Streamlit dialog, with the
+  icon as header, mirroring the "View the scenario definition"
+  drill-through for player agents.
+
+### 8.5 Full vs Approximated status
+
+The archetype binding declares **intended mechanism**, not
+current code fidelity. Every archetype profile MUST include a
+`Scenario Portability` row that lists bound scenarios and marks
+each one as:
+
+- **Full ✅** — coordinator code implements the archetype's
+  mechanism signature verbatim (aggregate rules, transition
+  equations, invariants).
+- **Approximated ⚠** — archetype bound for icon/UI/narrative
+  purposes, but the coordinator code currently uses the
+  standard price-impact formula.
+
+The profile MUST also include a `Scenario Status` row that
+explains this legend inline. This keeps academic honesty
+(readers see exactly what is implemented today) while
+preserving the design target for future upgrades.
+
+### 8.6 Injection / migration workflow
+
+For bulk migration of legacy scenarios, use
+`scripts/inject_market_archetype.py` which:
+
+1. Iterates all variant `players.yml` under `configs/`.
+2. Detects coordinator top-level key (matches
+   `^market:`, `^\w+_opinion_environment:`,
+   `^\w+_information_environment:`).
+3. Reads the mapping table (scenario stem → archetype stem).
+4. Inserts `archetype: {stem}  # -> AGENT_POOL/market/{stem}.md`
+   as the first child of the coordinator block. Idempotent —
+   updates in place if the field already exists.
+
+### 8.7 Cross-section consistency
+
+Add these rules to §6:
+
+- Every scenario in `examples/` MUST have `archetype:` set in every
+  variant's `players.yml`; the `_ARCHETYPE_FALLBACK` table SHOULD
+  be empty in a fully-migrated repo.
+- The `archetype:` value MUST exactly match a file stem in
+  `examples/AGENT_POOL/market/`.
+- The `Scenario Portability` row in every archetype profile MUST
+  enumerate all scenarios whose `players.yml → archetype:` binds
+  to that profile, with Full/Approximated markers.
+
+### 8.8 Related handbooks
+
+- `market-icon-generation-skill.md` — describes how the PNG
+  referenced by `get_market_icon_path()` is generated and where it
+  lives (`agent_images/icons/market/{stem}.png`).
+- `agent-design-skill.md` — the participant-side analogue; the
+  `class:` field in a player block plays the same role as
+  `archetype:` in a coordinator block.
+
+## 9. Status
 
 | Field   | Content                                                    |
 |---------|------------------------------------------------------------|
-| Version | 1.1.0                                                      |
-| Created | 2026-07-16 (v1.0.0); revised 2026-07-16 (v1.1.0 — added Lifecycle Mapping, State Initialization contract, §4.6.6 Invariants & Failure Modes, §4.7.1 parameter categorisation, Regime-dependent Feedback Direction, Exogenous Driver Boundary) |
+| Version | 1.2.0                                                      |
+| Created | 2026-07-16 (v1.0.0); revised 2026-07-16 (v1.1.0 — added Lifecycle Mapping, State Initialization contract, §4.6.6 Invariants & Failure Modes, §4.7.1 parameter categorisation, Regime-dependent Feedback Direction, Exogenous Driver Boundary); revised 2026-07-17 (v1.2.0 — added §8 Scenario Binding: `archetype:` field convention, resolution semantics, UI consumption, Full/Approximated status, injection workflow) |
 | Status  | canonical                                                  |
 | Domains | All simulation domains that expose an environment-side player |
-| Sibling | `agent-design-skill.md` (participant-agent handbook)       |
-| Icon    | See `market-icon-generation-skill.md`                      |
+| Sibling | `agent-design-skill.md` (participant-agent handbook); `market-icon-generation-skill.md` (icon handbook) |

@@ -16,6 +16,7 @@
 # Market (Coordinator) - Rule-Based with GARCH Volatility
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.VolatilityClustering.RuleLLM.players:Market"
   num_instances: 1

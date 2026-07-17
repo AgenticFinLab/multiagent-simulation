@@ -1,6 +1,7 @@
 # EuropeanDebtCrisis RuleLLM Agent Configuration
 
 market:
+  archetype: bond-yield-spread-inverse  # -> AGENT_POOL/market/bond-yield-spread-inverse.md
   name: "Market"
   class: "examples.EuropeanDebtCrisis.Rule.players:Market"
   num_instances: 1

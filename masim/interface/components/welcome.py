@@ -16,7 +16,7 @@ import shutil
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import streamlit as st
 
@@ -24,6 +24,42 @@ import streamlit as st
 _PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 _LOGO_PATH = _PROJECT_ROOT / "logo.jpg"
 _EXAMPLES_DIR = _PROJECT_ROOT / "examples"
+_CUSTOMIZED_CONFIGS_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
+
+# Bundle folders live under CUSTOMIZED_SIMULATION and follow the naming
+# convention ``{project_slug}-{project_id}-{scenario_base}``. The id is a
+# stable 8-char hex string (``uuid.uuid4().hex[:8]``). Scenario names in
+# this codebase never contain hyphens (e.g. ``AnchoringEffect``,
+# ``BlackMonday1987``); slugs may. The regex therefore anchors on the
+# 8-hex id in the middle and matches the scenario as a trailing
+# hyphen-free token, allowing the slug to be captured greedily.
+_BUNDLE_NAME_RE = re.compile(r"^(.+)-([0-9a-fA-F]{8})-([^-]+)$")
+
+# Regex for detecting a trailing ``-<8-hex>`` id suffix on a value in the
+# ``Name your project`` input. When the user selects an existing project
+# chip, the input is populated with ``{display_name}-{project_id}`` so the
+# text matches the chip label; we then split the input back into name and
+# id parts so folder creation stays clean (folders remain
+# ``examples/<slug>/`` — the id never leaks into the folder name itself).
+_ID_SUFFIX_RE = re.compile(r"^(.+)-([0-9a-fA-F]{8})$")
+
+
+def _split_project_input(value: str) -> tuple[str, str]:
+    """Split a project-input string into ``(name_part, id_part)``.
+
+    If ``value`` ends with ``-<8-hex>``, the trailing token is treated as
+    the id and the leading portion is the display name. Otherwise the
+    whole value is the name and id is empty. Enables the input to mirror
+    the chip label verbatim (``MYTest-b6beb998``) while keeping the
+    slug/id logically distinct downstream.
+    """
+    text = (value or "").strip()
+    if not text:
+        return "", ""
+    m = _ID_SUFFIX_RE.match(text)
+    if m:
+        return m.group(1), m.group(2).lower()
+    return text, ""
 
 
 # ---------------------------------------------------------------------------
@@ -54,46 +90,91 @@ def _logo_data_uri() -> Optional[str]:
     return f"data:image/png;base64,{b64}"
 
 
-def _list_existing_projects() -> list[dict[str, str]]:
-    """Return metadata for every existing project under ``examples/``.
+def _list_existing_projects() -> list[dict[str, Any]]:
+    """Return one row per (slug, project_id) pair discovered on disk.
 
-    A directory is treated as a project iff it contains a
-    ``project_meta.json`` file. The list is sorted by ``created_at``
-    descending (most recent first) with a slug fallback for entries
-    that lack a timestamp.
+    The **source of truth** is
+    ``configs/CUSTOMIZED_SIMULATION/{slug}-{id}-{scenario}/`` — those
+    folders are what the user has actually customized and can re-enter.
+    Each discovered ``(slug, project_id)`` pair collapses into a single
+    row that also records the list of scenarios that project has
+    touched. The friendlier ``display_name`` is resolved from
+    ``examples/<slug>/project_meta.json`` when available, otherwise
+    the slug is used verbatim (with underscores rewritten as spaces
+    for readability).
 
     Returns:
-        List of dicts with keys ``display_name``, ``slug``, ``created_at``.
+        List of dicts with keys ``display_name``, ``slug``,
+        ``project_id``, ``scenarios`` (list[str]) and ``latest_mtime``
+        (float), sorted by ``latest_mtime`` descending.
     """
-    if not _EXAMPLES_DIR.exists():
+    if not _CUSTOMIZED_CONFIGS_DIR.exists():
         return []
-    projects: list[dict[str, str]] = []
-    for entry in _EXAMPLES_DIR.iterdir():
+
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    for entry in _CUSTOMIZED_CONFIGS_DIR.iterdir():
         if not entry.is_dir():
             continue
-        meta_path = entry / "project_meta.json"
-        if not meta_path.exists():
+        match = _BUNDLE_NAME_RE.match(entry.name)
+        if not match:
             continue
+        slug, pid, scenario = match.group(1), match.group(2), match.group(3)
         try:
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
-            continue
-        projects.append(
-            {
-                "display_name": str(meta.get("project_name") or entry.name),
-                "slug": str(meta.get("slug") or entry.name),
-                "created_at": str(meta.get("created_at", "")),
-            }
+            mtime = entry.stat().st_mtime
+        except OSError:
+            mtime = 0.0
+        record = grouped.setdefault(
+            (slug, pid),
+            {"slug": slug, "project_id": pid,
+             "scenarios": [], "latest_mtime": 0.0},
         )
-    projects.sort(key=lambda p: p["created_at"], reverse=True)
-    return projects
+        record["scenarios"].append(scenario)
+        if mtime > record["latest_mtime"]:
+            record["latest_mtime"] = mtime
+
+    result: list[dict[str, Any]] = []
+    for (slug, pid), rec in grouped.items():
+        # Prefer the friendlier project_name from examples/<slug>/meta;
+        # fall back to the slug (underscores rewritten as spaces).
+        display_name = slug.replace("_", " ")
+        meta_path = _EXAMPLES_DIR / slug / "project_meta.json"
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                display_name = str(meta.get("project_name") or display_name)
+            except (json.JSONDecodeError, OSError):
+                pass
+        result.append({
+            "display_name": display_name,
+            "slug": slug,
+            "project_id": pid,
+            "scenarios": sorted(set(rec["scenarios"])),
+            "latest_mtime": rec["latest_mtime"],
+        })
+
+    result.sort(key=lambda p: p["latest_mtime"], reverse=True)
+    return result
 
 
-def create_run_environment(display_name: str) -> Path:
+def create_run_environment(
+    display_name: str,
+    *,
+    preferred_id: Optional[str] = None,
+) -> Path:
     """Create ``examples/<slug>/`` as the base run environment.
 
-    Also writes a small ``project_meta.json`` recording the display name and
-    creation timestamp. Idempotent: reuses the folder if it already exists.
+    Also writes a small ``project_meta.json`` recording the display name,
+    a stable 8-char ``project_id`` (used to compose customized-bundle folder
+    names), and the creation timestamp. Idempotent: reuses the folder and
+    meta if they already exist; back-fills a missing ``project_id`` on
+    legacy projects created before the id was persisted.
+
+    Args:
+        display_name: The user-visible project name.
+        preferred_id: Optional 8-char hex id to adopt (e.g. when reusing
+            a project picked from the existing-projects chip list). Only
+            applied when the on-disk meta has no id yet; existing ids are
+            never overwritten.
 
     Returns:
         The created (or existing) project directory path.
@@ -103,12 +184,29 @@ def create_run_environment(display_name: str) -> Path:
     project_dir.mkdir(parents=True, exist_ok=True)
 
     meta_path = project_dir / "project_meta.json"
-    if not meta_path.exists():
+    if meta_path.exists():
+        # Back-fill project_id for legacy projects that predate the field.
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            meta = {}
+        if not meta.get("project_id"):
+            meta["project_id"] = preferred_id or uuid.uuid4().hex[:8]
+            meta.setdefault("project_name", display_name.strip())
+            meta.setdefault("slug", slug)
+            meta.setdefault(
+                "created_at", datetime.now().isoformat(timespec="seconds")
+            )
+            meta_path.write_text(
+                json.dumps(meta, indent=2), encoding="utf-8"
+            )
+    else:
         meta_path.write_text(
             json.dumps(
                 {
                     "project_name": display_name.strip(),
                     "slug": slug,
+                    "project_id": preferred_id or uuid.uuid4().hex[:8],
                     "created_at": datetime.now().isoformat(timespec="seconds"),
                 },
                 indent=2,
@@ -116,6 +214,20 @@ def create_run_environment(display_name: str) -> Path:
             encoding="utf-8",
         )
     return project_dir
+
+
+def _read_project_id(slug: str) -> str:
+    """Read the persisted ``project_id`` for a given slug, or empty string."""
+    if not slug:
+        return ""
+    meta_path = _EXAMPLES_DIR / slug / "project_meta.json"
+    if not meta_path.exists():
+        return ""
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ""
+    return str(meta.get("project_id", ""))
 
 
 # ---------------------------------------------------------------------------
@@ -195,29 +307,84 @@ def _inject_welcome_styles() -> None:
             text-transform: uppercase; letter-spacing: 0.08em;
             margin-bottom: 0.2rem;
         }
-        /* Existing-projects picker (chips below the name input) */
+        /* Existing-projects picker (chips below the name input).
+           Design targets: compact, refined typography; clear visual
+           hierarchy between the (bold) project name and the (subtle,
+           monospace) 8-char id; tight but breathable spacing. */
         .welcome-projects-hint {
-            font-size: 0.72rem; color: #7a8794;
-            text-transform: uppercase; letter-spacing: 0.06em;
-            font-weight: 700; margin: 0.35rem 0 0.15rem 0;
+            font-size: 0.66rem; color: #8892a0;
+            text-transform: uppercase; letter-spacing: 0.09em;
+            font-weight: 600; margin: 0.65rem 0 0.35rem 0;
         }
+        /* Base chip button. Two-line max via wrap; consistent min-height
+           keeps rows visually aligned. */
         [class*="st-key-welcome_pick_project_"] button {
-            font-size: 0.78rem !important;
-            padding: 3px 10px !important;
-            min-height: 0 !important;
+            font-size: 0.72rem !important;
+            padding: 4px 10px !important;
+            min-height: 30px !important;
             height: auto !important;
-            line-height: 1.4 !important;
-            border-radius: 999px !important;
-            border: 1px solid #d5dde5 !important;
-            background: #f6f8fa !important;
-            color: #2a3742 !important;
+            line-height: 1.3 !important;
+            border-radius: 7px !important;
+            border: 1px solid #e2e8ee !important;
+            background: #fafbfc !important;
+            color: #3a4653 !important;
             box-shadow: none !important;
-            white-space: nowrap;
+            white-space: normal !important;
+            word-break: break-word !important;
+            text-align: center !important;
+            width: 100% !important;
+            transition: border-color 0.15s, background 0.15s, color 0.15s !important;
         }
         [class*="st-key-welcome_pick_project_"] button:hover {
             border-color: #2a5fa6 !important;
-            background: #eaf0f8 !important;
+            background: #f0f5fb !important;
             color: #17212b !important;
+        }
+        /* Selected chip state: rendered as ``type="primary"`` so we can
+           target it distinctly without a per-chip class. Streamlit tags
+           the primary variant via both the ``kind`` attribute (older
+           versions) and ``data-testid`` (newer versions); we cover both. */
+        [class*="st-key-welcome_pick_project_"] button[kind="primary"],
+        [class*="st-key-welcome_pick_project_"] button[data-testid*="primary"] {
+            background: #2a5fa6 !important;
+            border-color: #2a5fa6 !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 0 0 2px rgba(42, 95, 166, 0.15) !important;
+        }
+        [class*="st-key-welcome_pick_project_"] button[kind="primary"]:hover,
+        [class*="st-key-welcome_pick_project_"] button[data-testid*="primary"]:hover {
+            background: #234f8f !important;
+            border-color: #234f8f !important;
+            color: #ffffff !important;
+        }
+        /* Streamlit wraps button label markdown in a <p>; the default
+           <p> margin adds unwanted vertical whitespace inside chips. */
+        [class*="st-key-welcome_pick_project_"] button p {
+            margin: 0 !important;
+            line-height: 1.3 !important;
+        }
+        /* The id portion of a chip label is rendered as inline code
+           (backtick-wrapped in the markdown label) so it visually reads
+           as metadata: monospace font, smaller size, softer color, and
+           no code-block background. */
+        [class*="st-key-welcome_pick_project_"] button code {
+            background: transparent !important;
+            padding: 0 !important;
+            border: none !important;
+            font-size: 0.66rem !important;
+            font-weight: 500 !important;
+            color: #8892a0 !important;
+            letter-spacing: 0.02em !important;
+        }
+        [class*="st-key-welcome_pick_project_"] button[kind="primary"] code,
+        [class*="st-key-welcome_pick_project_"] button[data-testid*="primary"] code {
+            color: rgba(255, 255, 255, 0.82) !important;
+        }
+        /* Overflow caption below the chip grid. */
+        .welcome-projects-more {
+            font-size: 0.68rem; color: #8892a0;
+            margin: 0.4rem 0 0 0; font-style: italic;
         }
         /* Mode cards */
         .mode-card {
@@ -398,13 +565,29 @@ def render_welcome() -> None:
             # into this pending slot; we apply it to the widget's session_state
             # key BEFORE the text_input is instantiated so Streamlit picks up
             # the new value on the current run.
+            #
+            # IMPORTANT: We use ``session_state[key]`` as the SOLE source of
+            # truth for the widget's value — no ``value=`` parameter is
+            # passed. Combining ``value=`` with a pre-set session_state key
+            # in Streamlit can silently prefer whichever the current version
+            # deems the "newer" source, which caused chip clicks to not
+            # visibly update the input on some renders.
+            if "welcome_project_name_input" not in st.session_state:
+                # First-render initialization from any externally-set project
+                # name (e.g. one persisted from a prior session).
+                st.session_state["welcome_project_name_input"] = (
+                    st.session_state.get("project_name", "")
+                )
             pending = st.session_state.pop("_welcome_pending_name", None)
             if pending is not None:
                 st.session_state["welcome_project_name_input"] = pending
-            default_name = st.session_state.get("project_name", "")
+            pending_id = st.session_state.pop("_welcome_pending_id", None)
+            if pending_id is not None:
+                # Adopt the picked project's persisted id so downstream
+                # bundle names line up with the on-disk folders.
+                st.session_state["project_id"] = pending_id
             project_name = st.text_input(
                 "Project name",
-                value=default_name,
                 placeholder="e.g. My First Market Study",
                 label_visibility="collapsed",
                 key="welcome_project_name_input",
@@ -416,8 +599,17 @@ def render_welcome() -> None:
 
             # --- Existing projects picker (live filter as user types) ---
             existing_projects = _list_existing_projects()
+            # The input may hold either a bare name ("MyProj") or the
+            # chip-style ``{name}-{id}`` ("MyProj-b6beb998") when a chip
+            # is selected. All downstream logic below — filtering, slug
+            # computation, existence checks, folder creation — must
+            # operate on the name part only, while the id part (if any)
+            # feeds ``preferred_id`` for id reuse.
+            input_name_part, input_id_part = _split_project_input(
+                project_name
+            )
             if existing_projects:
-                query = (project_name or "").strip().casefold()
+                query = input_name_part.casefold()
                 if query:
                     matches = [
                         p for p in existing_projects
@@ -441,33 +633,126 @@ def render_welcome() -> None:
                         "create a new one."
                     )
                 else:
-                    # Show up to 8 matches as clickable chips, most recent first.
-                    visible = matches[:8]
-                    chip_cols = st.columns(min(len(visible), 4), gap="small")
-                    for idx, proj in enumerate(visible):
-                        col = chip_cols[idx % len(chip_cols)]
-                        with col:
-                            if st.button(
-                                proj["display_name"],
-                                key=f"welcome_pick_project_{proj['slug']}",
-                                help=f"Reuse project '{proj['display_name']}' (examples/{proj['slug']}/)",
-                                width="stretch",
-                            ):
-                                # Stash the pick and rerun; the pending slot
-                                # will be applied to the text_input on the
-                                # next run before the widget is re-created.
-                                st.session_state["_welcome_pending_name"] = (
-                                    proj["display_name"]
+                    # Row-major grid: fixed 4 chips per row, wrapping into
+                    # additional rows below. Using a fresh ``st.columns``
+                    # call per row (rather than a single one indexed by
+                    # ``idx % 4``) ensures chips lay out horizontally
+                    # row-by-row instead of stacking vertically inside
+                    # each column. Up to 12 chips are surfaced; more
+                    # than that is a signal to refine the search.
+                    visible = matches[:12]
+                    per_row = 4
+                    # Currently-selected chip is tracked as "slug::pid";
+                    # a click on the same chip toggles it back off.
+                    selected_key = st.session_state.get(
+                        "_welcome_selected_project", ""
+                    )
+                    for row_start in range(0, len(visible), per_row):
+                        row_slice = visible[row_start:row_start + per_row]
+                        # Always allocate `per_row` slots so the last row
+                        # stays left-aligned with the ones above (empty
+                        # trailing slots are simply not filled).
+                        chip_cols = st.columns(per_row, gap="small")
+                        for idx, proj in enumerate(row_slice):
+                            with chip_cols[idx]:
+                                pid = proj.get("project_id") or ""
+                                # Markdown label: bold name + inline-code
+                                # id gives clear visual hierarchy between
+                                # the human-readable label and the machine
+                                # identifier. CSS above strips the code
+                                # tag's default background and monospaces
+                                # the id in a subtle gray.
+                                chip_label = (
+                                    f"**{proj['display_name']}** \u2009`{pid}`"
+                                    if pid else f"**{proj['display_name']}**"
                                 )
-                                st.rerun()
+                                this_key = f"{proj['slug']}::{pid}"
+                                is_selected = (selected_key == this_key)
+                                if st.button(
+                                    chip_label,
+                                    key=f"welcome_pick_project_{proj['slug']}_{pid or 'nopid'}",
+                                    type="primary" if is_selected else "secondary",
+                                    help=(
+                                        f"Reuse '{proj['display_name']}' "
+                                        f"(examples/{proj['slug']}/). "
+                                        "Click again to deselect."
+                                    ),
+                                    width="stretch",
+                                ):
+                                    if is_selected:
+                                        # Toggle off: clear selection, wipe
+                                        # the pending name (empty string is
+                                        # applied to the widget key on the
+                                        # next run), and drop the adopted id.
+                                        st.session_state.pop(
+                                            "_welcome_selected_project", None
+                                        )
+                                        st.session_state[
+                                            "_welcome_pending_name"
+                                        ] = ""
+                                        st.session_state.pop("project_id", None)
+                                    else:
+                                        # Select (or switch to) this chip.
+                                        # Populate the input with the full
+                                        # chip-style label (``name-id``) so
+                                        # the visible text mirrors the chip.
+                                        st.session_state[
+                                            "_welcome_selected_project"
+                                        ] = this_key
+                                        st.session_state[
+                                            "_welcome_pending_name"
+                                        ] = (
+                                            f"{proj['display_name']}-{pid}"
+                                            if pid else proj["display_name"]
+                                        )
+                                        if pid:
+                                            st.session_state[
+                                                "_welcome_pending_id"
+                                            ] = pid
+                                    st.rerun()
                     if len(matches) > len(visible):
-                        st.caption(
-                            f"\u2026 {len(matches) - len(visible)} more "
-                            "hidden \u2014 refine the name to narrow down."
+                        st.markdown(
+                            f'<div class="welcome-projects-more">'
+                            f'\u2026 {len(matches) - len(visible)} more '
+                            'hidden \u2014 refine the name to narrow down.'
+                            '</div>',
+                            unsafe_allow_html=True,
                         )
 
-            slug_preview = _slugify(project_name) if project_name else ""
-            if project_name and not slug_preview:
+                    # Auto-deselect when the user has diverged from the
+                    # selected chip by typing manually. The invariant is
+                    # "chip selected ⇔ input == '<display_name>-<pid>'"
+                    # (or bare display_name when pid is missing). Any
+                    # divergence — including removing the id suffix —
+                    # means the user is starting a fresh project, so we
+                    # drop selection and the adopted id.
+                    if selected_key:
+                        sel_slug, _, sel_pid = selected_key.partition("::")
+                        sel_display = next(
+                            (
+                                p["display_name"]
+                                for p in existing_projects
+                                if p["slug"] == sel_slug
+                                and p["project_id"] == sel_pid
+                            ),
+                            None,
+                        )
+                        if sel_display is not None:
+                            expected = (
+                                f"{sel_display}-{sel_pid}"
+                                if sel_pid else sel_display
+                            )
+                            if (project_name or "").strip() != expected:
+                                st.session_state.pop(
+                                    "_welcome_selected_project", None
+                                )
+                                st.session_state.pop("project_id", None)
+
+            # ``project_name`` may hold ``{name}-{id}``; slugify and
+            # folder-existence must operate on the name part only.
+            slug_source, id_from_input = _split_project_input(project_name)
+            slug_preview = _slugify(slug_source) if slug_source else ""
+            if slug_source and not slug_preview:
                 st.warning(
                     "Please use at least one letter or number in the name."
                 )
@@ -485,14 +770,22 @@ def render_welcome() -> None:
                 width="stretch",
                 disabled=not slug_preview,
             ):
-                project_dir = create_run_environment(project_name)
-                st.session_state.project_name = project_name.strip()
+                # Prefer the id embedded in the input suffix (from chip
+                # selection) so downstream folder naming matches the
+                # on-disk CUSTOMIZED_SIMULATION bundles exactly. Fall back
+                # to any id already carried in session state.
+                adopted_id = id_from_input or st.session_state.get(
+                    "project_id"
+                ) or None
+                project_dir = create_run_environment(
+                    slug_source, preferred_id=adopted_id
+                )
+                st.session_state.project_name = slug_source
                 st.session_state.project_slug = slug_preview
                 st.session_state.project_dir = str(project_dir)
-                # Generate a short unique ID for this project session.
-                # Used to name customized bundle folders:
-                # {project_name}-{scenario}-{project_id}
-                if not st.session_state.get("project_id"):
-                    st.session_state["project_id"] = uuid.uuid4().hex[:8]
+                # Re-read the id from disk so session state always matches
+                # what create_run_environment persisted — the definitive
+                # value used by downstream bundle folder naming.
+                st.session_state["project_id"] = _read_project_id(slug_preview)
                 st.session_state.workflow_stage = "scenario_setup"
                 st.rerun()

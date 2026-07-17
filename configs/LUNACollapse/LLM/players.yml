@@ -1,6 +1,7 @@
 # LUNACollapse LLM Agent Configuration
 
 market:
+  archetype: crypto-algostable-depeg  # -> AGENT_POOL/market/crypto-algostable-depeg.md
   name: "Market"
   class: "examples.LUNACollapse.LLM.players:Market"
   num_instances: 1

@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: credit-minsky-cycle  # -> AGENT_POOL/market/credit-minsky-cycle.md
   name: "Market"
   class: "examples.GFC2008.Rag.players:Market"
   num_instances: 1

@@ -1,6 +1,7 @@
 # Volmageddon Rule Agent Configuration
 
 market:
+  archetype: derivatives-vol-feedback  # -> AGENT_POOL/market/derivatives-vol-feedback.md
   name: "Market"
   class: "examples.Volmageddon.Rule.players:Market"
   num_instances: 1

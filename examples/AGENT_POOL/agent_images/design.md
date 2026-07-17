@@ -353,15 +353,25 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
 
 Market coordinators live under `examples/AGENT_POOL/market/{market-type}-{stem}.md`
 and their icons under `agent_images/icons/market/{market-type}-{stem}.png`.
-They follow the same overall visual shell as participant icons, with three
-coordinator-specific overrides declared in `masim/skills/market-icon-generation-skill.md`:
-(1) a small hub / broadcast-dish / network accent floating above the robot head
-signalling *"I coordinate"*, (2) a **compound lower motif** combining the
-Market-Type element with the mechanism motif, and (3) a Chinese label tag
-ending in `协调器 / 场 / 系统` (never `投资者`).
+Per `masim/skills/market-icon-generation-skill.md` v1.1.x, coordinator icons are
+**headless mechanism diagrams** — deliberately different from participant icons.
+The three overrides are: (1) NO robot head / face / antenna — a market is a
+mechanism, not an agent; (2) a **dual-motif composition** where the upper 55–65%
+of the badge shows a large Market-Type primary symbol and the lower 20–25%
+shows a smaller mechanism secondary symbol, with a large empty gradient gap
+between them; (3) a Chinese label tag ending in `协调器 / 场 / 系统` (never
+`投资者`, which is reserved for player-side participants). The badge itself
+must have **zero outline stroke / no sticker halo** — the gradient fades to
+pure white at the circle boundary like a soft watercolor stain.
 
 | # | Coordinator                                          | Icon                                              | Display Label       | Match Reason                                                                                                                                             |
 |---|------------------------------------------------------|---------------------------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1 | `market/stock-standard-price-impact.md`              | `market/stock-standard-price-impact.png`          | 股票市场 / 协调器    | Stock (candlestick chart) + Standard price-impact + mean-reversion (anchor motif); blue-cyan palette; label uses 协调器 for matching-engine-like clearing |
 | 2 | `market/opinion-echo-chamber-clustering.md`          | `market/opinion-echo-chamber-clustering.png`      | 舆论场 / 回声室型    | Opinion (diverging speech bubbles) + Echo-chamber clustering (converging within-cluster arrows on two clusters); violet-cyan palette; label uses 场 for diffuse environmental field |
 | 3 | `market/information-sis-contagion.md`                | `market/information-sis-contagion.png`            | 信息场 / 谣言传播型  | Information (megaphone + propagation-node network) + SIS-style contagion (central node with radiating wave arcs); coral-cyan palette; label uses 场       |
+| 4 | `market/fx-currency-peg-and-attack.md`               | `market/fx-currency-peg-and-attack.png`           | 外汇市场 / 汇率协调器 | Two currency badges (¥/$) with crossing exchange arrows above; reservoir + shield motif below (reserves ledger defending the peg γ_eff → 0 pathway); teal-gold palette |
+| 5 | `market/bond-yield-spread-inverse.md`                | `market/bond-yield-spread-inverse.png`            | 债券市场 / 收益率协调器 | Bond certificate + decaying yield curve above (price/yield inverse); anchor with lateral tug arrows below (F(t) intervention_bonus pulling yield); olive-lavender palette |
+| 6 | `market/crypto-algostable-depeg.md`                  | `market/crypto-algostable-depeg.png`              | 加密货币市场 / 算稳脱锚协调器 | Two hexagon tiles (LUNA moon + UST $1) linked by a broken chain above (two-asset coupling breaks); spiral runaway arrow below (death-spiral dynamics); violet-cyan palette |
+| 7 | `market/derivatives-vol-feedback.md`                 | `market/derivatives-vol-feedback.png`             | 衍生品市场 / 波动率反馈协调器 | VIX↑ and XIV↓ mirror-image panels with reflexive feedback loop above; starburst below (volmageddon termination event, one-way `terminated` latch); lavender-cyan palette |
+| 8 | `market/deposit-bank-run-diamond-dybvig.md`          | `market/deposit-bank-run-diamond-dybvig.png`      | 存款市场 / 银行挤兑协调器 | Classical bank vault building with depositor-queue outflow arrow above; gauge/arc with ratchet indicator below (withdrawal_fraction ∈ [0,1], monotone non-decreasing); amber-gold palette |
+| 9 | `market/credit-minsky-cycle.md`                      | `market/credit-minsky-cycle.png`                  | 信贷市场 / 明斯基周期协调器 | Three-stage regime bar 对冲→投机→庞氏 with rightward ratchet above (monotone regime escalation, γ(regime) tightening); circular arrow loop below (Minsky credit cycle); teal-ochre palette |

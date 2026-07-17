@@ -1,6 +1,7 @@
 # GamblerFallacy Rule Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.GamblerFallacy.Rule.players:Market"
   num_instances: 1

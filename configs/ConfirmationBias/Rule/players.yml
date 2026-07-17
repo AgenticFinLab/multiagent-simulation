@@ -27,6 +27,7 @@
 # Environment dynamics: P(t+1) = P(t) + λ·D(t) + γ·[F − P(t)] + ε
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.ConfirmationBias.Rule.players:Market"
   num_instances: 1

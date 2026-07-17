@@ -7,6 +7,7 @@
 # the persona-driven policy can reference the intended archetype explicitly.
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.StatusQuoBias.LLM.players:Market"
   num_instances: 1

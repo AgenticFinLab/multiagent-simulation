@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: bond-yield-spread-inverse  # -> AGENT_POOL/market/bond-yield-spread-inverse.md
   name: "Market"
   class: "examples.LTCMCollapse.Rag.players:Market"
   num_instances: 1

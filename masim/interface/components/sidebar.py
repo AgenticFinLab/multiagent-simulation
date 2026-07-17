@@ -28,6 +28,8 @@ from ..config_loader import (
     get_topology_info,
     get_market_type,
     get_market_description,
+    get_market_archetype,
+    get_market_icon_path,
     get_diagram_path,
     scenario_display_name,
     _resolve_display_key,
@@ -451,15 +453,32 @@ def _load_yaml_lenient(path: Path) -> dict:
         return yaml.load(f, Loader=_LenientLoader) or {}
 
 
-def _icon_for_base(base_key: str) -> Optional[Path]:
+def _icon_for_base(base_key: str, scenario_name: Optional[str] = None) -> Optional[Path]:
     """Map a player base id (snake_case) to its agent icon PNG, if any.
 
-    Icons are stored kebab-cased with a ``finance-`` domain prefix in
-    ``agent_images/icons`` (e.g. the player ``anchored_trader`` ->
-    ``finance-anchored-trader.png``). The market coordinator has no icon
-    and returns None so callers draw the hub explicitly.
+    Investor players resolve to ``agent_images/icons/finance-{base}.png``
+    (kebab-cased). For the market coordinator, when ``scenario_name`` is
+    provided, resolves the scenario's bound archetype (via
+    :func:`config_loader.get_market_archetype`) and returns the matching
+    ``agent_images/icons/market/{archetype-stem}.png``. Returns ``None`` if
+    no icon can be found (the caller then falls back to a labelled shape).
     """
-    if not base_key or base_key == "market":
+    if not base_key:
+        return None
+    if base_key == "market" or base_key.endswith("_environment"):
+        if scenario_name:
+            p = get_market_icon_path(scenario_name)
+            if p is not None:
+                # get_market_icon_path returns a relative Path rooted at
+                # ``examples/...``; resolve against the project root so it
+                # matches the absolute paths used elsewhere.
+                abs_p = (
+                    Path(__file__).resolve().parents[3] / p
+                    if not p.is_absolute()
+                    else p
+                )
+                if abs_p.exists():
+                    return abs_p
         return None
     candidate = ICON_ROOT / f"finance-{base_key.replace('_', '-')}.png"
     return candidate if candidate.exists() else None
@@ -534,7 +553,9 @@ def _get_or_create_icon_topology_preview(scenario_name: str) -> Optional[Path]:
             return None
 
         preview_dir.mkdir(parents=True, exist_ok=True)
-        fig = _render_icon_topology_figure(hub, investor_nodes, raw_connections)
+        fig = _render_icon_topology_figure(
+            hub, investor_nodes, raw_connections, scenario_name
+        )
         fig.savefig(
             str(preview_path),
             dpi=150,
@@ -569,13 +590,20 @@ def _place_node_icon(ax, img_path: Path, x: float, y: float, half: float) -> Non
     )
 
 
-def _render_icon_topology_figure(hub: str, investor_nodes: list, connections: dict):
+def _render_icon_topology_figure(
+    hub: str,
+    investor_nodes: list,
+    connections: dict,
+    scenario_name: str,
+):
     """Build the matplotlib figure for the icon star topology.
 
     Args:
         hub: hub node id (typically ``market``).
         investor_nodes: concrete investor instance ids on the ring.
         connections: raw base-key connection map (for edge direction hints).
+        scenario_name: scenario key used to resolve the market archetype
+            icon and per-investor icons (via ``_icon_for_base``).
 
     Returns:
         matplotlib Figure (caller is responsible for saving/closing).
@@ -609,35 +637,46 @@ def _render_icon_topology_figure(hub: str, investor_nodes: list, connections: di
             zorder=1,
         )
 
-    # Hub node — labelled gold box.
+    # Hub node — market archetype icon if available, else labelled gold box.
     from matplotlib.patches import FancyBboxPatch
 
+    hub_icon_path = _icon_for_base("market", scenario_name)
     hub_r = icon_half * 1.15
-    box_w = hub_r * 2.6
-    box_h = hub_r * 1.6
-    ax.add_patch(
-        FancyBboxPatch(
-            (hub_pos[0] - box_w / 2, hub_pos[1] - box_h / 2),
-            box_w,
-            box_h,
-            boxstyle="round,pad=0.02,rounding_size=0.05",
-            linewidth=1.5,
-            edgecolor="#f0a500",
-            facecolor="#f0a500",
-            zorder=6,
+    if hub_icon_path is not None:
+        # Draw the market coordinator icon as the hub. Size is slightly
+        # larger than investor icons to emphasise the coordinator role.
+        try:
+            _place_node_icon(
+                ax, hub_icon_path, hub_pos[0], hub_pos[1], icon_half * 1.25
+            )
+        except Exception:
+            hub_icon_path = None  # fall through to gold box
+    if hub_icon_path is None:
+        box_w = hub_r * 2.6
+        box_h = hub_r * 1.6
+        ax.add_patch(
+            FancyBboxPatch(
+                (hub_pos[0] - box_w / 2, hub_pos[1] - box_h / 2),
+                box_w,
+                box_h,
+                boxstyle="round,pad=0.02,rounding_size=0.05",
+                linewidth=1.5,
+                edgecolor="#f0a500",
+                facecolor="#f0a500",
+                zorder=6,
+            )
         )
-    )
-    ax.text(
-        hub_pos[0],
-        hub_pos[1],
-        "Market",
-        ha="center",
-        va="center",
-        fontsize=8,
-        fontweight="bold",
-        color="#0e1117",
-        zorder=7,
-    )
+        ax.text(
+            hub_pos[0],
+            hub_pos[1],
+            "Market",
+            ha="center",
+            va="center",
+            fontsize=8,
+            fontweight="bold",
+            color="#0e1117",
+            zorder=7,
+        )
 
     # Investor nodes — agent icon or coloured-circle fallback.
     import re
@@ -645,7 +684,7 @@ def _render_icon_topology_figure(hub: str, investor_nodes: list, connections: di
     for node in investor_nodes:
         p = pos[node]
         base = _base_of_node(node)
-        icon_path = _icon_for_base(base)
+        icon_path = _icon_for_base(base, scenario_name)
         if icon_path is not None:
             try:
                 _place_node_icon(ax, icon_path, p[0], p[1], icon_half)

@@ -10,6 +10,7 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Short Interest Tracking"
   class: "examples.ShortSqueeze.LLM.players:Market"
   num_instances: 1

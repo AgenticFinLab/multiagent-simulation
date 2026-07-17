@@ -7,6 +7,7 @@ knowledge:
       path: "examples/document-sources/rag_index"
 
 market:
+  archetype: deposit-bank-run-diamond-dybvig  # -> AGENT_POOL/market/deposit-bank-run-diamond-dybvig.md
   name: "Market"
   class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1

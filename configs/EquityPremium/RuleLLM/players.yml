@@ -3,6 +3,7 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Stock and Bond"
   class: "examples.EquityPremium.RuleLLM.players:Market"
   num_instances: 1

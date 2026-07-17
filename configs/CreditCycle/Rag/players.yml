@@ -31,6 +31,7 @@ knowledge:
 # Market (Coordinator) — rule-based
 # -----------------------------------------------------------------------------
 market:
+  archetype: credit-minsky-cycle  # -> AGENT_POOL/market/credit-minsky-cycle.md
   name: "Market"
   class: "examples.CreditCycle.Rag.players:Market"
   num_instances: 1

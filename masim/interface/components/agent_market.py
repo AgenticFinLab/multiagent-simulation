@@ -17,7 +17,9 @@ from ..config_loader import (
     get_agents_info,
     get_finance_scenario_content,
     get_finance_scenario_path,
+    get_market_archetype,
     get_market_description,
+    get_market_icon_path,
     get_market_type,
     get_phenomenon_description,
     get_scenario_info,
@@ -455,15 +457,16 @@ def render_variant_choice() -> None:
             unsafe_allow_html=True,
         )
 
-        # Click-through to the canonical finance-{scenario}.md definition.
-        # Rendered as a scoped text-link button beneath the info card so
-        # users can drill into the full target-spec scenario definition
-        # (meta, phenomenon statement, anchors, stylized facts, historical
-        # anchors, roster, environment, parameters, variants, references).
-        if finance_path is not None:
+        # Shared scoped styling for the drill-through text-link buttons.
+        # Emitted whenever EITHER the finance-scenario button or the
+        # market-archetype button will render — the archetype button can
+        # appear without a finance-*.md (e.g. opinion / information domains),
+        # so this block must not be gated on `finance_path`.
+        if finance_path is not None or get_market_archetype(selected_base):
             st.markdown(
                 "<style>"
-                '[class*="st-key-view_bases_"] button{'
+                '[class*="st-key-view_bases_"] button,'
+                '[class*="st-key-view_archetype_"] button{'
                 'background:transparent !important;'
                 'border:none !important;box-shadow:none !important;'
                 'padding:2px 0 !important;margin:2px 0 6px 2px !important;'
@@ -472,13 +475,21 @@ def render_variant_choice() -> None:
                 'font-size:12.5px !important;text-align:left !important;'
                 'justify-content:flex-start !important;'
                 '}'
-                '[class*="st-key-view_bases_"] button:hover{'
+                '[class*="st-key-view_bases_"] button:hover,'
+                '[class*="st-key-view_archetype_"] button:hover{'
                 'color:#1a4a8f !important;text-decoration:underline !important;'
                 'background:transparent !important;'
                 '}'
                 "</style>",
                 unsafe_allow_html=True,
             )
+
+        # Click-through to the canonical finance-{scenario}.md definition.
+        # Rendered as a scoped text-link button beneath the info card so
+        # users can drill into the full target-spec scenario definition
+        # (meta, phenomenon statement, anchors, stylized facts, historical
+        # anchors, roster, environment, parameters, variants, references).
+        if finance_path is not None:
             finance_rel = finance_path.name
             with st.container(key=f"view_bases_{selected_base}"):
                 if st.button(
@@ -492,6 +503,26 @@ def render_variant_choice() -> None:
                     type="tertiary",
                 ):
                     _show_finance_scenario_dialog(selected_base)
+
+        # Click-through to the market archetype profile in AGENT_POOL/market/.
+        # Resolves via players.yml -> market.archetype: and renders the
+        # coordinator's canonical mechanism definition, mirroring the
+        # per-player profile drill-through.
+        market_archetype_stem = get_market_archetype(selected_base)
+        if market_archetype_stem:
+            with st.container(key=f"view_archetype_{selected_base}"):
+                if st.button(
+                    f"\U0001f3db\ufe0f  View the market coordinator archetype "
+                    f"({market_archetype_stem}) \u2192",
+                    key=f"btn_view_archetype_{selected_base}",
+                    help=(
+                        f"Open examples/AGENT_POOL/market/{market_archetype_stem}.md "
+                        "\u2014 shared coordinator profile bound to this scenario "
+                        "via players.yml \u2192 market.archetype:."
+                    ),
+                    type="tertiary",
+                ):
+                    _show_market_archetype_dialog(selected_base)
 
     st.divider()
     
@@ -970,6 +1001,59 @@ def _show_finance_scenario_dialog(scenario_base: str) -> None:
     st.divider()
     content = get_finance_scenario_content(scenario_base) or ""
     # Strip the leading H1 title \u2014 we already show a header above.
+    lines = content.split("\n")
+    if lines and lines[0].startswith("# "):
+        lines = lines[1:]
+    st.markdown("\n".join(lines).lstrip("\n"))
+
+
+@st.dialog("Market coordinator archetype", width="large")
+def _show_market_archetype_dialog(scenario_base: str) -> None:
+    """Modal that renders the coordinator archetype profile for a scenario.
+
+    Resolves the archetype stem via
+    :func:`config_loader.get_market_archetype` (which reads
+    ``players.yml -> market.archetype:``) and renders the corresponding
+    profile file at ``examples/AGENT_POOL/market/{stem}.md``. This mirrors
+    ``_show_agent_profile_dialog`` for players, giving the market
+    coordinator first-class documentation drill-through.
+    """
+    stem = get_market_archetype(scenario_base)
+    if not stem:
+        st.warning(
+            "No market archetype could be resolved for this scenario "
+            f"(**{html.escape(scenario_base)}**). Check that "
+            "`configs/{scenario}/{variant}/players.yml` has an "
+            "`archetype:` field in the coordinator block."
+        )
+        return
+
+    profile_path = AGENT_POOL_ROOT / "market" / f"{stem}.md"
+    icon_path = ICON_ROOT / "market" / f"{stem}.png"
+
+    header_cols = st.columns([1, 6], gap="small")
+    with header_cols[0]:
+        if icon_path.exists():
+            st.image(str(icon_path), width=64)
+    with header_cols[1]:
+        st.markdown(f"### {html.escape(stem)}")
+        st.caption(
+            f"Bound to scenario `{scenario_base}` via "
+            "`players.yml \u2192 market.archetype:` \u2014 see "
+            "`masim/skills/market-design-skill.md` for the field spec."
+        )
+    st.divider()
+
+    if not profile_path.exists():
+        st.warning(
+            f"Archetype profile missing at "
+            f"`examples/AGENT_POOL/market/{stem}.md`. Add the profile "
+            "following `masim/skills/market-design-skill.md`."
+        )
+        return
+    st.caption(f"Source: `examples/AGENT_POOL/market/{profile_path.name}`")
+    content = profile_path.read_text(encoding="utf-8")
+    # Strip the leading H1 to avoid double-titles in the modal.
     lines = content.split("\n")
     if lines and lines[0].startswith("# "):
         lines = lines[1:]

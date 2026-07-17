@@ -86,6 +86,7 @@ knowledge:
 # book, computes price updates, and manages trading mechanics.
 # =============================================================================
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"  # Source: implementation infrastructure (human-readable label)
   class: "examples.AssetBubble.Rag.players:Market"  # Source: implementation infrastructure (fully-qualified class path)
   num_instances: 1  # Source: implementation infrastructure (agent expander count)

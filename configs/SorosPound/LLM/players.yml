@@ -3,6 +3,7 @@
 # `agent_type` field required per agent-design-skill.md §3.6.0 I/O Contract.
 
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.SorosPound.LLM.players:Market"
   num_instances: 1

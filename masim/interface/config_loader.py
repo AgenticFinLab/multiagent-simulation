@@ -984,18 +984,167 @@ def get_market_description(scenario_name: str) -> str:
     )
 
 
+def _load_players_yml_lenient(scenario_key: str) -> Dict[str, Any]:
+    """Load configs/{scenario}/{variant}/players.yml with !include tolerance.
+
+    The players.yml files use `!include persona.yml` tags that PyYAML's
+    SafeLoader rejects. This helper installs a null constructor so we can
+    still read scalar keys like `archetype:` from within the market block.
+    Returns an empty dict on any error.
+    """
+    p = _configs_path(scenario_key) / "players.yml"
+    if not p.exists():
+        return {}
+
+    class _Loader(yaml.SafeLoader):
+        pass
+
+    _Loader.add_constructor("!include", lambda loader, node: None)
+    _Loader.add_multi_constructor("", lambda loader, tag_suffix, node: None)
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            data = yaml.load(f, Loader=_Loader)
+        return data if isinstance(data, dict) else {}
+    except Exception:  # noqa: BLE001 - defensive: bad YAML shouldn't crash UI
+        return {}
+
+
+def _find_coordinator_block(players_cfg: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Return the coordinator's config block from a parsed players.yml.
+
+    Standard finance scenarios use the top-level key ``market:``. Opinion /
+    information scenarios use ``{variant}_opinion_environment:`` or
+    ``{variant}_information_environment:``. This helper returns the value
+    dict for whichever coordinator-role block is present.
+    """
+    if not players_cfg:
+        return None
+    if isinstance(players_cfg.get("market"), dict):
+        return players_cfg["market"]
+    for key, val in players_cfg.items():
+        if isinstance(val, dict) and (
+            key.endswith("_opinion_environment")
+            or key.endswith("_information_environment")
+        ):
+            return val
+    return None
+
+
+# Fallback map used when a scenario's players.yml has no `archetype:` field
+# (e.g. the file predates the archetype convention). Prefer reading the YAML
+# field; this table only guards against config regressions.
+_ARCHETYPE_FALLBACK: Dict[str, str] = {
+    "EchoChamber": "opinion-echo-chamber-clustering",
+    "RumorSpread": "information-sis-contagion",
+    "LUNACollapse": "crypto-algostable-depeg",
+    "SVBBankRun": "deposit-bank-run-diamond-dybvig",
+    "Volmageddon": "derivatives-vol-feedback",
+    "CreditCycle": "credit-minsky-cycle",
+    "GFC2008": "credit-minsky-cycle",
+    "EuropeanDebtCrisis": "bond-yield-spread-inverse",
+    "LTCMCollapse": "bond-yield-spread-inverse",
+    "SorosPound": "fx-currency-peg-and-attack",
+    "AsianFinancialCrisis": "fx-currency-peg-and-attack",
+    "CurrencyCrisis": "fx-currency-peg-and-attack",
+    "CarryTradeUnwind": "fx-currency-peg-and-attack",
+}
+
+
+def get_market_archetype(scenario_name: str) -> Optional[str]:
+    """Return the archetype stem bound to this scenario, if any.
+
+    Resolution order:
+      1. Read `archetype:` field from the coordinator block in
+         configs/{scenario}/{variant}/players.yml.
+      2. Fall back to the built-in ``_ARCHETYPE_FALLBACK`` table for
+         scenarios whose YAML has not yet been updated.
+      3. Fall back to ``stock-standard-price-impact`` (the workhorse
+         archetype used by most behavioural-bias scenarios).
+
+    Args:
+        scenario_name: Scenario key (accepts flat "AssetBubble" or
+            slash-separated "AssetBubble/Rule").
+
+    Returns:
+        A kebab-case archetype stem (matching a file under
+        ``examples/AGENT_POOL/market/{stem}.md``) or ``None`` if the
+        scenario name is unknown and no players.yml can be parsed.
+    """
+    resolved = _resolve_display_key(scenario_name)
+    # Try each variant in turn — variants share the archetype in practice.
+    for variant in ("Rule", "LLM", "RuleLLM", "Rag"):
+        cfg = _load_players_yml_lenient(f"{resolved}/{variant}")
+        block = _find_coordinator_block(cfg)
+        if block:
+            arch = block.get("archetype")
+            if isinstance(arch, str) and arch:
+                return arch
+    # Also try the raw key in case it's already a full "Name/Variant" path.
+    cfg = _load_players_yml_lenient(scenario_name)
+    block = _find_coordinator_block(cfg)
+    if block:
+        arch = block.get("archetype")
+        if isinstance(arch, str) and arch:
+            return arch
+    if resolved in _ARCHETYPE_FALLBACK:
+        return _ARCHETYPE_FALLBACK[resolved]
+    return "stock-standard-price-impact"
+
+
+def get_market_icon_path(scenario_name: str) -> Optional[Path]:
+    """Return the coordinator icon PNG for this scenario, if present on disk.
+
+    The path is ``examples/AGENT_POOL/agent_images/icons/market/{stem}.png``
+    where ``{stem}`` is the archetype returned by :func:`get_market_archetype`.
+
+    Returns ``None`` if either the archetype cannot be resolved or the PNG
+    file does not exist.
+    """
+    stem = get_market_archetype(scenario_name)
+    if not stem:
+        return None
+    p = EXAMPLES_DIR / "AGENT_POOL" / "agent_images" / "icons" / "market" / f"{stem}.png"
+    return p if p.exists() else None
+
+
+# Human-readable Market-Type label per archetype stem. Used by
+# ``get_market_type`` so the sidebar shows a semantic label that matches
+# the icon rather than a keyword-guessed generic string.
+_ARCHETYPE_MARKET_TYPE: Dict[str, str] = {
+    "stock-standard-price-impact": "Stock Market",
+    "opinion-echo-chamber-clustering": "Opinion Field",
+    "information-sis-contagion": "Information Field",
+    "fx-currency-peg-and-attack": "FX Market",
+    "bond-yield-spread-inverse": "Bond Market",
+    "crypto-algostable-depeg": "Crypto Market",
+    "derivatives-vol-feedback": "Derivatives Market",
+    "deposit-bank-run-diamond-dybvig": "Deposit Market",
+    "credit-minsky-cycle": "Credit Market",
+}
+
+
 def get_market_type(scenario_name: str) -> str:
-    """Infer the market type from the scenario name and config.
+    """Infer the market type from the scenario's bound archetype.
+
+    Prefers the ``players.yml → market.archetype:`` field (via
+    :func:`get_market_archetype`) and maps it through
+    ``_ARCHETYPE_MARKET_TYPE`` to a human-readable label. Falls back to the
+    legacy keyword-based guess only when no archetype can be resolved.
 
     Args:
         scenario_name: Name of the scenario
 
     Returns:
-        Human-readable market type string (e.g. 'Stock Market')
+        Human-readable market type string (e.g. 'Stock Market').
     """
-    scenario_name = _resolve_display_key(scenario_name)
-    # All current scenarios are equity/stock market simulations
-    name_lower = scenario_name.lower()
+    stem = get_market_archetype(scenario_name)
+    if stem and stem in _ARCHETYPE_MARKET_TYPE:
+        return _ARCHETYPE_MARKET_TYPE[stem]
+
+    # Fallback: legacy keyword heuristic (kept for safety when the archetype
+    # cannot be resolved — should be unreachable once all scenarios carry
+    # the `archetype:` field).
+    name_lower = _resolve_display_key(scenario_name).lower()
     if "crypto" in name_lower:
         return "Crypto Market"
     elif "bond" in name_lower or "fixed" in name_lower:

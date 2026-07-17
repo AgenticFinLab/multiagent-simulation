@@ -1,6 +1,7 @@
 # LUNACollapse Rule Agent Configuration
 
 market:
+  archetype: crypto-algostable-depeg  # -> AGENT_POOL/market/crypto-algostable-depeg.md
   name: "Market"
   class: "examples.LUNACollapse.Rule.players:Market"
   num_instances: 1

@@ -26,6 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Mean Reversion"
   class: "examples.ReversalEffect.Rag.players:Market"
   num_instances: 1

@@ -68,20 +68,44 @@ exists.
 
 ## Style Contract
 
+Participant agents are **actors** — decision-making players inside the
+simulation. Their icons MUST look like character avatars. This visual
+language is the *complement* to market-coordinator icons (which are
+strictly headless mechanism diagrams — see the sibling
+`market-icon-generation-skill.md`). A user scanning
+`agent_images/icons/` in a file browser should be able to tell an
+actor-icon from a mechanism-icon at a glance.
+
+**Player vs. Environment — icon language boundary.**
+
+| Family                 | Directory                    | Visual language                | Central subject             |
+|------------------------|------------------------------|--------------------------------|-----------------------------|
+| Participant agents     | `icons/finance/`, `icons/opinion/`, other `icons/{domain}/` | **Robot head + one motif**     | Friendly robot head (an actor) |
+| Market coordinators    | `icons/market/`              | Headless dual-motif            | Market-Type primary symbol (a mechanism) |
+
+Participant icons MUST include a robot head. Coordinator icons MUST
+NOT include a robot head, face, or any humanoid element. Do not
+blur this boundary.
+
 Match the existing icon set in
 `examples/AGENT_POOL/agent_images/icon_focused_contact_sheet.jpg` and
 `examples/AGENT_POOL/agent_images/icons/`.
 
-**Composition.**
+**Composition (participant icons).**
 
 - Square 512x512 PNG.
 - Centered circular badge that fills most of the canvas.
-- Soft two-color gradient inside the circle; white or transparent outside
-  the circle.
-- Same friendly robot head in the upper third: rounded white helmet, dark
-  screen face, cyan facial details, small antenna points, simple neck circle.
-- One large, simple foreground motif in the lower half. The motif must be
-  readable at thumbnail size and tied to the agent behavior.
+- Soft two-color gradient inside the circle; **pure white** outside
+  the circle (never transparent, never checkerboard, and — critically
+  — the badge itself must have NO outline stroke, NO dark ring
+  border, NO sticker halo; the gradient fill simply ends at the
+  circle boundary, like a soft watercolor disc on white paper).
+- **Required robot head** in the upper third: rounded white helmet,
+  dark screen face, cyan facial details, small antenna points, simple
+  neck circle. This is mandatory — a participant icon without a
+  robot head is invalid.
+- One large, simple foreground motif in the lower half. The motif
+  must be readable at thumbnail size and tied to the agent behavior.
 - Rounded white Chinese label tag at the bottom, usually two lines:
   role label on top and role noun below, such as `趋势型` / `投资者`.
 
@@ -96,6 +120,10 @@ Match the existing icon set in
 
 **Do not generate.**
 
+- **Never omit the robot head.** A headless icon in a participant
+  domain is automatically invalid and must be regenerated. If you
+  need a headless mechanism-diagram icon, that agent belongs under
+  `examples/AGENT_POOL/market/` — use the market-icon skill instead.
 - No photorealistic people, office scenes, trading floors, screenshots, or
   detailed UI panels.
 - No full-body character replacing the standard robot head.
@@ -104,6 +132,16 @@ Match the existing icon set in
 - No English text inside the icon artwork, except file/catalog metadata
   outside the image.
 - No watermark, signature, brand mark, extra captions, or dense decoration.
+- No sticker outline halo around the badge — no dark ring border on
+  the circular badge's perimeter. The badge's gradient fill ends at
+  the circle boundary and the pure white background begins with zero
+  stroke width. Merely saying "no halo" in a prompt is insufficient;
+  ImageGen tends to add a dark ring by default. Explicitly instruct
+  it: "NO outline stroke on the badge itself, gradient fill ends at
+  circle boundary, treat like a soft watercolor disc on white paper."
+- No `协调器 / 场 / 系统` noun in the label — those are reserved for
+  market coordinators. Participants use `投资者` or the domain's
+  natural actor noun.
 
 ## Procedure
 
@@ -147,15 +185,21 @@ Match the existing icon set in
    ```text
    Create a 512x512 PNG agent icon matching the existing MASim AGENT_POOL
    icon style. Composition: large centered circular badge with soft
-   two-color gradient, white/transparent outside the circle, friendly robot
-   head in the upper third with rounded white helmet, dark screen face, cyan
-   face details and small antenna points. Lower half: one clean flat
-   vector-like motif for <motif>, using dark navy outlines and simple
-   high-contrast shapes. Bottom: rounded white Chinese label tag with exactly
-   this label: <display-label>. Style must match the icon-focused contact
-   sheet: flat, clean, geometric, thumbnail-readable. No photorealism, no 3D,
-   no full-body character, no complex background, no English text, no
-   watermark, no extra captions.
+   two-color gradient. IMPORTANT: the badge has NO outline stroke, NO
+   dark ring border, NO sticker halo — the gradient fill ends at the
+   circle boundary and the pure white background begins, like a soft
+   watercolor disc on white paper. Background outside the badge is pure
+   white (never transparent, never checkerboard). REQUIRED: friendly
+   robot head in the upper third with rounded white helmet, dark screen
+   face, cyan face details and small antenna points — the robot head
+   is mandatory, not optional. Lower half: one clean flat vector-like
+   motif for <motif>, using dark navy outlines and simple high-contrast
+   shapes. Bottom: rounded white Chinese label tag with exactly this
+   label: <display-label>. Style must match the icon-focused contact
+   sheet: flat, clean, geometric, thumbnail-readable. No photorealism,
+   no 3D, no full-body character, no complex background, no English
+   text, no watermark, no extra captions, no dark ring border on the
+   badge itself.
    ```
 
    If image generation is unavailable in the current environment, stop and
@@ -196,6 +240,10 @@ Run these checks three consecutive times during Step 2 closeout:
 - [ ] Every referenced pool profile has one `| Icon |` row.
 - [ ] The linked PNG exists under `examples/AGENT_POOL/agent_images/icons/`.
 - [ ] The PNG filename is `{domain}-{agent-stem}.png`.
+- [ ] The icon **visually contains a robot head** in the upper third
+      — headless icons in participant domains are invalid.
+- [ ] The badge has **no dark outline stroke / no sticker halo**;
+      background outside the badge is pure white.
 - [ ] `agent_images/design.md` has exactly one mapping row pairing
       `{domain}/{agent-stem}.md` with `{domain}-{agent-stem}.png`.
 - [ ] The mapping row's display label and match reason are consistent with the
@@ -203,3 +251,12 @@ Run these checks three consecutive times during Step 2 closeout:
 - [ ] Reused pool agents are not regenerated when their existing icon resolves;
       they are generated or repaired when the icon is missing, broken, or
       unmapped.
+
+## Status
+
+| Field   | Content                                                                    |
+|---------|----------------------------------------------------------------------------|
+| Version | 1.1.0                                                                      |
+| Updated | 2026-07-17 (v1.1.0: explicit player-vs-environment boundary; robot head mandatory; anti-halo prompt guidance) |
+| Status  | canonical                                                                  |
+| Sibling | `market-icon-generation-skill.md` (headless market-coordinator icons)      |

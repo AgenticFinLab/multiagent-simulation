@@ -1,4 +1,5 @@
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.TulipMania.Rule.players:Market"
   num_instances: 1

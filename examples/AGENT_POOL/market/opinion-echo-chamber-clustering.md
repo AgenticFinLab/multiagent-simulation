@@ -11,7 +11,8 @@
 | Broadcast Cadence    | every-tick (one broadcast per simulation round, after all agents submit polarize / depolarize / neutral actions)                                                                                            |
 | Determinism          | stochastic-given-seed (ε ~ N(0, σ²) drawn from a seeded RNG; identical seed + identical inbound action sequence + identical submitted opinions reproduce byte-equal broadcasts)                             |
 | Feedback Direction   | **Regime-dependent** — inside the moderate band (polarization near the equilibrium anchor `p*`), the centripetal term dominates and the mechanism is stabilising; outside that band, if `polarization_impact · |net_polarization|` exceeds `centripetal_force · |p − p*|`, the mechanism amplifies clustering [Ref 1, Ref 2] |
-| Scenario Portability | Used by opinion-domain scenarios where the collective observable is a scalar polarization index over [0, 1]. Reference host: **EchoChamber**. Reusable for FilterBubble, GroupPolarization, and any scenario requiring homophily-driven opinion clustering. |
+| Scenario Portability | 1 pool scenario bound via `players.yml → market.archetype: opinion-echo-chamber-clustering`. **Full ✅**: EchoChamber (dedicated `OpinionEnvironment` class with `polarization` + `cluster_separation` + `cross_cutting_exposure` state). **Approximated ⚠**: (none). See also the Scenario Status row below. |
+| Scenario Status      | **Full** = coordinator code implements the archetype's mechanism signature verbatim; **Approximated** = archetype bound via `players.yml → market.archetype:` for icon/UI/narrative purposes, but the coordinator code currently uses the standard price-impact formula `P(t+1)=P(t)+λ·NetDemand+γ·(F-P(t))+ε` as a placeholder — the archetype's specialized state and dynamics are intended but not yet realized in code. |
 
 ## Definition and Goals
 

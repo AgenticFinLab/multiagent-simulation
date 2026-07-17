@@ -35,6 +35,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DotComBubble.Rag.players:Market"
   num_instances: 1

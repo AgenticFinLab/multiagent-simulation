@@ -22,6 +22,7 @@ knowledge: &volmageddon_knowledge
     top_k: 5
 
 market:
+  archetype: derivatives-vol-feedback  # -> AGENT_POOL/market/derivatives-vol-feedback.md
   name: "Market"
   class: "examples.Volmageddon.Rag.players:Market"
   num_instances: 1

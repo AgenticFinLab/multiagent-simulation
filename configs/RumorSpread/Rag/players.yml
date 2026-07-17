@@ -42,6 +42,7 @@ knowledge:
 # InformationEnvironment (Coordinator) — identical to Rule variant
 # -----------------------------------------------------------------------------
 ragllm_information_environment:
+  archetype: information-sis-contagion  # -> AGENT_POOL/market/information-sis-contagion.md
   name: "InformationEnvironment"
   class: "examples.RumorSpread.Rag.players:InformationEnvironment"
   num_instances: 1

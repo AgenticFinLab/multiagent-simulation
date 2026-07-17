@@ -172,6 +172,16 @@
 #   Replace with whatever parameters YOUR Market class reads from extras.
 # =============================================================================
 market:
+  # REQUIRED: archetype — binds this scenario to a canonical market
+  # coordinator profile at AGENT_POOL/market/{archetype}.md. See
+  # masim/skills/market-design-skill.md §8 for the field contract and
+  # the 9-archetype canonical set. Value MUST equal one of:
+  #   stock-standard-price-impact, opinion-echo-chamber-clustering,
+  #   information-sis-contagion, fx-currency-peg-and-attack,
+  #   bond-yield-spread-inverse, crypto-algostable-depeg,
+  #   derivatives-vol-feedback, deposit-bank-run-diamond-dybvig,
+  #   credit-minsky-cycle.
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.[SCENARIO_NAME].[Variant].players:Market"
   # REQUIRED: num_instances — always 1 for market (single coordinator)

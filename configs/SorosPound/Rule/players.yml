@@ -2,6 +2,7 @@
 # All extras values traceable to target §9 Parameter Seeds via inline `# Source:` comments.
 
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.SorosPound.Rule.players:Market"
   num_instances: 1

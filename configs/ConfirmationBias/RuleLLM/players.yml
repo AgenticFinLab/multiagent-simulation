@@ -13,6 +13,7 @@
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.ConfirmationBias.RuleLLM.players:Market"
   num_instances: 1

@@ -2,6 +2,7 @@
 # Source: examples/SouthSeaBubble/finance-southseabubble.md §9 (Parameter Seeds table)
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.SouthSeaBubble.RuleLLM.players:Market"
   num_instances: 1
