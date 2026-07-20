@@ -35,6 +35,7 @@ from examples.MarketCrash.RuleLLM.prompts import (
     RULELLM_LEVERAGED_HEDGE_FUND_SYS,
     RULELLM_MARKET_MAKER_SYS,
     RULELLM_PANIC_SELLER_SYS,
+    RULELLM_PASSIVE_INVESTOR_SYS,
     RULELLM_USER_TEMPLATE,
 )
 
@@ -338,6 +339,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 "investor": self.identity,
                 "reasoning": "LLM parse failed: held position",
                 "provides_liquidity": False,
+                "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
             }
             return {
                 **order,
@@ -375,6 +377,7 @@ class RuleLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "provides_liquidity": decision["provides_liquidity"],
+            "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
         }
 
         return {
@@ -407,7 +410,7 @@ class RuleLLMRiskParityFund(RuleLLMInvestor):
     _system_prompt = RULELLM_RISK_PARITY_FUND_SYS
 
 
-class RuleLLMLeveragedFund(RuleLLMInvestor):
+class RuleLLMLeveragedHedgeFund(RuleLLMInvestor):
     """Hybrid LeveragedHedgeFund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RULELLM_LEVERAGED_HEDGE_FUND_SYS
@@ -425,12 +428,19 @@ class RuleLLMBottomFisher(RuleLLMInvestor):
     _system_prompt = RULELLM_BOTTOM_FISHER_SYS
 
 
+class RuleLLMPassiveInvestor(RuleLLMInvestor):
+    """Hybrid PassiveInvestor. Theory: simulation-bases.md §4.4."""
+
+    _system_prompt = RULELLM_PASSIVE_INVESTOR_SYS
+
+
 __all__ = [
     "Market",
     "RuleLLMInvestor",
     "RuleLLMPanicSeller",
     "RuleLLMRiskParityFund",
-    "RuleLLMLeveragedFund",
+    "RuleLLMLeveragedHedgeFund",
     "RuleLLMMarketMaker",
     "RuleLLMBottomFisher",
+    "RuleLLMPassiveInvestor",
 ]

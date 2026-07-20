@@ -28,7 +28,7 @@ knowledge:
 market:
   archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
-  class: "examples.MarketCrash.Rag.players:Market"
+  class: "examples.MarketCrash.Rule.players:Market"
   num_instances: 1
   config:
     identity: "market"
@@ -47,9 +47,6 @@ market:
       liquidity_recovery: 0.05  # Source: simulation-bases.md §6
       min_liquidity: 0.1  # Source: simulation-bases.md §6
       custom_state_hot_limit: 3  # Source: framework infrastructure
-      base_liquidity: 50.0  # Source: simulation-bases.md §6
-      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
-      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 ragllm_panic_seller:
@@ -138,13 +135,13 @@ ragllm_risk_parity_fund:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_leveraged_fund:
-  name: "RAG Leveraged Fund"
-  class: "examples.MarketCrash.Rag.players:RagLLMLeveragedFund"
-  # Expander → ragllm_leveraged_fund_1, ragllm_leveraged_fund_2, ragllm_leveraged_fund_3
+ragllm_leveraged_hedge_fund:
+  name: "RAG Leveraged Hedge Fund"
+  class: "examples.MarketCrash.Rag.players:RagLLMLeveragedHedgeFund"
+  # Expander creates three leveraged-hedge-fund instances.
   num_instances: 3
   config:
-    identity: "ragllm_leveraged_fund"
+    identity: "ragllm_leveraged_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -221,6 +218,54 @@ ragllm_market_maker:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
+          max_new_tokens: 600
+  persona: !include persona.yml
+
+ragllm_passive_investor:
+  name: "RAG Passive Investor"
+  class: "examples.MarketCrash.Rag.players:RagLLMPassiveInvestor"
+  num_instances: 1
+  config:
+    identity: "ragllm_passive_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      initial_volatility: 4.0
+      stress_impact_multiplier: 1.5
+      max_abs_return: 0.08
+      initial_liquidity: 1.0
+      random_seed: 20260721
+      price_floor: 30.0
+      price_ceiling: 120.0
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      rebalance_frequency: 20
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: []
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir: []
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_PASSIVE_INVESTOR_SYS"
+        user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
           max_new_tokens: 600
   persona: !include persona.yml
 

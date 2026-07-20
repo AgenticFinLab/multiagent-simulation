@@ -5,7 +5,7 @@
 market:
   archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
-  class: "examples.MarketCrash.LLM.players:Market"
+  class: "examples.MarketCrash.Rule.players:Market"
   num_instances: 1
   config:
     identity: "market"
@@ -78,13 +78,13 @@ llm_risk_parity_fund:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_leveraged_fund:
-  name: "LLM Leveraged Fund"
-  class: "examples.MarketCrash.LLM.players:LLMLeveragedFund"
-  # Expander → llm_leveraged_fund_1, llm_leveraged_fund_2, llm_leveraged_fund_3
+llm_leveraged_hedge_fund:
+  name: "LLM Leveraged Hedge Fund"
+  class: "examples.MarketCrash.LLM.players:LLMLeveragedHedgeFund"
+  # Expander creates three leveraged-hedge-fund instances.
   num_instances: 3
   config:
-    identity: "llm_leveraged_fund"
+    identity: "llm_leveraged_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -127,6 +127,39 @@ llm_market_maker:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+llm_passive_investor:
+  name: "LLM Passive Investor"
+  class: "examples.MarketCrash.LLM.players:LLMPassiveInvestor"
+  num_instances: 1
+  config:
+    identity: "llm_passive_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - llm_investors
+    extras:
+      initial_volatility: 4.0
+      stress_impact_multiplier: 1.5
+      max_abs_return: 0.08
+      initial_liquidity: 1.0
+      random_seed: 20260721
+      price_floor: 30.0
+      price_ceiling: 120.0
+      record_path: "EXPERIMENT/MarketCrash/LLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      rebalance_frequency: 20
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.LLM.prompts:LLM_PASSIVE_INVESTOR_SYS"
+        user_message: "examples.MarketCrash.LLM.prompts:LLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
           max_new_tokens: 500
   persona: !include persona.yml
 

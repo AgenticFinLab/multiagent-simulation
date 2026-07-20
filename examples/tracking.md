@@ -35,7 +35,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 27 | LossAversion           | 🟢      | Wenyou      | Jul 16 2026 | LLM, Rule, RuleLLM |
 | 28 | LTCMCollapse           | 🟢      | Wenyou      | Jul 16 2026 | LLM, Rule, RuleLLM |
 | 29 | LUNACollapse           | 🟢      | Wenyou      | Jul 20 2026 | Rule               |
-| 30 | MarketCrash            | 🟡      |              | Jul 11 2026 | —                 |
+| 30 | MarketCrash            | 🟢      | Wenyou      | 2026-07-21  | Rule              |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
 | 32 | MomentumEffect         | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |
 | 33 | OverconfidenceBias     | 🟢      | Zihan           | Jul 11 2026           | Rule, LLM, RuleLLM                 |

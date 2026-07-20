@@ -11,17 +11,20 @@ connections:
   market:
     - ragllm_panic_seller
     - ragllm_risk_parity_fund
-    - ragllm_leveraged_fund
+    - ragllm_leveraged_hedge_fund
     - ragllm_market_maker
+    - ragllm_passive_investor
     - ragllm_bottom_fisher
 
   ragllm_panic_seller:
     - market
   ragllm_risk_parity_fund:
     - market
-  ragllm_leveraged_fund:
+  ragllm_leveraged_hedge_fund:
     - market
   ragllm_market_maker:
+    - market
+  ragllm_passive_investor:
     - market
   ragllm_bottom_fisher:
     - market

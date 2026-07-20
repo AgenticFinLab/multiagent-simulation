@@ -3,7 +3,7 @@
 LLM investors with different trading personalities:
     - PanicSeller (Loss-Averse Retail Investor)
     - RiskParityFund (volatility-sensitive institutional)
-    - LeveragedFund (margin-constrained hedge fund)
+    - LeveragedHedgeFund (margin-constrained hedge fund)
     - MarketMaker (liquidity provider)
     - BottomFisher (patient value buyer)
 
@@ -46,6 +46,7 @@ from examples.MarketCrash.LLM.prompts import (
     LLM_LEVERAGED_FUND_SYS,
     LLM_MARKET_MAKER_SYS,
     LLM_BOTTOM_FISHER_SYS,
+    LLM_PASSIVE_INVESTOR_SYS,
     LLM_USER_TEMPLATE,
 )
 
@@ -324,6 +325,7 @@ class LLMInvestor(GeneralPlayer):
                 "quantity": 0.0,
                 "strategy": strategy_name,
                 "investor": self.identity,
+                "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
                 "reasoning": "LLM parse failed: held position",
             }
             return {
@@ -364,6 +366,7 @@ class LLMInvestor(GeneralPlayer):
             "quantity": quantity,
             "strategy": strategy_name,
             "investor": self.identity,
+            "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
             "reasoning": decision["reasoning"][:100],
         }
 
@@ -392,7 +395,7 @@ class LLMRiskParityFund(LLMInvestor):
     _system_prompt = LLM_RISK_PARITY_SYS
 
 
-class LLMLeveragedFund(LLMInvestor):
+class LLMLeveragedHedgeFund(LLMInvestor):
     """LLM LeveragedHedgeFund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = LLM_LEVERAGED_FUND_SYS
@@ -410,12 +413,19 @@ class LLMBottomFisher(LLMInvestor):
     _system_prompt = LLM_BOTTOM_FISHER_SYS
 
 
+class LLMPassiveInvestor(LLMInvestor):
+    """LLM PassiveInvestor. Theory: simulation-bases.md §4.4."""
+
+    _system_prompt = LLM_PASSIVE_INVESTOR_SYS
+
+
 __all__ = [
     "Market",
     "LLMInvestor",
     "LLMPanicSeller",
     "LLMRiskParityFund",
-    "LLMLeveragedFund",
+    "LLMLeveragedHedgeFund",
     "LLMMarketMaker",
     "LLMBottomFisher",
+    "LLMPassiveInvestor",
 ]

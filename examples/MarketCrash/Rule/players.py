@@ -61,9 +61,10 @@ class Market(GeneralPlayer):
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
             self.state.custom_state["price"] = extras["initial_price"]
-            self.state.custom_state["liquidity"] = 1.0  # Normalized liquidity
-            self.state.custom_state["volatility"] = 1.0
+            self.state.custom_state["liquidity"] = extras["initial_liquidity"]
+            self.state.custom_state["volatility"] = extras["initial_volatility"]
             self.state.custom_state["prev_return"] = 0.0
+            self._rng = random.Random(extras["random_seed"])
 
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
@@ -141,14 +142,21 @@ class Market(GeneralPlayer):
         new_liquidity = max(min_liquidity, min(1.0, new_liquidity))
 
         # Price impact inversely proportional to liquidity (crash mechanism)
-        adjusted_impact = base_price_impact / new_liquidity
+        stress_multiplier = extras["stress_impact_multiplier"]
+        adjusted_impact = base_price_impact * stress_multiplier / new_liquidity
 
         # Price dynamics
         price_impact = adjusted_impact * net_demand
         mean_reversion = mean_reversion_rate * (fundamental_value - current_price)
-        noise = random.gauss(0, noise_std)
+        noise = self._rng.gauss(0, noise_std)
 
-        new_price = max(1.0, current_price + price_impact + mean_reversion + noise)
+        raw_change = price_impact + mean_reversion + noise
+        max_change = extras["max_abs_return"] * current_price
+        bounded_change = max(-max_change, min(max_change, raw_change))
+        new_price = max(
+            extras["price_floor"],
+            min(extras["price_ceiling"], current_price + bounded_change),
+        )
         price_return = (new_price - current_price) / current_price
         return_pct = price_return * 100
 
@@ -673,20 +681,15 @@ class BottomFisher(BaseInvestor):
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
         price_return = market_data["return"]
-        price_history = self.state.custom_state["price_history"]
+        fundamental = market_data["fundamental"]
 
         crash_buy_threshold = extras["crash_buy_threshold"]
         discount_threshold = extras["discount_threshold"]
         buy_size = extras["buy_size"]
-        lookback = extras["lookback"]
         strategy_name = self.__class__.__name__
 
-        # Calculate if price is at discount
-        if len(price_history) >= lookback:
-            recent_avg = sum(list(price_history)[-lookback:]) / lookback
-            discount = (price - recent_avg) / recent_avg
-        else:
-            discount = 0.0
+        # Target §4.5 defines value entry relative to fundamental value.
+        discount = (price - fundamental) / fundamental
 
         # Buy conditions
         if price_return < crash_buy_threshold and discount < -discount_threshold:
@@ -696,7 +699,7 @@ class BottomFisher(BaseInvestor):
             logger.debug(
                 f"    [BOTTOM FISHING] Discount={discount:.1%}"
             )  # pylint: disable=logging-fstring-interpolation
-        elif discount < -discount_threshold * 1.5:
+        elif discount < -discount_threshold:
             # Deep value buy
             quantity = buy_size * 0.5
         else:

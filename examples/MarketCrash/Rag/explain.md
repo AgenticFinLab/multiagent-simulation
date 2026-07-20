@@ -27,7 +27,7 @@ configured in this API variant.
 
 | Theory Component | Implementation |
 |---|---|
-| Margin spiral | `RagLLMLeveragedFund` represents leveraged deleveraging with retrieved crisis context. |
+| Margin spiral | `RagLLMLeveragedHedgeFund` represents leveraged deleveraging with retrieved crisis context. |
 | RAG contract | Uses canonical trading JSON plus conservative liquidity default if omitted. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
@@ -41,8 +41,8 @@ configured in this API variant.
 
 | Theory Component | Implementation |
 |---|---|
-| Slow passive stabilization | Not instantiated in this API variant. |
-| Variant scope | Documented omission relative to the six-role Rule baseline. |
+| Slow passive stabilization | `RagLLMPassiveInvestor` applies the shared slow-rebalance rule. |
+| RAG contract | Retrieval is optional and decision fallback remains deterministic hold. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
@@ -60,9 +60,9 @@ configured in this API variant.
 
 ## §3 Market Mechanism
 
-The Rag market matches the RuleLLM liquidity-sensitive coordinator and
-explicitly consumes `order["provides_liquidity"]`. Each player also retrieves
-top-k knowledge snippets and stores the resolved `rag_context` in run records.
+The Rag configuration reuses `examples/MarketCrash/Rule/players.py:Market` for
+mechanical parity. Each player may retrieve top-k knowledge snippets and stores
+the resolved `rag_context` in run records, with an explicit empty-corpus path.
 
 ## §4 Variant Architecture
 
