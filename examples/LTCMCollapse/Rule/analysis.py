@@ -20,9 +20,18 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-from masim.evaluation.data_loader import _load_data, _series
+from masim.evaluation.data_loader import _load_data, aligned_prices_and_fundamentals
 from masim.evaluation.finance.timeseries import _returns, calculate_max_drawdown
 from masim.utils import load_config, load_results
+
+__all__ = [
+    "ValidationResult",
+    "load_simulation_data",
+    "calculate_metrics",
+    "validate_metrics",
+    "create_visualizations",
+    "main",
+]
 
 
 @dataclass(frozen=True)
@@ -53,18 +62,13 @@ def load_simulation_data(config: dict) -> dict:
         contexts = player.turns.field("rag_context")
         if contexts:
             rag_contexts[pid] = contexts
-    prices = _series(raw["market_prices"])
-    fundamentals = _series(raw["fundamentals"])
-    if not prices:
-        raise ValueError("No market price data recorded")
-    if not fundamentals:
-        raise ValueError("No fundamental data recorded")
-    if len(prices) != len(fundamentals):
-        raise ValueError("Price and fundamental series lengths differ")
+    rounds, prices, fundamentals = aligned_prices_and_fundamentals(raw)
     return {
+        "rounds": rounds,
         "prices": prices,
         "fundamentals": fundamentals,
         "rag_contexts": rag_contexts,
+        "agent_records": raw["investor_payloads"],
     }
 
 
@@ -105,9 +109,21 @@ def calculate_metrics(data: dict) -> dict:
     max_abs_deviation = float(np.max(np.abs(deviation)) * 100)
     mean_abs_deviation = float(np.mean(np.abs(deviation)) * 100)
     max_drawdown = abs(calculate_max_drawdown(prices.tolist())[0])
-    volatility = float(np.std(returns) * np.sqrt(252) * 100)
     onset_round = _cascade_onset_round(deviation)
     half_life = _recovery_half_life_rounds(deviation)
+    if onset_round is None:
+        stress_return_std = None
+    else:
+        stress_start = max(onset_round - 2, 0)
+        stress_end = (
+            len(returns)
+            if half_life is None
+            else min(len(returns), stress_start + half_life)
+        )
+        if stress_end <= stress_start:
+            raise ValueError("Stress window contains no returns")
+        stress_return_std = float(np.std(returns[stress_start:stress_end]) * 100)
+    full_run_return_std = float(np.std(returns) * 100)
 
     return {
         "price_metrics": {
@@ -125,8 +141,13 @@ def calculate_metrics(data: dict) -> dict:
             "recovery_half_life_rounds": half_life,
         },
         "volatility": {
-            "annualized_pct": volatility,
-            "return_std_pct": float(np.std(returns) * 100),
+            "annualized_pct": (
+                None
+                if stress_return_std is None
+                else stress_return_std * float(np.sqrt(252))
+            ),
+            "return_std_pct": stress_return_std,
+            "full_run_return_std_pct": full_run_return_std,
         },
     }
 
@@ -143,7 +164,9 @@ def validate_metrics(metrics: dict) -> ValidationResult:
     min_price = metrics["price_metrics"]["min"]
     deviation_score = 1.0 if 5.0 <= max_deviation <= 60.0 else 0.0
     drawdown_score = 1.0 if 5.0 <= drawdown <= 60.0 else 0.0
-    volatility_score = 1.0 if 1.0 <= volatility <= 12.0 else 0.0
+    volatility_score = (
+        1.0 if volatility is not None and 1.0 <= volatility <= 12.0 else 0.0
+    )
     recovery_score = 1.0 if final_abs_deviation <= max_deviation and min_price > 0 else 0.0
     half_life_score = 1.0 if half_life is not None else 0.0
 
@@ -161,7 +184,7 @@ def validate_metrics(metrics: dict) -> ValidationResult:
             "assessment": "pass" if drawdown_score == 1.0 else "fail",
         },
         "stress_volatility": {
-            "observed": round(volatility, 3),
+            "observed": None if volatility is None else round(volatility, 3),
             "expected": "1% to 12% return std during stress",
             "score": round(volatility_score, 3),
             "assessment": "pass" if volatility_score >= 1.0 else "weak",

@@ -11,7 +11,7 @@ This variant implements the deterministic baseline described in `../analysis-bas
 | Price deviation | `analysis-bases.md §2.1` | `calculate_metrics(data)` | `deviation_metrics.max_abs_deviation_pct` |
 | Maximum drawdown | `analysis-bases.md §2.2` | `calculate_metrics(data)` | `price_metrics.max_drawdown_pct` |
 | Mean absolute deviation | `analysis-bases.md §2.3` | `calculate_metrics(data)` | `deviation_metrics.mean_abs_deviation_pct` |
-| Volatility | `analysis-bases.md §2.4` | `calculate_metrics(data)` | `volatility.annualized_pct` |
+| Stress-window volatility | `analysis-bases.md §2.4` | `calculate_metrics(data)` | `volatility.return_std_pct`; `full_run_return_std_pct` is retained as a diagnostic |
 | Price trough | `analysis-bases.md §2.5` | `calculate_metrics(data)` | `price_metrics.min` |
 | Final recovery | `analysis-bases.md §2.6` | `calculate_metrics(data)` | `deviation_metrics.final_deviation_pct` |
 | LLM output quality | `analysis-bases.md §2.7` | external audit | not applicable to Rule |
@@ -19,6 +19,8 @@ This variant implements the deterministic baseline described in `../analysis-bas
 ## §3 Variant-Specific Notes
 
 Rule analysis has no LLM quality component. Its main responsibility is to verify that deterministic order rules produce a visible dislocation and recovery path in the price series.
+
+The final 200-round run passed all five validation gates: maximum absolute deviation 16.175%, maximum drawdown 16.339%, stress-window return volatility 1.090%, recovery half-life 66 rounds, and final deviation -2.349%. The independently reviewed price chart shows a shock-led trough followed by gradual recovery without a resume discontinuity.
 
 ## §4 Expected Ranges
 

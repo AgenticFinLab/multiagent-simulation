@@ -11,6 +11,9 @@
 - 2026-07-20  Polish pipeline re-validation: revised target passed the full §11 checklist three consecutive times and was re-locked before implementation resumed.
 - 2026-07-20  Define-skill revise mode: promoted the 30% deleveraging fraction, three-times-VaR multiplier, and 50% risk-cut fraction from formula literals to auditable configuration parameters.
 - 2026-07-20  Polish pipeline re-validation: the parameterized target passed the full §11 checklist three consecutive times and was re-locked.
+- 2026-07-20  Define-skill revise mode: added an explicit maintenance-margin buffer to initial leveraged equity after the formal Rule run showed that equality between initial equity and the maintenance threshold caused noise-driven deleveraging before the identification shock.
+- 2026-07-20  Polish pipeline re-validation: the maintenance-buffer revision passed the full §11 checklist three consecutive times and was re-locked before the final formal run.
+- 2026-07-20  Polish closeout: a fresh uninterrupted 200-round Rule run passed all five validation gates and visual continuity review; LLM and RuleLLM passed setup plus bounded behavior tests, Rag passed static contracts, and the pipeline released the target.
 
 ## §1 Meta
 
@@ -24,7 +27,7 @@
 | Revised | 2026-07-20 (Step 4 mechanism calibration via define-skill revise mode) |
 | Pipeline | masim/skills/polish-simulation-pipeline.md |
 | Target Spec | masim/skills/define-simulation-scenario-skill.md v1.2.0 |
-| Status | locked |
+| Status | released |
 
 ## §2 Phenomenon Statement
 
@@ -70,7 +73,7 @@ The episode ends when finite positions and cash limit additional forced trading,
 |---|---|
 | Full citation | Geanakoplos, J. (2010). The leverage cycle. *NBER Macroeconomics Annual 2009*, 24, 1-65. https://doi.org/10.1086/648285 |
 | Key mechanism (≤30 words) | Falling collateral values tighten feasible leverage and force rapid balance-sheet contraction after tranquil-period expansion. |
-| Key equation | With `initial_equity=abs(position*initial_price)/leverage_ratio`, current `equity=initial_equity+position*(price-initial_price)`; breach occurs when `equity < margin_call_threshold*abs(position*price)` and forced quantity is `floor(0.30*abs(position))`. |
+| Key equation | With `initial_equity=abs(position*initial_price)*(1/leverage_ratio+margin_call_threshold)`, current `equity=initial_equity+position*(price-initial_price)`; breach occurs when `equity < margin_call_threshold*abs(position*price)` and forced quantity is `floor(0.30*abs(position))`. |
 | Motivates agent | leverage-trader |
 | Parameter implication | `leverage_ratio=25` and `margin_call_threshold=0.04` encode high leverage and a finite equity buffer. |
 

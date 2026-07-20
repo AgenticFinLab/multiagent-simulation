@@ -251,9 +251,15 @@ class ConvergenceArbitrageur(GeneralPlayer):
                 )
                 if buy_qty > 0:
                     return _decision("buy", buy_qty, f"spread discount deviation={deviation:+.2%}")
-            sell_qty = min(int(leveraged_cash * abs(deviation) / price), max(position, 0))
-            if sell_qty > 0:
-                return _decision("sell", sell_qty, f"spread premium deviation={deviation:+.2%}")
+                return _decision("hold", 0, "long capacity reached during discount")
+            if deviation > 0:
+                sell_qty = min(
+                    int(leveraged_cash * abs(deviation) / price), max(position, 0)
+                )
+                if sell_qty > 0:
+                    return _decision(
+                        "sell", sell_qty, f"spread premium deviation={deviation:+.2%}"
+                    )
         return _decision("hold", 0, "spread below entry threshold")
 
     async def act(self, decision_payload: dict) -> Action:
@@ -262,6 +268,7 @@ class ConvergenceArbitrageur(GeneralPlayer):
         price = self.state.custom_state["price"]
         quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -302,10 +309,12 @@ class LeverageTrader(GeneralPlayer):
         leverage_ratio = extras["leverage_ratio"]
         margin_call = extras["margin_call_threshold"]
         initial_price = extras["initial_price"]
-        initial_equity = abs(position * initial_price) / leverage_ratio
+        initial_equity = abs(position * initial_price) * (1 / leverage_ratio + margin_call)
         equity = initial_equity + position * (price - initial_price)
         if equity < abs(position * price) * margin_call:
             delever_qty = int(abs(position) * extras["delever_fraction"])
+            if delever_qty <= 0:
+                return _decision("hold", 0, "margin breach below minimum trade lot")
             if position > 0:
                 return _decision("sell", min(delever_qty, position), "margin call deleveraging")
             if position < 0:
@@ -323,6 +332,7 @@ class LeverageTrader(GeneralPlayer):
         price = self.state.custom_state["price"]
         quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -374,6 +384,7 @@ class RiskManager(GeneralPlayer):
         price = self.state.custom_state["price"]
         quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -435,6 +446,7 @@ class LiquidityProvider(GeneralPlayer):
         price = self.state.custom_state["price"]
         quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -488,6 +500,7 @@ class CentralBank(GeneralPlayer):
         price = self.state.custom_state["price"]
         quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

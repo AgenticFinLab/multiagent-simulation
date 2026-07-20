@@ -9,7 +9,7 @@
 | Target spec | masim/skills/define-simulation-scenario-skill.md v1.2.0 |
 | Domain | finance |
 | Pipeline | masim/skills/polish-simulation-pipeline.md |
-| Status | locked (upgraded to `released` on closeout) |
+| Status | released |
 
 ## §A AGENT_POOL Reuse-or-Create Gate Log
 
@@ -49,6 +49,11 @@ Step 4 behavior probes added an explicit order-depth normalization, process-inde
 |---|---|---|
 | Formal Rag execution requires embedding resources and is outside Wenyou's current run scope. | Step 0 | deferred: static/import validation only per target §10 |
 | Two stale Ray clusters consumed local resources and delayed imports. | Step 4 | resolved: stopped before formal LTCMCollapse execution |
+| Investor orders were returned only inside `Action.payload`, so the framework did not dispatch them to the market. | Step 9 | resolved: every variant now also places canonical outbound messages in the decision payload |
+| Convergence-arbitrageur capacity fall-through converted a full long position into an unintended sell. | Step 9 | resolved: positive and negative deviation branches are mutually exclusive and capacity-boundary probes pass |
+| Initial leveraged equity equalled the maintenance threshold, allowing ordinary noise to trigger early deleveraging. | Step 9 | resolved through define-skill revise mode: initial equity includes an explicit maintenance buffer; three §11 re-validations passed |
+| A Windows checkpoint conflict caused one interrupted run and state-discontinuous resume output. | Step 9 | rejected and replaced: Ray/output were cleaned and a fresh uninterrupted 200-round run passed continuity and visual review |
+| Repo-wide naming audit reports 141 issues in other scenarios. | Step 10 | pre-existing and out of scope; LTCMCollapse scenario-local audit has zero issues |
 
 ## §D Build Log
 
@@ -60,3 +65,9 @@ Step 4 behavior probes added an explicit order-depth normalization, process-inde
 | Step 2 | 2026-07-20 | pass | Codex | Five profiles, four icons, and embedded agent contracts pass audits. |
 | Step 3 | 2026-07-20 | pass | Codex | Four canonical config families parse with prefix, topology, and parity checks. |
 | Step 4 | 2026-07-20 | pass | Codex | Target revise mode, implementation repair, compile/import checks, and five-agent behavior probes completed. |
+| Step 5 | 2026-07-20 | pass | Codex | Environment, round, communication, parameter, diversity, and behavior-boundary contracts were cross-checked against the locked target. |
+| Step 6 | 2026-07-20 | pass | Codex | Variant code compiles, uses configuration-owned parameters, preserves direct decision fields, fails fast, and shares evaluation loaders. |
+| Step 7 | 2026-07-20 | pass | Codex | Rule analysis uses shared evaluation utilities, stress-window volatility, five hard validation gates, standard outputs, and reusable variant imports. |
+| Step 8 | 2026-07-20 | pass | Codex | Root documents and all eight per-variant documents meet required heading counts, trace formulas, and record actual validation scope. |
+| Step 9 | 2026-07-20 | pass | Codex | Fresh uninterrupted Rule run completed 200 rounds; 10 agents each recorded 200 actions; all five gates scored 1.0 and visual continuity passed. |
+| Step 10 | 2026-07-20 | pass | Codex | Sixteen YAML files, twenty Python files, four imports, LLM/RuleLLM setup and bounded behavior, Rag static contracts, five profiles, scenario naming, and four-variant WebUI discovery all passed. |

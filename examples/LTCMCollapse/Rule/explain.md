@@ -30,8 +30,8 @@
 | Theory | `simulation-bases.md §4.2` |
 | Class | `LeverageTrader` |
 | Margin Trigger | `equity < abs(position * price) * extras["margin_call_threshold"]` |
-| Equity | `abs(position * initial_price) / leverage_ratio + position * (price - initial_price)` |
-| Deleveraging | sells or buys `int(abs(position) * extras["delever_fraction"])` |
+| Equity | `abs(position * initial_price) * (1 / leverage_ratio + margin_call_threshold) + position * (price - initial_price)` |
+| Deleveraging | sells or buys `int(abs(position) * extras["delever_fraction"])`; a zero-lot close becomes `hold` |
 | Opportunity Branch | buys `base_size` when `deviation < -margin_call_threshold` and no margin breach |
 
 ### §2.3 RiskManager (simulation-bases.md §4.3)

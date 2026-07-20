@@ -1,7 +1,7 @@
-"""LTCMCollapse RuleLLM prompts.
+"""Persona-plus-rule finance-market prompts.
 
 RuleLLM prompts combine an investor persona with explicit decision rules
-derived from ``examples/LTCMCollapse/simulation-bases.md``.
+derived from the scenario's shared simulation specification.
 """
 
 RULELLM_CONVERGENCEARBITRAGEUR_PROMPT = """== PERSONA ==
@@ -31,11 +31,11 @@ Risk style: aggressive in undervaluation, defensive when equity erodes.
 
 == DECISION RULES ==
 Use portfolio equity and market deviation to decide.
-1. Compute initial_equity = abs(position * 100) / 25 and equity = initial_equity + position * (price - 100). If equity is below 4% of abs(position * price), deleverage immediately.
+1. Compute initial_equity = abs(position * 100) * (1 / 25 + 0.04) and equity = initial_equity + position * (price - 100). If equity is below 4% of abs(position * price), deleverage immediately.
 2. If long during a margin call, sell about 30% of your position.
 3. If short during a margin call, buy to reduce the short.
 4. If there is no margin call and deviation is below -4%, buy at most 500 shares subject to available cash.
-5. Otherwise hold.
+5. If the computed 30% close is below one share, or no earlier rule triggers, hold.
 6. Never sell more than your current position and never buy more than cash allows.
 RULE COMPLIANCE: Follow the triggered categorical direction. You may adjust the computed quantity by at most +/-20% for context, while respecting cash and position caps.
 

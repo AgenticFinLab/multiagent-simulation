@@ -193,17 +193,19 @@ Implemented in `Rule/analysis.py::calculate_metrics`.
 Volatility / Risk
 
 #### Definition
-Standard deviation of one-round returns, reported both as per-round percent and annualized percent.
+Standard deviation of one-round returns during the endogenous stress window, reported both as per-round percent and annualized percent. Full-run return standard deviation is retained as a separate dilution diagnostic.
 
 #### Formula
 
 ```
 r(t) = (P(t) - P(t-1)) / P(t-1)
-return_std_pct = std(r) * 100
-annualized_pct = std(r) * sqrt(252) * 100
+stress_window = [cascade_onset, cascade_onset + recovery_half_life)
+return_std_pct = std(r within stress_window) * 100
+annualized_pct = std(r within stress_window) * sqrt(252) * 100
+full_run_return_std_pct = std(all r) * 100
 ```
 
-**Computation notes**: Requires at least two prices and no zero price before return calculation.
+**Computation notes**: Requires at least two prices and no zero price before return calculation. The stress window starts with the return entering cascade onset and spans the measured recovery half-life; if recovery is unobserved it extends through the final round.
 
 **Python function**:
 ```python

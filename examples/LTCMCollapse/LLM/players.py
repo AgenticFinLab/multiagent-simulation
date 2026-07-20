@@ -160,6 +160,7 @@ class LLMInvestor(GeneralPlayer):
             str(decision_payload["reasoning"]),
         )
         order["analysis"] = str(decision_payload["analysis"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

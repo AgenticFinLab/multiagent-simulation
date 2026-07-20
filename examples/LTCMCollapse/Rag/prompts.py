@@ -1,4 +1,4 @@
-"""LTCMCollapse RAG prompts.
+"""Retrieval-augmented finance-market prompts.
 
 RAG uses the RuleLLM persona/rule system prompts and injects retrieved crisis
 knowledge into the user message through ``{rag_context}``.

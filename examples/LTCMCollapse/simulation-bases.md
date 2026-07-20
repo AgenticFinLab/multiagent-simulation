@@ -66,7 +66,7 @@ Target trace for the required stylized facts:
 
 - **Citation**: Geanakoplos, J. (2010). The leverage cycle. In *NBER Macroeconomics Annual 2009*, 24, 1-65. https://doi.org/10.1086/648285
 - **Core Insight**: Falling collateral values tighten feasible leverage and force rapid contraction after tranquil-period balance-sheet expansion.
-- **Mathematical Formulation**: Let `E0=abs(position(t)*P0)/leverage_ratio` be initial posted equity and `equity(t)=E0+position(t)*(P(t)-P0)` its mark-to-market value. A breach occurs when `equity(t) < margin_call_threshold * abs(position(t)*P(t))`; the forced order closes `0.30*abs(position(t))`.
+- **Mathematical Formulation**: Let `E0=abs(position(t)*P0)*(1/leverage_ratio+margin_call_threshold)` be initial posted equity, including a maintenance-margin buffer, and `equity(t)=E0+position(t)*(P(t)-P0)` its mark-to-market value. A breach occurs when `equity(t) < margin_call_threshold * abs(position(t)*P(t))`; the forced order closes `0.30*abs(position(t))`.
 - **Empirical Evidence**: Adrian and Shin (2010), https://doi.org/10.1016/j.jfi.2008.12.002, document procyclical intermediary leverage; the PWG report, https://www.govinfo.gov/app/details/GOVPUB-PR-PURL-LPS77446, identifies excessive LTCM leverage as the central policy issue.
 - **Relevance to This Simulation**: `LeverageTrader` converts adverse marking-to-market into a mechanical reduction in exposure.
 - **Calibration Implication**: `leverage_ratio=25` and `margin_call_threshold=0.04` make modest price moves material to equity without imposing an exogenous crash path.
@@ -302,7 +302,7 @@ Buy, sell, or hold at current price for one round. A breach closes `30%` of abso
 
 ###### §4.2.5.4 Mathematical Model
 
-With initial posted equity `E0=abs(position*initial_price)/leverage_ratio` and current equity `E=E0+position*(price-initial_price)`, breach when `E<margin_call_threshold*abs(position*price)` and trade `floor(0.30*abs(position))` toward zero. State updates post-execution; the rule is deterministic.
+With initial posted equity `E0=abs(position*initial_price)*(1/leverage_ratio+margin_call_threshold)` and current equity `E=E0+position*(price-initial_price)`, breach when `E<margin_call_threshold*abs(position*price)` and trade `floor(0.30*abs(position))` toward zero. A zero-lot computed close becomes `hold`; state updates post-execution and the rule is deterministic.
 
 ###### §4.2.5.5 Behavioral Properties
 
@@ -323,13 +323,13 @@ Two persistent instances use the same balance-sheet rule and defaults; stochasti
 
 #### §4.2.8 Worked Numerical Examples
 
-If position is 500 shares, the forced deleveraging quantity is:
+If the baseline position is 5,000 shares, the forced deleveraging quantity is:
 
 ```
-Q = floor(0.30 * 500) = 150
+Q = floor(0.30 * 5000) = 1500
 ```
 
-A short breach buys 150 toward zero; an unbreached 5% discount buys the base size; zero inventory is the edge-case hold.
+A short breach buys 1,500 toward zero; an unbreached 5% discount buys the base size; zero inventory is the edge-case hold.
 
 #### §4.2.9 Validation and Calibration
 
@@ -421,13 +421,13 @@ Two persistent instances share the same limit and close fraction; all variants r
 
 #### §4.3.8 Worked Numerical Examples
 
-If position is 500 and deviation is -0.16:
+If the baseline position is 3,000 and deviation is -0.16:
 
 ```
-Q = floor(0.50 * 500) = 250 sell
+Q = floor(0.50 * 3000) = 1500 sell
 ```
 
-A breached short buys 250 toward zero; a 10% deviation holds; zero inventory is the edge-case hold.
+A breached short buys 1,500 toward zero; a 10% deviation holds; zero inventory is the edge-case hold.
 
 #### §4.3.9 Validation and Calibration
 
@@ -709,7 +709,7 @@ The simulation is configured for 200 rounds in all variants.
 
 | Variant | Decision Mechanism | Expected Use |
 |---|---|---|
-| Rule | deterministic formulas from §4 | calibrated baseline |
-| LLM | persona-only market reasoning | tests whether language agents reproduce similar stress responses without explicit formula execution |
-| RuleLLM | persona plus explicit decision rules | should stay close to Rule while allowing LLM reasoning variation |
-| Rag | RuleLLM-style agents with retrieved crisis context | tests whether historical knowledge changes risk-taking, deleveraging, or intervention timing |
+| Rule | deterministic formulas from §4 | formal 200-round baseline passed all five gates: 16.175% maximum deviation, 16.339% drawdown, 1.090% stress volatility, and 66-round recovery half-life |
+| LLM | persona-only market reasoning | configuration, actor setup, direct-field parsing, bounded decision, and outbound dispatch passed; formal API run remains for the experiment operator |
+| RuleLLM | persona plus explicit decision rules | configuration, actor setup, rule-direction enforcement, bounded decision, and outbound dispatch passed; formal API run remains for the experiment operator |
+| Rag | RuleLLM-style agents with retrieved crisis context | configuration, import, required class/method, retrieval-fallback, and analysis contracts passed; formal retrieval run is deferred by target scope |

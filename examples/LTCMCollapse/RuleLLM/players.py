@@ -38,9 +38,13 @@ def _expected_rule_actions(player: GeneralPlayer, price: float, deviation: float
             return ("sell",)
         return ("hold",)
     if role == "RuleLLMLeverageTrader":
-        initial_equity = abs(position * extras["initial_price"]) / extras["leverage_ratio"]
+        initial_equity = abs(position * extras["initial_price"]) * (
+            1 / extras["leverage_ratio"] + extras["margin_call_threshold"]
+        )
         equity = initial_equity + position * (price - extras["initial_price"])
         if equity < abs(position * price) * extras["margin_call_threshold"]:
+            if int(abs(position) * extras["delever_fraction"]) <= 0:
+                return ("hold",)
             return ("sell",) if position > 0 else ("buy",) if position < 0 else ("hold",)
         if deviation < -extras["margin_call_threshold"] and cash >= price:
             return ("buy",)
@@ -206,6 +210,7 @@ class RuleLLMInvestor(GeneralPlayer):
             str(decision_payload["reasoning"]),
         )
         order["analysis"] = str(decision_payload["analysis"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

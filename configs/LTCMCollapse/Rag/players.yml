@@ -135,7 +135,7 @@ ragllm_leverage_trader:
       # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 3000000.0
       # Source: target §9 / simulation-bases.md §4.N.6
-      initial_position: 500
+      initial_position: 5000
       # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
       # Source: target §9 / simulation-bases.md §4.N.6
@@ -195,7 +195,7 @@ ragllm_risk_manager:
       # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 1500000.0
       # Source: target §9 / simulation-bases.md §4.N.6
-      initial_position: 500
+      initial_position: 3000
       # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
       # Source: target §9 / simulation-bases.md §4.N.6

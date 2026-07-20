@@ -378,6 +378,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
         order["analysis"] = str(decision_payload["analysis"])
         order["rag_context"] = self.state.custom_state["last_rag_context"]
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
