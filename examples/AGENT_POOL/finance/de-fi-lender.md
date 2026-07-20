@@ -311,3 +311,4 @@ State update: position: 0 (unchanged); cash: 802500 (unchanged). Agent is inert.
 | Version | 1.0.0 |
 | Status | canonical |
 | Icon        | ![](../agent_images/icons/finance-de-fi-lender.png)         |
+| Change log | 2026-07-20: handbook provenance audit; reused by LUNACollapse with no profile-mechanism change. |

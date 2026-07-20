@@ -37,18 +37,28 @@ work motivate the lender/liquidator and yield-depositor agents.
 
 ## §3 Market Mechanism
 
-The market follows a standard demand-impact model:
+The shipped market is the openly disclosed single-risky-asset approximation of
+`examples/AGENT_POOL/market/crypto-algostable-depeg.md`. It isolates the LUNA
+leg of the death spiral while preserving the depeg-to-selling causal chain:
 
 ```text
-P(t+1) = max(P(t) + lambda * D(t) + gamma * (F - P(t)) + epsilon(t), 0.01)
+P(t+1) = max(P_floor,
+             P(t) + lambda * D(t) / M
+                  + gamma * (F - P(t))
+                  + epsilon(t) + F * S(t))
 ```
 
-where `D(t)` is buy volume minus sell volume, `lambda` is price impact, `gamma`
-is mean reversion toward fundamental value, and `epsilon(t)` is Gaussian noise.
+where `D(t)` is feasible buy volume minus sell volume, `M` is market depth,
+`lambda` is price impact, `gamma` is mean reversion, `epsilon(t)` is a
+round/identity-seeded Gaussian draw, and `S(t)` is the bounded May 2022 depeg
+identification stimulus from target §6.1 and §9. Depth normalization prevents
+agent-count changes from producing an accidental price-unit explosion.
 
 The market publishes `price`, `fundamental`, `deviation`, and `round` each
 round. Investors send canonical orders containing `type`, `from`, `action`,
-`bid_price`, `quantity`, `reasoning`, `agent_type`, and `strategy`.
+`bid_price`, `quantity`, `reasoning`, `agent_type`, and `strategy`. Each
+investor writes the order into the decision payload's `outbound_messages`
+before returning its Action, as required by the scheduler's routing hook.
 
 ## §4 Investor Archetypes
 
@@ -72,7 +82,8 @@ position.
 **Worked Numerical Example**: With `redemption_threshold = 0.05`,
 `deviation = -0.06`, and `position = 100000`, the holder sells 50000 units.
 
-**Academic References**: Klages-Mundt et al. (2020); Levy (2022).
+**Academic References**: Uhlig (2022), https://doi.org/10.3386/w30256;
+Klages-Mundt et al. (2020), https://arxiv.org/abs/2006.12388.
 
 ### §4.2 Arbitrageur
 
@@ -88,10 +99,12 @@ algorithmic peg but can increase base-token pressure during runs.
 `arb_threshold`.
 
 **Decision Process**: Quantity scales with `abs(deviation) * 100000`, capped at
-5000 and constrained by cash or position.
+5000 and constrained by inventory. Under negative deviation the conversion
+channel sells the LUNA-like base token; buying here would incorrectly turn the
+death-spiral channel into ordinary value arbitrage.
 
 **Worked Numerical Example**: With `deviation = -0.08`, target quantity is 5000;
-the arbitrageur buys if cash allows.
+the arbitrageur sells up to its available inventory.
 
 **Academic References**: Klages-Mundt et al. (2020); Terra/LUNA postmortem
 analyses.
@@ -115,7 +128,8 @@ protocol-defined fraction of position.
 **Worked Numerical Example**: With `liquidation_threshold = 0.15` and a 20%
 discount, the lender enters forced-sale mode.
 
-**Academic References**: Werner et al. (2022); DeFi liquidation literature.
+**Academic References**: Werner et al. (2022),
+https://doi.org/10.1145/3558535.3559780.
 
 ### §4.4 AnchorDepositor
 
@@ -137,7 +151,9 @@ threshold; otherwise hold.
 **Worked Numerical Example**: If confidence-implied stress exceeds 5%, the
 depositor exits part of the position.
 
-**Academic References**: Terra/Anchor event analyses; DeFi run literature.
+**Academic References**: Diamond and Dybvig (1983),
+https://doi.org/10.1086/261155; SEC (2023),
+https://www.sec.gov/files/terraform-labs-pte-ltd-amended-complaint.pdf.
 
 ### §4.5 ValueBuyer
 
@@ -158,7 +174,8 @@ otherwise hold.
 **Worked Numerical Example**: With `discount_threshold = 0.30`, the buyer waits
 for a 30% discount before deploying capital.
 
-**Academic References**: Shleifer and Vishny (1997); crisis arbitrage evidence.
+**Academic References**: Shleifer and Vishny (1997),
+https://doi.org/10.1111/j.1540-6261.1997.tb03807.x.
 
 ## §5 Agent Diversity Verification
 
@@ -175,6 +192,10 @@ one stabilizing archetype, matching the intended death-spiral design.
 | `price_impact` | `market.extras.price_impact` | Demand-to-price response | Thin crisis liquidity during stablecoin runs | High |
 | `mean_reversion` | `market.extras.mean_reversion` | Pull toward fundamental | Weak stabilizing arbitrage under stress | Medium |
 | `noise_std` | `market.extras.noise_std` | Exogenous noise | Background market uncertainty | Low |
+| `market_depth` | `market.extras.market_depth` | Order-flow normalization | Prevents population-scale unit explosions | High |
+| `random_seed` | `market.extras.random_seed` | Reproducible noise | Pipeline replay invariant | Low |
+| `price_floor` | `market.extras.price_floor` | Positive-price clamp | Numerical invariant | Low |
+| `shock_schedule` | `market.extras.shock_schedule` | May 2022 identification stimulus | Target §6.1 and §9 | High |
 | `redemption_threshold` | `stablecoinholder.extras.redemption_threshold` | Panic redemption trigger | Peg-break confidence threshold | High |
 | `arb_threshold` | `arbitrageur.extras.arb_threshold` | Arbitrage activation threshold | Spread threshold for conversion trades | Medium |
 | `liquidation_threshold` | `defilender.extras.liquidation_threshold` | Forced-sale trigger | Collateral impairment threshold | High |
@@ -222,3 +243,7 @@ once confidence has broken.
 | LLM | Persona-driven panic and discretion may alter timing |
 | RuleLLM | Rule formulas remain explicit but LLM may vary quantity/reasoning |
 | Rag | Retrieved stablecoin/depeg context may amplify or moderate panic reasoning |
+
+All four variants trace to target §10.1. The current polish run formally
+calibrates Rule, performs bounded contract checks for LLM and RuleLLM, and
+limits Rag to static configuration and import validation.

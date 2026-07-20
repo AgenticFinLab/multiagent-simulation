@@ -311,3 +311,4 @@ State update: position: 0 (unchanged); cash: 502600 (unchanged). Agent is inert.
 | Version | 1.0.0 |
 | Status | canonical |
 | Icon        | ![](../agent_images/icons/finance-stablecoin-holder.png)         |
+| Change log | 2026-07-20: handbook provenance audit; reused by LUNACollapse with no profile-mechanism change. |
