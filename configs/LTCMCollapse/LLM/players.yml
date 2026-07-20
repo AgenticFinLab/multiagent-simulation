@@ -12,13 +12,20 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"  # Source: framework infrastructure
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      price_impact: 0.03  # Source: simulation-bases.md §6
-      mean_reversion: 0.01  # Source: simulation-bases.md §6
-      noise_std: 0.015  # Source: simulation-bases.md §6
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      price_impact: 0.03
+      # Source: target §9 / simulation-bases.md §4.N.6
+      mean_reversion: 0.01
+      # Source: target §9 / simulation-bases.md §4.N.6
+      noise_std: 0.015
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 llm_convergence_arbitrageur:
@@ -32,16 +39,27 @@ llm_convergence_arbitrageur:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"  # Source: framework infrastructure
-      initial_cash: 2000000.0  # Source: simulation-bases.md §6
-      initial_position: 500  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      entry_spread: 0.03  # Source: simulation-bases.md §4.1.7
-      leverage: 15  # Source: simulation-bases.md §4.1.7
-      max_position: 5000  # Source: simulation-bases.md §4.1.7
-      base_size: 400  # Source: simulation-bases.md §4.1.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 2000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      entry_spread: 0.03
+      # Source: target §9 / simulation-bases.md §4.N.6
+      leverage: 15
+      # Source: target §9 / simulation-bases.md §4.N.6
+      max_position: 5000
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 400
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_CONVERGENCEARBITRAGEUR_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
@@ -63,15 +81,25 @@ llm_leverage_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"  # Source: framework infrastructure
-      initial_cash: 3000000.0  # Source: simulation-bases.md §6
-      initial_position: 500  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      leverage_ratio: 25  # Source: simulation-bases.md §4.2.7
-      margin_call_threshold: 0.04  # Source: simulation-bases.md §4.2.7
-      base_size: 500  # Source: simulation-bases.md §4.2.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 3000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      leverage_ratio: 25
+      # Source: target §9 / simulation-bases.md §4.N.6
+      margin_call_threshold: 0.04
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 500
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_LEVERAGETRADER_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
@@ -93,14 +121,23 @@ llm_risk_manager:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"  # Source: framework infrastructure
-      initial_cash: 1500000.0  # Source: simulation-bases.md §6
-      initial_position: 500  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      var_trigger: 0.06  # Source: simulation-bases.md §4.3.7
-      base_size: 300  # Source: simulation-bases.md §4.3.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 1500000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      var_trigger: 0.06
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 300
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_RISKMANAGER_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
@@ -122,15 +159,25 @@ llm_liquidity_provider:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"  # Source: framework infrastructure
-      initial_cash: 1000000.0  # Source: simulation-bases.md §6
-      initial_position: 1000  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      inventory_limit: 2000  # Source: simulation-bases.md §4.4.7
-      stress_exit: 0.4  # Source: simulation-bases.md §4.4.7
-      base_size: 400  # Source: simulation-bases.md §4.4.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 1000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 1000
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      inventory_limit: 2000
+      # Source: target §9 / simulation-bases.md §4.N.6
+      stress_exit: 0.4
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 400
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_LIQUIDITYPROVIDER_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"
@@ -152,14 +199,23 @@ llm_central_bank:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"  # Source: framework infrastructure
-      initial_cash: 500000.0  # Source: simulation-bases.md §6
-      initial_position: 200  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
-      noise_size: 150  # Source: simulation-bases.md §4.5.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/LLM/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 500000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 200
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      trade_probability: 0.3
+      # Source: target §9 / simulation-bases.md §4.N.6
+      noise_size: 150
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.LLM.prompts:LLM_CENTRALBANK_PROMPT"
         user_message: "examples.LTCMCollapse.LLM.prompts:LLM_USER_TEMPLATE"

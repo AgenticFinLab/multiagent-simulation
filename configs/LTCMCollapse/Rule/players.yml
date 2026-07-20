@@ -12,13 +12,20 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"  # Source: framework infrastructure
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      price_impact: 0.03  # Source: simulation-bases.md §6
-      mean_reversion: 0.01  # Source: simulation-bases.md §6
-      noise_std: 0.015  # Source: simulation-bases.md §6
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      price_impact: 0.03
+      # Source: target §9 / simulation-bases.md §4.N.6
+      mean_reversion: 0.01
+      # Source: target §9 / simulation-bases.md §4.N.6
+      noise_std: 0.015
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 rule_convergence_arbitrageur:
@@ -32,16 +39,26 @@ rule_convergence_arbitrageur:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"  # Source: framework infrastructure
-      initial_cash: 2000000.0  # Source: simulation-bases.md §6
-      initial_position: 500  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      entry_spread: 0.03  # Source: simulation-bases.md §4.1.7
-      leverage: 15  # Source: simulation-bases.md §4.1.7
-      max_position: 5000  # Source: simulation-bases.md §4.1.7
-      base_size: 400  # Source: simulation-bases.md §4.1.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 2000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      entry_spread: 0.03
+      # Source: target §9 / simulation-bases.md §4.N.6
+      leverage: 15
+      # Source: target §9 / simulation-bases.md §4.N.6
+      max_position: 5000
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 400
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 rule_leverage_trader:
@@ -55,15 +72,24 @@ rule_leverage_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"  # Source: framework infrastructure
-      initial_cash: 3000000.0  # Source: simulation-bases.md §6
-      initial_position: 500  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      leverage_ratio: 25  # Source: simulation-bases.md §4.2.7
-      margin_call_threshold: 0.04  # Source: simulation-bases.md §4.2.7
-      base_size: 500  # Source: simulation-bases.md §4.2.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 3000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      leverage_ratio: 25
+      # Source: target §9 / simulation-bases.md §4.N.6
+      margin_call_threshold: 0.04
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 500
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 rule_risk_manager:
@@ -77,15 +103,24 @@ rule_risk_manager:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"  # Source: framework infrastructure
-      initial_cash: 1500000.0  # Source: simulation-bases.md §6
-      initial_position: 500  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      var_trigger: 0.06  # Source: simulation-bases.md §4.3.7
-      base_size: 300  # Source: simulation-bases.md §4.3.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
-      var_limit: 0.05  # Source: simulation-bases.md §4.3.7
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 1500000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      var_trigger: 0.06
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 300
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §9 / simulation-bases.md §4.N.6
+      var_limit: 0.05
   persona: !include persona.yml
 
 rule_liquidity_provider:
@@ -99,15 +134,24 @@ rule_liquidity_provider:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"  # Source: framework infrastructure
-      initial_cash: 1000000.0  # Source: simulation-bases.md §6
-      initial_position: 1000  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      inventory_limit: 2000  # Source: simulation-bases.md §4.4.7
-      stress_exit: 0.4  # Source: simulation-bases.md §4.4.7
-      base_size: 400  # Source: simulation-bases.md §4.4.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 1000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 1000
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      inventory_limit: 2000
+      # Source: target §9 / simulation-bases.md §4.N.6
+      stress_exit: 0.4
+      # Source: target §9 / simulation-bases.md §4.N.6
+      base_size: 400
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
   persona: !include persona.yml
 
 rule_central_bank:
@@ -121,14 +165,24 @@ rule_central_bank:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"  # Source: framework infrastructure
-      initial_cash: 500000.0  # Source: simulation-bases.md §6
-      initial_position: 200  # Source: simulation-bases.md §6
-      initial_price: 100.0  # Source: simulation-bases.md §6
-      fundamental_value: 100.0  # Source: simulation-bases.md §6
-      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
-      noise_size: 150  # Source: simulation-bases.md §4.5.7
-      custom_state_hot_limit: 3  # Source: framework infrastructure
-      intervention_threshold: 0.1  # Source: simulation-bases.md §4.5.7
-      rescue_probability: 0.5  # Source: simulation-bases.md §4.5.7
+      # Source: target §10.2 runtime-output contract
+      record_path: "EXPERIMENT/LTCMCollapse/Rule/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_cash: 500000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 200
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
+      trade_probability: 0.3
+      # Source: target §9 / simulation-bases.md §4.N.6
+      noise_size: 150
+      # Source: target §10.2 runtime-output contract
+      custom_state_hot_limit: 3
+      # Source: target §9 / simulation-bases.md §4.N.6
+      intervention_threshold: 0.1
+      # Source: target §9 / simulation-bases.md §4.N.6
+      rescue_probability: 0.5
   persona: !include persona.yml
