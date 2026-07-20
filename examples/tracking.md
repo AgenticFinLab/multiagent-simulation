@@ -20,20 +20,20 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 12 | DotComBubble           | 🟢     | qihang      | Jul 6 2026  | LLM, Rule, RuleLLM |
 | 13 | EchoChamber            | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM |
 | 14 | EndowmentEffect        | 🟡     | qihang      | Jul 7 2026  | LLM, Rule, RuleLLM |
-| 15 | EquityPremium          | 🟡     | Wenyou      | Jul 6 2026  | LLM，Rule，RuleLLM |
-| 16 | EuropeanDebtCrisis     | 🟡     | Wenyou      | Jul 6 2026  | LLM, Rule, RuleLLM |
-| 17 | FlashCrash             | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
-| 18 | FlashCrash2010         | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
-| 19 | FramingEffect          | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
-| 20 | GamblerFallacy         | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
-| 21 | GameStopShortSqueeze   | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
-| 22 | GFC2008                | 🟡      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 15 | EquityPremium          | 🟢     | Wenyou      | Jul 6 2026  | LLM，Rule，RuleLLM |
+| 16 | EuropeanDebtCrisis     | 🟢     | Wenyou      | Jul 6 2026  | LLM, Rule, RuleLLM |
+| 17 | FlashCrash             | 🟢      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 18 | FlashCrash2010         | 🟢      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 19 | FramingEffect          | 🟢      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 20 | GamblerFallacy         | 🟢      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 21 | GameStopShortSqueeze   | 🟢      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
+| 22 | GFC2008                | 🟢      | Wenyou      | Jul 8 2026 | LLM, Rule, RuleLLM |
 | 23 | HerdEffect             | 🟢      | qihang      | Jul 8 2026           | —                 |
 | 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
 | 25 | HindsightBias          | 🟡      |              |             |                    |
 | 26 | LiquidityDryup         | 🟡      |              |            |                    |
 | 27 | LossAversion           | 🟢      | Wenyou      | Jul 16 2026 | LLM, Rule, RuleLLM |
-| 28 | LTCMCollapse           | 🟡      |             | Jul 10 2026 | LLM, Rule, RuleLLM |
+| 28 | LTCMCollapse           | 🟢      | Wenyou      | Jul 16 2026 | LLM, Rule, RuleLLM |
 | 29 | LUNACollapse           | 🟡      |             | Jul 11 2026 | —                 |
 | 30 | MarketCrash            | 🟡      |              | Jul 11 2026 | —                 |
 | 31 | MentalAccounting       | ⬜      | —           | —           | —                 |
