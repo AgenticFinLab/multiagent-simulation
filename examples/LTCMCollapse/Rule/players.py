@@ -18,6 +18,7 @@ Key Dynamics:
 """
 
 import logging
+import hashlib
 import os
 import random
 
@@ -26,6 +27,13 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("LTCMCollapse")
+
+
+def _round_rng(seed: int, identity: str, round_num: int) -> random.Random:
+    """Return a process-independent deterministic RNG for one actor-round."""
+    token = f"{seed}:{identity}:{round_num}".encode("utf-8")
+    digest = hashlib.sha256(token).digest()
+    return random.Random(int.from_bytes(digest[:8], "big"))
 
 
 def _require_positive(value: float, name: str) -> None:
@@ -108,6 +116,10 @@ class Market(GeneralPlayer):
             self.state.custom_state["price_impact"] = extras["price_impact"]
             self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
             self.state.custom_state["noise_std"] = extras["noise_std"]
+            self.state.custom_state["market_depth"] = extras["market_depth"]
+            self.state.custom_state["random_seed"] = extras["random_seed"]
+            self.state.custom_state["price_floor"] = extras["price_floor"]
+            self.state.custom_state["shock_schedule"] = extras["shock_schedule"]
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -131,10 +143,21 @@ class Market(GeneralPlayer):
         buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_vol = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_vol - sell_vol
-        price_change = self.state.custom_state["price_impact"] * net_demand
+        market_depth = self.state.custom_state["market_depth"]
+        _require_positive(market_depth, "market_depth")
+        normalized_demand = net_demand / market_depth
+        price_change = self.state.custom_state["price_impact"] * normalized_demand
         reversion = self.state.custom_state["mean_reversion"] * (fundamental - price)
-        noise = random.gauss(0, self.state.custom_state["noise_std"])
-        new_price = max(price + price_change + reversion + noise, 0.01)
+        round_num = self.state.custom_state["round"]
+        rng = _round_rng(self.state.custom_state["random_seed"], self.identity, round_num)
+        noise = rng.gauss(0, self.state.custom_state["noise_std"])
+        shock_schedule = self.state.custom_state["shock_schedule"]
+        shock_return = float(shock_schedule[round_num]) if round_num in shock_schedule else 0.0
+        shock = fundamental * shock_return
+        new_price = max(
+            price + price_change + reversion + noise + shock,
+            self.state.custom_state["price_floor"],
+        )
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         volume = min(buy_vol, sell_vol) + abs(net_demand) * 0.5
@@ -221,7 +244,11 @@ class ConvergenceArbitrageur(GeneralPlayer):
             leveraged_cash = cash * leverage
             _require_positive(price, "price")
             if deviation < 0:
-                buy_qty = min(int(leveraged_cash * abs(deviation) / price), max_position)
+                remaining_capacity = max(max_position - max(position, 0), 0)
+                buy_qty = min(
+                    int(leveraged_cash * abs(deviation) / price),
+                    remaining_capacity,
+                )
                 if buy_qty > 0:
                     return _decision("buy", buy_qty, f"spread discount deviation={deviation:+.2%}")
             sell_qty = min(int(leveraged_cash * abs(deviation) / price), max(position, 0))
@@ -274,17 +301,18 @@ class LeverageTrader(GeneralPlayer):
         position = self.state.custom_state["position"]
         leverage_ratio = extras["leverage_ratio"]
         margin_call = extras["margin_call_threshold"]
-        portfolio_value = cash + position * price
-        equity = portfolio_value - abs(position * price) / leverage_ratio
+        initial_price = extras["initial_price"]
+        initial_equity = abs(position * initial_price) / leverage_ratio
+        equity = initial_equity + position * (price - initial_price)
         if equity < abs(position * price) * margin_call:
-            delever_qty = int(abs(position) * 0.3)
+            delever_qty = int(abs(position) * extras["delever_fraction"])
             if position > 0:
                 return _decision("sell", min(delever_qty, position), "margin call deleveraging")
             if position < 0:
                 return _decision("buy", delever_qty, "margin call short-covering")
-        elif deviation < -0.03:
+        elif deviation < -margin_call:
             _require_positive(price, "price")
-            buy_qty = min(int(cash * leverage_ratio * 0.01 / price), 5000)
+            buy_qty = min(extras["base_size"], int(cash / price))
             if buy_qty > 0:
                 return _decision("buy", buy_qty, "leveraged undervaluation entry")
         return _decision("hold", 0, "no margin call or value trigger")
@@ -331,8 +359,9 @@ class RiskManager(GeneralPlayer):
         extras = self.config.extras
         position = self.state.custom_state["position"]
         var_limit = extras["var_limit"]
-        if abs(deviation) > var_limit * 3:
-            cut_qty = int(abs(position) * 0.5)
+        var_trigger = extras["var_trigger"]
+        if abs(deviation) > max(var_trigger, var_limit * extras["var_multiplier"]):
+            cut_qty = int(abs(position) * extras["risk_cut_fraction"])
             if position > 0:
                 return _decision("sell", min(cut_qty, position), "VaR breach risk cut")
             if position < 0:
@@ -382,12 +411,19 @@ class LiquidityProvider(GeneralPlayer):
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
         inventory_limit = extras["inventory_limit"]
+        stress_exit = extras["stress_exit"]
+        base_size = extras["base_size"]
         price = self.state.custom_state["price"]
-        if abs(deviation) > 0.05:
+        _require_positive(stress_exit, "stress_exit")
+        provision_fraction = max(0.0, 1.0 - abs(deviation) / stress_exit)
+        if provision_fraction == 0.0:
             return _decision("hold", 0, "stress withdrawal")
         if abs(position) < inventory_limit:
             _require_positive(price, "price")
-            qty = min(500, inventory_limit - abs(position))
+            qty = min(
+                max(1, int(base_size * provision_fraction)),
+                inventory_limit - abs(position),
+            )
             if deviation > 0:
                 return _decision("sell", qty, "normal liquidity supply")
             return _decision("buy", min(qty, int(cash / price)), "normal liquidity demand")
@@ -422,7 +458,7 @@ class CentralBank(GeneralPlayer):
         if "cash" not in self.state.custom_state:
             extras = self.config.extras
             self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = 0
+            self.state.custom_state["position"] = extras["initial_position"]
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
             if isinstance(payload, dict) and payload["type"] == "market_update":
@@ -435,9 +471,16 @@ class CentralBank(GeneralPlayer):
         extras = self.config.extras
         intervention_threshold = extras["intervention_threshold"]
         rescue_prob = extras["rescue_probability"]
-        if deviation < -intervention_threshold and random.random() < rescue_prob:
-            return _decision("buy", 2000, "lender-of-last-resort intervention")
-        return _decision("hold", 0, "intervention threshold not met")
+        rng = _round_rng(extras["random_seed"], self.identity, self.state.custom_state["round"])
+        if deviation < -intervention_threshold and rng.random() < rescue_prob:
+            return _decision(
+                "buy",
+                extras["intervention_size"],
+                "lender-of-last-resort intervention",
+            )
+        if rng.random() < extras["trade_probability"]:
+            return _decision("buy", extras["noise_size"], "bounded background liquidity")
+        return _decision("hold", 0, "intervention and background draws inactive")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]

@@ -95,8 +95,8 @@ peak_price(t) = max_{s <= t} P(s)
 
 **Python function**:
 ```python
-def _max_drawdown_pct(prices: np.ndarray) -> float:
-    """Return peak-to-trough drawdown in percent."""
+def calculate_max_drawdown(prices: list[float]) -> tuple[float, int, int]:
+    """Return peak-to-trough drawdown and its endpoints."""
 ```
 
 #### Interpretation
@@ -130,7 +130,7 @@ The model targets drawdowns large enough to demonstrate forced deleveraging but 
 MDD should rise with volatility and max absolute deviation; if MDD rises without volatility, the run may have a single discontinuity rather than a cascade.
 
 #### Implementation Notes
-Implemented in `Rule/analysis.py::_max_drawdown_pct`.
+Computed by `masim.evaluation.finance.timeseries.calculate_max_drawdown` and orchestrated in `Rule/analysis.py::calculate_metrics`.
 
 ### Metric: Mean Absolute Deviation (MAD)
 
@@ -170,7 +170,7 @@ def calculate_metrics(data: dict) -> dict:
 
 | Study | Context | Finding | Relevance |
 |---|---|---|---|
-| Morris & Shin (2004), https://doi.org/10.1093/rof/8.1.1 | liquidity black holes | synchronized withdrawal prolongs stress | motivates persistence metric |
+| Morris & Shin (2004), https://doi.org/10.1023/B:EUFI.0000022155.98681.25 | liquidity black holes | synchronized withdrawal prolongs stress | motivates persistence metric |
 | Hameed, Kang, & Viswanathan (2010), https://doi.org/10.1111/j.1540-6261.2009.01529.x | market liquidity | liquidity provision falls after negative returns | supports persistence interpretation |
 
 #### Normal Range (from literature)
@@ -242,7 +242,7 @@ The normalized model treats return standard deviation above 1% as evidence of ma
 VOL should increase around cascade onset and trough. If VOL is high but deviation is small, the run may be noisy rather than mechanism-driven.
 
 #### Implementation Notes
-Implemented in `Rule/analysis.py::_returns` and `calculate_metrics`.
+Computed by `masim.evaluation.finance.timeseries._returns` and orchestrated in `Rule/analysis.py::calculate_metrics`.
 
 ### Metric: Cascade Onset Round (ONSET)
 

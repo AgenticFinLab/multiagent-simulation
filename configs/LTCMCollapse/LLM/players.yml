@@ -24,6 +24,18 @@ market:
       mean_reversion: 0.01
       # Source: target §9 / simulation-bases.md §4.N.6
       noise_std: 0.015
+      # Source: target §9 / normalized order-flow calibration
+      market_depth: 100.0
+      # Source: target §9 / reproducibility invariant
+      random_seed: 20260720
+      # Source: target §9 / numerical invariant
+      price_floor: 0.01
+      # Source: target §9 / controlled identification stimulus
+      shock_schedule:
+        20: -0.06
+        21: -0.05
+        22: -0.04
+        23: -0.03
       # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
   persona: !include persona.yml
@@ -95,6 +107,8 @@ llm_leverage_trader:
       leverage_ratio: 25
       # Source: target §9 / simulation-bases.md §4.N.6
       margin_call_threshold: 0.04
+      # Source: target §9 / simulation-bases.md §4.2.6
+      delever_fraction: 0.3
       # Source: target §9 / simulation-bases.md §4.N.6
       base_size: 500
       # Source: target §10.2 runtime-output contract
@@ -133,6 +147,12 @@ llm_risk_manager:
       fundamental_value: 100.0
       # Source: target §9 / simulation-bases.md §4.N.6
       var_trigger: 0.06
+      # Source: target §9 / simulation-bases.md §4.3.6
+      var_limit: 0.05
+      # Source: target §9 / simulation-bases.md §4.3.6
+      var_multiplier: 3.0
+      # Source: target §9 / simulation-bases.md §4.3.6
+      risk_cut_fraction: 0.5
       # Source: target §9 / simulation-bases.md §4.N.6
       base_size: 300
       # Source: target §10.2 runtime-output contract
@@ -213,6 +233,14 @@ llm_central_bank:
       trade_probability: 0.3
       # Source: target §9 / simulation-bases.md §4.N.6
       noise_size: 150
+      # Source: target §9 / simulation-bases.md §4.5.6
+      intervention_threshold: 0.1
+      # Source: target §9 / simulation-bases.md §4.5.6
+      rescue_probability: 0.5
+      # Source: target §9 / bounded crisis-support calibration
+      intervention_size: 2000
+      # Source: target §9 / reproducibility invariant
+      random_seed: 20260720
       # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
       # Source: target §10.1 capability contract and target §9

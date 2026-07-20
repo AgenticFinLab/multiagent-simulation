@@ -42,7 +42,9 @@ def analyze_rag_knowledge_effect(
                 "total_rag_rounds": total,
                 "retrieval_success_rounds": total - failures,
                 "retrieval_failure_rounds": failures,
+                "retrieval_success_rate": float((total - failures) / total),
                 "retrieval_failure_rate": float(failures / total),
+                "meets_target": float((total - failures) / total) >= 0.70,
             }
 
     rates = [

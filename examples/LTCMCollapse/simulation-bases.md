@@ -66,7 +66,7 @@ Target trace for the required stylized facts:
 
 - **Citation**: Geanakoplos, J. (2010). The leverage cycle. In *NBER Macroeconomics Annual 2009*, 24, 1-65. https://doi.org/10.1086/648285
 - **Core Insight**: Falling collateral values tighten feasible leverage and force rapid contraction after tranquil-period balance-sheet expansion.
-- **Mathematical Formulation**: A breach occurs when `equity(t) < margin_call_threshold * abs(position(t)*P(t))`; the forced order closes `0.30*abs(position(t))`.
+- **Mathematical Formulation**: Let `E0=abs(position(t)*P0)/leverage_ratio` be initial posted equity and `equity(t)=E0+position(t)*(P(t)-P0)` its mark-to-market value. A breach occurs when `equity(t) < margin_call_threshold * abs(position(t)*P(t))`; the forced order closes `0.30*abs(position(t))`.
 - **Empirical Evidence**: Adrian and Shin (2010), https://doi.org/10.1016/j.jfi.2008.12.002, document procyclical intermediary leverage; the PWG report, https://www.govinfo.gov/app/details/GOVPUB-PR-PURL-LPS77446, identifies excessive LTCM leverage as the central policy issue.
 - **Relevance to This Simulation**: `LeverageTrader` converts adverse marking-to-market into a mechanical reduction in exposure.
 - **Calibration Implication**: `leverage_ratio=25` and `margin_call_threshold=0.04` make modest price moves material to equity without imposing an exogenous crash path.
@@ -105,7 +105,7 @@ Target trace for the required stylized facts:
 The market uses a linear order-imbalance model:
 
 ```
-P(t+1) = max(P(t) + lambda * D(t) + gamma * [F - P(t)] + epsilon(t), 0.01)
+P(t+1) = max(P(t) + lambda * D(t) / M + gamma * [F - P(t)] + epsilon(t) + F*S(t), P_min)
 D(t) = buy_volume(t) - sell_volume(t)
 epsilon(t) ~ N(0, sigma^2)
 delta(t) = (P(t) - F) / F
@@ -116,8 +116,11 @@ delta(t) = (P(t) - F) / F
 | `P(t)` | `state.custom_state["price"]` | 100.0 initial | Market price |
 | `F` | `extras["fundamental_value"]` | 100.0 | Fundamental anchor |
 | `lambda` | `extras["price_impact"]` | 0.03 | Price impact per net-demand unit |
+| `M` | `extras["market_depth"]` | 100.0 | Normalized executable order depth |
 | `gamma` | `extras["mean_reversion"]` | 0.01 | Mean reversion toward fundamental |
 | `sigma` | `extras["noise_std"]` | 0.015 | Gaussian noise standard deviation |
+| `S(t)` | `extras["shock_schedule"]` | rounds 20-23 | Deterministic identification impulse |
+| `P_min` | `extras["price_floor"]` | 0.01 | Strictly positive price invariant |
 
 ### §3.2 Additional Environment Mechanisms
 
@@ -299,7 +302,7 @@ Buy, sell, or hold at current price for one round. A breach closes `30%` of abso
 
 ###### §4.2.5.4 Mathematical Model
 
-With equity `E=cash+position*price-abs(position*price)/leverage_ratio`, breach when `E<margin_call_threshold*abs(position*price)` and trade `floor(0.30*abs(position))` toward zero. State updates post-execution; the rule is deterministic.
+With initial posted equity `E0=abs(position*initial_price)/leverage_ratio` and current equity `E=E0+position*(price-initial_price)`, breach when `E<margin_call_threshold*abs(position*price)` and trade `floor(0.30*abs(position))` toward zero. State updates post-execution; the rule is deterministic.
 
 ###### §4.2.5.5 Behavioral Properties
 
@@ -311,6 +314,7 @@ Medium horizon, high pre-breach risk tolerance, partial information, and institu
 |---|---:|---:|---|---|---|---|---|
 | `leverage_ratio` | float | 25 | `[1,50]` | high | liability scale | Higher -> lower equity buffer | PWG (1999) |
 | `margin_call_threshold` | float | 0.04 | `(0,1)` | high | breach buffer | Higher -> earlier cuts | §2.2 |
+| `delever_fraction` | float | 0.30 | `(0,1]` | high | fraction closed after breach | Higher -> faster deleveraging | §2.2 |
 | `base_size` | int | 500 | `>=1` | medium | ordinary buy size | Higher -> larger non-breach buys | scenario calibration |
 
 #### §4.2.7 Population and Heterogeneity
@@ -407,6 +411,8 @@ Short horizon, low risk tolerance after breach, partial information, and rule-bo
 |---|---:|---:|---|---|---|---|---|
 | `var_limit` | float | 0.05 | `(0,0.20]` | high | base risk boundary | Higher -> fewer cuts | Jorion (2000) |
 | `var_trigger` | float | 0.06 | `(0,0.20]` | medium | stress diagnostic | Higher -> later diagnostic stress | Jorion (2000) |
+| `var_multiplier` | float | 3.0 | `>=1` | high | VaR breach multiple | Higher -> later cuts | Jorion (2000) |
+| `risk_cut_fraction` | float | 0.50 | `(0,1]` | high | fraction closed after breach | Higher -> larger synchronized cuts | Jorion (2000) |
 | `base_size` | int | 300 | `>=1` | low | reporting/order unit | Higher -> coarser reporting | scenario calibration |
 
 #### §4.3.7 Population and Heterogeneity
@@ -492,7 +498,7 @@ Short horizon, medium risk tolerance, partial information, and inventory-sensiti
 | Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
 |---|---:|---:|---|---|---|---|---|
 | `inventory_limit` | int | 2000 | `>=1` | high | capacity cap | Higher -> more liquidity capacity | Brunnermeier & Pedersen (2009) |
-| `stress_exit` | float | 0.40 | `[0,1]` | high | stress-withdrawal intensity | Higher -> more withdrawal | §2.4 calibration |
+| `stress_exit` | float | 0.40 | `(0,1]` | high | deviation at which provision reaches zero | Higher -> slower withdrawal | §2.4 calibration |
 | `base_size` | int | 400 | `>=1` | medium | ordinary order cap | Higher -> larger quotes | scenario calibration |
 
 #### §4.4.7 Population and Heterogeneity
@@ -626,19 +632,27 @@ The mix covers rational arbitrage, funding fragility, institutional risk control
 | `initial_price` | 100.0 | `market.extras` | normalized price index used to make cross-scenario output comparable |
 | `fundamental_value` | 100.0 | `market.extras` | normalized fair-value anchor for convergence-trade deviation |
 | `price_impact` | 0.03 | `market.extras` | stress-market order impact calibration; consistent with the idea that dealer liquidity is thin during forced unwinds (Brunnermeier & Pedersen 2009) |
+| `market_depth` | 100.0 | `market.extras` | normalizes integer share orders into economically interpretable net-demand units |
 | `mean_reversion` | 0.01 | `market.extras` | slow correction toward fundamental so the liquidity spiral can persist before recovery |
 | `noise_std` | 0.015 | `market.extras` | small exogenous disturbance that can move the system across thresholds without dominating endogenous order flow |
+| `random_seed` | 20260720 | `market.extras`, `centralbank.extras` | process-independent reproducibility seed for Gaussian noise and Bernoulli intervention |
+| `price_floor` | 0.01 | `market.extras` | strictly positive numerical invariant |
+| `shock_schedule` | `{20:-0.06,21:-0.05,22:-0.04,23:-0.03}` | `market.extras` | bounded four-round flight-to-liquidity identification stimulus |
 | `entry_spread` | 0.03 | `convergencearbitrageur.extras` | convergence trade activation threshold; above calm-market noise but below deep-crisis deviation |
 | `leverage` | 15 | `convergencearbitrageur.extras` | stylized convergence-trade exposure; deliberately lower than peak reported LTCM gross leverage to keep the normalized market numerically stable |
 | `max_position` | 5000 | `convergencearbitrageur.extras` | hard cap representing prime-broker concentration and scenario stability limits |
 | `leverage_ratio` | 25 | `leveragetrader.extras` | high leverage consistent with LTCM-style balance-sheet pressure and the leverage-cycle mechanism |
 | `margin_call_threshold` | 0.04 | `leveragetrader.extras` | equity buffer trigger calibrated as a stress threshold rather than ordinary maintenance margin |
+| `delever_fraction` | 0.30 | `leveragetrader.extras` | fraction of exposure closed after a margin breach |
 | `var_trigger` | 0.06 | `riskmanager.extras` | direct stress trigger corresponding to a multi-sigma VaR breach proxy |
 | `var_limit` | 0.05 | `riskmanager.extras` | VaR-style risk threshold retained for documentation and API reasoning symmetry |
+| `var_multiplier` | 3.0 | `riskmanager.extras` | multiple of the VaR limit used as the severe common-risk boundary |
+| `risk_cut_fraction` | 0.50 | `riskmanager.extras` | fraction of inventory closed at a risk breach |
 | `inventory_limit` | 2000 | `liquidityprovider.extras` | market-maker inventory capacity under normal liquidity conditions |
-| `stress_exit` | 0.4 | `liquidityprovider.extras` | stress-withdrawal intensity; captures the transition from liquidity provision to liquidity black hole |
+| `stress_exit` | 0.4 | `liquidityprovider.extras` | absolute-deviation scale over which provision tapers linearly to zero |
 | `intervention_threshold` | 0.10 | `centralbank.extras` | systemic stress threshold for rescue consideration |
 | `rescue_probability` | 0.5 | `centralbank.extras` | probabilistic intervention to model coordination uncertainty and official-sector discretion |
+| `intervention_size` | 2000 | `centralbank.extras` | bounded emergency-support order scale |
 | `trade_probability` | 0.3 | `centralbank.extras` | background probability for central-bank activity outside the hard rescue trigger |
 | `noise_size` | 150 | `centralbank.extras` | small intervention-order scale used when the central-bank proxy trades without full rescue |
 

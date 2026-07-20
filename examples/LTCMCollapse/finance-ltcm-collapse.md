@@ -7,6 +7,10 @@
 - 2026-07-20  Polish Step 1 research audit: all five target theories now map one-to-one to complete six-field basis blocks; the Mitchell-Pedersen-Pulvino citation was corrected and an invalid Morris-Shin DOI was removed, official PWG evidence was anchored, and all five stylized facts gained upstream trace rows.
 - 2026-07-20  Polish Step 2 agent and environment audit: five exact-name pool profiles were reused; four legacy stubs were replaced with handbook-conformant specifications, four canonical 512x512 icons were generated and registered as mapping rows 106-109, every embedded agent gained the canonical 11-section spine and I/O contract, and environment/diversity/round structure was aligned.
 - 2026-07-20  Polish Step 3 config audit: all 16 YAML files and include chains parse, all four variant folders are complete, identity prefixes/topology/archetype parity pass, and every direct `extras.*` key in the four players files has an upstream `# Source:` annotation.
+- 2026-07-20  Define-skill revise mode: specified normalized order-flow depth, a deterministic four-round identification shock, mark-to-market equity from initial leveraged capital, and bounded intervention size after Step 4 behavior probes exposed unreachable margin calls and unscaled price impact.
+- 2026-07-20  Polish pipeline re-validation: revised target passed the full §11 checklist three consecutive times and was re-locked before implementation resumed.
+- 2026-07-20  Define-skill revise mode: promoted the 30% deleveraging fraction, three-times-VaR multiplier, and 50% risk-cut fraction from formula literals to auditable configuration parameters.
+- 2026-07-20  Polish pipeline re-validation: the parameterized target passed the full §11 checklist three consecutive times and was re-locked.
 
 ## §1 Meta
 
@@ -17,6 +21,7 @@
 | Requested By | Wenyou |
 | Produced By | define-simulation-scenario-skill.md v1.2.0 (invoking agent: Codex) |
 | Created | 2026-07-20 |
+| Revised | 2026-07-20 (Step 4 mechanism calibration via define-skill revise mode) |
 | Pipeline | masim/skills/polish-simulation-pipeline.md |
 | Target Spec | masim/skills/define-simulation-scenario-skill.md v1.2.0 |
 | Status | locked |
@@ -65,7 +70,7 @@ The episode ends when finite positions and cash limit additional forced trading,
 |---|---|
 | Full citation | Geanakoplos, J. (2010). The leverage cycle. *NBER Macroeconomics Annual 2009*, 24, 1-65. https://doi.org/10.1086/648285 |
 | Key mechanism (≤30 words) | Falling collateral values tighten feasible leverage and force rapid balance-sheet contraction after tranquil-period expansion. |
-| Key equation | A margin breach occurs when `equity < margin_call_threshold*abs(position*price)`; forced quantity is `floor(0.30*abs(position))`. |
+| Key equation | With `initial_equity=abs(position*initial_price)/leverage_ratio`, current `equity=initial_equity+position*(price-initial_price)`; breach occurs when `equity < margin_call_threshold*abs(position*price)` and forced quantity is `floor(0.30*abs(position))`. |
 | Motivates agent | leverage-trader |
 | Parameter implication | `leverage_ratio=25` and `margin_call_threshold=0.04` encode high leverage and a finite equity buffer. |
 
@@ -135,7 +140,7 @@ The episode ends when finite positions and cash limit additional forced trading,
 
 ### §8.1 Price Formation
 
-The market is a single-clearing-price environment with linear order impact: `P(t+1)=max(price_floor,P(t)+lambda*D(t)+gamma*(F-P(t))+epsilon(t)+F*shock_return(t))`. Here `D(t)` is net feasible order demand, `F` is the fixed public fundamental, and `epsilon(t)` is seeded Gaussian noise. The specification isolates the leverage-liquidity mechanism rather than reconstructing LTCM's multi-asset portfolio.
+The market is a single-clearing-price environment with depth-normalized linear order impact: `P(t+1)=max(price_floor,P(t)+lambda*D(t)/market_depth+gamma*(F-P(t))+epsilon(t)+F*shock_return(t))`. Here `D(t)` is net feasible order demand, `F` is the fixed public fundamental, and `epsilon(t)` is seeded Gaussian noise. The specification isolates the leverage-liquidity mechanism rather than reconstructing LTCM's multi-asset portfolio.
 
 ### §8.2 Information Broadcast
 
@@ -155,18 +160,22 @@ One round represents one stress-market clearing interval: prior orders update pr
 |---|---|---|---|---|---|
 | `initial_price`, `fundamental_value` | `P0,F` | §8.1 environment | positive normalized index | `100.0, 100.0` | normalization |
 | `price_impact` | `lambda` | §8.1 environment | positive stress-impact scale | `0.03` | Brunnermeier & Pedersen (2009), scenario calibration |
+| `market_depth` | `M` | §8.1 environment | strictly positive normalized order depth | `100.0` | Grossman & Miller (1988), scenario scale calibration |
 | `mean_reversion` | `gamma` | §8.1 environment | `[0,1]` | `0.01` | Shleifer & Vishny (1997), scenario calibration |
 | `noise_std` | `sigma` | §8.1 environment | `[0,0.05]` normalized | `0.015` | controlled trigger calibration |
 | `entry_spread`, `leverage`, `max_position` | `theta_e,L,Qmax` | convergence-arbitrageur | positive; leverage below reported LTCM balance-sheet scale | `0.03, 15, 5000` | Shleifer & Vishny (1997); PWG (1999) |
 | `leverage_ratio`, `margin_call_threshold` | `L_m,theta_m` | leverage-trader | high leverage; trigger in `(0,1)` | `25, 0.04` | Geanakoplos (2010); PWG (1999) |
+| `delever_fraction` | `d_m` | leverage-trader | fraction in `(0,1]` | `0.30` | Geanakoplos (2010), scenario stress calibration |
 | `var_trigger`, `var_limit` | `theta_v,V` | risk-manager | stress fractions in `(0,1)` | `0.06, 0.05` | Jorion (2000) |
+| `var_multiplier`, `risk_cut_fraction` | `m_v,d_v` | risk-manager | positive multiplier; fraction in `(0,1]` | `3.0, 0.50` | Jorion (2000), scenario risk-cut calibration |
 | `inventory_limit`, `stress_exit` | `Imax,s` | liquidity-provider | positive inventory; probability/intensity in `[0,1]` | `2000, 0.40` | Brunnermeier & Pedersen (2009) |
 | `intervention_threshold`, `rescue_probability` | `theta_i,p_i` | central-bank | stress fraction in `(0,1)`; probability in `[0,1]` | `0.10, 0.50` | PWG (1999), scenario calibration |
+| `intervention_size` | `Q_i` | central-bank | positive bounded quantity | `2000` | PWG (1999), normalized support calibration |
 | `trade_probability`, `noise_size` | `p_b,Q_b` | central-bank | probability in `[0,1]`; non-negative quantity | `0.30, 150` | bounded background-activity calibration |
 | `base_size` | `Q0` | all trading agents | positive bounded order quantity | `300-500` | scenario order-scale calibration |
 | `initial_cash`, `initial_position` | `C0,H0` | all trading agents | non-negative feasible endowment | role-specific | scenario balance-sheet calibration |
 | `random_seed`, `price_floor` | `seed,Pmin` | §8.1 environment | non-negative integer; strictly positive | `20260720, 0.01` | reproducibility and numerical invariant |
-| `shock_schedule` | `S(t)` | §8.1 environment | bounded signed round-to-return map | calibrated during Step 4 | controlled identification stimulus |
+| `shock_schedule` | `S(t)` | §8.1 environment | bounded signed round-to-return map | `{20:-0.06,21:-0.05,22:-0.04,23:-0.03}` | controlled identification stimulus representing the August 1998 flight to liquidity |
 | `temperature`, `max_tokens` | `T,M` | model-driven variants | `T in [0,2]`, `M>0` | role-specific, `600` | bounded model sampling configuration |
 | `chunk_size`, `chunk_overlap`, `top_k` | `c,o,k` | retrieval variant | positive integers with `o<c` | `512, 64, 5` | retrieval calibration |
 | `custom_state_hot_limit` | `h` | §8 environment and agents | positive integer | `3` | bounded runtime-history window |

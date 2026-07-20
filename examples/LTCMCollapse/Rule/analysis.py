@@ -20,7 +20,8 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-from examples.standard_rule_analysis import _load_data, _series
+from masim.evaluation.data_loader import _load_data, _series
+from masim.evaluation.finance.timeseries import _returns, calculate_max_drawdown
 from masim.utils import load_config, load_results
 
 
@@ -67,24 +68,6 @@ def load_simulation_data(config: dict) -> dict:
     }
 
 
-def _returns(prices: np.ndarray) -> np.ndarray:
-    if len(prices) < 2:
-        raise ValueError("At least two prices are required to calculate returns")
-    if np.any(prices[:-1] == 0):
-        raise ValueError("Price series contains zero before return calculation")
-    return np.diff(prices) / prices[:-1]
-
-
-def _max_drawdown_pct(prices: np.ndarray) -> float:
-    peak = prices[0]
-    max_drawdown = 0.0
-    for price in prices:
-        peak = max(peak, price)
-        drawdown = (peak - price) / peak
-        max_drawdown = max(max_drawdown, drawdown)
-    return float(max_drawdown * 100)
-
-
 def _cascade_onset_round(deviation: np.ndarray, threshold: float = -0.03) -> int | None:
     for index, value in enumerate(deviation, start=1):
         if value < threshold:
@@ -121,7 +104,7 @@ def calculate_metrics(data: dict) -> dict:
     final_deviation = float(deviation[-1] * 100)
     max_abs_deviation = float(np.max(np.abs(deviation)) * 100)
     mean_abs_deviation = float(np.mean(np.abs(deviation)) * 100)
-    max_drawdown = _max_drawdown_pct(prices)
+    max_drawdown = abs(calculate_max_drawdown(prices.tolist())[0])
     volatility = float(np.std(returns) * np.sqrt(252) * 100)
     onset_round = _cascade_onset_round(deviation)
     half_life = _recovery_half_life_rounds(deviation)
@@ -156,27 +139,36 @@ def validate_metrics(metrics: dict) -> ValidationResult:
     final_abs_deviation = abs(metrics["deviation_metrics"]["final_deviation_pct"])
     half_life = metrics["deviation_metrics"]["recovery_half_life_rounds"]
 
-    deviation_score = min(max_deviation / 5.0, 1.0)
-    volatility_score = min(volatility / 1.0, 1.0)
-    recovery_score = 1.0 if final_abs_deviation <= max_deviation else 0.0
-    half_life_score = 1.0 if half_life is not None else 0.4
+    drawdown = metrics["price_metrics"]["max_drawdown_pct"]
+    min_price = metrics["price_metrics"]["min"]
+    deviation_score = 1.0 if 5.0 <= max_deviation <= 60.0 else 0.0
+    drawdown_score = 1.0 if 5.0 <= drawdown <= 60.0 else 0.0
+    volatility_score = 1.0 if 1.0 <= volatility <= 12.0 else 0.0
+    recovery_score = 1.0 if final_abs_deviation <= max_deviation and min_price > 0 else 0.0
+    half_life_score = 1.0 if half_life is not None else 0.0
 
     criteria = {
         "price_dislocation": {
             "observed": round(max_deviation, 3),
-            "expected": ">= 5% max absolute deviation",
+            "expected": "5% to 60% max absolute deviation",
             "score": round(deviation_score, 3),
             "assessment": "pass" if deviation_score >= 1.0 else "weak",
         },
+        "finite_drawdown": {
+            "observed": round(drawdown, 3),
+            "expected": "5% to 60% maximum drawdown",
+            "score": round(drawdown_score, 3),
+            "assessment": "pass" if drawdown_score == 1.0 else "fail",
+        },
         "stress_volatility": {
             "observed": round(volatility, 3),
-            "expected": ">= 1% return std during stress",
+            "expected": "1% to 12% return std during stress",
             "score": round(volatility_score, 3),
             "assessment": "pass" if volatility_score >= 1.0 else "weak",
         },
         "recovery_direction": {
             "observed": round(final_abs_deviation, 3),
-            "expected": "final absolute deviation no worse than max deviation",
+            "expected": "positive prices and final absolute deviation no worse than max",
             "score": round(recovery_score, 3),
             "assessment": "pass" if recovery_score >= 1.0 else "fail",
         },
@@ -184,23 +176,25 @@ def validate_metrics(metrics: dict) -> ValidationResult:
             "observed": half_life,
             "expected": "finite if a negative trough occurs",
             "score": round(half_life_score, 3),
-            "assessment": "pass" if half_life is not None else "not_observed",
+            "assessment": "pass" if half_life is not None else "fail",
         },
     }
 
     score = (
-        0.35 * deviation_score
-        + 0.25 * volatility_score
-        + 0.25 * recovery_score
+        0.25 * deviation_score
+        + 0.20 * drawdown_score
+        + 0.20 * volatility_score
+        + 0.20 * recovery_score
         + 0.15 * half_life_score
     )
+    is_valid = all(item["assessment"] == "pass" for item in criteria.values())
     return ValidationResult(
-        is_valid=score >= 0.5,
+        is_valid=is_valid,
         score=score,
         criteria=criteria,
         interpretation=(
             "LTCM stress mechanism is sufficiently visible."
-            if score >= 0.5
+            if is_valid
             else "LTCM stress mechanism is weak under current metrics."
         ),
     )
@@ -298,7 +292,7 @@ def _write_summary(
 
     status = "VALID" if validation.is_valid else "INVALID"
     print(f"=== LTCMCOLLAPSE SIMULATION VALIDATION: {status} ===")
-    print(f"Overall Fit Score: {validation.score * 100:.1f}% (threshold: 50%)")
+    print(f"Overall Fit Score: {validation.score * 100:.1f}% (all five gates required)")
     for index, (name, criterion) in enumerate(validation.criteria.items(), start=1):
         print(f"[{index}] {name}")
         print(f"Observed: {criterion['observed']}")

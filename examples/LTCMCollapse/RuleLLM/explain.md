@@ -17,7 +17,7 @@
 | ConvergenceArbitrageur (`simulation-bases.md §4.1`) | `RuleLLMConvergenceArbitrageur` uses `RULELLM_CONVERGENCEARBITRAGEUR_PROMPT`; `== DECISION RULES ==` states ±3% spread trigger and capped leveraged sizing |
 | LeverageTrader (`simulation-bases.md §4.2`) | `RuleLLMLeverageTrader` uses `RULELLM_LEVERAGETRADER_PROMPT`; prompt encodes margin-call deleveraging and undervaluation buying rules |
 | RiskManager (`simulation-bases.md §4.3`) | `RuleLLMRiskManager` uses `RULELLM_RISKMANAGER_PROMPT`; prompt encodes three-times-VaR breach and 50% risk-cut rule |
-| LiquidityProvider (`simulation-bases.md §4.4`) | `RuleLLMLiquidityProvider` uses `RULELLM_LIQUIDITYPROVIDER_PROMPT`; prompt encodes 5% stress withdrawal and normal liquidity provision |
+| LiquidityProvider (`simulation-bases.md §4.4`) | `RuleLLMLiquidityProvider` uses `RULELLM_LIQUIDITYPROVIDER_PROMPT`; prompt encodes linear provision tapering to zero at 40% absolute deviation |
 | CentralBank (`simulation-bases.md §4.5`) | `RuleLLMCentralBank` uses `RULELLM_CENTRALBANK_PROMPT`; prompt encodes -10% systemic stress threshold and buy-only intervention |
 
 ## §3 Market Mechanism Implementation
@@ -31,7 +31,7 @@ Every system prompt has two required sections:
 - `== PERSONA ==`: investor role, belief, and risk style from `simulation-bases.md §4.N`.
 - `== DECISION RULES ==`: plain-language version of the Rule decision mechanism.
 
-The rules are guidance for LLM reasoning, not executable code. The parser still requires `<analysis>` and `<decision>` JSON with `action`, `bid_price`, `quantity`, and `reasoning`.
+The rules guide LLM reasoning, and `players.py::_expected_rule_actions()` rejects a non-stochastic categorical direction that contradicts the Rule mechanism. The parser requires `<analysis>` and `<decision>` JSON with `action`, `bid_price`, `quantity`, and `reasoning`.
 
 ## §5 Architecture Diagram
 

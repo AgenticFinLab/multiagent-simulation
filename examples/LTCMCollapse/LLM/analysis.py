@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from collections import Counter
 from pathlib import Path
 
 from examples.LTCMCollapse.Rule.analysis import (
@@ -16,6 +17,18 @@ from examples.LTCMCollapse.Rule.analysis import (
 from masim.utils import load_config
 
 DEFAULT_CONFIG = "configs/LTCMCollapse/LLM/simulation.yml"
+
+
+def analyze_action_distribution(agent_records: dict) -> dict[str, int]:
+    """Count categorical API decisions across agent-round records."""
+    counts: Counter[str] = Counter()
+    for round_records in agent_records.values():
+        for record in round_records.values():
+            action = record["action"]
+            if action not in ("buy", "sell", "hold"):
+                raise ValueError(f"Invalid recorded action: {action}")
+            counts[action] += 1
+    return {action: counts[action] for action in ("buy", "sell", "hold")}
 
 
 def main() -> None:
@@ -35,7 +48,13 @@ def main() -> None:
     _write_summary(analysis_path, metrics, validation)
 
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+__all__ = [
+    "load_simulation_data",
+    "calculate_metrics",
+    "create_visualizations",
+    "analyze_action_distribution",
+    "main",
+]
 
 
 if __name__ == "__main__":
