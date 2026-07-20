@@ -33,10 +33,7 @@ from ..config_loader import (
     get_diagram_path,
     scenario_display_name,
     _resolve_display_key,
-    CONFIGS_DIR,
-    EXPERIMENT_DIR,
     _configs_path,
-    _experiment_path,
 )
 
 
@@ -207,11 +204,17 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         topo = get_topology_info(selected_scenario)
         agents_for_topo = get_agents_info(selected_scenario)
         if topo.get("nodes"):
-            from .topology_d3 import render_d3_topology_with_expand
+            from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
+            # Give the market hub the same coordinator icon the user saw
+            # on the Stage-1 scenario card / Stage-2 header, so the
+            # market family is identifiable inside the topology as well.
+            _scenario_base = selected_scenario.split("/", 1)[0]
+            _hub_icons = {"market": market_icon_uri(_scenario_base)}
             render_d3_topology_with_expand(
                 topo,
                 agents_for_topo,
                 height=320,
+                icon_uris=_hub_icons,
                 key=f"workspace_{selected_scenario}",
                 title="Network Topology",
                 dialog_caption=selected_scenario,
@@ -264,6 +267,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
             key="docs_btn",
             help="Read the academic background and model details for this scenario",
         ):
+            st.session_state.previous_page = st.session_state.get("current_page", "Simulation")
             st.session_state.current_page = "Docs"
             st.rerun()
 
@@ -326,8 +330,8 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
 
     The preview is built from topology.yml + players.yml (with num_instances
     expansion so every concrete agent instance appears as its own node).
-    It is stored at EXPERIMENT/{scenario}/records/diagrams/topology_preview.png
-    and regenerated only when the source config files change (mtime hash).
+    It is cached at ``.cache/topology/{scenario}/topology_preview.png`` under the
+    project root and regenerated only when the source config files change.
 
     Args:
         scenario_name: Scenario directory name.
@@ -352,7 +356,10 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
         hash_src += _file_content_hash(players_path)
     config_fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
 
-    preview_dir = _experiment_path(scenario_name) / "records" / "diagrams"
+    # Cache in a project-local .cache directory (lightweight, gitignore-safe)
+    _project_root = Path(__file__).resolve().parents[3]
+    safe_name = scenario_name.replace("/", "_").replace("\\", "_")
+    preview_dir = _project_root / ".cache" / "topology" / safe_name
     preview_path = preview_dir / "topology_preview.png"
     fingerprint_path = preview_dir / ".topology_preview_hash"
 
@@ -490,8 +497,8 @@ def _get_or_create_icon_topology_preview(scenario_name: str) -> Optional[Path]:
     Each concrete investor instance is drawn as its agent icon (mapped from
     the player base id); the market hub is a labelled gold circle. Nodes with
     no matching icon fall back to a coloured circle. The image is cached at
-    ``EXPERIMENT/{scenario}/records/diagrams/topology_icons.png`` and rebuilt
-    only when topology.yml / players.yml change.
+    ``.cache/topology/{scenario_hash}/topology_icons.png`` under the project
+    root and rebuilt only when topology.yml / players.yml change.
 
     Args:
         scenario_name: Scenario key (rounds-adjusted Default bundles resolve
@@ -512,7 +519,10 @@ def _get_or_create_icon_topology_preview(scenario_name: str) -> Optional[Path]:
         hash_src += _file_content_hash(players_path)
     fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
 
-    preview_dir = _experiment_path(scenario_name) / "records" / "diagrams"
+    # Cache in a project-local .cache directory (lightweight, gitignore-safe)
+    _project_root = Path(__file__).resolve().parents[3]
+    safe_name = scenario_name.replace("/", "_").replace("\\", "_")
+    preview_dir = _project_root / ".cache" / "topology" / safe_name
     preview_path = preview_dir / "topology_icons.png"
     fingerprint_path = preview_dir / ".topology_icons_hash"
     if (

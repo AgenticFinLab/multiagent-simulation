@@ -383,7 +383,7 @@ def apply_customized_modifications(
     market_block, market_key = _extract_market_block(
         bundle_rule_players, bundle_name
     )
-    players_yaml_text = _render_players_yaml(
+    players_yaml_text, agent_keys = _render_players_yaml(
         market_block=market_block,
         market_key=market_key,
         selections=selections,
@@ -398,7 +398,7 @@ def apply_customized_modifications(
     # --- topology.yml ---
     topology_text = _render_topology_yaml(
         market_key=market_key,
-        selections=selections,
+        agent_keys=agent_keys,
     )
     topology_out = config_dir / "topology.yml"
     topology_out.write_text(topology_text, encoding="utf-8")
@@ -538,7 +538,7 @@ def write_customized_bundle(
 
     # --- players.yml: rebuild from selections + base market block
     market_block, market_key = _extract_market_block(base_players, cid)
-    players_yaml_text = _render_players_yaml(
+    players_yaml_text, agent_keys = _render_players_yaml(
         market_block=market_block,
         market_key=market_key,
         selections=selections,
@@ -552,7 +552,7 @@ def write_customized_bundle(
     # --- topology.yml: star centred on the market block
     topology_text = _render_topology_yaml(
         market_key=market_key,
-        selections=selections,
+        agent_keys=agent_keys,
     )
     topology_out = config_dir / "topology.yml"
     topology_out.write_text(topology_text, encoding="utf-8")
@@ -813,8 +813,15 @@ def _render_players_yaml(
     cid: str,
     has_prompts_module: bool,
     market_extras_override: Optional[dict[str, Any]] = None,
-) -> str:
-    """Compose the customized ``players.yml`` text."""
+) -> tuple[str, list[str]]:
+    """Compose the customized ``players.yml`` text.
+
+    Returns:
+        A tuple of (yaml_text, agent_keys) where ``agent_keys`` is the
+        ordered list of deduplicated player keys (excluding the market key).
+        The topology generator should use this list directly to guarantee
+        consistency between players.yml and topology.yml.
+    """
     record_path = f"EXPERIMENT/CUSTOMIZED_SIMULATION/{cid}/records"
     blocks: list[str] = []
     blocks.append(_HEADER_PLAYERS.format(cid=cid))
@@ -828,8 +835,9 @@ def _render_players_yaml(
     blocks.append(final_market_block.rstrip() + "\n")
 
     used_keys: set[str] = {market_key}
+    agent_keys: list[str] = []
     for selection, class_path in zip(selections, class_paths):
-        block = _render_agent_block(
+        block, resolved_key = _render_agent_block(
             selection=selection,
             class_path=class_path,
             record_path=record_path,
@@ -838,7 +846,8 @@ def _render_players_yaml(
             has_prompts_module=has_prompts_module,
         )
         blocks.append(block)
-    return "\n".join(blocks).rstrip() + "\n"
+        agent_keys.append(resolved_key)
+    return "\n".join(blocks).rstrip() + "\n", agent_keys
 
 
 def _apply_market_extras_override(
@@ -849,6 +858,9 @@ def _apply_market_extras_override(
     For each key in ``overrides``, finds the corresponding line in the
     market block (matching ``<key>: <value>``) and rewrites its value.
     This preserves comments, indentation, and ordering of the original.
+
+    String values are quoted to prevent YAML injection (e.g. values
+    containing ``:``, ``#``, or other special characters).
     """
     lines = market_block.splitlines()
     for key, new_value in overrides.items():
@@ -859,14 +871,21 @@ def _apply_market_extras_override(
             m = pattern.match(line)
             if m:
                 # Format the value appropriately.
-                if isinstance(new_value, float):
+                # Note: check bool BEFORE int since bool is a subclass of int.
+                if isinstance(new_value, bool):
+                    formatted = "true" if new_value else "false"
+                elif isinstance(new_value, float):
                     formatted = f"{new_value}"
                 elif isinstance(new_value, int):
                     formatted = str(new_value)
-                elif isinstance(new_value, bool):
-                    formatted = "true" if new_value else "false"
                 else:
-                    formatted = str(new_value)
+                    # String values: quote to prevent YAML injection.
+                    s = str(new_value)
+                    if any(c in s for c in (':', '#', '{', '}', '[', ']', ',', '&', '*', '?', '|', '-', '<', '>', '=', '!', '%', '@', '`', '"', "'")):
+                        # Use double-quotes with escaped inner double-quotes.
+                        formatted = '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
+                    else:
+                        formatted = s
                 lines[i] = f"{m.group(1)}{formatted}"
                 break
     return "\n".join(lines)
@@ -891,8 +910,13 @@ def _render_agent_block(
     used_keys: set[str],
     cid: str,
     has_prompts_module: bool,
-) -> str:
-    """Render one investor block for the customized players.yml."""
+) -> tuple[str, str]:
+    """Render one investor block for the customized players.yml.
+
+    Returns:
+        A tuple of (yaml_block_text, resolved_key) where resolved_key is
+        the final deduplicated key used for this agent in players.yml.
+    """
     base_key = _instance_key(selection)
     key = base_key
     counter = 2
@@ -941,7 +965,7 @@ def _render_agent_block(
         default_flow_style=False,
     )
     yaml_text = _append_persona_include(yaml_text, key)
-    return f"{comment}\n{yaml_text}".rstrip() + "\n"
+    return f"{comment}\n{yaml_text}".rstrip() + "\n", key
 
 
 def _build_llm_extras(
@@ -1110,9 +1134,20 @@ def _py_triple_quote(text: str) -> str:
 def _render_topology_yaml(
     *,
     market_key: str,
-    selections: list[CustomizedAgentSelection],
+    agent_keys: list[str],
+    selections: list[CustomizedAgentSelection] | None = None,
 ) -> str:
-    """Star topology centred on the market hub."""
+    """Star topology centred on the market hub.
+
+    Args:
+        market_key: The market coordinator's YAML key.
+        agent_keys: Ordered list of deduplicated agent keys as resolved by
+            ``_render_players_yaml``. Using this directly (instead of
+            recomputing from selections) guarantees consistency between
+            players.yml and topology.yml.
+        selections: Deprecated / unused. Kept for backward compatibility
+            but ignored when ``agent_keys`` is provided.
+    """
     lines: list[str] = []
     lines.append("# Auto-generated star topology for the customized bundle.")
     lines.append("# Market is the hub; every selected investor talks to market.")
@@ -1124,19 +1159,10 @@ def _render_topology_yaml(
     lines.append("")
     lines.append("connections:")
     lines.append(f"  {market_key}:")
-    used: set[str] = set()
-    for selection in selections:
-        key = _instance_key(selection)
-        suffix = ""
-        idx = 2
-        while (key + suffix) in used:
-            suffix = f"_{idx}"
-            idx += 1
-        full_key = key + suffix
-        used.add(full_key)
+    for full_key in agent_keys:
         lines.append(f"    - {full_key}")
     lines.append("")
-    for full_key in used:
+    for full_key in agent_keys:
         lines.append(f"  {full_key}:")
         lines.append(f"    - {market_key}")
         lines.append("")

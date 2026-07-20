@@ -56,6 +56,10 @@ def _resolve_icon_uri(node_id: str) -> str:
     ``finance-{kebab_id}.png``. Only a direct filename lookup is performed —
     scenarios that need a shared archetype must ship a thin alias ``.md``
     (and a companion icon copy) under the pool.
+
+    The ``market`` hub is intentionally skipped: its icon depends on the
+    scenario's coordinator archetype (bond / credit / fx / stock / …) and
+    must be resolved via :func:`market_icon_uri` by the caller.
     """
     if not node_id or node_id == "market":
         return ""
@@ -65,6 +69,32 @@ def _resolve_icon_uri(node_id: str) -> str:
     if candidate.exists():
         return _image_data_uri(candidate)
     return ""
+
+
+def market_icon_uri(scenario_base: str) -> str:
+    """Return the base64-encoded market coordinator icon for a scenario.
+
+    Delegates to :func:`config_loader.get_market_icon_path`, which reads
+    the scenario's ``players.yml → market.archetype:`` field and maps
+    it to ``examples/AGENT_POOL/agent_images/icons/market/{archetype}.png``.
+
+    Callers wire the result into the topology renderer via
+    ``icon_uris={"market": market_icon_uri(base), …}`` so the hub
+    node shows the actual market family (stock / FX / credit / crypto /
+    deposit / derivatives / bond / opinion / information) instead of the
+    generic gold-circle fallback. Returns an empty string when the
+    scenario has no archetype-bound icon.
+    """
+    if not scenario_base:
+        return ""
+    # Lazy import to avoid a hard dependency on the config loader at
+    # module-import time (topology_d3 is used from many entry points).
+    from ..config_loader import get_market_icon_path
+
+    path = get_market_icon_path(scenario_base)
+    if path is None or not path.exists():
+        return ""
+    return _image_data_uri(path)
 
 
 # ---------------------------------------------------------------------------
@@ -270,16 +300,25 @@ def render_d3_topology_with_expand(
 # ---------------------------------------------------------------------------
 
 def _build_html(graph_json: str, height: int) -> str:
-    """Generate self-contained HTML with embedded D3.js force graph."""
+    """Generate self-contained HTML with embedded D3.js force graph.
+
+    Uses a CDN with an onerror fallback that displays a graceful offline
+    message instead of a blank/broken graph when the network is unavailable.
+    """
     return f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js" onerror="document.getElementById('d3-error').style.display='flex';document.getElementById('d3-graph').style.display='none';"></script>
 <style>
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   body {{ background: transparent; overflow: hidden; }}
   svg {{ display: block; width: 100%; height: {height}px; }}
+  #d3-error {{
+    display: none; align-items: center; justify-content: center;
+    height: {height}px; font: 14px/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #64748b; text-align: center; padding: 2rem;
+  }}
   .tooltip {{
     position: absolute; pointer-events: none;
     background: #fff; border: 1px solid #dde4ea;
@@ -303,10 +342,14 @@ def _build_html(graph_json: str, height: int) -> str:
 </style>
 </head>
 <body>
+<div id="d3-error"><p>Network topology visualization requires an internet connection.<br>Please check your network and refresh.</p></div>
+<div id="d3-graph">
 <div id="graph"></div>
 <div class="tooltip" id="tooltip"></div>
+</div>
 <script>
 (function() {{
+  if (typeof d3 === 'undefined') return;
   const data = {graph_json};
   const width = document.body.clientWidth || 500;
   const height = {height};
@@ -369,9 +412,13 @@ def _build_html(graph_json: str, height: int) -> str:
         .attr("width", r * 2).attr("height", r * 2)
         .attr("x", -r).attr("y", -r)
         .attr("clip-path", "url(#clip-" + d.id + ")");
-      // Border circle
+      // Border: gold when this is the market hub (preserves the
+      // "hub" visual language even though we now show a real icon),
+      // subtle gray for regular agent nodes.
       g.append("circle").attr("r", r)
-        .attr("fill", "none").attr("stroke", "#dde4ea").attr("stroke-width", 1.5);
+        .attr("fill", "none")
+        .attr("stroke", d.isHub ? "#d4a843" : "#dde4ea")
+        .attr("stroke-width", d.isHub ? 2 : 1.5);
     }} else if (d.isHub) {{
       // Market hub: gold circle
       g.append("circle").attr("r", r)
@@ -392,7 +439,9 @@ def _build_html(graph_json: str, height: int) -> str:
     }}
   }});
 
-  // Labels below nodes
+  // Labels below nodes. Agents always get a name label; the market hub
+  // shows a "Market" caption only when it displays an icon (otherwise
+  // the "Market" text is already rendered inside the gold circle).
   node.filter(d => !d.isHub).append("text")
     .attr("class", "node-label")
     .attr("dy", d => (d.isHub ? hubRadius : nodeRadius) + 14)
@@ -400,6 +449,12 @@ def _build_html(graph_json: str, height: int) -> str:
       const name = d.name;
       return name.length > 14 ? name.substring(0, 12) + "..." : name;
     }});
+  node.filter(d => d.isHub && d.icon).append("text")
+    .attr("class", "node-label")
+    .attr("dy", hubRadius + 14)
+    .style("font-weight", "700")
+    .style("fill", "#8a6d14")
+    .text("Market");
 
   // Tooltip
   const tooltip = d3.select("#tooltip");

@@ -95,6 +95,8 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
 
 import ray
 
+logger = logging.getLogger(__name__)
+
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))

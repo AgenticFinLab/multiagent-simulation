@@ -16,7 +16,6 @@ def render_docs_page(scenario_name: str):
     """
     from ..config_loader import (
         get_docs_content,
-        get_scenario_info,
         get_market_description,
         scenario_display_name,
     )
@@ -28,7 +27,9 @@ def render_docs_page(scenario_name: str):
     with col_back:
         st.markdown("<div style='margin-top:18px'/>", unsafe_allow_html=True)
         if st.button("← Back", width="stretch", key="docs_back_btn"):
-            st.session_state.current_page = "Simulation"
+            st.session_state.current_page = st.session_state.get(
+                "previous_page", "Simulation"
+            )
             st.rerun()
     with col_title:
         display_name = scenario_display_name(scenario_name)

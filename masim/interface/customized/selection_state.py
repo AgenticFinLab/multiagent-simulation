@@ -221,6 +221,10 @@ def restore_state_to_session(
 ) -> bool:
     """Load persisted state and inject it into ``st.session_state``.
 
+    Clears any stale ``market_agent_*`` and ``market_engine_*`` keys
+    before restoring, so previously-selected agents that are no longer
+    in the saved state don't linger as ghost selections.
+
     Returns:
         ``True`` if state was successfully restored, ``False`` otherwise.
     """
@@ -229,6 +233,14 @@ def restore_state_to_session(
     data = load_selection_state(bundle_name=bundle_name, project_root=project_root)
     if data is None:
         return False
+
+    # ── Clear stale per-agent keys before restoring ──────────────────────
+    stale_keys = [
+        k for k in list(st.session_state.keys())
+        if k.startswith("market_agent_") or k.startswith("market_engine_")
+    ]
+    for k in stale_keys:
+        del st.session_state[k]
 
     # Restore selected agents.
     selected_agents = data.get("selected_agents", [])
@@ -248,10 +260,12 @@ def restore_state_to_session(
     if params:
         st.session_state["customized_params"] = params
 
-    # Restore market extras (future use).
+    # Restore market extras.
     market_extras = data.get("market_extras")
-    if market_extras:
+    if market_extras is not None:
         st.session_state["customized_market_extras"] = market_extras
+    else:
+        st.session_state.pop("customized_market_extras", None)
 
     logger.debug(
         "Selection state restored for bundle '%s': %d agents",

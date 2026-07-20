@@ -3,7 +3,7 @@
 import json
 import streamlit as st
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Tuple
 import subprocess
 import sys
 
@@ -30,7 +30,9 @@ def render_analysis_page(scenario_name: str):
     with col_back:
         st.markdown("<div style='margin-top:18px'/>", unsafe_allow_html=True)
         if st.button("← Back", width="stretch"):
-            st.session_state.current_page = "Simulation"
+            st.session_state.current_page = st.session_state.get(
+                "previous_page", "Simulation"
+            )
             st.rerun()
     with col_title:
         display_name = scenario_display_name(scenario_name)
@@ -96,8 +98,9 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
         Tuple of (success, message)
     """
     try:
-        script_path = Path("examples") / scenario_name / "analysis.py"
-        config_path = Path("configs") / scenario_name / "simulation.yml"
+        _project_root = Path(__file__).resolve().parents[3]
+        script_path = _project_root / "examples" / scenario_name / "analysis.py"
+        config_path = _project_root / "configs" / scenario_name / "simulation.yml"
 
         if not script_path.exists():
             return False, f"Analysis script not found: {script_path}"
@@ -109,6 +112,7 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
             capture_output=True,
             text=True,
             timeout=180,
+            cwd=str(_project_root),
         )
 
         if result.returncode == 0:

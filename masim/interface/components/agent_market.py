@@ -23,8 +23,6 @@ from ..config_loader import (
     get_market_type,
     get_phenomenon_description,
     get_scenario_info,
-    get_simulation_bases_content,
-    get_simulation_bases_path,
     get_topology_info,
     scenario_display_name,
 )
@@ -50,10 +48,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 AGENT_POOL_ROOT = PROJECT_ROOT / "examples" / "AGENT_POOL"
 IMAGE_ROOT = AGENT_POOL_ROOT / "agent_images"
 ICON_ROOT = IMAGE_ROOT / "icons"
+# Market coordinator icons live one level under the participant-icon root.
+# Filename convention: {market-type}-{coordinator-stem}.png (see
+# masim/skills/market-icon-generation-skill.md). Path resolution for a
+# given scenario is delegated to config_loader.get_market_icon_path(),
+# which reads the ``archetype:`` field from the scenario's players.yml.
+MARKET_ICON_ROOT = ICON_ROOT / "market"
 FINANCE_ROOT = AGENT_POOL_ROOT / "finance"
 OPINION_ROOT = AGENT_POOL_ROOT / "opinion"
 PROFILE_ROOT = FINANCE_ROOT
-CATALOG_PATH = IMAGE_ROOT / "agent_avatar_map.json"
+
 
 # All domain directories to scan for agent profiles.
 _DOMAIN_ROOTS: list[tuple[str, Path]] = [
@@ -81,8 +85,6 @@ ALL_ENGINES = ("Rule", "LLM", "RuleLLM", "Rag")
 def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
     """Return a lightweight cache key for avatar metadata and PNG changes."""
     paths: list[Path] = []
-    if CATALOG_PATH.exists():
-        paths.append(CATALOG_PATH)
     if ICON_ROOT.exists():
         paths.extend(sorted(ICON_ROOT.glob("*.png")))
     for _domain, root in _DOMAIN_ROOTS:
@@ -172,11 +174,12 @@ def render_entry_choice() -> None:
     st.markdown(
         '<div class="market-kicker">Stage 1 of 2</div>', unsafe_allow_html=True
     )
-    st.title("Pick a market scenario")
+    st.title("Pick a simulation scenario")
     st.write(
-        "Choose the market dynamic you want to simulate. The selected "
-        "scenario fixes the simulation parameters; in Stage 2 you "
-        "decide whether to run the default setup or build "
+        "Choose the market phenomenon you want to simulate. Each scenario "
+        "is anchored to a specific market family (stock, FX, credit, "
+        "crypto, deposit, derivatives, information, or opinion). In "
+        "Stage 2 you decide whether to run the default setup or build "
         "your own market."
     )
 
@@ -411,17 +414,49 @@ def render_variant_choice() -> None:
     phenomenon_desc = get_phenomenon_description(selected_base)
     finance_path = get_finance_scenario_path(selected_base)
 
+    # Resolve the market coordinator icon so the panel header carries a
+    # visual cue for the market family (matches the icon used on the
+    # Stage-1 scenario card).
+    scenario_market_icon = get_market_icon_path(selected_base)
+    if scenario_market_icon and scenario_market_icon.exists():
+        _icon_uri = _image_data_uri(scenario_market_icon)
+        market_icon_node = (
+            f'<img src="{_icon_uri}" alt="" '
+            f'style="width:48px;height:48px;border-radius:10px;'
+            f'object-fit:cover;border:1px solid #dde4ea;background:#fff;'
+            f'flex-shrink:0;box-shadow:0 1px 2px rgba(20,32,44,0.05);" />'
+            if _icon_uri else ""
+        )
+    else:
+        market_icon_node = ""
+
     if (
         market_type
         or market_desc
         or scenario_desc
         or phenomenon_desc
     ):
+        _header_html = (
+            "<div style='display:flex;align-items:center;gap:10px;"
+            "margin-bottom:10px;'>"
+            f"{market_icon_node}"
+            "<div style='display:flex;flex-direction:column;min-width:0;'>"
+            "<div style='font-size:13px;font-weight:700;color:#1a2633;"
+            "line-height:1.25;'>Simulation scenario</div>"
+            + (
+                f"<div style='font-size:11px;font-weight:600;color:#287a6d;"
+                f"text-transform:uppercase;letter-spacing:0.06em;"
+                f"line-height:1.4;margin-top:2px;'>"
+                f"{html.escape(market_type)}</div>"
+                if market_type
+                else ""
+            )
+            + "</div></div>"
+        )
         st.markdown(
             "<div style='margin-top:12px;padding:14px 16px;"
             "background:#f7f9fc;border:1px solid #dde4ea;border-radius:8px;'>"
-            "<div style='font-size:13px;font-weight:700;color:#1a2633;"
-            "margin-bottom:8px;'>Simulation scenario</div>"
+            + _header_html
             + (
                 f"<div style='font-size:13px;line-height:1.65;color:#374955;"
                 f"margin-bottom:6px;'>"
@@ -457,72 +492,111 @@ def render_variant_choice() -> None:
             unsafe_allow_html=True,
         )
 
-        # Shared scoped styling for the drill-through text-link buttons.
-        # Emitted whenever EITHER the finance-scenario button or the
-        # market-archetype button will render — the archetype button can
-        # appear without a finance-*.md (e.g. opinion / information domains),
-        # so this block must not be gated on `finance_path`.
-        if finance_path is not None or get_market_archetype(selected_base):
+        # Shared scoped styling for the drill-through link cards. Each
+        # target (finance-*.md scenario definition, and market coordinator
+        # archetype profile) is rendered as a bordered rectangular button
+        # rather than a plain text link, so users can find the market
+        # definitions at a glance instead of missing a subtle 12 px link.
+        market_archetype_stem = get_market_archetype(selected_base)
+        if finance_path is not None or market_archetype_stem:
             st.markdown(
                 "<style>"
                 '[class*="st-key-view_bases_"] button,'
                 '[class*="st-key-view_archetype_"] button{'
-                'background:transparent !important;'
-                'border:none !important;box-shadow:none !important;'
-                'padding:2px 0 !important;margin:2px 0 6px 2px !important;'
-                'min-height:0 !important;height:auto !important;'
-                'color:#2a5fa6 !important;font-weight:600 !important;'
-                'font-size:12.5px !important;text-align:left !important;'
+                'background:#ffffff !important;'
+                'border:1px solid #cfd8e3 !important;'
+                'border-left:3px solid #2a5fa6 !important;'
+                'box-shadow:0 1px 2px rgba(20,32,44,0.05) !important;'
+                'padding:10px 14px !important;'
+                'margin:0 !important;'
+                'min-height:52px !important;height:auto !important;'
+                'color:#2a5fa6 !important;font-weight:700 !important;'
+                'font-size:13px !important;'
+                'text-align:left !important;'
                 'justify-content:flex-start !important;'
+                'width:100% !important;'
+                'white-space:normal !important;'
+                'line-height:1.35 !important;'
+                'transition:border-color .15s, box-shadow .15s, background .15s;'
                 '}'
                 '[class*="st-key-view_bases_"] button:hover,'
                 '[class*="st-key-view_archetype_"] button:hover{'
-                'color:#1a4a8f !important;text-decoration:underline !important;'
-                'background:transparent !important;'
+                'border-color:#2a5fa6 !important;'
+                'background:#f3f7fc !important;'
+                'box-shadow:0 2px 6px rgba(42,95,166,0.15) !important;'
+                'color:#1a4a8f !important;'
+                'text-decoration:none !important;'
+                '}'
+                '[class*="st-key-view_archetype_"] button{'
+                'border-left-color:#287a6d !important;'
+                'color:#1f6157 !important;'
+                '}'
+                '[class*="st-key-view_archetype_"] button:hover{'
+                'border-color:#287a6d !important;'
+                'background:#f3f7f6 !important;'
+                'box-shadow:0 2px 6px rgba(40,122,109,0.15) !important;'
+                'color:#1a5348 !important;'
                 '}'
                 "</style>",
                 unsafe_allow_html=True,
             )
 
-        # Click-through to the canonical finance-{scenario}.md definition.
-        # Rendered as a scoped text-link button beneath the info card so
-        # users can drill into the full target-spec scenario definition
-        # (meta, phenomenon statement, anchors, stylized facts, historical
-        # anchors, roster, environment, parameters, variants, references).
-        if finance_path is not None:
-            finance_rel = finance_path.name
-            with st.container(key=f"view_bases_{selected_base}"):
-                if st.button(
-                    f"\U0001f4d6  View the full scenario definition ({finance_rel}) \u2192",
-                    key=f"btn_view_bases_{selected_base}",
-                    help=(
-                        f"Open examples/{selected_base}/{finance_rel} "
-                        "\u2014 phenomenon statement, anchors, stylized facts, "
-                        "roster, environment, parameters, and references."
-                    ),
-                    type="tertiary",
-                ):
-                    _show_finance_scenario_dialog(selected_base)
+        # Small caption above the link strip so users know what to expect.
+        if finance_path is not None or market_archetype_stem:
+            st.markdown(
+                "<div style='margin-top:14px;margin-bottom:6px;"
+                "font-size:11px;font-weight:700;color:#68737d;"
+                "text-transform:uppercase;letter-spacing:0.08em;'>"
+                "Market definitions"
+                "</div>",
+                unsafe_allow_html=True,
+            )
 
-        # Click-through to the market archetype profile in AGENT_POOL/market/.
-        # Resolves via players.yml -> market.archetype: and renders the
-        # coordinator's canonical mechanism definition, mirroring the
-        # per-player profile drill-through.
-        market_archetype_stem = get_market_archetype(selected_base)
+        # Render the two drill-through link cards side-by-side when both
+        # exist. Layout picks between one and two columns automatically.
+        _link_targets: list[str] = []
+        if finance_path is not None:
+            _link_targets.append("finance")
         if market_archetype_stem:
-            with st.container(key=f"view_archetype_{selected_base}"):
-                if st.button(
-                    f"\U0001f3db\ufe0f  View the market coordinator archetype "
-                    f"({market_archetype_stem}) \u2192",
-                    key=f"btn_view_archetype_{selected_base}",
-                    help=(
-                        f"Open examples/AGENT_POOL/market/{market_archetype_stem}.md "
-                        "\u2014 shared coordinator profile bound to this scenario "
-                        "via players.yml \u2192 market.archetype:."
-                    ),
-                    type="tertiary",
-                ):
-                    _show_market_archetype_dialog(selected_base)
+            _link_targets.append("archetype")
+        if _link_targets:
+            _link_cols = st.columns(len(_link_targets), gap="small")
+            for _col, _kind in zip(_link_cols, _link_targets):
+                with _col:
+                    if _kind == "finance" and finance_path is not None:
+                        finance_rel = finance_path.name
+                        with st.container(key=f"view_bases_{selected_base}"):
+                            if st.button(
+                                f"\U0001f4d6  Scenario definition \u2014 "
+                                f"{finance_rel} \u2192",
+                                key=f"btn_view_bases_{selected_base}",
+                                help=(
+                                    f"Open examples/{selected_base}/{finance_rel} "
+                                    "\u2014 phenomenon statement, anchors, "
+                                    "stylized facts, roster, environment, "
+                                    "parameters, and references."
+                                ),
+                                width="stretch",
+                            ):
+                                _show_finance_scenario_dialog(selected_base)
+                    elif _kind == "archetype" and market_archetype_stem:
+                        with st.container(
+                            key=f"view_archetype_{selected_base}"
+                        ):
+                            if st.button(
+                                f"\U0001f3db\ufe0f  Market coordinator "
+                                f"\u2014 {market_archetype_stem} \u2192",
+                                key=f"btn_view_archetype_{selected_base}",
+                                help=(
+                                    f"Open examples/AGENT_POOL/market/"
+                                    f"{market_archetype_stem}.md "
+                                    "\u2014 shared coordinator profile bound "
+                                    "to this scenario via players.yml "
+                                    "\u2192 market.archetype:."
+                                ),
+                                width="stretch",
+                            ):
+                                _show_market_archetype_dialog(selected_base)
 
     st.divider()
     
@@ -681,13 +755,19 @@ def render_variant_choice() -> None:
                 st.caption("No agent information available.")
 
         with topo_col:
-            from .topology_d3 import render_d3_topology_with_expand
+            from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
             topo = get_topology_info(probe_key)
             if topo["nodes"]:
+                # Feed the scenario's market coordinator icon into the
+                # ``market`` hub node so it renders the correct market
+                # family (stock / FX / credit / …) instead of the
+                # generic gold-circle fallback.
+                _hub_icons = {"market": market_icon_uri(selected_base)}
                 render_d3_topology_with_expand(
                     topo,
                     agents,
                     height=420,
+                    icon_uris=_hub_icons,
                     key=f"experience_stage2_{selected_base}",
                     title="Network topology",
                     dialog_caption=scenario_display_name(selected_base),
@@ -739,11 +819,16 @@ def render_variant_choice() -> None:
             default_agents = get_agents_info(probe_key)
             default_topo = get_topology_info(probe_key)
             if default_topo.get("nodes"):
-                from .topology_d3 import render_d3_topology_with_expand
+                from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
+                # Show the scenario's market coordinator icon on the
+                # hub node so users can identify the market family at a
+                # glance in the Default preview.
+                _hub_icons = {"market": market_icon_uri(selected_base)}
                 render_d3_topology_with_expand(
                     default_topo,
                     default_agents,
                     height=340,
+                    icon_uris=_hub_icons,
                     key=f"project_default_{selected_base}",
                     title=None,
                     dialog_caption=scenario_display_name(selected_base),
@@ -1114,27 +1199,23 @@ def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = No
 
     The canonical agent pool is the set of ``{domain}/*.md`` specs that
     have a matching ``agent_images/icons/{domain}-<stem>.png`` icon.
-    When an explicit ``agent_avatar_map.json`` exists it takes precedence.
     """
-    if CATALOG_PATH.exists():
-        raw_items = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
-    else:
-        raw_items = []
-        for domain, root in _DOMAIN_ROOTS:
-            if not root.exists():
-                continue
-            for md_path in sorted(root.glob("*.md")):
-                icon_name = f"{domain}-{md_path.stem}.png"
-                if (ICON_ROOT / icon_name).exists():
-                    raw_items.append(
-                        {
-                            "agent_type": md_path.stem,
-                            "display_name": _kebab_to_title(md_path.stem),
-                            "image_path": f"icons/{icon_name}",
-                            "source_profile": str(md_path),
-                            "domain": domain,
-                        }
-                    )
+    raw_items: list[dict[str, Any]] = []
+    for domain, root in _DOMAIN_ROOTS:
+        if not root.exists():
+            continue
+        for md_path in sorted(root.glob("*.md")):
+            icon_name = f"{domain}-{md_path.stem}.png"
+            if (ICON_ROOT / icon_name).exists():
+                raw_items.append(
+                    {
+                        "agent_type": md_path.stem,
+                        "display_name": _kebab_to_title(md_path.stem),
+                        "image_path": f"icons/{icon_name}",
+                        "source_profile": str(md_path),
+                        "domain": domain,
+                    }
+                )
 
     catalog: list[dict[str, Any]] = []
     for item in raw_items:
@@ -1276,9 +1357,38 @@ def _inject_market_styles() -> None:
             box-shadow: 0 0 0 2px rgba(40, 122, 109, 0.22);
             border-color: #287a6d;
         }
+        /* Header row: market icon + (name / market-type). Icon is a
+           square 44 px tile with a soft border so it reads at a glance
+           without overwhelming the card. */
+        .scenario-header {
+            display: flex; align-items: center; gap: 0.55rem;
+            margin-bottom: 0.35rem;
+        }
+        .scenario-header-text {
+            display: flex; flex-direction: column; min-width: 0; flex: 1;
+        }
+        .scenario-icon {
+            width: 44px; height: 44px; border-radius: 8px;
+            object-fit: cover; flex-shrink: 0;
+            border: 1px solid #e2e8ee; background: #fafbfc;
+            box-shadow: 0 1px 2px rgba(20, 32, 44, 0.05);
+        }
+        .scenario-icon.fallback {
+            display: flex; align-items: center; justify-content: center;
+            color: #b6c1cc; font-size: 1.2rem;
+        }
         .scenario-name {
             font-size: 0.95rem; font-weight: 700; color: #17212b;
-            line-height: 1.25; margin-bottom: 0.18rem;
+            line-height: 1.25;
+            overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .scenario-market {
+            font-size: 0.68rem; font-weight: 600; color: #287a6d;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            line-height: 1.3; margin-top: 0.1rem;
+            overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .scenario-meta {
             font-size: 0.7rem; color: #68737d; margin-bottom: 0.35rem;
@@ -1971,7 +2081,7 @@ def _render_live_market_preview(
     Icons are supplied via the ``icon_uris`` override so opinion-domain
     agents (whose icons are ``opinion-*.png``) render correctly too.
     """
-    from .topology_d3 import render_d3_topology, render_d3_topology_with_expand
+    from .topology_d3 import market_icon_uri, render_d3_topology, render_d3_topology_with_expand
 
     if not selected_agents:
         st.markdown("**Live market preview**")
@@ -2001,6 +2111,12 @@ def _render_live_market_preview(
     icon_uris = {
         a["agent_type"]: a.get("image_uri", "") for a in selected_agents
     }
+    # Attach the market coordinator icon so the hub in the customize
+    # preview visually matches the scenario's market family.
+    _preview_base = st.session_state.get("selected_scenario_base", "")
+    _market_uri = market_icon_uri(_preview_base)
+    if _market_uri:
+        icon_uris["market"] = _market_uri
     if with_expand:
         render_d3_topology_with_expand(
             topology,
@@ -2376,10 +2492,37 @@ def _render_scenario_card(
     if has_roster and not compatible and reasons:
         items = "".join(f"<li>{html.escape(r)}</li>" for r in reasons)
         reason_html = f"<ul class='scen-reasons'>{items}</ul>"
+
+    # Resolve the scenario's market coordinator so the card carries a
+    # clear visual identifier for the market family (Stock / FX / Credit /
+    # Crypto / Deposit / Derivatives / Opinion / Information / Bond).
+    # Both the archetype-driven icon and the human-readable market-type
+    # label live in ``config_loader``; here we just glue them together.
+    icon_path = get_market_icon_path(
+        _scenario_probe_key(scenario_base, groups)
+    )
+    market_type_label = get_market_type(
+        _scenario_probe_key(scenario_base, groups)
+    ) or ""
+    if icon_path and icon_path.exists():
+        icon_uri = _image_data_uri(icon_path)
+        icon_node = (
+            f'<img class="scenario-icon" src="{icon_uri}" alt="" />'
+            if icon_uri else '<div class="scenario-icon fallback">\u25a0</div>'
+        )
+    else:
+        icon_node = '<div class="scenario-icon fallback">\u25a0</div>'
+
     st.markdown(
         f"""
         <div class="scenario-card {state_class}">
-          <div class="scenario-name">{html.escape(name)}</div>
+          <div class="scenario-header">
+            {icon_node}
+            <div class="scenario-header-text">
+              <div class="scenario-name">{html.escape(name)}</div>
+              <div class="scenario-market">{html.escape(market_type_label)}</div>
+            </div>
+          </div>
           <div class="scenario-meta">{rounds} rounds</div>
           {badge}
           <div class="scenario-desc">{html.escape(description)}</div>

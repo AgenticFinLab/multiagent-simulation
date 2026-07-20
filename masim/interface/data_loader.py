@@ -22,6 +22,7 @@ This module exposes:
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -29,7 +30,7 @@ from typing import Any, Dict, List, Optional
 # Import path helper for nested scenario support
 from masim.interface.config_loader import _experiment_path
 
-EXPERIMENT_DIR = Path("EXPERIMENT")
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -149,6 +150,7 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
 
     # ── 1. Load execution_levels from history blocks ──────────────────────
     exec_levels: Dict[int, List[List[str]]] = {}
+    _skipped_blocks = 0
     hist_dir = base / "records" / "history"
     if hist_dir.is_dir():
         for block_file in sorted(hist_dir.glob("batch_block_*.json")):
@@ -162,8 +164,11 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
                         lvls = rec.get("execution_levels", [])
                         if rnd is not None:
                             exec_levels[int(rnd)] = lvls
-            except Exception:
-                pass
+            except Exception as exc:
+                _skipped_blocks += 1
+                logger.warning(
+                    "Skipped corrupt history block %s: %s", block_file.name, exc
+                )
 
     # ── 2. Load messages from communication blocks ────────────────────────
     #    Key message types:
@@ -212,10 +217,20 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
                         )
                         agent_actions.setdefault(round_num, []).append(action)
 
-            except Exception:
-                pass
+            except Exception as exc:
+                _skipped_blocks += 1
+                logger.warning(
+                    "Skipped corrupt message block %s: %s", block_file.name, exc
+                )
 
     # ── 3. Assemble RoundData objects ─────────────────────────────────────
+    if _skipped_blocks:
+        logger.warning(
+            "Data loading for '%s': %d block file(s) skipped due to parse errors.",
+            scenario_name,
+            _skipped_blocks,
+        )
+
     all_rounds: set = (
         set(exec_levels.keys())
         | set(market_broadcasts.keys())

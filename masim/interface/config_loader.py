@@ -1,17 +1,25 @@
 """Configuration loader for discovering and parsing simulation scenarios."""
 
-import os
+import logging
+from functools import lru_cache
 from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional
 import yaml
 
+logger = logging.getLogger(__name__)
+
+
+# Absolute project root — anchored to this source file's location so that
+# scenario discovery, experiment data, and example assets are found regardless
+# of the working directory from which Streamlit is launched.
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # masim/interface → project root
 
 # Base directory for docs
-EXAMPLES_DIR = Path("examples")
+EXAMPLES_DIR = _PROJECT_ROOT / "examples"
 
-CONFIGS_DIR = Path("configs")
-EXPERIMENT_DIR = Path("EXPERIMENT")
+CONFIGS_DIR = _PROJECT_ROOT / "configs"
+EXPERIMENT_DIR = _PROJECT_ROOT / "EXPERIMENT"
 
 # All implemented variants are available in the simulation workflow.
 _HIDDEN_VARIANTS: set[str] = set()
@@ -203,8 +211,8 @@ def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
                 info["description"] = config["setting"].get("description", "")
                 info["total_rounds"] = config["setting"].get("total_rounds", 0)
                 info["record_path"] = config["setting"].get("record_path", "")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to parse scenario config %s: %s", config_path, e)
 
     return info
 
@@ -753,7 +761,7 @@ def check_simulation_results(scenario_name: str) -> bool:
     if not info.get("record_path"):
         return False
 
-    record_path = Path(info["record_path"])
+    record_path = _PROJECT_ROOT / info["record_path"]
     return record_path.exists() and any(record_path.iterdir())
 
 
@@ -1050,6 +1058,7 @@ _ARCHETYPE_FALLBACK: Dict[str, str] = {
 }
 
 
+@lru_cache(maxsize=64)
 def get_market_archetype(scenario_name: str) -> Optional[str]:
     """Return the archetype stem bound to this scenario, if any.
 
@@ -1168,7 +1177,7 @@ def get_analysis_path(scenario_name: str) -> Optional[Path]:
     if not info.get("record_path"):
         return None
 
-    record_path = Path(info["record_path"])
+    record_path = _PROJECT_ROOT / info["record_path"]
     analysis_path = record_path.parent / "analysis"
 
     return analysis_path if analysis_path.exists() else None

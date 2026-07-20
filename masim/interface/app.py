@@ -32,6 +32,7 @@ from masim.interface.components.agent_market import (
     render_variant_choice,
 )
 from masim.interface.components.welcome import render_welcome
+from masim.interface.locale import t
 
 # Page configuration
 st.set_page_config(
@@ -111,6 +112,14 @@ def main():
         return
     if workflow_stage == "customize":
         render_customize()
+        return
+    if workflow_stage != "workspace":
+        st.error(
+            f"Unknown workflow stage: '{workflow_stage}'. "
+            "Resetting to welcome page."
+        )
+        st.session_state.workflow_stage = "welcome"
+        st.rerun()
         return
 
     selected_scenario = render_sidebar()
@@ -206,8 +215,10 @@ def render_simulation_page(scenario_name: str):
             rnd_num = rounds[viewed_idx].round_num if rounds else 0
             st.metric("Round", f"{rnd_num} / {n_rounds}")
 
-    # ── Price dynamics chart ───────────────────────────────────────────────
-    _render_price_chart(rounds, viewed_idx)
+    # ── Price ticker + expandable chart dialog ────────────────────────────
+    # Show a compact price-metrics row so agents stay visible. The full
+    # interactive Plotly chart lives in a dialog opened on demand.
+    _render_price_ticker_bar(rounds, viewed_idx)
 
     # ── Investor Activity panel (single round, refreshes in place) ─────────
     st.markdown("---")
@@ -454,6 +465,92 @@ def _render_price_chart_fallback(round_nums, market_prices, fundamentals):
     st.line_chart(df, height=480)
 
 
+# ---------------------------------------------------------------------------
+# Price ticker bar + dialog
+# ---------------------------------------------------------------------------
+
+
+def _render_price_ticker_bar(rounds: list, viewed_idx: int):
+    """Compact inline price metrics bar with an expand button.
+
+    Displays the current round's price, return %, and fundamental value
+    as a narrow row of metrics so the Investor Activity panel remains
+    above the fold. An \u201cExpand chart\u201d button opens the full Plotly
+    price-dynamics chart in a modal dialog.
+    """
+    rd = rounds[viewed_idx]
+    mb = rd.market_broadcast
+
+    price_str = ""
+    ret_str = ""
+    fundamental_str = ""
+    delta_str = ""
+    if mb is not None:
+        if mb.stock_price is not None:
+            price_str = f"{mb.stock_price:.4f}"
+        if mb.stock_return is not None:
+            pct = mb.stock_return * 100
+            ret_str = f"{pct:+.3f}%"
+            delta_str = f"{pct:+.3f}%"
+        if mb.fundamental is not None:
+            fundamental_str = f"{mb.fundamental:.4f}"
+
+    # Inject scoped button style: compact, dark-themed, matching the sim page.
+    st.markdown(
+        "<style>"
+        '[class*="st-key-open_price_dialog"] button{'
+        'background:#1a2744 !important;'
+        'border:1px solid #2a5fa6 !important;'
+        'color:#7baed4 !important;'
+        'font-weight:700 !important;'
+        'font-size:0.78rem !important;'
+        'padding:4px 12px !important;'
+        'min-height:0 !important;height:auto !important;'
+        'border-radius:6px !important;'
+        '}'
+        '[class*="st-key-open_price_dialog"] button:hover{'
+        'background:#223356 !important;'
+        'border-color:#4a90d9 !important;'
+        'color:#b8d8f8 !important;'
+        '}'
+        "</style>",
+        unsafe_allow_html=True,
+    )
+
+    # Layout: price | return | fundamental | expand button
+    cols = st.columns([2, 2, 2, 1.5])
+    with cols[0]:
+        st.metric("\U0001f4b0 Price", price_str or "\u2014")
+    with cols[1]:
+        st.metric("\U0001f4c8 Return", ret_str or "\u2014", delta=delta_str or None)
+    with cols[2]:
+        st.metric("\U0001f3af Fundamental", fundamental_str or "\u2014")
+    with cols[3]:
+        st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
+        with st.container(key="open_price_dialog"):
+            if st.button(
+                "\U0001f4c8 Price chart \u2922",
+                key=f"btn_price_dialog_{viewed_idx}",
+                help="Open the full price dynamics chart in an overlay",
+            ):
+                _show_price_chart_dialog(rounds, viewed_idx)
+
+
+@st.dialog("\U0001f4c8 Price Dynamics", width="large")
+def _show_price_chart_dialog(rounds: list, viewed_idx: int):
+    """Modal dialog rendering the full interactive Plotly price chart.
+
+    This moves the chart out of the main content flow so the Investor
+    Activity panel (agent orders) remains visible without scrolling.
+    The dialog shows the same growing-line chart that was previously
+    rendered inline.
+    """
+    n = len(rounds)
+    caption = f"Showing rounds 1\u2013{viewed_idx + 1} of {n}"
+    st.caption(caption)
+    _render_price_chart(rounds, viewed_idx)
+
+
 def _render_action_card(act):
     """Render a compact dark-themed action card for one agent.
 
@@ -633,33 +730,35 @@ def _render_action_buttons(scenario_name: str):
         if data_exists:
             c1, c2, c3 = st.columns(3)
             with c1:
-                if st.button("⏹ Stop", type="secondary", width="stretch"):
+                if st.button(t("simulation.stop"), type="secondary", width="stretch"):
                     _stop_simulation()
             with c2:
                 if st.button(
-                    "📊 View Analysis",
+                    t("simulation.view_analysis"),
                     type="primary",
                     width="stretch",
-                    help="Jump to analysis page while simulation continues",
+                    help=t("simulation.view_analysis_running_help"),
                 ):
+                    st.session_state.previous_page = st.session_state.current_page
                     st.session_state.current_page = "Analysis"
                     st.rerun()
             with c3:
-                if st.button("🔄 Reset", width="stretch"):
+                if st.button(t("simulation.reset"), width="stretch"):
                     _stop_simulation()
                     _reset_simulation()
         else:
-            if st.button("⏹ Stop", type="secondary", width="stretch"):
+            if st.button(t("simulation.stop"), type="secondary", width="stretch"):
                 _stop_simulation()
 
     elif st.session_state.simulation_completed:
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("📊 View Analysis", type="primary", width="stretch"):
+            if st.button(t("simulation.view_analysis"), type="primary", width="stretch"):
+                st.session_state.previous_page = st.session_state.current_page
                 st.session_state.current_page = "Analysis"
                 st.rerun()
         with c2:
-            if st.button("🔄 Reset", width="stretch"):
+            if st.button(t("simulation.reset"), width="stretch"):
                 _reset_simulation()
 
     elif data_exists:
@@ -667,31 +766,32 @@ def _render_action_buttons(scenario_name: str):
         c1, c2, c3 = st.columns(3)
         with c1:
             if st.button(
-                "📂 Load Results",
+                t("simulation.load_results"),
                 type="primary",
                 width="stretch",
-                help="Replay saved experiment data without re-running the simulation",
+                help=t("simulation.load_results_help"),
             ):
                 _start_replay(scenario_name, info)
         with c2:
             if st.button(
-                "📊 View Analysis",
+                t("simulation.view_analysis"),
                 type="secondary",
                 width="stretch",
-                help="Jump directly to analysis page without replay",
+                help=t("simulation.view_analysis_help"),
             ):
+                st.session_state.previous_page = st.session_state.current_page
                 st.session_state.current_page = "Analysis"
                 st.rerun()
         with c3:
             if st.button(
-                "▶ Re-run",
+                t("simulation.rerun"),
                 width="stretch",
-                help="Start a fresh simulation (overwrites existing data)",
+                help=t("simulation.rerun_help"),
             ):
                 _start_simulation(scenario_name, info)
 
     else:
-        if st.button("▶ Start Simulation", type="primary", width="stretch"):
+        if st.button(t("simulation.start"), type="primary", width="stretch"):
             _start_simulation(scenario_name, info)
 
 
