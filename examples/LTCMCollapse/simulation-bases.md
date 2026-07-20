@@ -119,7 +119,11 @@ delta(t) = (P(t) - F) / F
 | `gamma` | `extras["mean_reversion"]` | 0.01 | Mean reversion toward fundamental |
 | `sigma` | `extras["noise_std"]` | 0.015 | Gaussian noise standard deviation |
 
-### §3.2 Market Broadcast
+### §3.2 Additional Environment Mechanisms
+
+The market carries forward feasible portfolio state after each executed order. Margin and risk constraints are evaluated by the affected agent before its next order, liquidity withdrawal changes available countercyclical demand, and crisis support is contingent on an identity/round-seeded draw. Price remains strictly positive; missing mandatory public state prevents agent action rather than silently substituting a default.
+
+### §3.3 Information Broadcast Design
 
 Each round the market broadcasts:
 
@@ -130,7 +134,7 @@ Each round the market broadcasts:
 | `deviation` | `(price - fundamental) / fundamental` | all investors |
 | `round` | Simulation round | state tracking and records |
 
-### §3.3 Order Schema
+### §3.4 Order Schema
 
 Investor actions are standard trading orders:
 
@@ -150,11 +154,15 @@ The `ConvergenceArbitrageur` represents an LTCM-style relative-value trader that
 
 The simulation uses this investor to model the central LTCM hypothesis: sophisticated arbitrage can be correct in the long run and still fragile under short-run funding pressure.
 
-#### §4.1.2 Theoretical and Empirical Foundation
+#### §4.1.2 Definition and Goals
+
+This embedded design reuses `examples/AGENT_POOL/finance/convergence-arbitrageur.md`. It models a leveraged relative-value hedge fund, chooses a bounded order, and seeks convergence without predicting future prices. It MUST respect cash and position limits and hold on missing signals.
+
+#### §4.1.3 Theoretical Foundation
 
 Primary theory is limits to arbitrage (§2.1). The agent uses `entry_spread`, `leverage`, and `max_position` to translate deviations into leveraged order size. Empirically, LTCM's convergence trades were exposed to spread widening after the Russian default, making the strategy a natural mapping to this agent.
 
-#### §4.1.3 Design Purpose and Activation Scenarios
+#### §4.1.4 Design Purpose and Activation Triggers
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -162,7 +170,15 @@ Primary theory is limits to arbitrage (§2.1). The agent uses `entry_spread`, `l
 | `deviation < -entry_spread` | Buy up to leveraged cash and cap | Attempts convergence, absorbs supply but increases exposure | §2.1 |
 | `deviation > entry_spread` | Sell existing holdings | Bets on downward convergence | §2.1 |
 
-#### §4.1.4 Behavioral Framework
+Deactivation occurs at the position cap, with insufficient cash, or inside the entry boundary. Missing required signals produce hold. Behavior is inactive under small deviations and scales toward its cap under large deviations.
+
+#### §4.1.5 Behavioral Framework
+
+###### §4.1.5.0 I/O Contract
+
+Inputs are price, fundamental, deviation, cash, position, round, identity, and optional retrieved knowledge. Outputs are exactly `action`, `bid_price`, `quantity`, and `reasoning` in literal `<analysis>` and `<decision>` tags; empty retrieval uses `(No relevant knowledge retrieved this round.)`.
+
+###### §4.1.5.1 Decision Information Set
 
 Information set: `price`, `fundamental`, `deviation`, `cash`, `position`. Trigger function: `abs(deviation) > entry_spread`. Sizing function:
 
@@ -172,11 +188,35 @@ Q(t) = min(floor(cash(t) * leverage * |deviation(t)| / P(t)), max_position)
 
 State variables are cash and position. Position is updated after order execution.
 
-#### §4.1.5 Decision Process Walkthrough
+###### §4.1.5.2 Core Behavioral Mechanism
 
 If price is 95 and fundamental is 100, then `deviation = -0.05`. With `entry_spread = 0.03`, `leverage = 15`, and positive cash, the agent buys because the discount exceeds its entry threshold.
 
-#### §4.1.6 Worked Numerical Example
+###### §4.1.5.3 Action Space
+
+Buy, sell, or hold at current price for one round; size is the leveraged signal clipped by cash and `max_position`. The next call replaces prior intent, and no order may violate resources or the position cap.
+
+###### §4.1.5.4 Mathematical Model
+
+`q*=sign(-delta)*min(floor(cash*leverage*abs(delta)/price),max_position)` outside `entry_spread`; state updates post-execution and the mapping is deterministic.
+
+###### §4.1.5.5 Behavioral Properties
+
+Long horizon, high risk tolerance, partial information, and rational convergence with funding-path fragility.
+
+#### §4.1.6 Parameters
+
+| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
+|---|---:|---:|---|---|---|---|---|
+| `entry_spread` | float | 0.03 | `(0,0.20]` | high | entry gate | Higher -> fewer trades | §2.1 |
+| `leverage` | float | 15 | `[1,50]` | high | size multiplier | Higher -> larger orders | PWG (1999) |
+| `max_position` | int | 5000 | `>=1` | medium | position cap | Higher -> more capacity | scenario calibration |
+
+#### §4.1.7 Population and Heterogeneity
+
+Two persistent instances share the mechanism and defaults; seeded model reasoning may vary but the I/O contract does not.
+
+#### §4.1.8 Worked Numerical Examples
 
 With cash 2,000,000, price 95, deviation -0.05, and leverage 15:
 
@@ -185,9 +225,21 @@ raw_quantity = floor(2,000,000 * 15 * 0.05 / 95) = 15,789
 quantity = min(15,789, 5,000) = 5,000
 ```
 
-#### §4.1.7 Academic References
+Overvaluation with inventory produces a sell; a 2% deviation produces hold; a full cap produces a zero-quantity edge-case hold.
+
+#### §4.1.9 Validation and Calibration
+
+The agent MUST buy below `-entry_spread`, sell above it when inventory exists, and hold inside it. Unaffordable orders or quantity above `max_position` fail validation. Ablation `leverage=1` must reduce order size.
+
+#### §4.1.10 Academic References
 
 Shleifer & Vishny (1997); Jorion (2000); Lowenstein (2000), *When Genius Failed*.
+
+#### §4.1.11 Design Provenance and Versioning
+
+- Origin: reuse.
+- Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
+- Pool reference: `examples/AGENT_POOL/finance/convergence-arbitrageur.md` (three-stage match outcome: reuse).
 
 ### §4.2 LeverageTrader
 
@@ -197,11 +249,15 @@ The `LeverageTrader` represents balance-sheet-constrained investors whose action
 
 This investor produces forced selling pressure after losses accumulate, capturing the leverage-cycle channel of the LTCM crisis.
 
-#### §4.2.2 Theoretical and Empirical Foundation
+#### §4.2.2 Definition and Goals
+
+This embedded design reuses `examples/AGENT_POOL/finance/leverage-trader.md`. It models a marked-to-market leveraged fund, selects a feasible order, and prioritizes contraction after a margin breach. It MUST NOT increase absolute exposure during a breach or act without required balance-sheet signals.
+
+#### §4.2.3 Theoretical Foundation
 
 The primary basis is the leverage cycle (§2.2). The code computes equity from portfolio value and leverage exposure, then triggers a 30% deleveraging order when equity falls below a margin-call threshold.
 
-#### §4.2.3 Design Purpose and Activation Scenarios
+#### §4.2.4 Design Purpose and Activation Triggers
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -209,7 +265,15 @@ The primary basis is the leverage cycle (§2.2). The code computes equity from p
 | `deviation < -0.03` and no margin breach | Buy with leveraged capacity | Adds convergence exposure | §2.1, §2.2 |
 | Otherwise | Hold | No new pressure | §2.2 |
 
-#### §4.2.4 Behavioral Framework
+Deactivation occurs at zero position or when cash prevents a buy. Missing signals produce hold. Adequate equity permits opportunity exposure, while a margin breach forces contraction.
+
+#### §4.2.5 Behavioral Framework
+
+###### §4.2.5.0 I/O Contract
+
+Inputs are price, fundamental, deviation, cash, position, round, identity, and optional retrieved knowledge. Outputs are exactly `action`, `bid_price`, `quantity`, and `reasoning` in the common tagged JSON contract.
+
+###### §4.2.5.1 Decision Information Set
 
 Trigger:
 
@@ -225,11 +289,35 @@ Q_delever(t) = floor(0.30 * |position(t)|)
 
 The agent tracks cash and position and reacts to price through current portfolio value.
 
-#### §4.2.5 Decision Process Walkthrough
+###### §4.2.5.2 Core Behavioral Mechanism
 
 When losses reduce equity below the margin-call threshold, the trader sells if long and buys if short. If no margin call is active and the asset is undervalued by more than 3%, the trader adds a leveraged long.
 
-#### §4.2.6 Worked Numerical Example
+###### §4.2.5.3 Action Space
+
+Buy, sell, or hold at current price for one round. A breach closes `30%` of absolute position; an unbreached opportunity uses the bounded base size. Orders cannot exceed inventory or cash.
+
+###### §4.2.5.4 Mathematical Model
+
+With equity `E=cash+position*price-abs(position*price)/leverage_ratio`, breach when `E<margin_call_threshold*abs(position*price)` and trade `floor(0.30*abs(position))` toward zero. State updates post-execution; the rule is deterministic.
+
+###### §4.2.5.5 Behavioral Properties
+
+Medium horizon, high pre-breach risk tolerance, partial information, and institutionally constrained rationality.
+
+#### §4.2.6 Parameters
+
+| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
+|---|---:|---:|---|---|---|---|---|
+| `leverage_ratio` | float | 25 | `[1,50]` | high | liability scale | Higher -> lower equity buffer | PWG (1999) |
+| `margin_call_threshold` | float | 0.04 | `(0,1)` | high | breach buffer | Higher -> earlier cuts | §2.2 |
+| `base_size` | int | 500 | `>=1` | medium | ordinary buy size | Higher -> larger non-breach buys | scenario calibration |
+
+#### §4.2.7 Population and Heterogeneity
+
+Two persistent instances use the same balance-sheet rule and defaults; stochastic model wording does not alter the common decision fields.
+
+#### §4.2.8 Worked Numerical Examples
 
 If position is 500 shares, the forced deleveraging quantity is:
 
@@ -237,9 +325,21 @@ If position is 500 shares, the forced deleveraging quantity is:
 Q = floor(0.30 * 500) = 150
 ```
 
-#### §4.2.7 Academic References
+A short breach buys 150 toward zero; an unbreached 5% discount buys the base size; zero inventory is the edge-case hold.
+
+#### §4.2.9 Validation and Calibration
+
+A breached long MUST sell and a breached short MUST buy toward zero. Any breach action that raises absolute position fails. Ablation `leverage_ratio=1` must reduce breach frequency.
+
+#### §4.2.10 Academic References
 
 Geanakoplos (2010); Brunnermeier & Pedersen (2009); Jorion (2000).
+
+#### §4.2.11 Design Provenance and Versioning
+
+- Origin: reuse.
+- Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
+- Pool reference: `examples/AGENT_POOL/finance/leverage-trader.md` (three-stage match outcome: reuse).
 
 ### §4.3 RiskManager
 
@@ -247,11 +347,15 @@ Geanakoplos (2010); Brunnermeier & Pedersen (2009); Jorion (2000).
 
 The `RiskManager` represents institutional risk-control desks that cut exposure when deviations exceed allowed risk limits. The agent is stabilizing at the individual-book level but can amplify systemic stress when many agents cut positions simultaneously.
 
-#### §4.3.2 Theoretical and Empirical Foundation
+#### §4.3.2 Definition and Goals
+
+This embedded design reuses `examples/AGENT_POOL/finance/risk-manager.md`. It models an institutional risk desk, selects a position-reducing order, and applies a public stress proxy. It MUST NOT open new exposure, increase absolute inventory, or act without deviation and position.
+
+#### §4.3.3 Theoretical Foundation
 
 The design is based on VaR procyclicality (§2.3). It operationalizes a risk breach when price deviation exceeds three times the configured VaR limit.
 
-#### §4.3.3 Design Purpose and Activation Scenarios
+#### §4.3.4 Design Purpose and Activation Triggers
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -259,7 +363,15 @@ The design is based on VaR procyclicality (§2.3). It operationalizes a risk bre
 | `abs(deviation) > 3 * var_limit` and short | Buy to cover 50% | Risk reduction, possible buy pressure | §2.3 |
 | Within risk limits | Hold | No action | §2.3 |
 
-#### §4.3.4 Behavioral Framework
+Deactivation occurs at zero inventory or inside the risk boundary. Missing signals produce hold. Ordinary states leave exposure unchanged, while severe states close half the inventory.
+
+#### §4.3.5 Behavioral Framework
+
+###### §4.3.5.0 I/O Contract
+
+Inputs are price, fundamental, deviation, position, round, identity, and optional retrieved knowledge. Outputs are exactly `action`, `bid_price`, `quantity`, and `reasoning` in the common tagged JSON contract.
+
+###### §4.3.5.1 Decision Information Set
 
 Trigger:
 
@@ -273,11 +385,35 @@ Sizing:
 Q_cut(t) = floor(0.50 * |position(t)|)
 ```
 
-#### §4.3.5 Decision Process Walkthrough
+###### §4.3.5.2 Core Behavioral Mechanism
 
 At `var_limit = 0.05`, a 16% deviation exceeds `3 * var_limit = 15%`, causing a 50% position cut.
 
-#### §4.3.6 Worked Numerical Example
+###### §4.3.5.3 Action Space
+
+Buy, sell, or hold at current price for one round. A breach closes `50%` of signed inventory toward zero; otherwise quantity is zero. The next call recomputes the limit.
+
+###### §4.3.5.4 Mathematical Model
+
+If `abs(delta)>3*var_limit`, quantity is `floor(0.50*abs(position))` and direction is toward zero; otherwise hold. State updates post-execution and the mapping is deterministic.
+
+###### §4.3.5.5 Behavioral Properties
+
+Short horizon, low risk tolerance after breach, partial information, and rule-bound institutional rationality.
+
+#### §4.3.6 Parameters
+
+| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
+|---|---:|---:|---|---|---|---|---|
+| `var_limit` | float | 0.05 | `(0,0.20]` | high | base risk boundary | Higher -> fewer cuts | Jorion (2000) |
+| `var_trigger` | float | 0.06 | `(0,0.20]` | medium | stress diagnostic | Higher -> later diagnostic stress | Jorion (2000) |
+| `base_size` | int | 300 | `>=1` | low | reporting/order unit | Higher -> coarser reporting | scenario calibration |
+
+#### §4.3.7 Population and Heterogeneity
+
+Two persistent instances share the same limit and close fraction; all variants retain the same position-reducing contract.
+
+#### §4.3.8 Worked Numerical Examples
 
 If position is 500 and deviation is -0.16:
 
@@ -285,9 +421,21 @@ If position is 500 and deviation is -0.16:
 Q = floor(0.50 * 500) = 250 sell
 ```
 
-#### §4.3.7 Academic References
+A breached short buys 250 toward zero; a 10% deviation holds; zero inventory is the edge-case hold.
+
+#### §4.3.9 Validation and Calibration
+
+Breached positions MUST shrink and inside-limit positions MUST hold. Quantity above inventory or a direction that increases exposure fails. Ablation `var_limit=0.20` must reduce active cuts.
+
+#### §4.3.10 Academic References
 
 Jorion (2000); Danielsson et al. (2001), "An academic response to Basel II."
+
+#### §4.3.11 Design Provenance and Versioning
+
+- Origin: reuse.
+- Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
+- Pool reference: `examples/AGENT_POOL/finance/risk-manager.md` (three-stage match outcome: reuse).
 
 ### §4.4 LiquidityProvider
 
@@ -295,11 +443,15 @@ Jorion (2000); Danielsson et al. (2001), "An academic response to Basel II."
 
 The `LiquidityProvider` represents market makers that supply liquidity when deviations are moderate but withdraw when stress becomes large. Its withdrawal is central to the liquidity-black-hole mechanism.
 
-#### §4.4.2 Theoretical and Empirical Foundation
+#### §4.4.2 Definition and Goals
+
+This embedded design reuses `examples/AGENT_POOL/finance/liquidity-provider.md`. It models an inventory-constrained dealer, selects a countercyclical order in ordinary states, and withdraws under stress. It MUST NOT exceed its inventory or cash constraints or provide unlimited crisis liquidity.
+
+#### §4.4.3 Theoretical Foundation
 
 The design follows Morris & Shin's liquidity black-hole mechanism (§2.4). Liquidity provision is conditionally stabilizing and disappears in stressed deviations.
 
-#### §4.4.3 Design Purpose and Activation Scenarios
+#### §4.4.4 Design Purpose and Activation Triggers
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
@@ -307,21 +459,65 @@ The design follows Morris & Shin's liquidity black-hole mechanism (§2.4). Liqui
 | `abs(position) < inventory_limit` and `deviation > 0` | Sell up to 500 | Mean-reversion supply | §2.4 |
 | `abs(position) < inventory_limit` and `deviation <= 0` | Buy up to 500/cash limit | Mean-reversion demand | §2.4 |
 
-#### §4.4.4 Behavioral Framework
+Deactivation occurs outside the provision boundary or at the inventory cap. Missing signals produce hold. Moderate deviations receive liquidity, while severe deviations receive none.
+
+#### §4.4.5 Behavioral Framework
+
+###### §4.4.5.0 I/O Contract
+
+Inputs are price, fundamental, deviation, cash, position, round, identity, and optional retrieved knowledge. Outputs are exactly `action`, `bid_price`, `quantity`, and `reasoning` in the common tagged JSON contract.
+
+###### §4.4.5.1 Decision Information Set
 
 The stress trigger is `abs(deviation) > 0.05`; the inventory cap is `inventory_limit`. Normal-market size is capped at 500 shares per round.
 
-#### §4.4.5 Decision Process Walkthrough
+###### §4.4.5.2 Core Behavioral Mechanism
 
 If deviation is -2% and inventory room remains, the agent buys. If deviation is -7%, it withdraws and holds.
 
-#### §4.4.6 Worked Numerical Example
+###### §4.4.5.3 Action Space
+
+Buy, sell, or hold at current price for one round. Normal-state size is capped at 500 and by remaining inventory/cash; severe stress emits hold. Each call replaces the prior intent.
+
+###### §4.4.5.4 Mathematical Model
+
+Hold when `abs(delta)>stress_threshold`; otherwise trade against deviation with `q=min(500,inventory_room,affordable_quantity)`. State updates post-execution; the rule is deterministic.
+
+###### §4.4.5.5 Behavioral Properties
+
+Short horizon, medium risk tolerance, partial information, and inventory-sensitive liquidity provision.
+
+#### §4.4.6 Parameters
+
+| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
+|---|---:|---:|---|---|---|---|---|
+| `inventory_limit` | int | 2000 | `>=1` | high | capacity cap | Higher -> more liquidity capacity | Brunnermeier & Pedersen (2009) |
+| `stress_exit` | float | 0.40 | `[0,1]` | high | stress-withdrawal intensity | Higher -> more withdrawal | §2.4 calibration |
+| `base_size` | int | 400 | `>=1` | medium | ordinary order cap | Higher -> larger quotes | scenario calibration |
+
+#### §4.4.7 Population and Heterogeneity
+
+Two persistent instances share the stress boundary and inventory logic; any model variation is bounded by the same I/O contract.
+
+#### §4.4.8 Worked Numerical Examples
 
 With inventory limit 2,000 and current position 1,000, inventory room is 1,000. The per-round cap binds at 500 shares.
 
-#### §4.4.7 Academic References
+An overvalued ordinary state sells 500; a severe state holds; a full inventory cap is the edge-case hold.
+
+#### §4.4.9 Validation and Calibration
+
+Ordinary deviations MUST produce feasible countercyclical orders and severe deviations MUST withdraw. Cap violations or trading with missing signals fail. Ablation `inventory_limit=1` must reduce supplied quantity.
+
+#### §4.4.10 Academic References
 
 Morris & Shin (2004); Brunnermeier & Pedersen (2009).
+
+#### §4.4.11 Design Provenance and Versioning
+
+- Origin: reuse.
+- Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical embedded sections added.
+- Pool reference: `examples/AGENT_POOL/finance/liquidity-provider.md` (three-stage match outcome: reuse).
 
 ### §4.5 CentralBank
 
@@ -329,18 +525,30 @@ Morris & Shin (2004); Brunnermeier & Pedersen (2009).
 
 The `CentralBank` represents official-sector or coordinated private-sector lender-of-last-resort intervention. It is not a literal central-bank asset purchase model; it abstracts the 1998 coordination role into a stabilizing liquidity injection.
 
-#### §4.5.2 Theoretical and Empirical Foundation
+#### §4.5.2 Definition and Goals
+
+This embedded design reuses `examples/AGENT_POOL/finance/central-bank.md`. It models a systemic-crisis coordinator, selects a bounded contingent support order, and represents a Fed-facilitated private response rather than a literal automatic public purchase. It MUST NOT intervene at ordinary stress or emit unbounded demand.
+
+#### §4.5.3 Theoretical Foundation
 
 The design follows Bagehot's lender-of-last-resort principle (§2.5) and the historical New York Fed-facilitated coordination among LTCM counterparties.
 
-#### §4.5.3 Design Purpose and Activation Scenarios
+#### §4.5.4 Design Purpose and Activation Triggers
 
 | Market Condition | Response | Economic Effect | Theory |
 |---|---|---|---|
 | `deviation < -intervention_threshold` and random draw succeeds | Buy 2,000 | Stabilizing liquidity injection | §2.5 |
 | Stress below threshold or failed probability draw | Hold | No intervention | §2.5 |
 
-#### §4.5.4 Behavioral Framework
+Deactivation occurs when stress moves above the threshold or the current support opportunity expires. Missing price, fundamental, deviation, or seed produces hold. Severe stress changes the agent from inactive to contingent support.
+
+#### §4.5.5 Behavioral Framework
+
+###### §4.5.5.0 I/O Contract
+
+Inputs are price, fundamental, deviation, round, identity, seed, and optional retrieved knowledge. Outputs are exactly `action`, `bid_price`, `quantity`, and `reasoning` in the common tagged JSON contract; stochastic decisions log the seed.
+
+###### §4.5.5.1 Decision Information Set
 
 Trigger:
 
@@ -350,27 +558,64 @@ delta(t) < -intervention_threshold and u < rescue_probability
 
 Sizing is fixed at 2,000 shares to model a discrete support operation.
 
-#### §4.5.5 Decision Process Walkthrough
+###### §4.5.5.2 Core Behavioral Mechanism
 
 At deviation -12%, threshold 10%, and a successful probability draw, the agent buys 2,000 shares.
 
-#### §4.5.6 Worked Numerical Example
+###### §4.5.5.3 Action Space
+
+Buy, sell, or hold at current price for one round. Severe support uses a bounded size and background activity uses `noise_size`; decisions are recomputed from current stress and the round-seeded draw.
+
+###### §4.5.5.4 Mathematical Model
+
+With `u_t=PRNG(seed,round)`, buy support if `delta<-intervention_threshold` and `u_t<rescue_probability`; otherwise apply only bounded background activity or hold. The mapping is stochastic-given-seed.
+
+###### §4.5.5.5 Behavioral Properties
+
+Medium horizon, high mandate-level risk tolerance, partial information, and contingent institutional response.
+
+#### §4.5.6 Parameters
+
+| Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
+|---|---:|---:|---|---|---|---|---|
+| `intervention_threshold` | float | 0.10 | `(0,0.30]` | high | severe trigger | Higher -> fewer interventions | PWG (1999) |
+| `rescue_probability` | float | 0.50 | `[0,1]` | high | coordination probability | Higher -> more support | PWG (1999) calibration |
+| `trade_probability` | float | 0.30 | `[0,1]` | medium | background activity chance | Higher -> more ordinary buys | scenario calibration |
+| `noise_size` | int | 150 | `[0,2000]` | low | background order size | Higher -> larger background orders | scenario calibration |
+
+#### §4.5.7 Population and Heterogeneity
+
+Two persistent instances use identity-specific seeded draws and the same bounded policy parameters; I/O fields remain identical across variants.
+
+#### §4.5.8 Worked Numerical Examples
 
 With price 90, a 2,000-share intervention contributes 180,000 notional buy demand before market impact.
 
-#### §4.5.7 Academic References
+A failed severe-state draw holds; an ordinary successful background draw buys 150; equality at the threshold is the edge-case non-intervention.
+
+#### §4.5.9 Validation and Calibration
+
+Successful severe draws MUST create bounded support, failed draws MUST not force it, and repeated seeds MUST reproduce output. Intervention above the threshold or quantity above the cap fails. Ablation `rescue_probability=0` removes severe support.
+
+#### §4.5.10 Academic References
 
 Bagehot (1873); Lowenstein (2000); Jorion (2000).
 
+#### §4.5.11 Design Provenance and Versioning
+
+- Origin: reuse.
+- Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
+- Pool reference: `examples/AGENT_POOL/finance/central-bank.md` (three-stage match outcome: reuse).
+
 ## §5 Agent Diversity Verification
 
-| Agent | Direction In Stress | Stabilizing? | Distinct Signal |
-|---|---|---|---|
-| `ConvergenceArbitrageur` | Adds convergence exposure | Mixed | `abs(deviation) > entry_spread` |
-| `LeverageTrader` | Forced deleveraging | Destabilizing | equity/margin condition |
-| `RiskManager` | Cuts exposure | Individually stabilizing, systemically destabilizing | `abs(deviation) > 3 * var_limit` |
-| `LiquidityProvider` | Withdraws under stress | Stabilizing only in normal range | `abs(deviation) > 0.05` |
-| `CentralBank` | Buys in severe stress | Stabilizing | `deviation < -intervention_threshold` |
+| Agent | Time Horizon | Risk Tolerance | Information Asymmetry | Determinism | Direction In Stress | Distinct Signal |
+|---|---|---|---|---|---|---|
+| `ConvergenceArbitrageur` | long | high | partial | deterministic | Context-dependent convergence exposure | `abs(deviation) > entry_spread` |
+| `LeverageTrader` | medium | high then constrained | partial | deterministic | Forced deleveraging | equity/margin condition |
+| `RiskManager` | short | low after breach | partial | deterministic | Individually stabilizing, systemically amplifying | `abs(deviation) > 3 * var_limit` |
+| `LiquidityProvider` | short | medium | partial | deterministic | Stabilizing only in normal range | stress withdrawal boundary |
+| `CentralBank` | medium | high mandate capacity | partial | stochastic-given-seed | Stabilizing contingent support | `deviation < -intervention_threshold` |
 
 The mix covers rational arbitrage, funding fragility, institutional risk control, liquidity supply, and emergency support. No two investor types share the same trigger and market role.
 
@@ -409,6 +654,8 @@ Each round follows:
 4. Rule investors compute deterministic actions; API variants call an LLM using the same market state.
 5. Investor actions are emitted as `order` messages.
 6. The next market round clears those orders.
+
+The topology is a star centered on the market. The market broadcasts the four fields in §3.3 to every investor identity, and each investor sends at most one standard order back to the market per round. No investor-to-investor private channel is used.
 
 The simulation is configured for 200 rounds in all variants.
 

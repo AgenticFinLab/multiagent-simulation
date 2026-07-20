@@ -5,6 +5,7 @@
 - 2026-07-20  Target produced by `define-simulation-scenario-skill.md` from the existing LTCMCollapse research, configurations, and four implemented variants; no research question or agent archetype was added.
 - 2026-07-20  Polish target-file gate: Case B target produced by the define skill, §11 validation completed with three consecutive PASS runs, then status changed `draft` to `locked`.
 - 2026-07-20  Polish Step 1 research audit: all five target theories now map one-to-one to complete six-field basis blocks; the Mitchell-Pedersen-Pulvino citation was corrected and an invalid Morris-Shin DOI was removed, official PWG evidence was anchored, and all five stylized facts gained upstream trace rows.
+- 2026-07-20  Polish Step 2 agent and environment audit: five exact-name pool profiles were reused; four legacy stubs were replaced with handbook-conformant specifications, four canonical 512x512 icons were generated and registered as mapping rows 106-109, every embedded agent gained the canonical 11-section spine and I/O contract, and environment/diversity/round structure was aligned.
 
 ## §1 Meta
 
