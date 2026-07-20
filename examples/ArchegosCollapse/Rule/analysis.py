@@ -27,6 +27,7 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 from masim.evaluation.data_loader import (
+    aligned_market_series as _aligned_market_series,
     batch_to_rounds as _batch_to_rounds,
     load_data as _load_data,
     market_data_from_payload as _market_data_from_payload,

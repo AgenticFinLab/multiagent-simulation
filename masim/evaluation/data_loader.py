@@ -235,6 +235,48 @@ def aligned_prices_and_fundamentals(data: Dict[str, Any]) -> Tuple[
     return common, prices, funds
 
 
+def aligned_market_series(
+    market_prices: Dict[int, float],
+    fundamentals: Dict[int, float],
+) -> Tuple[List[int], List[float], List[float]]:
+    """Align market_prices and fundamentals on common rounds.
+
+    A lightweight utility for scenario ``analysis.py`` scripts that need
+    three parallel plain-Python lists (rounds, prices, fundamentals)
+    sorted by round number.  Unlike :func:`aligned_prices_and_fundamentals`
+    this function:
+
+    * accepts two separate dicts (instead of the canonical data dict),
+    * returns ``List[float]`` (instead of ``np.ndarray``), and
+    * degrades gracefully when fundamentals is empty (fills zeros) rather
+      than raising.
+
+    Parameters
+    ----------
+    market_prices : Dict[int, float]
+        Mapping of round number → market clearing price.
+    fundamentals : Dict[int, float]
+        Mapping of round number → fundamental value.
+
+    Returns
+    -------
+    tuple of (sorted_rounds, prices_list, fundamentals_list)
+        Three parallel sequences containing only the rounds present in
+        *both* input dicts. If ``fundamentals`` is empty, ``fund_list``
+        defaults to zeros matching ``prices_list`` length.
+    """
+    common_rounds = sorted(set(market_prices.keys()) & set(fundamentals.keys()))
+    if not common_rounds:
+        # Fallback: use market_prices alone with zero fundamentals.
+        common_rounds = sorted(market_prices.keys())
+        prices_list = [float(market_prices[r]) for r in common_rounds]
+        fund_list = [0.0] * len(common_rounds)
+    else:
+        prices_list = [float(market_prices[r]) for r in common_rounds]
+        fund_list = [float(fundamentals[r]) for r in common_rounds]
+    return common_rounds, prices_list, fund_list
+
+
 def payload_buy_sell(payload: Dict[str, Any]) -> Tuple[float, float]:
     """Return (buy_qty, sell_qty) for a single investor payload.
 
