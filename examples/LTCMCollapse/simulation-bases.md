@@ -33,6 +33,16 @@ This simulation abstracts that history into a single risky asset with a fixed fu
 | Global funding crisis | 2008-09 to 2008-10 | LIBOR-OIS spreads and dealer balance-sheet constraints widened sharply; public liquidity facilities expanded | `LeverageTrader`, `LiquidityProvider`, `CentralBank` | Funding-liquidity spiral and lender-of-last-resort comparison |
 | UK gilt / LDI crisis | 2022-09 to 2022-10 | Thirty-year gilt yields moved roughly 100+ bps in days; Bank of England announced temporary gilt purchases | `LeverageTrader`, `RiskManager`, `CentralBank` | Modern collateral-spiral analogue outside the US |
 
+Target trace for the required stylized facts:
+
+| Target fact | Evidence anchor in this section |
+|---|---|
+| F1 visible but finite dislocation | LTCM equity erosion and the Russian-default flight to liquidity |
+| F2 material but finite drawdown | LTCM collapse and later correlated deleveraging episodes |
+| F3 volatility above calm noise | Russian-default spread widening and the 2007 quant unwind |
+| F4 persistent dislocation | dealer withdrawal, counterparty pressure, and funding-crisis analogues |
+| F5 positive finite resolution | the 1998 private recapitalization and later official liquidity support |
+
 #### §1.1.3 Book And Practitioner Literature
 
 | Source | Type | Use In This Scenario |
@@ -43,97 +53,50 @@ This simulation abstracts that history into a single risky asset with a fixed fu
 
 ## §2 Theoretical Foundation
 
-### §2.1 Limits To Arbitrage
+### §2.1 Limits to Arbitrage
 
 - **Citation**: Shleifer, A., & Vishny, R. W. (1997). The limits of arbitrage. *Journal of Finance*, 52(1), 35-55. https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
-- **Mechanism**: Arbitrageurs may be correct about long-run convergence but still be forced out when short-run losses trigger investor withdrawals or margin pressure.
-- **Mathematical Formulation**:
-  ```
-  trade when |delta(t)| > theta_entry
-  exposure(t) = leverage * cash(t) * |delta(t)| / P(t)
-  ```
-  where `delta(t) = (P(t) - F) / F`.
-- **Empirical Evidence**:
-  | Source | Setting | Quantitative Finding | Scenario Role |
-  |---|---|---|---|
-  | Lowenstein (2000) | LTCM 1998 | Equity erosion from roughly $4.7B to roughly $0.6B during the crisis window | calibrates the fragility of leveraged arbitrage capital |
-  | Mitchell, Pedersen, & Pulvino (2007), https://doi.org/10.1111/j.1540-6261.2007.01217.x | convertible arbitrage | mispricing can persist when arbitrage capital is constrained | supports persistent deviation before recovery |
-  | MacKenzie (2003), https://doi.org/10.1080/03085140303130 | LTCM imitator trades | shared models created crowded positioning | supports multiple arbitrage-style agents |
-- **Empirical Relevance**: LTCM held relative-value positions that were expected to converge, but losses expanded when spreads moved further away from fundamental value. The scenario therefore lets convergence buying be individually rational while the system remains fragile.
-- **Agent Mapping**: `ConvergenceArbitrageur` in §4.1.
+- **Core Insight**: Correct long-horizon convergence beliefs do not protect arbitrageurs from withdrawals or funding pressure caused by interim losses.
+- **Mathematical Formulation**: Trade when `abs(delta(t)) > theta_entry`, with desired exposure `leverage * cash(t) * abs(delta(t)) / P(t)` and `delta(t)=(P(t)-F)/F`.
+- **Empirical Evidence**: Mitchell, Pedersen, and Pulvino (2007), https://doi.org/10.1257/aer.97.2.215, document slow-moving arbitrage capital; MacKenzie (2003), https://doi.org/10.1080/03085140303130, identifies imitation and crowded LTCM-style positioning.
+- **Relevance to This Simulation**: `ConvergenceArbitrageur` treats deviations as opportunities while remaining vulnerable to the path taken before convergence.
+- **Calibration Implication**: `entry_spread=0.03`, `leverage=15`, and `max_position=5000` create bounded leveraged exposure above calm noise.
 
-### §2.2 Leverage Cycle And Margin Pressure
+### §2.2 Leverage Cycle and Margin Pressure
 
 - **Citation**: Geanakoplos, J. (2010). The leverage cycle. In *NBER Macroeconomics Annual 2009*, 24, 1-65. https://doi.org/10.1086/648285
-- **Mechanism**: Leverage expands balance sheets in tranquil periods and forces rapid contraction when asset values fall.
-- **Mathematical Formulation**:
-  ```
-  equity(t) = cash(t) + position(t) * P(t) - |position(t) * P(t)| / leverage_ratio
-  margin breach when equity(t) < margin_call_threshold * |position(t) * P(t)|
-  ```
-- **Empirical Evidence**:
-  | Source | Setting | Quantitative Finding | Scenario Role |
-  |---|---|---|---|
-  | President's Working Group (1999) | LTCM | leverage and counterparty exposure made small spread moves systemically relevant | motivates `leverage_ratio` and margin trigger |
-  | Adrian & Shin (2010), https://doi.org/10.1016/j.jfi.2008.12.002 | broker-dealer balance sheets | leverage is procyclical and contracts in stress | motivates forced deleveraging |
-  | Gorton & Metrick (2012), https://doi.org/10.1016/j.jfineco.2011.03.016 | repo markets | crisis haircuts can jump sharply when collateral quality is questioned | motivates funding-liquidity stress |
-- **Empirical Relevance**: LTCM's high leverage made small spread moves large relative to equity. The `LeverageTrader` converts mark-to-market pressure into mechanical exposure reduction.
-- **Agent Mapping**: `LeverageTrader` in §4.2.
+- **Core Insight**: Falling collateral values tighten feasible leverage and force rapid contraction after tranquil-period balance-sheet expansion.
+- **Mathematical Formulation**: A breach occurs when `equity(t) < margin_call_threshold * abs(position(t)*P(t))`; the forced order closes `0.30*abs(position(t))`.
+- **Empirical Evidence**: Adrian and Shin (2010), https://doi.org/10.1016/j.jfi.2008.12.002, document procyclical intermediary leverage; the PWG report, https://www.govinfo.gov/app/details/GOVPUB-PR-PURL-LPS77446, identifies excessive LTCM leverage as the central policy issue.
+- **Relevance to This Simulation**: `LeverageTrader` converts adverse marking-to-market into a mechanical reduction in exposure.
+- **Calibration Implication**: `leverage_ratio=25` and `margin_call_threshold=0.04` make modest price moves material to equity without imposing an exogenous crash path.
 
-### §2.3 VaR-Based Risk Management And Procyclicality
+### §2.3 Procyclical Risk Management
 
 - **Citation**: Jorion, P. (2000). Risk management lessons from Long-Term Capital Management. *European Financial Management*, 6(3), 277-300. https://doi.org/10.1111/1468-036X.00125
-- **Mechanism**: Risk limits reduce individual exposure but can be procyclical when many institutions cut positions at the same time.
-- **Mathematical Formulation**:
-  ```
-  risk breach when |delta(t)| > 3 * VaR_limit
-  cut_quantity(t) = 0.50 * |position(t)|
-  ```
-- **Empirical Evidence**:
-  | Source | Setting | Quantitative Finding | Scenario Role |
-  |---|---|---|---|
-  | Jorion (2000), https://doi.org/10.1111/1468-036X.00125 | LTCM risk management | normal-period risk models understated stress-period correlation and liquidity risk | motivates VaR-triggered cuts |
-  | President's Working Group (1999) | dealer and hedge-fund exposures | counterparties reassessed exposure as losses mounted | motivates common risk-reduction behavior |
-  | Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098 | funding and market liquidity | risk constraints amplify market moves under funding stress | links risk cuts to liquidity spirals |
-- **Empirical Relevance**: The crisis exposed model-risk and tail-risk limitations in risk systems calibrated on normal-market correlations. The `RiskManager` therefore represents institutional de-risking rather than discretionary speculation.
-- **Agent Mapping**: `RiskManager` in §4.3.
+- **Core Insight**: Normal-period risk estimates understate stress correlation and liquidity, so synchronized cuts can amplify the crisis they individually mitigate.
+- **Mathematical Formulation**: A risk breach occurs when `abs(delta(t)) > 3*var_limit`; the risk desk closes `0.50*abs(position(t))`.
+- **Empirical Evidence**: Jorion shows that short histories and concentrated bets understated LTCM risk; Brunnermeier and Pedersen (2009), https://doi.org/10.1093/rfs/hhn098, connect risk constraints to liquidity spirals.
+- **Relevance to This Simulation**: `RiskManager` is an institutional exposure-control mechanism, not a discretionary speculator.
+- **Calibration Implication**: `var_limit=0.05` and `var_trigger=0.06` separate routine fluctuations from severe common-risk signals.
 
-### §2.4 Market Liquidity, Funding Liquidity, And Liquidity Black Holes
+### §2.4 Funding and Market Liquidity Spiral
 
-- **Citation**: Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201-2238. https://doi.org/10.1093/rfs/hhn098; Morris, S., & Shin, H. S. (2004). Liquidity black holes. *Review of Finance*, 8(1), 1-18. https://doi.org/10.1093/rof/8.1.1
-- **Mechanism**: Funding pressure reduces the ability to provide market liquidity; lower market liquidity increases price impact and worsens mark-to-market losses. When traders expect others to withdraw or sell, liquidity can disappear endogenously, producing a self-reinforcing price move.
-- **Mathematical Formulation**:
-  ```
-  provide liquidity when |delta(t)| <= theta_stress
-  withdraw when |delta(t)| > theta_stress
-  price_impact_effect(t) = lambda * net_demand(t)
-  ```
-- **Empirical Evidence**:
-  | Source | Setting | Quantitative Finding | Scenario Role |
-  |---|---|---|---|
-  | Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098 | funding and market liquidity | liquidity supply contracts when funding constraints bind | motivates `LiquidityProvider` withdrawal |
-  | Hameed, Kang, & Viswanathan (2010), https://doi.org/10.1111/j.1540-6261.2009.01529.x | market liquidity in stress | negative market returns predict reduced liquidity provision | supports stress-dependent liquidity participation |
-  | Nagel (2012), https://doi.org/10.1093/rfs/hhs066 | liquidity-provider returns | liquidity premia rise sharply in high-volatility states | supports withdrawal under large deviations |
-- **Empirical Relevance**: During the LTCM crisis, positions that appeared liquid became hard to unwind without large price concessions. This scenario represents that mechanism through a liquidity provider that stabilizes ordinary deviations but withdraws from deep stress.
-- **Agent Mapping**: `LiquidityProvider` in §4.4.
+- **Citation**: Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201-2238. https://doi.org/10.1093/rfs/hhn098
+- **Core Insight**: Funding constraints reduce liquidity supply; weaker market liquidity increases price impact and tightens funding constraints further.
+- **Mathematical Formulation**: Provide countercyclical orders inside the stress boundary, withdraw outside it, and update price by `lambda*net_demand(t)`.
+- **Empirical Evidence**: Hameed, Kang, and Viswanathan (2010), https://doi.org/10.1111/j.1540-6261.2009.01529.x, find market declines predict lower liquidity; Nagel (2012), https://doi.org/10.1093/rfs/hhs066, finds liquidity-provider returns spike in turmoil.
+- **Relevance to This Simulation**: `LiquidityProvider` stabilizes moderate deviations but removes capacity when stress is greatest.
+- **Calibration Implication**: `inventory_limit=2000` bounds capacity and `stress_exit=0.40` makes withdrawal stress-sensitive rather than certain.
 
-### §2.5 Lender Of Last Resort
+### §2.5 Crisis Coordination and Liquidity Backstop
 
-- **Citation**: Bagehot, W. (1873). *Lombard Street: A Description of the Money Market*. Henry S. King.
-- **Mechanism**: During systemic panic, a credible liquidity backstop can arrest fire-sale dynamics.
-- **Mathematical Formulation**:
-  ```
-  intervene when delta(t) < -theta_intervention and u < rescue_probability
-  injection_quantity = 2000
-  ```
-- **Empirical Evidence**:
-  | Source | Setting | Quantitative Finding | Scenario Role |
-  |---|---|---|---|
-  | Lowenstein (2000) | LTCM rescue | $3.625B recapitalization by a private consortium | motivates central-bank coordination proxy |
-  | President's Working Group (1999) | LTCM policy lessons | systemic-risk concerns centered on counterparty spillovers | motivates intervention trigger |
-  | Cecchetti & Disyatat (2010), BIS Working Paper 304 | 2008 facilities | central-bank liquidity facilities reduced stress spreads in crisis markets | supports backstop effect |
-- **Empirical Relevance**: The Federal Reserve Bank of New York facilitated a private-sector rescue of LTCM to reduce systemic spillovers. The simulation models this as probabilistic support rather than guaranteed rescue because official intervention is contingent on systemic-risk judgment.
-- **Agent Mapping**: `CentralBank` in §4.5.
+- **Citation**: President's Working Group on Financial Markets. (1999). *Hedge Funds, Leverage, and the Lessons of Long-Term Capital Management*. https://www.govinfo.gov/app/details/GOVPUB-PR-PURL-LPS77446
+- **Core Insight**: Coordinated private recapitalization can reduce disorderly liquidation when concentrated counterparty exposure threatens market functioning.
+- **Mathematical Formulation**: Intervene when `delta(t) < -intervention_threshold` and `u < rescue_probability`, using a bounded positive support order.
+- **Empirical Evidence**: Edwards (1999), https://doi.org/10.1257/jep.13.2.189, reports roughly $4.8 billion of equity, more than $125 billion of borrowing, and the September rescue.
+- **Relevance to This Simulation**: `CentralBank` is explicitly a coordination proxy for the New York Fed-facilitated private-sector operation, not a literal 1998 asset-purchase program.
+- **Calibration Implication**: `intervention_threshold=0.10` and `rescue_probability=0.50` keep support contingent on severe systemic stress.
 
 ## §3 Market Design Principles
 

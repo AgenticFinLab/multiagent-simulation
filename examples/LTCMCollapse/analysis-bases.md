@@ -2,13 +2,13 @@
 
 ## §1 Analysis Objectives
 
-| Objective | Research Question | Metrics | Expected Finding |
-|---|---|---|---|
-| O1 | Does leveraged convergence arbitrage create a measurable deviation from fundamental value? | price deviation, maximum drawdown | deviation exceeds ordinary noise after stress amplification |
-| O2 | Does deleveraging amplify the initial dislocation? | drawdown, return volatility, cascade onset round | forced selling and risk cuts raise volatility and deepen drawdown |
-| O3 | Does liquidity withdrawal slow recovery? | mean absolute deviation, recovery half-life | deviations persist when liquidity providers withdraw under stress |
-| O4 | Does emergency intervention stabilize the market? | final deviation, recovery half-life | intervention and mean reversion should prevent permanent collapse |
-| O5 | Do API variants preserve or alter the mechanism? | cross-variant metrics, LLM output quality fields, RAG retrieval stats | LLM/RuleLLM/Rag differ in timing and action distribution but keep the same market contract |
+| Objective | Target anchor | Research Question | Metrics | Expected Finding |
+|---|---|---|---|---|
+| O1 | target §3.1 | Does leveraged convergence arbitrage create a measurable deviation from fundamental value? | price deviation, maximum drawdown | deviation exceeds ordinary noise after stress amplification |
+| O2 | target §3.2 | Does deleveraging amplify the initial dislocation, and does ablation weaken it? | drawdown, return volatility, cascade onset round | forced selling and risk cuts raise volatility and deepen drawdown |
+| O3 | target §3.3 | How do funding and impact parameter sweeps change crisis timing and severity? | deviation, drawdown, cascade onset round, recovery half-life | higher impact or tighter constraints deepen and accelerate stress |
+| O4 | target §3.4 | Does liquidity withdrawal slow recovery and does intervention stabilize the tail? | mean absolute deviation, final deviation, recovery half-life | withdrawal increases persistence while support prevents permanent deterioration |
+| O5 | target §3.5 | Do API variants preserve or alter the mechanism? | cross-variant metrics and LLM output quality fields | LLM and RuleLLM may differ in timing and intensity while keeping the common market contract |
 
 The analysis does not treat `exit=0` as sufficient scientific quality. A run is accepted only after the Level-2 audit confirms round count, output structure, metric coherence, and API-output quality where applicable.
 
