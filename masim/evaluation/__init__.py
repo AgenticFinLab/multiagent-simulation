@@ -44,6 +44,7 @@ from .data_loader import (
     market_players,
     series,
 )
+from .llm_action_distribution import analyze_action_distribution
 
 __all__ = [
     # Submodules
@@ -58,4 +59,6 @@ __all__ = [
     "market_data_from_payload",
     "market_players",
     "series",
+    # LLM-specific analysis (implement-simulation-skill §7.2)
+    "analyze_action_distribution",
 ]

@@ -1,28 +1,36 @@
 #!/usr/bin/env python
 """2010 Flash Crash RuleLLM Simulation Analysis.
 
-Produces the standardized output set required by implement-simulation-skill:
-summary.json and variant-specific metrics.
+The RuleLLM variant embeds Rule-derived decision rules inside the LLM
+prompts. From an analysis standpoint it produces the same records shape as
+the Rule variant (identical Market coordinator, identical order payload
+schema), so it re-uses the Rule analysis pipeline verbatim.
 
-Usage:
-    python examples/FlashCrash2010/RuleLLM/analysis.py -c configs/FlashCrash2010/RuleLLM/simulation.yml
+Usage
+-----
+    python examples/FlashCrash2010/RuleLLM/analysis.py \
+        -c configs/FlashCrash2010/RuleLLM/simulation.yml
 """
 
+from __future__ import annotations
+
 import argparse
-import json
-import os
 import sys
 from pathlib import Path
 from typing import Any, Dict
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from examples.FlashCrash2010.Rule.analysis import analyze_flash_crash
+from examples.FlashCrash2010.Rule.analysis import (
+    analyze_flash_crash,
+)
 
 
-def main():
-    """Run the standard analysis output contract for this variant."""
-    parser = argparse.ArgumentParser(description="Analyze FlashCrash2010 RuleLLM simulation")
+def main() -> Dict[str, Any]:
+    """CLI entry point delegating to the Rule pipeline with a RuleLLM config."""
+    parser = argparse.ArgumentParser(
+        description="Analyze FlashCrash2010 RuleLLM simulation"
+    )
     parser.add_argument(
         "-c",
         "--config",
@@ -30,9 +38,9 @@ def main():
         default="configs/FlashCrash2010/RuleLLM/simulation.yml",
     )
     args = parser.parse_args()
-    result = analyze_flash_crash(args.config)
-    print(json.dumps(result, indent=2))
-    return result
+    summary = analyze_flash_crash(args.config)
+    summary["variant"] = "RuleLLM"
+    return summary
 
 
 __all__ = ["main"]

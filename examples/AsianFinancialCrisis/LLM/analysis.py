@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import sys
 
@@ -21,6 +22,7 @@ sys.path.insert(
 )
 
 from masim.utils import load_config, load_results
+from masim.evaluation import analyze_action_distribution
 
 from examples.AsianFinancialCrisis.Rule.analysis import (
     _batch_to_rounds,
@@ -59,10 +61,23 @@ def main() -> None:
     data = _load_data(results)
 
     summary = analyze_asian_financial_crisis(data, config, output_dir)
+
+    action_dist = analyze_action_distribution(results)
+    summary_path = os.path.join(output_dir, "summary.json")
+    try:
+        with open(summary_path, "r", encoding="utf-8") as f:
+            persisted = json.load(f)
+    except (OSError, ValueError):
+        persisted = summary if isinstance(summary, dict) else {}
+    persisted["llm_action_distribution"] = action_dist
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(persisted, f, indent=2, default=str)
+    if isinstance(summary, dict):
+        summary["llm_action_distribution"] = action_dist
     return summary
 
 
-__all__ = ["main"]
+__all__ = ["analyze_action_distribution", "main"]
 
 if __name__ == "__main__":
     main()

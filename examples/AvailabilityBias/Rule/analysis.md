@@ -30,32 +30,73 @@
 | Stabilization Effectiveness | SystematicAnalyst and ValueTrader correction is exact and interpretable. |
 | Cross-Variant Comparison    | Rule is the reference for LLM, RuleLLM, and Rag deviations.              |
 
-## §4 Phase Analysis
+## §4 Variant-Specific Observable Phenomena
 
-Rule runs should move from equilibrium into possible bias onset when return or deviation signals cross thresholds, then into correction as stabilizing agents and mean reversion offset biased order flow.
+The Rule variant realizes availability bias through deterministic weighting of
+recent events and media volume against systematic and value channels. Behavior
+is fully reproducible under a fixed seed; only NoiseTrader introduces stochasticity.
 
-## §5 Cross-Variant Comparison
+| Phenomenon                    | Description                                                                                                | How to Observe                                                                          | Contrast with Baseline |
+|-------------------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|------------------------|
+| Deterministic bias onset      | `|PDF|` crosses 5% at the round when accumulated recency/media pressure first exceeds ValueTrader anchor    | `01_availability_bias_dynamics.png` deviation curve crossing the 5% guideline           | This is the baseline   |
+| Threshold-locked persistence  | `BPS` reflects an exact count of rounds in which all 5 lagged deviations exceed 5%                          | `summary.json → metrics.bias_persistence`                                               | This is the baseline   |
+| Analytic magnitude            | `ABM` reproduces the config-driven ratio of biased to rational order sizes                                  | `02_availability_bias_analysis.png` volume panel                                        | This is the baseline   |
+| Reversal-consistent AC1       | Positive rolling AC1 during bias episode, near zero or negative during correction                          | `summary.json → metrics.return_autocorr_lag1` (via `_compute_rolling_ac1`)              | This is the baseline   |
+| Partial-correction stabilization | `SR` sits within 0.4–0.8 by construction of `SystematicAnalyst.max_size` and `ValueTrader.max_size`      | `summary.json → metrics.stabilization_ratio`                                            | This is the baseline   |
 
-Use Rule as the calibrated baseline. LLM should be compared for persona drift, RuleLLM for formula adherence, and Rag for knowledge effects.
+Rule is deterministic given the seed. Any drift in these metrics across
+repeated runs indicates a non-seeded RNG or investor state bug.
 
-## §6 Expected Results
+## §5 Scaling and Sensitivity Analysis
 
-### §6.1 Stylised Facts
+### Round Scaling
 
-The Rule variant should show bounded mispricing, nonzero biased-agent volume, and partial correction rather than permanent divergence.
+| Total Rounds | Expected Observable                                                              | Phenomenon Clarity | Recommended Use   |
+|--------------|----------------------------------------------------------------------------------|--------------------|-------------------|
+| 100          | Bias onset visible; persistence estimate noisy                                   | Low                | Smoke test        |
+| 200          | Full episode plus correction; matches `analysis-bases.md §6.2` targets           | High               | Standard runs     |
+| 500          | Multiple bias/reversal cycles; robust `BPS` estimate                              | Very High          | Sensitivity grid  |
 
-### §6.2 Calibration Targets
+### Agent Count Scaling
 
-Targets come from `analysis-bases.md §6.2`: peak deviation 5%-15%, persistence at least 10% in clear episodes, AC1 0.20-0.40 during active bias, and stabilization ratio 0.4-0.8.
+| Agent Count       | Expected Observable                                                          | Environment Dynamics                                     |
+|-------------------|------------------------------------------------------------------------------|----------------------------------------------------------|
+| 10 (min viable)   | Bias episode still forms; volume shares noisy                                | Individual agents drive channel share                    |
+| 20 (recommended)  | Clean recency vs. media vs. rational split; `ATV` stable                     | Standard configuration                                   |
+| 40+               | Volume shares near design targets; deterministic behaviour dominates          | Bias phenomenon fully expressed                          |
 
-### §6.3 Cross-Variant Predictions
+### Parameter Sensitivity (Variant-Specific)
 
-Rule is expected to be less variable than LLM and Rag because only NoiseTrader is stochastic.
+| Parameter                                             | Change | Expected Effect on This Variant's Analysis                                                                        |
+|-------------------------------------------------------|--------|-------------------------------------------------------------------------------------------------------------------|
+| `RecentEventOverweighter.recency_weight`              | +50%   | Larger `ABM`; higher peak `PDF`; longer `BPS`                                                                     |
+| `RecentEventOverweighter.recency_weight`              | −50%   | Bias may fail to form (peak `PDF < 3%`)                                                                           |
+| `MediaInfluencedTrader.media_response`                | +50%   | Positive AC1 wider; peak `PDF` deeper; risk of `SR < 0.3`                                                         |
+| `SystematicAnalyst.correction_gain` / `ValueTrader.anchor_weight` | +50% | `SR` rises; `BPS` shortens; `PDF` peak lower                                                                     |
+| Mean reversion (`γ`)                                  | +50%   | Faster convergence toward fundamental; shorter correction phase                                                   |
 
-### §6.4 Validation Failure Signs
+## §6 Output Files Reference
 
-No price data, no fundamental batch store, all-zero quantities, or invalid order fields indicate a contract problem rather than a meaningful market result.
+All outputs are written to `EXPERIMENT/AvailabilityBias/Rule/analysis/`.
 
-## §7 Visualization Catalogue
+| Output File                                | Generated By                                          | Contents                                                                                             | How to Interpret                                                                                                            |
+|--------------------------------------------|-------------------------------------------------------|------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `summary.json`                             | inline block in `Rule/analysis.py`                    | `metrics.peak_deviation`, `metrics.bias_persistence`, `metrics.bias_magnitude`, `metrics.return_autocorr_lag1`, `metrics.stabilization_ratio`, `metrics.agent_type_volume`, `validation.*` | Compare each metric to §6 targets: peak 5–15%, persistence ≥ 0.10, AC1 in [0.20, 0.40], SR in [0.4, 0.8]                    |
+| `00_investor_bids.png`                     | inline block in `Rule/analysis.py`                    | Market-price curve plus every investor bid                                                           | Recency/media bidders should overshoot fundamental during bias episodes; systematic/value bidders anchor near fundamental    |
+| `01_availability_bias_dynamics.png`        | inline block in `Rule/analysis.py`                    | Price + deviation path with 5% guideline                                                             | Bias episodes visible as `|PDF|` above 5%; correction visible as deviation returning inside band                             |
+| `02_availability_bias_analysis.png`        | inline block in `Rule/analysis.py`                    | Volume decomposition by channel plus rolling AC1                                                     | Biased channels should carry 30–60% of volume during episodes; AC1 positive during bias, near zero during correction        |
+| `03_summary.png`                           | inline block in `Rule/analysis.py`                    | Fit summary: score bars, return distribution                                                         | Overall validation score reflects match to §6 targets                                                                       |
 
-The analysis writes the fixed output set required by `masim/skills/implement-simulation-skill/08-step4-implement.md`: `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, `03_summary.png`, and `summary.json`.
+## §7 Cross-Variant Comparison Notes
+
+Rule is the reference for LLM, RuleLLM, and Rag runs of AvailabilityBias
+(`analysis-bases.md §5` and `§6.3`).
+
+| Comparison Axis           | Rule's Expected Position                                     | Reason                                                                                     |
+|---------------------------|--------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| Bias episode onset speed  | Fastest and reproducible                                     | Thresholds and weights are constants                                                        |
+| Peak deviation `PDF`      | Consistent (tight distribution)                              | No sampling variance                                                                        |
+| Persistence `BPS`         | Predictable from `γ`, `recency_weight`, `media_response`     | Deterministic transitions                                                                   |
+| Stabilization `SR`        | Within [0.4, 0.8] by construction                            | Systematic/value volumes set by config                                                      |
+| Behavioral realism        | Mechanistic; no persona reasoning                            | No LLM reasoning traces                                                                     |
+| Reproducibility           | Highest                                                      | Only NoiseTrader is stochastic                                                              |

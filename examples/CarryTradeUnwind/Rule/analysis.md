@@ -64,48 +64,48 @@ stabilizing agents reproduce the empirical carry-crash pattern?*
 
 ---
 
-## §4 Variant-Specific Phenomena
+## §4 Variant-Specific Observable Phenomena
 
-### 4.1 CarryTrader Trigger
+| Phenomenon                              | Description                                                                                          | How to Observe                                                                | Contrast with Baseline Variant |
+|-----------------------------------------|------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|--------------------------------|
+| Threshold-exact unwind cascade          | LeveragedCarryFund exits the moment `deviation < −stop_loss (−0.03)`; every eligible fund fires      | `01_carrytradeunwind_dynamics.png` deviation crosses −3 % and drops sharply   | This is the baseline           |
+| Deterministic velocity peak             | Peak `unwind_velocity` is a step function of `leverage × price_impact`; reproducible across seeds    | `summary.json → metrics.unwind_velocity` stable within ε(t) noise             | This is the baseline           |
+| Sharp counter-cycle re-entry            | FundingCurrencyBuyer buys the round `deviation < −0.05` first fires                                  | Bid trace of FundingCurrencyBuyer shows a rectangular pulse at trough         | This is the baseline           |
+| Vol-gated hedge dampening               | HedgedCarryTrader participation collapses whenever rolling vol > `vol_threshold`                     | Bid trace goes flat exactly when rolling vol exceeds the calibrated threshold | This is the baseline           |
+| Analytic max drawdown                   | `max_drawdown_pct` matches leverage × stop_loss window; no LLM hesitation                            | `summary.json → metrics.max_drawdown_pct`                                     | This is the baseline           |
 
+Rule is the deterministic reference: every threshold is hard, every trigger fires the round the price crosses the boundary, and no reasoning or retrieval softens the response.
+
+### Agent Trigger Details
+
+**4.1 CarryTrader**
 ```
 if |deviation| > 0.02:
     qty = min(800 × leverage, |deviation| × 5000)
 ```
+Large buys when `deviation > 0.02` (push above fundamental) and large sells when `deviation < −0.02` (accelerate unwind).
 
-Expect large buy orders when `deviation > 0.02` (push above fundamental)
-and large sell orders when `deviation < −0.02` (accelerate unwind).
-
-### 4.2 LeveragedCarryFund Forced Exit
-
+**4.2 LeveragedCarryFund forced exit**
 ```
 if deviation < −stop_loss (−0.03) OR (|deviation| > 0.02 AND deviation < 0):
     forced_sell = min(800 × leverage=5.0, position)
 ```
+Creates a cascade: initial sell pressure drives deviation down, triggering more forced exits. Visible as rapid multi-round drops in price series.
 
-This creates a *cascade*: initial sell pressure drives deviation down,
-triggering more forced exits. Visible as rapid multi-round drops in price series.
-
-### 4.3 FundingCurrencyBuyer Counter-Cycle
-
+**4.3 FundingCurrencyBuyer counter-cycle**
 ```
 risk_threshold = 0.05; position_size = 500
 BUY when deviation < −risk_threshold
 ```
+Dampens the cascade. In Rule variant, timing is immediate and deterministic — `recovery_ratio > 0.5` indicates effective stabilization.
 
-Dampens the cascade. In Rule variant, timing is immediate and deterministic —
-recovery_ratio > 0.5 indicates effective stabilization.
-
-### 4.4 HedgedCarryTrader Modulation
-
+**4.4 HedgedCarryTrader modulation**
 ```
 hedge_ratio = 0.30; adj_qty = 350
 SELL when deviation > 0 AND vol < vol_threshold
 BUY when deviation < 0 AND vol > vol_threshold
 ```
-
-Reduces participation during high-volatility periods — acts as automatic
-circuit breaker. Observe reduced unwind_velocity in runs with this agent active.
+Reduces participation during high-volatility periods — acts as automatic circuit breaker. Observe reduced `unwind_velocity` in runs with this agent active.
 
 ---
 

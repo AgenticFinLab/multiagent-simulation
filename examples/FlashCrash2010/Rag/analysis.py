@@ -1,9 +1,22 @@
 #!/usr/bin/env python
 """FlashCrash2010 Rag Simulation Analysis.
 
-Produces the standardized output set required by implement-simulation-skill:
-summary.json, 00_investor_bids.png, 01_flashcrash2010_dynamics.png,
-02_flashcrash2010_analysis.png, 03_summary.png, and rag_stats.json.
+Extends the Rule-variant pipeline with RAG retrieval diagnostics
+(``analyze_rag_knowledge_effect``) and writes both ``summary.json`` and
+``rag_stats.json`` to the analysis output directory.
+
+The Rag investors record two extra decision-payload fields:
+
+    * ``rag_context``               — the retrieved documents (or fallback text)
+    * ``liquidity_field_missing``   — whether the LLM omitted the
+                                      ``provides_liquidity`` field
+
+Both are consumed here to score retrieval coverage.
+
+Usage
+-----
+    python examples/FlashCrash2010/Rag/analysis.py \
+        -c configs/FlashCrash2010/Rag/simulation.yml
 """
 
 from __future__ import annotations
@@ -11,19 +24,29 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
+from pathlib import Path
 from typing import Any, Dict
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import numpy as np
 
 from masim.utils import load_config, load_results
 
-from masim.evaluation.data_loader import load_data as _load_data
-from masim.evaluation.pipeline import analyze_standard_scenario
+from examples.FlashCrash2010.Rule.analysis import (
+    STANDARD_OUTPUT_FILES,
+    _write_standard_named_outputs,
+    calculate_metrics,
+    create_visualizations,
+    load_simulation_data,
+    validate_flashcrash2010,
+)
 from examples.FlashCrash2010.Rag.players import _RAG_FALLBACK
 
 
 def _load_rag_payloads(results: Any) -> Dict[str, Dict[int, Dict[str, Any]]]:
-    """Extract recorded RAG contexts and conservative defaults by player and round."""
+    """Collect ``rag_context`` and ``liquidity_field_missing`` per-round."""
     payloads: Dict[str, Dict[int, Dict[str, Any]]] = {}
     for pid, player in results.players_by_role("player").items():
         round_payloads: Dict[int, Dict[str, Any]] = {}
@@ -43,7 +66,11 @@ def _load_rag_payloads(results: Any) -> Dict[str, Dict[int, Dict[str, Any]]]:
 def analyze_rag_knowledge_effect(
     investor_payloads: Dict[str, Dict[int, Dict[str, Any]]],
 ) -> Dict[str, Any]:
-    """Measure retrieval coverage for FlashCrash2010 Rag runs."""
+    """Measure per-agent retrieval coverage vs the ``_RAG_FALLBACK`` sentinel.
+
+    Any round whose ``rag_context`` equals ``_RAG_FALLBACK`` is scored as a
+    retrieval failure — the KnowledgeStore returned nothing usable.
+    """
     rag_stats: Dict[str, Any] = {}
 
     for agent_id, round_payloads in investor_payloads.items():
@@ -60,7 +87,7 @@ def analyze_rag_knowledge_effect(
             if rag_context is None:
                 continue
             total_rag_rounds += 1
-            if rag_context.strip() == _RAG_FALLBACK.strip():
+            if str(rag_context).strip() == _RAG_FALLBACK.strip():
                 failure_rounds += 1
             else:
                 success_rounds += 1
@@ -86,14 +113,49 @@ def analyze_rag_knowledge_effect(
         rag_stats["aggregate"] = {
             "mean_retrieval_failure_rate": float(np.mean(failure_rates)),
             "max_retrieval_failure_rate": float(np.max(failure_rates)),
+            "num_agents": len(agents_with_data),
         }
 
     return rag_stats
 
 
+def analyze_rag(config_path: str) -> Dict[str, Any]:
+    """Run the Rule pipeline, add Rag retrieval audit, persist both artefacts."""
+    config = load_config(config_path)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
+
+    results = load_results(config)
+    data = load_simulation_data(config, results)
+    metrics = calculate_metrics(data, config)
+    validation = validate_flashcrash2010(metrics)
+
+    create_visualizations(data, metrics, output_dir)
+    _write_standard_named_outputs(output_dir)
+
+    rag_stats = analyze_rag_knowledge_effect(_load_rag_payloads(results))
+    with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
+        json.dump(rag_stats, f, indent=2, default=str)
+
+    summary: Dict[str, Any] = {
+        "scenario": "FlashCrash2010",
+        "variant": "Rag",
+        "config_path": config_path,
+        **metrics,
+        "validation": validation,
+        "rag_knowledge_effect": rag_stats,
+    }
+    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2, default=str)
+    return summary
+
+
 def main() -> Dict[str, Any]:
-    """Run the standard analysis output contract plus RAG retrieval audit."""
-    parser = argparse.ArgumentParser(description="Analyze FlashCrash2010 Rag simulation")
+    """CLI entry point for the Rag variant."""
+    parser = argparse.ArgumentParser(
+        description="Analyze FlashCrash2010 Rag simulation"
+    )
     parser.add_argument(
         "-c",
         "--config",
@@ -101,27 +163,26 @@ def main() -> Dict[str, Any]:
         default="configs/FlashCrash2010/Rag/simulation.yml",
     )
     args = parser.parse_args()
-
-    config = load_config(args.config)
-    base_dir = os.path.dirname(config["setting"]["record_path"])
-    output_dir = os.path.join(base_dir, "analysis")
-    os.makedirs(output_dir, exist_ok=True)
-
-    results = load_results(config)
-    data = _load_data(results)
-    summary = analyze_standard_scenario("FlashCrash2010", data, config, output_dir)
-
-    rag_stats = analyze_rag_knowledge_effect(_load_rag_payloads(results))
-    with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
-        json.dump(rag_stats, f, indent=2)
-
-    summary["rag_knowledge_effect"] = rag_stats
-    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
+    print("=" * 72)
+    print("FlashCrash2010 Rag Analysis")
+    print("=" * 72)
+    summary = analyze_rag(args.config)
+    print(f"max_drawdown         = {summary['max_drawdown']:.4f}")
+    print(f"recovery_time        = {summary['recovery_time']}")
+    agg = summary["rag_knowledge_effect"].get("aggregate", {})
+    if agg:
+        print(
+            f"mean_retrieval_failure_rate = {agg['mean_retrieval_failure_rate']:.3f}"
+        )
+    print(summary["validation"]["interpretation"])
     return summary
 
 
-__all__ = ["analyze_rag_knowledge_effect", "main"]
+__all__ = [
+    "analyze_rag_knowledge_effect",
+    "analyze_rag",
+    "main",
+]
 
 
 if __name__ == "__main__":

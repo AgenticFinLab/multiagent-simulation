@@ -1,36 +1,116 @@
-# 2010 Flash Crash RuleLLM Analysis Plan
+# FlashCrash2010 RuleLLM — Analysis Documentation
 
-## §1 Objectives
+## 1. Overview
 
-This analysis checks whether the RuleLLM variant produces a complete, analyzable 2010 Flash Crash trajectory while preserving explicit rule guidance and the class-mapped `agent_type` contract required by the order-book depth model.
+| Item                            | Description                                                                                                                                              |
+|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Implements                      | `../analysis-bases.md`                                                                                                                                   |
+| Analysis Script                 | `analysis.py` in this directory (~30 lines — thin wrapper around Rule pipeline)                                                                          |
+| Output Location                 | `EXPERIMENT/FlashCrash2010/RuleLLM/analysis/`                                                                                                            |
+| Imports From                    | `Rule/analysis.py` — imports `analyze_flash_crash` and delegates the entire pipeline; only the `variant` field in `summary.json` is overridden.          |
+| Variant-Specific Functions      | None. All computation and figures re-use the Rule pipeline.                                                                                              |
+| Variant-Specific Considerations | RuleLLM prompts embed the Rule decision formulas inside the LLM system prompt. The LLM may reason around the rules but the metric surface is identical. |
 
-## §2 Core Metrics
+## 2. Metric Implementation
 
-| Metric | Function Contract | Source |
-|---|---|---|
-| Maximum Drawdown | `def max_drawdown(price_history: list) -> float` | `analysis-bases.md §2` |
-| Depth Collapse Ratio | `def depth_collapse_ratio(depth_history: list, base_depth: float) -> float` | `analysis-bases.md §2` |
-| Spread Widening Factor | `def spread_widening_factor(spread_history: list, normal_spread: float = 0.0001) -> float` | `analysis-bases.md §2` |
-| HFT Withdrawal Rounds | `def hft_withdrawal_rounds(hft_orders_by_round: list, withdrawal_threshold: int = 0) -> int` | `analysis-bases.md §2` |
-| Cascade Trigger Rounds | `def cascade_trigger_rounds(stoploss_orders_by_round: list) -> list` | `analysis-bases.md §2` |
-| Recovery Time | `def recovery_time(price_history: list, trough_round: int, fundamental: float, threshold: float = 0.02) -> int` | `analysis-bases.md §2` |
+All six §2 metrics identical to Rule. Interpretation differs only in
+whether the LLM adheres to the embedded rules.
 
-## §3 Analysis Dimensions
+### Metric: max_drawdown
 
-Analysis is performed by round, by agent type, by market phase, and by variant. RuleLLM review should additionally inspect prompt-rule compliance, parse failures, conservative liquidity defaults, and whether class-mapped HFT orders are present.
+- **Defined in**: `analysis-bases.md §2 — max_drawdown`
+- **Implemented in**: `Rule/analysis.py → calculate_metrics()`
+- **Data source**: `EXPERIMENT/FlashCrash2010/RuleLLM/records/market/turns/*`
+- **Variant-specific notes**: Because the LLM sees the rule text, drawdown magnitude typically tracks Rule closely with slight LLM hedging.
+- **Expected range**: 0.05 – 0.12.
 
-## §4 Phase Analysis
+### Metric: depth_collapse_ratio, spread_widening_factor, hft_withdrawal_rounds, cascade_trigger_rounds, recovery_time
 
-The phase framework follows `analysis-bases.md §4`: normal depth, trigger, cascade, trough, and recovery. Each phase should be measured with state, order-flow, and dispersion metrics listed in §2.
+Identical implementation to Rule; see `Rule/analysis.md §2` for the
+code sketches. RuleLLM behavioural notes:
 
-## §5 Cross-Variant Comparison
+- **depth_collapse_ratio**: rule-anchored → mostly rule-driven.
+- **spread_widening_factor**: hybrid — depends on whether the LLM follows the embedded stress rule.
+- **hft_withdrawal_rounds**: rule-dominant.
+- **cascade_trigger_rounds** / wave count: rule stops + LLM timing tweaks.
+- **recovery_time**: hybrid — LLM may buy early once "undervalued" is recognised.
 
-Compare Rule, LLM, RuleLLM, and Rag on drawdown, depth collapse, spread widening, HFT withdrawal timing, stop-loss waves, recovery time, and structural quality.
+Expected ranges match analysis-bases §6.
 
-## §6 Expected Results and Validation Criteria
+## 3. Dimension-by-Dimension Analysis
 
-Expected ranges and failure signs are defined in `analysis-bases.md §6`. A full experiment should record 200 rounds, finite state values, non-trivial agent activity, and mechanism-specific behavior consistent with `simulation-bases.md`.
+The six dimensions from `analysis-bases.md §3` are inspected exactly as
+in Rule. Additional variant-specific angle:
 
-## §7 Visualization Catalogue
+### Dimension 7 (RuleLLM only): Rule adherence
 
-Required outputs are `summary.json`, `00_investor_bids.png`, `01_flashcrash2010_dynamics.png`, `02_flashcrash2010_analysis.png`, and `03_summary.png`.
+**Objective**: Does the LLM follow the embedded `== DECISION RULES ==` block?
+
+**Implementation in `analysis.py`**:
+- No dedicated helper — the check is qualitative. Compare
+  `summary.json → cascade_trigger_rounds` and
+  `depth_collapse_ratio` against the Rule baseline in the same
+  experiment folder.
+
+**Variant-Specific Interpretation**: If cascade timing and depth trough
+match Rule tightly, the LLM is adhering. Divergence indicates the LLM
+is treating rules as persona flavour rather than executable logic (which
+is fine — see `explain.md §4`).
+
+**Expected Output Description**: Overlaid `fig3_drawdown.png` from Rule
+vs RuleLLM should be nearly indistinguishable when adherence is high.
+
+## 4. Variant-Specific Observable Phenomena
+
+| Phenomenon                | Description                                                                        | How to Observe                                    | Contrast with Baseline Variant |
+|--------------------------|------------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------|
+| Embedded-rule adherence   | LLM references the numerical thresholds from the prompt                            | Manual inspection of `records/*/turns/*` reasoning | LLM variant does not have such prompts |
+| Deeper characterization   | Investor persona feels more consistent (rules act as habits, not commands)         | Read cross-round `reasoning` fields                | Pure LLM shows more drift     |
+| Slightly smaller drawdown | Hedged buying/selling                                                              | `max_drawdown` histogram                          | Rule reaches full band        |
+
+RuleLLM variant characteristics:
+- Embedded rules as deeper investor characterization; comparison of LLM reasoning quality with and without explicit quantitative guidance.
+
+## 5. Scaling and Sensitivity Analysis
+
+### Round Scaling
+
+| Total Rounds | Expected Observable                     | Phenomenon Clarity | Recommended for  |
+|--------------|-----------------------------------------|--------------------|------------------|
+| 100          | Truncated recovery                      | Low                | Quick testing    |
+| 200          | Full crash + recovery                   | Medium             | Standard runs    |
+| 500          | Comparison with Rule at scale           | High               | Research quality |
+
+### Agent Count Scaling
+
+| Agent Count       | Expected Observable                              | Environment Dynamics |
+|-------------------|--------------------------------------------------|----------------------|
+| Baseline (12)     | Full flash-crash profile                         | Same as Rule         |
+| Reduced (≤ 6)     | Undershoots §6 bands                             | Insufficient signal  |
+
+### Parameter Sensitivity (RuleLLM)
+
+| Parameter                                | Change | Expected Effect                                             |
+|-----------------------------------------|--------|-------------------------------------------------------------|
+| `== DECISION RULES ==` explicitness      | Higher | Metrics converge to Rule                                    |
+| `llm.generation_config.temperature`      | +50 %  | Wider variance; more persona-driven divergence from Rule   |
+| Persona weight in system prompt         | Higher | Slight drift from Rule bands                                |
+
+## 6. Output Files Reference
+
+All outputs written to: `EXPERIMENT/FlashCrash2010/RuleLLM/analysis/`
+
+| Output File                       | Generated By                       | Contents                                              | How to Interpret |
+|-----------------------------------|------------------------------------|-------------------------------------------------------|------------------|
+| `summary.json`                    | `Rule/analysis.py → analyze_flash_crash()` | Metrics + `validation`                        | Compare directly with Rule summary |
+| `fig1_price_dynamics.png` … `fig8_recovery.png` | `Rule/analysis.py → create_visualizations()` | Same as Rule                        | See `Rule/analysis.md §6` |
+| `00_investor_bids.png` … `03_summary.png` | Rule aliases                      | Standard-name references                              | Same rules as Rule |
+
+## 7. Cross-Variant Comparison Notes
+
+| Comparison Axis        | This Variant's Expected Position         | Reason                                                        |
+|------------------------|------------------------------------------|---------------------------------------------------------------|
+| Phenomenon onset speed | Same as Rule                             | Embedded rules preserve threshold timing                      |
+| Phenomenon intensity   | Slightly lower than Rule                 | LLM hedging softens extreme moves                             |
+| Behavioral realism     | Between Rule and pure LLM                | Persona + rules produce structured reasoning                  |
+| Decision quality       | High rule adherence + human-readable rationale | Rules embed the mechanism; persona provides narrative     |

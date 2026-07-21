@@ -22,6 +22,8 @@ from examples.EchoChamber.Rule.analysis import (
     load_simulation_data,
 )
 from masim.utils.config import load_config
+from masim.utils import load_results
+from masim.evaluation import analyze_action_distribution
 
 
 def compute_polarization_amplification(polarization: Sequence[float]) -> float:
@@ -139,11 +141,22 @@ def main() -> None:
         "opinion_dispersion": compute_opinion_dispersion(data["agent_opinions"]),
         "api_quality": "requires recorded action payloads; use compute_api_quality()",
     }
+
+    # implement-simulation-skill §7.2 — LLM variants must expose an
+    # action-distribution audit and inject it into summary.json.
+    try:
+        results = load_results(config)
+        action_dist = analyze_action_distribution(results)
+    except Exception as exc:  # noqa: BLE001 — never fail the whole analysis
+        print(f"[warn] action-distribution audit failed: {exc}")
+        action_dist = analyze_action_distribution({})
+
     summary = {
         "scenario": "EchoChamber",
         "variant": "LLM",
         "total_rounds": metrics.get("total_rounds", 0),
         "metrics": metrics,
+        "llm_action_distribution": action_dist,
     }
     summary_path = os.path.join(analysis_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as file:
@@ -162,6 +175,7 @@ __all__ = [
     "compute_depolarize_activity",
     "compute_opinion_dispersion",
     "compute_api_quality",
+    "analyze_action_distribution",
     "main",
 ]
 

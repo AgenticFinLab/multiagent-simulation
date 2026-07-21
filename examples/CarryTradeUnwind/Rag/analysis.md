@@ -36,6 +36,21 @@
 
 Rag-specific evidence includes non-empty retrieved context, retrieval-hit rates by agent, explicit retrieval-miss marker rounds, and reasoning traces that use retrieved carry-crisis context without violating the canonical trading schema.
 
+### Retrieval Fallback Sentinel
+
+When `KnowledgeStore.query()` returns no documents, Rag agents inject the exact string:
+
+    _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
+into the `{rag_context}` prompt slot. This sentinel is defined in `Rag/players.py` and used by `Rag/analysis.py::analyze_rag_knowledge_effect()` to classify each round as a retrieval success (context differs from sentinel) or retrieval failure (context equals sentinel).
+
+The `rag_stats.json` output audit is:
+- `retrieval_success_rate` = success_rounds / total_rag_rounds — target ≥ 0.70 per agent
+- `retrieval_failure_rate` = failure_rounds / total_rag_rounds
+- `meets_target` = `retrieval_success_rate >= 0.70`
+
+A retrieval failure rate above 30% indicates the knowledge base or query formulation needs review before economic interpretation of that agent's decisions.
+
 ## §5 Scaling and Sensitivity Analysis
 
 Runtime scales with API latency, embedding/index load time, retrieval `top_k`, and agent count. Retrieval quality is sensitive to document coverage, embedding availability, and query phrasing. High retrieval-miss rates require quality review even when the simulation exits successfully.

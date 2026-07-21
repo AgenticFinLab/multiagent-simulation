@@ -10,10 +10,12 @@ label stamped into ``summary.json`` and every panel title.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from typing import Any, Dict
 
 from masim.utils import load_config, load_results
+from masim.evaluation import analyze_action_distribution
 
 from examples.FramingEffect.Rule.analysis import (
     STANDARD_OUTPUT_FILES,
@@ -49,7 +51,23 @@ def main() -> Dict[str, Any]:
 
     results = load_results(config)
     data = _load_data(results)
-    return analyze_framingeffect(data, config, output_dir, variant="LLM")
+    summary = analyze_framingeffect(data, config, output_dir, variant="LLM")
+
+    # implement-simulation-skill §7.2 — LLM variants must expose an
+    # action-distribution audit and inject it into summary.json.
+    action_dist = analyze_action_distribution(results)
+    summary_path = os.path.join(output_dir, "summary.json")
+    try:
+        with open(summary_path, "r", encoding="utf-8") as f:
+            persisted = json.load(f)
+    except (OSError, ValueError):
+        persisted = summary if isinstance(summary, dict) else {}
+    persisted["llm_action_distribution"] = action_dist
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(persisted, f, indent=2, default=str)
+    if isinstance(summary, dict):
+        summary["llm_action_distribution"] = action_dist
+    return summary
 
 
 __all__ = [
@@ -64,6 +82,7 @@ __all__ = [
     "create_visualizations",
     "compute_all_metrics",
     "analyze_framingeffect",
+    "analyze_action_distribution",
     "STANDARD_OUTPUT_FILES",
     "main",
 ]

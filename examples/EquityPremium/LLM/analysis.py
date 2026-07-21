@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from typing import Any, Dict
 
 from masim.utils import load_config, load_results
+from masim.evaluation import analyze_action_distribution
 
 from examples.EquityPremium.Rule.analysis import analyze_equity_premium, _load_data
 
@@ -29,8 +31,27 @@ def main() -> Dict[str, Any]:
 
     results = load_results(config)
     data = _load_data(results)
-    return analyze_equity_premium(data, output_dir)
+    summary = analyze_equity_premium(data, output_dir)
+
+    # implement-simulation-skill §7.2 — LLM variants must expose an
+    # action-distribution audit and inject it into summary.json.
+    action_dist = analyze_action_distribution(results)
+    summary_path = os.path.join(output_dir, "summary.json")
+    try:
+        with open(summary_path, "r", encoding="utf-8") as f:
+            persisted = json.load(f)
+    except (OSError, ValueError):
+        persisted = summary if isinstance(summary, dict) else {}
+    persisted["llm_action_distribution"] = action_dist
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(persisted, f, indent=2, default=str)
+    if isinstance(summary, dict):
+        summary["llm_action_distribution"] = action_dist
+    return summary
 
 
 if __name__ == "__main__":
     main()
+
+
+__all__ = ["analyze_action_distribution", "main"]

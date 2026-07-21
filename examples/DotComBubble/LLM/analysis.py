@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 
 from masim.utils import load_config, load_results
+from masim.evaluation import analyze_action_distribution
 
 
 DEFAULT_CONFIG = "configs/DotComBubble/LLM/simulation.yml"
@@ -237,13 +238,23 @@ def main() -> Dict[str, Any]:
     config = load_config(args.config)
     data = load_simulation_data(config)
     metrics = calculate_metrics(data)
+
+    # implement-simulation-skill §7.2 — LLM variants must expose an
+    # action-distribution audit and inject it into summary.json.
+    # ``data['agent_orders']`` is already the {agent_id: {round: payload}}
+    # shape our shared helper accepts.
+    metrics["llm_action_distribution"] = analyze_action_distribution(
+        data.get("agent_orders", {})
+    )
+
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "summary.json").write_text(
-        json.dumps(metrics, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(metrics, indent=2, ensure_ascii=False, default=str),
+        encoding="utf-8",
     )
     create_visualizations(data, str(output_dir))
-    print(json.dumps(metrics, indent=2, ensure_ascii=False))
+    print(json.dumps(metrics, indent=2, ensure_ascii=False, default=str))
     return metrics
 
 
@@ -255,6 +266,7 @@ __all__ = [
     "short_seller_resistance",
     "recovery_time",
     "api_quality",
+    "analyze_action_distribution",
     "load_simulation_data",
     "calculate_metrics",
     "create_visualizations",

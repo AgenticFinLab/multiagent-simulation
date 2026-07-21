@@ -22,6 +22,8 @@ project_root = os.path.dirname(
 sys.path.insert(0, project_root)
 
 from masim.utils.config import load_config
+from masim.utils import load_results
+from masim.evaluation import analyze_action_distribution
 from examples.DispositionEffect.Rule.analysis import (
     _write_standard_named_outputs,
     calculate_metrics,
@@ -99,6 +101,16 @@ def main():
     print("\n[4] Generating summary...")
     summary = metrics["summary"]
 
+    # implement-simulation-skill §7.2 — LLM variants must expose an
+    # action-distribution audit and inject it into summary.json.
+    try:
+        results = load_results(config)
+        action_dist = analyze_action_distribution(results)
+    except Exception as exc:  # noqa: BLE001 — never fail the whole analysis
+        print(f"    [warn] action-distribution audit failed: {exc}")
+        action_dist = analyze_action_distribution({})
+    summary["llm_action_distribution"] = action_dist
+
     summary_path = os.path.join(output_dir, "summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
@@ -127,4 +139,4 @@ if __name__ == "__main__":
     main()
 
 
-__all__ = ["main"]
+__all__ = ["analyze_action_distribution", "main"]

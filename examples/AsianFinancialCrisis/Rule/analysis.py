@@ -30,52 +30,31 @@ sys.path.insert(
 import matplotlib.pyplot as plt
 import numpy as np
 
+from masim.evaluation.data_loader import batch_to_rounds, load_data
+from masim.evaluation.finance import (
+    calculate_autocorrelation,
+    calculate_max_drawdown,
+)
 from masim.utils import load_config, load_results
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data loading (thin adapters over ``masim.evaluation``)
 # ---------------------------------------------------------------------------
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert 0-based batch list to 1-based round dict."""
-    return {i + 1: v for i, v in enumerate(values)}
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.batch_to_rounds``."""
+    return batch_to_rounds(values)
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Load simulation data from masim results object.
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``.
 
-    Args:
-        results: masim SimulationResults object.
-
-    Returns:
-        Dict with keys: market_prices, fundamentals, investor_payloads.
+    Preserves the historical return-schema keys used by downstream Rule/LLM
+    variants: ``market_prices``, ``fundamentals``, ``investor_bids``,
+    ``investor_payloads``.
     """
-    market_prices: Dict[int, float] = {}
-    fundamentals: Dict[int, float] = {}
-
-    for player in results.players_by_role("coordinator").values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-
-    investor_bids: Dict[str, Dict[int, float]] = {}
-    investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
-
-    return {
-        "market_prices": market_prices,
-        "fundamentals": fundamentals,
-        "investor_bids": investor_bids,
-        "investor_payloads": investor_payloads,
-    }
+    return load_data(results)
 
 
 def _load_data_from_communication(config: dict) -> Dict[str, Any]:
@@ -126,12 +105,15 @@ def _load_data_from_communication(config: dict) -> Dict[str, Any]:
 
 
 def _compute_max_drawdown(prices: np.ndarray) -> float:
-    """Compute peak-to-trough max drawdown as a percentage."""
+    """Peak-to-trough max drawdown as a positive percentage.
+
+    Thin adapter over ``masim.evaluation.finance.calculate_max_drawdown``.
+    That helper returns *signed* percent (negative for a drop); this legacy
+    surface returns the positive magnitude to preserve prior calibration.
+    """
     if len(prices) < 2:
         return 0.0
-    peak = np.maximum.accumulate(prices)
-    drawdown = (peak - prices) / np.where(peak > 0, peak, 1.0)
-    return float(np.max(drawdown) * 100.0)
+    return float(abs(calculate_max_drawdown(list(prices))[0]))
 
 
 def _compute_crisis_onset(

@@ -1,15 +1,24 @@
-"""Analysis entry point and metric exports for the LLM variant."""
+"""Analysis entry point and metric exports for the LLM variant.
 
-from typing import List
+Wraps the Rule pipeline and injects the LLM ``action-distribution``
+audit required by ``implement-simulation-skill §7.2``.
+"""
+
+import argparse
+import json
+import os
+from typing import Any, Dict, List
 
 import numpy as np
+
+from masim.utils import load_config, load_results
+from masim.evaluation import analyze_action_distribution
 
 from examples.EndowmentEffect.Rule.analysis import (
     calculate_metrics,
     create_visualizations,
     endowment_premium_capture_rate,
     load_simulation_data,
-    main,
     mean_absolute_deviation,
     price_deviation,
     validate_endowment_effect,
@@ -54,6 +63,46 @@ def turnover_rate(
     )
 
 
+def main() -> Dict[str, Any]:
+    """Run EndowmentEffect LLM analysis (Rule pipeline + action-distribution)."""
+    parser = argparse.ArgumentParser(description="Analyze EndowmentEffect LLM simulation")
+    parser.add_argument("-c", "--config", required=True, help="Path to simulation YAML")
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+    record_dir = config["setting"]["record_path"]
+    output_dir = os.path.join(os.path.dirname(record_dir), "analysis")
+    os.makedirs(output_dir, exist_ok=True)
+
+    data = load_simulation_data(config)
+    metrics = calculate_metrics(data, config)
+    validation = validate_endowment_effect(metrics)
+    create_visualizations(data, metrics, output_dir)
+
+    try:
+        results = load_results(config)
+        action_dist = analyze_action_distribution(results)
+    except Exception as exc:  # noqa: BLE001 — never fail the whole analysis
+        print(f"[warn] action-distribution audit failed: {exc}")
+        action_dist = analyze_action_distribution({})
+
+    summary = {
+        "scenario": "EndowmentEffect",
+        "variant": "LLM",
+        "total_rounds": metrics["total_rounds"],
+        "metrics": metrics,
+        "validation": validation,
+        "llm_action_distribution": action_dist,
+    }
+    summary_path = os.path.join(output_dir, "summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2, default=str)
+    print(f"\nVALIDATION: {validation['interpretation']}")
+    print(f"Fit Score: {validation['score']:.1%}")
+    print(f"Saved EndowmentEffect LLM analysis summary to {summary_path}")
+    return summary
+
+
 if __name__ == "__main__":
     main()
 
@@ -70,5 +119,6 @@ __all__ = [
     "calculate_metrics",
     "create_visualizations",
     "validate_endowment_effect",
+    "analyze_action_distribution",
     "main",
 ]
