@@ -42,6 +42,28 @@ ANNUAL_TRADING_DAYS = 252
 RISK_FREE_RATE_ANNUAL = 0.01  # 1% annual bond return
 
 
+def validate_price_series(prices: List[float]) -> np.ndarray:
+    """Validate prices before calculating or plotting scenario metrics."""
+    prices_arr = np.asarray(prices, dtype=float)
+    invalid = np.flatnonzero(~np.isfinite(prices_arr))
+    if invalid.size:
+        rounds = ", ".join(str(index + 1) for index in invalid[:10])
+        suffix = "..." if invalid.size > 10 else ""
+        raise ValueError(
+            "EquityPremium simulation produced non-finite stock prices at "
+            f"round(s) {rounds}{suffix}. Delete this variant's records and "
+            "rerun the simulation with the repaired market dynamics."
+        )
+    non_positive = np.flatnonzero(prices_arr <= 0)
+    if non_positive.size:
+        rounds = ", ".join(str(index + 1) for index in non_positive[:10])
+        raise ValueError(
+            "EquityPremium simulation produced non-positive stock prices at "
+            f"round(s) {rounds}."
+        )
+    return prices_arr
+
+
 def calculate_equity_premium(prices: List[float], periods: int) -> Dict[str, float]:
     """
     Calculate realized equity premium.
@@ -51,7 +73,7 @@ def calculate_equity_premium(prices: List[float], periods: int) -> Dict[str, flo
     if len(prices) < 2:
         return {}
 
-    prices_arr = np.array(prices)
+    prices_arr = validate_price_series(prices)
     returns = np.diff(prices_arr) / prices_arr[:-1]
 
     # Annualize returns
@@ -92,7 +114,7 @@ def calculate_loss_probability(
     if len(prices) < max(horizons) + 1:
         return {}
 
-    prices_arr = np.array(prices)
+    prices_arr = validate_price_series(prices)
     results = {}
 
     for horizon in horizons:
@@ -167,7 +189,7 @@ def plot_equity_premium_analysis(
     output_dir: str,
 ) -> None:
     """Generate equity premium analysis plots."""
-    prices = np.array(data["prices"])
+    prices = validate_price_series(data["prices"])
     if len(prices) == 0:
         return
 
@@ -535,7 +557,7 @@ def _load_data(results) -> Dict[str, Any]:
 def analyze_equity_premium(data: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     """Perform equity premium analysis using extracted data."""
     os.makedirs(output_dir, exist_ok=True)
-    prices = data["prices"]
+    prices = validate_price_series(data["prices"]).tolist()
     trades = data["trades"]
 
     premium_metrics = calculate_equity_premium(prices, len(prices))

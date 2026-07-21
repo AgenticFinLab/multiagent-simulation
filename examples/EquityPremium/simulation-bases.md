@@ -346,7 +346,7 @@ The aggregate demanded premium emerges from the tension between myopic loss-aver
 ## §7 Round Structure
 
 1. **Market perceive**: Collects all investor stock_qty orders from inbounds
-2. **Market decide**: Computes `net_stock_demand`; adds random return `r_stock`; sets new price; broadcasts `market_data`
+2. **Market decide**: Normalizes net demand by gross submitted volume, adds random return `r_stock`, applies a five-sigma numerical guard, sets the new price, and broadcasts `market_data`
 3. **Investor perceive**: Each investor receives `market_data`; updates `stock_history`
 4. **Investor decide**: Each investor computes target allocation; submits `stock_qty` order
 
