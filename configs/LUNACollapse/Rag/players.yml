@@ -37,6 +37,14 @@ market:
       price_impact: 0.04  # Source: simulation-bases.md §6
       mean_reversion: 0.005  # Source: simulation-bases.md §6
       noise_std: 0.015  # Source: simulation-bases.md §6
+      market_depth: 100.0  # Source: target §9 / simulation-bases.md §3.1
+      random_seed: 20260720  # Source: target §9 reproducibility invariant
+      price_floor: 0.01  # Source: target §9 positive-price invariant
+      shock_schedule:  # Source: target §6.1 / §9 controlled May 2022 depeg stimulus
+        20: -0.06
+        21: -0.05
+        22: -0.04
+        23: -0.03
       custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 

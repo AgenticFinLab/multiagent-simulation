@@ -18,7 +18,12 @@ from examples.LUNACollapse.LLM.prompts import (
     LLM_ANCHORDEPOSITOR_PROMPT,
     LLM_VALUEBUYER_PROMPT,
 )
-from examples.LUNACollapse.Rule.players import Market, _build_order, _require_positive
+from examples.LUNACollapse.Rule.players import (
+    Market,
+    _apply_trade,
+    _build_order,
+    _require_positive,
+)
 from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("LUNACollapse.LLM")
@@ -141,16 +146,7 @@ class LLMInvestor(GeneralPlayer):
         _require_positive(bid_price, "bid_price")
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if action == "buy" and quantity > 0 and price > 0:
-            quantity = min(quantity, int(cash / price))
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            quantity = min(quantity, max(position, 0))
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-        else:
-            quantity = 0
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(
             self,
             action,
@@ -159,6 +155,7 @@ class LLMInvestor(GeneralPlayer):
             str(decision_payload["reasoning"]),
         )
         order["analysis"] = str(decision_payload["analysis"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

@@ -3,7 +3,7 @@
 ## §1 Objectives
 
 Verify that the persona-driven API variant still produces a structurally
-coherent crash despite stochastic decision-making and a reduced five-archetype
+coherent crash despite stochastic decision-making and the shared six-archetype
 investor set.
 
 ## §2 Core Metrics

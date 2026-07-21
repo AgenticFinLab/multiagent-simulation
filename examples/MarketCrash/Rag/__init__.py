@@ -11,7 +11,8 @@ from .players import (
     RagLLMInvestor,
     RagLLMPanicSeller,
     RagLLMRiskParityFund,
-    RagLLMLeveragedFund,
+    RagLLMLeveragedHedgeFund,
+    RagLLMPassiveInvestor,
     RagLLMMarketMaker,
     RagLLMBottomFisher,
 )
@@ -21,7 +22,8 @@ __all__ = [
     "RagLLMInvestor",
     "RagLLMPanicSeller",
     "RagLLMRiskParityFund",
-    "RagLLMLeveragedFund",
+    "RagLLMLeveragedHedgeFund",
+    "RagLLMPassiveInvestor",
     "RagLLMMarketMaker",
     "RagLLMBottomFisher",
 ]

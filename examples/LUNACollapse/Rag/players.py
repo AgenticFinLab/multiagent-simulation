@@ -26,6 +26,7 @@ from examples.LUNACollapse.Rag.prompts import (
 )
 from examples.LUNACollapse.Rule.players import (  # noqa: F401
     Market,
+    _apply_trade,
     _build_order,
     _require_positive,
 )
@@ -342,16 +343,7 @@ class RagLLMInvestor(GeneralPlayer):
         _require_positive(bid_price, "bid_price")
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if action == "buy" and quantity > 0:
-            quantity = min(quantity, int(cash / price))
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            quantity = min(quantity, max(position, 0))
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-        else:
-            quantity = 0
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(
             self,
             action,
@@ -361,6 +353,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
         order["analysis"] = str(decision_payload["analysis"])
         order["rag_context"] = self.state.custom_state["last_rag_context"]
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

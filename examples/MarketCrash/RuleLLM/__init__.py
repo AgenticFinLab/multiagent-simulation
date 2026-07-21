@@ -5,7 +5,8 @@ from .players import (
     RuleLLMInvestor,
     RuleLLMPanicSeller,
     RuleLLMRiskParityFund,
-    RuleLLMLeveragedFund,
+    RuleLLMLeveragedHedgeFund,
+    RuleLLMPassiveInvestor,
     RuleLLMMarketMaker,
     RuleLLMBottomFisher,
 )
@@ -15,7 +16,8 @@ __all__ = [
     "RuleLLMInvestor",
     "RuleLLMPanicSeller",
     "RuleLLMRiskParityFund",
-    "RuleLLMLeveragedFund",
+    "RuleLLMLeveragedHedgeFund",
+    "RuleLLMPassiveInvestor",
     "RuleLLMMarketMaker",
     "RuleLLMBottomFisher",
 ]

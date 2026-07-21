@@ -12,7 +12,7 @@ absorption.
 ### §2.1 Maximum Drawdown
 
 ```python
-def compute_maximum_drawdown(prices: list[float]) -> float
+def maximum_drawdown(prices: Iterable[float]) -> float
 ```
 
 Measures peak-to-trough crash severity.
@@ -20,7 +20,7 @@ Measures peak-to-trough crash severity.
 ### §2.2 Largest One-Round Drop
 
 ```python
-def compute_largest_one_round_drop(prices: list[float]) -> float
+def largest_one_round_drop(prices: list[float]) -> float
 ```
 
 Measures crash velocity as the most negative one-round return.
@@ -28,7 +28,7 @@ Measures crash velocity as the most negative one-round return.
 ### §2.3 Volatility Spike
 
 ```python
-def compute_volatility_spike(returns: list[float], window: int) -> float
+def volatility_spike_ratio(volatility: Iterable[float]) -> float
 ```
 
 Measures whether realized volatility rises materially during the crash window.
@@ -45,7 +45,7 @@ archetypes.
 ### §2.5 Liquidity Withdrawal
 
 ```python
-def compute_liquidity_withdrawal(orders: list[dict], liquidity: list[float]) -> float
+def minimum_liquidity(liquidity: Iterable[float]) -> float
 ```
 
 Measures reduced market-making activity and lower effective liquidity during
@@ -62,7 +62,7 @@ Measures selling by PanicSeller agents during negative-return rounds.
 ### §2.7 Bottom-Fisher Absorption
 
 ```python
-def compute_bottom_fisher_absorption(orders: list[dict]) -> float
+def bottom_fisher_absorption(quantities: dict[int, float]) -> float
 ```
 
 Measures whether BottomFisher buy volume offsets crash selling after discounts.
@@ -87,10 +87,10 @@ share, bottom-fisher support, and API/RAG quality.
 
 ## §6 Expected Results And Validation Criteria
 
-A valid MarketCrash run should complete 200 rounds, record finite prices, show
-a clear drawdown episode, exhibit elevated volatility around stress, contain
-non-trivial sell pressure from deleveraging or panic archetypes, and show
-limited but visible contrarian support.
+A valid MarketCrash run should complete 200 rounds and record finite prices.
+The target acceptance bands are maximum drawdown 10%-75%, largest one-round
+drop at least 2%, minimum normalised liquidity at most 0.50, peak-to-floor
+volatility ratio at least 1.5, and positive BottomFisher absorption.
 
 ## §7 Visualization And Output Contract
 

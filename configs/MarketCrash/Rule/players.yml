@@ -30,6 +30,13 @@ market:
     extras:
       record_path: "EXPERIMENT/MarketCrash/Rule/records"  # Source: framework infrastructure
       # Price dynamics
+      initial_volatility: 4.0  # Source: finance-market-crash.md §9
+      stress_impact_multiplier: 1.5  # Source: finance-market-crash.md §9
+      max_abs_return: 0.08  # Source: finance-market-crash.md §9
+      initial_liquidity: 1.0  # Source: normalized market capacity
+      random_seed: 20260721  # Source: reproducibility invariant
+      price_floor: 30.0  # Source: finance-market-crash.md §9
+      price_ceiling: 120.0  # Source: finance-market-crash.md §9
       fundamental_value: 100.0  # Source: simulation-bases.md §6
       initial_price: 100.0  # Source: simulation-bases.md §6
       base_price_impact: 0.08  # Source: simulation-bases.md §6
@@ -191,8 +198,7 @@ rule_bottom_fisher:
       initial_position: 0.0  # Source: simulation-bases.md §6
       custom_state_hot_limit: 3  # Source: framework infrastructure
       # Bottom fishing specific
-      crash_buy_threshold: -0.03  # Source: simulation-bases.md §4.6.7
-      discount_threshold: 0.10  # Source: simulation-bases.md §4.6.7
+      crash_buy_threshold: -0.02  # Source: simulation-bases.md §4.6.7
+      discount_threshold: 0.08  # Source: simulation-bases.md §4.6.7
       buy_size: 15.0  # Source: simulation-bases.md §4.6.7
-      lookback: 10  # Source: simulation-bases.md §4.6.7
   persona: !include persona.yml

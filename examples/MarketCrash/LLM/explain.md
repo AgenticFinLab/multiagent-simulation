@@ -10,9 +10,9 @@
 | Theory Reference | `examples/MarketCrash/simulation-bases.md` |
 | Market Broadcast | `configs/MarketCrash/LLM/topology.yml` |
 
-This is a trading-schema scenario. The configured investor set contains five
-archetypes: `PanicSeller`, `RiskParityFund`, `LeveragedFund`, `MarketMaker`,
-and `BottomFisher`. `PassiveInvestor` is not configured in this API variant.
+This is a trading-schema scenario. The configured investor set contains six
+archetypes: `PanicSeller`, `RiskParityFund`, `LeveragedHedgeFund`,
+`MarketMaker`, `PassiveInvestor`, and `BottomFisher`.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -27,7 +27,7 @@ and `BottomFisher`. `PassiveInvestor` is not configured in this API variant.
 
 | Theory Component | Implementation |
 |---|---|
-| Margin spiral | `LLMLeveragedFund` represents the leveraged-fund archetype. |
+| Margin spiral | `LLMLeveragedHedgeFund` represents the leveraged-fund archetype. |
 | API contract | Parser validates canonical trading fields. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
@@ -41,8 +41,8 @@ and `BottomFisher`. `PassiveInvestor` is not configured in this API variant.
 
 | Theory Component | Implementation |
 |---|---|
-| Slow passive stabilization | Not instantiated in this API variant. |
-| Variant scope | Documented omission relative to the six-role Rule baseline. |
+| Slow passive stabilization | `LLMPassiveInvestor` rebalances at the configured slow cadence. |
+| API contract | A dedicated prompt forbids short-horizon panic selling. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
@@ -60,9 +60,9 @@ and `BottomFisher`. `PassiveInvestor` is not configured in this API variant.
 
 ## §3 Market Mechanism
 
-The LLM coordinator in `examples/MarketCrash/LLM/players.py:Market` uses its
-own internal liquidity state and volatility process. Investor orders do not
-carry `provides_liquidity` in this variant.
+The LLM configuration reuses `examples/MarketCrash/Rule/players.py:Market`,
+so price impact, seeded noise, liquidity depletion, and broadcasts are exactly
+comparable with the deterministic baseline.
 
 ## §4 Variant Architecture
 

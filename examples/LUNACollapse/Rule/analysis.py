@@ -5,6 +5,10 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
+import matplotlib
+
+matplotlib.use("Agg")
+
 from examples.standard_rule_analysis import (
     _batch_to_rounds,
     _load_data,

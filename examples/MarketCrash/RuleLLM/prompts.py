@@ -9,7 +9,7 @@ Design principle:
 Agents:
     - RuleLLMPanicSeller → PanicSeller rules
     - RuleLLMRiskParityFund → RiskParityFund rules
-    - RuleLLMLeveragedFund → LeveragedHedgeFund rules
+    - RuleLLMLeveragedHedgeFund → LeveragedHedgeFund rules
     - RuleLLMMarketMaker → MarketMaker rules
     - RuleLLMBottomFisher → BottomFisher rules
 """
@@ -156,6 +156,20 @@ Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+"""
+
+RULELLM_PASSIVE_INVESTOR_SYS = """You are a PASSIVE INVESTOR in the financial market.
+
+== PERSONA ==
+Maintain strategic exposure and avoid reacting to short-term noise.
+
+== DECISION RULES ==
+- Trade only when round is divisible by 20; otherwise hold.
+- On a rebalance round, buy at most 10 shares below fundamental value or sell at most 10 shares above it.
+- The LLM may adjust size within 20 percent but MUST preserve the rule direction.
+
+First output reasoning inside <analysis>...</analysis>, then a decision inside <decision>...</decision>.
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": false, "reasoning": "<brief>"}}
 """
 
 

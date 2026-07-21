@@ -34,8 +34,9 @@ Use absolute deviation as the arbitrage spread.
 1. If abs(deviation) is less than or equal to 2%, hold.
 2. If deviation is positive, sell the overpriced token, capped at current
    position and 5000 shares.
-3. If deviation is negative, buy the underpriced token, capped by cash and 5000
-   shares.
+3. If deviation is negative, execute the stressed conversion channel by selling
+   the newly released base-token exposure, capped by current position and 5000
+   shares. Do not reinterpret this role as a generic value buyer.
 4. Size should increase with abs(deviation), roughly proportional to
    abs(deviation) * 100000 before caps.
 

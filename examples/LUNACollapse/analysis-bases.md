@@ -2,9 +2,12 @@
 
 ## §1 Analysis Objectives
 
-The analysis verifies whether the simulation produces an algorithmic stablecoin
-death spiral: falling price, accelerating sell pressure, limited stabilizing
-buying, and contagion through DeFi-style exit channels.
+The analysis verifies target §3 and §5: whether the single-risky-asset
+approximation produces a visible algorithmic-stablecoin death spiral with
+falling price, nonzero sell pressure, limited stabilizing buying, and finite
+DeFi-style contagion. A successful process exit is not enough; the Rule run
+must contain 200 market rounds, finite positive prices, nonzero volume, and
+target-range deviation and drawdown.
 
 ## §2 Metrics
 
@@ -99,6 +102,13 @@ sizes.
 | Sell pressure share | Destabilizing agents dominate sell volume |
 | Stabilization ratio | ValueBuyer demand below total panic sell volume |
 | Collapse onset | Occurs after confidence threshold is breached |
+
+Target acceptance ranges are `5%-60%` maximum absolute deviation,
+`5%-60%` absolute maximum drawdown, positive total volume,
+`1%-40%` mean absolute deviation, and a positive final price whose stress does
+not exceed the worst observed stress. The 2026-07-20 calibrated Rule run
+produced 20.16% maximum deviation, 6.54% maximum drawdown, 3395.5 total volume,
+12.32% mean absolute deviation, and a positive final price.
 
 ## §7 Visualization Plan
 

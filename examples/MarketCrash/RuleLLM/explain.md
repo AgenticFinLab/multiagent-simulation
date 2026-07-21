@@ -10,11 +10,9 @@
 | Theory Reference | `examples/MarketCrash/simulation-bases.md` |
 | Market Broadcast | `configs/MarketCrash/RuleLLM/topology.yml` |
 
-This is a five-archetype API variant:
-`PanicSeller`, `RiskParityFund`, `LeveragedFund`, `MarketMaker`, and
-`BottomFisher`. `PassiveInvestor` is omitted by configuration. `BottomFisher`
-now uses its own prompt contract rather than the previous incorrect
-PassiveInvestor binding.
+This is a six-archetype API variant: `PanicSeller`, `RiskParityFund`,
+`LeveragedHedgeFund`, `MarketMaker`, `PassiveInvestor`, and `BottomFisher`.
+Each archetype has a dedicated prompt and a canonical cross-variant identity.
 
 ## §2 Theory -> Implementation Mapping
 
@@ -29,7 +27,7 @@ PassiveInvestor binding.
 
 | Theory Component | Implementation |
 |---|---|
-| Margin spiral | `RuleLLMLeveragedFund` represents leveraged deleveraging rules. |
+| Margin spiral | `RuleLLMLeveragedHedgeFund` represents leveraged deleveraging rules. |
 | API contract | Parser requires liquidity flag because the market consumes it. |
 
 ### §2.3 MarketMaker (simulation-bases.md §4.3)
@@ -43,8 +41,8 @@ PassiveInvestor binding.
 
 | Theory Component | Implementation |
 |---|---|
-| Slow passive stabilization | Not instantiated in this API variant. |
-| Variant scope | Documented omission relative to the Rule baseline. |
+| Slow passive stabilization | `RuleLLMPassiveInvestor` follows a 20-round rebalance guardrail. |
+| API contract | The role has a dedicated persona-plus-rule prompt. |
 
 ### §2.5 PanicSeller (simulation-bases.md §4.5)
 
@@ -58,14 +56,14 @@ PassiveInvestor binding.
 | Theory Component | Implementation |
 |---|---|
 | Contrarian absorption | `RuleLLMBottomFisher` binds to `RULELLM_BOTTOM_FISHER_SYS`. |
-| API contract | Uses the corrected BottomFisher prompt, not PassiveInvestor. |
+| API contract | BottomFisher and PassiveInvestor use distinct dedicated prompts. |
 
 ## §3 Market Mechanism
 
-The RuleLLM market in `examples/MarketCrash/RuleLLM/players.py:Market` is a
-liquidity-sensitive coordinator that explicitly consumes
-`order["provides_liquidity"]`. Prompt contracts therefore require
-`provides_liquidity` in every API decision payload.
+The RuleLLM configuration reuses `examples/MarketCrash/Rule/players.py:Market`
+to preserve identical market mechanics. Model decisions still emit
+`provides_liquidity` for audit, while canonical `is_market_maker` metadata
+drives the shared coordinator.
 
 ## §4 Variant Architecture
 

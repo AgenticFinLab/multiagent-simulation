@@ -301,3 +301,4 @@ State update: position: 6000 (unchanged); cash: 0.30 (unchanged). Agent inactive
 | Version | 1.0.0 |
 | Status | canonical |
 | Icon        | ![](../agent_images/icons/finance-value-buyer.png)         |
+| Change log | 2026-07-20: handbook provenance audit; reused by LUNACollapse with no profile-mechanism change. |

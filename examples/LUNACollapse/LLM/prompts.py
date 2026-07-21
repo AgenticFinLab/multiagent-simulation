@@ -42,8 +42,9 @@ pressure during crisis.
 HOW YOU INTERPRET MARKET DATA:
 - Small deviations do not justify trading.
 - Positive deviations can invite selling the overpriced exposure.
-- Negative deviations can invite buying the discounted exposure if liquidity and
-  risk remain acceptable.
+- Negative deviations activate the stressed conversion channel: sell available
+  base-token exposure because redemption releases supply into a falling market.
+  Do not act as a generic value buyer in this role.
 
 CONSTRAINTS:
 - Cannot spend more than available cash.

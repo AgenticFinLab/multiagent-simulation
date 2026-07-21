@@ -133,45 +133,45 @@ Does NOT use: price history, streak counts, momentum indicators, volume data, pe
 #### Core Behavioral Mechanism
 
 ```
-Step 1 — Read market inputs:
+1. Read market inputs:
   Read: price from market_data
   Read: fundamental from market_data
   (implementation convenience — input acquisition)
 
-Step 2 — Compute deviation (arbitrage signal):
+2. Compute deviation (arbitrage signal):
   Compute: deviation = (price - fundamental) / fundamental
   (Traces to: Shleifer & Vishny 1997 — mispricing magnitude is the arbitrage signal)
 
-Step 3 — Evaluate activation threshold (arbitrage cost assessment):
+3. Evaluate activation threshold (arbitrage cost assessment):
   Read: activation_threshold from parameters
   IF |deviation| > activation_threshold: → Active branch (Step 4)
   ELSE: → Hold branch (Step 7)
   (Traces to: De Long et al. 1990 — noise-trader risk requires minimum mispricing to justify position)
 
-Step 4 — Compute raw quantity (position sizing):
+4. Compute raw quantity (position sizing):
   Read: quantity_scale, max_order from parameters
   Compute: abs_deviation = |deviation|
   Compute: raw_qty = int(abs_deviation * quantity_scale)
   Compute: qty = min(max_order, raw_qty)
   (Traces to: Pontiff 2006 — arbitrage position size scales with mispricing but is capped by risk budget)
 
-Step 5 — Determine direction (CONTRARIAN — fade mispricing):
+5. Determine direction (CONTRARIAN, fade mispricing):
   IF deviation < 0: action = "buy"   (price below fundamental → buy for reversion profit)
   IF deviation > 0: action = "sell"  (price above fundamental → sell for reversion profit)
   (Traces to: Shleifer & Vishny 1997 — arbitrageurs trade opposite to noise-trader-induced mispricing)
 
-Step 6 — Apply resource constraints:
+6. Apply resource constraints:
   Read: cash, position from agent state
   IF action == "buy": qty = min(qty, int(cash / price))
   IF action == "sell": qty = min(qty, position)
   Write: IF qty == 0 THEN action = "hold"
   (Traces to: Shleifer & Vishny 1997 — capital constraints are binding for real arbitrageurs)
 
-Step 7 — Hold branch:
+7. Hold branch:
   Compute: action = "hold"; qty = 0
   (Traces to: De Long et al. 1990 — rational inaction when noise-trader risk exceeds arbitrage profit)
 
-Step 8 — Execute trade and update state (post-decision):
+8. Execute trade and update state (post-decision):
   IF action == "buy": Write: cash -= qty * price; Write: position += qty
   IF action == "sell": Write: cash += qty * price; Write: position -= qty
   (implementation convenience — state bookkeeping)
@@ -358,3 +358,4 @@ State update: `cash`: 800,000 → 800,000 + 100 * 109.0 = 810,900; `position`: 1
 | Version     | 1.0.0                        |
 | Status      | canonical                    |
 | Icon        | ![](../agent_images/icons/finance-arbitrageur.png)         |
+| Change log | 2026-07-20: handbook provenance audit; LUNACollapse applies a documented stressed-conversion override. |
