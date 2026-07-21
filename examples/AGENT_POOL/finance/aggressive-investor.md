@@ -346,12 +346,13 @@ State update: `price_history` appended.
 | 3 | Hong, H., & Stein, J. C. (1999). A unified theory of underreaction, momentum, and overreaction. *Journal of Finance*, 54(6), 2143-2184. https://doi.org/10.1111/0022-1082.00184  | Gradual information diffusion and momentum     |
 | 4 | Campbell, J. Y., & Hentschel, L. (1992). No news is good news. *Journal of Financial Economics*, 31(3), 281-318. https://doi.org/10.1016/0304-405X(92)90037-X                   | Volatility feedback effect                     |
 
-## Design Provenance
+## Design Provenance and Versioning
 
 | Field       | Content                    |
 |-------------|----------------------------|
 | Author      | polish-simulation-pipeline |
 | Created     | 2026-07-14                 |
-| Version     | 1.0.0                      |
+| Version     | 1.0.1                      |
+| Change log  | 2026-07-21: HerdEffect polish audit normalized provenance heading and added tool-required provenance row. |
 | Status      | canonical                  |
 | Icon        | ![](../agent_images/icons/finance-aggressive-investor.png)         |

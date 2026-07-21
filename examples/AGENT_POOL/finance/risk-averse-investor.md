@@ -341,6 +341,7 @@ State update: `price_history` continues to accumulate; will evaluate normally on
 |---------|----------------------------------------------------------------|
 | Author  | Codex                                                          |
 | Created | 2026-07-16                                                     |
-| Version | 1.0.0                                                          |
+| Version | 1.0.1                                                          |
+| Change log | 2026-07-21: HerdEffect polish audit added tool-required provenance row. |
 | Icon    | ![](../agent_images/icons/finance-risk-averse-investor.png)    |
 | Status  | draft                                                          |

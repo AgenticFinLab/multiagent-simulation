@@ -11,6 +11,13 @@ Usage:
 import argparse
 import asyncio
 import logging
+import os
+import sys
+
+project_root = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+sys.path.insert(0, project_root)
 
 from masim.simulator.general import GeneralSimulator
 from masim.simulator.base import SimulationConfig
@@ -21,11 +28,13 @@ setup_logging()
 logger = logging.getLogger("HerdEffect")
 
 
-async def run_simulation(config_path: str):
+async def run_simulation(config_path: str, rounds: int | None = None):
     """Run the herd effect simulation."""
 
     yaml_config = load_config(config_path)
     config = SimulationConfig(**yaml_config)
+    if rounds:
+        config.setting["total_rounds"] = rounds
 
     logger.info("=" * 70)
     logger.info("Herd Effect Simulation - Multi-Strategy Market")
@@ -92,9 +101,16 @@ Example:
         required=True,
         help="Path to simulation configuration file (YAML)",
     )
+    parser.add_argument(
+        "-r",
+        "--rounds",
+        type=int,
+        default=None,
+        help="Override number of rounds",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(run_simulation(args.config))
+    asyncio.run(run_simulation(args.config, args.rounds))

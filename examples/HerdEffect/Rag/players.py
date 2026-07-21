@@ -698,8 +698,8 @@ class RagLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                infer_output = llm_client.run([infer_input])
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                infer_output = llm_client.run(infer_input)
+                decision = self._parse_llm_response(infer_output.response)
                 break
             except Exception as exc:
                 last_error = exc

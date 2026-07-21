@@ -22,9 +22,15 @@ Environment Variables:
 import argparse
 import asyncio
 import os
+import sys
 import traceback
 
 from dotenv import load_dotenv
+
+project_root = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+sys.path.insert(0, project_root)
 
 from masim.simulator.base import SimulationConfig
 from masim.simulator.general import GeneralSimulator
@@ -40,6 +46,13 @@ async def main():
     parser.add_argument(
         "-c", "--config", type=str, default="configs/HerdEffect/Rag/simulation.yml"
     )
+    parser.add_argument(
+        "-r",
+        "--rounds",
+        type=int,
+        default=None,
+        help="Override number of rounds",
+    )
     args = parser.parse_args()
 
     load_dotenv()
@@ -52,14 +65,16 @@ async def main():
 
     yaml_config = load_config(args.config)
     config = SimulationConfig(**yaml_config)
+    if args.rounds:
+        config.setting["total_rounds"] = args.rounds
 
     print("\n" + "=" * 60)
     print("HerdEffectRag Simulation")
     print("=" * 60)
     print("Phenomenon: Herd Effect with RAG-Augmented LLM Decision-Making")
-    print("Theory:     Market Microstructure, Kirilenko et al. (2017) + RAG")
-    print("Agents:     HFT, Market Maker, Algorithmic Trader,")
-    print("            Stop-Loss Trader, Fundamental Trader  (all Rule+LLM+RAG)")
+    print("Theory:     Herding behavior, feedback trading, and market microstructure")
+    print("Agents:     Momentum, Contrarian, Risk-Averse, Aggressive,")
+    print("            Noise Trader investors  (all Rule+LLM+RAG)")
     print("Note:       Documents are pre-processed during simulation setup.")
     print("            Each agent loads from shared cache (no duplicates).")
     print("Rounds:     %s" % config.setting["total_rounds"])
