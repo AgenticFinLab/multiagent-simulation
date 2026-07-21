@@ -33,6 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 import numpy as np
 
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 from examples.FlashCrash2010.Rule.analysis import (
     STANDARD_OUTPUT_FILES,
@@ -175,6 +176,27 @@ def main() -> Dict[str, Any]:
             f"mean_retrieval_failure_rate = {agg['mean_retrieval_failure_rate']:.3f}"
         )
     print(summary["validation"]["interpretation"])
+    # [polish-hook-9] universal baseline invocation
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rag'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='FlashCrash2010',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

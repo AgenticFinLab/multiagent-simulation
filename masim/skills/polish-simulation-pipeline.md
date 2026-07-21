@@ -1075,8 +1075,11 @@ audit hooks themselves reference the module by role, not by name.
 
 ### 8.3 Procedure
 
-For each built variant `{V}`, run the eight Polish Hooks declared in
-the Step 4 Contract:
+For each built variant `{V}`, run the twelve Polish Hooks declared in
+the Step 4 Contract (Hooks 1–8 remain the original code / prompt /
+RAG gates; Hooks 9–12 are the new analysis-depth gates added in the
+2026-07-21 revision — see §8.6 for the analysis-depth contract they
+implement):
 
 1. **No-defaults rule.** Grep every Python file under
    `examples/{ScenarioName}/{V}/`:
@@ -1153,8 +1156,91 @@ the Step 4 Contract:
      to the reader).
    This hook is skipped for scenarios whose target §10.1 declares no
    retrieval-flavoured variant.
+9. **Universal-baseline coverage (analysis depth).** For every built
+   variant, its `analysis.py` MUST invoke the universal metric
+   aggregator declared in §8.6 exactly once per run:
+   ```
+   from masim.evaluation.universal import write_universal_summary
+   write_universal_summary(data, config, output_dir)
+   ```
+   The resulting `summary.json` MUST contain a `universal_metrics`
+   block whose sub-keys mirror the six standard categories
+   (`price_dynamics`, `information_efficiency`, `statistical_inference`,
+   `tail_risk`, `agent_behaviour`, `microstructure`) and whose entries
+   include every metric in `masim.evaluation.finance.STANDARD_METRICS`
+   that did not raise `MetricUnavailable`. **Minimum coverage floor:**
+   at least 20 of the 36 registered metrics MUST report a numeric
+   result (i.e., neither `_unavailable` nor `_error`). Fewer than 20
+   is a FAIL unless the target §10.1 explicitly documents a data
+   shape that excludes the missing metrics (e.g., pure opinion
+   dynamics scenarios that carry no `market_prices`); such
+   exemptions MUST be listed in `analysis-bases.md §2.0 Baseline
+   Coverage Exemptions` with the exempted metric names and the
+   stylized-fact rationale.
+10. **Reference completeness.** Every row in `analysis-bases.md §2`
+    (scenario-specific metric catalogue) and every row added under
+    §8.6's universal-metric appendix MUST cite a primary academic
+    source in the form `Author (Year)` with either a DOI, arXiv id,
+    or full journal citation (Journal, Volume(Issue): pages) reachable
+    in `simulation-bases.md §2 References`. Rows citing a textbook
+    MUST include the specific chapter/section number. Rows without a
+    verifiable citation are a FAIL; the fix is to add the citation
+    (never invent one). Every row in `analysis.md §2` (implementation
+    mapping) MUST re-echo the reference so a reader who opens only
+    the variant document can trace the metric back to its primary
+    source. Halt via `AskUserQuestion` if a metric was implemented
+    without a discoverable primary source — the choice is (a) find a
+    source, (b) drop the metric.
+11. **Output-artefact contract.** After a smoke run of variant `{V}`
+    at `--steps 20`, its analysis output directory
+    (`examples/{ScenarioName}/{V}/analysis_output/` or the path
+    declared in `analysis.md §5`) MUST contain:
+    - `summary.json` — top-level keys REQUIRED: `scenario`, `variant`,
+      `config_hash`, `n_rounds`, `universal_metrics`,
+      `scenario_metrics`, `variant_extras`, `validation`,
+      `files_written`, `references`. `universal_metrics` follows the
+      Hook 9 schema; `scenario_metrics` mirrors `analysis-bases.md §2`
+      row-for-row; `validation` MUST be a dict with at least
+      `passed: bool`, `score: float in [0,1]`, and one entry per
+      criterion listed in `analysis-bases.md §6`.
+    - Minimum eight PNG dashboards: the four universal panels
+      (`00_investor_bids.png`, `01_{scenario_lower}_dynamics.png`,
+      `02_{scenario_lower}_analysis.png`, `03_summary.png`) plus at
+      least four scenario-specific panels named after the metric
+      families in `analysis-bases.md §7`. Scenarios whose §7 declares
+      fewer than four scenario-specific panels MUST expand §7 first
+      via the define skill revise mode.
+    - For Rag-flavoured variants: `rag_stats.json` with per-round
+      retrieval counts and top-`k` provenance IDs.
+    - For LLM-flavoured variants: a `llm_action_distribution` block
+      inside `summary.json` produced by
+      `masim.evaluation.analyze_action_distribution`, plus a
+      `04_llm_actions.png` panel.
+    - For RuleLLM variants: both the LLM action distribution AND a
+      `rule_llm_divergence` block that reports the mean absolute
+      difference between the RuleLLM decision and the corresponding
+      Rule variant's rule output on identical inputs. This block MUST
+      be computable at smoke-run time; if the Rule variant's outputs
+      are not persisted, the smoke run is extended with
+      `--persist-rule-shadow`.
+    Missing files or missing top-level keys are a FAIL. Extra files
+    are allowed but MUST be referenced in `summary.json.files_written`.
+12. **Cross-variant summary parity.** After Hooks 9–11 pass for every
+    built variant of the scenario, diff each variant's
+    `summary.json` schema (keys, not values) against the Rule-variant
+    baseline. Every non-baseline variant's `summary.json` MUST have
+    the same top-level keys, the same `universal_metrics` category
+    keys, and the same `scenario_metrics` row names as the Rule
+    variant, plus the variant-specific extras from Hook 11 (Rag →
+    `rag_stats`; LLM/RuleLLM → `llm_action_distribution`; RuleLLM
+    → `rule_llm_divergence`). Divergent keys are a FAIL; the fix is
+    to promote the metric from a variant-local shadow into the
+    universal or scenario layer, or to drop it if it was truly
+    idiosyncratic. This hook exists so that cross-variant delta
+    tables in `analysis.md §4` and paper-level comparisons remain
+    apples-to-apples.
 
-Run the eight Polish Hooks three consecutive times per variant. Any
+Run the twelve Polish Hooks three consecutive times per variant. Any
 FAIL resets that variant's count.
 
 ### 8.4 Artefacts Changed
@@ -1162,25 +1248,166 @@ FAIL resets that variant's count.
 - `examples/{ScenarioName}/{V}/players.py` — `.get(...)` → `[...]`
   conversions, comments added.
 - `examples/{ScenarioName}/{V}/analysis.py` — same, plus function
-  additions if a metric was missing.
+  additions if a metric was missing, plus the mandatory
+  `write_universal_summary(data, config, output_dir)` call at the
+  end of the analysis pipeline (Hook 9).
 - `examples/{ScenarioName}/{V}/prompts.py` — parser fixes for §4.2.3
   compliance; dual-section labels restored where missing.
 - `examples/{ScenarioName}/{V}/explain.md` — §2 bidirectional
   completeness fills / removals.
 - `examples/{ScenarioName}/{V}/analysis.md` — §2 bidirectional
-  completeness fills / removals.
+  completeness fills / removals; reference column added to every §2
+  row (Hook 10); §5 output artefact list updated to enumerate the
+  eight-panel PNG floor and the `summary.json` schema (Hook 11).
+- `examples/{ScenarioName}/analysis-bases.md` — reference column
+  populated for every §2 row (Hook 10); new §2.0 Baseline Coverage
+  Exemptions subsection added when Hook 9 identifies data-shape
+  exemptions; §7 expanded to enumerate at least four scenario-specific
+  PNG panels when needed.
+- `examples/{ScenarioName}/{V}/analysis_output/summary.json` and the
+  eight-panel PNG floor — produced by the Hook 11 smoke run and
+  checked in per repo convention.
 
 Append per-variant audit summary to `tmpl/polish-log.md`.
 
 ### 8.5 Exit Conditions
 
-- All eight Step 4 Polish Hooks have three consecutive PASS runs for
+- All twelve Step 4 Polish Hooks have three consecutive PASS runs for
   every built variant.
 - No `.get(key, default)` pattern remains for required data anywhere
   under `examples/{ScenarioName}/`.
 - Every built variant compiles cleanly and imports cleanly.
 - Every built variant's `explain.md §2` and `analysis.md §2` are
   bidirectionally complete.
+- Every built variant's `analysis_output/summary.json` conforms to
+  the Hook 11 schema and passes the Hook 12 cross-variant parity
+  diff against the Rule-variant baseline.
+- Every metric row in `analysis-bases.md §2` and every row in each
+  variant's `analysis.md §2` carries a verifiable primary-source
+  citation (Hook 10).
+- The universal-baseline coverage floor of ≥ 20 numeric metrics
+  (out of 36 registered) is met by every variant, or the missing
+  metrics are documented in `analysis-bases.md §2.0 Baseline
+  Coverage Exemptions` with a stylized-fact rationale.
+
+### 8.6 Universal Metric Contract (analysis depth)
+
+This section is the substantive contract that Hooks 9–12 enforce.
+It defines a three-layer metric taxonomy — every scenario's
+`analysis-bases.md §2` MUST be structured under these three layers,
+in this order — and enumerates the primary academic sources that
+back the universal (Layer A) baseline.
+
+**Layer A — Universal baseline (36 metrics, reusable across all
+finance-like scenarios).** These metrics are provided by
+`masim.evaluation.finance.STANDARD_METRICS` and computed in one
+call via `write_universal_summary(...)`. Every scenario MUST invoke
+this call. Metrics that raise `MetricUnavailable` for a given data
+shape are silently skipped and recorded under
+`summary.json.universal_metrics.<category>._unavailable`.
+
+Category A.1 — `price_dynamics` (12 metrics).
+
+| Metric name                       | Primary reference                                                                     | What it measures                                             |
+|-----------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `price_deviation_ts`              | Shiller (1981) *AER* 71(3):421–436                                                    | Rolling price vs. fundamental deviation series               |
+| `mad_pct`                         | Shiller (2000) *Irrational Exuberance* ch. 1                                          | Mean-absolute-deviation of price from fundamental (%)        |
+| `half_life_threshold`             | Campbell & Shiller (1988) *RFS* 1(3):195–228                                          | Threshold-crossing time for deviation decay                  |
+| `half_life_fitted`                | Cochrane (2001) *Asset Pricing* §20.1                                                 | Log-linear fit of deviation decay half-life                  |
+| `rolling_volatility_ts`           | Officer (1973) *JB* 46(3):434–453                                                     | Rolling standard-deviation-of-returns time series            |
+| `mean_volatility_pct`             | Schwert (1989) *JF* 44(5):1115–1153                                                   | Period-mean volatility (%)                                   |
+| `max_drawdown_pct`                | Magdon-Ismail & Atiya (2004) *Risk* 17(10):99–102                                     | Maximum peak-to-trough decline (%)                           |
+| `return_skewness`                 | Chen, Hong & Stein (2001) *JFE* 61(3):345–381                                         | Skewness of the return distribution                          |
+| `return_kurtosis`                 | Cont (2001) *Quant. Finance* 1(2):223–236                                             | Excess kurtosis (fat-tail signature)                         |
+| `return_autocorr_lag1`            | Fama (1970) *JF* 25(2):383–417                                                        | Lag-1 return autocorrelation (weak-form efficiency)          |
+| `return_autocorr_profile`         | Lo & MacKinlay (1988) *RFS* 1(1):41–66                                                | Full 1..K lag autocorrelation profile                        |
+| `deviation_decay_slope`           | De Bondt & Thaler (1985) *JF* 40(3):793–805                                           | Slope of log-deviation on lag (mean reversion speed)         |
+
+Category A.2 — `information_efficiency` (5 metrics).
+
+| Metric name                       | Primary reference                                                                     | What it measures                                             |
+|-----------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `variance_ratio_lo_mackinlay`     | Lo & MacKinlay (1988) *RFS* 1(1):41–66                                                | Variance-ratio test statistic against the random walk        |
+| `under_revision_ratio`            | Barberis, Shleifer & Vishny (1998) *JFE* 49(3):307–343                                | Ratio of under-reactive to over-reactive belief updates      |
+| `regime_transition_lag`           | Hamilton (1989) *Econometrica* 57(2):357–384                                          | Latency between regime shift and detected transition         |
+| `price_efficiency_ratio`          | Grossman & Stiglitz (1980) *AER* 70(3):393–408                                        | Ratio of informed to noise-driven price variance             |
+| `forecast_error_persistence`      | Hong & Stein (1999) *JF* 54(6):2143–2184                                              | Autocorrelation of one-step-ahead forecast errors            |
+
+Category A.3 — `statistical_inference` (4 metrics).
+
+| Metric name                             | Primary reference                                                    | What it measures                                             |
+|-----------------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------|
+| `mad_block_bootstrap_ci_95`             | Politis & Romano (1994) *JASA* 89(428):1303–1313                     | Block-bootstrap 95 % CI for `mad_pct`                        |
+| `half_life_block_bootstrap_ci_95`       | Politis & Romano (1994) *JASA* 89(428):1303–1313                     | Block-bootstrap 95 % CI for `half_life_fitted`               |
+| `ljung_box_returns_pvalue`              | Ljung & Box (1978) *Biometrika* 65(2):297–303                        | Portmanteau test for serial correlation in returns           |
+| `adf_unit_root_pvalue`                  | Dickey & Fuller (1979) *JASA* 74(366a):427–431                       | Augmented Dickey–Fuller unit-root test p-value               |
+
+Category A.4 — `tail_risk` (2 metrics).
+
+| Metric name                       | Primary reference                                                                     | What it measures                                             |
+|-----------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `value_at_risk_95`                | Jorion (2006) *Value at Risk* 3rd ed. §5                                              | Historical VaR at 95 % confidence                            |
+| `conditional_var_95`              | Artzner, Delbaen, Eber & Heath (1999) *Math. Finance* 9(3):203–228                    | Expected shortfall (CVaR / ES) at 95 %                       |
+
+Category A.5 — `agent_behaviour` (8 metrics).
+
+| Metric name                       | Primary reference                                                                     | What it measures                                             |
+|-----------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `agent_action_frequency`          | Odean (1998) *JF* 53(6):1775–1798                                                     | Per-agent buy / sell / hold frequency                        |
+| `silent_agent_count`              | Merton (1987) *JF* 42(3):483–510                                                      | Number of agents that never traded                           |
+| `agent_volume_buy_sell`           | Karpoff (1987) *JFQA* 22(1):109–126                                                   | Per-agent gross buy and sell volumes                         |
+| `agent_net_position_ts`           | Kyle (1985) *Econometrica* 53(6):1315–1335                                            | Per-agent net position time series                           |
+| `agent_pnl_terminal`              | Sharpe (1966) *J. Business* 39(1):119–138                                             | Terminal per-agent profit-and-loss                           |
+| `agent_sharpe_terminal`           | Sharpe (1966) *J. Business* 39(1):119–138                                             | Terminal per-agent Sharpe ratio                              |
+| `agent_wealth_terminal`           | Levy, Levy & Solomon (2000) *Microscopic Simulation of Financial Markets* ch. 7       | Terminal per-agent wealth                                    |
+| `gini_coefficient`                | Gini (1912) *Variabilità e mutabilità*                                                | Gini coefficient of terminal wealth distribution             |
+
+Category A.6 — `microstructure` (5 metrics).
+
+| Metric name                       | Primary reference                                                                     | What it measures                                             |
+|-----------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `order_imbalance_ts`              | Chordia, Roll & Subrahmanyam (2002) *JFE* 65(1):111–130                               | Per-round buy-minus-sell order imbalance                     |
+| `signed_volume_autocorr`          | Hasbrouck (1991) *JF* 46(1):179–207                                                   | Autocorrelation of signed volume                             |
+| `herfindahl_volume_concentration` | Hirschman (1945) *National Power and the Structure of Foreign Trade*                  | Herfindahl–Hirschman index of per-agent volume share         |
+| `strategy_correlation_matrix`     | Lakonishok, Shleifer & Vishny (1992) *JFE* 32(1):23–43                                | Cross-strategy correlation matrix of net demand              |
+| `information_share_by_strategy`   | Hasbrouck (1995) *JF* 50(4):1175–1199                                                 | Information share attributed to each strategy family         |
+
+**Layer B — Scenario-specific metrics (typically 4–10 per scenario,
+authored in `analysis-bases.md §2` and implemented in
+`masim/evaluation/finance/scenario_metrics.py` or in the scenario's
+own `metrics.py` if truly local).** Layer B rows MUST cite a primary
+source and MUST NOT duplicate Layer A. Typical anchors by family:
+
+| Scenario family                            | Signature metrics                                                                    | Canonical references                                                                                                                                                                              |
+|--------------------------------------------|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Bubble / crash (AssetBubble, TulipMania, SouthSeaBubble, DotComBubble) | `bubble_magnitude`, `crash_amplitude`, `run_up_slope`, `peak_deviation`              | Shiller (2000); Kindleberger & Aliber (2005) *Manias, Panics, and Crashes* 5th ed.; De Long, Shleifer, Summers & Waldmann (1990) *JF* 45(2):379–395                                                |
+| Herding / cascade (HerdEffect, ConfirmationBias, EchoChamber)          | `bid_convergence_cv`, `directional_agreement`, `cascade_measure`, `herding_episodes` | Bikhchandani, Hirshleifer & Welch (1992) *JPE* 100(5):992–1026; Christie & Huang (1995) *FAJ* 51(4):31–37; Chang, Cheng & Khorana (2000) *JBF* 24(10):1651–1679                                    |
+| Volatility clustering (GARCHVolatility, FlashCrash)                    | `garch_signature`, `volatility_persistence`, `return_clustering`, `regime_switch`    | Bollerslev (1986) *J. Econometrics* 31(3):307–327; Engle (1982) *Econometrica* 50(4):987–1008; Andersen, Bollerslev, Diebold & Labys (2003) *Econometrica* 71(2):579–625                           |
+| Momentum / reversal (MomentumEffect, ReversalEffect)                   | `momentum_return`, `reversal_slope`, `winner_loser_spread`                           | Jegadeesh & Titman (1993) *JF* 48(1):65–91; De Bondt & Thaler (1985) *JF* 40(3):793–805                                                                                                            |
+| Currency crisis (CurrencyCrisis, AsianFinancialCrisis, CarryTradeUnwind) | `defense_reserves_burn`, `attack_probability`, `peg_break_lag`                       | Krugman (1979) *JMCB* 11(3):311–325; Obstfeld (1996) *EER* 40(3):1037–1047; Brunnermeier, Nagel & Pedersen (2008) *NBER Macro Annual* 23:313–347                                                   |
+| Bank / liquidity run (BankRun, SVBBankRun, LiquidityDryup)             | `withdrawal_hazard`, `run_probability`, `panic_onset_round`                          | Diamond & Dybvig (1983) *JPE* 91(3):401–419; Gorton (1988) *OEP* 40(4):751–781                                                                                                                     |
+| Anchoring / behavioural bias (AnchoringEffect, AvailabilityBias, DispositionEffect) | `anchor_bias_score`, `availability_bias_score`, `disposition_gain_loss_ratio`        | Northcraft & Neale (1987) *OBHDP* 39(1):84–97; Kahneman, Slovic & Tversky (1982) *Judgment under Uncertainty*; Shefrin & Statman (1985) *JF* 40(3):777–790                                         |
+| Credit / Minsky cycle (CreditCycle)                                    | `leverage_cycle_amplitude`, `credit_expansion_slope`, `minsky_moment_round`          | Minsky (1986) *Stabilizing an Unstable Economy* ch. 9; Geanakoplos (2010) *NBER Macro Annual* 24:1–65                                                                                              |
+| Equity premium / dividend puzzle (EquityPremium)                       | `equity_premium_pct`, `dividend_yield_gap`                                           | Mehra & Prescott (1985) *J. Monetary Econ.* 15(2):145–161; Campbell & Cochrane (1999) *JPE* 107(2):205–251                                                                                         |
+| Opinion / information dynamics (OpinionDynamics, InformationCascade)   | `polarization_index`, `consensus_time`, `information_diffusion_rate`                 | Deffuant, Neau, Amblard & Weisbuch (2000) *ACS* 3:87–98; DeGroot (1974) *JASA* 69(345):118–121; Watts & Dodds (2007) *JCR* 34(4):441–458                                                           |
+
+Layer B rows for scenarios outside the families above MUST still
+carry a primary source; consult `docs/analysis-bases-corpus.md` or
+halt via `AskUserQuestion` to solicit the source.
+
+**Layer C — Variant-specific extras (surface variance across
+Rule / LLM / RuleLLM / Rag).**
+
+| Variant  | Required extra                                                                          | Reference / rationale                                                          |
+|----------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| Rule     | (none beyond Layers A + B)                                                              | Rule variant is the schema baseline for Hook 12 parity.                        |
+| LLM      | `summary.json.llm_action_distribution` + `04_llm_actions.png`                           | `masim.evaluation.analyze_action_distribution`; Bikhchandani et al. (1992)     |
+| RuleLLM  | LLM extras + `summary.json.rule_llm_divergence`                                         | Divergence between LLM decision and shadow Rule decision; Christie–Huang (1995)|
+| Rag      | `rag_stats.json` (per-round retrieval count, top-k provenance) + `05_rag_provenance.png`| Lewis, Perez, Piktus et al. (2020) *NeurIPS* 33:9459–9474 (RAG paper)          |
+
+Layers A + B + C together determine the passing metric surface. A
+scenario that ships only Layers A + B without the applicable Layer C
+extras FAILs Hook 11.
 
 ---
 
@@ -1296,6 +1523,14 @@ run MUST NOT close if any row cannot be resolved.
 | `examples/AGENT_POOL/market/<file>.md` (touched)             | target §8 + coordinator §3.11 Provenance           |
 | `configs/{ScenarioName}/{V}/players.yml` coordinator block   | `AGENT_POOL/market/` profile (via `archetype:`)    |
 | Variant subdirectories present                               | target §10.1                                       |
+| `analysis_output/summary.json.universal_metrics`             | §8.6 Layer A tables (36 rows across 6 categories)  |
+| `analysis_output/summary.json.scenario_metrics`              | `analysis-bases.md §2` Layer B rows                |
+| `analysis_output/summary.json.variant_extras`                | §8.6 Layer C table                                 |
+| `analysis_output/summary.json.validation`                    | `analysis-bases.md §6` Validation Criteria         |
+| `analysis_output/summary.json.references`                    | `analysis-bases.md §2` reference column + §8.6 A/B |
+| Reference column in `analysis-bases.md §2` rows              | §8.6 Layer A/B primary-source tables               |
+| Reference column in variant `analysis.md §2` rows            | `analysis-bases.md §2` reference column            |
+| Eight-panel PNG floor in `analysis_output/`                  | `analysis-bases.md §7` visualization plan          |
 
 Any unanchored downstream artefact is a defect and MUST be repaired
 before Status transition (or halted via `AskUserQuestion` if it
@@ -1381,6 +1616,20 @@ any of the following occurs:
 - A dual-section prompt invariant (Step 4 Hook 5) or `_RAG_FALLBACK`
   invariant (Step 4 Hook 8) fails and the fix requires content that
   is not present in existing artefacts.
+- Universal-baseline coverage (Step 4 Hook 9) reports fewer than 20
+  numeric metrics and no defensible data-shape exemption can be
+  formulated. The halt options are: (i) implement the missing data
+  fields in the coordinator (loops back to Step 2), (ii) accept a
+  documented exemption in `analysis-bases.md §2.0`, or (iii) drop
+  the failing variant.
+- A metric row lacks a discoverable primary source (Step 4 Hook 10).
+  The halt options are: (i) supply a citation, (ii) drop the row —
+  never invent a citation.
+- Cross-variant `summary.json` parity (Step 4 Hook 12) fails and the
+  divergent key is genuinely idiosyncratic. The halt options are:
+  (i) promote the metric into the universal or scenario layer,
+  (ii) drop the metric from the variant that carries it. Silent
+  drift is forbidden.
 - A smoke-run variant crashes with an uncaught exception that traces
   back to a substantive gap (missing metric, missing prompt field,
   etc.) rather than a local coding fix.

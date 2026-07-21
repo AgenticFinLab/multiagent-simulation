@@ -19,6 +19,7 @@ from examples.LTCMCollapse.Rule.analysis import (
     validate_metrics,
 )
 from masim.utils import load_config
+from masim.evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/LTCMCollapse/Rag/simulation.yml"
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
@@ -76,6 +77,28 @@ def main() -> None:
     rag_stats = analyze_rag_knowledge_effect(data["rag_contexts"])
     with (analysis_path / "rag_stats.json").open("w", encoding="utf-8") as handle:
         json.dump(rag_stats, handle, indent=2)
+    # [polish-hook-9] universal baseline invocation
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rag'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='LTCMCollapse',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
+
 
 
 __all__ = [

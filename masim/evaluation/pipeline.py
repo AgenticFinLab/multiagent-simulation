@@ -221,7 +221,6 @@ def create_standard_visualizations(
         plot_volatility_analysis,
         plot_bid_convergence,
         save_figure,
-        create_figure,
     )
 
     os.makedirs(output_dir, exist_ok=True)
@@ -231,44 +230,40 @@ def create_standard_visualizations(
     fundamentals = data.get("fundamentals", {})
     investor_bids = data.get("investor_bids", {})
 
-    # 00: Investor bids
+    # ``plot_price_dynamics`` takes a scalar fundamental (reference line);
+    # collapse the {round: value} series to its arithmetic mean so the
+    # reference line is meaningful. Empty fundamentals → None (no line).
+    if fundamentals:
+        fund_scalar = sum(fundamentals.values()) / len(fundamentals)
+    else:
+        fund_scalar = None
+
+    # 00: Investor bids — skip only when no bids are present.
     if investor_bids:
-        try:
-            fig = plot_bid_convergence(investor_bids, market_prices)
-            path = os.path.join(output_dir, "00_investor_bids.png")
-            save_figure(fig, path)
-            files_written.append(path)
-        except Exception:
-            pass
+        fig = plot_bid_convergence(investor_bids, market_prices)
+        path = os.path.join(output_dir, "00_investor_bids.png")
+        save_figure(fig, path)
+        files_written.append(path)
 
-    # 01: Price dynamics
+    # 01: Price dynamics — skip only when no prices are present.
     if market_prices:
-        try:
-            fig = plot_price_dynamics(market_prices, fundamentals)
-            path = os.path.join(output_dir, f"01_{scenario_lower}_dynamics.png")
-            save_figure(fig, path)
-            files_written.append(path)
-        except Exception:
-            pass
+        fig = plot_price_dynamics(market_prices, fund_scalar)
+        path = os.path.join(output_dir, f"01_{scenario_lower}_dynamics.png")
+        save_figure(fig, path)
+        files_written.append(path)
 
-    # 02: Returns analysis
+    # 02: Returns analysis — skip only when no prices are present.
     if market_prices:
-        try:
-            fig = plot_returns_analysis(market_prices)
-            path = os.path.join(output_dir, f"02_{scenario_lower}_analysis.png")
-            save_figure(fig, path)
-            files_written.append(path)
-        except Exception:
-            pass
+        fig = plot_returns_analysis(market_prices)
+        path = os.path.join(output_dir, f"02_{scenario_lower}_analysis.png")
+        save_figure(fig, path)
+        files_written.append(path)
 
-    # 03: Summary (volatility)
+    # 03: Summary (volatility) — skip only when no prices are present.
     if market_prices:
-        try:
-            fig = plot_volatility_analysis(market_prices)
-            path = os.path.join(output_dir, "03_summary.png")
-            save_figure(fig, path)
-            files_written.append(path)
-        except Exception:
-            pass
+        fig = plot_volatility_analysis(market_prices)
+        path = os.path.join(output_dir, "03_summary.png")
+        save_figure(fig, path)
+        files_written.append(path)
 
     return files_written

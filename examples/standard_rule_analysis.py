@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 
 # ---------------------------------------------------------------------------
@@ -568,6 +569,7 @@ def analyze_standard_scenario(
     data: Dict[str, Any],
     config: Dict[str, Any],
     output_dir: str,
+    variant: str = "Rule",
 ) -> Dict[str, Any]:
     """Run standard metrics, validation, plots, and JSON output."""
     _ensure_fundamentals_from_config(data, config)
@@ -599,10 +601,45 @@ def analyze_standard_scenario(
     )
     print(f"\nVALIDATION: {validation.interpretation}")
     print(f"Fit Score: {validation.score:.1%}")
+
+    # ------------------------------------------------------------------
+    # Polish Hook 9: universal Layer A baseline. Writes summary.json in
+    # the Hook 11 schema (overwriting the legacy summary.json above).
+    # ------------------------------------------------------------------
+    write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario=scenario,
+        variant=variant,
+        extra_summary={
+            "scenario_metrics": metrics,
+            "validation": validation.to_dict(),
+        },
+    )
     return summary
 
 
-def run_standard_analysis(scenario: str, default_config: str) -> Dict[str, Any]:
+def _derive_variant_from_config_path(config_path: str) -> str:
+    """Best-effort variant inference from a canonical config path.
+
+    A canonical config path looks like
+    ``configs/{Scenario}/{Variant}/simulation.yml``. This helper returns
+    the variant if one of the four canonical names appears in the path;
+    otherwise returns ``"Rule"`` as the conservative default.
+    """
+    parts = os.path.normpath(config_path).split(os.sep)
+    for candidate in ("RuleLLM", "Rule", "LLM", "Rag"):
+        if candidate in parts:
+            return candidate
+    return "Rule"
+
+
+def run_standard_analysis(
+    scenario: str,
+    default_config: str,
+    variant: str | None = None,
+) -> Dict[str, Any]:
     """Run standard analysis for a scenario config path."""
     parser = argparse.ArgumentParser(description=f"Analyze {scenario} simulation results")
     parser.add_argument("-c", "--config", type=str, default=default_config)
@@ -613,4 +650,5 @@ def run_standard_analysis(scenario: str, default_config: str) -> Dict[str, Any]:
     os.makedirs(output_dir, exist_ok=True)
     results = load_results(config)
     data = _load_data(results)
-    return analyze_standard_scenario(scenario, data, config, output_dir)
+    resolved_variant = variant or _derive_variant_from_config_path(args.config)
+    return analyze_standard_scenario(scenario, data, config, output_dir, resolved_variant)

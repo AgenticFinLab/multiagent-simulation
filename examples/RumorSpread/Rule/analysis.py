@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils.config import load_config
+from masim.evaluation import write_universal_summary
 
 
 def load_simulation_data(config: dict) -> dict:
@@ -364,6 +365,27 @@ def main():
 
     if not data["belief"]:
         print("No simulation data found. Run the simulation first.")
+        # [polish-hook-9] universal baseline invocation
+        # Compute the 36-metric Layer A baseline and write summary.json
+        # + four universal PNG dashboards. The variant is derived from
+        # the config path so shared-main re-exports still report right.
+        _variant = 'Rule'
+        _cfg_path = locals().get('args', None)
+        _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+        if isinstance(_cfg_path, str):
+            for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+                if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                    _variant = _v
+                    break
+        _universal = write_universal_summary(
+            data,
+            config,
+            output_dir,
+            scenario='RumorSpread',
+            variant=_variant,
+            extra_summary={'scenario_metrics': summary}
+                if isinstance(summary, dict) else None,
+        )
         return
 
     truth_value = config["players"]["environment"]["config"]["extras"][

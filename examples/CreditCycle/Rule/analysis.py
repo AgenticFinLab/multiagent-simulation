@@ -25,6 +25,7 @@ from masim.evaluation.finance import (
     calculate_max_drawdown,
 )
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
 # Data loading (thin adapters over ``masim.evaluation``)
@@ -929,6 +930,27 @@ def main():
     results = load_results(config)
     data = _load_data(results)
     summary = analyze_credit_cycle(data, config, output_dir)
+    # [polish-hook-9] universal baseline invocation
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='CreditCycle',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

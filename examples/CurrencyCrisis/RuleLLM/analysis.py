@@ -13,6 +13,7 @@ import argparse
 import os
 
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 from examples.CurrencyCrisis.Rule.analysis import (
     _batch_to_rounds,
@@ -47,6 +48,27 @@ def main() -> None:
 
     summary = analyze_currency_crisis(data, config, output_dir)
 
+    # [polish-hook-9] universal baseline invocation
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'RuleLLM'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='CurrencyCrisis',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

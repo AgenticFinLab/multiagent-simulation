@@ -45,6 +45,11 @@ from .data_loader import (
     series,
 )
 from .llm_action_distribution import analyze_action_distribution
+from .universal import (
+    CATEGORY_ORDER,
+    compute_universal_metrics,
+    write_universal_summary,
+)
 
 __all__ = [
     # Submodules
@@ -61,4 +66,8 @@ __all__ = [
     "series",
     # LLM-specific analysis (implement-simulation-skill §7.2)
     "analyze_action_distribution",
+    # Universal metric aggregator (polish-simulation-pipeline §8.6 Hook 9)
+    "CATEGORY_ORDER",
+    "compute_universal_metrics",
+    "write_universal_summary",
 ]
