@@ -108,7 +108,6 @@ def main() -> Dict[str, Any]:
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, default=str)
     print(f"Saved FramingEffect RAG retrieval stats to {rag_stats_path}")
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

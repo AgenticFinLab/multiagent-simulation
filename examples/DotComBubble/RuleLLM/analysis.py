@@ -134,7 +134,6 @@ def main() -> Dict[str, Any]:
     )
     create_visualizations(data, str(output_dir))
     print(json.dumps(metrics, indent=2, ensure_ascii=False))
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

@@ -176,7 +176,6 @@ def main() -> Dict[str, Any]:
             f"mean_retrieval_failure_rate = {agg['mean_retrieval_failure_rate']:.3f}"
         )
     print(summary["validation"]["interpretation"])
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

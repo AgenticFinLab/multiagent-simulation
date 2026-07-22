@@ -890,7 +890,6 @@ def analyze_framingeffect(
     print(f"VAF: {computed.get('volatility_amplification_factor', float('nan')):.3f}  (target 1.5–3.5)")
     print(f"\n{validation.interpretation}")
     print(f"\nFit Score: {validation.score:.1%}  VALID={validation.is_valid}")
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

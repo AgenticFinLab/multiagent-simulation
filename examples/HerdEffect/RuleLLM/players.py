@@ -41,10 +41,11 @@ from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("HerdEffectRuleLLM")
 
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
-    build_messages,
-    call_llm,
+    is_retryable_llm_error,
 )
 
 
@@ -263,6 +264,12 @@ class BaseLLMInvestor(GeneralPlayer):
                 entry_limit=custom_state_hot_limit,
             )
 
+            llm_config = extras["llm"]
+            self.state.custom_state["llm_client"] = LangChainAPIInference(
+                lm_name=llm_config["lm_name"],
+                generation_config=llm_config["generation_config"],
+            )
+
         # Get market data
         if observation.inbounds:
             for inb in observation.inbounds:
@@ -319,23 +326,22 @@ class BaseLLMInvestor(GeneralPlayer):
             portfolio_value=cash + position * price,
         )
 
-        messages = build_messages(sys_msg, user_msg)
+        messages = [InferInput(system_msg=sys_msg, user_msg=user_msg)]
 
         # Call LLM
         max_retries = 3
+        llm_client = self.state.custom_state["llm_client"]
         decision = None
         last_error = None
         for attempt in range(max_retries):
             try:
-                infer_output = await call_llm(
-                    messages=messages,
-                    lm_type=llm_config["lm_type"],
-                    lm_name=llm_config["lm_name"],
-                    generation_config=llm_config["generation_config"],
-                )
-                decision = parse_llm_response_with_thinking(
+                infer_output = llm_client.run(messages)
+                response_text = (
                     infer_output.outputs[0].response
+                    if hasattr(infer_output, "outputs")
+                    else infer_output.response
                 )
+                decision = parse_llm_response_with_thinking(response_text)
                 break
             except Exception as exc:  # pylint: disable=broad-except
                 last_error = exc

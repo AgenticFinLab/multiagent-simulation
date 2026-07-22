@@ -208,8 +208,6 @@ def main() -> Dict[str, Any]:
         json.dump(rag_stats, f, indent=2)
     with open(os.path.join(analysis_dir, "summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

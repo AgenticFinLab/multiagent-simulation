@@ -26,7 +26,6 @@ def main() -> Dict[str, Any]:
     config = load_config(args.config)
     data = load_simulation_data(config)
     output_dir = Path(config["setting"]["record_path"]).parent / "analysis"
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

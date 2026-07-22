@@ -81,6 +81,9 @@ VARIANT_COLORS = {
 # selector always offers the full set regardless of the agent.
 ALL_ENGINES = ("Rule", "LLM", "RuleLLM", "Rag")
 
+# Engines temporarily disabled in the UI (shown grayed-out, non-operable).
+_DISABLED_ENGINES: set[str] = {"Rag"}
+
 
 def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
     """Return a lightweight cache key for avatar metadata and PNG changes."""
@@ -787,14 +790,20 @@ def render_variant_choice() -> None:
             chip_cols = st.columns(min(len(variant_keys), 4), gap="small")
             for col, key in zip(chip_cols, variant_keys):
                 variant = key.split("/", 1)[1] if "/" in key else key
+                _is_disabled = variant in _DISABLED_ENGINES
                 with col:
                     if st.button(
                         VARIANT_DISPLAY.get(variant, variant),
                         key=f"stage2_default_{variant}",
                         width="stretch",
+                        disabled=_is_disabled,
                         help=(
-                            f"Run {scenario_display_name(selected_base)} "
-                            f"with the {variant} decision engine."
+                            "暂时禁用 (temporarily disabled)"
+                            if _is_disabled
+                            else (
+                                f"Run {scenario_display_name(selected_base)} "
+                                f"with the {variant} decision engine."
+                            )
                         ),
                     ):
                         _launch_default_variant(key)
@@ -842,14 +851,20 @@ def render_variant_choice() -> None:
                 chip_cols = st.columns(min(len(variant_keys), 4), gap="small")
                 for col, key in zip(chip_cols, variant_keys):
                     variant = key.split("/", 1)[1] if "/" in key else key
+                    _is_disabled = variant in _DISABLED_ENGINES
                     with col:
                         if st.button(
                             VARIANT_DISPLAY.get(variant, variant),
                             key=f"stage2_default_{variant}",
                             width="stretch",
+                            disabled=_is_disabled,
                             help=(
-                                f"Run {scenario_display_name(selected_base)} "
-                                f"with the {variant} decision engine."
+                                "暂时禁用 (temporarily disabled)"
+                                if _is_disabled
+                                else (
+                                    f"Run {scenario_display_name(selected_base)} "
+                                    f"with the {variant} decision engine."
+                                )
                             ),
                         ):
                             _launch_default_variant(key)
@@ -1221,7 +1236,7 @@ def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = No
     for item in raw_items:
         agent_type = item["agent_type"]
         display_name = item.get("display_name", agent_type)
-        image_path = IMAGE_ROOT / item.get("image_path", f"png/{agent_type}.png")
+        image_path = IMAGE_ROOT / item["image_path"]
         domain = item.get("domain", "finance")
 
         source_value = item.get("source_profile", "")
@@ -1590,7 +1605,7 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
     agent_type = agent["agent_type"]
     # Every agent supports all decision engines by default, so the selector
     # always offers the full set (Rule / LLM / RuleLLM / RAG).
-    all_engines = list(ALL_ENGINES)
+    all_engines = [e for e in ALL_ENGINES if e not in _DISABLED_ENGINES]
     specs = _load_param_specs(agent)
 
     st.markdown('<div class="market-kicker">Customize</div>', unsafe_allow_html=True)
@@ -1609,10 +1624,14 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
         key=engine_key,
         help=(
             "Choose the decision-making engine. Rule = deterministic logic; "
-            "LLM = persona-driven prompt; RuleLLM = hybrid; RAG = "
-            "retrieval-augmented. Every agent supports all engines."
+            "LLM = persona-driven prompt; RuleLLM = hybrid."
         ),
     )
+    if _DISABLED_ENGINES:
+        st.caption(
+            f"{'、'.join(VARIANT_DISPLAY.get(e, e) for e in sorted(_DISABLED_ENGINES))}"
+            " 暂时禁用"
+        )
     engine = st.session_state[engine_key]
 
     if not specs:

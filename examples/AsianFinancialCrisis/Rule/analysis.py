@@ -869,7 +869,6 @@ def main() -> None:
     if not data["market_prices"]:
         data = _load_data_from_communication(config)
     summary = analyze_asian_financial_crisis(data, config, output_dir)
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

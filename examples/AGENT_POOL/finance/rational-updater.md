@@ -297,7 +297,7 @@ State update: unchanged.
 | Field | Content |
 |-------|---------|
 | Author | AGenticFinLab |
-| Reviewed by | audit_agent_handbook.py v1 |
+| Reviewed by | QoderWork three-pass self-check |
 | Created | 2026-06-27 |
 | Version | 1.0.3 |
 | Status | conformant |

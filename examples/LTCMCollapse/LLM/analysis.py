@@ -47,7 +47,6 @@ def main() -> None:
     from examples.LTCMCollapse.Rule.analysis import _write_summary
 
     _write_summary(analysis_path, metrics, validation)
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

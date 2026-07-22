@@ -43,9 +43,9 @@ that covers invariants no scenario-scoped Step 2/Step 3 audit can
 reach. This sweep is domain- and variant-neutral (it reads the
 variant prefix list from target §10.1 of each scenario) and MUST
 report zero issues, or halt via `AskUserQuestion` with per-issue
-options before Status transition. Backing tool:
-`scripts/audit_agent_naming.py` (no arguments → full repo scan).
-Coverage:
+options before Status transition. Executed manually by walking each
+invariant in the coverage list below across every scenario in
+`examples/`. Coverage:
 
 - **Orphan pool assets.** Any `examples/AGENT_POOL/{Domain}/*.md` or
   `examples/AGENT_POOL/agent_images/icons/{Domain}-*.png` not

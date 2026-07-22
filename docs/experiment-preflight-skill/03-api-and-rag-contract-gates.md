@@ -34,14 +34,7 @@ For API rows, inspect effective prompts and players:
 If one row reveals a shared missing field, run a static audit over related rows
 before patching only the observed row.
 
-Run the tracked contract regression before launching API batches:
-
-```bash
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate LMSim
-source scripts/env.sh
-python scripts/test_scenario_contracts.py
-```
+Manually walk every planned row's `analysis.py`, `players.py`, and prompt/parser pair before launching API batches: confirm every field written by an order or `decision` dict is consumed downstream, and every field consumed downstream is written. For special-schema scenarios (`RumorSpread`, `EchoChamber`), check against the scenario's own parser rather than forcing canonical trading fields.
 
 ## Gate 2: RAG Assets And Embedding
 

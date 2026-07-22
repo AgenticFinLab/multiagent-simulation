@@ -610,8 +610,6 @@ def analyze_equity_premium(data: Dict[str, Any], output_dir: str) -> Dict[str, A
     ax.text(0.05, 0.20, f"Validation score: {score:.1%}", fontsize=12)
     save_figure(fig, os.path.join(output_dir, "03_summary.png"))
     plt.close()
-
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

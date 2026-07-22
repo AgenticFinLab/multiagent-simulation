@@ -190,7 +190,6 @@ def main() -> Dict[str, Any]:
         f" {summary['llm_action_analysis']['aggregate']['mean_entropy_bits']:.3f}"
     )
     print(summary["validation"]["interpretation"])
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

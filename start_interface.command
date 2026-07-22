@@ -50,10 +50,39 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${PROJECT_ROOT}"
 
-if ! "${PROJECT_ROOT}/scripts/start_interface.sh"; then
-    echo
-    echo "Failed to start the MASim interface."
-    # Keep the Terminal window open when launched from Finder.
-    read -r -p "Press Return to close..." _
-    exit 1
+: "${MASIM_PYTHON:=python3}"
+: "${MASIM_PORT:=8501}"
+: "${MASIM_ADDRESS:=127.0.0.1}"
+
+URL="http://${MASIM_ADDRESS}:${MASIM_PORT}"
+LOG_FILE="${PROJECT_ROOT}/.streamlit_interface.log"
+
+# If already running on the target port, just open the browser.
+if lsof -iTCP:"${MASIM_PORT}" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "Streamlit already running on ${URL}; opening browser."
+    open "${URL}" || true
+    exit 0
 fi
+
+echo "Starting MASim interface at ${URL}"
+echo "Log: ${LOG_FILE}"
+
+nohup "${MASIM_PYTHON}" -m streamlit run masim/interface/app.py \
+    --server.address "${MASIM_ADDRESS}" \
+    --server.port "${MASIM_PORT}" \
+    --server.headless true \
+    > "${LOG_FILE}" 2>&1 &
+
+# Wait for the port to accept connections (max 30s), then open the browser.
+for _ in $(seq 1 60); do
+    if curl -sSf "${URL}" -o /dev/null 2>&1; then
+        open "${URL}" || true
+        exit 0
+    fi
+    sleep 0.5
+done
+
+echo
+echo "Streamlit did not become ready within 30s. See ${LOG_FILE} for details."
+read -r -p "Press Return to close..." _
+exit 1

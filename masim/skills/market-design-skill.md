@@ -1050,19 +1050,18 @@ explains this legend inline. This keeps academic honesty
 (readers see exactly what is implemented today) while
 preserving the design target for future upgrades.
 
-### 8.6 Injection / migration workflow
+### 8.6 Manual migration recipe
 
-For bulk migration of legacy scenarios, use
-`scripts/inject_market_archetype.py` which:
+For each variant `players.yml` under `configs/`:
 
-1. Iterates all variant `players.yml` under `configs/`.
-2. Detects coordinator top-level key (matches
+1. Detect the coordinator top-level key (matches
    `^market:`, `^\w+_opinion_environment:`,
    `^\w+_information_environment:`).
-3. Reads the mapping table (scenario stem → archetype stem).
-4. Inserts `archetype: {stem}  # -> AGENT_POOL/market/{stem}.md`
-   as the first child of the coordinator block. Idempotent —
-   updates in place if the field already exists.
+2. Look up the scenario stem → archetype stem in the mapping
+   table maintained in `market-icon-generation-skill.md`.
+3. Add `archetype: {stem}  # -> AGENT_POOL/market/{stem}.md`
+   as the first child of the coordinator block, updating in
+   place if the field already exists.
 
 ### 8.7 Cross-section consistency
 

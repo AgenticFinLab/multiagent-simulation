@@ -781,7 +781,6 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
     summary = analyze_availability_bias(data, config, output_dir)
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

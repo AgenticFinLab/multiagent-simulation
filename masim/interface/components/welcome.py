@@ -485,7 +485,8 @@ def render_welcome() -> None:
     st.markdown(
         '<div class="welcome-feature-row">'
         '<span class="welcome-chip">40+ market scenarios</span>'
-        '<span class="welcome-chip">Rule / LLM / RuleLLM / RAG engines</span>'
+        '<span class="welcome-chip">Rule / LLM / RuleLLM engines</span>'
+        '<span class="welcome-chip" style="opacity:0.5">RAG (暂不可用)</span>'
         '<span class="welcome-chip">Customizable investor roster</span>'
         "</div>",
         unsafe_allow_html=True,

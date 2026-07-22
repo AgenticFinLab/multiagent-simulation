@@ -365,7 +365,6 @@ def main():
 
     if not data["belief"]:
         print("No simulation data found. Run the simulation first.")
-        # [polish-hook-9] universal baseline invocation
         # Compute the 36-metric Layer A baseline and write summary.json
         # + four universal PNG dashboards. The variant is derived from
         # the config path so shared-main re-exports still report right.

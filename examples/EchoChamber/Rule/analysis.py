@@ -514,7 +514,6 @@ def main():
         print(f"Depolarize/Polarize Ratio: {a['depolarize_to_polarize_ratio']:.3f}")
         print(f"Depolarize Lag: {a['depolarize_lag_rounds']:.0f} rounds")
     print(f"\nResults saved to {analysis_dir}")
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

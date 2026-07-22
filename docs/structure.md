@@ -52,11 +52,10 @@ multiagent-simulation/
 |   |-- document-sources/     # RAG 文档原料
 |   `-- __init__.py
 |-- configs/                  # 场景运行配置（与 examples/ 同名目录、四变体并列）
-|-- scripts/                  # 矩阵运行、预检和回归测试
 |-- docs/                     # 架构、场景、实验规范与历史报告
 |-- EXPERIMENT/               # 本地实验产物（运行时生成）
 |-- simulation-results/       # 标准化发布数据包（外部交付）
-|-- tools/  third-part/  tests/  build/
+|-- third-part/  tests/  build/
 |-- setup.py
 `-- requirements.txt          # 项目依赖
 ```
@@ -157,14 +156,6 @@ python examples/Volmageddon/RuleLLM/run_volmageddon_rulellm.py `
   -c configs/Volmageddon/RuleLLM/simulation.yml
 ```
 
-矩阵发现、隔离运行和超时管理：
-
-```powershell
-python scripts/run_example_matrix.py --dry-run `
-  --scenario Volmageddon --mechanism RuleLLM `
-  --isolated-artifacts --conda-bin conda --conda-env LMSim
-```
-
 Web 界面：
 
 ```powershell
@@ -174,14 +165,6 @@ streamlit run masim/interface/app.py
 LLM 模式通常需要 `ARK_API_KEY`；RAG 还可能需要 `HUNYUAN_API_KEY`、`MINERU_API_KEY` 及可用的知识库目录。
 
 ## 9. 测试与验收
-
-正式运行前执行：
-
-```powershell
-python scripts/test_scenario_contracts.py
-python scripts/test_run_example_matrix.py
-python scripts/test_run_api_full_plan.py
-```
 
 推荐流程：
 
@@ -212,7 +195,7 @@ examples/AGENT_POOL/
 |-- ExtractedExampleInvestors/          # 从历史场景抽取的原始档案
 |   |-- unique/                         # 去重后的市场级原型
 |   `-- non-unique/                     # 场景级原始档案
-|-- agent_images/                       # 头像 (png/) + agent_avatar_map.json
+|-- agent_images/                       # 头像图标 (icons/) 与设计说明 (design.md)
 `-- README.md
 ```
 
@@ -309,7 +292,6 @@ polish-simulation-pipeline.md          (pipeline #2 入口)
 | 修改通信关系       | `topology.yml`                                                    |
 | 修改记录行为       | `persona.yml`                                                     |
 | 分析实验结果       | `analysis.py`、`masim/evaluation/`                                |
-| 批量运行实验       | `scripts/run_example_matrix.py`                                   |
 | 排查实验失败       | `docs/example-revision-guide/08-runtime-failure-patterns.md`      |
 | 撰写新场景目标文件     | `masim/skills/define-simulation-scenario-skill.md`（{domain}-{scenario}.md 规范）    |
 | 从零创建新场景         | `masim/skills/create-simulation-pipeline.md`（pipeline #1；需先有目标文件）           |

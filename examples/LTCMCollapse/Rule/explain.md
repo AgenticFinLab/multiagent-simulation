@@ -123,8 +123,7 @@ Investors.act()
 
 ## §8 Validation Checklist
 
-- `scripts/run_example_matrix.py --dry-run --scenario LTCMCollapse --mechanism Rule` discovers one row.
-- `preflight_rows.py --row LTCMCollapse__Rule` reports zero failures.
+- `python examples/LTCMCollapse/Rule/run_ltcmcollapse_rule.py -c configs/LTCMCollapse/Rule/simulation.yml --dry-run` discovers one experiment row.
 - Runtime logic should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 References

@@ -244,7 +244,6 @@ def analyze_lossaversion(
     summary_path = output / "summary.json"
     summary["files_written"].append(str(summary_path))
     summary_path.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

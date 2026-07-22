@@ -115,8 +115,6 @@ def main() -> None:
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
     with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
         json.dump(rag_stats, f, indent=2)
-
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

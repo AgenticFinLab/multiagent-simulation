@@ -236,7 +236,7 @@ Decision: hold (no capacity).
 | Field       | Content                                                                          |
 |-------------|----------------------------------------------------------------------------------|
 | Author      | AGenticFinLab                                                                    |
-| Reviewed by | audit_agent_handbook.py v1                                                       |
+| Reviewed by | QoderWork three-pass self-check |
 | Created     | 2026-07-11                                                                       |
 | Version     | 1.1.0                                                                            |
 | Status      | conformant                                                                       |

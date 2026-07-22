@@ -63,8 +63,8 @@ All other target-file changes go through the define skill's revise mode.
 | Market Coordinator Design Handbook     | `masim/skills/market-design-skill.md` (§2 Market Type taxonomy, §3 canonical section order, §6 Validation Checklist)                                                                                                                                                                                                   |
 | Market coordinator icon generation     | `masim/skills/market-icon-generation-skill.md`                                                                                                                                                                                                                                                                         |
 | Market coordinator pool match protocol | `examples/AGENT_POOL/market/` — three-stage match analogous to participant-agent gate, driven by `simulation-bases.md §3` coordinator identity                                                                                                                                                                         |
-| Agent handbook structural audit        | `scripts/audit_agent_handbook.py` (backs `06-step2-agent-design.md` Hook 5a); includes `--check todo` whole-file placeholder scan — any TODO / TBD / FIXME / XXX / PLACEHOLDER / `Status: stub` / `auto-generated placeholder` / `fill this section` / `insert here` marker outside a fenced code block is a hard FAIL |
-| Agent naming / parity / coverage audit | `scripts/audit_agent_naming.py` (backs Hooks 4, 6, 7)                                                                                                                                                                                                                                                                  |
+| Agent handbook structural audit        | Manual review against `06-step2-agent-design.md` Hook 5a — walk every AGENT_POOL profile and confirm no `TODO / TBD / FIXME / XXX / PLACEHOLDER / Status: stub / auto-generated placeholder / fill this section / insert here` marker exists outside fenced code blocks; any such marker is a hard FAIL |
+| Agent naming / parity / coverage audit | Manual review against Hooks 4, 6, 7 — cross-check every scenario's `players.py` roster, `simulation-bases.md §3` anchor, and per-config roster in `configs/{Scenario}/{Variant}/simulation.yml` for parity |
 | Three-PASS validation discipline       | This file §3 and `agent-design-skill.md §6`                                                                                                                                                                                                                                                                            |
 | From-scratch pipeline (contrast)       | `masim/skills/create-simulation-pipeline.md`                                                                                                                                                                                                                                                                           |
 
@@ -214,20 +214,20 @@ log to tmpl/".
     ┌────────────────────────────────────────────────────────────┐
     │ Step 2 — Agent + Environment Design Audit                  │
     │   File: 06-step2-agent-design.md ## Contract → Polish Hooks│
-    │   Hook 5a: `scripts/audit_agent_handbook.py` structural    │
-    │   gate (exit 0 required before proceeding). Covers §2      │
-    │   section order, §3 section-by-section requirements,       │
-    │   §3.6.0 I/O Contract presence, and a whole-file           │
-    │   placeholder scan (`--check todo`) that rejects any       │
-    │   TODO / TBD / FIXME / XXX / PLACEHOLDER / Status: stub /  │
-    │   auto-generated-placeholder / fill-this-section /         │
-    │   insert-here marker outside a fenced code block. No form  │
-    │   of TODO or placeholder content is permitted in a         │
-    │   conformant profile.                                      │
+    │   Hook 5a: Manual structural gate — walk every AGENT_POOL   │
+    │   profile line-by-line and confirm §2 section order, §3     │
+    │   section-by-section requirements, §3.6.0 I/O Contract      │
+    │   presence, and reject any TODO / TBD / FIXME / XXX /       │
+    │   PLACEHOLDER / Status: stub / auto-generated-placeholder / │
+    │   fill-this-section / insert-here marker outside a fenced   │
+    │   code block. No form of TODO or placeholder content is     │
+    │   permitted in a conformant profile.                        │
     │   Hook 5b: agent-design-skill.md §6 three-PASS semantic    │
     │   checklist.                                               │
-    │   Hook 6: `scripts/audit_agent_naming.py --anchor          │
-    │   simulation-bases` parity gate.                           │
+    │   Hook 6: Manual parity gate — cross-check every scenario's │
+    │   `players.py` roster against `simulation-bases.md §3`     │
+    │   anchor and per-config roster in                          │
+    │   `configs/{Scenario}/{Variant}/simulation.yml`.           │
     │   AGENT_POOL three-stage match rerun (handles reuse/       │
     │   fork/new AND outcome-shrink new→reuse).                  │
     │   Also audits root doc §3 Environment Design, §5 Diversity │

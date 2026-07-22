@@ -42,7 +42,7 @@ these seven checks — no new configs are added:
 6. **Variant prefix.** Every identity MUST start with the variant's canonical prefix as declared in target §10.1 (finance-default: `rule_`, `llm_`, `rulellm_`, `ragllm_`). Stripping the prefix (via `masim/interface/components/agent_market.py::_canonical_archetype()`) MUST yield an archetype stem that resolves to an existing `examples/AGENT_POOL/{Domain}/{stem-kebab}.md` profile — this ties Step 3's identity form back to Step 2's AGENT_POOL match (Hook 4 there). Fix: rename the identity to include the prefix and rerun the pool three-stage match; do NOT rename the pool file.
 7. **Topology–players identity consistency.** Every identity referenced in `topology.yml` (any variant folder) MUST be defined as a top-level key in the same variant's `players.yml`. Stray topology identities are a defect; fix by removing the orphan reference or by adding the missing player block (whichever the design intent supports — halt via `AskUserQuestion` if unclear).
 
-**Backing tool.** `scripts/audit_agent_naming.py --scenario {ScenarioName}` implements Hooks 5, 6, 7 (and mirrors Step 2 Hook 6 for cross-variant parity). Invoke with no arguments for a repo-wide sweep (see Steps 5 – 10 Contract Hook "repo-wide invariant sweep").
+**Manual audit procedure.** For Hooks 5–7, for the scenario under polish (or every scenario during a repo-wide sweep): (i) list every top-level identity in each variant's `configs/{Scenario}/{Variant}/players.yml`, (ii) list every identity referenced in the same variant's `topology.yml`, and (iii) diff both sets across variants. Any orphan, missing, or unequal identity is a defect and MUST halt via `AskUserQuestion`.
 
 ---
 

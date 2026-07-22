@@ -117,8 +117,6 @@ def main() -> None:
             f"Mean RAG retrieval failure rate: "
             f"{agg['mean_retrieval_failure_rate']:.1%}"
         )
-
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.

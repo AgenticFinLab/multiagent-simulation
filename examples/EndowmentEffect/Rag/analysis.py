@@ -129,7 +129,6 @@ def main() -> Dict[str, Any]:
     print(f"Fit Score: {validation['score']:.1%}")
     print(f"Saved EndowmentEffect RAG retrieval stats to {rag_stats_path}")
     print(f"Saved EndowmentEffect RAG analysis summary to {summary_path}")
-    # [polish-hook-9] universal baseline invocation
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
