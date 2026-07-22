@@ -35,6 +35,10 @@ import random
 import importlib
 from typing import Any, Dict, Optional
 
+from dotenv import load_dotenv
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
+
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
@@ -259,6 +263,17 @@ class BaseLLMInvestor(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
+            load_dotenv()
+            llm_config = extras["llm"]
+            self.state.custom_state["lm_name"] = llm_config["lm_name"]
+            self.state.custom_state["generation_config"] = llm_config[
+                "generation_config"
+            ]
+            self.state.custom_state["llm_client"] = LangChainAPIInference(
+                lm_name=llm_config["lm_name"],
+                generation_config=llm_config["generation_config"],
+            )
+
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
                 entry_limit=custom_state_hot_limit,
@@ -276,6 +291,26 @@ class BaseLLMInvestor(GeneralPlayer):
                 market_data = inb.payload
                 self.state.custom_state["market_data"] = market_data
                 self.state.custom_state["price_history"].append(market_data["price"])
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if "state" in state and hasattr(state["state"], "custom_state"):
+            custom = state["state"].custom_state
+            if "llm_client" in custom:
+                custom = dict(custom)
+                del custom["llm_client"]
+                state["state"].custom_state = custom
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
+            custom = self.state.custom_state
+            if "lm_name" in custom and "llm_client" not in custom:
+                custom["llm_client"] = LangChainAPIInference(
+                    lm_name=custom["lm_name"],
+                    generation_config=custom["generation_config"],
+                )
 
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras

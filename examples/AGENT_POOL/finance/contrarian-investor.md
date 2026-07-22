@@ -330,12 +330,13 @@ State update: No state change.
 | 3 | Fama, E. F., & French, K. R. (1993). Common risk factors in the returns on stocks and bonds. *Journal of Financial Economics*, 33(1), 3-56. https://doi.org/10.1016/0304-405X(93)90023-5 | Value factor as rational explanation |
 | 4 | Hong, H., & Stein, J. C. (1999). A unified theory of underreaction, momentum, and overreaction. *Journal of Finance*, 54(6), 2143-2184. https://doi.org/10.1111/0022-1082.00184  | Alternative: gradual information diffusion |
 
-## Design Provenance
+## Design Provenance and Versioning
 
 | Field       | Content                    |
 |-------------|----------------------------|
 | Author      | polish-simulation-pipeline |
 | Created     | 2026-07-14                 |
-| Version     | 1.0.0                      |
+| Version     | 1.0.1                      |
+| Change log  | 2026-07-21: HerdEffect polish audit normalized provenance heading and added tool-required provenance row. |
 | Status      | canonical                  |
 | Icon        | ![](../agent_images/icons/finance-contrarian-investor.png)         |

@@ -213,7 +213,7 @@ Parameter symbol table:
 
 | Dimension | Specification |
 |-----------|---------------|
-| Default population size | 1 instance in ArchegosCollapse configs. |
+| Default population size | Scenario-defined; use 1-3 instances for concentrated block-liquidity behaviour and larger populations only when the scenario explicitly models dispersed distressed buyers. |
 | Parameter heterogeneity policy | Deterministic base value with optional scenario-level +/-10% sweep around listed defaults. |
 | Heterogeneity per parameter | Threshold and size parameters may vary within the Valid Range; cash/position scale the agent's market impact. |
 | Cross-agent correlation | Same archetype instances share theory and trigger sign; cash and position levels may differ. |
@@ -286,6 +286,6 @@ State update: no state becomes negative.
 | Author | Codex |
 | Reviewed by | Codex three-pass self-check |
 | Created | 2026-06-30 |
-| Version | 1.0.3 |
+| Version | 1.0.4 |
 | Status | conformant |
 | Icon        | ![](../agent_images/icons/finance-block-trade-buyer.png) |
