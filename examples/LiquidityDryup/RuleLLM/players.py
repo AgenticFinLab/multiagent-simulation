@@ -432,25 +432,25 @@ class RuleLLMMarketMaker(RuleLLMInvestor):
     _system_prompt = RULELLM_MARKET_MAKER_SYS
 
 
-class RuleLLMLiquidityDemander(RuleLLMInvestor):
+class RuleLLMLiquiditySeeker(RuleLLMInvestor):
     """Hybrid: LiquiditySeeker rules + LLM reasoning. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RULELLM_LIQUIDITY_SEEKER_SYS
 
 
-class RuleLLMArbitrageur(RuleLLMInvestor):
+class RuleLLMValueTrader(RuleLLMInvestor):
     """Hybrid: ValueTrader rules + LLM reasoning. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RULELLM_VALUE_TRADER_SYS
 
 
-class RuleLLMValueInvestor(RuleLLMInvestor):
+class RuleLLMMomentumTrader(RuleLLMInvestor):
     """Hybrid: MomentumTrader rules + LLM reasoning. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
 
 
-class RuleLLMForcedSeller(RuleLLMInvestor):
+class RuleLLMNoiseTrader(RuleLLMInvestor):
     """Hybrid: NoiseTrader rules + LLM reasoning. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
@@ -460,8 +460,8 @@ __all__ = [
     "Market",
     "RuleLLMInvestor",
     "RuleLLMMarketMaker",
-    "RuleLLMLiquidityDemander",
-    "RuleLLMArbitrageur",
-    "RuleLLMValueInvestor",
-    "RuleLLMForcedSeller",
+    "RuleLLMLiquiditySeeker",
+    "RuleLLMValueTrader",
+    "RuleLLMMomentumTrader",
+    "RuleLLMNoiseTrader",
 ]

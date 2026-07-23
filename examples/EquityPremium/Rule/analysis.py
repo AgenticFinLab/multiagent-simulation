@@ -35,9 +35,6 @@ from masim.evaluation.finance import (
     validate_equity_premium,
 )
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
-
-
 # Constants for equity premium analysis
 ANNUAL_TRADING_DAYS = 252
 RISK_FREE_RATE_ANNUAL = 0.01  # 1% annual bond return
@@ -610,26 +607,6 @@ def analyze_equity_premium(data: Dict[str, Any], output_dir: str) -> Dict[str, A
     ax.text(0.05, 0.20, f"Validation score: {score:.1%}", fontsize=12)
     save_figure(fig, os.path.join(output_dir, "03_summary.png"))
     plt.close()
-    # Compute the 36-metric Layer A baseline and write summary.json
-    # + four universal PNG dashboards. The variant is derived from
-    # the config path so shared-main re-exports still report right.
-    _variant = 'Rule'
-    _cfg_path = locals().get('args', None)
-    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
-    if isinstance(_cfg_path, str):
-        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
-            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
-                _variant = _v
-                break
-    _universal = write_universal_summary(
-        data,
-        config,
-        output_dir,
-        scenario='EquityPremium',
-        variant=_variant,
-        extra_summary={'scenario_metrics': summary}
-            if isinstance(summary, dict) else None,
-    )
     return summary
 
 

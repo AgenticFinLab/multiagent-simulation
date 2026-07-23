@@ -2,10 +2,10 @@
 
 LLM Investor Types:
     - Market Maker: Provides liquidity for spread
-    - Liquidity Demander: Takes liquidity
-    - Arbitrageur: Seeks opportunities
-    - Value Investor: Patient buyer
-    - Forced Seller: Must sell
+    - Liquidity Seeker: Takes liquidity
+    - Value Trader: Provides contrarian liquidity
+    - Momentum Trader: Follows recent returns
+    - Noise Trader: Creates uninformed order flow
 
 Market Parameters (from config.extras):
     - record_path: Path for output records
@@ -39,10 +39,10 @@ from lmbase.inference.base import InferInput
 from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.LiquidityDryup.LLM.prompts import (
     LLM_MARKET_MAKER_SYS,
-    LLM_LIQUIDITY_DEMANDER_SYS,
-    LLM_ARBITRAGEUR_SYS,
-    LLM_VALUE_SYS,
-    LLM_FORCED_SELLER_SYS,
+    LLM_LIQUIDITY_SEEKER_SYS,
+    LLM_VALUE_TRADER_SYS,
+    LLM_MOMENTUM_TRADER_SYS,
+    LLM_NOISE_TRADER_SYS,
     LLM_USER_TEMPLATE,
 )
 
@@ -290,36 +290,36 @@ class LLMMarketMaker(LLMInvestor):
     _system_prompt = LLM_MARKET_MAKER_SYS
 
 
-class LLMLiquidityDemander(LLMInvestor):
+class LLMLiquiditySeeker(LLMInvestor):
     """Liquidity demander - takes liquidity. Theory: simulation-bases.md §4.2"""
 
-    _system_prompt = LLM_LIQUIDITY_DEMANDER_SYS
+    _system_prompt = LLM_LIQUIDITY_SEEKER_SYS
 
 
-class LLMArbitrageur(LLMInvestor):
-    """Arbitrageur - seeks opportunities. Theory: simulation-bases.md §4.3"""
+class LLMValueTrader(LLMInvestor):
+    """Value trader - seeks dislocations and provides liquidity. Theory: simulation-bases.md §4.3"""
 
-    _system_prompt = LLM_ARBITRAGEUR_SYS
+    _system_prompt = LLM_VALUE_TRADER_SYS
 
 
-class LLMValueInvestor(LLMInvestor):
+class LLMMomentumTrader(LLMInvestor):
     """Momentum-style LLM investor using the legacy class name. Theory: simulation-bases.md §4.4"""
 
-    _system_prompt = LLM_VALUE_SYS
+    _system_prompt = LLM_MOMENTUM_TRADER_SYS
 
 
-class LLMForcedSeller(LLMInvestor):
+class LLMNoiseTrader(LLMInvestor):
     """Noise-trader LLM investor using the legacy class name. Theory: simulation-bases.md §4.5"""
 
-    _system_prompt = LLM_FORCED_SELLER_SYS
+    _system_prompt = LLM_NOISE_TRADER_SYS
 
 
 __all__ = [
     "Market",
     "LLMInvestor",
     "LLMMarketMaker",
-    "LLMLiquidityDemander",
-    "LLMArbitrageur",
-    "LLMValueInvestor",
-    "LLMForcedSeller",
+    "LLMLiquiditySeeker",
+    "LLMValueTrader",
+    "LLMMomentumTrader",
+    "LLMNoiseTrader",
 ]

@@ -10,18 +10,18 @@ from .players import (
     Market,
     RagLLMInvestor,
     RagLLMMarketMaker,
-    RagLLMLiquidityDemander,
-    RagLLMArbitrageur,
-    RagLLMValueInvestor,
-    RagLLMForcedSeller,
+    RagLLMLiquiditySeeker,
+    RagLLMValueTrader,
+    RagLLMMomentumTrader,
+    RagLLMNoiseTrader,
 )
 
 __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMMarketMaker",
-    "RagLLMLiquidityDemander",
-    "RagLLMArbitrageur",
-    "RagLLMValueInvestor",
-    "RagLLMForcedSeller",
+    "RagLLMLiquiditySeeker",
+    "RagLLMValueTrader",
+    "RagLLMMomentumTrader",
+    "RagLLMNoiseTrader",
 ]

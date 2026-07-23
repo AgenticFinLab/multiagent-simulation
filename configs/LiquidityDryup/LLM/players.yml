@@ -25,6 +25,7 @@ market:
   persona: !include persona.yml
 
 llm_market_maker:
+  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
   name: "LLM Market Maker"
   class: "examples.LiquidityDryup.LLM.players:LLMMarketMaker"
   # Expander → llm_market_maker_1, llm_market_maker_2, llm_market_maker_3
@@ -50,13 +51,14 @@ llm_market_maker:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_liquidity_demander:
-  name: "LLM Liquidity Demander"
-  class: "examples.LiquidityDryup.LLM.players:LLMLiquidityDemander"
-  # Expander → llm_liquidity_demander_1, llm_liquidity_demander_2, llm_liquidity_demander_3
+llm_liquidity_seeker:
+  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
+  name: "LLM Liquidity Seeker"
+  class: "examples.LiquidityDryup.LLM.players:LLMLiquiditySeeker"
+  # Expander → llm_liquidity_seeker_1, llm_liquidity_seeker_2, llm_liquidity_seeker_3
   num_instances: 3
   config:
-    identity: "llm_liquidity_demander"
+    identity: "llm_liquidity_seeker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -67,7 +69,7 @@ llm_liquidity_demander:
       initial_position: 50.0  # Source: simulation-bases.md §6
       custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
-        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_LIQUIDITY_DEMANDER_SYS"
+        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_LIQUIDITY_SEEKER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -76,13 +78,14 @@ llm_liquidity_demander:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_arbitrageur:
-  name: "LLM Arbitrageur"
-  class: "examples.LiquidityDryup.LLM.players:LLMArbitrageur"
-  # Expander → llm_arbitrageur_1, llm_arbitrageur_2
+llm_value_trader:
+  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
+  name: "LLM Value Trader"
+  class: "examples.LiquidityDryup.LLM.players:LLMValueTrader"
+  # Expander → llm_value_trader_1, llm_value_trader_2
   num_instances: 2
   config:
-    identity: "llm_arbitrageur"
+    identity: "llm_value_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -93,7 +96,7 @@ llm_arbitrageur:
       initial_position: 50.0  # Source: simulation-bases.md §6
       custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
-        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_ARBITRAGEUR_SYS"
+        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_VALUE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -102,13 +105,14 @@ llm_arbitrageur:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_value_investor:
-  name: "LLM Value Investor"
-  class: "examples.LiquidityDryup.LLM.players:LLMValueInvestor"
-  # Expander → llm_value_1, llm_value_2
+llm_momentum_trader:
+  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
+  name: "LLM Momentum Trader"
+  class: "examples.LiquidityDryup.LLM.players:LLMMomentumTrader"
+  # Expander → llm_momentum_trader_1, llm_momentum_trader_2
   num_instances: 2
   config:
-    identity: "llm_value_investor"
+    identity: "llm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -119,7 +123,7 @@ llm_value_investor:
       initial_position: 50.0  # Source: simulation-bases.md §6
       custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
-        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_VALUE_SYS"
+        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
@@ -128,13 +132,14 @@ llm_value_investor:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_forced_seller:
-  name: "LLM Forced Seller"
-  class: "examples.LiquidityDryup.LLM.players:LLMForcedSeller"
-  # Expander → llm_forced_seller_1, llm_forced_seller_2
+llm_noise_trader:
+  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
+  name: "LLM Noise Trader"
+  class: "examples.LiquidityDryup.LLM.players:LLMNoiseTrader"
+  # Expander → llm_noise_trader_1, llm_noise_trader_2
   num_instances: 2
   config:
-    identity: "llm_forced_seller"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -142,10 +147,10 @@ llm_forced_seller:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/LLM/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 100.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
-        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_FORCED_SELLER_SYS"
+        sys_message: "examples.LiquidityDryup.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.LiquidityDryup.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"

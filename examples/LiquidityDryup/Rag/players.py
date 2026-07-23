@@ -763,26 +763,26 @@ class RagLLMMarketMaker(RagLLMInvestor):
     _system_prompt = RAGLLM_MARKET_MAKER_SYS
 
 
-class RagLLMLiquidityDemander(RagLLMInvestor):
-    """RAG-augmented: LiquidityDemander rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2"""
+class RagLLMLiquiditySeeker(RagLLMInvestor):
+    """RAG-augmented liquidity-seeker rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RAGLLM_LIQUIDITY_SEEKER_SYS
 
 
-class RagLLMArbitrageur(RagLLMInvestor):
-    """RAG-augmented: Arbitrageur rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3"""
+class RagLLMValueTrader(RagLLMInvestor):
+    """RAG-augmented value-trader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RAGLLM_VALUE_TRADER_SYS
 
 
-class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.4"""
+class RagLLMMomentumTrader(RagLLMInvestor):
+    """RAG-augmented momentum-trader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RAGLLM_MOMENTUM_TRADER_SYS
 
 
-class RagLLMForcedSeller(RagLLMInvestor):
-    """RAG-augmented: ForcedSeller rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5"""
+class RagLLMNoiseTrader(RagLLMInvestor):
+    """RAG-augmented noise-trader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 
@@ -791,8 +791,8 @@ __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMMarketMaker",
-    "RagLLMLiquidityDemander",
-    "RagLLMArbitrageur",
-    "RagLLMValueInvestor",
-    "RagLLMForcedSeller",
+    "RagLLMLiquiditySeeker",
+    "RagLLMValueTrader",
+    "RagLLMMomentumTrader",
+    "RagLLMNoiseTrader",
 ]

@@ -26,23 +26,23 @@ This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `qu
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMLiquidityDemander` uses `RAGLLM_LIQUIDITY_SEEKER_SYS` plus retrieved execution-stress knowledge. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RagLLMLiquiditySeeker` uses `RAGLLM_LIQUIDITY_SEEKER_SYS` plus retrieved execution-stress knowledge. |
 | Mathematical model from simulation-bases.md §4.2 | Prompt instructs demand around +/-15 shares, scaled by liquidity / 100, with zero liquidity provision. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_liquidity_demander.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_liquidity_seeker.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
 | Variant-specific decision mechanism | RAG-augmented constrained-execution order. |
 ### §2.3 ValueTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMArbitrageur` uses `RAGLLM_VALUE_TRADER_SYS` plus retrieved post-crisis value/liquidity context. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RagLLMValueTrader` uses `RAGLLM_VALUE_TRADER_SYS` plus retrieved post-crisis value/liquidity context. |
 | Mathematical model from simulation-bases.md §4.3 | Prompt instructs liquidity around 20 above 5% absolute deviation and quantity about `deviation * 30` above 3%. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_arbitrageur.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_value_trader.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
 | Variant-specific decision mechanism | RAG-augmented stabilizing value order. |
 ### §2.4 MomentumTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMValueInvestor` is a legacy class name whose prompt `RAGLLM_MOMENTUM_TRADER_SYS` implements momentum-trader behavior. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `RagLLMMomentumTrader` uses `RAGLLM_MOMENTUM_TRADER_SYS` to implement momentum-trader behavior. |
 | Mathematical model from simulation-bases.md §4.4 | Prompt instructs trend-following quantity about `return * 200` above 1% absolute return. |
 | Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_value.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
 | Variant-specific decision mechanism | RAG-augmented trend-following order. |
@@ -50,9 +50,9 @@ This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `qu
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMForcedSeller` is a legacy class name whose prompt `RAGLLM_NOISE_TRADER_SYS` implements noise-trader behavior. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `RagLLMNoiseTrader` uses `RAGLLM_NOISE_TRADER_SYS` to implement noise-trader behavior. |
 | Mathematical model from simulation-bases.md §4.5 | Prompt instructs small noisy orders, quantity below about 15 shares, and zero liquidity provision. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_forced_seller.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/Rag/players.yml:ragllm_noise_trader.config.extras` supplies portfolio state, ARK model policy, and RAG config. |
 | Variant-specific decision mechanism | RAG-augmented uninformed order flow. |
 
 ## §3 Market Mechanism

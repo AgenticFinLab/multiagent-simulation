@@ -40,6 +40,7 @@ market:
   persona: !include persona.yml
 
 rule_market_maker:
+  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
   name: "Market Maker"
   class: "examples.LiquidityDryup.Rule.players:MarketMaker"
   # Expander → market_maker_1, market_maker_2, market_maker_3
@@ -53,7 +54,7 @@ rule_market_maker:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 0.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       # MarketMaker specific
       volatility_threshold: 0.02  # Source: simulation-bases.md §4.1.7
@@ -63,6 +64,7 @@ rule_market_maker:
   persona: !include persona.yml
 
 rule_liquidity_seeker:
+  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
   name: "Liquidity Seeker"
   class: "examples.LiquidityDryup.Rule.players:LiquiditySeeker"
   # Expander → liquidity_seeker_1, liquidity_seeker_2, liquidity_seeker_3
@@ -76,7 +78,7 @@ rule_liquidity_seeker:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 0.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       # LiquiditySeeker specific
       target_volatility: 15.0  # Source: simulation-bases.md §4.2.7
@@ -84,6 +86,7 @@ rule_liquidity_seeker:
   persona: !include persona.yml
 
 rule_value_trader:
+  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
   name: "Value Trader"
   class: "examples.LiquidityDryup.Rule.players:ValueTrader"
   # Expander → value_trader_1, value_trader_2
@@ -97,7 +100,7 @@ rule_value_trader:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 0.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       # ValueTrader specific
       liquidity_threshold: 0.05  # Source: simulation-bases.md §4.3.7
@@ -107,6 +110,7 @@ rule_value_trader:
   persona: !include persona.yml
 
 rule_momentum_trader:
+  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
   name: "Momentum Trader"
   class: "examples.LiquidityDryup.Rule.players:MomentumTrader"
   # Expander → momentum_trader_1, momentum_trader_2
@@ -120,7 +124,7 @@ rule_momentum_trader:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 0.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       # MomentumTrader specific
       momentum_threshold: 0.01  # Source: simulation-bases.md §4.4.7
@@ -128,6 +132,7 @@ rule_momentum_trader:
   persona: !include persona.yml
 
 rule_noise_trader:
+  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
   name: "Noise Trader"
   class: "examples.LiquidityDryup.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
@@ -141,7 +146,7 @@ rule_noise_trader:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/Rule/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 0.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       # NoiseTrader specific
       noise_volatility: 10.0  # Source: simulation-bases.md §4.5.7

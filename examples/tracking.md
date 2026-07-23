@@ -31,7 +31,7 @@ Coordination table for `examples/` scenarios. Record modifications here to preve
 | 23 | HerdEffect             | 🟢      | qihang      | Jul 8 2026           | —                 |
 | 24 | HerdingInformation     | 🟡      | qihang          | Jul 8 2026           |  LLM, Rule, Rag                 |
 | 25 | HindsightBias          | 🟡      |              |             |                    |
-| 26 | LiquidityDryup         | 🟡      |              |            |                    |
+| 26 | LiquidityDryup         | 🟢      | Wenyou      | 2026-07-23 | Rule              |
 | 27 | LossAversion           | 🟢      | Wenyou      | Jul 16 2026 | LLM, Rule, RuleLLM |
 | 28 | LTCMCollapse           | 🟢      | Wenyou      | Jul 16 2026 | LLM, Rule, RuleLLM |
 | 29 | LUNACollapse           | 🟢      | Wenyou      | Jul 20 2026 | LLM, Rule, RuleLLM |

@@ -201,9 +201,7 @@ def create_visualizations(data: Dict[str, Any], output_path: str) -> list[str]:
     if not fundamental_series:
         raise ValueError("fundamental series is empty")
     standard_data = dict(data)
-    standard_data["fundamentals"] = float(
-        fundamental_series[min(fundamental_series)]
-    )
+    standard_data["fundamentals"] = fundamental_series
     return create_standard_visualizations(SCENARIO, standard_data, output_path)
 
 

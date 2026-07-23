@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 from examples.LTCMCollapse.Rule.analysis import (
+    _universal_data,
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
@@ -34,6 +35,10 @@ def main() -> None:
     from examples.LTCMCollapse.Rule.analysis import _write_summary
 
     _write_summary(analysis_path, metrics, validation)
+    summary = {
+        "metrics": metrics,
+        "validation": validation.to_dict(),
+    }
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
@@ -46,9 +51,9 @@ def main() -> None:
                 _variant = _v
                 break
     _universal = write_universal_summary(
-        data,
+        _universal_data(data),
         config,
-        output_dir,
+        analysis_path,
         scenario='LTCMCollapse',
         variant=_variant,
         extra_summary={'scenario_metrics': summary}

@@ -6,12 +6,12 @@ summary.json, 00_investor_bids.png, 01_liquiditydryup_dynamics.png,
 02_liquiditydryup_analysis.png, and 03_summary.png.
 """
 
-from examples.standard_rule_analysis import run_standard_analysis
+from examples.LiquidityDryup.Rule.analysis import run_liquidity_analysis
 
 
 def main():
     """Run the standard analysis output contract for this variant."""
-    return run_standard_analysis("LiquidityDryup", "configs/LiquidityDryup/LLM/simulation.yml")
+    return run_liquidity_analysis("configs/LiquidityDryup/LLM/simulation.yml")
 
 
 if __name__ == "__main__":

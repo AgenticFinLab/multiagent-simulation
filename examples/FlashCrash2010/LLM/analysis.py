@@ -163,6 +163,14 @@ def analyze_llm(config_path: str) -> Dict[str, Any]:
     }
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, default=str)
+    write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario="FlashCrash2010",
+        variant="LLM",
+        extra_summary={"scenario_metrics": summary},
+    )
     return summary
 
 
@@ -190,26 +198,6 @@ def main() -> Dict[str, Any]:
         f" {summary['llm_action_analysis']['aggregate']['mean_entropy_bits']:.3f}"
     )
     print(summary["validation"]["interpretation"])
-    # Compute the 36-metric Layer A baseline and write summary.json
-    # + four universal PNG dashboards. The variant is derived from
-    # the config path so shared-main re-exports still report right.
-    _variant = 'LLM'
-    _cfg_path = locals().get('args', None)
-    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
-    if isinstance(_cfg_path, str):
-        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
-            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
-                _variant = _v
-                break
-    _universal = write_universal_summary(
-        data,
-        config,
-        output_dir,
-        scenario='FlashCrash2010',
-        variant=_variant,
-        extra_summary={'scenario_metrics': summary}
-            if isinstance(summary, dict) else None,
-    )
     return summary
 
 

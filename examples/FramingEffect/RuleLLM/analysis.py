@@ -50,6 +50,9 @@ def main() -> Dict[str, Any]:
 
     results = load_results(config)
     data = _load_data(results)
+    summary = analyze_framingeffect(
+        data, config, output_dir, variant="RuleLLM"
+    )
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
@@ -70,7 +73,7 @@ def main() -> Dict[str, Any]:
         extra_summary={'scenario_metrics': summary}
             if isinstance(summary, dict) else None,
     )
-    return analyze_framingeffect(data, config, output_dir, variant="RuleLLM")
+    return summary
 
 
 __all__ = [
