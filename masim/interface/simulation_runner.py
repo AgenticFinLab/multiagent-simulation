@@ -73,7 +73,6 @@ Workflows
 Classes
 -------
 - SimulationRunner: Main async runner with factory constructors
-- MockSimulationRunner: Mock runner for UI testing
 - RoundUpdate: Dataclass for per-round updates
 - SimulationStatus: Dataclass for simulation state
 
@@ -442,122 +441,18 @@ class SimulationRunner:
         self.status.message = "Stopping simulation..."
 
 
-class MockSimulationRunner:
-    """Mock runner for testing without actual simulation."""
-
-    def __init__(self, config_path: str):
-        self.config_path = config_path
-        self.config = None
-        self.status = SimulationStatus(state="idle")
-        self._stop_requested = False
-
-    async def setup(self) -> bool:
-        """Mock setup."""
-        try:
-            yaml_config = load_config(self.config_path)
-            self.config = SimulationConfig(**yaml_config)
-            self.status.total_rounds = self.config.setting.get("total_rounds", 50)
-            self.status = SimulationStatus(
-                state="running", message="Setup complete (mock mode)"
-            )
-            return True
-        except Exception as e:
-            self.status = SimulationStatus(
-                state="error", error=f"Setup failed: {str(e)}"
-            )
-            return False
-
-    async def run(
-        self, progress_callback: Optional[Callable[[SimulationStatus], None]] = None
-    ) -> AsyncGenerator[RoundUpdate, None]:
-        """Mock run with simulated progress."""
-        total_rounds = (
-            self.config.setting.get("total_rounds", 50) if self.config else 50
-        )
-
-        for round_num in range(1, total_rounds + 1):
-            if self._stop_requested:
-                break
-
-            self.status.current_round = round_num
-            self.status.progress_pct = (round_num / total_rounds) * 100
-            self.status.message = f"Round {round_num}/{total_rounds}"
-
-            if progress_callback:
-                progress_callback(self.status)
-
-            # Generate mock agent actions
-            agent_actions = self._generate_mock_actions(round_num)
-
-            yield RoundUpdate(
-                round_num=round_num,
-                total_rounds=total_rounds,
-                agent_actions=agent_actions,
-                market_data={"price": 100 + round_num * 0.5},
-                messages=[],
-            )
-
-            # Simulate work
-            await asyncio.sleep(0.05)
-
-        self.status.state = "completed"
-        self.status.progress_pct = 100.0
-        self.status.message = "Mock simulation completed!"
-
-        if progress_callback:
-            progress_callback(self.status)
-
-    def _generate_mock_actions(self, round_num: int) -> List[Dict[str, Any]]:
-        """Generate mock agent actions for display."""
-        import random
-
-        agents = [
-            ("Momentum Speculator", "momentum_speculator_1"),
-            ("Rational Arbitrageur", "rational_arbitrageur_1"),
-            ("Noise Trader", "noise_trader_1"),
-            ("Fundamental Investor", "fundamental_investor_1"),
-        ]
-
-        actions = []
-        for name, agent_id in agents:
-            bid = round(random.uniform(95, 105), 2)
-            qty = round(random.uniform(-20, 20), 1)
-            actions.append(
-                {
-                    "agent_name": name,
-                    "agent_id": agent_id,
-                    "bid_price": bid,
-                    "quantity": qty,
-                    "action": "BUY" if qty > 0 else "SELL" if qty < 0 else "HOLD",
-                }
-            )
-
-        return actions
-
-    async def shutdown(self):
-        """Mock shutdown."""
-        pass
-
-    def stop(self):
-        """Request stop."""
-        self._stop_requested = True
-
-
 async def run_simulation_with_progress(
-    config_path: str, use_mock: bool = False
+    config_path: str,
 ) -> AsyncGenerator[SimulationStatus, None]:
     """Convenience function to run simulation and yield status updates.
 
     Args:
         config_path: Path to simulation config
-        use_mock: If True, use mock runner for testing
 
     Yields:
         SimulationStatus updates
     """
-    runner = (
-        MockSimulationRunner(config_path) if use_mock else SimulationRunner(config_path)
-    )
+    runner = SimulationRunner(config_path)
 
     # Setup
     if not await runner.setup():

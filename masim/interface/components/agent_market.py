@@ -169,7 +169,7 @@ def render_entry_choice() -> None:
         else:
             st.markdown("**Stage 2.** Default or customize")
         st.markdown("---")
-        if st.button("\u2190 Back to welcome", width="stretch"):
+        if st.button("← Back", width="stretch"):
             st.session_state.workflow_stage = "welcome"
             st.rerun()
         st.caption("MASIM v0.1.0")
@@ -274,7 +274,7 @@ def render_variant_choice() -> None:
         else:
             st.markdown("**Stage 2.** Default or customize")
         st.markdown("---")
-        if st.button("\u2190 Back to scenarios", width="stretch"):
+        if st.button("← Back", width="stretch"):
             st.session_state.workflow_stage = "scenario_setup"
             st.session_state.pop("selected_scenario_base", None)
             st.rerun()
@@ -1492,10 +1492,10 @@ def render_back_to_stage1_bar(
             page while keeping the committed scenario.
     """
     if target_stage == "variant_choice":
-        label = "← Back to run options"
+        label = "← Back"
         help_text = 'Return to the "Choose how to run it" page.'
     else:
-        label = "← Back to scenario"
+        label = "← Back"
         help_text = "Return to the scenario picker (Stage 1)."
     btn_col, _ = st.columns([1, 6])
     with btn_col:

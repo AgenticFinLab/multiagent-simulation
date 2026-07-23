@@ -246,6 +246,18 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                         st.image(buf, width="stretch")
                         plt.close(fig)
 
+        # Market coordinator profile — click to open the archetype .md
+        # (examples/AGENT_POOL/market/{stem}.md) in a modal, mirroring the
+        # drill-through available on the "Choose how to run it" page.
+        if st.button(
+            "📄 View market profile",
+            width="stretch",
+            key="sidebar_view_market_profile",
+            help="Open the market coordinator archetype definition (.md).",
+        ):
+            from .agent_market import _show_market_archetype_dialog
+            _show_market_archetype_dialog(selected_scenario)
+
         # ------------------------------------------------------------------
         # Agent cards — show Principle + Instances + Key Params only
         # ------------------------------------------------------------------
@@ -257,17 +269,29 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
             st.info("No agent configuration found")
         else:
             for agent in agents:
-                _render_agent_card(agent)
+                _render_agent_card(agent, selected_scenario)
 
-        # Documentation button — opens full explain.md page
+        # Bases documents — open the full simulation / analysis bases pages
         st.markdown("")
         if st.button(
-            "📖 Full Documentation",
+            "📖 Simulation Bases",
             width="stretch",
-            key="docs_btn",
-            help="Read the academic background and model details for this scenario",
+            key="sim_bases_btn",
+            help="Read the simulation theory and modeling bases (simulation-bases.md)",
         ):
             st.session_state.previous_page = st.session_state.get("current_page", "Simulation")
+            st.session_state.docs_target = "simulation_bases"
+            st.session_state.current_page = "Docs"
+            st.rerun()
+
+        if st.button(
+            "📊 Analysis Bases",
+            width="stretch",
+            key="analysis_bases_btn",
+            help="Read the analysis metrics and evaluation bases (analysis-bases.md)",
+        ):
+            st.session_state.previous_page = st.session_state.get("current_page", "Simulation")
+            st.session_state.docs_target = "analysis_bases"
             st.session_state.current_page = "Docs"
             st.rerun()
 
@@ -282,11 +306,13 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
 # ---------------------------------------------------------------------------
 
 
-def _render_agent_card(agent: dict):
+def _render_agent_card(agent: dict, selected_scenario: str = ""):
     """Render a compact agent card with Theory, Principle, Instances, and key params.
 
     Args:
         agent: Agent info dict from get_agents_info
+        selected_scenario: Active scenario key, used to resolve the market
+            coordinator archetype when the card represents the coordinator.
     """
     icon = "🏦" if agent.get("role") == "coordinator" else "👤"
     instances = agent.get("instances", 1)
@@ -295,6 +321,7 @@ def _render_agent_card(agent: dict):
     )
     theory = agent.get("theory", "")
     principle = agent.get("principle", "")
+    is_coordinator = agent.get("role") == "coordinator"
 
     with st.expander(f"{icon} {agent.get('name', 'Unknown')}"):
         if theory:
@@ -318,6 +345,21 @@ def _render_agent_card(agent: dict):
             for key, value in params.items():
                 display_key = key.replace("_", " ").title()
                 st.caption(f"  • {display_key}: {value}")
+
+        # Profile drill-through — open the agent/coordinator .md in a modal.
+        st.markdown("")
+        if st.button(
+            "📄 View profile",
+            width="stretch",
+            key=f"sidebar_view_profile_{agent.get('id', agent.get('name', ''))}",
+            help="Open this agent's design profile (.md).",
+        ):
+            if is_coordinator:
+                from .agent_market import _show_market_archetype_dialog
+                _show_market_archetype_dialog(selected_scenario)
+            else:
+                from .agent_market import _show_agent_profile_dialog
+                _show_agent_profile_dialog(agent)
 
 
 # ---------------------------------------------------------------------------

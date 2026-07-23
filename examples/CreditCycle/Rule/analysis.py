@@ -55,10 +55,10 @@ def _compute_peak_deviation(
     Returns (peak_positive, trough_negative) as absolute fractions.
     """
     if not prices_list or fundamental <= 0:
-        return (0.0, 0.0)
+        return (float("nan"), float("nan"))
     deviations = [(p - fundamental) / fundamental for p in prices_list]
-    peak = max(deviations) if deviations else 0.0
-    trough = min(deviations) if deviations else 0.0
+    peak = max(deviations) if deviations else float("nan")
+    trough = min(deviations) if deviations else float("nan")
     return (float(peak), float(trough))
 
 
@@ -67,8 +67,13 @@ def _compute_leverage_amplitude_index(peak: float, trough: float) -> float:
 
     analysis-bases.md §2.1 — Geanakoplos (2010).
     """
+    if not np.isfinite(peak) or not np.isfinite(trough):
+        return float("nan")
     if abs(trough) < 1e-12:
-        return float("inf") if peak > 0 else 0.0
+        # No downside amplitude observed:
+        # - peak > 0  → truly unbounded asymmetry (inf is faithful)
+        # - peak == 0 → no cycle observed at all → undefined, NOT "zero LAI"
+        return float("inf") if peak > 0 else float("nan")
     return abs(peak) / abs(trough)
 
 
@@ -83,7 +88,7 @@ def _compute_minsky_fragility_score(
     Approximation: count consecutive rounds where |δ|<0.02 before each bust onset.
     """
     if not prices_list or fundamental <= 0:
-        return 0.0
+        return float("nan")
     deviations = [(p - fundamental) / fundamental for p in prices_list]
     # Find bust onsets: first round crossing crisis_threshold after stable
     bust_onsets: List[int] = []
@@ -96,7 +101,10 @@ def _compute_minsky_fragility_score(
             in_crisis = False
 
     if not bust_onsets:
-        return 0.0
+        # No bust occurred in this run: MFS is genuinely undefined
+        # (there is no "stable-rounds-before-bust" to average). Report NaN
+        # rather than 0.0 to avoid the "zero fragility" null-hypothesis mask.
+        return float("nan")
 
     scores: List[float] = []
     for onset in bust_onsets:
@@ -107,20 +115,22 @@ def _compute_minsky_fragility_score(
             else:
                 break
         scores.append(float(stable))
-    return float(np.mean(scores)) if scores else 0.0
+    return float(np.mean(scores)) if scores else float("nan")
 
 
 def _compute_credit_contraction_speed(prices_list: List[float]) -> float:
     """CCS — price units per round from peak to trough. analysis-bases.md §2.3."""
     if len(prices_list) < 2:
-        return 0.0
+        return float("nan")
     peak_val = max(prices_list)
     peak_idx = prices_list.index(peak_val)
     post_peak = prices_list[peak_idx:]
     trough_val = min(post_peak)
     trough_idx = peak_idx + post_peak.index(trough_val)
     if trough_idx == peak_idx:
-        return 0.0
+        # Peak is the last observation → no post-peak contraction observed.
+        # CCS is undefined here, not "zero speed".
+        return float("nan")
     return float((peak_val - trough_val) / (trough_idx - peak_idx))
 
 
@@ -132,11 +142,14 @@ def _compute_counter_cyclical_offset_ratio(
 ) -> float:
     """CCOR — stabilizer buy / destabilizer sell during bust. analysis-bases.md §2.4."""
     if not prices_list or fundamental <= 0:
-        return 0.0
+        return float("nan")
     deviations = [(p - fundamental) / fundamental for p in prices_list]
     bust_rounds = {i + 1 for i, d in enumerate(deviations) if d < bust_threshold}
     if not bust_rounds:
-        return 0.0
+        # No bust rounds → CCOR is undefined (nothing to counter-cycle against).
+        # Emitting 0.0 here would falsely register "no stabilization" against a
+        # non-existent bust; NaN is the honest signal.
+        return float("nan")
 
     stabilizer_buy = 0.0
     destabilizer_sell = 0.0
@@ -168,7 +181,10 @@ def _compute_counter_cyclical_offset_ratio(
                     destabilizer_sell += qty
 
     if destabilizer_sell < 1e-6:
-        return float("inf") if stabilizer_buy > 0 else 0.0
+        # No destabilizer sold during bust:
+        # - stabilizer_buy > 0 → infinite counter-cyclical dominance (faithful)
+        # - stabilizer_buy == 0 → nobody acted during bust → ratio undefined
+        return float("inf") if stabilizer_buy > 0 else float("nan")
     return float(stabilizer_buy / destabilizer_sell)
 
 
@@ -177,12 +193,16 @@ def _compute_phase_duration_ratio(
 ) -> float:
     """PDR — expansion rounds / contraction rounds. analysis-bases.md §2.5."""
     if not prices_list or fundamental <= 0:
-        return 0.0
+        return float("nan")
     deviations = [(p - fundamental) / fundamental for p in prices_list]
     expansion = sum(1 for d in deviations if d > threshold)
     contraction = sum(1 for d in deviations if d < -threshold)
     if contraction == 0:
-        return float("inf") if expansion > 0 else 1.0
+        # No contraction phase:
+        # - expansion > 0 → truly unbounded expansion/contraction ratio (inf)
+        # - expansion == 0 → neither phase observed → undefined, NOT "balanced 1.0"
+        #   (returning 1.0 here would collide with the "balanced cycle" null.)
+        return float("inf") if expansion > 0 else float("nan")
     return float(expansion / contraction)
 
 
@@ -263,7 +283,7 @@ def _compute_agent_vwap(
             elif action == "sell":
                 total_sell += qty
         vwap_data[aid] = {
-            "vwap": pv_sum / total_vol if total_vol > 0 else 0.0,
+            "vwap": pv_sum / total_vol if total_vol > 0 else float("nan"),
             "total_volume": total_vol,
             "total_buy": total_buy,
             "total_sell": total_sell,

@@ -75,7 +75,18 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["fundamental_history"].append(fundamental)
 
-        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        if fundamental <= 0:
+            # Fundamental must be positive in this scenario — it seeds mean
+            # reversion, deviation, and every downstream decision rule.  A
+            # silent 0.0 deviation fallback would mask a broken configuration
+            # AND coincide with the "at fundamental" null hypothesis that
+            # nearly every rule tests for.  Fail loudly instead.
+            raise ValueError(
+                f"CreditCycle Coordinator: non-positive fundamental "
+                f"({fundamental!r}) at round {observation.round}; "
+                "cannot compute deviation."
+            )
+        deviation = (new_price - fundamental) / fundamental
         self.state.custom_state["deviation"] = deviation
         logger.debug(
             "Round %d: price=%.2f deviation=%.4f",

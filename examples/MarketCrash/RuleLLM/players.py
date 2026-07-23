@@ -333,6 +333,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 last_error,
             )
             order = {
+                "action": "hold",
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
@@ -340,6 +341,8 @@ class RuleLLMInvestor(GeneralPlayer):
                 "reasoning": "LLM parse failed: held position",
                 "provides_liquidity": False,
                 "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
             return {
                 **order,

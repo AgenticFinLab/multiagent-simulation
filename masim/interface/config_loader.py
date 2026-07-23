@@ -439,6 +439,30 @@ def get_simulation_bases_content(scenario_key: str) -> Optional[str]:
         return None
 
 
+def get_analysis_bases_path(scenario_key: str) -> Optional[Path]:
+    """Return the path to a scenario's analysis-bases.md, or None.
+
+    Every scenario ships one canonical analysis basis at
+    ``examples/{ScenarioBase}/analysis-bases.md``. The lookup is
+    variant-agnostic and project-agnostic: only the base scenario name
+    is used to resolve the file.
+    """
+    base = _scenario_base(scenario_key)
+    candidate = EXAMPLES_DIR / base / "analysis-bases.md"
+    return candidate if candidate.exists() else None
+
+
+def get_analysis_bases_content(scenario_key: str) -> Optional[str]:
+    """Return the full markdown text of ``analysis-bases.md`` or None."""
+    path = get_analysis_bases_path(scenario_key)
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
 def get_phenomenon_description(scenario_key: str) -> str:
     """Extract the ``Phenomenon Name`` cell from ``simulation-bases.md``.
 

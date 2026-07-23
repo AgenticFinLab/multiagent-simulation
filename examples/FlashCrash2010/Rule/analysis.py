@@ -116,19 +116,31 @@ def depth_collapse_ratio(depth_history: List[float], base_depth: float) -> float
     """Minimum observed depth divided by the configured ``base_depth``.
 
     ``0.1`` means depth fell to 10 % of baseline (a 90 % collapse).
+    Returns NaN when the metric is undefined (empty history / non-positive
+    base). 1.0 was previously used as a fallback, but that is the exact
+    "no collapse / normal liquidity" null and silently made missing data
+    look like a real negative result.
     """
     if not depth_history or base_depth <= 0:
-        return 1.0
+        return float("nan")
     return float(min(depth_history) / base_depth)
 
 
 def spread_widening_factor(
     spread_history: List[float], normal_spread: float = 0.0001
 ) -> float:
-    """Maximum spread reached divided by ``normal_spread`` (baseline)."""
-    if not spread_history:
-        return 1.0
-    return float(max(spread_history) / max(normal_spread, 1e-8))
+    """Maximum spread reached divided by ``normal_spread`` (baseline).
+
+    Returns NaN when the metric is undefined (empty history or invalid
+    baseline). Previously returned 1.0 (the "no widening" null) on empty
+    input, which conflated a missing measurement with a real negative
+    result. Also removed the max(normal_spread, 1e-8) denominator floor,
+    which turned intended NaN divisions into artificially-large finite
+    numbers.
+    """
+    if not spread_history or normal_spread <= 0:
+        return float("nan")
+    return float(max(spread_history) / normal_spread)
 
 
 def hft_withdrawal_rounds(
@@ -242,9 +254,9 @@ def _extract_series_from_market(
         if "price" not in md:
             continue
         price.append(float(md["price"]))
-        spread.append(float(md.get("spread", 0.0)))
-        depth.append(float(md.get("depth", 0.0)))
-        volume.append(float(md.get("volume", 0.0)))
+        spread.append(float(md["spread"]) if "spread" in md else float("nan"))
+        depth.append(float(md["depth"]) if "depth" in md else float("nan"))
+        volume.append(float(md["volume"]) if "volume" in md else float("nan"))
         rounds.append(int(rn))
     return price, spread, depth, volume, rounds
 

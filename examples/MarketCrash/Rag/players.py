@@ -703,6 +703,7 @@ class RagLLMInvestor(GeneralPlayer):
                 last_error,
             )
             order = {
+                "action": "hold",
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
@@ -711,6 +712,8 @@ class RagLLMInvestor(GeneralPlayer):
                 "provides_liquidity": False,
                 "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
                 "rag_context": self.state.custom_state.get("last_rag_context"),
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
             return {
                 **order,

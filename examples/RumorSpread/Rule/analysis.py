@@ -143,19 +143,21 @@ def calculate_metrics(data: dict, truth_value: float = 0.1) -> dict:
         late_rounds = belief[total_rounds // 2 :]
         belief_persistence = float(np.mean(late_rounds))
 
-    rumor_amplification = peak_belief / max(belief[0], 0.01) if belief[0] > 0 else 0.0
+    rumor_amplification = (
+        peak_belief / belief[0] if belief[0] > 0 else float("nan")
+    )
 
-    max_distortion = float(np.max(distortion)) if len(distortion) > 0 else 0.0
-    final_distortion = float(distortion[-1]) if len(distortion) > 0 else 0.0
-    avg_distortion = float(np.mean(distortion)) if len(distortion) > 0 else 0.0
+    max_distortion = float(np.max(distortion)) if len(distortion) > 0 else float("nan")
+    final_distortion = float(distortion[-1]) if len(distortion) > 0 else float("nan")
+    avg_distortion = float(np.mean(distortion)) if len(distortion) > 0 else float("nan")
 
     total_spread = float(np.sum(spread_count)) if len(spread_count) > 0 else 0.0
     total_correction = (
         float(np.sum(correction_count)) if len(correction_count) > 0 else 0.0
     )
-    avg_spread = float(np.mean(spread_count)) if len(spread_count) > 0 else 0.0
+    avg_spread = float(np.mean(spread_count)) if len(spread_count) > 0 else float("nan")
     avg_correction = (
-        float(np.mean(correction_count)) if len(correction_count) > 0 else 0.0
+        float(np.mean(correction_count)) if len(correction_count) > 0 else float("nan")
     )
 
     correction_ratio = total_correction / total_spread if total_spread > 0 else 0.0

@@ -332,8 +332,19 @@ def m_wealth_transfer_direction(data, config):
     biased_wealth_change = 0.0
     corrective_wealth_change = 0.0
     for pid, round_payloads in payloads.items():
-        cash = initial_cash.get(pid, 0.0)
-        position = initial_positions.get(pid, 0.0)
+        if pid not in initial_cash or pid not in initial_positions:
+            # Fail loudly rather than silently endow an unknown agent with
+            # cash=0/position=0.  A default zero endowment silently zeroes
+            # initial_wealth and turns the entire terminal-vs-initial delta
+            # into a fabricated "profit" equal to the mark-to-market value —
+            # exactly the class of null-hypothesis-coincident mock the audit
+            # is eliminating.
+            raise MetricUnavailable(
+                f"agent {pid!r} appears in payloads but has no config entry "
+                "(initial_cash / initial_position missing)"
+            )
+        cash = initial_cash[pid]
+        position = initial_positions[pid]
         initial_wealth = cash + position * final_price
         strategy = None
         for payload in round_payloads.values():

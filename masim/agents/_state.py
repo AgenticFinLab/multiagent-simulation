@@ -61,10 +61,39 @@ class StandardMarketState:
         volatility: Optional[float] = None,
     ) -> "StandardMarketState":
         """Build a :class:`StandardMarketState` from a broadcast payload."""
-        price = float(market_data.get("price", 0.0))
+        # FAIL-LOUD: `price` is the minimum viable market signal. If the market
+        # coordinator broadcasts a payload without a price, agents cannot make
+        # decisions — silently defaulting to 0.0 would allow "free buys"
+        # (fill_price=0) and poison every portfolio-based metric.
+        if "price" not in market_data or market_data["price"] is None:
+            raise ValueError(
+                "StandardMarketState.from_market_data: market_data is missing "
+                "'price'. Every scenario coordinator MUST broadcast price. "
+                "Silent default to 0.0 would falsify portfolio_value and "
+                "make fill_price=0 (agents 'buy for free')."
+            )
+        price = float(market_data["price"])
         prev_price = float(market_data.get("prev_price", price))
-        fundamental = float(market_data.get("fundamental", price))
-        deviation = float(market_data.get("deviation", 0.0))
+        # For fundamental/deviation: if the scenario does NOT model a
+        # fundamental value, coordinators should still broadcast an explicit
+        # `fundamental` field (NaN or matching price). Silently defaulting
+        # to price would lie to the LLM prompt ("Fundamental = Price,
+        # Deviation = 0", i.e. perfect fair pricing) and poison every
+        # under_revision / bias_magnitude / price_deviation metric.
+        _fund_raw = market_data.get("fundamental")
+        if _fund_raw is None:
+            fundamental = float("nan")
+        else:
+            fundamental = float(_fund_raw)
+        _dev_raw = market_data.get("deviation")
+        if _dev_raw is None:
+            # Derive from price/fundamental when possible; else NaN.
+            if fundamental == fundamental and fundamental != 0.0:  # not NaN
+                deviation = (price - fundamental) / fundamental
+            else:
+                deviation = float("nan")
+        else:
+            deviation = float(_dev_raw)
         if prev_price > 0:
             price_change = (price - prev_price) / prev_price
         else:

@@ -713,10 +713,36 @@ class LLMValidator:
             if "overall_reasoning" in data:
                 reasoning_parts.append(f"\n**Overall**: {data['overall_reasoning']}")
 
+            # Confidence is required; a silent 0.5 default would masquerade
+            # as a real "neutral" judgment. Missing/invalid confidence is a
+            # malformed response and must be surfaced as a parse failure.
+            if "confidence" not in data:
+                return LLMValidationResult(
+                    scenario=scenario,
+                    is_valid=False,
+                    confidence=float("nan"),
+                    reasoning="LLM response missing required 'confidence' field",
+                    theory_alignment={},
+                    suggestions=["Ensure the prompt template requests a confidence value"],
+                    raw_response=response,
+                )
+            try:
+                conf_val = float(data["confidence"])
+            except (TypeError, ValueError):
+                return LLMValidationResult(
+                    scenario=scenario,
+                    is_valid=False,
+                    confidence=float("nan"),
+                    reasoning=f"LLM returned non-numeric confidence: {data['confidence']!r}",
+                    theory_alignment={},
+                    suggestions=["Retry validation with a stricter JSON schema"],
+                    raw_response=response,
+                )
+
             return LLMValidationResult(
                 scenario=scenario,
                 is_valid=data.get("is_valid", False),
-                confidence=float(data.get("confidence", 0.5)),
+                confidence=conf_val,
                 reasoning="\n\n".join(reasoning_parts),
                 theory_alignment=theory_alignment,
                 suggestions=data.get("suggestions", []),
@@ -724,11 +750,12 @@ class LLMValidator:
             )
 
         except (json.JSONDecodeError, ValueError, KeyError) as e:
-            # Return failed result with error info
+            # Return failed result with error info. NaN (not 0.0) so downstream
+            # cannot accidentally treat this as a real "0% confidence" verdict.
             return LLMValidationResult(
                 scenario=scenario,
                 is_valid=False,
-                confidence=0.0,
+                confidence=float("nan"),
                 reasoning=f"Failed to parse LLM response: {e}",
                 theory_alignment={},
                 suggestions=["Retry validation with different LLM parameters"],

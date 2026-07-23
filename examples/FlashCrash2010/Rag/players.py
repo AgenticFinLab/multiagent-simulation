@@ -400,6 +400,8 @@ class RagLLMInvestor(GeneralPlayer):
                 "reasoning": f"LLM fallback hold after retries: {last_error}",
                 "analysis": "",
                 "provides_liquidity": False,
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
 
         action = decision["action"]
@@ -442,6 +444,13 @@ class RagLLMInvestor(GeneralPlayer):
             "liquidity_field_missing": liquidity_field_missing,
             "rag_context": self.state.custom_state["last_rag_context"],
         }
+        # Propagate LLM-failure sentinel so downstream metrics can exclude
+        # synthetic hold rounds from action-distribution statistics.
+        if decision.get("_skipped"):
+            order["_skipped"] = True
+            order["_skipped_reason"] = decision.get(
+                "_skipped_reason", "llm_failed"
+            )
         validate_order(order)
         return {
             **order,

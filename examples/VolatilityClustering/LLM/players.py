@@ -356,6 +356,7 @@ class LLMInvestor(GeneralPlayer):
                 f"Skipping trade this round."
             )
             order = {
+                "action": "hold",
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
@@ -364,6 +365,8 @@ class LLMInvestor(GeneralPlayer):
                 "analysis": "",
                 "cash": self.state.custom_state["cash"],
                 "position": self.state.custom_state["position"],
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
             return {
                 **order,

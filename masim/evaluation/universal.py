@@ -140,21 +140,30 @@ def _collect_references() -> Dict[str, List[str]]:
 def _series_to_round_dict(series: Any) -> Dict[int, float]:
     """Convert a list/tuple series to ``{round: value}`` (1-indexed).
 
-    Returns an empty dict if the input isn't a coercible list-of-numbers.
-    Dict inputs are passed through unchanged (with int keys).
+    Returns an empty dict if the input isn't a list/tuple/mapping at all.
+    Raises ``ValueError`` if the input HAS a list/mapping shape but its
+    values cannot be coerced to ``(int, float)`` — silently swallowing this
+    used to hide scenario-level bugs (e.g. NaN-string values) and cause
+    metrics to be reported as ``_unavailable`` when they should be
+    ``_error``.
     """
     if isinstance(series, Mapping):
         try:
             return {int(k): float(v) for k, v in series.items()}
-        except (TypeError, ValueError):
-            return {}
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"_series_to_round_dict: mapping has non-numeric values: {exc}"
+            ) from exc
     if isinstance(series, (list, tuple)):
         out: Dict[int, float] = {}
         for i, v in enumerate(series):
             try:
                 out[i + 1] = float(v)
-            except (TypeError, ValueError):
-                return {}
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"_series_to_round_dict: index {i} value {v!r} is not "
+                    f"numeric: {exc}"
+                ) from exc
         return out
     return {}
 
@@ -189,22 +198,35 @@ def _normalize_data(data: Mapping[str, Any]) -> Dict[str, Any]:
             promoted = _series_to_round_dict(candidate)
             if promoted:
                 normalized["fundamentals"] = promoted
+                normalized["_fundamentals_source"] = f"promoted_from:{alt_key}"
                 break
         else:
-            # Fallback: a scalar market_parameters.fundamental_value + a
-            # price series → broadcast the scalar to every price round so
-            # the metric functions have a comparable series.
-            fv = None
+            # Deliberately DO NOT auto-broadcast a scalar
+            # market_parameters.fundamental_value to every round.
+            #
+            # For dynamic-fundamental scenarios (AssetBubble, MomentumEffect,
+            # ReversalEffect, GFC2008, etc.) the fundamental should evolve
+            # over time (dividend growth, regime shifts, announcement
+            # shocks). Broadcasting a constant lies about the baseline and
+            # falsifies price_deviation_ts / mad_pct / half_life_threshold /
+            # under_revision_ratio / price_efficiency_ratio /
+            # forecast_error_persistence — all of which read from
+            # normalized["fundamentals"].
+            #
+            # We record the scalar under a hint key so scenarios that
+            # explicitly want the scalar baseline (rare) can promote it
+            # themselves in their analysis.py.
             mp = normalized.get("market_parameters")
             if isinstance(mp, Mapping) and "fundamental_value" in mp:
-                fv = mp["fundamental_value"]
-            price_dict = normalized.get("market_prices") or {}
-            if fv is not None and price_dict:
                 try:
-                    fv_float = float(fv)
-                    normalized["fundamentals"] = {r: fv_float for r in price_dict}
+                    normalized["_fundamentals_scalar_hint"] = float(
+                        mp["fundamental_value"]
+                    )
+                    normalized["_fundamentals_source"] = "scalar_hint_only"
                 except (TypeError, ValueError):
-                    pass
+                    normalized["_fundamentals_source"] = "scalar_hint_bad_value"
+            else:
+                normalized["_fundamentals_source"] = "missing"
 
     # volumes — canonical Dict[int, float]
     if not normalized.get("volumes"):

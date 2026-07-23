@@ -19,7 +19,7 @@ Metrics Summary:
     | Cross-Sectional Std        | σ(bids)                   | Lower = More      |
 """
 
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple, Any, Mapping
 import numpy as np
 from scipy import stats
 
@@ -391,10 +391,21 @@ def m_agent_action_frequency(data, config):
         raise MetricUnavailable("no investor payloads recorded")
     per_agent: Dict[str, Dict[str, int]] = {}
     for pid, round_payloads in payloads.items():
-        counts = {"buy": 0, "sell": 0, "hold": 0}
+        counts = {"buy": 0, "sell": 0, "hold": 0, "_skipped": 0, "_malformed": 0}
         for payload in round_payloads.values():
-            action = payload.get("action", "hold")
-            counts[action] = counts.get(action, 0) + 1
+            if not isinstance(payload, Mapping):
+                counts["_malformed"] += 1
+                continue
+            if payload.get("_skipped"):
+                counts["_skipped"] += 1
+                continue
+            action = payload.get("action")
+            if action in ("buy", "sell", "hold"):
+                counts[action] += 1
+            else:
+                # Do NOT coerce missing/unknown action to 'hold' — that
+                # inflates the hold bucket and pollutes decision entropy.
+                counts["_malformed"] += 1
         per_agent[pid] = counts
     return {"per_agent": per_agent}
 
@@ -451,16 +462,51 @@ from masim.evaluation.data_loader import (
 )
 
 
+def _require_initial_maps(
+    payloads: Mapping[str, Any],
+    config: Dict[str, Any],
+    require_cash: bool = True,
+    require_position: bool = True,
+) -> Tuple[Dict[str, float], Dict[str, float]]:
+    """Return (cash_map, position_map) after validating every payload pid.
+
+    Silently defaulting missing agents to 0.0 previously masked configuration
+    errors — an agent with a runtime payload but no ``initial_cash`` / ``initial_position``
+    in config would look "broke from start", polluting PnL/wealth/Gini metrics.
+    """
+    cash_map = per_agent_initial_cash(config) if require_cash else {}
+    position_map = per_agent_initial_position(config) if require_position else {}
+    missing_cash = [
+        pid for pid in payloads if require_cash and pid not in cash_map
+    ]
+    missing_pos = [
+        pid for pid in payloads if require_position and pid not in position_map
+    ]
+    if missing_cash:
+        raise MetricUnavailable(
+            f"initial_cash missing for {len(missing_cash)} agent(s): "
+            f"{missing_cash[:5]}{'...' if len(missing_cash) > 5 else ''}"
+        )
+    if missing_pos:
+        raise MetricUnavailable(
+            f"initial_position missing for {len(missing_pos)} agent(s): "
+            f"{missing_pos[:5]}{'...' if len(missing_pos) > 5 else ''}"
+        )
+    return cash_map, position_map
+
+
 def m_agent_net_position_ts(data, config):
     """Cumulative position evolution per agent (initial_position + Δ)."""
     payloads = data.get("investor_payloads")
     if not payloads:
         raise MetricUnavailable("no investor payloads recorded")
-    initial_positions = per_agent_initial_position(config)
+    _, initial_positions = _require_initial_maps(
+        payloads, config, require_cash=False, require_position=True
+    )
     per_agent: Dict[str, Dict[str, Any]] = {}
     for pid, round_payloads in payloads.items():
         rounds_sorted = sorted(round_payloads)
-        position = float(initial_positions.get(pid, 0.0))
+        position = float(initial_positions[pid])
         positions = []
         for round_num in rounds_sorted:
             payload = round_payloads[round_num]
@@ -488,8 +534,9 @@ def m_agent_pnl_terminal(data, config):
     market_prices = data.get("market_prices")
     if not market_prices:
         raise MetricUnavailable("market_prices is empty")
-    initial_cash_map = per_agent_initial_cash(config)
-    initial_position_map = per_agent_initial_position(config)
+    initial_cash_map, initial_position_map = _require_initial_maps(
+        payloads, config
+    )
     # Use first available price as initial price for initial value calculation
     first_round = min(market_prices)
     initial_price = float(market_prices[first_round])
@@ -497,20 +544,34 @@ def m_agent_pnl_terminal(data, config):
     final_price = float(market_prices[final_round])
     per_agent: Dict[str, Dict[str, float]] = {}
     for pid, round_payloads in payloads.items():
-        cash = float(initial_cash_map.get(pid, 0.0))
-        position = float(initial_position_map.get(pid, 0.0))
+        cash = float(initial_cash_map[pid])
+        position = float(initial_position_map[pid])
         for round_num in sorted(round_payloads):
             payload = round_payloads[round_num]
-            bid_price = float(payload.get("bid_price", 0.0)) or float(
-                market_prices.get(round_num, 0.0)
-            )
+            if payload.get("_skipped"):
+                # Synthetic bootstrap placeholder — no real trade.
+                continue
             buy, sell = payload_buy_sell(payload)
+            # LOOK-AHEAD-SAFE: use CURRENT round's price as fallback.
+            # Falling back to 0.0 previously silently zeroed cash flow
+            # (buy*0/sell*0), biasing PnL toward "position pure gain".
+            bid_raw = payload.get("bid_price")
+            if bid_raw is not None and float(bid_raw) > 0:
+                bid_price = float(bid_raw)
+            else:
+                mp = market_prices.get(round_num)
+                if mp is None or float(mp) <= 0:
+                    raise MetricUnavailable(
+                        f"agent {pid} round {round_num} has no bid_price "
+                        f"and market_prices lacks that round"
+                    )
+                bid_price = float(mp)
             cash -= buy * bid_price
             cash += sell * bid_price
             position += buy - sell
         terminal_value = cash + position * final_price
-        initial_value = float(initial_cash_map.get(pid, 0.0)) + float(
-            initial_position_map.get(pid, 0.0)
+        initial_value = float(initial_cash_map[pid]) + float(
+            initial_position_map[pid]
         ) * initial_price
         per_agent[pid] = {
             "terminal_cash": cash,
@@ -521,7 +582,7 @@ def m_agent_pnl_terminal(data, config):
             "pnl_pct": (
                 (terminal_value - initial_value) / initial_value * 100
                 if initial_value > 0
-                else 0.0
+                else float("nan")
             ),
         }
     return {"per_agent": per_agent, "final_price": final_price}
@@ -539,18 +600,29 @@ def m_agent_sharpe_terminal(data, config):
     market_prices = data.get("market_prices")
     if not market_prices:
         raise MetricUnavailable("market_prices is empty")
-    initial_position_map = per_agent_initial_position(config)
+    _, initial_position_map = _require_initial_maps(
+        payloads, config, require_cash=False, require_position=True
+    )
     per_agent: Dict[str, Dict[str, float]] = {}
     for pid, round_payloads in payloads.items():
-        position = float(initial_position_map.get(pid, 0.0))
+        position = float(initial_position_map[pid])
         prev_price = float(market_prices[min(market_prices)])
         round_pnl: List[float] = []
         for round_num in sorted(round_payloads):
             payload = round_payloads[round_num]
-            price = float(market_prices.get(round_num, prev_price))
+            if payload.get("_skipped"):
+                # Synthetic bootstrap placeholder — no real trade this round.
+                continue
+            mp = market_prices.get(round_num)
+            if mp is None or float(mp) <= 0:
+                raise MetricUnavailable(
+                    f"agent {pid} round {round_num} missing from market_prices"
+                )
+            price = float(mp)
             mtm = position * (price - prev_price)
             buy, sell = payload_buy_sell(payload)
-            bid = float(payload.get("bid_price", 0.0)) or price
+            bid_raw = payload.get("bid_price")
+            bid = float(bid_raw) if (bid_raw is not None and float(bid_raw) > 0) else price
             trade_pnl = sell * (bid - price) - buy * (bid - price)
             round_pnl.append(mtm + trade_pnl)
             position = position + buy - sell
@@ -575,16 +647,30 @@ def m_agent_wealth_terminal(data, config):
         raise MetricUnavailable("no investor payloads recorded")
     _, prices, _ = aligned_prices_and_fundamentals(data)
     final_price = float(prices[-1])
-    initial_cash_map = per_agent_initial_cash(config)
-    initial_positions_map = per_agent_initial_position(config)
+    # Build a per-round price map for the look-ahead-safe bid fallback.
+    market_prices = data.get("market_prices") or {}
+    initial_cash_map, initial_positions_map = _require_initial_maps(
+        payloads, config
+    )
     per_agent: Dict[str, Dict[str, Any]] = {}
     for pid, round_payloads in payloads.items():
-        cash = initial_cash_map.get(pid, 0.0)
-        position = initial_positions_map.get(pid, 0.0)
+        cash = float(initial_cash_map[pid])
+        position = float(initial_positions_map[pid])
         for round_num in sorted(round_payloads):
             payload = round_payloads[round_num]
+            if payload.get("_skipped"):
+                # Synthetic bootstrap placeholder — no real trade.
+                continue
             buy, sell = payload_buy_sell(payload)
-            bid = float(payload.get("bid_price", final_price))
+            # LOOK-AHEAD-SAFE: fall back to the CURRENT round's market
+            # price, never final_price. Using final_price previously
+            # back-filled past trades with future information and
+            # systematically inflated wealth toward 'perfect prediction'.
+            bid_raw = payload.get("bid_price")
+            if bid_raw is None or float(bid_raw) <= 0:
+                bid = float(market_prices.get(round_num, final_price))
+            else:
+                bid = float(bid_raw)
             cash -= buy * bid
             cash += sell * bid
             position = position + buy - sell
@@ -608,15 +694,29 @@ def m_gini_coefficient(data, config):
         raise MetricUnavailable("no investor payloads recorded")
     _, prices, _ = aligned_prices_and_fundamentals(data)
     final_price = float(prices[-1])
-    initial_cash_map = per_agent_initial_cash(config)
-    initial_positions_map = per_agent_initial_position(config)
+    # Per-round price map for look-ahead-safe bid fallback.
+    market_prices = data.get("market_prices") or {}
+    initial_cash_map, initial_positions_map = _require_initial_maps(
+        payloads, config
+    )
     wealths = []
     for pid, round_payloads in payloads.items():
-        cash = initial_cash_map.get(pid, 0.0)
-        position = initial_positions_map.get(pid, 0.0)
-        for payload in round_payloads.values():
+        cash = float(initial_cash_map[pid])
+        position = float(initial_positions_map[pid])
+        for round_num in sorted(round_payloads):
+            payload = round_payloads[round_num]
+            if payload.get("_skipped"):
+                # Synthetic bootstrap placeholder — no real trade.
+                continue
             buy, sell = payload_buy_sell(payload)
-            bid = float(payload.get("bid_price", final_price))
+            # LOOK-AHEAD-SAFE: fall back to the CURRENT round's market
+            # price, never final_price. Using final_price to back-fill
+            # past trades leaks future information and distorts Gini.
+            bid_raw = payload.get("bid_price")
+            if bid_raw is None or float(bid_raw) <= 0:
+                bid = float(market_prices.get(round_num, final_price))
+            else:
+                bid = float(bid_raw)
             cash -= buy * bid
             cash += sell * bid
             position = position + buy - sell

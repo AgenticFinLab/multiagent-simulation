@@ -249,4 +249,19 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
         )
         result.append(rd)
 
+    # Backfill prev_stock_price / stock_return for replay. Saved experiment
+    # data often omits these, which left the "Price Change" metric blank and
+    # unchanging on Load Results. Walk rounds in order and derive the return
+    # from the previous round's cleared price (mirrors the live-run path).
+    prev_price: Optional[float] = None
+    for rd in result:
+        mb = rd.market_broadcast
+        if mb is None or mb.stock_price is None:
+            continue
+        if mb.prev_stock_price is None:
+            mb.prev_stock_price = prev_price
+        if mb.stock_return is None and prev_price not in (None, 0):
+            mb.stock_return = (mb.stock_price - prev_price) / prev_price
+        prev_price = mb.stock_price
+
     return result

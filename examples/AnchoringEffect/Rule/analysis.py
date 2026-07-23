@@ -484,7 +484,11 @@ def _panel_autocorrelation(data, computed, output_dir, variant):
     vr = computed.get("variance_ratio_lo_mackinlay", {})
     if vr:
         periods = ["VR(2)", "VR(4)", "VR(8)"]
-        vals = [vr.get("vr_q2", 1.0), vr.get("vr_q4", 1.0), vr.get("vr_q8", 1.0)]
+        vals = [
+            vr.get("vr_q2", float("nan")),
+            vr.get("vr_q4", float("nan")),
+            vr.get("vr_q8", float("nan")),
+        ]
         axes[1].bar(periods, vals, color="#7209b7", alpha=0.7)
         axes[1].axhline(y=1.0, color="black", linestyle="--",
                         label="Random walk (1.0)")
@@ -1003,10 +1007,10 @@ def analyze_anchoring(
         computed.get("silent_agent_count", {}).get("silent_count", 0)
     )
     under_rev = float(
-        computed.get("under_revision_ratio", {}).get("value", 1.0)
+        computed.get("under_revision_ratio", {}).get("value", float("nan"))
     )
     sv_ac = float(
-        computed.get("signed_volume_autocorr", {}).get("value", 0.0)
+        computed.get("signed_volume_autocorr", {}).get("value", float("nan"))
     )
 
     validation = _validate_anchoring_effect(

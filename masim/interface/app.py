@@ -17,10 +17,7 @@ from masim.interface.config_loader import (
     _configs_path,
 )
 from masim.interface.data_loader import has_experiment_data, load_rounds
-from masim.interface.simulation_runner import (
-    MockSimulationRunner,
-    SimulationRunner,
-)
+from masim.interface.simulation_runner import SimulationRunner
 from masim.interface.components.sidebar import render_sidebar
 from masim.interface.components.analysis_view import render_analysis_page
 from masim.interface.components.docs_view import render_docs_page
@@ -61,9 +58,6 @@ if "simulation_completed" not in st.session_state:
 
 if "runner" not in st.session_state:
     st.session_state.runner = None
-
-if "use_mock" not in st.session_state:
-    st.session_state.use_mock = True
 
 # Replay state — all round data stored here; activity panel reads from it
 if "replay_index" not in st.session_state:
@@ -124,17 +118,20 @@ def main():
 
     selected_scenario = render_sidebar()
 
-    render_back_to_stage1_bar(
-        key_suffix="workspace",
-        reset_runtime=True,
-        target_stage="variant_choice",
-    )
-
+    # Sub-pages (Analysis / Docs) render their own single "← Back" button that
+    # returns to the Simulation page, so the workspace-level stage-1 back bar
+    # is shown ONLY on the Simulation page — otherwise those pages would show
+    # two back buttons.
     if st.session_state.current_page == "Analysis":
         render_analysis_page(selected_scenario)
     elif st.session_state.current_page == "Docs":
         render_docs_page(selected_scenario)
     else:
+        render_back_to_stage1_bar(
+            key_suffix="workspace",
+            reset_runtime=True,
+            target_stage="variant_choice",
+        )
         render_simulation_page(selected_scenario)
 
 
@@ -156,17 +153,31 @@ def render_simulation_page(scenario_name: str):
       | system notices                                           |
       └──────────────────────────────────────────────────────────┘
     """
-    render_selected_market_strip()
-    st.divider()
-
-    title_col, btn_col = st.columns([3, 1])
-    with title_col:
-        st.title("Simulation Platform")
-    with btn_col:
-        st.markdown("<div style='margin-top:18px'/>", unsafe_allow_html=True)
-        _render_action_buttons(scenario_name)
+    st.title("Simulation Platform")
+    # Action controls sit in a full-width toolbar row directly below the title
+    # (rather than crammed into a narrow side column), so each button gets a
+    # consistent, comfortable width.
+    _render_action_buttons(scenario_name)
 
     info = get_scenario_info(scenario_name)
+
+    # Deferred start / replay — launched here, ABOVE the divider, so the running
+    # spinner status ("Running … computing N rounds…") renders full-width in the
+    # header zone. Everything below the divider stays dedicated to the
+    # simulation flow / progress display.
+    pending = st.session_state.get("pending_action")
+    if pending and info.get("exists"):
+        st.session_state.pending_action = None
+        if pending == "start":
+            _start_simulation(scenario_name, info)
+        elif pending == "replay":
+            _start_replay(scenario_name, info)
+
+    st.markdown("")
+    st.divider()
+
+    render_selected_market_strip()
+
     if not info.get("exists"):
         st.error(f"Scenario configuration not found: {scenario_name}")
         return
@@ -177,8 +188,11 @@ def render_simulation_page(scenario_name: str):
     is_completed = st.session_state.simulation_completed
 
     # ── System notices ─────────────────────────────────────────────────────
+    # Only surface warnings / errors; routine info (ℹ️) and success (✅) notices
+    # are suppressed — the progress bar / slider already conveys run state.
     for notice in st.session_state.sys_messages:
-        _render_sys_notice(notice)
+        if notice.get("level") in ("warning", "error"):
+            _render_sys_notice(notice)
 
     if not (is_running or is_completed) or n_rounds == 0:
         return
@@ -188,16 +202,16 @@ def render_simulation_page(scenario_name: str):
     progress_frac = (replay_idx / n_rounds) if n_rounds else 0.0
 
     st.markdown("")
-    prog_col, label_col = st.columns([5, 1])
 
     if is_completed and n_rounds > 1:
-        # Interactive slider — lets user browse any round after replay ends
+        # Completed → interactive slider to browse any recorded round.
+        prog_col, label_col = st.columns([5, 1])
         with prog_col:
             slider_val = st.slider(
                 "Round",
                 min_value=1,
                 max_value=n_rounds,
-                value=st.session_state.viewed_round_idx + 1,
+                value=min(st.session_state.viewed_round_idx + 1, n_rounds),
                 step=1,
                 label_visibility="collapsed",
                 key="round_slider",
@@ -207,13 +221,14 @@ def render_simulation_page(scenario_name: str):
         with label_col:
             st.metric("Round", f"{rounds[viewed_idx].round_num} / {n_rounds}")
     else:
-        # Auto-advancing progress bar during replay
-        with prog_col:
-            st.progress(progress_frac)
+        # Running → animated progress bar with a live round counter.
+        cur_round = replay_idx if replay_idx > 0 else 0
+        pct = int(round(progress_frac * 100))
+        st.progress(
+            progress_frac,
+            text=f"Round {cur_round} / {n_rounds}  ·  {pct}% complete",
+        )
         viewed_idx = max(0, replay_idx - 1)  # show the last delivered round
-        with label_col:
-            rnd_num = rounds[viewed_idx].round_num if rounds else 0
-            st.metric("Round", f"{rnd_num} / {n_rounds}")
 
     # ── Price ticker + expandable chart dialog ────────────────────────────
     # Show a compact price-metrics row so agents stay visible. The full
@@ -281,7 +296,7 @@ def _render_investor_activity(round_data, scenario_name: str):
         with m2:
             if ret is not None:
                 pct = ret * 100
-                st.metric("Return", f"{pct:+.4f}%", delta=f"{pct:+.4f}%")
+                st.metric("Price Change", f"{pct:+.4f}%", delta=f"{pct:+.4f}%")
         with m3:
             if prev is not None:
                 st.metric("Prev Price", f"{prev:.4f}")
@@ -320,12 +335,14 @@ def _render_investor_activity(round_data, scenario_name: str):
 
 
 def _render_price_chart(rounds: list, viewed_idx: int):
-    """Render a live price-dynamics chart that grows up to the current round.
+    """Render a composite price-dynamics chart that grows up to the current round.
 
-    Only rounds 0..*viewed_idx* are plotted and the x-axis is trimmed to the
-    currently viewed round (no empty future span). The line therefore extends
-    one round at a time during replay. During rapid replay the figure is
-    cached and only rebuilt every few rounds for performance.
+    Two vertically-stacked, x-aligned panels are drawn for rounds 0..*viewed_idx*:
+      1. Price panel — dashed grey fundamental line, solid gold market
+         clearing price, and a semi-transparent scatter of every investor's
+         bid price each round (coloured by side, sized by order quantity).
+      2. Volume panel — per-round trading-volume distribution as buy (up,
+         green) / sell (down, red) bars.
 
     Args:
         rounds: Full list of RoundData objects.
@@ -334,133 +351,218 @@ def _render_price_chart(rounds: list, viewed_idx: int):
     if viewed_idx < 0 or not rounds:
         return
 
-    n_rounds = len(rounds)
+    import pandas as pd
 
-    # ── Throttle during rapid replay ──────────────────────────────────
-    # Rebuilding a plotly figure 20 times/sec causes flicker; cache the
-    # figure in session_state and only rebuild every *step* rounds.
-    replay_active = st.session_state.get("replay_active", False)
-    step = max(1, n_rounds // 60)  # ~60 chart frames total
-    last_idx = st.session_state.get("_pc_last_idx", -1)
-
-    if replay_active and 0 <= last_idx < viewed_idx < n_rounds - 1:
-        if viewed_idx - last_idx < step:
-            cached = st.session_state.get("_pc_fig")
-            if cached is not None:
-                st.plotly_chart(
-                    cached,
-                    width="stretch",
-                    key="price_dynamics",
-                )
-                return
-
-    # ── Collect market price and fundamental up to viewed_idx ─────────
+    # ── Collect per-round series and distributions ──────────────────────────────────
     round_nums: list = []
     market_prices: list = []
     fundamentals: list = []
+    bid_stat_rows: list = []
+    vol_stat_rows: list = []
 
     for i in range(viewed_idx + 1):
         rd = rounds[i]
-        round_nums.append(rd.round_num)
+        rn = rd.round_num
+        round_nums.append(rn)
         mb = rd.market_broadcast
-        if mb is not None:
-            mp = float(mb.stock_price) if mb.stock_price is not None else None
-            fv = float(mb.fundamental) if mb.fundamental is not None else None
-        else:
-            mp = None
-            fv = None
+        mp = float(mb.stock_price) if mb and mb.stock_price is not None else None
+        fv = float(mb.fundamental) if mb and mb.fundamental is not None else None
         market_prices.append(mp)
         fundamentals.append(fv)
 
+        bids: list = []
+        buys: list = []
+        sells: list = []
+        for act in rd.agent_actions:
+            price = act.price
+            qty = act.quantity
+            if price is not None:
+                bids.append(float(price))
+            if qty > 0:
+                buys.append(float(qty))
+            elif qty < 0:
+                sells.append(float(-qty))
+
+        # Per-round bid-price spread (whisker-style, not a box): min / IQR /
+        # median / max, drawn slightly left of the round tick on the price axis.
+        if bids:
+            s = pd.Series(bids)
+            bid_stat_rows.append(
+                {
+                    "Round": rn,
+                    "X": rn - 0.14,
+                    "lo": float(s.min()),
+                    "q1": float(s.quantile(0.25)),
+                    "med": float(s.median()),
+                    "q3": float(s.quantile(0.75)),
+                    "hi": float(s.max()),
+                }
+            )
+        # Per-round order-size spread on the right (volume) axis: buys up (+),
+        # sells down (-), each a min→max range line with a median tick.
+        if buys:
+            b = pd.Series(buys)
+            vol_stat_rows.append(
+                {
+                    "Round": rn,
+                    "X": rn + 0.14,
+                    "Side": "Buy",
+                    "lo": float(b.min()),
+                    "med": float(b.median()),
+                    "hi": float(b.max()),
+                }
+            )
+        if sells:
+            se = pd.Series(sells)
+            vol_stat_rows.append(
+                {
+                    "Round": rn,
+                    "X": rn + 0.14,
+                    "Side": "Sell",
+                    "lo": -float(se.max()),
+                    "med": -float(se.median()),
+                    "hi": -float(se.min()),
+                }
+            )
+
     has_market = any(p is not None for p in market_prices)
     has_fundamental = any(f is not None for f in fundamentals)
-    if not has_market and not has_fundamental:
+    if not has_market and not has_fundamental and not bid_stat_rows:
         return
 
-    # ── Build plotly chart ────────────────────────────────────────────
+    # Price reference lines in long form so one colour scale drives the legend.
+    line_rows: list = []
+    for rn, mp, fv in zip(round_nums, market_prices, fundamentals):
+        if fv is not None:
+            line_rows.append(
+                {"Round": rn, "X": rn, "Value": fv, "Series": "Fundamental"}
+            )
+        if mp is not None:
+            line_rows.append(
+                {"Round": rn, "X": rn, "Value": mp, "Series": "Market Price"}
+            )
+
+    # ── Build composite chart (Altair) ────────────────────────────────────────────
     try:
-        import plotly.graph_objects as go
+        import altair as alt
     except ImportError:
         _render_price_chart_fallback(round_nums, market_prices, fundamentals)
         return
 
-    fig = go.Figure()
-
-    # Market clearing price — thick gold reference line
-    fig.add_trace(
-        go.Scatter(
-            x=round_nums,
-            y=market_prices,
-            mode="lines",
-            name="Market Price",
-            line=dict(color="#f0a500", width=3),
-            connectgaps=False,
-            hovertemplate="Round %{x}<br>Price: %{y:.4f}<extra>Market</extra>",
-        )
+    x_enc = alt.X(
+        "X:Q",
+        title="Round",
+        scale=alt.Scale(domainMin=0.3, domainMax=round_nums[-1] + 0.7, nice=False),
     )
 
-    # Fundamental value — dashed reference line
-    if has_fundamental:
-        fig.add_trace(
-            go.Scatter(
-                x=round_nums,
-                y=fundamentals,
-                mode="lines",
-                name="Fundamental",
-                line=dict(color="#06d6a0", width=2, dash="dash"),
-                connectgaps=False,
-                hovertemplate="Round %{x}<br>Fundamental: %{y:.4f}<extra></extra>",
+    # ---- Left axis: price (reference lines + investor bid spread) ----
+    price_marks: list = []
+    if line_rows:
+        line_df = pd.DataFrame(line_rows)
+        price_marks.append(
+            alt.Chart(line_df)
+            .mark_line(size=2.5)
+            .encode(
+                x=x_enc,
+                y=alt.Y("Value:Q", title="Price"),
+                color=alt.Color(
+                    "Series:N",
+                    scale=alt.Scale(
+                        domain=["Fundamental", "Market Price"],
+                        range=["#9ba8bb", "#f0a500"],
+                    ),
+                    legend=alt.Legend(title="Price lines"),
+                ),
+                strokeDash=alt.StrokeDash(
+                    "Series:N",
+                    scale=alt.Scale(
+                        domain=["Fundamental", "Market Price"],
+                        range=[[5, 4], [1, 0]],
+                    ),
+                    legend=None,
+                ),
+                tooltip=["Round", "Series", "Value"],
+            )
+        )
+    if bid_stat_rows:
+        bid_df = pd.DataFrame(bid_stat_rows)
+        base_bid = alt.Chart(bid_df)
+        # min→max whisker (thin), IQR band (thick), median tick.
+        price_marks.append(
+            base_bid.mark_rule(color="#4cc9c0", size=1.5, opacity=0.55).encode(
+                x=x_enc,
+                y=alt.Y("lo:Q", title="Price"),
+                y2="hi:Q",
+                tooltip=["Round", "lo", "q1", "med", "q3", "hi"],
+            )
+        )
+        price_marks.append(
+            base_bid.mark_rule(color="#4cc9c0", size=5, opacity=0.9).encode(
+                x=x_enc, y="q1:Q", y2="q3:Q"
+            )
+        )
+        price_marks.append(
+            base_bid.mark_tick(color="#e0fbfc", thickness=2, size=13).encode(
+                x=x_enc, y="med:Q"
             )
         )
 
-    fig.update_layout(
-        title=dict(
-            text="\U0001f4c8 Price Dynamics",
-            font=dict(size=16, color="#e0e6f0"),
-        ),
-        xaxis_title="Round",
-        yaxis_title="Price",
-        template="plotly_dark",
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(14,17,23,1)",
-        height=480,
-        margin=dict(l=60, r=20, t=50, b=80),
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.15,
-            xanchor="center",
-            x=0.5,
-            font=dict(size=10, color="#9ba8bb"),
-        ),
-        hovermode="x unified",
-        uirevision="price_dynamics",
-        xaxis=dict(
-            range=[0.5, round_nums[-1] + 0.5],
-            gridcolor="rgba(255,255,255,0.06)",
-            zeroline=False,
-            dtick=max(1, len(round_nums) // 10),
-        ),
-        yaxis=dict(
-            gridcolor="rgba(255,255,255,0.06)",
-            zeroline=False,
-            tickformat=".2f",
-        ),
-    )
+    price_layer = alt.layer(*price_marks)
 
-    # Cache for throttled replay
-    st.session_state["_pc_fig"] = fig
-    st.session_state["_pc_last_idx"] = viewed_idx
+    # ---- Right axis: volume (buy/sell order-size spread) ----
+    if vol_stat_rows:
+        vol_df = pd.DataFrame(vol_stat_rows)
+        vol_color = alt.Color(
+            "Side:N",
+            scale=alt.Scale(domain=["Buy", "Sell"], range=["#06d6a0", "#ef476f"]),
+            legend=alt.Legend(title="Volume"),
+        )
+        base_vol = alt.Chart(vol_df)
+        vol_layer = alt.layer(
+            base_vol.mark_rule(size=5, opacity=0.85).encode(
+                x=x_enc,
+                y=alt.Y(
+                    "lo:Q",
+                    title="Quantity (Buy +, Sell -)",
+                    axis=alt.Axis(orient="right"),
+                ),
+                y2="hi:Q",
+                color=vol_color,
+                tooltip=["Round", "Side", "lo", "med", "hi"],
+            ),
+            base_vol.mark_tick(thickness=2, size=13).encode(
+                x=x_enc,
+                y=alt.Y("med:Q", axis=alt.Axis(orient="right")),
+                color=vol_color,
+            ),
+        )
+        chart = alt.layer(price_layer, vol_layer).resolve_scale(
+            y="independent", color="independent"
+        )
+    else:
+        chart = price_layer
 
-    st.plotly_chart(fig, width="stretch", key="price_dynamics")
+    chart = chart.properties(
+        height=460, title="Price & Volume Distribution per Round"
+    ).configure_view(strokeWidth=0)
+    st.altair_chart(chart, width="stretch", key="price_dynamics")
 
 
 def _render_price_chart_fallback(round_nums, market_prices, fundamentals):
     """Minimal fallback chart using st.line_chart when plotly is unavailable."""
     import pandas as pd
 
-    data = {"Market Price": market_prices, "Fundamental": fundamentals}
-    df = pd.DataFrame(data, index=round_nums)
+    # Only include series that actually have data — an all-None column becomes
+    # an object dtype that st.line_chart rejects ("mixed types"). Coerce the
+    # rest to numeric so partially-missing series render as gaps, not errors.
+    data = {}
+    if any(p is not None for p in market_prices):
+        data["Market Price"] = market_prices
+    if any(f is not None for f in fundamentals):
+        data["Fundamental"] = fundamentals
+    if not data:
+        return
+    df = pd.DataFrame(data, index=round_nums).apply(pd.to_numeric, errors="coerce")
     df.index.name = "Round"
     st.line_chart(df, height=480)
 
@@ -520,11 +622,28 @@ def _render_price_ticker_bar(rounds: list, viewed_idx: int):
     # Layout: price | return | fundamental | expand button
     cols = st.columns([2, 2, 2, 1.5])
     with cols[0]:
-        st.metric("\U0001f4b0 Price", price_str or "\u2014")
+        st.metric(
+            "\U0001f4b0 Price",
+            price_str or "—",
+            help="The market clearing price at which trades settle this round — "
+            "the price the market's supply and demand agreed on.",
+        )
     with cols[1]:
-        st.metric("\U0001f4c8 Return", ret_str or "\u2014", delta=delta_str or None)
+        st.metric(
+            "\U0001f4c8 Price Change",
+            ret_str or "—",
+            delta=delta_str or None,
+            help="Round-over-round price change: (price − previous price) / "
+            "previous price. Positive means the price rose versus last round.",
+        )
     with cols[2]:
-        st.metric("\U0001f3af Fundamental", fundamental_str or "\u2014")
+        st.metric(
+            "\U0001f3af Fundamental",
+            fundamental_str or "—",
+            help="The asset's intrinsic (fair) value benchmark. Gaps between "
+            "price and fundamental signal over-/under-valuation — e.g. a "
+            "bubble when price sits well above fundamental.",
+        )
     with cols[3]:
         st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
         with st.container(key="open_price_dialog"):
@@ -716,83 +835,122 @@ def _render_sys_notice(notice: dict):
 # ---------------------------------------------------------------------------
 
 
+def _render_toolbar(buttons: list, disabled: bool = False):
+    """Render a list of action buttons as a left-aligned full-width toolbar.
+
+    Buttons keep a consistent, comfortable width via equal 1-unit columns plus
+    a trailing spacer, so they never stretch across the whole page.
+
+    Args:
+        buttons: list of (label, type, help_text, callback) tuples.
+        disabled: when True, every button is rendered greyed-out and
+            non-clickable (used while a run is already queued/starting).
+    """
+    if not buttons:
+        return
+    n = len(buttons)
+    cols = st.columns([1] * n + [max(1, 6 - n)])
+    for i, (label, btn_type, help_text, callback) in enumerate(buttons):
+        with cols[i]:
+            if st.button(
+                label,
+                type=btn_type,
+                width="stretch",
+                help=help_text,
+                key=f"action_btn_{i}_{label}",
+                disabled=disabled,
+            ):
+                callback()
+
+
 def _render_action_buttons(scenario_name: str):
-    """Render Start / Load / View Analysis / Reset buttons.
+    """Render the state-dependent action toolbar.
+
+    Buttons only appear when their prerequisite data exists:
+      * ``Load Results`` / ``Re-run`` require saved experiment (round) data.
+      * ``View Analysis`` requires analysis output (charts) to exist.
 
     Args:
         scenario_name: Currently selected scenario.
     """
+    from masim.interface.config_loader import get_analysis_path
+
     info = get_scenario_info(scenario_name)
     data_exists = has_experiment_data(scenario_name)
+    analysis_path = get_analysis_path(scenario_name)
+    analysis_exists = analysis_path is not None and any(analysis_path.glob("*.png"))
+
+    def _go_analysis():
+        st.session_state.previous_page = st.session_state.current_page
+        st.session_state.current_page = "Analysis"
+        st.rerun()
+
+    def _defer(action: str):
+        # Record the intent and rerun; the blocking run is launched at full
+        # page width in render_simulation_page so its spinner isn't cramped
+        # inside this narrow toolbar column.
+        st.session_state.pending_action = action
+        st.rerun()
+
+    buttons: list = []
 
     if st.session_state.simulation_running:
-        # When simulation is running, show Stop and View Analysis (if data exists)
+        buttons.append((t("simulation.stop"), "secondary", None, _stop_simulation))
+        if analysis_exists:
+            buttons.append((
+                t("simulation.view_analysis"),
+                "primary",
+                t("simulation.view_analysis_running_help"),
+                _go_analysis,
+            ))
         if data_exists:
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                if st.button(t("simulation.stop"), type="secondary", width="stretch"):
-                    _stop_simulation()
-            with c2:
-                if st.button(
-                    t("simulation.view_analysis"),
-                    type="primary",
-                    width="stretch",
-                    help=t("simulation.view_analysis_running_help"),
-                ):
-                    st.session_state.previous_page = st.session_state.current_page
-                    st.session_state.current_page = "Analysis"
-                    st.rerun()
-            with c3:
-                if st.button(t("simulation.reset"), width="stretch"):
-                    _stop_simulation()
-                    _reset_simulation()
-        else:
-            if st.button(t("simulation.stop"), type="secondary", width="stretch"):
-                _stop_simulation()
-
+            buttons.append((
+                t("simulation.reset"),
+                "secondary",
+                None,
+                lambda: (_stop_simulation(), _reset_simulation()),
+            ))
     elif st.session_state.simulation_completed:
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button(t("simulation.view_analysis"), type="primary", width="stretch"):
-                st.session_state.previous_page = st.session_state.current_page
-                st.session_state.current_page = "Analysis"
-                st.rerun()
-        with c2:
-            if st.button(t("simulation.reset"), width="stretch"):
-                _reset_simulation()
+        if analysis_exists:
+            buttons.append((
+                t("simulation.view_analysis"), "primary", None, _go_analysis
+            ))
+        buttons.append((t("simulation.reset"), "secondary", None, _reset_simulation))
 
     elif data_exists:
-        # When data exists but no simulation running, show Load, View Analysis, and Re-run
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            if st.button(
-                t("simulation.load_results"),
-                type="primary",
-                width="stretch",
-                help=t("simulation.load_results_help"),
-            ):
-                _start_replay(scenario_name, info)
-        with c2:
-            if st.button(
+        buttons.append((
+            t("simulation.load_results"),
+            "primary",
+            t("simulation.load_results_help"),
+            lambda: _defer("replay"),
+        ))
+        if analysis_exists:
+            buttons.append((
                 t("simulation.view_analysis"),
-                type="secondary",
-                width="stretch",
-                help=t("simulation.view_analysis_help"),
-            ):
-                st.session_state.previous_page = st.session_state.current_page
-                st.session_state.current_page = "Analysis"
-                st.rerun()
-        with c3:
-            if st.button(
-                t("simulation.rerun"),
-                width="stretch",
-                help=t("simulation.rerun_help"),
-            ):
-                _start_simulation(scenario_name, info)
+                "secondary",
+                t("simulation.view_analysis_help"),
+                _go_analysis,
+            ))
+        buttons.append((
+            t("simulation.rerun"),
+            "secondary",
+            t("simulation.rerun_help"),
+            lambda: _defer("start"),
+        ))
 
     else:
-        if st.button(t("simulation.start"), type="primary", width="stretch"):
-            _start_simulation(scenario_name, info)
+        buttons.append((
+            t("simulation.start"),
+            "primary",
+            None,
+            lambda: _defer("start"),
+        ))
+
+    # A run is queued (button just clicked, blocking launch happens right after
+    # in render_simulation_page). Grey out the whole toolbar so the primary
+    # trigger button can't be clicked again while the simulation starts.
+    pending = bool(st.session_state.get("pending_action"))
+    _render_toolbar(buttons, disabled=pending)
 
 
 # ---------------------------------------------------------------------------
@@ -845,16 +1003,20 @@ def _start_simulation(scenario_name: str, info: dict):
         _configs_path(scenario_name) / "simulation.yml"
     )
 
-    if st.session_state.use_mock:
-        st.session_state.runner = MockSimulationRunner(config_path)
-    else:
-        st.session_state.runner = SimulationRunner(config_path)
+    # Always run the real simulation engine. Mock/fake data has been removed
+    # deliberately: fabricated prices/bids silently corrupt results, so we
+    # prefer a real error over invalid data.
+    st.session_state.runner = SimulationRunner(config_path)
 
     _sys_notice(f"Starting simulation: {scenario_name}", "info")
     _sys_notice(f"Total rounds: {info.get('total_rounds', 'unknown')}", "info")
 
     try:
-        asyncio.run(_run_simulation_async())
+        with st.spinner(
+            f"⚙️ Running {scenario_name} — computing "
+            f"{info.get('total_rounds', 'all')} rounds\u2026"
+        ):
+            asyncio.run(_run_simulation_async())
     except Exception as e:
         _sys_notice(f"Error: {str(e)}", "error")
         st.session_state.simulation_running = False
@@ -877,6 +1039,7 @@ async def _run_simulation_async():
         return
 
     rounds = []
+    prev_price = None
     try:
         async for update in runner.run():
             if update.round_num > 0:
@@ -894,10 +1057,21 @@ async def _run_simulation_async():
                 ]
                 mb = None
                 if update.market_data:
+                    price = update.market_data.get("price")
+                    # Derive the round-over-round return from the previous
+                    # cleared price so the Return metric/chart isn't blank.
+                    stock_return = None
+                    if price is not None and prev_price not in (None, 0):
+                        stock_return = (price - prev_price) / prev_price
                     mb = MarketBroadcast(
                         round_num=update.round_num,
-                        stock_price=update.market_data.get("price"),
+                        stock_price=price,
+                        prev_stock_price=prev_price,
+                        stock_return=stock_return,
+                        fundamental=update.market_data.get("fundamental"),
                     )
+                    if price is not None:
+                        prev_price = price
                 rounds.append(
                     RoundData(
                         round_num=update.round_num,
@@ -907,17 +1081,31 @@ async def _run_simulation_async():
                 )
 
         st.session_state.replay_rounds = rounds
-        st.session_state.replay_index = len(rounds)
-        st.session_state.viewed_round_idx = max(0, len(rounds) - 1)
-        st.session_state.simulation_completed = True
-        _sys_notice("Simulation completed successfully!", "success")
+        if rounds:
+            # Animate the freshly computed rounds one-by-one via the shared
+            # replay pump, so users see a clear round-by-round progression
+            # instead of jumping straight to the final frame.
+            st.session_state.replay_index = 0
+            st.session_state.viewed_round_idx = 0
+            st.session_state.replay_active = True
+            st.session_state.simulation_running = True
+            st.session_state.simulation_completed = False
+            _sys_notice(
+                f"Simulation finished — replaying {len(rounds)} rounds\u2026",
+                "success",
+            )
+        else:
+            st.session_state.replay_active = False
+            st.session_state.simulation_running = False
+            st.session_state.simulation_completed = True
+            _sys_notice("Simulation produced no rounds.", "warning")
 
     except Exception as e:
         _sys_notice(f"Simulation error: {str(e)}", "error")
+        st.session_state.simulation_running = False
 
     finally:
         await runner.shutdown()
-        st.session_state.simulation_running = False
 
 
 def _stop_simulation():

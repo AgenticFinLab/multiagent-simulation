@@ -75,13 +75,26 @@ def _infer_action(payload: Mapping[str, Any]) -> str:
     """Return a lowercase action label from an LLM decision payload.
 
     Priority:
-        1. explicit ``action`` field (any non-empty string is kept
-           lowercase; canonical labels handled separately);
-        2. signed ``quantity``: ``>0`` → buy, ``<0`` → sell, ``0`` → hold;
-        3. fallback ``"hold"``.
+        1. Explicit ``_skipped=True`` marker → ``"_skipped"`` (bootstrap
+           placeholder produced by ``_noop_order``; MUST be excluded from
+           real action-distribution statistics);
+        2. Explicit ``_clipped=True`` marker → ``"_clipped_hold"``
+           (buy/sell intent that was clipped to 0 by ``_finalize_order``
+           due to insufficient cash/position; distinct from a genuine
+           hold decision — silently coercing it inflates the hold bucket
+           and understates decisiveness);
+        3. Non-Mapping input → ``"_malformed"`` (do NOT coerce to "hold");
+        4. Explicit ``action`` field (any non-empty string is lowercased);
+        5. Signed ``quantity``: ``>0`` → buy, ``<0`` → sell, ``0`` → hold;
+        6. Otherwise → ``"_malformed"`` (do NOT coerce to "hold" — a fake
+           hold pollutes decision-entropy and action-frequency metrics).
     """
     if not isinstance(payload, Mapping):
-        return "hold"
+        return "_malformed"
+    if payload.get("_skipped"):
+        return "_skipped"
+    if payload.get("_clipped"):
+        return "_clipped_hold"
     raw_action = payload.get("action")
     if raw_action is not None:
         action = str(raw_action).strip().lower()
@@ -99,7 +112,7 @@ def _infer_action(payload: Mapping[str, Any]) -> str:
             return "hold"
     except (TypeError, ValueError):
         pass
-    return "hold"
+    return "_malformed"
 
 
 def _reasoning_length(payload: Mapping[str, Any]) -> int:
@@ -245,20 +258,45 @@ def analyze_action_distribution(
 
     per_agent: Dict[str, Dict[str, Any]] = {}
     aggregate_counts: Dict[str, int] = {a: 0 for a in _CANONICAL_ACTIONS}
+    aggregate_skipped: int = 0
+    aggregate_malformed: int = 0
+    aggregate_clipped: int = 0
     all_reasoning_lens: List[int] = []
 
     for agent_id, payloads in records.items():
         if not payloads:
             continue
         counts: Dict[str, int] = {a: 0 for a in _CANONICAL_ACTIONS}
+        skipped_count = 0
+        malformed_count = 0
+        clipped_count = 0
         reasoning_lens: List[int] = []
         for payload in payloads:
             action = _infer_action(payload)
+            if action == "_skipped":
+                skipped_count += 1
+                # Do NOT include reasoning length for synthetic bootstrap
+                # placeholders — they have no real reasoning.
+                continue
+            if action == "_malformed":
+                malformed_count += 1
+                continue
+            if action == "_clipped_hold":
+                # Constraint-clipped intended trade — count separately so
+                # the canonical hold bucket reflects only genuine holds.
+                clipped_count += 1
+                reasoning_lens.append(_reasoning_length(payload))
+                continue
             counts[action] = counts.get(action, 0) + 1
             reasoning_lens.append(_reasoning_length(payload))
 
         total_rounds = sum(counts.values())
-        if total_rounds == 0:
+        if (
+            total_rounds == 0
+            and skipped_count == 0
+            and malformed_count == 0
+            and clipped_count == 0
+        ):
             continue
 
         mean_len = (
@@ -270,6 +308,9 @@ def analyze_action_distribution(
 
         per_agent[agent_id] = {
             "actions": dict(counts),
+            "skipped_rounds": int(skipped_count),
+            "malformed_rounds": int(malformed_count),
+            "clipped_hold_rounds": int(clipped_count),
             "mean_reasoning_len": round(mean_len, 4),
             "median_reasoning_len": round(median_len, 4),
             "decision_entropy": round(entropy, 4),
@@ -277,6 +318,9 @@ def analyze_action_distribution(
         }
         for key, val in counts.items():
             aggregate_counts[key] = aggregate_counts.get(key, 0) + int(val)
+        aggregate_skipped += skipped_count
+        aggregate_malformed += malformed_count
+        aggregate_clipped += clipped_count
         all_reasoning_lens.extend(reasoning_lens)
 
     aggregate_total = sum(aggregate_counts.values())
@@ -292,6 +336,9 @@ def analyze_action_distribution(
             if all_reasoning_lens else 0.0
         ),
         "total_rounds": int(aggregate_total),
+        "skipped_rounds": int(aggregate_skipped),
+        "malformed_rounds": int(aggregate_malformed),
+        "clipped_hold_rounds": int(aggregate_clipped),
         "num_agents": len(per_agent),
     }
     return {"per_agent": per_agent, "aggregate": aggregate}

@@ -198,17 +198,41 @@ class CanonicalRulePlayer(GeneralPlayer):
     def _finalize_order(
         self, order: Dict[str, Any], state: StandardMarketState
     ) -> Dict[str, Any]:
-        action = order.get("action", "hold")
-        quantity = float(order.get("quantity", 0.0) or 0.0)
+        original_action = order.get("action", "hold")
+        original_quantity = float(order.get("quantity", 0.0) or 0.0)
+        action = original_action
+        quantity = original_quantity
         bid_price = float(order.get("bid_price") or state.price)
 
+        clipped = False
+        clipped_reason: str = ""
         if action == "buy" and quantity > 0:
             affordable = state.cash / bid_price if bid_price > 0 else 0.0
-            quantity = min(quantity, max(affordable, 0.0))
+            new_qty = min(quantity, max(affordable, 0.0))
+            if new_qty < quantity:
+                clipped = True
+                clipped_reason = "insufficient_cash"
+            quantity = new_qty
         elif action == "sell" and quantity > 0:
-            quantity = min(quantity, max(state.position, 0.0))
+            new_qty = min(quantity, max(state.position, 0.0))
+            if new_qty < quantity:
+                clipped = True
+                clipped_reason = "insufficient_position"
+            quantity = new_qty
 
-        if quantity <= 0:
+        # Preserve intent: an order clipped down to 0 from a genuine buy/sell
+        # intent is NOT the same as an explicit hold decision. Downstream
+        # behavioral metrics (action_frequency, decision_entropy) must be
+        # able to distinguish them; silent masking previously inflated the
+        # hold bucket and understated agent decisiveness.
+        clipped_to_hold = False
+        if quantity <= 0 and original_action in ("buy", "sell"):
+            clipped_to_hold = True
+            if not clipped_reason:
+                clipped_reason = "zero_quantity_after_clip"
+            action = "hold"
+            quantity = 0.0
+        elif quantity <= 0:
             action = "hold"
             quantity = 0.0
 
@@ -219,19 +243,31 @@ class CanonicalRulePlayer(GeneralPlayer):
             "investor": self.identity,
             "strategy": order.get("strategy", self.STRATEGY),
         }
+        if clipped or clipped_to_hold:
+            finalized["_clipped"] = True
+            finalized["_clipped_from"] = original_action
+            finalized["_clipped_intended_quantity"] = float(original_quantity)
+            finalized["_clipped_reason"] = clipped_reason or "unspecified"
         # Preserve any extra metadata the subclass attached.
         for k, v in order.items():
             finalized.setdefault(k, v)
         validate_order(finalized)
         return finalized
 
-    def _noop_order(self) -> Dict[str, Any]:
+    def _noop_order(self, reason: str = "no_market_data") -> Dict[str, Any]:
+        # NOTE: Placeholder for bootstrap rounds where market_data is not yet
+        # available. NOT a real decision. Must be marked so downstream
+        # audit/metrics can exclude these from statistics (herding CV,
+        # action-frequency, decision-entropy, bid-convergence). Previously
+        # bid_price=0.01 leaked into mean_bid and polluted CV computations.
         order = {
             "action": "hold",
             "quantity": 0.0,
-            "bid_price": 0.01,
+            "bid_price": 0.0,
             "investor": self.identity,
             "strategy": self.STRATEGY,
+            "_skipped": True,
+            "_skipped_reason": reason,
         }
         return {
             **order,
@@ -313,13 +349,19 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
         try:
             decision = self._run_llm(state)
-        except Exception as exc:  # noqa: BLE001 — degrade gracefully, never abort
-            logger.warning(
-                "[%s] LLM call failed (%s); falling back to hold.",
+        except Exception as exc:  # noqa: BLE001
+            # FAIL-LOUD: never silently fabricate a "hold" decision. A synthetic
+            # hold with bid_price=0.01 would pollute herding/CV/entropy metrics
+            # and lie about LLM agents' true behaviour. If retries in _run_llm
+            # were already exhausted, the run must be considered invalid.
+            logger.error(
+                "[%s] LLM call failed after retries (%s); aborting round.",
                 self.identity,
                 exc,
             )
-            return self._noop_order()
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable: {exc}"
+            ) from exc
 
         action = decision.get("action", "hold")
         bid_price = float(decision.get("bid_price") or state.price)
@@ -467,13 +509,20 @@ class CanonicalLLMPlayer(GeneralPlayer):
                     )
         raise RuntimeError(f"LLM call failed after {max_retries} retries: {last_error}")
 
-    def _noop_order(self) -> Dict[str, Any]:
+    def _noop_order(self, reason: str = "no_market_data") -> Dict[str, Any]:
+        # NOTE: Placeholder for bootstrap rounds where market_data is not yet
+        # available. NOT a real decision. Must be marked so downstream
+        # audit/metrics can exclude these from statistics (herding CV,
+        # action-frequency, decision-entropy, bid-convergence). Previously
+        # bid_price=0.01 leaked into mean_bid and polluted CV computations.
         order = {
             "action": "hold",
             "quantity": 0.0,
-            "bid_price": 0.01,
+            "bid_price": 0.0,
             "investor": self.identity,
             "strategy": self.STRATEGY,
+            "_skipped": True,
+            "_skipped_reason": reason,
         }
         return {
             **order,

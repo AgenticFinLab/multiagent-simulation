@@ -248,8 +248,7 @@ def aligned_market_series(
 
     * accepts two separate dicts (instead of the canonical data dict),
     * returns ``List[float]`` (instead of ``np.ndarray``), and
-    * degrades gracefully when fundamentals is empty (fills zeros) rather
-      than raising.
+    * requires overlapping rounds — it will NOT fabricate fundamentals.
 
     Parameters
     ----------
@@ -262,18 +261,27 @@ def aligned_market_series(
     -------
     tuple of (sorted_rounds, prices_list, fundamentals_list)
         Three parallel sequences containing only the rounds present in
-        *both* input dicts. If ``fundamentals`` is empty, ``fund_list``
-        defaults to zeros matching ``prices_list`` length.
+        *both* input dicts.
+
+    Raises
+    ------
+    ValueError
+        If ``fundamentals`` is empty or shares no rounds with
+        ``market_prices``. Silently filling zeros here previously
+        produced (p - 0)/0 divisions that either raised or silently
+        propagated inf/NaN into deviation-based metrics; callers must
+        instead detect the missing-fundamental case and skip the metric.
     """
     common_rounds = sorted(set(market_prices.keys()) & set(fundamentals.keys()))
     if not common_rounds:
-        # Fallback: use market_prices alone with zero fundamentals.
-        common_rounds = sorted(market_prices.keys())
-        prices_list = [float(market_prices[r]) for r in common_rounds]
-        fund_list = [0.0] * len(common_rounds)
-    else:
-        prices_list = [float(market_prices[r]) for r in common_rounds]
-        fund_list = [float(fundamentals[r]) for r in common_rounds]
+        raise ValueError(
+            "aligned_market_series: no overlapping rounds between "
+            "market_prices and fundamentals. Silent zero-fill removed to "
+            "avoid poisoning deviation-based metrics — caller must skip "
+            "metric or supply real fundamentals."
+        )
+    prices_list = [float(market_prices[r]) for r in common_rounds]
+    fund_list = [float(fundamentals[r]) for r in common_rounds]
     return common_rounds, prices_list, fund_list
 
 
@@ -292,7 +300,16 @@ def payload_buy_sell(payload: Dict[str, Any]) -> Tuple[float, float]:
     -------
     tuple of (buy_quantity, sell_quantity)
     """
-    action = payload.get("action", "hold")
+    # Synthetic bootstrap payloads (produced by _noop_order before market_data
+    # is broadcast) MUST NOT be counted as real trading activity.
+    if payload.get("_skipped"):
+        return 0.0, 0.0
+    action = payload.get("action")
+    if action not in ("buy", "sell", "hold"):
+        # Malformed payload: do not silently coerce to 'hold' — return zero
+        # so it does not inflate any bucket. Callers that need to audit
+        # malformed rate should inspect payload["action"] directly.
+        return 0.0, 0.0
     quantity = abs(float(payload.get("quantity", 0.0)))
     if action == "buy":
         return quantity, 0.0

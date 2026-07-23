@@ -62,8 +62,16 @@ def calculate_volume_metrics(
 
         total = buy_vol + sell_vol
         total_volume[r] = total
-        buy_ratio[r] = buy_vol / total if total > 0 else 0.5
-        sell_ratio[r] = sell_vol / total if total > 0 else 0.5
+        if total > 0:
+            buy_ratio[r] = buy_vol / total
+            sell_ratio[r] = sell_vol / total
+        else:
+            # No volume this round — do NOT synthesise a 50/50 "neutral"
+            # split. Zero volume and "50/50 balanced" are entirely different
+            # market states; a fake 0.5 pollutes herding, cascade and CSAD
+            # time-series averages.
+            buy_ratio[r] = float("nan")
+            sell_ratio[r] = float("nan")
         net_flow[r] = net
 
     return {

@@ -212,14 +212,21 @@ def calculate_sharpe_ratio(
         Annualized Sharpe Ratio
     """
     if len(returns) < 2:
-        return 0.0
+        # NaN, not 0.0: a Sharpe of 0 is a valid measurement (zero excess
+        # return), so it must not be reused as an "insufficient data"
+        # sentinel.
+        return float("nan")
 
     arr = np.array(returns)
     excess_return = np.mean(arr) - risk_free_rate
     std_return = np.std(arr, ddof=1)
 
     if std_return == 0:
-        return 0.0
+        # Zero-variance returns produce a mathematically undefined Sharpe
+        # (division by zero). Return NaN — using 0.0 here would falsely
+        # signal "no risk-adjusted alpha" for what is actually
+        # "risk-adjusted alpha is undefined".
+        return float("nan")
 
     return float(excess_return / std_return * np.sqrt(annualization_factor))
 
@@ -237,7 +244,9 @@ def calculate_max_drawdown(prices: List[float]) -> Tuple[float, int, int]:
         (max_drawdown_pct, peak_idx, trough_idx)
     """
     if len(prices) < 2:
-        return 0.0, 0, 0
+        # NaN with sentinel indices: 0.0 is a valid "no drawdown observed"
+        # measurement, so it must not be reused for "insufficient data".
+        return float("nan"), -1, -1
 
     arr = np.array(prices)
     running_max = np.maximum.accumulate(arr)
@@ -316,7 +325,11 @@ def _half_life_threshold_impl(prices: np.ndarray, fundamental: float) -> float:
     """First round at which |deviation| <= 0.5 * |deviation_0|."""
     devs = np.abs((prices - fundamental) / fundamental)
     if devs[0] == 0:
-        return 0.0
+        # Initial price already equals fundamental — half-life is undefined
+        # (no deviation to decay). Returning 0.0 previously falsely reported
+        # "reached half-life at round 0" and dragged the scenario mean-
+        # reversion metric downward.
+        raise MetricUnavailable("initial deviation is zero — half-life undefined")
     target = devs[0] / 2.0
     for idx, dev in enumerate(devs):
         if dev <= target:

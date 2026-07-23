@@ -960,16 +960,29 @@ def aggregate_strategy_results(
     paper_losses = sum(result["paper_losses"] for result in matches)
     gain_denominator = realized_gains + paper_gains
     loss_denominator = realized_losses + paper_losses
-    pgr = realized_gains / gain_denominator if gain_denominator > 0 else 0.0
-    plr = realized_losses / loss_denominator if loss_denominator > 0 else 0.0
+    # NaN — not 0.0 — when the denominator is empty: "no gains available to realize"
+    # is not the same as "0% of gains realized"; the metric is genuinely undefined
+    # and defaulting to 0.0 would falsely register maximum reluctance.
+    pgr = realized_gains / gain_denominator if gain_denominator > 0 else float("nan")
+    plr = realized_losses / loss_denominator if loss_denominator > 0 else float("nan")
+
+    if plr is not None and plr > 0:
+        disposition_ratio = pgr / plr
+    elif plr == 0 and pgr and pgr > 0:
+        disposition_ratio = float("inf")
+    else:
+        disposition_ratio = float("nan")
+    disposition_effect = (
+        bool(pgr > plr) if np.isfinite(pgr) and np.isfinite(plr) else False
+    )
 
     return {
         "strategy": matches[0]["strategy"],
         "player_count": len(matches),
         "pgr": pgr,
         "plr": plr,
-        "disposition_ratio": pgr / plr if plr > 0 else float("inf"),
-        "disposition_effect": pgr > plr,
+        "disposition_ratio": disposition_ratio,
+        "disposition_effect": disposition_effect,
         "realized_gains": realized_gains,
         "realized_losses": realized_losses,
         "paper_gains": paper_gains,
@@ -1037,9 +1050,20 @@ def holding_period_asymmetry(
             else:
                 lots[0][0] = lot_quantity
 
-    avg_winner = winner_rounds / winner_quantity if winner_quantity else 0.0
-    avg_loser = loser_rounds / loser_quantity if loser_quantity else 0.0
-    hpa = avg_loser / avg_winner if avg_winner > 0 else 0.0
+    # NaN — not 0.0 — when no winner/loser sales were reconstructed:
+    # "no winners sold" is not the same as "held winners for 0 rounds", and a
+    # 0.0 HPA would collide with the "no asymmetry" null hypothesis.
+    avg_winner = winner_rounds / winner_quantity if winner_quantity else float("nan")
+    avg_loser = loser_rounds / loser_quantity if loser_quantity else float("nan")
+    if not np.isfinite(avg_winner) or not np.isfinite(avg_loser):
+        hpa = float("nan")
+    elif avg_winner > 0:
+        hpa = avg_loser / avg_winner
+    elif avg_loser > 0:
+        # Winners held zero rounds but losers held some — infinite asymmetry
+        hpa = float("inf")
+    else:
+        hpa = float("nan")
     return {
         "avg_winner_holding_rounds": avg_winner,
         "avg_loser_holding_rounds": avg_loser,
@@ -1119,7 +1143,15 @@ def calculate_extended_metrics(
     )
     tax_result = aggregate_strategy_results(strategy_results, "tax")
     disposition_plr = float(disposition_result["plr"])
-    tri = float(tax_result["plr"]) / disposition_plr if disposition_plr > 0 else 0.0
+    tax_plr = float(tax_result["plr"])
+    # TRI is a ratio of two PLRs.  If the disposition group has no realizable
+    # losses (PLR NaN or 0), the ratio is undefined, NOT "zero anti-disposition
+    # strength".  Emitting 0.0 would silently signal "no tax-loss harvesting
+    # effect" and pass the "TRI ≈ 0" null.
+    if not np.isfinite(disposition_plr) or disposition_plr <= 0:
+        tri = float("nan")
+    else:
+        tri = tax_plr / disposition_plr
     return {
         "holding_periods": holding_periods,
         "terminal_wealth": wealth,

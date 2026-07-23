@@ -398,8 +398,19 @@ def _extract_hedgedfund_state(
     Uses turn payloads to replay orders using bid_price and quantity so that
     reconstructed wealth is independent of the coordinator clearing.
     """
-    initial_cash = float(hf_extras.get("initial_cash", 0.0))
-    initial_position = float(hf_extras.get("initial_position", 0.0))
+    if "initial_cash" not in hf_extras or "initial_position" not in hf_extras:
+        # Fail loudly rather than silently endow the HedgedFund with cash=0
+        # and position=0.  A zero endowment yields zero initial wealth and
+        # collapses PnL to the mark-to-market of every trade — a
+        # null-hypothesis-coincident mock exactly like the ones the audit
+        # is eliminating.  Missing extras is a configuration error.
+        raise ValueError(
+            "EuropeanDebtCrisis Rule analysis: HedgedFund config extras must "
+            "provide both 'initial_cash' and 'initial_position'; got keys "
+            f"{sorted(hf_extras.keys())!r}"
+        )
+    initial_cash = float(hf_extras["initial_cash"])
+    initial_position = float(hf_extras["initial_position"])
 
     price_by_round = {r: p for r, p in zip(rounds, prices)}
     trades_by_pid: Dict[str, List[Dict[str, Any]]] = {}

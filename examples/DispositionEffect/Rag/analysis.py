@@ -128,9 +128,20 @@ def holding_period_asymmetry(
             else:
                 lots[0][0] = lot_quantity
 
-    avg_winner = winner_rounds / winner_quantity if winner_quantity else 0.0
-    avg_loser = loser_rounds / loser_quantity if loser_quantity else 0.0
-    ratio = avg_loser / avg_winner if avg_winner > 0 else 0.0
+    # NaN — not 0.0 — when no winner/loser sales were reconstructed:
+    # 0.0 HPA would falsely register "no asymmetry" (the null hypothesis) even
+    # though no data is available to compute the ratio.
+    avg_winner = winner_rounds / winner_quantity if winner_quantity else float("nan")
+    avg_loser = loser_rounds / loser_quantity if loser_quantity else float("nan")
+    import math as _math  # local import — one-off usage in this leaf function
+    if not _math.isfinite(avg_winner) or not _math.isfinite(avg_loser):
+        ratio = float("nan")
+    elif avg_winner > 0:
+        ratio = avg_loser / avg_winner
+    elif avg_loser > 0:
+        ratio = float("inf")
+    else:
+        ratio = float("nan")
     return {
         "avg_winner_holding_rounds": avg_winner,
         "avg_loser_holding_rounds": avg_loser,
@@ -191,17 +202,21 @@ def calculate_extended_metrics(
         raise ValueError("Disposition and rational wealth are required for PDI")
     mean_disposition = sum(disposition_wealth) / len(disposition_wealth)
     mean_rational = sum(rational_wealth) / len(rational_wealth)
+    # PDI is undefined when rational wealth mean is zero; 0.0 would misread as
+    # "no performance drag".
     pdi = (
         (mean_rational - mean_disposition) / mean_rational
         if mean_rational != 0
-        else 0.0
+        else float("nan")
     )
     mean_disposition_plr = sum(disposition_plr) / len(disposition_plr)
-    mean_tax_plr = sum(tax_plr) / len(tax_plr) if tax_plr else 0.0
+    # NaN when the tax cohort produced no observations at all — 0.0 would
+    # register "zero tax-loss harvesting" against a non-existent cohort.
+    mean_tax_plr = sum(tax_plr) / len(tax_plr) if tax_plr else float("nan")
     tri = (
         mean_tax_plr / mean_disposition_plr
         if mean_disposition_plr > 0
-        else 0.0
+        else float("nan")
     )
     return {
         "holding_periods": holding_periods,
