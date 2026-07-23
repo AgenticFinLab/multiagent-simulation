@@ -3,11 +3,11 @@
 # =============================================================================
 # Star topology: Market broadcasts to all RAG+LLM investors
 #
-#         ragllm_anchored ────────────────┐
-#         ragllm_historical ──────────────┤
-#         ragllm_rational ────────────────┼──▶ market ──▶ all investors
-#         ragllm_momentum ────────────────┤           (market data: price, deviation)
-#         ragllm_noise ───────────────────┘
+#         ragllm_anchored_trader ──────────────┐
+#         ragllm_historical_anchor ────────────┤
+#         ragllm_rational_updater ─────────────┼──▶ market ──▶ all investors
+#         ragllm_momentum_trader ──────────────┤           (market data: price, deviation)
+#         ragllm_noise_trader ─────────────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + deviation metrics)
@@ -22,24 +22,24 @@ sources:
 connections:
   # Market → All investors (price + deviation data broadcast)
   market:
-    - ragllm_anchored
-    - ragllm_historical
-    - ragllm_rational
-    - ragllm_momentum
-    - ragllm_noise
+    - ragllm_anchored_trader
+    - ragllm_historical_anchor
+    - ragllm_rational_updater
+    - ragllm_momentum_trader
+    - ragllm_noise_trader
 
   # Each investor → Market only (order submission)
-  ragllm_anchored:
+  ragllm_anchored_trader:
     - market
 
-  ragllm_historical:
+  ragllm_historical_anchor:
     - market
 
-  ragllm_rational:
+  ragllm_rational_updater:
     - market
 
-  ragllm_momentum:
+  ragllm_momentum_trader:
     - market
 
-  ragllm_noise:
+  ragllm_noise_trader:
     - market

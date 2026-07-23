@@ -1,6 +1,7 @@
 """Analysis view component for displaying simulation results and charts."""
 
 import json
+import os
 import streamlit as st
 from pathlib import Path
 from typing import Tuple
@@ -40,11 +41,15 @@ def render_analysis_page(scenario_name: str):
 
     st.markdown("---")
 
+    # A forced rerun (triggered by the toolbar's "Run Analysis" when the
+    # analysis is missing or stale) must regenerate charts even if old PNGs
+    # still exist on disk — otherwise the stale fast path would short-circuit.
+    force_rerun = st.session_state.pop("force_analysis_rerun", False)
     analysis_path = get_analysis_path(scenario_name)
     charts_exist = analysis_path is not None and any(analysis_path.glob("*.png"))
 
-    if charts_exist:
-        # ── Fast path: charts already on disk, display immediately ──────────────────
+    if charts_exist and not force_rerun:
+        # ── Fast path: fresh charts already on disk, display immediately ────────────
         _display_analysis_results(scenario_name, analysis_path)
 
         # Offer a re-run button at the bottom so the user can refresh results
@@ -64,7 +69,7 @@ def render_analysis_page(scenario_name: str):
                     st.code(message)
         return
 
-    # ── No charts yet: check for raw simulation data ─────────────────────────────
+    # ── Need to (re)generate charts: none exist yet, or a forced refresh ─────────
     has_results = check_simulation_results(scenario_name)
     if not has_results:
         st.warning("No simulation results found for this scenario.")
@@ -79,7 +84,6 @@ def render_analysis_page(scenario_name: str):
         with st.expander("Error detail"):
             st.code(message)
         return
-    st.success(message)
     analysis_path = get_analysis_path(scenario_name)
 
     if analysis_path and analysis_path.exists():
@@ -107,12 +111,38 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
         if not config_path.exists():
             return False, f"Config not found: {config_path}"
 
+        # Remove charts from any previous run before regenerating. Older
+        # versions of an analysis script may have used a different filename
+        # scheme (e.g. 01_anchoringeffect_dynamics.png vs 01_price_dynamics.png);
+        # since the current script writes different names it never overwrites
+        # those leftovers, so they pile up and show as duplicate 00/01/02…
+        # numbers in the gallery. Clearing first guarantees the gallery matches
+        # exactly what this run produced.
+        analysis_dir = get_analysis_path(scenario_name)
+        if analysis_dir and analysis_dir.exists():
+            for old_png in analysis_dir.glob("*.png"):
+                try:
+                    old_png.unlink()
+                except OSError:
+                    pass
+
+        # The analysis script does `from masim import ...`, but when run as a
+        # subprocess Python only puts the SCRIPT's own directory on sys.path
+        # (not cwd), so the top-level `masim` package is invisible. Inject the
+        # project root via PYTHONPATH so the import resolves without requiring
+        # an installed/editable package.
+        env = os.environ.copy()
+        env["PYTHONPATH"] = os.pathsep.join(
+            filter(None, [str(_project_root), env.get("PYTHONPATH", "")])
+        )
+
         result = subprocess.run(
             [sys.executable, str(script_path), "-c", str(config_path)],
             capture_output=True,
             text=True,
             timeout=180,
             cwd=str(_project_root),
+            env=env,
         )
 
         if result.returncode == 0:
@@ -184,48 +214,78 @@ def _display_summary(summary_path: Path):
     st.header("Simulation Results")
 
     # ── Validation block ──────────────────────────────────────────────────
-    validation = summary.get("validation", {})
-    if validation:
-        score = validation.get("score", validation.get("fit_score", None))
-        interpretation = validation.get("interpretation", "")
-        passed = validation.get("valid", validation.get("passed", None))
+    # The richest validation card lives under scenario_metrics.validation; the
+    # top-level "validation" is usually an empty placeholder (score=null), which
+    # previously showed the useless "Validation result available" line with no
+    # Fit Score. Pick the first candidate that actually carries a score.
+    validation = {}
+    for cand in (
+        summary.get("scenario_metrics", {}).get("validation"),
+        summary.get("validation"),
+        summary.get("universal_metrics", {}).get("validation"),
+    ):
+        if isinstance(cand, dict) and cand.get("score") is not None:
+            validation = cand
+            break
+    if not validation:
+        validation = summary.get("scenario_metrics", {}).get("validation") or {}
 
-        v_col1, v_col2 = st.columns([2, 1])
-        with v_col1:
-            if passed is True:
-                st.success(f"✅  Validation PASSED — {interpretation}")
-            elif passed is False:
-                st.error(f"❌  Validation FAILED — {interpretation}")
-            else:
-                # No explicit boolean; infer from score
-                st.info(
-                    f"📊  {interpretation}"
-                    if interpretation
-                    else "Validation result available"
+    score = validation.get("score", validation.get("fit_score"))
+    interpretation = validation.get("interpretation", "")
+
+    # Fit Score — shown as a neutral data card. The interface ONLY reports the
+    # number from the data; it does NOT synthesise a PASS/FAIL verdict or use
+    # traffic-light colouring (those are conclusions, not raw data).
+    if score is not None:
+        pct = score if score > 1 else score * 100
+        st.markdown(
+            f"""
+            <div style="
+                background:#2b2b3d;
+                border-radius:10px;
+                padding:14px 16px;
+                text-align:center;
+                color:white;
+                font-size:22px;
+                font-weight:bold;
+                width:160px;
+            ">
+                {pct:.1f}%
+                <div style="font-size:12px;font-weight:normal;margin-top:2px;">Fit Score</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Validation criteria — faithful data only: observed value, target band and
+    # the per-criterion score. No verdict marks are added by the interface.
+    criteria = validation.get("criteria", {})
+    if criteria:
+        c_cols = st.columns(min(len(criteria), 4))
+        for i, (name, crit) in enumerate(criteria.items()):
+            with c_cols[i % 4]:
+                label = name.replace("_", " ").title()
+                val = crit.get("value")
+                val_str = (
+                    f"{val:.3f}" if isinstance(val, (int, float)) else str(val)
                 )
-        with v_col2:
-            if score is not None:
-                pct = score if score > 1 else score * 100
-                color = (
-                    "#28a745" if pct >= 60 else "#ffc107" if pct >= 40 else "#dc3545"
-                )
-                st.markdown(
-                    f"""
-                    <div style="
-                        background:{color};
-                        border-radius:10px;
-                        padding:14px 10px;
-                        text-align:center;
-                        color:white;
-                        font-size:22px;
-                        font-weight:bold;
-                    ">
-                        {pct:.1f}%
-                        <div style="font-size:12px;font-weight:normal;margin-top:2px;">Fit Score</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                parts = []
+                if crit.get("target") is not None:
+                    parts.append(f"Target: {crit['target']}")
+                if isinstance(crit.get("score"), (int, float)):
+                    parts.append(f"Score: {crit['score']:.3f}")
+                st.metric(label, val_str, help="  |  ".join(parts) or None)
+
+    # Advisories — verbatim notes from the data
+    advisories = validation.get("advisories", [])
+    if advisories:
+        for note in advisories:
+            st.caption(note)
+
+    # Full textual analysis, verbatim from summary.json
+    if interpretation:
+        st.subheader("Detailed Analysis")
+        st.code(interpretation, language=None)
 
     st.markdown("---")
 
@@ -286,10 +346,6 @@ def _display_summary(summary_path: Path):
                     st.metric(label, f"{value:.2f}")
                 else:
                     st.metric(label, str(value))
-
-    # ── Raw JSON expander ─────────────────────────────────────────────────
-    with st.expander("View full summary JSON"):
-        st.json(summary)
 
 
 def _chart_description(stem: str) -> str:

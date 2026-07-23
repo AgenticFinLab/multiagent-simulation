@@ -1205,3 +1205,77 @@ def get_analysis_path(scenario_name: str) -> Optional[Path]:
     analysis_path = record_path.parent / "analysis"
 
     return analysis_path if analysis_path.exists() else None
+
+
+def _dir_latest_mtime(
+    root: Optional[Path], exclude: Optional[Path] = None
+) -> Optional[float]:
+    """Return the newest file mtime under *root* (recursive).
+
+    Args:
+        root: Directory to scan; None/absent yields None.
+        exclude: Optional subtree to skip (e.g. the analysis output dir).
+
+    Returns:
+        The maximum st_mtime among files, or None when no files are found.
+    """
+    if not root or not root.exists():
+        return None
+    latest: Optional[float] = None
+    for p in root.rglob("*"):
+        if not p.is_file():
+            continue
+        if exclude is not None:
+            try:
+                p.relative_to(exclude)
+                continue  # inside the excluded subtree
+            except ValueError:
+                pass
+        try:
+            m = p.stat().st_mtime
+        except OSError:
+            continue
+        if latest is None or m > latest:
+            latest = m
+    return latest
+
+
+def get_analysis_freshness(scenario_name: str) -> str:
+    """Classify analysis output relative to the underlying experiment data.
+
+    Compares the newest analysis artefact mtime against the newest data-file
+    mtime, so a stale analysis (produced before the latest run) can be flagged
+    for re-running rather than silently shown.
+
+    Args:
+        scenario_name: Scenario directory name.
+
+    Returns:
+        One of:
+          - "no_data": no experiment data exists.
+          - "missing": data exists but no analysis charts are on disk.
+          - "stale":   analysis charts exist but predate the newest data file.
+          - "fresh":   analysis charts exist and post-date all data files.
+    """
+    info = get_scenario_info(scenario_name)
+    if not info.get("record_path"):
+        return "no_data"
+
+    record_path = _PROJECT_ROOT / info["record_path"]
+    variant_dir = record_path.parent
+    analysis_path = variant_dir / "analysis"
+
+    pngs = list(analysis_path.glob("*.png")) if analysis_path.exists() else []
+    data_mtime = _dir_latest_mtime(variant_dir, exclude=analysis_path)
+
+    if not pngs:
+        return "missing" if data_mtime is not None else "no_data"
+
+    analysis_mtime = max(p.stat().st_mtime for p in pngs)
+    summary = analysis_path / "summary.json"
+    if summary.exists():
+        analysis_mtime = max(analysis_mtime, summary.stat().st_mtime)
+
+    if data_mtime is None:
+        return "fresh"
+    return "fresh" if analysis_mtime >= data_mtime else "stale"

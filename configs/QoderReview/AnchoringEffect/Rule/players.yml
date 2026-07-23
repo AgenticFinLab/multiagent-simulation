@@ -1,0 +1,276 @@
+# =============================================================================
+# AnchoringEffect Players Configuration
+# =============================================================================
+# Heterogeneous agents for anchoring bias simulation
+#
+# Agent Types (with market impact):
+#   - Market: Rule-based coordinator (price-impact dynamics)
+#   - AnchoredTrader: Anchors to initial price, adjusts insufficiently (DESTABILIZING)
+#   - HistoricalAnchor: Anchors to historical average price (DESTABILIZING)
+#   - RationalUpdater: Bayesian updating without bias (STABILIZING)
+#   - MomentumTrader: Follows price trends (DESTABILIZING)
+#   - NoiseTrader: Random uninformed trader (CONTEXT-DEPENDENT)
+#   - DispositionTrader: Prospect-theory asymmetric exit (CONTEXT-DEPENDENT)
+#   - ContrarianTrader: Fades short-horizon overshoots (STABILIZING)
+#   - FundamentalAnalyst: Slow-learning belief updater (STABILIZING)
+#   - LiquidityProvider: Two-sided market maker (STABILIZING)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Market (Coordinator)
+# -----------------------------------------------------------------------------
+market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  name: "Market"
+  class: "examples.AnchoringEffect.Rule.players:Market"
+  num_instances: 1
+  config:
+    identity: "market"
+    role: coordinator
+    steps_per_turn: 1
+    group_tags:
+      - market
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      # Market dynamics parameters (price formula P(t+1) = P(t) + λ·D(t) + γ·[F−P(t)] + ε)
+      fundamental_value: 100.0     # Source: target §9 F; simulation-bases.md §3.1 (normalization, 100-scale index)
+      initial_price: 105.0         # Source: target §9 P0; simulation-bases.md §3.1 (5% above F, IPO-anchor seed)
+      price_impact: 0.01           # Source: target §9 lambda; Hasbrouck (1991) https://doi.org/10.2307/2328883
+      mean_reversion: 0.01         # Source: target §9 gamma; Campbell & Sharpe (2009) https://doi.org/10.1017/S0022109009090127
+      noise_std: 0.5               # Source: target §9 sigma; Lux & Marchesi (1999) https://doi.org/10.1038/17290
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring-buffer per masim.core state contract)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Anchored Traders (Primary Anchoring Bias Agents)
+# Theory: Tversky & Kahneman (1974) — Anchoring and Insufficient Adjustment
+# -----------------------------------------------------------------------------
+rule_anchored_trader:
+  name: "Anchored Trader"
+  class: "examples.AnchoringEffect.Rule.players:AnchoredTrader"
+  # Expander → rule_anchored_trader_1, rule_anchored_trader_2
+  num_instances: 2
+  config:
+    identity: "rule_anchored_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization (10000-scale)
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization (100-share seed)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # AnchoredTrader specific parameters (target §4.1 anchor: Tversky & Kahneman 1974)
+      adjustment_factor: 0.3       # Source: target §9 alpha; Tversky & Kahneman (1974) https://doi.org/10.1126/science.185.4157.1124
+      base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization, mid-range)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Historical Anchors (Historical Price Fixation)
+# Theory: Northcraft & Neale (1987) — Experts anchor to past prices
+# -----------------------------------------------------------------------------
+rule_historical_anchor:
+  name: "Historical Anchor"
+  class: "examples.AnchoringEffect.Rule.players:HistoricalAnchor"
+  # Expander → rule_historical_anchor_1, rule_historical_anchor_2
+  num_instances: 2
+  config:
+    identity: "rule_historical_anchor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # HistoricalAnchor specific parameters (target §4.2 anchor: Northcraft & Neale 1987)
+      anchor_weight: 0.5           # Source: target §9 w; Northcraft & Neale (1987) https://doi.org/10.1016/0749-5978(87)90046-X
+      lookback: 60                 # Source: target §9 L; Campbell & Sharpe (2009) https://doi.org/10.1017/S0022109009090127
+      base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Rational Updater (Benchmark — Correct Bayesian Updating)
+# Theory: Muth (1961) — Rational Expectations Benchmark
+# -----------------------------------------------------------------------------
+rule_rational_updater:
+  name: "Rational Updater"
+  class: "examples.AnchoringEffect.Rule.players:RationalUpdater"
+  num_instances: 1
+  config:
+    identity: "rule_rational_updater"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # RationalUpdater specific parameters (target §4.4 anchor: Muth 1961)
+      base_position_size: 25.0     # Source: target §9 b; simulation-bases.md §6 (higher size for corrective force)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Momentum Traders (Trend Amplifiers)
+# Theory: Jegadeesh & Titman (1993) — Short-Horizon Momentum
+# -----------------------------------------------------------------------------
+rule_momentum_trader:
+  name: "Momentum Trader"
+  class: "examples.AnchoringEffect.Rule.players:MomentumTrader"
+  # Expander → rule_momentum_trader_1, rule_momentum_trader_2
+  num_instances: 2
+  config:
+    identity: "rule_momentum_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # MomentumTrader specific parameters (target §4.5 anchor: Jegadeesh & Titman 1993)
+      entry_threshold: 0.02        # Source: target §9 tau_MT; Jegadeesh & Titman (1993) https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
+      base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Noise Traders (Background Liquidity)
+# Theory: Black (1986) — Noise Trading
+# -----------------------------------------------------------------------------
+rule_noise_trader:
+  name: "Noise Trader"
+  class: "examples.AnchoringEffect.Rule.players:NoiseTrader"
+  # Expander → rule_noise_trader_1, rule_noise_trader_2
+  num_instances: 2
+  config:
+    identity: "rule_noise_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # NoiseTrader specific parameters (target §4 noise anchor: Black 1986)
+      trade_probability: 0.05      # Source: target §9 p_NT; Black (1986) https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
+      min_order: 100.0             # Source: simulation-bases.md §4.5.7 (min-order normalization, one-share-lot scale)
+      max_order: 500.0             # Source: simulation-bases.md §4.5.7 (max-order normalization, five-lot cap)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Disposition Traders (Prospect Theory Asymmetric)
+# Theory: Shefrin & Statman (1985) — Disposition Effect; Kahneman & Tversky (1979)
+# -----------------------------------------------------------------------------
+rule_disposition_trader:
+  name: "Disposition Trader"
+  class: "examples.AnchoringEffect.Rule.players:DispositionTrader"
+  # Expander → rule_disposition_trader_1, rule_disposition_trader_2
+  num_instances: 2
+  config:
+    identity: "rule_disposition_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # DispositionTrader specific parameters (target §4.6 anchor: Shefrin & Statman 1985)
+      gain_threshold: 0.04         # Source: target §9 g; Odean (1998) https://doi.org/10.1111/0022-1082.00072
+      loss_aversion_mult: 2.5      # Source: target §9 lambda_LA; Kahneman & Tversky (1979) https://doi.org/10.2307/1914185
+      base_position_size: 15.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization, lower for asymmetric agent)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Contrarian Trader (Statistical Mean Reversion)
+# Theory: De Bondt & Thaler (1985) — Market Overreaction; Jegadeesh (1990)
+# -----------------------------------------------------------------------------
+rule_contrarian_trader:
+  name: "Contrarian Trader"
+  class: "examples.AnchoringEffect.Rule.players:ContrarianTrader"
+  num_instances: 1
+  config:
+    identity: "rule_contrarian_trader"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # ContrarianTrader specific parameters (target §4.7 anchor: De Bondt & Thaler 1985)
+      lookback_window: 10          # Source: target §9 L_CT; Jegadeesh (1990) https://doi.org/10.1111/j.1540-6261.1990.tb03723.x
+      entry_threshold: 0.05        # Source: target §9 tau_CT; De Bondt & Thaler (1985) https://doi.org/10.1111/j.1540-6261.1985.tb05004.x
+      base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Fundamental Analyst (Conservative Institutional Updater)
+# Theory: Barberis, Shleifer & Vishny (1998) — Conservatism Bias / Slow Belief Updating
+# -----------------------------------------------------------------------------
+rule_fundamental_analyst:
+  name: "Fundamental Analyst"
+  class: "examples.AnchoringEffect.Rule.players:FundamentalAnalyst"
+  num_instances: 1
+  config:
+    identity: "rule_fundamental_analyst"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
+      initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # FundamentalAnalyst specific parameters (target §4.8 anchor: Barberis, Shleifer & Vishny 1998)
+      learning_rate: 0.05          # Source: target §9 eta; Barberis, Shleifer & Vishny (1998) https://doi.org/10.1016/S0304-405X(98)00027-0
+      base_position_size: 25.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization, higher for corrective force)
+  persona: !include persona.yml
+
+# -----------------------------------------------------------------------------
+# Liquidity Provider (Passive Market Maker)
+# Theory: Glosten & Milgrom (1985); Hendershott, Jones & Menkveld (2011)
+# -----------------------------------------------------------------------------
+rule_liquidity_provider:
+  name: "Liquidity Provider"
+  class: "examples.AnchoringEffect.Rule.players:LiquidityProvider"
+  num_instances: 1
+  config:
+    identity: "rule_liquidity_provider"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - investors
+    extras:
+      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
+      # Investor base parameters
+      initial_cash: 15000.0        # Source: simulation-bases.md §4.9.7 (market-maker inventory buffer, 1.5x normalization)
+      initial_position: 150.0      # Source: simulation-bases.md §4.9.7 (market-maker inventory, 1.5x share-normalization)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      # LiquidityProvider specific parameters (target §4.9 anchor: Glosten & Milgrom 1985)
+      ema_window: 20               # Source: target §9 L_EMA; Hendershott, Jones & Menkveld (2011) https://doi.org/10.1111/j.1540-6261.2010.01624.x
+      half_spread: 0.015           # Source: target §9 h; Huang & Stoll (1997) https://doi.org/10.1093/rfs/10.4.995
+      base_position_size: 30.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization, highest for LP)
+  persona: !include persona.yml

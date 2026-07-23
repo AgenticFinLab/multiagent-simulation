@@ -11,9 +11,9 @@
 setting:
   name: "anchoring_effect_simulation"
   description: "Anchoring bias causes traders to insufficiently adjust from reference prices, creating slow price discovery"
-  total_rounds: 100
+  total_rounds: 200
   round_history_limit: 3
-  record_path: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rule-r100/records"
+  record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
   save_diagram_interval: 50
 
 environment:
@@ -52,6 +52,6 @@ players: !include players.yml
 topology: !include topology.yml
 
 communication:
-  storage_path: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rule-r100/communication"
+  storage_path: "EXPERIMENT/AnchoringEffect/Rule/communication"
   record_messages: true
   message_block_size: 500

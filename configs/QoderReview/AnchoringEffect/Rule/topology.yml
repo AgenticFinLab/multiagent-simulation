@@ -1,0 +1,71 @@
+# =============================================================================
+# AnchoringEffect Topology - Star Pattern
+# =============================================================================
+# Market as hub, all investors communicate through market.
+#
+# Note: player keys with num_instances > 1 use their base key here.
+# The simulator expander resolves them to foo_1, foo_2, ... before building
+# the TopologyGraph, so all edge rules apply to every instance automatically.
+#
+#         rule_anchored_trader ────────────┐
+#         rule_historical_anchor ──────────┤
+#         rule_rational_updater ───────────┤
+#         rule_momentum_trader ────────────┤
+#         rule_noise_trader ───────────────┼──▶ market ──▶ all investors
+#         rule_disposition_trader ──────────┤             (market data: price, deviation)
+#         rule_contrarian_trader ───────────┤
+#         rule_fundamental_analyst ─────────┤
+#         rule_liquidity_provider ──────────┘
+#
+# Execution flow per round:
+#   Level 0: market executes (broadcasts price + deviation metrics)
+#   Level 1: all investors execute in parallel (submit P,Q orders)
+#
+# Total: 14 investors + 1 market coordinator = 15 players
+# =============================================================================
+
+type: "star"
+
+sources:
+  - market
+
+connections:
+  # Market → All investors (price + deviation data broadcast)
+  market:
+    - rule_anchored_trader
+    - rule_historical_anchor
+    - rule_rational_updater
+    - rule_momentum_trader
+    - rule_noise_trader
+    - rule_disposition_trader
+    - rule_contrarian_trader
+    - rule_fundamental_analyst
+    - rule_liquidity_provider
+
+  # Each investor → Market only (order submission)
+  rule_anchored_trader:
+    - market
+
+  rule_historical_anchor:
+    - market
+
+  rule_rational_updater:
+    - market
+
+  rule_momentum_trader:
+    - market
+
+  rule_noise_trader:
+    - market
+
+  rule_disposition_trader:
+    - market
+
+  rule_contrarian_trader:
+    - market
+
+  rule_fundamental_analyst:
+    - market
+
+  rule_liquidity_provider:
+    - market

@@ -868,20 +868,35 @@ def _render_action_buttons(scenario_name: str):
 
     Buttons only appear when their prerequisite data exists:
       * ``Load Results`` / ``Re-run`` require saved experiment (round) data.
-      * ``View Analysis`` requires analysis output (charts) to exist.
+      * ``Run Analysis`` appears when data exists but the analysis is missing
+        OR stale (older than the newest data file). Clicking it (re)generates
+        the charts on the analysis page, then shows them.
+      * ``View Analysis`` appears only when the analysis is FRESH (newer than
+        all data files), so users never view charts computed from older data.
 
     Args:
         scenario_name: Currently selected scenario.
     """
-    from masim.interface.config_loader import get_analysis_path
+    from masim.interface.config_loader import get_analysis_freshness
 
     info = get_scenario_info(scenario_name)
     data_exists = has_experiment_data(scenario_name)
-    analysis_path = get_analysis_path(scenario_name)
-    analysis_exists = analysis_path is not None and any(analysis_path.glob("*.png"))
+    # Classify analysis output vs the underlying data so we can offer the right
+    # action: view fresh analysis, or (re)run analysis when missing/stale.
+    freshness = get_analysis_freshness(scenario_name)
+    analysis_fresh = freshness == "fresh"
+    analysis_runnable = data_exists and freshness in ("missing", "stale")
 
     def _go_analysis():
         st.session_state.previous_page = st.session_state.current_page
+        st.session_state.current_page = "Analysis"
+        st.rerun()
+
+    def _run_analysis():
+        # Force the analysis page to (re)generate charts even when stale ones
+        # already exist on disk, then land on the fresh results.
+        st.session_state.previous_page = st.session_state.current_page
+        st.session_state.force_analysis_rerun = True
         st.session_state.current_page = "Analysis"
         st.rerun()
 
@@ -892,11 +907,27 @@ def _render_action_buttons(scenario_name: str):
         st.session_state.pending_action = action
         st.rerun()
 
+    def _analysis_button(style: str, help_key: str = ""):
+        """Build a View (fresh) or Run (missing/stale) analysis button spec."""
+        if analysis_fresh:
+            return (
+                t("simulation.view_analysis"),
+                style,
+                t(help_key) if help_key else t("simulation.view_analysis_help"),
+                _go_analysis,
+            )
+        return (
+            t("simulation.run_analysis"),
+            style,
+            t(help_key) if help_key else t("simulation.run_analysis_help"),
+            _run_analysis,
+        )
+
     buttons: list = []
 
     if st.session_state.simulation_running:
         buttons.append((t("simulation.stop"), "secondary", None, _stop_simulation))
-        if analysis_exists:
+        if analysis_fresh:
             buttons.append((
                 t("simulation.view_analysis"),
                 "primary",
@@ -911,10 +942,8 @@ def _render_action_buttons(scenario_name: str):
                 lambda: (_stop_simulation(), _reset_simulation()),
             ))
     elif st.session_state.simulation_completed:
-        if analysis_exists:
-            buttons.append((
-                t("simulation.view_analysis"), "primary", None, _go_analysis
-            ))
+        if analysis_fresh or analysis_runnable:
+            buttons.append(_analysis_button("primary"))
         buttons.append((t("simulation.reset"), "secondary", None, _reset_simulation))
 
     elif data_exists:
@@ -924,13 +953,7 @@ def _render_action_buttons(scenario_name: str):
             t("simulation.load_results_help"),
             lambda: _defer("replay"),
         ))
-        if analysis_exists:
-            buttons.append((
-                t("simulation.view_analysis"),
-                "secondary",
-                t("simulation.view_analysis_help"),
-                _go_analysis,
-            ))
+        buttons.append(_analysis_button("secondary"))
         buttons.append((
             t("simulation.rerun"),
             "secondary",

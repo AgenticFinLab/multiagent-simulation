@@ -18,9 +18,9 @@
 setting:
   name: "anchoring_effect_rag_simulation"
   description: "RAG-augmented anchoring bias: agents retrieve knowledge from personal RAG libraries per decision"
-  total_rounds: 100
+  total_rounds: 200
   round_history_limit: 3
-  record_path: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rag-r100/records"
+  record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
   save_diagram_interval: 50
 
 environment:
@@ -58,6 +58,6 @@ players: !include players.yml
 topology: !include topology.yml
 
 communication:
-  storage_path: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rag-r100/communication"
+  storage_path: "EXPERIMENT/AnchoringEffect/Rag/communication"
   record_messages: true
   message_block_size: 500

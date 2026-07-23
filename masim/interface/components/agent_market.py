@@ -1216,12 +1216,22 @@ def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = No
     have a matching ``agent_images/icons/{domain}-<stem>.png`` icon.
     """
     raw_items: list[dict[str, Any]] = []
+    # A handful of stems (e.g. ``distorting-relayer``) ship in BOTH the
+    # finance and opinion domains with their own icon + profile. The grid
+    # keys every widget by ``agent_type`` (the stem), so emitting both would
+    # collide (StreamlitDuplicateElementKey). Dedupe by stem, keeping the
+    # first domain in ``_DOMAIN_ROOTS`` (finance) to match the finance-first
+    # icon/profile resolution used elsewhere in this module.
+    seen_types: set[str] = set()
     for domain, root in _DOMAIN_ROOTS:
         if not root.exists():
             continue
         for md_path in sorted(root.glob("*.md")):
+            if md_path.stem in seen_types:
+                continue
             icon_name = f"{domain}-{md_path.stem}.png"
             if (ICON_ROOT / icon_name).exists():
+                seen_types.add(md_path.stem)
                 raw_items.append(
                     {
                         "agent_type": md_path.stem,

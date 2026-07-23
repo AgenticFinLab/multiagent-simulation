@@ -7,13 +7,13 @@ debug_mode: true
 
 proxy:
   storage:
-    checkpoint_dir: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rag-r100/checkpoints"
-    record_path: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rag-r100/records"
+    checkpoint_dir: "EXPERIMENT/AnchoringEffect/Rag/checkpoints"
+    record_path: "EXPERIMENT/AnchoringEffect/Rag/records"
     record_rounds: true
     turn_block_size: 3
 
   monitoring:
-    record_path: "EXPERIMENT/CUSTOMIZED_SIMULATION/Default-AnchoringEffect-Rag-r100/monitoring"
+    record_path: "EXPERIMENT/AnchoringEffect/Rag/monitoring"
     monitor_hot_limit: 3
 
   communication:
