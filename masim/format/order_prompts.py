@@ -1,4 +1,19 @@
-"""Investor decision format -- prompt instruction for LLM output."""
+"""Investor decision format — prompt instructions and builders for LLM output.
+
+Every canonical LLM agent must inject :data:`DECISION_FORMAT_INSTRUCTION` (or
+call :func:`build_llm_system_prompt` / :func:`build_llm_user_template`) so the
+prompt speaks the exact format that
+:func:`masim.utils.llm_utils.parse_llm_response_with_thinking` expects and
+that :meth:`masim.format.order.InvestorOrder.from_llm_decision` can consume.
+
+Do NOT hand-write the format contract in individual agent prompts. Route
+everything through the helpers below so a schema change is a one-file edit.
+"""
+
+from __future__ import annotations
+
+from .base_prompts import ANALYSIS_DECISION_TAG, TRADING_CONSTRAINTS
+
 
 DECISION_FORMAT_INSTRUCTION = """\
 The decision JSON must follow this exact format:
@@ -20,3 +35,103 @@ Field requirements:
 DECISION_FORMAT_INSTRUCTION_TPL = DECISION_FORMAT_INSTRUCTION.replace(
     "{", "{{"
 ).replace("}", "}}")
+
+
+# ---------------------------------------------------------------------------
+# Standard market-state placeholders (the ONLY variables that
+# masim.agents._state.StandardMarketState.template_vars guarantees).
+# ---------------------------------------------------------------------------
+
+
+STANDARD_MARKET_STATE_BLOCK = (
+    "Market state:\n"
+    "- round: {round}\n"
+    "- price: {price:.4f} (prev {prev_price:.4f}, change {price_change:+.2%})\n"
+    "- fundamental: {fundamental:.4f} (deviation {deviation:+.2%})\n"
+    "\n"
+    "Portfolio:\n"
+    "- cash: {cash:.4f}\n"
+    "- position: {position:.4f}\n"
+    "- portfolio_value: {portfolio_value:.4f}\n"
+)
+
+
+# ---------------------------------------------------------------------------
+# Builders
+# ---------------------------------------------------------------------------
+
+
+def build_llm_system_prompt(
+    *,
+    persona: str,
+    decision_rules: str = "",
+    include_constraints: bool = True,
+) -> str:
+    """Compose a canonical LLM system prompt.
+
+    Layout::
+
+        <persona>
+
+        DECISION RULES:
+        <decision_rules>
+
+        <TRADING_CONSTRAINTS>            # optional
+
+        <ANALYSIS_DECISION_TAG>
+        <DECISION_FORMAT_INSTRUCTION>
+
+    Passing ``decision_rules`` is strongly recommended for Rule/LLM parity —
+    it forces the model to spell out the exact quantitative rule the Rule
+    sibling would apply, so behavioural drift between engines is bounded.
+    """
+    parts = [persona.strip()]
+    if decision_rules.strip():
+        parts.append("DECISION RULES:\n" + decision_rules.strip())
+    if include_constraints:
+        parts.append(TRADING_CONSTRAINTS)
+    parts.append(ANALYSIS_DECISION_TAG)
+    parts.append(DECISION_FORMAT_INSTRUCTION)
+    return "\n\n".join(parts)
+
+
+def build_llm_user_template(
+    *,
+    intro: str = "",
+    extras_block: str = "",
+    ask: str = "",
+) -> str:
+    """Compose a canonical LLM user-template string.
+
+    Layout::
+
+        <intro>                          # optional lead-in
+
+        <STANDARD_MARKET_STATE_BLOCK>
+
+        <extras_block>                   # optional per-archetype signals
+
+        <ask>                            # optional closing question
+
+    The result is a ``str.format()`` template — every ``{...}`` placeholder
+    is resolved by :meth:`StandardMarketState.template_vars`, so agents that
+    only need vanilla market signals do not have to memorise the field names.
+    """
+    chunks = []
+    if intro.strip():
+        chunks.append(intro.strip())
+    chunks.append(STANDARD_MARKET_STATE_BLOCK.strip())
+    if extras_block.strip():
+        chunks.append(extras_block.strip())
+    if ask.strip():
+        chunks.append(ask.strip())
+    return "\n\n".join(chunks) + "\n"
+
+
+__all__ = [
+    "DECISION_FORMAT_INSTRUCTION",
+    "DECISION_FORMAT_INSTRUCTION_TPL",
+    "STANDARD_MARKET_STATE_BLOCK",
+    "build_llm_system_prompt",
+    "build_llm_user_template",
+]

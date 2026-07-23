@@ -1,4 +1,15 @@
-"""NoiseTrader — random uninformed retail trader.
+"""noise-trader — Random uninformed retail trader.
+
+Canonical implementation of the ``noise-trader`` archetype documented in
+``examples/AGENT_POOL/finance/noise-trader.md``. Supplies zero-mean random
+order flow; neither converges nor diverges from fundamental on average.
+
+The archetype identifier (``STRATEGY = "noise-trader"``) matches the
+AGENT_POOL profile filename stem verbatim and is the single source of truth
+used by :mod:`masim.interface.customized.agent_catalog`, generated
+``players.yml`` files, and the marketplace UI. Rule and LLM siblings MUST
+share the same STRATEGY so ``load_agent_catalog`` pairs them into one
+``AgentEntry``.
 
 Theoretical basis: Black (1986) — Noise Trader Risk.
 
@@ -19,10 +30,11 @@ from typing import Any, Dict
 
 from masim.agents._base import CanonicalRulePlayer, CanonicalLLMPlayer
 from masim.agents._state import StandardMarketState
+from masim.format.order import InvestorOrder
 
 
 class RuleNoiseTrader(CanonicalRulePlayer):
-    STRATEGY = "NoiseTrader"
+    STRATEGY = "noise-trader"
     DISPLAY_NAME = "Noise Trader"
     SUMMARY = "Random uninformed retail trader supplying microstructure noise (Black 1986)."
     REQUIRES_FEATURES: tuple = ()
@@ -34,20 +46,29 @@ class RuleNoiseTrader(CanonicalRulePlayer):
         self.state.custom_state["min_order"] = float(extras.get("min_order", 100.0))
         self.state.custom_state["max_order"] = float(extras.get("max_order", 500.0))
 
-    def decide_order(self, state: StandardMarketState) -> Dict[str, Any]:
+    def decide_order(self, state: StandardMarketState) -> InvestorOrder:
         if random.random() >= self.state.custom_state["trade_probability"]:
-            return {"action": "hold", "quantity": 0.0, "bid_price": state.price}
+            return InvestorOrder.hold(
+                price=state.price,
+                investor=self.identity,
+                strategy=self.STRATEGY,
+            )
 
         quantity = random.uniform(
             self.state.custom_state["min_order"],
             self.state.custom_state["max_order"],
         )
-        action = "buy" if random.random() > 0.5 else "sell"
-        return {"action": action, "quantity": quantity, "bid_price": state.price}
+        factory = InvestorOrder.buy if random.random() > 0.5 else InvestorOrder.sell
+        return factory(
+            quantity=quantity,
+            price=state.price,
+            investor=self.identity,
+            strategy=self.STRATEGY,
+        )
 
 
 class LLMNoiseTrader(CanonicalLLMPlayer):
-    STRATEGY = "NoiseTrader"
+    STRATEGY = "noise-trader"
     DEFAULT_SYS_PROMPT = (
         "You are a noise trader: an uninformed retail participant who trades\n"
         "small, mostly random orders for liquidity reasons. You do not study\n"

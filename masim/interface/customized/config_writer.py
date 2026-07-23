@@ -771,7 +771,7 @@ def _instance_key(selection: CustomizedAgentSelection) -> str:
     """Pick a YAML block key for an agent: snake_case archetype by default."""
     if selection.instance_key:
         return selection.instance_key
-    return _camel_to_snake(selection.archetype)
+    return _normalise_stem(selection.archetype)
 
 
 def _camel_to_snake(text: str) -> str:
@@ -779,9 +779,25 @@ def _camel_to_snake(text: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
+def _normalise_stem(archetype: str) -> str:
+    """Normalise an archetype id to a Python-safe snake_case stem.
+
+    Handles both the canonical kebab-case form documented in
+    ``examples/AGENT_POOL/finance/<stem>.md`` (e.g. ``"anchored-trader"``)
+    and the legacy PascalCase form used by earlier canonical classes
+    (e.g. ``"AnchoringBiasInvestor"``).  Downstream identifiers (YAML block
+    keys, Python module stems, ``SCREAMING_SNAKE`` prompt constants) MUST
+    be valid Python attribute names, which forbids ``-``.  Without this
+    normalisation, ``_prompt_var_stem("anchored-trader")`` would emit
+    ``ANCHORED-TRADER_SYS = ...`` and blow up the generated ``prompts.py``
+    with a ``SyntaxError`` at import time.
+    """
+    return _camel_to_snake(archetype).replace("-", "_")
+
+
 def _prompt_var_stem(archetype: str) -> str:
     """Return the SCREAMING_SNAKE stem used for prompt constants."""
-    return _camel_to_snake(archetype).upper()
+    return _normalise_stem(archetype).upper()
 
 
 def _split_handbook_and_llm(

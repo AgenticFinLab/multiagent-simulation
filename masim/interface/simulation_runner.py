@@ -31,11 +31,11 @@ Workflows
 
    selections = [
        CustomizedAgentSelection(
-           archetype="NoiseTrader", display_name="Noise Trader",
+           archetype="noise-trader", display_name="Noise Trader",
            engine="Rule", params={}, num_instances=3,
        ),
        CustomizedAgentSelection(
-           archetype="MomentumTrendTrader", display_name="Momentum Trader",
+           archetype="momentum-trader", display_name="Momentum Trader",
            engine="LLM", params={}, num_instances=2,
        ),
    ]

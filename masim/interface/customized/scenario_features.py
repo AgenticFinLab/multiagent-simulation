@@ -70,7 +70,7 @@ def is_scenario_compatible(
     """Return ``(is_compatible, reasons)`` for a roster against a scenario.
 
     ``roster`` is an iterable of archetype names (e.g.
-    ``["NoiseTrader", "AnchoringBiasInvestor"]``). The check passes when every
+    ``["noise-trader", "anchored-trader"]``). The check passes when every
     archetype's ``requires_market_features`` set is a subset of the scenario's
     ``market_features``. ``reasons`` lists each blocking pair as a
     human-readable string; the list is empty on success.

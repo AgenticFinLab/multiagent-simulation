@@ -4,32 +4,53 @@ Two bases are exported:
 
 * :class:`CanonicalRulePlayer` — for deterministic, formula-driven agents.
   Subclasses implement :meth:`CanonicalRulePlayer.decide_order` returning an
-  order dict; this base handles ``extras`` parsing, ``custom_state``
-  bookkeeping, the perceive→decide→act lifecycle, and outbound-message
-  dispatch.
+  :class:`~masim.format.order.InvestorOrder` (or, for backwards compatibility,
+  a partial dict which is normalised via
+  :meth:`~masim.format.order.InvestorOrder.from_dict`).  This base handles
+  ``extras`` parsing, ``custom_state`` bookkeeping, the perceive→decide→act
+  lifecycle, and outbound-message dispatch.
 
 * :class:`CanonicalLLMPlayer` — for LLM-driven agents.  Reads ``extras["llm"]``
   (``lm_name``, ``generation_config``, ``sys_message``, ``user_message``),
   loads prompts via dotted ``module:VAR`` references, formats the user
   template against :class:`StandardMarketState`, calls
   :class:`LangChainAPIInference`, parses ``<analysis>``/``<decision>``
-  responses, and falls back to ``hold`` when the LLM is unavailable.
+  responses, and turns the parsed dict into an
+  :class:`~masim.format.order.InvestorOrder` via
+  :meth:`~masim.format.order.InvestorOrder.from_llm_decision`.
 
 Both bases derive from :class:`masim.player.general.GeneralPlayer` so they
 plug into the existing simulator without further wiring.
+
+Format contract (single source of truth: :mod:`masim.format.order`)
+-------------------------------------------------------------------
+
+Every order that leaves an agent is built through
+:class:`~masim.format.order.InvestorOrder`'s factory classmethods and
+serialised via :meth:`~masim.format.order.InvestorOrder.to_dict`.  Raw dicts
+are never constructed by hand in this module — even the outbound-message
+payload comes from a ``.to_dict()`` call — so the wire format is guaranteed
+to match what :func:`~masim.format.order.validate_order` enforces.
 """
 
 from __future__ import annotations
 
+import dataclasses
 import importlib
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional, Union
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import (
+    BUY,
+    HOLD,
+    SELL,
+    InvestorOrder,
+    validate_order,
+)
 from masim.agents._state import StandardMarketState
 
 logger = logging.getLogger("masim.agents")
@@ -55,6 +76,59 @@ def _load_dotted(reference: str) -> str:
     return getattr(module, var_name)
 
 
+def _coerce_to_order(
+    candidate: Union[InvestorOrder, Dict[str, Any]],
+    *,
+    investor: str,
+    strategy: str,
+) -> InvestorOrder:
+    """Normalise a subclass return value to :class:`InvestorOrder`.
+
+    Subclasses may either construct an :class:`InvestorOrder` directly (the
+    preferred path) or return a partial dict (legacy path). This helper
+    guarantees the finaliser always operates on an ``InvestorOrder`` and
+    fills in ``investor``/``strategy`` when the subclass omitted them.
+    """
+    if isinstance(candidate, InvestorOrder):
+        order = candidate
+    elif isinstance(candidate, dict):
+        order = InvestorOrder.from_dict(candidate)
+    else:
+        raise TypeError(
+            "decide_order must return InvestorOrder or dict, got "
+            f"{type(candidate).__name__}"
+        )
+    updates: Dict[str, Any] = {}
+    if not order.investor:
+        updates["investor"] = investor
+    if not order.strategy:
+        updates["strategy"] = strategy
+    return dataclasses.replace(order, **updates) if updates else order
+
+
+def _emit(order: InvestorOrder) -> Dict[str, Any]:
+    """Serialise an :class:`InvestorOrder` for the pipeline.
+
+    Attaches the ``outbound_messages`` envelope required by the market
+    coordinator; the inner payload is a *fresh* ``to_dict()`` snapshot so
+    the wire format is decoupled from any local mutation.
+    """
+    payload = order.to_dict()
+    # `validate_order` is idempotent; running it here means every code path
+    # that reaches the network is guaranteed to match the schema regardless
+    # of which factory produced the order.
+    validate_order(payload)
+    outbound_payload = {
+        k: v for k, v in payload.items() if k not in {"reasoning", "analysis"}
+    }
+    return {
+        **payload,
+        "outbound_messages": [
+            {"payload": outbound_payload, "content_type": "investor_bid"}
+        ],
+    }
+
+
 # ---------------------------------------------------------------------------
 # Rule base
 # ---------------------------------------------------------------------------
@@ -66,8 +140,9 @@ class CanonicalRulePlayer(GeneralPlayer):
     Subclasses MUST:
       * declare a class-level ``STRATEGY`` attribute (defaults to class name)
       * implement :meth:`decide_order` taking a :class:`StandardMarketState`
-        and returning a partial order dict (``action``, ``quantity``,
-        optional ``bid_price``).
+        and returning either an :class:`InvestorOrder` (preferred) or a
+        partial order dict (bridged to :class:`InvestorOrder` via
+        :meth:`InvestorOrder.from_dict`).
 
     Subclasses MAY override :meth:`init_extras` to read additional parameters
     from ``self.config.extras`` once on the first ``perceive`` call.
@@ -114,7 +189,7 @@ class CanonicalRulePlayer(GeneralPlayer):
         market_data = self.state.custom_state.get("market_data")
         if market_data is None:
             # Round 0 / no market signal yet — return a no-op order.
-            return self._noop_order()
+            return _emit(self._noop_order())
 
         state = StandardMarketState.from_market_data(
             market_data,
@@ -122,27 +197,26 @@ class CanonicalRulePlayer(GeneralPlayer):
             position=self.state.custom_state["position"],
         )
 
-        order = self.decide_order(state)
+        raw = self.decide_order(state)
+        order = _coerce_to_order(
+            raw,
+            investor=self.identity,
+            strategy=self.STRATEGY,
+        )
         order = self._finalize_order(order, state)
-
-        return {
-            **order,
-            "outbound_messages": [
-                {"payload": order, "content_type": "investor_bid"}
-            ],
-        }
+        return _emit(order)
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload.get("action", "hold")
+        action = decision_payload.get("action", HOLD)
         quantity = float(decision_payload.get("quantity", 0.0) or 0.0)
         bid_price = float(decision_payload.get("bid_price") or 0.0)
         market_data = self.state.custom_state.get("market_data") or {}
         fill_price = bid_price if bid_price > 0 else float(market_data.get("price", 0.0))
 
-        if action == "buy" and quantity > 0:
+        if action == BUY and quantity > 0:
             self.state.custom_state["cash"] -= quantity * fill_price
             self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
+        elif action == SELL and quantity > 0:
             self.state.custom_state["cash"] += quantity * fill_price
             self.state.custom_state["position"] -= quantity
 
@@ -154,11 +228,16 @@ class CanonicalRulePlayer(GeneralPlayer):
 
     # -- override hooks ----------------------------------------------------
 
-    def decide_order(self, state: StandardMarketState) -> Dict[str, Any]:
-        """Return a partial order dict for the given market state.
+    def decide_order(
+        self, state: StandardMarketState
+    ) -> Union[InvestorOrder, Dict[str, Any]]:
+        """Return an :class:`InvestorOrder` for the given market state.
 
-        Subclasses MUST implement. The framework will fill in ``investor`` and
-        ``strategy`` if missing.
+        Subclasses MUST implement. Preferred return type is
+        :class:`~masim.format.order.InvestorOrder`; a partial dict is
+        accepted for backwards compatibility (bridged via
+        :meth:`InvestorOrder.from_dict`). The framework will fill in
+        ``investor`` and ``strategy`` when the subclass omits them.
         """
         raise NotImplementedError
 
@@ -196,24 +275,40 @@ class CanonicalRulePlayer(GeneralPlayer):
         self.init_extras(extras)
 
     def _finalize_order(
-        self, order: Dict[str, Any], state: StandardMarketState
-    ) -> Dict[str, Any]:
-        original_action = order.get("action", "hold")
-        original_quantity = float(order.get("quantity", 0.0) or 0.0)
+        self,
+        order: InvestorOrder,
+        state: StandardMarketState,
+    ) -> InvestorOrder:
+        """Clip buy/sell orders to available cash/inventory and validate.
+
+        Returns a new :class:`InvestorOrder` (frozen; uses
+        :func:`dataclasses.replace` to apply clipping) with the
+        ``_clipped*`` bookkeeping flags populated whenever we had to shrink
+        the intended size. An order clipped down to zero is converted to a
+        ``hold`` but is still marked ``clipped_from`` so downstream metrics
+        can distinguish it from an explicit hold decision.
+        """
+        original_action = order.action
+        original_quantity = float(order.quantity or 0.0)
+
+        # Fall back to reference price when the subclass omitted it (or
+        # supplied a non-positive value; e.g. a legacy dict with
+        # bid_price=0.0 for a hold).
+        bid_price = float(order.bid_price) if order.bid_price > 0 else float(state.price)
+
         action = original_action
         quantity = original_quantity
-        bid_price = float(order.get("bid_price") or state.price)
-
         clipped = False
-        clipped_reason: str = ""
-        if action == "buy" and quantity > 0:
+        clipped_reason = ""
+
+        if action == BUY and quantity > 0:
             affordable = state.cash / bid_price if bid_price > 0 else 0.0
             new_qty = min(quantity, max(affordable, 0.0))
             if new_qty < quantity:
                 clipped = True
                 clipped_reason = "insufficient_cash"
             quantity = new_qty
-        elif action == "sell" and quantity > 0:
+        elif action == SELL and quantity > 0:
             new_qty = min(quantity, max(state.position, 0.0))
             if new_qty < quantity:
                 clipped = True
@@ -226,55 +321,49 @@ class CanonicalRulePlayer(GeneralPlayer):
         # able to distinguish them; silent masking previously inflated the
         # hold bucket and understated agent decisiveness.
         clipped_to_hold = False
-        if quantity <= 0 and original_action in ("buy", "sell"):
+        if quantity <= 0 and original_action in (BUY, SELL):
             clipped_to_hold = True
             if not clipped_reason:
                 clipped_reason = "zero_quantity_after_clip"
-            action = "hold"
+            action = HOLD
             quantity = 0.0
-        elif quantity <= 0:
-            action = "hold"
+        elif quantity <= 0 and action != HOLD:
+            action = HOLD
             quantity = 0.0
 
-        finalized = {
-            "action": action,
-            "quantity": float(quantity),
-            "bid_price": float(bid_price if bid_price > 0 else state.price),
-            "investor": self.identity,
-            "strategy": order.get("strategy", self.STRATEGY),
-        }
+        finalized = dataclasses.replace(
+            order,
+            action=action,
+            quantity=float(quantity),
+            bid_price=float(bid_price if bid_price > 0 else state.price),
+            investor=self.identity,
+            strategy=order.strategy or self.STRATEGY,
+        )
         if clipped or clipped_to_hold:
-            finalized["_clipped"] = True
-            finalized["_clipped_from"] = original_action
-            finalized["_clipped_intended_quantity"] = float(original_quantity)
-            finalized["_clipped_reason"] = clipped_reason or "unspecified"
-        # Preserve any extra metadata the subclass attached.
-        for k, v in order.items():
-            finalized.setdefault(k, v)
-        validate_order(finalized)
+            finalized = dataclasses.replace(
+                finalized,
+                clipped=True,
+                clipped_from=original_action,
+                clipped_intended_quantity=float(original_quantity),
+                clipped_reason=clipped_reason or "unspecified",
+            )
+        # Sanity-check via the legacy validator; keeps the format-drift
+        # tests exercising the same code path as the wire format.
+        validate_order(finalized.to_dict())
         return finalized
 
-    def _noop_order(self, reason: str = "no_market_data") -> Dict[str, Any]:
-        # NOTE: Placeholder for bootstrap rounds where market_data is not yet
-        # available. NOT a real decision. Must be marked so downstream
-        # audit/metrics can exclude these from statistics (herding CV,
-        # action-frequency, decision-entropy, bid-convergence). Previously
-        # bid_price=0.01 leaked into mean_bid and polluted CV computations.
-        order = {
-            "action": "hold",
-            "quantity": 0.0,
-            "bid_price": 0.0,
-            "investor": self.identity,
-            "strategy": self.STRATEGY,
-            "_skipped": True,
-            "_skipped_reason": reason,
-        }
-        return {
-            **order,
-            "outbound_messages": [
-                {"payload": order, "content_type": "investor_bid"}
-            ],
-        }
+    def _noop_order(self, reason: str = "no_market_data") -> InvestorOrder:
+        """Bootstrap-round placeholder.
+
+        NOT a real decision. Marked ``skipped=True`` so downstream
+        audit/metrics can exclude it from statistics (herding CV,
+        action-frequency, decision-entropy, bid-convergence).
+        """
+        return InvestorOrder.noop(
+            investor=self.identity,
+            strategy=self.STRATEGY,
+            reason=reason,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -293,9 +382,11 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
     The user template is formatted against :class:`StandardMarketState` every
     round. The LLM response is parsed with
-    :func:`masim.utils.llm_utils.parse_llm_response_with_thinking`. On any LLM
-    failure the agent degrades gracefully to a ``hold`` order so a single
-    network blip does not abort the whole simulation.
+    :func:`masim.utils.llm_utils.parse_llm_response_with_thinking` and turned
+    into an :class:`InvestorOrder` via
+    :meth:`InvestorOrder.from_llm_decision`. On any LLM failure the round is
+    aborted (fail-loud) so a silent synthetic hold never pollutes downstream
+    behavioural metrics.
 
     Subclasses are usually empty apart from class-level prompt defaults — they
     exist so the bundle's ``players.yml`` can reference a class name that
@@ -339,7 +430,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         market_data = self.state.custom_state.get("market_data")
         if market_data is None:
-            return self._noop_order()
+            return _emit(self._noop_order())
 
         state = StandardMarketState.from_market_data(
             market_data,
@@ -363,52 +454,29 @@ class CanonicalLLMPlayer(GeneralPlayer):
                 f"[{self.identity}] LLM decision unavailable: {exc}"
             ) from exc
 
-        action = decision.get("action", "hold")
-        bid_price = float(decision.get("bid_price") or state.price)
-        if bid_price <= 0:
-            bid_price = state.price
-        quantity = float(decision.get("quantity") or 0.0)
-
-        if action == "buy" and quantity > 0:
-            affordable = state.cash / bid_price if bid_price > 0 else 0.0
-            quantity = min(quantity, max(affordable, 0.0))
-        elif action == "sell" and quantity > 0:
-            quantity = min(quantity, max(state.position, 0.0))
-
-        if quantity <= 0:
-            action = "hold"
-            quantity = 0.0
-
-        order = {
-            "action": action,
-            "quantity": float(quantity),
-            "bid_price": float(bid_price),
-            "investor": self.identity,
-            "strategy": self.STRATEGY,
-            "reasoning": str(decision.get("reasoning", ""))[:200],
-            "analysis": str(decision.get("analysis", ""))[:1000],
-        }
-        validate_order(order)
-
-        return {
-            **order,
-            "outbound_messages": [
-                {"payload": {k: v for k, v in order.items() if k not in {"reasoning", "analysis"}},
-                 "content_type": "investor_bid"}
-            ],
-        }
+        order = InvestorOrder.from_llm_decision(
+            decision,
+            investor=self.identity,
+            strategy=self.STRATEGY,
+            market_price=state.price,
+        )
+        # Apply cash/inventory clipping through the same finaliser used by
+        # Rule agents — reuse of the code path guarantees Rule / LLM parity
+        # for the clipping semantics.
+        order = self._finalize_llm_order(order, state)
+        return _emit(order)
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload.get("action", "hold")
+        action = decision_payload.get("action", HOLD)
         quantity = float(decision_payload.get("quantity", 0.0) or 0.0)
         bid_price = float(decision_payload.get("bid_price") or 0.0)
         market_data = self.state.custom_state.get("market_data") or {}
         fill_price = bid_price if bid_price > 0 else float(market_data.get("price", 0.0))
 
-        if action == "buy" and quantity > 0:
+        if action == BUY and quantity > 0:
             self.state.custom_state["cash"] -= quantity * fill_price
             self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
+        elif action == SELL and quantity > 0:
             self.state.custom_state["cash"] += quantity * fill_price
             self.state.custom_state["position"] -= quantity
 
@@ -509,27 +577,77 @@ class CanonicalLLMPlayer(GeneralPlayer):
                     )
         raise RuntimeError(f"LLM call failed after {max_retries} retries: {last_error}")
 
-    def _noop_order(self, reason: str = "no_market_data") -> Dict[str, Any]:
-        # NOTE: Placeholder for bootstrap rounds where market_data is not yet
-        # available. NOT a real decision. Must be marked so downstream
-        # audit/metrics can exclude these from statistics (herding CV,
-        # action-frequency, decision-entropy, bid-convergence). Previously
-        # bid_price=0.01 leaked into mean_bid and polluted CV computations.
-        order = {
-            "action": "hold",
-            "quantity": 0.0,
-            "bid_price": 0.0,
-            "investor": self.identity,
-            "strategy": self.STRATEGY,
-            "_skipped": True,
-            "_skipped_reason": reason,
-        }
-        return {
-            **order,
-            "outbound_messages": [
-                {"payload": order, "content_type": "investor_bid"}
-            ],
-        }
+    def _finalize_llm_order(
+        self,
+        order: InvestorOrder,
+        state: StandardMarketState,
+    ) -> InvestorOrder:
+        """Apply cash/inventory clipping to an LLM-produced order.
+
+        Mirrors :meth:`CanonicalRulePlayer._finalize_order` but skips the
+        dict-normalisation step (the LLM path already lands in
+        :class:`InvestorOrder` via
+        :meth:`InvestorOrder.from_llm_decision`).
+        """
+        original_action = order.action
+        original_quantity = float(order.quantity or 0.0)
+        bid_price = float(order.bid_price) if order.bid_price > 0 else float(state.price)
+
+        action = original_action
+        quantity = original_quantity
+        clipped = False
+        clipped_reason = ""
+
+        if action == BUY and quantity > 0:
+            affordable = state.cash / bid_price if bid_price > 0 else 0.0
+            new_qty = min(quantity, max(affordable, 0.0))
+            if new_qty < quantity:
+                clipped = True
+                clipped_reason = "insufficient_cash"
+            quantity = new_qty
+        elif action == SELL and quantity > 0:
+            new_qty = min(quantity, max(state.position, 0.0))
+            if new_qty < quantity:
+                clipped = True
+                clipped_reason = "insufficient_position"
+            quantity = new_qty
+
+        clipped_to_hold = False
+        if quantity <= 0 and original_action in (BUY, SELL):
+            clipped_to_hold = True
+            if not clipped_reason:
+                clipped_reason = "zero_quantity_after_clip"
+            action = HOLD
+            quantity = 0.0
+
+        finalized = dataclasses.replace(
+            order,
+            action=action,
+            quantity=float(quantity),
+            bid_price=float(bid_price if bid_price > 0 else state.price),
+        )
+        if clipped or clipped_to_hold:
+            finalized = dataclasses.replace(
+                finalized,
+                clipped=True,
+                clipped_from=original_action,
+                clipped_intended_quantity=float(original_quantity),
+                clipped_reason=clipped_reason or "unspecified",
+            )
+        validate_order(finalized.to_dict())
+        return finalized
+
+    def _noop_order(self, reason: str = "no_market_data") -> InvestorOrder:
+        """Bootstrap-round placeholder for the LLM path.
+
+        Same semantics as :meth:`CanonicalRulePlayer._noop_order`: emit a
+        skipped-marker order so downstream metrics can exclude it.
+        """
+        return InvestorOrder.noop(
+            investor=self.identity,
+            strategy=self.STRATEGY,
+            reason=reason,
+        )
 
 
 __all__ = [
