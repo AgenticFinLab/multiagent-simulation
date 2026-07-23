@@ -10,18 +10,18 @@ sources:
 connections:
   market:
     - rulellm_market_maker
-    - rulellm_liquidity_demander
-    - rulellm_arbitrageur
-    - rulellm_value_investor
-    - rulellm_forced_seller
+    - rulellm_liquidity_seeker
+    - rulellm_value_trader
+    - rulellm_momentum_trader
+    - rulellm_noise_trader
 
   rulellm_market_maker:
     - market
-  rulellm_liquidity_demander:
+  rulellm_liquidity_seeker:
     - market
-  rulellm_arbitrageur:
+  rulellm_value_trader:
     - market
-  rulellm_value_investor:
+  rulellm_momentum_trader:
     - market
-  rulellm_forced_seller:
+  rulellm_noise_trader:
     - market

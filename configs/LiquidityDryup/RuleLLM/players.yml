@@ -27,6 +27,7 @@ market:
   persona: !include persona.yml
 
 rulellm_market_maker:
+  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
   name: "RuleLLM Market Maker"
   class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMMarketMaker"
   # Expander → rulellm_market_maker_1, rulellm_market_maker_2, rulellm_market_maker_3
@@ -52,13 +53,14 @@ rulellm_market_maker:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_liquidity_demander:
-  name: "RuleLLM Liquidity Demander"
-  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMLiquidityDemander"
-  # Expander → rulellm_liquidity_demander_1, rulellm_liquidity_demander_2, rulellm_liquidity_demander_3
+rulellm_liquidity_seeker:
+  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
+  name: "RuleLLM Liquidity Seeker"
+  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMLiquiditySeeker"
+  # Expander → rulellm_liquidity_seeker_1, rulellm_liquidity_seeker_2, rulellm_liquidity_seeker_3
   num_instances: 3
   config:
-    identity: "rulellm_liquidity_demander"
+    identity: "rulellm_liquidity_seeker"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -78,13 +80,14 @@ rulellm_liquidity_demander:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_arbitrageur:
-  name: "RuleLLM Arbitrageur"
-  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMArbitrageur"
-  # Expander → rulellm_arbitrageur_1, rulellm_arbitrageur_2
+rulellm_value_trader:
+  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
+  name: "RuleLLM Value Trader"
+  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMValueTrader"
+  # Expander → rulellm_value_trader_1, rulellm_value_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_arbitrageur"
+    identity: "rulellm_value_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -104,13 +107,14 @@ rulellm_arbitrageur:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_value_investor:
-  name: "RuleLLM Value Investor"
-  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMValueInvestor"
-  # Expander → rulellm_value_1, rulellm_value_2
+rulellm_momentum_trader:
+  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
+  name: "RuleLLM Momentum Trader"
+  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMMomentumTrader"
+  # Expander → rulellm_momentum_trader_1, rulellm_momentum_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_value_investor"
+    identity: "rulellm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -130,13 +134,14 @@ rulellm_value_investor:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_forced_seller:
-  name: "RuleLLM Forced Seller"
-  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMForcedSeller"
-  # Expander → rulellm_forced_seller_1, rulellm_forced_seller_2
+rulellm_noise_trader:
+  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
+  name: "RuleLLM Noise Trader"
+  class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMNoiseTrader"
+  # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2
   num_instances: 2
   config:
-    identity: "rulellm_forced_seller"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -144,7 +149,7 @@ rulellm_forced_seller:
     extras:
       record_path: "EXPERIMENT/LiquidityDryup/RuleLLM/records"  # Source: framework infrastructure
       initial_cash: 10000.0  # Source: simulation-bases.md §6
-      initial_position: 100.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
       custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.LiquidityDryup.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

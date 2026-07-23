@@ -25,29 +25,29 @@ This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `qu
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `LLMLiquidityDemander` uses `LLM_LIQUIDITY_DEMANDER_SYS` to scale demand by available liquidity. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_liquidity_demander.config.extras` supplies portfolio state and ARK model policy. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `LLMLiquiditySeeker` uses `LLM_LIQUIDITY_SEEKER_SYS` to scale demand by available liquidity. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_liquidity_seeker.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Persona-driven constrained execution order. |
 ### §2.3 ValueTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `LLMArbitrageur` uses `LLM_ARBITRAGEUR_SYS` to seek price dislocations and provide liquidity when others withdraw. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_arbitrageur.config.extras` supplies portfolio state and ARK model policy. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `LLMValueTrader` uses `LLM_VALUE_TRADER_SYS` to seek price dislocations and provide liquidity when others withdraw. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_value_trader.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Persona-driven value/liquidity-provider order. |
 ### §2.4 MomentumTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `LLMValueInvestor` is a legacy class name whose prompt `LLM_VALUE_SYS` implements momentum-trader behavior. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `LLMMomentumTrader` uses `LLM_MOMENTUM_TRADER_SYS` to implement momentum-trader behavior. |
 | Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_value.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Persona-driven trend-following order. |
 ### §2.5 NoiseTrader (simulation-bases.md §4.5)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `LLMForcedSeller` is a legacy class name whose prompt `LLM_FORCED_SELLER_SYS` implements noise-trader behavior. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_forced_seller.config.extras` supplies portfolio state and ARK model policy. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `LLMNoiseTrader` uses `LLM_NOISE_TRADER_SYS` to implement noise-trader behavior. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/LLM/players.yml:llm_noise_trader.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Persona-driven uninformed order flow. |
 
 ## §3 Market Mechanism
