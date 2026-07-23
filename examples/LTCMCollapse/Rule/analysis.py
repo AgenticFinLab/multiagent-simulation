@@ -73,6 +73,18 @@ def load_simulation_data(config: dict) -> dict:
     }
 
 
+def _universal_data(data: dict) -> dict:
+    """Return canonical series shapes expected by the universal evaluator."""
+    rounds = data["rounds"]
+    normalized = dict(data)
+    normalized["prices"] = [float(value) for value in data["prices"]]
+    normalized["fundamentals"] = {
+        int(round_num): float(value)
+        for round_num, value in zip(rounds, data["fundamentals"])
+    }
+    return normalized
+
+
 def _cascade_onset_round(deviation: np.ndarray, threshold: float = -0.03) -> int | None:
     for index, value in enumerate(deviation, start=1):
         if value < threshold:
@@ -344,6 +356,10 @@ def main() -> None:
     analysis_path.mkdir(parents=True, exist_ok=True)
     create_visualizations(data, str(analysis_path))
     _write_summary(analysis_path, metrics, validation)
+    summary = {
+        "metrics": metrics,
+        "validation": validation.to_dict(),
+    }
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
@@ -356,9 +372,9 @@ def main() -> None:
                 _variant = _v
                 break
     _universal = write_universal_summary(
-        data,
+        _universal_data(data),
         config,
-        output_dir,
+        analysis_path,
         scenario='LTCMCollapse',
         variant=_variant,
         extra_summary={'scenario_metrics': summary}

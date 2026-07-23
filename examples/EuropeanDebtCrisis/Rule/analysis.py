@@ -249,7 +249,11 @@ def _hf_extras(config: Dict[str, Any]) -> Dict[str, Any]:
         if pc["extras"].get("initial_cash") is None:
             continue
         cls_path = str(entry.get("class", ""))
-        if cls_path.endswith(f":{_HEDGE_CLASS}"):
+        cls_name = cls_path.rsplit(":", 1)[-1]
+        if (
+            str(entry.get("name", "")) == _HEDGE_CLASS
+            or cls_name.endswith(_HEDGE_CLASS)
+        ):
             return pc["extras"]
     return {}
 

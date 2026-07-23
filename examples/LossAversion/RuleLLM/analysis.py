@@ -26,6 +26,7 @@ def main() -> Dict[str, Any]:
     config = load_config(args.config)
     data = load_simulation_data(config)
     output_dir = Path(config["setting"]["record_path"]).parent / "analysis"
+    summary = analyze_lossaversion(data, config, str(output_dir))
     # Compute the 36-metric Layer A baseline and write summary.json
     # + four universal PNG dashboards. The variant is derived from
     # the config path so shared-main re-exports still report right.
@@ -46,7 +47,7 @@ def main() -> Dict[str, Any]:
         extra_summary={'scenario_metrics': summary}
             if isinstance(summary, dict) else None,
     )
-    return analyze_lossaversion(data, config, str(output_dir))
+    return summary
 
 
 __all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
