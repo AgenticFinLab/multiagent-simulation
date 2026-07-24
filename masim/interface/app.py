@@ -1129,6 +1129,10 @@ async def _run_simulation_async():
     if not runner:
         return
 
+    # Clear previous experiment records BEFORE setup so the simulator
+    # initialises into a clean directory (HistoryBuffer, etc.).
+    runner.clear_records()
+
     if not await runner.setup():
         _sys_notice(f"Setup failed: {runner.status.error}", "error")
         st.session_state.simulation_running = False
@@ -1178,6 +1182,16 @@ async def _run_simulation_async():
 
         st.session_state.replay_rounds = rounds
         if rounds:
+            # The runner's RoundUpdate objects track progress but don't carry
+            # full agent_actions / market_data. Reload from disk to get the
+            # actual per-round detail written by the simulator.
+            disk_rounds = load_rounds(
+                st.session_state.get("selected_scenario", "")
+            )
+            if disk_rounds:
+                rounds = disk_rounds
+                st.session_state.replay_rounds = rounds
+
             # Animate the freshly computed rounds one-by-one via the shared
             # replay pump, so users see a clear round-by-round progression
             # instead of jumping straight to the final frame.

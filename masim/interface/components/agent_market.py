@@ -478,30 +478,35 @@ def render_variant_choice() -> None:
             shipped_rounds = int(info.get("total_rounds") or 0)
         except (TypeError, ValueError):
             shipped_rounds = 0
-        # Editable rounds — user can shrink for a quick preview or extend
-        # to observe long-run dynamics.  The value is persisted under
-        # ``variant_rounds_<base>`` and consumed by ``_launch_default_variant``
-        # (Default) and ``_write_customized_bundle`` (Customize). Leaving
-        # the value untouched preserves the shipped default (zero-copy
-        # launch path). Values <1 are clamped to 1 by the widget.
         _rounds_key = f"variant_rounds_{selected_base}"
         _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
-        _rounds_now = int(st.session_state.get(_rounds_key, _rounds_default))
-        edited_rounds = st.number_input(
-            "Rounds",
-            min_value=1,
-            max_value=100000,
-            value=_rounds_now,
-            step=1,
-            key=f"widget_{_rounds_key}",
-            help=(
-                f"Number of simulation rounds. Shipped default: "
-                f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}. "
-                "Change to produce a reproducible copy under "
-                "configs/CUSTOMIZED_SIMULATION/."
-            ),
-        )
-        st.session_state[_rounds_key] = int(edited_rounds)
+        if is_experience:
+            # Experience mode: read-only display, no editing allowed.
+            st.metric("Rounds", str(_rounds_default))
+            st.session_state[_rounds_key] = _rounds_default
+        else:
+            # Editable rounds — user can shrink for a quick preview or extend
+            # to observe long-run dynamics.  The value is persisted under
+            # ``variant_rounds_<base>`` and consumed by ``_launch_default_variant``
+            # (Default) and ``_write_customized_bundle`` (Customize). Leaving
+            # the value untouched preserves the shipped default (zero-copy
+            # launch path). Values <1 are clamped to 1 by the widget.
+            _rounds_now = int(st.session_state.get(_rounds_key, _rounds_default))
+            edited_rounds = st.number_input(
+                "Rounds",
+                min_value=1,
+                max_value=100000,
+                value=_rounds_now,
+                step=1,
+                key=f"widget_{_rounds_key}",
+                help=(
+                    f"Number of simulation rounds. Shipped default: "
+                    f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}. "
+                    "Change to produce a reproducible copy under "
+                    "configs/CUSTOMIZED_SIMULATION/."
+                ),
+            )
+            st.session_state[_rounds_key] = int(edited_rounds)
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
@@ -977,12 +982,6 @@ def render_variant_choice() -> None:
                 st.caption("No topology data available.")
 
         st.divider()
-
-        # Advanced parameter editor — lets users tweak market and per-agent
-        # extras before launching a Default engine.  Emits an overrides dict
-        # under session_state[default_extras_<base>] which
-        # ``_launch_default_variant`` picks up.
-        _render_default_param_editor(selected_base)
 
         # Engine buttons.
         variant_keys = groups.get(selected_base) or []
