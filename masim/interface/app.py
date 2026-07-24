@@ -936,6 +936,13 @@ def _render_action_buttons(scenario_name: str):
                 t("simulation.view_analysis_running_help"),
                 _go_analysis,
             ))
+        elif analysis_runnable:
+            buttons.append((
+                t("simulation.run_analysis"),
+                "secondary",
+                t("simulation.run_analysis_help"),
+                _run_analysis,
+            ))
         if data_exists:
             buttons.append((
                 t("simulation.reset"),

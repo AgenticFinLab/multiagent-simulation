@@ -96,15 +96,37 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
     """Run the analysis script for a scenario.
 
     Args:
-        scenario_name: Name of the scenario
+        scenario_name: Name of the scenario (may be a CUSTOMIZED_SIMULATION key)
 
     Returns:
         Tuple of (success, message)
     """
+    from ..config_loader import get_analysis_path, _resolve_display_key
+
     try:
         _project_root = Path(__file__).resolve().parents[3]
-        script_path = _project_root / "examples" / scenario_name / "analysis.py"
+
+        # Resolve script and config paths. Customized bundles share the base
+        # scenario's analysis script but have their own simulation.yml.
         config_path = _project_root / "configs" / scenario_name / "simulation.yml"
+
+        # For the analysis script, resolve the base scenario/variant:
+        # "CUSTOMIZED_SIMULATION/Default-HerdEffect-Rule-r40" → "HerdEffect/Rule"
+        # "CUSTOMIZED_SIMULATION/HerdEffect" → base scenario "HerdEffect"
+        display_key = _resolve_display_key(scenario_name)
+        script_path = _project_root / "examples" / display_key / "analysis.py"
+
+        # Fallback: if display_key didn't resolve to a variant with analysis.py,
+        # try the Rule variant of the base scenario as a sensible default.
+        if not script_path.exists() and "/" not in display_key:
+            script_path = _project_root / "examples" / display_key / "Rule" / "analysis.py"
+
+        # Further fallback for customized bundles: strip CUSTOMIZED_SIMULATION/
+        if not script_path.exists() and scenario_name.startswith("CUSTOMIZED_SIMULATION/"):
+            bundle_id = scenario_name.split("/", 1)[1]
+            # Non-Default bundles: bundle_id IS the scenario name
+            if not bundle_id.startswith("Default-"):
+                script_path = _project_root / "examples" / bundle_id / "Rule" / "analysis.py"
 
         if not script_path.exists():
             return False, f"Analysis script not found: {script_path}"
