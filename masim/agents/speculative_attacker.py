@@ -39,7 +39,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -82,11 +82,9 @@ class RuleSpeculativeAttacker(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        reserves = _read_float(state.raw, "reserves")
-        initial_reserves = _read_float(state.raw, "initial_reserves")
-        misalign = _read_float(state.raw, "fundamental_misalignment")
-        if reserves is None or initial_reserves is None or misalign is None:
-            return hold
+        reserves = state.raw_require("reserves", cast=float)
+        initial_reserves = state.raw_require("initial_reserves", cast=float)
+        misalign = state.raw_require("fundamental_misalignment", cast=float)
         if initial_reserves <= 0:
             return hold
 

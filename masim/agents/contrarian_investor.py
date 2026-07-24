@@ -33,7 +33,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 

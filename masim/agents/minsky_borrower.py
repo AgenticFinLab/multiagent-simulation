@@ -43,7 +43,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -87,12 +87,11 @@ class RuleMinskyBorrower(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        raw = state.raw or {}
-        asset_return = float(raw.get("asset_return", 0.0) or 0.0)
-        refi = float(raw.get("refinancing_cost", 0.0) or 0.0)
-        boom_duration = float(raw.get("boom_duration", 0.0) or 0.0)
-        debt = float(raw.get("debt", 0.0) or 0.0)
-        income = float(raw.get("income", 0.0) or 0.0)
+        asset_return = state.raw_require("asset_return", cast=float)
+        refi = state.raw_require("refinancing_cost", cast=float)
+        boom_duration = state.raw_require("boom_duration", cast=float)
+        debt = state.raw_require("debt", cast=float)
+        income = state.raw_require("income", cast=float)
 
         # Debt-service ratio — guard div-by-zero (no income == infinite DSR).
         if income > 0:

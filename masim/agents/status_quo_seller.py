@@ -15,7 +15,7 @@ Decision rule (from AGENT_POOL profile §Behavioral Framework):
 
     peak_price       <- running max of price
     drawdown         =  max(0, (peak - price) / peak)
-    external         =  state.raw.get("external_pressure", 0.0)
+    external         =  state.raw_require("external_pressure", cast=float)
     pressure         =  max(drawdown, external)
 
     if pressure > pressure_threshold and position > 0:
@@ -38,7 +38,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -86,11 +86,7 @@ class RuleStatusQuoSeller(CanonicalRulePlayer):
             return hold
         drawdown = max(0.0, (peak - state.price) / peak)
 
-        external_raw = state.raw.get("external_pressure", 0.0)
-        try:
-            external = float(external_raw)
-        except (TypeError, ValueError):
-            external = 0.0
+        external = state.raw_require("external_pressure", cast=float)
 
         pressure = max(drawdown, external)
 

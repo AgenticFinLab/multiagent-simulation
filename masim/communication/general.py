@@ -100,21 +100,38 @@ class GeneralCommunicationChannel(CommunicationChannel):
         refs = []
         for message in messages:
             recipient_id = message.recipient_id
-            if recipient_id and recipient_id in handles:
-                # 1. Encode Message → SimPacket (wire envelope)
-                packet = self.encode_message(message)
+            # Fail-loud: silent drops here would let messages disappear
+            # without any downstream indication, and every metric that
+            # depends on message counts would silently drift.
+            if not recipient_id:
+                raise ValueError(
+                    "encode_and_deliver: message has empty recipient_id "
+                    f"(sender_id={message.sender_id!r}, payload_type="
+                    f"{getattr(message, 'payload', None)!r}). Every message "
+                    "MUST target a concrete recipient."
+                )
+            if recipient_id not in handles:
+                raise KeyError(
+                    f"encode_and_deliver: recipient_id={recipient_id!r} not "
+                    f"in registered actor handles (known="
+                    f"{sorted(handles.keys())}). Silent drop would erase "
+                    "the message with no downstream indication; fix the "
+                    "routing / registration bug at the caller instead."
+                )
+            # 1. Encode Message → SimPacket (wire envelope)
+            packet = self.encode_message(message)
 
-                # 2. Record the SimPacket (skipped at scale when record_messages=False)
-                if self.record_messages:
-                    self.record_encoded_message(packet)
+            # 2. Record the SimPacket (skipped at scale when record_messages=False)
+            if self.record_messages:
+                self.record_encoded_message(packet)
 
-                # 3. Decode SimPacket → Message (proxy layer restored)
-                decoded_message = self.decode_message(packet)
+            # 3. Decode SimPacket → Message (proxy layer restored)
+            decoded_message = self.decode_message(packet)
 
-                # 4. Deliver to target Persona
-                target_handle = handles[recipient_id]
-                ref = target_handle.receive_message.remote(decoded_message)
-                refs.append(ref)
+            # 4. Deliver to target Persona
+            target_handle = handles[recipient_id]
+            ref = target_handle.receive_message.remote(decoded_message)
+            refs.append(ref)
 
         return refs
 

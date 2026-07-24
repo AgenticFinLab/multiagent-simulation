@@ -42,7 +42,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -87,13 +87,7 @@ class RuleNewEconomyEvangelist(CanonicalRulePlayer):
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
-        narrative = state.raw.get("narrative_strength")
-        if narrative is None:
-            return hold
-        try:
-            narrative = float(narrative)
-        except (TypeError, ValueError):
-            return hold
+        narrative = state.raw_require("narrative_strength", cast=float)
 
         if narrative > belief_th and state.cash > 0 and state.price > 0:
             base_qty = weight * state.cash / state.price

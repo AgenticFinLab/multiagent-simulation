@@ -50,7 +50,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -82,8 +82,8 @@ class RuleGullibleSpreader(CanonicalRulePlayer):
         distortion_amp = cs["distortion_amplification"]
         threshold = cs["spread_threshold"]
 
-        env_belief = float(state.raw.get("env_belief", 0.0))
-        distortion = float(state.raw.get("distortion", 0.0))
+        env_belief = state.raw_require("env_belief", cast=float)
+        distortion = state.raw_require("distortion", cast=float)
 
         # Step 1-2 — credulous belief update.
         my_belief = cs["my_belief"]

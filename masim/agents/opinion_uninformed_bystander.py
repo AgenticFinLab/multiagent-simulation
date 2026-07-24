@@ -40,7 +40,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -69,7 +69,7 @@ class RuleOpinionUninformedBystander(CanonicalRulePlayer):
         cs = self.state.custom_state
         absorption_rate = cs["absorption_rate"]
 
-        env_belief = float(state.raw.get("env_belief", 0.5))
+        env_belief = state.raw_require("env_belief", cast=float)
         my_belief = float(cs.get("my_belief", 0.5))
         my_belief = _clamp(
             my_belief + absorption_rate * (env_belief - my_belief), 0.0, 1.0

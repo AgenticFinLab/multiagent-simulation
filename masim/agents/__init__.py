@@ -3,15 +3,22 @@
 This package auto-registers every archetype whose profile lives at
 ``examples/AGENT_POOL/{finance,market,opinion}/<stem>.md``.  See the
 module docstring in earlier revisions for the naming contract and
-the replication playbook.  200 archetypes are shipped as of the
-latest full-pool rollout (195 finance + 5 opinion-prefixed for the
-opinion-diffusion domain, whose profiles share stems with finance).
-Every module in this package exposes a ``Rule<PascalStem>`` +
-``LLM<PascalStem>`` pair sharing the same kebab-case ``STRATEGY``.
+the replication playbook.  209 archetypes are shipped as of the
+latest full-pool rollout:
+
+  * 195 finance investor agents  (Rule + LLM pairs)
+  * 5 opinion-prefixed investor agents  (Rule + LLM pairs)
+  * 9 market coordinators  (single Market<PascalStem> class each)
+
+Investor modules expose ``Rule<PascalStem>`` + ``LLM<PascalStem>``
+pairs sharing the same kebab-case ``STRATEGY``.  Coordinator modules
+expose a single ``Market<PascalStem>`` class; they are always
+rule-executed even when participants are LLM-driven.
 """
 
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.agents._base import CanonicalRulePlayer, CanonicalLLMPlayer
+from masim.agents._coordinator_base import CanonicalMarketCoordinator
 
 from masim.agents.active_rebalancer import RuleActiveRebalancer, LLMActiveRebalancer
 from masim.agents.aggressive_investor import RuleAggressiveInvestor, LLMAggressiveInvestor
@@ -418,6 +425,42 @@ REGISTRY: dict[str, tuple[type, type]] = {
     "volatility-trader": (RuleVolatilityTrader, LLMVolatilityTrader),
 }
 
+# ---------------------------------------------------------------------------
+# Market coordinator imports
+# ---------------------------------------------------------------------------
+
+from masim.agents.market_stock_standard_price_impact import MarketStockStandardPriceImpact
+from masim.agents.market_opinion_echo_chamber_clustering import MarketOpinionEchoChamberClustering
+from masim.agents.market_information_sis_contagion import MarketInformationSisContagion
+from masim.agents.market_fx_currency_peg_and_attack import MarketFxCurrencyPegAndAttack
+from masim.agents.market_bond_yield_spread_inverse import MarketBondYieldSpreadInverse
+from masim.agents.market_crypto_algostable_depeg import MarketCryptoAlgostableDepeg
+from masim.agents.market_derivatives_vol_feedback import MarketDerivativesVolFeedback
+from masim.agents.market_deposit_bank_run_diamond_dybvig import MarketDepositBankRunDiamondDybvig
+from masim.agents.market_credit_minsky_cycle import MarketCreditMinskyCycle
+
+COORDINATOR_REGISTRY: dict[str, type] = {
+    "stock-standard-price-impact": MarketStockStandardPriceImpact,
+    "opinion-echo-chamber-clustering": MarketOpinionEchoChamberClustering,
+    "information-sis-contagion": MarketInformationSisContagion,
+    "fx-currency-peg-and-attack": MarketFxCurrencyPegAndAttack,
+    "bond-yield-spread-inverse": MarketBondYieldSpreadInverse,
+    "crypto-algostable-depeg": MarketCryptoAlgostableDepeg,
+    "derivatives-vol-feedback": MarketDerivativesVolFeedback,
+    "deposit-bank-run-diamond-dybvig": MarketDepositBankRunDiamondDybvig,
+    "credit-minsky-cycle": MarketCreditMinskyCycle,
+}
+
+
+def get_coordinator(archetype: str) -> type:
+    """Look up a canonical market coordinator class by kebab stem."""
+    if archetype not in COORDINATOR_REGISTRY:
+        raise KeyError(
+            f"Unknown coordinator archetype {archetype!r}. Known: "
+            f"{sorted(COORDINATOR_REGISTRY)}"
+        )
+    return COORDINATOR_REGISTRY[archetype]
+
 
 def get_agent(archetype: str, engine: str = "Rule") -> type:
     """Look up a canonical agent class by kebab stem and engine."""
@@ -438,8 +481,20 @@ __all__ = [
     "StandardMarketState",
     "CanonicalRulePlayer",
     "CanonicalLLMPlayer",
+    "CanonicalMarketCoordinator",
     "REGISTRY",
+    "COORDINATOR_REGISTRY",
     "get_agent",
+    "get_coordinator",
+    "MarketStockStandardPriceImpact",
+    "MarketOpinionEchoChamberClustering",
+    "MarketInformationSisContagion",
+    "MarketFxCurrencyPegAndAttack",
+    "MarketBondYieldSpreadInverse",
+    "MarketCryptoAlgostableDepeg",
+    "MarketDerivativesVolFeedback",
+    "MarketDepositBankRunDiamondDybvig",
+    "MarketCreditMinskyCycle",
     "RuleActiveRebalancer",
     "RuleAggressiveInvestor",
     "RuleAlgorithmicTrader",

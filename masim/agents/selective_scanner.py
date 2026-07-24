@@ -40,7 +40,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -75,13 +75,7 @@ class RuleSelectiveScanner(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        signal_raw = state.raw.get("signal", None)
-        if signal_raw is None:
-            return hold
-        try:
-            signal = float(signal_raw)
-        except (TypeError, ValueError):
-            return hold
+        signal = state.raw_require("signal", cast=float)
         if math.isnan(signal):
             return hold
 

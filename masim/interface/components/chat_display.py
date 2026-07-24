@@ -1,27 +1,60 @@
-"""Chat/activity display component for real-time simulation updates."""
+"""Chat/activity display component for real-time simulation updates.
+
+Note (2026-07-24): The UI-side ``ChatUiAgentAction`` and ``ChatUiMarketUpdate``
+dataclasses defined here are *presentation view-models*, not runtime format
+contracts. They exist purely to feed the Streamlit ChatDisplay widget. The
+authoritative runtime structures live in :mod:`masim.format` — see
+:class:`masim.format.InvestorOrder` and :class:`masim.format.MarketBroadcast`.
+The view-models were renamed with ``ChatUi`` prefixes on 2026-07-24 to
+eliminate the previous name collision with ``masim.format.MarketBroadcast``
+and to signal that lowercase ``buy`` / ``sell`` / ``hold`` (the canonical
+enum from :data:`masim.format.INVESTOR_ORDER_ACTION_VALUES`) is expected here.
+"""
 
 import streamlit as st
 from typing import List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 
+from masim.format import BUY, SELL, HOLD, INVESTOR_ORDER_ACTION_VALUES
+
 
 @dataclass
-class AgentAction:
-    """Represents a single agent action in a round."""
+class ChatUiAgentAction:
+    """Presentation view-model for a single agent action in a round.
+
+    ``action`` MUST be one of :data:`masim.format.INVESTOR_ORDER_ACTION_VALUES`
+    (``"buy"`` / ``"sell"`` / ``"hold"``). Construction fails loudly for any
+    other value; silently coercing an unknown value to ``hold`` would mask
+    upstream bugs in the log-parser.
+    """
 
     round_num: int
     agent_name: str
     agent_id: str
     bid_price: float
     quantity: float
-    action: str  # "BUY", "SELL", "HOLD"
+    action: str
     timestamp: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.action not in INVESTOR_ORDER_ACTION_VALUES:
+            raise ValueError(
+                f"ChatUiAgentAction.action must be one of "
+                f"{sorted(INVESTOR_ORDER_ACTION_VALUES)}, "
+                f"got {self.action!r}. Silent coercion would mask "
+                f"upstream log-parser bugs."
+            )
 
 
 @dataclass
-class MarketUpdate:
-    """Represents a market state update."""
+class ChatUiMarketUpdate:
+    """Presentation view-model for a market state update.
+
+    Mirrors a subset of :class:`masim.format.MarketBroadcast` payload keys for
+    display purposes. NOT to be used as a runtime broadcast — coordinators
+    MUST emit through :class:`masim.format.MarketBroadcast`.
+    """
 
     round_num: int
     price: float
@@ -60,11 +93,11 @@ class ChatDisplay:
         )
         self._trim_messages()
 
-    def add_agent_action(self, action: AgentAction):
+    def add_agent_action(self, action: ChatUiAgentAction):
         """Add an agent action message.
 
         Args:
-            action: AgentAction to display
+            action: ChatUiAgentAction to display
         """
         self.messages.append(
             {
@@ -75,11 +108,11 @@ class ChatDisplay:
         )
         self._trim_messages()
 
-    def add_market_update(self, update: MarketUpdate):
+    def add_market_update(self, update: ChatUiMarketUpdate):
         """Add a market state update.
 
         Args:
-            update: MarketUpdate to display
+            update: ChatUiMarketUpdate to display
         """
         self.messages.append(
             {
@@ -163,17 +196,20 @@ class ChatDisplay:
         action = msg["data"]
         timestamp = msg.get("timestamp", "")
 
-        # Determine action styling
+        # Determine action styling (canonical lowercase enum from masim.format)
         action_colors = {
-            "BUY": "#28a745",  # Green
-            "SELL": "#dc3545",  # Red
-            "HOLD": "#6c757d",  # Gray
+            BUY: "#28a745",   # Green
+            SELL: "#dc3545",  # Red
+            HOLD: "#6c757d",  # Gray
         }
         action_color = action_colors.get(action.action, "#6c757d")
 
         # Format quantity with sign
         qty = action.quantity
         qty_str = f"+{qty:.1f}" if qty > 0 else f"{qty:.1f}"
+
+        # Uppercase label is a *display* choice; the canonical enum stays lowercase.
+        display_action = action.action.upper()
 
         st.markdown(
             f"""
@@ -193,7 +229,7 @@ class ChatDisplay:
                     border-radius: 12px;
                     font-size: 12px;
                     font-weight: bold;
-                ">{action.action}</span>
+                ">{display_action}</span>
             </div>
             <div style="margin-top: 5px; font-size: 14px; color: #495057;">
                 Bid: <b>${action.bid_price:.2f}</b> | Qty: <b>{qty_str}</b>

@@ -47,7 +47,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -89,15 +89,8 @@ class RuleRetailCoordinator(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        signal = state.raw.get("coordination_signal", None)
-        short_interest = state.raw.get("short_interest", None)
-        if signal is None or short_interest is None:
-            return hold
-        try:
-            signal = float(signal)
-            short_interest = float(short_interest)
-        except (TypeError, ValueError):
-            return hold
+        signal = state.raw_require("coordination_signal", cast=float)
+        short_interest = state.raw_require("short_interest", cast=float)
         if math.isnan(signal) or math.isnan(short_interest):
             return hold
 

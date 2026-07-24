@@ -40,7 +40,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -75,9 +75,9 @@ class RuleIpoFlipper(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        offer_price = float(state.raw.get("offer_price", state.price))
-        ipo_active = bool(state.raw.get("ipo_active", False))
-        ticks_since_ipo = int(state.raw.get("ticks_since_ipo", 0))
+        offer_price = state.raw_require("offer_price", cast=float)
+        ipo_active = state.raw_require("ipo_active", cast=bool)
+        ticks_since_ipo = state.raw_require("ticks_since_ipo", cast=int)
 
         if not ipo_active:
             return hold

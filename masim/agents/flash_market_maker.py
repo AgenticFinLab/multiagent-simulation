@@ -35,7 +35,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -71,8 +71,8 @@ class RuleFlashMarketMaker(CanonicalRulePlayer):
 
         volatility = state.volatility
         if volatility is None:
-            volatility = float(state.raw.get("volatility", math.nan))
-        ofi = float(state.raw.get("order_flow_imbalance", math.nan))
+            volatility = state.raw_require("volatility", cast=float)
+        ofi = state.raw_require("order_flow_imbalance", cast=float)
 
         if math.isnan(volatility) or math.isnan(ofi):
             return hold

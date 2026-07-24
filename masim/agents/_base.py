@@ -51,7 +51,7 @@ from masim.format.order import (
     InvestorOrder,
     validate_order,
 )
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 
 logger = logging.getLogger("masim.agents")
 
@@ -207,18 +207,41 @@ class CanonicalRulePlayer(GeneralPlayer):
         return _emit(order)
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload.get("action", HOLD)
-        quantity = float(decision_payload.get("quantity", 0.0) or 0.0)
-        bid_price = float(decision_payload.get("bid_price") or 0.0)
-        market_data = self.state.custom_state.get("market_data") or {}
-        fill_price = bid_price if bid_price > 0 else float(market_data.get("price", 0.0))
+        # decision_payload comes from _emit(order) where order is a fully
+        # validated InvestorOrder — action/quantity/bid_price are guaranteed
+        # to be present.  Missing keys here indicate an invariant violation
+        # in the emission pipeline, not a routine "empty round".
+        for required in ("action", "quantity", "bid_price"):
+            if required not in decision_payload:
+                raise KeyError(
+                    f"CanonicalRulePlayer.act: decision_payload missing "
+                    f"required field {required!r}. Payload keys: "
+                    f"{sorted(decision_payload)}"
+                )
+        action = decision_payload["action"]
+        quantity = float(decision_payload["quantity"])
+        bid_price = float(decision_payload["bid_price"])
 
-        if action == BUY and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * fill_price
-            self.state.custom_state["position"] += quantity
-        elif action == SELL and quantity > 0:
-            self.state.custom_state["cash"] += quantity * fill_price
-            self.state.custom_state["position"] -= quantity
+        if action in (BUY, SELL) and quantity > 0:
+            # Buy/sell requires a fill price; bid_price is guaranteed positive
+            # after _finalize_order (falls back to state.price when the raw
+            # subclass output was <= 0).  If it is still non-positive here we
+            # have a wire-format violation — refuse to fabricate a nonsense
+            # cash update at fill_price=0.
+            if bid_price <= 0:
+                raise ValueError(
+                    f"CanonicalRulePlayer.act: {action} order has "
+                    f"bid_price={bid_price!r}; every non-hold order MUST "
+                    f"carry a positive bid_price after _finalize_order."
+                )
+            fill_price = bid_price
+
+            if action == BUY:
+                self.state.custom_state["cash"] -= quantity * fill_price
+                self.state.custom_state["position"] += quantity
+            else:  # SELL
+                self.state.custom_state["cash"] += quantity * fill_price
+                self.state.custom_state["position"] -= quantity
 
         return Action(
             action_type="investor_bid",
@@ -347,6 +370,19 @@ class CanonicalRulePlayer(GeneralPlayer):
                 clipped_intended_quantity=float(original_quantity),
                 clipped_reason=clipped_reason or "unspecified",
             )
+        # Every non-hold order MUST carry a strictly positive bid_price so
+        # downstream cash bookkeeping cannot silently fabricate a fill at
+        # price zero. If we get here with bid_price <= 0 on a buy/sell, the
+        # broadcast lacked a usable price (state.price non-positive) — that
+        # is a scenario configuration bug, not a runtime "no data" case.
+        if finalized.action in (BUY, SELL) and float(finalized.bid_price) <= 0:
+            raise ValueError(
+                f"CanonicalRulePlayer._finalize_order: {finalized.action} "
+                f"order emerges with bid_price={finalized.bid_price!r}. "
+                f"state.price={state.price!r}, original bid_price="
+                f"{order.bid_price!r}. Every non-hold order requires a "
+                f"positive bid_price."
+            )
         # Sanity-check via the legacy validator; keeps the format-drift
         # tests exercising the same code path as the wire format.
         validate_order(finalized.to_dict())
@@ -467,18 +503,36 @@ class CanonicalLLMPlayer(GeneralPlayer):
         return _emit(order)
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        action = decision_payload.get("action", HOLD)
-        quantity = float(decision_payload.get("quantity", 0.0) or 0.0)
-        bid_price = float(decision_payload.get("bid_price") or 0.0)
-        market_data = self.state.custom_state.get("market_data") or {}
-        fill_price = bid_price if bid_price > 0 else float(market_data.get("price", 0.0))
+        # Same contract as CanonicalRulePlayer.act — the payload is emitted
+        # by _emit() from a validated InvestorOrder.  Missing keys or a
+        # non-positive bid_price on a non-hold order indicate an invariant
+        # violation upstream, not a benign empty round.
+        for required in ("action", "quantity", "bid_price"):
+            if required not in decision_payload:
+                raise KeyError(
+                    f"CanonicalLLMPlayer.act: decision_payload missing "
+                    f"required field {required!r}. Payload keys: "
+                    f"{sorted(decision_payload)}"
+                )
+        action = decision_payload["action"]
+        quantity = float(decision_payload["quantity"])
+        bid_price = float(decision_payload["bid_price"])
 
-        if action == BUY and quantity > 0:
-            self.state.custom_state["cash"] -= quantity * fill_price
-            self.state.custom_state["position"] += quantity
-        elif action == SELL and quantity > 0:
-            self.state.custom_state["cash"] += quantity * fill_price
-            self.state.custom_state["position"] -= quantity
+        if action in (BUY, SELL) and quantity > 0:
+            if bid_price <= 0:
+                raise ValueError(
+                    f"CanonicalLLMPlayer.act: {action} order has "
+                    f"bid_price={bid_price!r}; every non-hold order MUST "
+                    f"carry a positive bid_price after _finalize_llm_order."
+                )
+            fill_price = bid_price
+
+            if action == BUY:
+                self.state.custom_state["cash"] -= quantity * fill_price
+                self.state.custom_state["position"] += quantity
+            else:  # SELL
+                self.state.custom_state["cash"] += quantity * fill_price
+                self.state.custom_state["position"] -= quantity
 
         return Action(
             action_type="investor_bid",
@@ -633,6 +687,18 @@ class CanonicalLLMPlayer(GeneralPlayer):
                 clipped_from=original_action,
                 clipped_intended_quantity=float(original_quantity),
                 clipped_reason=clipped_reason or "unspecified",
+            )
+        # Mirror CanonicalRulePlayer._finalize_order: refuse to emit a non-hold
+        # order with bid_price <= 0. LLM output that fails this check indicates
+        # the parsing/from_llm_decision step let a bogus price through, which
+        # would otherwise silently corrupt cash bookkeeping downstream.
+        if finalized.action in (BUY, SELL) and float(finalized.bid_price) <= 0:
+            raise ValueError(
+                f"CanonicalLLMPlayer._finalize_llm_order: {finalized.action} "
+                f"order emerges with bid_price={finalized.bid_price!r}. "
+                f"state.price={state.price!r}, original bid_price="
+                f"{order.bid_price!r}. Every non-hold order requires a "
+                f"positive bid_price."
             )
         validate_order(finalized.to_dict())
         return finalized

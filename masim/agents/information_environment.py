@@ -62,29 +62,54 @@ import random
 from typing import Any, Dict, Iterable, List
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
 def _sum_intensities(raw_value: Any) -> tuple[float, int]:
-    """Return (sum, count) from a possibly-missing intensity payload."""
+    """Return (sum, count) from an intensity payload.
+
+    Accepts three shapes:
+      * ``None`` — scenario declared no intensity data; treated as (0.0, 0).
+      * ``dict`` — mapping agent_id -> intensity value.
+      * iterable — flat sequence of intensities.
+
+    All non-``None`` values MUST be numeric.  Non-iterable values and
+    non-numeric entries raise ``TypeError`` / ``ValueError``.  Silent
+    error-swallowing is forbidden per the project's fail-loud policy —
+    malformed intensity data in a scientific simulation is always a
+    hard error, never a "treat as zero" situation.
+    """
     if raw_value is None:
         return 0.0, 0
     if isinstance(raw_value, dict):
         items: Iterable[float] = raw_value.values()
     else:
+        # Reject non-iterables (str would iterate character-by-character which
+        # is never what we want here).
+        if isinstance(raw_value, (str, bytes)):
+            raise TypeError(
+                f"_sum_intensities received string/bytes {raw_value!r}; "
+                "expected dict or numeric iterable."
+            )
         try:
             items = list(raw_value)
-        except TypeError:
-            return 0.0, 0
+        except TypeError as exc:
+            raise TypeError(
+                f"_sum_intensities received non-iterable {raw_value!r}; "
+                "expected dict, list, or None."
+            ) from exc
     total = 0.0
     count = 0
     for v in items:
         try:
             total += float(v)
-            count += 1
-        except (TypeError, ValueError):
-            continue
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"_sum_intensities encountered non-numeric intensity {v!r} "
+                f"in payload {raw_value!r}."
+            ) from exc
+        count += 1
     return total, count
 
 
@@ -128,11 +153,20 @@ class RuleInformationEnvironment(CanonicalRulePlayer):
         ]
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
-        # Read intensities from the raw scenario payload.
+        # ``spread_intensities`` and ``correct_intensities`` are declared
+        # in REQUIRES_FEATURES, so the upstream scenario coordinator MUST
+        # emit these keys on every broadcast (even when no participant
+        # spread or corrected — in that case the coordinator emits an
+        # empty dict/list, which _sum_intensities correctly reduces to
+        # (0.0, 0)). raw_require makes the contract explicit and turns a
+        # coordinator wiring bug into a KeyError rather than a silent
+        # "no rumor activity" reading.
         spread_sum, spreader_count = _sum_intensities(
-            state.raw.get("spread_intensities")
+            state.raw_require("spread_intensities")
         )
-        correct_sum, _ = _sum_intensities(state.raw.get("correct_intensities"))
+        correct_sum, _ = _sum_intensities(
+            state.raw_require("correct_intensities")
+        )
         net_spread = spread_sum - correct_sum
 
         belief = float(self.state.custom_state["belief"])

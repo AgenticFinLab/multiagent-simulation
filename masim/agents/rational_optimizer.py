@@ -39,7 +39,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -68,14 +68,9 @@ class RuleRationalOptimizer(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        mu = state.raw.get("expected_return")
-        rf = state.raw.get("risk_free_rate")
-        var = state.raw.get("variance")
-        if mu is None or rf is None or var is None:
-            return hold
-        mu = float(mu)
-        rf = float(rf)
-        var = float(var)
+        mu = state.raw_require("expected_return", cast=float)
+        rf = state.raw_require("risk_free_rate", cast=float)
+        var = state.raw_require("variance", cast=float)
         if var <= 0:
             return hold
 

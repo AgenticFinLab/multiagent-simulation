@@ -28,7 +28,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -53,7 +53,7 @@ class RuleAnchorDepositor(CanonicalRulePlayer):
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
-        parity = float(state.raw.get("parity", 1.0) or 1.0)
+        parity = state.raw_require("parity", cast=float)
         if parity <= 0 or math.isnan(parity):
             return hold
 

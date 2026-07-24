@@ -47,7 +47,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -85,12 +85,17 @@ class RuleUninformedBystander(CanonicalRulePlayer):
         # derive a bounded sentiment proxy from price_change (a rise
         # implies bullish ambient belief, a decline bearish); if that is
         # also unavailable, return the neutral 0.5. Kept in [0, 1].
-        raw = state.raw.get("env_belief") if state.raw else None
+        #
+        # ``env_belief`` is intentionally *not* in REQUIRES_FEATURES: the
+        # profile documents it as a soft-optional signal that the
+        # bystander only *prefers* when available (a rumor-market
+        # coordinator supplies it; a stock-only scenario will not). The
+        # sentinel default of NaN routes through the price_change fallback
+        # branch. Using raw_optional() (rather than bare .get) makes the
+        # optional intent explicit at code-review time.
+        raw = state.raw_optional("env_belief", default=None, cast=float)
         if raw is not None:
-            try:
-                belief = float(raw)
-            except (TypeError, ValueError):
-                belief = 0.5
+            belief = raw
         else:
             change = state.price_change
             # Squash: ±10% price change maps to ±0.5 around 0.5.

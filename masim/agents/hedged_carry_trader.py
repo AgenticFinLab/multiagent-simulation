@@ -33,7 +33,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -61,9 +61,21 @@ class RuleHedgedCarryTrader(CanonicalRulePlayer):
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
+        # `volatility` is a canonical StandardMarketState field (see
+        # masim/format/state.py) but is Optional there because not every
+        # scenario models a rolling-volatility signal. When the direct
+        # attribute is None we fall through to the raw payload as a
+        # documented backup (some coordinators broadcast a scalar
+        # ``volatility`` field alongside the price series); if it is not
+        # present, the strategy holds instead of trading blind. This is
+        # an *explicit* optional lookup — routed through raw_optional so
+        # a code reader (or lint sweep) can see that a bare .get is not
+        # a silent-default bug.
         volatility = state.volatility
         if volatility is None:
-            volatility = float(state.raw.get("volatility", math.nan))
+            volatility = state.raw_optional(
+                "volatility", default=math.nan, cast=float
+            )
         if math.isnan(volatility) or state.price <= 0:
             return hold
 

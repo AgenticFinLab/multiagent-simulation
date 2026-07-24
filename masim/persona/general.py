@@ -222,20 +222,27 @@ class PlayerPersona(BasePersona):
         # phase_dispatch for level N-1 completes (all receive_message.remote()
         # futures resolved) before phase_execute for level N is called.
         # Therefore is_received_ready() should always return True on first check.
-        # A False result indicates an unexpected topology/timing issue — log and proceed.
+        # A False result indicates an unexpected topology/timing issue — this
+        # is a hard-invariant violation, NOT a recoverable condition. Silently
+        # "proceeding anyway" would let the Player operate on stale/missing
+        # inbound messages and poison every downstream decision, so we fail
+        # loudly and let the Simulator surface the topology bug.
         if not self.player.is_received_ready(
             round_num,
             self.message_proxy.get_received_senders(),
             level=level,
         ):
-            logger.warning(
-                "Actor %s: is_received_ready=False at operate() start "
-                "(round=%d, level=%d, received=%s, expected=%s) — proceeding anyway",
-                self.identity,
-                round_num,
-                level,
-                self.message_proxy.get_received_senders(),
-                self.player.expected_senders,
+            raise RuntimeError(
+                f"Actor {self.identity}: is_received_ready=False at operate() "
+                f"start (round={round_num}, level={level}, "
+                f"received={self.message_proxy.get_received_senders()}, "
+                f"expected={self.player.expected_senders}). "
+                f"The Simulator's level-ordered execution model guarantees "
+                f"that all messages from previous levels have been delivered "
+                f"before this call; a False result indicates a topology or "
+                f"timing bug that must be fixed at the Simulator layer, not "
+                f"papered over here. Proceeding would operate on stale or "
+                f"missing inbound messages."
             )
 
         # Deliver from proxy to Player (single delivery point)

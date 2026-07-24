@@ -53,7 +53,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -84,8 +84,8 @@ class RuleOpinionGullibleSpreader(CanonicalRulePlayer):
         p_share = cs["p_share"]
         base_size = cs["base_size"]
 
-        env_belief = float(state.raw.get("env_belief", 0.5))
-        emotional_salience = float(state.raw.get("emotional_salience", 0.0))
+        env_belief = state.raw_require("env_belief", cast=float)
+        emotional_salience = state.raw_require("emotional_salience", cast=float)
 
         # Gullible adoption: fully assimilate env_belief each tick.
         my_belief = float(cs.get("my_belief", 0.5))

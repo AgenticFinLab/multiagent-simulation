@@ -61,7 +61,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -109,9 +109,9 @@ class RuleFactChecker(CanonicalRulePlayer):
         truth_convergence_rate = cs["truth_convergence_rate"]
         base_size = cs["base_size"]
 
-        env_belief = float(state.raw.get("env_belief", 0.0))
-        distortion = float(state.raw.get("distortion", 0.0))
-        truth_value = float(state.raw.get("truth_value", 0.0))
+        env_belief = state.raw_require("env_belief", cast=float)
+        distortion = state.raw_require("distortion", cast=float)
+        truth_value = state.raw_require("truth_value", cast=float)
 
         my_belief = float(cs.get("my_belief", 0.1))
         my_belief = _clamp(

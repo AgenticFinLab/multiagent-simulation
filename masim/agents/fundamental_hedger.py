@@ -40,7 +40,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -67,10 +67,8 @@ class RuleFundamentalHedger(CanonicalRulePlayer):
         band = cs["rebalance_band"]
         max_order = cs["max_order_size"]
 
-        exposure_value = float(state.raw.get("exposure_value", cs["exposure_value"]))
-        effectiveness = float(
-            state.raw.get("hedge_effectiveness", cs["hedge_effectiveness"])
-        )
+        exposure_value = state.raw_require("exposure_value", cast=float)
+        effectiveness = state.raw_require("hedge_effectiveness", cast=float)
 
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY

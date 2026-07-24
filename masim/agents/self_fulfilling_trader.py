@@ -49,7 +49,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -95,13 +95,7 @@ class RuleSelfFulfillingTrader(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        vuln_raw = state.raw.get("vulnerability_index", None)
-        if vuln_raw is None:
-            return hold
-        try:
-            vulnerability = float(vuln_raw)
-        except (TypeError, ValueError):
-            return hold
+        vulnerability = state.raw_require("vulnerability_index", cast=float)
         if math.isnan(vulnerability):
             return hold
 

@@ -52,7 +52,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -83,8 +83,8 @@ class RuleOpinionSkepticalEvaluator(CanonicalRulePlayer):
         p_share_s = cs["p_share_s"]
         base_size = cs["base_size"]
 
-        env_belief = float(state.raw.get("env_belief", 0.5))
-        evidence_quality = float(state.raw.get("evidence_quality", 0.0))
+        env_belief = state.raw_require("env_belief", cast=float)
+        evidence_quality = state.raw_require("evidence_quality", cast=float)
 
         # Evidence-weighted (slow, cautious) belief update.
         my_belief = float(cs.get("my_belief", 0.5))

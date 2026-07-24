@@ -46,6 +46,7 @@ from functools import lru_cache
 from typing import Iterable, Optional
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
+from masim.agents._coordinator_base import CanonicalMarketCoordinator
 
 
 _AGENTS_PACKAGE = "masim.agents"
@@ -124,11 +125,17 @@ def load_agent_catalog(path: Optional[str] = None) -> dict[str, AgentEntry]:
 
     The ``path`` parameter is accepted for backwards compatibility but is
     ignored — the catalog is now derived from class metadata, not a YAML file.
+
+    Discovers three class families:
+      * ``CanonicalRulePlayer`` subclasses — investor Rule agents
+      * ``CanonicalLLMPlayer`` subclasses — investor LLM agents
+      * ``CanonicalMarketCoordinator`` subclasses — market coordinators
     """
     del path  # discovery is path-free
 
     rule_classes: dict[str, type] = {}
     llm_classes: dict[str, type] = {}
+    coordinator_classes: dict[str, type] = {}
 
     for module in _iter_agent_modules():
         for _, cls in inspect.getmembers(module, inspect.isclass):
@@ -138,13 +145,34 @@ def load_agent_catalog(path: Optional[str] = None) -> dict[str, AgentEntry]:
                 rule_classes.setdefault(cls.STRATEGY, cls)
             elif _is_concrete_subclass(cls, CanonicalLLMPlayer):
                 llm_classes.setdefault(cls.STRATEGY, cls)
+            elif _is_concrete_subclass(cls, CanonicalMarketCoordinator):
+                coordinator_classes.setdefault(cls.STRATEGY, cls)
 
-    archetypes = sorted(set(rule_classes) | set(llm_classes))
+    archetypes = sorted(set(rule_classes) | set(llm_classes) | set(coordinator_classes))
     out: dict[str, AgentEntry] = {}
     for archetype in archetypes:
         rule_cls = rule_classes.get(archetype)
         llm_cls = llm_classes.get(archetype)
+        coord_cls = coordinator_classes.get(archetype)
 
+        # Coordinator path — single class, always Rule engine.
+        if coord_cls is not None:
+            display_name = getattr(coord_cls, "DISPLAY_NAME", "") or archetype
+            summary = getattr(coord_cls, "SUMMARY", "") or ""
+            requires = tuple(getattr(coord_cls, "BROADCAST_FIELDS", ()) or ())
+            canonical: dict[str, str] = {"Rule": _class_path(coord_cls)}
+            out[archetype] = AgentEntry(
+                archetype=archetype,
+                display_name=str(display_name),
+                summary=str(summary),
+                supported_engines=("Rule",),
+                requires_market_features=requires,
+                canonical_classes=canonical,
+                default_prompts={},
+            )
+            continue
+
+        # Investor path — Rule + LLM siblings.
         # Display metadata: prefer Rule class (always present for implemented
         # archetypes); fall back to LLM class if Rule is missing.
         meta_src = rule_cls or llm_cls
@@ -152,7 +180,7 @@ def load_agent_catalog(path: Optional[str] = None) -> dict[str, AgentEntry]:
         summary = getattr(meta_src, "SUMMARY", "") or ""
         requires = tuple(getattr(meta_src, "REQUIRES_FEATURES", ()) or ())
 
-        canonical: dict[str, str] = {}
+        canonical = {}
         if rule_cls is not None:
             canonical["Rule"] = _class_path(rule_cls)
             # RuleLLM reuses the Rule executor; the LLM only contributes

@@ -37,7 +37,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -69,13 +69,7 @@ class RuleSentimentTrader(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        sentiment_raw = state.raw.get("sentiment", None)
-        if sentiment_raw is None:
-            return hold
-        try:
-            sentiment = float(sentiment_raw)
-        except (TypeError, ValueError):
-            return hold
+        sentiment = state.raw_require("sentiment", cast=float)
         if math.isnan(sentiment):
             return hold
 

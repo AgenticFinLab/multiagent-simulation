@@ -47,7 +47,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -91,13 +91,7 @@ class RuleSkepticalEvaluator(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        env_belief_raw = state.raw.get("env_belief")
-        if env_belief_raw is None:
-            return hold
-        try:
-            env_belief = float(env_belief_raw)
-        except (TypeError, ValueError):
-            return hold
+        env_belief = state.raw_require("env_belief", cast=float)
 
         skepticism = self.state.custom_state["skepticism"]
         eagerness = self.state.custom_state["correction_eagerness"]

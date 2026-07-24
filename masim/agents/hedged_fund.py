@@ -40,7 +40,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -75,9 +75,8 @@ class RuleHedgedFund(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        drawdown = float(state.raw.get("drawdown", 0.0))
-        default_spread = 0.0 if math.isnan(state.deviation) else state.deviation
-        valuation_spread = float(state.raw.get("valuation_spread", default_spread))
+        drawdown = state.raw_require("drawdown", cast=float)
+        valuation_spread = state.raw_require("valuation_spread", cast=float)
 
         # Forced deleveraging dominates.
         if drawdown >= max_dd and state.position > 0:

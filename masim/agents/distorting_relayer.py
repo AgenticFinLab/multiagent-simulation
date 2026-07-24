@@ -54,7 +54,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -99,8 +99,8 @@ class RuleDistortingRelayer(CanonicalRulePlayer):
         relay_threshold = cs["relay_threshold"]
         base_size = cs["base_size"]
 
-        env_belief = float(state.raw.get("env_belief", 0.0))
-        distortion = float(state.raw.get("distortion", 0.0))
+        env_belief = state.raw_require("env_belief", cast=float)
+        distortion = state.raw_require("distortion", cast=float)
 
         my_belief = float(cs.get("my_belief", 0.3))
         gap = env_belief - my_belief

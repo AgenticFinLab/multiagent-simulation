@@ -43,7 +43,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -80,7 +80,7 @@ class RuleProCyclicalLender(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        C = float(state.raw.get("cycle_indicator", 0.0) or 0.0)
+        C = state.raw_require("cycle_indicator", cast=float)
         exp_t = self.state.custom_state["expansion_threshold"]
         con_t = self.state.custom_state["contraction_threshold"]
         lr = self.state.custom_state["lending_rate"]

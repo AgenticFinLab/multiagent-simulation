@@ -34,7 +34,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -67,8 +67,8 @@ class RuleLiquidityDemander(CanonicalRulePlayer):
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
-        liquidity_need = float(state.raw.get("liquidity_need", 0.0) or 0.0)
-        direction = str(state.raw.get("need_direction", "") or "").lower()
+        liquidity_need = state.raw_require("liquidity_need", cast=float)
+        direction = state.raw_require("need_direction", cast=str).lower()
         if liquidity_need <= urgency_thr or direction not in {"buy", "sell"}:
             return hold
 

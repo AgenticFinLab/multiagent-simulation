@@ -39,7 +39,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -80,11 +80,8 @@ class RuleLeveragedSpeculator(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        margin_used = float(state.raw.get("margin_used", 0.0) or 0.0)
-        signal = state.raw.get("signal")
-        if signal is None:
-            return hold
-        signal = float(signal)
+        margin_used = state.raw_require("margin_used", cast=float)
+        signal = state.raw_require("signal", cast=float)
 
         # Margin call takes priority over the entry signal.
         if margin_used > call_level and state.position > 0:

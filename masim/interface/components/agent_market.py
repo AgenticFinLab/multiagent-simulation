@@ -29,6 +29,7 @@ from ..config_loader import (
 from ..customized import (
     CustomizedAgentSelection,
     apply_customized_modifications,
+    extract_default_players,
     extract_market_extras,
     get_default_prompts,
     initialize_customized_folder,
@@ -237,6 +238,181 @@ def _inject_variant_button_styles() -> None:
     st.markdown("<style>" + "".join(rules) + "</style>", unsafe_allow_html=True)
 
 
+def _default_extras_session_key(scenario_base: str) -> str:
+    """Session-state key holding the Default-mode extras override dict.
+
+    The dict has the shape ``{"__market__": {extras_key: value}, "<agent_key>":
+    {extras_key: value}}`` where ``<agent_key>`` matches a top-level block in
+    ``configs/<Scenario>/Rule/players.yml``.  ``_launch_default_variant``
+    reads this dict and forwards it to
+    :func:`write_default_scenario_bundle` so any edits land on disk.
+    """
+    return f"default_extras_{scenario_base}"
+
+
+def _coerce_extras_value(default_value: Any, new_value: Any) -> Any:
+    """Cast a widget value back to the type of the shipped default.
+
+    ``st.number_input`` returns ``int`` for int defaults and ``float`` for
+    float defaults; ``st.text_input`` always returns ``str``.  We only
+    round-trip through this helper when the user actually edits the
+    value, so passing ``None`` / mismatched types is fine — we fall back
+    to the widget's own type in that case.
+    """
+    if isinstance(default_value, bool):
+        return bool(new_value)
+    if isinstance(default_value, int) and not isinstance(default_value, bool):
+        try:
+            return int(new_value)
+        except (TypeError, ValueError):
+            return new_value
+    if isinstance(default_value, float):
+        try:
+            return float(new_value)
+        except (TypeError, ValueError):
+            return new_value
+    return new_value
+
+
+def _render_default_param_editor(scenario_base: str) -> None:
+    """Render the Default-mode market + agent parameter editor.
+
+    Shows one expander per top-level block in ``configs/<base>/Rule/players.yml``
+    (market coordinator first, then every investor).  Each block exposes
+    its ``extras`` fields as ``st.number_input`` widgets (numeric) or
+    ``st.text_input`` widgets (strings).  Edits are persisted under
+    ``st.session_state[default_extras_<base>][<block_key>][<field>]``.
+
+    When the user picks a Default engine, ``_launch_default_variant``
+    checks whether *anything* under that session key is non-empty and,
+    if so, materialises a rounds/params-adjusted bundle via
+    :func:`write_default_scenario_bundle`.
+
+    Silently no-ops if the scenario has no shipped ``Rule/players.yml``
+    (e.g. rare LLM-only scenarios) — Default launch still works, users
+    simply cannot tweak parameters without the reference variant.
+    """
+    players = extract_default_players(
+        scenario_name=scenario_base, variant="Rule", project_root=PROJECT_ROOT
+    )
+    if not players:
+        return
+
+    session_key = _default_extras_session_key(scenario_base)
+    edits: dict[str, dict[str, Any]] = st.session_state.setdefault(
+        session_key, {}
+    )
+
+    with st.expander(
+        "Advanced parameters — market & agent extras", expanded=False
+    ):
+        st.caption(
+            "Fine-tune the shipped roster before launching.  Any edit "
+            "here produces a reproducible copy under "
+            "`configs/CUSTOMIZED_SIMULATION/Default-…/` — the shipped "
+            "YAML is never mutated."
+        )
+        if st.button(
+            "Reset to shipped defaults",
+            key=f"default_extras_reset_{scenario_base}",
+            help="Discard all edits below and relaunch with the shipped values.",
+        ):
+            st.session_state.pop(session_key, None)
+            # Clear each per-widget session slot too so the next rerun
+            # reflects the reset. Widget keys follow the naming below.
+            for block_key, block_info in players.items():
+                for extras_key in (block_info.get("extras") or {}):
+                    st.session_state.pop(
+                        f"defx_{scenario_base}_{block_key}_{extras_key}",
+                        None,
+                    )
+            st.rerun()
+
+        for block_key, block_info in players.items():
+            extras = block_info.get("extras") or {}
+            if not extras:
+                continue
+            is_market = block_key == next(iter(players))
+            override_slot = (
+                edits.setdefault("__market__", {})
+                if is_market
+                else edits.setdefault(block_key, {})
+            )
+            role_tag = (
+                "market coordinator"
+                if is_market
+                else f"{block_info.get('num_instances', 1)} instance"
+                + ("s" if int(block_info.get("num_instances", 1)) > 1 else "")
+            )
+            label = f"**{block_info.get('name') or block_key}**  · {role_tag}"
+            st.markdown(label)
+
+            cols_per_row = 3
+            keys = list(extras.keys())
+            for row_start in range(0, len(keys), cols_per_row):
+                row_keys = keys[row_start : row_start + cols_per_row]
+                cols = st.columns(len(row_keys))
+                for col, extras_key in zip(cols, row_keys):
+                    with col:
+                        default_val = extras[extras_key]
+                        current_val = override_slot.get(extras_key, default_val)
+                        widget_key = (
+                            f"defx_{scenario_base}_{block_key}_{extras_key}"
+                        )
+                        pretty = extras_key.replace("_", " ").title()
+                        # bool subclasses int -> check bool first.
+                        if isinstance(default_val, bool):
+                            new_val = st.checkbox(
+                                pretty,
+                                value=bool(current_val),
+                                key=widget_key,
+                                help=f"Default: {default_val}",
+                            )
+                        elif isinstance(default_val, (int, float)):
+                            new_val = st.number_input(
+                                pretty,
+                                value=(
+                                    float(current_val)
+                                    if isinstance(default_val, float)
+                                    else int(current_val)
+                                ),
+                                format=(
+                                    "%.6g"
+                                    if isinstance(default_val, float)
+                                    else "%d"
+                                ),
+                                key=widget_key,
+                                help=f"Default: {default_val}",
+                            )
+                        else:
+                            new_val = st.text_input(
+                                pretty,
+                                value=str(current_val),
+                                key=widget_key,
+                                help=f"Default: {default_val!r}",
+                            )
+                        # Only persist a slot when the value actually
+                        # deviates from the shipped default — keeps the
+                        # override dict tight and lets the launcher
+                        # short-circuit to zero-copy when nothing changed.
+                        coerced = _coerce_extras_value(default_val, new_val)
+                        if coerced != default_val:
+                            override_slot[extras_key] = coerced
+                        else:
+                            override_slot.pop(extras_key, None)
+
+            # Prune empty per-block dicts so the launcher can detect a
+            # fully-reset override state with a truthiness check.
+            if not override_slot:
+                if is_market:
+                    edits.pop("__market__", None)
+                else:
+                    edits.pop(block_key, None)
+
+        # Persist back the pruned dict.
+        st.session_state[session_key] = edits
+
+
 def render_variant_choice() -> None:
     """Stage 2: choose Default or Customized (build your own market).
 
@@ -302,9 +478,30 @@ def render_variant_choice() -> None:
             shipped_rounds = int(info.get("total_rounds") or 0)
         except (TypeError, ValueError):
             shipped_rounds = 0
-        # Rounds are locked to the value shipped with the scenario —
-        # the user picks the market, not the schedule length.
-        st.metric("Rounds", shipped_rounds if shipped_rounds > 0 else "\u2014")
+        # Editable rounds — user can shrink for a quick preview or extend
+        # to observe long-run dynamics.  The value is persisted under
+        # ``variant_rounds_<base>`` and consumed by ``_launch_default_variant``
+        # (Default) and ``_write_customized_bundle`` (Customize). Leaving
+        # the value untouched preserves the shipped default (zero-copy
+        # launch path). Values <1 are clamped to 1 by the widget.
+        _rounds_key = f"variant_rounds_{selected_base}"
+        _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
+        _rounds_now = int(st.session_state.get(_rounds_key, _rounds_default))
+        edited_rounds = st.number_input(
+            "Rounds",
+            min_value=1,
+            max_value=100000,
+            value=_rounds_now,
+            step=1,
+            key=f"widget_{_rounds_key}",
+            help=(
+                f"Number of simulation rounds. Shipped default: "
+                f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}. "
+                "Change to produce a reproducible copy under "
+                "configs/CUSTOMIZED_SIMULATION/."
+            ),
+        )
+        st.session_state[_rounds_key] = int(edited_rounds)
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
@@ -781,6 +978,12 @@ def render_variant_choice() -> None:
 
         st.divider()
 
+        # Advanced parameter editor — lets users tweak market and per-agent
+        # extras before launching a Default engine.  Emits an overrides dict
+        # under session_state[default_extras_<base>] which
+        # ``_launch_default_variant`` picks up.
+        _render_default_param_editor(selected_base)
+
         # Engine buttons.
         variant_keys = groups.get(selected_base) or []
         st.markdown("**Select a decision engine to run**")
@@ -844,6 +1047,12 @@ def render_variant_choice() -> None:
                 )
             else:
                 st.caption("No topology data available for this scenario.")
+
+            # Advanced parameter editor — same widget as Experience mode,
+            # so users can tune the shipped roster before hitting a
+            # Default engine button (which produces a rounds/params-
+            # adjusted reproducible bundle under CUSTOMIZED_SIMULATION/).
+            _render_default_param_editor(selected_base)
 
             if not variant_keys:
                 st.info("No default variants available for this scenario.")
@@ -926,11 +1135,14 @@ def _initialize_bundle_on_entry(scenario_base: str) -> None:
 def _launch_default_variant(scenario_key: str) -> None:
     """Send the user to the workspace with a default variant.
 
-    If the user adjusted the round count on the variant_choice page, we
-    never mutate the shipped config: instead a reproducible copy is
-    generated under ``configs/CUSTOMIZED_SIMULATION/Default-...-rN`` and
-    that bundle is launched. Leaving rounds at the shipped default keeps
-    the current zero-copy behaviour.
+    Zero-copy fast path: if the user left both the round count and the
+    market/agent extras untouched, the shipped ``configs/<Scenario>/<Variant>/``
+    directory is launched directly.  Any deviation — an edited round count,
+    a market extras change, or a per-agent extras change — triggers
+    :func:`write_default_scenario_bundle` to produce a reproducible copy
+    under ``configs/CUSTOMIZED_SIMULATION/Default-<Scenario>-<Variant>-rN/``
+    with the requested overrides baked in.  The shipped YAML is never
+    mutated.
     """
     base = scenario_key.split("/", 1)[0]
     variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
@@ -943,24 +1155,49 @@ def _launch_default_variant(scenario_key: str) -> None:
         shipped_rounds = 0
     edited_rounds = st.session_state.get(f"variant_rounds_{base}")
 
-    launch_key = scenario_key
-    customized_id = None
-    if (
+    # Pick up any market/agent extras edits produced by the Default
+    # parameter editor (``_render_default_param_editor``).  Structure:
+    # ``{"__market__": {extras_key: value}, "<agent_key>": {...}}``.
+    default_extras = st.session_state.get(
+        _default_extras_session_key(base), {}
+    ) or {}
+    market_over = default_extras.get("__market__") or {}
+    agent_over = {
+        k: v
+        for k, v in default_extras.items()
+        if k != "__market__" and v
+    }
+
+    rounds_changed = (
         edited_rounds is not None
         and shipped_rounds > 0
         and int(edited_rounds) != shipped_rounds
-    ):
+    )
+    extras_changed = bool(market_over) or bool(agent_over)
+
+    launch_key = scenario_key
+    customized_id = None
+    if rounds_changed or extras_changed:
+        target_rounds = (
+            int(edited_rounds)
+            if edited_rounds is not None
+            else shipped_rounds
+        )
+        if target_rounds < 1:
+            target_rounds = shipped_rounds if shipped_rounds > 0 else 1
         try:
             result = write_default_scenario_bundle(
                 scenario_name=base,
                 variant=variant,
-                total_rounds=int(edited_rounds),
+                total_rounds=target_rounds,
                 project_root=PROJECT_ROOT,
+                market_extras_override=market_over or None,
+                agent_extras_overrides=agent_over or None,
             )
             launch_key = f"CUSTOMIZED_SIMULATION/{result.customized_id}"
             customized_id = result.customized_id
         except (FileNotFoundError, ValueError) as exc:
-            st.error(f"Could not apply the adjusted round count: {exc}")
+            st.error(f"Could not apply the adjusted parameters: {exc}")
             return
 
     st.session_state.selected_scenario = launch_key
@@ -1650,6 +1887,30 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
             "defaults will be used as-is."
         )
 
+    # ---- Instance count -------------------------------------------------
+    # Per-archetype num_instances lets the user spawn multiple copies of
+    # the same agent under distinct YAML block keys (deduplicated
+    # downstream via `_render_agent_block`).  Persisted under a top-level
+    # session key so it survives dialog closes and page reruns.
+    ninst_key = f"customized_num_instances_{agent_type}"
+    ninst_default = int(st.session_state.get(ninst_key, 1) or 1)
+    if ninst_default < 1:
+        ninst_default = 1
+    st.number_input(
+        "Instances",
+        min_value=1,
+        max_value=100,
+        value=ninst_default,
+        step=1,
+        key=ninst_key,
+        help=(
+            "How many independent copies of this agent to spawn. Each "
+            "instance receives its own identity and record path; they "
+            "share the same class, engine, and parameter values but act "
+            "independently. **Config key:** `num_instances`."
+        ),
+    )
+
     # ---- Per-parameter widgets -----------------------------------------
     persisted = (
         st.session_state.setdefault("customized_params", {})
@@ -1668,9 +1929,16 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
 
     # ---- Action buttons -------------------------------------------------
     st.divider()
-    btn_add, btn_reset, btn_close = st.columns([2, 1, 1])
+    already_in = bool(st.session_state.get(f"market_agent_{agent_type}", False))
+    if already_in:
+        # Present four buttons when the agent is already in the market:
+        # Update / Remove / Reset / Close.
+        btn_add, btn_rm, btn_reset, btn_close = st.columns([2, 2, 1, 1])
+    else:
+        # Three buttons when not yet added: Add / Reset / Close.
+        btn_add, btn_reset, btn_close = st.columns([3, 1, 1])
+        btn_rm = None
     with btn_add:
-        already_in = bool(st.session_state.get(f"market_agent_{agent_type}", False))
         primary_label = "Update in market" if already_in else "Add to market"
         if st.button(primary_label, type="primary", width="stretch",
                      key=f"customized_add_{agent_type}"):
@@ -1680,6 +1948,28 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
             save_state_from_session(project_root=PROJECT_ROOT)
             st.toast(f"{agent['display_name']} → market", icon="✅")
             st.rerun()
+    if btn_rm is not None:
+        with btn_rm:
+            if st.button(
+                "Remove from market",
+                width="stretch",
+                key=f"customized_remove_{agent_type}",
+                help=(
+                    "Uncheck this agent from the market roster. Its "
+                    "customized parameters are preserved in session state "
+                    "so re-adding it restores the last edits."
+                ),
+            ):
+                st.session_state[f"market_agent_{agent_type}"] = False
+                # Also strip it from the durable selection list so the
+                # sidebar preview and Launch button update immediately.
+                cur = list(st.session_state.get("selected_market_agents", []))
+                st.session_state.selected_market_agents = [
+                    t for t in cur if t != agent_type
+                ]
+                save_state_from_session(project_root=PROJECT_ROOT)
+                st.toast(f"{agent['display_name']} removed", icon="🗑️")
+                st.rerun()
     with btn_reset:
         if st.button("Reset", width="stretch",
                      key=f"customized_reset_{agent_type}"):
@@ -1687,6 +1977,8 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
             for sub_key in list(st.session_state.keys()):
                 if sub_key.startswith(f"customized_input_{agent_type}_{engine}_"):
                     del st.session_state[sub_key]
+            # Also reset the num_instances widget back to 1.
+            st.session_state[ninst_key] = 1
             st.rerun()
     with btn_close:
         if st.button("Close", width="stretch",
@@ -2132,7 +2424,11 @@ def _render_live_market_preview(
             "id": a["agent_type"],
             "name": a["display_name"],
             "theory": a.get("archetype", ""),
-            "instances": 1,
+            "instances": int(
+                st.session_state.get(
+                    f"customized_num_instances_{a['agent_type']}", 1
+                ) or 1
+            ),
             "role": "player",
         }
         for a in selected_agents
@@ -2225,16 +2521,46 @@ def render_customize() -> None:
         info = get_scenario_info(
             _scenario_probe_key(scenario_base, discover_scenario_groups())
         )
-        rounds = info.get("total_rounds", "—")
+        try:
+            shipped_rounds = int(info.get("total_rounds") or 0)
+        except (TypeError, ValueError):
+            shipped_rounds = 0
         feats = scenario_market_features(scenario_base)
         feats_text = ", ".join(sorted(feats)) if feats else "standard"
-        st.markdown(
-            f"<div class='scenario-confirm-chip' style='margin-top:14px'>"
-            f"🔒 {html.escape(scenario_display_name(scenario_base))} · "
-            f"{rounds} rounds · {html.escape(feats_text)}"
-            f"</div>",
-            unsafe_allow_html=True,
+
+        # Editable rounds — mirrors the widget on the variant_choice page
+        # so the user can also adjust the round count from inside the
+        # Customize flow.  Persisted under the same session key
+        # (``variant_rounds_<base>``) so ``_write_customized_bundle``
+        # picks it up unchanged.
+        _rounds_key = f"variant_rounds_{scenario_base}"
+        _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
+        _rounds_now = int(
+            st.session_state.get(_rounds_key, _rounds_default)
         )
+        chip_col, num_col = st.columns([3, 1])
+        with chip_col:
+            st.markdown(
+                f"<div class='scenario-confirm-chip' style='margin-top:14px'>"
+                f"🔒 {html.escape(scenario_display_name(scenario_base))} · "
+                f"{html.escape(feats_text)}"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+        with num_col:
+            edited_rounds = st.number_input(
+                "Rounds",
+                min_value=1,
+                max_value=100000,
+                value=_rounds_now,
+                step=1,
+                key=f"widget_customize_{_rounds_key}",
+                help=(
+                    f"Number of simulation rounds. Shipped default: "
+                    f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}."
+                ),
+            )
+            st.session_state[_rounds_key] = int(edited_rounds)
 
     # Pre-compute the Default preset targets. The selection snapshot
     # (selected_agents_now / selected_types_now) was already computed above,
@@ -2408,6 +2734,17 @@ def render_customize() -> None:
             else:
                 st.info("No editable market parameters found for this scenario.")
 
+    # --- Config preview: dry-run the bundle write to show the exact YAML
+    # the user is about to launch.  Uses the same code path as the actual
+    # Launch button so what they see is precisely what runs.  Rendered
+    # inside a collapsed expander so it stays out of the way but is a
+    # click away when the user wants to audit the config.
+    if selected_agents:
+        _render_config_preview(
+            selected_agents=selected_agents,
+            scenario_base=scenario_base,
+        )
+
     reset_col, launch_col = st.columns([1, 3])
     with reset_col:
         if st.button(
@@ -2429,13 +2766,18 @@ def render_customize() -> None:
             disabled=not selected or compat_blocker is not None,
             key="customize_launch",
         ):
-            save_state_from_session(project_root=PROJECT_ROOT)
             target = _write_customized_bundle(
                 selected_agents=selected_agents,
                 scenario_base=scenario_base,
             )
             if target is None:
                 return
+            # Persist AFTER _write_customized_bundle: that helper sweeps
+            # live widget state into ``customized_params`` and merges every
+            # unsaved dialog edit. Calling save_state_from_session here
+            # (instead of before) guarantees the on-disk state file mirrors
+            # exactly what was rendered into players.yml.
+            save_state_from_session(project_root=PROJECT_ROOT)
             _clear_query_agent()
             st.session_state.selected_scenario = target
             st.session_state.workflow_stage = "workspace"
@@ -2446,10 +2788,22 @@ def render_customize() -> None:
 def _render_market_chips(agents: list[dict[str, Any]]) -> None:
     chips = []
     for agent in agents:
+        ninst = int(
+            st.session_state.get(
+                f"customized_num_instances_{agent['agent_type']}", 1
+            ) or 1
+        )
+        badge = ""
+        if ninst > 1:
+            badge = (
+                f'<span style="margin-left:6px;padding:1px 6px;'
+                f'border-radius:8px;background:#2a5fa6;color:white;'
+                f'font-size:0.7rem;font-weight:600;">×{ninst}</span>'
+            )
         chips.append(
             '<span class="market-chip">'
             f'<img src="{agent["image_uri"]}" alt="">'
-            f'{html.escape(agent["display_name"])}'
+            f'{html.escape(agent["display_name"])}{badge}'
             "</span>"
         )
     st.markdown(
@@ -2583,6 +2937,258 @@ def _render_scenario_card(
             st.rerun()
 
 
+def _render_config_preview(
+    *,
+    selected_agents: list[dict[str, Any]],
+    scenario_base: str,
+) -> None:
+    """Show a read-only preview of the config that Launch will materialise.
+
+    Two-tier disclosure so it stays out of the way:
+
+    - **Roster summary** (always visible inside the expander) — one row
+      per selected agent listing archetype, engine, num_instances, and
+      the count of customized parameters.  This lets the user verify at
+      a glance that the checkbox toggles, engine picks, and instance
+      spinners match their intent before spending a launch on a wrong
+      config.
+    - **Generated `players.yml`** (button-gated) — renders the exact
+      YAML text that Launch would write.  Behind a button because
+      producing it requires running the config-writer against the on-
+      disk bundle, which we don't want to trigger on every rerun.
+    """
+    with st.expander("Preview generated config", expanded=False):
+        st.caption(
+            "Verify that the roster below matches what you intend to "
+            "launch.  Numbers reflect the current session state; the "
+            "Launch button uses this exact snapshot."
+        )
+        customized_params = st.session_state.get("customized_params") or {}
+        rows: list[dict[str, Any]] = []
+        for agent in selected_agents:
+            agent_type = agent["agent_type"]
+            engine = st.session_state.get(
+                f"market_engine_{agent_type}",
+                ALL_ENGINES[0],
+            )
+            ninst = int(
+                st.session_state.get(
+                    f"customized_num_instances_{agent_type}", 1
+                ) or 1
+            )
+            persisted = customized_params.get(agent_type, {}).get(engine, {}) or {}
+            # Count widgets that are ALSO in session state (unsaved edits).
+            widget_prefix = f"customized_input_{agent_type}_{engine}_"
+            live_widget_keys = {
+                k[len(widget_prefix):]
+                for k in st.session_state.keys()
+                if k.startswith(widget_prefix)
+            }
+            # Total customized symbols = union of persisted keys + live
+            # widget keys, minus reserved LLM sentinels (which we count
+            # separately as "prompts/hyperparams" so the user can tell
+            # handbook params apart from LLM overrides).
+            all_symbols = set(persisted.keys()) | live_widget_keys
+            handbook_syms = {
+                s for s in all_symbols if not s.startswith("__llm_")
+            }
+            llm_syms = {s for s in all_symbols if s.startswith("__llm_")}
+            rows.append({
+                "Agent": agent["display_name"],
+                "Archetype": agent_type,
+                "Engine": engine,
+                "Instances": ninst,
+                "Custom params": len(handbook_syms),
+                "LLM overrides": len(llm_syms),
+            })
+        if rows:
+            st.dataframe(rows, width="stretch", hide_index=True)
+        else:
+            st.info("No agents selected yet.")
+
+        # Rounds + market-extras summary.
+        rounds_now = int(
+            st.session_state.get(f"variant_rounds_{scenario_base}", 0) or 0
+        )
+        market_extras = st.session_state.get("customized_market_extras") or {}
+        summary_bits: list[str] = []
+        if rounds_now:
+            summary_bits.append(f"**Rounds:** {rounds_now}")
+        if market_extras:
+            summary_bits.append(
+                f"**Market overrides:** {len(market_extras)} key(s) — "
+                + ", ".join(f"`{k}={v}`" for k, v in market_extras.items())
+            )
+        if summary_bits:
+            st.markdown(" · ".join(summary_bits))
+
+        # Optional deep-dive: regenerate the YAML on demand.  Uses the
+        # same code path as Launch so the preview is an EXACT match for
+        # what will run.  Kept behind a button so opening the expander
+        # doesn't touch disk.
+        if st.button(
+            "Regenerate & show players.yml",
+            key="customize_preview_regen",
+            help=(
+                "Run the bundle writer against the current session "
+                "state and display the resulting YAML.  Safe: rewrites "
+                "the bundle files that Launch would rewrite anyway."
+            ),
+        ):
+            bundle_name = st.session_state.get("customized_bundle_name", "")
+            if not bundle_name:
+                st.warning(
+                    "Bundle folder has not been initialized yet. "
+                    "Select at least one agent and click Launch once "
+                    "to create it, or re-enter the Customize flow."
+                )
+                return
+            # Same selection-building logic as _write_customized_bundle
+            # so preview = reality.  We do NOT call the full launcher
+            # here to avoid the side-effect of switching workflow_stage.
+            try:
+                _preview_write_bundle(
+                    selected_agents=selected_agents,
+                    scenario_base=scenario_base,
+                    bundle_name=bundle_name,
+                )
+            except Exception as exc:
+                st.error(f"Preview generation failed: {exc}")
+                return
+            players_path = (
+                PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
+                / bundle_name / "players.yml"
+            )
+            sim_path = (
+                PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
+                / bundle_name / "simulation.yml"
+            )
+            if sim_path.exists():
+                st.markdown("**simulation.yml**")
+                st.code(sim_path.read_text(encoding="utf-8"), language="yaml")
+            if players_path.exists():
+                st.markdown("**players.yml**")
+                st.code(
+                    players_path.read_text(encoding="utf-8"),
+                    language="yaml",
+                )
+            else:
+                st.warning(f"Expected players.yml at {players_path} but none found.")
+
+
+def _preview_write_bundle(
+    *,
+    selected_agents: list[dict[str, Any]],
+    scenario_base: str,
+    bundle_name: str,
+) -> None:
+    """Regenerate the customized bundle files on disk without navigating.
+
+    Extracted from :func:`_write_customized_bundle` and used by the
+    Preview expander.  It intentionally does NOT flip
+    ``workflow_stage`` or ``selected_scenario`` so the user stays on
+    the Customize page.  Any exception bubbles up to the caller.
+    """
+    selections = _build_selections_from_session(
+        selected_agents=selected_agents, persist_merge=True,
+    )
+    edited_rounds = st.session_state.get(f"variant_rounds_{scenario_base}")
+    market_extras = st.session_state.get("customized_market_extras") or None
+    apply_customized_modifications(
+        bundle_name=bundle_name,
+        selections=selections,
+        scenario_name=scenario_base,
+        project_root=PROJECT_ROOT,
+        total_rounds=(
+            int(edited_rounds) if edited_rounds is not None else None
+        ),
+        market_extras_override=market_extras,
+    )
+
+
+def _build_selections_from_session(
+    *,
+    selected_agents: list[dict[str, Any]],
+    persist_merge: bool = True,
+) -> list[CustomizedAgentSelection]:
+    """Collect ``CustomizedAgentSelection`` list from live session state.
+
+    Central helper used by both the Preview and Launch paths so the widget
+    sweep policy is defined in exactly one place. For every selected
+    agent it:
+
+      * resolves the engine from ``market_engine_{type}`` (defaulting to
+        the first entry in ``ALL_ENGINES``);
+      * sweeps every live widget under
+        ``customized_input_{type}_{engine}_*`` and the ``__llm_*__``
+        sentinels, so dialog edits are captured even when the user never
+        clicked "Add to market";
+      * merges the sweep on top of ``customized_params[type][engine]``,
+        with widget values winning ties;
+      * reads the per-agent instance count from
+        ``customized_num_instances_{type}`` (min = 1);
+      * optionally writes the merged params back into
+        ``customized_params`` so subsequent dialog opens and the on-disk
+        ``selection_state.json`` see the same values.
+    """
+    customized_params = st.session_state.get("customized_params") or {}
+    selections: list[CustomizedAgentSelection] = []
+    for agent in selected_agents:
+        agent_type = agent["agent_type"]
+        engine = st.session_state.get(
+            f"market_engine_{agent_type}",
+            ALL_ENGINES[0],
+        )
+        widget_snapshot: dict[str, Any] = {}
+        param_prefix = f"customized_input_{agent_type}_{engine}_"
+        for wkey in list(st.session_state.keys()):
+            if wkey.startswith(param_prefix):
+                symbol = wkey[len(param_prefix):]
+                widget_snapshot[symbol] = st.session_state[wkey]
+        _llm_widget_map = {
+            f"customized_llm_lm_{agent_type}_{engine}": "__llm_lm_name__",
+            f"customized_llm_temp_{agent_type}_{engine}": "__llm_temperature__",
+            f"customized_llm_tokens_{agent_type}_{engine}": "__llm_max_tokens__",
+            f"customized_llm_sysprompt_{agent_type}_{engine}": "__llm_system_prompt__",
+            f"customized_llm_userprompt_{agent_type}_{engine}": "__llm_user_prompt__",
+        }
+        for wkey, sentinel in _llm_widget_map.items():
+            if wkey in st.session_state:
+                widget_snapshot[sentinel] = st.session_state[wkey]
+
+        persisted_params = (
+            customized_params.get(agent_type, {}).get(engine, {}) or {}
+        )
+        merged_params = dict(persisted_params)
+        merged_params.update(widget_snapshot)
+
+        if persist_merge:
+            customized_params.setdefault(agent_type, {})[engine] = merged_params
+            st.session_state["customized_params"] = customized_params
+
+        try:
+            ninst = int(
+                st.session_state.get(
+                    f"customized_num_instances_{agent_type}", 1
+                ) or 1
+            )
+        except (TypeError, ValueError):
+            ninst = 1
+        if ninst < 1:
+            ninst = 1
+
+        selections.append(
+            CustomizedAgentSelection(
+                archetype=agent_type,
+                display_name=agent["display_name"],
+                engine=engine,
+                params=dict(merged_params),
+                num_instances=ninst,
+            )
+        )
+    return selections
+
+
 def _write_customized_bundle(
     *,
     selected_agents: list[dict[str, Any]],
@@ -2622,24 +3228,9 @@ def _write_customized_bundle(
         )
         return None
 
-    customized_params = st.session_state.get("customized_params") or {}
-    selections: list[CustomizedAgentSelection] = []
-    for agent in selected_agents:
-        agent_type = agent["agent_type"]
-        engine = st.session_state.get(
-            f"market_engine_{agent_type}",
-            ALL_ENGINES[0],
-        )
-        params = customized_params.get(agent_type, {}).get(engine, {}) or {}
-        selections.append(
-            CustomizedAgentSelection(
-                archetype=agent_type,
-                display_name=agent["display_name"],
-                engine=engine,
-                params=dict(params),
-                num_instances=1,
-            )
-        )
+    selections = _build_selections_from_session(
+        selected_agents=selected_agents, persist_merge=True,
+    )
 
     try:
         # Carry any user-adjusted round count from the variant_choice page

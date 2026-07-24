@@ -39,7 +39,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -76,14 +76,8 @@ class RulePassiveFollower(CanonicalRulePlayer):
         hold = InvestorOrder.hold(
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
-        majority_action = state.raw.get("majority_action")
-        majority_fraction = state.raw.get("majority_fraction")
-        if majority_action is None or majority_fraction is None:
-            return hold
-        try:
-            majority_fraction = float(majority_fraction)
-        except (TypeError, ValueError):
-            return hold
+        majority_action = state.raw_require("majority_action", cast=str)
+        majority_fraction = state.raw_require("majority_fraction", cast=float)
 
         if majority_fraction <= 0.5 + consensus_th:
             return hold

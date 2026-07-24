@@ -34,7 +34,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -67,7 +67,7 @@ class RuleForcedSeller(CanonicalRulePlayer):
         if state.position <= 0:
             return hold
 
-        current_margin = float(state.raw.get("current_margin", math.nan))
+        current_margin = state.raw_require("current_margin", cast=float)
         if math.isnan(current_margin) or current_margin >= maint or maint <= 0:
             return hold
 

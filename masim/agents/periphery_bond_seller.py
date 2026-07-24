@@ -44,7 +44,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -82,8 +82,8 @@ class RulePeripheryBondSeller(CanonicalRulePlayer):
         if state.price <= 0:
             return hold
 
-        spread = float(state.raw.get("spread", 0.0) or 0.0)
-        contagion = float(state.raw.get("contagion_signal", 0.0) or 0.0)
+        spread = state.raw_require("spread", cast=float)
+        contagion = state.raw_require("contagion_signal", cast=float)
         cw = self.state.custom_state["contagion_weight"]
         eff_spread = spread + cw * contagion
 

@@ -56,7 +56,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -88,8 +88,8 @@ class RuleOpinionFactChecker(CanonicalRulePlayer):
         correction_threshold = cs["correction_threshold"]
         base_size = cs["base_size"]
 
-        env_belief = float(state.raw.get("env_belief", 0.5))
-        truth = float(state.raw.get("truth", 0.5))
+        env_belief = state.raw_require("env_belief", cast=float)
+        truth = state.raw_require("truth", cast=float)
 
         deviation = env_belief - truth
 

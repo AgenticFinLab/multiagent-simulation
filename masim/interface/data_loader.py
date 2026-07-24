@@ -1,5 +1,16 @@
 """Load completed simulation data from EXPERIMENT/ for replay in the Web UI.
 
+The read-model dataclasses defined here (:class:`ReplayAgentAction`,
+:class:`ReplayMarketBroadcast`, :class:`RoundData`) are *log-replay
+view-models* — they parse persisted simulation logs for post-hoc
+inspection. They are NOT part of the runtime format contract, which lives
+in :mod:`masim.format`. The classes were renamed with ``Replay`` prefixes
+on 2026-07-24 to eliminate a name collision with
+:class:`masim.format.MarketBroadcast` and to make it clear that the
+runtime broadcast contract is the source of truth. Action strings are
+normalised to the canonical lowercase enum
+(:data:`masim.format.INVESTOR_ORDER_ACTION_VALUES`).
+
 Data layout (produced by the simulator):
   EXPERIMENT/{scenario}/
     communication/
@@ -30,17 +41,26 @@ from typing import Any, Dict, List, Optional
 # Import path helper for nested scenario support
 from masim.interface.config_loader import _experiment_path
 
+# Canonical action enum — used to normalise log-derived action_str
+from masim.format import BUY, SELL, HOLD
+
 logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Data structures
+# Data structures — LOG-REPLAY VIEW MODELS
+# (Runtime contracts live in masim.format; do NOT use these at runtime.)
 # ---------------------------------------------------------------------------
 
 
 @dataclass
-class AgentAction:
-    """Decoded action sent from an investor to the market."""
+class ReplayAgentAction:
+    """Decoded action sent from an investor to the market (log-replay view).
+
+    This is a lossy view of a persisted log entry, not the canonical
+    :class:`masim.format.InvestorOrder`. The ``action_str`` property returns
+    the canonical lowercase enum from :data:`masim.format.INVESTOR_ORDER_ACTION_VALUES`.
+    """
 
     round_num: int
     agent_id: str
@@ -48,15 +68,24 @@ class AgentAction:
 
     @property
     def action_str(self) -> str:
-        """Human-readable action label derived from content."""
+        """Human-readable action label derived from content.
+
+        Returns one of the canonical enum values ``buy``, ``sell``, ``hold``.
+        We accept both the current ``stock_qty`` field name and the legacy
+        ``quantity`` field name for backward-compatibility with older logs;
+        the log-source is a historical artefact, not a runtime contract,
+        so a missing quantity is interpreted as ``hold`` — this is the
+        one place where a defensive fallback is legitimate because we are
+        parsing a fixed on-disk file, not making a runtime decision.
+        """
         qty = self.content.get("stock_qty", self.content.get("quantity", None))
         if qty is None:
-            return "HOLD"
+            return HOLD
         if qty > 0:
-            return "BUY"
+            return BUY
         elif qty < 0:
-            return "SELL"
-        return "HOLD"
+            return SELL
+        return HOLD
 
     @property
     def quantity(self) -> float:
@@ -81,8 +110,14 @@ class AgentAction:
 
 
 @dataclass
-class MarketBroadcast:
-    """Price broadcast from the market to investors."""
+class ReplayMarketBroadcast:
+    """Price broadcast from the market to investors (log-replay view).
+
+    This is a lossy view of a persisted broadcast, NOT the canonical
+    :class:`masim.format.MarketBroadcast`. It carries only the fields the
+    UI needs for a stock-scenario replay; for the full authoritative
+    broadcast, load the raw payload via the format layer instead.
+    """
 
     round_num: int
     stock_price: Optional[float] = None
@@ -91,7 +126,9 @@ class MarketBroadcast:
     fundamental: Optional[float] = None
 
     @classmethod
-    def from_content(cls, round_num: int, content: Dict[str, Any]) -> "MarketBroadcast":
+    def from_content(
+        cls, round_num: int, content: Dict[str, Any]
+    ) -> "ReplayMarketBroadcast":
         return cls(
             round_num=round_num,
             stock_price=content.get("stock_price", content.get("price")),
@@ -107,8 +144,8 @@ class RoundData:
 
     round_num: int
     execution_levels: List[List[str]] = field(default_factory=list)
-    market_broadcast: Optional[MarketBroadcast] = None
-    agent_actions: List[AgentAction] = field(default_factory=list)
+    market_broadcast: Optional[ReplayMarketBroadcast] = None
+    agent_actions: List[ReplayAgentAction] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -174,8 +211,8 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
     #    Key message types:
     #      market → investor  : market_price broadcast
     #      investor → market  : action/order
-    market_broadcasts: Dict[int, MarketBroadcast] = {}
-    agent_actions: Dict[int, List[AgentAction]] = {}
+    market_broadcasts: Dict[int, ReplayMarketBroadcast] = {}
+    agent_actions: Dict[int, List[ReplayAgentAction]] = {}
 
     comm_dir = base / "communication"
     if comm_dir.is_dir():
@@ -204,13 +241,13 @@ def load_rounds(scenario_name: str) -> List[RoundData]:
                     if sender == "market" and content_type == "market_price":
                         # Only store the first broadcast per round (all are identical)
                         if round_num not in market_broadcasts:
-                            market_broadcasts[round_num] = MarketBroadcast.from_content(
+                            market_broadcasts[round_num] = ReplayMarketBroadcast.from_content(
                                 round_num, content
                             )
 
                     elif recipient == "market" and sender != "market":
                         # Investor → market action
-                        action = AgentAction(
+                        action = ReplayAgentAction(
                             round_num=round_num,
                             agent_id=sender,
                             content=content,

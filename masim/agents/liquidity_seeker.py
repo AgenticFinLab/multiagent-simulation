@@ -39,7 +39,7 @@ import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -72,11 +72,11 @@ class RuleLiquiditySeeker(CanonicalRulePlayer):
             price=state.price, investor=self.identity, strategy=self.STRATEGY
         )
 
-        liquidity_raw = state.raw.get("liquidity")
-        if liquidity_raw is None or base <= 0:
+        liquidity_val = state.raw_require("liquidity", cast=float)
+        if base <= 0:
             adjustment = 1.0
         else:
-            adjustment = min(1.0, float(liquidity_raw) / base)
+            adjustment = min(1.0, liquidity_val / base)
 
         target_raw = random.gauss(0.0, sigma)
         target_scaled = target_raw * adjustment

@@ -596,24 +596,37 @@ def write_default_scenario_bundle(
     variant: str,
     total_rounds: int,
     project_root: Path,
+    market_extras_override: Optional[dict[str, Any]] = None,
+    agent_extras_overrides: Optional[dict[str, dict[str, Any]]] = None,
 ) -> CustomizedBundleResult:
-    """Materialise a rounds-adjusted copy of a shipped scenario/variant.
+    """Materialise a rounds/params-adjusted copy of a shipped scenario/variant.
 
     Unlike :func:`write_customized_bundle` (which rebuilds the roster from
     the user's agent picks), this copies the shipped ``{scenario}/{variant}``
-    config *verbatim* and only overrides ``total_rounds``. The copy lives
-    under ``configs/CUSTOMIZED_SIMULATION/Default-{scenario}-{variant}-r{N}``
-    so the shipped YAML is never mutated and the run stays reproducible.
+    config *verbatim* and lets the caller override ``total_rounds``, the
+    market coordinator's ``extras`` block, and per-agent ``extras`` blocks.
+    The copy lives under
+    ``configs/CUSTOMIZED_SIMULATION/Default-{scenario}-{variant}-r{N}`` so the
+    shipped YAML is never mutated and the run stays reproducible.
 
-    The folder name is deterministic: re-running the same scenario/variant
-    at the same round count reuses (overwrites) the same bundle, so no
-    duplicate folders accumulate.
+    The folder name is deterministic in ``(scenario, variant, N)``: the same
+    triple always overwrites the same bundle, so no duplicate folders
+    accumulate. When ``market_extras_override`` or ``agent_extras_overrides``
+    is supplied the players.yml inside that folder is rewritten in-place to
+    reflect the edited values (still using the shipped roster).
 
     Args:
         scenario_name: scenario base name (e.g. ``"AssetBubble"``).
         variant: engine variant folder (e.g. ``"Rule"``).
         total_rounds: the user-adjusted round count to bake in.
         project_root: repo root (parent of ``configs/`` and ``examples/``).
+        market_extras_override: optional ``{extras_key: new_value}`` dict for
+            the market coordinator block (top-level key in players.yml).
+        agent_extras_overrides: optional
+            ``{agent_block_key: {extras_key: new_value}}`` dict. Each
+            ``agent_block_key`` MUST match a top-level key already present
+            in players.yml; unknown keys are silently ignored to keep the
+            call resilient to Streamlit widget-state churn.
 
     Returns:
         :class:`CustomizedBundleResult` with absolute paths of the copied
@@ -643,11 +656,20 @@ def write_default_scenario_bundle(
 
     # Copy every YAML verbatim; retarget record paths so this run writes
     # under its own EXPERIMENT subtree, and bake the new round count into
-    # simulation.yml only.
+    # simulation.yml only. players.yml gets an extra pass to patch any
+    # user-provided extras overrides.
     for yml in sorted(base_path.glob("*.yml")):
         text = _retarget_record_paths(yml.read_text(encoding="utf-8"), cid)
         if yml.name == "simulation.yml":
             text = _set_total_rounds(text, int(total_rounds))
+        if yml.name == "players.yml" and (
+            market_extras_override or agent_extras_overrides
+        ):
+            text = _apply_players_extras_overrides(
+                text,
+                market_extras_override=market_extras_override or {},
+                agent_extras_overrides=agent_extras_overrides or {},
+            )
         (config_dir / yml.name).write_text(text, encoding="utf-8")
 
     def _out(name: str) -> Path:
@@ -760,6 +782,148 @@ def extract_market_extras(
     # Filter out non-editable infrastructure keys.
     _INFRA_KEYS = {"record_path", "custom_state_hot_limit"}
     return {k: v for k, v in extras.items() if k not in _INFRA_KEYS}
+
+
+# Infrastructure keys hidden from user-facing extras editors.  These are
+# owned by the runner (record path, custom-state hot limit) rather than by
+# the agent's behavioural parameterisation, so surfacing them would only
+# encourage users to shoot themselves in the foot.
+_INFRA_EXTRAS_KEYS = frozenset(
+    {"record_path", "custom_state_hot_limit"}
+)
+
+
+def extract_default_players(
+    *,
+    scenario_name: str,
+    variant: str,
+    project_root: Path,
+) -> dict[str, dict[str, Any]]:
+    """Read every top-level block from a shipped ``players.yml`` file.
+
+    Returns a mapping ``{block_key: {"name", "class", "num_instances",
+    "role", "extras": {...}}}`` covering both the market coordinator block
+    (first top-level key) and each investor block that follows. The
+    ``extras`` sub-dict strips infrastructure-only keys (``record_path``,
+    ``custom_state_hot_limit``) that are managed by the runner rather than
+    the user. Returns an empty dict when the scenario has no shipped
+    players.yml for this variant (defensive; also lets the UI hide the
+    editor cleanly instead of crashing).
+
+    Used by the *Default* section of the Streamlit interface to build the
+    agent-parameter editor panel: every listed extras key becomes a
+    ``st.number_input`` (numeric values) or ``st.text_input`` (strings)
+    with an associated session-state override slot.
+    """
+    project_root = Path(project_root).resolve()
+    players_path = project_root / "configs" / scenario_name / variant / "players.yml"
+    if not players_path.exists():
+        return {}
+
+    import yaml as _yaml
+
+    class _IncludeLoader(_yaml.SafeLoader):
+        pass
+
+    _IncludeLoader.add_constructor(
+        "!include",
+        lambda loader, node: loader.construct_scalar(node),
+    )
+
+    try:
+        data = _yaml.load(
+            players_path.read_text(encoding="utf-8"), Loader=_IncludeLoader
+        )
+    except _yaml.YAMLError:
+        return {}
+
+    if not isinstance(data, dict):
+        return {}
+
+    out: dict[str, dict[str, Any]] = {}
+    for key, block in data.items():
+        if not isinstance(block, dict):
+            continue
+        cfg = block.get("config") or {}
+        extras_raw = cfg.get("extras") or {}
+        extras = {
+            k: v
+            for k, v in extras_raw.items()
+            if k not in _INFRA_EXTRAS_KEYS
+        }
+        out[key] = {
+            "name": block.get("name", key),
+            "class": block.get("class", ""),
+            "num_instances": block.get("num_instances", 1),
+            "role": (cfg.get("role") or "").strip(),
+            "extras": extras,
+        }
+    return out
+
+
+def _apply_players_extras_overrides(
+    text: str,
+    *,
+    market_extras_override: dict[str, Any],
+    agent_extras_overrides: dict[str, dict[str, Any]],
+) -> str:
+    """Rewrite a shipped ``players.yml`` text with per-block extras overrides.
+
+    Reuses :func:`_apply_market_extras_override` to patch individual lines
+    inside each top-level block while preserving all formatting, comments,
+    and !include directives.  The first top-level key is treated as the
+    market coordinator (matching :func:`_extract_market_block`); every
+    other top-level key is matched by name against
+    ``agent_extras_overrides``.  Unknown keys in either override dict are
+    silently ignored so stale Streamlit widget state cannot corrupt the
+    output.
+    """
+    # First top-level key — market coordinator — is patched via the market
+    # override dict.
+    market_key = _first_top_level_key(text) or ""
+
+    # Discover every top-level key so we can slice each block, patch it,
+    # and reassemble.  The market block is the first slice; investor
+    # blocks follow.
+    top_keys: list[str] = []
+    for raw in text.splitlines():
+        if not raw or raw.startswith("#") or raw[0].isspace():
+            continue
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:", raw)
+        if m:
+            top_keys.append(m.group(1))
+
+    if not top_keys:
+        return text
+
+    # Header preserved verbatim: everything before the first top-level
+    # key stays as-is (including shebang/blank lines/comments).
+    header_end: int = 0
+    for i, raw in enumerate(text.splitlines()):
+        if (
+            raw
+            and not raw.startswith("#")
+            and not raw[0].isspace()
+            and re.match(r"^[A-Za-z_][A-Za-z0-9_]*\s*:", raw)
+        ):
+            header_end = i
+            break
+    header_lines = text.splitlines()[:header_end]
+
+    patched_blocks: list[str] = []
+    for key in top_keys:
+        block = _slice_top_level_block(text, key).rstrip("\n")
+        overrides: dict[str, Any] = {}
+        if key == market_key:
+            overrides = dict(market_extras_override or {})
+        else:
+            overrides = dict((agent_extras_overrides or {}).get(key) or {})
+        if overrides:
+            block = _apply_market_extras_override(block, overrides).rstrip("\n")
+        patched_blocks.append(block + "\n")
+
+    body = "\n".join(patched_blocks)
+    return ("\n".join(header_lines) + ("\n" if header_lines else "") + body)
 
 
 # ----------------------------------------------------------------------

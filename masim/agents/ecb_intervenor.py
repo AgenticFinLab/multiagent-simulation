@@ -37,7 +37,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -76,7 +76,7 @@ class RuleEcbIntervenor(CanonicalRulePlayer):
         if capacity <= 0 or state.price <= 0:
             return hold
 
-        spread = float(state.raw.get("spread", 0.0))
+        spread = state.raw_require("spread", cast=float)
         if spread <= spread_threshold:
             return hold
 

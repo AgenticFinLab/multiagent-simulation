@@ -278,7 +278,7 @@ def _render_investor_activity(round_data, scenario_name: str):
         scenario_name: Active scenario key (to resolve the full roster).
     """
     from masim.interface.config_loader import get_agent_roster
-    from masim.interface.data_loader import AgentAction
+    from masim.interface.data_loader import ReplayAgentAction
 
     rnd = round_data.round_num
     st.subheader(f"📈 Investor Activity — Round {rnd}")
@@ -312,7 +312,7 @@ def _render_investor_activity(round_data, scenario_name: str):
     for member in roster:
         act = action_by_id.get(member["id"])
         if act is None:
-            act = AgentAction(round_num=rnd, agent_id=member["id"], content={})
+            act = ReplayAgentAction(round_num=rnd, agent_id=member["id"], content={})
         display_actions.append(act)
     # Safety: include any traded agent not present in the config roster.
     for a in round_data.agent_actions:
@@ -674,9 +674,9 @@ def _render_action_card(act):
     """Render a compact dark-themed action card for one agent.
 
     Args:
-        act: AgentAction dataclass from data_loader.
+        act: ReplayAgentAction dataclass from data_loader.
     """
-    action_str = act.action_str
+    action_str = act.action_str  # canonical lowercase from masim.format
     qty = act.quantity
     price = act.price
     strategy = act.strategy
@@ -684,8 +684,10 @@ def _render_action_card(act):
     analysis = act.analysis
     reasoning = act.reasoning
 
-    color_map = {"BUY": "#28a745", "SELL": "#dc3545", "HOLD": "#6c757d"}
+    # Canonical enum from masim.format is lowercase; keep upper-case display.
+    color_map = {"buy": "#28a745", "sell": "#dc3545", "hold": "#6c757d"}
     color = color_map.get(action_str, "#6c757d")
+    display_action_str = action_str.upper()
     qty_str = f"+{qty:.1f}" if qty > 0 else f"{qty:.1f}"
     price_str = f"${price:.4f}" if price else "—"
     strategy_html = (
@@ -765,7 +767,7 @@ def _render_action_card(act):
       background:{color};color:#fff;
       padding:2px 10px;border-radius:10px;
       font-size:11px;font-weight:700;
-    ">{action_str}</span>
+    ">{display_action_str}</span>
   </div>
   <div style="margin-top:6px;font-size:12px;color:#9ba8bb;">
     Qty: <b style='color:#e0e6f0;'>{qty_str}</b>
@@ -1049,8 +1051,8 @@ def _start_simulation(scenario_name: str, info: dict):
 
 async def _run_simulation_async():
     """Run simulation asynchronously and collect rounds into replay_rounds."""
-    from masim.interface.data_loader import AgentAction as DLAction
-    from masim.interface.data_loader import MarketBroadcast, RoundData
+    from masim.interface.data_loader import ReplayAgentAction as DLAction
+    from masim.interface.data_loader import ReplayMarketBroadcast, RoundData
 
     runner = st.session_state.runner
     if not runner:
@@ -1086,7 +1088,7 @@ async def _run_simulation_async():
                     stock_return = None
                     if price is not None and prev_price not in (None, 0):
                         stock_return = (price - prev_price) / prev_price
-                    mb = MarketBroadcast(
+                    mb = ReplayMarketBroadcast(
                         round_num=update.round_num,
                         stock_price=price,
                         prev_stock_price=prev_price,

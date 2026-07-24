@@ -39,7 +39,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -76,9 +76,7 @@ class RuleGreaterFoolSpeculator(CanonicalRulePlayer):
             return hold
 
         overvaluation_ratio = state.price / fundamental
-        momentum_signal = float(
-            state.raw.get("momentum_signal", state.price_change)
-        )
+        momentum_signal = state.raw_require("momentum_signal", cast=float)
 
         # Emergency exit dominates.
         if (

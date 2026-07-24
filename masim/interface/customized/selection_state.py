@@ -6,14 +6,16 @@ inside the bundle's *configs* directory. On re-entry (e.g. after a page
 refresh or app restart), the state can be loaded back into
 ``st.session_state`` to restore the UI exactly where the user left off.
 
-Schema (v1):
+Schema (v2 — backward-compatible with v1):
     {
-        "version": 1,
+        "version": 2,
         "scenario": "<ScenarioBase>",
         "bundle_name": "<slug-id-scenario>",
         "updated_at": "<ISO-8601>",
         "selected_agents": ["AgentType1", "AgentType2", ...],
         "engines": {"AgentType1": "LLM", "AgentType2": "Rule", ...},
+        "num_instances": {"AgentType1": 3, "AgentType2": 1, ...},
+        "total_rounds": 25,
         "params": {
             "AgentType1": {
                 "LLM": {"symbol1": value1, "symbol2": value2, ...}
@@ -25,6 +27,12 @@ Schema (v1):
             ...
         }
     }
+
+The v2 additions ``num_instances`` (per-agent instance counts) and
+``total_rounds`` (variant-rounds widget) ensure that the on-disk state
+truly captures what the user configured. Without them, a page refresh
+would silently reset instance counts to 1 and rounds to the scenario
+default even though the shipped players.yml recorded the correct values.
 """
 
 from __future__ import annotations
@@ -38,7 +46,7 @@ from typing import Any, Optional
 logger = logging.getLogger(__name__)
 
 _STATE_FILENAME = "selection_state.json"
-_SCHEMA_VERSION = 1
+_SCHEMA_VERSION = 2
 
 
 # ----------------------------------------------------------------------
@@ -55,6 +63,8 @@ def save_selection_state(
     engines: dict[str, str],
     params: dict[str, dict[str, dict[str, Any]]],
     market_extras: Optional[dict[str, Any]] = None,
+    num_instances: Optional[dict[str, int]] = None,
+    total_rounds: Optional[int] = None,
 ) -> Path:
     """Persist the current UI selection state to disk.
 
@@ -66,6 +76,10 @@ def save_selection_state(
         engines: mapping of agent_type → chosen engine string.
         params: nested dict: ``{agent_type: {engine: {symbol: value}}}``.
         market_extras: optional market parameter overrides.
+        num_instances: optional mapping of agent_type → integer instance
+            count. Values ≤0 or missing entries default to 1 on restore.
+        total_rounds: optional edited round count from the variant-rounds
+            widget. When ``None`` the scenario's shipped default applies.
 
     Returns:
         Path to the written JSON file.
@@ -90,6 +104,28 @@ def save_selection_state(
     }
     if market_extras:
         payload["market_extras"] = dict(market_extras)
+    if num_instances:
+        # Persist only positive integer overrides — silently drop entries
+        # for agents that are no longer selected so the state file stays
+        # tightly aligned with ``selected_agents``.
+        cleaned_instances: dict[str, int] = {}
+        for agent_type in selected_agents:
+            raw = num_instances.get(agent_type)
+            if raw is None:
+                continue
+            try:
+                value = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if value >= 1:
+                cleaned_instances[agent_type] = value
+        if cleaned_instances:
+            payload["num_instances"] = cleaned_instances
+    if total_rounds is not None:
+        try:
+            payload["total_rounds"] = int(total_rounds)
+        except (TypeError, ValueError):
+            pass
 
     out_path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False, default=str),
@@ -193,6 +229,33 @@ def save_state_from_session(
         engine_key = f"market_engine_{agent_type}"
         engines[agent_type] = st.session_state.get(engine_key, "Rule")
 
+    # Collect per-agent instance counts (spinner widget). Missing / non-
+    # numeric values simply fall back to 1 on restore, so we don't need to
+    # emit a value when the widget hasn't been touched.
+    num_instances: dict[str, int] = {}
+    for agent_type in selected_agents:
+        raw = st.session_state.get(f"customized_num_instances_{agent_type}")
+        if raw is None:
+            continue
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            continue
+        if value >= 1:
+            num_instances[agent_type] = value
+
+    # Collect the (possibly edited) round count driving this run. The
+    # variant-rounds widget is keyed by scenario base — pull that first.
+    total_rounds_val: Optional[int] = None
+    rounds_raw = st.session_state.get(f"variant_rounds_{scenario_name}")
+    if rounds_raw is None:
+        rounds_raw = st.session_state.get("customized_total_rounds")
+    if rounds_raw is not None:
+        try:
+            total_rounds_val = int(rounds_raw)
+        except (TypeError, ValueError):
+            total_rounds_val = None
+
     # Collect customized params (nested dict from the customize dialog).
     params: dict[str, dict[str, dict[str, Any]]] = dict(
         st.session_state.get("customized_params", {})
@@ -211,6 +274,8 @@ def save_state_from_session(
         engines=engines,
         params=params,
         market_extras=market_extras,
+        num_instances=num_instances,
+        total_rounds=total_rounds_val,
     )
 
 
@@ -237,7 +302,9 @@ def restore_state_to_session(
     # ── Clear stale per-agent keys before restoring ──────────────────────
     stale_keys = [
         k for k in list(st.session_state.keys())
-        if k.startswith("market_agent_") or k.startswith("market_engine_")
+        if k.startswith("market_agent_")
+        or k.startswith("market_engine_")
+        or k.startswith("customized_num_instances_")
     ]
     for k in stale_keys:
         del st.session_state[k]
@@ -254,6 +321,34 @@ def restore_state_to_session(
     engines = data.get("engines", {})
     for agent_type, engine in engines.items():
         st.session_state[f"market_engine_{agent_type}"] = engine
+
+    # Restore per-agent instance counts (v2+). Absent entries default to 1
+    # so old v1 state files simply behave as they did before.
+    num_instances = data.get("num_instances", {}) or {}
+    for agent_type in selected_agents:
+        raw = num_instances.get(agent_type, 1)
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            value = 1
+        if value < 1:
+            value = 1
+        st.session_state[f"customized_num_instances_{agent_type}"] = value
+
+    # Restore the edited round count (v2+). We seed both the scenario-
+    # keyed widget key AND the generic mirror, so whichever the customize
+    # page reads on the next rerun will see the same value.
+    total_rounds_val = data.get("total_rounds")
+    scenario_name = data.get("scenario") or ""
+    if total_rounds_val is not None:
+        try:
+            rounds_int = int(total_rounds_val)
+        except (TypeError, ValueError):
+            rounds_int = None
+        if rounds_int is not None and rounds_int >= 1:
+            if scenario_name:
+                st.session_state[f"variant_rounds_{scenario_name}"] = rounds_int
+            st.session_state["customized_total_rounds"] = rounds_int
 
     # Restore customized params.
     params = data.get("params", {})

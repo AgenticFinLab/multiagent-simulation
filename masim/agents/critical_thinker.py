@@ -46,7 +46,7 @@ import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
-from masim.agents._state import StandardMarketState
+from masim.format.state import StandardMarketState
 from masim.format.order import InvestorOrder
 
 
@@ -86,7 +86,7 @@ class RuleCriticalThinker(CanonicalRulePlayer):
         max_pos = cs["max_position"]
         div_scale = cs["divergence_scale"]
 
-        consensus = float(state.raw.get("consensus_signal", state.price))
+        consensus = state.raw_require("consensus_signal", cast=float)
         divergence = consensus - state.fundamental
         scaled_theta = theta * state.fundamental
         if scaled_theta <= 0:
