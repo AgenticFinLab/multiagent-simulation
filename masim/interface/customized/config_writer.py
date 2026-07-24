@@ -1104,6 +1104,12 @@ def _render_agent_block(
         key = f"{base_key}_{counter}"
         counter += 1
     used_keys.add(key)
+    # When num_instances > 1, expand_player_instances will produce keys
+    # "{key}_1", "{key}_2", ..., "{key}_N".  Reserve those names so
+    # subsequent blocks cannot collide with the expanded names.
+    if selection.num_instances > 1:
+        for i in range(1, selection.num_instances + 1):
+            used_keys.add(f"{key}_{i}")
 
     handbook_params, llm_overrides = _split_handbook_and_llm(selection)
     extras: dict[str, Any] = dict(handbook_params)
