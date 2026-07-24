@@ -24,6 +24,7 @@ from masim.interface.components.docs_view import render_docs_page
 from masim.interface.components.agent_market import (
     render_back_to_stage1_bar,
     render_customize,
+    render_default_config,
     render_scenario_setup,
     render_selected_market_strip,
     render_variant_choice,
@@ -103,6 +104,9 @@ def main():
         return
     if workflow_stage == "variant_choice":
         render_variant_choice()
+        return
+    if workflow_stage == "default_config":
+        render_default_config()
         return
     if workflow_stage == "customize":
         render_customize()

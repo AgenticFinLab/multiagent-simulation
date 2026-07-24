@@ -29,6 +29,8 @@ from ..config_loader import (
 from ..customized import (
     CustomizedAgentSelection,
     apply_customized_modifications,
+    apply_default_bundle_overrides,
+    copy_default_scenario_bundle,
     extract_default_players,
     extract_market_extras,
     get_default_prompts,
@@ -1017,41 +1019,10 @@ def render_variant_choice() -> None:
             variant_keys = groups.get(selected_base) or []
             st.markdown("**Default**")
             st.caption(
-                "Launch the pre-configured scenario directly. "
-                "The diagram below previews the shipped agent lineup and "
-                "network topology; each button below launches a decision "
-                "engine."
+                "Run the pre-configured scenario with adjustable market "
+                "and agent parameters. Select a decision engine below to "
+                "review and configure the simulation before launching."
             )
-
-            # Dynamic topology preview mirroring Experience mode. It gives
-            # the user an at-a-glance sense of the shipped agent roster and
-            # how the agents connect before they commit to a decision engine.
-            probe_key = _scenario_probe_key(selected_base, groups)
-            default_agents = get_agents_info(probe_key)
-            default_topo = get_topology_info(probe_key)
-            if default_topo.get("nodes"):
-                from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
-                # Show the scenario's market coordinator icon on the
-                # hub node so users can identify the market family at a
-                # glance in the Default preview.
-                _hub_icons = {"market": market_icon_uri(selected_base)}
-                render_d3_topology_with_expand(
-                    default_topo,
-                    default_agents,
-                    height=340,
-                    icon_uris=_hub_icons,
-                    key=f"project_default_{selected_base}",
-                    title=None,
-                    dialog_caption=scenario_display_name(selected_base),
-                )
-            else:
-                st.caption("No topology data available for this scenario.")
-
-            # Advanced parameter editor — same widget as Experience mode,
-            # so users can tune the shipped roster before hitting a
-            # Default engine button (which produces a rounds/params-
-            # adjusted reproducible bundle under CUSTOMIZED_SIMULATION/).
-            _render_default_param_editor(selected_base)
 
             if not variant_keys:
                 st.info("No default variants available for this scenario.")
@@ -1070,12 +1041,14 @@ def render_variant_choice() -> None:
                                 "暂时禁用 (temporarily disabled)"
                                 if _is_disabled
                                 else (
-                                    f"Run {scenario_display_name(selected_base)} "
-                                    f"with the {variant} decision engine."
+                                    f"Configure {scenario_display_name(selected_base)} "
+                                    f"with the {variant} engine, then launch."
                                 )
                             ),
                         ):
-                            _launch_default_variant(key)
+                            st.session_state.default_config_key = key
+                            st.session_state.workflow_stage = "default_config"
+                            st.rerun()
 
         with custom_col:
             st.markdown("**Customized**")
@@ -1214,6 +1187,309 @@ def _launch_default_variant(scenario_key: str) -> None:
         st.session_state.customized_dir_id = customized_id
     else:
         st.session_state.pop("customized_dir_id", None)
+    st.rerun()
+
+
+# ---------------------------------------------------------------------------
+# Default Config page — intermediate parameter editing before simulation
+# ---------------------------------------------------------------------------
+
+
+def render_default_config() -> None:
+    """Render the Default configuration page.
+
+    Entered after the user picks a decision engine in the Project-mode
+    Default column.  Shows market parameters, agent cards with editable
+    extras, and a Confirm button that launches the simulation.
+    """
+    scenario_key = st.session_state.get("default_config_key", "")
+    if not scenario_key:
+        st.warning("No engine selected. Returning to scenario picker.")
+        st.session_state.workflow_stage = "variant_choice"
+        st.rerun()
+        return
+
+    base = scenario_key.split("/", 1)[0]
+    variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
+
+    # ── Copy scenario to bundle on first entry ────────────────────────────
+    # Idempotent: only copies if the bundle doesn't already exist.
+    try:
+        bundle = copy_default_scenario_bundle(
+            scenario_name=base, variant=variant, project_root=PROJECT_ROOT
+        )
+        st.session_state["default_config_bundle"] = bundle
+    except FileNotFoundError as exc:
+        st.error(f"Could not prepare scenario bundle: {exc}")
+        return
+
+    # ── Back button ───────────────────────────────────────────────────────
+    render_back_to_stage1_bar(
+        key_suffix="default_config",
+        target_stage="variant_choice",
+    )
+
+    # ── Title ─────────────────────────────────────────────────────────────
+    st.title(f"{scenario_display_name(base)} · {VARIANT_DISPLAY.get(variant, variant)}")
+    st.caption(
+        "Review and adjust the market environment and agent parameters below. "
+        "Click **Confirm & Launch** at the bottom to start the simulation."
+    )
+
+    st.divider()
+
+    # ── Rounds editor ─────────────────────────────────────────────────────
+    info = get_scenario_info(scenario_key)
+    try:
+        shipped_rounds = int(info.get("total_rounds") or 0)
+    except (TypeError, ValueError):
+        shipped_rounds = 0
+    _rounds_key = f"variant_rounds_{base}"
+    _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
+    _rounds_now = int(st.session_state.get(_rounds_key, _rounds_default))
+
+    rounds_col, _ = st.columns([2, 4])
+    with rounds_col:
+        edited_rounds = st.number_input(
+            "Total Rounds",
+            min_value=1,
+            max_value=100000,
+            value=_rounds_now,
+            step=1,
+            key=f"dc_rounds_{base}",
+            help=(
+                f"Number of simulation rounds. Shipped default: "
+                f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}."
+            ),
+        )
+        st.session_state[_rounds_key] = int(edited_rounds)
+
+    st.divider()
+
+    # ── Load player data ──────────────────────────────────────────────────
+    players = extract_default_players(
+        scenario_name=base, variant="Rule", project_root=PROJECT_ROOT
+    )
+    if not players:
+        st.info("No configurable parameters for this scenario.")
+        _render_launch_button(scenario_key)
+        return
+
+    session_key = _default_extras_session_key(base)
+    edits: dict[str, dict[str, Any]] = st.session_state.setdefault(session_key, {})
+
+    # Separate market coordinator from investor agents
+    player_items = list(players.items())
+    market_key, market_info = player_items[0]
+    agent_items = player_items[1:]
+
+    # ── Market Parameters ─────────────────────────────────────────────────
+    market_extras = market_info.get("extras") or {}
+    if market_extras:
+        st.subheader("Market Environment")
+        market_override = edits.setdefault("__market__", {})
+        _render_extras_grid(
+            extras=market_extras,
+            override_slot=market_override,
+            key_prefix=f"dc_{base}_market",
+        )
+        if not market_override:
+            edits.pop("__market__", None)
+        st.divider()
+
+    # ── Agent Cards ───────────────────────────────────────────────────────
+    if agent_items:
+        st.subheader("Agents")
+        per_row = 2
+        for row_start in range(0, len(agent_items), per_row):
+            row = agent_items[row_start : row_start + per_row]
+            cols = st.columns(per_row, gap="medium")
+            for col, (block_key, block_info) in zip(cols, row):
+                with col:
+                    _render_agent_config_card(
+                        base=base,
+                        block_key=block_key,
+                        block_info=block_info,
+                        edits=edits,
+                    )
+        st.divider()
+
+    # Persist pruned edits back
+    st.session_state[session_key] = edits
+
+    # ── Confirm & Launch button ───────────────────────────────────────────
+    _render_launch_button(scenario_key)
+
+
+def _render_extras_grid(
+    *,
+    extras: dict[str, Any],
+    override_slot: dict[str, Any],
+    key_prefix: str,
+) -> None:
+    """Render a responsive grid of parameter widgets for an extras dict."""
+    cols_per_row = 3
+    keys = list(extras.keys())
+    for row_start in range(0, len(keys), cols_per_row):
+        row_keys = keys[row_start : row_start + cols_per_row]
+        cols = st.columns(len(row_keys))
+        for col, extras_key in zip(cols, row_keys):
+            with col:
+                default_val = extras[extras_key]
+                current_val = override_slot.get(extras_key, default_val)
+                widget_key = f"{key_prefix}_{extras_key}"
+                pretty = extras_key.replace("_", " ").title()
+
+                if isinstance(default_val, bool):
+                    new_val = st.checkbox(
+                        pretty,
+                        value=bool(current_val),
+                        key=widget_key,
+                        help=f"Default: {default_val}",
+                    )
+                elif isinstance(default_val, (int, float)):
+                    new_val = st.number_input(
+                        pretty,
+                        value=(
+                            float(current_val)
+                            if isinstance(default_val, float)
+                            else int(current_val)
+                        ),
+                        format=(
+                            "%.6g"
+                            if isinstance(default_val, float)
+                            else "%d"
+                        ),
+                        key=widget_key,
+                        help=f"Default: {default_val}",
+                    )
+                else:
+                    new_val = st.text_input(
+                        pretty,
+                        value=str(current_val),
+                        key=widget_key,
+                        help=f"Default: {default_val!r}",
+                    )
+
+                coerced = _coerce_extras_value(default_val, new_val)
+                if coerced != default_val:
+                    override_slot[extras_key] = coerced
+                else:
+                    override_slot.pop(extras_key, None)
+
+
+def _render_agent_config_card(
+    *,
+    base: str,
+    block_key: str,
+    block_info: dict[str, Any],
+    edits: dict[str, dict[str, Any]],
+) -> None:
+    """Render a single agent card with icon, name, instances, and extras."""
+    archetype = _canonical_archetype(block_key)
+    icon_path = ICON_ROOT / f"finance-{archetype.replace('_', '-')}.png"
+    display_name = block_info.get("name") or block_key
+    num_instances = block_info.get("num_instances", 1)
+    extras = block_info.get("extras") or {}
+
+    # Card container with a subtle border
+    with st.container(border=True):
+        # Header: icon + name + instance count
+        header_col, info_col = st.columns([1, 3], vertical_alignment="center")
+        with header_col:
+            if icon_path.exists():
+                uri = _image_data_uri(icon_path)
+                st.markdown(
+                    f'<img src="{uri}" style="width:48px;height:48px;'
+                    f'border-radius:50%;border:2px solid #dde4ea;'
+                    f'object-fit:cover;" />',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f'<div style="width:48px;height:48px;border-radius:50%;'
+                    f'background:#e8f0fb;display:flex;align-items:center;'
+                    f'justify-content:center;color:#2a5fa6;font-weight:700;'
+                    f'font-size:14px;border:2px solid #dde4ea;">'
+                    f'{html.escape(display_name[:2].upper())}</div>',
+                    unsafe_allow_html=True,
+                )
+        with info_col:
+            instance_badge = f" ×{num_instances}" if num_instances > 1 else ""
+            st.markdown(f"**{html.escape(display_name)}**{instance_badge}")
+
+        # Extras parameters
+        if extras:
+            override_slot = edits.setdefault(block_key, {})
+            _render_extras_grid(
+                extras=extras,
+                override_slot=override_slot,
+                key_prefix=f"dc_{base}_{block_key}",
+            )
+            if not override_slot:
+                edits.pop(block_key, None)
+
+
+def _render_launch_button(scenario_key: str) -> None:
+    """Render the Confirm & Launch button at the bottom of the config page."""
+    _, center_col, _ = st.columns([2, 2, 2])
+    with center_col:
+        if st.button(
+            "✓ Confirm & Launch",
+            key="dc_confirm_launch",
+            type="primary",
+            use_container_width=True,
+        ):
+            _launch_from_default_config(scenario_key)
+
+
+def _launch_from_default_config(scenario_key: str) -> None:
+    """Apply parameter edits to the bundle and enter the workspace."""
+    base = scenario_key.split("/", 1)[0]
+    variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
+
+    bundle = st.session_state.get("default_config_bundle")
+    if not bundle:
+        st.error("Bundle not found. Please go back and select an engine again.")
+        return
+
+    # Gather user edits from session state
+    _rounds_key = f"variant_rounds_{base}"
+    info = get_scenario_info(scenario_key)
+    try:
+        shipped_rounds = int(info.get("total_rounds") or 0)
+    except (TypeError, ValueError):
+        shipped_rounds = 0
+    edited_rounds = int(
+        st.session_state.get(_rounds_key, shipped_rounds if shipped_rounds > 0 else 1)
+    )
+
+    session_key = _default_extras_session_key(base)
+    default_extras = st.session_state.get(session_key, {}) or {}
+    market_over = default_extras.get("__market__") or {}
+    agent_over = {
+        k: v for k, v in default_extras.items() if k != "__market__" and v
+    }
+
+    # Write edits into the bundle's config files
+    try:
+        apply_default_bundle_overrides(
+            config_dir=bundle.config_dir,
+            total_rounds=edited_rounds,
+            market_extras_override=market_over or None,
+            agent_extras_overrides=agent_over or None,
+        )
+    except Exception as exc:
+        st.error(f"Failed to apply parameter changes: {exc}")
+        return
+
+    # Transition to workspace — launch from the bundle
+    launch_key = f"CUSTOMIZED_SIMULATION/{bundle.customized_id}/{variant}"
+    st.session_state.selected_scenario = launch_key
+    st.session_state.selected_market_agents = []
+    st.session_state.workflow_stage = "workspace"
+    st.session_state.current_page = "Simulation"
+    st.session_state.customized_dir_id = bundle.customized_id
     st.rerun()
 
 

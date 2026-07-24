@@ -724,6 +724,166 @@ def write_default_scenario_bundle(
     )
 
 
+def copy_default_scenario_bundle(
+    *,
+    scenario_name: str,
+    variant: str,
+    project_root: Path,
+) -> CustomizedBundleResult:
+    """Copy a full shipped scenario into a Default bundle for editing.
+
+    Creates a self-contained bundle at:
+        configs/CUSTOMIZED_SIMULATION/Default-{scenario}/{variant}/
+        examples/CUSTOMIZED_SIMULATION/Default-{scenario}/{variant}/
+
+    The bundle mirrors the shipped scenario structure verbatim (configs
+    YAML + examples code/docs) so users can edit parameters on the config
+    page and then launch directly.  Re-targets ``record_path`` and
+    ``analysis_output_path`` in ``simulation.yml`` so that output goes to
+    the bundle's own EXPERIMENT/ subtree rather than overwriting the
+    shipped scenario's data.
+
+    Idempotent: if the bundle already exists, returns existing paths
+    without re-copying (so repeated page refreshes don't clobber edits).
+
+    Args:
+        scenario_name: base scenario name (e.g. ``"AnchoringEffect"``).
+        variant: engine variant (e.g. ``"Rule"``).
+        project_root: repository root.
+
+    Returns:
+        :class:`CustomizedBundleResult` with paths to the copied bundle.
+    """
+    import shutil
+
+    project_root = Path(project_root).resolve()
+    cid = f"Default-{scenario_name}"
+
+    configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
+    examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
+
+    config_dir = configs_parent / cid / variant
+    example_dir = examples_parent / cid / variant
+
+    # Idempotent: if simulation.yml already exists in the target, skip copy.
+    if (config_dir / "simulation.yml").exists():
+        return CustomizedBundleResult(
+            customized_id=cid,
+            config_dir=config_dir,
+            example_dir=example_dir,
+            simulation_yaml=config_dir / "simulation.yml",
+            players_yaml=config_dir / "players.yml",
+            topology_yaml=config_dir / "topology.yml",
+            persona_yaml=config_dir / "persona.yml",
+            runner_path=example_dir / "run_customized.py",
+            scenario_name=scenario_name,
+            prompts_path=None,
+        )
+
+    # Source directories
+    src_configs = project_root / "configs" / scenario_name / variant
+    src_examples = project_root / "examples" / scenario_name / variant
+
+    if not src_configs.exists():
+        raise FileNotFoundError(
+            f"Source configs not found: {src_configs}"
+        )
+
+    # Copy configs (YAML files)
+    config_dir.mkdir(parents=True, exist_ok=True)
+    for yml in src_configs.glob("*.yml"):
+        text = yml.read_text(encoding="utf-8")
+        # Re-target record paths so the bundle writes its own data
+        text = _retarget_record_paths(text, f"{cid}/{variant}")
+        (config_dir / yml.name).write_text(text, encoding="utf-8")
+
+    # Copy examples (code, .md, .py files — skip __pycache__)
+    example_dir.mkdir(parents=True, exist_ok=True)
+    if src_examples.exists():
+        for item in src_examples.iterdir():
+            if item.name == "__pycache__":
+                continue
+            dst = example_dir / item.name
+            if item.is_dir():
+                if dst.exists():
+                    shutil.rmtree(dst)
+                shutil.copytree(item, dst)
+            else:
+                shutil.copy2(item, dst)
+
+    # Also copy scenario-level shared files (e.g., finance-*.md, metrics.py)
+    src_scenario_root = project_root / "examples" / scenario_name
+    scenario_shared_dir = examples_parent / cid
+    scenario_shared_dir.mkdir(parents=True, exist_ok=True)
+    for item in src_scenario_root.iterdir():
+        if item.is_dir():
+            continue  # skip variant subdirs and __pycache__
+        dst = scenario_shared_dir / item.name
+        if not dst.exists():
+            shutil.copy2(item, dst)
+
+    # Ensure __init__.py exists
+    init_path = example_dir / "__init__.py"
+    if not init_path.exists():
+        init_path.write_text("", encoding="utf-8")
+    scenario_init = scenario_shared_dir / "__init__.py"
+    if not scenario_init.exists():
+        scenario_init.write_text("", encoding="utf-8")
+
+    return CustomizedBundleResult(
+        customized_id=cid,
+        config_dir=config_dir,
+        example_dir=example_dir,
+        simulation_yaml=config_dir / "simulation.yml",
+        players_yaml=config_dir / "players.yml",
+        topology_yaml=config_dir / "topology.yml",
+        persona_yaml=config_dir / "persona.yml",
+        runner_path=example_dir / "run_customized.py"
+        if (example_dir / "run_customized.py").exists()
+        else None,
+        scenario_name=scenario_name,
+        prompts_path=None,
+    )
+
+
+def apply_default_bundle_overrides(
+    *,
+    config_dir: Path,
+    total_rounds: int,
+    market_extras_override: Optional[dict[str, Any]] = None,
+    agent_extras_overrides: Optional[dict[str, dict[str, Any]]] = None,
+) -> None:
+    """Write parameter edits into an already-copied Default bundle.
+
+    Called on Confirm & Launch — patches the bundle's simulation.yml and
+    players.yml in-place with the user's round count and extras changes.
+
+    Args:
+        config_dir: path to the bundle's config directory (e.g.,
+            ``configs/CUSTOMIZED_SIMULATION/Default-AnchoringEffect/Rule/``).
+        total_rounds: the user-edited round count.
+        market_extras_override: market coordinator extras overrides.
+        agent_extras_overrides: per-agent extras overrides.
+    """
+    # Patch simulation.yml total_rounds
+    sim_path = config_dir / "simulation.yml"
+    if sim_path.exists():
+        text = sim_path.read_text(encoding="utf-8")
+        text = _set_total_rounds(text, int(total_rounds))
+        sim_path.write_text(text, encoding="utf-8")
+
+    # Patch players.yml extras
+    players_path = config_dir / "players.yml"
+    if players_path.exists() and (market_extras_override or agent_extras_overrides):
+        text = players_path.read_text(encoding="utf-8")
+        text = _apply_players_extras_overrides(
+            text,
+            market_extras_override=market_extras_override or {},
+            agent_extras_overrides=agent_extras_overrides or {},
+        )
+        players_path.write_text(text, encoding="utf-8")
+
+
 def extract_market_extras(
     *,
     bundle_name: str,
