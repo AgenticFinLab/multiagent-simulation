@@ -309,6 +309,13 @@ def restore_state_to_session(
     for k in stale_keys:
         del st.session_state[k]
 
+    # ── Restore bundle/scenario context keys ───────────────────────────
+    # These are required by save_state_from_session; without them a
+    # clear()+restore cycle leaves the session unable to persist again.
+    st.session_state["customized_bundle_name"] = data.get("bundle_name", bundle_name)
+    if data.get("scenario"):
+        st.session_state["selected_scenario_base"] = data["scenario"]
+
     # Restore selected agents.
     selected_agents = data.get("selected_agents", [])
     st.session_state["selected_market_agents"] = list(selected_agents)
