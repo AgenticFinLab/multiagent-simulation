@@ -114,9 +114,26 @@ def _resolve_display_key(scenario_key: str) -> str:
         return "/".join(parts[1:])
 
     if scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
-        bundle_id = scenario_key.split("/", 1)[1]
-        if bundle_id.startswith("Default-"):
-            body = re.sub(r"-r\d+$", "", bundle_id[len("Default-"):])
+        tail = scenario_key.split("/", 1)[1]
+        # New project-scoped format:
+        # CUSTOMIZED_SIMULATION/{bundle_name}/Default/{variant}
+        # bundle_name = "{slug}-{id}-{Scenario}" → extract scenario from last segment.
+        tail_parts = tail.split("/")
+        if len(tail_parts) >= 3 and tail_parts[1] == "Default":
+            bundle_name = tail_parts[0]  # e.g. "MYTest-b6beb998-AnchoringEffect"
+            variant = tail_parts[2]
+            # Scenario is the last hyphen-separated segment of bundle_name
+            scenario = bundle_name.rsplit("-", 1)[-1]
+            return f"{scenario}/{variant}"
+        # Customized-agents format:
+        # CUSTOMIZED_SIMULATION/{bundle_name}/Customized-agents
+        if len(tail_parts) >= 2 and tail_parts[1] == "Customized-agents":
+            bundle_name = tail_parts[0]
+            scenario = bundle_name.rsplit("-", 1)[-1]
+            return f"{scenario}/Rule"
+        # Legacy format: CUSTOMIZED_SIMULATION/Default-{S}-{V}-rN
+        if tail.startswith("Default-"):
+            body = re.sub(r"-r\d+$", "", tail[len("Default-"):])
             if "-" in body:
                 scenario, variant = body.rsplit("-", 1)
                 return f"{scenario}/{variant}"

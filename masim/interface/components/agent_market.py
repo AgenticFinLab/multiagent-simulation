@@ -1063,8 +1063,15 @@ def render_variant_choice() -> None:
                 type="primary",
                 width="stretch",
             ):
-                # --- Initialize bundle folder on Customize entry ---
-                _initialize_bundle_on_entry(selected_base)
+                # Record the bundle name for later lazy initialization.
+                # The actual file copy is deferred to launch time
+                # (inside _write_customized_bundle) to avoid redundant
+                # copies when the user hasn't committed yet.
+                project_slug = st.session_state.get("project_slug", "")
+                project_id = st.session_state.get("project_id", "0000")
+                if project_slug:
+                    bundle_name = f"{project_slug}-{project_id}-{selected_base}"
+                    st.session_state["customized_bundle_name"] = bundle_name
                 st.session_state.workflow_stage = "customize"
                 st.rerun()
 
@@ -1212,13 +1219,22 @@ def render_default_config() -> None:
     base = scenario_key.split("/", 1)[0]
     variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
 
+    # ── Resolve project bundle name ──────────────────────────────────────
+    project_slug = st.session_state.get("project_slug", "project")
+    project_id = st.session_state.get("project_id", "0000")
+    bundle_name = f"{project_slug}-{project_id}-{base}"
+
     # ── Copy scenario to bundle on first entry ────────────────────────────
     # Idempotent: only copies if the bundle doesn't already exist.
     try:
         bundle = copy_default_scenario_bundle(
-            scenario_name=base, variant=variant, project_root=PROJECT_ROOT
+            scenario_name=base,
+            variant=variant,
+            bundle_name=bundle_name,
+            project_root=PROJECT_ROOT,
         )
         st.session_state["default_config_bundle"] = bundle
+        st.session_state["customized_bundle_name"] = bundle_name
     except FileNotFoundError as exc:
         st.error(f"Could not prepare scenario bundle: {exc}")
         return
@@ -1484,7 +1500,7 @@ def _launch_from_default_config(scenario_key: str) -> None:
         return
 
     # Transition to workspace — launch from the bundle
-    launch_key = f"CUSTOMIZED_SIMULATION/{bundle.customized_id}/{variant}"
+    launch_key = f"CUSTOMIZED_SIMULATION/{bundle.customized_id}/Default/{variant}"
     st.session_state.selected_scenario = launch_key
     st.session_state.selected_market_agents = []
     st.session_state.workflow_stage = "workspace"
@@ -3200,14 +3216,6 @@ def _render_scenario_card(
             width="stretch",
         ):
             st.session_state.selected_scenario_base = scenario_base
-            # Copy scenario into project-local dirs if a project is active.
-            project_slug = st.session_state.get("project_slug", "")
-            if project_slug:
-                from masim.interface.components.welcome import copy_scenario_to_project
-                copy_scenario_to_project(project_slug, scenario_base)
-                # Also materialise the customized bundle folder immediately
-                # so the user can see it on disk before entering Stage 2.
-                _initialize_bundle_on_entry(scenario_base)
             st.session_state.workflow_stage = "variant_choice"
             st.rerun()
 
@@ -3469,30 +3477,21 @@ def _write_customized_bundle(
     selected_agents: list[dict[str, Any]],
     scenario_base: str,
 ) -> str | None:
-    """Apply user's customization to the pre-existing bundle folder.
+    """Apply user's customization and launch from Customized-agents/.
 
-    Returns the new scenario key (e.g. ``CUSTOMIZED_SIMULATION/MyProject-Scenario-abc12345``)
-    or ``None`` on failure. The bundle folder was created when the user entered
-    the Customize flow; this function regenerates players/topology/prompts.
+    Returns the new scenario key (e.g.
+    ``CUSTOMIZED_SIMULATION/MyProject-Scenario-abc12345/Customized-agents``)
+    or ``None`` on failure. The Customized-agents/ subfolder is created
+    lazily by apply_customized_modifications if it doesn't exist yet.
     """
-    # Read bundle name from session state (set during initialize_bundle_on_entry).
+    # Read bundle name from session state (set when entering Customize flow).
     bundle_name = st.session_state.get("customized_bundle_name", "")
     if not bundle_name:
-        # Fallback: if somehow no bundle was initialized (e.g. Experience mode),
-        # create one now using the legacy path.
+        # Fallback: compute the bundle name from session state.
         project_slug = st.session_state.get("project_slug", "project")
         project_id = st.session_state.get("project_id", "0000")
         bundle_name = f"{project_slug}-{project_id}-{scenario_base}"
-        try:
-            initialize_customized_folder(
-                bundle_name=bundle_name,
-                scenario_name=scenario_base,
-                project_root=PROJECT_ROOT,
-            )
-            st.session_state["customized_bundle_name"] = bundle_name
-        except (FileNotFoundError, OSError) as exc:
-            st.error(f"Could not initialize customized folder: {exc}")
-            return None
+        st.session_state["customized_bundle_name"] = bundle_name
 
     roster_archetypes = [a["agent_type"] for a in selected_agents]
     compatible, reasons = is_scenario_compatible(scenario_base, roster_archetypes)
@@ -3533,7 +3532,7 @@ def _write_customized_bundle(
         f"(scenario {scenario_base})",
         icon="\u2728",
     )
-    return f"CUSTOMIZED_SIMULATION/{result.customized_id}"
+    return f"CUSTOMIZED_SIMULATION/{result.customized_id}/Customized-agents"
 
 
 def render_selected_market_strip() -> None:

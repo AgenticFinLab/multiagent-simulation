@@ -155,17 +155,20 @@ def initialize_customized_folder(
     scenario_name: str,
     project_root: Path,
 ) -> CustomizedBundleResult:
-    """Create the bundle folder with a FULL copy of all scenario variants.
+    """Create the Customized-agents/ subfolder with a full scenario copy.
 
-    Called when the user enters the Customize flow (clicks "Select agents
-    for simulation"). The folder is a complete snapshot of the scenario —
-    all variant subdirectories (Rule, LLM, RuleLLM, Rag) are copied into
-    both ``configs/CUSTOMIZED_SIMULATION/{bundle}/`` and
-    ``examples/CUSTOMIZED_SIMULATION/{bundle}/``, preserving their
-    subdirectory structure.
+    Called lazily at launch time (inside :func:`apply_customized_modifications`)
+    when the user commits their agent selections. The folder is a complete
+    snapshot of the scenario — all variant subdirectories (Rule, LLM,
+    RuleLLM, Rag) are copied into
+    ``configs/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/`` and
+    ``examples/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/``.
 
-    At launch time, :func:`apply_customized_modifications` overlays the
-    user's agent selections onto this pre-existing folder.
+    This keeps the Customize path's files separate from the Default
+    path's files; both live under the same project bundle directory.
+
+    Idempotent: if ``Customized-agents/Rule/simulation.yml`` already
+    exists, returns existing paths without re-copying.
 
     Args:
         bundle_name: folder name, e.g. ``"MyProject-a3b9c1d2-AnchoringEffect"``.
@@ -183,8 +186,25 @@ def initialize_customized_folder(
     project_root = Path(project_root).resolve()
     configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
     examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
-    config_dir = configs_parent / bundle_name
-    example_dir = examples_parent / bundle_name
+    config_dir = configs_parent / bundle_name / "Customized-agents"
+    example_dir = examples_parent / bundle_name / "Customized-agents"
+
+    # Idempotent: if already initialized, return existing paths.
+    if (config_dir / "Rule" / "simulation.yml").exists():
+        runner_out = example_dir / "run_customized.py"
+        return CustomizedBundleResult(
+            customized_id=bundle_name,
+            config_dir=config_dir,
+            example_dir=example_dir,
+            simulation_yaml=config_dir / "Rule" / "simulation.yml",
+            players_yaml=config_dir / "Rule" / "players.yml",
+            topology_yaml=config_dir / "Rule" / "topology.yml",
+            persona_yaml=config_dir / "Rule" / "persona.yml",
+            runner_path=runner_out if runner_out.exists() else None,
+            scenario_name=scenario_name,
+            prompts_path=None,
+        )
+
     config_dir.mkdir(parents=True, exist_ok=True)
     example_dir.mkdir(parents=True, exist_ok=True)
 
@@ -200,6 +220,9 @@ def initialize_customized_folder(
     def _ignore_pycache(directory: str, contents: list[str]) -> list[str]:
         return [c for c in contents if c == "__pycache__"]
 
+    # Record paths target: {bundle_name}/Customized-agents
+    record_sub = f"{bundle_name}/Customized-agents"
+
     # --- Copy ALL variant subdirectories from configs/{scenario}/ ---
     src_configs = project_root / "configs" / scenario_name
     for variant_dir in sorted(src_configs.iterdir()):
@@ -214,7 +237,7 @@ def initialize_customized_folder(
         # bundle's own EXPERIMENT directory.
         for yml in dst_variant.glob("*.yml"):
             text = yml.read_text(encoding="utf-8")
-            text = _retarget_record_paths(text, bundle_name)
+            text = _retarget_record_paths(text, record_sub)
             yml.write_text(text, encoding="utf-8")
 
     # --- Copy ALL variant subdirectories from examples/{scenario}/ ---
@@ -238,14 +261,14 @@ def initialize_customized_folder(
     runner_out = example_dir / "run_customized.py"
     runner_out.write_text(runner_text, encoding="utf-8")
 
-    # --- __init__.py package marker at bundle root ---
+    # --- __init__.py package marker ---
     init_path = example_dir / "__init__.py"
     if not init_path.exists():
         init_path.write_text("", encoding="utf-8")
 
     # --- README.md provenance placeholder ---
     readme_text = (
-        f"# {bundle_name}\n\n"
+        f"# {bundle_name} / Customized-agents\n\n"
         f"Customized simulation bundle (scenario: `{scenario_name}`).\n\n"
         f"- **Initialized**: {_dt.datetime.now().isoformat(timespec='seconds')}\n"
         f"- **Status**: awaiting agent selections (launch will finalize)\n\n"
@@ -255,8 +278,10 @@ def initialize_customized_folder(
         f"prompts from the variant matching the user's engine choice.\n\n"
         f"## Run\n\n"
         f"```bash\n"
-        f"python examples/CUSTOMIZED_SIMULATION/{bundle_name}/run_customized.py \\\n"
-        f"    -c configs/CUSTOMIZED_SIMULATION/{bundle_name}/simulation.yml\n"
+        f"python examples/CUSTOMIZED_SIMULATION/{bundle_name}/Customized-agents/"
+        f"run_customized.py \\\n"
+        f"    -c configs/CUSTOMIZED_SIMULATION/{bundle_name}/"
+        f"Customized-agents/simulation.yml\n"
         f"```\n"
     )
     (example_dir / "README.md").write_text(readme_text, encoding="utf-8")
@@ -284,27 +309,27 @@ def apply_customized_modifications(
     total_rounds: Optional[int] = None,
     market_extras_override: Optional[dict[str, Any]] = None,
 ) -> CustomizedBundleResult:
-    """Apply user's agent selections and params to an existing bundle folder.
+    """Apply user's agent selections and params to the Customized-agents/ folder.
 
-    Called at launch time. The folder must already exist (created by
-    :func:`initialize_customized_folder`). This function regenerates
+    Called at launch time. If the ``Customized-agents/`` subfolder does
+    not exist yet, it is created lazily via
+    :func:`initialize_customized_folder`. This function then regenerates
     ``players.yml``, ``topology.yml``, and optionally ``prompts.py``
-    from the user's selections. It does NOT re-copy ``simulation.yml``
-    or ``persona.yml`` (already present from initialization).
+    from the user's selections.
 
     Args:
-        bundle_name: the existing folder name.
+        bundle_name: the project bundle folder name.
         selections: user's agent selections with edited params.
         scenario_name: scenario base name.
         project_root: repo root.
         total_rounds: optional round count override baked into simulation.yml.
+        market_extras_override: optional market parameter overrides.
 
     Returns:
         :class:`CustomizedBundleResult` with absolute paths.
 
     Raises:
         ValueError: roster is incompatible or an archetype has no class path.
-        FileNotFoundError: the bundle folder does not exist.
     """
     # --- compatibility gate ---
     roster = [s.archetype for s in selections]
@@ -329,13 +354,21 @@ def apply_customized_modifications(
         class_paths.append(path)
 
     project_root = Path(project_root).resolve()
-    config_dir = project_root / "configs" / "CUSTOMIZED_SIMULATION" / bundle_name
-    example_dir = project_root / "examples" / "CUSTOMIZED_SIMULATION" / bundle_name
+    config_dir = (
+        project_root / "configs" / "CUSTOMIZED_SIMULATION"
+        / bundle_name / "Customized-agents"
+    )
+    example_dir = (
+        project_root / "examples" / "CUSTOMIZED_SIMULATION"
+        / bundle_name / "Customized-agents"
+    )
 
-    if not config_dir.exists():
-        raise FileNotFoundError(
-            f"Bundle folder does not exist: {config_dir}. "
-            "Call initialize_customized_folder() first."
+    # Lazy initialization: create Customized-agents/ if not present yet.
+    if not config_dir.exists() or not (config_dir / "Rule" / "simulation.yml").exists():
+        initialize_customized_folder(
+            bundle_name=bundle_name,
+            scenario_name=scenario_name,
+            project_root=project_root,
         )
 
     # --- optionally update total_rounds in simulation.yml ---
@@ -728,20 +761,21 @@ def copy_default_scenario_bundle(
     *,
     scenario_name: str,
     variant: str,
+    bundle_name: str,
     project_root: Path,
 ) -> CustomizedBundleResult:
     """Copy a full shipped scenario into a Default bundle for editing.
 
     Creates a self-contained bundle at:
-        configs/CUSTOMIZED_SIMULATION/Default-{scenario}/{variant}/
-        examples/CUSTOMIZED_SIMULATION/Default-{scenario}/{variant}/
+        configs/CUSTOMIZED_SIMULATION/{bundle_name}/Default/{variant}/
+        examples/CUSTOMIZED_SIMULATION/{bundle_name}/Default/{variant}/
 
-    The bundle mirrors the shipped scenario structure verbatim (configs
-    YAML + examples code/docs) so users can edit parameters on the config
-    page and then launch directly.  Re-targets ``record_path`` and
-    ``analysis_output_path`` in ``simulation.yml`` so that output goes to
-    the bundle's own EXPERIMENT/ subtree rather than overwriting the
-    shipped scenario's data.
+    The bundle is scoped under the project's bundle directory so multiple
+    projects don't collide.  Mirrors the shipped scenario structure
+    verbatim (configs YAML + examples code/docs) so users can edit
+    parameters on the config page and then launch directly.  Re-targets
+    ``record_path`` in ``simulation.yml`` so output goes to its own
+    EXPERIMENT/ subtree.
 
     Idempotent: if the bundle already exists, returns existing paths
     without re-copying (so repeated page refreshes don't clobber edits).
@@ -749,6 +783,7 @@ def copy_default_scenario_bundle(
     Args:
         scenario_name: base scenario name (e.g. ``"AnchoringEffect"``).
         variant: engine variant (e.g. ``"Rule"``).
+        bundle_name: project bundle name (e.g. ``"MYTest-b6beb998-AnchoringEffect"``).
         project_root: repository root.
 
     Returns:
@@ -757,13 +792,13 @@ def copy_default_scenario_bundle(
     import shutil
 
     project_root = Path(project_root).resolve()
-    cid = f"Default-{scenario_name}"
+    cid = bundle_name
 
     configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
     examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
 
-    config_dir = configs_parent / cid / variant
-    example_dir = examples_parent / cid / variant
+    config_dir = configs_parent / cid / "Default" / variant
+    example_dir = examples_parent / cid / "Default" / variant
 
     # Idempotent: if simulation.yml already exists in the target, skip copy.
     if (config_dir / "simulation.yml").exists():
@@ -791,10 +826,11 @@ def copy_default_scenario_bundle(
 
     # Copy configs (YAML files)
     config_dir.mkdir(parents=True, exist_ok=True)
+    record_sub = f"{cid}/Default/{variant}"
     for yml in src_configs.glob("*.yml"):
         text = yml.read_text(encoding="utf-8")
         # Re-target record paths so the bundle writes its own data
-        text = _retarget_record_paths(text, f"{cid}/{variant}")
+        text = _retarget_record_paths(text, record_sub)
         (config_dir / yml.name).write_text(text, encoding="utf-8")
 
     # Copy examples (code, .md, .py files — skip __pycache__)
@@ -813,7 +849,7 @@ def copy_default_scenario_bundle(
 
     # Also copy scenario-level shared files (e.g., finance-*.md, metrics.py)
     src_scenario_root = project_root / "examples" / scenario_name
-    scenario_shared_dir = examples_parent / cid
+    scenario_shared_dir = examples_parent / cid / "Default"
     scenario_shared_dir.mkdir(parents=True, exist_ok=True)
     for item in src_scenario_root.iterdir():
         if item.is_dir():
