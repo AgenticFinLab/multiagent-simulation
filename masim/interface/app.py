@@ -200,6 +200,12 @@ def render_simulation_page(scenario_name: str):
     # ── Progress slider / bar ──────────────────────────────────────────────
     replay_idx = st.session_state.replay_index  # rounds delivered so far
     progress_frac = (replay_idx / n_rounds) if n_rounds else 0.0
+    replay_paused = (
+        is_running
+        and not st.session_state.replay_active
+        and replay_idx > 0
+        and replay_idx < n_rounds
+    )
 
     st.markdown("")
 
@@ -220,6 +226,24 @@ def render_simulation_page(scenario_name: str):
         st.session_state.viewed_round_idx = viewed_idx
         with label_col:
             st.metric("Round", f"{rounds[viewed_idx].round_num} / {n_rounds}")
+    elif replay_paused:
+        # Paused → interactive slider limited to rounds delivered so far.
+        prog_col, label_col = st.columns([5, 1])
+        with prog_col:
+            slider_val = st.slider(
+                "Round",
+                min_value=1,
+                max_value=replay_idx,
+                value=min(st.session_state.viewed_round_idx + 1, replay_idx),
+                step=1,
+                label_visibility="collapsed",
+                key="round_slider_paused",
+            )
+        viewed_idx = slider_val - 1
+        st.session_state.viewed_round_idx = viewed_idx
+        with label_col:
+            st.metric("Round", f"{rounds[viewed_idx].round_num} / {n_rounds}")
+            st.caption("⏸ Paused")
     else:
         # Running → animated progress bar with a live round counter.
         cur_round = replay_idx if replay_idx > 0 else 0
@@ -925,31 +949,71 @@ def _render_action_buttons(scenario_name: str):
             _run_analysis,
         )
 
+    def _resume_replay():
+        """Resume a paused replay animation."""
+        st.session_state.replay_active = True
+        st.rerun()
+
     buttons: list = []
 
     if st.session_state.simulation_running:
-        buttons.append((t("simulation.stop"), "secondary", None, _stop_simulation))
-        if analysis_fresh:
+        replay_paused = (
+            not st.session_state.replay_active
+            and len(st.session_state.replay_rounds) > 0
+            and st.session_state.replay_index < len(st.session_state.replay_rounds)
+        )
+        if replay_paused:
+            # ── Paused replay: show Continue + analysis + Reset ──────────
             buttons.append((
-                t("simulation.view_analysis"),
+                t("simulation.continue"),
                 "primary",
-                t("simulation.view_analysis_running_help"),
-                _go_analysis,
+                t("simulation.continue_help"),
+                _resume_replay,
             ))
-        elif analysis_runnable:
-            buttons.append((
-                t("simulation.run_analysis"),
-                "secondary",
-                t("simulation.run_analysis_help"),
-                _run_analysis,
-            ))
-        if data_exists:
+            if analysis_fresh:
+                buttons.append((
+                    t("simulation.view_analysis"),
+                    "secondary",
+                    t("simulation.view_analysis_help"),
+                    _go_analysis,
+                ))
+            elif analysis_runnable:
+                buttons.append((
+                    t("simulation.run_analysis"),
+                    "secondary",
+                    t("simulation.run_analysis_help"),
+                    _run_analysis,
+                ))
             buttons.append((
                 t("simulation.reset"),
                 "secondary",
                 None,
-                lambda: (_stop_simulation(), _reset_simulation()),
+                _reset_simulation,
             ))
+        else:
+            # ── Actively running / animating ────────────────────────────
+            buttons.append((t("simulation.stop"), "secondary", None, _stop_simulation))
+            if analysis_fresh:
+                buttons.append((
+                    t("simulation.view_analysis"),
+                    "primary",
+                    t("simulation.view_analysis_running_help"),
+                    _go_analysis,
+                ))
+            elif analysis_runnable:
+                buttons.append((
+                    t("simulation.run_analysis"),
+                    "secondary",
+                    t("simulation.run_analysis_help"),
+                    _run_analysis,
+                ))
+            if data_exists:
+                buttons.append((
+                    t("simulation.reset"),
+                    "secondary",
+                    None,
+                    lambda: (_stop_simulation(), _reset_simulation()),
+                ))
     elif st.session_state.simulation_completed:
         if analysis_fresh or analysis_runnable:
             buttons.append(_analysis_button("primary"))
@@ -1141,15 +1205,28 @@ async def _run_simulation_async():
 
 
 def _stop_simulation():
-    """Stop the running simulation or replay."""
+    """Stop the running simulation or pause a replay."""
     if st.session_state.get("replay_active"):
+        # Pause the replay animation — keep simulation_running=True so the
+        # progress display and data remain visible. The user can resume via
+        # the "Continue" button or reset to start over.
         st.session_state.replay_active = False
-        st.session_state.simulation_running = False
-        st.session_state.simulation_completed = True
         n = st.session_state.replay_index
+        total = len(st.session_state.replay_rounds)
         if n > 0:
             st.session_state.viewed_round_idx = n - 1
-        _sys_notice("Replay stopped by user.", "warning")
+        if n >= total:
+            # All rounds already delivered — treat as completed.
+            st.session_state.simulation_running = False
+            st.session_state.simulation_completed = True
+            _sys_notice("All rounds loaded.", "success")
+        else:
+            # Mid-replay pause — stay in running state so UI shows data.
+            _sys_notice(
+                f"Replay paused at round {n}/{total}. "
+                "Click Continue to resume.",
+                "info",
+            )
     else:
         if st.session_state.runner:
             st.session_state.runner.stop()

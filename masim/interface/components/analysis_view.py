@@ -185,6 +185,7 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
 
 def _display_analysis_results(scenario_name: str, analysis_path: Path):
     """Display summary metrics, validation badge, and all charts."""
+    import re as _re
 
     # 1. Summary metrics + validation
     summary_path = analysis_path / "summary.json"
@@ -192,11 +193,33 @@ def _display_analysis_results(scenario_name: str, analysis_path: Path):
         _display_summary(summary_path)
         st.markdown("---")
 
-    # 2. Charts
-    images = sorted(analysis_path.glob("*.png"))
-    if not images:
+    # 2. Charts — deduplicate by numeric prefix
+    all_images = sorted(analysis_path.glob("*.png"))
+    if not all_images:
         st.info("No analysis charts found.")
         return
+
+    # Group by leading numeric prefix (e.g., "01_", "02_"). When multiple
+    # files share a prefix (old vs new naming scheme), keep only the newest.
+    _PREFIX_RE = _re.compile(r"^(\d+)[_\-]")
+    prefix_groups: dict = {}  # prefix -> list of Path
+    no_prefix: list = []
+    for img in all_images:
+        m = _PREFIX_RE.match(img.name)
+        if m:
+            prefix_groups.setdefault(m.group(1), []).append(img)
+        else:
+            no_prefix.append(img)
+
+    images: list = []
+    for prefix in sorted(prefix_groups.keys()):
+        group = prefix_groups[prefix]
+        if len(group) == 1:
+            images.append(group[0])
+        else:
+            # Keep only the newest file in this prefix group
+            images.append(max(group, key=lambda p: p.stat().st_mtime))
+    images.extend(sorted(no_prefix))
 
     st.header("Analysis Charts")
     # Single-column for wide figures; 2-col grid otherwise

@@ -48,12 +48,14 @@ simulation:
   view_analysis: "📊 查看分析"
   run_analysis: "📊 运行分析"
   rerun: "▶ 重新运行"
+  continue: "▶ 继续"
 
   # Button help text
   load_results_help: "重放已保存的实验数据，无需重新运行仿真"
   view_analysis_help: "直接跳转到分析页面，无需重放"
   run_analysis_help: "分析缺失或早于数据 — 运行分析脚本以（重）新生成图表并查看"
   rerun_help: "开始新的仿真（将覆盖现有数据）"
+  continue_help: "从暂停位置继续重放"
   view_analysis_running_help: "仿真运行时跳转到分析页面"
 
   # Metrics
