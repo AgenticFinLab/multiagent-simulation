@@ -28,19 +28,32 @@ from ..config_loader import (
 )
 from ..customized import (
     CustomizedAgentSelection,
+    RosterEntry,
+    add_entry,
     apply_customized_modifications,
     apply_default_bundle_overrides,
+    clear_roster,
     copy_default_scenario_bundle,
+    duplicate_entry,
+    entries_for_type,
     extract_default_players,
     extract_market_extras,
+    find_entry,
     get_default_prompts,
+    get_roster,
     initialize_customized_folder,
     is_archetype_supported,
     is_scenario_compatible,
+    migrate_from_legacy_state,
     parse_parameters_file,
+    remove_entry,
     restore_state_to_session,
     save_state_from_session,
     scenario_market_features,
+    set_roster,
+    total_instances,
+    unique_agent_types,
+    update_entry,
     write_customized_bundle,
     write_default_scenario_bundle,
 )
@@ -2213,11 +2226,18 @@ def _clear_query_agent() -> None:
 
 
 def _selected_types(catalog: list[dict[str, Any]]) -> list[str]:
-    return [
-        agent["agent_type"]
-        for agent in catalog
-        if st.session_state.get(f"market_agent_{agent['agent_type']}", False)
-    ]
+    """Distinct archetypes present in the current roster, in catalog order.
+
+    The old flat model tracked selection via ``market_agent_{type}`` flags;
+    with the roster refactor, selection is derived from the presence of at
+    least one :class:`RosterEntry` for that archetype. The result is
+    intersected with the catalog to keep icon-grid rendering deterministic
+    even when the roster has entries for archetypes the current catalog
+    signature no longer knows about.
+    """
+    roster = get_roster(st.session_state)
+    active = set(unique_agent_types(roster))
+    return [agent["agent_type"] for agent in catalog if agent["agent_type"] in active]
 
 
 def _inject_market_styles() -> None:
@@ -2507,43 +2527,77 @@ def _load_param_specs(agent: dict[str, Any]) -> list[ParamSpec]:
     return parse_parameters_file(profile_path)
 
 
-@st.dialog("Customize Agent", width="large")
-def _show_customize_dialog(agent: dict[str, Any]) -> None:
-    """Dialog overlay for agent customization.
+@st.dialog("Edit roster entry", width="large")
+def _show_entry_edit_dialog(agent: dict[str, Any], entry_id: str) -> None:
+    """Dialog overlay for editing ONE roster entry.
 
-    Opened by the Customize button on each agent card. Replaces the
-    previous layout-reshuffling approach (panel_col + grid_col) with a
-    lightweight modal that doesn't force a full grid re-render.
+    Opened by the Edit / Configure buttons in the customize page.  The
+    entry_id argument scopes every widget key inside the dialog so
+    multiple entries of the same archetype can be edited independently
+    without stepping on each other's widget state.
     """
-    _render_param_panel(agent)
+    _render_entry_edit_panel(agent, entry_id)
 
 
-def _render_param_panel(agent: dict[str, Any]) -> None:
-    """Render the editable parameter panel for an agent.
+def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
+    """Render the editable parameter panel for one roster entry.
 
-    Can be called standalone (inside a dialog, container, or column).
+    Everything inside this panel is scoped by ``entry_id`` — the entry
+    can be a fresh one that was just added by the +Add button, or an
+    existing entry the user opened via the "My Roster" list.
 
-    Behaviour:
-    - Engine selector (segmented control) at the top.
-    - One widget per parameter row: number_input for numerics, selectbox
-      for enums, text_input as a fallback.
-    - "Reset to defaults" reverts the agent's edits to the handbook
-      defaults; "Add to market" persists params and ticks the
-      Add-to-Market checkbox in one atomic action.
+    On **Save changes**: writes engine / num_instances / label / params
+    back into the ``RosterEntry`` in session state, then closes the
+    dialog with a toast.
+
+    On **Reset to defaults**: clears the entry's ``params`` dict and
+    every entry-scoped widget so the fields fall back to handbook
+    defaults on the next open.
+
+    On **Delete this entry**: removes the entry from the roster (with
+    an inline confirmation) and closes the dialog.
     """
+    roster = get_roster(st.session_state)
+    entry = find_entry(roster, entry_id)
+    if entry is None:
+        st.error(
+            "This roster entry no longer exists — it may have been "
+            "removed in another tab. Close this dialog and try again."
+        )
+        if st.button("Close", key=f"entry_missing_close_{entry_id}"):
+            st.rerun()
+        return
+
     agent_type = agent["agent_type"]
-    # Every agent supports all decision engines by default, so the selector
-    # always offers the full set (Rule / LLM / RuleLLM / RAG).
     all_engines = [e for e in ALL_ENGINES if e not in _DISABLED_ENGINES]
     specs = _load_param_specs(agent)
 
-    st.markdown('<div class="market-kicker">Customize</div>', unsafe_allow_html=True)
+    st.markdown('<div class="market-kicker">Edit roster entry</div>', unsafe_allow_html=True)
     st.subheader(agent["display_name"])
-    st.caption(agent["agent_type"])
+    header_bits = [f"`{agent_type}`", f"Entry ID `{entry_id}`"]
+    st.caption(" · ".join(header_bits))
+
+    # ---- Optional label -------------------------------------------------
+    label_key = f"entry_{entry_id}_label"
+    if label_key not in st.session_state:
+        st.session_state[label_key] = entry.label or ""
+    st.text_input(
+        "Preset label (optional)",
+        key=label_key,
+        placeholder="e.g. Aggressive, Cautious, Whale…",
+        help=(
+            "Optional nickname shown next to this entry in the "
+            "**My Roster** list. Leave empty to fall back to the "
+            "archetype's default name."
+        ),
+    )
 
     # ---- Engine selector ------------------------------------------------
-    engine_key = f"market_engine_{agent_type}"
-    if engine_key not in st.session_state or st.session_state[engine_key] not in all_engines:
+    engine_key = f"entry_{entry_id}_engine"
+    if engine_key not in st.session_state:
+        default_engine = entry.engine if entry.engine in all_engines else all_engines[0]
+        st.session_state[engine_key] = default_engine
+    elif st.session_state[engine_key] not in all_engines:
         st.session_state[engine_key] = all_engines[0]
 
     st.segmented_control(
@@ -2563,127 +2617,135 @@ def _render_param_panel(agent: dict[str, Any]) -> None:
         )
     engine = st.session_state[engine_key]
 
-    if not specs:
-        st.info(
-            "This agent's handbook has no `## Parameters` table; "
-            "defaults will be used as-is."
-        )
-
     # ---- Instance count -------------------------------------------------
-    # Per-archetype num_instances lets the user spawn multiple copies of
-    # the same agent under distinct YAML block keys (deduplicated
-    # downstream via `_render_agent_block`).  Persisted under a top-level
-    # session key so it survives dialog closes and page reruns.
-    ninst_key = f"customized_num_instances_{agent_type}"
-    ninst_default = int(st.session_state.get(ninst_key, 1) or 1)
-    if ninst_default < 1:
-        ninst_default = 1
+    ninst_key = f"entry_{entry_id}_ninst"
+    if ninst_key not in st.session_state:
+        st.session_state[ninst_key] = int(entry.num_instances or 1)
     st.number_input(
         "Instances",
         min_value=1,
         max_value=100,
-        value=ninst_default,
         step=1,
         key=ninst_key,
         help=(
-            "How many independent copies of this agent to spawn. Each "
-            "instance receives its own identity and record path; they "
+            "How many independent copies of THIS configured entry to spawn. "
+            "Each instance receives its own identity and record path; they "
             "share the same class, engine, and parameter values but act "
             "independently. **Config key:** `num_instances`."
         ),
     )
 
     # ---- Per-parameter widgets -----------------------------------------
-    persisted = (
-        st.session_state.setdefault("customized_params", {})
-        .setdefault(agent_type, {})
-        .setdefault(engine, {})
-    )
+    if not specs:
+        st.info(
+            "This agent's handbook has no `## Parameters` table; "
+            "defaults will be used as-is."
+        )
     edited: dict[str, Any] = {}
+    persisted_params = dict(entry.params)
     with st.container():
         for spec in specs:
-            value = _render_param_widget(agent_type, engine, spec, persisted)
+            value = _render_entry_param_widget(
+                entry_id=entry_id,
+                spec=spec,
+                persisted=persisted_params,
+            )
             edited[spec.symbol] = value
 
     # ---- LLM-engine extras (prompt + hyperparameters) ------------------
     if engine in {"LLM", "RuleLLM", "Rag"}:
-        _render_llm_extras(agent, agent_type, engine, persisted, edited)
+        _render_entry_llm_extras(
+            agent=agent,
+            entry_id=entry_id,
+            engine=engine,
+            persisted=persisted_params,
+            edited=edited,
+        )
 
     # ---- Action buttons -------------------------------------------------
     st.divider()
-    already_in = bool(st.session_state.get(f"market_agent_{agent_type}", False))
-    if already_in:
-        # Present four buttons when the agent is already in the market:
-        # Update / Remove / Reset / Close.
-        btn_add, btn_rm, btn_reset, btn_close = st.columns([2, 2, 1, 1])
-    else:
-        # Three buttons when not yet added: Add / Reset / Close.
-        btn_add, btn_reset, btn_close = st.columns([3, 1, 1])
-        btn_rm = None
-    with btn_add:
-        primary_label = "Update in market" if already_in else "Add to market"
-        if st.button(primary_label, type="primary", width="stretch",
-                     key=f"customized_add_{agent_type}"):
-            persisted.clear()
-            persisted.update(edited)
-            st.session_state[f"market_agent_{agent_type}"] = True
+    btn_save, btn_reset, btn_del, btn_close = st.columns([3, 1, 1, 1])
+    with btn_save:
+        if st.button(
+            "Save changes",
+            type="primary",
+            width="stretch",
+            key=f"entry_{entry_id}_save",
+        ):
+            update_entry(
+                roster,
+                entry_id,
+                engine=st.session_state.get(engine_key, engine),
+                num_instances=int(st.session_state.get(ninst_key, 1) or 1),
+                label=st.session_state.get(label_key) or None,
+                params=edited,
+            )
             save_state_from_session(project_root=PROJECT_ROOT)
-            st.toast(f"{agent['display_name']} → market", icon="✅")
+            st.toast(
+                f"{agent['display_name']} entry updated",
+                icon="✅",
+            )
             st.rerun()
-    if btn_rm is not None:
-        with btn_rm:
-            if st.button(
-                "Remove from market",
-                width="stretch",
-                key=f"customized_remove_{agent_type}",
-                help=(
-                    "Uncheck this agent from the market roster. Its "
-                    "customized parameters are preserved in session state "
-                    "so re-adding it restores the last edits."
-                ),
-            ):
-                st.session_state[f"market_agent_{agent_type}"] = False
-                # Also strip it from the durable selection list so the
-                # sidebar preview and Launch button update immediately.
-                cur = list(st.session_state.get("selected_market_agents", []))
-                st.session_state.selected_market_agents = [
-                    t for t in cur if t != agent_type
-                ]
-                save_state_from_session(project_root=PROJECT_ROOT)
-                st.toast(f"{agent['display_name']} removed", icon="🗑️")
-                st.rerun()
     with btn_reset:
-        if st.button("Reset", width="stretch",
-                     key=f"customized_reset_{agent_type}"):
-            persisted.clear()
-            for sub_key in list(st.session_state.keys()):
-                if sub_key.startswith(f"customized_input_{agent_type}_{engine}_"):
-                    del st.session_state[sub_key]
-            # Also reset the num_instances widget back to 1.
-            st.session_state[ninst_key] = 1
+        if st.button(
+            "Reset",
+            width="stretch",
+            key=f"entry_{entry_id}_reset",
+            help=(
+                "Clear this entry's parameter overrides and revert to "
+                "handbook defaults. Engine and instance count are kept."
+            ),
+        ):
+            update_entry(roster, entry_id, params={})
+            # Also drop every entry-scoped widget so their defaults
+            # repopulate from the handbook on the next open.
+            for wkey in list(st.session_state.keys()):
+                if wkey.startswith(f"entry_{entry_id}_input_") or (
+                    wkey.startswith(f"entry_{entry_id}_llm_")
+                ):
+                    del st.session_state[wkey]
+            save_state_from_session(project_root=PROJECT_ROOT)
+            st.toast("Parameters reset", icon="↺")
+            st.rerun()
+    with btn_del:
+        if st.button(
+            "× Delete",
+            width="stretch",
+            key=f"entry_{entry_id}_delete",
+            help="Remove this entry from the roster.",
+        ):
+            remove_entry(roster, entry_id)
+            # Drop scoped widget state so nothing lingers.
+            for wkey in list(st.session_state.keys()):
+                if wkey.startswith(f"entry_{entry_id}_"):
+                    del st.session_state[wkey]
+            save_state_from_session(project_root=PROJECT_ROOT)
+            st.toast(
+                f"{agent['display_name']} entry removed",
+                icon="🗑️",
+            )
             st.rerun()
     with btn_close:
-        if st.button("Close", width="stretch",
-                     key=f"customized_close_{agent_type}"):
+        if st.button(
+            "Close",
+            width="stretch",
+            key=f"entry_{entry_id}_close",
+        ):
             st.rerun()
 
 
-def _render_param_widget(
-    agent_type: str,
-    engine: str,
+def _render_entry_param_widget(
+    *,
+    entry_id: str,
     spec: ParamSpec,
     persisted: dict[str, Any],
 ) -> Any:
-    """Render one editable widget for a parameter spec, return its value.
+    """Render one editable widget for a parameter spec, scoped to an entry.
 
-    UX rule: the row shows ONLY the human-readable label (and the
-    widget itself).  Every piece of metadata — description, default,
-    range, units, sensitivity, impact, raw config key, source — lives
-    inside the widget's ``help`` tooltip and is revealed on demand
-    when the user hovers the ``?`` icon Streamlit renders next to the
-    label.  No gray captions are emitted below the widget.
+    Widget key format: ``entry_{entry_id}_input_{symbol}`` — unique across
+    the app so two entries of the same archetype never share state.
     """
-    widget_key = f"customized_input_{agent_type}_{engine}_{spec.symbol}"
+    widget_key = f"entry_{entry_id}_input_{spec.symbol}"
     initial = persisted.get(spec.symbol, spec.default_value)
     label_main = spec.display_label
     help_text = _compose_help(spec)
@@ -2703,8 +2765,6 @@ def _render_param_widget(
         )
 
     if spec.kind == "int":
-        # Streamlit's number_input rejects None; coerce missing values
-        # to 0 so the widget can render.
         coerced = int(initial) if isinstance(initial, (int, float)) else 0
         kwargs: dict[str, Any] = {"step": 1, "key": widget_key, "help": help_text}
         if spec.numeric_low is not None and spec.numeric_low != float("-inf"):
@@ -2722,8 +2782,6 @@ def _render_param_widget(
             kwargs["max_value"] = float(spec.numeric_high)
         return st.number_input(label_main, value=coerced_f, **kwargs)
 
-    # Free-text fallback (covers list-valued defaults like
-    # ``[-0.01, -0.02, ...]`` and Greek-letter symbols).
     return st.text_input(
         label_main,
         value=str(initial) if initial is not None else "",
@@ -2732,34 +2790,36 @@ def _render_param_widget(
     )
 
 
-def _render_llm_extras(
+def _render_entry_llm_extras(
+    *,
     agent: dict[str, Any],
-    agent_type: str,
+    entry_id: str,
     engine: str,
     persisted: dict[str, Any],
     edited: dict[str, Any],
 ) -> None:
-    """Render LLM hyperparameters and editable prompt textareas.
+    """Render LLM hyperparameters and editable prompt textareas for an entry.
 
-    Two prompts are exposed because every LLM player in this codebase
-    follows the same two-message contract: a *system prompt* that
-    defines the persona once, and a *user prompt template* that is
-    rendered every round with the current market state injected via
-    ``str.format(**vars)``.  Both are editable here; both are persisted
-    under reserved sentinel keys so they round-trip with the rest of
-    the agent's customized params:
+    Widget keys are ``entry_{entry_id}_llm_{field}_{engine}`` where
+    ``field`` is one of ``lm`` / ``temp`` / ``tokens`` / ``sysprompt`` /
+    ``userprompt``.  Values are written into ``edited`` under the
+    reserved ``__llm_*__`` sentinels so they round-trip with the rest of
+    the entry's params on the next Save.
 
-        ``__llm_lm_name__``, ``__llm_temperature__``, ``__llm_max_tokens__``,
-        ``__llm_system_prompt__``, ``__llm_user_prompt__``.
+    IMPORTANT: the key names above must stay in lock-step with the
+    ``_llm_widget_map`` inside :func:`_build_selections_from_session` —
+    that map is what folds unsaved prompt edits back into the launch
+    payload.  Renaming here without updating there silently drops any
+    prompt edit the user has typed but not yet clicked "Save" on.
     """
     st.markdown("---")
     st.markdown(f"**LLM settings** — *{VARIANT_DISPLAY.get(engine, engine)} engine*")
 
-    lm_key = f"customized_llm_lm_{agent_type}_{engine}"
-    temp_key = f"customized_llm_temp_{agent_type}_{engine}"
-    tok_key = f"customized_llm_tokens_{agent_type}_{engine}"
-    sys_key = f"customized_llm_sysprompt_{agent_type}_{engine}"
-    usr_key = f"customized_llm_userprompt_{agent_type}_{engine}"
+    lm_key = f"entry_{entry_id}_llm_lm_{engine}"
+    temp_key = f"entry_{entry_id}_llm_temp_{engine}"
+    tok_key = f"entry_{entry_id}_llm_tokens_{engine}"
+    sys_key = f"entry_{entry_id}_llm_sysprompt_{engine}"
+    usr_key = f"entry_{entry_id}_llm_userprompt_{engine}"
 
     lm_default = persisted.get("__llm_lm_name__", "ark/doubao-seed-2-0-mini-260428")
     temp_default = float(persisted.get("__llm_temperature__", 0.7))
@@ -2767,14 +2827,7 @@ def _render_llm_extras(
     sys_default = str(persisted.get("__llm_system_prompt__", ""))
     usr_default = str(persisted.get("__llm_user_prompt__", ""))
 
-    # Pre-fill the textareas with the shipped default prompt so users
-    # can SEE the actual prompt the agent will run with, instead of
-    # staring at an empty box. ``shipped_*`` is the upstream default
-    # imported from the example codebase; ``*_default`` is whatever the
-    # user has typed so far. We treat "persisted matches the shipped
-    # default" as "still default", and the textarea simply renders the
-    # shipped string as its initial value.
-    shipped_sys, shipped_user = get_default_prompts(agent_type, engine)
+    shipped_sys, shipped_user = get_default_prompts(agent["agent_type"], engine)
     if not sys_default and shipped_sys:
         sys_default = shipped_sys
     if not usr_default and shipped_user:
@@ -2943,22 +2996,26 @@ def _compose_help(spec: ParamSpec) -> str:
 def _render_agent_card(agent: dict[str, Any]) -> None:
     """Render one card in the agent grid.
 
-    Performance-critical: rendered ~200 times per page load.
+    Roster-aware: multiple entries per archetype are surfaced as an
+    aggregate badge (``N entries · M×``) and a compact secondary link
+    labelled "Manage N entries" that scrolls the user to the *My Roster*
+    section below.
 
-    Image uses ``st.image(path, use_container_width=True)`` so Streamlit
-    deduplicates the binary across reruns (browser-cached) and renders
-    at full column width, preserving source resolution on Retina
-    displays.
+    Two primary actions on every card:
 
-    UX: two distinct interaction modes:
-      * **Not selected** → "+ Add" button provides one-click selection
-        with default engine (Rule); "Customize" opens the dialog for
-        users who want to configure before adding.
-      * **Selected** → Richer badge shows engine + instance count;
-        "Customize" for editing; "Remove" for deselection.
+      * **+ Add** — append a new :class:`RosterEntry` for this archetype
+        with default engine (Rule) and instance count 1. Immediate;
+        surfaces a toast.
+      * **Configure…** — append a fresh entry *and* open the edit dialog
+        so the user can pick engine / edit params / adjust instance count
+        before the entry is committed to the roster.
     """
     agent_type = agent["agent_type"]
-    selected = bool(st.session_state.get(f"market_agent_{agent_type}", False))
+    roster = get_roster(st.session_state)
+    entries_here = entries_for_type(roster, agent_type)
+    entry_count = len(entries_here)
+    instance_count = sum(int(e.num_instances or 1) for e in entries_here)
+    selected = entry_count > 0
 
     # --- Image (browser-cached, full-column width) -------------------
     img_path = Path(agent["image_file"])
@@ -2975,26 +3032,17 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
 
     # --- Status badge (compact pill beneath image) -------------------
     if selected:
-        engine = st.session_state.get(f"market_engine_{agent_type}", "Rule")
-        ninst = int(
-            st.session_state.get(
-                f"customized_num_instances_{agent_type}", 1
-            ) or 1
+        # Show engine breakdown when heterogeneous.
+        engines = {e.engine for e in entries_here}
+        engine_label = (
+            next(iter(engines)) if len(engines) == 1 else "mixed"
         )
-        # Check if any handbook params have been customized
-        customized_params = st.session_state.get("customized_params") or {}
-        agent_params = customized_params.get(agent_type, {}).get(engine, {})
-        has_edits = bool(
-            {k for k in agent_params if not k.startswith("__llm_")}
-        )
-
-        # Build concise status: "✓ LLM ×3 ·edited" or "✓ Rule"
-        parts = [f"\u2713 {engine}"]
-        if ninst > 1:
-            parts.append(f"\u00d7{ninst}")
-        badge_text = " ".join(parts)
-        if has_edits:
-            badge_text += " · edited"
+        parts = [f"\u2713 {engine_label}"]
+        if entry_count > 1:
+            parts.append(f"{entry_count} entries")
+        if instance_count != entry_count:
+            parts.append(f"\u00d7{instance_count}")
+        badge_text = " · ".join(parts)
 
         badge = (
             "<div style='text-align:center;margin:4px 0 2px;'>"
@@ -3007,7 +3055,7 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
             "<div style='text-align:center;margin:4px 0 2px;'>"
             "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
             "border-radius:10px;background:#f0f2f4;color:#6c757d;'>"
-            "not selected</span></div>"
+            "not in roster</span></div>"
         )
     st.markdown(badge, unsafe_allow_html=True)
 
@@ -3020,56 +3068,50 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
     ):
         _show_catalog_agent_profile_dialog(agent)
 
-    # --- Action buttons: differ based on selection state -------------
+    # --- Primary action row: + Add (quick) and Configure… (opens dialog)
+    if st.button(
+        "+ Add",
+        key=f"market_quick_add_{agent_type}",
+        type="primary",
+        width="stretch",
+        help=(
+            "Append a new roster entry for this agent with default "
+            "settings (Rule engine, 1 instance). You can add the same "
+            "agent multiple times with different configurations."
+        ),
+    ):
+        add_entry(roster, agent_type=agent_type, engine="Rule", num_instances=1)
+        save_state_from_session(project_root=PROJECT_ROOT)
+        st.toast(f"Added {agent['display_name']}", icon="➕")
+        st.rerun()
+
+    if st.button(
+        "Configure…",
+        key=f"market_configure_{agent_type}",
+        type="tertiary",
+        width="stretch",
+        help=(
+            "Create a new roster entry and immediately open its editor "
+            "to pick engine, adjust parameters, and (for LLM engines) "
+            "edit the prompt before committing."
+        ),
+    ):
+        new_entry = add_entry(
+            roster, agent_type=agent_type, engine="Rule", num_instances=1
+        )
+        save_state_from_session(project_root=PROJECT_ROOT)
+        _show_entry_edit_dialog(agent, new_entry.id)
+
+    # --- Secondary action: quick jump to the Roster list for management
     if selected:
-        # Already in market → primary action is Customize; secondary is Remove
-        if st.button(
-            "Customize",
-            key=f"market_customize_{agent_type}",
-            width="stretch",
-            help="Edit this agent's engine, parameters, and prompts.",
-        ):
-            _show_customize_dialog(agent)
-        if st.button(
-            "× Remove",
-            key=f"market_quick_remove_{agent_type}",
-            type="tertiary",
-            width="stretch",
-            help="Remove this agent from the market roster.",
-        ):
-            st.session_state[f"market_agent_{agent_type}"] = False
-            cur = list(st.session_state.get("selected_market_agents", []))
-            st.session_state.selected_market_agents = [
-                t for t in cur if t != agent_type
-            ]
-            save_state_from_session(project_root=PROJECT_ROOT)
-            st.rerun()
-    else:
-        # Not in market → primary action is quick Add; secondary is Customize
-        if st.button(
-            "+ Add",
-            key=f"market_quick_add_{agent_type}",
-            type="primary",
-            width="stretch",
-            help="Add this agent to the market with default settings (Rule engine).",
-        ):
-            st.session_state[f"market_agent_{agent_type}"] = True
-            # Also append to the durable selection list so
-            # save_state_from_session persists the full roster.
-            cur = list(st.session_state.get("selected_market_agents", []))
-            if agent_type not in cur:
-                cur.append(agent_type)
-            st.session_state.selected_market_agents = cur
-            save_state_from_session(project_root=PROJECT_ROOT)
-            st.rerun()
-        if st.button(
-            "Customize",
-            key=f"market_customize_{agent_type}",
-            type="tertiary",
-            width="stretch",
-            help="Configure engine and parameters before adding.",
-        ):
-            _show_customize_dialog(agent)
+        st.markdown(
+            "<div style='text-align:center;margin-top:2px;'>"
+            "<span style='font-size:0.68rem;color:#6c757d;'>"
+            f"Manage in <b>My Roster</b> below ({entry_count} "
+            f"{'entry' if entry_count == 1 else 'entries'})"
+            "</span></div>",
+            unsafe_allow_html=True,
+        )
 
 
 def _class_to_agent_type(class_name: str) -> str:
@@ -3164,6 +3206,7 @@ def _render_live_market_preview(
         return
 
     node_ids = [a["agent_type"] for a in selected_agents]
+    roster = get_roster(st.session_state)
     topology = {
         "topology_type": "star",
         "sources": ["market"],
@@ -3175,11 +3218,7 @@ def _render_live_market_preview(
             "id": a["agent_type"],
             "name": a["display_name"],
             "theory": a.get("archetype", ""),
-            "instances": int(
-                st.session_state.get(
-                    f"customized_num_instances_{a['agent_type']}", 1
-                ) or 1
-            ),
+            "instances": total_instances(roster, a["agent_type"]) or 1,
             "role": "player",
         }
         for a in selected_agents
@@ -3226,10 +3265,10 @@ def render_customize() -> None:
         st.rerun()
 
     # --- Restore persisted selection state on fresh session entry ---
-    # If a bundle exists but no agents are loaded in memory (e.g. after
-    # a page refresh or app restart), attempt to recover from disk.
+    # If a bundle exists but no roster has been loaded in memory (e.g.
+    # after a page refresh or app restart), attempt to recover from disk.
     bundle_name = st.session_state.get("customized_bundle_name", "")
-    if bundle_name and not st.session_state.get("selected_market_agents"):
+    if bundle_name and not get_roster(st.session_state):
         restore_state_to_session(
             bundle_name=bundle_name, project_root=PROJECT_ROOT
         )
@@ -3237,19 +3276,47 @@ def render_customize() -> None:
     _inject_market_styles()
     catalog = load_agent_catalog(_agent_catalog_signature())
 
-    # Streamlit drops widget keys for un-rendered pages; restore the
-    # checkbox state from the durable market list when users return
-    # to this stage from the workspace.
-    saved_selection = set(st.session_state.get("selected_market_agents", []))
-    for agent in catalog:
-        key = f"market_agent_{agent['agent_type']}"
-        if key not in st.session_state:
-            st.session_state[key] = agent["agent_type"] in saved_selection
+    # One-time in-session migration: if a legacy flat selection still
+    # exists in session state (from a pre-refactor UI load) but the
+    # roster is empty, fold the flat state into a fresh roster so the
+    # user's previous work isn't lost when they navigate back to the
+    # Customize page.
+    if not get_roster(st.session_state):
+        legacy_selected = list(
+            st.session_state.get("selected_market_agents", []) or []
+        )
+        if legacy_selected:
+            legacy_engines: dict[str, str] = {}
+            legacy_ninst: dict[str, int] = {}
+            for agent_type in legacy_selected:
+                legacy_engines[agent_type] = st.session_state.get(
+                    f"market_engine_{agent_type}", "Rule"
+                )
+                try:
+                    legacy_ninst[agent_type] = int(
+                        st.session_state.get(
+                            f"customized_num_instances_{agent_type}", 1
+                        ) or 1
+                    )
+                except (TypeError, ValueError):
+                    legacy_ninst[agent_type] = 1
+            legacy_params = st.session_state.get("customized_params") or {}
+            entries = migrate_from_legacy_state(
+                selected_agents=legacy_selected,
+                engines=legacy_engines,
+                num_instances=legacy_ninst,
+                params=legacy_params,
+            )
+            set_roster(st.session_state, entries)
+
+    # Derived cache: ``selected_market_agents`` used to be the flat
+    # source of truth. We now compute it from the roster on every render
+    # so downstream consumers (sidebar, chips, preview) keep working.
+    roster_snapshot = get_roster(st.session_state)
+    st.session_state.selected_market_agents = unique_agent_types(roster_snapshot)
 
     # Compute the current selection ONCE up front so the sidebar preview and
-    # the main-column grid share a single source of truth. The preview lives
-    # in the sidebar (see _render_customize_sidebar) and re-renders on every
-    # rerun triggered by a checkbox toggle in the grid.
+    # the main-column grid share a single source of truth.
     selected_types_now = _selected_types(catalog)
     selected_agents_now = [
         a for a in catalog if a["agent_type"] in set(selected_types_now)
@@ -3340,20 +3407,36 @@ def render_customize() -> None:
             key="customize_load_default_top",
             help=default_help,
         ):
-            wanted = set(default_available)
-            for agent in catalog:
-                st.session_state[f"market_agent_{agent['agent_type']}"] = (
-                    agent["agent_type"] in wanted
+            # Roster semantics: the default preset REPLACES the current
+            # roster with one entry per default archetype so the user
+            # gets a clean starting point.  Any bespoke entries the user
+            # added get overwritten — matching the pre-refactor behaviour
+            # of the flat checkbox reset.
+            clear_roster(st.session_state)
+            # Also drop every entry-scoped widget key so stale values
+            # from the previous roster cannot leak into the fresh entries.
+            for wkey in list(st.session_state.keys()):
+                if wkey.startswith("entry_"):
+                    del st.session_state[wkey]
+            roster_now = get_roster(st.session_state)
+            for agent_type in default_available:
+                add_entry(
+                    roster_now,
+                    agent_type=agent_type,
+                    engine="Rule",
+                    num_instances=1,
                 )
             st.session_state.selected_market_agents = list(default_available)
             save_state_from_session(project_root=PROJECT_ROOT)
             st.rerun()
 
     st.write(
-        "Click **+ Add** to quickly add agents to the market. "
-        "Use **Customize** to change the decision engine (Rule / LLM / RuleLLM), "
-        "adjust parameters, or edit prompts before or after adding. "
-        "Click an agent's **name** to view its full design profile."
+        "Click **+ Add** on any agent card to append a new roster entry. "
+        "The same agent can appear multiple times with different engines "
+        "and parameters — click **Configure…** to edit before committing, "
+        "or open the **My Roster** list below to Edit / Duplicate / Remove "
+        "any entry independently. Click an agent's **name** for its full "
+        "design profile."
     )
 
     # Legacy inline profile (query-param based) kept for bookmarked URLs.
@@ -3361,8 +3444,6 @@ def render_customize() -> None:
     by_type = {agent["agent_type"]: agent for agent in catalog}
     if requested_agent in by_type:
         _render_profile(by_type[requested_agent])
-
-    selected_before = _selected_types(catalog)
 
     # ---- Agent grid: wrapped in @st.fragment for scoped reruns ------
     # Only search / grid widgets trigger fragment-local reruns.
@@ -3378,7 +3459,17 @@ def render_customize() -> None:
                 label_visibility="collapsed",
             )
         with count:
-            st.metric("Selected", len(_selected_types(catalog)))
+            roster_here = get_roster(st.session_state)
+            st.metric(
+                "Roster entries",
+                len(roster_here),
+                delta=(
+                    f"{total_instances(roster_here)} instances"
+                    if roster_here
+                    else None
+                ),
+                delta_color="off",
+            )
 
         query = search.strip().lower()
         filtered = [
@@ -3409,10 +3500,6 @@ def render_customize() -> None:
     st.session_state.selected_market_agents = selected
     selected_agents = [a for a in catalog if a["agent_type"] in set(selected)]
 
-    # Auto-save when grid selection changed (agent toggled via checkbox).
-    if set(selected) != saved_selection:
-        save_state_from_session(project_root=PROJECT_ROOT)
-
     # Inline compatibility warning: surface incompatible archetypes
     # before the user attempts to launch.
     compat_blocker = None
@@ -3432,6 +3519,12 @@ def render_customize() -> None:
                 f"**{scenario_display_name(scenario_base)}**:\n\n"
                 + "\n".join(f"- {r}" for r in compat_blocker)
             )
+
+    # ---- My Roster: full entry-level management ---------------------
+    # Rendered even when empty so first-time users see the affordance
+    # and know where their +Add clicks are going.
+    st.markdown("---")
+    _render_my_roster(catalog)
 
     # --- Market Parameters Editor ---
     bundle_name = st.session_state.get("customized_bundle_name", "")
@@ -3503,8 +3596,12 @@ def render_customize() -> None:
             disabled=not selected,
             key="customize_clear",
         ):
-            for agent in catalog:
-                st.session_state[f"market_agent_{agent['agent_type']}"] = False
+            clear_roster(st.session_state)
+            # Also drop every entry-scoped widget key so no stale widget
+            # state lingers if the user immediately adds new entries.
+            for wkey in list(st.session_state.keys()):
+                if wkey.startswith("entry_"):
+                    del st.session_state[wkey]
             st.session_state.selected_market_agents = []
             save_state_from_session(project_root=PROJECT_ROOT)
             st.rerun()
@@ -3536,15 +3633,20 @@ def render_customize() -> None:
 
 
 def _render_market_chips(agents: list[dict[str, Any]]) -> None:
+    """Render the compact "current market" strip.
+
+    Instance counts are aggregated across every roster entry that shares
+    the same ``agent_type`` so an archetype configured twice (e.g. 3
+    Aggressive + 2 Cautious NoiseTraders) surfaces the total (×5) rather
+    than the per-entry count.
+    """
+    roster = get_roster(st.session_state)
     chips = []
     for agent in agents:
-        ninst = int(
-            st.session_state.get(
-                f"customized_num_instances_{agent['agent_type']}", 1
-            ) or 1
-        )
+        ninst = total_instances(roster, agent["agent_type"])
+        entry_count = len(entries_for_type(roster, agent["agent_type"]))
         badge = ""
-        if ninst > 1:
+        if ninst > 1 or entry_count > 1:
             badge = (
                 f'<span style="margin-left:6px;padding:1px 6px;'
                 f'border-radius:8px;background:#2a5fa6;color:white;'
@@ -3560,6 +3662,189 @@ def _render_market_chips(agents: list[dict[str, Any]]) -> None:
         f'<div class="market-strip">{"".join(chips)}</div>',
         unsafe_allow_html=True,
     )
+
+
+def _render_my_roster(catalog: list[dict[str, Any]]) -> None:
+    """Render the *My Roster* list: one row per :class:`RosterEntry`.
+
+    This is the authoritative place for managing entries. Each row shows
+    a small icon, the archetype's display name, the optional label, the
+    engine chip, the instance count, and three actions:
+
+    * **Edit** — opens the entry's edit dialog (:func:`_show_entry_edit_dialog`).
+    * **Duplicate** — inserts a clone immediately below with a fresh id
+      (label suffixed with "(copy)" when present).
+    * **× Remove** — deletes just this row without touching the rest.
+
+    Empty roster renders a friendly hint pointing users at the grid /
+    Load default agents button above.
+    """
+    roster = get_roster(st.session_state)
+    st.markdown("**My Roster**")
+    if not roster:
+        st.caption(
+            "No entries yet — click **+ Add** on any agent card above to "
+            "append a fresh roster row, or **Load default agents** to seed "
+            "the scenario's shipped lineup."
+        )
+        return
+
+    st.caption(
+        f"{len(roster)} entries · "
+        f"{total_instances(roster)} total instances. "
+        "Each row is an independent configuration — the same agent can "
+        "appear multiple times with different engines or parameters."
+    )
+
+    by_type = {a["agent_type"]: a for a in catalog}
+    # Iterate over a snapshot so remove/duplicate reruns don't fight our loop.
+    for pos, entry in enumerate(list(roster), start=1):
+        agent = by_type.get(entry.agent_type)
+        if agent is None:
+            # Roster references an archetype no longer in the catalog —
+            # surface a stub with just remove available.
+            with st.container(border=True):
+                col_info, col_del = st.columns([6, 1])
+                with col_info:
+                    st.markdown(
+                        f"**{html.escape(entry.agent_type)}** "
+                        f"<span style='color:#c1272d'>· catalog entry missing</span>",
+                        unsafe_allow_html=True,
+                    )
+                    st.caption(f"Entry `{entry.id}` · engine {entry.engine}")
+                with col_del:
+                    if st.button(
+                        "× Remove",
+                        key=f"roster_del_orphan_{entry.id}",
+                        type="tertiary",
+                    ):
+                        remove_entry(roster, entry.id)
+                        save_state_from_session(project_root=PROJECT_ROOT)
+                        st.rerun()
+            continue
+
+        with st.container(border=True):
+            icon_col, main_col, action_col = st.columns([1, 5, 3])
+            with icon_col:
+                img_path = Path(agent.get("image_file", ""))
+                if img_path.exists():
+                    st.image(str(img_path), use_container_width=True)
+                else:
+                    st.markdown(
+                        "<div style='width:100%;aspect-ratio:1/1;"
+                        "border-radius:6px;background:#e8f0fb;"
+                        "display:flex;align-items:center;justify-content:center;"
+                        "color:#2a5fa6;font-weight:700;'>"
+                        f"{agent['display_name'][0]}</div>",
+                        unsafe_allow_html=True,
+                    )
+
+            with main_col:
+                # Header line: display name (+ optional label) + positional
+                # badge so the user can spot which entry they're editing.
+                label_html = ""
+                if entry.label:
+                    label_html = (
+                        "<span style='margin-left:8px;padding:2px 8px;"
+                        "border-radius:10px;background:#eef4ff;color:#264d80;"
+                        "font-size:0.72rem;font-weight:600;'>"
+                        f"{html.escape(entry.label)}</span>"
+                    )
+                st.markdown(
+                    f"<div style='font-size:1.02rem;font-weight:600;'>"
+                    f"{html.escape(agent['display_name'])}"
+                    f"<span style='margin-left:8px;color:#6c757d;"
+                    f"font-size:0.75rem;font-weight:500;'>#{pos}</span>"
+                    f"{label_html}</div>",
+                    unsafe_allow_html=True,
+                )
+                # Second line: engine chip + instance count + edit summary.
+                param_count = sum(
+                    1 for k in entry.params if not k.startswith("__llm_")
+                )
+                llm_edited = any(
+                    k.startswith("__llm_") for k in entry.params
+                )
+                summary_bits = [
+                    f"<span style='padding:1px 8px;border-radius:10px;"
+                    f"background:#f0f4fa;color:#2a5fa6;font-size:0.72rem;"
+                    f"font-weight:600;'>{html.escape(entry.engine)}</span>",
+                    f"<span style='color:#6c757d;font-size:0.78rem;'>"
+                    f"×{entry.num_instances} instances</span>",
+                ]
+                if param_count:
+                    summary_bits.append(
+                        f"<span style='color:#6c757d;font-size:0.78rem;'>"
+                        f"{param_count} param{'s' if param_count > 1 else ''} edited</span>"
+                    )
+                if llm_edited:
+                    summary_bits.append(
+                        "<span style='color:#6c757d;font-size:0.78rem;'>"
+                        "LLM overrides</span>"
+                    )
+                st.markdown(
+                    "<div style='margin-top:2px;display:flex;gap:10px;"
+                    "align-items:center;flex-wrap:wrap;'>"
+                    + "".join(summary_bits)
+                    + "</div>",
+                    unsafe_allow_html=True,
+                )
+                st.caption(f"Entry id: `{entry.id}`")
+
+            with action_col:
+                edit_col, dup_col, del_col = st.columns(3)
+                with edit_col:
+                    if st.button(
+                        "Edit",
+                        key=f"roster_edit_{entry.id}",
+                        width="stretch",
+                        help="Open the edit dialog for this entry only.",
+                    ):
+                        _show_entry_edit_dialog(agent, entry.id)
+                with dup_col:
+                    if st.button(
+                        "Duplicate",
+                        key=f"roster_dup_{entry.id}",
+                        width="stretch",
+                        help=(
+                            "Insert a copy of this entry immediately below. "
+                            "Handy for tweaking a variant without losing the "
+                            "original."
+                        ),
+                    ):
+                        clone = duplicate_entry(roster, entry.id)
+                        # Copy widget state so the new entry opens with the
+                        # same values pre-populated on first edit.
+                        if clone is not None:
+                            src_prefix = f"entry_{entry.id}_"
+                            dst_prefix = f"entry_{clone.id}_"
+                            for wkey in list(st.session_state.keys()):
+                                if wkey.startswith(src_prefix):
+                                    tail = wkey[len(src_prefix):]
+                                    st.session_state[dst_prefix + tail] = (
+                                        st.session_state[wkey]
+                                    )
+                        save_state_from_session(project_root=PROJECT_ROOT)
+                        st.toast("Entry duplicated", icon="📄")
+                        st.rerun()
+                with del_col:
+                    if st.button(
+                        "× Remove",
+                        key=f"roster_del_{entry.id}",
+                        type="tertiary",
+                        width="stretch",
+                        help="Delete this entry without touching the others.",
+                    ):
+                        remove_entry(roster, entry.id)
+                        # Drop scoped widget state so nothing lingers for
+                        # future entries that happen to reuse the id space.
+                        prefix = f"entry_{entry.id}_"
+                        for wkey in list(st.session_state.keys()):
+                            if wkey.startswith(prefix):
+                                del st.session_state[wkey]
+                        save_state_from_session(project_root=PROJECT_ROOT)
+                        st.toast("Entry removed", icon="🗑️")
+                        st.rerun()
 
 
 def _render_scenario_card(
@@ -3705,48 +3990,43 @@ def _render_config_preview(
             "launch.  Numbers reflect the current session state; the "
             "Launch button uses this exact snapshot."
         )
-        customized_params = st.session_state.get("customized_params") or {}
+        by_type = {a["agent_type"]: a for a in selected_agents}
+        roster = get_roster(st.session_state)
         rows: list[dict[str, Any]] = []
-        for agent in selected_agents:
-            agent_type = agent["agent_type"]
-            engine = st.session_state.get(
-                f"market_engine_{agent_type}",
-                ALL_ENGINES[0],
+        for pos, entry in enumerate(roster, start=1):
+            agent = by_type.get(entry.agent_type)
+            display_name = (
+                agent["display_name"] if agent else entry.agent_type
             )
-            ninst = int(
-                st.session_state.get(
-                    f"customized_num_instances_{agent_type}", 1
-                ) or 1
-            )
-            persisted = customized_params.get(agent_type, {}).get(engine, {}) or {}
-            # Count widgets that are ALSO in session state (unsaved edits).
-            widget_prefix = f"customized_input_{agent_type}_{engine}_"
+            # Merge entry.params with live entry-scoped widget snapshot
+            # so the preview reflects unsaved edits.
+            widget_prefix = f"entry_{entry.id}_input_"
             live_widget_keys = {
                 k[len(widget_prefix):]
                 for k in st.session_state.keys()
                 if k.startswith(widget_prefix)
             }
-            # Total customized symbols = union of persisted keys + live
-            # widget keys, minus reserved LLM sentinels (which we count
-            # separately as "prompts/hyperparams" so the user can tell
-            # handbook params apart from LLM overrides).
-            all_symbols = set(persisted.keys()) | live_widget_keys
+            all_symbols = set(entry.params.keys()) | live_widget_keys
             handbook_syms = {
                 s for s in all_symbols if not s.startswith("__llm_")
             }
             llm_syms = {s for s in all_symbols if s.startswith("__llm_")}
+            label_display = entry.label or ""
             rows.append({
-                "Agent": agent["display_name"],
-                "Archetype": agent_type,
-                "Engine": engine,
-                "Instances": ninst,
+                "#": pos,
+                "Agent": display_name,
+                "Label": label_display,
+                "Archetype": entry.agent_type,
+                "Engine": entry.engine,
+                "Instances": int(entry.num_instances or 1),
                 "Custom params": len(handbook_syms),
                 "LLM overrides": len(llm_syms),
+                "Entry id": entry.id,
             })
         if rows:
             st.dataframe(rows, width="stretch", hide_index=True)
         else:
-            st.info("No agents selected yet.")
+            st.info("No entries in the roster yet.")
 
         # Rounds + market-extras summary.
         rounds_now = int(
@@ -3853,76 +4133,109 @@ def _build_selections_from_session(
     selected_agents: list[dict[str, Any]],
     persist_merge: bool = True,
 ) -> list[CustomizedAgentSelection]:
-    """Collect ``CustomizedAgentSelection`` list from live session state.
+    """Collect ``CustomizedAgentSelection`` list from the live roster.
 
-    Central helper used by both the Preview and Launch paths so the widget
-    sweep policy is defined in exactly one place. For every selected
-    agent it:
+    Iterates :func:`get_roster` in list order and emits one
+    :class:`CustomizedAgentSelection` per :class:`RosterEntry`.  This
+    means the same archetype can appear multiple times in the resulting
+    list — the bundle writer's key-deduplication logic (see
+    ``config_writer._render_agent_block``) handles that transparently by
+    suffixing the second, third, … entry keys with ``_2``, ``_3`` etc.
 
-      * resolves the engine from ``market_engine_{type}`` (defaulting to
-        the first entry in ``ALL_ENGINES``);
-      * sweeps every live widget under
-        ``customized_input_{type}_{engine}_*`` and the ``__llm_*__``
-        sentinels, so dialog edits are captured even when the user never
-        clicked "Add to market";
-      * merges the sweep on top of ``customized_params[type][engine]``,
-        with widget values winning ties;
-      * reads the per-agent instance count from
-        ``customized_num_instances_{type}`` (min = 1);
-      * optionally writes the merged params back into
-        ``customized_params`` so subsequent dialog opens and the on-disk
-        ``selection_state.json`` see the same values.
+    Widget sweep: for the currently active edit dialog (if any) the
+    entry-scoped widget keys (``entry_{entry.id}_input_*`` and
+    ``entry_{entry.id}_llm_*_<engine>``) are folded on top of the
+    entry's stored ``params`` so unsaved dialog edits still flow into
+    the preview / launch path.  When ``persist_merge`` is true, the
+    merged params are written back into the entry so subsequent renders
+    keep the same values.
+
+    ``selected_agents`` is retained purely to source the ``display_name``
+    for :class:`CustomizedAgentSelection`; the roster is the source of
+    truth for which entries to emit.
     """
-    customized_params = st.session_state.get("customized_params") or {}
+    display_by_type: dict[str, str] = {
+        a["agent_type"]: a["display_name"] for a in selected_agents
+    }
+
+    roster = get_roster(st.session_state)
     selections: list[CustomizedAgentSelection] = []
-    for agent in selected_agents:
-        agent_type = agent["agent_type"]
-        engine = st.session_state.get(
-            f"market_engine_{agent_type}",
-            ALL_ENGINES[0],
-        )
+    for entry in roster:
+        agent_type = entry.agent_type
+        engine = entry.engine or ALL_ENGINES[0]
+
+        # ---- Engine override MUST resolve first ------------------------
+        # If the user is currently editing an entry in the dialog and
+        # has flipped the engine segmented control (e.g. Rule → LLM) but
+        # not yet clicked Save, the live LLM widgets below are keyed
+        # with the *new* engine suffix.  Reading the override up front
+        # ensures the widget sweep looks for the right keys and does
+        # not silently drop unsaved prompt edits.
+        engine_wkey = f"entry_{entry.id}_engine"
+        if engine_wkey in st.session_state:
+            live_engine = st.session_state[engine_wkey]
+            if live_engine:
+                engine = str(live_engine)
+                if persist_merge:
+                    entry.engine = engine
+
+        # ---- Sweep entry-scoped widget state (unsaved dialog edits) ----
         widget_snapshot: dict[str, Any] = {}
-        param_prefix = f"customized_input_{agent_type}_{engine}_"
+        param_prefix = f"entry_{entry.id}_input_"
         for wkey in list(st.session_state.keys()):
             if wkey.startswith(param_prefix):
                 symbol = wkey[len(param_prefix):]
                 widget_snapshot[symbol] = st.session_state[wkey]
+
         _llm_widget_map = {
-            f"customized_llm_lm_{agent_type}_{engine}": "__llm_lm_name__",
-            f"customized_llm_temp_{agent_type}_{engine}": "__llm_temperature__",
-            f"customized_llm_tokens_{agent_type}_{engine}": "__llm_max_tokens__",
-            f"customized_llm_sysprompt_{agent_type}_{engine}": "__llm_system_prompt__",
-            f"customized_llm_userprompt_{agent_type}_{engine}": "__llm_user_prompt__",
+            f"entry_{entry.id}_llm_lm_{engine}": "__llm_lm_name__",
+            f"entry_{entry.id}_llm_temp_{engine}": "__llm_temperature__",
+            f"entry_{entry.id}_llm_tokens_{engine}": "__llm_max_tokens__",
+            f"entry_{entry.id}_llm_sysprompt_{engine}": "__llm_system_prompt__",
+            f"entry_{entry.id}_llm_userprompt_{engine}": "__llm_user_prompt__",
         }
         for wkey, sentinel in _llm_widget_map.items():
             if wkey in st.session_state:
                 widget_snapshot[sentinel] = st.session_state[wkey]
 
-        persisted_params = (
-            customized_params.get(agent_type, {}).get(engine, {}) or {}
-        )
-        merged_params = dict(persisted_params)
+        # ---- Merge with entry-persisted params (widgets win ties) -----
+        merged_params = dict(entry.params)
         merged_params.update(widget_snapshot)
 
-        if persist_merge:
-            customized_params.setdefault(agent_type, {})[engine] = merged_params
-            st.session_state["customized_params"] = customized_params
+        if persist_merge and widget_snapshot:
+            # Write the merged params back so the next render sees the
+            # same values (idempotent).
+            entry.params = dict(merged_params)
 
-        try:
-            ninst = int(
-                st.session_state.get(
-                    f"customized_num_instances_{agent_type}", 1
-                ) or 1
-            )
-        except (TypeError, ValueError):
-            ninst = 1
+        # ---- Optional instance-count widget override (spinner) --------
+        ninst_wkey = f"entry_{entry.id}_ninst"
+        ninst = int(entry.num_instances or 1)
+        if ninst_wkey in st.session_state:
+            try:
+                ninst = int(st.session_state[ninst_wkey] or 1)
+            except (TypeError, ValueError):
+                ninst = int(entry.num_instances or 1)
         if ninst < 1:
             ninst = 1
+        if persist_merge:
+            entry.num_instances = ninst
+
+        # Prefer the label from the widget when the dialog is open so
+        # unsaved label edits still flow through to the preview.
+        label_wkey = f"entry_{entry.id}_label"
+        label = entry.label
+        if label_wkey in st.session_state:
+            raw_label = st.session_state[label_wkey]
+            label = None if raw_label in (None, "") else str(raw_label)
+
+        display_name = display_by_type.get(agent_type, agent_type)
+        if label:
+            display_name = f"{display_name} · {label}"
 
         selections.append(
             CustomizedAgentSelection(
                 archetype=agent_type,
-                display_name=agent["display_name"],
+                display_name=display_name,
                 engine=engine,
                 params=dict(merged_params),
                 num_instances=ninst,

@@ -57,6 +57,25 @@ from .selection_state import (
     save_selection_state,
     save_state_from_session,
 )
+from .roster import (
+    ROSTER_KEY,
+    RosterEntry,
+    add_entry,
+    clear_roster,
+    duplicate_entry,
+    entries_for_type,
+    entries_from_dicts,
+    entries_to_dicts,
+    find_entry,
+    get_roster,
+    migrate_from_legacy_state,
+    new_entry_id,
+    remove_entry,
+    set_roster,
+    total_instances,
+    unique_agent_types,
+    update_entry,
+)
 
 __all__ = [
     # handbook params
@@ -95,4 +114,22 @@ __all__ = [
     "restore_state_to_session",
     "save_selection_state",
     "save_state_from_session",
+    # roster entries (v3 data model)
+    "ROSTER_KEY",
+    "RosterEntry",
+    "add_entry",
+    "clear_roster",
+    "duplicate_entry",
+    "entries_for_type",
+    "entries_from_dicts",
+    "entries_to_dicts",
+    "find_entry",
+    "get_roster",
+    "migrate_from_legacy_state",
+    "new_entry_id",
+    "remove_entry",
+    "set_roster",
+    "total_instances",
+    "unique_agent_types",
+    "update_entry",
 ]
