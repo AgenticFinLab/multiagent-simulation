@@ -149,6 +149,238 @@ def next_customized_id(*roots: Path, width: int = 3) -> str:
     return f"Customized-{next_index:0{width}d}"
 
 
+# ---------------------------------------------------------------------------
+# Import / class-path localisation
+# ---------------------------------------------------------------------------
+
+# Sys-path prelude injected at the top of every ENTRY-POINT script inside a
+# bundle. Entry-point = a script executed directly via ``python <path>`` (by
+# ``run_analysis`` subprocess, ``run_customized.py``, or a user's shell). The
+# prelude adds the bundle's ``Customized-agents/`` root to ``sys.path`` so
+# short-form imports like ``from metrics import REGISTRY`` and
+# ``from Rule.players import Market`` resolve to the bundle's own copies.
+#
+# Marker comment lets us detect the block and avoid duplicate injection on
+# re-localisation (idempotency).
+_LOCALIZE_PRELUDE_MARKER = "# ⇢ MASIM bundle-localise sys.path prelude"
+_LOCALIZE_PRELUDE = f"""{_LOCALIZE_PRELUDE_MARKER}
+import sys as _sys
+from pathlib import Path as _Path
+_BUNDLE_ROOT = _Path(__file__).resolve()
+while _BUNDLE_ROOT.name and _BUNDLE_ROOT.name != "Customized-agents":
+    _BUNDLE_ROOT = _BUNDLE_ROOT.parent
+if _BUNDLE_ROOT.name == "Customized-agents":
+    _p = str(_BUNDLE_ROOT)
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+del _sys, _Path, _BUNDLE_ROOT
+# ⇠ end MASIM prelude
+"""
+
+# Files that are executed directly (subprocess entry points) and therefore
+# need the sys.path prelude. Any file matching these RELATIVE paths inside
+# ``example_dir`` receives the prelude.
+_ENTRY_POINT_RELPATHS = frozenset({
+    "run_customized.py",
+    "Rule/analysis.py",
+    "LLM/analysis.py",
+    "RuleLLM/analysis.py",
+    "Rag/analysis.py",
+    # scenario-specific runners preserved from shipped examples/
+    # (name pattern ``run_<scenario>.py`` — matched by suffix below).
+})
+
+
+def _needs_prelude(rel_path: Path) -> bool:
+    """True if ``rel_path`` (relative to example_dir) is an entry-point script."""
+    posix = rel_path.as_posix()
+    if posix in _ENTRY_POINT_RELPATHS:
+        return True
+    # Scenario-specific runners: {Variant}/run_<anything>.py
+    parts = posix.split("/")
+    if len(parts) == 2 and parts[1].startswith("run_") and parts[1].endswith(".py"):
+        return True
+    return False
+
+
+def _localize_bundle_imports(
+    *,
+    example_dir: Path,
+    config_dir: Path,
+    scenario_name: str,
+    bundle_name: str,
+) -> int:
+    """Make the bundle fully self-contained: every reference to shipped
+    ``examples.{Scenario}.…`` is rewritten to a short bundle-local form,
+    and each entry-point script gets a ``sys.path`` prelude so that short
+    form resolves inside the bundle instead of via project-root packages.
+
+    Why not ``examples.CUSTOMIZED_SIMULATION.{bundle}.Customized-agents.<sub>``
+    fully-qualified paths? Because bundle folder names include hyphens
+    (e.g. ``MYTest-a4fc6d93-AnchoringEffect``) which are illegal in Python
+    ``import`` statement syntax. Short-form imports ``from metrics import X``
+    combined with a per-file ``sys.path.insert(0, <bundle_root>)`` prelude
+    are the cleanest way to keep imports lexically legal AND ensure the
+    resolved module lives inside the bundle.
+
+    Rewrites applied to every ``.py`` under ``example_dir``:
+
+        from examples.{S}.metrics import X           → from metrics import X
+        from examples.{S}.{Var}.<mod> import X       → from {Var}.<mod> import X
+        from examples.{S} import X                   → from . import X   (rare)
+        import examples.{S}.<mod> [as N]             → import <mod> [as N]
+
+    Rewrites applied to every ``*.yml`` under ``config_dir``:
+
+        examples.{S}.<mod>:Class  → <mod>:Class     (dotted class-path form
+                                                     used by masim's plug-in
+                                                     loader; kept short so
+                                                     the runner's importer,
+                                                     which respects sys.path,
+                                                     resolves inside bundle)
+
+    Entry-point scripts additionally receive the sys.path prelude at the
+    top of the file (below any ``__future__`` imports, after the module
+    docstring). Idempotent: the prelude is guarded by
+    ``_LOCALIZE_PRELUDE_MARKER`` so repeated invocations are safe.
+
+    Args:
+        example_dir: ``examples/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/``
+        config_dir:  ``configs/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/``
+        scenario_name: source scenario name, e.g. ``"AnchoringEffect"``.
+        bundle_name: bundle folder, e.g. ``"MYTest-a4fc6d93-AnchoringEffect"``.
+
+    Returns:
+        Number of files that were rewritten (useful for logging/tests).
+    """
+    src = re.escape(f"examples.{scenario_name}")
+
+    # ── Python rewrite patterns ──────────────────────────────────────────
+    # Order matters: match the most specific first.
+    py_rules = [
+        # from examples.{S}.<sub> import X   →  from <sub> import X
+        (
+            re.compile(rf"\bfrom\s+{src}\.([\w.]+)\s+import\b"),
+            lambda m: f"from {m.group(1)} import",
+        ),
+        # from examples.{S} import X         →  from . import X
+        (
+            re.compile(rf"\bfrom\s+{src}\s+import\b"),
+            lambda m: "from . import",
+        ),
+        # import examples.{S}.<sub> [as N]   →  import <sub> [as N]
+        (
+            re.compile(rf"\bimport\s+{src}\.([\w.]+)"),
+            lambda m: f"import {m.group(1)}",
+        ),
+        # bare dotted refs in strings/comments
+        (
+            re.compile(rf"\b{src}(\.[\w.]+)"),
+            lambda m: m.group(1).lstrip("."),
+        ),
+    ]
+
+    yml_class_rule = (
+        # examples.{S}.<mod>:Class → <mod>:Class
+        re.compile(rf"\b{src}\.([\w.]+:[\w.]+)"),
+        lambda m: m.group(1),
+    )
+
+    changed = 0
+
+    # --- Rewrite Python files ---
+    for py in example_dir.rglob("*.py"):
+        if "__pycache__" in py.parts:
+            continue
+        try:
+            text = py.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        new_text = text
+        for pat, repl in py_rules:
+            new_text = pat.sub(repl, new_text)
+
+        # Inject sys.path prelude for entry-point scripts (idempotent).
+        rel = py.relative_to(example_dir)
+        if _needs_prelude(rel) and _LOCALIZE_PRELUDE_MARKER not in new_text:
+            new_text = _inject_prelude(new_text)
+
+        if new_text != text:
+            py.write_text(new_text, encoding="utf-8")
+            changed += 1
+
+    # --- Rewrite YAML class-paths in per-variant snapshots ---
+    # (Root ``players.yml`` is regenerated fresh by apply_customized_modifications
+    #  each launch and already uses canonical ``masim.agents.*`` class paths.)
+    pat, repl = yml_class_rule
+    for yml in config_dir.rglob("*.yml"):
+        try:
+            text = yml.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        new_text = pat.sub(repl, text)
+        if new_text != text:
+            yml.write_text(new_text, encoding="utf-8")
+            changed += 1
+
+    return changed
+
+
+def _inject_prelude(source: str) -> str:
+    """Insert the sys.path prelude at the correct spot in a Python source.
+
+    Placement rules:
+      * If the file has a ``__future__`` import block, prelude goes AFTER
+        all ``from __future__ import …`` lines (Python requires future
+        imports to precede any executable statement).
+      * Otherwise the prelude goes right after the module docstring
+        (if present) and any shebang / encoding declaration.
+    """
+    lines = source.splitlines(keepends=True)
+    insert_at = 0
+
+    # Skip shebang.
+    if lines and lines[0].startswith("#!"):
+        insert_at = 1
+    # Skip encoding declaration (must be in first two lines).
+    if insert_at < len(lines) and re.match(r"^#.*coding[:=]", lines[insert_at]):
+        insert_at += 1
+
+    # Skip module-level docstring if present.
+    i = insert_at
+    # Skip blank/comment lines to find the first real token.
+    while i < len(lines) and (lines[i].strip() == "" or lines[i].lstrip().startswith("#")):
+        i += 1
+    if i < len(lines):
+        stripped = lines[i].lstrip()
+        if stripped.startswith(('"""', "'''")):
+            quote = stripped[:3]
+            # single-line docstring?
+            if stripped.count(quote) >= 2 and len(stripped) > 3:
+                insert_at = i + 1
+            else:
+                # multi-line: find closing quote
+                j = i + 1
+                while j < len(lines) and quote not in lines[j]:
+                    j += 1
+                insert_at = min(j + 1, len(lines))
+
+    # Skip past any __future__ imports.
+    j = insert_at
+    while j < len(lines):
+        stripped = lines[j].strip()
+        if stripped.startswith("from __future__ import"):
+            j += 1
+            insert_at = j
+        elif stripped == "" or stripped.startswith("#"):
+            j += 1
+        else:
+            break
+
+    prelude_block = "\n" + _LOCALIZE_PRELUDE + "\n"
+    return "".join(lines[:insert_at]) + prelude_block + "".join(lines[insert_at:])
+
+
 def initialize_customized_folder(
     *,
     bundle_name: str,
@@ -266,6 +498,23 @@ def initialize_customized_folder(
     if not init_path.exists():
         init_path.write_text("", encoding="utf-8")
 
+    # --- Localise all imports inside the bundle ---
+    # After copytree, every .py under example_dir still references shipped
+    # ``examples.{scenario_name}.…`` modules; rewrite those to bundle-local
+    # short-form imports and inject a sys.path prelude into entry-point
+    # scripts so subprocess execution (analysis.py, run_customized.py,
+    # scenario-specific runners) resolves inside the bundle rather than
+    # falling back to the shipped code tree.
+    #
+    # Called BEFORE README so any errors surface without leaving a
+    # half-finalised bundle marked as complete.
+    _localize_bundle_imports(
+        example_dir=example_dir,
+        config_dir=config_dir,
+        scenario_name=scenario_name,
+        bundle_name=bundle_name,
+    )
+
     # --- README.md provenance placeholder ---
     readme_text = (
         f"# {bundle_name} / Customized-agents\n\n"
@@ -276,6 +525,11 @@ def initialize_customized_folder(
         f"All 4 variants (Rule, LLM, RuleLLM, Rag) are copied from the\n"
         f"shipped scenario as a full snapshot. The Customize flow reads\n"
         f"prompts from the variant matching the user's engine choice.\n\n"
+        f"All imports inside this bundle have been *localised* — code here\n"
+        f"references sibling modules directly (e.g. ``from metrics import\n"
+        f"REGISTRY``) so this bundle is fully self-contained and does NOT\n"
+        f"depend on the shipped ``examples/{scenario_name}/`` folder at\n"
+        f"runtime.\n\n"
         f"## Run\n\n"
         f"```bash\n"
         f"python examples/CUSTOMIZED_SIMULATION/{bundle_name}/Customized-agents/"
