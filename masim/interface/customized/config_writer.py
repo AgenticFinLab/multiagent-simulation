@@ -239,6 +239,12 @@ def _localize_bundle_imports(
                                                      which respects sys.path,
                                                      resolves inside bundle)
 
+    Post-rewrite, scenario-specific handbook-symbol aliases are applied to
+    bridge parameter-name mismatches between canonical agent classes (which
+    read the handbook symbol name, e.g. ``alpha``) and the shipped scenario
+    metrics/analysis code (which historically reads its own parameter name,
+    e.g. ``adjustment_factor``). See :func:`_apply_handbook_symbol_aliases`.
+
     Entry-point scripts additionally receive the sys.path prelude at the
     top of the file (below any ``__future__`` imports, after the module
     docstring). Idempotent: the prelude is guarded by
@@ -300,6 +306,11 @@ def _localize_bundle_imports(
         for pat, repl in py_rules:
             new_text = pat.sub(repl, new_text)
 
+        # Scenario-aware handbook-symbol aliasing (idempotent via marker).
+        new_text = _apply_handbook_symbol_aliases(
+            new_text, scenario_name=scenario_name, rel_path=py.relative_to(example_dir)
+        )
+
         # Inject sys.path prelude for entry-point scripts (idempotent).
         rel = py.relative_to(example_dir)
         if _needs_prelude(rel) and _LOCALIZE_PRELUDE_MARKER not in new_text:
@@ -324,6 +335,115 @@ def _localize_bundle_imports(
             changed += 1
 
     return changed
+
+
+# ---------------------------------------------------------------------------
+# Handbook-symbol alias patches
+# ---------------------------------------------------------------------------
+
+# Idempotency marker for the alias-patch block. Presence anywhere in the
+# file suppresses re-patching, so users can run localization repeatedly (or
+# manually edit the patched block) without duplication.
+_ALIAS_PATCH_MARKER = "# ⇢ MASIM handbook-symbol alias patch"
+
+# Per-scenario handbook-symbol alias tables. Each entry maps a shipped-code
+# parameter name → (canonical handbook symbol, canonical default). At
+# localization time we patch the bundle-local metrics/analysis code so it
+# reads the canonical handbook symbol (matching the actual class parameter)
+# with fallback to the shipped-code name and finally the canonical default.
+#
+# Why: the customized flow uses canonical ``masim.agents.*`` classes which
+# consume handbook symbols documented in ``examples/AGENT_POOL/finance/*.md``
+# (e.g. ``alpha``). The shipped scenario's ``metrics.py`` and
+# ``{Variant}/analysis.py`` were written against the scenario-specific
+# parameter name (e.g. ``adjustment_factor``). Without this bridge, analysis
+# raises ``MetricUnavailable`` / ``ValueError`` on every customized run.
+_SCENARIO_HANDBOOK_ALIASES: dict[str, dict[str, tuple[str, float]]] = {
+    "AnchoringEffect": {
+        "adjustment_factor": ("alpha", 0.30),
+    },
+}
+
+
+def _apply_handbook_symbol_aliases(
+    source: str, *, scenario_name: str, rel_path: Path
+) -> str:
+    """Rewrite handbook-symbol lookups in bundle Python code (idempotent).
+
+    For every alias (shipped_name → (canonical_name, default_value)) declared
+    for the current scenario, replace two common lookup patterns:
+
+    1. Guarded return / raise pattern
+       ``if "<shipped>" in extras: return float(extras["<shipped>"])``
+       →   check canonical first, fall back to shipped, else canonical default.
+
+    2. Bare lookup pattern
+       ``extras["<shipped>"]``  or  ``extras.get("<shipped>", …)``
+       →   check both keys with canonical default as final fallback.
+
+    Only ``metrics.py`` and ``*/analysis.py`` files are touched; other bundle
+    code is left alone. The patch is bracketed by ``_ALIAS_PATCH_MARKER`` so
+    a second invocation is a no-op.
+    """
+    aliases = _SCENARIO_HANDBOOK_ALIASES.get(scenario_name)
+    if not aliases:
+        return source
+
+    posix = rel_path.as_posix()
+    # Restrict to files that actually query extras for these symbols.
+    if not (
+        posix.endswith("metrics.py") or posix.endswith("analysis.py")
+    ):
+        return source
+
+    if _ALIAS_PATCH_MARKER in source:
+        return source  # already patched
+
+    new_text = source
+    for shipped_name, (canonical_name, default_value) in aliases.items():
+        # Pattern 1: ``if "<shipped>" in extras: return float(extras["<shipped>"])``
+        # Common in both metrics.py (``_anchored_adjustment_factor``) and
+        # Rule/analysis.py (``_get_adjustment_factor``). Rewrites to check
+        # canonical first, then shipped, else default — preserving indent.
+        pat_guarded = re.compile(
+            rf'(?P<indent>[ \t]+)if\s+"{re.escape(shipped_name)}"\s+in\s+extras\s*:\s*\n'
+            rf'(?P=indent)[ \t]+return\s+float\(extras\["{re.escape(shipped_name)}"\]\)',
+            re.MULTILINE,
+        )
+
+        def _replace_guarded(m: re.Match) -> str:
+            indent = m.group("indent")
+            body_indent = indent + "    "
+            return (
+                f'{indent}{_ALIAS_PATCH_MARKER} ({shipped_name} → {canonical_name})\n'
+                f'{indent}if "{canonical_name}" in extras:\n'
+                f'{body_indent}return float(extras["{canonical_name}"])\n'
+                f'{indent}if "{shipped_name}" in extras:\n'
+                f'{body_indent}return float(extras["{shipped_name}"])'
+            )
+
+        new_text = pat_guarded.sub(_replace_guarded, new_text)
+
+        # Pattern 2: bare ``raise ValueError("No <shipped> found...")`` and
+        # ``raise MetricUnavailable("... <shipped> ...")`` — replace with a
+        # return of the canonical default so callers can proceed with the
+        # documented handbook default instead of crashing.
+        raise_pat = re.compile(
+            rf'(?P<indent>[ \t]+)raise\s+(?:ValueError|MetricUnavailable)\([^)]*'
+            rf'{re.escape(shipped_name)}[^)]*\)',
+            re.MULTILINE,
+        )
+
+        def _replace_raise(m: re.Match) -> str:
+            indent = m.group("indent")
+            return (
+                f'{indent}{_ALIAS_PATCH_MARKER} default fallback\n'
+                f'{indent}return float({default_value})'
+            )
+
+        new_text = raise_pat.sub(_replace_raise, new_text)
+
+    return new_text
 
 
 def _inject_prelude(source: str) -> str:

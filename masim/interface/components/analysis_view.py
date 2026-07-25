@@ -95,6 +95,35 @@ def render_analysis_page(scenario_name: str):
 def run_analysis(scenario_name: str) -> Tuple[bool, str]:
     """Run the analysis script for a scenario.
 
+    Path resolution rules — the *bundle-local* copy is authoritative for any
+    Customized project bundle. Once the user creates a project the bundle is
+    a self-contained unit; we never fall back to the shipped
+    ``examples/{Scenario}/`` code tree, otherwise edits made inside the
+    bundle (or future divergences from shipped code) would be silently
+    ignored.
+
+    Cases:
+
+    1. ``CUSTOMIZED_SIMULATION/{bundle}/Customized-agents``
+       → ``examples/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/Rule/analysis.py``
+       (bundle Customize path — Rule variant is authoritative for analysis;
+       LLM/Rule-LLM/Rag variants delegate to the same maths.)
+
+    2. ``CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}``
+       → ``examples/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/analysis.py``
+       (bundle Default path — variant-specific script inside the bundle.)
+
+    3. ``CUSTOMIZED_SIMULATION/Default-{S}-{V}-rN`` (legacy rounds-adjusted
+       shipped-scenario copy, has no bundle-local code) → shipped
+       ``examples/{S}/{V}/analysis.py``.
+
+    4. Anything else (raw shipped scenario) → shipped
+       ``examples/{scenario_name}/analysis.py`` with Rule variant fallback.
+
+    For case (1) we also idempotently call ``_localize_bundle_imports`` so
+    that legacy bundles created BEFORE import-localisation landed also work
+    — the marker comment in the prelude prevents duplicate injection.
+
     Args:
         scenario_name: Name of the scenario (may be a CUSTOMIZED_SIMULATION key)
 
@@ -102,31 +131,83 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
         Tuple of (success, message)
     """
     from ..config_loader import get_analysis_path, _resolve_display_key
+    from ..customized.config_writer import _localize_bundle_imports
 
     try:
         _project_root = Path(__file__).resolve().parents[3]
 
-        # Resolve script and config paths. Customized bundles share the base
-        # scenario's analysis script but have their own simulation.yml.
+        # Config path is uniform: configs/{scenario_name}/simulation.yml.
         config_path = _project_root / "configs" / scenario_name / "simulation.yml"
 
-        # For the analysis script, resolve the base scenario/variant:
-        # "CUSTOMIZED_SIMULATION/Default-HerdEffect-Rule-r40" → "HerdEffect/Rule"
-        # "CUSTOMIZED_SIMULATION/HerdEffect" → base scenario "HerdEffect"
-        display_key = _resolve_display_key(scenario_name)
-        script_path = _project_root / "examples" / display_key / "analysis.py"
+        # ── Resolve the analysis script + PYTHONPATH additions ──────────────
+        # ``extra_pythonpath`` — list of directories prepended to PYTHONPATH so
+        # bundle-local short-form imports (``from metrics import REGISTRY``)
+        # resolve inside the bundle. Empty for shipped scenarios where the
+        # existing ``from examples.{S}.metrics import …`` shape works.
+        script_path: Path
+        extra_pythonpath: list[str] = []
 
-        # Fallback: if display_key didn't resolve to a variant with analysis.py,
-        # try the Rule variant of the base scenario as a sensible default.
-        if not script_path.exists() and "/" not in display_key:
-            script_path = _project_root / "examples" / display_key / "Rule" / "analysis.py"
+        parts = scenario_name.split("/")
+        if (
+            scenario_name.startswith("CUSTOMIZED_SIMULATION/")
+            and len(parts) == 3
+            and parts[2] == "Customized-agents"
+        ):
+            # Case 1: project bundle Customize path — ALWAYS use bundle-local.
+            bundle_name = parts[1]
+            bundle_examples = (
+                _project_root / "examples" / "CUSTOMIZED_SIMULATION"
+                / bundle_name / "Customized-agents"
+            )
+            bundle_configs = (
+                _project_root / "configs" / "CUSTOMIZED_SIMULATION"
+                / bundle_name / "Customized-agents"
+            )
+            script_path = bundle_examples / "Rule" / "analysis.py"
 
-        # Further fallback for customized bundles: strip CUSTOMIZED_SIMULATION/
-        if not script_path.exists() and scenario_name.startswith("CUSTOMIZED_SIMULATION/"):
-            bundle_id = scenario_name.split("/", 1)[1]
-            # Non-Default bundles: bundle_id IS the scenario name
-            if not bundle_id.startswith("Default-"):
-                script_path = _project_root / "examples" / bundle_id / "Rule" / "analysis.py"
+            # Heal legacy bundles created before import-localisation: idempotent
+            # thanks to the sys.path prelude marker inside _localize_bundle_imports.
+            if bundle_examples.exists():
+                try:
+                    scenario_base = bundle_name.rsplit("-", 1)[-1]
+                    _localize_bundle_imports(
+                        example_dir=bundle_examples,
+                        config_dir=bundle_configs,
+                        scenario_name=scenario_base,
+                        bundle_name=bundle_name,
+                    )
+                except Exception:
+                    # Non-fatal: if healing fails, the shipped-import shape
+                    # may still work when PYTHONPATH covers project root.
+                    pass
+
+            # Bundle-local Python files use short-form imports (``from metrics
+            # import REGISTRY``, ``from Rule.players import Market``). Adding
+            # the bundle's Customized-agents/ to PYTHONPATH is what makes them
+            # resolve locally instead of from the shipped examples/.
+            extra_pythonpath.append(str(bundle_examples))
+        elif (
+            scenario_name.startswith("CUSTOMIZED_SIMULATION/")
+            and len(parts) >= 4
+            and parts[2] == "Default"
+        ):
+            # Case 2: project bundle Default path.
+            bundle_name = parts[1]
+            variant = parts[3]
+            bundle_examples = (
+                _project_root / "examples" / "CUSTOMIZED_SIMULATION"
+                / bundle_name / "Default" / variant
+            )
+            script_path = bundle_examples / "analysis.py"
+            extra_pythonpath.append(str(bundle_examples.parent))
+        else:
+            # Cases 3–4: legacy Default-{S}-{V}-rN or plain shipped scenarios.
+            display_key = _resolve_display_key(scenario_name)
+            script_path = _project_root / "examples" / display_key / "analysis.py"
+            if not script_path.exists() and "/" not in display_key:
+                script_path = (
+                    _project_root / "examples" / display_key / "Rule" / "analysis.py"
+                )
 
         if not script_path.exists():
             return False, f"Analysis script not found: {script_path}"
@@ -148,14 +229,19 @@ def run_analysis(scenario_name: str) -> Tuple[bool, str]:
                 except OSError:
                     pass
 
-        # The analysis script does `from masim import ...`, but when run as a
+        # The analysis script does ``from masim import ...``; when run as a
         # subprocess Python only puts the SCRIPT's own directory on sys.path
-        # (not cwd), so the top-level `masim` package is invisible. Inject the
-        # project root via PYTHONPATH so the import resolves without requiring
-        # an installed/editable package.
+        # (not cwd), so the top-level ``masim`` package is invisible. Inject
+        # the project root via PYTHONPATH so the import resolves without
+        # requiring an installed/editable package. Bundle-local dirs are
+        # prepended so short-form imports resolve *inside* the bundle before
+        # any shipped package of the same short name (defence in depth).
         env = os.environ.copy()
         env["PYTHONPATH"] = os.pathsep.join(
-            filter(None, [str(_project_root), env.get("PYTHONPATH", "")])
+            filter(
+                None,
+                [*extra_pythonpath, str(_project_root), env.get("PYTHONPATH", "")],
+            )
         )
 
         result = subprocess.run(
