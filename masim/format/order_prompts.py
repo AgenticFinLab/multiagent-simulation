@@ -61,6 +61,43 @@ STANDARD_MARKET_STATE_BLOCK = (
 # ---------------------------------------------------------------------------
 
 
+# Markers that reliably indicate the start of the locked format tail in a
+# full LLM system prompt. Any of these lines (or the header directly above
+# them) means everything from that offset onward is the DECISION_FORMAT_*
+# contract that the bundle writer must re-append verbatim — the persona is
+# only the text BEFORE the first marker.
+_PERSONA_CUT_MARKERS: tuple[str, ...] = (
+    "TRADING CONSTRAINTS:",
+    "== FORMAT ==",
+    "Respond with your thinking in",
+    "Your response MUST use the following structure",
+    "The decision JSON must follow this exact format",
+)
+
+
+def extract_persona(full_prompt: str) -> str:
+    """Return only the persona portion of a full LLM system prompt.
+
+    Trims everything from the first occurrence of any known
+    format-contract marker (see :data:`_PERSONA_CUT_MARKERS`) onward, so
+    the caller can present the user with an editable persona textarea
+    while keeping the locked format tail (TRADING_CONSTRAINTS +
+    ANALYSIS_DECISION_TAG + DECISION_FORMAT_INSTRUCTION) safe from
+    accidental edits.
+
+    Idempotent: passing a persona-only string returns it unchanged
+    (modulo trailing whitespace normalisation).  Passing an empty string
+    returns an empty string.
+    """
+    text = full_prompt or ""
+    cut_pos = len(text)
+    for marker in _PERSONA_CUT_MARKERS:
+        idx = text.find(marker)
+        if idx != -1 and idx < cut_pos:
+            cut_pos = idx
+    return text[:cut_pos].rstrip("\n").rstrip()
+
+
 def build_llm_system_prompt(
     *,
     persona: str,
@@ -134,4 +171,5 @@ __all__ = [
     "STANDARD_MARKET_STATE_BLOCK",
     "build_llm_system_prompt",
     "build_llm_user_template",
+    "extract_persona",
 ]

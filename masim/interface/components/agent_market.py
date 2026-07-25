@@ -47,6 +47,7 @@ from ..customized import (
     migrate_from_legacy_state,
     parse_parameters_file,
     remove_entry,
+    required_features,
     restore_state_to_session,
     save_state_from_session,
     scenario_market_features,
@@ -1374,28 +1375,17 @@ def _resolve_prompt_text(module_ref: str) -> str:
 def _extract_persona_section(full_prompt: str) -> str:
     """Extract only the persona part from a full system prompt.
 
-    Strips everything from the TRADING_CONSTRAINTS / ANALYSIS_DECISION_TAG
-    section onward, since those are format instructions that should be locked.
-    The persona is the creative content the user may want to edit.
+    Thin wrapper around :func:`masim.format.order_prompts.extract_persona`
+    kept for backwards compatibility with the Default-config editor and
+    the customized entry-edit dialog.  Both routes now share a single
+    definition of "where the persona ends" so the two flows cannot drift.
     """
-    # Known markers that signal the start of locked format instructions.
-    _MARKERS = [
-        "TRADING CONSTRAINTS:",
-        "== FORMAT ==",
-        "Respond with your thinking in",
-        "Your response MUST use the following structure",
-        "The decision JSON must follow this exact format",
-    ]
-    text = full_prompt
-    # Find the earliest marker position
-    cut_pos = len(text)
-    for marker in _MARKERS:
-        idx = text.find(marker)
-        if idx != -1 and idx < cut_pos:
-            cut_pos = idx
-    result = text[:cut_pos].rstrip()
-    # Also strip trailing blank lines left by the cut
-    return result.rstrip("\n") + "\n"
+    from masim.format.order_prompts import extract_persona
+
+    persona = extract_persona(full_prompt)
+    # Preserve historical caller expectation: ensure a trailing newline
+    # so downstream string concatenation looks clean.
+    return persona.rstrip("\n") + "\n"
 
 
 def _render_default_agent_card(
@@ -2876,44 +2866,78 @@ def _render_entry_llm_extras(
 
     sys_placeholder = (
         "No default persona is registered for this archetype + engine yet. "
-        "Type a system prompt here: describe the persona, beliefs, and "
-        "trading approach. Do not reveal the underlying market mechanism "
-        "or ground-truth formulas."
+        "Type a persona description here: beliefs, trading approach, risk "
+        "attitude, etc. The output-format contract "
+        "(analysis/decision tags, JSON schema) is appended automatically — "
+        "do NOT include it here."
     )
     sys_label = (
-        "System prompt (default persona shown below — edit to customize)"
+        "Persona prompt (default persona shown below — edit to customize)"
         if has_shipped_sys else
-        "System prompt (no default registered — type a custom persona)"
+        "Persona prompt (no default registered — type a custom persona)"
     )
+    # Strip the locked format tail from the persisted value so the user
+    # only sees / edits the persona portion.  Mirrors the Default-config
+    # editor: the DECISION_FORMAT_INSTRUCTION + ANALYSIS_DECISION_TAG +
+    # TRADING_CONSTRAINTS block is auto-appended by the bundle writer
+    # (see ``_build_prompts_module``), so surfacing it here would let
+    # the user accidentally break the LLM output contract.
+    persona_only_default = _extract_persona_section(sys_default).rstrip()
+
     with st.expander(sys_label, expanded=True):
         if has_shipped_sys:
             st.caption(
                 "This is the actual default persona shipped with the "
-                "example codebase. Edit any text here to override; the "
-                "bundle writer will materialize your version into the "
-                "generated `prompts.py` and reference it from "
-                "`players.yml`."
+                "example codebase. Edit the persona description below — the "
+                "output-format contract (analysis/decision tags + decision "
+                "JSON schema) shown further down is appended automatically "
+                "when the bundle is written, so you cannot accidentally "
+                "break the LLM output contract."
             )
         else:
             st.caption(
                 "No default persona has been registered for this "
-                "archetype + engine combination yet. Type your own below "
-                "— the bundle writer will save it into the generated "
-                "`prompts.py`."
+                "archetype + engine combination yet. Type your persona "
+                "description below — the output-format contract shown "
+                "further down is auto-appended by the bundle writer."
             )
         edited["__llm_system_prompt__"] = st.text_area(
-            "System prompt",
-            value=sys_default,
+            "Persona prompt",
+            value=persona_only_default,
             placeholder=sys_placeholder,
             height=260,
             key=sys_key,
             label_visibility="collapsed",
             help=(
-                "Plain-text persona prompt sent as the system message on "
-                "every call. Avoid leaking quantitative thresholds or "
-                "naming the simulated phenomenon. **Config key:** "
-                "`llm.sys_message`."
+                "Persona-only content: identity, beliefs, trading style. "
+                "Do NOT include analysis/decision tags or the JSON schema "
+                "— those are locked and appended automatically. "
+                "**Config key:** `llm.sys_message` (persona portion)."
             ),
+        )
+
+        # Locked format contract — visible so the user knows exactly what
+        # will be appended to their persona at bundle-write time.
+        st.info(
+            "**Output format** (locked — appended automatically to your "
+            "persona at Launch time):\n\n"
+            "```\n"
+            "TRADING CONSTRAINTS:\n"
+            "- Cannot spend more than your available cash\n"
+            "- Cannot sell more shares than you currently hold\n"
+            "\n"
+            "Respond with your thinking in <analysis>...</analysis> tags "
+            "followed by your decision in <decision>...</decision> tags.\n"
+            "\n"
+            "The decision JSON must follow this exact format:\n"
+            "{\n"
+            "    \"action\": \"buy\" | \"sell\" | \"hold\",\n"
+            "    \"bid_price\": <float>,\n"
+            "    \"quantity\": <float>,\n"
+            "    \"reasoning\": <str>,\n"
+            "}\n"
+            "```",
+            icon="\U0001f512",
         )
 
     usr_placeholder = (
@@ -3627,6 +3651,12 @@ def render_customize() -> None:
             save_state_from_session(project_root=PROJECT_ROOT)
             _clear_query_agent()
             st.session_state.selected_scenario = target
+            # Post-launch the simulation page must mirror Experience mode:
+            # a purely read-only workspace with no "Edit market" strip in the
+            # body. That strip is driven by ``selected_market_agents`` being
+            # non-empty (see ``render_selected_market_strip``), so clear it
+            # here after the bundle is written to disk.
+            st.session_state.selected_market_agents = []
             st.session_state.workflow_stage = "workspace"
             st.session_state.current_page = "Simulation"
             st.rerun()
@@ -3665,16 +3695,18 @@ def _render_market_chips(agents: list[dict[str, Any]]) -> None:
 
 
 def _render_my_roster(catalog: list[dict[str, Any]]) -> None:
-    """Render the *My Roster* list: one row per :class:`RosterEntry`.
+    """Render the *My Roster* list as a compact multi-column grid.
 
-    This is the authoritative place for managing entries. Each row shows
-    a small icon, the archetype's display name, the optional label, the
-    engine chip, the instance count, and three actions:
+    The panel doubles as a live visual overview of the entire lineup, so
+    entries are laid out in a grid (up to three per row) with a small
+    icon, a tight info block, and a single narrow action column that
+    stacks **Edit**, **Duplicate**, and **×** vertically to save
+    horizontal space.
 
     * **Edit** — opens the entry's edit dialog (:func:`_show_entry_edit_dialog`).
     * **Duplicate** — inserts a clone immediately below with a fresh id
       (label suffixed with "(copy)" when present).
-    * **× Remove** — deletes just this row without touching the rest.
+    * **×** — deletes just this row without touching the rest.
 
     Empty roster renders a friendly hint pointing users at the grid /
     Load default agents button above.
@@ -3697,154 +3729,219 @@ def _render_my_roster(catalog: list[dict[str, Any]]) -> None:
     )
 
     by_type = {a["agent_type"]: a for a in catalog}
-    # Iterate over a snapshot so remove/duplicate reruns don't fight our loop.
-    for pos, entry in enumerate(list(roster), start=1):
-        agent = by_type.get(entry.agent_type)
-        if agent is None:
-            # Roster references an archetype no longer in the catalog —
-            # surface a stub with just remove available.
-            with st.container(border=True):
-                col_info, col_del = st.columns([6, 1])
-                with col_info:
-                    st.markdown(
-                        f"**{html.escape(entry.agent_type)}** "
-                        f"<span style='color:#c1272d'>· catalog entry missing</span>",
-                        unsafe_allow_html=True,
-                    )
-                    st.caption(f"Entry `{entry.id}` · engine {entry.engine}")
-                with col_del:
-                    if st.button(
-                        "× Remove",
-                        key=f"roster_del_orphan_{entry.id}",
-                        type="tertiary",
-                    ):
-                        remove_entry(roster, entry.id)
-                        save_state_from_session(project_root=PROJECT_ROOT)
-                        st.rerun()
-            continue
+    roster_snapshot = list(roster)
+    # Emoji-only action buttons (✏️ / 📋 / 🗑️) are narrow enough to
+    # comfortably fit three cards per row again — giving the panel a
+    # dense at-a-glance overview of the whole lineup. Trailing empty
+    # slots keep card widths consistent when the roster count is not a
+    # multiple of the row size.
+    cards_per_row = 3
+    total = len(roster_snapshot)
+    for row_start in range(0, total, cards_per_row):
+        row_slice = roster_snapshot[row_start : row_start + cards_per_row]
+        columns = st.columns(cards_per_row, gap="small")
+        for offset, entry in enumerate(row_slice):
+            pos = row_start + offset + 1
+            with columns[offset]:
+                _render_roster_card(entry, pos, by_type.get(entry.agent_type))
+        # Fill trailing empty slots so the row keeps a consistent width.
+        for empty_slot in range(len(row_slice), cards_per_row):
+            with columns[empty_slot]:
+                st.empty()
 
+
+def _render_roster_card(
+    entry: RosterEntry,
+    pos: int,
+    agent: dict[str, Any] | None,
+) -> None:
+    """Render one bordered card for a single roster entry.
+
+    Layout inside the bordered card::
+
+        ┌──────────────────────────┐
+        │ [icon] Name #pos label   │  ← top row: fixed-width icon + info
+        │        engine ×N params  │
+        │        entry-id          │
+        ├──────────────────────────┤
+        │ [Edit] [Dup] [×]         │  ← full-width action bar (3 equal cols)
+        └──────────────────────────┘
+
+    The action bar spans the full inner width of the card so the three
+    tertiary buttons each get roughly one third of the card width and
+    stay inside the border regardless of how narrow the outer grid
+    column gets (three cards per row on a typical screen).
+    """
+    roster = get_roster(st.session_state)
+
+    # Missing-catalog stub: keep a compact one-liner + delete affordance.
+    if agent is None:
         with st.container(border=True):
-            icon_col, main_col, action_col = st.columns([1, 5, 3])
-            with icon_col:
-                img_path = Path(agent.get("image_file", ""))
-                if img_path.exists():
-                    st.image(str(img_path), use_container_width=True)
-                else:
-                    st.markdown(
-                        "<div style='width:100%;aspect-ratio:1/1;"
-                        "border-radius:6px;background:#e8f0fb;"
-                        "display:flex;align-items:center;justify-content:center;"
-                        "color:#2a5fa6;font-weight:700;'>"
-                        f"{agent['display_name'][0]}</div>",
-                        unsafe_allow_html=True,
-                    )
-
-            with main_col:
-                # Header line: display name (+ optional label) + positional
-                # badge so the user can spot which entry they're editing.
-                label_html = ""
-                if entry.label:
-                    label_html = (
-                        "<span style='margin-left:8px;padding:2px 8px;"
-                        "border-radius:10px;background:#eef4ff;color:#264d80;"
-                        "font-size:0.72rem;font-weight:600;'>"
-                        f"{html.escape(entry.label)}</span>"
-                    )
+            info_col, del_col = st.columns([4, 1])
+            with info_col:
                 st.markdown(
-                    f"<div style='font-size:1.02rem;font-weight:600;'>"
-                    f"{html.escape(agent['display_name'])}"
-                    f"<span style='margin-left:8px;color:#6c757d;"
-                    f"font-size:0.75rem;font-weight:500;'>#{pos}</span>"
-                    f"{label_html}</div>",
+                    f"<div style='font-size:0.82rem;font-weight:600;'>"
+                    f"{html.escape(entry.agent_type)}</div>"
+                    f"<div style='color:#c1272d;font-size:0.68rem;'>"
+                    f"catalog entry missing · engine {html.escape(entry.engine)}"
+                    f"</div>",
                     unsafe_allow_html=True,
                 )
-                # Second line: engine chip + instance count + edit summary.
-                param_count = sum(
-                    1 for k in entry.params if not k.startswith("__llm_")
-                )
-                llm_edited = any(
-                    k.startswith("__llm_") for k in entry.params
-                )
-                summary_bits = [
-                    f"<span style='padding:1px 8px;border-radius:10px;"
-                    f"background:#f0f4fa;color:#2a5fa6;font-size:0.72rem;"
-                    f"font-weight:600;'>{html.escape(entry.engine)}</span>",
-                    f"<span style='color:#6c757d;font-size:0.78rem;'>"
-                    f"×{entry.num_instances} instances</span>",
-                ]
-                if param_count:
-                    summary_bits.append(
-                        f"<span style='color:#6c757d;font-size:0.78rem;'>"
-                        f"{param_count} param{'s' if param_count > 1 else ''} edited</span>"
-                    )
-                if llm_edited:
-                    summary_bits.append(
-                        "<span style='color:#6c757d;font-size:0.78rem;'>"
-                        "LLM overrides</span>"
-                    )
+            with del_col:
+                if st.button(
+                    "🗑️",
+                    key=f"roster_del_orphan_{entry.id}",
+                    type="tertiary",
+                    width="stretch",
+                    help="Remove this orphaned entry.",
+                ):
+                    remove_entry(roster, entry.id)
+                    save_state_from_session(project_root=PROJECT_ROOT)
+                    st.rerun()
+        return
+
+    with st.container(border=True):
+        # --- Top row: fixed-width icon + info block --------------------
+        # ``vertical_alignment="center"`` glues the info stack to the
+        # icon's vertical mid-line so short info blocks don't float at
+        # the top while the icon dangles to the right.
+        icon_col, info_col = st.columns(
+            [1, 5], gap="small", vertical_alignment="center"
+        )
+
+        with icon_col:
+            img_path = Path(agent.get("image_file", ""))
+            if img_path.exists():
+                # Fixed pixel width so the icon never fights the info
+                # column for horizontal space (use_container_width would
+                # blow up on wide viewports and squeeze the info).
+                st.image(str(img_path), width=44)
+            else:
                 st.markdown(
-                    "<div style='margin-top:2px;display:flex;gap:10px;"
-                    "align-items:center;flex-wrap:wrap;'>"
-                    + "".join(summary_bits)
-                    + "</div>",
+                    "<div style='width:44px;height:44px;border-radius:6px;"
+                    "background:#e8f0fb;display:flex;align-items:center;"
+                    "justify-content:center;color:#2a5fa6;font-weight:700;"
+                    "font-size:0.85rem;'>"
+                    f"{html.escape(agent['display_name'][0])}</div>",
                     unsafe_allow_html=True,
                 )
-                st.caption(f"Entry id: `{entry.id}`")
 
-            with action_col:
-                edit_col, dup_col, del_col = st.columns(3)
-                with edit_col:
-                    if st.button(
-                        "Edit",
-                        key=f"roster_edit_{entry.id}",
-                        width="stretch",
-                        help="Open the edit dialog for this entry only.",
-                    ):
-                        _show_entry_edit_dialog(agent, entry.id)
-                with dup_col:
-                    if st.button(
-                        "Duplicate",
-                        key=f"roster_dup_{entry.id}",
-                        width="stretch",
-                        help=(
-                            "Insert a copy of this entry immediately below. "
-                            "Handy for tweaking a variant without losing the "
-                            "original."
-                        ),
-                    ):
-                        clone = duplicate_entry(roster, entry.id)
-                        # Copy widget state so the new entry opens with the
-                        # same values pre-populated on first edit.
-                        if clone is not None:
-                            src_prefix = f"entry_{entry.id}_"
-                            dst_prefix = f"entry_{clone.id}_"
-                            for wkey in list(st.session_state.keys()):
-                                if wkey.startswith(src_prefix):
-                                    tail = wkey[len(src_prefix):]
-                                    st.session_state[dst_prefix + tail] = (
-                                        st.session_state[wkey]
-                                    )
-                        save_state_from_session(project_root=PROJECT_ROOT)
-                        st.toast("Entry duplicated", icon="📄")
-                        st.rerun()
-                with del_col:
-                    if st.button(
-                        "× Remove",
-                        key=f"roster_del_{entry.id}",
-                        type="tertiary",
-                        width="stretch",
-                        help="Delete this entry without touching the others.",
-                    ):
-                        remove_entry(roster, entry.id)
-                        # Drop scoped widget state so nothing lingers for
-                        # future entries that happen to reuse the id space.
-                        prefix = f"entry_{entry.id}_"
-                        for wkey in list(st.session_state.keys()):
-                            if wkey.startswith(prefix):
-                                del st.session_state[wkey]
-                        save_state_from_session(project_root=PROJECT_ROOT)
-                        st.toast("Entry removed", icon="🗑️")
-                        st.rerun()
+        with info_col:
+            # Line 1: display name (compact) + optional label chip + pos badge.
+            label_html = ""
+            if entry.label:
+                label_html = (
+                    "<span style='margin-left:6px;padding:1px 6px;"
+                    "border-radius:8px;background:#eef4ff;color:#264d80;"
+                    "font-size:0.62rem;font-weight:600;'>"
+                    f"{html.escape(entry.label)}</span>"
+                )
+            st.markdown(
+                "<div style='font-size:0.78rem;font-weight:600;"
+                "line-height:1.15;overflow:hidden;text-overflow:ellipsis;'>"
+                f"{html.escape(agent['display_name'])}"
+                "<span style='margin-left:6px;color:#8a97a5;"
+                "font-size:0.62rem;font-weight:500;'>"
+                f"#{pos}</span>"
+                f"{label_html}</div>",
+                unsafe_allow_html=True,
+            )
+            # Line 2: engine chip + instance count + tiny edit hints.
+            param_count = sum(
+                1 for k in entry.params if not k.startswith("__llm_")
+            )
+            llm_edited = any(k.startswith("__llm_") for k in entry.params)
+            summary_bits = [
+                "<span style='padding:1px 6px;border-radius:8px;"
+                "background:#f0f4fa;color:#2a5fa6;font-size:0.62rem;"
+                f"font-weight:600;'>{html.escape(entry.engine)}</span>",
+                "<span style='color:#6c757d;font-size:0.64rem;'>"
+                f"×{entry.num_instances} instances</span>",
+            ]
+            if param_count:
+                summary_bits.append(
+                    "<span style='color:#6c757d;font-size:0.64rem;'>"
+                    f"{param_count} param{'s' if param_count > 1 else ''} edited</span>"
+                )
+            if llm_edited:
+                summary_bits.append(
+                    "<span style='color:#6c757d;font-size:0.64rem;'>"
+                    "LLM edits</span>"
+                )
+            st.markdown(
+                "<div style='margin-top:2px;display:flex;gap:8px;"
+                "align-items:center;flex-wrap:wrap;'>"
+                + "".join(summary_bits)
+                + "</div>"
+                "<div style='margin-top:1px;color:#9aa3ad;"
+                "font-size:0.58rem;font-family:ui-monospace,monospace;"
+                "line-height:1.15;overflow:hidden;text-overflow:ellipsis;"
+                "white-space:nowrap;'>"
+                f"{html.escape(entry.id)}</div>",
+                unsafe_allow_html=True,
+            )
+
+        # --- Bottom action bar: full-width row, 3 equal columns --------
+        # Sitting on its own row inside the same bordered container
+        # guarantees the buttons stay flush with the card frame instead
+        # of overflowing the previous narrow side column. Labels are
+        # emoji-only (✏️ / 📋 / 🗑️) for a compact overview grid —
+        # hover tooltips carry the full description for discoverability.
+        act_edit, act_dup, act_del = st.columns(3, gap="small")
+        with act_edit:
+            if st.button(
+                "✏️",
+                key=f"roster_edit_{entry.id}",
+                width="stretch",
+                type="tertiary",
+                help="Edit — open this entry's editor dialog.",
+            ):
+                _show_entry_edit_dialog(agent, entry.id)
+        with act_dup:
+            if st.button(
+                "📋",
+                key=f"roster_dup_{entry.id}",
+                width="stretch",
+                type="tertiary",
+                help=(
+                    "Duplicate — insert a copy of this entry immediately "
+                    "below. Handy for tweaking a variant without losing "
+                    "the original."
+                ),
+            ):
+                clone = duplicate_entry(roster, entry.id)
+                # Copy widget state so the new entry opens with the same
+                # values pre-populated on first edit.
+                if clone is not None:
+                    src_prefix = f"entry_{entry.id}_"
+                    dst_prefix = f"entry_{clone.id}_"
+                    for wkey in list(st.session_state.keys()):
+                        if wkey.startswith(src_prefix):
+                            tail = wkey[len(src_prefix):]
+                            st.session_state[dst_prefix + tail] = (
+                                st.session_state[wkey]
+                            )
+                save_state_from_session(project_root=PROJECT_ROOT)
+                st.toast("Entry duplicated", icon="📄")
+                st.rerun()
+        with act_del:
+            if st.button(
+                "🗑️",
+                key=f"roster_del_{entry.id}",
+                width="stretch",
+                type="tertiary",
+                help="Remove — delete this entry (does not touch the others).",
+            ):
+                remove_entry(roster, entry.id)
+                # Drop scoped widget state so nothing lingers for future
+                # entries that happen to reuse the id space.
+                prefix = f"entry_{entry.id}_"
+                for wkey in list(st.session_state.keys()):
+                    if wkey.startswith(prefix):
+                        del st.session_state[wkey]
+                save_state_from_session(project_root=PROJECT_ROOT)
+                st.toast("Entry removed", icon="🗑️")
+                st.rerun()
 
 
 def _render_scenario_card(

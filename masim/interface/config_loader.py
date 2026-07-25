@@ -422,24 +422,69 @@ def _scenario_base(scenario_key: str) -> str:
         'AssetBubble/Rule' -> 'AssetBubble'
         'AssetBubble'      -> 'AssetBubble'
         'myproj/AssetBubble/Rule' -> 'AssetBubble' (project-prefixed key)
+        'CUSTOMIZED_SIMULATION/{slug}-{id}-AssetBubble/Customized-agents'
+            -> 'AssetBubble'
+        'CUSTOMIZED_SIMULATION/Default-AssetBubble-LLM-r5' -> 'AssetBubble'
+
+    Customized bundle keys are resolved through ``_resolve_display_key``
+    first so the caller lands on the shipped scenario directory (e.g.
+    ``examples/AssetBubble/``) instead of on a nonexistent
+    ``examples/Customized-agents/`` path.
     """
     if not scenario_key:
         return scenario_key
-    parts = scenario_key.split("/")
+    key = _resolve_display_key(scenario_key)
+    parts = key.split("/")
     # Strip trailing variant if present (Rule/LLM/RuleLLM/Rag)
     if parts[-1] in ("Rule", "LLM", "RuleLLM", "Rag"):
         parts = parts[:-1]
-    return parts[-1] if parts else scenario_key
+    return parts[-1] if parts else key
+
+
+def _customized_bundle_bases_path(
+    scenario_key: str, filename: str
+) -> Optional[Path]:
+    """Return the bundle-local bases file for a customized scenario, if any.
+
+    Customized bundles ship their own copies of ``simulation-bases.md`` /
+    ``analysis-bases.md`` under
+    ``examples/CUSTOMIZED_SIMULATION/{bundle}/{sub}/{filename}`` where
+    ``{sub}`` is ``Default`` or ``Customized-agents``. The bundle-local
+    copy is preferred because it survives even if the shipped scenario
+    is later archived, and it reflects any bundle-time snapshots.
+    """
+    if not scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
+        return None
+    tail = scenario_key.split("/", 1)[1]
+    tail_parts = tail.split("/")
+    if len(tail_parts) < 2:
+        return None
+    bundle_name, sub = tail_parts[0], tail_parts[1]
+    if sub not in ("Default", "Customized-agents"):
+        return None
+    candidate = (
+        EXAMPLES_DIR / "CUSTOMIZED_SIMULATION" / bundle_name / sub / filename
+    )
+    return candidate if candidate.exists() else None
 
 
 def get_simulation_bases_path(scenario_key: str) -> Optional[Path]:
     """Return the path to a scenario's simulation-bases.md, or None.
 
-    Every scenario ships one canonical basis at
-    ``examples/{ScenarioBase}/simulation-bases.md``. The lookup is
-    variant-agnostic and project-agnostic: only the base scenario name
-    is used to resolve the file.
+    Resolution order:
+      1. Customized bundles: check the bundle-local copy under
+         ``examples/CUSTOMIZED_SIMULATION/{bundle}/{sub}/`` first.
+      2. Shipped scenarios: fall back to the canonical
+         ``examples/{ScenarioBase}/simulation-bases.md``.
+
+    The lookup is variant-agnostic and project-agnostic: only the base
+    scenario name (extracted via :func:`_scenario_base`) is used.
     """
+    bundle_local = _customized_bundle_bases_path(
+        scenario_key, "simulation-bases.md"
+    )
+    if bundle_local is not None:
+        return bundle_local
     base = _scenario_base(scenario_key)
     candidate = EXAMPLES_DIR / base / "simulation-bases.md"
     return candidate if candidate.exists() else None
@@ -459,11 +504,20 @@ def get_simulation_bases_content(scenario_key: str) -> Optional[str]:
 def get_analysis_bases_path(scenario_key: str) -> Optional[Path]:
     """Return the path to a scenario's analysis-bases.md, or None.
 
-    Every scenario ships one canonical analysis basis at
-    ``examples/{ScenarioBase}/analysis-bases.md``. The lookup is
-    variant-agnostic and project-agnostic: only the base scenario name
-    is used to resolve the file.
+    Resolution order:
+      1. Customized bundles: check the bundle-local copy under
+         ``examples/CUSTOMIZED_SIMULATION/{bundle}/{sub}/`` first.
+      2. Shipped scenarios: fall back to the canonical
+         ``examples/{ScenarioBase}/analysis-bases.md``.
+
+    The lookup is variant-agnostic and project-agnostic: only the base
+    scenario name (extracted via :func:`_scenario_base`) is used.
     """
+    bundle_local = _customized_bundle_bases_path(
+        scenario_key, "analysis-bases.md"
+    )
+    if bundle_local is not None:
+        return bundle_local
     base = _scenario_base(scenario_key)
     candidate = EXAMPLES_DIR / base / "analysis-bases.md"
     return candidate if candidate.exists() else None

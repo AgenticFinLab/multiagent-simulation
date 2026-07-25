@@ -1466,6 +1466,28 @@ def _maybe_write_prompts_module(
                 sys_text = default_sys
             if not user_text:
                 user_text = default_user
+
+        # ── Re-lock the output-format contract ────────────────────────
+        # The Streamlit editor exposes only the persona portion of the
+        # system prompt to the user; the DECISION_FORMAT_INSTRUCTION +
+        # ANALYSIS_DECISION_TAG + TRADING_CONSTRAINTS tail is always
+        # appended here so the LLM output contract cannot drift
+        # regardless of what the user typed (or what a legacy
+        # selection_state.json carries).  ``extract_persona`` is
+        # idempotent: a persona-only string passes through unchanged
+        # (modulo trailing whitespace), while any full prompt gets its
+        # format tail stripped before we re-append the canonical one.
+        from masim.format.order_prompts import (
+            build_llm_system_prompt,
+            extract_persona,
+        )
+
+        persona = extract_persona(sys_text)
+        if persona:
+            sys_text = build_llm_system_prompt(
+                persona=persona,
+                include_constraints=True,
+            )
         entries.append((sel.archetype, sel.engine, sys_text, user_text))
 
     text = _render_prompts_module(cid=cid, entries=entries)
