@@ -43,7 +43,11 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import (
+    normalize_action_quantity,
+    signed_order_quantity,
+    validate_order,
+)
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -121,7 +125,7 @@ class Market(GeneralPlayer):
                     {
                         "investor": inb.sender_id,
                         "price": order["bid_price"],
-                        "quantity": order["quantity"],
+                        "quantity": signed_order_quantity(order),
                         "strategy": order["strategy"],
                         "reasoning": order["reasoning"],
                     }
@@ -399,9 +403,11 @@ Respond with ONLY valid JSON:
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
-        action = decision["action"]
+        action, quantity_magnitude = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
+        quantity = -quantity_magnitude if action == "sell" else quantity_magnitude
 
         # Guard: LLMs sometimes output bid_price=0 for hold actions.
         # Use the current market price so recorded bids stay meaningful.
@@ -410,14 +416,14 @@ Respond with ONLY valid JSON:
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         # Execute trade
-        if action == "buy" and quantity > 0:
+        if quantity > 0:
             cost = quantity * bid_price
             self.state.custom_state["cash"] -= cost
             self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            proceeds = quantity * bid_price
+        elif quantity < 0:
+            proceeds = abs(quantity) * bid_price
             self.state.custom_state["cash"] += proceeds
-            self.state.custom_state["position"] -= quantity
+            self.state.custom_state["position"] += quantity
 
         logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "

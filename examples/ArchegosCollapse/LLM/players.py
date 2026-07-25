@@ -7,9 +7,11 @@ Environment Variables:
     ARK_API_KEY: ByteDance Doubao API key (required for LLM calls)
 """
 
+import asyncio
 import importlib
 import logging
 import os
+import random
 import sys
 from typing import Any, Dict, Optional
 
@@ -21,7 +23,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import normalize_action_quantity, validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -151,7 +153,7 @@ class LLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                infer_output = llm_client.run([infer_input]).outputs[0]
+                infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
                     infer_output.response
                 )
@@ -162,11 +164,14 @@ class LLMInvestor(GeneralPlayer):
                 parse_error = isinstance(exc, (ValueError, KeyError))
                 retryable_api_error = is_retryable_llm_error(exc)
                 if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    delay = min(4.0, 0.75 * (2**attempt)) + random.uniform(0.0, 0.5)
                     logger.debug(
-                        "[%s] LLM call/parse failed, retrying: %s",
+                        "[%s] LLM call/parse failed, retrying in %.2fs: %s",
                         self.identity,
+                        delay,
                         exc,
                     )
+                    await asyncio.sleep(delay)
                     continue
                 if not parse_error and not retryable_api_error:
                     raise
@@ -176,9 +181,10 @@ class LLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
-        action = decision["action"]
+        action, quantity = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
 
         if action == "buy":
             max_affordable = cash / bid_price
@@ -189,6 +195,9 @@ class LLMInvestor(GeneralPlayer):
             quantity = min(quantity, max(position, 0.0))
             self.state.custom_state["cash"] += quantity * bid_price
             self.state.custom_state["position"] -= quantity
+
+        if quantity == 0:
+            action = "hold"
 
         logger.info(
             "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity

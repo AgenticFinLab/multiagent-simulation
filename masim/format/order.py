@@ -1,9 +1,9 @@
 """Investor order format — the single source of truth for agent output.
 
 Every canonical agent (Rule or LLM) in :mod:`masim.agents` MUST return orders
-constructed through this module.  There is no bypass path: hand-rolled dicts
-are still accepted for backwards compatibility but flow through
-:func:`validate_order` and are rejected on schema drift.
+constructed through this module.  Hand-rolled dicts are still accepted for
+backwards compatibility; common LLM sign/zero representation drift is
+canonicalised and other schema drift is rejected by :func:`validate_order`.
 
 Public surface
 --------------
@@ -59,6 +59,40 @@ INVESTOR_ORDER_ACTION_VALUES: Set[str] = {"buy", "sell", "hold"}
 BUY: str = "buy"
 SELL: str = "sell"
 HOLD: str = "hold"
+
+
+def normalize_action_quantity(action: Any, quantity: Any) -> tuple[str, float]:
+    """Return canonical action and non-negative order size.
+
+    LLMs commonly express sells with a negative quantity or emit a zero-size
+    buy/sell.  The wire contract uses a separate action field and therefore
+    always stores quantity as a non-negative magnitude.  A zero-size trade is
+    semantically a hold.
+    """
+    normalized_action = str(action).lower().strip()
+    try:
+        magnitude = abs(float(quantity))
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"Quantity must be numeric, got {type(quantity).__name__}"
+        ) from exc
+
+    if normalized_action == HOLD or magnitude == 0:
+        return HOLD, 0.0
+    return normalized_action, magnitude
+
+
+def signed_order_quantity(order: Mapping[str, Any]) -> float:
+    """Read an order quantity using a signed value for legacy market math."""
+    quantity = float(order.get("quantity", 0.0) or 0.0)
+    action = str(order.get("action", "")).lower().strip()
+    if action == BUY:
+        return abs(quantity)
+    if action == SELL:
+        return -abs(quantity)
+    if action == HOLD:
+        return 0.0
+    return quantity
 
 
 # ---------------------------------------------------------------------------
@@ -348,7 +382,9 @@ def validate_order(order: Any) -> None:
 
     Accepts either a raw ``dict`` or an :class:`InvestorOrder` (converted via
     :meth:`InvestorOrder.to_dict` first). The check is intentionally strict:
-    the schema is a public contract and downstream analytics assume it.
+    the schema is a public contract and downstream analytics assume it.  For
+    legacy LLM dicts, signed quantities and zero-size trades are canonicalised
+    in place before the strict checks run.
 
     Raises:
         ValueError: If any required field is missing or has an invalid value.
@@ -374,8 +410,19 @@ def validate_order(order: Any) -> None:
     quantity = order["quantity"]
     if not isinstance(quantity, (int, float)):
         raise ValueError(f"Quantity must be numeric, got {type(quantity).__name__}")
-    if quantity < 0:
-        raise ValueError(f"Quantity must be non-negative, got {quantity}")
+
+    # Canonicalise the two harmless representation drifts most often produced
+    # by LLMs.  Dicts are intentionally updated in place so the validated wire
+    # payload is the same object later sent to the market.
+    normalized_action, normalized_quantity = normalize_action_quantity(
+        action, quantity
+    )
+    if isinstance(order, dict):
+        order["action"] = normalized_action
+        order["quantity"] = normalized_quantity
+    action = normalized_action
+    quantity = normalized_quantity
+
     if action == HOLD and quantity != 0:
         raise ValueError(
             f"HOLD orders must have quantity=0, got {quantity}"
@@ -408,6 +455,8 @@ __all__ = [
     "BUY",
     "SELL",
     "HOLD",
+    "normalize_action_quantity",
+    "signed_order_quantity",
     "InvestorOrder",
     "validate_order",
 ]

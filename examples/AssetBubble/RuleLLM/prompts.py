@@ -220,16 +220,17 @@ Step 2 — Compute value deviation:
     Negative deviation means price is ABOVE fundamental → overvalued → opportunity to SELL.
 
 Step 3 — Size your trade:
-    quantity = value_sensitivity × deviation × base_size
+    signed_quantity = value_sensitivity × deviation × base_size
         where value_sensitivity=1.5, base_size=10
-    Clamp to [-15, +15] shares (conservative sizing).
-    If quantity > 0: bid_price = current_price (buy)
-    If quantity < 0: bid_price = current_price (sell)
-    If quantity ≈ 0: hold
+    Clamp signed_quantity to [-15, +15] shares (conservative sizing).
+    If signed_quantity > 0: action = "buy", quantity = abs(signed_quantity)
+    If signed_quantity < 0: action = "sell", quantity = abs(signed_quantity)
+    If signed_quantity ≈ 0: action = "hold", quantity = 0
+    bid_price = current_price
 
 Step 4 — Apply portfolio constraints:
     If buying: quantity ≤ available_cash / bid_price
-    If selling: quantity ≥ -(long_position + 50)
+    If selling: quantity ≤ long_position + 50
 
 == YOUR TASK ==
 Check if this is a trading round (round_number divisible by 5). If yes, compute
@@ -352,6 +353,32 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 """
 
 
+# The formulas above sometimes use a signed intermediate value to choose a
+# direction.  The public order schema stores direction in ``action`` and size
+# in a non-negative ``quantity``.  Append this contract to every system prompt
+# so all RuleLLM personas receive the same unambiguous output instruction.
+ORDER_OUTPUT_CONTRACT = """
+
+== ORDER OUTPUT CONTRACT ==
+Quantity must always be a non-negative magnitude.
+
+- For BUY:  action="buy",  quantity=abs(calculated_quantity)
+- For SELL: action="sell", quantity=abs(calculated_quantity)
+- For HOLD: action="hold", quantity=0
+
+Never output a negative quantity because the action field already represents
+the trading direction. This output contract overrides any signed intermediate
+quantity notation used in the decision rules above.
+"""
+
+RULELLM_MOMENTUM_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_ARBITRAGEUR_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_NOISE_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_VALUE_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_LEVERAGED_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_CONSERVATIVE_SYS += ORDER_OUTPUT_CONTRACT
+
+
 # =============================================================================
 # Shared User Message Template
 # =============================================================================
@@ -377,6 +404,6 @@ RULELLM_USER_TEMPLATE = """
 Apply your DECISION RULES above to this data and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <non-negative share magnitude as NUMBER>, "reasoning": "<brief>"}}
+IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions. Quantity must never be negative; use action="sell" with a positive quantity for sells.
 """

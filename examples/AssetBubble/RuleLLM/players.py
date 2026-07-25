@@ -49,7 +49,11 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import (
+    normalize_action_quantity,
+    signed_order_quantity,
+    validate_order,
+)
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -166,7 +170,7 @@ class Market(GeneralPlayer):
                     {
                         "investor": inb.sender_id,
                         "price": order["bid_price"],
-                        "quantity": order["quantity"],
+                        "quantity": signed_order_quantity(order),
                         "strategy": order["strategy"],
                         "reasoning": order["reasoning"],
                     }
@@ -387,7 +391,8 @@ Short Cost: {market_data['short_cost_rate']:.1%} | Recent Prices: {recent_prices
 Portfolio → Cash: ${cash:.2f} | Long: {position:.2f} | Short: {short_pos:.2f} | Value: ${cash + position * market_data['price']:.2f}
 
 Respond with ONLY valid JSON:
-{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float, +buy/-sell>, "reasoning": "<brief>"}}
+{{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <non-negative float>, "reasoning": "<brief>"}}
+Quantity must never be negative. Use action="sell" with a positive quantity for sells.
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
@@ -463,8 +468,11 @@ Respond with ONLY valid JSON:
                     f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
                 )
 
+        action, quantity_magnitude = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
+        quantity = -quantity_magnitude if action == "sell" else quantity_magnitude
         if bid_price <= 0:
             bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
@@ -493,7 +501,7 @@ Respond with ONLY valid JSON:
         )
 
         order = {
-            "action": decision["action"],
+            "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,

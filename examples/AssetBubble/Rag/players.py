@@ -73,7 +73,11 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import (
+    normalize_action_quantity,
+    signed_order_quantity,
+    validate_order,
+)
 
 logger = logging.getLogger("AssetBubbleRag")
 
@@ -162,7 +166,7 @@ class Market(GeneralPlayer):
                     {
                         "investor": inb.sender_id,
                         "price": order["bid_price"],
-                        "quantity": order["quantity"],
+                        "quantity": signed_order_quantity(order),
                         "strategy": order["strategy"],
                         "reasoning": order["reasoning"],
                     }
@@ -801,8 +805,11 @@ class RagLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM failed after {max_retries} retries: {last_error}"
             )
 
+        action, quantity_magnitude = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
+        quantity = -quantity_magnitude if action == "sell" else quantity_magnitude
         if bid_price <= 0:
             bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity)
@@ -833,7 +840,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         order = {
-            "action": decision["action"],
+            "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,

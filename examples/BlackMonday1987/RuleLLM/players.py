@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from masim.format.order import validate_order
+from masim.format.order import normalize_action_quantity, validate_order
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -166,14 +166,18 @@ class RuleLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             ) from last_error
 
-        action_str = decision["action"]
-        bid_price = decision["bid_price"]
-        quantity = decision["quantity"]
+        action_str, quantity = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
+        bid_price = float(decision["bid_price"])
         if action_str == "buy":
             max_buy = cash / bid_price
             quantity = min(quantity, max_buy)
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
+
+        if quantity == 0:
+            action_str = "hold"
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * bid_price
