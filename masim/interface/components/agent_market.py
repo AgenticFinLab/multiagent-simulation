@@ -1284,7 +1284,7 @@ def render_default_config() -> None:
 
     # ── Load player data ──────────────────────────────────────────────────
     players = extract_default_players(
-        scenario_name=base, variant="Rule", project_root=PROJECT_ROOT
+        scenario_name=base, variant=variant, project_root=PROJECT_ROOT
     )
     if not players:
         st.info("No configurable parameters for this scenario.")
@@ -1313,28 +1313,289 @@ def render_default_config() -> None:
             edits.pop("__market__", None)
         st.divider()
 
-    # ── Agent Cards ───────────────────────────────────────────────────────
+    # ── Agent Cards (icon + name + Edit dialog) ─────────────────────────
+    is_llm_variant = variant in ("LLM", "RuleLLM", "Rag")
     if agent_items:
         st.subheader("Agents")
-        per_row = 2
+        per_row = 6
         for row_start in range(0, len(agent_items), per_row):
             row = agent_items[row_start : row_start + per_row]
             cols = st.columns(per_row, gap="medium")
             for col, (block_key, block_info) in zip(cols, row):
                 with col:
-                    _render_agent_config_card(
+                    _render_default_agent_card(
                         base=base,
+                        variant=variant,
                         block_key=block_key,
                         block_info=block_info,
                         edits=edits,
+                        is_llm_variant=is_llm_variant,
                     )
         st.divider()
 
-    # Persist pruned edits back
-    st.session_state[session_key] = edits
-
     # ── Confirm & Launch button ───────────────────────────────────────────
     _render_launch_button(scenario_key)
+
+
+def _resolve_prompt_text(module_ref: str) -> str:
+    """Resolve a 'module.path:VARIABLE' reference to its string value.
+
+    Used to load the actual prompt text from e.g.
+    'examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_TRADER_SYS'.
+    Returns the resolved string, or the raw reference if import fails.
+    """
+    if ":" not in module_ref:
+        return module_ref
+    module_path, var_name = module_ref.rsplit(":", 1)
+    try:
+        import importlib
+        mod = importlib.import_module(module_path)
+        value = getattr(mod, var_name, None)
+        if isinstance(value, str):
+            return value
+    except Exception:
+        pass
+    return module_ref
+
+
+def _extract_persona_section(full_prompt: str) -> str:
+    """Extract only the persona part from a full system prompt.
+
+    Strips everything from the TRADING_CONSTRAINTS / ANALYSIS_DECISION_TAG
+    section onward, since those are format instructions that should be locked.
+    The persona is the creative content the user may want to edit.
+    """
+    # Known markers that signal the start of locked format instructions.
+    _MARKERS = [
+        "TRADING CONSTRAINTS:",
+        "== FORMAT ==",
+        "Respond with your thinking in",
+        "Your response MUST use the following structure",
+        "The decision JSON must follow this exact format",
+    ]
+    text = full_prompt
+    # Find the earliest marker position
+    cut_pos = len(text)
+    for marker in _MARKERS:
+        idx = text.find(marker)
+        if idx != -1 and idx < cut_pos:
+            cut_pos = idx
+    result = text[:cut_pos].rstrip()
+    # Also strip trailing blank lines left by the cut
+    return result.rstrip("\n") + "\n"
+
+
+def _render_default_agent_card(
+    *,
+    base: str,
+    variant: str,
+    block_key: str,
+    block_info: dict[str, Any],
+    edits: dict[str, dict[str, Any]],
+    is_llm_variant: bool,
+) -> None:
+    """Render one agent card in the Default config grid (Customized-style).
+
+    Shows: icon image → agent name → edited badge → Edit button (opens dialog).
+    """
+    archetype = _canonical_archetype(block_key)
+    icon_path = ICON_ROOT / f"finance-{archetype.replace('_', '-')}.png"
+    display_name = block_info.get("name") or block_key
+
+    # --- Icon image (full-column width, like Customized cards) ---
+    if icon_path.exists():
+        st.image(str(icon_path), use_container_width=True)
+    else:
+        st.markdown(
+            "<div style='width:100%;aspect-ratio:1/1;border-radius:8px;"
+            "background:#e8f0fb;display:flex;align-items:center;"
+            "justify-content:center;color:#2a5fa6;font-weight:700;"
+            f"font-size:1.4rem;'>{html.escape(display_name[0])}</div>",
+            unsafe_allow_html=True,
+        )
+
+    # --- Agent name ---
+    num_instances = block_info.get("num_instances", 1)
+    instance_badge = f" ×{num_instances}" if num_instances > 1 else ""
+    st.markdown(
+        f"<p style='text-align:center;margin:2px 0;font-weight:600;"
+        f"font-size:0.85rem;'>{html.escape(display_name)}{instance_badge}</p>",
+        unsafe_allow_html=True,
+    )
+
+    # --- Edited indicator ---
+    has_edits = (
+        bool(edits.get(block_key))
+        or bool(edits.get("__llm__", {}).get(block_key))
+        or st.session_state.get(f"dc_edited_{block_key}", False)
+    )
+    if has_edits:
+        st.markdown(
+            "<div style='text-align:center;margin:2px 0;'>"
+            "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
+            "border-radius:10px;background:#d4edda;color:#155724;"
+            "font-weight:600;'>✓ 已修改</span></div>",
+            unsafe_allow_html=True,
+        )
+
+    # --- Edit button (opens dialog) ---
+    if st.button(
+        "编辑",
+        key=f"dc_edit_btn_{base}_{block_key}",
+        use_container_width=True,
+    ):
+        _show_default_edit_dialog(
+            base=base,
+            variant=variant,
+            block_key=block_key,
+            block_info=block_info,
+            edits=edits,
+            is_llm_variant=is_llm_variant,
+        )
+
+
+@st.dialog("Edit Agent", width="large")
+def _show_default_edit_dialog(
+    *,
+    base: str,
+    variant: str,
+    block_key: str,
+    block_info: dict[str, Any],
+    edits: dict[str, dict[str, Any]],
+    is_llm_variant: bool,
+) -> None:
+    """Dialog overlay for editing a Default-config agent's parameters."""
+    display_name = block_info.get("name") or block_key
+    extras = block_info.get("extras") or {}
+
+    st.subheader(display_name)
+
+    # ── Parameters (extras) ───────────────────────────────────────────
+    if extras:
+        st.markdown("**Parameters**")
+        override_slot = edits.setdefault(block_key, {})
+        _render_extras_grid(
+            extras=extras,
+            override_slot=override_slot,
+            key_prefix=f"dc_{base}_{block_key}",
+        )
+        if not override_slot:
+            edits.pop(block_key, None)
+        st.divider()
+
+    # ── LLM Prompt & Model (only for LLM/RuleLLM/Rag engines) ────────
+    if is_llm_variant:
+        llm_cfg = block_info.get("llm")
+        if llm_cfg:
+            st.markdown("**Persona Prompt**")
+            st.caption(
+                "Edit the agent's persona below. The output format instruction "
+                "is appended automatically — you only need to adjust the "
+                "persona description."
+            )
+
+            llm_edits: dict[str, dict[str, Any]] = edits.setdefault("__llm__", {})
+            agent_llm_edits = llm_edits.setdefault(block_key, {})
+
+            # Resolve the current system prompt text
+            sys_ref = llm_cfg.get("sys_message", "")
+            prompt_text = agent_llm_edits.get("persona_prompt", "")
+            if not prompt_text and sys_ref:
+                prompt_text = _resolve_prompt_text(sys_ref)
+
+            # Strip the format tail so users only see persona
+            persona_only = _extract_persona_section(prompt_text)
+
+            edited_prompt = st.text_area(
+                "Persona Prompt",
+                value=agent_llm_edits.get("persona_prompt", persona_only),
+                height=220,
+                key=f"dc_llm_prompt_{base}_{block_key}",
+                help="Edit the agent's persona content.",
+                label_visibility="collapsed",
+            )
+            if edited_prompt.strip() != persona_only.strip():
+                agent_llm_edits["persona_prompt"] = edited_prompt.strip()
+            else:
+                agent_llm_edits.pop("persona_prompt", None)
+
+            # Locked format display
+            st.info(
+                "**Output format** (locked — appended automatically):\n\n"
+                "```\n"
+                '<analysis>...</analysis><decision>JSON</decision>\n'
+                "JSON: {action, bid_price, quantity, reasoning}\n"
+                "```",
+                icon="\U0001f512",
+            )
+
+            st.divider()
+
+            # Model & Generation parameters
+            st.markdown("**Model & Generation**")
+            gen_cfg = llm_cfg.get("generation_config") or {}
+            pcol1, pcol2 = st.columns(2)
+            with pcol1:
+                current_temp = float(
+                    agent_llm_edits.get(
+                        "temperature", gen_cfg.get("temperature", 0.7)
+                    )
+                )
+                new_temp = st.slider(
+                    "Temperature",
+                    min_value=0.0,
+                    max_value=2.0,
+                    value=current_temp,
+                    step=0.05,
+                    key=f"dc_llm_temp_{base}_{block_key}",
+                )
+                if abs(new_temp - float(gen_cfg.get("temperature", 0.7))) > 0.01:
+                    agent_llm_edits["temperature"] = round(new_temp, 2)
+                else:
+                    agent_llm_edits.pop("temperature", None)
+            with pcol2:
+                current_tokens = int(
+                    agent_llm_edits.get(
+                        "max_tokens", gen_cfg.get("max_tokens", 512)
+                    )
+                )
+                new_tokens = st.number_input(
+                    "Max Tokens",
+                    min_value=64,
+                    max_value=4096,
+                    value=current_tokens,
+                    step=64,
+                    key=f"dc_llm_tokens_{base}_{block_key}",
+                )
+                if int(new_tokens) != int(gen_cfg.get("max_tokens", 512)):
+                    agent_llm_edits["max_tokens"] = int(new_tokens)
+                else:
+                    agent_llm_edits.pop("max_tokens", None)
+
+            current_model = agent_llm_edits.get(
+                "lm_name", llm_cfg.get("lm_name", "")
+            )
+            new_model = st.text_input(
+                "Model Name",
+                value=current_model,
+                key=f"dc_llm_model_{base}_{block_key}",
+                help="LLM endpoint identifier (e.g. ark/doubao-seed-2-0-mini-260428).",
+            )
+            if new_model.strip() != llm_cfg.get("lm_name", ""):
+                agent_llm_edits["lm_name"] = new_model.strip()
+            else:
+                agent_llm_edits.pop("lm_name", None)
+
+            # Prune empty per-agent dicts
+            if not agent_llm_edits:
+                llm_edits.pop(block_key, None)
+            if not llm_edits:
+                edits.pop("__llm__", None)
+
+    # ── Save button ────────────────────────────────────────────────────
+    if st.button("保存", key="dc_edit_save", type="primary", use_container_width=True):
+        st.session_state[f"dc_edited_{block_key}"] = True
+        st.rerun()
 
 
 def _render_extras_grid(
@@ -1394,58 +1655,6 @@ def _render_extras_grid(
                     override_slot.pop(extras_key, None)
 
 
-def _render_agent_config_card(
-    *,
-    base: str,
-    block_key: str,
-    block_info: dict[str, Any],
-    edits: dict[str, dict[str, Any]],
-) -> None:
-    """Render a single agent card with icon, name, instances, and extras."""
-    archetype = _canonical_archetype(block_key)
-    icon_path = ICON_ROOT / f"finance-{archetype.replace('_', '-')}.png"
-    display_name = block_info.get("name") or block_key
-    num_instances = block_info.get("num_instances", 1)
-    extras = block_info.get("extras") or {}
-
-    # Card container with a subtle border
-    with st.container(border=True):
-        # Header: icon + name + instance count
-        header_col, info_col = st.columns([1, 3], vertical_alignment="center")
-        with header_col:
-            if icon_path.exists():
-                uri = _image_data_uri(icon_path)
-                st.markdown(
-                    f'<img src="{uri}" style="width:48px;height:48px;'
-                    f'border-radius:50%;border:2px solid #dde4ea;'
-                    f'object-fit:cover;" />',
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    f'<div style="width:48px;height:48px;border-radius:50%;'
-                    f'background:#e8f0fb;display:flex;align-items:center;'
-                    f'justify-content:center;color:#2a5fa6;font-weight:700;'
-                    f'font-size:14px;border:2px solid #dde4ea;">'
-                    f'{html.escape(display_name[:2].upper())}</div>',
-                    unsafe_allow_html=True,
-                )
-        with info_col:
-            instance_badge = f" ×{num_instances}" if num_instances > 1 else ""
-            st.markdown(f"**{html.escape(display_name)}**{instance_badge}")
-
-        # Extras parameters
-        if extras:
-            override_slot = edits.setdefault(block_key, {})
-            _render_extras_grid(
-                extras=extras,
-                override_slot=override_slot,
-                key_prefix=f"dc_{base}_{block_key}",
-            )
-            if not override_slot:
-                edits.pop(block_key, None)
-
-
 def _render_launch_button(scenario_key: str) -> None:
     """Render the Confirm & Launch button at the bottom of the config page."""
     _, center_col, _ = st.columns([2, 2, 2])
@@ -1483,8 +1692,10 @@ def _launch_from_default_config(scenario_key: str) -> None:
     session_key = _default_extras_session_key(base)
     default_extras = st.session_state.get(session_key, {}) or {}
     market_over = default_extras.get("__market__") or {}
+    llm_over = default_extras.get("__llm__") or {}
     agent_over = {
-        k: v for k, v in default_extras.items() if k != "__market__" and v
+        k: v for k, v in default_extras.items()
+        if k not in ("__market__", "__llm__") and v
     }
 
     # Write edits into the bundle's config files
@@ -1499,6 +1710,20 @@ def _launch_from_default_config(scenario_key: str) -> None:
         st.error(f"Failed to apply parameter changes: {exc}")
         return
 
+    # Apply LLM overrides (prompts + generation params) if any
+    if llm_over:
+        try:
+            _apply_llm_overrides_to_bundle(
+                config_dir=bundle.config_dir,
+                example_dir=bundle.example_dir,
+                llm_edits=llm_over,
+                scenario_name=base,
+                variant=variant,
+            )
+        except Exception as exc:
+            st.error(f"Failed to apply LLM overrides: {exc}")
+            return
+
     # Transition to workspace — launch from the bundle
     launch_key = f"CUSTOMIZED_SIMULATION/{bundle.customized_id}/Default/{variant}"
     st.session_state.selected_scenario = launch_key
@@ -1507,6 +1732,172 @@ def _launch_from_default_config(scenario_key: str) -> None:
     st.session_state.current_page = "Simulation"
     st.session_state.customized_dir_id = bundle.customized_id
     st.rerun()
+
+
+def _apply_llm_overrides_to_bundle(
+    *,
+    config_dir: "Path",
+    example_dir: "Path",
+    llm_edits: dict[str, dict[str, Any]],
+    scenario_name: str,
+    variant: str,
+) -> None:
+    """Apply LLM prompt/param edits to the bundle's players.yml and prompts.py.
+
+    For each agent in llm_edits:
+      - temperature / max_tokens / lm_name → patched in-place in players.yml
+      - persona_prompt → written to a custom prompts.py that the players.yml
+        sys_message reference will point to (rewired).
+
+    The output format instruction is automatically appended to each edited
+    persona so the model output stays parseable.
+    """
+    import re as _re
+    from pathlib import Path
+
+    players_path = config_dir / "players.yml"
+    if not players_path.exists():
+        return
+
+    players_text = players_path.read_text(encoding="utf-8")
+    prompts_written: dict[str, str] = {}  # var_name -> full prompt text
+
+    for block_key, agent_edits in llm_edits.items():
+        if not agent_edits:
+            continue
+
+        # --- Patch generation_config fields in players.yml ---
+        if "temperature" in agent_edits:
+            # Replace temperature: <old> for this agent block
+            players_text = _patch_llm_yaml_field(
+                players_text, block_key, "temperature",
+                str(agent_edits["temperature"]),
+            )
+        if "max_tokens" in agent_edits:
+            players_text = _patch_llm_yaml_field(
+                players_text, block_key, "max_tokens",
+                str(agent_edits["max_tokens"]),
+            )
+        if "lm_name" in agent_edits:
+            players_text = _patch_llm_yaml_field(
+                players_text, block_key, "lm_name",
+                f'"{agent_edits["lm_name"]}"',
+            )
+
+        # --- Build custom prompt if persona was edited ---
+        if "persona_prompt" in agent_edits:
+            # Build a variable name from block_key
+            var_name = f"CUSTOM_{block_key.upper()}_SYS"
+            # Compose full prompt: edited persona + locked format tail
+            from masim.format.base_prompts import (
+                ANALYSIS_DECISION_TAG,
+                TRADING_CONSTRAINTS,
+            )
+            from masim.format.order_prompts import DECISION_FORMAT_INSTRUCTION
+
+            full_prompt = (
+                agent_edits["persona_prompt"].rstrip()
+                + "\n\n"
+                + TRADING_CONSTRAINTS
+                + "\n\n"
+                + ANALYSIS_DECISION_TAG
+                + "\n"
+                + DECISION_FORMAT_INSTRUCTION
+                + "\n"
+            )
+            prompts_written[var_name] = full_prompt
+
+            # Rewrite sys_message reference in players.yml to point to
+            # the custom prompts module
+            bundle_module = _bundle_prompts_module_path(config_dir)
+            new_ref = f"{bundle_module}:{var_name}"
+            players_text = _patch_llm_yaml_field(
+                players_text, block_key, "sys_message",
+                f'"{new_ref}"',
+            )
+
+    # Write back players.yml
+    players_path.write_text(players_text, encoding="utf-8")
+
+    # Write custom prompts.py if any personas were edited
+    if prompts_written:
+        prompts_py_path = example_dir / "prompts.py"
+        # Build the module file
+        lines = [
+            '"""Custom prompts generated by Default config editor."""\n\n',
+        ]
+        for var_name, prompt_text in prompts_written.items():
+            # Use triple-quoted string
+            escaped = prompt_text.replace('\\', '\\\\').replace('"""', '\\"\\"\\"')
+            lines.append(f'{var_name} = """{escaped}"""\n\n')
+        prompts_py_path.parent.mkdir(parents=True, exist_ok=True)
+        prompts_py_path.write_text("".join(lines), encoding="utf-8")
+        # Ensure __init__.py exists for import
+        init_path = example_dir / "__init__.py"
+        if not init_path.exists():
+            init_path.write_text("", encoding="utf-8")
+
+
+def _patch_llm_yaml_field(
+    text: str, block_key: str, field: str, new_value: str
+) -> str:
+    """Patch a YAML field value within a specific agent block's llm section.
+
+    Simple line-level replacement: finds the first occurrence of
+    ``field: <old_value>`` that appears after the block_key header line,
+    and replaces the value. Preserves surrounding formatting.
+    """
+    import re as _re
+
+    # Find block start
+    block_pattern = _re.compile(
+        rf"^{_re.escape(block_key)}\s*:", flags=_re.MULTILINE
+    )
+    block_match = block_pattern.search(text)
+    if not block_match:
+        return text
+
+    # Search for the field within this block (before next top-level key)
+    block_start = block_match.end()
+    # Find next top-level key (non-indented line with colon)
+    next_block = _re.search(r"^\S+\s*:", text[block_start:], flags=_re.MULTILINE)
+    block_end = block_start + next_block.start() if next_block else len(text)
+
+    block_section = text[block_start:block_end]
+    # Match the field line (indented)
+    field_pattern = _re.compile(
+        rf"^(\s+{_re.escape(field)}\s*:\s*).+$", flags=_re.MULTILINE
+    )
+    field_match = field_pattern.search(block_section)
+    if not field_match:
+        return text
+
+    # Replace
+    replacement = field_match.group(1) + new_value
+    new_section = (
+        block_section[: field_match.start()]
+        + replacement
+        + block_section[field_match.end():]
+    )
+    return text[:block_start] + new_section + text[block_end:]
+
+
+def _bundle_prompts_module_path(config_dir: "Path") -> str:
+    """Derive the Python import path for the bundle's custom prompts.py.
+
+    Given config_dir like ``.../configs/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/``,
+    the corresponding example module is
+    ``examples.CUSTOMIZED_SIMULATION.{bundle}.Default.{variant}.prompts``.
+    """
+    from pathlib import Path
+    parts = Path(config_dir).parts
+    # Find 'CUSTOMIZED_SIMULATION' in parts and take everything after
+    try:
+        idx = parts.index("CUSTOMIZED_SIMULATION")
+    except ValueError:
+        return "prompts"
+    module_parts = ["examples", "CUSTOMIZED_SIMULATION"] + list(parts[idx + 1:])
+    return ".".join(module_parts) + ".prompts"
 
 
 def _field_from_summary_table(markdown: str, field: str) -> str:
@@ -2559,9 +2950,12 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
     at full column width, preserving source resolution on Retina
     displays.
 
-    Clicking the agent name opens the profile in a dialog overlay.
-    The Customize button opens the parameter dialog — no grid
-    reshuffling required.
+    UX: two distinct interaction modes:
+      * **Not selected** → "+ Add" button provides one-click selection
+        with default engine (Rule); "Customize" opens the dialog for
+        users who want to configure before adding.
+      * **Selected** → Richer badge shows engine + instance count;
+        "Customize" for editing; "Remove" for deselection.
     """
     agent_type = agent["agent_type"]
     selected = bool(st.session_state.get(f"market_agent_{agent_type}", False))
@@ -2579,18 +2973,42 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
             unsafe_allow_html=True,
         )
 
-    # --- Selection badge (compact pill beneath image) ----------------
-    badge = (
-        "<div style='text-align:center;margin:4px 0 2px;'>"
-        "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
-        "border-radius:10px;background:#d4edda;color:#155724;font-weight:600;'>"
-        "\u2713 in market</span></div>"
-        if selected
-        else "<div style='text-align:center;margin:4px 0 2px;'>"
-        "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
-        "border-radius:10px;background:#f0f2f4;color:#6c757d;'>"
-        "not selected</span></div>"
-    )
+    # --- Status badge (compact pill beneath image) -------------------
+    if selected:
+        engine = st.session_state.get(f"market_engine_{agent_type}", "Rule")
+        ninst = int(
+            st.session_state.get(
+                f"customized_num_instances_{agent_type}", 1
+            ) or 1
+        )
+        # Check if any handbook params have been customized
+        customized_params = st.session_state.get("customized_params") or {}
+        agent_params = customized_params.get(agent_type, {}).get(engine, {})
+        has_edits = bool(
+            {k for k in agent_params if not k.startswith("__llm_")}
+        )
+
+        # Build concise status: "✓ LLM ×3 ·edited" or "✓ Rule"
+        parts = [f"\u2713 {engine}"]
+        if ninst > 1:
+            parts.append(f"\u00d7{ninst}")
+        badge_text = " ".join(parts)
+        if has_edits:
+            badge_text += " · edited"
+
+        badge = (
+            "<div style='text-align:center;margin:4px 0 2px;'>"
+            "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
+            "border-radius:10px;background:#d4edda;color:#155724;font-weight:600;'>"
+            f"{html.escape(badge_text)}</span></div>"
+        )
+    else:
+        badge = (
+            "<div style='text-align:center;margin:4px 0 2px;'>"
+            "<span style='display:inline-block;font-size:0.68rem;padding:2px 8px;"
+            "border-radius:10px;background:#f0f2f4;color:#6c757d;'>"
+            "not selected</span></div>"
+        )
     st.markdown(badge, unsafe_allow_html=True)
 
     # --- Agent name: clickable text button -> opens profile dialog ---
@@ -2602,14 +3020,56 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
     ):
         _show_catalog_agent_profile_dialog(agent)
 
-    # --- Customize: opens the parameter dialog (no grid reshuffle) ---
-    if st.button(
-        "Customize",
-        key=f"market_customize_{agent_type}",
-        width="stretch",
-        help="Open this agent's parameter and engine editor.",
-    ):
-        _show_customize_dialog(agent)
+    # --- Action buttons: differ based on selection state -------------
+    if selected:
+        # Already in market → primary action is Customize; secondary is Remove
+        if st.button(
+            "Customize",
+            key=f"market_customize_{agent_type}",
+            width="stretch",
+            help="Edit this agent's engine, parameters, and prompts.",
+        ):
+            _show_customize_dialog(agent)
+        if st.button(
+            "× Remove",
+            key=f"market_quick_remove_{agent_type}",
+            type="tertiary",
+            width="stretch",
+            help="Remove this agent from the market roster.",
+        ):
+            st.session_state[f"market_agent_{agent_type}"] = False
+            cur = list(st.session_state.get("selected_market_agents", []))
+            st.session_state.selected_market_agents = [
+                t for t in cur if t != agent_type
+            ]
+            save_state_from_session(project_root=PROJECT_ROOT)
+            st.rerun()
+    else:
+        # Not in market → primary action is quick Add; secondary is Customize
+        if st.button(
+            "+ Add",
+            key=f"market_quick_add_{agent_type}",
+            type="primary",
+            width="stretch",
+            help="Add this agent to the market with default settings (Rule engine).",
+        ):
+            st.session_state[f"market_agent_{agent_type}"] = True
+            # Also append to the durable selection list so
+            # save_state_from_session persists the full roster.
+            cur = list(st.session_state.get("selected_market_agents", []))
+            if agent_type not in cur:
+                cur.append(agent_type)
+            st.session_state.selected_market_agents = cur
+            save_state_from_session(project_root=PROJECT_ROOT)
+            st.rerun()
+        if st.button(
+            "Customize",
+            key=f"market_customize_{agent_type}",
+            type="tertiary",
+            width="stretch",
+            help="Configure engine and parameters before adding.",
+        ):
+            _show_customize_dialog(agent)
 
 
 def _class_to_agent_type(class_name: str) -> str:
@@ -2890,11 +3350,10 @@ def render_customize() -> None:
             st.rerun()
 
     st.write(
-        "Select the agents you want in the simulation. Click an agent's "
-        "**name** to view its profile, use **Customize** to edit its "
-        "parameters, and (for LLM engines) tweak the persona / per-round "
-        "prompt. Each agent's decision engine is set per-card. The "
-        "**Live market preview** in the left sidebar updates automatically."
+        "Click **+ Add** to quickly add agents to the market. "
+        "Use **Customize** to change the decision engine (Rule / LLM / RuleLLM), "
+        "adjust parameters, or edit prompts before or after adding. "
+        "Click an agent's **name** to view its full design profile."
     )
 
     # Legacy inline profile (query-param based) kept for bookmarked URLs.

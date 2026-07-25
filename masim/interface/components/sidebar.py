@@ -77,6 +77,14 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                 selected_scenario = active
                 st.session_state.selected_scenario = active
                 st.subheader(scenario_display_name(_resolve_display_key(active)))
+            elif "/Default/" in customized_id:
+                # Build-a-Project Default bundle:
+                # {slug}-{id}-{Scenario}/Default/{variant}
+                # Treat as a shipped-scenario view with full sidebar rendering.
+                selected_scenario = active
+                st.session_state.selected_scenario = active
+                display_key = _resolve_display_key(active)
+                st.subheader(scenario_display_name(display_key))
             else:
                 st.subheader("Customized bundle")
                 st.markdown(
@@ -208,7 +216,8 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
             # Give the market hub the same coordinator icon the user saw
             # on the Stage-1 scenario card / Stage-2 header, so the
             # market family is identifiable inside the topology as well.
-            _scenario_base = selected_scenario.split("/", 1)[0]
+            _display_key = _resolve_display_key(selected_scenario)
+            _scenario_base = _display_key.split("/", 1)[0]
             _hub_icons = {"market": market_icon_uri(_scenario_base)}
             render_d3_topology_with_expand(
                 topo,

@@ -145,7 +145,8 @@ class LLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run(infer_input)
+            batch_output = llm_client.run([infer_input])
+            infer_output = batch_output.outputs[0]
             try:
                 decision = parse_llm_response_with_thinking(infer_output.response)
                 break

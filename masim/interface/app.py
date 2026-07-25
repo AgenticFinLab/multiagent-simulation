@@ -2,6 +2,7 @@
 # D:\Anaconda\envs\masim_env\python.exe -m streamlit run "masim\interface\app.py" --server.port=8502
 import asyncio
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -76,6 +77,13 @@ if "viewed_round_idx" not in st.session_state:
 # System messages (start / stop / error notices, separate from round data)
 if "sys_messages" not in st.session_state:
     st.session_state.sys_messages = []
+
+# Background simulation progress — mutable dict shared between the main
+# Streamlit thread and the simulation background thread.  The background
+# thread writes simple key assignments (GIL-safe in CPython); the main
+# thread reads during reruns to render live progress.
+if "_sim_progress" not in st.session_state:
+    st.session_state._sim_progress = None  # None when no bg sim active
 
 if "workflow_stage" not in st.session_state:
     st.session_state.workflow_stage = "welcome"
@@ -197,6 +205,65 @@ def render_simulation_page(scenario_name: str):
     for notice in st.session_state.sys_messages:
         if notice.get("level") in ("warning", "error"):
             _render_sys_notice(notice)
+
+    # ── Live progress pump (background-thread simulation) ─────────────────
+    # While the simulation runs in a background thread, this section renders
+    # a live progress bar and triggers periodic reruns to poll for updates.
+    sim_prog = st.session_state.get("_sim_progress")
+    if sim_prog is not None:
+        phase = sim_prog["phase"]
+
+        if phase == "setup":
+            st.info("⚙️ Initializing simulation environment…")
+            time.sleep(0.8)
+            st.rerun()
+
+        elif phase == "running":
+            cur = sim_prog["current_round"]
+            total = sim_prog["total_rounds"]
+            msg = sim_prog.get("message", "")
+            if total and total > 0:
+                frac = min(cur / total, 1.0)
+                st.progress(frac, text=f"⚙️ {msg}")
+            else:
+                st.info(f"⚙️ {msg}")
+            time.sleep(0.8)
+            st.rerun()
+
+        elif phase == "done":
+            # Transition: move collected rounds into replay state
+            collected_rounds = sim_prog.get("rounds", [])
+            st.session_state._sim_progress = None
+
+            if collected_rounds:
+                st.session_state.replay_rounds = collected_rounds
+                st.session_state.replay_index = 0
+                st.session_state.viewed_round_idx = 0
+                st.session_state.replay_active = True
+                st.session_state.simulation_running = True
+                st.session_state.simulation_completed = False
+                _sys_notice(
+                    f"Simulation finished — replaying {len(collected_rounds)} rounds…",
+                    "success",
+                )
+            else:
+                st.session_state.replay_active = False
+                st.session_state.simulation_running = False
+                st.session_state.simulation_completed = True
+                _sys_notice("Simulation produced no rounds.", "warning")
+            st.rerun()
+
+        elif phase == "error":
+            err = sim_prog.get("error", "Unknown error")
+            st.session_state._sim_progress = None
+            st.session_state.simulation_running = False
+            _sys_notice(f"Simulation error: {err}", "error")
+            st.rerun()
+
+        else:
+            # Defensive fallback: unknown phase — keep polling.
+            time.sleep(0.8)
+            st.rerun()
 
     if not (is_running or is_completed) or n_rounds == 0:
         return
@@ -1052,6 +1119,14 @@ def _render_action_buttons(scenario_name: str):
     pending = bool(st.session_state.get("pending_action"))
     _render_toolbar(buttons, disabled=pending)
 
+    # Show saved data round count when experiment data exists on disk.
+    if data_exists and not st.session_state.simulation_running:
+        from masim.interface.data_loader import count_experiment_rounds
+
+        saved_rounds = count_experiment_rounds(scenario_name)
+        if saved_rounds > 0:
+            st.caption(f"📊 已保存数据: {saved_rounds} rounds")
+
 
 # ---------------------------------------------------------------------------
 # Replay lifecycle
@@ -1090,7 +1165,13 @@ def _start_replay(scenario_name: str, info: dict):  # noqa: ARG001
 
 
 def _start_simulation(scenario_name: str, info: dict):
-    """Initialise and run the simulation."""
+    """Initialise and run the simulation in a background thread.
+
+    Instead of blocking the Streamlit script thread with asyncio.run(), we
+    launch the async simulation in a daemon thread and communicate progress
+    via a shared mutable dict stored in session state.  The live-progress
+    pump in render_simulation_page() polls this dict and triggers reruns.
+    """
     st.session_state.simulation_running = True
     st.session_state.simulation_completed = False
     st.session_state.sys_messages = []
@@ -1103,44 +1184,72 @@ def _start_simulation(scenario_name: str, info: dict):
         _configs_path(scenario_name) / "simulation.yml"
     )
 
-    # Always run the real simulation engine. Mock/fake data has been removed
-    # deliberately: fabricated prices/bids silently corrupt results, so we
-    # prefer a real error over invalid data.
-    st.session_state.runner = SimulationRunner(config_path)
+    runner = SimulationRunner(config_path)
+    st.session_state.runner = runner
+
+    total = info.get("total_rounds") or 0
+
+    # Shared progress container — the background thread writes to this;
+    # the main thread reads during reruns.
+    progress = {
+        "phase": "setup",
+        "current_round": 0,
+        "total_rounds": total,
+        "error": None,
+        "rounds": [],
+        "message": "Initializing…",
+    }
+    st.session_state._sim_progress = progress
 
     _sys_notice(f"Starting simulation: {scenario_name}", "info")
-    _sys_notice(f"Total rounds: {info.get('total_rounds', 'unknown')}", "info")
+    _sys_notice(f"Total rounds: {total or 'unknown'}", "info")
 
-    try:
-        with st.spinner(
-            f"⚙️ Running {scenario_name} — computing "
-            f"{info.get('total_rounds', 'all')} rounds\u2026"
-        ):
-            asyncio.run(_run_simulation_async())
-    except Exception as e:
-        _sys_notice(f"Error: {str(e)}", "error")
-        st.session_state.simulation_running = False
+    # Launch background thread
+    thread = threading.Thread(
+        target=_simulation_thread_entry,
+        args=(runner, progress, scenario_name),
+        daemon=True,
+    )
+    thread.start()
 
+    # Kick the first rerun so the live-progress pump activates immediately.
     st.rerun()
 
 
-async def _run_simulation_async():
-    """Run simulation asynchronously and collect rounds into replay_rounds."""
+def _simulation_thread_entry(runner, progress: dict, scenario_name: str):
+    """Entry point for the simulation background thread.
+
+    Runs the async simulation loop in a fresh event loop.  All progress is
+    communicated via simple key assignments on *progress* (GIL-safe).
+    """
+    try:
+        asyncio.run(_run_simulation_bg(runner, progress, scenario_name))
+    except Exception as e:
+        progress["phase"] = "error"
+        progress["error"] = str(e)
+
+
+async def _run_simulation_bg(runner, progress: dict, scenario_name: str):
+    """Run the simulation asynchronously, updating *progress* after each round."""
     from masim.interface.data_loader import ReplayAgentAction as DLAction
     from masim.interface.data_loader import ReplayMarketBroadcast, RoundData
-
-    runner = st.session_state.runner
-    if not runner:
-        return
 
     # Clear previous experiment records BEFORE setup so the simulator
     # initialises into a clean directory (HistoryBuffer, etc.).
     runner.clear_records()
 
+    progress["message"] = "Setting up simulation…"
+
     if not await runner.setup():
-        _sys_notice(f"Setup failed: {runner.status.error}", "error")
-        st.session_state.simulation_running = False
+        progress["phase"] = "error"
+        progress["error"] = f"Setup failed: {runner.status.error}"
         return
+
+    # After setup, the runner knows the true total_rounds.
+    total = runner.status.total_rounds or progress["total_rounds"]
+    progress["total_rounds"] = total
+    progress["phase"] = "running"
+    progress["message"] = f"Running — Round 0/{total}"
 
     rounds = []
     prev_price = None
@@ -1162,8 +1271,6 @@ async def _run_simulation_async():
                 mb = None
                 if update.market_data:
                     price = update.market_data.get("price")
-                    # Derive the round-over-round return from the previous
-                    # cleared price so the Return metric/chart isn't blank.
                     stock_return = None
                     if price is not None and prev_price not in (None, 0):
                         stock_return = (price - prev_price) / prev_price
@@ -1184,39 +1291,24 @@ async def _run_simulation_async():
                     )
                 )
 
-        st.session_state.replay_rounds = rounds
-        if rounds:
-            # The runner's RoundUpdate objects track progress but don't carry
-            # full agent_actions / market_data. Reload from disk to get the
-            # actual per-round detail written by the simulator.
-            disk_rounds = load_rounds(
-                st.session_state.get("selected_scenario", "")
-            )
-            if disk_rounds:
-                rounds = disk_rounds
-                st.session_state.replay_rounds = rounds
+                # Update progress for the live pump
+                progress["current_round"] = update.round_num
+                progress["message"] = (
+                    f"Running — Round {update.round_num}/{total}"
+                )
 
-            # Animate the freshly computed rounds one-by-one via the shared
-            # replay pump, so users see a clear round-by-round progression
-            # instead of jumping straight to the final frame.
-            st.session_state.replay_index = 0
-            st.session_state.viewed_round_idx = 0
-            st.session_state.replay_active = True
-            st.session_state.simulation_running = True
-            st.session_state.simulation_completed = False
-            _sys_notice(
-                f"Simulation finished — replaying {len(rounds)} rounds\u2026",
-                "success",
-            )
-        else:
-            st.session_state.replay_active = False
-            st.session_state.simulation_running = False
-            st.session_state.simulation_completed = True
-            _sys_notice("Simulation produced no rounds.", "warning")
+        # Prefer full-detail data from disk over the sparse RoundUpdate stream.
+        disk_rounds = load_rounds(scenario_name)
+        if disk_rounds:
+            rounds = disk_rounds
+
+        progress["rounds"] = rounds
+        progress["phase"] = "done"
+        progress["message"] = f"Completed — {len(rounds)} rounds"
 
     except Exception as e:
-        _sys_notice(f"Simulation error: {str(e)}", "error")
-        st.session_state.simulation_running = False
+        progress["phase"] = "error"
+        progress["error"] = str(e)
 
     finally:
         await runner.shutdown()
@@ -1246,8 +1338,11 @@ def _stop_simulation():
                 "info",
             )
     else:
+        # Stop a live (background-thread) simulation or legacy blocking run.
         if st.session_state.runner:
             st.session_state.runner.stop()
+        # Clear the progress dict so the live pump stops polling.
+        st.session_state._sim_progress = None
         st.session_state.simulation_running = False
         _sys_notice("Simulation stopped by user.", "warning")
     st.rerun()
@@ -1262,6 +1357,7 @@ def _reset_simulation():
     st.session_state.replay_index = 0
     st.session_state.viewed_round_idx = 0
     st.session_state.replay_active = False
+    st.session_state._sim_progress = None
     st.session_state.runner = None
     st.session_state.current_page = "Simulation"
     st.rerun()

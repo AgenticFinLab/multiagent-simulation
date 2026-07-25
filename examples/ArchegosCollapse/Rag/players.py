@@ -392,7 +392,7 @@ class RagLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                infer_output = llm_client.run(infer_input)
+                infer_output = llm_client.run([infer_input]).outputs[0]
                 decision = parse_llm_response_with_thinking(
                     infer_output.response
                 )

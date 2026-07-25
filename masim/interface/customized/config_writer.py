@@ -1042,10 +1042,12 @@ def extract_default_players(
             continue
         cfg = block.get("config") or {}
         extras_raw = cfg.get("extras") or {}
+        # Separate the llm sub-block (if present) from regular extras.
+        llm_block = extras_raw.get("llm") if isinstance(extras_raw.get("llm"), dict) else None
         extras = {
             k: v
             for k, v in extras_raw.items()
-            if k not in _INFRA_EXTRAS_KEYS
+            if k not in _INFRA_EXTRAS_KEYS and k != "llm"
         }
         out[key] = {
             "name": block.get("name", key),
@@ -1053,6 +1055,7 @@ def extract_default_players(
             "num_instances": block.get("num_instances", 1),
             "role": (cfg.get("role") or "").strip(),
             "extras": extras,
+            "llm": llm_block,
         }
     return out
 

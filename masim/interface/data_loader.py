@@ -171,6 +171,40 @@ def has_experiment_data(scenario_name: str) -> bool:
     return has_comm or has_hist
 
 
+def count_experiment_rounds(scenario_name: str) -> int:
+    """Count the number of recorded rounds in saved experiment data.
+
+    Lightweight alternative to load_rounds() — scans batch_block JSON files
+    in records/history/ for unique round numbers without fully parsing
+    agent actions.
+
+    Args:
+        scenario_name: Scenario directory name.
+
+    Returns:
+        Number of unique rounds found, or 0 if no data.
+    """
+    base = _experiment_path(scenario_name)
+    hist_dir = base / "records" / "history"
+    if not hist_dir.is_dir():
+        return 0
+
+    round_nums: set = set()
+    for block_file in hist_dir.glob("batch_block_*.json"):
+        try:
+            raw = json.loads(block_file.read_text(encoding="utf-8"))
+            for _batch_id, records in raw.items():
+                if not isinstance(records, list):
+                    continue
+                for rec in records:
+                    rnd = rec.get("round")
+                    if rnd is not None:
+                        round_nums.add(int(rnd))
+        except Exception:
+            continue
+    return len(round_nums)
+
+
 def load_rounds(scenario_name: str) -> List[RoundData]:
     """Load and reconstruct per-round data from saved EXPERIMENT files.
 

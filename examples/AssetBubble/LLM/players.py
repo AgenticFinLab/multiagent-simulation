@@ -385,7 +385,7 @@ Respond with ONLY valid JSON:
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run(infer_input)
+            infer_output = llm_client.run([infer_input]).outputs[0]
             try:
                 decision = self._parse_llm_response(_infer_response_text(infer_output))
                 break
