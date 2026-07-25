@@ -29,6 +29,8 @@ from .order import (
     BUY,
     SELL,
     HOLD,
+    normalize_action_quantity,
+    signed_order_quantity,
     InvestorOrder,
     validate_order,
 )
@@ -77,6 +79,8 @@ __all__ = [
     "BUY",
     "SELL",
     "HOLD",
+    "normalize_action_quantity",
+    "signed_order_quantity",
     # Structured order + validators
     "InvestorOrder",
     "validate_order",

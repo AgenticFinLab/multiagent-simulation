@@ -1,11 +1,13 @@
 """Main Streamlit application for MASIM Web Interface."""
 # D:\Anaconda\envs\masim_env\python.exe -m streamlit run "masim\interface\app.py" --server.port=8502
-import asyncio
+import json
+import subprocess
 import sys
 import threading
 import time
 from pathlib import Path
 
+import psutil
 import streamlit as st
 
 # Add project root to path
@@ -18,7 +20,6 @@ from masim.interface.config_loader import (
     _configs_path,
 )
 from masim.interface.data_loader import has_experiment_data, load_rounds
-from masim.interface.simulation_runner import SimulationRunner
 from masim.interface.components.sidebar import render_sidebar
 from masim.interface.components.analysis_view import render_analysis_page
 from masim.interface.components.docs_view import render_docs_page
@@ -1165,12 +1166,10 @@ def _start_replay(scenario_name: str, info: dict):  # noqa: ARG001
 
 
 def _start_simulation(scenario_name: str, info: dict):
-    """Initialise and run the simulation in a background thread.
+    """Launch an isolated worker and monitor it from a background thread.
 
-    Instead of blocking the Streamlit script thread with asyncio.run(), we
-    launch the async simulation in a daemon thread and communicate progress
-    via a shared mutable dict stored in session state.  The live-progress
-    pump in render_simulation_page() polls this dict and triggers reruns.
+    The live-progress pump in :func:`render_simulation_page` polls a shared
+    dict, while Ray remains confined to the child process.
     """
     st.session_state.simulation_running = True
     st.session_state.simulation_completed = False
@@ -1184,8 +1183,10 @@ def _start_simulation(scenario_name: str, info: dict):
         _configs_path(scenario_name) / "simulation.yml"
     )
 
-    runner = SimulationRunner(config_path)
-    st.session_state.runner = runner
+    # Ray is intentionally NOT initialised in the Streamlit process.  The
+    # simulation worker runs in a child process so a native Ray crash cannot
+    # terminate the web server and disconnect every browser session.
+    st.session_state.runner = None
 
     total = info.get("total_rounds") or 0
 
@@ -1207,7 +1208,7 @@ def _start_simulation(scenario_name: str, info: dict):
     # Launch background thread
     thread = threading.Thread(
         target=_simulation_thread_entry,
-        args=(runner, progress, scenario_name),
+        args=(config_path, progress, scenario_name),
         daemon=True,
     )
     thread.start()
@@ -1216,102 +1217,183 @@ def _start_simulation(scenario_name: str, info: dict):
     st.rerun()
 
 
-def _simulation_thread_entry(runner, progress: dict, scenario_name: str):
-    """Entry point for the simulation background thread.
+def _simulation_thread_entry(config_path: str, progress: dict, scenario_name: str):
+    """Run an isolated simulation worker and mirror its progress into the UI.
 
-    Runs the async simulation loop in a fresh event loop.  All progress is
-    communicated via simple key assignments on *progress* (GIL-safe).
+    The thread only supervises a child Python process; it never imports or
+    calls Ray.  This process boundary is required on Windows because a native
+    access violation inside Ray bypasses Python exception handling entirely.
     """
     try:
-        asyncio.run(_run_simulation_bg(runner, progress, scenario_name))
+        _run_simulation_worker(config_path, progress, scenario_name)
     except Exception as e:
         progress["phase"] = "error"
         progress["error"] = str(e)
 
 
-async def _run_simulation_bg(runner, progress: dict, scenario_name: str):
-    """Run the simulation asynchronously, updating *progress* after each round."""
-    from masim.interface.data_loader import ReplayAgentAction as DLAction
-    from masim.interface.data_loader import ReplayMarketBroadcast, RoundData
+def _terminate_process_tree(process: subprocess.Popen | None) -> None:
+    """Terminate a simulation worker and every Ray process it spawned.
 
-    # Clear previous experiment records BEFORE setup so the simulator
-    # initialises into a clean directory (HistoryBuffer, etc.).
-    runner.clear_records()
-
-    progress["message"] = "Setting up simulation…"
-
-    if not await runner.setup():
-        progress["phase"] = "error"
-        progress["error"] = f"Setup failed: {runner.status.error}"
+    ``Popen.terminate()`` only stops the direct child on Windows.  Ray's GCS,
+    raylet, dashboard agents, and Python workers then remain alive and make
+    later local clusters time out during startup.  Descendants are resolved
+    from the exact worker PID created by this interface, so the Streamlit
+    server and unrelated Python processes are never targeted.
+    """
+    if process is None:
         return
 
-    # After setup, the runner knows the true total_rounds.
-    total = runner.status.total_rounds or progress["total_rounds"]
-    progress["total_rounds"] = total
-    progress["phase"] = "running"
-    progress["message"] = f"Running — Round 0/{total}"
+    # Build the tree from a process-table snapshot instead of relying only on
+    # ``psutil.Process(root).children()``.  After a native Ray crash the direct
+    # worker may already be gone, but Windows still exposes its PID as the
+    # parent of surviving GCS/raylet/worker processes in this snapshot.
+    root_pid = int(process.pid)
+    snapshot = {}
+    for candidate in psutil.process_iter(["pid", "ppid"]):
+        try:
+            snapshot[int(candidate.pid)] = (
+                int(candidate.info.get("ppid") or 0),
+                candidate,
+            )
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
 
-    rounds = []
-    prev_price = None
+    descendant_ids: set[int] = {root_pid}
+    changed = True
+    while changed:
+        changed = False
+        for pid, (parent_pid, _candidate) in snapshot.items():
+            if parent_pid in descendant_ids and pid not in descendant_ids:
+                descendant_ids.add(pid)
+                changed = True
+
+    # Children first, driver last.  Killing only the driver is the exact leak
+    # that previously left multiple local Ray clusters running indefinitely.
+    targets = [
+        snapshot[pid][1]
+        for pid in descendant_ids
+        if pid != root_pid and pid in snapshot
+    ]
+    targets.sort(key=lambda item: item.pid, reverse=True)
+    if root_pid in snapshot:
+        targets.append(snapshot[root_pid][1])
+
+    for target in targets:
+        try:
+            target.terminate()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+
+    _gone, alive = psutil.wait_procs(targets, timeout=3)
+    for target in alive:
+        try:
+            target.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+    if alive:
+        psutil.wait_procs(alive, timeout=3)
+
     try:
-        async for update in runner.run():
-            if update.round_num > 0:
-                actions = [
-                    DLAction(
-                        round_num=update.round_num,
-                        agent_id=a.get("agent_id", ""),
-                        content={
-                            "stock_qty": a.get("quantity", 0),
-                            "bid_price": a.get("bid_price", 0),
-                            "strategy": a.get("agent_name", ""),
-                        },
-                    )
-                    for a in update.agent_actions
-                ]
-                mb = None
-                if update.market_data:
-                    price = update.market_data.get("price")
-                    stock_return = None
-                    if price is not None and prev_price not in (None, 0):
-                        stock_return = (price - prev_price) / prev_price
-                    mb = ReplayMarketBroadcast(
-                        round_num=update.round_num,
-                        stock_price=price,
-                        prev_stock_price=prev_price,
-                        stock_return=stock_return,
-                        fundamental=update.market_data.get("fundamental"),
-                    )
-                    if price is not None:
-                        prev_price = price
-                rounds.append(
-                    RoundData(
-                        round_num=update.round_num,
-                        market_broadcast=mb,
-                        agent_actions=actions,
-                    )
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=2)
+
+
+def _run_simulation_worker(
+    config_path: str,
+    progress: dict,
+    scenario_name: str,
+) -> None:
+    """Supervise ``masim.interface.simulation_worker`` as a child process."""
+    command = [
+        sys.executable,
+        "-m",
+        "masim.interface.simulation_worker",
+        "--config",
+        str(config_path),
+    ]
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    creationflags |= getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    worker_log = project_root / ".streamlit_simulation_worker.log"
+    worker_error = ""
+    terminal_event = ""
+
+    with worker_log.open("a", encoding="utf-8") as error_log:
+        process = subprocess.Popen(
+            command,
+            cwd=str(project_root),
+            stdout=subprocess.PIPE,
+            stderr=error_log,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            bufsize=1,
+            creationflags=creationflags,
+        )
+        progress["_process"] = process
+
+        assert process.stdout is not None
+        for raw_line in process.stdout:
+            line = raw_line.strip()
+            if not line.startswith("MASIM_EVENT "):
+                continue
+            try:
+                event = json.loads(line[len("MASIM_EVENT "):])
+            except json.JSONDecodeError:
+                continue
+
+            event_type = event.get("type")
+            if event_type == "setup":
+                progress["phase"] = "setup"
+                progress["message"] = event.get(
+                    "message", "Setting up simulation…"
                 )
-
-                # Update progress for the live pump
-                progress["current_round"] = update.round_num
-                progress["message"] = (
-                    f"Running — Round {update.round_num}/{total}"
+            elif event_type == "running":
+                total = int(event.get("total_rounds") or 0)
+                current = int(event.get("current_round") or 0)
+                progress["phase"] = "running"
+                progress["total_rounds"] = total
+                progress["current_round"] = current
+                progress["message"] = event.get(
+                    "message", f"Running — Round {current}/{total}"
                 )
+            elif event_type == "error":
+                worker_error = str(event.get("error") or "Simulation failed")
+                terminal_event = "error"
+                break
+            elif event_type == "done":
+                terminal_event = "done"
+                break
 
-        # Prefer full-detail data from disk over the sparse RoundUpdate stream.
-        disk_rounds = load_rounds(scenario_name)
-        if disk_rounds:
-            rounds = disk_rounds
+        # The worker has emitted its terminal event, so its useful work is
+        # complete.  Close its complete process tree now; waiting only for the
+        # driver leaves Ray's Windows child processes orphaned.
+        _terminate_process_tree(process)
+        return_code = process.wait()
+        progress["_process"] = None
 
-        progress["rounds"] = rounds
-        progress["phase"] = "done"
-        progress["message"] = f"Completed — {len(rounds)} rounds"
-
-    except Exception as e:
+    if worker_error or (terminal_event != "done" and return_code != 0):
         progress["phase"] = "error"
-        progress["error"] = str(e)
+        if worker_error:
+            progress["error"] = worker_error
+        elif return_code in (-1, 0xFFFFFFFF):
+            progress["error"] = (
+                "The Ray worker stopped unexpectedly. Its complete process "
+                "tree has been cleaned, so it is safe to click Re-run. "
+                f"See {worker_log.name} for diagnostics."
+            )
+        else:
+            progress["error"] = (
+                f"Simulation worker exited unexpectedly (code {return_code}). "
+                f"See {worker_log.name}."
+            )
+        return
 
-    finally:
-        await runner.shutdown()
+    rounds = load_rounds(scenario_name)
+    progress["rounds"] = rounds
+    progress["phase"] = "done"
+    progress["message"] = f"Completed — {len(rounds)} rounds"
 
 
 def _stop_simulation():
@@ -1341,6 +1423,9 @@ def _stop_simulation():
         # Stop a live (background-thread) simulation or legacy blocking run.
         if st.session_state.runner:
             st.session_state.runner.stop()
+        sim_progress = st.session_state.get("_sim_progress")
+        process = sim_progress.get("_process") if sim_progress else None
+        _terminate_process_tree(process)
         # Clear the progress dict so the live pump stops polling.
         st.session_state._sim_progress = None
         st.session_state.simulation_running = False

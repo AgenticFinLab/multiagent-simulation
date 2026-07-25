@@ -35,6 +35,7 @@ from ..config_loader import (
     _resolve_display_key,
     _configs_path,
 )
+from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
 
 
 def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -> str:
@@ -177,7 +178,6 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         topo = get_topology_info(selected_scenario)
         agents_for_topo = get_agents_info(selected_scenario)
         if topo.get("nodes"):
-            from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
             # Give the market hub the same coordinator icon the user saw
             # on the Stage-1 scenario card / Stage-2 header, so the
             # market family is identifiable inside the topology as well.

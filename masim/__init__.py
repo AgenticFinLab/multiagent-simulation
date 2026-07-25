@@ -35,6 +35,27 @@ Usage:
 
 __version__ = "0.0.1"
 
+
+def _install_lmbase_output_compatibility() -> None:
+    """Let legacy scenarios read a modern InferOutput as ``outputs[0]``.
+
+    Current lmbase releases return one InferOutput directly from ``run()``.
+    Older MASim scenarios expect the former batch-shaped result.  Providing a
+    read-only compatibility property here keeps both calling conventions
+    working without duplicating version checks across every scenario.
+    """
+    try:
+        from lmbase.inference.base import InferOutput
+    except ImportError:
+        return
+
+    fields = getattr(InferOutput, "__dataclass_fields__", {})
+    if "outputs" not in fields and not hasattr(InferOutput, "outputs"):
+        setattr(InferOutput, "outputs", property(lambda output: [output]))
+
+
+_install_lmbase_output_compatibility()
+
 # Player module
 from masim.player import (
     PayloadType,
