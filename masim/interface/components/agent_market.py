@@ -481,7 +481,7 @@ def render_variant_choice() -> None:
     info = get_scenario_info(_scenario_probe_key(selected_base, groups))
     is_experience = st.session_state.get("mode") == "experience"
 
-    name_col, rounds_col, features_col = st.columns([3, 1, 2])
+    name_col, logo_col, features_col = st.columns([3, 1, 2])
     with name_col:
         st.markdown(
             f"<div class='scenario-confirm-chip'>\u2713 "
@@ -489,40 +489,38 @@ def render_variant_choice() -> None:
             f"</div>",
             unsafe_allow_html=True,
         )
-    with rounds_col:
-        try:
-            shipped_rounds = int(info.get("total_rounds") or 0)
-        except (TypeError, ValueError):
-            shipped_rounds = 0
-        _rounds_key = f"variant_rounds_{selected_base}"
-        _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
-        if is_experience:
-            # Experience mode: read-only display, no editing allowed.
-            st.metric("Rounds", str(_rounds_default))
-            st.session_state[_rounds_key] = _rounds_default
-        else:
-            # Editable rounds — user can shrink for a quick preview or extend
-            # to observe long-run dynamics.  The value is persisted under
-            # ``variant_rounds_<base>`` and consumed by ``_launch_default_variant``
-            # (Default) and ``_write_customized_bundle`` (Customize). Leaving
-            # the value untouched preserves the shipped default (zero-copy
-            # launch path). Values <1 are clamped to 1 by the widget.
-            _rounds_now = int(st.session_state.get(_rounds_key, _rounds_default))
-            edited_rounds = st.number_input(
-                "Rounds",
-                min_value=1,
-                max_value=100000,
-                value=_rounds_now,
-                step=1,
-                key=f"widget_{_rounds_key}",
-                help=(
-                    f"Number of simulation rounds. Shipped default: "
-                    f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}. "
-                    "Change to produce a reproducible copy under "
-                    "configs/CUSTOMIZED_SIMULATION/."
-                ),
-            )
-            st.session_state[_rounds_key] = int(edited_rounds)
+    # The rounds editor previously lived in this middle column, but it is
+    # already available inside both the Default sub-page
+    # (``render_default_config`` — Rounds input at ``dc_rounds_<base>``) and
+    # the Customize sub-page (``render_customize`` — Rounds input at
+    # ``widget_customize_variant_rounds_<base>``). All simulation
+    # modifications — round count, market extras, agent extras, LLM
+    # prompts — now live *inside* the Default or Customized sub-page as
+    # part of the modification workflow, and this top strip only carries
+    # scenario identification.
+    #
+    # We still seed ``variant_rounds_<selected_base>`` here so any launch
+    # path that reads the key before the user visits a sub-page (defensive
+    # against future entry points) receives the shipped default rather
+    # than ``None``. Sub-page widgets keep the same key and will
+    # override the value the moment the user edits it.
+    try:
+        shipped_rounds = int(info.get("total_rounds") or 0)
+    except (TypeError, ValueError):
+        shipped_rounds = 0
+    _rounds_key = f"variant_rounds_{selected_base}"
+    if _rounds_key not in st.session_state:
+        st.session_state[_rounds_key] = shipped_rounds if shipped_rounds > 0 else 1
+    with logo_col:
+        _logo_path = PROJECT_ROOT / "logo.jpg"
+        if _logo_path.exists():
+            _logo_uri = _image_data_uri(_logo_path)
+            if _logo_uri:
+                st.markdown(
+                    f'<div class="variant-choice-logo-wrap">'
+                    f'<img src="{_logo_uri}" alt="Project logo"></div>',
+                    unsafe_allow_html=True,
+                )
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
@@ -2377,6 +2375,14 @@ def _inject_market_styles() -> None:
             background: #e7f3f0; border: 1px solid #b6d8d0;
             padding: 0.28rem 0.7rem; border-radius: 14px;
             letter-spacing: 0.01em;
+        }
+        .variant-choice-logo-wrap {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+        }
+        .variant-choice-logo-wrap img {
+            height: 3rem; width: auto; max-width: 100%;
+            object-fit: contain; border-radius: 6px;
         }
         </style>
         """,
