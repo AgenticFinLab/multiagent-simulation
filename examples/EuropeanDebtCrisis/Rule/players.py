@@ -61,7 +61,9 @@ class Market(GeneralPlayer):
             record_path = extras["record_path"]
             base_path = os.path.join(record_path, self.config.identity)
             custom_state_hot_limit = extras["custom_state_hot_limit"]
-            self.state.custom_state["price"] = float(extras["initial_price"])
+            initial_price = float(extras["initial_price"])
+            self.state.custom_state["price"] = initial_price
+            self.state.custom_state["prev_price"] = initial_price
             self.state.custom_state["fundamental"] = float(extras["fundamental_value"])
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
@@ -97,6 +99,7 @@ class Market(GeneralPlayer):
             + noise
         )
         new_price = max(new_price, 0.01)
+        self.state.custom_state["prev_price"] = price
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["fundamental_history"].append(fundamental)
@@ -107,6 +110,7 @@ class Market(GeneralPlayer):
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0.0
         market_data = {
             "price": price,
+            "prev_price": self.state.custom_state["prev_price"],
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],
