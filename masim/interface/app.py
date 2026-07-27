@@ -1096,6 +1096,13 @@ def _render_action_buttons(scenario_name: str):
                     t("simulation.run_analysis_help"),
                     _run_analysis,
                 ))
+            if data_exists:
+                buttons.append((
+                    t("simulation.view_reasoning"),
+                    "secondary",
+                    t("simulation.view_reasoning_help"),
+                    _go_reasoning,
+                ))
             buttons.append((
                 t("simulation.reset"),
                 "secondary",
@@ -1120,6 +1127,12 @@ def _render_action_buttons(scenario_name: str):
                     _run_analysis,
                 ))
             if data_exists:
+                buttons.append((
+                    t("simulation.view_reasoning"),
+                    "secondary",
+                    t("simulation.view_reasoning_help"),
+                    _go_reasoning,
+                ))
                 buttons.append((
                     t("simulation.reset"),
                     "secondary",
