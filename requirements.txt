@@ -26,6 +26,9 @@ ray
 psutil
 filelock
 pydantic
+psutil
+ray
+streamlit
 
 # ── I/O + config ───────────────────────────────────────────────────────────
 python-dotenv
