@@ -799,10 +799,22 @@ def render_welcome() -> None:
             elif slug_preview:
                 existing = (_EXAMPLES_DIR / slug_preview).exists()
                 note = (
-                    "will reuse existing folder" if existing
+                    "will reuse existing project" if existing
                     else "will be created"
                 )
-                st.caption(f"\u2192 Project ID: `{slug_preview}` ({note})")
+                from .team_gate import current_team
+                _team = current_team()
+                if _team:
+                    st.caption(
+                        f"\u2192 `configs/CUSTOMIZED_SIMULATION/"
+                        f"team-{_team}-{slug_preview}-<id>-<scenario>/` "
+                        f"({note})"
+                    )
+                else:
+                    st.caption(
+                        f"\u2192 `configs/CUSTOMIZED_SIMULATION/"
+                        f"{slug_preview}-<id>-<scenario>/` ({note})"
+                    )
 
             if st.button(
                 "Create & continue \u2192",

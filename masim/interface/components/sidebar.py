@@ -51,18 +51,6 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
     with st.sidebar:
         st.title("MASIM Simulator")
 
-        # --- Team badge (always visible) ---
-        from .team_gate import current_team
-        _team = current_team()
-        if _team:
-            st.markdown(
-                f"<div style='background:#e8f4fd;border-left:3px solid #0B3D91;"
-                f"padding:4px 10px;margin-bottom:8px;border-radius:3px;"
-                f"font-size:0.82rem;color:#0B3D91;'>"
-                f"🏷️ Team: <b>{_team}</b></div>",
-                unsafe_allow_html=True,
-            )
-
         project_name = st.session_state.get("project_name", "")
         project_id = st.session_state.get("project_id", "")
         if project_name:

@@ -126,6 +126,16 @@ def main():
         render_team_gate()
         return
 
+    # --- Persistent team badge (visible on ALL pages) ---
+    with st.sidebar:
+        st.markdown(
+            f"<div style='background:#e8f4fd;border-left:3px solid #0B3D91;"
+            f"padding:6px 12px;margin-bottom:10px;border-radius:4px;"
+            f"font-size:0.85rem;color:#0B3D91;'>"
+            f"🏷️ Team: <b>{current_team()}</b></div>",
+            unsafe_allow_html=True,
+        )
+
     workflow_stage = st.session_state.workflow_stage
     if workflow_stage == "welcome":
         render_welcome()
