@@ -68,6 +68,32 @@ async def _run(config_path: str) -> None:
 
 
 def main():
+    # --- Load .env and rotate numbered API keys BEFORE any scenario code runs ---
+    # Scenario players.py files call LangChainAPIInference() directly, which
+    # expects e.g. ARK_API_KEY. Users configure ARK_API_KEY_1, ARK_API_KEY_2, etc.
+    # for load-balancing. We pick one randomly and set the canonical key here,
+    # at the process entry point, so every downstream consumer finds it.
+    import os
+    import random
+
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except Exception:
+        pass
+
+    # Rotate numbered keys for all known providers
+    for provider in ("ARK", "DEEPSEEK", "OPENAI", "ZHIPU"):
+        key_var = f"{provider}_API_KEY"
+        if os.environ.get(key_var):
+            continue  # canonical key already set, no rotation needed
+        candidates = [
+            v for k, v in os.environ.items()
+            if k.startswith(f"{key_var}_") and k[len(key_var) + 1:].isdigit() and v
+        ]
+        if candidates:
+            os.environ[key_var] = random.choice(candidates)
+
     parser = argparse.ArgumentParser(description="MASIM simulation worker")
     parser.add_argument("--config", required=True, help="Path to simulation.yml")
     args = parser.parse_args()
