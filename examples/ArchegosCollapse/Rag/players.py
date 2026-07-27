@@ -396,7 +396,7 @@ class RagLLMInvestor(GeneralPlayer):
             try:
                 infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
-                    infer_output.response
+                    infer_output.outputs[0].response
                 )
                 decision = _validate_decision(decision, self.identity)
                 break

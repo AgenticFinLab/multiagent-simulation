@@ -385,7 +385,7 @@ class RagLLMSocialAgent(GeneralPlayer):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 infer_output = llm_client.run([infer_input])
-                decision = _parse_echo_chamber_response(infer_output.response)
+                decision = _parse_echo_chamber_response(infer_output.outputs[0].response)
                 break
             except Exception as exc:
                 last_error = exc

@@ -386,7 +386,7 @@ class BaseLLMInvestor(GeneralPlayer):
                     [InferInput(system_msg=sys_msg, user_msg=user_msg)]
                 )
                 decision = parse_llm_response_with_thinking(
-                    infer_output.response
+                    infer_output.outputs[0].response
                 )
                 if decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"invalid action: {decision['action']}")
