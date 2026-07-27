@@ -119,6 +119,21 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
             return ""
 
         # ------------------------------------------------------------------
+        # Path info — collapsible reference for debugging/transparency
+        # ------------------------------------------------------------------
+        with st.expander("📂 Path Info", expanded=False):
+            _cfg_path = f"configs/{selected_scenario}/simulation.yml"
+            _code_path = f"examples/{selected_scenario}/"
+            # Results path mirrors the config path under EXPERIMENT/
+            _result_path = f"EXPERIMENT/{selected_scenario}/records/"
+            st.code(
+                f"Config:  {_cfg_path}\n"
+                f"Code:    {_code_path}\n"
+                f"Results: {_result_path}",
+                language=None,
+            )
+
+        # ------------------------------------------------------------------
         # Scenario Info — compact caption style
         # ------------------------------------------------------------------
         info = get_scenario_info(selected_scenario)

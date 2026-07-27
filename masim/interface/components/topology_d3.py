@@ -8,6 +8,7 @@ hover tooltips, and click-to-highlight interactions.
 from __future__ import annotations
 
 import base64
+import functools
 import json
 from pathlib import Path
 from typing import Any
@@ -48,7 +49,13 @@ def _canonical_archetype(player_id: str) -> str:
 
 
 def _image_data_uri(path: Path) -> str:
-    """Encode a PNG file as a base64 data URI."""
+    """Encode a PNG file as a base64 data URI (cached)."""
+    return _image_data_uri_cached(str(path))
+
+
+@functools.lru_cache(maxsize=256)
+def _image_data_uri_cached(path_str: str) -> str:
+    path = Path(path_str)
     if not path.exists():
         return ""
     encoded = base64.b64encode(path.read_bytes()).decode("ascii")

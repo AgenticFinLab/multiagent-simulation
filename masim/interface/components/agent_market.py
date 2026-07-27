@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import functools
 import html
 import json
 import re
@@ -1952,6 +1953,13 @@ def _profile_intro(markdown: str, display_name: str) -> str:
 
 
 def _image_data_uri(path: Path) -> str:
+    """Convert an image file to a data URI. Cached to avoid re-encoding on every rerun."""
+    return _image_data_uri_cached(str(path))
+
+
+@functools.lru_cache(maxsize=256)
+def _image_data_uri_cached(path_str: str) -> str:
+    path = Path(path_str)
     if not path.exists():
         return ""
     data = path.read_bytes()
