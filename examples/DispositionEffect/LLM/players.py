@@ -33,7 +33,6 @@ import logging
 import math
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
-import torch  # Load native DLLs before MASim/NumPy on Windows.
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult

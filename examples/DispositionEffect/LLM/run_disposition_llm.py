@@ -11,7 +11,6 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-import torch  # Load native DLLs before MASim/NumPy on Windows.
 
 project_root = os.path.dirname(
     os.path.dirname(

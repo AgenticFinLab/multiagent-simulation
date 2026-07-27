@@ -1,37 +1,50 @@
-# Core dependencies
+# =============================================================================
+# MASIM runtime dependencies
+# =============================================================================
+# Only packages actually imported in `masim/` or `examples/` are listed here.
+# Zombie deps removed on 2026-07-27 after a full codebase audit (torch,
+# transformers, selenium, pyarrow, pydot, datasets, graphviz, tenacity, txtai,
+# h5py, wandb, einops, litellm, duckduckgo-search — all zero-import).
+#
+# NOTE — `lmbase` is a separate GitHub project (`AgenticFinLab/lmbase`) and is
+# NOT on PyPI. `masim` imports it as a HARD dependency in
+# `masim/utils/history.py`, `masim/proxy/general.py`, and
+# `masim/communication/base.py`. Install it FROM SOURCE before running
+# `pip install -e .`:
+#
+#     git clone https://github.com/AgenticFinLab/lmbase.git /opt/lmbase
+#     pip install -e /opt/lmbase
+# =============================================================================
+
+# ── Core numeric stack ─────────────────────────────────────────────────────
 numpy
 pandas
+scipy
+
+# ── Simulation runtime ─────────────────────────────────────────────────────
 ray
 psutil
-torch==2.5.1
-transformers
-selenium
-python-dotenv
-pyarrow
-networkx
-pydot
-datasets
-matplotlib
-graphviz
-tenacity
-txtai
-h5py
-wandb
-einops
-litellm
+filelock
+pydantic
 
-# RAG (masim.rag module — used by AssetBubbleRag and future scenarios)
+# ── I/O + config ───────────────────────────────────────────────────────────
+python-dotenv
+pyyaml
+httpx
+requests
+
+# ── Visualisation ──────────────────────────────────────────────────────────
+matplotlib
+networkx
+
+# ── Web interface ──────────────────────────────────────────────────────────
+streamlit>=1.28
+
+# ── RAG stack (masim.knowledge / examples/*/Rag) ───────────────────────────
 llama-index-core
-llama-index-embeddings-openai
 llama-index-readers-file
+llama-index-embeddings-huggingface
+llama-index-embeddings-openai
+llama-index-embeddings-litellm
 PyMuPDF
 beautifulsoup4
-duckduckgo-search
-llama-index-embeddings-huggingface
-httpx
-filelock
-
-# Web Interface
-streamlit>=1.28
-pyyaml
-llama-index-embeddings-litellm
