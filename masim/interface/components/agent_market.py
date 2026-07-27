@@ -57,7 +57,6 @@ from ..customized import (
     unique_agent_types,
     update_entry,
     write_customized_bundle,
-    write_default_scenario_bundle,
 )
 from ..customized.handbook_params import ParamSpec
 from .team_gate import current_team

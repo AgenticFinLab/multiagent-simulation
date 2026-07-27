@@ -591,6 +591,18 @@ class CanonicalLLMPlayer(GeneralPlayer):
         from lmbase.inference.api_call import LangChainAPIInference  # type: ignore
 
         lm_name = self.state.custom_state.get("lm_name", "")
+
+        # --- Multi-key rotation: pick a random key from numbered variants ---
+        if lm_name and "/" in lm_name:
+            import os, random  # noqa: E401
+            _provider = lm_name.split("/", 1)[0].upper()
+            _key_var = f"{_provider}_API_KEY"
+            _candidates = [
+                v for k, v in os.environ.items()
+                if k.startswith(f"{_key_var}_") and k[len(_key_var) + 1:].isdigit() and v
+            ]
+            if _candidates:
+                os.environ[_key_var] = random.choice(_candidates)
         if not lm_name:
             raise RuntimeError("extras.llm.lm_name is required for LLM agents")
         client = LangChainAPIInference(
