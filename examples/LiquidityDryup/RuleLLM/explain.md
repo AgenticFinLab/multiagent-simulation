@@ -26,23 +26,23 @@ This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `qu
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMLiquidityDemander` uses `RULELLM_LIQUIDITY_SEEKER_SYS` to encode liquidity-scaled demand. |
+| Investor role and activation rule from simulation-bases.md §4.2 | `RuleLLMLiquiditySeeker` uses `RULELLM_LIQUIDITY_SEEKER_SYS` to encode liquidity-scaled demand. |
 | Mathematical model from simulation-bases.md §4.2 | Prompt instructs normal demand around +/-15 shares, scaled down by liquidity / 100, with zero liquidity provision. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_liquidity_demander.config.extras` supplies portfolio state and ARK model policy. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_liquidity_seeker.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Formula-anchored constrained-execution order. |
 ### §2.3 ValueTrader (simulation-bases.md §4.3)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMArbitrageur` uses `RULELLM_VALUE_TRADER_SYS` to encode deviation-based value trading and crisis liquidity provision. |
+| Investor role and activation rule from simulation-bases.md §4.3 | `RuleLLMValueTrader` uses `RULELLM_VALUE_TRADER_SYS` to encode deviation-based value trading and crisis liquidity provision. |
 | Mathematical model from simulation-bases.md §4.3 | Prompt instructs liquidity around 20 when `abs(deviation) > 5%` and quantity about `deviation * 30` when `abs(deviation) > 3%`. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_arbitrageur.config.extras` supplies portfolio state and ARK model policy. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_value_trader.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Formula-anchored stabilizing value order. |
 ### §2.4 MomentumTrader (simulation-bases.md §4.4)
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMValueInvestor` is a legacy class name whose prompt `RULELLM_MOMENTUM_TRADER_SYS` implements momentum-trader behavior. |
+| Investor role and activation rule from simulation-bases.md §4.4 | `RuleLLMMomentumTrader` uses `RULELLM_MOMENTUM_TRADER_SYS` to implement momentum-trader behavior. |
 | Mathematical model from simulation-bases.md §4.4 | Prompt instructs hold below 1% absolute return and trend-following quantity about `return * 200` above that threshold. |
 | Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_value.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Formula-anchored trend-following order. |
@@ -50,9 +50,9 @@ This is a trading-schema scenario. API decisions emit `action`, `bid_price`, `qu
 
 | Theory Component | Implementation |
 |---|---|
-| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMForcedSeller` is a legacy class name whose prompt `RULELLM_NOISE_TRADER_SYS` implements noise-trader behavior. |
+| Investor role and activation rule from simulation-bases.md §4.5 | `RuleLLMNoiseTrader` uses `RULELLM_NOISE_TRADER_SYS` to implement noise-trader behavior. |
 | Mathematical model from simulation-bases.md §4.5 | Prompt instructs small noisy orders, quantity below about 15 shares, and zero liquidity provision. |
-| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_forced_seller.config.extras` supplies portfolio state and ARK model policy. |
+| Behavioral parameters from simulation-bases.md §6 | `configs/LiquidityDryup/RuleLLM/players.yml:rulellm_noise_trader.config.extras` supplies portfolio state and ARK model policy. |
 | Variant-specific decision mechanism | Formula-anchored uninformed order flow. |
 
 ## §3 Market Mechanism

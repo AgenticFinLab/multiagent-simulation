@@ -1,7 +1,7 @@
 # =============================================================================
 # AssetBubbleRuleLLM Players Configuration
 # =============================================================================
-# 1 Market (rule-based) + 5 Hybrid Rule+LLM Investors
+# 1 Market (rule-based) + 6 Hybrid Rule+LLM Investors
 # Each LLM agent's system prompt embeds:
 #   - Personal profile: identity, style, risk attitude (from LLM variant)
 #   - Quantitative rules: exact financial/mathematical principles (from rule-based)
@@ -9,6 +9,7 @@
 
 # Market (rule-based, identical to AssetBubble)
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.AssetBubble.RuleLLM.players:Market"
   num_instances: 1
@@ -19,203 +20,198 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
       # Market parameters (aligned with AssetBubble rule-based)
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.15
-      mean_reversion: 0.005
-      fundamental_growth: 0.001
-      noise_std: 0.3
-      short_cost_rate: 0.02
-      custom_state_hot_limit: 3
+      fundamental_value: 100.0    # Source: target §9 / simulation-bases.md §3.1 (normalization, 100-scale index)
+      initial_price: 100.0        # Source: target §9 / simulation-bases.md §3.1 (normalization, starts at fair value)
+      price_impact: 0.15          # Source: target §9 lambda; De Long et al. (1990) https://doi.org/10.1086/261703
+      mean_reversion: 0.005       # Source: target §9 gamma; Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
+      fundamental_growth: 0.001   # Source: target §9 g; Shiller (2000) Irrational Exuberance
+      noise_std: 0.3              # Source: target §9 sigma; De Long et al. (1990) https://doi.org/10.1086/261703
+      short_cost_rate: 0.02       # Source: target §9 c_short; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
-# Hybrid Momentum Speculator (Greater Fool Theory + LLM reasoning)
-rulellm_momentum:
+# Hybrid Momentum Speculator (§4.1 anchor: Jegadeesh & Titman 1993) + LLM reasoning
+rulellm_momentum_speculator:
   name: "RuleLLM Momentum Speculator"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMMomentumSpeculator"
-  # Expander → rulellm_momentum_1 .. rulellm_momentum_5
+  # Expander → rulellm_momentum_speculator_1 .. rulellm_momentum_speculator_5
   num_instances: 5
   config:
-    identity: "rulellm_momentum"
+    identity: "rulellm_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 momentum-speculator Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # Rule parameters (from AssetBubble MomentumSpeculator)
-      lookback_short: 5
-      aggressiveness: 2.0
-      base_position_size: 20.0
-      leverage_multiplier: 2.0
+      lookback_short: 5            # Source: target §9 k (3-12 rounds); Jegadeesh & Titman (1993) https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
+      aggressiveness: 2.0          # Source: target §9 alpha; De Long et al. (1990) https://doi.org/10.1111/j.1540-6261.1990.tb03695.x
+      base_position_size: 20.0     # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
+      leverage_multiplier: 2.0     # Source: target §9 ell_m; Adrian & Shin (2010) https://doi.org/10.1016/j.jfineco.2009.12.002
       llm:
-        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"
-        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_MOMENTUM_SYS"  # Source: RuleLLM wiring — dual persona+rule prompt for momentum-speculator
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE" # Source: RuleLLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# Hybrid Rational Arbitrageur (Limits to Arbitrage + LLM reasoning)
-rulellm_arbitrageur:
+# Hybrid Rational Arbitrageur (§4.2 anchor: Shleifer & Vishny 1997) + LLM reasoning
+rulellm_rational_arbitrageur:
   name: "RuleLLM Rational Arbitrageur"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMRationalArbitrageur"
-  # Expander → rulellm_arbitrageur_1, rulellm_arbitrageur_2, rulellm_arbitrageur_3
   num_instances: 3
   config:
-    identity: "rulellm_arbitrageur"
+    identity: "rulellm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 rational-arbitrageur Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # Rule parameters (from AssetBubble RationalArbitrageur)
-      deviation_threshold: 0.05
-      base_position_size: 20.0
-      max_short_position: 30.0
-      short_cost_sensitivity: 2.0
+      deviation_threshold: 0.05    # Source: target §9 theta_dev; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
+      base_position_size: 20.0     # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
+      max_short_position: 30.0     # Source: target §9 q_short_max; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
+      short_cost_sensitivity: 2.0  # Source: target §9 c_s; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
       llm:
-        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS"
-        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_ARBITRAGEUR_SYS" # Source: RuleLLM wiring — dual persona+rule prompt for arbitrageur
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: RuleLLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# Hybrid Noise Trader (Sentiment herding + LLM reasoning)
-rulellm_noise:
+# Hybrid Noise Trader (§4.3 anchor: De Long et al. 1990) + LLM reasoning
+rulellm_noise_trader:
   name: "RuleLLM Noise Trader"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMNoiseTrader"
-  # Expander → rulellm_noise_1, rulellm_noise_2
   num_instances: 2
   config:
-    identity: "rulellm_noise"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 noise-trader Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # Rule parameters (from AssetBubble NoiseTrader)
-      sentiment_volatility: 0.3
-      herding_weight: 0.7
-      base_position_size: 15.0
+      sentiment_volatility: 0.3    # Source: target §9 sigma_s; De Long et al. (1990) https://doi.org/10.1086/261703
+      herding_weight: 0.7          # Source: target §9 h; Barber & Odean (2008) https://doi.org/10.1093/rfs/hhm079
+      base_position_size: 15.0     # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       llm:
-        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_NOISE_SYS"
-        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_NOISE_SYS"      # Source: RuleLLM wiring — dual persona+rule prompt for noise-trader
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE" # Source: RuleLLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.5
-          max_new_tokens: 500
+          temperature: 0.5         # Source: LLM wiring — sampling temperature (higher for sentiment/herd variability)
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# Hybrid Value Investor (Fundamental value + LLM reasoning)
-rulellm_value:
-  name: "RuleLLM Value Investor"
-  class: "examples.AssetBubble.RuleLLM.players:RuleLLMValueInvestor"
-  # Expander → rulellm_value_1, rulellm_value_2, rulellm_value_3, rulellm_value_4
+# Hybrid Fundamental Investor (§4.4 anchor: Fama & French 1992) + LLM reasoning
+rulellm_fundamental_investor:
+  name: "RuleLLM Fundamental Investor"
+  class: "examples.AssetBubble.RuleLLM.players:RuleLLMFundamentalInvestor"
   num_instances: 4
   config:
-    identity: "rulellm_value"
+    identity: "rulellm_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 fundamental-investor Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # Rule parameters (from AssetBubble FundamentalInvestor)
-      trade_frequency: 5
-      value_sensitivity: 1.5
-      base_position_size: 10.0
+      trade_frequency: 5           # Source: target §9 tau; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
+      value_sensitivity: 1.5       # Source: target §9 beta_v; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
+      base_position_size: 10.0     # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
       llm:
-        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_VALUE_SYS"
-        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_VALUE_SYS"      # Source: RuleLLM wiring — dual persona+rule prompt for fundamental-investor
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE" # Source: RuleLLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# Hybrid Leveraged Buyer (Margin amplification + LLM reasoning)
-rulellm_leveraged:
+# Hybrid Leveraged Buyer (§4.5 anchor: Abreu & Brunnermeier 2003) + LLM reasoning
+rulellm_leveraged_buyer:
   name: "RuleLLM Leveraged Buyer"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMLeveragedBuyer"
-  # Expander → rulellm_leveraged_1, rulellm_leveraged_2, rulellm_leveraged_3
   num_instances: 3
   config:
-    identity: "rulellm_leveraged"
+    identity: "rulellm_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 leveraged-buyer Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # Rule parameters (from AssetBubble LeveragedBuyer)
-      leverage_ratio: 3.0
-      margin_call_threshold: 0.7
-      base_position_size: 20.0
-      initial_equity: 10000.0
+      leverage_ratio: 3.0          # Source: target §9 ell (2.0-3.0); Adrian & Shin (2010) https://doi.org/10.1016/j.jfineco.2009.12.002
+      margin_call_threshold: 0.7   # Source: target §9 m (0.30-0.70); Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
+      base_position_size: 20.0     # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
+      initial_equity: 10000.0      # Source: target §9 E0; portfolio normalization (10000-scale)
       llm:
-        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_LEVERAGED_SYS"
-        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_LEVERAGED_SYS"  # Source: RuleLLM wiring — dual persona+rule prompt for leveraged-buyer
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE" # Source: RuleLLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# Hybrid Conservative Holder (Strategic allocation + LLM reasoning)
-rulellm_conservative:
+# Hybrid Conservative Holder (§4.4 anchor: Fama & French 1992) + LLM reasoning
+rulellm_conservative_holder:
   name: "RuleLLM Conservative Holder"
   class: "examples.AssetBubble.RuleLLM.players:RuleLLMConservativeHolder"
-  # Expander -> rulellm_conservative_1, rulellm_conservative_2
   num_instances: 2
   config:
-    identity: "rulellm_conservative"
+    identity: "rulellm_conservative_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/RuleLLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 conservative-holder Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # Rule parameters (from AssetBubble ConservativeHolder)
-      target_position: 20.0
-      rebalance_frequency: 10
-      rebalance_rate: 0.2
+      target_position: 20.0        # Source: target §9 q_target; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
+      rebalance_frequency: 10      # Source: target §9 tau_reb; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
+      rebalance_rate: 0.2          # Source: target §9 rho; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
       llm:
-        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_CONSERVATIVE_SYS"
-        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_CONSERVATIVE_SYS" # Source: RuleLLM wiring — dual persona+rule prompt for conservative-holder
+        user_message: "examples.AssetBubble.RuleLLM.prompts:RULELLM_USER_TEMPLATE"   # Source: RuleLLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.2
-          max_new_tokens: 500
+          temperature: 0.2         # Source: LLM wiring — sampling temperature (lowest for slowest-adapting archetype)
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml

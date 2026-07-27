@@ -2,54 +2,113 @@
 
 ## §1 Analysis Objectives
 
-Quantify bubble formation, peak amplitude, crash severity, and agent-wealth divergence produced by the Rule variant's deterministic threshold rules. All metrics are defined in `analysis-bases.md §2`.
+Quantify bubble formation, persistence, crash severity, momentum amplification,
+short-seller resistance, and recovery in the Rule variant. Definitions and
+interpretation thresholds come from `analysis-bases.md §2`.
 
 ## §2 Metric → Function Mapping
 
-| Metric                              | Function                                                                   | analysis-bases.md ref |
-|-------------------------------------|----------------------------------------------------------------------------|-----------------------|
-| BAI (Bubble Amplitude Index)        | `bubble_amplitude_index(price_history, fundamental)`                       | §2.1                  |
-| BD (Bubble Duration)                | `bubble_duration(price_history, fundamental, bubble_threshold=0.10)`       | §2.2                  |
-| CS (Crash Severity)                 | `crash_severity(price_history)`                                            | §2.3                  |
-| MAF (Momentum Amplification Factor) | `momentum_amplification_factor(agent_volume_by_type, bubble_rounds)`       | §2.4                  |
-| SSR (Short Squeeze Resistance)      | `short_squeeze_resistance(short_seller_orders, momentum_sign_history)`     | §2.5                  |
-| RT (Recovery Time)                  | `recovery_time(price_history, fundamental, recovery_threshold=0.10)`       | §2.6                  |
-| WDI (Wealth Divergence Index)       | `wealth_divergence_index(agent_final_states, final_price, initial_wealth)` | §2.7                  |
+| Metric | Function | Analysis basis |
+|---|---|---|
+| Bubble Amplitude Index (BAI) | `bubble_amplitude_index()` | `analysis-bases.md §2`, BAI |
+| Bubble Duration (BD) | `bubble_duration()` | `analysis-bases.md §2`, BD |
+| Crash Severity (CS) | `crash_severity()` | `analysis-bases.md §2`, CS |
+| Momentum Amplification Factor (MAF) | `momentum_amplification_factor()` | `analysis-bases.md §2`, MAF |
+| Short-Seller Resistance (SSR) | `short_seller_resistance()` | `analysis-bases.md §2`, SSR |
+| Recovery Time (RT) | `recovery_time()` | `analysis-bases.md §2`, RT |
+| API and RAG Quality (AQR) | `rule_order_quality()` records `applicable_to_api_or_rag: false` and validates the common order contract | `analysis-bases.md §2`, AQR |
+
+`calculate_metrics()` computes all seven reported entries and raises when no
+market records exist. The Rule variant has no API or retrieval calls, so its AQR
+entry is explicitly non-applicable rather than inventing API/RAG statistics.
 
 ## §3 Rule-Variant-Specific Notes
 
-- **NewEconomyEvangelist (§4.1)**: Extreme hold rule (sell only at δ < −0.30) inflates BAI and BD — maximum destabilising effect with pure rules.
-- **IPOFlipper (§4.2)**: Asymmetric buy-low/flip-high pattern contributes a secondary MAF spike; volume visible in `agent_volume_by_type`.
-- **MomentumFollower (§4.3)**: 1-period momentum threshold 0.02 is sensitive to noise — SSR can be low if momentum reverses frequently.
-- **SkepticalValueInvestor (§4.4) + ShortSeller (§4.5)**: Together supply corrective selling; their final WDI contribution should be positive (wealth gain relative to index).
+- `NewEconomyEvangelist` supplies persistent narrative demand until a deep crash.
+- `IPOFlipper` begins with inventory so its profit-taking branch is observable.
+- `MomentumFollower` contributes to MAF only in rounds above the 10% bubble threshold.
+- `SkepticalValueInvestor` and `ShortSeller` begin with the inventories used by
+  the design-basis worked examples, allowing their stabilizing sell rules to run.
 
-## §4 Expected Ranges
+## §4 Variant-Specific Observable Phenomena
 
-| Metric | Rule-Variant Expected Range | Interpretation                                               |
-|--------|-----------------------------|--------------------------------------------------------------|
-| BAI    | 0.5 – 1.5                   | 50–150% above fundamental at peak                            |
-| BD     | 20 – 50 rounds              | Multi-phase bubble; weak γ = 0.005 sustains                  |
-| CS     | 0.40 – 0.70                 | 40–70% crash from peak                                       |
-| MAF    | 0.35 – 0.60                 | Momentum volume fraction during bubble                       |
-| SSR    | 0.30 – 0.60                 | Short sellers persist through moderate momentum              |
-| RT     | 10 – 30 rounds              | Post-crash re-convergence                                    |
-| WDI    | −0.3 – +0.3                 | Negative during bubble; positive post-crash for value/shorts |
+| Phenomenon                            | Description                                                                                            | How to Observe                                                                | Contrast with Baseline Variant |
+|---------------------------------------|--------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|--------------------------------|
+| Deterministic narrative demand        | NewEconomyEvangelist bids until price exceeds crash trigger; no reasoning-driven hesitation            | Bid volume of Evangelist strictly non-zero until deep-crash round             | This is the baseline           |
+| Threshold-locked momentum surge       | MomentumFollower contributes exactly when `deviation > 0.10`                                           | `summary.json → metrics.momentum_amplification_factor` (MAF ≈ 0.20–0.50)      | This is the baseline           |
+| Constrained short-seller resistance   | ShortSeller sells only when position remains within borrow limits; SSR non-zero but bounded            | `metrics.short_seller_resistance` > 0                                         | This is the baseline           |
+| Analytic crash severity               | CS matches the peak-to-trough drop implied by decision rules; reproducible seed-to-seed                | `metrics.crash_severity` in [0.30, 0.80]                                      | This is the baseline           |
+| IPO flip signature                    | IPOFlipper starts with inventory and unloads once profit-taking threshold trips                        | Bid trace shows a clear post-peak sell pulse                                  | This is the baseline           |
 
-## §5 References
+Rule is the deterministic reference for DotComBubble: every threshold is hard, every bubble/crash phase transition fires exactly at the calibrated boundary. AQR (API/RAG Quality) is explicitly non-applicable because Rule makes no API or retrieval calls.
 
-See `analysis-bases.md §2` for full metric derivations and `simulation-bases.md §4` for agent parameter sources.
+**Rule expected metric ranges** (calibration anchors):
 
-## §6 Cross-Variant Comparison
+| Metric | Primary validation signal                                                     |
+|--------|-------------------------------------------------------------------------------|
+| BAI    | > 0.10 indicates a visible normalized bubble                                  |
+| BD     | > 15 rounds indicates meaningful persistence                                  |
+| CS     | 0.30–0.80 is the broad meaningful-crash band                                  |
+| MAF    | 0.20–0.50 indicates mixed momentum amplification                              |
+| SSR    | Non-zero values show active constrained arbitrage                             |
+| RT     | `null` allowed when recovery is incomplete within the run                     |
+| AQR    | Common order-contract compliance = 1.0 (API/RAG marked non-applicable)        |
+
+---
+
+## §5 Scaling and Sensitivity Analysis
+
+### Round Scaling
+
+| Total Rounds | Expected Observable                                                    | Phenomenon Clarity | Recommended for  |
+|--------------|------------------------------------------------------------------------|--------------------|------------------|
+| 100          | Bubble formation + crash visible; recovery truncated                   | Low                | Quick testing    |
+| 200          | Full Bubble → Crash → Recovery arc; MAF and SSR stably estimated       | Medium             | Standard runs    |
+| 500          | Multiple bubble cycles; RT/CS distributions tighten across seeds       | High               | Research quality |
+
+### Agent Count Scaling
+
+| Agent Count | Expected Observable                                                | Environment Dynamics                        |
+|-------------|--------------------------------------------------------------------|---------------------------------------------|
+| 20          | Bubble still visible; noisier MAF                                  | Sparse order flow; BAI variance elevated    |
+| 40          | Clean phase separation; stable estimates for all seven §2 metrics  | Full mechanism observable                   |
+| 80          | Reduced per-seed variance; suitable for parameter sweeps           | Baseline mechanism with statistical mass    |
+
+### Parameter Sensitivity (Variant-Specific)
+
+| Parameter                                | Change | Expected Effect on This Variant's Analysis                                          |
+|------------------------------------------|--------|-------------------------------------------------------------------------------------|
+| `NewEconomyEvangelist.narrative_strength`| +50 %  | BAI rises above 0.15; BD lengthens; CS deepens                                      |
+| `NewEconomyEvangelist.narrative_strength`| −50 %  | BAI drops below 0.10; bubble may fail to form                                       |
+| `MomentumFollower.momentum_threshold`    | +50 %  | MAF drops; fewer rounds trigger amplification                                       |
+| `ShortSeller.borrow_limit`               | +50 %  | SSR rises; crash severity dampens; recovery begins earlier                          |
+| `SkepticalValueInvestor` share           | +50 %  | BAI compresses; CS softens; BD shortens                                             |
+
+---
+
+## §6 Output Files Reference
+
+All outputs written to `EXPERIMENT/DotComBubble/Rule/analysis/`.
+
+| Output File                          | Generated By                    | Contents                                                             | How to Interpret                                                                     |
+|--------------------------------------|---------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `summary.json`                       | `main()`                        | Metrics (BAI/BD/CS/MAF/SSR/RT/AQR) + validation + order-contract QA  | Compare against calibration anchors above; AQR should carry `applicable_to_api_or_rag: false` |
+| `dotcombubble_rule_dynamics.png`     | `create_visualizations()`       | Price vs fundamental with bubble/crash phase annotations             | Visual sanity check: bubble peak, trough, recovery arc                               |
+
+Missing records must be treated as an error; the pipeline does not substitute zero-valued metrics. Every order must present a valid `action`, positive `bid_price`, non-negative `quantity`, `reasoning`, and `strategy` (agent type) — checked by `rule_order_quality()`.
+
+## §7 Cross-Variant Comparison
 
 | Variant | Expected comparison |
 |---|---|
-| LLM | Higher variance in bubble amplitude and crash timing from persona reasoning |
-| RuleLLM | Similar directional behavior with language-mediated quantities |
-| Rag | RuleLLM-like behavior modified by retrieved bubble and crash cases |
+| LLM | Persona reasoning can change action timing and quantities |
+| RuleLLM | Explicit rules are mediated through language-model decisions |
+| Rag | Retrieved historical context can change valuation discipline and timing |
 
-## §7 Quality Checks
+### Quality Checks
 
-- Confirm the run completed the configured 200 rounds.
-- Confirm price and fundamental histories are non-empty and aligned by round.
-- Confirm analysis raises on missing market records rather than fabricating zero metrics.
-- Confirm order payloads contain valid `action` and numeric `quantity`.
+- Confirm the number of market records equals the configured round count.
+- Confirm every market record contains positive `price` and `fundamental` values.
+- Confirm every order has a valid action, positive bid price, non-negative quantity, reasoning, and agent type.
+- Confirm `summary.json` and `dotcombubble_rule_dynamics.png` are produced.
+- Treat missing records as an error; do not substitute zero-valued metrics.

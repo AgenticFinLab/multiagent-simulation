@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""DotComBubble Rag Simulation Analysis
+"""Post-run metrics for the DotComBubble Rag variant.
 
 Usage:
-    python examples/DotComBubble/Rag/analysis.py \
+    python -m examples.DotComBubble.Rag.analysis \
         -c configs/DotComBubble/Rag/simulation.yml
 """
 
@@ -10,50 +10,118 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
+import math
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, Optional
 
 import numpy as np
 
-from examples.DotComBubble.Rule.analysis import (
-    SCENARIO,
-    analyze_standard_scenario,
-    calculate_metrics,
-    create_visualizations,
-    load_simulation_data as load_rule_simulation_data,
-)
+from examples.DotComBubble.Rag.players import _RAG_FALLBACK
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/DotComBubble/Rag/simulation.yml"
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
-def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
-    """Load DotComBubble market data and recorded RAG contexts."""
-    data = load_rule_simulation_data(config)
-    results = load_results(config)
-    rag_contexts = {}
-    for pid, player in results.players_by_role("player").items():
-        contexts = player.turns.field("rag_context")
-        if contexts:
-            rag_contexts[pid] = contexts
-    data["rag_contexts"] = rag_contexts
-    return data
+def bubble_amplitude_index(
+    price_history: list[float], fundamental: float
+) -> float:
+    """Return maximum overvaluation relative to fundamental value."""
+    if not price_history or fundamental <= 0:
+        raise ValueError("BAI requires prices and a positive fundamental value")
+    return max((price - fundamental) / fundamental for price in price_history)
+
+
+def bubble_duration(
+    price_history: list[float],
+    fundamental: float,
+    bubble_threshold: float = 0.10,
+) -> int:
+    """Count rounds above the configured overvaluation threshold."""
+    if fundamental <= 0:
+        raise ValueError("BD requires a positive fundamental value")
+    return sum(
+        (price - fundamental) / fundamental > bubble_threshold
+        for price in price_history
+    )
+
+
+def crash_severity(price_history: list[float]) -> float:
+    """Return the largest peak-to-subsequent-trough drawdown."""
+    if not price_history:
+        raise ValueError("CS requires at least one price")
+    peak_index = max(range(len(price_history)), key=price_history.__getitem__)
+    peak = price_history[peak_index]
+    trough = min(price_history[peak_index:])
+    return (peak - trough) / peak if peak > 0 else 0.0
+
+
+def momentum_amplification_factor(
+    agent_orders: Dict[str, Dict[int, Dict[str, Any]]],
+    bubble_rounds: Iterable[int],
+) -> float:
+    """Return momentum-follower share of buy volume in bubble rounds."""
+    selected = set(bubble_rounds)
+    total_buy = 0.0
+    momentum_buy = 0.0
+    for player_id, orders in agent_orders.items():
+        for round_num, order in orders.items():
+            if round_num not in selected or order["action"] != "buy":
+                continue
+            quantity = float(order["quantity"])
+            total_buy += quantity
+            if "momentumfollower" in player_id.lower():
+                momentum_buy += quantity
+    return momentum_buy / total_buy if total_buy > 0 else 0.0
+
+
+def short_seller_resistance(
+    short_seller_orders: Dict[int, Dict[str, Any]],
+    overvaluation_rounds: Iterable[int],
+) -> float:
+    """Return sell frequency by the short seller in overvaluation rounds."""
+    selected = set(overvaluation_rounds)
+    if not selected:
+        return 0.0
+    sell_rounds = sum(
+        round_num in selected
+        and order["action"] == "sell"
+        and float(order["quantity"]) > 0
+        for round_num, order in short_seller_orders.items()
+    )
+    return sell_rounds / len(selected)
+
+
+def recovery_time(
+    price_history: list[float],
+    fundamental: float,
+    recovery_threshold: float = 0.10,
+) -> Optional[int]:
+    """Return rounds from the post-peak trough to fundamental recovery."""
+    if not price_history or fundamental <= 0:
+        raise ValueError("RT requires prices and a positive fundamental value")
+    peak_index = max(range(len(price_history)), key=price_history.__getitem__)
+    trough_index = min(
+        range(peak_index, len(price_history)), key=price_history.__getitem__
+    )
+    for index in range(trough_index + 1, len(price_history)):
+        deviation = (price_history[index] - fundamental) / fundamental
+        if abs(deviation) < recovery_threshold:
+            return index - trough_index
+    return None
 
 
 def analyze_rag_knowledge_effect(
     rag_contexts: Dict[str, Dict[int, Any]],
 ) -> Dict[str, Any]:
-    """Calculate retrieval coverage from recorded RAG contexts."""
+    """Calculate per-agent and aggregate retrieval coverage."""
     rag_stats: Dict[str, Any] = {}
     for agent_id, round_contexts in rag_contexts.items():
-        total = 0
-        failures = 0
-        for context in round_contexts.values():
-            total += 1
-            if str(context).strip() == _RAG_FALLBACK:
-                failures += 1
+        total = len(round_contexts)
+        failures = sum(
+            str(context).strip() == _RAG_FALLBACK
+            for context in round_contexts.values()
+        )
         if total:
             rag_stats[agent_id] = {
                 "total_rag_rounds": total,
@@ -74,28 +142,196 @@ def analyze_rag_knowledge_effect(
     return rag_stats
 
 
-def main() -> None:
-    """Run DotComBubble Rag analysis and write `rag_stats.json`."""
+def api_and_rag_quality(
+    agent_orders: Dict[str, Dict[int, Dict[str, Any]]],
+    rag_contexts: Dict[str, Dict[int, Any]],
+) -> Dict[str, Any]:
+    """Measure decision-contract compliance and retrieval coverage."""
+    required = {"action", "bid_price", "quantity", "reasoning", "analysis"}
+    total = 0
+    valid = 0
+    for orders in agent_orders.values():
+        for order in orders.values():
+            total += 1
+            try:
+                price = float(order["bid_price"])
+                quantity = float(order["quantity"])
+                contract_ok = required.issubset(order)
+                contract_ok = contract_ok and order["action"] in {
+                    "buy",
+                    "sell",
+                    "hold",
+                }
+                contract_ok = contract_ok and math.isfinite(price) and price > 0
+                contract_ok = contract_ok and math.isfinite(quantity) and quantity >= 0
+                contract_ok = contract_ok and bool(str(order["reasoning"]).strip())
+            except (KeyError, TypeError, ValueError):
+                contract_ok = False
+            valid += int(contract_ok)
+    quality: Dict[str, Any] = {
+        "total_decisions": total,
+        "valid_decisions": valid,
+        "contract_compliance_rate": valid / total if total else 0.0,
+    }
+    rag_stats = analyze_rag_knowledge_effect(rag_contexts)
+    quality["retrieval"] = rag_stats["aggregate"] if "aggregate" in rag_stats else {}
+    return quality
+
+
+def _market_state(payload: Dict[str, Any]) -> Dict[str, Any]:
+    state = payload["market_data"] if "market_data" in payload else payload
+    if not isinstance(state, dict):
+        raise TypeError("Recorded market state must be a mapping")
+    return state
+
+
+def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Load market paths, investor orders, and recorded RAG contexts."""
+    results = load_results(config)
+    market_players = results.players_by_role("coordinator")
+    if not market_players and "market" in results.players:
+        market_players = {"market": results.players["market"]}
+
+    market_by_round: Dict[int, Dict[str, Any]] = {}
+    for player in market_players.values():
+        for round_num, payload in player.turns.payloads().items():
+            state = _market_state(payload)
+            if "price" in state and "fundamental" in state:
+                market_by_round[round_num] = state
+
+    agent_orders: Dict[str, Dict[int, Dict[str, Any]]] = {}
+    rag_contexts: Dict[str, Dict[int, Any]] = {}
+    for player_id, player in results.players_by_role("player").items():
+        agent_orders[player_id] = player.turns.payloads()
+        contexts = player.turns.field("rag_context")
+        if contexts:
+            rag_contexts[player_id] = contexts
+    return {
+        "market_by_round": market_by_round,
+        "agent_orders": agent_orders,
+        "rag_contexts": rag_contexts,
+    }
+
+
+def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate every metric declared in ``analysis-bases.md §2``."""
+    market = data["market_by_round"]
+    if not market:
+        raise ValueError("No market records found; run the simulation first")
+    rounds = sorted(market)
+    prices = [float(market[round_num]["price"]) for round_num in rounds]
+    fundamental = float(market[rounds[0]]["fundamental"])
+    bubble_rounds = [
+        round_num
+        for round_num in rounds
+        if (float(market[round_num]["price"]) - fundamental) / fundamental > 0.10
+    ]
+    overvaluation_rounds = [
+        round_num
+        for round_num in rounds
+        if float(market[round_num]["price"]) > fundamental
+    ]
+    short_orders: Dict[int, Dict[str, Any]] = {}
+    for player_id, orders in data["agent_orders"].items():
+        if "shortseller" in player_id.lower():
+            short_orders.update(orders)
+
+    return {
+        "BAI": bubble_amplitude_index(prices, fundamental),
+        "BD": bubble_duration(prices, fundamental),
+        "CS": crash_severity(prices),
+        "MAF": momentum_amplification_factor(data["agent_orders"], bubble_rounds),
+        "SSR": short_seller_resistance(short_orders, overvaluation_rounds),
+        "RT": recovery_time(prices, fundamental),
+        "AQR": api_and_rag_quality(data["agent_orders"], data["rag_contexts"]),
+    }
+
+
+def create_visualizations(data: Dict[str, Any], output_path: str) -> None:
+    """Write a price/fundamental path plot for visual inspection."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    market = data["market_by_round"]
+    rounds = sorted(market)
+    prices = [float(market[round_num]["price"]) for round_num in rounds]
+    fundamentals = [
+        float(market[round_num]["fundamental"]) for round_num in rounds
+    ]
+    output_dir = Path(output_path)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    figure, axis = plt.subplots(figsize=(10, 5))
+    axis.plot(rounds, prices, label="Market price")
+    axis.plot(rounds, fundamentals, "--", label="Fundamental value")
+    axis.set(xlabel="Round", ylabel="Price", title="DotComBubble Rag dynamics")
+    axis.legend()
+    figure.tight_layout()
+    figure.savefig(output_dir / "dotcombubble_rag_dynamics.png", dpi=150)
+    plt.close(figure)
+
+
+def main() -> Dict[str, Any]:
+    """Load one run, calculate metrics, and write auditable outputs."""
     parser = argparse.ArgumentParser(description="Analyze DotComBubble Rag results")
-    parser.add_argument("-c", "--config", type=str, default=DEFAULT_CONFIG)
+    parser.add_argument("-c", "--config", default=DEFAULT_CONFIG)
+    parser.add_argument(
+        "-o", "--output-dir", default="EXPERIMENT/DotComBubble/Rag/analysis"
+    )
     args = parser.parse_args()
     config = load_config(args.config)
     data = load_simulation_data(config)
-    analysis_path = Path(os.path.dirname(config["setting"]["record_path"])) / "analysis"
-    analysis_path.mkdir(parents=True, exist_ok=True)
-    analyze_standard_scenario(SCENARIO, data, config, str(analysis_path))
+    metrics = calculate_metrics(data)
     rag_stats = analyze_rag_knowledge_effect(data["rag_contexts"])
-    with (analysis_path / "rag_stats.json").open("w", encoding="utf-8") as handle:
-        json.dump(rag_stats, handle, indent=2)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "summary.json").write_text(
+        json.dumps(metrics, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    (output_dir / "rag_stats.json").write_text(
+        json.dumps(rag_stats, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    create_visualizations(data, str(output_dir))
+    print(json.dumps(metrics, indent=2, ensure_ascii=False))
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rag'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='DotComBubble',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
+    return metrics
 
 
 __all__ = [
+    "bubble_amplitude_index",
+    "bubble_duration",
+    "crash_severity",
+    "momentum_amplification_factor",
+    "short_seller_resistance",
+    "recovery_time",
+    "analyze_rag_knowledge_effect",
+    "api_and_rag_quality",
     "load_simulation_data",
     "calculate_metrics",
     "create_visualizations",
-    "analyze_rag_knowledge_effect",
     "main",
 ]
+
 
 if __name__ == "__main__":
     main()

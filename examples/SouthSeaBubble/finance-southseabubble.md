@@ -1,0 +1,181 @@
+# SouthSeaBubble Scenario Target
+
+## §1 Meta
+
+| Field       | Content                                                                                                                                                   |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name        | SouthSeaBubble                                                                                                                                            |
+| Domain      | finance                                                                                                                                                   |
+| Phenomenon  | Politically endorsed monopoly narratives and resale-option speculation inflate prices beyond any fundamental anchor until insider exit triggers collapse. |
+| Pipeline    | masim/skills/polish-simulation-pipeline.md                                                                                                                |
+| Target Spec | masim/skills/define-simulation-scenario-skill.md (v1.2)                                                                                                   |
+
+## §2 Phenomenon Statement
+
+### §2.1 Trigger
+
+A politically endorsed monopoly narrative (South Sea Company, 1720) collides with easy access to leveraged subscription and elevates a stock's price far beyond any realistic discounted-cash-flow anchor. The archetypal triggers are the South Sea Company subscription rounds and share-conversion scheme of 1720 (Temin and Voth, 2004; Dale, 2004), the Mississippi Company monetary-monopoly boom of 1719–1720 (Neal, 1990), and the resale-option speculative-pricing regime characterised by Scheinkman and Xiong (2003), in which investors buy overpriced assets because they expect to resell to a still-more-optimistic buyer.
+
+### §2.2 Population
+
+Five investor archetypes populate the proxy equity market: `InsiderAdvantaged` (population 2) exploits privileged information and political connections around narrative turning points; `NarrativeBeliever` (population 3) amplifies demand whenever the monopoly story appears validated; `SkepticalAnalyst` (population 2) provides valuation-driven selling pressure once the price is clearly disconnected from fundamentals; `Arbitrageur` (population 2) leans against large mispricings subject to capital limits; `NoiseTrader` (population 2) supplies uninformed background liquidity. A single `Market` coordinator implements the price-formation law.
+
+### §2.3 Amplification
+
+Amplification is bubble-shaped rather than merely gradual: `InsiderAdvantaged` and `NarrativeBeliever` both buy on positive deviation (`deviation > 0.02`), pushing net demand and price further above fundamental value. The `Market` clearing law converts this net demand into positive price impact `price_impact × net_demand`, which raises the observed deviation on the next round. Because the shared activation threshold is low (`0.02`) and the amplifier sizing cap is high (`800` units), the two amplifier classes together can dominate net demand during the boom phase. Simultaneously, `SkepticalAnalyst` and `Arbitrageur` accumulate short-side pressure but activate only once `|deviation| > 0.05` and are capped at `500` units, so their correction pressure lags the amplifier flow.
+
+### §2.4 Collapse / Correction
+
+Correction arises from two channels running in parallel: (a) the mean-reversion term `γ × (F − P(t))` in the price-formation law, and (b) coordinated selling by `SkepticalAnalyst` and `Arbitrageur` once `|deviation| > 0.05`. When the amplifier side loses cash-buying capacity or inventory-selling capacity — because they have exhausted cash to buy at inflated prices or, on the reversal, exhausted inventory to sell — the stabiliser side and mean reversion dominate the price change, producing a decline that can be sharp enough to satisfy the drawdown-based crash-round criterion (`analysis-bases.md §2.6`).
+
+## §3 Research Goals
+
+1. Reproduce the South Sea bubble anatomy: a rising positive deviation from fundamental in the early rounds, a peak, and a drawdown that exceeds the crash-round threshold under Rule seeds within a fixed 200-round horizon.
+2. Quantify the amplifier-vs-stabiliser order-flow gap during positive-deviation windows, using the standard investor-order log.
+3. Compare insider portfolio value trajectories with narrative-believer trajectories to verify that the timing-advantage encoding produces a directionally different terminal outcome under Rule.
+4. Compare Rule and LLM decision fidelity: verify whether persona-only LLM agents preserve, dampen, or exaggerate the Rule amplifier signature and the correction timing.
+5. Measure whether retrieved historical evidence (South Sea 1720, Mississippi 1720, railway/technology narrative bubbles) shifts amplifier, stabiliser, and arbitrage behaviour in the Rag variant, using `rag_stats.json` retrieval coverage as the observable proxy.
+
+## §4 Theoretical Anchors
+
+### §4.1 Bubble Pricing And Resale Option
+
+- Primary citation: Scheinkman, J. A., and Xiong, W. (2003). "Overconfidence and speculative bubbles." *Journal of Political Economy* 111(6), 1183–1220. DOI 10.1086/378531.
+- Core mechanism: heterogeneous beliefs and a resale option make investors pay above their own valuation because they expect to sell to a still-more-optimistic buyer; the option value inflates during periods of high disagreement.
+- Simulation mapping: `NarrativeBeliever` (`examples/SouthSeaBubble/Rule/players.py`) implements `act iff |deviation| > 0.02` and buys on positive deviation, encoding the amplifier side of resale-driven demand. `InsiderAdvantaged` adds the timing-advantage complement of the same story.
+
+### §4.2 Narrative Economics
+
+- Primary citation: Shiller, R. J. (2017). "Narrative economics." *American Economic Review* 107(4), 967–1004. DOI 10.1257/aer.107.4.967.
+- Core mechanism: story-shaped beliefs can spread across investors and coordinate demand independently of discounted cash flows; narrative peaks precede large price movements.
+- Simulation mapping: `NarrativeBeliever` explicitly encodes narrative-driven demand at a low activation threshold (`|deviation| > 0.02`) and a large amplifier cap (`min(800, int(|deviation| × 5000))`), so a positive deviation is reinforced whenever the narrative continues to look validated.
+
+### §4.3 Insider Advantage And Political Connections
+
+- Primary citation: Temin, P., and Voth, H.-J. (2004). "Riding the South Sea Bubble." *American Economic Review* 94(5), 1654–1668. DOI 10.1257/0002828043052268.
+- Core mechanism: politically connected investors accumulated South Sea stock ahead of the peak and exited earlier than uninformed followers; leveraged subscription schemes let insiders capture disproportionate boom-phase profits.
+- Simulation mapping: `InsiderAdvantaged` uses the same amplifier rule (`|deviation| > 0.02`, cap `800`, sizing `int(|deviation| × 5000)`) but is seeded with higher starting cash (`3,000,000`) and inventory (`800`) than the narrative agents, so timing-advantage translates into an absolute PnL differential rather than a threshold difference.
+
+### §4.4 Fundamental Skepticism And Limits To Arbitrage
+
+- Primary citation: Shleifer, A., and Vishny, R. W. (1997). "The limits of arbitrage." *Journal of Finance* 52(1), 35–55. DOI 10.1111/j.1540-6261.1997.tb03807.x.
+- Core mechanism: even when mispricing is large, capital constraints, mark-to-market losses, and synchronisation risk prevent professional arbitrageurs from eliminating it quickly.
+- Simulation mapping: `SkepticalAnalyst` and `Arbitrageur` both implement `act iff |deviation| > 0.05` with a strictly smaller cap (`500`) and a strictly smaller scaling constant (`3000`) than the amplifier side, encoding the limit-to-arbitrage inequality that stabilisers activate later and trade smaller sizes than amplifiers do.
+
+### §4.5 Noise Trading
+
+- Primary citation: Black, F. (1986). "Noise." *Journal of Finance* 41(3), 529–543. DOI 10.1111/j.1540-6261.1986.tb04513.x.
+- Core mechanism: non-informational traders keep markets liquid and add order-flow noise that is orthogonal to fundamentals.
+- Simulation mapping: `NoiseTrader` samples `Bernoulli(0.30)` per round and, when active, submits a random `randint(100, 500)` buy or sell capped by cash and inventory. The activation gate is independent of `deviation`, so noise flow behaves as a valuation-orthogonal liquidity channel.
+
+## §5 Stylized Facts
+
+| #  | Fact                                                                                                    | Acceptance range                                                                                                                                                                                                  | Analysis metric                                                                                 |
+|----|---------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| F1 | Peak positive deviation exceeds a bubble threshold before any correction.                               | `max(deviation)` across the run reaches at least `+0.05` under Rule seeds; `bubble_magnitude` reported as `max_price / fundamental_value − 1 ≥ 0.05`.                                                             | `compute_bubble_magnitude` (analysis-bases.md §2.1).                                            |
+| F2 | Amplifier order flow dominates during positive-deviation rounds.                                        | Under `deviation > 0.02`, the combined buy quantity of `InsiderAdvantaged` and `NarrativeBeliever` is at least three times the combined sell quantity of `SkepticalAnalyst` and `Arbitrageur` in the same window. | `compute_narrative_demand` + `compute_agent_attribution` (analysis-bases.md §2.2, §2.7).        |
+| F3 | Correction pressure from stabilisers is visible once deviation crosses the higher stabiliser threshold. | Under `deviation > 0.05`, the total sell quantity of `SkepticalAnalyst` plus `Arbitrageur` is strictly positive across the run.                                                                                   | `compute_skeptical_resistance` + `compute_arbitrage_correction` (analysis-bases.md §2.4, §2.5). |
+| F4 | The bubble reverses within the horizon.                                                                 | `compute_crash_round` returns a finite round index with drawdown `≥ 0.10` from the observed peak; the drawdown occurs strictly after the peak round.                                                              | `compute_crash_round` (analysis-bases.md §2.6).                                                 |
+| F5 | Insider terminal portfolio value differs from narrative-believer terminal portfolio value.              | Under Rule seeds, `insider_timing_profit` returns a nonzero signed value across the run.                                                                                                                          | `compute_insider_timing_profit` (analysis-bases.md §2.3).                                       |
+
+## §6 Historical / Empirical Anchors
+
+| Case                                     | Time          | Correspondence to model                                                                                                                                                                                                                                                                                  |
+|------------------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| South Sea Company bubble                 | 1720          | Share price rose from about £128 in January to about £1,050 at the August peak and collapsed to roughly £150 by December (Temin and Voth 2004, 10.1257/0002828043052268; Dale 2004); maps to the `InsiderAdvantaged` + `NarrativeBeliever` boom and the subsequent stabiliser + mean-reversion collapse. |
+| Mississippi Company / John Law's system  | 1719–1720     | Monopoly narrative combined with monetary expansion pushed Compagnie d'Occident shares far above realistic cash-flow anchors before collapse (Neal 1990, ISBN 0-521-38205-6); reinforces §4.2 narrative economics and §4.3 insider advantage.                                                            |
+| Railway and later infrastructure bubbles | 1840s onwards | Similar interaction of monopoly-style storytelling, insider allocations, skepticism, and arbitrage limits; motivates keeping the amplifier vs stabiliser threshold gap (`0.02` vs `0.05`) rather than a single threshold.                                                                                |
+| Overconfidence-and-resale-option regime  | Modelled      | High-disagreement equity episodes documented in Scheinkman and Xiong (2003, 10.1086/378531) sustain prices above any single investor's own valuation; anchors the resale-option interpretation of `NarrativeBeliever`.                                                                                   |
+| Primary sources                          | —             | Temin and Voth (2004) 10.1257/0002828043052268; Shiller (2017) 10.1257/aer.107.4.967; Shleifer and Vishny (1997) 10.1111/j.1540-6261.1997.tb03807.x; Black (1986) 10.1111/j.1540-6261.1986.tb04513.x; Scheinkman and Xiong (2003) 10.1086/378531.                                                        |
+
+## §7 Agent Roster
+
+| Role               | Class Name          | Population | Role Type                          | Key Behavior                                                                                                                                         | Data Signal        | Time Horizon                                                                               |
+|--------------------|---------------------|-----------:|------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|--------------------------------------------------------------------------------------------|
+| Insider advantaged | `InsiderAdvantaged` |          2 | Destabilising (amplifier + timing) | On `                                                                                                                                                 | deviation          | > 0.02` buys on positive deviation and sells on negative deviation with `Q = min(800, int( |
+| Narrative believer | `NarrativeBeliever` |          3 | Destabilising (amplifier)          | On `                                                                                                                                                 | deviation          | > 0.02` buys on positive deviation and sells on negative deviation with `Q = min(800, int( |
+| Skeptical analyst  | `SkepticalAnalyst`  |          2 | Stabilising                        | On `                                                                                                                                                 | deviation          | > 0.05` buys on negative deviation and sells on positive deviation with `Q = min(500, int( |
+| Arbitrageur        | `Arbitrageur`       |          2 | Stabilising                        | Same rule shape as `SkepticalAnalyst` (`                                                                                                             | deviation          | > 0.05`, `Q = min(500, int(                                                                |
+| Noise trader       | `NoiseTrader`       |          2 | Neutral (liquidity)                | With probability `0.30` per round submits a random buy or sell of size `randint(100, 500)`; capped by cash/position; not conditioned on `deviation`. | `cash`, `position` | Reacts each round via a fresh Bernoulli draw.                                              |
+
+Diversity check: two destabilising amplifier channels (`InsiderAdvantaged`, `NarrativeBeliever`), two stabilising channels (`SkepticalAnalyst`, `Arbitrageur`), and one neutral liquidity channel (`NoiseTrader`). Theory families §4.1/§4.2/§4.3 (resale option / narrative / insider advantage) collectively motivate the two amplifier agents; §4.4 (limits to arbitrage) motivates two stabiliser agents; §4.5 motivates the noise agent.
+
+## §8 Environment Specification
+
+### §8.1 Price Formation
+
+Single-clearing-price rule-based coordinator implemented by `Market` in `examples/SouthSeaBubble/Rule/players.py`. The update law is
+
+`P(t+1) = max(0.01, P(t) + price_impact × net_demand + mean_reversion × (fundamental − P(t)) + ε(t))`
+
+with `ε(t) ~ N(0, noise_std)`, `net_demand = total_buy_quantity − total_sell_quantity` computed from the current round's `{"action", "quantity"}` orders, `fundamental` a constant valuation anchor, and `price_impact`, `mean_reversion`, `noise_std` seeded from `market.extras` in `configs/SouthSeaBubble/*/players.yml`. Justification: reduced-form encoding of amplifier-vs-stabiliser order pressure around a mean-reverting fundamental anchor, faithful to §4.1 Scheinkman–Xiong resale option, §4.2 Shiller narrative, and §4.4 Shleifer–Vishny limits-to-arbitrage.
+
+### §8.2 Information Broadcast
+
+Each round the `Market.decide` step broadcasts a six-field dictionary to every investor: `price` (`P(t+1)` after the current-round update), `fundamental` (constant `F`), `deviation` (`(price − fundamental) / fundamental`, or zero if `fundamental ≤ 0`), `round` (integer index), `volume` (`min(total_buy, total_sell) + 0.5 × |net_demand|`), and `net_demand`. No private cost-basis or full order-book fields are broadcast; agents maintain any needed history in their own `custom_state`. Justification: keeps the amplifier / stabiliser decision reducible to public `deviation` so that amplifier and stabiliser channels can be compared on a common observable.
+
+### §8.3 Constraints And Frictions
+
+Short selling: No — sell quantities are capped at current position (`min(quantity, position)`). Cash constraint: Yes — buy quantities are capped at `int(cash / price)`. Margin requirement: No. Circuit breakers: No. Trading hours: No — every round is a full price-formation event. Order type: current-market quantity orders only, tagged with `agent_type` for accounting; the clearing law uses the coordinator's running `price`.
+
+### §8.4 Round Structure And Granularity
+
+Each round proceeds in three coordinator steps: (1) `Market.perceive` ingests investor orders from the previous round and stores them; (2) `Market.decide` computes `price`, `deviation`, `volume`, `net_demand`, and broadcasts the market-data dictionary; (3) investors run `perceive → decide → act` and submit `{"action", "quantity", "agent_type"}` orders (with `reasoning` added in LLM/RuleLLM/Rag variants). One round represents one decision interval at a granularity coarse enough to capture bubble build-up and correction rather than intra-day microstructure. A 200-round run notionally spans a multi-quarter horizon over which the peak deviation, the crash round, and the terminal insider-vs-narrative PnL differential become clearly distinguishable.
+
+## §9 Parameter Seeds
+
+| Parameter                                        | Meaning                                                       | Default     | Source                                                                                                      |
+|--------------------------------------------------|---------------------------------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------|
+| `market.extras.initial_price`                    | Initial market price at round 0                               | `100.0`     | Source: normalization (simulation-bases.md §6)                                                              |
+| `market.extras.fundamental_value`                | Constant forward-looking anchor                               | `100.0`     | Source: normalization; equal to `initial_price` so starting deviation is zero (simulation-bases.md §6)      |
+| `market.extras.price_impact`                     | Net-demand price-impact gain `lambda`                         | `0.025`     | simulation-bases.md §3; Rule/players.py `Market.decide`                                                     |
+| `market.extras.mean_reversion`                   | Pull-toward-fundamental gain `gamma`                          | `0.008`     | simulation-bases.md §3                                                                                      |
+| `market.extras.noise_std`                        | Std-dev of Gaussian price noise `epsilon`                     | `0.015`     | simulation-bases.md §3                                                                                      |
+| `insideradvantaged.num_instances`                | Number of InsiderAdvantaged agents                            | `2`         | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `insideradvantaged.extras.initial_cash`          | Starting cash per InsiderAdvantaged                           | `3000000.0` | configs/SouthSeaBubble/Rule/players.yml (deliberately larger than other agents to encode timing advantage)  |
+| `insideradvantaged.extras.initial_position`      | Starting inventory per InsiderAdvantaged                      | `800`       | configs/SouthSeaBubble/Rule/players.yml (deliberately larger than other agents to encode timing advantage)  |
+| `insideradvantaged.extras.information_advantage` | Metadata calibrating insider edge                             | `0.8`       | simulation-bases.md §6                                                                                      |
+| `insideradvantaged.extras.front_run_size`        | Metadata calibrating insider order size                       | `500`       | simulation-bases.md §6 (retained runtime formula uses the hard-coded amplifier cap `800` and scale `5000`)  |
+| `narrativebeliever.num_instances`                | Number of NarrativeBeliever agents                            | `3`         | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `narrativebeliever.extras.initial_cash`          | Starting cash per NarrativeBeliever                           | `1000000.0` | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `narrativebeliever.extras.initial_position`      | Starting inventory per NarrativeBeliever                      | `500`       | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `narrativebeliever.extras.narrative_weight`      | Metadata calibrating narrative sensitivity                    | `0.8`       | simulation-bases.md §4.2; Shiller (2017), 10.1257/aer.107.4.967                                             |
+| `narrativebeliever.extras.base_size`             | Metadata calibrating narrative order size                     | `350`       | simulation-bases.md §6 (retained runtime formula uses the hard-coded amplifier cap `800` and scale `5000`)  |
+| `skepticalanalyst.num_instances`                 | Number of SkepticalAnalyst agents                             | `2`         | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `skepticalanalyst.extras.initial_cash`           | Starting cash per SkepticalAnalyst                            | `1200000.0` | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `skepticalanalyst.extras.initial_position`       | Starting inventory per SkepticalAnalyst                       | `500`       | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `skepticalanalyst.extras.cash_flow_threshold`    | Metadata calibrating fundamental-skepticism activation        | `0.15`      | simulation-bases.md §4.4; Shleifer and Vishny (1997), 10.1111/j.1540-6261.1997.tb03807.x                    |
+| `skepticalanalyst.extras.base_size`              | Metadata calibrating skeptic order size                       | `300`       | simulation-bases.md §6 (retained runtime formula uses the hard-coded stabiliser cap `500` and scale `3000`) |
+| `arbitrageur.num_instances`                      | Number of Arbitrageur agents                                  | `2`         | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `arbitrageur.extras.initial_cash`                | Starting cash per Arbitrageur                                 | `2000000.0` | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `arbitrageur.extras.initial_position`            | Starting inventory per Arbitrageur                            | `600`       | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `arbitrageur.extras.spread_threshold`            | Metadata calibrating arbitrage activation                     | `0.25`      | simulation-bases.md §4.4; Shleifer and Vishny (1997), 10.1111/j.1540-6261.1997.tb03807.x                    |
+| `arbitrageur.extras.position_size`               | Metadata calibrating arbitrage order size                     | `350`       | simulation-bases.md §6 (retained runtime formula uses the hard-coded stabiliser cap `500` and scale `3000`) |
+| `noisetrader.num_instances`                      | Number of NoiseTrader agents                                  | `2`         | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `noisetrader.extras.initial_cash`                | Starting cash per NoiseTrader                                 | `500000.0`  | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `noisetrader.extras.initial_position`            | Starting inventory per NoiseTrader                            | `200`       | configs/SouthSeaBubble/Rule/players.yml                                                                     |
+| `noisetrader.extras.trade_probability`           | Bernoulli activation probability                              | `0.3`       | simulation-bases.md §4.5; Black (1986), 10.1111/j.1540-6261.1986.tb04513.x                                  |
+| `noisetrader.extras.noise_size`                  | Metadata size hint; retained rule samples `randint(100, 500)` | `150`       | simulation-bases.md §6 (retained runtime formula uses the hard-coded uniform range `100–500`)               |
+| `custom_state_hot_limit` (all agents)            | Hot-tier cache size for `custom_state`                        | `3`         | configs/SouthSeaBubble/Rule/players.yml (runtime plumbing; not a scenario parameter)                        |
+
+Normalization rows: `initial_price`, `fundamental_value`, and the per-investor `initial_cash` / `initial_position` fields are pure scale parameters; `initial_price = fundamental_value` guarantees a zero starting deviation. Metadata rows are marked explicitly where the retained Rule runtime uses hard-coded amplifier / stabiliser sizing (`min(800, int(|dev| × 5000))` and `min(500, int(|dev| × 3000))`) instead of the config-level `base_size` / `front_run_size` / `position_size` / `noise_size` fields.
+
+## §10 Variants And Expected Signatures
+
+### §10.1 Variants To Build
+
+| Variant | Yes/No | Notes                                                                                                                                                                                                                        |
+|---------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Rule    | Yes    | Deterministic baseline; encodes the §4 activation thresholds, quantity rules, and price-formation equation exactly as prescribed by the theoretical anchors and as implemented in `examples/SouthSeaBubble/Rule/players.py`. |
+| LLM     | Yes    | Needed to answer §3 research goal 4 (Rule vs LLM decision fidelity); persona-only reasoning replaces the Rule quantity formulas while keeping the canonical order schema (`action`, `quantity`, `agent_type`, `reasoning`).  |
+| RuleLLM | Yes    | Exposes the Rule thresholds and quantity formulas as prompt content; isolates the effect of explicit rule guidance on LLM amplifier and stabiliser behaviour.                                                                |
+| Rag     | Yes    | Needed for §3 goal 5; adds retrieved historical bubble evidence (South Sea 1720, Mississippi 1720, later narrative bubbles) to the LLM prompt and reports retrieval coverage via `rag_stats.json`.                           |
+
+### §10.2 Expected Phenomenon Signature Per Variant
+
+| Variant | Expected signature                                                                                                                                                                                                                                                                                                                               |
+|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Rule    | Reproduces F1–F5 within their acceptance ranges. Positive peak deviation `≥ 0.05`; amplifier-vs-stabiliser buy-quantity ratio `≥ 3` during `deviation > 0.02` windows; strictly positive stabiliser sell quantity during `deviation > 0.05` windows; finite crash round with drawdown `≥ 0.10`; nonzero insider-vs-narrative terminal-value gap. |
+| LLM     | Similar qualitative bubble anatomy to Rule; magnitudes more variable across runs because persona-conditioned reasoning may partially rationalise or exaggerate boom-phase buying and correction-phase selling; parse-fallback counts reported in `summary.json` for quality gating.                                                              |
+| RuleLLM | Should stay closer to the Rule baseline than pure LLM because the Rule thresholds and quantity formulas are exposed to the model as prompt content; residual deviation from Rule captures the effect of persona reasoning at the margins.                                                                                                        |
+| Rag     | Retrieved bubble evidence is expected to sharpen amplifier conviction during the boom phase and stabiliser conviction once deviation is large; retrieval coverage reported in `rag_stats.json` and mirrored into `summary.json`.                                                                                                                 |

@@ -28,7 +28,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from MomentumTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the MomentumTrader strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -57,7 +57,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from ContrarianTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the ContrarianTrader strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -86,7 +86,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from TechnicalTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the TechnicalTrader strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -115,7 +115,7 @@ Style: Fast, procyclical, and conviction-driven.
 Risk tolerance: High — trends justify larger exposure while they persist.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from TrendFollower) ==
+== DECISION RULES ==
 
 Apply an aggressive trend-following rule:
 - Buy when medium-horizon momentum is positive
@@ -146,7 +146,7 @@ Style: Patient, valuation-focused, and stabilizing.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from FundamentalAnchor) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the FundamentalTrader strategy:
 - Buy when price is materially below fundamental value

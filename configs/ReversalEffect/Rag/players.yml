@@ -26,6 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Mean Reversion"
   class: "examples.ReversalEffect.Rag.players:Market"
   num_instances: 1
@@ -36,145 +37,145 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.5
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      record_path: "EXPERIMENT/ReversalEffectRag/records"  # Source: AGENT_POOL/finance/market.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      base_price_impact: 0.08  # Source: AGENT_POOL/finance/market.md §6
+      mean_reversion: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
+      base_liquidity: 50.0  # Source: AGENT_POOL/finance/market.md §6
+      high_impact_multiplier: 3.0  # Source: AGENT_POOL/finance/market.md §6
+      low_liquidity_threshold: 30.0  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
-ragllm_contrarian:
+ragllm_contrarian_investor:
   name: "RAG Contrarian Investor"
   class: "examples.ReversalEffect.Rag.players:RagLLMContrarianInvestor"
   # Expander → ragllm_contrarian_1, ragllm_contrarian_2, ragllm_contrarian_3
   num_instances: 3
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRag/records"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"
+          - "MinerU_processed"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
         local_resources:
-          local_uri: ""
-          local_resources: []
+          local_uri: ""  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          local_resources: []  # Source: AGENT_POOL/finance/contrarian-investor.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+            - "rag_index"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          local_index_dir: ""  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          embed_type: "litellm"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          chunk_size: 512  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          chunk_overlap: 64  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          top_k: 5  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_CONTRARIAN_INVESTOR_SYS"
-        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_CONTRARIAN_INVESTOR_SYS"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 600
+          temperature: 0.3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          max_new_tokens: 600  # Source: AGENT_POOL/finance/contrarian-investor.md §6
   persona: !include persona.yml
 
-ragllm_overconfident:
+ragllm_overconfident_trader:
   name: "RAG Overconfident Trader"
   class: "examples.ReversalEffect.Rag.players:RagLLMOverconfidentTrader"
   # Expander → ragllm_overconfident_1, ragllm_overconfident_2, ragllm_overconfident_3
   num_instances: 3
   config:
-    identity: "ragllm_overconfident"
+    identity: "ragllm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRag/records"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/overconfident-trader.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"
+          - "MinerU_processed"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
         local_resources:
-          local_uri: ""
-          local_resources: []
+          local_uri: ""  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          local_resources: []  # Source: AGENT_POOL/finance/overconfident-trader.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+            - "rag_index"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          local_index_dir: ""  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          embed_type: "litellm"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          chunk_size: 512  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          chunk_overlap: 64  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          top_k: 5  # Source: AGENT_POOL/finance/overconfident-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_OVERCONFIDENT_TRADER_SYS"
-        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_OVERCONFIDENT_TRADER_SYS"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
         generation_config:
-          temperature: 0.5
-          max_new_tokens: 600
+          temperature: 0.5  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          max_new_tokens: 600  # Source: AGENT_POOL/finance/overconfident-trader.md §6
   persona: !include persona.yml
 
-ragllm_value:
+ragllm_value_investor:
   name: "RAG Value Investor"
   class: "examples.ReversalEffect.Rag.players:RagLLMValueInvestor"
   # Expander → ragllm_value_1, ragllm_value_2
   num_instances: 2
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRag/records"  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/value-investor.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"
+          - "MinerU_processed"  # Source: AGENT_POOL/finance/value-investor.md §6
         local_resources:
-          local_uri: ""
-          local_resources: []
+          local_uri: ""  # Source: AGENT_POOL/finance/value-investor.md §6
+          local_resources: []  # Source: AGENT_POOL/finance/value-investor.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+            - "rag_index"  # Source: AGENT_POOL/finance/value-investor.md §6
+          local_index_dir: ""  # Source: AGENT_POOL/finance/value-investor.md §6
+          embed_type: "litellm"  # Source: AGENT_POOL/finance/value-investor.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/finance/value-investor.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/finance/value-investor.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/finance/value-investor.md §6
+          chunk_size: 512  # Source: AGENT_POOL/finance/value-investor.md §6
+          chunk_overlap: 64  # Source: AGENT_POOL/finance/value-investor.md §6
+          top_k: 5  # Source: AGENT_POOL/finance/value-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_VALUE_INVESTOR_SYS"
-        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_VALUE_INVESTOR_SYS"  # Source: AGENT_POOL/finance/value-investor.md §6
+        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/value-investor.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/value-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/value-investor.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 600
+          temperature: 0.3  # Source: AGENT_POOL/finance/value-investor.md §6
+          max_new_tokens: 600  # Source: AGENT_POOL/finance/value-investor.md §6
   persona: !include persona.yml
 
 ragllm_momentum_chaser:
@@ -189,76 +190,76 @@ ragllm_momentum_chaser:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRag/records"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/momentum-chaser.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"
+          - "MinerU_processed"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
         local_resources:
-          local_uri: ""
-          local_resources: []
+          local_uri: ""  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          local_resources: []  # Source: AGENT_POOL/finance/momentum-chaser.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+            - "rag_index"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          local_index_dir: ""  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          embed_type: "litellm"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          chunk_size: 512  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          chunk_overlap: 64  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          top_k: 5  # Source: AGENT_POOL/finance/momentum-chaser.md §6
       llm:
-        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_MOMENTUM_INVESTOR_SYS"
-        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_MOMENTUM_INVESTOR_SYS"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 600
+          temperature: 0.4  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          max_new_tokens: 600  # Source: AGENT_POOL/finance/momentum-chaser.md §6
   persona: !include persona.yml
 
-ragllm_noise:
+ragllm_noise_trader:
   name: "RAG Noise Trader"
   class: "examples.ReversalEffect.Rag.players:RagLLMNoiseTrader"
   # Expander → ragllm_noise_1, ragllm_noise_2
   num_instances: 2
   config:
-    identity: "ragllm_noise"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectRag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectRag/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"
+          - "MinerU_processed"  # Source: AGENT_POOL/finance/noise-trader.md §6
         local_resources:
-          local_uri: ""
-          local_resources: []
+          local_uri: ""  # Source: AGENT_POOL/finance/noise-trader.md §6
+          local_resources: []  # Source: AGENT_POOL/finance/noise-trader.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"
-          local_index_dir: ""
-          embed_type: "litellm"
-          embed_model: "openai/hunyuan-embedding"
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+            - "rag_index"  # Source: AGENT_POOL/finance/noise-trader.md §6
+          local_index_dir: ""  # Source: AGENT_POOL/finance/noise-trader.md §6
+          embed_type: "litellm"  # Source: AGENT_POOL/finance/noise-trader.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/finance/noise-trader.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/finance/noise-trader.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/finance/noise-trader.md §6
+          chunk_size: 512  # Source: AGENT_POOL/finance/noise-trader.md §6
+          chunk_overlap: 64  # Source: AGENT_POOL/finance/noise-trader.md §6
+          top_k: 5  # Source: AGENT_POOL/finance/noise-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
-        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        user_message: "examples.ReversalEffect.Rag.prompts:RAGLLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/noise-trader.md §6
         generation_config:
-          temperature: 0.7
-          max_new_tokens: 600
+          temperature: 0.7  # Source: AGENT_POOL/finance/noise-trader.md §6
+          max_new_tokens: 600  # Source: AGENT_POOL/finance/noise-trader.md §6
   persona: !include persona.yml

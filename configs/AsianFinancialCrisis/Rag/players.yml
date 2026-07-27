@@ -34,6 +34,7 @@ knowledge:
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.AsianFinancialCrisis.Rag.players:Market"
   num_instances: 1
@@ -44,13 +45,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      fundamental_value: 100.0   # Source: target §9 F (normalization, 100-scale crisis index)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation)
+      price_impact: 0.04         # Source: target §9 lambda; Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (crisis thin-liquidity calibration)
+      mean_reversion: 0.02       # Source: target §9 gamma; Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098
+      noise_std: 0.02            # Source: target §9 sigma; Black (1986), https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring-buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -69,12 +70,12 @@ ragllm_hot_money_funder:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
-      initial_cash: 800000.0
-      initial_position: 3000.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 800000.0       # Source: target §7 hot-money-funder Intent line + §6.1 quantitative arc (leveraged foreign creditor scale)
+      initial_position: 3000.0     # Source: target §7 hot-money-funder Intent line (carries a short-term-loan funded position at simulation start)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -118,12 +119,12 @@ ragllm_contagion_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
-      initial_cash: 600000.0
-      initial_position: 4000.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 600000.0       # Source: target §7 contagion-trader Intent line + §6.1 quantitative arc (cross-border fund scale)
+      initial_position: 4000.0     # Source: target §7 contagion-trader Intent line (carries a large cross-border position at simulation start)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -166,12 +167,12 @@ ragllm_imf_rescuer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
-      initial_cash: 5000000.0
-      initial_position: 0.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 5000000.0       # Source: target §7 imf-rescuer Intent line + §6.1 quantitative arc (official-sector deep pockets, >100bn USD IMF package scale)
+      initial_position: 0.0     # Source: target §7 imf-rescuer Intent line (official rescuer starts with zero market exposure)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -215,12 +216,12 @@ ragllm_value_contrarian:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 1000000.0       # Source: target §7 value-contrarian Intent line + §2.4 (patient capital scale, distressed-asset investor)
+      initial_position: 500.0     # Source: target §7 value-contrarian Intent line (small pre-crisis holding as anchor position)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -264,12 +265,12 @@ ragllm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"
-      initial_cash: 200000.0
-      initial_position: 1000.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/Rag/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 200000.0       # Source: target §7 noise-trader Intent line + §4.5 (retail/liquidity-motivated scale, small vs. crisis-driver agents)
+      initial_position: 1000.0     # Source: target §7 noise-trader Intent line (small background inventory)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

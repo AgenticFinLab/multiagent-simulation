@@ -3,11 +3,11 @@
 # =============================================================================
 # Market as hub, all investors communicate through market.
 #
-#   recent_event_overweighter ────┐
-#   media_influenced_trader ──────┤
-#   systematic_analyst ───────────┼──▶ market ──▶ all investors
-#   value_trader ─────────────────┤
-#   noise_trader ─────────────────┘
+#   rule_recent_event_overweighter ────┐
+#   rule_media_influenced_trader ──────┤
+#   rule_systematic_analyst ───────────┼──▶ market ──▶ all investors
+#   rule_value_trader ─────────────────┤
+#   rule_noise_trader ─────────────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price, fundamental, deviation data)
@@ -22,24 +22,24 @@ sources:
 connections:
   # Market → All investors (price + market data broadcast)
   market:
-    - recent_event_overweighter
-    - media_influenced_trader
-    - systematic_analyst
-    - value_trader
-    - noise_trader
+    - rule_recent_event_overweighter
+    - rule_media_influenced_trader
+    - rule_systematic_analyst
+    - rule_value_trader
+    - rule_noise_trader
 
   # Each investor → Market only (order submission)
-  recent_event_overweighter:
+  rule_recent_event_overweighter:
     - market
 
-  media_influenced_trader:
+  rule_media_influenced_trader:
     - market
 
-  systematic_analyst:
+  rule_systematic_analyst:
     - market
 
-  value_trader:
+  rule_value_trader:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market

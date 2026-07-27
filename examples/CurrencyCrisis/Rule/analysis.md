@@ -35,14 +35,69 @@ It exports:
 | Recovery | Recovery Speed (`§2.6`) | Shorter recovery indicates peg resilience. |
 | Distributional outcome | Wealth Transfer Index (`§2.7`) | Positive values favor attackers; negative values favor defenders. |
 
-## §4 Phase Attribution
+## §4 Variant-Specific Observable Phenomena
+
+Under the Rule variant, every agent decision is a deterministic function of
+the observed deviation from peg, reserve state, and agent-type thresholds.
+The following phenomena should therefore appear reproducibly across seeds
+whenever configuration parameters are held fixed.
+
+| Phenomenon                           | Trigger condition                                                              | Expected metric signature                                          |
+|--------------------------------------|--------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| Threshold-triggered attack           | Deviation crosses `attacker_activation_threshold` (e.g. −0.02)                 | Step increase in `Attack Intensity Index (AII)`                    |
+| Self-fulfilling amplification        | SelfFulfillingTrader observes prior attacker sells                             | `SFAF > 1` during attack phase                                     |
+| Central-bank defense burst           | Deviation crosses defender threshold; reserves > 0                             | Peak `Defense Exhaustion Rate (DER)` early in crisis               |
+| Reserve exhaustion collapse          | Cumulative defender spending ≥ initial cash                                    | PSD terminates; AII deepens; DER caps at 1                         |
+| Fundamental anchoring                | FundamentalHedger sees deviation and holds counter-position                    | `FAS` stable and positive during attack rounds                     |
+| Post-trough recovery                 | Attack pressure exhausts; hedger buys re-emerge                                | Non-zero `Recovery Speed`; deviation returns above −0.03           |
+
+Because the Rule variant is deterministic, repeated runs with identical seeds
+yield identical metric values; any cross-run variance indicates a
+configuration or ordering bug rather than genuine stochasticity.
+
+### Phase Attribution
 
 Attack phases are identified using the deviation thresholds in
-`analysis-bases.md §4`. During each phase, order payloads are grouped by agent
-type to attribute selling and buying pressure to speculative, self-fulfilling,
-defensive, and fundamental channels.
+`analysis-bases.md §4`. During each phase, order payloads are grouped by
+agent type to attribute selling and buying pressure to speculative,
+self-fulfilling, defensive, and fundamental channels. Compare the sell-side
+volume from `SpeculativeAttacker` vs `SelfFulfillingTrader` to isolate the
+expectation channel.
 
-## §5 Output Files
+---
+
+## §5 Scaling and Sensitivity Analysis
+
+### Round Scaling
+
+| Round count | Expected metric behavior                                                                            |
+|-------------|-----------------------------------------------------------------------------------------------------|
+| 100         | Attack phase observable; PSD typically ≤ 40; recovery may be truncated                              |
+| 200         | Full attack-defense-recovery cycle; steady-state `SFAF` and `FAS` values                            |
+| 500         | Late-simulation regime dominated by post-recovery drift; watch for secondary attacks                |
+
+### Agent Count Scaling
+
+| Configuration                                            | Expected effect on metrics                                                             |
+|----------------------------------------------------------|----------------------------------------------------------------------------------------|
+| +50% `SpeculativeAttacker` / `SelfFulfillingTrader`      | AII deepens; PSD shortens; SFAF grows super-linearly                                   |
+| +50% `CentralBankDefender` reserves or count             | PSD lengthens; DER per round falls; recovery may accelerate                            |
+| +50% `FundamentalHedger`                                 | FAS rises toward 1.0; AII shallower; recovery speed increases                          |
+| Balanced doubling of all agent counts                    | Volatility rises via order-book depth; qualitative crisis shape preserved              |
+
+### Parameter Sensitivity (±50%)
+
+| Parameter                          | Effect                                                                        |
+|------------------------------------|-------------------------------------------------------------------------------|
+| `peg_target`                       | Shifts reference; affects deviation labeling but not qualitative dynamics     |
+| `attacker_activation_threshold`    | Lower magnitude → earlier attack; higher AII                                  |
+| `defender_initial_cash`            | Higher → longer PSD, lower DER, higher recovery odds                          |
+| `hedger_position_size`             | Higher → higher FAS; AII shallower; DER lower                                 |
+| `self_fulfilling_gain`             | Higher → SFAF above 1 more rapidly; expectation channel dominant              |
+
+---
+
+## §6 Output Files Reference
 
 Running `Rule/analysis.py` writes the standard analysis artifacts under the
 configured experiment output directory:
@@ -55,7 +110,9 @@ configured experiment output directory:
 | `03_summary.png` | Agent VWAP and total volume summary |
 | `summary.json` | Metrics, validation criteria, and agent VWAP data |
 
-## §6 Cross-Variant Comparison
+---
+
+## §7 Cross-Variant Comparison Notes
 
 Rule metrics provide the baseline for comparing:
 
@@ -65,7 +122,7 @@ Rule metrics provide the baseline for comparing:
 | RuleLLM | Similar directional behavior with language-mediated quantities |
 | Rag | RuleLLM-like behavior modified by retrieved FX-crisis context |
 
-## §7 Quality Checks
+### Quality Checks
 
 - Confirm the run completed the configured 200 rounds.
 - Confirm market price, fundamental, and deviation histories contain all rounds.

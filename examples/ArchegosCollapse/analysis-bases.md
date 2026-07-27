@@ -2,14 +2,14 @@
 
 ## §1 Analysis Objectives
 
-| Objective | Research Question                                                         | Metric(s)                                                                      | Expected Finding                                                                |
-|-----------|---------------------------------------------------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| O1        | Does forced liquidation produce a measurable price cascade?               | Price deviation, max drawdown                                                  | Deviation < −15% sustained for ≥10 rounds; drawdown in [20%, 60%]               |
-| O2        | How fast does the cascade develop and resolve?                            | Cascade onset round, cascade half-life                                         | Onset within rounds 10–30; recovery over 20–40 rounds after peak                |
-| O3        | Do prime broker timing differences produce a measurable payoff gap?       | Agent sell price (PrimeBroker1 vs PrimeBroker2), volume-weighted average price | PrimeBroker1 achieves ≥5% better average sell price than PrimeBroker2           |
-| O4        | Does BlockTradeBuyer provide a measurable price floor?                    | Min price round, deviation at floor, recovery onset round                      | Price stabilization observable ≤ 5 rounds after BlockTradeBuyer first activates |
-| O5        | How does LLM variant cascade timing compare to Rule baseline?             | Cross-variant peak deviation, onset round                                      | LLM may delay or accelerate onset by ≥5 rounds relative to Rule                 |
-| O6        | Does InformationTrader's front-running generate measurable excess return? | InformationTrader PnL vs ConcentratedFund PnL                                  | InformationTrader captures ≥2× per-share return relative to ConcentratedFund    |
+| Objective | Research Question                                                         | Metric(s)                                                                                               | Expected Finding                                                                               |
+|-----------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| O1        | Does forced liquidation produce a measurable price cascade?               | Price deviation, max drawdown                                                                           | Deviation < −15% sustained for ≥10 rounds; drawdown in [20%, 60%]                              |
+| O2        | How fast does the cascade develop and resolve?                            | Cascade onset round, cascade half-life                                                                  | Onset within rounds 10–30; recovery over 20–40 rounds after peak                               |
+| O3        | Do prime broker timing differences produce a measurable payoff gap?       | Agent sell price (PrimeBrokerFirstMover vs PrimeBrokerDelayedLiquidator), volume-weighted average price | PrimeBrokerFirstMover achieves ≥5% better average sell price than PrimeBrokerDelayedLiquidator |
+| O4        | Does BlockTradeBuyer provide a measurable price floor?                    | Min price round, deviation at floor, recovery onset round                                               | Price stabilization observable ≤ 5 rounds after BlockTradeBuyer first activates                |
+| O5        | How does LLM variant cascade timing compare to Rule baseline?             | Cross-variant peak deviation, onset round                                                               | LLM may delay or accelerate onset by ≥5 rounds relative to Rule                                |
+| O6        | Does InformationTrader's front-running generate measurable excess return? | InformationTrader PnL vs ConcentratedFund PnL                                                           | InformationTrader captures ≥2× per-share return relative to ConcentratedFund                   |
 
 
 ## §2 Core Metrics Catalogue
@@ -31,8 +31,8 @@
 - **Interpretation**:
   - deviation = 0: Price at fundamental fair value
   - deviation ∈ (−10%, 0%): Mild discount — InformationTrader activates; ConcentratedFund approaching threshold
-  - deviation < −10%: Cascade zone — PrimeBroker1 liquidation threshold breached
-  - deviation < −15%: Deep cascade — PrimeBroker2 liquidation threshold breached
+  - deviation < −10%: Cascade zone — PrimeBrokerFirstMover liquidation threshold breached
+  - deviation < −15%: Deep cascade — PrimeBrokerDelayedLiquidator liquidation threshold breached
   - deviation < −30%: Extreme stress; sensitivity check required
 - **Normal Range**: −5% to +5% in pre-cascade equilibrium; −20% to −40% during peak cascade (ViacomCBS fell ~60% in March 2021)
 - **Red Flag**: Deviation never reaches −10% → ConcentratedFund not triggering; check `leverage_trigger` config and initial position size
@@ -116,15 +116,15 @@
   ```
   volume_type      = Σ_t Σ_{i ∈ type} |quantity_i(t)|
   VWAP_type        = Σ_t Σ_{i ∈ type} [|quantity_i(t)| × P(t)] / volume_type
-  price_gap        = VWAP_PrimeBroker1 − VWAP_PrimeBroker2   (should be > 0)
+  price_gap        = VWAP_PrimeBrokerFirstMover − VWAP_PrimeBrokerDelayedLiquidator   (should be > 0)
   ```
 - **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
-- **Derivation Rationale**: The first-mover advantage hypothesis (Gorton & Metrick, 2012) specifically predicts that PrimeBroker1 should liquidate at higher prices than PrimeBroker2 because it acts when prices are less depressed. VWAP is the correct measure because simple volume comparisons do not capture the price quality difference.
+- **Derivation Rationale**: The first-mover advantage hypothesis (Gorton & Metrick, 2012) specifically predicts that PrimeBrokerFirstMover should liquidate at higher prices than PrimeBrokerDelayedLiquidator because it acts when prices are less depressed. VWAP is the correct measure because simple volume comparisons do not capture the price quality difference.
 - **Academic Calibration Source**:
   - Gorton, G., & Metrick, A. (2012). Securitized banking and the run on repo. *Journal of Financial Economics*, 104(3), 425–451. https://doi.org/10.1016/j.jfineco.2011.03.016 — establishes that first-moving creditors recover 5–15% more per unit of collateral in repo run scenarios.
   - Chordia, T., Roll, R., & Subrahmanyam, A. (2002). Order imbalance, liquidity, and market returns. *Journal of Financial Economics*, 65(1), 111–130. https://doi.org/10.1016/S0304-405X(02)00136-8 — documents that order imbalance (concentrated selling by one agent type) predicts negative returns with R² ≈ 0.10–0.25 at short horizons.
 - **Interpretation**: Reveals which agents drive the cascade vs. which absorb supply; PrimeBroker volumes should exceed ConcentratedFund after the margin call; price_gap > 0 validates first-mover advantage
-- **Normal Range**: PrimeBroker1 VWAP should exceed PrimeBroker2 VWAP by ≥5%; BlockTradeBuyer volume > 0 after round 20
+- **Normal Range**: PrimeBrokerFirstMover VWAP should exceed PrimeBrokerDelayedLiquidator VWAP by ≥5%; BlockTradeBuyer volume > 0 after round 20
 - **Red Flag**: BlockTradeBuyer has zero volume → floor mechanism not activating; check `discount_threshold` config. price_gap ≤ 0 → timing asymmetry not working; check threshold separation
 
 ---
@@ -132,14 +132,14 @@
 ### Metric: Cascade Onset Round
 
 - **Category**: Phenomenon-Specific / Timing
-- **Definition**: The first simulation round in which price deviation crosses the −10% threshold (the PrimeBroker1 liquidation trigger), marking the beginning of the creditor race.
+- **Definition**: The first simulation round in which price deviation crosses the −10% threshold (the PrimeBrokerFirstMover liquidation trigger), marking the beginning of the creditor race.
 - **Formula**:
   ```
   t_onset = min { t : deviation(t) < −0.10 }
   If no such t exists, t_onset = NaN (cascade did not occur)
   ```
 - **Python Function Signature**: `def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]`
-- **Derivation Rationale**: The −10% threshold mirrors PrimeBroker1's `liquidation_threshold = 0.10` parameter in the simulation config. Using the broker's own trigger as the cascade onset definition ensures the metric directly measures when the creditor race mechanism begins, rather than a model-free price threshold.
+- **Derivation Rationale**: The −10% threshold mirrors PrimeBrokerFirstMover's `liquidation_threshold = 0.10` parameter in the simulation config. Using the broker's own trigger as the cascade onset definition ensures the metric directly measures when the creditor race mechanism begins, rather than a model-free price threshold.
 - **Academic Calibration Source**:
   - Archegos timeline: Forced liquidations began March 25–26, 2021 (approximately 1–2 trading days after ViacomCBS first declined significantly on March 22–23). With 50 simulation rounds per run and an initial position-building phase, rounds 10–30 correspond to the first 1–3 trading days of the event.
   - Brunnermeier, M. K. (2009). Deciphering the liquidity and credit crunch 2007–2008. *Journal of Economic Perspectives*, 23(1), 77–100. https://doi.org/10.1257/jep.23.1.77 — documents that in leverage-driven cascades, the interval from initial shock to creditor action is 1–3 trading days, matching the [10, 30] round calibration target.
@@ -162,7 +162,7 @@
 - **Derivation Rationale**: The half-life captures the pace of mean reversion after the cascade floor, which depends on the balance between the mean-reversion parameter γ and residual selling pressure. A short half-life indicates γ is strong; a long half-life indicates that selling pressure persists.
 - **Academic Calibration Source**:
   - Fama, E. F., & French, K. R. (1988). Permanent and temporary components of stock prices. *Journal of Political Economy*, 96(2), 246–273. https://doi.org/10.1086/261535 — estimates the half-life of mean reversion in equity prices at 3–5 years for fundamental-driven deviations; short-horizon cascade recoveries are faster (days to weeks).
-  - Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04591.x — block trade buyers provide near-immediate stabilization once the discount exceeds the risk-compensation threshold, suggesting a recovery half-life of 5–15 rounds once BlockTradeBuyer activates.
+  - Grossman, S. J., & Miller, M. H. (1988). Liquidity and market structure. *Journal of Finance*, 43(3), 617–637. https://doi.org/10.1111/j.1540-6261.1988.tb04594.x — block trade buyers provide near-immediate stabilization once the discount exceeds the risk-compensation threshold, suggesting a recovery half-life of 5–15 rounds once BlockTradeBuyer activates.
 - **Normal Range**: 5–20 rounds after peak cascade
 - **Red Flag**: half_life < 3 rounds → γ (mean_reversion) too high; recovery unrealistically fast. half_life > 40 rounds → γ too low; recovery never occurs within simulation window
 
@@ -182,8 +182,8 @@
 - **Purpose**: Confirm that each agent type behaves as designed — liquidators sell on schedule, buyer provides floor, InformationTrader front-runs
 - **Metrics Used**: Agent-type volume, VWAP by type, cascade onset round
 - **Visualization**: Stacked bar chart of cumulative volume by agent type; round-by-round action heatmap
-- **Expected Pattern**: PrimeBroker1 volume peaks 2–5 rounds before PrimeBroker2; BlockTradeBuyer activates at price floor; InformationTrader volume concentrated in early rounds (before ConcentratedFund peaks)
-- **Comparison Baseline**: Agent-type volumes should match theoretical liquidation fractions from §4 (ConcentratedFund: 50%; PrimeBroker1: 40%; PrimeBroker2: 35%)
+- **Expected Pattern**: PrimeBrokerFirstMover volume peaks 2–5 rounds before PrimeBrokerDelayedLiquidator; BlockTradeBuyer activates at price floor; InformationTrader volume concentrated in early rounds (before ConcentratedFund peaks)
+- **Comparison Baseline**: Agent-type volumes should match theoretical liquidation fractions from §4 (ConcentratedFund: 50%; PrimeBrokerFirstMover: 40%; PrimeBrokerDelayedLiquidator: 35%)
 
 ### Dimension 3: Cascade Intensity and Lifecycle
 
@@ -194,7 +194,7 @@
 
 ### Dimension 4: First-Mover Advantage Quantification
 
-- **Purpose**: Measure the payoff gap between PrimeBroker1 and PrimeBroker2 attributable to timing advantage
+- **Purpose**: Measure the payoff gap between PrimeBrokerFirstMover and PrimeBrokerDelayedLiquidator attributable to timing advantage
 - **Metrics Used**: VWAP by broker type, price_gap = VWAP_PB1 − VWAP_PB2
 - **Visualization**: Side-by-side VWAP comparison bar; timeline overlay showing when each broker sells
 - **Expected Pattern**: price_gap > 0 in all runs; price_gap ≥ 5% of initial price; gap larger in runs with steeper cascade (higher max_drawdown)
@@ -211,22 +211,22 @@
 
 ### Phase Detection Rules
 
-| Phase | Name          | Entry Condition               | Exit Condition             | Key Indicators                                                         | Typical Round Range |
-|-------|---------------|-------------------------------|----------------------------|------------------------------------------------------------------------|---------------------|
-| 1     | Pre-Cascade   | Round 1                       | deviation(t) < −0.10       | Normal price fluctuation; ConcentratedFund building toward threshold   | Rounds 1–20         |
-| 2     | Cascade Onset | deviation(t) < −0.10          | deviation(t) < −0.15       | PrimeBroker1 initiates liquidation; volume spike; AC1 turns positive   | Rounds 10–25        |
-| 3     | Peak Cascade  | deviation(t) < −0.15          | deviation(t) starts rising | Maximum drawdown; PrimeBroker2 active; BlockTradeBuyer first activates | Rounds 15–35        |
-| 4     | Recovery      | deviation rising from minimum | deviation(t) > −0.05       | BlockTradeBuyer absorbing supply; AC1 turns negative; γ-term dominant  | Rounds 25–50        |
+| Phase | Name          | Entry Condition               | Exit Condition             | Key Indicators                                                                         | Typical Round Range |
+|-------|---------------|-------------------------------|----------------------------|----------------------------------------------------------------------------------------|---------------------|
+| 1     | Pre-Cascade   | Round 1                       | deviation(t) < −0.10       | Normal price fluctuation; ConcentratedFund building toward threshold                   | Rounds 1–20         |
+| 2     | Cascade Onset | deviation(t) < −0.10          | deviation(t) < −0.15       | PrimeBrokerFirstMover initiates liquidation; volume spike; AC1 turns positive          | Rounds 10–25        |
+| 3     | Peak Cascade  | deviation(t) < −0.15          | deviation(t) starts rising | Maximum drawdown; PrimeBrokerDelayedLiquidator active; BlockTradeBuyer first activates | Rounds 15–35        |
+| 4     | Recovery      | deviation rising from minimum | deviation(t) > −0.05       | BlockTradeBuyer absorbing supply; AC1 turns negative; γ-term dominant                  | Rounds 25–50        |
 
 ### Quantitative Phase Criteria
 
 **Phase 2 observable signatures**:
-- Agent action log: PrimeBroker1 places sell orders in ≥2 consecutive rounds
+- Agent action log: PrimeBrokerFirstMover places sell orders in ≥2 consecutive rounds
 - Rolling volatility vol(t) crosses 3% per round
 - AC1 of last 10 rounds > 0.15
 
 **Phase 3 observable signatures**:
-- Agent action log: PrimeBroker2 places sell orders in ≥1 round
+- Agent action log: PrimeBrokerDelayedLiquidator places sell orders in ≥1 round
 - Max deviation in Phase 3 < −0.20 (target for parameter validation)
 - BlockTradeBuyer places at least one buy order
 
@@ -237,12 +237,12 @@
 
 ### Phase Transition Failure Diagnostics
 
-| Failure              | Symptom                                           | Likely Cause                                            | Fix                                                 |
-|----------------------|---------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------|
-| Phase 2 never starts | deviation never < −0.10                           | leverage_trigger too high or initial_position too small | Reduce ConcentratedFund leverage_trigger to 0.10    |
-| Stuck in Phase 2     | deviation stays in (−0.15, −0.10) for > 30 rounds | PrimeBroker2 threshold too high                         | Reduce PrimeBroker2 liquidation_threshold to 0.12   |
-| Phase 3 too brief    | Peak cascade lasts < 3 rounds                     | price_impact (λ) too low; selling pressure insufficient | Increase λ from 0.03 to 0.05                        |
-| Phase 4 never starts | deviation stays < −0.20 indefinitely              | BlockTradeBuyer not activating; γ too low               | Check discount_threshold; increase mean_reversion γ |
+| Failure              | Symptom                                           | Likely Cause                                            | Fix                                                               |
+|----------------------|---------------------------------------------------|---------------------------------------------------------|-------------------------------------------------------------------|
+| Phase 2 never starts | deviation never < −0.10                           | leverage_trigger too high or initial_position too small | Reduce ConcentratedFund leverage_trigger to 0.10                  |
+| Stuck in Phase 2     | deviation stays in (−0.15, −0.10) for > 30 rounds | PrimeBrokerDelayedLiquidator threshold too high         | Reduce PrimeBrokerDelayedLiquidator liquidation_threshold to 0.12 |
+| Phase 3 too brief    | Peak cascade lasts < 3 rounds                     | price_impact (λ) too low; selling pressure insufficient | Increase λ from 0.03 to 0.05                                      |
+| Phase 4 never starts | deviation stays < −0.20 indefinitely              | BlockTradeBuyer not activating; γ too low               | Check discount_threshold; increase mean_reversion γ               |
 
 
 ## §5 Cross-Variant Comparison Framework
@@ -268,20 +268,20 @@
 
 ### Calibration Targets from Literature
 
-| Metric                         | Target Range       | Calibration Source                                                  | Validation Method                                     |
-|--------------------------------|--------------------|---------------------------------------------------------------------|-------------------------------------------------------|
-| Max drawdown                   | [20%, 60%]         | Archegos (ViacomCBS −60%); Morgan Stanley scenario (−25%–40%)       | Run 10 Rule-variant simulations; reject if mean < 15% |
-| Cascade onset round            | [10, 30]           | Archegos unfolded over 3–5 trading days from initial decline        | Check t_onset in all runs                             |
-| Cascade volatility (peak)      | [3%, 8%] per round | Archegos affected stocks: 5–8% intraday; FSB (2022)                 | Rolling vol during Phase 3                            |
-| AC1 during cascade             | [0.20, 0.50]       | Brunnermeier & Pedersen (2009): leverage spiral signature           | Compute AC1 over Phase 2–3 rounds only                |
-| PrimeBroker1 VWAP gap over PB2 | ≥ 5%               | Gorton & Metrick (2012): first-mover recovers 5–15% better          | Compute price_gap over 10 runs; report mean           |
-| Recovery half-life             | [5, 20] rounds     | Grossman & Miller (1988): block buyers provide near-immediate floor | Compute half_life for each run                        |
+| Metric                                  | Target Range       | Calibration Source                                                  | Validation Method                                     |
+|-----------------------------------------|--------------------|---------------------------------------------------------------------|-------------------------------------------------------|
+| Max drawdown                            | [20%, 60%]         | Archegos (ViacomCBS −60%); Morgan Stanley scenario (−25%–40%)       | Run 10 Rule-variant simulations; reject if mean < 15% |
+| Cascade onset round                     | [10, 30]           | Archegos unfolded over 3–5 trading days from initial decline        | Check t_onset in all runs                             |
+| Cascade volatility (peak)               | [3%, 8%] per round | Archegos affected stocks: 5–8% intraday; FSB (2022)                 | Rolling vol during Phase 3                            |
+| AC1 during cascade                      | [0.20, 0.50]       | Brunnermeier & Pedersen (2009): leverage spiral signature           | Compute AC1 over Phase 2–3 rounds only                |
+| PrimeBrokerFirstMover VWAP gap over PB2 | ≥ 5%               | Gorton & Metrick (2012): first-mover recovers 5–15% better          | Compute price_gap over 10 runs; report mean           |
+| Recovery half-life                      | [5, 20] rounds     | Grossman & Miller (1988): block buyers provide near-immediate floor | Compute half_life for each run                        |
 
 ### Sensitivity Discussion
 
 - **λ (price_impact) sensitivity**: Doubling λ from 0.03 to 0.06 approximately doubles max_drawdown. Recommended sensitivity test: run grid λ ∈ {0.02, 0.03, 0.04, 0.05} with all other parameters fixed. Document the λ value that produces mean max_drawdown closest to the 30%–40% target.
 - **γ (mean_reversion) sensitivity**: γ controls recovery speed. γ = 0.01 (baseline) produces half_life ≈ 15–20 rounds. γ = 0.05 produces half_life ≈ 5 rounds. Recommended test: γ ∈ {0.005, 0.01, 0.02, 0.05}.
-- **Threshold separation sensitivity**: The gap between PrimeBroker1.threshold (0.10) and PrimeBroker2.threshold (0.15) determines the first-mover payoff gap. Narrowing the gap to 0.02 should reduce price_gap below 5%. Test: {0.02, 0.05, 0.10} separation.
+- **Threshold separation sensitivity**: The gap between PrimeBrokerFirstMover.threshold (0.10) and PrimeBrokerDelayedLiquidator.threshold (0.15) determines the first-mover payoff gap. Narrowing the gap to 0.02 should reduce price_gap below 5%. Test: {0.02, 0.05, 0.10} separation.
 
 ### Validation Failure Signs
 

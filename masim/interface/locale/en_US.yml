@@ -46,12 +46,16 @@ simulation:
   reset: "🔄 Reset"
   load_results: "📂 Load Results"
   view_analysis: "📊 View Analysis"
+  run_analysis: "📊 Run Analysis"
   rerun: "▶ Re-run"
+  continue: "▶ Continue"
 
   # Button help text
   load_results_help: "Replay saved experiment data without re-running the simulation"
   view_analysis_help: "Jump directly to analysis page without replay"
+  run_analysis_help: "Analysis is missing or older than the data — run the analysis script to (re)generate charts, then view them"
   rerun_help: "Start a fresh simulation (overwrites existing data)"
+  continue_help: "Resume the replay from where it was paused"
   view_analysis_running_help: "Jump to analysis page while simulation continues"
 
   # Metrics

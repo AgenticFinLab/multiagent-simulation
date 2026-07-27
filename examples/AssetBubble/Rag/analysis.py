@@ -13,15 +13,18 @@ See examples/AssetBubble/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
+import sys
+from pathlib import Path
 from typing import Any, Dict
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import numpy as np
 
 from masim.utils import load_config, load_results
 
 from examples.AssetBubble.Rule.analysis import analyze_bubble, _load_data
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.AssetBubble.Rag.players import _RAG_FALLBACK
 
 
 def _load_rag_payloads(results) -> Dict[str, Dict[int, Dict[str, Any]]]:

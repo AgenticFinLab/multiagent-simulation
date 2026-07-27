@@ -6,6 +6,7 @@
 
 # Market (rule-based)
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.AssetBubble.LLM.players:Market"
   num_instances: 1
@@ -16,179 +17,179 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      # Market parameters
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.15
-      mean_reversion: 0.005
-      fundamental_growth: 0.001
-      noise_std: 0.3
-      short_cost_rate: 0.02
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      # Market parameters (price formula P(t+1) = P(t) + λ·D(t) + γ·[F(t)-P(t)] + ε)
+      fundamental_value: 100.0    # Source: target §9 / simulation-bases.md §3.1 (normalization, 100-scale index)
+      initial_price: 100.0        # Source: target §9 / simulation-bases.md §3.1 (normalization, starts at fair value)
+      price_impact: 0.15          # Source: target §9 lambda; De Long et al. (1990) https://doi.org/10.1086/261703
+      mean_reversion: 0.005       # Source: target §9 gamma; Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
+      fundamental_growth: 0.001   # Source: target §9 g; Shiller (2000) Irrational Exuberance
+      noise_std: 0.3              # Source: target §9 sigma; De Long et al. (1990) https://doi.org/10.1086/261703
+      short_cost_rate: 0.02       # Source: target §9 c_short; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
+      custom_state_hot_limit: 3   # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
-# LLM Greater Fool Speculator
-llm_greater_fool:
-  name: "LLM Greater Fool Speculator"
-  class: "examples.AssetBubble.LLM.players:LLMGreaterFoolSpeculator"
-  # Expander → llm_greater_fool_1 .. llm_greater_fool_5
+# LLM Momentum Speculator (§4.1 anchor: Jegadeesh & Titman 1993)
+llm_momentum_speculator:
+  name: "LLM Momentum Speculator"
+  class: "examples.AssetBubble.LLM.players:LLMMomentumSpeculator"
+  # Expander → llm_momentum_speculator_1 .. llm_momentum_speculator_5
   num_instances: 5
   config:
-    identity: "llm_greater_fool"
+    identity: "llm_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 momentum-speculator Intent line (zero-position start)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.AssetBubble.LLM.prompts:LLM_GREATER_FOOL_SYS"
-        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_GREATER_FOOL_SYS"  # Source: LLM wiring — persona prompt for momentum-speculator archetype
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"    # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode (remote API)
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier (ARK Doubao Seed-2 mini)
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature (low for structured decisions)
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# LLM Rational Arbitrageur
-llm_arbitrageur:
+# LLM Rational Arbitrageur (§4.2 anchor: Shleifer & Vishny 1997)
+llm_rational_arbitrageur:
   name: "LLM Rational Arbitrageur"
   class: "examples.AssetBubble.LLM.players:LLMRationalArbitrageur"
-  # Expander → llm_arbitrageur_1, llm_arbitrageur_2, llm_arbitrageur_3
+  # Expander → llm_rational_arbitrageur_1..3
   num_instances: 3
   config:
-    identity: "llm_arbitrageur"
+    identity: "llm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 rational-arbitrageur Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.AssetBubble.LLM.prompts:LLM_ARBITRAGEUR_SYS"
-        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_ARBITRAGEUR_SYS"  # Source: LLM wiring — persona prompt for arbitrageur archetype
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"   # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# LLM Sentiment Trader
-llm_sentiment:
-  name: "LLM Sentiment Trader"
-  class: "examples.AssetBubble.LLM.players:LLMSentimentTrader"
-  # Expander → llm_sentiment_1, llm_sentiment_2
+# LLM Noise Trader (§4.3 anchor: De Long et al. 1990)
+llm_noise_trader:
+  name: "LLM Noise Trader"
+  class: "examples.AssetBubble.LLM.players:LLMNoiseTrader"
+  # Expander → llm_noise_trader_1, llm_noise_trader_2
   num_instances: 2
   config:
-    identity: "llm_sentiment"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 noise-trader Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.AssetBubble.LLM.prompts:LLM_SENTIMENT_SYS"
-        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_SENTIMENT_SYS"    # Source: LLM wiring — persona prompt for noise-trader archetype
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"   # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 500
+          temperature: 0.4         # Source: LLM wiring — sampling temperature (slightly higher for sentiment/herd variability)
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# LLM Value Investor
-llm_value:
-  name: "LLM Value Investor"
-  class: "examples.AssetBubble.LLM.players:LLMValueInvestor"
-  # Expander → llm_value_1, llm_value_2, llm_value_3, llm_value_4
+# LLM Fundamental Investor (§4.4 anchor: Fama & French 1992)
+llm_fundamental_investor:
+  name: "LLM Fundamental Investor"
+  class: "examples.AssetBubble.LLM.players:LLMFundamentalInvestor"
+  # Expander → llm_fundamental_investor_1..4
   num_instances: 4
   config:
-    identity: "llm_value"
+    identity: "llm_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 fundamental-investor Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.AssetBubble.LLM.prompts:LLM_VALUE_SYS"
-        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_VALUE_SYS"        # Source: LLM wiring — persona prompt for fundamental-investor archetype
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"   # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# LLM Leveraged Speculator
-llm_leveraged:
-  name: "LLM Leveraged Speculator"
-  class: "examples.AssetBubble.LLM.players:LLMLeveragedSpeculator"
-  # Expander → llm_leveraged_1, llm_leveraged_2, llm_leveraged_3
+# LLM Leveraged Buyer (§4.5 anchor: Abreu & Brunnermeier 2003)
+llm_leveraged_buyer:
+  name: "LLM Leveraged Buyer"
+  class: "examples.AssetBubble.LLM.players:LLMLeveragedBuyer"
+  # Expander → llm_leveraged_buyer_1..3
   num_instances: 3
   config:
-    identity: "llm_leveraged"
+    identity: "llm_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 leveraged-buyer Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.AssetBubble.LLM.prompts:LLM_LEVERAGED_SYS"
-        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_LEVERAGED_SYS"    # Source: LLM wiring — persona prompt for leveraged-buyer archetype
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"   # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3         # Source: LLM wiring — sampling temperature
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml
 
-# LLM Conservative Holder
-llm_conservative:
+# LLM Conservative Holder (§4.4 anchor: Fama & French 1992)
+llm_conservative_holder:
   name: "LLM Conservative Holder"
   class: "examples.AssetBubble.LLM.players:LLMConservativeHolder"
-  # Expander -> llm_conservative_1, llm_conservative_2
+  # Expander -> llm_conservative_holder_1, llm_conservative_holder_2
   num_instances: 2
   config:
-    identity: "llm_conservative"
+    identity: "llm_conservative_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      target_position: 20.0
-      rebalance_frequency: 10
-      rebalance_rate: 0.2
+      record_path: "EXPERIMENT/AssetBubble/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 10000.0        # Source: target §9 initial_equity (portfolio normalization)
+      initial_position: 0.0        # Source: target §7 conservative-holder Intent line
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      target_position: 20.0        # Source: target §9 q_target; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
+      rebalance_frequency: 10      # Source: target §9 tau_reb; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
+      rebalance_rate: 0.2          # Source: target §9 rho; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
       llm:
-        sys_message: "examples.AssetBubble.LLM.prompts:LLM_CONSERVATIVE_SYS"
-        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.AssetBubble.LLM.prompts:LLM_CONSERVATIVE_SYS" # Source: LLM wiring — persona prompt for conservative-holder archetype
+        user_message: "examples.AssetBubble.LLM.prompts:LLM_USER_TEMPLATE"   # Source: LLM wiring — shared user prompt template
+        lm_type: "api"                             # Source: LLM wiring — inference mode
+        lm_name: "ark/doubao-seed-2-0-mini-260428" # Source: LLM wiring — model identifier
         generation_config:
-          temperature: 0.2
-          max_new_tokens: 500
+          temperature: 0.2         # Source: LLM wiring — sampling temperature (lowest for the slowest-adapting archetype)
+          max_new_tokens: 500      # Source: LLM wiring — response length cap
   persona: !include persona.yml

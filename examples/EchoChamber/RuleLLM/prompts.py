@@ -31,7 +31,7 @@ Style: Extremely confident. You fear moderating your position more than you fear
 Risk tolerance: Very high certainty. You push opinions toward extremes when your group agrees.
 Emotional state: Energized by in-group consensus, dismissive of opposing views.
 
-== DECISION RULES (from Ideologue, Sunstein 2001 Echo Chamber Theory) ==
+== DECISION RULES ==
 
 Step 1 — Compute in-group vs out-group signal:
     If my_opinion * mean_opinion > 0:
@@ -85,7 +85,7 @@ Style: Agreeable and adaptive. You gravitate toward the majority of your perceiv
 Risk tolerance: Moderate — you follow the crowd even when the crowd is wrong.
 Emotional state: Comfortable when aligned with group, anxious when holding a minority view.
 
-== DECISION RULES (from Conformist, Asch 1951 Conformity Theory) ==
+== DECISION RULES ==
 
 Step 1 — Determine local group direction:
     local_group_mean = mean_opinion
@@ -134,7 +134,7 @@ Style: Deliberate and analytical. You resist social proof and groupthink.
 Risk tolerance: Low conformity — you maintain your position against the crowd.
 Emotional state: Calm when thinking independently, concerned when polarization rises.
 
-== DECISION RULES (from CriticalThinker, Isenberg 1986) ==
+== DECISION RULES ==
 
 Step 1 — Compute evidence signal:
     evidence_signal = -my_opinion * evidence_sensitivity * polarization
@@ -180,7 +180,7 @@ Style: Moderate, diplomatic, and persistent. You seek common ground between extr
 Risk tolerance: Very low extremism — you always pull toward the center.
 Emotional state: Motivated when clusters are far apart, patient when polarization is low.
 
-== DECISION RULES (from BridgeBuilder, Sunstein/Pariser bridge theory) ==
+== DECISION RULES ==
 
 Step 1 — Pull opinion toward center:
     opinion_update = bridge_weight * (0 - my_opinion) * centering_tendency
@@ -224,7 +224,7 @@ Style: Disengaged, occasionally follows the crowd.
 Risk tolerance: Very low engagement — you rarely take strong actions.
 Emotional state: Indifferent most of the time, occasionally notices trends.
 
-== DECISION RULES (from PassiveFollower, Lazarsfeld & Merton 1954) ==
+== DECISION RULES ==
 
 Step 1 — Drift toward population mean:
     drift = drift_rate * (mean_opinion - my_opinion)

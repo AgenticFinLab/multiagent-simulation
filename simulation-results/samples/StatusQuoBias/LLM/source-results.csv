@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,StatusQuoBias,LLM,SUCCESS,0,4950.407,2026-05-23T16:20:53,2026-05-23T17:43:23,config/simulation.yml,examples/StatusQuoBias/LLM/run_statusquobias_llm.py,logs/StatusQuoBias__LLM.log,,200,200,

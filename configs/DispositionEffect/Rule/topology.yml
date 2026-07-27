@@ -13,25 +13,25 @@ sources:
 
 connections:
   market:
-    # num_instances: 50 → expands to disposition_investor_1 … disposition_investor_50
-    - disposition_investor
-    - rational_investor
-    - tax_aware_investor
-    - index_holder
-    - institutional_investor
+    # num_instances: 50 → expands to rule_disposition_investor_1 … rule_disposition_investor_50
+    - rule_disposition_investor
+    - rule_rational_investor
+    - rule_tax_aware_investor
+    - rule_index_holder
+    - rule_institutional_investor
 
-  # num_instances: 50 → expands to disposition_investor_1 → market … disposition_investor_50 → market
-  disposition_investor:
+  # num_instances: 50 → expands to rule_disposition_investor_1 → market … rule_disposition_investor_50 → market
+  rule_disposition_investor:
     - market
 
-  rational_investor:
+  rule_rational_investor:
     - market
 
-  tax_aware_investor:
+  rule_tax_aware_investor:
     - market
 
-  index_holder:
+  rule_index_holder:
     - market
 
-  institutional_investor:
+  rule_institutional_investor:
     - market

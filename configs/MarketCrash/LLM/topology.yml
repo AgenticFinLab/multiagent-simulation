@@ -6,18 +6,21 @@ sources:
 connections:
   market:
     - llm_panic_seller
-    - llm_risk_parity
-    - llm_leveraged_fund
+    - llm_risk_parity_fund
+    - llm_leveraged_hedge_fund
     - llm_market_maker
+    - llm_passive_investor
     - llm_bottom_fisher
 
   llm_panic_seller:
     - market
-  llm_risk_parity:
+  llm_risk_parity_fund:
     - market
-  llm_leveraged_fund:
+  llm_leveraged_hedge_fund:
     - market
   llm_market_maker:
+    - market
+  llm_passive_investor:
     - market
   llm_bottom_fisher:
     - market

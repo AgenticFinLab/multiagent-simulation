@@ -25,7 +25,7 @@ from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.AnchoringEffect.Rule.players import Market
 
 logger = logging.getLogger("AnchoringEffect.RuleLLM")
@@ -140,11 +140,9 @@ class RuleLLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
+            infer_output = llm_client.run([infer_input]).outputs[0]
             try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = parse_llm_response_with_thinking(infer_output.response)
                 break
             except Exception as exc:
                 last_error = exc
@@ -239,6 +237,30 @@ class RuleLLMNoiseTrader(RuleLLMInvestor):
     pass
 
 
+class RuleLLMDispositionTrader(RuleLLMInvestor):
+    """RuleLLM disposition trader — Prospect-Theory asymmetric cost-basis reference. Theory: simulation-bases.md §4.6 — DispositionTrader."""
+
+    pass
+
+
+class RuleLLMContrarianTrader(RuleLLMInvestor):
+    """RuleLLM contrarian trader — fades short-horizon cumulative overextension. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
+
+    pass
+
+
+class RuleLLMFundamentalAnalyst(RuleLLMInvestor):
+    """RuleLLM fundamental analyst — slow belief updating toward fundamental (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
+
+    pass
+
+
+class RuleLLMLiquidityProvider(RuleLLMInvestor):
+    """RuleLLM liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
+
+    pass
+
+
 __all__ = [
     "Market",
     "RuleLLMInvestor",
@@ -247,4 +269,8 @@ __all__ = [
     "RuleLLMRationalUpdater",
     "RuleLLMMomentumTrader",
     "RuleLLMNoiseTrader",
+    "RuleLLMDispositionTrader",
+    "RuleLLMContrarianTrader",
+    "RuleLLMFundamentalAnalyst",
+    "RuleLLMLiquidityProvider",
 ]

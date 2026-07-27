@@ -32,7 +32,9 @@ ray:
   actor_options:
     max_restarts: 3
     max_task_retries: 1
-    max_concurrency: 10
+    # Each persona is driven sequentially by the simulator.  A value of 10
+    # only multiplies queued actor work and memory pressure on Windows.
+    max_concurrency: 1
   runtime_env:
     working_dir: null
     pip: []

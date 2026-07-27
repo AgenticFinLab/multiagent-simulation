@@ -16,15 +16,14 @@ git rev-parse --short HEAD
 git status --short
 source <conda-root>/etc/profile.d/conda.sh
 conda activate LMSim
-source scripts/env.sh
-python scripts/check_environment.py
+python -c "import masim, streamlit; print('imports OK')"
 ```
 
 Pass criteria:
 
 - Commit is the intended one.
 - Worktree is clean or documented.
-- `check_environment.py` passes.
+- `masim` and `streamlit` import cleanly.
 - API keys are set when API modes or RAG are scheduled.
 
 ## Gate 2: Row Discovery And Clean Output
@@ -32,13 +31,9 @@ Pass criteria:
 For each row:
 
 ```bash
-python scripts/run_example_matrix.py \
-  --dry-run \
-  --scenario <Scenario> \
-  --mechanism <Mechanism> \
-  --isolated-artifacts \
-  --conda-bin <conda-root>/bin/conda \
-  --output-dir <preflight-output>/rows/<Scenario>__<Mechanism>
+python examples/<Scenario>/<Mechanism>/run_<scenario_lower>_<mechanism_lower>.py \
+  -c configs/<Scenario>/<Mechanism>/simulation.yml \
+  --dry-run
 ```
 
 Pass criteria:

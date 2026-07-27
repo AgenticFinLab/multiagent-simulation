@@ -75,6 +75,25 @@
 - **Relevance to This Simulation**: `ValueContrarian` represents the private-sector value buyer who enters later and deeper than IMFRescuer, providing a second layer of price floor support. The `−0.08` threshold (8% below fundamental) reflects the deeper discount private buyers require vs. IMF's 5%.
 - **Calibration Implication**: `oversold_threshold = −0.08` (requires deeper discount than IMF); `overbought_threshold = +0.10` (sells when recovered significantly above fundamental, capturing crisis-recovery premium); `buy_ratio = sell_ratio = 0.20` (conservative capital deployment).
 
+Cross-reference: this ValueContrarian theory block also links to the funding-liquidity framework of Brunnermeier, M. K., & Pedersen, L. H. (2009). Market liquidity and funding liquidity. *Review of Financial Studies*, 22(6), 2201–2238. https://doi.org/10.1093/rfs/hhn098 — cited in target §4.4 and analysis-bases.md §2.4 as the primary calibration source for return autocorrelation during funding-liquidity spirals.
+
+---
+
+### Theory: Noise Trading and Background Liquidity in Crisis-Era EM Markets
+
+- **Citation**: Black, F. (1986). Noise. *Journal of Finance*, 41(3), 529–543. https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
+- **Core Insight**: Uninformed order flow ("noise") creates the residual trading volume that keeps markets liquid enough for informed and structural traders to execute. Without noise, markets would be too thin to clear; with too much noise, prices become disconnected from fundamentals. In emerging-market FX during crisis, the proportion of noise-driven flow rises as institutional participants withdraw and retail speculators become relatively more active. The noise trader hypothesis is the theoretical basis for including a non-informational, randomly-directed liquidity-supplying agent in the simulation.
+- **Mathematical Formulation**:
+  ```
+  Trade fires with probability p_noise per round.
+  Direction: Bernoulli(0.5) → buy or sell.
+  Quantity:  Q_noise ~ Uniform(min_order, max_order); clamped to cash / price on buy and to current position on sell.
+  Aggregate expected net demand: E[D_noise] ≈ 0 over many rounds; variance contributes background volatility.
+  ```
+- **Empirical Evidence**: Black (1986) estimates that uninformed trading accounts for 30–60% of order flow in liquid markets; Glosten & Milgrom (1985, https://doi.org/10.1016/0304-405X(85)90044-3) formalise the informed/uninformed split in a market-microstructure setting. In crisis-era EM FX markets, participant survey evidence and daily-turnover decompositions imply an elevated uninformed share consistent with `p_noise = 0.30` (higher than the 0.05 used in developed-market equity simulations).
+- **Relevance to This Simulation**: `NoiseTrader` (three instances) implements background liquidity that prevents the simulated crisis path from being a smooth monotonic decline. Its symmetric random direction means the noise trader does not systematically move price mean, but it adds realistic per-round variance and provides the "sticky" liquidity that lets HotMoneyFunder, ContagionTrader, IMFRescuer, and ValueContrarian execute their strategies at every round rather than facing zero counterparties in low-activity phases.
+- **Calibration Implication**: `p_noise = 0.30` (Black 1986: 30–60% uninformed share in liquid markets, calibrated to the higher end for crisis-era EM FX where retail speculation surges as institutional participation retreats); order size drawn from `Uniform(100, 500)` shares per instance, giving expected per-round volume contribution of ≈150 shares × 3 instances × 0.30 activation = ≈135 shares baseline, small relative to the destabilising / stabilising crisis-agent scale but sufficient to prevent mechanically deterministic price paths.
+
 
 ## §3 Market Design Principles
 

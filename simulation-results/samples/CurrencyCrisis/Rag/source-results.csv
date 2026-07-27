@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-1,9,CurrencyCrisis,Rag,SUCCESS,0,20461.355,2026-05-22T05:08:15,2026-05-22T10:49:16,config/simulation.yml,examples/CurrencyCrisis/Rag/run_currencycrisis_rag.py,logs/CurrencyCrisis__Rag.log,,200,200,,

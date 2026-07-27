@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - retailcoordinated
-    - shortsellerhf
-    - marketmakergamma
-    - institutionalvalue
-    - momentumretail
+    - rule_retail_coordinated
+    - rule_short_seller_hf
+    - rule_market_maker_gamma
+    - rule_institutional_value
+    - rule_momentum_retail
 
-  retailcoordinated:
+  rule_retail_coordinated:
     - market
 
-  shortsellerhf:
+  rule_short_seller_hf:
     - market
 
-  marketmakergamma:
+  rule_market_maker_gamma:
     - market
 
-  institutionalvalue:
+  rule_institutional_value:
     - market
 
-  momentumretail:
+  rule_momentum_retail:
     - market

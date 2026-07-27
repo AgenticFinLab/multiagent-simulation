@@ -8,11 +8,10 @@ The scenario is not driven by one exogenous news shock. Its core mechanism is a
 feedback loop among leverage, volatility targeting, liquidity depth, panic
 selling, and delayed contrarian absorption.
 
-This is a trading-schema scenario. Rule uses a six-archetype deterministic
-baseline. LLM, RuleLLM, and Rag use five API archetypes and omit PassiveInvestor
-to bound API cost and role count. RuleLLM and Rag additionally consume
-`provides_liquidity` because their market coordinators distinguish passive
-depth from directional demand.
+This is a trading-schema scenario. Rule, LLM, RuleLLM, and Rag all use the same
+six archetypes. That parity keeps identity, mechanism coverage, and analysis
+comparable across variants. RuleLLM and Rag additionally emit
+`provides_liquidity` as an auditable model-output field.
 
 ## §2 Theoretical Foundation
 
@@ -156,11 +155,9 @@ discount threshold is 10%, the agent submits a buy order of the configured size.
 
 ## §5 Agent Diversity Verification
 
-The Rule baseline contains six archetypes: RiskParityFund, LeveragedHedgeFund,
-MarketMaker, PassiveInvestor, PanicSeller, and BottomFisher. The API variants
-retain five archetypes: PanicSeller, RiskParityFund, LeveragedFund,
-MarketMaker, and BottomFisher. The omitted PassiveInvestor is documented in
-variant docs and should not be silently inferred during API comparison.
+Every variant contains six archetypes: RiskParityFund, LeveragedHedgeFund,
+MarketMaker, PassiveInvestor, PanicSeller, and BottomFisher. All identities map
+to the same canonical AGENT_POOL profiles and appear explicitly in topology.
 
 The population includes mechanical sellers, behavioral sellers, liquidity
 providers, slow stabilizers, and contrarian buyers. This satisfies diversity by
@@ -171,6 +168,11 @@ time horizon, signal source, stabilizing/destabilizing role, and risk tolerance.
 | Parameter | Value | Used By | Role In Crash | Source / Rationale |
 |---|---:|---|---|---|
 | `base_price_impact` | 0.08 | Market | Net-demand impact | Calibrated scale for visible stress in 200 rounds |
+| `initial_volatility` | 4.0 | Market | Initial stressed state | Upper end of the target seed range |
+| `stress_impact_multiplier` | 1.5 | Market | Funding-liquidity amplification | Target §4.2 stressed impact range |
+| `max_abs_return` | 0.08 | Market | Bounded one-round transition | Prevents low-liquidity numerical overshoot while retaining multi-round cascades |
+| `price_floor`, `price_ceiling` | 30, 120 | Market | Normalized numerical domain | Prevents reverse-impact overshoot outside the calibrated asset-price domain |
+| `random_seed` | 20260721 | Market | Reproducible stochastic path | Pipeline reproducibility invariant |
 | `mean_reversion` | 0.01 | Market | Fundamental pull | Slow recovery consistent with crisis persistence |
 | `noise_std` | 0.5 | Market | Exogenous disturbance | Background microstructure noise |
 | `target_volatility` | 2.0 | RiskParityFund | Deleveraging target | Volatility-management mechanism from Moreira and Muir (2017) |
@@ -179,7 +181,7 @@ time horizon, signal source, stabilizing/destabilizing role, and risk tolerance.
 | `volatility_withdraw_threshold` | 5.0 | MarketMaker | Liquidity withdrawal trigger | Liquidity-supply stress proxy |
 | `rebalance_frequency` | 20 | PassiveInvestor | Slow stabilizing cadence | Long-horizon rebalancing approximation |
 | `panic_sell_fraction` | 0.5 | PanicSeller | Behavioral liquidation intensity | Loss-aversion stress response |
-| `discount_threshold` | 0.10 | BottomFisher | Contrarian entry | Value/contrarian discount threshold |
+| `discount_threshold` | 0.08 | BottomFisher | Contrarian entry | Value/contrarian discount threshold |
 
 ## §7 Communication And Round Structure
 

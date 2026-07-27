@@ -31,7 +31,7 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_quantity_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_quantity_response_with_thinking
 
 from .prompts import (
     RAGLLM_EARLY_EXIT_TRADER_SYS,
@@ -43,6 +43,8 @@ from .prompts import (
 from ..Rule.players import Market  # noqa: F401 — re-exported
 
 logger = logging.getLogger("TulipMania.Rag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 class RagLLMInvestor(GeneralPlayer):
@@ -305,7 +307,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         return (

@@ -11,26 +11,27 @@
 # -----------------------------------------------------------------------------
 # InformationEnvironment (Coordinator) — imported from Rule variant
 # -----------------------------------------------------------------------------
-environment:
+rulellm_information_environment:
+  archetype: information-sis-contagion  # -> AGENT_POOL/market/information-sis-contagion.md
   name: "InformationEnvironment"
   class: "examples.RumorSpread.RuleLLM.players:InformationEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "rulellm_information_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:
       - environment
     extras:
-      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"
-      rumor_truth_value: 0.1
-      initial_belief: 0.3
-      spread_impact: 0.15
-      truth_correction: 0.02
-      leveling_rate: 0.01
-      sharpening_rate: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"  # Source: AGENT_POOL/finance/information-environment.md §6
+      rumor_truth_value: 0.1  # Source: AGENT_POOL/finance/information-environment.md §6
+      initial_belief: 0.3  # Source: AGENT_POOL/finance/information-environment.md §6
+      spread_impact: 0.15  # Source: AGENT_POOL/finance/information-environment.md §6
+      truth_correction: 0.02  # Source: AGENT_POOL/finance/information-environment.md §6
+      leveling_rate: 0.01  # Source: AGENT_POOL/finance/information-environment.md §6
+      sharpening_rate: 0.02  # Source: AGENT_POOL/finance/information-environment.md §6
+      noise_std: 0.02  # Source: AGENT_POOL/finance/information-environment.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/information-environment.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -47,18 +48,18 @@ rulellm_gullible_spreader:
     group_tags:
       - rulellm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"
-      initial_belief: 0.3
-      initial_credibility: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      initial_belief: 0.3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      initial_credibility: 0.5  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
       llm:
-        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_GULLIBLE_SYS"
-        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_GULLIBLE_SYS"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -75,18 +76,18 @@ rulellm_distorting_relayer:
     group_tags:
       - rulellm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"
-      initial_belief: 0.2
-      initial_credibility: 0.4
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      initial_belief: 0.2  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      initial_credibility: 0.4  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
       llm:
-        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_DISTORTING_SYS"
-        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_DISTORTING_SYS"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+        lm_type: "api"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -103,18 +104,18 @@ rulellm_skeptical_evaluator:
     group_tags:
       - rulellm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"
-      initial_belief: 0.1
-      initial_credibility: 0.7
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      initial_belief: 0.1  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      initial_credibility: 0.7  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
       llm:
-        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_SKEPTICAL_SYS"
-        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_SKEPTICAL_SYS"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+        lm_type: "api"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -131,18 +132,18 @@ rulellm_fact_checker:
     group_tags:
       - rulellm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"
-      initial_belief: 0.05
-      initial_credibility: 0.9
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      initial_belief: 0.05  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      initial_credibility: 0.9  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/fact-checker.md §6
       llm:
-        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_FACTCHECKER_SYS"
-        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_FACTCHECKER_SYS"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+        lm_type: "api"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/fact-checker.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/opinion/fact-checker.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/opinion/fact-checker.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -159,16 +160,16 @@ rulellm_uninformed_bystander:
     group_tags:
       - rulellm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"
-      initial_belief: 0.2
-      initial_credibility: 0.3
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RumorSpread/RuleLLM/records"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      initial_belief: 0.2  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      initial_credibility: 0.3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
       llm:
-        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_BYSTANDER_SYS"
-        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_BYSTANDER_SYS"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+        user_message: "examples.RumorSpread.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+        lm_type: "api"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 500
+          temperature: 0.4  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
   persona: !include persona.yml

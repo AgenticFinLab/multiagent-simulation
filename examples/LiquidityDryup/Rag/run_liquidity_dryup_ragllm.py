@@ -40,6 +40,13 @@ async def main():
     parser.add_argument(
         "-c", "--config", type=str, default="configs/LiquidityDryup/Rag/simulation.yml"
     )
+    parser.add_argument(
+        "-r",
+        "--rounds",
+        type=int,
+        default=None,
+        help="Override total rounds (use 5 for a smoke run)",
+    )
     args = parser.parse_args()
 
     load_dotenv()
@@ -52,14 +59,16 @@ async def main():
 
     yaml_config = load_config(args.config)
     config = SimulationConfig(**yaml_config)
+    if args.rounds is not None:
+        config.setting["total_rounds"] = args.rounds
 
     print("\n" + "=" * 60)
     print("LiquidityDryupRag Simulation")
     print("=" * 60)
     print("Phenomenon: Liquidity Dryup with RAG-Augmented LLM Decision-Making")
     print("Theory:     Market Microstructure, Kirilenko et al. (2017) + RAG")
-    print("Agents:     HFT, Market Maker, Algorithmic Trader,")
-    print("            Stop-Loss Trader, Fundamental Trader  (all Rule+LLM+RAG)")
+    print("Agents:     Market Maker, Liquidity Seeker, Value Trader,")
+    print("            Momentum Trader, Noise Trader  (all Rule+LLM+RAG)")
     print("Note:       Documents are pre-processed during simulation setup.")
     print("            Each agent loads from shared cache (no duplicates).")
     print("Rounds:     %s" % config.setting["total_rounds"])

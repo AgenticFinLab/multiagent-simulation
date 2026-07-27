@@ -17,6 +17,7 @@
 # Market (Coordinator)
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.AssetBubble.Rule.players:Market"
   num_instances: 1
@@ -27,173 +28,169 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
-      # Market dynamics parameters
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.15        # High: demand strongly affects price
-      mean_reversion: 0.005     # Low: slow correction to fundamental
-      fundamental_growth: 0.001 # Slow fundamental appreciation
-      noise_std: 0.3
-      short_cost_rate: 0.02     # Cost of borrowing shares to short
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      # Market dynamics parameters (price formula P(t+1) = P(t) + λ·D(t) + γ·[F(t)-P(t)] + ε)
+      fundamental_value: 100.0     # Source: target §9 / simulation-bases.md §3.1 (normalization, 100-scale index)
+      initial_price: 100.0         # Source: target §9 / simulation-bases.md §3.1 (normalization, starts at fair value)
+      price_impact: 0.15           # Source: target §9 lambda; De Long et al. (1990) https://doi.org/10.1086/261703
+      mean_reversion: 0.005        # Source: target §9 gamma; Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
+      fundamental_growth: 0.001    # Source: target §9 g; Shiller (2000) Irrational Exuberance
+      noise_std: 0.3               # Source: target §9 sigma; De Long et al. (1990) https://doi.org/10.1086/261703
+      short_cost_rate: 0.02        # Source: target §9 c_short; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring-buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Momentum Speculators (Primary Bubble Drivers)
 # -----------------------------------------------------------------------------
-momentum_speculator:
+rule_momentum_speculator:
   name: "Momentum Speculator"
   class: "examples.AssetBubble.Rule.players:MomentumSpeculator"
   # Expander → momentum_speculator_1, momentum_speculator_2
   num_instances: 5
   config:
-    identity: "momentum_speculator"
+    identity: "rule_momentum_speculator"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # MomentumSpeculator specific parameters
-      lookback_short: 3
-      # High: amplifies momentum signals
-      aggressiveness: 2.0
-      # Large positions
-      base_position_size: 50.0
-      # Uses leverage
-      leverage_multiplier: 1.5
+      initial_cash: 10000.0          # Source: target §9 initial_equity; portfolio normalization (10000-scale)
+      initial_position: 0.0          # Source: target §7 momentum-speculator Intent line; zero-position simulation start
+      custom_state_hot_limit: 3      # Source: implementation infrastructure (hot-state ring buffer)
+      # MomentumSpeculator specific parameters (§4.1 anchor: Jegadeesh & Titman 1993)
+      lookback_short: 3              # Source: target §9 k; Jegadeesh & Titman (1993) https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
+      aggressiveness: 2.0            # Source: target §9 alpha; De Long et al. (1990) https://doi.org/10.1111/j.1540-6261.1990.tb03695.x
+      base_position_size: 50.0       # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
+      leverage_multiplier: 1.5       # Source: target §9 ell_m; Adrian & Shin (2010) https://doi.org/10.1016/j.jfineco.2009.12.002
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Rational Arbitrageur (Limited Corrective Force)
 # -----------------------------------------------------------------------------
-rational_arbitrageur:
+rule_rational_arbitrageur:
   name: "Rational Arbitrageur"
   class: "examples.AssetBubble.Rule.players:RationalArbitrageur"
   num_instances: 3
   config:
-    identity: "rational_arbitrageur"
+    identity: "rule_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # RationalArbitrageur specific parameters
-      deviation_threshold: 0.10     # Only act on >10% deviation
-      base_position_size: 25.0      # Moderate size (limited capital)
-      max_short_position: 40.0      # Limited short capacity
-      short_cost_sensitivity: 0.5   # How much short cost affects decision
+      initial_cash: 10000.0          # Source: target §9 initial_equity; portfolio normalization
+      initial_position: 0.0          # Source: target §7 rational-arbitrageur Intent line
+      custom_state_hot_limit: 3      # Source: implementation infrastructure (hot-state ring buffer)
+      # RationalArbitrageur specific parameters (§4.2 anchor: Shleifer & Vishny 1997)
+      deviation_threshold: 0.10      # Source: target §9 theta_dev; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
+      base_position_size: 25.0       # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
+      max_short_position: 40.0       # Source: target §9 q_short_max; D'Avolio (2002) https://doi.org/10.1016/S0304-405X(02)00257-4
+      short_cost_sensitivity: 0.5    # Source: target §9 c_s; Shleifer & Vishny (1997) https://doi.org/10.1111/j.1540-6261.1997.tb03807.x
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Noise Traders (Herd Followers)
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.AssetBubble.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # NoiseTrader specific parameters
-      sentiment_volatility: 0.3
-      # How much to follow recent returns
-      herding_weight: 0.6
-      base_position_size: 20.0
+      initial_cash: 10000.0          # Source: target §9 initial_equity; portfolio normalization
+      initial_position: 0.0          # Source: target §7 noise-trader Intent line
+      custom_state_hot_limit: 3      # Source: implementation infrastructure (hot-state ring buffer)
+      # NoiseTrader specific parameters (§4.3 anchor: De Long et al. 1990)
+      sentiment_volatility: 0.3      # Source: target §9 sigma_s; De Long et al. (1990) https://doi.org/10.1086/261703
+      herding_weight: 0.6            # Source: target §9 h; Barber & Odean (2008) https://doi.org/10.1093/rfs/hhm079
+      base_position_size: 20.0       # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Fundamental Investor (Weak Anchor)
 # -----------------------------------------------------------------------------
-fundamental_investor:
+rule_fundamental_investor:
   name: "Fundamental Investor"
   class: "examples.AssetBubble.Rule.players:FundamentalInvestor"
   num_instances: 4
   config:
-    identity: "fundamental_investor"
+    identity: "rule_fundamental_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # FundamentalInvestor specific parameters
-      trade_frequency: 5        # Trade every N rounds
-      value_sensitivity: 0.3
-      base_position_size: 15.0
+      initial_cash: 10000.0          # Source: target §9 initial_equity; portfolio normalization
+      initial_position: 0.0          # Source: target §7 fundamental-investor Intent line
+      custom_state_hot_limit: 3      # Source: implementation infrastructure (hot-state ring buffer)
+      # FundamentalInvestor specific parameters (§4.4 anchor: Fama & French 1992)
+      trade_frequency: 5             # Source: target §9 tau; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
+      value_sensitivity: 0.3         # Source: target §9 beta_v; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
+      base_position_size: 15.0       # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Leveraged Buyer (Amplifier)
 # -----------------------------------------------------------------------------
-leveraged_buyer:
+rule_leveraged_buyer:
   name: "Leveraged Buyer"
   class: "examples.AssetBubble.Rule.players:LeveragedBuyer"
   num_instances: 3
   config:
-    identity: "leveraged_buyer"
+    identity: "rule_leveraged_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # LeveragedBuyer specific parameters
-      leverage_ratio: 2.0           # 2x leverage
-      margin_call_threshold: 0.3    # Forced sell if equity drops 30%
-      base_position_size: 40.0
-      initial_equity: 10000.0
+      initial_cash: 10000.0          # Source: target §9 initial_equity; portfolio normalization
+      initial_position: 0.0          # Source: target §7 leveraged-buyer Intent line
+      custom_state_hot_limit: 3      # Source: implementation infrastructure (hot-state ring buffer)
+      # LeveragedBuyer specific parameters (§4.5 anchor: Abreu & Brunnermeier 2003)
+      leverage_ratio: 2.0            # Source: target §9 ell; Adrian & Shin (2010) https://doi.org/10.1016/j.jfineco.2009.12.002
+      margin_call_threshold: 0.3     # Source: target §9 m; Abreu & Brunnermeier (2003) https://doi.org/10.1111/1468-0262.00393
+      base_position_size: 40.0       # Source: target §9 q0; Chordia et al. (2002) https://doi.org/10.1016/S0304-405X(02)00136-8
+      initial_equity: 10000.0        # Source: target §9 E0; portfolio normalization (10000-scale)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Conservative Holder (Stability)
 # -----------------------------------------------------------------------------
-conservative_holder:
+rule_conservative_holder:
   name: "Conservative Holder"
   class: "examples.AssetBubble.Rule.players:ConservativeHolder"
   num_instances: 2
   config:
-    identity: "conservative_holder"
+    identity: "rule_conservative_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AssetBubble/Rule/records"
+      record_path: "EXPERIMENT/AssetBubble/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      # ConservativeHolder specific parameters
-      target_position: 20.0         # Target holding
-      rebalance_frequency: 10       # Rebalance every N rounds
-      rebalance_rate: 0.2           # Slowly rebalance
+      initial_cash: 10000.0          # Source: target §9 initial_equity; portfolio normalization
+      initial_position: 0.0          # Source: target §7 conservative-holder Intent line
+      custom_state_hot_limit: 3      # Source: implementation infrastructure (hot-state ring buffer)
+      # ConservativeHolder specific parameters (§4.4 anchor: Fama & French 1992)
+      target_position: 20.0          # Source: target §9 q_target; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
+      rebalance_frequency: 10        # Source: target §9 tau_reb; Barber & Odean (2000) https://doi.org/10.1111/0022-1082.00226
+      rebalance_rate: 0.2            # Source: target §9 rho; Fama & French (1992) https://doi.org/10.1111/j.1540-6261.1992.tb04398.x
   persona: !include persona.yml

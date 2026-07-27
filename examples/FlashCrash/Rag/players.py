@@ -61,7 +61,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -75,6 +75,8 @@ from masim.utils.history import HistoryBuffer
 from masim.format.order import validate_order
 
 logger = logging.getLogger("FlashCrashRag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -631,7 +633,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
 
         llm_config = self.config.extras["llm"]
         template = load_prompt(llm_config["user_message"])
@@ -737,6 +739,8 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["position"],
         )
 
+        # LLM output parsing: provides_liquidity may be absent from LLM response;
+        # conservative False is the documented fallback (not a config-data default).
         liquidity_field_missing = decision.get("provides_liquidity") is None
         if liquidity_field_missing:
             logger.warning(
@@ -751,6 +755,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
+            # LLM-parsed field: fallback to False when LLM omits provides_liquidity
             "provides_liquidity": bool(decision.get("provides_liquidity", False)),
             "liquidity_field_missing": liquidity_field_missing,
             "rag_context": self.state.custom_state["last_rag_context"],

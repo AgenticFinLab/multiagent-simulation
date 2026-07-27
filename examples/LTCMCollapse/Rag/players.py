@@ -23,17 +23,18 @@ from examples.LTCMCollapse.Rag.prompts import (
     RAG_LIQUIDITYPROVIDER_PROMPT,
     RAG_RISKMANAGER_PROMPT,
     RAG_USER_TEMPLATE,
+    RAG_FALLBACK,
 )
 from examples.LTCMCollapse.Rule.players import (  # noqa: F401
     Market,
     _build_order,
     _require_positive,
 )
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("LTCMCollapse.Rag")
 
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+_RAG_FALLBACK = RAG_FALLBACK
 
 
 def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
@@ -95,9 +96,13 @@ class RagLLMInvestor(GeneralPlayer):
                     if not embed_api_key:
                         embed_type = rag_cfg["embed_type"]
                         if embed_type == "litellm":
-                            embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+                            embed_api_key = os.getenv("HUNYUAN_API_KEY")
                         elif embed_type == "openai":
-                            embed_api_key = os.getenv("ARK_API_KEY", "")
+                            embed_api_key = os.getenv("ARK_API_KEY")
+                    if not embed_api_key:
+                        raise RuntimeError(
+                            f"[{self.identity}] missing embedding API key during RAG restore"
+                        )
                     rag_store = KnowledgeStore(
                         embed_model_name=rag_cfg["embed_model"],
                         embed_api_key=embed_api_key,
@@ -120,7 +125,7 @@ class RagLLMInvestor(GeneralPlayer):
             await self._initialize_agent()
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
-            if isinstance(payload, dict) and payload.get("type") == "market_update":
+            if isinstance(payload, dict) and payload["type"] == "market_update":
                 self.state.custom_state["price"] = payload["price"]
                 self.state.custom_state["fundamental"] = payload["fundamental"]
                 self.state.custom_state["deviation"] = payload["deviation"]
@@ -141,14 +146,14 @@ class RagLLMInvestor(GeneralPlayer):
         )
         self.state.custom_state["llm_client"] = llm_client
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = extras.get("rag") or private_knowledge.get("rag", {})
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = extras["rag"] if "rag" in extras else private_knowledge["rag"]
         await self._initialize_rag(rag_cfg)
 
     async def _initialize_rag(self, rag_cfg: Dict[str, Any]) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -165,7 +170,7 @@ class RagLLMInvestor(GeneralPlayer):
             }
 
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = dict(extras.get("private_knowledge", {}))
+        private_knowledge = dict(extras["private_knowledge"])
         if "rag" not in private_knowledge:
             private_knowledge["rag"] = rag_cfg
         agent_knowledge = resource_manager.resolve_agent_knowledge(
@@ -187,9 +192,13 @@ class RagLLMInvestor(GeneralPlayer):
         if not embed_api_key:
             embed_type = resolved_rag["embed_type"]
             if embed_type == "litellm":
-                embed_api_key = os.getenv("HUNYUAN_API_KEY", "")
+                embed_api_key = os.getenv("HUNYUAN_API_KEY")
             elif embed_type == "openai":
-                embed_api_key = os.getenv("ARK_API_KEY", "")
+                embed_api_key = os.getenv("ARK_API_KEY")
+        if not embed_api_key:
+            raise RuntimeError(
+                f"[{self.identity}] missing embedding API key for {resolved_rag['embed_type']}"
+            )
 
         rag_store = KnowledgeStore(
             embed_model_name=resolved_rag["embed_model"],
@@ -258,25 +267,29 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
 
-    def _retrieve_context(self) -> str:
+    def _formulate_knowledge_query(self) -> KnowledgeQuery:
+        """Build a round-specific retrieval query from mandatory market state."""
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
         round_num = self.state.custom_state["round"]
-        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
         rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
+        return KnowledgeQuery(
+            text=(
+                "convergence arbitrage leverage liquidity crisis "
+                f"price={price:.2f} fundamental={fundamental:.2f} "
+                f"deviation={deviation:+.2%}"
+            ),
+            top_k=rag_cfg["top_k"],
+            round_num=round_num,
+            agent_id=self.config.identity,
+        )
+
+    def _get_rag_context(self) -> str:
+        """Retrieve context or return the exact auditable empty-result sentinel."""
+        rag_store: KnowledgeStore = self.state.custom_state["rag_store"]
         if rag_store and rag_store.is_built():
-            query = KnowledgeQuery(
-                text=(
-                    "LTCM collapse convergence arbitrage leverage liquidity crisis "
-                    f"price={price:.2f} fundamental={fundamental:.2f} "
-                    f"deviation={deviation:+.2%}"
-                ),
-                top_k=rag_cfg["top_k"],
-                round_num=round_num,
-                agent_id=self.config.identity,
-            )
-            result = rag_store.query(query)
+            result = rag_store.query(self._formulate_knowledge_query())
             if result.formatted_text:
                 return result.formatted_text
         return _RAG_FALLBACK
@@ -288,9 +301,11 @@ class RagLLMInvestor(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
+        initial_price = self.config.extras["initial_price"]
+        initial_position = self.config.extras["initial_position"]
         round_num = self.state.custom_state["round"]
         portfolio_value = cash + position * price
-        rag_context = self._retrieve_context()
+        rag_context = self._get_rag_context()
         self.state.custom_state["last_rag_context"] = rag_context
         user_msg = RAG_USER_TEMPLATE.format(
             rag_context=rag_context,
@@ -300,6 +315,8 @@ class RagLLMInvestor(GeneralPlayer):
             deviation=deviation,
             cash=cash,
             position=position,
+            initial_price=initial_price,
+            initial_position=initial_position,
             portfolio_value=portfolio_value,
         )
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
@@ -361,6 +378,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
         order["analysis"] = str(decision_payload["analysis"])
         order["rag_context"] = self.state.custom_state["last_rag_context"]
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

@@ -63,55 +63,75 @@ Running `Rag/analysis.py` writes to `EXPERIMENT/ConfirmationBias/Rag/records/ana
 
 ---
 
-## §4 Dimension-by-Dimension Interpretation
+## §4 Variant-Specific Observable Phenomena
 
-### 4.1 Price vs Fundamental
+Under the Rag variant, agent decisions depend not only on the observed
+deviation and persona, but also on the `rag_context` string retrieved before
+each decision. When retrieval fails the shared fallback sentinel
+`_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"` is
+substituted, and the agent proceeds as in the LLM variant for that round.
 
-- Compare `bias_amplitude_pct` Rag vs LLM:
-  - If Rag < LLM: retrieved knowledge moderating bias
-  - If Rag ≈ LLM: knowledge not effective or `retrieval_success_rate` too low
+| Phenomenon                                | Trigger condition                                                    | Expected metric signature                                          |
+|-------------------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------------|
+| Knowledge-informed stabilization          | `rag_context != _RAG_FALLBACK` for BalancedAnalyst/ContrarianTrader  | `correction_ratio` above LLM baseline; `bias_persistence` shorter  |
+| Sparse-KB fallback regime                 | `retrieval_success_rate < 0.70` for biased agents                    | Rag metrics converge to LLM baseline; `meets_target` = false       |
+| Retrieval-modulated belief revision       | BeliefAnchor receives debiasing text                                 | Reduced `bias_amplitude_pct`; occasional belief-flip event         |
+| Amplifying-knowledge failure mode         | BeliefAnchor retrieves confirming rather than debiasing content      | `bias_amplitude_pct` at or above LLM; `belief_flip_count` low      |
+| Context-dependent phenomenon variability  | Knowledge base composition changes                                   | Rag results shift while Rule/LLM/RuleLLM remain stable             |
 
-### 4.2 Deviation Time Series
+### Retrieval Fallback Contract
 
-- If stabilizing agents (BalancedAnalyst, ContrarianTrader) retrieve relevant content:
-  earlier activation → shorter bias_persistence_rounds
-- If BeliefAnchor retrieves content about its own bias and ignores it:
-  bias amplitude unchanged but deviation may oscillate more
+Every agent record surfaces a `rag_context` field. If retrieval returns no
+documents (empty index, no matches, or invalid embedding), the field is set
+to `_RAG_FALLBACK`. `analyze_rag_knowledge_effect()` classifies such rounds
+as `failure_rounds`; downstream analysis must **not** treat the sentinel
+string as a real retrieved snippet.
 
-### 4.3 RAG Retrieval Bar Chart
+### Dimension-Level Interpretation
 
-- **Green bars** (≥ 70%): KnowledgeStore has sufficient relevant documents
-- **Red bars** (< 70%): Need more documents for this agent's topic
-- Expected: BalancedAnalyst and ContrarianTrader should have high retrieval
-  (rational trading documents easy to find); BeliefAnchor may have lower
-  retrieval if KnowledgeStore lacks bias-specific documents
+- **Price vs Fundamental**: compare `bias_amplitude_pct` Rag vs LLM; if
+  Rag < LLM the retrieval is genuinely moderating bias, otherwise
+  `retrieval_success_rate` is likely below target.
+- **Deviation Time Series**: stabilizer agents receiving relevant text
+  activate earlier, shortening `bias_persistence_rounds`.
+- **RAG Retrieval Bar Chart**: green bars (≥ 70%) mean the KnowledgeStore
+  covers the agent's topic; red bars flag gaps to prioritize.
 
 ---
 
-## §5 Variant-Specific Phenomena
+## §5 Scaling and Sensitivity Analysis
 
-### 5.1 Knowledge Quality vs Quantity
+### Round Scaling
 
-High retrieval rate is not the same as high quality. Inspect `rag_stats.json`
-and also manually check a few retrieved contexts:
-- Does retrieved text mention "confirmation bias" explicitly?
-- Is retrieved text actionable for the agent's decision?
+| Round count | Expected metric behavior                                                                   |
+|-------------|--------------------------------------------------------------------------------------------|
+| 100         | Retrieval success rate stabilizes within first 30 rounds; correction ratio partially seen  |
+| 200         | Bias amplitude vs LLM diverges clearly if KB is adequate                                   |
+| 500         | Long-horizon regime: fallback rate stabilizes; steady-state `correction_ratio` observable  |
 
-### 5.2 Bias Agent Response to Knowledge
+### Agent Count Scaling
 
-Interesting research question: Can `BeliefAnchor` overcome its bias
-when retrieved text explains the mechanism of confirmation bias?
+| Configuration                                       | Expected effect on metrics                                                       |
+|-----------------------------------------------------|----------------------------------------------------------------------------------|
+| +50% stabilizer agents (BalancedAnalyst/Contrarian) | Retrieval load spreads; `correction_ratio` rises if KB covers rational trading   |
+| +50% biased agents                                  | KB coverage per biased agent drops; `retrieval_success_rate` may fall below 0.70 |
+| Uniform doubling                                    | Total retrieval calls double; latency budget matters more than metric shape      |
 
-Possible outcomes:
-1. **Knowledge ignored**: BeliefAnchor continues buying despite retrieved warning
-2. **Knowledge heeded**: BeliefAnchor reduces buying after retrieval
-3. **Knowledge amplifying**: BeliefAnchor uses retrieved confirmation examples
-   to justify even stronger belief
+### Parameter Sensitivity (±50%)
 
-### 5.3 Fallback Behavior
+| Parameter                        | Effect on Rag-specific metrics                                                    |
+|----------------------------------|-----------------------------------------------------------------------------------|
+| KnowledgeStore document count    | Higher → higher `retrieval_success_rate`; below threshold → fallback dominates    |
+| Retrieval top-k                  | Higher → richer context but more noise; watch belief-flip stability               |
+| Similarity threshold             | Lower → fewer fallbacks but noisier context; raise if amplifying-knowledge occurs |
+| `confirmation_strength` (0.7)    | Same directional effect as Rule variant, moderated by retrieval quality           |
+| Stabilizer `analysis_threshold`  | Lower → stabilizers act earlier; combined with RAG boosts `correction_ratio`      |
 
-When `retrieval_success_rate < 70%`, Rag ≈ LLM (no knowledge benefit).
-In this case, focus improvements on KnowledgeStore content, not agent prompts.
+### Fallback Behaviour
+
+When `retrieval_success_rate < 70%`, Rag ≈ LLM and no knowledge benefit is
+observed; the recommended remediation is to enrich the KnowledgeStore rather
+than tune agent prompts.
 
 ---
 

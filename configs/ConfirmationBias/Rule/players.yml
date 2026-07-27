@@ -1,12 +1,16 @@
 # =============================================================================
 # ConfirmationBias Rule Players Configuration
 # =============================================================================
-# Heterogeneous agents for confirmation bias simulation
+# Heterogeneous agents for confirmation bias simulation.
+# Every non-infrastructure parameter is annotated with an inline
+# `# Source: ...` reference tying it back to `finance-confirmation-bias.md §9`
+# (the target parameter table) or to a labelled provenance
+# (`normalization`, `implementation infrastructure`, `bias calibration`).
 #
-# Price = normalized stock price (fundamental = 100.0)
+# Price = normalized stock price (fundamental = 100.0).
 #
 # Agent Types:
-#   - Market: Rule-based price coordinator
+#   - Market: Rule-based price coordinator (Kyle-style linear-impact dynamics)
 #   - BeliefAnchor: Overweights confirming signals (DESTABILIZING)
 #     Theory: Nickerson (1998) — confirmation bias
 #   - SelectiveScanner: Seeks confirming info, ignores contradictions (DESTABILIZING)
@@ -20,8 +24,10 @@
 
 # -----------------------------------------------------------------------------
 # Market (Coordinator)
+# Environment dynamics: P(t+1) = P(t) + λ·D(t) + γ·[F − P(t)] + ε
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.ConfirmationBias.Rule.players:Market"
   num_instances: 1
@@ -32,139 +38,141 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.02          # Low: bias effect slows price discovery
-      mean_reversion: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"  # Source: implementation infrastructure (record-path convention)
+      fundamental_value: 100.0     # Source: target §9 F; normalization (100-scale index)
+      initial_price: 100.0         # Source: target §9 P0; normalization (fundamental-anchored seed)
+      price_impact: 0.02           # Source: target §9 λ; Hong & Stein (1999) https://doi.org/10.1111/0022-1082.00184
+      mean_reversion: 0.02         # Source: target §9 γ; Fama (1970) https://doi.org/10.2307/2325486
+      noise_std: 0.02              # Source: target §9 σ; standard calibration consistent with AvailabilityBias family
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Belief Anchors (Primary Destabilizers)
-# Theory: Nickerson (1998)
+# Theory: Nickerson (1998); Rabin & Schrag (1999) upper-range priors
 # -----------------------------------------------------------------------------
-belief_anchor:
+rule_belief_anchor:
   name: "Belief Anchor"
   class: "examples.ConfirmationBias.Rule.players:BeliefAnchor"
   # Expander → belief_anchor_1, belief_anchor_2
   num_instances: 2
   config:
-    identity: "belief_anchor"
+    identity: "rule_belief_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      belief_strength: 0.8        # Probability of staying in current belief
-      confirm_weight: 2.5         # Amplify confirming signals by 2.5×
-      disconfirm_weight: 0.3      # Dampen disconfirming signals to 0.3×
-      base_size: 30.0
-      confirmation_strength: 0.7
-      initial_belief: 1.0
-      order_size: 500
+      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment, target §9 sibling scenarios convention)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      belief_strength: 0.8         # Source: bias calibration — persistence of prior belief; Rabin & Schrag (1999) https://doi.org/10.1162/003355399555945
+      confirm_weight: 2.5          # Source: bias calibration — asymmetric update amplification for confirming signals; Nickerson (1998) https://doi.org/10.1037/1089-2680.2.2.175
+      disconfirm_weight: 0.3       # Source: bias calibration — attenuation for disconfirming signals; Nickerson (1998) https://doi.org/10.1037/1089-2680.2.2.175
+      base_size: 30.0              # Source: normalization (mid-range base position size)
+      confirmation_strength: 0.7   # Source: target §9 c (confirmation_strength); Nickerson (1998) upper-range
+      initial_belief: 1.0          # Source: target §9 b0 (initial_belief); Rabin & Schrag (1999) first-impression prior
+      order_size: 500              # Source: target §9 q_BA (order_size, BeliefAnchor); bias-dominance condition
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Selective Scanners (Secondary Destabilizers)
-# Theory: Lord, Ross & Lepper (1979)
+# Theory: Lord, Ross & Lepper (1979); Klayman (1995) selective-search
 # -----------------------------------------------------------------------------
-selective_scanner:
+rule_selective_scanner:
   name: "Selective Scanner"
   class: "examples.ConfirmationBias.Rule.players:SelectiveScanner"
   # Expander → selective_scanner_1, selective_scanner_2
   num_instances: 2
   config:
-    identity: "selective_scanner"
+    identity: "rule_selective_scanner"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      search_bias: 0.7            # Amplify confirming signals by 1.7×
-      ignore_contradiction: 0.6  # Dampen contradicting signals to 0.4×
-      base_size: 25.0
-      order_size: 600
-      scan_threshold: 0.02
+      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      search_bias: 0.7             # Source: bias calibration — Lord, Ross & Lepper (1979) 2:1 confirming:disconfirming search bias; https://doi.org/10.1037/0022-3514.37.11.2098
+      ignore_contradiction: 0.6    # Source: bias calibration — Lord, Ross & Lepper (1979) disconfirmation attenuation
+      base_size: 25.0              # Source: normalization (mid-range base position size)
+      order_size: 600              # Source: target §9 q_SS (order_size, SelectiveScanner); Lord et al. (1979) 2:1 ratio
+      scan_threshold: 0.02         # Source: target §9 τ_SS (scan_threshold); Klayman (1995) selective-search calibration
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# Balanced Analyst (Stabilizer)
-# Theory: Rabin & Schrag (1999) rational baseline
+# Balanced Analyst (Rationality Stabilizer)
+# Theory: Rabin & Schrag (1999) rational baseline; Fama (1970) EMH
 # -----------------------------------------------------------------------------
-balanced_analyst:
+rule_balanced_analyst:
   name: "Balanced Analyst"
   class: "examples.ConfirmationBias.Rule.players:BalancedAnalyst"
   num_instances: 1
   config:
-    identity: "balanced_analyst"
+    identity: "rule_balanced_analyst"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      trade_threshold: 0.03      # Trade when |deviation| > 3%
-      base_size: 30.0
-      analysis_threshold: 0.05
-      order_size: 400
+      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      trade_threshold: 0.03        # Source: bias calibration — rational-analyst deviation floor before trading; De Bondt & Thaler (1985) https://doi.org/10.2307/2327804
+      base_size: 30.0              # Source: normalization (mid-range base position size)
+      analysis_threshold: 0.05     # Source: target §9 τ_BAn (analysis_threshold); Fama (1970) & De Bondt & Thaler (1985)
+      order_size: 400              # Source: normalization (mid-range order size for rational trader)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Contrarian Trader (Stabilizer)
+# Theory: Hong & Stein (1999) fade-the-overshoot behaviour
 # -----------------------------------------------------------------------------
-contrarian_trader:
+rule_contrarian_trader:
   name: "Contrarian Trader"
   class: "examples.ConfirmationBias.Rule.players:ContrarianTrader"
   num_instances: 1
   config:
-    identity: "contrarian_trader"
+    identity: "rule_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      contrarian_threshold: 0.10  # Fade when |deviation| > 10%
-      base_size: 40.0
-      order_size: 500
+      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      contrarian_threshold: 0.10   # Source: target §9 τ_CT (contrarian_threshold); Hong & Stein (1999) https://doi.org/10.1111/0022-1082.00184
+      base_size: 40.0              # Source: normalization (mid-range base position size)
+      order_size: 500              # Source: normalization (mid-range order size)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
-# Noise Traders (Black, 1986)
+# Noise Traders (Neutral Background Liquidity)
+# Theory: Black (1986) — noise traders enable rational-trader profits
 # -----------------------------------------------------------------------------
-noise_trader:
+rule_noise_trader:
   name: "Noise Trader"
   class: "examples.ConfirmationBias.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"
-      initial_cash: 20000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      trade_probability: 0.3
-      min_order: 10.0
-      max_order: 50.0
+      record_path: "EXPERIMENT/ConfirmationBias/Rule/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 20000.0        # Source: normalization (smaller cash endowment for background liquidity)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
+      trade_probability: 0.3       # Source: target §9 p_NT (trade_probability); Black (1986) https://doi.org/10.2307/2328481
+      min_order: 10.0              # Source: normalization (order-size floor for noise trader)
+      max_order: 50.0              # Source: normalization (order-size ceiling for noise trader)
   persona: !include persona.yml

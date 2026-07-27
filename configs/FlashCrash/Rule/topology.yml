@@ -16,30 +16,30 @@ sources:
 connections:
   # num_instances: 2 → hft_1/2, market_maker_1/2, stop_loss_1/2
   market:
-    - hft
-    - market_maker
-    - algo_trader
-    - stop_loss
-    - fundamental_trader
-    - retail_trader
+    - rule_high_frequency_trader
+    - rule_market_maker
+    - rule_algorithmic_trader
+    - rule_stop_loss_trader
+    - rule_fundamental_trader
+    - rule_retail_trader
 
   # num_instances: 2 → expands to hft_1/2 → market
-  hft:
+  rule_high_frequency_trader:
     - market
 
   # num_instances: 2 → expands to market_maker_1/2 → market
-  market_maker:
+  rule_market_maker:
     - market
 
-  algo_trader:
+  rule_algorithmic_trader:
     - market
 
   # num_instances: 2 → expands to stop_loss_1/2 → market
-  stop_loss:
+  rule_stop_loss_trader:
     - market
 
-  fundamental_trader:
+  rule_fundamental_trader:
     - market
 
-  retail_trader:
+  rule_retail_trader:
     - market

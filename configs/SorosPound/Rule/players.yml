@@ -1,6 +1,8 @@
 # SorosPound Rule Agent Configuration
+# All extras values traceable to target §9 Parameter Seeds via inline `# Source:` comments.
 
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.SorosPound.Rule.players:Market"
   num_instances: 1
@@ -11,117 +13,117 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rule/records"
-      initial_price: 100.0
-      peg_rate: 100.0
-      fundamental_value: 95.0
-      price_impact: 0.03
-      mean_reversion: 0.015
-      noise_std: 0.012
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rule/records"          # Source: target §8.1 coordinator record path
+      initial_price: 100.0                                        # Source: target §9 initial_price row; §2.2, §8.1
+      peg_rate: 100.0                                             # Source: target §9 peg_rate row; §4.3 policy reference
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row; §2.2, §4.1
+      price_impact: 0.03                                          # Source: target §9 price_impact row; §8.1 price-formation
+      mean_reversion: 0.015                                       # Source: target §9 mean_reversion row; §2.4 corrective pull
+      noise_std: 0.012                                            # Source: target §9 noise_std row; Black 1986 (§4.5)
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row; runtime hot-state cap
   persona: !include persona.yml
 
-macrohedgefund:
+rule_macro_hedge_fund:
   name: "MacroHedgeFund"
   class: "examples.SorosPound.Rule.players:MacroHedgeFund"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 MacroHedgeFund population
   config:
-    identity: "macrohedgefund"
+    identity: "rule_macro_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rule/records"
-      initial_cash: 5000000.0
-      initial_position: 800
-      initial_price: 100.0
-      fundamental_value: 95.0
-      leverage: 3.0
-      position_size: 600
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rule/records"           # Source: target §8.1 coordinator record path
+      initial_cash: 5000000.0                                     # Source: target §9 MacroHedgeFund initial_cash row; §4.1 attack sizing budget
+      initial_position: 800                                       # Source: target §9 MacroHedgeFund initial_position row; §4.1
+      initial_price: 100.0                                        # Source: target §9 initial_price row; §2.2, §8.1
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row; §4.1
+      leverage: 3.0                                               # Source: target §9 leverage row; §4.1 retained metadata (Krugman 1979)
+      position_size: 600                                          # Source: target §9 MacroHedgeFund position_size row; §4.1 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-pegdefender:
+rule_peg_defender:
   name: "PegDefender"
   class: "examples.SorosPound.Rule.players:PegDefender"
-  num_instances: 1
+  num_instances: 1                                                # Source: target §7 PegDefender population
   config:
-    identity: "pegdefender"
+    identity: "rule_peg_defender"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rule/records"
-      initial_cash: 10000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 95.0
-      reserve_capacity: 0.8
-      defense_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rule/records"           # Source: target §8.1 coordinator record path
+      initial_cash: 10000000.0                                    # Source: target §9 PegDefender initial_cash row; §4.3 reserves (Obstfeld 1996)
+      initial_position: 0                                         # Source: target §9 PegDefender initial_position row; §4.3 defender enters flat
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      reserve_capacity: 0.8                                       # Source: target §9 reserve_capacity row; §4.3 retained metadata (Eichengreen & Wyplosz 1993)
+      defense_size: 500                                           # Source: target §9 defense_size row; §4.3 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-convergencetrader:
+rule_convergence_trader:
   name: "ConvergenceTrader"
   class: "examples.SorosPound.Rule.players:ConvergenceTrader"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 ConvergenceTrader population
   config:
-    identity: "convergencetrader"
+    identity: "rule_convergence_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 95.0
-      convergence_threshold: 0.03
-      position_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rule/records"           # Source: target §8.1 coordinator record path
+      initial_cash: 1000000.0                                     # Source: target §9 ConvergenceTrader initial_cash row; §4.4 medium book (Fratzscher 2003)
+      initial_position: 500                                       # Source: target §9 ConvergenceTrader initial_position row; §4.4
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      convergence_threshold: 0.03                                 # Source: target §9 convergence_threshold row; §4.4 retained metadata
+      position_size: 300                                          # Source: target §9 ConvergenceTrader position_size row; §4.4 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-opportunistictrader:
+rule_opportunistic_trader:
   name: "OpportunisticTrader"
   class: "examples.SorosPound.Rule.players:OpportunisticTrader"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 OpportunisticTrader population
   config:
-    identity: "opportunistictrader"
+    identity: "rule_opportunistic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rule/records"
-      initial_cash: 2000000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 95.0
-      attack_join_threshold: 0.3
-      position_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rule/records"           # Source: target §8.1 coordinator record path
+      initial_cash: 2000000.0                                     # Source: target §9 OpportunisticTrader initial_cash row; §4.2 follow-on (Obstfeld 1996)
+      initial_position: 600                                       # Source: target §9 OpportunisticTrader initial_position row; §4.2
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      attack_join_threshold: 0.3                                  # Source: target §9 attack_join_threshold row; §4.2 retained metadata
+      position_size: 400                                          # Source: target §9 OpportunisticTrader position_size row; §4.2 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.SorosPound.Rule.players:NoiseTrader"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 NoiseTrader population
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 95.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rule/records"           # Source: target §8.1 coordinator record path
+      initial_cash: 500000.0                                      # Source: target §9 NoiseTrader initial_cash row; §4.5 small book (Black 1986)
+      initial_position: 200                                       # Source: target §9 NoiseTrader initial_position row; §4.5
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      trade_probability: 0.3                                      # Source: target §9 trade_probability row; §4.5 Bernoulli gate
+      noise_size: 150                                             # Source: target §9 noise_size row; §4.5 retained metadata (actual qty ~ randint(100,500))
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml

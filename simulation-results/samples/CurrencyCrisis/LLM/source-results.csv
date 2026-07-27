@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,CurrencyCrisis,LLM,SUCCESS,0,7210.539,2026-05-23T20:03:19,2026-05-23T22:03:29,config/simulation.yml,examples/CurrencyCrisis/LLM/run_currencycrisis_llm.py,logs/CurrencyCrisis__LLM.log,,200,200,

@@ -15,26 +15,26 @@ connections:
   # Market → All investors
   # num_instances: 2 → short_seller_1/2, momentum_buyer_1/2, retail_1/2
   market:
-    - short_seller
-    - momentum_buyer
-    - retail
-    - value_investor
-    - institutional
+    - rule_short_seller
+    - rule_momentum_buyer
+    - rule_retail_trader
+    - rule_value_investor
+    - rule_institutional_holder
 
   # num_instances: 2 → expands to short_seller_1/2 → market
-  short_seller:
+  rule_short_seller:
     - market
 
   # num_instances: 2 → expands to momentum_buyer_1/2 → market
-  momentum_buyer:
+  rule_momentum_buyer:
     - market
 
   # num_instances: 2 → expands to retail_1/2 → market
-  retail:
+  rule_retail_trader:
     - market
 
-  value_investor:
+  rule_value_investor:
     - market
 
-  institutional:
+  rule_institutional_holder:
     - market

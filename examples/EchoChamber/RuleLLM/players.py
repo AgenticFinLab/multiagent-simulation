@@ -39,6 +39,7 @@ Environment Variables:
 import logging
 import os
 import json as _json
+import math
 import random
 import re as _re
 import sys
@@ -56,7 +57,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error
 
 logger = logging.getLogger("EchoChamberRuleLLM")
 
@@ -110,9 +111,13 @@ class OpinionEnvironment(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
 
             self.state.custom_state["polarization"] = extras["initial_polarization"]
-            self.state.custom_state["mean_opinion"] = 0.0
-            self.state.custom_state["cluster_separation"] = 0.0
-            self.state.custom_state["cross_cutting_exposure"] = 0.5
+            self.state.custom_state["mean_opinion"] = extras["initial_mean_opinion"]
+            self.state.custom_state["cluster_separation"] = extras[
+                "initial_cluster_separation"
+            ]
+            self.state.custom_state["cross_cutting_exposure"] = extras[
+                "initial_cross_cutting_exposure"
+            ]
 
             custom_state_hot_limit = extras["custom_state_hot_limit"]
             self.state.custom_state["polarization_history"] = HistoryBuffer(
@@ -161,6 +166,14 @@ class OpinionEnvironment(GeneralPlayer):
         # Aggregate agent actions
         polarize_actions = [a for a in actions if a["action_type"] == "polarize"]
         depolarize_actions = [a for a in actions if a["action_type"] == "depolarize"]
+        valid_action_types = {"polarize", "neutral", "depolarize"}
+        for action in actions:
+            if action["action_type"] not in valid_action_types:
+                raise ValueError(f"Invalid social action type: {action['action_type']}")
+            if not 0.0 <= action["intensity"] <= 1.0:
+                raise ValueError(f"Action intensity outside [0, 1]: {action['intensity']}")
+            if not -1.0 <= action["opinion"] <= 1.0:
+                raise ValueError(f"Opinion outside [-1, 1]: {action['opinion']}")
 
         total_polarize = sum(a["intensity"] for a in polarize_actions)
         total_depolarize = sum(a["intensity"] for a in depolarize_actions)
@@ -177,7 +190,9 @@ class OpinionEnvironment(GeneralPlayer):
         # Update polarization: agent actions push it, center-pull resists
         action_effect = polarization_impact * net_polarization
         # Centripetal force: weak pull toward moderate center
-        center_pull = centripetal_force * (0.3 - current_polarization)
+        center_pull = centripetal_force * (
+            extras["polarization_equilibrium"] - current_polarization
+        )
         noise = random.gauss(0, noise_std)
 
         new_polarization = max(
@@ -205,9 +220,14 @@ class OpinionEnvironment(GeneralPlayer):
             new_cluster_separation = self.state.custom_state["cluster_separation"]
 
         # Cross-cutting exposure: fraction of actions from agents near center
-        center_agents = sum(1 for a in actions if abs(a["opinion"] or 0) < 0.3)
-        total_agents = max(len(actions), 1)
-        new_cross_cutting = center_agents / total_agents
+        if actions:
+            threshold = extras["moderate_opinion_threshold"]
+            center_agents = sum(
+                1 for action in actions if abs(action["opinion"]) < threshold
+            )
+            new_cross_cutting = center_agents / len(actions)
+        else:
+            new_cross_cutting = self.state.custom_state["cross_cutting_exposure"]
 
         # Update state
         self.state.custom_state["polarization"] = new_polarization
@@ -316,7 +336,12 @@ class RuleLLMSocialAgent(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
-            self.state.custom_state["my_opinion"] = extras["initial_opinion"]
+            initial_opinion = extras["initial_opinion"]
+            if extras["alternate_initial_sign"] and initial_opinion != 0.0:
+                instance_number = int(self.identity.rsplit("_", 1)[1])
+                if instance_number % 2 == 0:
+                    initial_opinion = -initial_opinion
+            self.state.custom_state["my_opinion"] = initial_opinion
 
             load_dotenv()
             llm_config = extras["llm"]
@@ -402,49 +427,25 @@ Respond with ONLY valid JSON:
 """
 
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse LLM response with analysis and decision sections.
+        """Parse the canonical tagged EchoChamber decision contract.
 
         EchoChamber expects: {"action_type": ..., "intensity": ..., "reasoning": ...}
-        The shared ``parse_llm_response_with_thinking`` validates for financial
-        trading fields, so we do our own field validation here.
+        Both tags are required so malformed output is retried rather than accepted
+        through an undocumented fallback format.
         """
-
-        analysis = ""
-        decision_json = None
-
         analysis_match = _re.search(
             r"<analysis>(.*?)</analysis>", response_text, _re.DOTALL
         )
-        if not analysis_match:
-            analysis_match = _re.search(
-                r"<think>(.*?)</think>", response_text, _re.DOTALL
-            )
-        if analysis_match:
-            analysis = analysis_match.group(1).strip()
-
         decision_match = _re.search(
             r"<decision>(.*?)</decision>", response_text, _re.DOTALL
         )
-        if decision_match:
-            decision_json = decision_match.group(1).strip()
+        if analysis_match is None or not analysis_match.group(1).strip():
+            raise ValueError("Missing or empty <analysis> section")
+        if decision_match is None or not decision_match.group(1).strip():
+            raise ValueError("Missing or empty <decision> section")
 
-        if not decision_json:
-            code_match = _re.search(
-                r"```(?:json)?\s*(.*?)\s*```", response_text, _re.DOTALL
-            )
-            if code_match:
-                decision_json = code_match.group(1).strip()
-            else:
-                json_match = _re.search(r"\{[^{}]*\}", response_text, _re.DOTALL)
-                if json_match:
-                    decision_json = json_match.group(0)
-
-        if not decision_json:
-            raise ValueError(
-                f"No decision JSON found in response: {response_text[:100]}"
-            )
-
-
+        analysis = analysis_match.group(1).strip()
+        decision_json = decision_match.group(1).strip()
         try:
             parsed = _json.loads(decision_json)
         except _json.JSONDecodeError:
@@ -457,16 +458,20 @@ Respond with ONLY valid JSON:
         action_type = str(parsed["action_type"]).lower()
         if action_type not in {"polarize", "neutral", "depolarize"}:
             raise ValueError(f"Invalid action_type: {parsed['action_type']!r}")
+        if isinstance(parsed["intensity"], bool):
+            raise ValueError(f"Invalid intensity: {parsed['intensity']!r}")
         try:
             intensity = float(parsed["intensity"])
         except (TypeError, ValueError) as exc:
             raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
+        if not math.isfinite(intensity) or not 0.0 <= intensity <= 1.0:
+            raise ValueError(f"Intensity outside [0, 1]: {intensity!r}")
         reasoning = str(parsed["reasoning"]).strip()
         if not reasoning:
             raise ValueError("Empty reasoning")
 
         parsed["action_type"] = action_type
-        parsed["intensity"] = self._apply_intensity_constraints(intensity)
+        parsed["intensity"] = intensity
         parsed["reasoning"] = reasoning
         parsed["analysis"] = analysis
         return parsed
@@ -490,14 +495,16 @@ Respond with ONLY valid JSON:
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        max_retries = 3
+        max_retries = int(llm_config["max_retries"])
+        if max_retries < 1:
+            raise ValueError("extras.llm.max_retries must be at least 1")
         decision = None
         last_error = None
         for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 infer_output = llm_client.run([infer_input])
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                decision = self._parse_llm_response(infer_output.response)
                 break
             except Exception as exc:
                 last_error = exc
@@ -519,19 +526,19 @@ Respond with ONLY valid JSON:
 
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
-        reasoning = str(decision.pop("reasoning"))[:120]
+        reasoning = str(decision.pop("reasoning"))
         analysis = str(decision.pop("analysis"))
 
         # Update opinion based on LLM-decided action type
         # Opinion shifts follow the same direction as the rule-based counterpart
         my_opinion = self.state.custom_state["my_opinion"]
+        polarize_step = float(self.config.extras["polarize_opinion_step"])
+        depolarize_step = float(self.config.extras["depolarize_opinion_step"])
         if action_type == "polarize":
-            # Polarizing: opinion shifts toward the extreme of current direction
-            shift = 0.05 * (1 if my_opinion >= 0 else -1)
-            my_opinion += shift
+            direction = 1 if my_opinion >= 0 else -1
+            my_opinion += polarize_step * intensity * direction
         elif action_type == "depolarize":
-            # Depolarizing: opinion shifts toward center
-            my_opinion *= 0.95
+            my_opinion *= 1.0 - depolarize_step * intensity
         my_opinion = self._clamp_opinion(my_opinion)
         self.state.custom_state["my_opinion"] = my_opinion
 

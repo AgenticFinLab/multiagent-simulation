@@ -62,7 +62,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -73,9 +73,19 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import (
+    normalize_action_quantity,
+    signed_order_quantity,
+    validate_order,
+)
 
 logger = logging.getLogger("AssetBubbleRag")
+
+# Sentinel string injected into the LLM prompt when the RAG query returns no
+# relevant chunks. Defined here (players.py) as the source of truth and
+# imported by analysis.py so downstream diagnostics can identify fallback rounds
+# without duplicating the literal in multiple files.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -83,6 +93,13 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _infer_response_text(infer_output: Any) -> str:
+    """Read response text from current or legacy lmbase output objects."""
+    if hasattr(infer_output, "response"):
+        return infer_output.response
+    return infer_output.outputs[0].response
 
 
 # =============================================================================
@@ -149,7 +166,7 @@ class Market(GeneralPlayer):
                     {
                         "investor": inb.sender_id,
                         "price": order["bid_price"],
-                        "quantity": order["quantity"],
+                        "quantity": signed_order_quantity(order),
                         "strategy": order["strategy"],
                         "reasoning": order["reasoning"],
                     }
@@ -699,7 +716,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         llm_config = self.config.extras["llm"]
@@ -771,8 +788,8 @@ class RagLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                infer_output = llm_client.run([infer_input])
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                infer_output = llm_client.run([infer_input]).outputs[0]
+                decision = self._parse_llm_response(_infer_response_text(infer_output))
                 break
             except Exception as exc:
                 last_error = exc
@@ -788,8 +805,11 @@ class RagLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM failed after {max_retries} retries: {last_error}"
             )
 
+        action, quantity_magnitude = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
+        quantity = -quantity_magnitude if action == "sell" else quantity_magnitude
         if bid_price <= 0:
             bid_price = market_data["price"]
         quantity = self._apply_constraints(bid_price, quantity)
@@ -820,7 +840,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
 
         order = {
-            "action": decision["action"],
+            "action": action,
             "bid_price": bid_price,
             "quantity": quantity,
             "strategy": strategy_name,
@@ -870,7 +890,7 @@ class RagLLMNoiseTrader(RagLLMInvestor):
     pass
 
 
-class RagLLMValueInvestor(RagLLMInvestor):
+class RagLLMFundamentalInvestor(RagLLMInvestor):
     """RAG-augmented value rules with retrieved knowledge. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass

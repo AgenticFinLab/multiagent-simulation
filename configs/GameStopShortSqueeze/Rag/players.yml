@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.GameStopShortSqueeze.Rag.players:Market"
   num_instances: 1
@@ -30,33 +31,33 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_price: 20.0
-      fundamental_value: 20.0
-      price_impact: 0.04
-      mean_reversion: 0.01
-      noise_std: 0.02
-      initial_short_interest: 1.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      price_impact: 0.04  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.02  # Source: simulation-bases.md §6
+      initial_short_interest: 1.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
-retailcoordinated:
+ragllm_retail_coordinated:
   name: "RetailCoordinated"
   class: "examples.GameStopShortSqueeze.Rag.players:RagLLMRetailCoordinated"
   num_instances: 3
   config:
-    identity: "retailcoordinated"
+    identity: "ragllm_retail_coordinated"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 100
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 100  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_RETAIL_COORDINATED_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -84,23 +85,23 @@ retailcoordinated:
           top_k: 5
   persona: !include persona.yml
 
-shortsellerhf:
+ragllm_short_seller_hf:
   name: "ShortSellerHF"
   class: "examples.GameStopShortSqueeze.Rag.players:RagLLMShortSellerHF"
   num_instances: 2
   config:
-    identity: "shortsellerhf"
+    identity: "ragllm_short_seller_hf"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: -1000
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: -1000  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_SHORT_SELLER_HF_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -128,23 +129,23 @@ shortsellerhf:
           top_k: 5
   persona: !include persona.yml
 
-marketmakergamma:
+ragllm_market_maker_gamma:
   name: "MarketMakerGamma"
   class: "examples.GameStopShortSqueeze.Rag.players:RagLLMMarketMakerGamma"
   num_instances: 1
   config:
-    identity: "marketmakergamma"
+    identity: "ragllm_market_maker_gamma"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 3000000.0
-      initial_position: 0
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 3000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_MARKET_MAKER_GAMMA_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -172,23 +173,23 @@ marketmakergamma:
           top_k: 5
   persona: !include persona.yml
 
-institutionalvalue:
+ragllm_institutional_value:
   name: "InstitutionalValue"
   class: "examples.GameStopShortSqueeze.Rag.players:RagLLMInstitutionalValue"
   num_instances: 1
   config:
-    identity: "institutionalvalue"
+    identity: "ragllm_institutional_value"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: 2000
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 2000  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_INSTITUTIONAL_VALUE_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"
@@ -216,23 +217,23 @@ institutionalvalue:
           top_k: 5
   persona: !include persona.yml
 
-momentumretail:
+ragllm_momentum_retail:
   name: "NoiseTrader"
   class: "examples.GameStopShortSqueeze.Rag.players:RagLLMMomentumRetail"
   num_instances: 2
   config:
-    identity: "momentumretail"
+    identity: "ragllm_momentum_retail"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"
-      initial_cash: 300000.0
-      initial_position: 0
-      initial_price: 20.0
-      fundamental_value: 20.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GameStopShortSqueeze/Rag/records"  # Source: framework infrastructure
+      initial_cash: 300000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 20.0  # Source: simulation-bases.md §6
+      fundamental_value: 20.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GameStopShortSqueeze.Rag.prompts:RAGLLM_MOMENTUM_RETAIL_SYS"
         user_message: "examples.GameStopShortSqueeze.Rag.prompts:RAG_USER_TEMPLATE"

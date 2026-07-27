@@ -53,7 +53,7 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from .prompts import (
     RAGLLM_FUNDAMENTALIST_SYS,
     RAGLLM_TREND_FOLLOWER_SYS,
@@ -73,6 +73,8 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("VolatilityClusteringRag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 # =============================================================================
@@ -613,7 +615,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         portfolio_value = cash + position * market_data["price"]

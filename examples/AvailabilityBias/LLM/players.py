@@ -24,7 +24,7 @@ from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.AvailabilityBias.Rule.players import Market
 
 logger = logging.getLogger("AvailabilityBias.LLM")
@@ -146,10 +146,8 @@ class LLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                infer_output = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                infer_output = llm_client.run([infer_input]).outputs[0]
+                decision = parse_llm_response_with_thinking(infer_output.response)
                 decision = _validate_decision(decision, self.identity)
                 break
             except Exception as exc:

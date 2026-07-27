@@ -4,8 +4,7 @@
 Endowment effect: LLM-driven biased holders vs. rational agents
 
 Usage:
-    python examples/EndowmentEffect/LLM/run_endowmenteffect_llm.py \
-        -c configs/EndowmentEffect/LLM/simulation.yml
+    python -m examples.EndowmentEffect.LLM.run_endowmenteffect_llm -c configs/EndowmentEffect/LLM/simulation.yml
 """
 
 import argparse
@@ -18,7 +17,7 @@ from masim.simulator.general import GeneralSimulator
 from masim.utils.config import load_config, setup_logging
 
 
-async def main():
+async def main() -> None:
     load_dotenv()
     setup_logging()
 
@@ -44,7 +43,7 @@ async def main():
 
     try:
         await simulator.setup()
-        results = await simulator.run()
+        await simulator.run()
         print("\n" + "=" * 70)
         print("Simulation Complete!")
         print("=" * 70)

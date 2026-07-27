@@ -1,8 +1,18 @@
 # =============================================================================
-# ShortSqueezeLLM Players Configuration
+# ShortSqueeze RuleLLM Players Configuration
+# =============================================================================
+# Traceability: every extras leaf below carries a `# Source: target §9 <param>
+# row; <citation>` comment referencing examples/ShortSqueeze/finance-shortsqueeze.md.
+# Liquidity-aware market extension (target §8.1): P(t+1) = max(1, P(t) +
+# lambda × LiquidityFactor × net_demand + gamma × (F − P) + epsilon) with
+# base_liquidity, high_impact_multiplier, low_liquidity_threshold.
+# Order-contract note: this scenario uses `{bid_price, quantity, strategy,
+# is_short_cover, provides_liquidity}` in the RuleLLM variant; `strategy` is
+# derived at runtime from `self.__class__.__name__` inside the player class.
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Short Interest Tracking"
   class: "examples.ShortSqueeze.RuleLLM.players:Market"
   num_instances: 1
@@ -14,16 +24,16 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/RuleLLM/records"
-      fundamental_value: 50.0
-      initial_price: 30.0
-      base_price_impact: 0.1
-      mean_reversion: 0.005
-      noise_std: 0.5
-      initial_short_interest: 80.0
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      fundamental_value: 50.0  # Source: target §9 fundamental_value row.
+      initial_price: 30.0  # Source: target §9 initial_price row.
+      base_price_impact: 0.1  # Source: target §9 price_impact / base_price_impact row; RuleLLM/Rag alias.
+      mean_reversion: 0.005  # Source: target §9 mean_reversion row.
+      noise_std: 0.5  # Source: target §9 noise_std row.
+      initial_short_interest: 80.0  # Source: target §9 initial_short_interest row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      base_liquidity: 50.0  # Source: target §9 base_liquidity row; RuleLLM/Rag liquidity-aware market.
+      high_impact_multiplier: 3.0  # Source: target §9 high_impact_multiplier row; liquidity-thin amplification.
+      low_liquidity_threshold: 30.0  # Source: target §9 low_liquidity_threshold row; liquidity amplification switch.
   persona: !include persona.yml
 
 rulellm_short_seller:
@@ -39,9 +49,9 @@ rulellm_short_seller:
       - rulellm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: -50.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: -50.0  # Source: target §9 initial_position (ShortSeller LLM/RuleLLM/Rag) row; §4.1.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_SHORT_SELLER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -52,22 +62,22 @@ rulellm_short_seller:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_retail_coord:
+rulellm_retail_coordinator:
   name: "RuleLLM Retail Coordinator"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMRetailCoordinator"
   # Expander → rulellm_retail_coord_1, rulellm_retail_coord_2, rulellm_retail_coord_3
   num_instances: 3
   config:
-    identity: "rulellm_retail_coord"
+    identity: "rulellm_retail_coordinator"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_RETAIL_TRADER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -78,22 +88,22 @@ rulellm_retail_coord:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_momentum:
+rulellm_momentum_buyer:
   name: "RuleLLM Momentum Buyer"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMMomentumBuyer"
   # Expander → rulellm_momentum_1, rulellm_momentum_2, rulellm_momentum_3
   num_instances: 3
   config:
-    identity: "rulellm_momentum"
+    identity: "rulellm_momentum_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_MOMENTUM_BUYER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -104,22 +114,22 @@ rulellm_momentum:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_value:
+rulellm_value_investor:
   name: "RuleLLM Value Investor"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMValueInvestor"
   # Expander → rulellm_value_1, rulellm_value_2
   num_instances: 2
   config:
-    identity: "rulellm_value"
+    identity: "rulellm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -130,21 +140,21 @@ rulellm_value:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_institutional:
+rulellm_institutional_holder:
   name: "RuleLLM Institutional Holder"
   class: "examples.ShortSqueeze.RuleLLM.players:RuleLLMInstitutionalHolder"
   num_instances: 1
   config:
-    identity: "rulellm_institutional"
+    identity: "rulellm_institutional_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 100.0  # Source: target §9 initial_position (InstitutionalHolder) row; §4.5 float scarcity.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       llm:
         sys_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_INSTITUTIONAL_HOLDER_SYS"
         user_message: "examples.ShortSqueeze.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

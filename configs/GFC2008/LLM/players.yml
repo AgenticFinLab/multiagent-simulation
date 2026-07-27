@@ -1,6 +1,7 @@
 # GFC2008 LLM Agent Configuration
 
 market:
+  archetype: credit-minsky-cycle  # -> AGENT_POOL/market/credit-minsky-cycle.md
   name: "Market"
   class: "examples.GFC2008.LLM.players:Market"
   num_instances: 1
@@ -11,34 +12,34 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/GFC2008/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.005
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.04  # Source: simulation-bases.md §6
+      mean_reversion: 0.005  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
-mbsoriginator:
+llm_mbs_originator:
   name: "MBSOriginator"
   class: "examples.GFC2008.LLM.players:LLMMBSOriginator"
   num_instances: 2
   config:
-    identity: "mbsoriginator"
+    identity: "llm_mbs_originator"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 3000
-      initial_price: 100.0
-      fundamental_value: 100.0
-      origination_rate: 0.08
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/LLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 3000  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      origination_rate: 0.08  # Source: simulation-bases.md §4.1.7
+      base_size: 300  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GFC2008.LLM.prompts:LLM_MBS_ORIGINATOR_SYS"
         user_message: "examples.GFC2008.LLM.prompts:LLM_USER_TEMPLATE"
@@ -49,27 +50,27 @@ mbsoriginator:
           max_tokens: 512
   persona: !include persona.yml
 
-leveragedinvestor:
+llm_leveraged_investor:
   name: "LeveragedInvestor"
   class: "examples.GFC2008.LLM.players:LLMLeveragedInvestor"
   num_instances: 2
   config:
-    identity: "leveragedinvestor"
+    identity: "llm_leveraged_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/LLM/records"
-      initial_cash: 2000000.0
-      initial_position: 1500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      margin_trigger: 0.30
-      fire_sale_fraction: 0.25
-      buy_threshold: -0.03
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/LLM/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 1500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      margin_trigger: 0.30  # Source: simulation-bases.md §4.3.7
+      fire_sale_fraction: 0.25  # Source: simulation-bases.md §4.3.7
+      buy_threshold: -0.03  # Source: simulation-bases.md §4.3.7
+      base_size: 350  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GFC2008.LLM.prompts:LLM_LEVERAGED_INVESTOR_SYS"
         user_message: "examples.GFC2008.LLM.prompts:LLM_USER_TEMPLATE"
@@ -80,25 +81,25 @@ leveragedinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-ratingagency:
+llm_rating_agency:
   name: "RatingAgency"
   class: "examples.GFC2008.LLM.players:LLMRatingAgency"
   num_instances: 2
   config:
-    identity: "ratingagency"
+    identity: "llm_rating_agency"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/LLM/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      overrating_bias: 0.20
-      base_size: 250
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      overrating_bias: 0.20  # Source: simulation-bases.md §4.2.7
+      base_size: 250  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GFC2008.LLM.prompts:LLM_RATING_AGENCY_SYS"
         user_message: "examples.GFC2008.LLM.prompts:LLM_USER_TEMPLATE"
@@ -109,25 +110,25 @@ ratingagency:
           max_tokens: 512
   persona: !include persona.yml
 
-distressedbuyer:
+llm_distressed_buyer:
   name: "DistressedBuyer"
   class: "examples.GFC2008.LLM.players:LLMDistressedBuyer"
   num_instances: 1
   config:
-    identity: "distressedbuyer"
+    identity: "llm_distressed_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/LLM/records"
-      initial_cash: 5000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      discount_threshold: 0.20
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/LLM/records"  # Source: framework infrastructure
+      initial_cash: 5000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      discount_threshold: 0.20  # Source: simulation-bases.md §4.4.7
+      base_size: 400  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GFC2008.LLM.prompts:LLM_DISTRESSED_BUYER_SYS"
         user_message: "examples.GFC2008.LLM.prompts:LLM_USER_TEMPLATE"
@@ -138,26 +139,26 @@ distressedbuyer:
           max_tokens: 512
   persona: !include persona.yml
 
-regulator:
+llm_regulator:
   name: "Regulator"
   class: "examples.GFC2008.LLM.players:LLMRegulator"
   num_instances: 1
   config:
-    identity: "regulator"
+    identity: "llm_regulator"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/GFC2008/LLM/records"
-      initial_cash: 10000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      intervention_threshold: 0.50
-      rescue_size: 500
-      rescue_probability: 0.6
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/GFC2008/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      intervention_threshold: 0.50  # Source: simulation-bases.md §4.5.7
+      rescue_size: 500  # Source: simulation-bases.md §4.5.7
+      rescue_probability: 0.6  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.GFC2008.LLM.prompts:LLM_REGULATOR_SYS"
         user_message: "examples.GFC2008.LLM.prompts:LLM_USER_TEMPLATE"

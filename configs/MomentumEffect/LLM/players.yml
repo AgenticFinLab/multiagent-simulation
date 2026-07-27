@@ -3,6 +3,7 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Momentum Dynamics"
   class: "examples.MomentumEffect.LLM.players:Market"
   num_instances: 1
@@ -13,15 +14,15 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/LLM/records"
-      initial_price: 100.0
-      initial_fundamental: 100.0
-      price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.3
-      drift_persistence: 0.95
-      drift_volatility: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      initial_fundamental: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.3  # Source: simulation-bases.md §6
+      drift_persistence: 0.95  # Source: simulation-bases.md §6
+      drift_volatility: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 llm_momentum_trader:
@@ -36,10 +37,10 @@ llm_momentum_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.LLM.prompts:LLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.MomentumEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -50,22 +51,22 @@ llm_momentum_trader:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_contrarian:
+llm_contrarian_trader:
   name: "LLM Contrarian Trader"
   class: "examples.MomentumEffect.LLM.players:LLMContrarianTrader"
   # Expander → llm_contrarian_1, llm_contrarian_2
   num_instances: 2
   config:
-    identity: "llm_contrarian"
+    identity: "llm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.LLM.prompts:LLM_CONTRARIAN_SYS"
         user_message: "examples.MomentumEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -76,22 +77,22 @@ llm_contrarian:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_technical:
+llm_technical_trader:
   name: "LLM Technical Trader"
   class: "examples.MomentumEffect.LLM.players:LLMTechnicalTrader"
   # Expander → llm_technical_1, llm_technical_2
   num_instances: 2
   config:
-    identity: "llm_technical"
+    identity: "llm_technical_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.LLM.prompts:LLM_TECHNICAL_SYS"
         user_message: "examples.MomentumEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -114,10 +115,10 @@ llm_trend_follower:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.LLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffect.LLM.prompts:LLM_USER_TEMPLATE"
@@ -128,22 +129,22 @@ llm_trend_follower:
           max_new_tokens: 500
   persona: !include persona.yml
 
-llm_fundamental:
+llm_fundamental_anchor:
   name: "LLM Fundamental Anchor"
   class: "examples.MomentumEffect.LLM.players:LLMFundamentalAnchor"
   # Expander → llm_fundamental_1, llm_fundamental_2
   num_instances: 2
   config:
-    identity: "llm_fundamental"
+    identity: "llm_fundamental_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/LLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.LLM.prompts:LLM_FUNDAMENTAL_SYS"
         user_message: "examples.MomentumEffect.LLM.prompts:LLM_USER_TEMPLATE"

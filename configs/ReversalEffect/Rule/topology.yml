@@ -7,12 +7,12 @@
 # The simulator expander resolves them to foo_1, foo_2, ... before building
 # the TopologyGraph, so all edge rules apply to every instance automatically.
 #
-#         contrarian ───────────────┐
-#         momentum ─────────────────┤
-#         overconfident ────────────┼──▶ market ──▶ all investors
-#         noise_trader ─────────────┤             (market data)
-#         value_investor ───────────┤
-#         index_tracker ────────────┘
+#         rule_contrarian_investor ───────────────┐
+#         rule_momentum_investor ─────────────────┤
+#         rule_overconfident_trader ────────────┼──▶ market ──▶ all investors
+#         rule_noise_trader ─────────────┤             (market data)
+#         rule_value_investor ───────────┤
+#         rule_index_tracker ────────────┘
 # =============================================================================
 
 type: "star"
@@ -23,30 +23,30 @@ sources:
 connections:
   # num_instances: 2 → contrarian_1/2, momentum_1/2, overconfident_1/2
   market:
-    - contrarian
-    - momentum
-    - overconfident
-    - noise_trader
-    - value_investor
-    - index_tracker
+    - rule_contrarian_investor
+    - rule_momentum_investor
+    - rule_overconfident_trader
+    - rule_noise_trader
+    - rule_value_investor
+    - rule_index_tracker
 
   # num_instances: 2 → expands to contrarian_1/2 → market
-  contrarian:
+  rule_contrarian_investor:
     - market
 
   # num_instances: 2 → expands to momentum_1/2 → market
-  momentum:
+  rule_momentum_investor:
     - market
 
   # num_instances: 2 → expands to overconfident_1/2 → market
-  overconfident:
+  rule_overconfident_trader:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market
 
-  value_investor:
+  rule_value_investor:
     - market
 
-  index_tracker:
+  rule_index_tracker:
     - market

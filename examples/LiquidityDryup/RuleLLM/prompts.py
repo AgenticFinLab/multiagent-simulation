@@ -8,10 +8,10 @@ Design principle:
 
 Agents:
     - RuleLLMMarketMaker → MarketMaker rules
-    - RuleLLMLiquidityDemander → LiquiditySeeker rules
-    - RuleLLMArbitrageur → ValueTrader rules
-    - RuleLLMValueInvestor → MomentumTrader rules
-    - RuleLLMForcedSeller → NoiseTrader rules
+    - RuleLLMLiquiditySeeker → LiquiditySeeker rules
+    - RuleLLMValueTrader → ValueTrader rules
+    - RuleLLMMomentumTrader → MomentumTrader rules
+    - RuleLLMNoiseTrader → NoiseTrader rules
 """
 
 # =============================================================================
@@ -28,7 +28,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from MarketMaker) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the MarketMaker strategy:
 - If absolute return exceeds 2%, withdraw: set provides_liquidity = 0.
@@ -59,7 +59,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from LiquiditySeeker) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the LiquiditySeeker strategy:
 - Target an order size based on execution need, around +/-15 shares in normal liquidity.
@@ -89,7 +89,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from ValueTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the ValueTrader strategy:
 - Estimate deviation as (fundamental - price) / fundamental.
@@ -120,7 +120,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from MomentumTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the MomentumTrader strategy:
 - If absolute return is at or below 1%, hold.
@@ -151,7 +151,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from NoiseTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the NoiseTrader strategy:
 - Submit small noisy orders with no systematic signal.

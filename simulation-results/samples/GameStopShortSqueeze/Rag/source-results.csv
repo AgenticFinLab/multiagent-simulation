@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-4,9,GameStopShortSqueeze,Rag,SUCCESS,0,19871.623,2026-05-22T08:50:52,2026-05-22T14:22:04,config/simulation.yml,examples/GameStopShortSqueeze/Rag/run_gamestopshortsqueeze_rag.py,logs/GameStopShortSqueeze__Rag.log,,200,200,,

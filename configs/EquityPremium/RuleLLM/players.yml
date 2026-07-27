@@ -1,8 +1,9 @@
 # =============================================================================
-# EquityPremiumLLM Players Configuration
+# EquityPremium RuleLLM Players Configuration
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Stock and Bond"
   class: "examples.EquityPremium.RuleLLM.players:Market"
   num_instances: 1
@@ -13,37 +14,45 @@ market:
     group_tags:
       - market
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/RuleLLM/records"
-      # ~6% annual / 252 days
+      # Source: target §9 — ~6% annual / 252 (Mehra & Prescott 1985)
       stock_expected_return: 0.000238
-      # ~1% annual / 252 days
+      # Source: target §9 — ~1% annual / 252
       bond_return: 0.0000397
-      # ~15% annual vol / sqrt(252)
+      # Source: target §9 — ~15% annual vol / sqrt(252)
       stock_volatility: 0.00945
+      # Source: target §9 — normalization
       initial_stock_price: 100.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-rulellm_myopic:
+rulellm_myopic_loss_averse:
   name: "RuleLLM Myopic Loss-Averse"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMMyopicLossAverse"
   # Expander → rulellm_myopic_1, rulellm_myopic_2, rulellm_myopic_3, rulellm_myopic_4, rulellm_myopic_5
   num_instances: 5
   config:
-    identity: "rulellm_myopic"
+    identity: "rulellm_myopic_loss_averse"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/RuleLLM/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
-      # 50% cash
+      # Source: simulation-bases.md §4.1 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.1 — initial stock position
       initial_stock_shares: 50.0
-      # 25% bonds
+      # Source: simulation-bases.md §4.1 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_MYOPIC_LOSS_AVERSE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -54,24 +63,31 @@ rulellm_myopic:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_long_term:
+rulellm_long_term_investor:
   name: "RuleLLM Long-Term Investor"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMLongTermInvestor"
   # Expander → rulellm_long_term_1, rulellm_long_term_2
   num_instances: 2
   config:
-    identity: "rulellm_long_term"
+    identity: "rulellm_long_term_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/RuleLLM/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.2 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.2 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.2 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_LONG_HORIZON_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -82,23 +98,30 @@ rulellm_long_term:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_institutional:
+rulellm_institutional_investor:
   name: "RuleLLM Institutional Investor"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMInstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "rulellm_institutional"
+    identity: "rulellm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/RuleLLM/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.3 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.3 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.3 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_RISK_NEUTRAL_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -109,24 +132,31 @@ rulellm_institutional:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_risk_averse:
+rulellm_risk_averse_saver:
   name: "RuleLLM Risk-Averse Saver"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMRiskAverseSaver"
   # Expander → rulellm_risk_averse_1, rulellm_risk_averse_2, rulellm_risk_averse_3
   num_instances: 3
   config:
-    identity: "rulellm_risk_averse"
+    identity: "rulellm_risk_averse_saver"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/RuleLLM/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.4 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.4 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.4 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_CONSERVATIVE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -137,24 +167,31 @@ rulellm_risk_averse:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_rational:
+rulellm_rational_optimizer:
   name: "RuleLLM Rational Optimizer"
   class: "examples.EquityPremium.RuleLLM.players:RuleLLMRationalOptimizer"
   # Expander → rulellm_rational_1, rulellm_rational_2
   num_instances: 2
   config:
-    identity: "rulellm_rational"
+    identity: "rulellm_rational_optimizer"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/RuleLLM/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.5 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.5 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.5 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.EquityPremium.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

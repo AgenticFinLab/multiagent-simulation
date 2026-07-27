@@ -1,4 +1,6 @@
 # SorosPound Rag Agent Configuration
+# All extras values traceable to target §9 Parameter Seeds via inline `# Source:` comments.
+# `agent_type` field required per agent-design-skill.md §3.6.0 I/O Contract.
 
 knowledge:
   backend: "local"
@@ -20,6 +22,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.SorosPound.Rag.players:Market"
   num_instances: 1
@@ -30,35 +33,36 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rag/records"
-      initial_price: 100.0
-      peg_rate: 100.0
-      fundamental_value: 95.0
-      price_impact: 0.03
-      mean_reversion: 0.015
-      noise_std: 0.012
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rag/records"            # Source: target §8.1 coordinator record path
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      peg_rate: 100.0                                             # Source: target §9 peg_rate row; §4.3
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row; §2.2, §4.1
+      price_impact: 0.03                                          # Source: target §9 price_impact row; §8.1
+      mean_reversion: 0.015                                       # Source: target §9 mean_reversion row; §2.4
+      noise_std: 0.012                                            # Source: target §9 noise_std row; Black 1986
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
   persona: !include persona.yml
 
-macrohedgefund:
+ragllm_macro_hedge_fund:
   name: "MacroHedgeFund"
   class: "examples.SorosPound.Rag.players:RagLLMMacroHedgeFund"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 MacroHedgeFund population
   config:
-    identity: "macrohedgefund"
+    identity: "ragllm_macro_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rag/records"
-      initial_cash: 5000000.0
-      initial_position: 800
-      initial_price: 100.0
-      fundamental_value: 95.0
-      leverage: 3.0
-      position_size: 600
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rag/records"            # Source: target §8.1 coordinator record path
+      agent_type: "MacroHedgeFund"                                # Source: target §7 agent class label; agent-design-skill.md §3.6.0 I/O contract
+      initial_cash: 5000000.0                                     # Source: target §9 MacroHedgeFund initial_cash row; §4.1
+      initial_position: 800                                       # Source: target §9 MacroHedgeFund initial_position row; §4.1
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      leverage: 3.0                                               # Source: target §9 leverage row; §4.1 retained metadata (Krugman 1979)
+      position_size: 600                                          # Source: target §9 MacroHedgeFund position_size row; §4.1 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -86,25 +90,26 @@ macrohedgefund:
           max_tokens: 600
   persona: !include persona.yml
 
-pegdefender:
+ragllm_peg_defender:
   name: "PegDefender"
   class: "examples.SorosPound.Rag.players:RagLLMPegDefender"
-  num_instances: 1
+  num_instances: 1                                                # Source: target §7 PegDefender population
   config:
-    identity: "pegdefender"
+    identity: "ragllm_peg_defender"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rag/records"
-      initial_cash: 10000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 95.0
-      reserve_capacity: 0.8
-      defense_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rag/records"            # Source: target §8.1 coordinator record path
+      agent_type: "PegDefender"                                   # Source: target §7 agent class label; agent-design-skill.md §3.6.0 I/O contract
+      initial_cash: 10000000.0                                    # Source: target §9 PegDefender initial_cash row; §4.3 reserves (Obstfeld 1996)
+      initial_position: 0                                         # Source: target §9 PegDefender initial_position row; §4.3
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      reserve_capacity: 0.8                                       # Source: target §9 reserve_capacity row; §4.3 retained metadata
+      defense_size: 500                                           # Source: target §9 defense_size row; §4.3 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -132,25 +137,26 @@ pegdefender:
           max_tokens: 600
   persona: !include persona.yml
 
-convergencetrader:
+ragllm_convergence_trader:
   name: "ConvergenceTrader"
   class: "examples.SorosPound.Rag.players:RagLLMConvergenceTrader"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 ConvergenceTrader population
   config:
-    identity: "convergencetrader"
+    identity: "ragllm_convergence_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 95.0
-      convergence_threshold: 0.03
-      position_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rag/records"            # Source: target §8.1 coordinator record path
+      agent_type: "ConvergenceTrader"                             # Source: target §7 agent class label; agent-design-skill.md §3.6.0 I/O contract
+      initial_cash: 1000000.0                                     # Source: target §9 ConvergenceTrader initial_cash row; §4.4
+      initial_position: 500                                       # Source: target §9 ConvergenceTrader initial_position row; §4.4
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      convergence_threshold: 0.03                                 # Source: target §9 convergence_threshold row; §4.4 retained metadata
+      position_size: 300                                          # Source: target §9 ConvergenceTrader position_size row; §4.4 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -178,25 +184,26 @@ convergencetrader:
           max_tokens: 600
   persona: !include persona.yml
 
-opportunistictrader:
+ragllm_opportunistic_trader:
   name: "OpportunisticTrader"
   class: "examples.SorosPound.Rag.players:RagLLMOpportunisticTrader"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 OpportunisticTrader population
   config:
-    identity: "opportunistictrader"
+    identity: "ragllm_opportunistic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 95.0
-      attack_join_threshold: 0.3
-      position_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rag/records"            # Source: target §8.1 coordinator record path
+      agent_type: "OpportunisticTrader"                           # Source: target §7 agent class label; agent-design-skill.md §3.6.0 I/O contract
+      initial_cash: 2000000.0                                     # Source: target §9 OpportunisticTrader initial_cash row; §4.2 (Obstfeld 1996)
+      initial_position: 600                                       # Source: target §9 OpportunisticTrader initial_position row; §4.2
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      attack_join_threshold: 0.3                                  # Source: target §9 attack_join_threshold row; §4.2 retained metadata
+      position_size: 400                                          # Source: target §9 OpportunisticTrader position_size row; §4.2 metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -224,25 +231,26 @@ opportunistictrader:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SorosPound.Rag.players:RagLLMNoiseTrader"
-  num_instances: 2
+  num_instances: 2                                                # Source: target §7 NoiseTrader population
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/SorosPound/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 95.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/SorosPound/Rag/records"            # Source: target §8.1 coordinator record path
+      agent_type: "NoiseTrader"                                   # Source: target §7 agent class label; agent-design-skill.md §3.6.0 I/O contract
+      initial_cash: 500000.0                                      # Source: target §9 NoiseTrader initial_cash row; §4.5 (Black 1986)
+      initial_position: 200                                       # Source: target §9 NoiseTrader initial_position row; §4.5
+      initial_price: 100.0                                        # Source: target §9 initial_price row
+      fundamental_value: 95.0                                     # Source: target §9 fundamental_value row
+      trade_probability: 0.3                                      # Source: target §9 trade_probability row; §4.5 Bernoulli gate
+      noise_size: 150                                             # Source: target §9 noise_size row; §4.5 retained metadata
+      custom_state_hot_limit: 3                                   # Source: target §9 custom_state_hot_limit row
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

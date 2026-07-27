@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-2,9,LossAversion,Rag,SUCCESS,0,16761.393,2026-05-22T09:45:21,2026-05-22T14:24:42,config/simulation.yml,examples/LossAversion/Rag/run_lossaversion_rag.py,logs/LossAversion__Rag.log,,200,200,,

@@ -48,7 +48,7 @@ from masim.utils.history import HistoryBuffer
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.LiquidityDryup.RuleLLM.prompts import (
     RULELLM_MARKET_MAKER_SYS,
     RULELLM_LIQUIDITY_SEEKER_SYS,
@@ -319,7 +319,7 @@ class RuleLLMInvestor(GeneralPlayer):
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections.
 
-        Delegates to shared utility in examples/llm_utils.py
+        Delegates to shared utility in masim.utils.llm_utils.py
         """
         return parse_llm_response_with_thinking(response_text)
 
@@ -432,25 +432,25 @@ class RuleLLMMarketMaker(RuleLLMInvestor):
     _system_prompt = RULELLM_MARKET_MAKER_SYS
 
 
-class RuleLLMLiquidityDemander(RuleLLMInvestor):
+class RuleLLMLiquiditySeeker(RuleLLMInvestor):
     """Hybrid: LiquiditySeeker rules + LLM reasoning. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RULELLM_LIQUIDITY_SEEKER_SYS
 
 
-class RuleLLMArbitrageur(RuleLLMInvestor):
+class RuleLLMValueTrader(RuleLLMInvestor):
     """Hybrid: ValueTrader rules + LLM reasoning. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RULELLM_VALUE_TRADER_SYS
 
 
-class RuleLLMValueInvestor(RuleLLMInvestor):
+class RuleLLMMomentumTrader(RuleLLMInvestor):
     """Hybrid: MomentumTrader rules + LLM reasoning. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RULELLM_MOMENTUM_TRADER_SYS
 
 
-class RuleLLMForcedSeller(RuleLLMInvestor):
+class RuleLLMNoiseTrader(RuleLLMInvestor):
     """Hybrid: NoiseTrader rules + LLM reasoning. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RULELLM_NOISE_TRADER_SYS
@@ -460,8 +460,8 @@ __all__ = [
     "Market",
     "RuleLLMInvestor",
     "RuleLLMMarketMaker",
-    "RuleLLMLiquidityDemander",
-    "RuleLLMArbitrageur",
-    "RuleLLMValueInvestor",
-    "RuleLLMForcedSeller",
+    "RuleLLMLiquiditySeeker",
+    "RuleLLMValueTrader",
+    "RuleLLMMomentumTrader",
+    "RuleLLMNoiseTrader",
 ]

@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: bond-yield-spread-inverse  # -> AGENT_POOL/market/bond-yield-spread-inverse.md
   name: "Market"
   class: "examples.EuropeanDebtCrisis.Rag.players:Market"
   num_instances: 1
@@ -30,36 +31,36 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 95.0  # Source: AGENT_POOL/finance/market.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      core_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      price_impact: 0.05  # Source: AGENT_POOL/finance/market.md §6
+      mean_reversion: 0.02  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
-peripherybondseller:
+ragllm_periphery_bond_seller:
   name: "PeripheryBondSeller"
   class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMPeripheryBondSeller"
   num_instances: 2
   config:
-    identity: "peripherybondseller"
+    identity: "ragllm_periphery_bond_seller"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      panic_threshold: 5.0
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      initial_price: 95.0  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      core_price: 100.0  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      panic_threshold: 5.0  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      base_size: 300  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-periphery-bond-seller.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_PERIPHERY_BOND_SELLER_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
@@ -87,26 +88,26 @@ peripherybondseller:
           top_k: 5
   persona: !include persona.yml
 
-creditorpanicker:
+ragllm_creditor_panicker:
   name: "CreditorPanicker"
   class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMCreditorPanicker"
   num_instances: 2
   config:
-    identity: "creditorpanicker"
+    identity: "ragllm_creditor_panicker"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 400
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      stress_threshold: 3.0
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      initial_position: 400  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      initial_price: 95.0  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      core_price: 100.0  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      stress_threshold: 3.0  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      base_size: 350  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-creditor-panicker.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CREDITOR_PANICKER_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
@@ -134,26 +135,26 @@ creditorpanicker:
           top_k: 5
   persona: !include persona.yml
 
-corebondbuyer:
+ragllm_core_bond_buyer:
   name: "CoreBondBuyer"
   class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMCoreBondBuyer"
   num_instances: 1
   config:
-    identity: "corebondbuyer"
+    identity: "ragllm_core_bond_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      value_threshold: 0.05
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      initial_price: 95.0  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      core_price: 100.0  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      value_threshold: 0.05  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      base_size: 300  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-core-bond-buyer.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_CORE_BOND_BUYER_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
@@ -181,26 +182,26 @@ corebondbuyer:
           top_k: 5
   persona: !include persona.yml
 
-ecbintervenor:
+ragllm_ecb_intervenor:
   name: "ECBIntervenor"
   class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMECBIntervenor"
   num_instances: 1
   config:
-    identity: "ecbintervenor"
+    identity: "ragllm_ecb_intervenor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
-      initial_cash: 5000000.0
-      initial_position: 0
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      ecb_threshold: 8.0
-      intervention_size: 600
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      initial_cash: 5000000.0  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      initial_price: 95.0  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      core_price: 100.0  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      ecb_threshold: 8.0  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      intervention_size: 600  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-ecb-intervenor.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_ECB_INTERVENOR_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"
@@ -228,27 +229,27 @@ ecbintervenor:
           top_k: 5
   persona: !include persona.yml
 
-hedgedfund:
+ragllm_hedged_fund:
   name: "HedgedFund"
   class: "examples.EuropeanDebtCrisis.Rag.players:RagLLMHedgedFund"
   num_instances: 1
   config:
-    identity: "hedgedfund"
+    identity: "ragllm_hedged_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 95.0
-      fundamental_value: 100.0
-      core_price: 100.0
-      spread_buy_threshold: 7.0
-      spread_exit_threshold: 3.0
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      initial_price: 95.0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      core_price: 100.0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      spread_buy_threshold: 7.0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      spread_exit_threshold: 3.0  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      base_size: 400  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-hedged-fund.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_HEDGED_FUND_SYS"
         user_message: "examples.EuropeanDebtCrisis.Rag.prompts:RAG_USER_TEMPLATE"

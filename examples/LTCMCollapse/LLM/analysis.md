@@ -15,6 +15,7 @@ The LLM variant uses the same price-series analysis as Rule and adds post-run LL
 | Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest API-mode price |
 | Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | end-state stabilization |
 | LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse/contract/action-quality review |
+| Action distribution | `analysis-bases.md §3.4` | `analyze_action_distribution(agent_records)` | buy/sell/hold counts for API decisions |
 
 ## §3 Variant-Specific Notes
 

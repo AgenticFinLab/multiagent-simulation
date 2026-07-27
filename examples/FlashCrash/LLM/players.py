@@ -46,7 +46,7 @@ from lmbase.inference.base import InferInput
 
 # Shared utility for parsing LLM responses with analysis/decision format
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("FlashCrashLLM")
 

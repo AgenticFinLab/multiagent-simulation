@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Herd Effect Rule Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_herdeffect_dynamics.png,
 02_herdeffect_analysis.png, and 03_summary.png.
 """

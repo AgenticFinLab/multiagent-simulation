@@ -11,27 +11,27 @@ sources:
 
 connections:
   market:
-    - ragllm_momentum
-    - ragllm_arbitrageur
-    - ragllm_noise
-    - ragllm_value
-    - ragllm_leveraged
-    - ragllm_conservative
+    - ragllm_momentum_speculator
+    - ragllm_rational_arbitrageur
+    - ragllm_noise_trader
+    - ragllm_fundamental_investor
+    - ragllm_leveraged_buyer
+    - ragllm_conservative_holder
 
-  ragllm_momentum:
+  ragllm_momentum_speculator:
     - market
 
-  ragllm_arbitrageur:
+  ragllm_rational_arbitrageur:
     - market
 
-  ragllm_noise:
+  ragllm_noise_trader:
     - market
 
-  ragllm_value:
+  ragllm_fundamental_investor:
     - market
 
-  ragllm_leveraged:
+  ragllm_leveraged_buyer:
     - market
 
-  ragllm_conservative:
+  ragllm_conservative_holder:
     - market

@@ -7,7 +7,7 @@ from typing import Any, Dict, Mapping, Optional
 
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +57,11 @@ def _positive_int(value: Any) -> Optional[int]:
 
 def infer_max_order_size(extras: Mapping[str, Any]) -> int:
     """Infer the role-level maximum order size from CreditCycle config extras."""
-    explicit = _positive_int(extras.get("order_size"))
+    explicit = _positive_int(extras["order_size"]) if "order_size" in extras else None
     if explicit is not None:
         base_size = explicit
     else:
-        sizes = [_positive_int(extras.get(key)) for key in SIZE_KEYS]
+        sizes = [_positive_int(extras[key]) for key in SIZE_KEYS if key in extras]
         base_size = max((size for size in sizes if size is not None), default=0)
 
     multiplier = 1.0

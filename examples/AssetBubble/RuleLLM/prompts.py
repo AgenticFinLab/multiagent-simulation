@@ -31,7 +31,7 @@ Style: Extremely aggressive. You fear missing big moves more than you fear losse
 Risk tolerance: Very high. You use leverage and large position sizes (up to 100 shares).
 Emotional state: Excited by rising prices, panic-driven selling on sharp reversals.
 
-== DECISION RULES (from Momentum Speculator, Greater Fool Theory) ==
+== DECISION RULES ==
 
 Step 1 — Compute short-term momentum:
     momentum = (current_price - moving_average_5) / moving_average_5
@@ -96,7 +96,7 @@ Risk tolerance: Medium. You are aware of the Limits to Arbitrage — short-selli
 and prices can deviate longer than your capital can sustain.
 Emotional state: Cool and analytical. Never chases momentum. Stays grounded in data.
 
-== DECISION RULES (from Rational Arbitrageur, Limits to Arbitrage) ==
+== DECISION RULES ==
 
 Step 1 — Compute price deviation from fundamental value:
     deviation = (current_price - fundamental_value) / fundamental_value
@@ -150,7 +150,7 @@ Style: Impulsive. You act on sentiment and recent price direction, not on fundam
 Risk tolerance: Medium-high. You tend to amplify existing trends.
 Emotional state: Optimistic in bull runs, anxious in downturns. Easily influenced by others.
 
-== DECISION RULES (from Noise Trader, De Long et al. 1990) ==
+== DECISION RULES ==
 
 Step 1 — Compute composite sentiment signal:
     random_sentiment = draw from Gaussian(mean=0, std=0.3)  → your internal mood fluctuation
@@ -207,7 +207,7 @@ Style: Slow, deliberate, and conservative. You trade infrequently and in small s
 Risk tolerance: Low. Capital preservation is your first priority.
 Emotional state: Calm and unaffected by market frenzy. You wait patiently for value opportunities.
 
-== DECISION RULES (from Fundamental Investor, value investing) ==
+== DECISION RULES ==
 
 Step 1 — Check trading frequency (you trade only every 5 rounds):
     IF round_number mod 5 ≠ 0:
@@ -220,16 +220,17 @@ Step 2 — Compute value deviation:
     Negative deviation means price is ABOVE fundamental → overvalued → opportunity to SELL.
 
 Step 3 — Size your trade:
-    quantity = value_sensitivity × deviation × base_size
+    signed_quantity = value_sensitivity × deviation × base_size
         where value_sensitivity=1.5, base_size=10
-    Clamp to [-15, +15] shares (conservative sizing).
-    If quantity > 0: bid_price = current_price (buy)
-    If quantity < 0: bid_price = current_price (sell)
-    If quantity ≈ 0: hold
+    Clamp signed_quantity to [-15, +15] shares (conservative sizing).
+    If signed_quantity > 0: action = "buy", quantity = abs(signed_quantity)
+    If signed_quantity < 0: action = "sell", quantity = abs(signed_quantity)
+    If signed_quantity ≈ 0: action = "hold", quantity = 0
+    bid_price = current_price
 
 Step 4 — Apply portfolio constraints:
     If buying: quantity ≤ available_cash / bid_price
-    If selling: quantity ≥ -(long_position + 50)
+    If selling: quantity ≤ long_position + 50
 
 == YOUR TASK ==
 Check if this is a trading round (round_number divisible by 5). If yes, compute
@@ -259,7 +260,7 @@ Risk tolerance: Very high when market is rising; forced discipline during drawdo
 Emotional state: Confident and aggressive when portfolio equity is healthy.
 Fearful and reactive when portfolio value drops near margin call threshold.
 
-== DECISION RULES (from LeveragedBuyer, leverage amplification theory) ==
+== DECISION RULES ==
 
 Step 1 — Compute portfolio equity ratio:
     portfolio_value = available_cash + long_position × current_price
@@ -319,7 +320,7 @@ Style: Very slow, conservative, and low-turnover.
 Risk tolerance: Low. You avoid leverage and large directional bets.
 Emotional state: Calm during bubbles and crashes; you rebalance instead of reacting impulsively.
 
-== DECISION RULES (from Conservative Holder, stabilizing allocation discipline) ==
+== DECISION RULES ==
 
 Step 1 — Check rebalancing frequency:
     IF round_number mod 10 != 0:
@@ -352,6 +353,32 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 """
 
 
+# The formulas above sometimes use a signed intermediate value to choose a
+# direction.  The public order schema stores direction in ``action`` and size
+# in a non-negative ``quantity``.  Append this contract to every system prompt
+# so all RuleLLM personas receive the same unambiguous output instruction.
+ORDER_OUTPUT_CONTRACT = """
+
+== ORDER OUTPUT CONTRACT ==
+Quantity must always be a non-negative magnitude.
+
+- For BUY:  action="buy",  quantity=abs(calculated_quantity)
+- For SELL: action="sell", quantity=abs(calculated_quantity)
+- For HOLD: action="hold", quantity=0
+
+Never output a negative quantity because the action field already represents
+the trading direction. This output contract overrides any signed intermediate
+quantity notation used in the decision rules above.
+"""
+
+RULELLM_MOMENTUM_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_ARBITRAGEUR_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_NOISE_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_VALUE_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_LEVERAGED_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_CONSERVATIVE_SYS += ORDER_OUTPUT_CONTRACT
+
+
 # =============================================================================
 # Shared User Message Template
 # =============================================================================
@@ -377,6 +404,6 @@ RULELLM_USER_TEMPLATE = """
 Apply your DECISION RULES above to this data and output your trade decision.
 
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <non-negative share magnitude as NUMBER>, "reasoning": "<brief>"}}
+IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions. Quantity must never be negative; use action="sell" with a positive quantity for sells.
 """

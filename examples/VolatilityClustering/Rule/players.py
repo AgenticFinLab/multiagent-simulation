@@ -58,6 +58,7 @@ class Market(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
+        """Collect investor orders and initialize market state on first round."""
         round_num = observation.round
         self.state.custom_state["round"] = round_num
 
@@ -101,6 +102,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        """Update price via GARCH dynamics and aggregate investor orders."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
@@ -198,6 +200,7 @@ class Market(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        """Broadcast updated market state to all investors."""
         return Action(
             action_type="market_broadcast",
             payload=decision_payload,
@@ -218,6 +221,7 @@ class BaseInvestor(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
+        """Receive market broadcast and update price/volatility history."""
         round_num = observation.round
         self.state.custom_state["round"] = round_num
 
@@ -277,6 +281,7 @@ class BaseInvestor(GeneralPlayer):
             self.state.custom_state["position"] += quantity
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        """Submit investor order to the market."""
         return Action(
             action_type="investor_order",
             payload=decision_payload,
@@ -295,6 +300,7 @@ class Fundamentalist(BaseInvestor):
     """
 
     async def decide(self) -> Dict[str, Any]:
+        """Compute value-based contrarian order from fundamental deviation."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
@@ -364,6 +370,7 @@ class TrendFollower(BaseInvestor):
     """
 
     async def decide(self) -> Dict[str, Any]:
+        """Compute momentum order scaled by volatility regime."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
@@ -439,6 +446,7 @@ class NoiseTrader(BaseInvestor):
     """
 
     async def decide(self) -> Dict[str, Any]:
+        """Generate stochastic order with mean-reverting position bias."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
@@ -497,6 +505,7 @@ class SlowAdapter(BaseInvestor):
     """
 
     async def decide(self) -> Dict[str, Any]:
+        """Compute order from slowly-updated perceived value estimate."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]
@@ -569,6 +578,7 @@ class VolatilityTrader(BaseInvestor):
     """
 
     async def decide(self) -> Dict[str, Any]:
+        """Compute volatility-regime order: sell high-vol, buy low-vol."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         market_data = self.state.custom_state["market_data"]

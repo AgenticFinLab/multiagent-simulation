@@ -35,16 +35,21 @@ import random
 import importlib
 from typing import Any, Dict, Optional
 
+from dotenv import load_dotenv
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
+
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("HerdEffectRuleLLM")
 
-from examples.llm_utils import (
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
+from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
-    build_messages,
-    call_llm,
+    is_retryable_llm_error,
 )
 
 
@@ -258,9 +263,26 @@ class BaseLLMInvestor(GeneralPlayer):
             base_path = os.path.join(record_path, self.config.identity)
             custom_state_hot_limit = extras["custom_state_hot_limit"]
 
+            load_dotenv()
+            llm_config = extras["llm"]
+            self.state.custom_state["lm_name"] = llm_config["lm_name"]
+            self.state.custom_state["generation_config"] = llm_config[
+                "generation_config"
+            ]
+            self.state.custom_state["llm_client"] = LangChainAPIInference(
+                lm_name=llm_config["lm_name"],
+                generation_config=llm_config["generation_config"],
+            )
+
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
                 entry_limit=custom_state_hot_limit,
+            )
+
+            llm_config = extras["llm"]
+            self.state.custom_state["llm_client"] = LangChainAPIInference(
+                lm_name=llm_config["lm_name"],
+                generation_config=llm_config["generation_config"],
             )
 
         # Get market data
@@ -269,6 +291,26 @@ class BaseLLMInvestor(GeneralPlayer):
                 market_data = inb.payload
                 self.state.custom_state["market_data"] = market_data
                 self.state.custom_state["price_history"].append(market_data["price"])
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        if "state" in state and hasattr(state["state"], "custom_state"):
+            custom = state["state"].custom_state
+            if "llm_client" in custom:
+                custom = dict(custom)
+                del custom["llm_client"]
+                state["state"].custom_state = custom
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
+            custom = self.state.custom_state
+            if "lm_name" in custom and "llm_client" not in custom:
+                custom["llm_client"] = LangChainAPIInference(
+                    lm_name=custom["lm_name"],
+                    generation_config=custom["generation_config"],
+                )
 
     async def decide(self) -> Dict[str, Any]:
         extras = self.config.extras
@@ -319,23 +361,22 @@ class BaseLLMInvestor(GeneralPlayer):
             portfolio_value=cash + position * price,
         )
 
-        messages = build_messages(sys_msg, user_msg)
+        messages = [InferInput(system_msg=sys_msg, user_msg=user_msg)]
 
         # Call LLM
         max_retries = 3
+        llm_client = self.state.custom_state["llm_client"]
         decision = None
         last_error = None
         for attempt in range(max_retries):
             try:
-                infer_output = await call_llm(
-                    messages=messages,
-                    lm_type=llm_config["lm_type"],
-                    lm_name=llm_config["lm_name"],
-                    generation_config=llm_config["generation_config"],
-                )
-                decision = parse_llm_response_with_thinking(
+                infer_output = llm_client.run(messages)
+                response_text = (
                     infer_output.outputs[0].response
+                    if hasattr(infer_output, "outputs")
+                    else infer_output.response
                 )
+                decision = parse_llm_response_with_thinking(response_text)
                 break
             except Exception as exc:  # pylint: disable=broad-except
                 last_error = exc

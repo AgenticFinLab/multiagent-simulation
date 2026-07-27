@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,EquityPremium,LLM,SUCCESS,0,10150.943,2026-05-23T20:10:57,2026-05-23T23:00:08,config/simulation.yml,examples/EquityPremium/LLM/run_equity_premium_llm.py,logs/EquityPremium__LLM.log,,200,200,

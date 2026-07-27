@@ -30,7 +30,7 @@ from masim.format.order import validate_order
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.AnchoringEffect.Rule.players import Market
 
 logger = logging.getLogger("AnchoringEffect.LLM")
@@ -145,11 +145,10 @@ class LLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
+            batch_output = llm_client.run([infer_input])
+            infer_output = batch_output.outputs[0]
             try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = parse_llm_response_with_thinking(infer_output.response)
                 break
             except Exception as exc:
                 last_error = exc
@@ -244,6 +243,30 @@ class LLMNoiseTrader(LLMInvestor):
     pass
 
 
+class LLMDispositionTrader(LLMInvestor):
+    """LLM-driven disposition trader — sells winners early, holds losers (Prospect Theory). Theory: simulation-bases.md §4.6 — DispositionTrader."""
+
+    pass
+
+
+class LLMContrarianTrader(LLMInvestor):
+    """LLM-driven contrarian trader — fades cumulative overextension over a short lookback. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
+
+    pass
+
+
+class LLMFundamentalAnalyst(LLMInvestor):
+    """LLM-driven fundamental analyst — slow belief convergence toward fundamental value (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
+
+    pass
+
+
+class LLMLiquidityProvider(LLMInvestor):
+    """LLM-driven liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
+
+    pass
+
+
 __all__ = [
     "Market",
     "LLMInvestor",
@@ -252,4 +275,8 @@ __all__ = [
     "LLMRationalUpdater",
     "LLMMomentumTrader",
     "LLMNoiseTrader",
+    "LLMDispositionTrader",
+    "LLMContrarianTrader",
+    "LLMFundamentalAnalyst",
+    "LLMLiquidityProvider",
 ]

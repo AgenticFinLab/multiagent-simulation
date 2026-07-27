@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""ArchegosCollapse Rule-Based Simulation Analysis
+"""ArchegosCollapse Mathematical Model Simulation Analysis
 
-Analyzes simulation results for forced-liquidation cascade dynamics and
+Analyzes simulation results for forced-liquidation race dynamics and
 prime-broker first-mover advantage.
 Based on analysis-bases.md calibration targets (Archegos 2021 / FSB 2022).
 
@@ -13,69 +13,37 @@ Usage:
 import argparse
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
+
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
-from examples.standard_rule_analysis import _market_data_from_payload, _market_players
+from masim.evaluation.data_loader import (
+    aligned_market_series as _aligned_market_series,
+    batch_to_rounds as _batch_to_rounds,
+    load_data as _load_data,
+    market_data_from_payload as _market_data_from_payload,
+    market_players as _market_players,
+)
+from masim.evaluation.finance.timeseries import (
+    calculate_max_drawdown,
+    calculate_rolling_volatility,
+    calculate_autocorrelation,
+)
+from masim.evaluation import write_universal_summary
+
 
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
-
-
-def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert batch store list to {round_num: value}, round_num is 1-based."""
-    return {i + 1: v for i, v in enumerate(values)}
-
-
-def _load_data(results) -> Dict[str, Any]:
-    """Load price/fundamental batch stores and investor turn payloads.
-
-    Returns
-    -------
-    dict with keys:
-        market_prices       : {round_num: float}
-        fundamentals        : {round_num: float}
-        investor_payloads   : {player_id: {round_num: dict}}
-    """
-    market_prices: Dict[int, float] = {}
-    fundamentals: Dict[int, float] = {}
-
-    for player in _market_players(results).values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-        for round_num, payload in player.turns.payloads().items():
-            market_data = _market_data_from_payload(payload)
-            if round_num not in market_prices and "price" in market_data:
-                market_prices[round_num] = float(market_data["price"])
-            if round_num not in fundamentals:
-                if "fundamental" in market_data:
-                    fundamentals[round_num] = float(market_data["fundamental"])
-                elif "fundamental_value" in market_data:
-                    fundamentals[round_num] = float(market_data["fundamental_value"])
-
-    investor_bids: Dict[str, Dict[int, float]] = {}
-    investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
-
-    return {
-        "market_prices": market_prices,
-        "fundamentals": fundamentals,
-        "investor_bids": investor_bids,
-        "investor_payloads": investor_payloads,
-    }
 
 
 # ---------------------------------------------------------------------------
@@ -84,19 +52,17 @@ def _load_data(results) -> Dict[str, Any]:
 
 
 def _compute_max_drawdown(prices_list: List[float]) -> float:
-    """Maximum peak-to-trough drawdown (%, positive value)."""
-    arr = np.array(prices_list)
-    if len(arr) < 2:
+    """Maximum peak-to-trough drawdown (%, positive value).
+
+    Delegates to ``masim.evaluation.finance.timeseries.calculate_max_drawdown``
+    (Pass 2 Analysis Migration Rule).  Evaluation returns a signed % (negative
+    for a drawdown) plus peak/trough indices; this wrapper preserves the
+    scenario's positive-magnitude contract.
+    """
+    if len(prices_list) < 2:
         return 0.0
-    peak = arr[0]
-    max_dd = 0.0
-    for price in arr:
-        if price > peak:
-            peak = price
-        dd = (peak - price) / peak if peak > 0 else 0.0
-        if dd > max_dd:
-            max_dd = dd
-    return float(max_dd * 100)
+    signed_dd, _, _ = calculate_max_drawdown(prices_list)
+    return float(abs(signed_dd))
 
 
 def _compute_cascade_onset(
@@ -129,34 +95,48 @@ def _compute_peak_rolling_volatility(
 def _compute_rolling_volatility(
     prices_list: List[float], window: int = 10
 ) -> List[float]:
-    """Rolling volatility time series."""
+    """Rolling volatility of returns (per window, %).
+
+    Scenario contract: list of rolling std-dev values over the *returns*
+    series (Archegos analysis-bases.md).  This wrapper computes the pct
+    returns and delegates the rolling std to
+    ``masim.evaluation.finance.timeseries.calculate_rolling_volatility``
+    per the Pass 2 Analysis Migration Rule.  Values before the window
+    fills are computed with the shorter partial window to preserve the
+    pre-refactor length contract.
+    """
     arr = np.array(prices_list)
     if len(arr) < 2:
         return []
-    returns = np.diff(arr) / arr[:-1] * 100
-    vols = []
-    for i in range(len(returns)):
+    returns_pct = (np.diff(arr) / arr[:-1]) * 100
+    vols: List[float] = []
+    n = len(returns_pct)
+    for i in range(n):
         start = max(0, i - window + 1)
-        vols.append(float(np.std(returns[start : i + 1])))
+        window_slice = returns_pct[start : i + 1]
+        # Reuse the evaluation helper on the partial window (list input path
+        # returns per-index std with the window's own std at the final index).
+        rolled = calculate_rolling_volatility(list(window_slice), window=len(window_slice))
+        vols.append(float(rolled[-1]) if len(rolled) else 0.0)
     return vols
 
 
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
-    """Lag-1 autocorrelation of returns."""
+    """Lag-``lag`` autocorrelation of returns.
+
+    Delegates to ``masim.evaluation.finance.timeseries.calculate_autocorrelation``
+    on the returns series (Pass 2 Analysis Migration Rule).  Returns 0.0
+    when the series is too short for the requested lag, matching the
+    pre-refactor guard.
+    """
     arr = np.array(prices_list)
     if len(arr) < lag + 2:
         return 0.0
     returns = np.diff(arr) / arr[:-1]
-    n = len(returns)
-    if n <= lag:
+    acf = calculate_autocorrelation(list(returns), max_lag=lag)
+    if not acf:
         return 0.0
-    mu = np.mean(returns)
-    centered = returns - mu
-    autocov = np.mean(centered[: n - lag] * centered[lag:])
-    var = np.var(centered)
-    if var < 1e-12:
-        return 0.0
-    return float(autocov / var)
+    return float(acf[lag - 1])
 
 
 def _compute_agent_vwap(
@@ -438,7 +418,7 @@ def _build_interpretation(
     lines.append("[SUMMARY]")
     if is_valid:
         lines.append(
-            f"The simulation successfully reproduces Archegos-style forced-liquidation cascade dynamics: "
+            f"The simulation successfully reproduces TRS forced-liquidation dynamics: "
             f"a {max_drawdown_pct:.1f}% drawdown with "
             + (
                 f"cascade onset at round {cascade_onset_round}"
@@ -451,7 +431,7 @@ def _build_interpretation(
         )
     else:
         lines.append(
-            f"The simulation does not fully reproduce Archegos-style cascade dynamics. "
+            f"The simulation does not fully reproduce TRS liquidation-race dynamics. "
             f"Overall Fit Score {overall_score:.1%} is below the 50% threshold. "
             f"Key issues: "
             + ("drawdown too low; " if max_drawdown_pct < 20.0 else "")
@@ -512,9 +492,9 @@ def _create_visualizations(
     02_archegoscollapse_analysis.png : Rolling Volatility + Return Autocorrelation
     03_summary.png         : Agent VWAP comparison + Cascade onset annotation
     """
-    rounds_sorted = sorted(market_prices.keys())
-    prices_list = [market_prices[r] for r in rounds_sorted]
-    fund_list = [fundamentals[r] for r in rounds_sorted]
+    rounds_sorted, prices_list, fund_list = _aligned_market_series(
+        market_prices, fundamentals
+    )
     rounds_arr = np.array(rounds_sorted)
     prices_arr = np.array(prices_list)
     fund_arr = np.array(fund_list)
@@ -770,11 +750,10 @@ def analyze_archegos_collapse(
     fundamentals = data["fundamentals"]
     investor_payloads = data["investor_payloads"]
 
-    rounds_sorted = sorted(market_prices.keys())
-    prices_list = [market_prices[r] for r in rounds_sorted]
-    if not fundamentals:
-        raise ValueError("No fundamental data recorded - simulation data is incomplete")
-    fund_value = float(np.mean(list(fundamentals.values())))
+    rounds_sorted, prices_list, fund_list = _aligned_market_series(
+        market_prices, fundamentals
+    )
+    fund_value = float(np.mean(fund_list))
     total_rounds = len(rounds_sorted)
 
     # Metrics
@@ -877,6 +856,26 @@ def main():
     results = load_results(config)
     data = _load_data(results)
     summary = analyze_archegos_collapse(data, config, output_dir)
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='ArchegosCollapse',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

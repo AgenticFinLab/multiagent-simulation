@@ -8,10 +8,10 @@ Design principle:
 
 Agents:
     - RuleLLMMarketMaker → MarketMaker rules
-    - RuleLLMLiquidityDemander → LiquiditySeeker rules
-    - RuleLLMArbitrageur → ValueTrader rules
-    - RuleLLMValueInvestor → MomentumTrader rules
-    - RuleLLMForcedSeller → NoiseTrader rules
+    - RagLLMLiquiditySeeker → LiquiditySeeker rules
+    - RagLLMValueTrader → ValueTrader rules
+    - RagLLMMomentumTrader → MomentumTrader rules
+    - RagLLMNoiseTrader → NoiseTrader rules
 """
 
 # =============================================================================

@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.CurrencyCrisis.Rag.players:Market"
   num_instances: 1
@@ -30,34 +31,34 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
-      initial_price: 100.0
-      peg_rate: 100.0
-      fundamental_value: 100.0
-      reserve_level: 500000.0
-      price_impact: 0.01
-      mean_reversion: 0.02
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      peg_rate: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      reserve_level: 500000.0  # Source: AGENT_POOL/finance/market.md §6
+      price_impact: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      mean_reversion: 0.02  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
-speculativeattacker:
+ragllm_speculative_attacker:
   name: "SpeculativeAttacker"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMSpeculativeAttacker"
   num_instances: 2
   config:
-    identity: "speculativeattacker"
+    identity: "ragllm_speculative_attacker"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 5000
-      attack_threshold: 0.03
-      position_size: 800
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-speculative-attacker.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/ragllm-speculative-attacker.md §6
+      initial_position: 5000  # Source: AGENT_POOL/finance/ragllm-speculative-attacker.md §6
+      attack_threshold: 0.03  # Source: AGENT_POOL/finance/ragllm-speculative-attacker.md §6
+      position_size: 800  # Source: AGENT_POOL/finance/ragllm-speculative-attacker.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-speculative-attacker.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -85,24 +86,24 @@ speculativeattacker:
           max_tokens: 600
   persona: !include persona.yml
 
-selffulfillingtrader:
+ragllm_self_fulfilling_trader:
   name: "SelfFulfillingTrader"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMSelfFulfillingTrader"
   num_instances: 2
   config:
-    identity: "selffulfillingtrader"
+    identity: "ragllm_self_fulfilling_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
-      initial_cash: 800000.0
-      initial_position: 5000
-      contagion_sensitivity: 0.01
-      exit_threshold: 0.03
-      position_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
+      initial_cash: 800000.0  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
+      initial_position: 5000  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
+      contagion_sensitivity: 0.01  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
+      exit_threshold: 0.03  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
+      position_size: 500  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-self-fulfilling-trader.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -130,23 +131,23 @@ selffulfillingtrader:
           max_tokens: 600
   persona: !include persona.yml
 
-centralbankdefender:
+ragllm_central_bank_defender:
   name: "CentralBankDefender"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMCentralBankDefender"
   num_instances: 1
   config:
-    identity: "centralbankdefender"
+    identity: "ragllm_central_bank_defender"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
-      initial_cash: 5000000.0
-      initial_position: 3000
-      defense_size: 600
-      defense_threshold: 0.05
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-central-bank-defender.md §6
+      initial_cash: 5000000.0  # Source: AGENT_POOL/finance/ragllm-central-bank-defender.md §6
+      initial_position: 3000  # Source: AGENT_POOL/finance/ragllm-central-bank-defender.md §6
+      defense_size: 600  # Source: AGENT_POOL/finance/ragllm-central-bank-defender.md §6
+      defense_threshold: 0.05  # Source: AGENT_POOL/finance/ragllm-central-bank-defender.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-central-bank-defender.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -174,23 +175,23 @@ centralbankdefender:
           max_tokens: 600
   persona: !include persona.yml
 
-fundamentalhedger:
+ragllm_fundamental_hedger:
   name: "FundamentalHedger"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMFundamentalHedger"
   num_instances: 1
   config:
-    identity: "fundamentalhedger"
+    identity: "ragllm_fundamental_hedger"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 2000
-      hedge_ratio: 0.05
-      position_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-fundamental-hedger.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/ragllm-fundamental-hedger.md §6
+      initial_position: 2000  # Source: AGENT_POOL/finance/ragllm-fundamental-hedger.md §6
+      hedge_ratio: 0.05  # Source: AGENT_POOL/finance/ragllm-fundamental-hedger.md §6
+      position_size: 400  # Source: AGENT_POOL/finance/ragllm-fundamental-hedger.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-fundamental-hedger.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -218,23 +219,23 @@ fundamentalhedger:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CurrencyCrisis.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 500
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/CurrencyCrisis/Rag/records"  # Source: AGENT_POOL/finance/ragllm-noise-trader.md §6
+      initial_cash: 500000.0  # Source: AGENT_POOL/finance/ragllm-noise-trader.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/ragllm-noise-trader.md §6
+      trade_probability: 0.3  # Source: AGENT_POOL/finance/ragllm-noise-trader.md §6
+      noise_size: 100  # Source: AGENT_POOL/finance/ragllm-noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/ragllm-noise-trader.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

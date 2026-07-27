@@ -134,9 +134,9 @@ YOUR STRATEGY:
 3. The LOWER the price relative to value, the MORE you buy
 
 BUYING CRITERIA:
-- Price < $80: Start buying (10-20 shares)
-- Price < $70: Buy moderately (20-40 shares)
-- Price < $60: Buy more aggressively (40-60 shares)
+- Price < $92: Start buying (5-15 shares)
+- Price < $85: Buy moderately (15-25 shares)
+- Price < $75: Buy more aggressively (20-25 shares)
 - Price > $90: Hold or reduce
 
 BEHAVIOR:
@@ -147,6 +147,20 @@ BEHAVIOR:
 First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
 The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
+"""
+
+LLM_PASSIVE_INVESTOR_SYS = """You are a PASSIVE LONG-HORIZON INVESTOR.
+
+CORE BELIEF: Maintain strategic exposure and rebalance slowly rather than chase short-term moves.
+
+YOUR STRATEGY:
+- Trade only on scheduled rebalance rounds (every 20 rounds).
+- When price is below fundamental value, buy a small amount (at most 10 shares).
+- When price is above fundamental value, sell a small amount (at most 10 shares).
+- On all other rounds, hold. Never panic sell.
+
+First output reasoning inside <analysis>...</analysis>, then a decision inside <decision>...</decision>.
+The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": float, "quantity": float, "reasoning": string}
 """
 
 # =============================================================================

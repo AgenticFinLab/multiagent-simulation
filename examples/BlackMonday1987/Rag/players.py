@@ -25,14 +25,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
     KnowledgeStore,
     ResourceManager,
 )
-from masim.format.order import validate_order
+from masim.format.order import normalize_action_quantity, validate_order
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -40,6 +40,12 @@ from masim.utils.history import HistoryBuffer
 from examples.BlackMonday1987.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)
+
+
+# Single-source-of-truth fallback string injected when RAG retrieval returns
+# no documents. Imported by examples/BlackMonday1987/Rag/analysis.py so both
+# the runtime path and the post-hoc analyzer agree on the exact sentinel value.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -368,7 +374,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
 
         self.state.custom_state["last_rag_context"] = rag_context
 
@@ -400,8 +406,8 @@ class RagLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
+                result = llm_client.run([infer_input]).outputs[0]
+                response = result.response
                 parsed = parse_llm_response_with_thinking(response)
                 decision = _validate_decision(parsed, self.identity)
                 break
@@ -424,14 +430,18 @@ class RagLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             ) from last_error
 
-        action_str = decision["action"]
-        bid_price = decision["bid_price"]
-        quantity = decision["quantity"]
+        action_str, quantity = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
+        bid_price = float(decision["bid_price"])
         if action_str == "buy":
             max_buy = cash / bid_price
             quantity = min(quantity, max_buy)
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
+
+        if quantity == 0:
+            action_str = "hold"
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * bid_price

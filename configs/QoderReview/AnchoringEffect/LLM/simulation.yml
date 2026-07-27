@@ -1,0 +1,57 @@
+# =============================================================================
+# AnchoringEffectLLM Simulation Configuration
+# =============================================================================
+# LLM agents with anchoring-bias personas make trading decisions via language
+# model reasoning. Market dynamics are rule-based (same as Rule variant).
+#
+# Usage:
+#   python examples/AnchoringEffect/LLM/run_anchoringeffect_llm.py \
+#       -c configs/AnchoringEffect/LLM/simulation.yml
+# =============================================================================
+
+setting:
+  name: "anchoring_effect_llm_simulation"
+  description: "Anchoring bias with LLM-driven agents: traders insufficiently adjust from reference prices"
+  total_rounds: 200
+  round_history_limit: 3
+  record_path: "EXPERIMENT/AnchoringEffect/LLM/records"
+  save_diagram_interval: 50
+
+environment:
+  dotenv_path: .env
+  workspace: "."
+
+ray:
+  address: null
+  namespace: "anchoring_effect_llm"
+  actor_prefix: null
+  # LLM simulations need more memory for prompt/response strings
+  # Derived: 10 players, star topology -> 18 msgs/round
+  #   10 TurnResult + 10 pending_info + 18 Message = 38 Ray objects
+  #   LLM TurnResult also carries prompt+response strings (~4-8 KB each)
+  #   Minimum 512 MB floor for LLM simulations -> 536870912 bytes
+  num_cpus: null
+  num_gpus: null
+  object_store_memory: 536870912
+  include_dashboard: false
+  logging_level: "warning"
+  log_to_driver: false
+  actor_options:
+    max_restarts: 3
+    max_task_retries: 1
+    max_concurrency: 10
+  runtime_env:
+    working_dir: null
+    pip: []
+    env_vars: {}
+  serialization:
+    use_arrow: true
+    register_custom_serializers: true
+
+players: !include players.yml
+topology: !include topology.yml
+
+communication:
+  storage_path: "EXPERIMENT/AnchoringEffect/LLM/communication"
+  record_messages: true
+  message_block_size: 500

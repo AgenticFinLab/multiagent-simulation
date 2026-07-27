@@ -1,23 +1,31 @@
 """Configuration loader for discovering and parsing simulation scenarios."""
 
-import os
+import logging
+from functools import lru_cache
 from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional
 import yaml
 
+logger = logging.getLogger(__name__)
+
+
+# Absolute project root — anchored to this source file's location so that
+# scenario discovery, experiment data, and example assets are found regardless
+# of the working directory from which Streamlit is launched.
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]  # masim/interface → project root
 
 # Base directory for docs
-EXAMPLES_DIR = Path("examples")
+EXAMPLES_DIR = _PROJECT_ROOT / "examples"
 
-CONFIGS_DIR = Path("configs")
-EXPERIMENT_DIR = Path("EXPERIMENT")
+CONFIGS_DIR = _PROJECT_ROOT / "configs"
+EXPERIMENT_DIR = _PROJECT_ROOT / "EXPERIMENT"
 
-# Hidden variants — Rag temporarily disabled per user request
-_HIDDEN_VARIANTS = {"Rag"}
+# All implemented variants are available in the simulation workflow.
+_HIDDEN_VARIANTS: set[str] = set()
 
 # Directories excluded from scenario discovery
-_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo"}
+_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION"}
 
 
 def _configs_path(scenario_key: str) -> Path:
@@ -60,10 +68,16 @@ def scenario_display_name(key: str) -> str:
     """Auto-generate a display name from a scenario key by splitting CamelCase.
 
     Examples:
-        'AssetBubble/Rule'      -> 'Asset Bubble (Rule)'
-        'FlashCrash2010/LLM'    -> 'Flash Crash 2010 (LLM)'
-        'Demo'                  -> 'Demo'
+        'AssetBubble/Rule'                -> 'Asset Bubble (Rule)'
+        'FlashCrash2010/LLM'              -> 'Flash Crash 2010 (LLM)'
+        'My_Study/AnchoringEffect/Rule'   -> 'Anchoring Effect (Rule)'
+        'Demo'                            -> 'Demo'
     """
+    # Strip project prefix for 3+-part keys (project/scenario/variant).
+    parts = key.split("/")
+    if len(parts) >= 3 and not key.startswith("CUSTOMIZED_SIMULATION/"):
+        key = "/".join(parts[1:])  # drop project segment
+
     if "/" in key:
         base, variant = key.split("/", 1)
     else:
@@ -79,6 +93,57 @@ def scenario_display_name(key: str) -> str:
     if variant:
         return f"{display} ({variant})"
     return display
+
+
+def _resolve_display_key(scenario_key: str) -> str:
+    """Map special scenario keys to their source key for metadata display.
+
+    Handles:
+    - Project-prefixed keys: ``{project}/{scenario}/{variant}`` -> ``{scenario}/{variant}``
+    - Rounds-adjusted bundles: ``CUSTOMIZED_SIMULATION/Default-{S}-{V}-rN`` -> ``{S}/{V}``
+
+    Non-special keys are returned unchanged.
+    """
+    # Project-prefixed: 3+ parts where first is not a known special dir.
+    parts = scenario_key.split("/")
+    if (
+        len(parts) >= 3
+        and not scenario_key.startswith("CUSTOMIZED_SIMULATION/")
+    ):
+        # Strip project prefix for metadata lookup.
+        return "/".join(parts[1:])
+
+    if scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
+        tail = scenario_key.split("/", 1)[1]
+        # New project-scoped format:
+        # CUSTOMIZED_SIMULATION/{bundle_name}/Default/{variant}
+        # bundle_name = "{slug}-{id}-{Scenario}" → extract scenario from last segment.
+        tail_parts = tail.split("/")
+        if len(tail_parts) >= 3 and tail_parts[1] == "Default":
+            bundle_name = tail_parts[0]  # e.g. "MYTest-b6beb998-AnchoringEffect"
+            variant = tail_parts[2]
+            # Scenario is the last hyphen-separated segment of bundle_name
+            scenario = bundle_name.rsplit("-", 1)[-1]
+            return f"{scenario}/{variant}"
+        # Customized-agents format:
+        # CUSTOMIZED_SIMULATION/{bundle_name}/Customized-agents
+        if len(tail_parts) >= 2 and tail_parts[1] == "Customized-agents":
+            bundle_name = tail_parts[0]
+            scenario = bundle_name.rsplit("-", 1)[-1]
+            return f"{scenario}/Rule"
+        # Legacy format: CUSTOMIZED_SIMULATION/[team-{team}-]Default-{S}-{V}-rN
+        # Multi-team deployments prefix the deterministic Default bundle id
+        # with ``team-{team_name}-``; peel that off first so the shape check
+        # below matches both single-team and multi-team layouts.  The import
+        # is deferred to avoid a circular import at module load.
+        from .customized.team_namespace import strip_team_prefix
+        stripped_tail = strip_team_prefix(tail)
+        if stripped_tail.startswith("Default-"):
+            body = re.sub(r"-r\d+$", "", stripped_tail[len("Default-"):])
+            if "-" in body:
+                scenario, variant = body.rsplit("-", 1)
+                return f"{scenario}/{variant}"
+    return scenario_key
 
 
 def discover_scenarios() -> List[str]:
@@ -169,8 +234,8 @@ def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
                 info["description"] = config["setting"].get("description", "")
                 info["total_rounds"] = config["setting"].get("total_rounds", 0)
                 info["record_path"] = config["setting"].get("record_path", "")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Failed to parse scenario config %s: %s", config_path, e)
 
     return info
 
@@ -352,6 +417,202 @@ def get_docs_content(scenario_name: str) -> Optional[str]:
         return None
     try:
         return docs_path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
+def _scenario_base(scenario_key: str) -> str:
+    """Return the base scenario name for a scenario key.
+
+    Examples:
+        'AssetBubble/Rule' -> 'AssetBubble'
+        'AssetBubble'      -> 'AssetBubble'
+        'myproj/AssetBubble/Rule' -> 'AssetBubble' (project-prefixed key)
+        'CUSTOMIZED_SIMULATION/{slug}-{id}-AssetBubble/Customized-agents'
+            -> 'AssetBubble'
+        'CUSTOMIZED_SIMULATION/Default-AssetBubble-LLM-r5' -> 'AssetBubble'
+
+    Customized bundle keys are resolved through ``_resolve_display_key``
+    first so the caller lands on the shipped scenario directory (e.g.
+    ``examples/AssetBubble/``) instead of on a nonexistent
+    ``examples/Customized-agents/`` path.
+    """
+    if not scenario_key:
+        return scenario_key
+    key = _resolve_display_key(scenario_key)
+    parts = key.split("/")
+    # Strip trailing variant if present (Rule/LLM/RuleLLM/Rag)
+    if parts[-1] in ("Rule", "LLM", "RuleLLM", "Rag"):
+        parts = parts[:-1]
+    return parts[-1] if parts else key
+
+
+def _customized_bundle_bases_path(
+    scenario_key: str, filename: str
+) -> Optional[Path]:
+    """Return the bundle-local bases file for a customized scenario, if any.
+
+    Customized bundles ship their own copies of ``simulation-bases.md`` /
+    ``analysis-bases.md`` under
+    ``examples/CUSTOMIZED_SIMULATION/{bundle}/{sub}/{filename}`` where
+    ``{sub}`` is ``Default`` or ``Customized-agents``. The bundle-local
+    copy is preferred because it survives even if the shipped scenario
+    is later archived, and it reflects any bundle-time snapshots.
+    """
+    if not scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
+        return None
+    tail = scenario_key.split("/", 1)[1]
+    tail_parts = tail.split("/")
+    if len(tail_parts) < 2:
+        return None
+    bundle_name, sub = tail_parts[0], tail_parts[1]
+    if sub not in ("Default", "Customized-agents"):
+        return None
+    candidate = (
+        EXAMPLES_DIR / "CUSTOMIZED_SIMULATION" / bundle_name / sub / filename
+    )
+    return candidate if candidate.exists() else None
+
+
+def get_simulation_bases_path(scenario_key: str) -> Optional[Path]:
+    """Return the path to a scenario's simulation-bases.md, or None.
+
+    Resolution order:
+      1. Customized bundles: check the bundle-local copy under
+         ``examples/CUSTOMIZED_SIMULATION/{bundle}/{sub}/`` first.
+      2. Shipped scenarios: fall back to the canonical
+         ``examples/{ScenarioBase}/simulation-bases.md``.
+
+    The lookup is variant-agnostic and project-agnostic: only the base
+    scenario name (extracted via :func:`_scenario_base`) is used.
+    """
+    bundle_local = _customized_bundle_bases_path(
+        scenario_key, "simulation-bases.md"
+    )
+    if bundle_local is not None:
+        return bundle_local
+    base = _scenario_base(scenario_key)
+    candidate = EXAMPLES_DIR / base / "simulation-bases.md"
+    return candidate if candidate.exists() else None
+
+
+def get_simulation_bases_content(scenario_key: str) -> Optional[str]:
+    """Return the full markdown text of ``simulation-bases.md`` or None."""
+    path = get_simulation_bases_path(scenario_key)
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
+def get_analysis_bases_path(scenario_key: str) -> Optional[Path]:
+    """Return the path to a scenario's analysis-bases.md, or None.
+
+    Resolution order:
+      1. Customized bundles: check the bundle-local copy under
+         ``examples/CUSTOMIZED_SIMULATION/{bundle}/{sub}/`` first.
+      2. Shipped scenarios: fall back to the canonical
+         ``examples/{ScenarioBase}/analysis-bases.md``.
+
+    The lookup is variant-agnostic and project-agnostic: only the base
+    scenario name (extracted via :func:`_scenario_base`) is used.
+    """
+    bundle_local = _customized_bundle_bases_path(
+        scenario_key, "analysis-bases.md"
+    )
+    if bundle_local is not None:
+        return bundle_local
+    base = _scenario_base(scenario_key)
+    candidate = EXAMPLES_DIR / base / "analysis-bases.md"
+    return candidate if candidate.exists() else None
+
+
+def get_analysis_bases_content(scenario_key: str) -> Optional[str]:
+    """Return the full markdown text of ``analysis-bases.md`` or None."""
+    path = get_analysis_bases_path(scenario_key)
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+
+def get_phenomenon_description(scenario_key: str) -> str:
+    """Extract the ``Phenomenon Name`` cell from ``simulation-bases.md``.
+
+    The canonical simulation-bases.md opens with a table whose first row
+    is ``| Phenomenon Name | <bold-name> \u2014 <clear description> |``.
+    This function returns just the value cell, stripped of markdown
+    formatting, so callers can render a brief, human-readable scenario
+    description. Returns an empty string when the field is not found.
+    """
+    content = get_simulation_bases_content(scenario_key)
+    if not content:
+        return ""
+    # Match the row: |  Phenomenon Name  |  <value>  |
+    match = re.search(
+        r"^\|\s*Phenomenon\s+Name\s*\|\s*(.+?)\s*\|\s*$",
+        content,
+        flags=re.MULTILINE | re.IGNORECASE,
+    )
+    if not match:
+        return ""
+    text = match.group(1).strip()
+    # Strip bold markdown (**text**) and stray backticks.
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = text.replace("`", "")
+    return text.strip()
+
+
+def get_finance_scenario_path(scenario_key: str) -> Optional[Path]:
+    """Return the path to a scenario's ``finance-{name}.md``, or None.
+
+    The finance file lives at
+    ``examples/{ScenarioBase}/finance-{name}.md`` and is the target-spec
+    / reverse-reconstructed scenario definition (produced by
+    ``polish-simulation-pipeline`` / ``define-simulation-scenario-skill``).
+    Filename casing is inconsistent across scenarios, so this helper tries
+    a few variants in order:
+
+    1. Kebab-case from CamelCase (e.g. ``AnchoringEffect`` \u2192
+       ``finance-anchoring-effect.md``).
+    2. All-lowercase with no hyphens (e.g. ``ShortSqueeze`` \u2192
+       ``finance-shortsqueeze.md``).
+    3. Any ``finance-*.md`` file found in the scenario directory
+       (first match, alphabetically) as a defensive fallback.
+    """
+    base = _scenario_base(scenario_key)
+    scenario_dir = EXAMPLES_DIR / base
+    if not scenario_dir.exists():
+        return None
+    # Kebab-case: split CamelCase and letter-digit boundaries with '-'.
+    kebab = re.sub(
+        r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[A-Za-z])(?=[0-9])",
+        "-",
+        base,
+    ).lower()
+    candidate = scenario_dir / f"finance-{kebab}.md"
+    if candidate.exists():
+        return candidate
+    # All-lowercase fallback (e.g. finance-shortsqueeze.md).
+    lower_candidate = scenario_dir / f"finance-{base.lower()}.md"
+    if lower_candidate.exists():
+        return lower_candidate
+    # Last-resort glob (picks up any unforeseen naming variant).
+    matches = sorted(scenario_dir.glob("finance-*.md"))
+    return matches[0] if matches else None
+
+
+def get_finance_scenario_content(scenario_key: str) -> Optional[str]:
+    """Return the full markdown text of ``finance-{scenario}.md`` or None."""
+    path = get_finance_scenario_path(scenario_key)
+    if path is None:
+        return None
+    try:
+        return path.read_text(encoding="utf-8")
     except Exception:
         return None
 
@@ -542,6 +803,52 @@ def get_agents_info(scenario_name: str) -> List[Dict[str, Any]]:
     return agents
 
 
+def get_agent_roster(scenario_name: str) -> List[Dict[str, Any]]:
+    """Return the full list of concrete agent instances for a scenario.
+
+    Mirrors ``expand_player_instances`` in ``masim/utils/config.py`` so the
+    instance ids match the simulator's ``sender_id`` values:
+      * ``num_instances == 1`` -> instance id = base key (unchanged)
+      * ``num_instances  > 1`` -> instance ids = ``base_1`` ... ``base_N``
+
+    The market coordinator is excluded. Used by the simulation page to render
+    every configured investor each round (non-trading ones shown as HOLD),
+    so the activity panel matches the sidebar roster.
+
+    Returns:
+        List of dicts with keys ``id``, ``name``, ``base``.
+    """
+    players = load_players_config(scenario_name)
+    roster: List[Dict[str, Any]] = []
+
+    for base_key, config in players.items():
+        if not isinstance(config, dict):
+            continue
+        if base_key == "market":
+            continue
+        role = ""
+        if "config" in config and isinstance(config["config"], dict):
+            role = config["config"].get("role", "")
+        if role == "coordinator":
+            continue
+
+        name = config.get("name", base_key)
+        try:
+            n = int(config.get("num_instances", 1) or 1)
+        except (TypeError, ValueError):
+            n = 1
+
+        if n <= 1:
+            roster.append({"id": base_key, "name": name, "base": base_key})
+        else:
+            for i in range(1, n + 1):
+                roster.append(
+                    {"id": f"{base_key}_{i}", "name": f"{name} {i}", "base": base_key}
+                )
+
+    return roster
+
+
 def check_simulation_results(scenario_name: str) -> bool:
     """Check if simulation results exist for a scenario.
 
@@ -555,7 +862,7 @@ def check_simulation_results(scenario_name: str) -> bool:
     if not info.get("record_path"):
         return False
 
-    record_path = Path(info["record_path"])
+    record_path = _PROJECT_ROOT / info["record_path"]
     return record_path.exists() and any(record_path.iterdir())
 
 
@@ -571,6 +878,7 @@ def get_diagram_path(scenario_name: str) -> Optional[Path]:
     Returns:
         Path to the latest topology PNG, or None if not found
     """
+    scenario_name = _resolve_display_key(scenario_name)
     diagram_dir = _experiment_path(scenario_name) / "records" / "diagrams"
     if not diagram_dir.exists():
         return None
@@ -588,6 +896,7 @@ def get_topology_info(scenario_name: str) -> Dict[str, Any]:
     Returns:
         Dict with topology_type, sources, connections (node -> [targets])
     """
+    scenario_name = _resolve_display_key(scenario_name)
     topology_path = _configs_path(scenario_name) / "topology.yml"
 
     result: Dict[str, Any] = {
@@ -774,6 +1083,7 @@ def get_market_description(scenario_name: str) -> str:
     Returns:
         Human-readable market description string
     """
+    scenario_name = _resolve_display_key(scenario_name)
     flat = _flat_scenario_name(scenario_name)
     # Fallback: strip LLM/RuleLLM suffix
     base = flat[:-3] if flat.endswith("LLM") else flat
@@ -783,17 +1093,168 @@ def get_market_description(scenario_name: str) -> str:
     )
 
 
+def _load_players_yml_lenient(scenario_key: str) -> Dict[str, Any]:
+    """Load configs/{scenario}/{variant}/players.yml with !include tolerance.
+
+    The players.yml files use `!include persona.yml` tags that PyYAML's
+    SafeLoader rejects. This helper installs a null constructor so we can
+    still read scalar keys like `archetype:` from within the market block.
+    Returns an empty dict on any error.
+    """
+    p = _configs_path(scenario_key) / "players.yml"
+    if not p.exists():
+        return {}
+
+    class _Loader(yaml.SafeLoader):
+        pass
+
+    _Loader.add_constructor("!include", lambda loader, node: None)
+    _Loader.add_multi_constructor("", lambda loader, tag_suffix, node: None)
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            data = yaml.load(f, Loader=_Loader)
+        return data if isinstance(data, dict) else {}
+    except Exception:  # noqa: BLE001 - defensive: bad YAML shouldn't crash UI
+        return {}
+
+
+def _find_coordinator_block(players_cfg: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Return the coordinator's config block from a parsed players.yml.
+
+    Standard finance scenarios use the top-level key ``market:``. Opinion /
+    information scenarios use ``{variant}_opinion_environment:`` or
+    ``{variant}_information_environment:``. This helper returns the value
+    dict for whichever coordinator-role block is present.
+    """
+    if not players_cfg:
+        return None
+    if isinstance(players_cfg.get("market"), dict):
+        return players_cfg["market"]
+    for key, val in players_cfg.items():
+        if isinstance(val, dict) and (
+            key.endswith("_opinion_environment")
+            or key.endswith("_information_environment")
+        ):
+            return val
+    return None
+
+
+# Fallback map used when a scenario's players.yml has no `archetype:` field
+# (e.g. the file predates the archetype convention). Prefer reading the YAML
+# field; this table only guards against config regressions.
+_ARCHETYPE_FALLBACK: Dict[str, str] = {
+    "EchoChamber": "opinion-echo-chamber-clustering",
+    "RumorSpread": "information-sis-contagion",
+    "LUNACollapse": "crypto-algostable-depeg",
+    "SVBBankRun": "deposit-bank-run-diamond-dybvig",
+    "Volmageddon": "derivatives-vol-feedback",
+    "CreditCycle": "credit-minsky-cycle",
+    "GFC2008": "credit-minsky-cycle",
+    "EuropeanDebtCrisis": "bond-yield-spread-inverse",
+    "LTCMCollapse": "bond-yield-spread-inverse",
+    "SorosPound": "fx-currency-peg-and-attack",
+    "AsianFinancialCrisis": "fx-currency-peg-and-attack",
+    "CurrencyCrisis": "fx-currency-peg-and-attack",
+    "CarryTradeUnwind": "fx-currency-peg-and-attack",
+}
+
+
+@lru_cache(maxsize=64)
+def get_market_archetype(scenario_name: str) -> Optional[str]:
+    """Return the archetype stem bound to this scenario, if any.
+
+    Resolution order:
+      1. Read `archetype:` field from the coordinator block in
+         configs/{scenario}/{variant}/players.yml.
+      2. Fall back to the built-in ``_ARCHETYPE_FALLBACK`` table for
+         scenarios whose YAML has not yet been updated.
+      3. Fall back to ``stock-standard-price-impact`` (the workhorse
+         archetype used by most behavioural-bias scenarios).
+
+    Args:
+        scenario_name: Scenario key (accepts flat "AssetBubble" or
+            slash-separated "AssetBubble/Rule").
+
+    Returns:
+        A kebab-case archetype stem (matching a file under
+        ``examples/AGENT_POOL/market/{stem}.md``) or ``None`` if the
+        scenario name is unknown and no players.yml can be parsed.
+    """
+    resolved = _resolve_display_key(scenario_name)
+    # Try each variant in turn — variants share the archetype in practice.
+    for variant in ("Rule", "LLM", "RuleLLM", "Rag"):
+        cfg = _load_players_yml_lenient(f"{resolved}/{variant}")
+        block = _find_coordinator_block(cfg)
+        if block:
+            arch = block.get("archetype")
+            if isinstance(arch, str) and arch:
+                return arch
+    # Also try the raw key in case it's already a full "Name/Variant" path.
+    cfg = _load_players_yml_lenient(scenario_name)
+    block = _find_coordinator_block(cfg)
+    if block:
+        arch = block.get("archetype")
+        if isinstance(arch, str) and arch:
+            return arch
+    if resolved in _ARCHETYPE_FALLBACK:
+        return _ARCHETYPE_FALLBACK[resolved]
+    return "stock-standard-price-impact"
+
+
+def get_market_icon_path(scenario_name: str) -> Optional[Path]:
+    """Return the coordinator icon PNG for this scenario, if present on disk.
+
+    The path is ``examples/AGENT_POOL/agent_images/icons/market/{stem}.png``
+    where ``{stem}`` is the archetype returned by :func:`get_market_archetype`.
+
+    Returns ``None`` if either the archetype cannot be resolved or the PNG
+    file does not exist.
+    """
+    stem = get_market_archetype(scenario_name)
+    if not stem:
+        return None
+    p = EXAMPLES_DIR / "AGENT_POOL" / "agent_images" / "icons" / "market" / f"{stem}.png"
+    return p if p.exists() else None
+
+
+# Human-readable Market-Type label per archetype stem. Used by
+# ``get_market_type`` so the sidebar shows a semantic label that matches
+# the icon rather than a keyword-guessed generic string.
+_ARCHETYPE_MARKET_TYPE: Dict[str, str] = {
+    "stock-standard-price-impact": "Stock Market",
+    "opinion-echo-chamber-clustering": "Opinion Field",
+    "information-sis-contagion": "Information Field",
+    "fx-currency-peg-and-attack": "FX Market",
+    "bond-yield-spread-inverse": "Bond Market",
+    "crypto-algostable-depeg": "Crypto Market",
+    "derivatives-vol-feedback": "Derivatives Market",
+    "deposit-bank-run-diamond-dybvig": "Deposit Market",
+    "credit-minsky-cycle": "Credit Market",
+}
+
+
 def get_market_type(scenario_name: str) -> str:
-    """Infer the market type from the scenario name and config.
+    """Infer the market type from the scenario's bound archetype.
+
+    Prefers the ``players.yml → market.archetype:`` field (via
+    :func:`get_market_archetype`) and maps it through
+    ``_ARCHETYPE_MARKET_TYPE`` to a human-readable label. Falls back to the
+    legacy keyword-based guess only when no archetype can be resolved.
 
     Args:
         scenario_name: Name of the scenario
 
     Returns:
-        Human-readable market type string (e.g. 'Stock Market')
+        Human-readable market type string (e.g. 'Stock Market').
     """
-    # All current scenarios are equity/stock market simulations
-    name_lower = scenario_name.lower()
+    stem = get_market_archetype(scenario_name)
+    if stem and stem in _ARCHETYPE_MARKET_TYPE:
+        return _ARCHETYPE_MARKET_TYPE[stem]
+
+    # Fallback: legacy keyword heuristic (kept for safety when the archetype
+    # cannot be resolved — should be unreachable once all scenarios carry
+    # the `archetype:` field).
+    name_lower = _resolve_display_key(scenario_name).lower()
     if "crypto" in name_lower:
         return "Crypto Market"
     elif "bond" in name_lower or "fixed" in name_lower:
@@ -817,7 +1278,81 @@ def get_analysis_path(scenario_name: str) -> Optional[Path]:
     if not info.get("record_path"):
         return None
 
-    record_path = Path(info["record_path"])
+    record_path = _PROJECT_ROOT / info["record_path"]
     analysis_path = record_path.parent / "analysis"
 
     return analysis_path if analysis_path.exists() else None
+
+
+def _dir_latest_mtime(
+    root: Optional[Path], exclude: Optional[Path] = None
+) -> Optional[float]:
+    """Return the newest file mtime under *root* (recursive).
+
+    Args:
+        root: Directory to scan; None/absent yields None.
+        exclude: Optional subtree to skip (e.g. the analysis output dir).
+
+    Returns:
+        The maximum st_mtime among files, or None when no files are found.
+    """
+    if not root or not root.exists():
+        return None
+    latest: Optional[float] = None
+    for p in root.rglob("*"):
+        if not p.is_file():
+            continue
+        if exclude is not None:
+            try:
+                p.relative_to(exclude)
+                continue  # inside the excluded subtree
+            except ValueError:
+                pass
+        try:
+            m = p.stat().st_mtime
+        except OSError:
+            continue
+        if latest is None or m > latest:
+            latest = m
+    return latest
+
+
+def get_analysis_freshness(scenario_name: str) -> str:
+    """Classify analysis output relative to the underlying experiment data.
+
+    Compares the newest analysis artefact mtime against the newest data-file
+    mtime, so a stale analysis (produced before the latest run) can be flagged
+    for re-running rather than silently shown.
+
+    Args:
+        scenario_name: Scenario directory name.
+
+    Returns:
+        One of:
+          - "no_data": no experiment data exists.
+          - "missing": data exists but no analysis charts are on disk.
+          - "stale":   analysis charts exist but predate the newest data file.
+          - "fresh":   analysis charts exist and post-date all data files.
+    """
+    info = get_scenario_info(scenario_name)
+    if not info.get("record_path"):
+        return "no_data"
+
+    record_path = _PROJECT_ROOT / info["record_path"]
+    variant_dir = record_path.parent
+    analysis_path = variant_dir / "analysis"
+
+    pngs = list(analysis_path.glob("*.png")) if analysis_path.exists() else []
+    data_mtime = _dir_latest_mtime(variant_dir, exclude=analysis_path)
+
+    if not pngs:
+        return "missing" if data_mtime is not None else "no_data"
+
+    analysis_mtime = max(p.stat().st_mtime for p in pngs)
+    summary = analysis_path / "summary.json"
+    if summary.exists():
+        analysis_mtime = max(analysis_mtime, summary.stat().st_mtime)
+
+    if data_mtime is None:
+        return "fresh"
+    return "fresh" if analysis_mtime >= data_mtime else "stale"

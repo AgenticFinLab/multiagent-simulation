@@ -19,7 +19,10 @@ from typing import Any, Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 
+from masim.evaluation.data_loader import batch_to_rounds, load_data
+from masim.evaluation.finance import calculate_autocorrelation
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 __all__ = [
     "_batch_to_rounds",
@@ -32,42 +35,18 @@ __all__ = [
 
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data loading (thin adapters over ``masim.evaluation``)
 # ---------------------------------------------------------------------------
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert batch store list to {round_num: value}, round_num is 1-based."""
-    return {i + 1: v for i, v in enumerate(values)}
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.batch_to_rounds``."""
+    return batch_to_rounds(values)
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Load price/fundamental batch stores and investor turn payloads."""
-    market_prices: Dict[int, float] = {}
-    fundamentals: Dict[int, float] = {}
-
-    for player in results.players_by_role("coordinator").values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-
-    investor_bids: Dict[str, Dict[int, float]] = {}
-    investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
-
-    return {
-        "market_prices": market_prices,
-        "fundamentals": fundamentals,
-        "investor_bids": investor_bids,
-        "investor_payloads": investor_payloads,
-    }
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``."""
+    return load_data(results)
 
 
 # ---------------------------------------------------------------------------
@@ -112,35 +91,37 @@ def _compute_correction_ratio(prices_list: List[float], fundamental: float) -> f
 
 
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
-    """Lag-1 autocorrelation of returns."""
-    arr = np.array(prices_list)
-    if len(arr) < lag + 2:
+    """Lag-N autocorrelation of returns.
+
+    Thin adapter over ``masim.evaluation.finance.calculate_autocorrelation``.
+    """
+    if len(prices_list) < lag + 2:
         return 0.0
+    arr = np.asarray(prices_list, dtype=float)
     returns = np.diff(arr) / arr[:-1]
-    n = len(returns)
-    if n <= lag:
+    acf = calculate_autocorrelation(list(returns), max_lag=lag)
+    if not acf or len(acf) < lag:
         return 0.0
-    mu = np.mean(returns)
-    centered = returns - mu
-    autocov = np.mean(centered[: n - lag] * centered[lag:])
-    var = np.var(centered)
-    if var < 1e-12:
-        return 0.0
-    return float(autocov / var)
+    return float(acf[lag - 1])
 
 
 def _compute_rolling_volatility(
     prices_list: List[float], window: int = 10
 ) -> List[float]:
-    """Rolling volatility time series."""
-    arr = np.array(prices_list)
+    """Rolling volatility of returns (percent).
+
+    Kept local because ``masim.evaluation.finance.calculate_rolling_volatility``
+    computes std of *prices* (not returns) and does not multiply by 100 — the
+    legacy calibration targets require the percent-return convention.
+    """
+    arr = np.asarray(prices_list, dtype=float)
     if len(arr) < 2:
         return []
-    returns = np.diff(arr) / arr[:-1] * 100
-    vols = []
-    for i in range(len(returns)):
+    returns_pct = np.diff(arr) / arr[:-1] * 100.0
+    vols: List[float] = []
+    for i in range(len(returns_pct)):
         start = max(0, i - window + 1)
-        vols.append(float(np.std(returns[start : i + 1])))
+        vols.append(float(np.std(returns_pct[start : i + 1])))
     return vols
 
 
@@ -783,6 +764,26 @@ def main():
     results = load_results(config)
     data = _load_data(results)
     summary = analyze_confirmation_bias(data, config, output_dir)
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='ConfirmationBias',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

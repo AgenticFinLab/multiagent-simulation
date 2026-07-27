@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,AsianFinancialCrisis,Rag,SUCCESS,0,3200.216,2026-05-23T01:27:39,2026-05-23T02:20:59,config/simulation.yml,examples/AsianFinancialCrisis/Rag/run_asianfinancialcrisis_rag.py,logs/AsianFinancialCrisis__Rag.log,,200,200,

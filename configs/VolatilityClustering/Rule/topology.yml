@@ -7,11 +7,11 @@
 # The simulator expander resolves them to foo_1, foo_2, ... before building
 # the TopologyGraph, so all edge rules apply to every instance automatically.
 #
-#         fundamentalist ──────────┐
-#         trend_follower ──────────┤
-#         noise_trader ────────────┼──▶ market ──▶ all investors
-#         slow_adapter ────────────┤             (market: price, volatility)
-#         volatility_trader ───────┘
+#         rule_fundamentalist ──────────┐
+#         rule_trend_follower ──────────┤
+#         rule_noise_trader ────────────┼──▶ market ──▶ all investors
+#         rule_slow_adapter ────────────┤             (market: price, volatility)
+#         rule_volatility_trader ───────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + volatility)
@@ -27,26 +27,26 @@ connections:
   # Market → All investors (price + volatility broadcast)
   # num_instances: 2 → trend_follower_1/2, noise_trader_1/2
   market:
-    - fundamentalist
-    - trend_follower
-    - noise_trader
-    - slow_adapter
-    - volatility_trader
+    - rule_fundamentalist
+    - rule_trend_follower
+    - rule_noise_trader
+    - rule_slow_adapter
+    - rule_volatility_trader
 
   # Each investor → Market only (order submission)
-  fundamentalist:
+  rule_fundamentalist:
     - market
 
   # num_instances: 2 → expands to trend_follower_1/2 → market
-  trend_follower:
+  rule_trend_follower:
     - market
 
   # num_instances: 2 → expands to noise_trader_1/2 → market
-  noise_trader:
+  rule_noise_trader:
     - market
 
-  slow_adapter:
+  rule_slow_adapter:
     - market
 
-  volatility_trader:
+  rule_volatility_trader:
     - market

@@ -9,8 +9,10 @@ from __future__ import annotations
 import importlib
 import logging
 import os
+import random
 import shutil
 import sys
+import asyncio
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -21,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -31,11 +33,16 @@ from masim.knowledge import (
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import normalize_action_quantity, validate_order
 
 from examples.ArchegosCollapse.Rule.players import Market
 
 logger = logging.getLogger("ArchegosCollapse.Rag")
+
+# Module-level fallback string injected when no documents are retrieved.
+# Single source of truth for the retrieval failure sentinel; imported by
+# examples.ArchegosCollapse.Rag.analysis as `_RAG_FALLBACK`.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -354,7 +361,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
@@ -389,7 +396,7 @@ class RagLLMInvestor(GeneralPlayer):
             try:
                 infer_output = llm_client.run([infer_input])
                 decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
+                    infer_output.response
                 )
                 decision = _validate_decision(decision, self.identity)
                 break
@@ -398,11 +405,14 @@ class RagLLMInvestor(GeneralPlayer):
                 parse_error = isinstance(exc, (ValueError, KeyError))
                 retryable_api_error = is_retryable_llm_error(exc)
                 if attempt < max_retries - 1 and (parse_error or retryable_api_error):
+                    delay = min(4.0, 0.75 * (2**attempt)) + random.uniform(0.0, 0.5)
                     logger.debug(
-                        "[%s] LLM call/parse failed, retrying: %s",
+                        "[%s] LLM call/parse failed, retrying in %.2fs: %s",
                         self.identity,
+                        delay,
                         exc,
                     )
+                    await asyncio.sleep(delay)
                     continue
                 if not parse_error and not retryable_api_error:
                     raise
@@ -415,9 +425,10 @@ class RagLLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
-        action = decision["action"]
+        action, quantity = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
 
         if action == "buy":
             max_affordable = cash / bid_price
@@ -428,6 +439,9 @@ class RagLLMInvestor(GeneralPlayer):
             quantity = min(quantity, max(position, 0.0))
             self.state.custom_state["cash"] += quantity * bid_price
             self.state.custom_state["position"] -= quantity
+
+        if quantity == 0:
+            action = "hold"
 
         logger.info(
             "[%s] R%d (%s): Q=%+.2f", self.identity, round_num, strategy_name, quantity
@@ -464,13 +478,13 @@ class RagLLMConcentratedFund(RagLLMInvestor):
     pass
 
 
-class RagLLMPrimeBroker1(RagLLMInvestor):
+class RagLLMPrimeBrokerFirstMover(RagLLMInvestor):
     """RAG-augmented prime broker 1 — first-mover liquidator. Theory: simulation-bases.md §4.2."""
 
     pass
 
 
-class RagLLMPrimeBroker2(RagLLMInvestor):
+class RagLLMPrimeBrokerDelayedLiquidator(RagLLMInvestor):
     """RAG-augmented prime broker 2 — delayed liquidator at worse prices. Theory: simulation-bases.md §4.3."""
 
     pass
@@ -492,8 +506,8 @@ __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMConcentratedFund",
-    "RagLLMPrimeBroker1",
-    "RagLLMPrimeBroker2",
+    "RagLLMPrimeBrokerFirstMover",
+    "RagLLMPrimeBrokerDelayedLiquidator",
     "RagLLMBlockTradeBuyer",
     "RagLLMInformationTrader",
     "_validate_decision",

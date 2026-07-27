@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-2,9,ShortSqueeze,RuleLLM,SUCCESS,0,10750.944,2026-05-22T06:24:36,2026-05-22T09:23:47,config/simulation.yml,examples/ShortSqueeze/RuleLLM/run_short_squeeze_rulellm.py,logs/ShortSqueeze__RuleLLM.log,,200,200,,

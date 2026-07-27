@@ -1,12 +1,48 @@
-"""Async simulation runner with progress streaming for Streamlit.
+"""Simulation runner with two execution modes: Default and Customized.
 
-This module provides async simulation execution with real-time progress updates,
-designed for integration with the Streamlit web UI (masim/interface/app.py).
+This module is the central orchestration layer for running multi-agent
+financial simulations. It supports two workflows:
 
-Usage
------
+Workflows
+---------
 
-1. **Via Streamlit Web UI (Recommended):**
+1. **Default mode** — run a shipped scenario as-is:
+
+   ```python
+   import asyncio
+   from masim.interface.simulation_runner import SimulationRunner
+
+   async def main():
+       runner = SimulationRunner.from_scenario("AssetBubble", variant="Rule")
+       if not await runner.setup():
+           return
+       async for update in runner.run():
+           print(f"Round {update.round_num}")
+       await runner.shutdown()
+
+   asyncio.run(main())
+   ```
+
+2. **Customized mode** — pick agents from AGENT_POOL, generate a bundle, run:
+
+   ```python
+   from masim.interface.simulation_runner import SimulationRunner
+   from masim.interface.customized import CustomizedAgentSelection
+
+   selections = [
+       CustomizedAgentSelection(
+           archetype="noise-trader", display_name="Noise Trader",
+           engine="Rule", params={}, num_instances=3,
+       ),
+       CustomizedAgentSelection(
+           archetype="momentum-trader", display_name="Momentum Trader",
+           engine="LLM", params={}, num_instances=2,
+       ),
+   ]
+   runner = SimulationRunner.from_customized("AssetBubble", selections)
+   ```
+
+3. **Via Streamlit Web UI (Recommended):**
 
    Launch the web interface and select a scenario:
 
@@ -16,93 +52,196 @@ Usage
    ```
 
    Then:
-   - Select a scenario from the sidebar (e.g., AssetBubble, HerdEffect)
-   - Click "Start Simulation" to run
-   - View real-time progress and results
+   - Stage 1: Select a scenario from the grid (e.g., AssetBubble, HerdEffect)
+   - Stage 2: Click a variant chip (Default) or "Customize my roster" (Customized)
+   - View real-time progress and results in the simulation workspace
 
-2. **Programmatic Usage:**
-
-   ```python
-   import asyncio
-   from masim.interface.simulation_runner import SimulationRunner
-
-   async def main():
-       # Initialize with config path
-       runner = SimulationRunner("configs/AssetBubble/Rule/simulation.yml")
-
-       # Setup
-       if not await runner.setup():
-           print(f"Setup failed: {runner.status.error}")
-           return
-
-       # Run with progress callback
-       def on_progress(status):
-           print(f"Progress: {status.progress_pct:.1f}% - {status.message}")
-
-       async for update in runner.run(progress_callback=on_progress):
-           # Process round updates here
-           print(f"Round {update.round_num} completed")
-
-       # Cleanup
-       await runner.shutdown()
-
-   asyncio.run(main())
-   ```
-
-3. **Using Convenience Function:**
+4. **Discovery helpers** (standalone, no Streamlit needed):
 
    ```python
-   from masim.interface.simulation_runner import run_simulation_with_progress
+   from masim.interface.simulation_runner import (
+       discover_available_scenarios,
+       discover_variants,
+       list_agent_pool,
+   )
 
-   async def main():
-       async for status in run_simulation_with_progress(
-           "configs/AssetBubble/Rule/simulation.yml",
-           use_mock=False  # Set True for testing without real simulation
-       ):
-           print(f"{status.state}: {status.progress_pct:.1f}%")
-
-   asyncio.run(main())
-   ```
-
-4. **Mock Mode for Testing:**
-
-   Use mock mode to test the UI without running actual simulations:
-
-   ```python
-   runner = SimulationRunner(config_path)  # Real simulation
-   # vs
-   from masim.interface.simulation_runner import MockSimulationRunner
-   runner = MockSimulationRunner(config_path)  # Mock for testing
+   scenarios = discover_available_scenarios()   # ['AnchoringEffect', ...]
+   variants = discover_variants("AssetBubble")  # ['Rule', 'LLM', 'RuleLLM']
+   agents = list_agent_pool()                   # [{'name': 'noise-trader', ...}, ...]
    ```
 
 Classes
 -------
-- SimulationRunner: Main async runner with progress streaming
-- MockSimulationRunner: Mock runner for UI testing
+- SimulationRunner: Main async runner with factory constructors
 - RoundUpdate: Dataclass for per-round updates
 - SimulationStatus: Dataclass for simulation state
 
-Integration Notes
------------------
+Integration
+-----------
 - Used by: masim/interface/app.py (Streamlit web UI)
-- Depends on: masim/simulator/general.py (GeneralSimulator)
+- Depends on: masim/simulator/general.py, masim/interface/customized/
 - Progress callbacks enable real-time UI updates in Streamlit
 """
 
 import asyncio
 import logging
+import os
+import re
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
+
+import ray
+
+logger = logging.getLogger(__name__)
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from masim.simulator.general import GeneralSimulator
-from masim.simulator.base import SimulationConfig
+from masim.simulator.base import SimulationConfig, SimulatorStatus
 from masim.utils.config import load_config, setup_logging
+
+
+# ---------------------------------------------------------------------------
+# Directory constants
+# ---------------------------------------------------------------------------
+
+_CONFIGS_DIR = project_root / "configs"
+_EXAMPLES_DIR = project_root / "examples"
+_AGENT_POOL_DIR = _EXAMPLES_DIR / "AGENT_POOL"
+_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION", "AGENT_POOL"}
+
+
+# ---------------------------------------------------------------------------
+# Customized-bundle import support
+# ---------------------------------------------------------------------------
+
+
+def _customized_bundle_import_root(config_path: str | Path) -> Optional[Path]:
+    """Return the examples directory paired with a customized config.
+
+    Customized bundles deliberately use short, bundle-local module paths such
+    as ``Rule.players:Market``.  Direct entry-point scripts add the matching
+    examples directory to ``sys.path`` themselves, but the Streamlit simulation
+    worker starts through :class:`SimulationRunner` and therefore needs the same
+    import root installed here before player classes are loaded.
+    """
+    try:
+        relative = Path(config_path).resolve().relative_to(_CONFIGS_DIR.resolve())
+    except (OSError, ValueError):
+        return None
+
+    if not relative.parts or relative.parts[0] != "CUSTOMIZED_SIMULATION":
+        return None
+
+    candidate = (_EXAMPLES_DIR / relative.parent).resolve()
+    return candidate if candidate.is_dir() else None
+
+
+def _prepend_python_path(path: Path, ray_config: Optional[Dict[str, Any]] = None) -> None:
+    """Expose *path* to this process and to Ray worker processes."""
+    path_str = str(path)
+    if path_str in sys.path:
+        sys.path.remove(path_str)
+    sys.path.insert(0, path_str)
+
+    existing_process_path = os.environ.get("PYTHONPATH", "")
+    process_entries = [
+        entry for entry in existing_process_path.split(os.pathsep) if entry
+    ]
+    process_entries = [entry for entry in process_entries if entry != path_str]
+    os.environ["PYTHONPATH"] = os.pathsep.join([path_str, *process_entries])
+
+    if ray_config is None:
+        return
+    runtime_env = ray_config.setdefault("runtime_env", {})
+    env_vars = runtime_env.setdefault("env_vars", {})
+    existing_worker_path = str(env_vars.get("PYTHONPATH", ""))
+    worker_entries = [
+        entry for entry in existing_worker_path.split(os.pathsep) if entry
+    ]
+    worker_entries = [entry for entry in worker_entries if entry != path_str]
+    env_vars["PYTHONPATH"] = os.pathsep.join([path_str, *worker_entries])
+
+
+# ---------------------------------------------------------------------------
+# Scenario & agent discovery utilities
+# ---------------------------------------------------------------------------
+
+
+def discover_available_scenarios() -> List[str]:
+    """List all scenario names available under configs/.
+
+    Returns:
+        Sorted list of scenario base names (e.g. ['AnchoringEffect', 'AssetBubble', ...]).
+    """
+    if not _CONFIGS_DIR.exists():
+        return []
+    return sorted(
+        d.name
+        for d in _CONFIGS_DIR.iterdir()
+        if d.is_dir() and d.name not in _EXCLUDED_DIRS and not d.name.startswith(".")
+    )
+
+
+def discover_variants(scenario_name: str) -> List[str]:
+    """List variants (Rule, LLM, RuleLLM, Rag) available for a scenario.
+
+    Args:
+        scenario_name: Base scenario name (e.g. 'AssetBubble').
+
+    Returns:
+        List of variant names that have a simulation.yml, e.g. ['Rule', 'LLM'].
+    """
+    scenario_dir = _CONFIGS_DIR / scenario_name
+    if not scenario_dir.exists():
+        return []
+    return sorted(
+        d.name
+        for d in scenario_dir.iterdir()
+        if d.is_dir() and (d / "simulation.yml").exists()
+    )
+
+
+def list_agent_pool() -> List[Dict[str, Any]]:
+    """List available agent archetypes from AGENT_POOL/finance/.
+
+    Each entry contains:
+        - name: filename stem (e.g. 'noise-trader')
+        - path: absolute path to the .md file
+        - archetype: extracted from the Summary table (or derived from name)
+        - time_horizon: extracted from Summary table if present
+        - risk_tolerance: extracted from Summary table if present
+
+    Returns:
+        List of agent metadata dicts, sorted by name.
+    """
+    finance_dir = _AGENT_POOL_DIR / "finance"
+    if not finance_dir.exists():
+        return []
+
+    agents: List[Dict[str, Any]] = []
+    for md_file in sorted(finance_dir.glob("*.md")):
+        content = md_file.read_text(encoding="utf-8")
+        agents.append({
+            "name": md_file.stem,
+            "path": str(md_file),
+            "archetype": _extract_field(content, "Archetype") or md_file.stem,
+            "time_horizon": _extract_field(content, "Time Horizon") or "",
+            "risk_tolerance": _extract_field(content, "Risk Tolerance") or "",
+        })
+    return agents
+
+
+def _extract_field(markdown: str, field: str) -> str:
+    """Extract a value from a markdown Summary table row."""
+    pattern = rf"^\|\s*{re.escape(field)}\s*\|\s*(.*?)\s*\|\s*$"
+    match = re.search(pattern, markdown, flags=re.MULTILINE | re.IGNORECASE)
+    return match.group(1).strip() if match else ""
 
 
 @dataclass
@@ -126,10 +265,19 @@ class SimulationStatus:
     progress_pct: float = 0.0
     message: str = ""
     error: Optional[str] = None
+    elapsed_seconds: float = 0.0
+    eta_seconds: Optional[float] = None
+    average_round_seconds: Optional[float] = None
 
 
 class SimulationRunner:
-    """Wrapper for running simulations with progress callbacks."""
+    """Async simulation runner with Default and Customized mode support.
+
+    Construction:
+        - ``SimulationRunner(config_path)``          — direct config path
+        - ``SimulationRunner.from_scenario(name)``   — Default mode (shipped scenario)
+        - ``SimulationRunner.from_customized(...)``  — Customized mode (AGENT_POOL)
+    """
 
     def __init__(self, config_path: str):
         """Initialize runner with config path.
@@ -142,6 +290,72 @@ class SimulationRunner:
         self.config: Optional[SimulationConfig] = None
         self.status = SimulationStatus(state="idle")
         self._stop_requested = False
+
+    # ------------------------------------------------------------------
+    # Factory constructors
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def from_scenario(
+        cls, scenario_name: str, variant: str = "Rule"
+    ) -> "SimulationRunner":
+        """Default mode: run a shipped scenario from configs/.
+
+        Resolves *scenario_name* + *variant* to the corresponding
+        ``configs/{scenario_name}/{variant}/simulation.yml``.
+
+        Args:
+            scenario_name: Base scenario name (e.g. 'AssetBubble').
+            variant: Decision-engine variant ('Rule', 'LLM', 'RuleLLM', 'Rag').
+
+        Returns:
+            A configured SimulationRunner ready for ``setup()`` → ``run()``.
+
+        Raises:
+            FileNotFoundError: When the resolved config file does not exist.
+        """
+        config_path = _CONFIGS_DIR / scenario_name / variant / "simulation.yml"
+        if not config_path.exists():
+            raise FileNotFoundError(
+                f"No simulation config found at {config_path}. "
+                f"Available variants for '{scenario_name}': "
+                f"{discover_variants(scenario_name) or '(none)'}"
+            )
+        return cls(str(config_path))
+
+    @classmethod
+    def from_customized(
+        cls,
+        scenario_name: str,
+        agent_selections: List[Any],
+    ) -> "SimulationRunner":
+        """Customized mode: build a bundle from AGENT_POOL selections, then run.
+
+        Generates a self-contained simulation bundle via
+        :func:`masim.interface.customized.write_customized_bundle`, then
+        returns a runner pointing at the generated config.
+
+        Args:
+            scenario_name: Base scenario to inherit market/round settings from.
+            agent_selections: List of ``CustomizedAgentSelection`` objects
+                describing the chosen agents, engines, and parameters.
+
+        Returns:
+            A configured SimulationRunner whose ``config_path`` points to
+            the freshly generated ``simulation.yml``.
+
+        Raises:
+            ValueError: Roster is incompatible with the chosen scenario.
+            FileNotFoundError: Base scenario config is missing.
+        """
+        from masim.interface.customized import write_customized_bundle
+
+        result = write_customized_bundle(
+            selections=agent_selections,
+            scenario_name=scenario_name,
+            project_root=project_root,
+        )
+        return cls(str(result.simulation_yaml))
 
     async def setup(self) -> bool:
         """Setup the simulation.
@@ -157,6 +371,10 @@ class SimulationRunner:
             yaml_config = load_config(self.config_path)
             self.config = SimulationConfig(**yaml_config)
 
+            bundle_import_root = _customized_bundle_import_root(self.config_path)
+            if bundle_import_root is not None:
+                _prepend_python_path(bundle_import_root, self.config.ray)
+
             self.status.total_rounds = self.config.setting.get("total_rounds", 0)
 
             self.simulator = GeneralSimulator(self.config)
@@ -170,6 +388,41 @@ class SimulationRunner:
                 state="error", error=f"Setup failed: {str(e)}"
             )
             return False
+
+    def clear_records(self) -> None:
+        """Remove existing experiment records so the simulation starts fresh.
+
+        Can be called BEFORE ``setup()`` — reads ``record_path`` directly from
+        the YAML config file.  Removes the directory tree and recreates it empty.
+        """
+        import shutil
+
+        import yaml as _yaml
+
+        try:
+            with open(self.config_path, "r", encoding="utf-8") as fh:
+                content = fh.read()
+            # Strip !include directives so yaml.safe_load doesn't choke
+            lines = []
+            for line in content.split("\n"):
+                if "!include" in line:
+                    key = line.split(":")[0]
+                    lines.append(f"{key}: {{}}")
+                else:
+                    lines.append(line)
+            raw = _yaml.safe_load("\n".join(lines))
+            record_path = (raw or {}).get("setting", {}).get("record_path", "")
+        except Exception:
+            record_path = ""
+
+        if not record_path:
+            return
+        # record_path is relative to project root
+        abs_record = project_root / record_path
+        if abs_record.exists():
+            shutil.rmtree(abs_record)
+            logger.info("Cleared previous records at %s", abs_record)
+        abs_record.mkdir(parents=True, exist_ok=True)
 
     async def run(
         self, progress_callback: Optional[Callable[[SimulationStatus], None]] = None
@@ -188,53 +441,75 @@ class SimulationRunner:
                 progress_callback(self.status)
             return
 
-        total_rounds = self.config.setting.get("total_rounds", 1)
+        total_rounds = self.config.setting["total_rounds"]
+        record_path = self.config.setting["record_path"]
 
         try:
-            for round_num in range(1, total_rounds + 1):
+            # Mirror GeneralSimulator.run() resume detection, but execute the
+            # rounds here so progress updates represent completed real work.
+            completed_on_disk = self.simulator._detect_resume_round(record_path)
+            start_round = completed_on_disk + 1
+            run_started = time.monotonic()
+            completed_this_run = 0
+            self.simulator.status = SimulatorStatus.RUNNING
+
+            if start_round > total_rounds:
+                self.status = SimulationStatus(
+                    state="completed",
+                    current_round=total_rounds,
+                    total_rounds=total_rounds,
+                    progress_pct=100.0,
+                    message="All rounds already exist on disk.",
+                    elapsed_seconds=0.0,
+                    eta_seconds=0.0,
+                    average_round_seconds=0.0,
+                )
+                return
+
+            for round_num in range(start_round, total_rounds + 1):
                 if self._stop_requested:
+                    self.status.state = "stopped"
                     self.status.message = "Simulation stopped by user"
                     break
 
-                # Update status
+                await self.simulator.run_round(round_num)
+                completed_this_run += 1
+                elapsed = time.monotonic() - run_started
+                average_round_seconds = elapsed / completed_this_run
+                eta_seconds = average_round_seconds * (total_rounds - round_num)
+
+                # Update only after a real round has completed.
+                self.status.state = "running"
                 self.status.current_round = round_num
+                self.status.total_rounds = total_rounds
                 self.status.progress_pct = (round_num / total_rounds) * 100
-                self.status.message = f"Running round {round_num}/{total_rounds}..."
+                self.status.elapsed_seconds = elapsed
+                self.status.eta_seconds = eta_seconds
+                self.status.average_round_seconds = average_round_seconds
+                self.status.message = f"Completed real round {round_num}/{total_rounds}"
 
                 if progress_callback:
                     progress_callback(self.status)
 
-                # Run single round (this is a simplified version)
-                # In reality, the simulator.run() runs all rounds at once
-                # We need to hook into the simulator's round completion
-
-                # For now, yield a simple update
                 update = RoundUpdate(
                     round_num=round_num,
                     total_rounds=total_rounds,
-                    agent_actions=[],  # Would need to extract from simulator
+                    agent_actions=[],
                     market_data=None,
                     messages=[],
                 )
                 yield update
 
-                # Small delay to allow UI updates
-                await asyncio.sleep(0.01)
+            if not self._stop_requested:
+                self.simulator.status = SimulatorStatus.TERMINATED
+                self.status.state = "completed"
+                self.status.progress_pct = 100.0
+                self.status.message = "Simulation completed successfully!"
+                self.status.current_round = total_rounds
+                self.status.eta_seconds = 0.0
 
-            # Actually run the full simulation
-            self.status.message = "Executing simulation..."
-            if progress_callback:
-                progress_callback(self.status)
-
-            results = await self.simulator.run()
-
-            self.status.state = "completed"
-            self.status.progress_pct = 100.0
-            self.status.message = "Simulation completed successfully!"
-            self.status.current_round = total_rounds
-
-            if progress_callback:
-                progress_callback(self.status)
+                if progress_callback:
+                    progress_callback(self.status)
 
         except Exception as e:
             self.status = SimulationStatus(
@@ -249,6 +524,8 @@ class SimulationRunner:
         if self.simulator:
             await self.simulator.shutdown()
             self.simulator = None
+        if ray.is_initialized():
+            ray.shutdown()
 
     def stop(self):
         """Request simulation stop."""
@@ -256,122 +533,18 @@ class SimulationRunner:
         self.status.message = "Stopping simulation..."
 
 
-class MockSimulationRunner:
-    """Mock runner for testing without actual simulation."""
-
-    def __init__(self, config_path: str):
-        self.config_path = config_path
-        self.config = None
-        self.status = SimulationStatus(state="idle")
-        self._stop_requested = False
-
-    async def setup(self) -> bool:
-        """Mock setup."""
-        try:
-            yaml_config = load_config(self.config_path)
-            self.config = SimulationConfig(**yaml_config)
-            self.status.total_rounds = self.config.setting.get("total_rounds", 50)
-            self.status = SimulationStatus(
-                state="running", message="Setup complete (mock mode)"
-            )
-            return True
-        except Exception as e:
-            self.status = SimulationStatus(
-                state="error", error=f"Setup failed: {str(e)}"
-            )
-            return False
-
-    async def run(
-        self, progress_callback: Optional[Callable[[SimulationStatus], None]] = None
-    ) -> AsyncGenerator[RoundUpdate, None]:
-        """Mock run with simulated progress."""
-        total_rounds = (
-            self.config.setting.get("total_rounds", 50) if self.config else 50
-        )
-
-        for round_num in range(1, total_rounds + 1):
-            if self._stop_requested:
-                break
-
-            self.status.current_round = round_num
-            self.status.progress_pct = (round_num / total_rounds) * 100
-            self.status.message = f"Round {round_num}/{total_rounds}"
-
-            if progress_callback:
-                progress_callback(self.status)
-
-            # Generate mock agent actions
-            agent_actions = self._generate_mock_actions(round_num)
-
-            yield RoundUpdate(
-                round_num=round_num,
-                total_rounds=total_rounds,
-                agent_actions=agent_actions,
-                market_data={"price": 100 + round_num * 0.5},
-                messages=[],
-            )
-
-            # Simulate work
-            await asyncio.sleep(0.05)
-
-        self.status.state = "completed"
-        self.status.progress_pct = 100.0
-        self.status.message = "Mock simulation completed!"
-
-        if progress_callback:
-            progress_callback(self.status)
-
-    def _generate_mock_actions(self, round_num: int) -> List[Dict[str, Any]]:
-        """Generate mock agent actions for display."""
-        import random
-
-        agents = [
-            ("Momentum Speculator", "momentum_speculator_1"),
-            ("Rational Arbitrageur", "rational_arbitrageur_1"),
-            ("Noise Trader", "noise_trader_1"),
-            ("Fundamental Investor", "fundamental_investor_1"),
-        ]
-
-        actions = []
-        for name, agent_id in agents:
-            bid = round(random.uniform(95, 105), 2)
-            qty = round(random.uniform(-20, 20), 1)
-            actions.append(
-                {
-                    "agent_name": name,
-                    "agent_id": agent_id,
-                    "bid_price": bid,
-                    "quantity": qty,
-                    "action": "BUY" if qty > 0 else "SELL" if qty < 0 else "HOLD",
-                }
-            )
-
-        return actions
-
-    async def shutdown(self):
-        """Mock shutdown."""
-        pass
-
-    def stop(self):
-        """Request stop."""
-        self._stop_requested = True
-
-
 async def run_simulation_with_progress(
-    config_path: str, use_mock: bool = False
+    config_path: str,
 ) -> AsyncGenerator[SimulationStatus, None]:
     """Convenience function to run simulation and yield status updates.
 
     Args:
         config_path: Path to simulation config
-        use_mock: If True, use mock runner for testing
 
     Yields:
         SimulationStatus updates
     """
-    runner = (
-        MockSimulationRunner(config_path) if use_mock else SimulationRunner(config_path)
-    )
+    runner = SimulationRunner(config_path)
 
     # Setup
     if not await runner.setup():

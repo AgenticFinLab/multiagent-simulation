@@ -2,10 +2,10 @@
 
 Investor personalities for market simulation:
     - Market Maker: Liquidity provider with withdrawal conditions
-    - Liquidity Demander: Needs to execute trades
-    - Arbitrageur: Seeks opportunities from price dislocations
-    - Value Investor: Fundamentals-focused
-    - Forced Seller: Must sell regardless of conditions
+    - Liquidity Seeker: Needs to execute trades
+    - Value Trader: Provides contrarian liquidity around fundamentals
+    - Momentum Trader: Follows recent returns
+    - Noise Trader: Creates uninformed order flow
 """
 
 # =============================================================================
@@ -25,10 +25,10 @@ The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": fl
 """
 
 # =============================================================================
-# Liquidity Demander
+# Liquidity Seeker
 # =============================================================================
 
-LLM_LIQUIDITY_DEMANDER_SYS = """You are a LIQUIDITY DEMANDER who needs to execute trades.
+LLM_LIQUIDITY_SEEKER_SYS = """You are a LIQUIDITY SEEKER who needs to execute trades.
 
 STRATEGY:
 - Liquidity > 70: Trade normally
@@ -41,10 +41,10 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 """
 
 # =============================================================================
-# Arbitrageur
+# Value Trader
 # =============================================================================
 
-LLM_ARBITRAGEUR_SYS = """You are an ARBITRAGEUR seeking opportunities.
+LLM_VALUE_TRADER_SYS = """You are a VALUE TRADER seeking price-dislocation opportunities.
 
 STRATEGY:
 - Liquidity < 40: Potential opportunities from wider spreads
@@ -59,7 +59,7 @@ The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": fl
 # Momentum Trader
 # =============================================================================
 
-LLM_VALUE_SYS = """You are a MOMENTUM TRADER during a liquidity dry-up.
+LLM_MOMENTUM_TRADER_SYS = """You are a MOMENTUM TRADER during a liquidity dry-up.
 
 STRATEGY:
 - Return above +1%: buy with the trend
@@ -76,7 +76,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Noise Trader
 # =============================================================================
 
-LLM_FORCED_SELLER_SYS = """You are a NOISE TRADER creating uninformed order flow.
+LLM_NOISE_TRADER_SYS = """You are a NOISE TRADER creating uninformed order flow.
 
 - Submit small noisy trades without a directional information advantage
 - Buy, sell, or hold based on random liquidity demand, not fundamentals

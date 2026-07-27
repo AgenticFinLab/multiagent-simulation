@@ -1,4 +1,5 @@
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.SunkCostFallacy.Rule.players:Market"
   num_instances: 1
@@ -9,32 +10,33 @@ market:
     steps_per_turn: 1
     group_tags: [market]
     extras:
-      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/market"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.015
-      noise_std: 0.01
+      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/market"  # Source: variant runtime plumbing
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization (simulation-bases.md §6)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization; equal to initial_price so starting deviation is zero (simulation-bases.md §6)
+      price_impact: 0.02  # Source: target §9 market.extras.price_impact row; simulation-bases.md §3.1
+      mean_reversion: 0.015  # Source: target §9 market.extras.mean_reversion row; simulation-bases.md §3.1
+      noise_std: 0.01  # Source: target §9 market.extras.noise_std row; simulation-bases.md §3.1
 
-sunkcostholder:
+llm_sunk_cost_holder:
   name: "SunkCostHolder"
   class: "examples.SunkCostFallacy.LLM.players:LLMSunkCostHolder"
-  num_instances: 3
+  num_instances: 3  # Source: target §9 sunkcostholder.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "sunkcostholder"
+    identity: "llm_sunk_cost_holder"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/sunkcostholder"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      hold_threshold: 0.1
-      base_size: 200
-      custom_state_hot_limit: 3
+      agent_type: "sunkcostholder"  # Source: agent-design-skill §3.6.0 I/O Contract (LLM/RuleLLM/Rag variants)
+      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/sunkcostholder"  # Source: variant runtime plumbing
+      initial_cash: 1000000.0  # Source: target §9 sunkcostholder.extras.initial_cash row
+      initial_position: 500  # Source: target §9 sunkcostholder.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      hold_threshold: 0.1  # Source: target §9 sunkcostholder.extras.hold_threshold row; Arkes and Blumer (1985), 10.1016/0749-5978(85)90049-4
+      base_size: 200  # Source: target §9 sunkcostholder.extras.base_size row
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
       llm:
         sys_message: "examples.SunkCostFallacy.LLM.prompts:LLM_SUNK_COST_HOLDER_SYS"
         user_message: "examples.SunkCostFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -43,25 +45,26 @@ sunkcostholder:
           temperature: 0.7
           max_tokens: 512
 
-commitmentescalator:
+llm_commitment_escalator:
   name: "CommitmentEscalator"
   class: "examples.SunkCostFallacy.LLM.players:LLMCommitmentEscalator"
-  num_instances: 3
+  num_instances: 3  # Source: target §9 commitmentescalator.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "commitmentescalator"
+    identity: "llm_commitment_escalator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/commitmentescalator"
-      initial_cash: 1200000.0
-      initial_position: 400
-      initial_price: 100.0
-      fundamental_value: 100.0
-      escalation_threshold: 0.05
-      escalation_size: 400
-      custom_state_hot_limit: 3
+      agent_type: "commitmentescalator"  # Source: agent-design-skill §3.6.0 I/O Contract (LLM/RuleLLM/Rag variants)
+      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/commitmentescalator"  # Source: variant runtime plumbing
+      initial_cash: 1200000.0  # Source: target §9 commitmentescalator.extras.initial_cash row
+      initial_position: 400  # Source: target §9 commitmentescalator.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      escalation_threshold: 0.05  # Source: target §9 commitmentescalator.extras.escalation_threshold row; Staw (1976), 10.1016/0030-5073(76)90005-2
+      escalation_size: 400  # Source: target §9 commitmentescalator.extras.escalation_size row
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
       llm:
         sys_message: "examples.SunkCostFallacy.LLM.prompts:LLM_COMMITMENT_ESCALATOR_SYS"
         user_message: "examples.SunkCostFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -70,25 +73,26 @@ commitmentescalator:
           temperature: 0.7
           max_tokens: 512
 
-rationalcutter:
+llm_rational_cutter:
   name: "RationalCutter"
   class: "examples.SunkCostFallacy.LLM.players:LLMRationalCutter"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 rationalcutter.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "rationalcutter"
+    identity: "llm_rational_cutter"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/rationalcutter"
-      initial_cash: 1500000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      cut_threshold: 0.05
-      position_size: 350
-      custom_state_hot_limit: 3
+      agent_type: "rationalcutter"  # Source: agent-design-skill §3.6.0 I/O Contract (LLM/RuleLLM/Rag variants)
+      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/rationalcutter"  # Source: variant runtime plumbing
+      initial_cash: 1500000.0  # Source: target §9 rationalcutter.extras.initial_cash row
+      initial_position: 600  # Source: target §9 rationalcutter.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      cut_threshold: 0.05  # Source: target §9 rationalcutter.extras.cut_threshold row; Odean (1998), 10.1111/0022-1082.00072
+      position_size: 350  # Source: target §9 rationalcutter.extras.position_size row
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
       llm:
         sys_message: "examples.SunkCostFallacy.LLM.prompts:LLM_RATIONAL_CUTTER_SYS"
         user_message: "examples.SunkCostFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -97,25 +101,26 @@ rationalcutter:
           temperature: 0.7
           max_tokens: 512
 
-opportunitycosttrader:
+llm_opportunity_cost_trader:
   name: "OpportunityCostTrader"
   class: "examples.SunkCostFallacy.LLM.players:LLMOpportunityCostTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 opportunitycosttrader.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "opportunitycosttrader"
+    identity: "llm_opportunity_cost_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/opportunitycosttrader"
-      initial_cash: 1300000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      realloc_threshold: 0.08
-      position_size: 300
-      custom_state_hot_limit: 3
+      agent_type: "opportunitycosttrader"  # Source: agent-design-skill §3.6.0 I/O Contract (LLM/RuleLLM/Rag variants)
+      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/opportunitycosttrader"  # Source: variant runtime plumbing
+      initial_cash: 1300000.0  # Source: target §9 opportunitycosttrader.extras.initial_cash row
+      initial_position: 500  # Source: target §9 opportunitycosttrader.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      realloc_threshold: 0.08  # Source: target §9 opportunitycosttrader.extras.realloc_threshold row; Barber and Odean (2000), 10.1111/0022-1082.00226
+      position_size: 300  # Source: target §9 opportunitycosttrader.extras.position_size row
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
       llm:
         sys_message: "examples.SunkCostFallacy.LLM.prompts:LLM_OPPORTUNITY_COST_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.LLM.prompts:LLM_USER_TEMPLATE"
@@ -124,25 +129,26 @@ opportunitycosttrader:
           temperature: 0.7
           max_tokens: 512
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.SunkCostFallacy.LLM.players:LLMNoiseTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 noisetrader.num_instances row
   persona: !include ../LLM/persona.yml
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/noisetrader"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
+      agent_type: "noisetrader"  # Source: agent-design-skill §3.6.0 I/O Contract (LLM/RuleLLM/Rag variants)
+      record_path: "EXPERIMENT/SunkCostFallacy/LLM/records/noisetrader"  # Source: variant runtime plumbing
+      initial_cash: 500000.0  # Source: target §9 noisetrader.extras.initial_cash row
+      initial_position: 200  # Source: target §9 noisetrader.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      trade_probability: 0.3  # Source: target §9 noisetrader.extras.trade_probability row; Black (1986), 10.1111/j.1540-6261.1986.tb04513.x
+      noise_size: 100  # Source: target §9 noisetrader.extras.noise_size row
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
       llm:
         sys_message: "examples.SunkCostFallacy.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.SunkCostFallacy.LLM.prompts:LLM_USER_TEMPLATE"

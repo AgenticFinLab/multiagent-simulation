@@ -9,7 +9,8 @@ Theoretical Foundation:
 
 Agents:
 - Market: Price formation via net-demand + mean-reversion
-- NewEconomyEvangelist: Believes in new paradigm, ignores traditional valuation (destabilizing)
+- NewEconomyEvangelist: Believes in the new paradigm and ignores traditional
+  valuation (destabilizing)
 - IPOFlipper: Buys IPOs and quickly sells for short-term profit (destabilizing)
 - MomentumFollower: Follows price trends and amplifies moves (destabilizing)
 - SkepticalValueInvestor: Waits for correction, buys undervalued assets (stabilizing)
@@ -19,9 +20,9 @@ Agents:
 import logging
 import os
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
@@ -40,16 +41,33 @@ def _build_order(
         raise ValueError(f"{player.identity} emitted invalid action: {action}")
     if price <= 0:
         raise ValueError(f"{player.identity} emitted non-positive bid_price: {price}")
+    if quantity < 0:
+        raise ValueError(f"{player.identity} emitted negative quantity: {quantity}")
     return {
         "type": "order",
         "from": player.identity,
         "action": action,
         "bid_price": float(price),
-        "quantity": max(0, int(quantity)),
+        "quantity": int(quantity),
         "reasoning": reasoning,
         "agent_type": player.__class__.__name__,
         "strategy": player.__class__.__name__,
     }
+
+
+def _initialize_investor(player: GeneralPlayer) -> None:
+    """Initialize the shared investor state from required config fields."""
+    extras = player.config.extras
+    player.state.custom_state["cash"] = float(extras["initial_cash"])
+    player.state.custom_state["position"] = int(extras["initial_position"])
+    player.state.custom_state["price_history"] = []
+
+
+def _buy_quantity(order_size: int, cash: float, price: float) -> int:
+    """Return an affordable quantity while failing on invalid market data."""
+    if price <= 0:
+        raise ValueError(f"Cannot size a buy order at non-positive price {price}")
+    return min(order_size, int(cash / price))
 
 
 class Market(GeneralPlayer):
@@ -66,6 +84,10 @@ class Market(GeneralPlayer):
             self.state.custom_state["price_impact"] = float(extras["price_impact"])
             self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
             self.state.custom_state["noise_std"] = float(extras["noise_std"])
+            if self.state.custom_state["price"] <= 0:
+                raise ValueError("initial_price must be positive")
+            if self.state.custom_state["fundamental"] <= 0:
+                raise ValueError("fundamental_value must be positive")
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "price"),
                 entry_limit=custom_state_hot_limit,
@@ -80,9 +102,17 @@ class Market(GeneralPlayer):
         if observation.inbounds:
             for inb in observation.inbounds:
                 payload = inb.payload
-                if isinstance(payload, dict) and "type" not in payload and "order" in payload:
+                if (
+                    isinstance(payload, dict)
+                    and "type" not in payload
+                    and "order" in payload
+                ):
                     payload = payload["order"]
-                if isinstance(payload, dict) and payload.get("action") in ("buy", "sell", "hold"):
+                if isinstance(payload, dict) and payload.get("action") in (
+                    "buy",
+                    "sell",
+                    "hold",
+                ):
                     orders.append(payload)
 
         price = self.state.custom_state["price"]
@@ -101,7 +131,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["fundamental_history"].append(fundamental)
 
-        deviation = (new_price - fundamental) / fundamental if fundamental > 0 else 0.0
+        deviation = (new_price - fundamental) / fundamental
         self.state.custom_state["deviation"] = deviation
         logger.debug(
             "Round %d: price=%.2f deviation=%.4f",
@@ -136,23 +166,18 @@ class Market(GeneralPlayer):
 
 
 class NewEconomyEvangelist(GeneralPlayer):
-    """Believes in new paradigm — ignores traditional valuation metrics during internet bubble.
+    """Ignore traditional valuation metrics during the internet bubble.
 
     Theory: simulation-bases.md §4.1 — NewEconomyEvangelist
-    Theoretical basis: Shiller (2000) narrative economics; tech evangelists dismiss P/E ratios as irrelevant.
+    Theoretical basis: Shiller (2000) narrative economics and the dismissal of
+    conventional valuation ratios.
     See simulation-bases.md §4.1 for mathematical model.
     Role: destabilizing.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = float(extras["initial_cash"])
-            self.state.custom_state["position"] = int(extras["initial_position"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="DotComBubble/NewEconomyEvangelist", entry_limit=200
-            )
+            _initialize_investor(self)
 
         self.state.custom_state["round"] = observation.round
         if observation.inbounds:
@@ -175,7 +200,7 @@ class NewEconomyEvangelist(GeneralPlayer):
         # Ignores overvaluation — keeps buying as long as price is rising
         if deviation > -0.20:
             # Buy as long as not deeply below fundamental
-            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            qty = _buy_quantity(order_size, cash, price)
             if qty > 0:
                 action, quantity = "buy", qty
         elif deviation < -0.30:
@@ -220,20 +245,15 @@ class IPOFlipper(GeneralPlayer):
     """Buys IPOs and quickly sells for short-term profit.
 
     Theory: simulation-bases.md §4.2 — IPOFlipper
-    Theoretical basis: Ofek & Richardson (2003) IPO dynamics; Ritter (1991) underpricing and flipping.
+    Theoretical basis: Ofek & Richardson (2003) IPO dynamics and Ritter (1991)
+    on underpricing and flipping.
     See simulation-bases.md §4.2 for mathematical model.
     Role: destabilizing.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = float(extras["initial_cash"])
-            self.state.custom_state["position"] = int(extras["initial_position"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="DotComBubble/IPOFlipper", entry_limit=200
-            )
+            _initialize_investor(self)
 
         self.state.custom_state["round"] = observation.round
         if observation.inbounds:
@@ -261,7 +281,7 @@ class IPOFlipper(GeneralPlayer):
                 action, quantity = "sell", qty
         elif deviation < 0:
             # Price dipped — buy in for next flip
-            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            qty = _buy_quantity(order_size, cash, price)
             if qty > 0:
                 action, quantity = "buy", qty
 
@@ -301,20 +321,15 @@ class MomentumFollower(GeneralPlayer):
     """Follows price trends and amplifies moves — trend-chasing behavior.
 
     Theory: simulation-bases.md §4.3 — MomentumFollower
-    Theoretical basis: Abreu & Brunnermeier (2003) momentum synchronization; Jegadeesh & Titman (1993).
+    Theoretical basis: Abreu & Brunnermeier (2003) synchronization and
+    Jegadeesh & Titman (1993) momentum.
     See simulation-bases.md §4.3 for mathematical model.
     Role: destabilizing.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = float(extras["initial_cash"])
-            self.state.custom_state["position"] = int(extras["initial_position"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="DotComBubble/MomentumFollower", entry_limit=200
-            )
+            _initialize_investor(self)
 
         self.state.custom_state["round"] = observation.round
         if observation.inbounds:
@@ -338,13 +353,12 @@ class MomentumFollower(GeneralPlayer):
         price_history = self.state.custom_state["price_history"]
         action, quantity = "hold", 0
         if len(price_history) >= 2:
-            momentum = (
-                (price_history[-1] - price_history[-2]) / price_history[-2]
-                if price_history[-2] > 0
-                else 0
-            )
+            previous_price = price_history[-2]
+            if previous_price <= 0:
+                raise ValueError("Momentum calculation requires positive prices")
+            momentum = (price_history[-1] - previous_price) / previous_price
             if momentum > momentum_threshold:
-                qty = min(order_size, int(cash / price) if price > 0 else 0)
+                qty = _buy_quantity(order_size, cash, price)
                 if qty > 0:
                     action, quantity = "buy", qty
             elif momentum < -momentum_threshold:
@@ -388,20 +402,15 @@ class SkepticalValueInvestor(GeneralPlayer):
     """Avoids overvalued tech stocks — waits for correction, then buys.
 
     Theory: simulation-bases.md §4.4 — SkepticalValueInvestor
-    Theoretical basis: Graham (1949) value investing; Abreu & Brunnermeier (2003) rational arbitrageurs too early.
+    Theoretical basis: Graham (1949) value investing and Abreu & Brunnermeier
+    (2003) on early rational arbitrage.
     See simulation-bases.md §4.4 for mathematical model.
     Role: stabilizing.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = float(extras["initial_cash"])
-            self.state.custom_state["position"] = int(extras["initial_position"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="DotComBubble/SkepticalValueInvestor", entry_limit=200
-            )
+            _initialize_investor(self)
 
         self.state.custom_state["round"] = observation.round
         if observation.inbounds:
@@ -425,7 +434,7 @@ class SkepticalValueInvestor(GeneralPlayer):
         action, quantity = "hold", 0
         if deviation < value_buy_threshold:
             # Post-crash buying
-            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            qty = _buy_quantity(order_size, cash, price)
             if qty > 0:
                 action, quantity = "buy", qty
         elif deviation > value_sell_threshold:
@@ -470,20 +479,15 @@ class ShortSeller(GeneralPlayer):
     """Bets against overvalued stocks — faces squeeze risk during bubble.
 
     Theory: simulation-bases.md §4.5 — ShortSeller
-    Theoretical basis: Abreu & Brunnermeier (2003) limits to arbitrage; short sellers face synchronization risk.
+    Theoretical basis: Abreu & Brunnermeier (2003) limits to arbitrage and
+    synchronization risk.
     See simulation-bases.md §4.5 for mathematical model.
     Role: stabilizing.
     """
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            self.state.custom_state["cash"] = float(extras["initial_cash"])
-            self.state.custom_state["position"] = int(extras["initial_position"])
-            self.state.custom_state["price_history"] = []
-            self.state.custom_state["history_buffer"] = HistoryBuffer(
-                folder="DotComBubble/ShortSeller", entry_limit=200
-            )
+            _initialize_investor(self)
 
         self.state.custom_state["round"] = observation.round
         if observation.inbounds:
@@ -512,7 +516,7 @@ class ShortSeller(GeneralPlayer):
                 action, quantity = "sell", qty
         elif deviation < cover_threshold:
             # Cover shorts (buy back) as price falls
-            qty = min(order_size, int(cash / price) if price > 0 else 0)
+            qty = _buy_quantity(order_size, cash, price)
             if qty > 0:
                 action, quantity = "buy", qty
 
@@ -521,7 +525,8 @@ class ShortSeller(GeneralPlayer):
             action,
             quantity,
             price,
-            "short seller trades against extreme overvaluation and covers after correction",
+            "short seller trades against extreme overvaluation and covers "
+            "after correction",
         )
         return {
             **order,

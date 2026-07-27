@@ -12,15 +12,40 @@ See examples/DispositionEffect/Rule/analysis.py for detailed documentation.
 import argparse
 import json
 import os
+import sys
 
-from masim.utils import load_config
+project_root = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 from examples.DispositionEffect.Rule.analysis import (
     _write_standard_named_outputs,
     calculate_metrics,
     create_visualizations,
-    load_simulation_data,
+    load_simulation_data as _load_rule_simulation_data,
 )
+
+
+def load_simulation_data(config):
+    """Load shared metrics data, recovering resumed prices from market turns."""
+    data = _load_rule_simulation_data(config)
+    results = load_results(config)
+    coordinators = list(results.players_by_role("coordinator").values())
+    if not coordinators:
+        raise ValueError("No coordinator result found")
+    payloads = coordinators[0].turns.payloads()
+    resumed_prices = [
+        payload["market_data"]["price"]
+        for _, payload in sorted(payloads.items())
+    ]
+    if len(resumed_prices) > len(data["prices"]):
+        data["prices"] = resumed_prices
+    return data
 
 
 def main():
@@ -90,7 +115,26 @@ def main():
         )
     print(f"\nVALIDATION: {summary['validation']['interpretation']}")
     print(f"Fit Score: {summary['validation']['score']:.1%}")
-
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'RuleLLM'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='DispositionEffect',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

@@ -31,6 +31,7 @@ knowledge:
 # Market (Coordinator) — rule-based
 # -----------------------------------------------------------------------------
 market:
+  archetype: credit-minsky-cycle  # -> AGENT_POOL/market/credit-minsky-cycle.md
   name: "Market"
   class: "examples.CreditCycle.Rag.players:Market"
   num_instances: 1
@@ -42,39 +43,39 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/CreditCycle/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      initial_price: 100.0            # Source: target §9 row 1 (normalization)
+      fundamental_value: 100.0        # Source: target §9 row 2 (normalization)
+      price_impact: 0.05              # Source: target §9 row 3; simulation-bases.md §3
+      mean_reversion: 0.02            # Source: target §9 row 4; simulation-bases.md §3
+      noise_std: 0.02                 # Source: target §9 row 5; simulation-bases.md §3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # RAG Pro-Cyclical Lenders
 # Theory: Adrian & Shin (2010)
 # -----------------------------------------------------------------------------
-procyclicallender:
+ragllm_pro_cyclical_lender:
   name: "ProCyclicalLender"
   class: "examples.CreditCycle.Rag.players:RagLLMProCyclicalLender"
   num_instances: 2
   config:
-    identity: "procyclicallender"
+    identity: "ragllm_pro_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/CreditCycle/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      leverage_expansion_rate: 0.3
-      leverage_contraction_rate: 0.4
-      expansion_threshold: 0.01
-      contraction_threshold: -0.015
-      base_size: 500
-      custom_state_hot_limit: 3
-      private_knowledge:
+      initial_cash: 1000000.0         # Source: implementation-infrastructure
+      initial_position: 0             # Source: implementation-infrastructure
+      leverage_expansion_rate: 0.3    # Source: simulation-bases.md §4.1.3
+      leverage_contraction_rate: 0.4  # Source: simulation-bases.md §4.1.3
+      expansion_threshold: 0.01       # Source: target §9 row 6; simulation-bases.md §4.1.3
+      contraction_threshold: -0.015   # Source: target §9 row 7; simulation-bases.md §4.1.3
+      base_size: 500                  # Source: simulation-bases.md §4.1.3
+      custom_state_hot_limit: 3       # Source: implementation-infrastructure
+      private_knowledge:              # Source: RAG-wiring
         from_global_resources:
           - "MinerU_processed"
         local_resources:
@@ -105,12 +106,12 @@ procyclicallender:
 # RAG Minsky Borrowers
 # Theory: Minsky (1986)
 # -----------------------------------------------------------------------------
-minskyborrower:
+ragllm_minsky_borrower:
   name: "MinskyBorrower"
   class: "examples.CreditCycle.Rag.players:RagLLMMinskyBorrower"
   num_instances: 2
   config:
-    identity: "minskyborrower"
+    identity: "ragllm_minsky_borrower"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -157,12 +158,12 @@ minskyborrower:
 # RAG Counter-Cyclical Lenders
 # Theory: Geanakoplos (2010)
 # -----------------------------------------------------------------------------
-countercyclicallender:
+ragllm_counter_cyclical_lender:
   name: "CounterCyclicalLender"
   class: "examples.CreditCycle.Rag.players:RagLLMCounterCyclicalLender"
   num_instances: 1
   config:
-    identity: "countercyclicallender"
+    identity: "ragllm_counter_cyclical_lender"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -206,12 +207,12 @@ countercyclicallender:
 # RAG Value Investors
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-valueinvestor:
+ragllm_value_investor:
   name: "ValueInvestor"
   class: "examples.CreditCycle.Rag.players:RagLLMValueInvestor"
   num_instances: 1
   config:
-    identity: "valueinvestor"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
@@ -255,12 +256,12 @@ valueinvestor:
 # RAG Noise Traders
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.CreditCycle.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:

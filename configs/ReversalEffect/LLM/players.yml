@@ -3,6 +3,7 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Mean Reversion"
   class: "examples.ReversalEffect.LLM.players:Market"
   num_instances: 1
@@ -13,91 +14,91 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.5
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/market.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
+      price_impact: 0.08  # Source: AGENT_POOL/finance/market.md §6
+      mean_reversion: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
-llm_contrarian:
+llm_contrarian_investor:
   name: "LLM Contrarian Investor"
   class: "examples.ReversalEffect.LLM.players:LLMContrarianInvestor"
   # Expander → llm_contrarian_1, llm_contrarian_2, llm_contrarian_3
   num_instances: 3
   config:
-    identity: "llm_contrarian"
+    identity: "llm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_CONTRARIAN_SYS"
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_CONTRARIAN_SYS"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/contrarian-investor.md §6
   persona: !include persona.yml
 
-llm_overconfident:
+llm_overconfident_trader:
   name: "LLM Overconfident Trader"
   class: "examples.ReversalEffect.LLM.players:LLMOverconfidentTrader"
   # Expander → llm_overconfident_1, llm_overconfident_2, llm_overconfident_3
   num_instances: 3
   config:
-    identity: "llm_overconfident"
+    identity: "llm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/overconfident-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_OVERCONFIDENT_SYS"
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_OVERCONFIDENT_SYS"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
         generation_config:
-          temperature: 0.5
-          max_new_tokens: 500
+          temperature: 0.5  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/overconfident-trader.md §6
   persona: !include persona.yml
 
-llm_value:
+llm_value_investor:
   name: "LLM Value Investor"
   class: "examples.ReversalEffect.LLM.players:LLMValueInvestor"
   # Expander → llm_value_1, llm_value_2
   num_instances: 2
   config:
-    identity: "llm_value"
+    identity: "llm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/value-investor.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/value-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_VALUE_SYS"
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_VALUE_SYS"  # Source: AGENT_POOL/finance/value-investor.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/value-investor.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/value-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/value-investor.md §6
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: AGENT_POOL/finance/value-investor.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/value-investor.md §6
   persona: !include persona.yml
 
 llm_momentum_chaser:
@@ -112,42 +113,42 @@ llm_momentum_chaser:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/momentum-chaser.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
         generation_config:
-          temperature: 0.4
-          max_new_tokens: 500
+          temperature: 0.4  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/momentum-chaser.md §6
   persona: !include persona.yml
 
-llm_noise:
+llm_noise_trader:
   name: "LLM Noise Trader"
   class: "examples.ReversalEffect.LLM.players:LLMNoiseTrader"
   # Expander → llm_noise_1, llm_noise_2
   num_instances: 2
   config:
-    identity: "llm_noise"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_cash: 10000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_position: 50.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_NOISE_SYS"
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_NOISE_SYS"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        lm_type: "api"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/noise-trader.md §6
         generation_config:
-          temperature: 0.7
-          max_new_tokens: 500
+          temperature: 0.7  # Source: AGENT_POOL/finance/noise-trader.md §6
+          max_new_tokens: 500  # Source: AGENT_POOL/finance/noise-trader.md §6
   persona: !include persona.yml

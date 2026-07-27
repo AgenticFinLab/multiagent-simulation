@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - endowedholder
-    - statusquoseller
-    - rationalarbitrageur
-    - newbuyer
-    - noisetrader
+    - ragllm_endowed_holder
+    - ragllm_status_quo_seller
+    - ragllm_rational_arbitrageur
+    - ragllm_new_buyer
+    - ragllm_noise_trader
 
-  endowedholder:
+  ragllm_endowed_holder:
     - market
 
-  statusquoseller:
+  ragllm_status_quo_seller:
     - market
 
-  rationalarbitrageur:
+  ragllm_rational_arbitrageur:
     - market
 
-  newbuyer:
+  ragllm_new_buyer:
     - market
 
-  noisetrader:
+  ragllm_noise_trader:
     - market

@@ -8,23 +8,23 @@ sources:
 
 connections:
   market:
-    - belief_anchor
-    - selective_scanner
-    - balanced_analyst
-    - contrarian_trader
-    - noise_trader
+    - rule_belief_anchor
+    - rule_selective_scanner
+    - rule_balanced_analyst
+    - rule_contrarian_trader
+    - rule_noise_trader
 
-  belief_anchor:
+  rule_belief_anchor:
     - market
 
-  selective_scanner:
+  rule_selective_scanner:
     - market
 
-  balanced_analyst:
+  rule_balanced_analyst:
     - market
 
-  contrarian_trader:
+  rule_contrarian_trader:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market

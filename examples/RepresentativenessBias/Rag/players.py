@@ -15,7 +15,7 @@ from masim.knowledge import (
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from .prompts import (
     RAG_USER_TEMPLATE,
@@ -28,7 +28,7 @@ from .prompts import (
 from examples.RepresentativenessBias.Rule.players import Market, _info_payload
 
 logger = logging.getLogger("RepresentativenessBias.Rag")
-RAG_FALLBACK_CONTEXT = "(No relevant knowledge retrieved this round.)"
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def _validate_decision(decision: Dict[str, Any]) -> None:
@@ -152,7 +152,7 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             if result.formatted_text:
                 return result.formatted_text
-        return RAG_FALLBACK_CONTEXT
+        return _RAG_FALLBACK
 
     async def perceive(
         self, observation: Observation, prev_result: Optional[StepResult] = None

@@ -25,51 +25,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils import load_config, load_results
+from masim.evaluation.data_loader import batch_to_rounds, load_data
+from masim.evaluation.finance import calculate_autocorrelation
+from masim.evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data loading (legacy underscore names preserved as thin adapters
+# so non-Rule variants that import them keep working)
 # ---------------------------------------------------------------------------
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert 0-based batch list to 1-based round dict."""
-    return {i + 1: v for i, v in enumerate(values)}
+    """Legacy adapter -> masim.evaluation.data_loader.batch_to_rounds."""
+    return batch_to_rounds(values)
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Load simulation data from masim results object.
+    """Legacy adapter -> masim.evaluation.data_loader.load_data.
 
-    Args:
-        results: masim SimulationResults object.
-
-    Returns:
-        Dict with keys: market_prices, fundamentals, investor_payloads.
+    Returns the canonical dict (which is a superset of the previous
+    scenario-local shape: adds ``investor_quantities`` while preserving
+    the keys this scenario reads: ``market_prices``, ``fundamentals``,
+    ``investor_bids``, ``investor_payloads``).
     """
-    market_prices: Dict[int, float] = {}
-    fundamentals: Dict[int, float] = {}
-
-    for player in results.players_by_role("coordinator").values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-
-    investor_bids: Dict[str, Dict[int, float]] = {}
-    investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
-
-    return {
-        "market_prices": market_prices,
-        "fundamentals": fundamentals,
-        "investor_bids": investor_bids,
-        "investor_payloads": investor_payloads,
-    }
+    return load_data(results)
 
 
 # ---------------------------------------------------------------------------
@@ -106,19 +85,29 @@ def _compute_bias_persistence(
 
 
 def _compute_rolling_ac1(returns: np.ndarray, window: int = 10) -> float:
-    """Compute maximum rolling lag-1 autocorrelation over any window."""
-    if len(returns) < window + 1:
-        if len(returns) > 2:
-            ac = float(np.corrcoef(returns[:-1], returns[1:])[0, 1])
-            return ac if not np.isnan(ac) else 0.0
+    """Compute maximum rolling lag-1 autocorrelation over any window.
+
+    Thin wrapper around ``masim.evaluation.finance.calculate_autocorrelation``
+    applied to each sliding window of length ``window`` in the returns
+    series; the maximum lag-1 value is returned. Falls back to a single
+    full-series lag-1 autocorrelation when the series is shorter than
+    ``window + 1``.
+    """
+    arr = np.asarray(returns, dtype=float)
+    if len(arr) < window + 1:
+        if len(arr) > 2:
+            acf = calculate_autocorrelation(list(arr), max_lag=1)
+            return float(acf[0]) if acf else 0.0
         return 0.0
     best = 0.0
-    for start in range(len(returns) - window):
-        seg = returns[start : start + window]
-        if len(seg) > 2:
-            ac = float(np.corrcoef(seg[:-1], seg[1:])[0, 1])
-            if not np.isnan(ac) and ac > best:
-                best = ac
+    for start in range(len(arr) - window):
+        seg = arr[start : start + window]
+        acf = calculate_autocorrelation(list(seg), max_lag=1)
+        if not acf:
+            continue
+        val = float(acf[0])
+        if not np.isnan(val) and val > best:
+            best = val
     return best
 
 
@@ -792,6 +781,26 @@ def main() -> None:
     results = load_results(config)
     data = _load_data(results)
     summary = analyze_availability_bias(data, config, output_dir)
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='AvailabilityBias',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

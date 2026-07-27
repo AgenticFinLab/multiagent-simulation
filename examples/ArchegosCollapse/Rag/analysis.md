@@ -93,7 +93,7 @@ Monitor whether cascade phases align with RAG retrieval patterns. High retrieval
 |----------------------------------|----------------------------------------------------------------------------|--------------------------------------------------------------|---------------------------------------------|
 | **Knowledge-Reinforced Urgency** | Brokers cite historical Archegos/LTCM cases to justify faster liquidation  | Agent reasoning logs; `rag_stats.json` — high retrieval rate | RuleLLM: no historical context in reasoning |
 | **Fallback = RuleLLM Behavior**  | In fallback rounds, agent behaves identically to RuleLLM                   | Compare fallback-round decisions vs RuleLLM baseline         | Direct behavioral equivalence when no RAG   |
-| **Historical Anchoring Effect**  | BlockTradeBuyer buys more aggressively after retrieving recovery case data | BlockTradeBuyer volumes in high-retrieval rounds vs fallback | RuleLLM: fixed ±20% range                   |
+| **Historical Context Effect**    | BlockTradeBuyer buys more aggressively after retrieving recovery case data | BlockTradeBuyer volumes in high-retrieval rounds vs fallback | RuleLLM: fixed ±20% range                   |
 | **Retrieval Failure Rate**       | Rounds where no relevant knowledge is retrieved (fallback rate)            | `rag_stats.json` — `retrieval_failure_rate` per agent        | N/A — Rag-only metric                       |
 
 ---

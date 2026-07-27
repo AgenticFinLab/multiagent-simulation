@@ -2,13 +2,13 @@
 
 ## §1 Analysis Objectives
 
-| Objective | Research Question | Metrics | Expected Finding |
-|---|---|---|---|
-| O1 | Does leveraged convergence arbitrage create a measurable deviation from fundamental value? | price deviation, maximum drawdown | deviation exceeds ordinary noise after stress amplification |
-| O2 | Does deleveraging amplify the initial dislocation? | drawdown, return volatility, cascade onset round | forced selling and risk cuts raise volatility and deepen drawdown |
-| O3 | Does liquidity withdrawal slow recovery? | mean absolute deviation, recovery half-life | deviations persist when liquidity providers withdraw under stress |
-| O4 | Does emergency intervention stabilize the market? | final deviation, recovery half-life | intervention and mean reversion should prevent permanent collapse |
-| O5 | Do API variants preserve or alter the mechanism? | cross-variant metrics, LLM output quality fields, RAG retrieval stats | LLM/RuleLLM/Rag differ in timing and action distribution but keep the same market contract |
+| Objective | Target anchor | Research Question | Metrics | Expected Finding |
+|---|---|---|---|---|
+| O1 | target §3.1 | Does leveraged convergence arbitrage create a measurable deviation from fundamental value? | price deviation, maximum drawdown | deviation exceeds ordinary noise after stress amplification |
+| O2 | target §3.2 | Does deleveraging amplify the initial dislocation, and does ablation weaken it? | drawdown, return volatility, cascade onset round | forced selling and risk cuts raise volatility and deepen drawdown |
+| O3 | target §3.3 | How do funding and impact parameter sweeps change crisis timing and severity? | deviation, drawdown, cascade onset round, recovery half-life | higher impact or tighter constraints deepen and accelerate stress |
+| O4 | target §3.4 | Does liquidity withdrawal slow recovery and does intervention stabilize the tail? | mean absolute deviation, final deviation, recovery half-life | withdrawal increases persistence while support prevents permanent deterioration |
+| O5 | target §3.5 | Do API variants preserve or alter the mechanism? | cross-variant metrics and LLM output quality fields | LLM and RuleLLM may differ in timing and intensity while keeping the common market contract |
 
 The analysis does not treat `exit=0` as sufficient scientific quality. A run is accepted only after the Level-2 audit confirms round count, output structure, metric coherence, and API-output quality where applicable.
 
@@ -95,8 +95,8 @@ peak_price(t) = max_{s <= t} P(s)
 
 **Python function**:
 ```python
-def _max_drawdown_pct(prices: np.ndarray) -> float:
-    """Return peak-to-trough drawdown in percent."""
+def calculate_max_drawdown(prices: list[float]) -> tuple[float, int, int]:
+    """Return peak-to-trough drawdown and its endpoints."""
 ```
 
 #### Interpretation
@@ -130,7 +130,7 @@ The model targets drawdowns large enough to demonstrate forced deleveraging but 
 MDD should rise with volatility and max absolute deviation; if MDD rises without volatility, the run may have a single discontinuity rather than a cascade.
 
 #### Implementation Notes
-Implemented in `Rule/analysis.py::_max_drawdown_pct`.
+Computed by `masim.evaluation.finance.timeseries.calculate_max_drawdown` and orchestrated in `Rule/analysis.py::calculate_metrics`.
 
 ### Metric: Mean Absolute Deviation (MAD)
 
@@ -170,7 +170,7 @@ def calculate_metrics(data: dict) -> dict:
 
 | Study | Context | Finding | Relevance |
 |---|---|---|---|
-| Morris & Shin (2004), https://doi.org/10.1093/rof/8.1.1 | liquidity black holes | synchronized withdrawal prolongs stress | motivates persistence metric |
+| Morris & Shin (2004), https://doi.org/10.1023/B:EUFI.0000022155.98681.25 | liquidity black holes | synchronized withdrawal prolongs stress | motivates persistence metric |
 | Hameed, Kang, & Viswanathan (2010), https://doi.org/10.1111/j.1540-6261.2009.01529.x | market liquidity | liquidity provision falls after negative returns | supports persistence interpretation |
 
 #### Normal Range (from literature)
@@ -193,17 +193,19 @@ Implemented in `Rule/analysis.py::calculate_metrics`.
 Volatility / Risk
 
 #### Definition
-Standard deviation of one-round returns, reported both as per-round percent and annualized percent.
+Standard deviation of one-round returns during the endogenous stress window, reported both as per-round percent and annualized percent. Full-run return standard deviation is retained as a separate dilution diagnostic.
 
 #### Formula
 
 ```
 r(t) = (P(t) - P(t-1)) / P(t-1)
-return_std_pct = std(r) * 100
-annualized_pct = std(r) * sqrt(252) * 100
+stress_window = [cascade_onset, cascade_onset + recovery_half_life)
+return_std_pct = std(r within stress_window) * 100
+annualized_pct = std(r within stress_window) * sqrt(252) * 100
+full_run_return_std_pct = std(all r) * 100
 ```
 
-**Computation notes**: Requires at least two prices and no zero price before return calculation.
+**Computation notes**: Requires at least two prices and no zero price before return calculation. The stress window starts with the return entering cascade onset and spans the measured recovery half-life; if recovery is unobserved it extends through the final round.
 
 **Python function**:
 ```python
@@ -242,7 +244,7 @@ The normalized model treats return standard deviation above 1% as evidence of ma
 VOL should increase around cascade onset and trough. If VOL is high but deviation is small, the run may be noisy rather than mechanism-driven.
 
 #### Implementation Notes
-Implemented in `Rule/analysis.py::_returns` and `calculate_metrics`.
+Computed by `masim.evaluation.finance.timeseries._returns` and orchestrated in `Rule/analysis.py::calculate_metrics`.
 
 ### Metric: Cascade Onset Round (ONSET)
 

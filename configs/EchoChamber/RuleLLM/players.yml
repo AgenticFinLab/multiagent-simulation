@@ -10,23 +10,39 @@
 # -----------------------------------------------------------------------------
 # OpinionEnvironment (Coordinator) — identical to Rule variant
 # -----------------------------------------------------------------------------
-environment:
+rulellm_opinion_environment:
+  archetype: opinion-echo-chamber-clustering  # -> AGENT_POOL/market/opinion-echo-chamber-clustering.md
   name: "OpinionEnvironment"
   class: "examples.EchoChamber.RuleLLM.players:OpinionEnvironment"
   num_instances: 1
   config:
-    identity: "environment"
+    identity: "rulellm_opinion_environment"
     role: coordinator
     steps_per_turn: 1
     group_tags:
       - environment
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
-      # Polarization dynamics parameters (aligned with EchoChamber.Rule)
-      initial_polarization: 0.15   # Low starting polarization (moderate population)
-      polarization_impact: 0.12    # How strongly agent actions shift polarization
-      centripetal_force: 0.01      # Weak center-pull (Sunstein: centripetal forces are weak)
-      noise_std: 0.02              # Opinion perturbation noise
+      # Source: simulation-bases.md §6 Parameter Table
+      initial_polarization: 0.15
+      # Source: simulation-bases.md §3 Environment Mechanism
+      initial_mean_opinion: 0.0
+      # Source: simulation-bases.md §3 Environment Mechanism
+      initial_cluster_separation: 0.0
+      # Source: simulation-bases.md §3 Environment Mechanism
+      initial_cross_cutting_exposure: 0.5
+      # Source: simulation-bases.md §6 Parameter Table
+      polarization_impact: 0.12
+      # Source: simulation-bases.md §6 Parameter Table
+      centripetal_force: 0.01
+      # Source: simulation-bases.md §3 Environment Mechanism
+      polarization_equilibrium: 0.3
+      # Source: simulation-bases.md §3 Environment Mechanism
+      noise_std: 0.02
+      # Source: simulation-bases.md §3 Environment Mechanism
+      moderate_opinion_threshold: 0.3
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -46,23 +62,42 @@ rulellm_ideologue:
     group_tags:
       - rulellm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
-      # Agent base parameters
-      initial_opinion: 0.4         # Will be ±0.4 per instance (set at startup)
+      # Source: simulation-bases.md §4.1 Ideologue
+      initial_opinion: 0.4
+      # Source: simulation-bases.md §4.1 Ideologue
+      alternate_initial_sign: true
+      # Source: simulation-bases.md §4.1 Decision Process
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.1 Behavioral Framework
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       # Rule parameters (from EchoChamber.Rule.Ideologue)
+      # Source: simulation-bases.md §4.1 Decision Process
       in_group_weight: 0.6         # Strong: amplifies in-group consensus
+      # Source: simulation-bases.md §4.1 Decision Process
       extremity_boost: 1.3         # Pushes toward more extreme version
+      # Source: simulation-bases.md §4.1 Decision Process
       out_group_discount: 0.05     # Almost ignores opposing views
+      # Source: simulation-bases.md §4.1 Decision Process
       spread_eagerness: 0.9        # High: actively polarizes
       # LLM configuration
       llm:
+        # Source: simulation-bases.md §4.1 Ideologue
         sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_IDEOLOGUE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability policy
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -81,22 +116,40 @@ rulellm_conformist:
     group_tags:
       - rulellm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
-      # Agent base parameters
-      initial_opinion: 0.0         # Starts neutral, will drift
+      # Source: simulation-bases.md §4.2 Conformist
+      initial_opinion: 0.0
+      # Source: simulation-bases.md §4.2 Conformist
+      alternate_initial_sign: false
+      # Source: simulation-bases.md §4.2 Decision Process
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.2 Behavioral Framework
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       # Rule parameters (from EchoChamber.Rule.Conformist)
+      # Source: simulation-bases.md §4.2 Decision Process
       conformity: 0.7              # High: adopts group opinion readily
+      # Source: simulation-bases.md §4.2 Decision Process
       conformity_eagerness: 0.6    # Moderate-high: follows group
+      # Source: simulation-bases.md §4.2 Decision Process
       group_proximity_threshold: 0.3  # Polarize when opinion exceeds this
       # LLM configuration
       llm:
+        # Source: simulation-bases.md §4.2 Conformist
         sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_CONFORMIST_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability policy
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -115,22 +168,40 @@ rulellm_critical_thinker:
     group_tags:
       - rulellm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
-      # Agent base parameters
-      initial_opinion: 0.0         # Starts neutral
+      # Source: simulation-bases.md §4.3 CriticalThinker
+      initial_opinion: 0.0
+      # Source: simulation-bases.md §4.3 CriticalThinker
+      alternate_initial_sign: false
+      # Source: simulation-bases.md §4.3 Behavioral Framework
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.3 Decision Process
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       # Rule parameters (from EchoChamber.Rule.CriticalThinker)
+      # Source: simulation-bases.md §4.3 Decision Process
       critical_weight: 0.5         # Moderate: evaluates independently
+      # Source: simulation-bases.md §4.3 Decision Process
       critical_eagerness: 0.7      # High: actively depolarizes when needed
+      # Source: simulation-bases.md §4.3 Decision Process
       evidence_sensitivity: 0.6    # Responds to polarization as evidence of groupthink
       # LLM configuration
       llm:
+        # Source: simulation-bases.md §4.3 CriticalThinker
         sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_CRITICAL_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability policy
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -149,22 +220,40 @@ rulellm_bridge_builder:
     group_tags:
       - rulellm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
-      # Agent base parameters
-      initial_opinion: 0.0         # Starts at center
+      # Source: simulation-bases.md §4.4 BridgeBuilder
+      initial_opinion: 0.0
+      # Source: simulation-bases.md §4.4 BridgeBuilder
+      alternate_initial_sign: false
+      # Source: simulation-bases.md §4.4 Behavioral Framework
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.4 Decision Process
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       # Rule parameters (from EchoChamber.Rule.BridgeBuilder)
+      # Source: simulation-bases.md §4.4 Decision Process
       bridge_weight: 0.4           # Moderate: pulls toward center
+      # Source: simulation-bases.md §4.4 Decision Process
       bridge_strength: 0.8         # Strong: effective depolarizer
+      # Source: simulation-bases.md §4.4 Decision Process
       centering_tendency: 0.5      # Tends toward moderate center
       # LLM configuration
       llm:
+        # Source: simulation-bases.md §4.4 BridgeBuilder
         sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_BRIDGE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability policy
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.3
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -183,21 +272,39 @@ rulellm_passive_follower:
     group_tags:
       - rulellm_agents
     extras:
+      # Source: simulation-bases.md §7 Communication And Round Structure
       record_path: "EXPERIMENT/EchoChamber/RuleLLM/records"
-      # Agent base parameters
-      initial_opinion: 0.0         # Starts neutral
+      # Source: simulation-bases.md §4.5 PassiveFollower
+      initial_opinion: 0.0
+      # Source: simulation-bases.md §4.5 PassiveFollower
+      alternate_initial_sign: false
+      # Source: simulation-bases.md §4.5 Decision Process
+      polarize_opinion_step: 0.05
+      # Source: simulation-bases.md §4.5 Behavioral Framework
+      depolarize_opinion_step: 0.05
+      # Source: simulation-bases.md §7 Communication And Round Structure
       custom_state_hot_limit: 3
       # Rule parameters (from EchoChamber.Rule.PassiveFollower)
+      # Source: simulation-bases.md §4.5 Decision Process
       engagement_probability: 0.3  # Low: rarely engages
+      # Source: simulation-bases.md §4.5 Decision Process
       drift_rate: 0.1              # Small drift toward mean
+      # Source: simulation-bases.md §4.5 Decision Process
       alignment_strength: 0.4      # When engaged, moderately aligns
       # LLM configuration
       llm:
+        # Source: simulation-bases.md §4.5 PassiveFollower
         sys_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_PASSIVE_SYS"
+        # Source: simulation-bases.md §7 Communication And Round Structure
         user_message: "examples.EchoChamber.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_type: "api"
+        # Source: simulation-bases.md §9 Variant Comparison Preview
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability policy
         generation_config:
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           temperature: 0.5
+          # Source: simulation-bases.md §9 Variant Comparison Preview
           max_new_tokens: 500
   persona: !include persona.yml

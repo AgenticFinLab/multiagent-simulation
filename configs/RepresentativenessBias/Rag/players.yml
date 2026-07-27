@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.RepresentativenessBias.Rag.players:Market"
   num_instances: 1
@@ -39,25 +40,25 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-patternmatcher:
+ragllm_pattern_matcher:
   name: "PatternMatcher"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMPatternMatcher"
   num_instances: 2
   config:
-    identity: "patternmatcher"
+    identity: "ragllm_pattern_matcher"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      streak_sensitivity: 2.0
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      streak_sensitivity: 2.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      base_size: 400  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/pattern-matcher.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -85,25 +86,25 @@ patternmatcher:
           max_tokens: 600
   persona: !include persona.yml
 
-categoryovergeneralizer:
+ragllm_category_overgeneralizer:
   name: "CategoryOvergeneralizer"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMCategoryOvergeneralizer"
   num_instances: 2
   config:
-    identity: "categoryovergeneralizer"
+    identity: "ragllm_category_overgeneralizer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      sample_size: 2
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      sample_size: 2  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      base_size: 350  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -131,25 +132,25 @@ categoryovergeneralizer:
           max_tokens: 600
   persona: !include persona.yml
 
-bayesianupdater:
+ragllm_bayesian_updater:
   name: "BayesianUpdater"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMBayesianUpdater"
   num_instances: 1
   config:
-    identity: "bayesianupdater"
+    identity: "ragllm_bayesian_updater"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      base_rate_weight: 0.7
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      initial_cash: 1200000.0  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      base_rate_weight: 0.7  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      base_size: 300  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/bayesian-updater.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -177,25 +178,25 @@ bayesianupdater:
           max_tokens: 600
   persona: !include persona.yml
 
-contrarianstatistical:
+ragllm_contrarian_statistical:
   name: "ContrarianStatistical"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMContrarianStatistical"
   num_instances: 1
   config:
-    identity: "contrarianstatistical"
+    identity: "ragllm_contrarian_statistical"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      contrarian_threshold: 0.04
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      contrarian_threshold: 0.04  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      base_size: 350  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -223,25 +224,25 @@ contrarianstatistical:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.RepresentativenessBias.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/Rag/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_cash: 500000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_position: 200  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      trade_probability: 0.3  # Source: AGENT_POOL/finance/noise-trader.md §6
+      noise_size: 150  # Source: AGENT_POOL/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

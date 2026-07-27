@@ -47,7 +47,6 @@ Environment Variables:
 
 import logging
 import os
-import random
 import sys
 import importlib
 from typing import Any, Dict, Optional
@@ -56,6 +55,7 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+from examples.EquityPremium.market import calculate_stock_transition
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -119,17 +119,13 @@ class Market(GeneralPlayer):
         orders = self.state.custom_state["orders"]
 
         # Get parameters from config
-        stock_expected_return = extras["stock_expected_return"]
         bond_return = extras["bond_return"]
-        stock_volatility = extras["stock_volatility"]
-
-        net_stock_demand = sum(o["stock_qty"] for o in orders)
-        demand_impact = 0.001 * net_stock_demand
-
-        base_return = stock_expected_return + random.gauss(0, stock_volatility)
-        stock_return = base_return + demand_impact
-
-        new_price = max(1.0, current_price * (1 + stock_return))
+        new_price, stock_return = calculate_stock_transition(
+            current_price,
+            orders,
+            extras["stock_expected_return"],
+            extras["stock_volatility"],
+        )
 
         self.state.custom_state["stock_price"] = new_price
         self.state.custom_state["stock_history"].append(new_price)

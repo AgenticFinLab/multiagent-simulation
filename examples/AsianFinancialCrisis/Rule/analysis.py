@@ -18,56 +18,84 @@ Usage:
 import argparse
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
+
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
+)
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from masim.evaluation.data_loader import batch_to_rounds, load_data
+from masim.evaluation.finance import (
+    calculate_autocorrelation,
+    calculate_max_drawdown,
+)
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data loading (thin adapters over ``masim.evaluation``)
 # ---------------------------------------------------------------------------
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert 0-based batch list to 1-based round dict."""
-    return {i + 1: v for i, v in enumerate(values)}
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.batch_to_rounds``."""
+    return batch_to_rounds(values)
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Load simulation data from masim results object.
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``.
 
-    Args:
-        results: masim SimulationResults object.
-
-    Returns:
-        Dict with keys: market_prices, fundamentals, investor_payloads.
+    Preserves the historical return-schema keys used by downstream Rule/LLM
+    variants: ``market_prices``, ``fundamentals``, ``investor_bids``,
+    ``investor_payloads``.
     """
+    return load_data(results)
+
+
+def _load_data_from_communication(config: dict) -> Dict[str, Any]:
+    """Load market and order data from communication message blocks."""
+    storage_path = config["communication"]["storage_path"]
     market_prices: Dict[int, float] = {}
     fundamentals: Dict[int, float] = {}
-
-    for player in results.players_by_role("coordinator").values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-
-    investor_bids: Dict[str, Dict[int, float]] = {}
     investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
+
+    if not os.path.isdir(storage_path):
+        return {
+            "market_prices": market_prices,
+            "fundamentals": fundamentals,
+            "investor_bids": {},
+            "investor_payloads": investor_payloads,
+        }
+
+    for name in sorted(os.listdir(storage_path)):
+        if not name.startswith("msg_block_") or not name.endswith(".json"):
+            continue
+        with open(os.path.join(storage_path, name), "r", encoding="utf-8") as f:
+            block = json.load(f)
+        for entry in block.values():
+            message = json.loads(entry["encoded"])
+            round_num = int(message["extras"]["round_num"])
+            payload = message["payload"]
+            content = payload["content"]
+            content_type = payload["content_type"]
+            if content_type == "market_data":
+                if round_num not in market_prices:
+                    market_prices[round_num] = float(content["price"])
+                    fundamentals[round_num] = float(content["fundamental"])
+            elif content_type == "order":
+                sender = message["sender_id"]
+                investor_payloads.setdefault(sender, {})[round_num] = content
 
     return {
         "market_prices": market_prices,
         "fundamentals": fundamentals,
-        "investor_bids": investor_bids,
+        "investor_bids": {},
         "investor_payloads": investor_payloads,
     }
 
@@ -78,12 +106,15 @@ def _load_data(results) -> Dict[str, Any]:
 
 
 def _compute_max_drawdown(prices: np.ndarray) -> float:
-    """Compute peak-to-trough max drawdown as a percentage."""
+    """Peak-to-trough max drawdown as a positive percentage.
+
+    Thin adapter over ``masim.evaluation.finance.calculate_max_drawdown``.
+    That helper returns *signed* percent (negative for a drop); this legacy
+    surface returns the positive magnitude to preserve prior calibration.
+    """
     if len(prices) < 2:
         return 0.0
-    peak = np.maximum.accumulate(prices)
-    drawdown = (peak - prices) / np.where(peak > 0, peak, 1.0)
-    return float(np.max(drawdown) * 100.0)
+    return float(abs(calculate_max_drawdown(list(prices))[0]))
 
 
 def _compute_crisis_onset(
@@ -835,7 +866,29 @@ def main() -> None:
 
     results = load_results(config)
     data = _load_data(results)
+    if not data["market_prices"]:
+        data = _load_data_from_communication(config)
     summary = analyze_asian_financial_crisis(data, config, output_dir)
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='AsianFinancialCrisis',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

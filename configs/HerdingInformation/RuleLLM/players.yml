@@ -1,6 +1,7 @@
 # HerdingInformation RuleLLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.HerdingInformation.RuleLLM.players:Market"
   num_instances: 1
@@ -11,35 +12,35 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.03  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
-cascadefollower:
+rulellm_cascade_follower:
   name: "CascadeFollower"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMCascadeFollower"
   num_instances: 3
   config:
-    identity: "cascadefollower"
+    identity: "rulellm_cascade_follower"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      social_weight: 0.8
-      cascade_trigger: 0.3
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      social_weight: 0.8  # Source: simulation-bases.md §4.1.7
+      cascade_trigger: 0.3  # Source: simulation-bases.md §4.1.7
+      base_size: 400  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_CASCADE_FOLLOWER_SYS"
         user_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -50,25 +51,25 @@ cascadefollower:
           max_tokens: 512
   persona: !include persona.yml
 
-reputationherder:
+rulellm_reputation_herder:
   name: "ReputationHerder"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMReputationHerder"
   num_instances: 3
   config:
-    identity: "reputationherder"
+    identity: "rulellm_reputation_herder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      reputation_concern: 0.7
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 1200000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      reputation_concern: 0.7  # Source: simulation-bases.md §4.2.7
+      base_size: 350  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_REPUTATION_HERDER_SYS"
         user_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -79,25 +80,25 @@ reputationherder:
           max_tokens: 512
   persona: !include persona.yml
 
-independentthinker:
+rulellm_independent_thinker:
   name: "IndependentThinker"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMIndependentThinker"
   num_instances: 2
   config:
-    identity: "independentthinker"
+    identity: "rulellm_independent_thinker"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      signal_precision: 0.9
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      signal_precision: 0.9  # Source: simulation-bases.md §4.3.7
+      base_size: 300  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_INDEPENDENT_THINKER_SYS"
         user_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -108,25 +109,25 @@ independentthinker:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarian:
+rulellm_contrarian:
   name: "Contrarian"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMContrarian"
   num_instances: 1
   config:
-    identity: "contrarian"
+    identity: "rulellm_contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
-      initial_cash: 2000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      contrarian_threshold: 0.4
-      base_size: 250
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      contrarian_threshold: 0.4  # Source: simulation-bases.md §4.4.7
+      base_size: 250  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_CONTRARIAN_SYS"
         user_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -137,25 +138,25 @@ contrarian:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.HerdingInformation.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdingInformation/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 200  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
+      noise_size: 150  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.HerdingInformation.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-3,9,GamblerFallacy,LLM,SUCCESS,0,2100.797,2026-05-22T06:52:24,2026-05-22T07:27:25,config/simulation.yml,examples/GamblerFallacy/LLM/run_gamblerfallacy_llm.py,logs/GamblerFallacy__LLM.log,,200,200,,

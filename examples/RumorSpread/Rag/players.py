@@ -62,7 +62,7 @@ from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import is_retryable_llm_error
+from masim.utils.llm_utils import is_retryable_llm_error
 from examples.RumorSpread.llm_parser import parse_rumor_response
 
 from .prompts import (
@@ -75,6 +75,7 @@ from .prompts import (
 )
 
 logger = logging.getLogger("RumorSpreadRag")
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 # =============================================================================
@@ -544,7 +545,7 @@ class RagLLMSocialAgent(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         return RAG_USER_TEMPLATE.format(

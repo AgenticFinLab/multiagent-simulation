@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-2,9,DispositionEffect,LLM,SUCCESS,0,16946.643,2026-05-22T05:00:13,2026-05-22T09:42:40,config/simulation.yml,examples/DispositionEffect/LLM/run_disposition_llm.py,logs/DispositionEffect__LLM.log,,200,200,,

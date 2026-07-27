@@ -26,8 +26,9 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
-  class: "examples.MarketCrash.Rag.players:Market"
+  class: "examples.MarketCrash.Rule.players:Market"
   num_instances: 1
   config:
     identity: "market"
@@ -36,19 +37,23 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MarketCrash/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.5
-      liquidity_decay: 0.1
-      liquidity_recovery: 0.05
-      min_liquidity: 0.1
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      initial_volatility: 4.0  # Source: finance-market-crash.md §9
+      stress_impact_multiplier: 1.5  # Source: finance-market-crash.md §9
+      max_abs_return: 0.08  # Source: finance-market-crash.md §9
+      initial_liquidity: 1.0  # Source: normalized market capacity
+      random_seed: 20260721  # Source: reproducibility invariant
+      price_floor: 30.0  # Source: finance-market-crash.md §9
+      price_ceiling: 120.0  # Source: finance-market-crash.md §9
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      liquidity_decay: 0.1  # Source: simulation-bases.md §6
+      liquidity_recovery: 0.05  # Source: simulation-bases.md §6
+      min_liquidity: 0.1  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 ragllm_panic_seller:
@@ -63,10 +68,10 @@ ragllm_panic_seller:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -94,22 +99,22 @@ ragllm_panic_seller:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_risk_parity:
+ragllm_risk_parity_fund:
   name: "RAG Risk Parity Fund"
   class: "examples.MarketCrash.Rag.players:RagLLMRiskParityFund"
   # Expander → ragllm_risk_parity_1, ragllm_risk_parity_2
   num_instances: 2
   config:
-    identity: "ragllm_risk_parity"
+    identity: "ragllm_risk_parity_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -137,22 +142,22 @@ ragllm_risk_parity:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_leveraged_fund:
-  name: "RAG Leveraged Fund"
-  class: "examples.MarketCrash.Rag.players:RagLLMLeveragedFund"
-  # Expander → ragllm_leveraged_fund_1, ragllm_leveraged_fund_2, ragllm_leveraged_fund_3
+ragllm_leveraged_hedge_fund:
+  name: "RAG Leveraged Hedge Fund"
+  class: "examples.MarketCrash.Rag.players:RagLLMLeveragedHedgeFund"
+  # Expander creates three leveraged-hedge-fund instances.
   num_instances: 3
   config:
-    identity: "ragllm_leveraged_fund"
+    identity: "ragllm_leveraged_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 80.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 80.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -192,10 +197,10 @@ ragllm_market_maker:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 30.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -223,6 +228,47 @@ ragllm_market_maker:
           max_new_tokens: 600
   persona: !include persona.yml
 
+ragllm_passive_investor:
+  name: "RAG Passive Investor"
+  class: "examples.MarketCrash.Rag.players:RagLLMPassiveInvestor"
+  num_instances: 1
+  config:
+    identity: "ragllm_passive_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - ragllm_investors
+    extras:
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      rebalance_frequency: 20
+      custom_state_hot_limit: 3
+      private_knowledge:
+        from_global_resources: []
+        local_resources:
+          local_uri: ""
+          local_resources: []
+        rag:
+          from_global_index_dir: []
+          local_index_dir: ""
+          embed_type: "litellm"
+          embed_model: "openai/hunyuan-embedding"
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+          chunk_size: 512
+          chunk_overlap: 64
+          top_k: 5
+      llm:
+        sys_message: "examples.MarketCrash.Rag.prompts:RAGLLM_PASSIVE_INVESTOR_SYS"
+        user_message: "examples.MarketCrash.Rag.prompts:RAGLLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
+          max_new_tokens: 600
+  persona: !include persona.yml
+
 ragllm_bottom_fisher:
   name: "RAG Bottom Fisher"
   class: "examples.MarketCrash.Rag.players:RagLLMBottomFisher"
@@ -234,10 +280,10 @@ ragllm_bottom_fisher:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 10.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 10.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

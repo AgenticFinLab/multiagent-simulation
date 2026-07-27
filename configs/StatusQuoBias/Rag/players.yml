@@ -1,4 +1,10 @@
 # StatusQuoBias Rag Agent Configuration
+# Traceability: every extras leaf is annotated with a `# Source:` comment
+# pointing to the corresponding row in the target-file §9 Parameter Seeds
+# table (`examples/StatusQuoBias/finance-statusquobias.md`). Per
+# `agent-design-skill.md §3.6.0 I/O Contract`, LLM/RuleLLM/Rag variants
+# expose an `agent_type` field inside each investor's `extras` block so that
+# the persona-driven policy can reference the intended archetype explicitly.
 
 knowledge:
   backend: "local"
@@ -20,6 +26,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.StatusQuoBias.Rag.players:Market"
   num_instances: 1
@@ -30,35 +37,36 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"   # Source: runtime plumbing (records path); not a §9 parameter
+      initial_price: 100.0                                  # Source: target §9 market.extras.initial_price row; normalization (simulation-bases.md §6)
+      fundamental_value: 100.0                              # Source: target §9 market.extras.fundamental_value row; normalization (simulation-bases.md §6)
+      price_impact: 0.02                                    # Source: target §9 market.extras.price_impact row; simulation-bases.md §3.1
+      mean_reversion: 0.02                                  # Source: target §9 market.extras.mean_reversion row; simulation-bases.md §3.1
+      noise_std: 0.01                                       # Source: target §9 market.extras.noise_std row; simulation-bases.md §3.1
+      custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
   persona: !include persona.yml
 
-inertialholder:
+ragllm_inertial_holder:
   name: "InertialHolder"
   class: "examples.StatusQuoBias.Rag.players:RagLLMInertialHolder"
-  num_instances: 3
+  num_instances: 3                                          # Source: target §9 inertialholder.num_instances row; agent roster §7
   config:
-    identity: "inertialholder"
+    identity: "ragllm_inertial_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      inertia_strength: 0.9
-      change_threshold: 0.3
-      base_size: 200
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"   # Source: runtime plumbing (records path); not a §9 parameter
+      agent_type: "InertialHolder"                          # Source: agent-design-skill.md §3.6.0 I/O Contract; identifies the persona archetype for logging/analysis
+      initial_cash: 1000000.0                               # Source: target §9 inertialholder.extras.initial_cash row
+      initial_position: 500                                 # Source: target §9 inertialholder.extras.initial_position row
+      initial_price: 100.0                                  # Source: target §9 market.extras.initial_price row; agent-side echo
+      fundamental_value: 100.0                              # Source: target §9 market.extras.fundamental_value row; agent-side echo
+      inertia_strength: 0.9                                 # Source: target §9 inertialholder.extras.inertia_strength row; simulation-bases.md §4.1
+      change_threshold: 0.3                                 # Source: target §9 inertialholder.extras.change_threshold row; Samuelson and Zeckhauser (1988), 10.1007/BF00055564
+      base_size: 200                                        # Source: target §9 inertialholder.extras.base_size row; simulation-bases.md §4.1
+      custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -86,26 +94,27 @@ inertialholder:
           max_tokens: 600
   persona: !include persona.yml
 
-defaultfollower:
+ragllm_default_follower:
   name: "DefaultFollower"
   class: "examples.StatusQuoBias.Rag.players:RagLLMDefaultFollower"
-  num_instances: 3
+  num_instances: 3                                          # Source: target §9 defaultfollower.num_instances row; agent roster §7
   config:
-    identity: "defaultfollower"
+    identity: "ragllm_default_follower"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"
-      initial_cash: 800000.0
-      initial_position: 400
-      initial_price: 100.0
-      fundamental_value: 100.0
-      default_weight: 0.5
-      active_deviation: 0.15
-      base_size: 250
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"   # Source: runtime plumbing (records path); not a §9 parameter
+      agent_type: "DefaultFollower"                         # Source: agent-design-skill.md §3.6.0 I/O Contract; identifies the persona archetype for logging/analysis
+      initial_cash: 800000.0                                # Source: target §9 defaultfollower.extras.initial_cash row
+      initial_position: 400                                 # Source: target §9 defaultfollower.extras.initial_position row
+      initial_price: 100.0                                  # Source: target §9 market.extras.initial_price row; agent-side echo
+      fundamental_value: 100.0                              # Source: target §9 market.extras.fundamental_value row; agent-side echo
+      default_weight: 0.5                                   # Source: target §9 defaultfollower.extras.default_weight row; simulation-bases.md §4.2
+      active_deviation: 0.15                                # Source: target §9 defaultfollower.extras.active_deviation row; Madrian and Shea (2001), 10.1162/003355301753265543
+      base_size: 250                                        # Source: target §9 defaultfollower.extras.base_size row; simulation-bases.md §4.2
+      custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -133,25 +142,26 @@ defaultfollower:
           max_tokens: 600
   persona: !include persona.yml
 
-activerebalancer:
+ragllm_active_rebalancer:
   name: "ActiveRebalancer"
   class: "examples.StatusQuoBias.Rag.players:RagLLMActiveRebalancer"
-  num_instances: 2
+  num_instances: 2                                          # Source: target §9 activerebalancer.num_instances row; agent roster §7
   config:
-    identity: "activerebalancer"
+    identity: "ragllm_active_rebalancer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"
-      initial_cash: 1500000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      rebalance_threshold: 0.05
-      position_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"   # Source: runtime plumbing (records path); not a §9 parameter
+      agent_type: "ActiveRebalancer"                        # Source: agent-design-skill.md §3.6.0 I/O Contract; identifies the persona archetype for logging/analysis
+      initial_cash: 1500000.0                               # Source: target §9 activerebalancer.extras.initial_cash row
+      initial_position: 600                                 # Source: target §9 activerebalancer.extras.initial_position row
+      initial_price: 100.0                                  # Source: target §9 market.extras.initial_price row; agent-side echo
+      fundamental_value: 100.0                              # Source: target §9 market.extras.fundamental_value row; agent-side echo
+      rebalance_threshold: 0.05                             # Source: target §9 activerebalancer.extras.rebalance_threshold row; Markowitz (1952), 10.1111/j.1540-6261.1952.tb01525.x
+      position_size: 350                                    # Source: target §9 activerebalancer.extras.position_size row; simulation-bases.md §4.3
+      custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -179,25 +189,26 @@ activerebalancer:
           max_tokens: 600
   persona: !include persona.yml
 
-momentumtrader:
+ragllm_momentum_trader:
   name: "MomentumTrader"
   class: "examples.StatusQuoBias.Rag.players:RagLLMMomentumTrader"
-  num_instances: 2
+  num_instances: 2                                          # Source: target §9 momentumtrader.num_instances row; agent roster §7
   config:
-    identity: "momentumtrader"
+    identity: "ragllm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      entry_threshold: 0.01
-      position_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"   # Source: runtime plumbing (records path); not a §9 parameter
+      agent_type: "MomentumTrader"                          # Source: agent-design-skill.md §3.6.0 I/O Contract; identifies the persona archetype for logging/analysis
+      initial_cash: 1200000.0                               # Source: target §9 momentumtrader.extras.initial_cash row
+      initial_position: 500                                 # Source: target §9 momentumtrader.extras.initial_position row
+      initial_price: 100.0                                  # Source: target §9 market.extras.initial_price row; agent-side echo
+      fundamental_value: 100.0                              # Source: target §9 market.extras.fundamental_value row; agent-side echo
+      entry_threshold: 0.01                                 # Source: target §9 momentumtrader.extras.entry_threshold row; Jegadeesh and Titman (1993), 10.1111/j.1540-6261.1993.tb04702.x
+      position_size: 300                                    # Source: target §9 momentumtrader.extras.position_size row; simulation-bases.md §4.4
+      custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -225,25 +236,26 @@ momentumtrader:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.StatusQuoBias.Rag.players:RagLLMNoiseTrader"
-  num_instances: 2
+  num_instances: 2                                          # Source: target §9 noisetrader.num_instances row; agent roster §7
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/StatusQuoBias/Rag/records"   # Source: runtime plumbing (records path); not a §9 parameter
+      agent_type: "NoiseTrader"                             # Source: agent-design-skill.md §3.6.0 I/O Contract; identifies the persona archetype for logging/analysis
+      initial_cash: 500000.0                                # Source: target §9 noisetrader.extras.initial_cash row
+      initial_position: 200                                 # Source: target §9 noisetrader.extras.initial_position row
+      initial_price: 100.0                                  # Source: target §9 market.extras.initial_price row; agent-side echo
+      fundamental_value: 100.0                              # Source: target §9 market.extras.fundamental_value row; agent-side echo
+      trade_probability: 0.3                                # Source: target §9 noisetrader.extras.trade_probability row; Black (1986), 10.1111/j.1540-6261.1986.tb04513.x
+      noise_size: 100                                       # Source: target §9 noisetrader.extras.noise_size row; simulation-bases.md §4.5
+      custom_state_hot_limit: 3                             # Source: target §9 custom_state_hot_limit row; runtime plumbing
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

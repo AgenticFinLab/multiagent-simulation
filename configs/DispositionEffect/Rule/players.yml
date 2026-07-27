@@ -16,6 +16,7 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DispositionEffect.Rule.players:Market"
   num_instances: 1
@@ -26,145 +27,150 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+      record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"  # Source: implementation infrastructure; simulation.yml setting.record_path
       # Market parameters
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.08
-      mean_reversion: 0.05
-      noise_std: 0.6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.05  # Source: simulation-bases.md §6
+      noise_std: 0.6  # Source: simulation-bases.md §6
+      minimum_price: 1.0  # Source: simulation-bases.md §3 positivity constraint
       # News shock parameters
-      news_probability: 0.15
-      news_impact_range: 4.0
-      custom_state_hot_limit: 3
+      news_probability: 0.15  # Source: simulation-bases.md §6
+      news_impact_range: 4.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
-disposition_investor:
+rule_disposition_investor:
   name: "Disposition Investor"
   class: "examples.DispositionEffect.Rule.players:DispositionInvestor"
-  # Expander → disposition_investor_1, disposition_investor_2
+  # Expander → rule_disposition_investor_1, rule_disposition_investor_2
   num_instances: 50
   config:
-    identity: "disposition_investor"
+    identity: "rule_disposition_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+      record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"  # Source: implementation infrastructure; simulation.yml setting.record_path
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.1.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.1.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       # DispositionInvestor specific (Prospect Theory)
       # Sell at 3% gain (quicker realization of winners)
-      gain_threshold: 0.03
+      gain_threshold: 0.03  # Source: simulation-bases.md §6
       # Sell at 10% loss (strong but not extreme threshold)
-      loss_threshold: -0.10
+      loss_threshold: -0.10  # Source: simulation-bases.md §6
       # λ parameter (Kahneman-Tversky 1979)
-      loss_aversion: 2.25
+      loss_aversion: 2.25  # Source: simulation-bases.md §6
       # Sell 50% of position on gain realization
-      sell_fraction_gain: 0.5
+      sell_fraction_gain: 0.5  # Source: simulation-bases.md §6
       # Very reluctantly sell only 15% at loss
-      sell_fraction_loss: 0.15
+      sell_fraction_loss: 0.15  # Source: simulation-bases.md §6
       # Ceiling = initial_position
-      max_position: 30.0
+      max_position: 30.0  # Source: simulation-bases.md §4.1.4
       # Buy 15% of deficit only when ±1% of reference point
-      buy_fraction: 0.15
+      buy_fraction: 0.15  # Source: simulation-bases.md §4.1.4
+      reference_buy_band: 0.01  # Source: simulation-bases.md §4.1.3
+      cash_deployment_fraction: 0.15  # Source: simulation-bases.md §4.1.4
+      minimum_trade_quantity: 0.5  # Source: implementation granularity constraint
   persona: !include persona.yml
 
-rational_investor:
+rule_rational_investor:
   name: "Rational Investor"
   class: "examples.DispositionEffect.Rule.players:RationalInvestor"
-  # Expander → rational_investor_1, rational_investor_2
+  # Expander → rule_rational_investor_1, rule_rational_investor_2
   num_instances: 2
   config:
-    identity: "rational_investor"
+    identity: "rule_rational_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+      record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"  # Source: implementation infrastructure; simulation.yml setting.record_path
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.2.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.2.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       # RationalInvestor specific
-      target_allocation: 0.5
-      rebalance_threshold: 0.1
+      target_allocation: 0.5  # Source: simulation-bases.md §6
+      rebalance_threshold: 0.1  # Source: simulation-bases.md §4.2.5
+      rebalance_speed: 0.5  # Source: simulation-bases.md §4.2.4
   persona: !include persona.yml
 
-tax_aware_investor:
+rule_tax_aware_investor:
   name: "Tax Aware Investor"
   class: "examples.DispositionEffect.Rule.players:TaxAwareInvestor"
-  # Expander → tax_aware_investor_1, tax_aware_investor_2
+  # Expander → rule_tax_aware_investor_1, rule_tax_aware_investor_2
   num_instances: 2
   config:
-    identity: "tax_aware_investor"
+    identity: "rule_tax_aware_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+      record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"  # Source: implementation infrastructure; simulation.yml setting.record_path
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.3.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.3.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       # TaxAwareInvestor specific
       # Sell at 5% loss for tax benefit
-      tax_loss_threshold: -0.05
+      tax_loss_threshold: -0.05  # Source: simulation-bases.md §6
       # Hold until 20% gain (deferral benefit)
-      capital_gains_hold: 0.20
+      capital_gains_hold: 0.20  # Source: simulation-bases.md §4.3.3
       # Sell 50% when harvesting
-      tax_harvest_fraction: 0.5
+      tax_harvest_fraction: 0.5  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
-index_holder:
+rule_index_holder:
   name: "Index Holder"
   class: "examples.DispositionEffect.Rule.players:IndexHolder"
   num_instances: 1
   config:
-    identity: "index_holder"
+    identity: "rule_index_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+      record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"  # Source: implementation infrastructure; simulation.yml setting.record_path
       # Base investor parameters
-      initial_cash: 10000.0
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.4 normalized endowment
       # Larger position for passive holder
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
+      initial_position: 50.0  # Source: simulation-bases.md §4.4.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
-institutional_investor:
+rule_institutional_investor:
   name: "Institutional Investor"
   class: "examples.DispositionEffect.Rule.players:InstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "institutional_investor"
+    identity: "rule_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rule/records"
+      record_path: "${DISPOSITION_RULE_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rule}/records"  # Source: implementation infrastructure; simulation.yml setting.record_path
       # Base investor parameters
-      initial_cash: 10000.0
-      initial_position: 30.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.5.6 normalized endowment
+      initial_position: 30.0  # Source: simulation-bases.md §4.5.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       # InstitutionalInvestor specific (weaker disposition)
       # Hold longer than retail
-      gain_threshold: 0.25
+      gain_threshold: 0.25  # Source: simulation-bases.md §6
       # Cut losses earlier than retail
-      loss_threshold: -0.15
-      sell_fraction: 0.4
+      loss_threshold: -0.15  # Source: simulation-bases.md §6
+      sell_fraction: 0.4  # Source: simulation-bases.md §6
   persona: !include persona.yml

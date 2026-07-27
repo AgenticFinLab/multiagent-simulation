@@ -26,8 +26,8 @@
 | Position constraint → sim-bases §6                                    | `quantity = min(quantity, max(position, 0.0))` in `decide()`                                      |
 | Cash update on execution → sim-bases §4                               | `self.state.custom_state["cash"] += quantity * price` in `act()`                                  |
 
-### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
+### PrimeBrokerFirstMover: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.2 — PrimeBrokerFirstMover)*
 
 | Theory Component                                                         | Implementation                                                                                          |
 |--------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
@@ -36,14 +36,14 @@
 | Sell `liquidation_sell_ratio × position` → sim-bases §4                  | `quantity = position * liquidation_sell_ratio`; ratio loaded from `extras`                              |
 | Receives full market price (first-mover advantage) → sim-bases §4        | No `price_penalty` applied; `cash += quantity * price` directly in `act()`                              |
 
-### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
+### PrimeBrokerDelayedLiquidator: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator)*
 
-| Theory Component                                                             | Implementation                                                                       |
-|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Second-mover disadvantage → simulation-bases.md §2 (Liquidation Race)        | Class docstring; higher `liquidation_threshold` = 0.15 vs PrimeBroker1's 0.10        |
-| Price penalty: effective_price = market_price × price_penalty → sim-bases §4 | `effective_price = price * price_penalty`; `price_penalty = extras["price_penalty"]` |
-| Cash update at effective price → sim-bases §4                                | `cash += quantity * effective_price` in `act()` (vs PrimeBroker1 using full price)   |
+| Theory Component                                                             | Implementation                                                                              |
+|------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| Second-mover disadvantage → simulation-bases.md §2 (Liquidation Race)        | Class docstring; higher `liquidation_threshold` = 0.15 vs PrimeBrokerFirstMover's 0.10      |
+| Price penalty: effective_price = market_price × price_penalty → sim-bases §4 | `effective_price = price * price_penalty`; `price_penalty = extras["price_penalty"]`        |
+| Cash update at effective price → sim-bases §4                                | `cash += quantity * effective_price` in `act()` (vs PrimeBrokerFirstMover using full price) |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
@@ -90,11 +90,11 @@ Code translation:
 
 Price floor: `new_price = max(new_price, 0.01)` — prevents negative prices during extreme cascades.
 
-Deviation broadcast: `deviation = (new_price − fundamental) / fundamental` — key cascade signal.
+Deviation broadcast: `deviation = (new_price − fundamental) / fundamental` — key distress signal.
 
 Additional mechanisms (simulation-bases.md §3.2):
 - Short selling allowed: `InformationTrader` can hold negative `position` and short `front_run_size` shares
-- PrimeBroker2 price penalty: `effective_price = price * price_penalty` — models second-mover worse execution
+- PrimeBrokerDelayedLiquidator price penalty: `effective_price = price * price_penalty` — models second-mover worse execution
 
 Deviations from simulation-bases.md design: None — all formula variables map directly.
 
@@ -107,8 +107,8 @@ Deviations from simulation-bases.md design: None — all formula variables map d
 **Fully deterministic**: All thresholds are loaded from `extras` in `players.yml`. Given the same config and random seed, the same cascade triggers at the same round every time. This makes the Rule variant the calibration baseline for cross-variant comparison.
 
 **Threshold asymmetry implementation**: The key first-mover advantage is encoded as `liquidation_threshold` difference:
-- PrimeBroker1: `extras["liquidation_threshold"]` = −0.10 (acts first)
-- PrimeBroker2: `extras["liquidation_threshold"]` = −0.15 (acts after price has already fallen further)
+- PrimeBrokerFirstMover: `extras["liquidation_threshold"]` = −0.10 (acts first)
+- PrimeBrokerDelayedLiquidator: `extras["liquidation_threshold"]` = −0.15 (acts after price has already fallen further)
 
 **No LLM delay**: ConcentratedFund sells immediately when `deviation < margin_threshold` — no hesitation or denial psychology. This creates the fastest, deepest cascade of any variant.
 
@@ -133,8 +133,8 @@ Deviations from simulation-bases.md design: None — all formula variables map d
 ║                               deviation, round} to all investors      ║
 ║                                                                       ║
 ║  ConcentratedFund:  deviation < −0.15? → SELL 50% position           ║
-║  PrimeBroker1:      deviation < −0.10? → SELL 40% position           ║
-║  PrimeBroker2:      deviation < −0.15? → SELL 35% position @ −3%    ║
+║  PrimeBrokerFirstMover:      deviation < −0.10? → SELL 40% position           ║
+║  PrimeBrokerDelayedLiquidator:      deviation < −0.15? → SELL 35% position @ −3%    ║
 ║  BlockTradeBuyer:   deviation < −0.10? → BUY 30% of cash / price    ║
 ║  InformationTrader: deviation < −0.05 AND rand<0.5? → SELL 1000      ║
 ║         │                                                             ║
@@ -148,18 +148,18 @@ Deviations from simulation-bases.md design: None — all formula variables map d
 
 Key Configuration Parameters (`configs/ArchegosCollapse/Rule/players.yml`):
 
-| Parameter               | Config Path                    | Value         | Design Justification                                                        |
-|-------------------------|--------------------------------|---------------|-----------------------------------------------------------------------------|
-| `price_impact`          | `extras.price_impact`          | 0.03          | High λ — large liquidation blocks cause significant price impact            |
-| `mean_reversion`        | `extras.mean_reversion`        | 0.01          | Low γ — ensures cascade persists; not immediately corrected                 |
-| `fundamental_value`     | `extras.fundamental_value`     | 100.0         | Stable benchmark; all deviations relative to this                           |
-| `initial_price`         | `extras.initial_price`         | 100.0         | Starts at fair value; cascade driven by liquidation, not initial mispricing |
-| `margin_threshold`      | `extras.margin_threshold`      | −0.15         | Becketti (2021) TRS margin call level; see sim-bases §6                     |
-| `trs_sell_ratio`        | `extras.trs_sell_ratio`        | 0.50          | Archegos post-mortem: 50% position forced liquidation                       |
-| `liquidation_threshold` | `extras.liquidation_threshold` | −0.10 / −0.15 | PrimeBroker1/2 asymmetry captures first-mover timing                        |
-| `price_penalty`         | `extras.price_penalty`         | 0.97          | PrimeBroker2 sells at 3% discount — second-mover disadvantage               |
-| `discount_threshold`    | `extras.discount_threshold`    | −0.10         | Grossman & Miller (1988) block buyer entry level; see sim-bases §6          |
-| `detection_threshold`   | `extras.detection_threshold`   | −0.05         | Kyle (1985) information signal threshold; see sim-bases §6                  |
+| Parameter               | Config Path                    | Value         | Design Justification                                                          |
+|-------------------------|--------------------------------|---------------|-------------------------------------------------------------------------------|
+| `price_impact`          | `extras.price_impact`          | 0.03          | High λ — large liquidation blocks cause significant price impact              |
+| `mean_reversion`        | `extras.mean_reversion`        | 0.01          | Low γ — ensures cascade persists; not immediately corrected                   |
+| `fundamental_value`     | `extras.fundamental_value`     | 100.0         | Stable benchmark; all deviations relative to this                             |
+| `initial_price`         | `extras.initial_price`         | 100.0         | Starts at fair value; cascade driven by liquidation, not initial mispricing   |
+| `margin_threshold`      | `extras.margin_threshold`      | −0.15         | Becketti (2021) TRS margin call level; see sim-bases §6                       |
+| `trs_sell_ratio`        | `extras.trs_sell_ratio`        | 0.50          | Archegos post-mortem: 50% position forced liquidation                         |
+| `liquidation_threshold` | `extras.liquidation_threshold` | −0.10 / −0.15 | PrimeBrokerFirstMover/2 asymmetry captures first-mover timing                 |
+| `price_penalty`         | `extras.price_penalty`         | 0.97          | PrimeBrokerDelayedLiquidator sells at 3% discount — second-mover disadvantage |
+| `discount_threshold`    | `extras.discount_threshold`    | −0.10         | Grossman & Miller (1988) block buyer entry level; see sim-bases §6            |
+| `detection_threshold`   | `extras.detection_threshold`   | −0.05         | Kyle (1985) information signal threshold; see sim-bases §6                    |
 
 ---
 
@@ -180,12 +180,12 @@ Output location: `EXPERIMENT/ArchegosCollapse/Rule/`
 
 ## §8 Expected Behavior Patterns
 
-| Phase         | Rounds | Expected Agent Behavior                                                               | Expected Price Dynamics                            |
-|---------------|--------|---------------------------------------------------------------------------------------|----------------------------------------------------|
-| Pre-Cascade   | 1–10   | All agents hold; InformationTrader may detect early signal at ~5% deviation           | Price near 100; small fluctuations from noise      |
-| Cascade Onset | 10–20  | PrimeBroker1 triggers at −10%; ConcentratedFund at −15%; InformationTrader front-runs | Sharp price drop; deviation crosses −10% then −15% |
-| Peak Cascade  | 20–35  | PrimeBroker2 forced to sell at discounted prices; BlockTradeBuyer activates           | Price trough; max drawdown; deviation −20% to −40% |
-| Recovery      | 35–100 | BlockTradeBuyer absorbs supply; InformationTrader covers short; mean reversion        | Price gradually recovers toward fundamental (100)  |
+| Phase         | Rounds | Expected Agent Behavior                                                                        | Expected Price Dynamics                            |
+|---------------|--------|------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| Pre-Cascade   | 1–10   | All agents hold; InformationTrader may detect early signal at ~5% deviation                    | Price near 100; small fluctuations from noise      |
+| Cascade Onset | 10–20  | PrimeBrokerFirstMover triggers at −10%; ConcentratedFund at −15%; InformationTrader front-runs | Sharp price drop; deviation crosses −10% then −15% |
+| Peak Cascade  | 20–35  | PrimeBrokerDelayedLiquidator forced to sell at discounted prices; BlockTradeBuyer activates    | Price trough; max drawdown; deviation −20% to −40% |
+| Recovery      | 35–100 | BlockTradeBuyer absorbs supply; InformationTrader covers short; mean reversion                 | Price gradually recovers toward fundamental (100)  |
 
 ---
 
@@ -194,7 +194,7 @@ Output location: `EXPERIMENT/ArchegosCollapse/Rule/`
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 
 - TRS leverage / ConcentratedFund behavior → `simulation-bases.md §2, §4 — ConcentratedFund`
-- Creditor run / prime broker liquidation race → `simulation-bases.md §2, §4 — PrimeBroker1, PrimeBroker2`
+- Creditor run / prime broker liquidation race → `simulation-bases.md §2, §4 — PrimeBrokerFirstMover, PrimeBrokerDelayedLiquidator`
 - Opportunistic block trading / price floor → `simulation-bases.md §2, §4 — BlockTradeBuyer`
 - Information-based front-running → `simulation-bases.md §2, §4 — InformationTrader`
 - Price formula implementation → `simulation-bases.md §3.1`

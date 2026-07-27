@@ -3,7 +3,7 @@
 RAG-augmented prompts for agents using domain knowledge retrieval.
 System prompts combine behavioral persona, quantitative rules, and RAG context injection.
 
-Construction rule (create-example-skill.md — Rag variant):
+Construction rule (implement-simulation-skill.md — Rag variant):
     System prompts are identical to RuleLLM (== PERSONA == + == DECISION RULES ==).
     User prompt template adds {rag_context} placeholder after portfolio state.
     If no documents are retrieved, inject: "(No relevant knowledge retrieved this round.)"
@@ -28,6 +28,10 @@ from examples.AnchoringEffect.RuleLLM.prompts import (
     RULELLM_RATIONAL_UPDATER_SYS,
     RULELLM_MOMENTUM_TRADER_SYS,
     RULELLM_NOISE_TRADER_SYS,
+    RULELLM_DISPOSITION_TRADER_SYS,
+    RULELLM_CONTRARIAN_TRADER_SYS,
+    RULELLM_FUNDAMENTAL_ANALYST_SYS,
+    RULELLM_LIQUIDITY_PROVIDER_SYS,
 )
 
 # RAG system prompts are identical to RuleLLM system prompts.
@@ -37,6 +41,10 @@ RAG_HISTORICAL_ANCHOR_SYS = RULELLM_HISTORICAL_ANCHOR_SYS
 RAG_RATIONAL_UPDATER_SYS = RULELLM_RATIONAL_UPDATER_SYS
 RAG_MOMENTUM_TRADER_SYS = RULELLM_MOMENTUM_TRADER_SYS
 RAG_NOISE_TRADER_SYS = RULELLM_NOISE_TRADER_SYS
+RAG_DISPOSITION_TRADER_SYS = RULELLM_DISPOSITION_TRADER_SYS
+RAG_CONTRARIAN_TRADER_SYS = RULELLM_CONTRARIAN_TRADER_SYS
+RAG_FUNDAMENTAL_ANALYST_SYS = RULELLM_FUNDAMENTAL_ANALYST_SYS
+RAG_LIQUIDITY_PROVIDER_SYS = RULELLM_LIQUIDITY_PROVIDER_SYS
 
 RAG_USER_TEMPLATE = (
     "Current Market State (Round {round}):\n"

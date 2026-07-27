@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,SouthSeaBubble,RuleLLM,SUCCESS,0,4040.375,2026-05-23T17:01:45,2026-05-23T18:09:05,config/simulation.yml,examples/SouthSeaBubble/RuleLLM/run_southseabubble_rulellm.py,logs/SouthSeaBubble__RuleLLM.log,,200,200,

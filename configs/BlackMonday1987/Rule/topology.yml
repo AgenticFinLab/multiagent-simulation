@@ -7,11 +7,11 @@
 # The simulator expander resolves them to foo_1, foo_2, ... before building
 # the TopologyGraph, so all edge rules apply to every instance automatically.
 #
-#    portfolio_insurer ──────────┐
-#    index_arbitrageur ──────────┤
-#    program_trader    ──────────┼──▶ market ──▶ all investors
-#    value_investor    ──────────┤             (market data: price, return)
-#    noise_trader      ──────────┘
+#    rule_portfolio_insurer ──────────┐
+#    rule_index_arbitrageur ──────────┤
+#    rule_program_trader    ──────────┼──▶ market ──▶ all investors
+#    rule_value_investor    ──────────┤             (market data: price, return)
+#    rule_noise_trader      ──────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + dynamics data)
@@ -26,24 +26,24 @@ sources:
 connections:
   # Market → All investors (price + market data broadcast)
   market:
-    - portfolio_insurer
-    - index_arbitrageur
-    - program_trader
-    - value_investor
-    - noise_trader
+    - rule_portfolio_insurer
+    - rule_index_arbitrageur
+    - rule_program_trader
+    - rule_value_investor
+    - rule_noise_trader
 
   # Each investor → Market only (order submission)
-  portfolio_insurer:
+  rule_portfolio_insurer:
     - market
 
-  index_arbitrageur:
+  rule_index_arbitrageur:
     - market
 
-  program_trader:
+  rule_program_trader:
     - market
 
-  value_investor:
+  rule_value_investor:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market

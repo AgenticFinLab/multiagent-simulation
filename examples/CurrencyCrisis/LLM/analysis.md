@@ -37,40 +37,102 @@ LLM decision records.
 | Recovery | Recovery speed reflects whether LLM agents recognize stabilization opportunities. |
 | Wealth transfer | Positive WTI indicates LLM speculators profited from devaluation. |
 
-## §4 Variant-Specific Phenomena
+## §4 Variant-Specific Observable Phenomena
 
-The LLM variant should not embed the deterministic formulas from the Rule
+Under the LLM variant, each agent receives a persona-only prompt and no
+explicit trading rules; the observed decisions therefore reflect the
+language model's interpretation of the market state and role. Deviations
+from the Rule baseline can be attributed to reasoning variability rather
+than mechanism differences.
+
+| Phenomenon                                | Trigger condition                                                     | Expected metric signature                                          |
+|-------------------------------------------|-----------------------------------------------------------------------|--------------------------------------------------------------------|
+| Persona-driven attack timing              | Attacker persona infers pressure without explicit threshold           | AII broader distribution than Rule; attack rounds shift            |
+| Coordinated self-fulfilling reasoning     | SelfFulfilling persona interprets prior sells as expectation signal   | `SFAF` may exceed Rule if LLM emphasises crowd behaviour           |
+| Defender hesitation or over-commitment    | Central-bank persona reasons about reserves before spending           | `DER` smoother or spikier depending on framing                     |
+| Hedger persona drift                      | FundamentalHedger reasoning may deprioritize buying                   | `FAS` variance rises; occasional dropouts                          |
+| Reasoning-triggered recovery              | Persona identifies stabilization opportunity post-trough              | Recovery speed higher variance; some seeds fail to recover         |
+| Reasoning parse-failure fallback          | Malformed LLM output forces canonical fallback order                  | Silent hold rounds; must be audited as quality failure             |
+
+The LLM variant must **not** embed the deterministic formulas from the Rule
 variant. Its quality depends on whether persona-only prompts produce coherent
-trading actions and whether those actions generate the same crisis channels:
-speculative attack, self-fulfilling selling, peg defense, and fundamental
-anchoring.
+trading actions and whether those actions reproduce the four canonical
+crisis channels: speculative attack, self-fulfilling selling, peg defense,
+and fundamental anchoring.
 
-## §5 Output Files
+---
+
+## §5 Scaling and Sensitivity Analysis
+
+### Round Scaling
+
+| Round count | Expected metric behavior                                                                                        |
+|-------------|-----------------------------------------------------------------------------------------------------------------|
+| 100         | Persona coherence assessable; AII distribution wide; sample too small to isolate seed effects                   |
+| 200         | Central setting; full attack-defense-recovery cycle observable; parse-failure rate stabilizes                   |
+| 500         | Long-horizon regime; watch for reasoning drift, repetitive actions, or context saturation                       |
+
+### Agent Count Scaling
+
+| Configuration                                       | Expected effect on metrics                                                                    |
+|-----------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| +50% attacker/self-fulfilling personas              | AII deepens (like Rule) but with higher run-to-run variance                                   |
+| +50% defender/hedger personas                       | Persona diversity may not fully offset LLM hesitation; FAS may still lag Rule                 |
+| Uniform doubling                                    | LLM-call cost doubles; reasoning quality per agent may degrade under context pressure         |
+
+### Parameter Sensitivity (±50%)
+
+| Parameter                          | Effect on LLM-specific metrics                                                        |
+|------------------------------------|---------------------------------------------------------------------------------------|
+| Prompt temperature                 | Higher → wider AII/SFAF distribution; more parse failures                             |
+| Persona verbosity                  | Longer personas can improve role adherence but risk context overflow                  |
+| Max output tokens                  | Below decision-block size → increased parse failures                                  |
+| `peg_target` / `initial_cash`      | Same directional effects as Rule, moderated by LLM interpretation                     |
+| Retry budget                       | Higher → fewer fallback holds; audit trail more complete                              |
+
+---
+
+## §6 Output Files Reference
 
 Running `LLM/analysis.py` writes the standard analysis artifacts under the
-configured experiment output directory:
+configured experiment output directory (`EXPERIMENT/CurrencyCrisis/LLM/analysis/`).
+The variant delegates plot generation to `_create_visualizations()` (imported
+from the Rule analysis) and emits a `summary.json` stamped with `variant="LLM"`.
 
-| File | Contents |
-|---|---|
-| `00_investor_bids.png` | Market price, peg line, and investor bid curves |
-| `01_currencycrisis_dynamics.png` | Exchange rate vs. peg and deviation thresholds |
-| `02_currencycrisis_analysis.png` | Rolling volatility and per-round returns |
-| `03_summary.png` | Agent VWAP and total volume summary |
-| `summary.json` | Metrics, validation criteria, and agent VWAP data |
+| File | Generated By | Contents | How to Interpret |
+|---|---|---|---|
+| `00_investor_bids.png` | `_create_visualizations()` | Market price, peg line, and investor bid curves | Attacker/self-fulfilling bids cluster once `|δ| > 0.03`; defender curve mirrors reserve spending |
+| `01_currencycrisis_dynamics.png` | `_create_visualizations()` | Exchange rate vs. peg and deviation thresholds (−5 %, −10 %) | Locate peg breach round (PSD) and trough round (AII); LLM breach timing more stochastic than Rule |
+| `02_currencycrisis_analysis.png` | `_create_visualizations()` | Rolling volatility and per-round returns | Volatility spikes concentrated near attack and crisis phases; parse-failure rounds show gaps |
+| `03_summary.png` | `_create_visualizations()` | Agent VWAP and total volume summary | Cross-check SFAF against attacker vs self-fulfilling VWAP disparity |
+| `summary.json` | `main()` | Metrics (AII/PSD/DER/SFAF/FAS/RS/WTI) + validation criteria + agent VWAP data + variant label | Compare against calibration targets in `../analysis-bases.md §6.2`; check `variant == "LLM"` |
 
-## §6 Cross-Variant Comparison
+LLM reports should additionally record action-distribution and parse-quality
+tables alongside `summary.json`. Any silent hold arising from a parse failure
+must be logged as a quality failure rather than counted as a "hold" action.
 
-Compare LLM metrics against Rule:
+## §7 Cross-Variant Comparison Notes
 
-| Metric | Expected reading |
-|---|---|
-| AII | Higher dispersion than Rule because crisis reasoning is stochastic |
-| PSD | Later or earlier breach depending on attacker/defender reasoning |
-| SFAF | Can exceed Rule if LLMs infer crowd coordination |
-| FAS | Should remain positive if the fundamental persona is preserved |
-| WTI | Captures whether language reasoning shifts gains toward attackers or defenders |
+Compare LLM metrics against Rule, RuleLLM, and Rag along the axes in
+`../analysis-bases.md §5` and §6.3:
 
-## §7 Quality Checks
+| Metric | LLM Expected Reading vs Rule                                                       | vs RuleLLM                                                | vs Rag                                                              |
+|--------|------------------------------------------------------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------------|
+| AII    | Higher dispersion; crisis reasoning is stochastic                                  | LLM AII typically wider band than rule-anchored RuleLLM   | Rag may moderate AII when historical crisis context is retrieved    |
+| PSD    | Later or earlier breach depending on attacker/defender reasoning                    | Similar in mean; LLM has larger seed-to-seed variance     | Rag defender may extend PSD by recognizing familiar attack patterns |
+| DER    | Adaptive spending pattern; smoother or spikier than Rule                            | RuleLLM closer to Rule schedule                           | Rag defender may pace reserves informed by historical exhaustion    |
+| SFAF   | Can exceed Rule when LLMs infer crowd coordination                                  | RuleLLM SFAF anchored to Rule threshold                   | Rag may reduce SFAF via retrieved contagion warnings                |
+| FAS    | Should remain positive if fundamental persona is preserved; may dip on some seeds   | RuleLLM FAS closer to Rule (threshold active)             | Rag PPP/fundamentals retrieval typically improves FAS               |
+| RS     | Higher variance; some seeds fail to recover                                         | RuleLLM RS close to Rule                                  | Rag RS improved when recovery case studies retrieved                |
+| WTI    | Captures whether language reasoning shifts gains toward attackers or defenders      | RuleLLM WTI near zero (rule symmetry)                     | Rag may favor defenders when retrieval succeeds                     |
+
+**Comparison protocol**: run LLM under the same parameters and seed set as
+Rule; report `Δ vs Rule = LLM − Rule` per metric across ≥ 3 seeds, plus
+reasoning-quality summary (parse success rate, mean reasoning length,
+persona-vocabulary hit rate). Any silent parse-failure fallback disqualifies
+the sample.
+
+## §8 Quality Checks
 
 - Confirm the run completed 200 configured rounds.
 - Audit LLM parse failures, retry counts, and fallback behavior before accepting

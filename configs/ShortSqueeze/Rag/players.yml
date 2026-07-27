@@ -1,5 +1,13 @@
 # =============================================================================
-# ShortSqueezeLLM Players Configuration
+# ShortSqueeze Rag Players Configuration
+# =============================================================================
+# Traceability: every extras leaf below carries a `# Source: target §9 <param>
+# row; <citation>` comment referencing examples/ShortSqueeze/finance-shortsqueeze.md.
+# Liquidity-aware market extension (target §8.1) with base_liquidity,
+# high_impact_multiplier, low_liquidity_threshold. Order-contract:
+# `{bid_price, quantity, strategy, is_short_cover, provides_liquidity}` plus
+# `reasoning` and `rag_context`; `strategy` is derived from
+# `self.__class__.__name__`. Rag also writes rag_stats.json.
 # =============================================================================
 
 # =============================================================================
@@ -26,6 +34,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Short Interest Tracking"
   class: "examples.ShortSqueeze.Rag.players:Market"
   num_instances: 1
@@ -37,16 +46,16 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      fundamental_value: 50.0
-      initial_price: 30.0
-      base_price_impact: 0.1
-      mean_reversion: 0.005
-      noise_std: 0.5
-      initial_short_interest: 80.0
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      fundamental_value: 50.0  # Source: target §9 fundamental_value row.
+      initial_price: 30.0  # Source: target §9 initial_price row.
+      base_price_impact: 0.1  # Source: target §9 price_impact / base_price_impact row; RuleLLM/Rag alias.
+      mean_reversion: 0.005  # Source: target §9 mean_reversion row.
+      noise_std: 0.5  # Source: target §9 noise_std row.
+      initial_short_interest: 80.0  # Source: target §9 initial_short_interest row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
+      base_liquidity: 50.0  # Source: target §9 base_liquidity row; RuleLLM/Rag liquidity-aware market.
+      high_impact_multiplier: 3.0  # Source: target §9 high_impact_multiplier row.
+      low_liquidity_threshold: 30.0  # Source: target §9 low_liquidity_threshold row.
   persona: !include persona.yml
 
 ragllm_short_seller:
@@ -62,9 +71,9 @@ ragllm_short_seller:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: -50.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: -50.0  # Source: target §9 initial_position (ShortSeller LLM/RuleLLM/Rag) row; §4.1.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -92,22 +101,22 @@ ragllm_short_seller:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_retail_coord:
+ragllm_retail_coordinator:
   name: "RAG Retail Coordinator"
   class: "examples.ShortSqueeze.Rag.players:RagLLMRetailCoordinator"
   # Expander → ragllm_retail_coord_1, ragllm_retail_coord_2, ragllm_retail_coord_3
   num_instances: 3
   config:
-    identity: "ragllm_retail_coord"
+    identity: "ragllm_retail_coordinator"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -135,22 +144,22 @@ ragllm_retail_coord:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_momentum:
+ragllm_momentum_buyer:
   name: "RAG Momentum Buyer"
   class: "examples.ShortSqueeze.Rag.players:RagLLMMomentumBuyer"
   # Expander → ragllm_momentum_1, ragllm_momentum_2, ragllm_momentum_3
   num_instances: 3
   config:
-    identity: "ragllm_momentum"
+    identity: "ragllm_momentum_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -178,22 +187,22 @@ ragllm_momentum:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_value:
+ragllm_value_investor:
   name: "RAG Value Investor"
   class: "examples.ShortSqueeze.Rag.players:RagLLMValueInvestor"
   # Expander → ragllm_value_1, ragllm_value_2
   num_instances: 2
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 0.0  # Source: target §9 initial_position row.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -221,21 +230,21 @@ ragllm_value:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_institutional:
+ragllm_institutional_holder:
   name: "RAG Institutional Holder"
   class: "examples.ShortSqueeze.Rag.players:RagLLMInstitutionalHolder"
   num_instances: 1
   config:
-    identity: "ragllm_institutional"
+    identity: "ragllm_institutional_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
       record_path: "EXPERIMENT/ShortSqueeze/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      initial_cash: 10000.0  # Source: target §9 initial_cash row.
+      initial_position: 100.0  # Source: target §9 initial_position (InstitutionalHolder) row; §4.5 float scarcity.
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row.
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - hindsightoverconfident
-    - outcomelearner
-    - processevaluator
-    - contrarianskeptic
-    - noisetrader
+    - llm_hindsight_overconfident
+    - llm_outcome_learner
+    - llm_process_evaluator
+    - llm_contrarian_skeptic
+    - llm_noise_trader
 
-  hindsightoverconfident:
+  llm_hindsight_overconfident:
     - market
 
-  outcomelearner:
+  llm_outcome_learner:
     - market
 
-  processevaluator:
+  llm_process_evaluator:
     - market
 
-  contrarianskeptic:
+  llm_contrarian_skeptic:
     - market
 
-  noisetrader:
+  llm_noise_trader:
     - market

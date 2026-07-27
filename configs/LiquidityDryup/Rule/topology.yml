@@ -15,25 +15,25 @@ connections:
   # Market → All investors
   # num_instances: 2 → market_maker_1/2, liquidity_seeker_1/2
   market:
-    - market_maker
-    - liquidity_seeker
-    - value_trader
-    - momentum_trader
-    - noise_trader
+    - rule_market_maker
+    - rule_liquidity_seeker
+    - rule_value_trader
+    - rule_momentum_trader
+    - rule_noise_trader
 
   # num_instances: 2 → expands to market_maker_1/2 → market
-  market_maker:
+  rule_market_maker:
     - market
 
   # num_instances: 2 → expands to liquidity_seeker_1/2 → market
-  liquidity_seeker:
+  rule_liquidity_seeker:
     - market
 
-  value_trader:
+  rule_value_trader:
     - market
 
-  momentum_trader:
+  rule_momentum_trader:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market

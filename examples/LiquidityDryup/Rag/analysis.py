@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Liquidity Dry-up Rag Simulation Analysis.
 
-Produces the standardized output set required by create-example-skill:
+Produces the standardized output set required by implement-simulation-skill:
 summary.json, 00_investor_bids.png, 01_liquiditydryup_dynamics.png,
 02_liquiditydryup_analysis.png, 03_summary.png, and rag_stats.json.
 """
@@ -21,6 +21,7 @@ from examples.standard_rule_analysis import (
     _load_data,
     analyze_standard_scenario,
 )
+from examples.LiquidityDryup.Rule.analysis import calculate_liquidity_metrics
 
 _RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
@@ -105,6 +106,7 @@ def main() -> Dict[str, Any]:
         json.dump(rag_stats, f, indent=2)
 
     summary["rag_knowledge_effect"] = rag_stats
+    summary["liquidity_dryup_metrics"] = calculate_liquidity_metrics(args.config)
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     return summary

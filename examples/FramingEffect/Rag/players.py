@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -31,6 +31,8 @@ from examples.FramingEffect.Rule.players import Market
 from examples.FramingEffect.Rag.prompts import RAG_USER_TEMPLATE
 
 logger = logging.getLogger(__name__)
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -99,7 +101,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -297,7 +299,7 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         return RAG_USER_TEMPLATE.format(

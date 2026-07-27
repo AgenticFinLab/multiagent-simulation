@@ -1,45 +1,45 @@
 # =============================================================================
 # RumorSpread Topology - Star Pattern
 # =============================================================================
-# InformationEnvironment as hub, all agents communicate through environment.
+# InformationEnvironment as hub, all agents communicate through rule_information_environment.
 #
-#         gullible_spreader ──────────┐
-#         distorting_relayer ─────────┤
-#         skeptical_evaluator ────────┼──▶ environment ──▶ all agents
-#         fact_checker ───────────────┤             (belief, distortion, truth)
-#         uninformed_bystander ───────┘
+#         rule_gullible_spreader ──────────┐
+#         rule_distorting_relayer ─────────┤
+#         rule_skeptical_evaluator ────────┼──▶ rule_information_environment ──▶ all agents
+#         rule_fact_checker ───────────────┤             (belief, distortion, truth)
+#         rule_uninformed_bystander ───────┘
 #
 # Execution flow per round:
-#   Level 0: environment executes (broadcasts belief + distortion metrics)
+#   Level 0: rule_information_environment executes (broadcasts belief + distortion metrics)
 #   Level 1: all agents execute in parallel (submit spread/correct/ignore actions)
 # =============================================================================
 
 type: "star"
 
 sources:
-  - environment
+  - rule_information_environment
 
 connections:
   # Environment → All agents (belief + distortion data broadcast)
-  environment:
-    - gullible_spreader
-    - distorting_relayer
-    - skeptical_evaluator
-    - fact_checker
-    - uninformed_bystander
+  rule_information_environment:
+    - rule_gullible_spreader
+    - rule_distorting_relayer
+    - rule_skeptical_evaluator
+    - rule_fact_checker
+    - rule_uninformed_bystander
 
   # Each agent → Environment only (action submission)
-  gullible_spreader:
-    - environment
+  rule_gullible_spreader:
+    - rule_information_environment
 
-  distorting_relayer:
-    - environment
+  rule_distorting_relayer:
+    - rule_information_environment
 
-  skeptical_evaluator:
-    - environment
+  rule_skeptical_evaluator:
+    - rule_information_environment
 
-  fact_checker:
-    - environment
+  rule_fact_checker:
+    - rule_information_environment
 
-  uninformed_bystander:
-    - environment
+  rule_uninformed_bystander:
+    - rule_information_environment

@@ -51,13 +51,14 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.MarketCrash.Rag.prompts import (
     RAGLLM_BOTTOM_FISHER_SYS,
     RAGLLM_RISK_PARITY_FUND_SYS,
     RAGLLM_LEVERAGED_HEDGE_FUND_SYS,
     RAGLLM_MARKET_MAKER_SYS,
     RAGLLM_PANIC_SELLER_SYS,
+    RAGLLM_PASSIVE_INVESTOR_SYS,
     RAGLLM_USER_TEMPLATE,
 )
 from masim.knowledge import (
@@ -72,6 +73,8 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("MarketCrashRag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 # =============================================================================
@@ -616,7 +619,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         return RAGLLM_USER_TEMPLATE.format(
@@ -675,7 +678,8 @@ class RagLLMInvestor(GeneralPlayer):
         system_prompt = self._system_prompt
 
         max_retries = 3
-        decision: Dict[str, Any] = {}
+        decision: Optional[Dict[str, Any]] = None
+        last_error: Optional[Exception] = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             infer_output = llm_client.run([infer_input])
@@ -683,17 +687,44 @@ class RagLLMInvestor(GeneralPlayer):
                 decision = self._parse_llm_response(infer_output.outputs[0].response)
                 break
             except ValueError as e:
-                if attempt == max_retries - 1:
-                    raise RuntimeError(
-                        f"[{self.identity}] LLM failed after {max_retries} attempts: {e}"
-                    )
+                last_error = e
+                if attempt < max_retries - 1:
                     logger.debug(
                         "[%s] LLM parse failed (attempt %d), retrying...",
                         self.identity,
                         attempt + 1,
                     )
 
+        if decision is None:
+            logger.warning(
+                "[%s] LLM failed after %d attempts: %s. Holding this round.",
+                self.identity,
+                max_retries,
+                last_error,
+            )
+            order = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0.0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "LLM parse failed: held position",
+                "provides_liquidity": False,
+                "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
+                "rag_context": self.state.custom_state.get("last_rag_context"),
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
+            }
+            return {
+                **order,
+                "outbound_messages": [
+                    {"payload": order, "content_type": "investor_bid"}
+                ],
+            }
+
         bid_price = float(decision["bid_price"])
+        if bid_price <= 0:
+            bid_price = market_data["price"]
         quantity = float(decision["quantity"])
         quantity = self._apply_constraints(bid_price, quantity)
 
@@ -723,6 +754,7 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "provides_liquidity": decision["provides_liquidity"],
+            "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
             "rag_context": self.state.custom_state.get("last_rag_context"),
         }
 
@@ -756,7 +788,7 @@ class RagLLMRiskParityFund(RagLLMInvestor):
     _system_prompt = RAGLLM_RISK_PARITY_FUND_SYS
 
 
-class RagLLMLeveragedFund(RagLLMInvestor):
+class RagLLMLeveragedHedgeFund(RagLLMInvestor):
     """RAG LeveragedHedgeFund. Theory: simulation-bases.md §4.2."""
 
     _system_prompt = RAGLLM_LEVERAGED_HEDGE_FUND_SYS
@@ -774,12 +806,19 @@ class RagLLMBottomFisher(RagLLMInvestor):
     _system_prompt = RAGLLM_BOTTOM_FISHER_SYS
 
 
+class RagLLMPassiveInvestor(RagLLMInvestor):
+    """RAG PassiveInvestor. Theory: simulation-bases.md §4.4."""
+
+    _system_prompt = RAGLLM_PASSIVE_INVESTOR_SYS
+
+
 __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMPanicSeller",
     "RagLLMRiskParityFund",
-    "RagLLMLeveragedFund",
+    "RagLLMLeveragedHedgeFund",
     "RagLLMMarketMaker",
     "RagLLMBottomFisher",
+    "RagLLMPassiveInvestor",
 ]

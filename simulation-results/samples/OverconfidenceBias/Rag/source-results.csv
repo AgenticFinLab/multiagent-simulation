@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,OverconfidenceBias,Rag,SUCCESS,0,4730.354,2026-05-23T17:21:52,2026-05-23T18:40:43,config/simulation.yml,examples/OverconfidenceBias/Rag/run_overconfidencebias_rag.py,logs/OverconfidenceBias__Rag.log,,200,200,

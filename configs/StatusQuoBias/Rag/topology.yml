@@ -7,18 +7,18 @@ sources:
 
 connections:
   market:
-    - inertialholder
-    - defaultfollower
-    - activerebalancer
-    - momentumtrader
-    - noisetrader
-  inertialholder:
+    - ragllm_inertial_holder
+    - ragllm_default_follower
+    - ragllm_active_rebalancer
+    - ragllm_momentum_trader
+    - ragllm_noise_trader
+  ragllm_inertial_holder:
     - market
-  defaultfollower:
+  ragllm_default_follower:
     - market
-  activerebalancer:
+  ragllm_active_rebalancer:
     - market
-  momentumtrader:
+  ragllm_momentum_trader:
     - market
-  noisetrader:
+  ragllm_noise_trader:
     - market

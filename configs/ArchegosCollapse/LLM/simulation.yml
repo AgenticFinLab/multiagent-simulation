@@ -11,7 +11,7 @@
 
 setting:
   name: "archegsoscollapse_llm_simulation"
-  description: "Archegos-style collapse with LLM-driven agents: TRS leverage, prime broker liquidation cascade"
+  description: "TRS leverage liquidation-race scenario with LLM-driven agents: TRS leverage, prime broker liquidation race"
   total_rounds: 200
   round_history_limit: 3
   record_path: "EXPERIMENT/ArchegosCollapse/LLM/records"

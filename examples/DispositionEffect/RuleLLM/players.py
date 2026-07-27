@@ -33,14 +33,22 @@ Requirements:
 
 import json
 import logging
+import math
 import os
 import random
 import importlib
+import copy
 from typing import Any, Dict, Optional
+
+from dotenv import load_dotenv
+import torch  # Load native DLLs before MASim/NumPy on Windows.
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
+
+from lmbase.inference.api_call import LangChainAPIInference
+from lmbase.inference.base import InferInput
 
 logger = logging.getLogger("DispositionEffectRuleLLM")
 _DECISION_PARAM_SKIP_KEYS = {
@@ -52,10 +60,9 @@ _DECISION_PARAM_SKIP_KEYS = {
     "llm",
 }
 
-from examples.llm_utils import (
+from masim.utils.llm_utils import (
+    is_retryable_llm_error,
     parse_llm_response_with_thinking,
-    build_messages,
-    call_llm,
 )
 
 
@@ -99,6 +106,7 @@ class Market(GeneralPlayer):
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
+        """Initialize market state and collect investor orders."""
         round_num = observation.round
         self.state.custom_state["round"] = round_num
 
@@ -129,6 +137,7 @@ class Market(GeneralPlayer):
         self.state.custom_state["orders"] = orders
 
     async def decide(self) -> Dict[str, Any]:
+        """Advance the market price and prepare the broadcast payload."""
         extras = self.config.extras
         round_num = self.state.custom_state["round"]
         current_price = self.state.custom_state["price"]
@@ -158,7 +167,8 @@ class Market(GeneralPlayer):
         noise = random.gauss(0, noise_std)
 
         new_price = max(
-            1.0, current_price + price_impact + mean_reversion + noise + news_shock
+            extras["minimum_price"],
+            current_price + price_impact + mean_reversion + noise + news_shock,
         )
         price_return = (new_price - current_price) / current_price
 
@@ -206,6 +216,7 @@ class Market(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        """Broadcast the market decision to connected investors."""
         return Action(
             action_type="market_broadcast",
             payload=decision_payload,
@@ -233,17 +244,32 @@ class BaseLLMInvestor(GeneralPlayer):
 
     def __getstate__(self) -> Dict[str, Any]:
         """Return picklable state for Ray serialization."""
-        return self.__dict__.copy()
+        state = self.__dict__.copy()
+        if "state" in state and hasattr(state["state"], "custom_state"):
+            player_state = copy.copy(state["state"])
+            custom_state = dict(player_state.custom_state)
+            custom_state.pop("llm_client", None)
+            player_state.custom_state = custom_state
+            state["state"] = player_state
+        return state
 
     def __setstate__(self, state: Dict[str, Any]) -> None:
         """Restore state after Ray deserialization."""
         self.__dict__.update(state)
+        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
+            custom_state = self.state.custom_state
+            if "lm_name" in custom_state and "llm_client" not in custom_state:
+                custom_state["llm_client"] = LangChainAPIInference(
+                    lm_name=custom_state["lm_name"],
+                    generation_config=custom_state["generation_config"],
+                )
 
     async def perceive(
         self,
         observation: Observation,
         prev_result: Optional[StepResult] = None,
     ) -> None:
+        """Initialize portfolio state, LLM client, and current market data."""
         round_num = observation.round
         self.state.custom_state["round"] = round_num
 
@@ -258,6 +284,17 @@ class BaseLLMInvestor(GeneralPlayer):
             self.state.custom_state["purchase_price"] = initial_purchase_price
             self.state.custom_state["total_cost"] = (
                 initial_position * initial_purchase_price
+            )
+
+            load_dotenv()
+            llm_config = extras["llm"]
+            self.state.custom_state["lm_name"] = llm_config["lm_name"]
+            self.state.custom_state["generation_config"] = llm_config[
+                "generation_config"
+            ]
+            self.state.custom_state["llm_client"] = LangChainAPIInference(
+                lm_name=llm_config["lm_name"],
+                generation_config=llm_config["generation_config"],
             )
 
         market_data = None
@@ -290,6 +327,7 @@ class BaseLLMInvestor(GeneralPlayer):
         self.state.custom_state["total_cost"] = max(0, total_cost)
 
     async def decide(self) -> Dict[str, Any]:
+        """Request an explanation, enforce the rule, and execute the order."""
         extras = self.config.extras
         llm_config = self._get_llm_config()
         round_num = self.state.custom_state["round"]
@@ -338,34 +376,41 @@ class BaseLLMInvestor(GeneralPlayer):
             decision_params=format_decision_params(extras),
         )
 
-        messages = build_messages(sys_msg, user_msg)
-
         # Call LLM
-        max_retries = 3
+        max_retries = llm_config["max_retries"]
+        llm_client = self.state.custom_state["llm_client"]
         decision = None
         last_error = None
         for attempt in range(max_retries):
             try:
-                infer_output = await call_llm(
-                    messages=messages,
-                    lm_type=llm_config["lm_type"],
-                    lm_name=llm_config["lm_name"],
-                    generation_config=llm_config["generation_config"],
+                infer_output = llm_client.run(
+                    [InferInput(system_msg=sys_msg, user_msg=user_msg)]
                 )
                 decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
+                    infer_output.response
                 )
                 if decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"invalid action: {decision['action']}")
-                if float(decision["bid_price"]) <= 0:
+                proposed_price = float(decision["bid_price"])
+                if not math.isfinite(proposed_price) or proposed_price <= 0:
                     raise ValueError(f"invalid bid_price: {decision['bid_price']}")
                 if not str(decision["reasoning"]).strip():
                     raise ValueError("missing reasoning")
+                if not str(decision["analysis"]).strip():
+                    raise ValueError("missing analysis")
                 break
-            except (json.JSONDecodeError, ValueError, KeyError) as e:
+            except Exception as e:
+                decision = None
+                parse_error = isinstance(
+                    e, (json.JSONDecodeError, ValueError, KeyError, TypeError)
+                )
+                if not parse_error and not is_retryable_llm_error(e):
+                    raise
                 last_error = e
                 if attempt < max_retries - 1:
-                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
+                    logger.debug(
+                        "[%s] LLM parse failed, retrying...", self.config.identity
+                    )
 
         if decision is None:
             raise RuntimeError(
@@ -374,7 +419,11 @@ class BaseLLMInvestor(GeneralPlayer):
 
         # Extract decision
         action = decision["action"]
-        bid_price = float(decision["bid_price"])
+        # Execute at the broadcast market price; the model-proposed bid is only
+        # validated for schema compliance and cannot create off-market cash flows.
+        bid_price = float(price)
+        if not math.isfinite(bid_price) or bid_price <= 0:
+            raise ValueError(f"invalid market price: {bid_price}")
         quantity = float(decision["quantity"])
         reasoning = decision["reasoning"]
         analysis = decision["analysis"]
@@ -386,8 +435,31 @@ class BaseLLMInvestor(GeneralPlayer):
         else:
             quantity = 0.0
 
-        # Determine move_reference based on agent type
-        move_reference = "DispositionBiased" not in strategy_name
+        if not math.isfinite(quantity):
+            raise ValueError("quantity must be finite")
+
+        # Preserve the rule-selected direction as a hard constraint while
+        # allowing the documented +/-20% LLM sizing adjustment.
+        rule_quantity = self._rule_quantity(price)
+        if rule_quantity == 0:
+            quantity = 0.0
+        else:
+            # The LLM may vary magnitude, never the rule-selected direction.
+            magnitude = min(
+                max(abs(quantity), abs(rule_quantity) * 0.8),
+                abs(rule_quantity) * 1.2,
+            )
+            quantity = math.copysign(magnitude, rule_quantity)
+
+        quantity = self._apply_constraints(bid_price, quantity)
+        if quantity > 0:
+            action = "buy"
+        elif quantity < 0:
+            action = "sell"
+        else:
+            action = "hold"
+
+        move_reference = not isinstance(self, RuleLLMDispositionBiased)
 
         # Execute trade
         if quantity > 0:
@@ -439,9 +511,96 @@ class BaseLLMInvestor(GeneralPlayer):
             ],
         }
 
-    def _hold_order(self, round_num, strategy_name, reason=""):
+    def _rule_quantity(self, price: float) -> float:
+        """Return the deterministic counterpart quantity for the current state."""
+        extras = self.config.extras
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        purchase_price = self.state.custom_state["purchase_price"]
+        if price <= 0 or purchase_price <= 0:
+            raise ValueError("price and purchase_price must be positive")
+
+        if isinstance(self, RuleLLMDispositionBiased):
+            gain_loss = (price - purchase_price) / purchase_price
+            if extras["loss_aversion"] <= 1.0:
+                raise ValueError("loss_aversion must be greater than 1")
+            if extras["sell_fraction_gain"] <= (
+                extras["loss_aversion"] * extras["sell_fraction_loss"]
+            ):
+                raise ValueError(
+                    "sell fractions must preserve the configured loss-aversion asymmetry"
+                )
+            if gain_loss >= extras["gain_threshold"] and position > 0:
+                return -position * extras["sell_fraction_gain"]
+            if gain_loss <= extras["loss_threshold"] and position > 0:
+                return -position * extras["sell_fraction_loss"]
+            if (
+                abs(gain_loss) < extras["reference_buy_band"]
+                and position < extras["max_position"]
+            ):
+                target = (extras["max_position"] - position) * extras["buy_fraction"]
+                affordable = cash * extras["cash_deployment_fraction"] / price
+                quantity = min(target, affordable)
+                if quantity >= extras["minimum_trade_quantity"]:
+                    return quantity
+            return 0.0
+
+        if isinstance(self, RuleLLMRationalInvestor):
+            total_value = cash + position * price
+            if total_value <= 0:
+                raise ValueError("total portfolio value must be positive")
+            current_allocation = position * price / total_value
+            if abs(current_allocation - extras["target_allocation"]) <= extras[
+                "rebalance_threshold"
+            ]:
+                return 0.0
+            target_position = total_value * extras["target_allocation"] / price
+            return (target_position - position) * extras["rebalance_speed"]
+
+        if isinstance(self, RuleLLMTaxAwareInvestor):
+            gain_loss = (price - purchase_price) / purchase_price
+            if gain_loss <= extras["tax_loss_threshold"] and position > 0:
+                return -position * extras["tax_harvest_fraction"]
+            return 0.0
+
+        if isinstance(self, RuleLLMInstitutionalInvestor):
+            gain_loss = (price - purchase_price) / purchase_price
+            if (
+                gain_loss >= extras["gain_threshold"]
+                or gain_loss <= extras["loss_threshold"]
+            ) and position > 0:
+                return -position * extras["sell_fraction"]
+            return 0.0
+
+        if isinstance(self, RuleLLMIndexHolder):
+            return 0.0
+
+        raise TypeError(f"unsupported RuleLLM investor type: {type(self).__name__}")
+
+    def _apply_constraints(self, bid_price: float, quantity: float) -> float:
+        """Apply cash, inventory, and configured position constraints."""
+        cash = self.state.custom_state["cash"]
+        position = self.state.custom_state["position"]
+        if quantity > 0:
+            max_affordable = cash / bid_price
+            if isinstance(self, RuleLLMDispositionBiased):
+                remaining_capacity = max(
+                    0.0, self.config.extras["max_position"] - position
+                )
+                quantity = min(quantity, max_affordable, remaining_capacity)
+            else:
+                quantity = min(quantity, max_affordable)
+        elif quantity < 0:
+            quantity = max(quantity, -position)
+        return quantity
+
+    def _hold_order(
+        self, round_num: int, strategy_name: str, reason: str = ""
+    ) -> Dict[str, Any]:
+        """Return a schema-complete hold order when market data is unavailable."""
+        bid_price = self.state.custom_state["purchase_price"]
         return {
-            "bid_price": 0,
+            "bid_price": bid_price,
             "quantity": 0,
             "action": "hold",
             "strategy": strategy_name,
@@ -450,7 +609,7 @@ class BaseLLMInvestor(GeneralPlayer):
             "outbound_messages": [
                 {
                     "payload": {
-                        "bid_price": 0,
+                        "bid_price": bid_price,
                         "quantity": 0,
                         "action": "hold",
                         "strategy": strategy_name,
@@ -463,6 +622,7 @@ class BaseLLMInvestor(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
+        """Submit the investor order to the market."""
         return Action(
             action_type="order",
             payload=decision_payload,
@@ -499,8 +659,8 @@ class RuleLLMInstitutionalInvestor(BaseLLMInvestor):
     pass
 
 
-class RuleLLMLossAverse(BaseLLMInvestor):
-    """Hybrid rule+LLM extreme loss-averse investor — high λ rules embedded. Theory: simulation-bases.md §4.1."""
+class RuleLLMIndexHolder(BaseLLMInvestor):
+    """Hybrid passive benchmark that always holds. Theory: simulation-bases.md §4.4."""
 
     pass
 
@@ -512,5 +672,5 @@ __all__ = [
     "RuleLLMRationalInvestor",
     "RuleLLMTaxAwareInvestor",
     "RuleLLMInstitutionalInvestor",
-    "RuleLLMLossAverse",
+    "RuleLLMIndexHolder",
 ]

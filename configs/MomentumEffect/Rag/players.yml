@@ -26,6 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Momentum Dynamics"
   class: "examples.MomentumEffect.Rag.players:Market"
   num_instances: 1
@@ -36,18 +37,18 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.3
-      drift_persistence: 0.95
-      drift_volatility: 0.5
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.3  # Source: simulation-bases.md §6
+      drift_persistence: 0.95  # Source: simulation-bases.md §6
+      drift_volatility: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 ragllm_momentum_trader:
@@ -62,10 +63,10 @@ ragllm_momentum_trader:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -93,22 +94,22 @@ ragllm_momentum_trader:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_contrarian:
+ragllm_contrarian_trader:
   name: "RAG Contrarian Trader"
   class: "examples.MomentumEffect.Rag.players:RagLLMContrarianTrader"
   # Expander → ragllm_contrarian_1, ragllm_contrarian_2
   num_instances: 2
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -136,22 +137,22 @@ ragllm_contrarian:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_technical:
+ragllm_technical_trader:
   name: "RAG Technical Trader"
   class: "examples.MomentumEffect.Rag.players:RagLLMTechnicalTrader"
   # Expander → ragllm_technical_1, ragllm_technical_2
   num_instances: 2
   config:
-    identity: "ragllm_technical"
+    identity: "ragllm_technical_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -191,10 +192,10 @@ ragllm_trend_follower:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -222,22 +223,22 @@ ragllm_trend_follower:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_fundamental:
+ragllm_fundamental_anchor:
   name: "RAG Fundamental Anchor"
   class: "examples.MomentumEffect.Rag.players:RagLLMFundamentalAnchor"
   # Expander → ragllm_fundamental_1, ragllm_fundamental_2
   num_instances: 2
   config:
-    identity: "ragllm_fundamental"
+    identity: "ragllm_fundamental_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

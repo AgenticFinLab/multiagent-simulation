@@ -1,11 +1,19 @@
 # =============================================================================
 # ConfirmationBias RuleLLM Players Configuration
 # =============================================================================
+# 1 Market (rule-based) + 5 RuleLLM Investor types.
+# RuleLLM = LLM persona reasoning + rule-derived quantitative belief update.
+# Every non-infrastructure parameter is annotated with an inline
+# `# Source: ...` reference tying it back to `finance-confirmation-bias.md §9`
+# or to a labelled provenance (`normalization`, `implementation infrastructure`,
+# `bias calibration`, `LLM decoding profile`).
+# =============================================================================
 
 # -----------------------------------------------------------------------------
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.ConfirmationBias.RuleLLM.players:Market"
   num_instances: 1
@@ -16,13 +24,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"  # Source: implementation infrastructure (record-path convention)
+      fundamental_value: 100.0     # Source: target §9 F; normalization (100-scale index)
+      initial_price: 100.0         # Source: target §9 P0; normalization (fundamental-anchored seed)
+      price_impact: 0.02           # Source: target §9 λ; Hong & Stein (1999) https://doi.org/10.1111/0022-1082.00184
+      mean_reversion: 0.02         # Source: target §9 γ; Fama (1970) https://doi.org/10.2307/2325486
+      noise_std: 0.02              # Source: target §9 σ; standard calibration consistent with AvailabilityBias family
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -41,18 +49,18 @@ rulellm_belief_anchor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BELIEF_ANCHOR_SYS"
-        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BELIEF_ANCHOR_SYS"  # Source: implementation infrastructure (dual-section prompt binding)
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"     # Source: implementation infrastructure (prompt binding)
+        lm_type: "api"             # Source: implementation infrastructure (LLM backend selector)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: implementation infrastructure (default LLM per masim runtime)
         generation_config:
-          temperature: 0.3
-          max_tokens: 512
+          temperature: 0.3         # Source: LLM decoding profile — rule-guided low stochasticity (dual-section prompt convention)
+          max_tokens: 512          # Source: LLM decoding profile — response length ceiling
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -71,18 +79,18 @@ rulellm_selective_scanner:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_SELECTIVE_SCANNER_SYS"
-        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_SELECTIVE_SCANNER_SYS"  # Source: implementation infrastructure (dual-section prompt binding)
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"         # Source: implementation infrastructure (prompt binding)
+        lm_type: "api"             # Source: implementation infrastructure (LLM backend selector)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: implementation infrastructure (default LLM per masim runtime)
         generation_config:
-          temperature: 0.3
-          max_tokens: 512
+          temperature: 0.3         # Source: LLM decoding profile — rule-guided low stochasticity
+          max_tokens: 512          # Source: LLM decoding profile — response length ceiling
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -100,22 +108,23 @@ rulellm_balanced_analyst:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BALANCED_ANALYST_SYS"
-        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_BALANCED_ANALYST_SYS"  # Source: implementation infrastructure (dual-section prompt binding)
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"         # Source: implementation infrastructure (prompt binding)
+        lm_type: "api"             # Source: implementation infrastructure (LLM backend selector)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: implementation infrastructure (default LLM per masim runtime)
         generation_config:
-          temperature: 0.2
-          max_tokens: 512
+          temperature: 0.2         # Source: LLM decoding profile — deterministic rational baseline
+          max_tokens: 512          # Source: LLM decoding profile — response length ceiling
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # RuleLLM Contrarian Trader
+# Theory: Hong & Stein (1999) fade-the-overshoot behaviour
 # -----------------------------------------------------------------------------
 rulellm_contrarian_trader:
   name: "RuleLLM Contrarian Trader"
@@ -128,18 +137,18 @@ rulellm_contrarian_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
-      initial_cash: 50000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 50000.0        # Source: normalization (cash endowment)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
-        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"  # Source: implementation infrastructure (dual-section prompt binding)
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"         # Source: implementation infrastructure (prompt binding)
+        lm_type: "api"             # Source: implementation infrastructure (LLM backend selector)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: implementation infrastructure (default LLM per masim runtime)
         generation_config:
-          temperature: 0.2
-          max_tokens: 512
+          temperature: 0.2         # Source: LLM decoding profile — deterministic contrarian rule execution
+          max_tokens: 512          # Source: LLM decoding profile — response length ceiling
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -158,16 +167,16 @@ rulellm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"
-      initial_cash: 20000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/ConfirmationBias/RuleLLM/records"  # Source: implementation infrastructure (record-path convention)
+      initial_cash: 20000.0        # Source: normalization (smaller cash endowment for background liquidity)
+      initial_position: 0.0        # Source: normalization (flat opening position)
+      custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       llm:
-        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
-        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        sys_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"  # Source: implementation infrastructure (dual-section prompt binding)
+        user_message: "examples.ConfirmationBias.RuleLLM.prompts:RULELLM_USER_TEMPLATE"    # Source: implementation infrastructure (prompt binding)
+        lm_type: "api"             # Source: implementation infrastructure (LLM backend selector)
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: implementation infrastructure (default LLM per masim runtime)
         generation_config:
-          temperature: 0.9
-          max_tokens: 512
+          temperature: 0.9         # Source: LLM decoding profile — high stochasticity per Black (1986) noise-trader convention
+          max_tokens: 512          # Source: LLM decoding profile — response length ceiling
   persona: !include persona.yml

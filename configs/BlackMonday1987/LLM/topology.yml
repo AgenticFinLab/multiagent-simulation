@@ -3,11 +3,11 @@
 # =============================================================================
 # Market as hub, all investors communicate through market.
 #
-#    portfolio_insurer ──────────┐
-#    index_arbitrageur ──────────┤
-#    program_trader    ──────────┼──▶ market ──▶ all investors
-#    value_investor    ──────────┤             (market data: price, return)
-#    noise_trader      ──────────┘
+#    llm_portfolio_insurer ──────────┐
+#    llm_index_arbitrageur ──────────┤
+#    llm_program_trader    ──────────┼──▶ market ──▶ all investors
+#    llm_value_investor    ──────────┤             (market data: price, return)
+#    llm_noise_trader      ──────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + dynamics data)
@@ -21,23 +21,23 @@ sources:
 
 connections:
   market:
-    - portfolio_insurer
-    - index_arbitrageur
-    - program_trader
-    - value_investor
-    - noise_trader
+    - llm_portfolio_insurer
+    - llm_index_arbitrageur
+    - llm_program_trader
+    - llm_value_investor
+    - llm_noise_trader
 
-  portfolio_insurer:
+  llm_portfolio_insurer:
     - market
 
-  index_arbitrageur:
+  llm_index_arbitrageur:
     - market
 
-  program_trader:
+  llm_program_trader:
     - market
 
-  value_investor:
+  llm_value_investor:
     - market
 
-  noise_trader:
+  llm_noise_trader:
     - market

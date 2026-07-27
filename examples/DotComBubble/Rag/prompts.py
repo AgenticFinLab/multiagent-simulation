@@ -26,9 +26,13 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules and the domain knowledge above to decide your action.
-Respond with <analysis>...</analysis> and <decision>{{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}}</decision>.
-IMPORTANT: bid_price must be strictly positive; for hold, use the current price as bid_price; never output bid_price: 0.
+Respond with <analysis>...</analysis> and a <decision> JSON object containing
+action, bid_price, quantity, and reasoning.
+IMPORTANT: bid_price must be strictly positive; for hold, use the current price
+as bid_price; never output bid_price: 0.
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Output format requirement: action must be "buy", "sell", or "hold"; bid_price
+must be a number; quantity must be a number of shares; reasoning must be a
+non-empty string."""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

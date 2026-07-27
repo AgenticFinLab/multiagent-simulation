@@ -18,6 +18,7 @@ from typing import Any, Dict
 import numpy as np
 
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 from examples.CreditCycle.Rule.analysis import (
     _batch_to_rounds,
@@ -26,8 +27,7 @@ from examples.CreditCycle.Rule.analysis import (
     _build_interpretation,
     analyze_credit_cycle,
 )
-
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+from examples.CreditCycle.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(
@@ -115,7 +115,26 @@ def main() -> None:
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
     with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as f:
         json.dump(rag_stats, f, indent=2)
-
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rag'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='CreditCycle',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

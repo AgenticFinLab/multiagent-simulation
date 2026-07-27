@@ -26,6 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
   class: "examples.LiquidityDryup.Rag.players:Market"
   num_instances: 1
@@ -36,19 +37,20 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.015
-      noise_std: 0.4
-      custom_state_hot_limit: 3
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
-      base_liquidity: 50.0
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.015  # Source: simulation-bases.md §6
+      noise_std: 0.4  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 ragllm_market_maker:
+  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
   name: "RAG Market Maker"
   class: "examples.LiquidityDryup.Rag.players:RagLLMMarketMaker"
   # Expander → ragllm_market_maker_1, ragllm_market_maker_2, ragllm_market_maker_3
@@ -60,10 +62,10 @@ ragllm_market_maker:
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -91,22 +93,23 @@ ragllm_market_maker:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_liquidity_demander:
-  name: "RAG Liquidity Demander"
-  class: "examples.LiquidityDryup.Rag.players:RagLLMLiquidityDemander"
-  # Expander → ragllm_liquidity_demander_1, ragllm_liquidity_demander_2, ragllm_liquidity_demander_3
+ragllm_liquidity_seeker:
+  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
+  name: "RAG Liquidity Seeker"
+  class: "examples.LiquidityDryup.Rag.players:RagLLMLiquiditySeeker"
+  # Expander → ragllm_liquidity_seeker_1, ragllm_liquidity_seeker_2, ragllm_liquidity_seeker_3
   num_instances: 3
   config:
-    identity: "ragllm_liquidity_demander"
+    identity: "ragllm_liquidity_seeker"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -134,22 +137,23 @@ ragllm_liquidity_demander:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_arbitrageur:
-  name: "RAG Arbitrageur"
-  class: "examples.LiquidityDryup.Rag.players:RagLLMArbitrageur"
-  # Expander → ragllm_arbitrageur_1, ragllm_arbitrageur_2
+ragllm_value_trader:
+  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
+  name: "RAG Value Trader"
+  class: "examples.LiquidityDryup.Rag.players:RagLLMValueTrader"
+  # Expander → ragllm_value_trader_1, ragllm_value_trader_2
   num_instances: 2
   config:
-    identity: "ragllm_arbitrageur"
+    identity: "ragllm_value_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -177,22 +181,23 @@ ragllm_arbitrageur:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_value:
-  name: "RAG Value Investor"
-  class: "examples.LiquidityDryup.Rag.players:RagLLMValueInvestor"
+ragllm_momentum_trader:
+  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
+  name: "RAG Momentum Trader"
+  class: "examples.LiquidityDryup.Rag.players:RagLLMMomentumTrader"
   # Expander → ragllm_value_1, ragllm_value_2
   num_instances: 2
   config:
-    identity: "ragllm_value"
+    identity: "ragllm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -220,22 +225,23 @@ ragllm_value:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_forced_seller:
-  name: "RAG Forced Seller"
-  class: "examples.LiquidityDryup.Rag.players:RagLLMForcedSeller"
-  # Expander → ragllm_forced_seller_1, ragllm_forced_seller_2
+ragllm_noise_trader:
+  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
+  name: "RAG Noise Trader"
+  class: "examples.LiquidityDryup.Rag.players:RagLLMNoiseTrader"
+  # Expander → ragllm_noise_trader_1, ragllm_noise_trader_2
   num_instances: 2
   config:
-    identity: "ragllm_forced_seller"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LiquidityDryup/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: finance-liquidity-dryup.md §9
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

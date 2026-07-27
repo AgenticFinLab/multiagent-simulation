@@ -28,7 +28,7 @@ from .prompts import (
     RULELLM_TREND_FOLLOWER_SYS,
     RULELLM_USER_TEMPLATE,
 )
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("MomentumEffectRuleLLM")
 
@@ -288,10 +288,15 @@ class RuleLLMInvestor(GeneralPlayer):
                 last_error,
             )
             order = {
+                "action": "hold",
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "LLM parse failed: held position",
                 "provides_liquidity": False,
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
             return {
                 **order,

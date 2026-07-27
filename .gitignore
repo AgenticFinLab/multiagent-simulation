@@ -210,6 +210,14 @@ marimo/_lsp/
 __marimo__/
 .DS_Store
 
-EXPERIMENT/
+*EXPERIMENT*/
 
 third-part/
+.qoder/
+
+# Local pipeline logs (never committed)
+tmpl/
+
+*TEST*
+
+

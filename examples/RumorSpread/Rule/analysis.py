@@ -25,19 +25,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from masim.utils.config import load_config
+from masim.evaluation import write_universal_summary
 
 
 def load_simulation_data(config: dict) -> dict:
     """Load simulation data from experiment records.
 
-    Reads the environment agent's batch stores for belief, distortion,
+    Reads the environment agent's turn records for belief, distortion,
     spread_count, and correction_count time series.
 
     Returns:
         dict with keys: belief, distortion, spread_count, correction_count,
         agent_beliefs (dict mapping agent_id -> belief list)
     """
-    record_path = config["setting"]["record_path"]
+    from masim.utils.result_loader import load_results
+
     data = {
         "belief": [],
         "distortion": [],
@@ -46,24 +48,30 @@ def load_simulation_data(config: dict) -> dict:
         "agent_beliefs": {},
     }
 
-    env_path = os.path.join(record_path, "environment")
-    if os.path.exists(env_path):
-        for metric in ["belief", "distortion", "spread_count", "correction_count"]:
-            metric_path = os.path.join(env_path, metric)
-            if os.path.exists(metric_path):
-                values = _load_metric_values(metric_path)
-                data[metric] = values
-
-    agent_dirs = [
-        d
-        for d in os.listdir(record_path)
-        if os.path.isdir(os.path.join(record_path, d)) and d != "environment"
-    ]
-    for agent_id in sorted(agent_dirs):
-        belief_path = os.path.join(record_path, agent_id, "belief")
-        if os.path.exists(belief_path):
-            values = _load_metric_values(belief_path)
-            data["agent_beliefs"][agent_id] = values
+    results = load_results(config)
+    for pid, player in results.players.items():
+        if pid == "environment":
+            payloads = player.turns.payloads()
+            for r in sorted(payloads.keys()):
+                env_data = payloads[r].get("env_data", {})
+                if "belief" in env_data:
+                    data["belief"].append(float(env_data["belief"]))
+                if "distortion" in env_data:
+                    data["distortion"].append(float(env_data["distortion"]))
+                sp = int(env_data.get("num_spreaders", 0))
+                co = int(env_data.get("num_correctors", 0))
+                data["spread_count"].append(sp)
+                data["correction_count"].append(co)
+        elif pid != "environment":
+            payloads = player.turns.payloads()
+            beliefs = []
+            for r in sorted(payloads.keys()):
+                turn_data = payloads[r]
+                belief = turn_data.get("belief", turn_data.get("current_belief"))
+                if belief is not None:
+                    beliefs.append(float(belief))
+            if beliefs:
+                data["agent_beliefs"][pid] = beliefs
 
     return data
 
@@ -135,19 +143,21 @@ def calculate_metrics(data: dict, truth_value: float = 0.1) -> dict:
         late_rounds = belief[total_rounds // 2 :]
         belief_persistence = float(np.mean(late_rounds))
 
-    rumor_amplification = peak_belief / max(belief[0], 0.01) if belief[0] > 0 else 0.0
+    rumor_amplification = (
+        peak_belief / belief[0] if belief[0] > 0 else float("nan")
+    )
 
-    max_distortion = float(np.max(distortion)) if len(distortion) > 0 else 0.0
-    final_distortion = float(distortion[-1]) if len(distortion) > 0 else 0.0
-    avg_distortion = float(np.mean(distortion)) if len(distortion) > 0 else 0.0
+    max_distortion = float(np.max(distortion)) if len(distortion) > 0 else float("nan")
+    final_distortion = float(distortion[-1]) if len(distortion) > 0 else float("nan")
+    avg_distortion = float(np.mean(distortion)) if len(distortion) > 0 else float("nan")
 
     total_spread = float(np.sum(spread_count)) if len(spread_count) > 0 else 0.0
     total_correction = (
         float(np.sum(correction_count)) if len(correction_count) > 0 else 0.0
     )
-    avg_spread = float(np.mean(spread_count)) if len(spread_count) > 0 else 0.0
+    avg_spread = float(np.mean(spread_count)) if len(spread_count) > 0 else float("nan")
     avg_correction = (
-        float(np.mean(correction_count)) if len(correction_count) > 0 else 0.0
+        float(np.mean(correction_count)) if len(correction_count) > 0 else float("nan")
     )
 
     correction_ratio = total_correction / total_spread if total_spread > 0 else 0.0
@@ -357,6 +367,26 @@ def main():
 
     if not data["belief"]:
         print("No simulation data found. Run the simulation first.")
+        # Compute the 36-metric Layer A baseline and write summary.json
+        # + four universal PNG dashboards. The variant is derived from
+        # the config path so shared-main re-exports still report right.
+        _variant = 'Rule'
+        _cfg_path = locals().get('args', None)
+        _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+        if isinstance(_cfg_path, str):
+            for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+                if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                    _variant = _v
+                    break
+        _universal = write_universal_summary(
+            data,
+            config,
+            output_dir,
+            scenario='RumorSpread',
+            variant=_variant,
+            extra_summary={'scenario_metrics': summary}
+                if isinstance(summary, dict) else None,
+        )
         return
 
     truth_value = config["players"]["environment"]["config"]["extras"][

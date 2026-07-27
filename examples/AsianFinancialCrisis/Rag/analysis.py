@@ -19,11 +19,18 @@ Usage:
 import argparse
 import json
 import os
+import sys
 from typing import Any, Dict
+
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
+)
 
 import numpy as np
 
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 from examples.AsianFinancialCrisis.Rule.analysis import (
     _batch_to_rounds,
@@ -33,8 +40,10 @@ from examples.AsianFinancialCrisis.Rule.analysis import (
     analyze_asian_financial_crisis,
 )
 
-# Retrieval-miss marker injected when no documents are retrieved (Rag/players.py)
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+# Retrieval-miss marker injected when no documents are retrieved.
+# Single source of truth lives in Rag/players.py; imported here so analysis
+# can count retrieval-failure rounds without duplicating the string.
+from examples.AsianFinancialCrisis.Rag.players import _RAG_FALLBACK
 
 
 def analyze_rag_knowledge_effect(
@@ -133,7 +142,26 @@ def main() -> None:
             f"Mean RAG retrieval failure rate: "
             f"{agg['mean_retrieval_failure_rate']:.1%}"
         )
-
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rag'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='AsianFinancialCrisis',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

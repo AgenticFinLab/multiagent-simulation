@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -41,6 +41,13 @@ from masim.format.order import validate_order
 from examples.AnchoringEffect.Rule.players import Market
 
 logger = logging.getLogger("AnchoringEffect.Rag")
+
+# Module-level sentinel returned when the RAG retrieval yields no documents.
+# Rag/analysis.py imports this constant to detect Retrieval-Failure rounds,
+# so the string MUST match verbatim between producer (perceive) and consumer
+# (analyze_rag_knowledge_effect). See analysis-bases.md §3 (Knowledge-Effect
+# diagnostics) and finance-anchoring-effect.md §0 Meta CHANGELOG.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -378,7 +385,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
@@ -418,11 +425,9 @@ class RagLLMInvestor(GeneralPlayer):
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
+            infer_output = llm_client.run([infer_input]).outputs[0]
             try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                decision = parse_llm_response_with_thinking(infer_output.response)
                 break
             except Exception as exc:
                 last_error = exc
@@ -515,6 +520,30 @@ class RagLLMNoiseTrader(RagLLMInvestor):
     pass
 
 
+class RagLLMDispositionTrader(RagLLMInvestor):
+    """RAG-augmented disposition trader — sells winners early, holds losers (Prospect Theory). Theory: simulation-bases.md §4.6 — DispositionTrader."""
+
+    pass
+
+
+class RagLLMContrarianTrader(RagLLMInvestor):
+    """RAG-augmented contrarian trader — fades cumulative overextension over a short lookback. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
+
+    pass
+
+
+class RagLLMFundamentalAnalyst(RagLLMInvestor):
+    """RAG-augmented fundamental analyst — slow belief convergence toward fundamental value (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
+
+    pass
+
+
+class RagLLMLiquidityProvider(RagLLMInvestor):
+    """RAG-augmented liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
+
+    pass
+
+
 __all__ = [
     "Market",
     "RagLLMInvestor",
@@ -523,4 +552,8 @@ __all__ = [
     "RagLLMRationalUpdater",
     "RagLLMMomentumTrader",
     "RagLLMNoiseTrader",
+    "RagLLMDispositionTrader",
+    "RagLLMContrarianTrader",
+    "RagLLMFundamentalAnalyst",
+    "RagLLMLiquidityProvider",
 ]

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,ReversalEffect,Rag,SUCCESS,0,4390.393,2026-05-23T01:27:42,2026-05-23T02:40:53,config/simulation.yml,examples/ReversalEffect/Rag/run_reversal_effect_ragllm.py,logs/ReversalEffect__Rag.log,,200,200,

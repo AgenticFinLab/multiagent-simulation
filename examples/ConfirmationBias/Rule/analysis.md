@@ -61,38 +61,66 @@ persistent price mispricing? Do rational/contrarian agents correct the bias?*
 
 ---
 
-## §4 Variant-Specific Phenomena
+## §4 Variant-Specific Observable Phenomena
 
-### 4.1 BeliefAnchor Compounding
+Under the Rule variant, all agent decisions are deterministic functions of the
+observed deviation and internal belief state. The following phenomena should
+appear reproducibly whenever configuration parameters are held fixed.
+
+| Phenomenon                       | Trigger condition                                              | Expected metric signature                             |
+|----------------------------------|----------------------------------------------------------------|-------------------------------------------------------|
+| BeliefAnchor lock-in             | `deviation > 0` for ≥ 3 consecutive rounds                     | `bias_amplitude_pct` monotonically rising early       |
+| Selective-scan asymmetry         | Confirming signal buys 600 vs disconfirming sells 300          | Positive skew in `belief_flip_count` residual returns |
+| Stabilizer late activation       | `|deviation| > 0.05` (higher than biased-agent 0.02 threshold) | `correction_ratio` moderate; deviation lingers first  |
+| Persistent overpricing regime    | Positive deviation held across mid-simulation                  | `bias_persistence` ≥ half of total rounds             |
+| Momentum autocorrelation         | Biased-agent trades reinforce prior return sign                | `return_autocorrelation_ac1` > 0                      |
+
+Because the Rule variant is deterministic, repeated runs with identical seeds
+produce identical metric values; observed cross-run variance signals a
+configuration or ordering bug rather than genuine stochasticity.
+
+### Agent Trigger Details
 
 ```python
-# Confirming signal: belief multiplies
+# BeliefAnchor — confirming signal: belief multiplies
 belief = min(belief * (1 + 0.7 * deviation), 3.0)
-# Disconfirming signal: slow decay
+# BeliefAnchor — disconfirming signal: slow decay
 belief = belief * 0.95 + deviation * 0.5
 ```
 
 BeliefAnchor is initially bullish (`initial_belief = 1.0`). After just 5 rounds
 of positive deviation, belief can reach > 2.0, locking in aggressive buying.
 
-### 4.2 SelectiveScanner Asymmetry
+- SelectiveScanner **confirming signal** (deviation > 0.02 AND position ≥ 0):
+  full 600-unit buy.
+- SelectiveScanner **disconfirming signal** (deviation < −0.02 AND position ≥ 0):
+  half 300-unit sell.
 
-- **Confirming signal** (deviation > 0.02 AND position ≥ 0): full 600-unit buy
-- **Disconfirming signal** (deviation < −0.02 AND position ≥ 0): half 300-unit sell
-
-This asymmetry means SelectiveScanner accumulates positions faster than it unwinds —
-contributing to persistent positive deviations.
-
-### 4.3 BalancedAnalyst vs ContrarianTrader
-
-Both stabilizers trigger at `|deviation| > 0.05` (analysis_threshold).
-But biased agents trigger at only `|deviation| > 0.02`, so stabilizers are
-always reacting to an already-established bias. Check if `bias_persistence_rounds`
-decreases when stabilizer order_size is increased.
+BalancedAnalyst and ContrarianTrader stabilizers only trigger at
+`|deviation| > 0.05`; biased agents trigger at `|deviation| > 0.02`, so
+stabilizers are always reacting to an already-established bias.
 
 ---
 
-## §5 Scaling and Sensitivity
+## §5 Scaling and Sensitivity Analysis
+
+### Round Scaling
+
+| Round count | Expected metric behavior                                                       |
+|-------------|--------------------------------------------------------------------------------|
+| 100         | BeliefAnchor lock-in visible; `bias_persistence` typically 40–70               |
+| 200         | Correction ratio stabilizes; late-round stabilizer activity visible            |
+| 500         | Steady-state bias amplitude; `return_autocorrelation_ac1` converges            |
+
+### Agent Count Scaling
+
+| Configuration                                | Expected effect on metrics                                       |
+|----------------------------------------------|------------------------------------------------------------------|
+| +50% BeliefAnchor / SelectiveScanner         | `bias_amplitude_pct` rises; `correction_ratio` falls             |
+| +50% BalancedAnalyst / ContrarianTrader      | `bias_persistence` shortens; `correction_ratio` rises            |
+| Balanced doubling of all agent counts        | Volatility rises via order-book depth; bias shape preserved      |
+
+### Parameter Sensitivity (±50%)
 
 | Parameter                       | Effect                                                            |
 |---------------------------------|-------------------------------------------------------------------|

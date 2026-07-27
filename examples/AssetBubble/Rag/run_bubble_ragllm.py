@@ -29,8 +29,13 @@ import argparse
 import asyncio
 import os
 import traceback
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
+
+project_root = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(project_root))
 
 from masim.simulator.base import SimulationConfig
 from masim.simulator.general import GeneralSimulator

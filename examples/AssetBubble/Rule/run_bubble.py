@@ -11,6 +11,10 @@ Usage:
 import argparse
 import asyncio
 import logging
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from masim.simulator.general import GeneralSimulator
 from masim.simulator.base import SimulationConfig

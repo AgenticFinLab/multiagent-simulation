@@ -1,6 +1,7 @@
 # DotComBubble LLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DotComBubble.LLM.players:Market"
   num_instances: 1
@@ -11,150 +12,223 @@ market:
     group_tags:
       - market
     extras:
+      # Source: simulation-bases.md §7 (output contract)
       record_path: "EXPERIMENT/DotComBubble/LLM/records"
-      initial_price: 50.0
-      fundamental_value: 50.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.02
+      # Source: simulation-bases.md §6
+      initial_price: 100.0
+      # Source: simulation-bases.md §6
+      fundamental_value: 100.0
+      # Source: simulation-bases.md §6
+      price_impact: 0.01
+      # Source: simulation-bases.md §6
+      mean_reversion: 0.005
+      # Source: simulation-bases.md §6
+      noise_std: 1.0
+      # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-neweconomyevangelist:
+llm_new_economy_evangelist:
   name: "NewEconomyEvangelist"
   class: "examples.DotComBubble.LLM.players:LLMNewEconomyEvangelist"
   num_instances: 2
   config:
-    identity: "neweconomyevangelist"
+    identity: "llm_new_economy_evangelist"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7 (output contract)
       record_path: "EXPERIMENT/DotComBubble/LLM/records"
+      # Source: simulation-bases.md §4.1 (solvency constraint)
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.1 (inventory constraint)
       initial_position: 0
-      max_pf_ratio: 10.0
-      base_buy_size: 400
-      narrative_strength: 0.8
+      # Source: simulation-bases.md §6
+      order_size: 600
+      # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
+        # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_NEW_ECONOMY_EVANGELIST_SYS"
+        # Source: examples/DotComBubble/LLM/prompts.py
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: implement-simulation-skill/08-step4-implement.md §4.2
         lm_type: "api"
+        # Source: project-supported API model configuration
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: analysis-bases.md §2 AQR quality gate
+        max_retries: 3
+        # Source: infrastructure
         generation_config:
+          # Source: LLM variant stochastic-deliberation design
           temperature: 0.8
+          # Source: canonical tagged decision output budget
           max_tokens: 512
   persona: !include persona.yml
 
-ipoflipper:
+llm_ipo_flipper:
   name: "IPOFlipper"
   class: "examples.DotComBubble.LLM.players:LLMIPOFlipper"
   num_instances: 2
   config:
-    identity: "ipoflipper"
+    identity: "llm_ipo_flipper"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7 (output contract)
       record_path: "EXPERIMENT/DotComBubble/LLM/records"
+      # Source: simulation-bases.md §4.2 (solvency constraint)
       initial_cash: 800000.0
+      # Source: simulation-bases.md §4.2 (inventory constraint)
       initial_position: 0
-      entry_threshold: 0.05
-      flip_return: 0.15
-      base_size: 300
+      # Source: simulation-bases.md §6
+      order_size: 700
+      # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
+        # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_IPO_FLIPPER_SYS"
+        # Source: examples/DotComBubble/LLM/prompts.py
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: implement-simulation-skill/08-step4-implement.md §4.2
         lm_type: "api"
+        # Source: project-supported API model configuration
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: analysis-bases.md §2 AQR quality gate
+        max_retries: 3
+        # Source: infrastructure
         generation_config:
+          # Source: LLM variant stochastic-deliberation design
           temperature: 0.7
+          # Source: canonical tagged decision output budget
           max_tokens: 512
   persona: !include persona.yml
 
-momentumfollower:
+llm_momentum_follower:
   name: "MomentumFollower"
   class: "examples.DotComBubble.LLM.players:LLMMomentumFollower"
   num_instances: 2
   config:
-    identity: "momentumfollower"
+    identity: "llm_momentum_follower"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7 (output contract)
       record_path: "EXPERIMENT/DotComBubble/LLM/records"
+      # Source: simulation-bases.md §4.3 (solvency constraint)
       initial_cash: 800000.0
+      # Source: simulation-bases.md §4.3 (inventory constraint)
       initial_position: 0
-      entry_threshold: 0.03
-      base_size: 350
+      # Source: simulation-bases.md §6
+      order_size: 500
+      # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
+        # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_MOMENTUM_FOLLOWER_SYS"
+        # Source: examples/DotComBubble/LLM/prompts.py
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: implement-simulation-skill/08-step4-implement.md §4.2
         lm_type: "api"
+        # Source: project-supported API model configuration
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: analysis-bases.md §2 AQR quality gate
+        max_retries: 3
+        # Source: infrastructure
         generation_config:
+          # Source: LLM variant stochastic-deliberation design
           temperature: 0.7
+          # Source: canonical tagged decision output budget
           max_tokens: 512
   persona: !include persona.yml
 
-skepticalvalueinvestor:
+llm_skeptical_value_investor:
   name: "SkepticalValueInvestor"
   class: "examples.DotComBubble.LLM.players:LLMSkepticalValueInvestor"
   num_instances: 1
   config:
-    identity: "skepticalvalueinvestor"
+    identity: "llm_skeptical_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7 (output contract)
       record_path: "EXPERIMENT/DotComBubble/LLM/records"
+      # Source: simulation-bases.md §4.4 (solvency constraint)
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.4 (inventory constraint)
       initial_position: 0
-      buy_pf: 1.2
-      max_pf: 3.0
-      base_size: 300
+      # Source: simulation-bases.md §6
+      order_size: 400
+      # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
+        # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_SKEPTICAL_VALUE_INVESTOR_SYS"
+        # Source: examples/DotComBubble/LLM/prompts.py
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: implement-simulation-skill/08-step4-implement.md §4.2
         lm_type: "api"
+        # Source: project-supported API model configuration
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: analysis-bases.md §2 AQR quality gate
+        max_retries: 3
+        # Source: infrastructure
         generation_config:
+          # Source: LLM variant low-temperature valuation discipline
           temperature: 0.4
+          # Source: canonical tagged decision output budget
           max_tokens: 512
   persona: !include persona.yml
 
-shortseller:
+llm_short_seller:
   name: "ShortSeller"
   class: "examples.DotComBubble.LLM.players:LLMShortSeller"
   num_instances: 1
   config:
-    identity: "shortseller"
+    identity: "llm_short_seller"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: simulation-bases.md §7 (output contract)
       record_path: "EXPERIMENT/DotComBubble/LLM/records"
+      # Source: simulation-bases.md §4.5 (solvency constraint)
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.5 (inventory constraint)
       initial_position: 0
-      short_threshold: 5.0
-      cover_threshold: 2.5
-      base_size: 300
+      # Source: simulation-bases.md §6
+      order_size: 400
+      # Source: simulation-bases.md §7 (bounded persisted state)
       custom_state_hot_limit: 3
+      # Source: infrastructure
       llm:
+        # Source: examples/DotComBubble/LLM/prompts.py
         sys_message: "examples.DotComBubble.LLM.prompts:LLM_SHORT_SELLER_SYS"
+        # Source: examples/DotComBubble/LLM/prompts.py
         user_message: "examples.DotComBubble.LLM.prompts:LLM_USER_TEMPLATE"
+        # Source: implement-simulation-skill/08-step4-implement.md §4.2
         lm_type: "api"
+        # Source: project-supported API model configuration
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        # Source: analysis-bases.md §2 AQR quality gate
+        max_retries: 3
+        # Source: infrastructure
         generation_config:
+          # Source: LLM variant moderate-temperature constrained-arbitrage design
           temperature: 0.5
+          # Source: canonical tagged decision output budget
           max_tokens: 512
   persona: !include persona.yml

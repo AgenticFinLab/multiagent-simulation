@@ -3,6 +3,7 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Momentum Dynamics"
   class: "examples.MomentumEffect.RuleLLM.players:Market"
   num_instances: 1
@@ -13,18 +14,18 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.3
-      drift_persistence: 0.95
-      drift_volatility: 0.5
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.3  # Source: simulation-bases.md §6
+      drift_persistence: 0.95  # Source: simulation-bases.md §6
+      drift_volatility: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 rulellm_momentum_trader:
@@ -39,10 +40,10 @@ rulellm_momentum_trader:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_MOMENTUM_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -53,22 +54,22 @@ rulellm_momentum_trader:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_contrarian:
+rulellm_contrarian_trader:
   name: "RuleLLM Contrarian Trader"
   class: "examples.MomentumEffect.RuleLLM.players:RuleLLMContrarianTrader"
   # Expander → rulellm_contrarian_1, rulellm_contrarian_2
   num_instances: 2
   config:
-    identity: "rulellm_contrarian"
+    identity: "rulellm_contrarian_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_CONTRARIAN_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -79,22 +80,22 @@ rulellm_contrarian:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_technical:
+rulellm_technical_trader:
   name: "RuleLLM Technical Trader"
   class: "examples.MomentumEffect.RuleLLM.players:RuleLLMTechnicalTrader"
   # Expander → rulellm_technical_1, rulellm_technical_2
   num_instances: 2
   config:
-    identity: "rulellm_technical"
+    identity: "rulellm_technical_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TECHNICAL_TRADER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -117,10 +118,10 @@ rulellm_trend_follower:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_TREND_FOLLOWER_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -131,22 +132,22 @@ rulellm_trend_follower:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_fundamental:
+rulellm_fundamental_anchor:
   name: "RuleLLM Fundamental Anchor"
   class: "examples.MomentumEffect.RuleLLM.players:RuleLLMFundamentalAnchor"
   # Expander → rulellm_fundamental_1, rulellm_fundamental_2
   num_instances: 2
   config:
-    identity: "rulellm_fundamental"
+    identity: "rulellm_fundamental_anchor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MomentumEffect/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_FUNDAMENTAL_ANCHOR_SYS"
         user_message: "examples.MomentumEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

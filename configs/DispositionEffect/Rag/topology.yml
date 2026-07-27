@@ -17,24 +17,24 @@ sources:
 connections:
   # Market → All RAG investors (broadcasts market data)
   market:
-    - rag_disposition
-    - rag_rational
-    - rag_tax_aware
-    - rag_institutional
-    - rag_loss_averse
+    - ragllm_disposition_investor
+    - ragllm_rational_investor
+    - ragllm_tax_aware_investor
+    - ragllm_index_holder
+    - ragllm_institutional_investor
 
   # RAG investors → Market (submit orders)
-  rag_disposition:
+  ragllm_disposition_investor:
     - market
 
-  rag_rational:
+  ragllm_rational_investor:
     - market
 
-  rag_tax_aware:
+  ragllm_tax_aware_investor:
     - market
 
-  rag_institutional:
+  ragllm_index_holder:
     - market
 
-  rag_loss_averse:
+  ragllm_institutional_investor:
     - market

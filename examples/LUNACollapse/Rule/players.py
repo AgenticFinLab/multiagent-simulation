@@ -18,6 +18,7 @@ Key Dynamics:
 import logging
 import os
 import random
+import hashlib
 
 from masim.player.base import Action
 from masim.player.general import GeneralPlayer
@@ -63,6 +64,29 @@ def _decision(action: str, quantity: int, reasoning: str) -> dict:
     return {"action": action, "quantity": int(quantity), "reasoning": reasoning}
 
 
+def _round_rng(seed: int, identity: str, round_num: int) -> random.Random:
+    """Return a stable per-agent, per-round RNG independent of actor ordering."""
+    material = f"{seed}:{identity}:{round_num}".encode("utf-8")
+    derived_seed = int.from_bytes(hashlib.sha256(material).digest()[:8], "big")
+    return random.Random(derived_seed)
+
+
+def _apply_trade(state: dict, action: str, quantity: int, price: float) -> int:
+    """Clip an order to available resources and update portfolio state."""
+    quantity = max(int(quantity), 0)
+    if action == "buy" and quantity > 0:
+        quantity = min(quantity, int(state["cash"] / price))
+        state["cash"] -= quantity * price
+        state["position"] += quantity
+    elif action == "sell" and quantity > 0:
+        quantity = min(quantity, max(int(state["position"]), 0))
+        state["cash"] += quantity * price
+        state["position"] -= quantity
+    else:
+        quantity = 0
+    return quantity
+
+
 class Market(GeneralPlayer):
     """
     Market agent for LUNACollapse simulation.
@@ -99,6 +123,10 @@ class Market(GeneralPlayer):
             self.state.custom_state["price_impact"] = float(extras["price_impact"])
             self.state.custom_state["mean_reversion"] = float(extras["mean_reversion"])
             self.state.custom_state["noise_std"] = float(extras["noise_std"])
+            self.state.custom_state["market_depth"] = float(extras["market_depth"])
+            self.state.custom_state["random_seed"] = int(extras["random_seed"])
+            self.state.custom_state["price_floor"] = float(extras["price_floor"])
+            self.state.custom_state["shock_schedule"] = extras["shock_schedule"]
         orders = []
         for msg in observation.inbounds:
             payload = msg.payload if hasattr(msg, "payload") else msg
@@ -116,10 +144,20 @@ class Market(GeneralPlayer):
         buy_vol = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_vol = sum(o["quantity"] for o in orders if o["action"] == "sell")
         net_demand = buy_vol - sell_vol
-        price_change = self.state.custom_state["price_impact"] * net_demand
+        market_depth = self.state.custom_state["market_depth"]
+        _require_positive(market_depth, "market_depth")
+        price_change = self.state.custom_state["price_impact"] * net_demand / market_depth
         reversion = self.state.custom_state["mean_reversion"] * (fundamental - price)
-        noise = random.gauss(0, self.state.custom_state["noise_std"])
-        new_price = max(price + price_change + reversion + noise, 0.01)
+        round_num = self.state.custom_state["round"]
+        rng = _round_rng(self.state.custom_state["random_seed"], self.identity, round_num)
+        noise = rng.gauss(0, self.state.custom_state["noise_std"])
+        schedule = self.state.custom_state["shock_schedule"]
+        shock_return = float(schedule[round_num]) if round_num in schedule else 0.0
+        shock = fundamental * shock_return
+        new_price = max(
+            price + price_change + reversion + noise + shock,
+            self.state.custom_state["price_floor"],
+        )
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["fundamental_history"].append(fundamental)
@@ -206,13 +244,9 @@ class StablecoinHolder(GeneralPlayer):
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
-        if action == "buy" and quantity > 0 and price > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -258,22 +292,18 @@ class Arbitrageur(GeneralPlayer):
                 if sell_qty > 0:
                     return _decision("sell", sell_qty, "positive spread arbitrage sale")
             else:
-                buy_qty = min(qty, int(cash / price) if price > 0 else 0)
-                if buy_qty > 0:
-                    return _decision("buy", buy_qty, "negative spread arbitrage buy")
+                sell_qty = min(qty, max(position, 0))
+                if sell_qty > 0:
+                    return _decision("sell", sell_qty, "depeg redemption mints and sells base token")
         return _decision("hold", 0, "spread below arbitrage threshold")
 
     async def act(self, decision_payload: dict) -> Action:
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
-        if action == "buy" and quantity > 0 and price > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -320,13 +350,9 @@ class DeFiLender(GeneralPlayer):
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
-        if action == "buy" and quantity > 0 and price > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -373,13 +399,9 @@ class AnchorDepositor(GeneralPlayer):
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
-        if action == "buy" and quantity > 0 and price > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={
@@ -427,13 +449,9 @@ class ValueBuyer(GeneralPlayer):
         action = decision_payload["action"]
         quantity = decision_payload["quantity"]
         price = self.state.custom_state["price"]
-        if action == "buy" and quantity > 0 and price > 0:
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(self, action, quantity, price, decision_payload["reasoning"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

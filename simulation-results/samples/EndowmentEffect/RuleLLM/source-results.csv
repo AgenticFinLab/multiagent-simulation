@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-5,9,EndowmentEffect,RuleLLM,SUCCESS,0,4580.332,2026-05-22T19:39:38,2026-05-22T20:55:59,config/simulation.yml,examples/EndowmentEffect/RuleLLM/run_endowmenteffect_rulellm.py,logs/EndowmentEffect__RuleLLM.log,,200,200,,

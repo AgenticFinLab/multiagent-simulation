@@ -1,21 +1,5 @@
-"""DispositionEffect RuleLLM — Hybrid Rule + LLM Investor Simulation."""
+"""DispositionEffect RuleLLM package.
 
-from examples.DispositionEffect.RuleLLM.players import (
-    Market,
-    BaseLLMInvestor,
-    RuleLLMDispositionBiased,
-    RuleLLMRationalInvestor,
-    RuleLLMTaxAwareInvestor,
-    RuleLLMInstitutionalInvestor,
-    RuleLLMLossAverse,
-)
-
-__all__ = [
-    "Market",
-    "BaseLLMInvestor",
-    "RuleLLMDispositionBiased",
-    "RuleLLMRationalInvestor",
-    "RuleLLMTaxAwareInvestor",
-    "RuleLLMInstitutionalInvestor",
-    "RuleLLMLossAverse",
-]
+Keep package import side-effect free so consumers can import ``prompts``
+without importing the optional runtime player stack.
+"""

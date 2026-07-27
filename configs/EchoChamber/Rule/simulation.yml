@@ -5,7 +5,7 @@
 # drives extremity in opinion dynamics.
 #
 # Usage:
-#   python examples/EchoChamber/Rule/run_echo_chamber.py -c configs/EchoChamber/Rule/simulation.yml
+#   python -m examples.EchoChamber.Rule.run_echo_chamber -c configs/EchoChamber/Rule/simulation.yml
 # =============================================================================
 
 setting:

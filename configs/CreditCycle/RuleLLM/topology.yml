@@ -9,23 +9,23 @@ sources:
 
 connections:
   market:
-    - procyclicallender
-    - minskyborrower
-    - countercyclicallender
-    - valueinvestor
-    - noisetrader
+    - rulellm_pro_cyclical_lender
+    - rulellm_minsky_borrower
+    - rulellm_counter_cyclical_lender
+    - rulellm_value_investor
+    - rulellm_noise_trader
 
-  procyclicallender:
+  rulellm_pro_cyclical_lender:
     - market
 
-  minskyborrower:
+  rulellm_minsky_borrower:
     - market
 
-  countercyclicallender:
+  rulellm_counter_cyclical_lender:
     - market
 
-  valueinvestor:
+  rulellm_value_investor:
     - market
 
-  noisetrader:
+  rulellm_noise_trader:
     - market

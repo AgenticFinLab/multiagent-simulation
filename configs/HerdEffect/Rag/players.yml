@@ -32,6 +32,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.HerdEffect.Rag.players:Market"
   num_instances: 1
@@ -42,36 +43,36 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      supply_elasticity: 0.1
-      mean_reversion: 0.02
-      noise_std: 0.5
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      base_price_impact: 0.08
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      record_path: "EXPERIMENT/HerdEffect/Rag/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      supply_elasticity: 0.1  # Source: simulation-bases.md §6
+      mean_reversion: 0.02  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
+      base_liquidity: 50.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      high_impact_multiplier: 3.0  # Source: simulation-bases.md §6
+      low_liquidity_threshold: 30.0  # Source: simulation-bases.md §6
   persona: !include persona.yml
 
 # RuleLLM Momentum Investor (Trend Following)
-ragllm_momentum:
+ragllm_momentum_investor:
   name: "RAG Momentum Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMMomentumInvestor"
   num_instances: 3
   config:
-    identity: "ragllm_momentum"
+    identity: "ragllm_momentum_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -100,22 +101,22 @@ ragllm_momentum:
   persona: !include persona.yml
 
 # RuleLLM Contrarian Investor (Value/Mean Reversion)
-ragllm_contrarian:
+ragllm_contrarian_investor:
   name: "RAG Contrarian Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMContrarianInvestor"
   num_instances: 2
   config:
-    identity: "ragllm_contrarian"
+    identity: "ragllm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -144,22 +145,22 @@ ragllm_contrarian:
   persona: !include persona.yml
 
 # RuleLLM Risk Averse Investor (Variance Sensitive)
-ragllm_risk_averse:
+ragllm_risk_averse_investor:
   name: "RAG Risk Averse Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMRiskAverseInvestor"
   num_instances: 2
   config:
-    identity: "ragllm_risk_averse"
+    identity: "ragllm_risk_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -188,22 +189,22 @@ ragllm_risk_averse:
   persona: !include persona.yml
 
 # RuleLLM Aggressive Investor (Acceleration Momentum)
-ragllm_aggressive:
+ragllm_aggressive_investor:
   name: "RAG Aggressive Investor"
   class: "examples.HerdEffect.Rag.players:RagLLMAggressiveInvestor"
   num_instances: 2
   config:
-    identity: "ragllm_aggressive"
+    identity: "ragllm_aggressive_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -232,22 +233,22 @@ ragllm_aggressive:
   persona: !include persona.yml
 
 # RuleLLM Noise Trader (Random Trading)
-ragllm_noise:
+ragllm_noise_trader:
   name: "RAG Noise Trader"
   class: "examples.HerdEffect.Rag.players:RagLLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "ragllm_noise"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
-      record_path: "EXPERIMENT/HerdEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      fundamental: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HerdEffect/Rag/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 0.0  # Source: simulation-bases.md §6
+      fundamental: 100.0  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

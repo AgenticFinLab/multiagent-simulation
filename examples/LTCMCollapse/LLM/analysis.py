@@ -5,17 +5,32 @@ from __future__ import annotations
 
 import argparse
 import os
+from collections import Counter
 from pathlib import Path
 
 from examples.LTCMCollapse.Rule.analysis import (
+    _universal_data,
     calculate_metrics,
     create_visualizations,
     load_simulation_data,
     validate_metrics,
 )
 from masim.utils import load_config
+from masim.evaluation import write_universal_summary
 
 DEFAULT_CONFIG = "configs/LTCMCollapse/LLM/simulation.yml"
+
+
+def analyze_action_distribution(agent_records: dict) -> dict[str, int]:
+    """Count categorical API decisions across agent-round records."""
+    counts: Counter[str] = Counter()
+    for round_records in agent_records.values():
+        for record in round_records.values():
+            action = record["action"]
+            if action not in ("buy", "sell", "hold"):
+                raise ValueError(f"Invalid recorded action: {action}")
+            counts[action] += 1
+    return {action: counts[action] for action in ("buy", "sell", "hold")}
 
 
 def main() -> None:
@@ -33,9 +48,41 @@ def main() -> None:
     from examples.LTCMCollapse.Rule.analysis import _write_summary
 
     _write_summary(analysis_path, metrics, validation)
+    summary = {
+        "metrics": metrics,
+        "validation": validation.to_dict(),
+        "action_distribution": analyze_action_distribution(data["agent_records"]),
+    }
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'LLM'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        _universal_data(data),
+        config,
+        analysis_path,
+        scenario='LTCMCollapse',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
 
 
-__all__ = ["load_simulation_data", "calculate_metrics", "create_visualizations", "main"]
+
+__all__ = [
+    "load_simulation_data",
+    "calculate_metrics",
+    "create_visualizations",
+    "analyze_action_distribution",
+    "main",
+]
 
 
 if __name__ == "__main__":

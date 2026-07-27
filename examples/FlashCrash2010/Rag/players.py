@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
@@ -37,6 +37,8 @@ from masim.format.order import validate_order
 from examples.FlashCrash2010.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger("FlashCrash2010.Rag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -334,7 +336,7 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         llm_cfg = self.config.extras["llm"]
@@ -398,6 +400,8 @@ class RagLLMInvestor(GeneralPlayer):
                 "reasoning": f"LLM fallback hold after retries: {last_error}",
                 "analysis": "",
                 "provides_liquidity": False,
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
 
         action = decision["action"]
@@ -440,6 +444,13 @@ class RagLLMInvestor(GeneralPlayer):
             "liquidity_field_missing": liquidity_field_missing,
             "rag_context": self.state.custom_state["last_rag_context"],
         }
+        # Propagate LLM-failure sentinel so downstream metrics can exclude
+        # synthetic hold rounds from action-distribution statistics.
+        if decision.get("_skipped"):
+            order["_skipped"] = True
+            order["_skipped_reason"] = decision.get(
+                "_skipped_reason", "llm_failed"
+            )
         validate_order(order)
         return {
             **order,

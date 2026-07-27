@@ -42,6 +42,7 @@ from masim.evaluation.finance import (
     validate_disposition_effect,
 )
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 
 STANDARD_OUTPUT_FILES = (
@@ -68,7 +69,13 @@ def _write_standard_named_outputs(output_dir: str) -> None:
         shutil.copyfile(source_path, os.path.join(output_dir, target))
 
 
-def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, float]:
+def calculate_pgr_plr(
+    trades: List[Dict[str, Any]],
+    prices: List[float],
+    initial_position: float,
+    initial_purchase_price: float,
+    move_reference_on_buy: bool,
+) -> Dict[str, float]:
     """
     Calculate Proportion of Gains/Losses Realized (PGR/PLR).
 
@@ -88,19 +95,21 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
     realized_losses = 0
     paper_losses = 0
 
-    # Track position and reference point
-    position = 30.0  # matches initial_position in players.yml
-    purchase_price = 100.0  # matches initial_purchase_price — fixed reference
+    # Track position and reference point from the expanded player config.
+    position = float(initial_position)
+    purchase_price = float(initial_purchase_price)
     total_cost = position * purchase_price
 
     if not prices:
         raise ValueError("prices must contain at least one market price")
+    if position < 0 or purchase_price <= 0:
+        raise ValueError("initial position must be non-negative and purchase price positive")
 
     price_by_round: Dict[int, float] = {idx + 1: p for idx, p in enumerate(prices)}
 
-    for i, trade in enumerate(trades):
-        bid_price = trade["bid_price"]
-        round_num = trade["round"]
+    for trade in trades:
+        bid_price = float(trade["bid_price"])
+        round_num = int(trade["round"])
         if bid_price > 0:
             current_price = bid_price
         elif round_num in price_by_round:
@@ -111,14 +120,14 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
         if current_price <= 0 or position <= 0 or purchase_price <= 0:
             continue
 
-        quantity = trade["quantity"]
+        quantity = float(trade["quantity"])
         unit_gain = current_price - purchase_price
 
         if quantity < 0:  # Selling — classify as realized
             realized_qty = min(abs(quantity), position)
             if unit_gain > 0:
                 realized_gains += realized_qty * unit_gain
-            else:
+            elif unit_gain < 0:
                 realized_losses += realized_qty * abs(unit_gain)
 
             # Remaining position after this sell — paper gain/loss
@@ -126,7 +135,7 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
             if remaining > 0:
                 if unit_gain > 0:
                     paper_gains += remaining * unit_gain
-                else:
+                elif unit_gain < 0:
                     paper_losses += remaining * abs(unit_gain)
 
             # Update position; cost basis reduces proportionally
@@ -135,18 +144,16 @@ def calculate_pgr_plr(trades: List[Dict], prices: List[float]) -> Dict[str, floa
             position = max(0.0, position + quantity)
 
         elif quantity > 0:  # Buying
-            # move_reference=False: DispositionInvestor preserves original purchase_price
-            # as behavioral anchor — do NOT update purchase_price on buys.
-            # This matches players.py update_reference_point(move_reference=False).
             total_cost += quantity * current_price
             position += quantity
-            # purchase_price intentionally NOT updated here
+            if move_reference_on_buy:
+                purchase_price = total_cost / position
 
         else:  # HOLD — accumulate paper gains/losses only
             if position > 0:
                 if unit_gain > 0:
                     paper_gains += position * unit_gain
-                else:
+                elif unit_gain < 0:
                     paper_losses += position * abs(unit_gain)
 
     # Calculate PGR and PLR
@@ -187,7 +194,14 @@ def analyze_by_strategy(data: Dict[str, Any]) -> Dict[str, Dict]:
         strategy = trades[0]["strategy"]
 
         # Calculate PGR/PLR
-        metrics = calculate_pgr_plr(trades, prices)
+        player_parameters = data["player_parameters"][player_id]
+        metrics = calculate_pgr_plr(
+            trades,
+            prices,
+            player_parameters["initial_position"],
+            player_parameters["initial_purchase_price"],
+            strategy != "DispositionInvestor",
+        )
 
         # Calculate trading activity
         buy_count = sum(1 for t in trades if t["quantity"] > 0)
@@ -236,8 +250,11 @@ def plot_fig1_price_dynamics(
     if len(prices) == 0:
         return
 
-    returns = np.diff(prices) / prices[:-1] if len(prices) > 1 else np.array([])
+    if len(prices) < 2:
+        raise ValueError("at least two prices are required for price dynamics")
+    returns = np.diff(prices) / prices[:-1]
     rounds = np.arange(1, len(prices) + 1)
+    fundamental_value = float(data["market_parameters"]["fundamental_value"])
 
     # Rolling 20-round volatility (annualized as pct)
     vol_window = 20
@@ -255,17 +272,17 @@ def plot_fig1_price_dynamics(
     ax = axes[0]
     ax.plot(rounds, prices, color="#2C3E50", linewidth=1.5, label="Market Price")
     ax.axhline(
-        y=100.0,
+        y=fundamental_value,
         color="#BDC3C7",
         linestyle="--",
         linewidth=1.2,
-        label="Fundamental (100)",
+        label=f"Fundamental ({fundamental_value:g})",
     )
     ax.fill_between(
         rounds,
         prices,
-        100.0,
-        where=(prices >= 100.0),
+        fundamental_value,
+        where=(prices >= fundamental_value),
         alpha=0.12,
         color="#2ECC71",
         label="Above Fundamental",
@@ -273,8 +290,8 @@ def plot_fig1_price_dynamics(
     ax.fill_between(
         rounds,
         prices,
-        100.0,
-        where=(prices < 100.0),
+        fundamental_value,
+        where=(prices < fundamental_value),
         alpha=0.12,
         color="#E74C3C",
         label="Below Fundamental",
@@ -388,8 +405,9 @@ def plot_fig2_pgr_plr_comparison(
                 va="bottom",
                 fontsize=7,
             )
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
+    ax.set_xticks(x, labels=labels)
+    ax.tick_params(axis="x", labelrotation=30, labelsize=9)
+    plt.setp(ax.get_xticklabels(), ha="right")
     ax.set_ylabel("Proportion")
     ax.set_title("A. PGR vs PLR by Strategy\n(PGR > PLR = Disposition Effect)")
     ax.legend(fontsize=9)
@@ -419,7 +437,8 @@ def plot_fig2_pgr_plr_comparison(
     ax.axhline(
         y=0.15, color="#E74C3C", linestyle=":", linewidth=1, label="DC=0.15 (strong)"
     )
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
+    ax.tick_params(axis="x", labelrotation=30, labelsize=9)
+    plt.setp(ax.get_xticklabels(), ha="right")
     ax.set_ylabel("Disposition Coefficient (PGR - PLR)")
     ax.set_title("B. Disposition Coefficient per Strategy\n(>0.10 = meaningful effect)")
     ax.legend(fontsize=8)
@@ -469,8 +488,9 @@ def plot_fig3_trading_activity(
         color="#E74C3C",
         alpha=0.85,
     )
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
+    ax.set_xticks(x, labels=labels)
+    ax.tick_params(axis="x", labelrotation=30, labelsize=9)
+    plt.setp(ax.get_xticklabels(), ha="right")
     ax.set_ylabel("Number of Events")
     ax.set_title("A. Buy vs Sell Event Counts")
     ax.legend(fontsize=9)
@@ -491,7 +511,8 @@ def plot_fig3_trading_activity(
             va="bottom",
             fontsize=8,
         )
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
+    ax.tick_params(axis="x", labelrotation=30, labelsize=9)
+    plt.setp(ax.get_xticklabels(), ha="right")
     ax.set_ylabel("Total Shares Traded")
     ax.set_title("B. Total Trading Volume")
     ax.grid(True, alpha=0.3, axis="y")
@@ -632,7 +653,8 @@ def plot_fig5_disposition_ratio(
         linewidth=1.5,
         label="PGR = PLR (no disposition)",
     )
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=9)
+    ax.tick_params(axis="x", labelrotation=30, labelsize=9)
+    plt.setp(ax.get_xticklabels(), ha="right")
     ax.set_ylabel("PGR / PLR  (capped at 8x)")
     ax.set_title(
         "A. Disposition Ratio\n(Red >1 = disposition effect; Blue <1 = reverse)"
@@ -706,16 +728,16 @@ def plot_fig6_portfolio_evolution(
     colors = _strategy_colors()
     # Build round->price lookup (available for future per-round portfolio valuation)
     _ = {i + 1: p for i, p in enumerate(prices)}
-    player_positions: Dict[str, Dict[int, float]] = {}
-    player_strategies: Dict[str, str] = {}
+    strategy_positions: Dict[str, List[List[float]]] = {}
 
     for player_id, trades in data["trades"].items():
         if not trades:
             continue
         strategy = trades[0]["strategy"]
-        player_strategies[player_id] = strategy
-
-        position = 30.0  # initial_position
+        initial_position = float(
+            data["player_parameters"][player_id]["initial_position"]
+        )
+        position = initial_position
         pos_by_round: Dict[int, float] = {1: position}  # start of sim
         for trade in sorted(trades, key=lambda t: t["round"]):
             rnd = trade["round"]
@@ -724,15 +746,15 @@ def plot_fig6_portfolio_evolution(
 
         # Forward-fill
         all_rounds = list(range(1, len(prices) + 1))
-        last_pos = 30.0
+        last_pos = initial_position
         positions = []
         for r in all_rounds:
             if r in pos_by_round:
                 last_pos = pos_by_round[r]
             positions.append(last_pos)
-        player_positions[player_id] = positions
+        strategy_positions.setdefault(strategy, []).append(positions)
 
-    if not player_positions:
+    if not strategy_positions:
         return
 
     fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
@@ -745,19 +767,11 @@ def plot_fig6_portfolio_evolution(
 
     # Panel A: Position size over time
     ax = axes[0]
-    for player_id, positions in player_positions.items():
-        strategy = player_strategies[player_id]
+    for strategy, position_series in strategy_positions.items():
+        positions = np.mean(np.asarray(position_series), axis=0)
         color = colors.get(strategy, "#7F8C8D")
-        label = f"{_strategy_label(strategy)} ({player_id.split('_')[-1]})"
+        label = _strategy_label(strategy)
         ax.plot(rounds, positions, color=color, linewidth=1.5, alpha=0.85, label=label)
-    ax.axhline(
-        y=30.0,
-        color="black",
-        linestyle=":",
-        linewidth=1,
-        alpha=0.5,
-        label="Initial position (30)",
-    )
     ax.set_ylabel("Shares Held")
     ax.set_title("A. Position Size Over Time")
     ax.legend(fontsize=8, ncol=2)
@@ -765,22 +779,14 @@ def plot_fig6_portfolio_evolution(
 
     # Panel B: Portfolio value (position × price)
     ax = axes[1]
-    for player_id, positions in player_positions.items():
-        strategy = player_strategies[player_id]
+    for strategy, position_series in strategy_positions.items():
+        positions = np.mean(np.asarray(position_series), axis=0)
         color = colors.get(strategy, "#7F8C8D")
         label = _strategy_label(strategy)
         port_values = [pos * price for pos, price in zip(positions, prices)]
         ax.plot(
             rounds, port_values, color=color, linewidth=1.5, alpha=0.85, label=label
         )
-    ax.axhline(
-        y=3000.0,
-        color="black",
-        linestyle=":",
-        linewidth=1,
-        alpha=0.5,
-        label="Initial equity value (30 × 100)",
-    )
     ax.set_xlabel("Round")
     ax.set_ylabel("Equity Value ($)")
     ax.set_title("B. Equity Value (Position × Price)")
@@ -800,8 +806,8 @@ def plot_fig7_sell_gain_loss(
 ) -> None:
     """Fig 7: Scatter of gain/loss % at each sell event, colored by strategy.
 
-    For each sell trade, computes the approximate gain/loss % by comparing
-    bid_price at the sell round against the initial purchase price (100.0).
+    For each sell trade, computes gain/loss against that player's configured
+    initial purchase price.
     This visualizes the disposition effect: sells clustered in gain territory.
     """
     prices = np.array(data["prices"])
@@ -810,7 +816,6 @@ def plot_fig7_sell_gain_loss(
 
     colors = _strategy_colors()
     price_by_round = {i + 1: p for i, p in enumerate(prices)}
-    initial_purchase = 100.0
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
     fig.suptitle(
@@ -821,14 +826,23 @@ def plot_fig7_sell_gain_loss(
 
     # Collect sell events per strategy type
     strategy_sell_data: Dict[str, List] = {}
-    for _pid, trades in data["trades"].items():
-        strategy = trades[0]["strategy"] if trades else "Unknown"
+    for player_id, trades in data["trades"].items():
+        if not trades:
+            continue
+        strategy = trades[0]["strategy"]
+        initial_purchase = float(
+            data["player_parameters"][player_id]["initial_purchase_price"]
+        )
         for trade in trades:
             if trade["quantity"] < 0:
                 rnd = trade["round"]
-                if rnd not in price_by_round:
-                    raise ValueError(f"sell trade round {rnd} is outside price history")
-                price_at_sell = price_by_round[rnd]
+                price_at_sell = float(trade["bid_price"])
+                if price_at_sell <= 0:
+                    if rnd not in price_by_round:
+                        raise ValueError(
+                            f"sell trade round {rnd} is outside price history"
+                        )
+                    price_at_sell = price_by_round[rnd]
                 gain_loss_pct = (
                     (price_at_sell - initial_purchase) / initial_purchase * 100
                 )
@@ -856,23 +870,9 @@ def plot_fig7_sell_gain_loss(
             linewidths=0.3,
         )
     ax.axhline(y=0, color="black", linewidth=1)
-    ax.axhline(
-        y=5,
-        color="#F39C12",
-        linestyle=":",
-        linewidth=1,
-        label="+5% gain threshold (Disposition)",
-    )
-    ax.axhline(
-        y=-30,
-        color="#C0392B",
-        linestyle=":",
-        linewidth=1,
-        label="-30% loss threshold (Disposition)",
-    )
     ax.set_xlabel("Round")
     ax.set_ylabel("Gain/Loss % at Sell (vs initial purchase price)")
-    ax.set_title("A. Sell Events by Round\n(Disposition = sells clustered above +5%)")
+    ax.set_title("A. Sell Events by Round\n(Disposition = more sales in gain territory)")
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3)
 
@@ -900,8 +900,6 @@ def plot_fig7_sell_gain_loss(
             body.set_facecolor(colors.get(strategy_key, "#7F8C8D"))
             body.set_alpha(0.7)
         ax.axhline(y=0, color="black", linewidth=1)
-        ax.axhline(y=5, color="#F39C12", linestyle=":", linewidth=1)
-        ax.axhline(y=-30, color="#C0392B", linestyle=":", linewidth=1)
         ax.set_xticks(range(1, len(strategy_names_for_violin) + 1))
         ax.set_xticklabels(
             strategy_names_for_violin, rotation=30, ha="right", fontsize=9
@@ -944,6 +942,226 @@ def plot_disposition_analysis(
     plot_fig7_sell_gain_loss(data, output_dir)
 
 
+def aggregate_strategy_results(
+    strategy_results: Dict[str, Dict], strategy_keyword: str
+) -> Dict[str, Any]:
+    """Aggregate all matching player instances before scenario validation."""
+    matches = [
+        result
+        for result in strategy_results.values()
+        if strategy_keyword in result["strategy"].lower()
+    ]
+    if not matches:
+        raise ValueError(f"No strategy result matches {strategy_keyword!r}")
+
+    realized_gains = sum(result["realized_gains"] for result in matches)
+    realized_losses = sum(result["realized_losses"] for result in matches)
+    paper_gains = sum(result["paper_gains"] for result in matches)
+    paper_losses = sum(result["paper_losses"] for result in matches)
+    gain_denominator = realized_gains + paper_gains
+    loss_denominator = realized_losses + paper_losses
+    # NaN — not 0.0 — when the denominator is empty: "no gains available to realize"
+    # is not the same as "0% of gains realized"; the metric is genuinely undefined
+    # and defaulting to 0.0 would falsely register maximum reluctance.
+    pgr = realized_gains / gain_denominator if gain_denominator > 0 else float("nan")
+    plr = realized_losses / loss_denominator if loss_denominator > 0 else float("nan")
+
+    if plr is not None and plr > 0:
+        disposition_ratio = pgr / plr
+    elif plr == 0 and pgr and pgr > 0:
+        disposition_ratio = float("inf")
+    else:
+        disposition_ratio = float("nan")
+    disposition_effect = (
+        bool(pgr > plr) if np.isfinite(pgr) and np.isfinite(plr) else False
+    )
+
+    return {
+        "strategy": matches[0]["strategy"],
+        "player_count": len(matches),
+        "pgr": pgr,
+        "plr": plr,
+        "disposition_ratio": disposition_ratio,
+        "disposition_effect": disposition_effect,
+        "realized_gains": realized_gains,
+        "realized_losses": realized_losses,
+        "paper_gains": paper_gains,
+        "paper_losses": paper_losses,
+        "buy_count": sum(result["buy_count"] for result in matches),
+        "sell_count": sum(result["sell_count"] for result in matches),
+        "total_volume": sum(result["total_volume"] for result in matches),
+    }
+
+
+def aggregate_all_strategies(
+    strategy_results: Dict[str, Dict[str, Any]],
+) -> Dict[str, Dict[str, Any]]:
+    """Aggregate player-instance metrics into one row per exact strategy."""
+    strategy_names = sorted(
+        {result["strategy"] for result in strategy_results.values()}
+    )
+    return {
+        strategy: aggregate_strategy_results(strategy_results, strategy.lower())
+        for strategy in strategy_names
+    }
+
+
+def holding_period_asymmetry(
+    trades: List[Dict[str, Any]],
+    initial_position: float,
+    initial_purchase_price: float,
+) -> Dict[str, float]:
+    """Calculate quantity-weighted loser/winner holding periods using FIFO lots."""
+    lots: List[List[float]] = [
+        [float(initial_position), float(initial_purchase_price), 0.0]
+    ]
+    winner_rounds = winner_quantity = 0.0
+    loser_rounds = loser_quantity = 0.0
+
+    for trade in sorted(trades, key=lambda item: item["round"]):
+        quantity = float(trade["quantity"])
+        price = float(trade["bid_price"])
+        round_num = float(trade["round"])
+        if quantity > 0:
+            lots.append([quantity, price, round_num])
+            continue
+        if quantity == 0:
+            continue
+
+        remaining = abs(quantity)
+        while remaining > 1e-9:
+            if not lots:
+                raise ValueError("sell quantity exceeds reconstructed FIFO position")
+            lot_quantity, lot_price, opened_round = lots[0]
+            realized = min(remaining, lot_quantity)
+            held_rounds = round_num - opened_round
+            if held_rounds < 0:
+                raise ValueError("trade rounds must be non-decreasing")
+            if price > lot_price:
+                winner_rounds += held_rounds * realized
+                winner_quantity += realized
+            elif price < lot_price:
+                loser_rounds += held_rounds * realized
+                loser_quantity += realized
+            lot_quantity -= realized
+            remaining -= realized
+            if lot_quantity <= 1e-12:
+                lots.pop(0)
+            else:
+                lots[0][0] = lot_quantity
+
+    # NaN — not 0.0 — when no winner/loser sales were reconstructed:
+    # "no winners sold" is not the same as "held winners for 0 rounds", and a
+    # 0.0 HPA would collide with the "no asymmetry" null hypothesis.
+    avg_winner = winner_rounds / winner_quantity if winner_quantity else float("nan")
+    avg_loser = loser_rounds / loser_quantity if loser_quantity else float("nan")
+    if not np.isfinite(avg_winner) or not np.isfinite(avg_loser):
+        hpa = float("nan")
+    elif avg_winner > 0:
+        hpa = avg_loser / avg_winner
+    elif avg_loser > 0:
+        # Winners held zero rounds but losers held some — infinite asymmetry
+        hpa = float("inf")
+    else:
+        hpa = float("nan")
+    return {
+        "avg_winner_holding_rounds": avg_winner,
+        "avg_loser_holding_rounds": avg_loser,
+        "holding_period_asymmetry": hpa,
+    }
+
+
+def terminal_wealth(
+    trades: List[Dict[str, Any]],
+    final_price: float,
+    initial_cash: float,
+    initial_position: float,
+) -> float:
+    """Reconstruct terminal mark-to-market wealth from signed orders."""
+    cash = float(initial_cash)
+    position = float(initial_position)
+    for trade in trades:
+        quantity = float(trade["quantity"])
+        price = float(trade["bid_price"])
+        if quantity != 0 and price <= 0:
+            raise ValueError("non-zero trades must have a positive bid price")
+        cash -= quantity * price
+        position += quantity
+    if position < -1e-9:
+        raise ValueError("reconstructed terminal position cannot be negative")
+    return cash + position * float(final_price)
+
+
+def calculate_extended_metrics(
+    data: Dict[str, Any], strategy_results: Dict[str, Dict[str, Any]]
+) -> Dict[str, Any]:
+    """Calculate HPA, PDI, and TRI exactly as defined in analysis-bases.md."""
+    holding_periods: Dict[str, Dict[str, float]] = {}
+    wealth: Dict[str, float] = {}
+    wealth_by_strategy: Dict[str, List[float]] = {}
+
+    for player_id, trades in data["trades"].items():
+        parameters = data["player_parameters"][player_id]
+        holding_periods[player_id] = holding_period_asymmetry(
+            trades,
+            parameters["initial_position"],
+            parameters["initial_purchase_price"],
+        )
+        wealth[player_id] = terminal_wealth(
+            trades,
+            data["prices"][-1],
+            parameters["initial_cash"],
+            parameters["initial_position"],
+        )
+        strategy = strategy_results[player_id]["strategy"]
+        wealth_by_strategy.setdefault(strategy, []).append(wealth[player_id])
+
+    disposition_wealth = [
+        value
+        for strategy, values in wealth_by_strategy.items()
+        if "disposition" in strategy.lower()
+        for value in values
+    ]
+    rational_wealth = [
+        value
+        for strategy, values in wealth_by_strategy.items()
+        if "rational" in strategy.lower()
+        for value in values
+    ]
+    if not disposition_wealth or not rational_wealth:
+        raise ValueError(
+            "Disposition and rational investor wealth are required"
+        )
+    mean_disposition = float(np.mean(disposition_wealth))
+    mean_rational = float(np.mean(rational_wealth))
+    if mean_rational == 0:
+        raise ValueError("mean RationalInvestor wealth must be non-zero")
+    pdi = (mean_rational - mean_disposition) / mean_rational
+
+    disposition_result = aggregate_strategy_results(
+        strategy_results, "disposition"
+    )
+    tax_result = aggregate_strategy_results(strategy_results, "tax")
+    disposition_plr = float(disposition_result["plr"])
+    tax_plr = float(tax_result["plr"])
+    # TRI is a ratio of two PLRs.  If the disposition group has no realizable
+    # losses (PLR NaN or 0), the ratio is undefined, NOT "zero anti-disposition
+    # strength".  Emitting 0.0 would silently signal "no tax-loss harvesting
+    # effect" and pass the "TRI ≈ 0" null.
+    if not np.isfinite(disposition_plr) or disposition_plr <= 0:
+        tri = float("nan")
+    else:
+        tri = tax_plr / disposition_plr
+    return {
+        "holding_periods": holding_periods,
+        "terminal_wealth": wealth,
+        "mean_disposition_wealth": mean_disposition,
+        "mean_rational_wealth": mean_rational,
+        "performance_drag_index": pdi,
+        "tax_reversal_index": tri,
+    }
+
+
 def generate_summary(
     data: Dict[str, Any],
     strategy_results: Dict[str, Dict],
@@ -959,20 +1177,10 @@ def generate_summary(
     prices_list = list(prices)
     max_dd, peak_idx, trough_idx = calculate_max_drawdown(prices_list)
 
-    # Find disposition investor
-    disp_result = None
-    rational_result = None
-    for pid, res in strategy_results.items():
-        strategy_lower = res["strategy"].lower()
-        if "disposition" in strategy_lower:
-            disp_result = res
-        if "rational" in strategy_lower:
-            rational_result = res
-
-    if disp_result is None:
-        raise ValueError("DispositionInvestor result is required for validation")
-    if rational_result is None:
-        raise ValueError("RationalInvestor result is required for validation")
+    # Validate on all instances of each archetype, not whichever dictionary
+    # entry happened to be encountered last.
+    disp_result = aggregate_strategy_results(strategy_results, "disposition")
+    rational_result = aggregate_strategy_results(strategy_results, "rational")
 
     # Extract PGR and PLR for validation
     pgr = disp_result["pgr"]
@@ -985,6 +1193,8 @@ def generate_summary(
         plr=plr,
         disposition_coefficient=disposition_coefficient,
     )
+
+    extended_metrics = calculate_extended_metrics(data, strategy_results)
 
     return {
         "scenario": "DispositionEffect",
@@ -1010,6 +1220,7 @@ def generate_summary(
         "disposition_investor": disp_result,
         "rational_investor": rational_result,
         "disposition_effect_detected": disp_result["disposition_effect"],
+        "extended_metrics": extended_metrics,
         "strategy_comparison": {
             pid: {
                 "strategy": res["strategy"],
@@ -1036,6 +1247,7 @@ def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError("Coordinator price series is empty")
 
     trades = {}
+    player_parameters: Dict[str, Dict[str, float]] = {}
     for pid, player in results.players_by_role("player").items():
         payloads_by_round = player.turns.payloads()
         if payloads_by_round:
@@ -1043,11 +1255,26 @@ def load_simulation_data(config: Dict[str, Any]) -> Dict[str, Any]:
                 {**payload, "round": round_num}
                 for round_num, payload in sorted(payloads_by_round.items())
             ]
+            extras = config["players"][pid]["config"]["extras"]
+            player_parameters[pid] = {
+                "initial_cash": float(extras["initial_cash"]),
+                "initial_position": float(extras["initial_position"]),
+                "initial_purchase_price": float(extras["initial_purchase_price"]),
+            }
 
     if not trades:
         raise ValueError("No player trade payloads found")
 
-    return {"prices": prices, "trades": trades}
+    market_id = coordinators[0].player_id
+    market_extras = config["players"][market_id]["config"]["extras"]
+    return {
+        "prices": prices,
+        "trades": trades,
+        "player_parameters": player_parameters,
+        "market_parameters": {
+            "fundamental_value": float(market_extras["fundamental_value"]),
+        },
+    }
 
 
 def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -1059,7 +1286,8 @@ def calculate_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
 
 def create_visualizations(data: Dict[str, Any], metrics: Dict[str, Any], output_dir: str) -> None:
     """Create DispositionEffect analysis figures."""
-    plot_disposition_analysis(data, metrics["strategy_results"], output_dir)
+    aggregated = aggregate_all_strategies(metrics["strategy_results"])
+    plot_disposition_analysis(data, aggregated, output_dir)
 
 
 def main():
@@ -1093,7 +1321,7 @@ def main():
     metrics = calculate_metrics(data)
     strategy_results = metrics["strategy_results"]
 
-    for _, res in strategy_results.items():
+    for res in aggregate_all_strategies(strategy_results).values():
         print(
             f"    {res['strategy']:24s}: PGR={res['pgr']:.3f}, PLR={res['plr']:.3f}, "
             f"Disp={'YES' if res['disposition_effect'] else 'NO'}"
@@ -1127,7 +1355,26 @@ def main():
         )
     print(f"\nVALIDATION: {summary['validation']['interpretation']}")
     print(f"Fit Score: {summary['validation']['score']:.1%}")
-
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='DispositionEffect',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 
@@ -1141,6 +1388,11 @@ __all__ = [
     "create_visualizations",
     "calculate_pgr_plr",
     "analyze_by_strategy",
+    "aggregate_strategy_results",
+    "aggregate_all_strategies",
+    "holding_period_asymmetry",
+    "terminal_wealth",
+    "calculate_extended_metrics",
     "plot_disposition_analysis",
     "generate_summary",
     "main",

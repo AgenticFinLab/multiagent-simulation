@@ -21,13 +21,18 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
     KnowledgeStore,
     ResourceManager,
 )
+
+# Single source of truth for the "no relevant knowledge retrieved" fallback
+# string. Also imported by Rag/analysis.py so the retrieval-failure-rate metric
+# uses the identical marker as the runtime path.
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -133,7 +138,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -353,7 +358,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         template = load_prompt(self.config.extras["llm"]["user_message"])
@@ -387,10 +392,8 @@ class RagLLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                infer_output = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
+                infer_output = llm_client.run([infer_input]).outputs[0]
+                decision = parse_llm_response_with_thinking(infer_output.response)
                 decision = _validate_decision(decision, self.identity)
                 break
             except Exception as exc:

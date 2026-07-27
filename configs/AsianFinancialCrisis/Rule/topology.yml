@@ -3,11 +3,11 @@
 # =============================================================================
 # Star topology: Market broadcasts to all agents; agents send orders to market.
 #
-#         hot_money_funder ────────────────┐
-#         contagion_trader ────────────────┤
-#         imf_rescuer ─────────────────────┼──▶ market ──▶ all agents
-#         value_contrarian ────────────────┤        (price, deviation, volume)
-#         noise_trader ────────────────────┘
+#         rule_hot_money_funder ────────────────┐
+#         rule_contagion_trader ────────────────┤
+#         rule_imf_rescuer ─────────────────────┼──▶ market ──▶ all agents
+#         rule_value_contrarian ────────────────┤        (price, deviation, volume)
+#         rule_noise_trader ────────────────────┘
 #
 # Execution flow per round:
 #   Level 0: market broadcasts current price + market data
@@ -22,24 +22,24 @@ sources:
 connections:
   # Market → All agents (price + market data broadcast)
   market:
-    - hot_money_funder
-    - contagion_trader
-    - imf_rescuer
-    - value_contrarian
-    - noise_trader
+    - rule_hot_money_funder
+    - rule_contagion_trader
+    - rule_imf_rescuer
+    - rule_value_contrarian
+    - rule_noise_trader
 
   # Each agent → Market only (order submission)
-  hot_money_funder:
+  rule_hot_money_funder:
     - market
 
-  contagion_trader:
+  rule_contagion_trader:
     - market
 
-  imf_rescuer:
+  rule_imf_rescuer:
     - market
 
-  value_contrarian:
+  rule_value_contrarian:
     - market
 
-  noise_trader:
+  rule_noise_trader:
     - market

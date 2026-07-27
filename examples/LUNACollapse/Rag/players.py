@@ -26,10 +26,11 @@ from examples.LUNACollapse.Rag.prompts import (
 )
 from examples.LUNACollapse.Rule.players import (  # noqa: F401
     Market,
+    _apply_trade,
     _build_order,
     _require_positive,
 )
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("LUNACollapse.Rag")
 
@@ -140,14 +141,14 @@ class RagLLMInvestor(GeneralPlayer):
             generation_config=generation_config,
         )
 
-        private_knowledge = extras.get("private_knowledge", {})
-        rag_cfg = extras.get("rag") or private_knowledge.get("rag", {})
+        private_knowledge = extras["private_knowledge"]
+        rag_cfg = extras["rag"] if "rag" in extras else private_knowledge["rag"]
         await self._initialize_rag(rag_cfg)
 
     async def _initialize_rag(self, rag_cfg: Dict[str, Any]) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -164,7 +165,7 @@ class RagLLMInvestor(GeneralPlayer):
             }
 
         resource_manager = ResourceManager(knowledge_config)
-        private_knowledge = dict(extras.get("private_knowledge", {}))
+        private_knowledge = dict(extras["private_knowledge"])
         if "rag" not in private_knowledge:
             private_knowledge["rag"] = rag_cfg
         agent_knowledge = resource_manager.resolve_agent_knowledge(
@@ -342,16 +343,7 @@ class RagLLMInvestor(GeneralPlayer):
         _require_positive(bid_price, "bid_price")
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        if action == "buy" and quantity > 0:
-            quantity = min(quantity, int(cash / price))
-            self.state.custom_state["cash"] -= quantity * price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            quantity = min(quantity, max(position, 0))
-            self.state.custom_state["cash"] += quantity * price
-            self.state.custom_state["position"] -= quantity
-        else:
-            quantity = 0
+        quantity = _apply_trade(self.state.custom_state, action, quantity, price)
         order = _build_order(
             self,
             action,
@@ -361,6 +353,7 @@ class RagLLMInvestor(GeneralPlayer):
         )
         order["analysis"] = str(decision_payload["analysis"])
         order["rag_context"] = self.state.custom_state["last_rag_context"]
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

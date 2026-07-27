@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-5,9,StatusQuoBias,Rag,SUCCESS,0,6540.563,2026-05-22T16:18:40,2026-05-22T18:07:41,config/simulation.yml,examples/StatusQuoBias/Rag/run_statusquobias_rag.py,logs/StatusQuoBias__Rag.log,,200,200,,

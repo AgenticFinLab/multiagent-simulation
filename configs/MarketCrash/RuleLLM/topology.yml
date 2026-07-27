@@ -10,18 +10,21 @@ sources:
 connections:
   market:
     - rulellm_panic_seller
-    - rulellm_risk_parity
-    - rulellm_leveraged_fund
+    - rulellm_risk_parity_fund
+    - rulellm_leveraged_hedge_fund
     - rulellm_market_maker
+    - rulellm_passive_investor
     - rulellm_bottom_fisher
 
   rulellm_panic_seller:
     - market
-  rulellm_risk_parity:
+  rulellm_risk_parity_fund:
     - market
-  rulellm_leveraged_fund:
+  rulellm_leveraged_hedge_fund:
     - market
   rulellm_market_maker:
+    - market
+  rulellm_passive_investor:
     - market
   rulellm_bottom_fisher:
     - market

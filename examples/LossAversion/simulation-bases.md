@@ -34,102 +34,83 @@ Prospect Theory (Kahneman & Tversky 1979) replaced expected-utility theory as th
 
 ## §2 Theoretical Framework
 
-### §T1 Prospect Theory (Kahneman & Tversky 1979)
+### Theory 1 — Prospect Theory and Loss Aversion
 
-#### §T1.1 Citation
-Kahneman, D., & Tversky, A. (1979). Prospect Theory: An Analysis of Decision under Risk. *Econometrica*, 47(2), 263–291. doi:[10.2307/1914185](https://doi.org/10.2307/1914185)
+**Citation:** Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision under risk. *Econometrica*, 47(2), 263–291. https://doi.org/10.2307/1914185
 
-#### §T1.2 Core Claim
-Individuals evaluate outcomes relative to a reference point. The value function is concave for gains and convex for losses, and steeper in the loss domain by a factor λ ≈ 2.25 (the loss-aversion coefficient).
+**Core Insight:** Outcomes are evaluated relative to a reference point. The value function is concave for gains, convex for losses, and steeper in the loss domain, so an equal loss changes behavior more strongly than an equal gain.
 
-#### §T1.3 Simulation Mapping
-`LossAverseInvestor` encodes the asymmetric value function directly: sell winners at `pnl_pct > sell_gain_threshold` (capturing gains before they become losses) but sell losers at only `pnl_pct < –sell_gain × loss_lambda` (a far more negative threshold). The ratio `loss_lambda = 2.25` matches Kahneman–Tversky's empirical estimate.
+**Mathematical Formulation:** `v(x)=x^alpha` for `x>=0`; `v(x)=-lambda*(-x)^beta` for `x<0`, with `lambda>1`. The implementation uses purchase price as the reference point.
 
-#### §T1.4 Key Parameters
-`loss_aversion_lambda` (2.25), `sell_gain_threshold` (0.05), `entry_price` (reference point)
+**Empirical Evidence:** The canonical calibration uses the established loss-aversion benchmark `lambda=2.25`; sensitivity analysis covers the target range 1.8–2.8 rather than treating the point estimate as exact.
 
-#### §T1.5 Limitations
-Prospect Theory is static; the simulation adds a dynamic reference-point update when the agent buys more shares at a new price.
+**Relevance to This Simulation:** `LossAverseInvestor` realizes 70% of an eligible winner but only 20% of an eligible loser, with the loss trigger shifted by `loss_aversion_lambda`.
+
+**Calibration Implication:** Set `loss_aversion_lambda=2.25`, `sell_gain_threshold=0.05`, and preserve entry price as the explicit reference state.
 
 ---
 
-### §T2 Cumulative Prospect Theory (Tversky & Kahneman 1992)
+### Theory 2 — Cumulative Prospect Theory and Break-Even Risk Seeking
 
-#### §T2.1 Citation
-Tversky, A., & Kahneman, D. (1992). Advances in Prospect Theory: Cumulative Representation of Uncertainty. *Journal of Risk and Uncertainty*, 5(4), 297–323. doi:[10.1007/BF00122574](https://doi.org/10.1007/BF00122574)
+**Citation:** Tversky, A., & Kahneman, D. (1992). Advances in prospect theory: Cumulative representation of uncertainty. *Journal of Risk and Uncertainty*, 5, 297–323. https://doi.org/10.1007/BF00122574
 
-#### §T2.2 Core Claim
-CPT extends Prospect Theory to lotteries with many outcomes by applying rank-dependent probability weighting. This preserves first-order stochastic dominance and better fits empirical data on tail-risk overweighting.
+**Core Insight:** The convex loss-domain value function supports risk seeking below a reference point, while probability weighting can increase the appeal of a low-probability recovery.
 
-#### §T2.3 Simulation Mapping
-`BreakEvenTrader` operationalises CPT's prediction that agents overweight the small probability of recovering a large loss. When `pnl_pct < –0.05`, the agent buys aggressively — `risky_qty = min(int(|pnl| × risk_increase × 5000), cash/price)` — proportional to the depth of loss, consistent with CPT's convex value function in the loss domain.
+**Mathematical Formulation:** When `pnl_pct<-0.05`, `Q_buy=min(floor(abs(pnl_pct)*risk_increase_factor*5000), floor(cash/price))`; otherwise hold.
 
-#### §T2.4 Key Parameters
-`risk_increase_factor` (2.0), activation threshold `pnl_pct < –0.05`
+**Empirical Evidence:** Tversky and Kahneman report a fourfold pattern that includes risk seeking for high-probability losses. The scenario tests the directional implication—more risk in the loss domain—not a full probability-weighting estimator.
 
-#### §T2.5 Limitations
-Full probability weighting is not implemented; the model captures only the quantity-escalation implication of CPT.
+**Relevance to This Simulation:** `BreakEvenTrader` increases purchase quantity monotonically with loss depth and remains cash constrained.
+
+**Calibration Implication:** Set `risk_increase_factor=2.0` and the activation threshold to a 5% unrealized loss; sweep the factor rather than claiming it is directly estimated by the paper.
 
 ---
 
-### §T3 Disposition Effect (Shefrin & Statman 1985; Odean 1998)
+### Theory 3 — Disposition Effect
 
-#### §T3.1 Citation
-Shefrin, H., & Statman, M. (1985). The Disposition to Sell Winners Too Early and Ride Losers Too Long. *Journal of Finance*, 40(3), 777–790. doi:[10.1111/j.1540-6261.1985.tb05002.x](https://doi.org/10.1111/j.1540-6261.1985.tb05002.x)
+**Citation:** Odean, T. (1998). Are investors reluctant to realize their losses? *Journal of Finance*, 53(5), 1775–1798. https://doi.org/10.1111/0022-1082.00072
 
-Odean, T. (1998). Are Investors Reluctant to Realize Their Losses? *Journal of Finance*, 53(5), 1775–1798. doi:[10.1111/0022-1082.00072](https://doi.org/10.1111/0022-1082.00072)
+**Core Insight:** Investors realize winning positions more readily than losing positions, beyond explanations based on rebalancing, transaction costs, or subsequent performance.
 
-#### §T3.2 Core Claim
-Investors have a higher propensity to realise gains than losses (Proportion of Gains Realised > Proportion of Losses Realised). The effect is strongest for retail investors and reverses near year-end tax harvesting.
+**Mathematical Formulation:** `DEI=realized_gain_rate/realized_loss_rate`; the rule-level conditional sell-fraction benchmark is `0.70/0.20=3.5`.
 
-#### §T3.3 Simulation Mapping
-The asymmetry is encoded in `LossAverseInvestor._make_decision`: winners trigger 70% position liquidation at a 5% gain threshold, while losers trigger only 20% liquidation at a far more negative loss threshold (`–sell_gain × loss_lambda ≈ –11.25%`). The sell ratio (70% vs 20%) and threshold asymmetry replicate the Odean PGR/PLR ratio.
+**Empirical Evidence:** Odean analyzes trading records for 10,000 discount-brokerage accounts from 1987–1993 and finds a strong preference for realizing winners rather than losers.
 
-#### §T3.4 Key Parameters
-`sell_qty = int(position × 0.7)` for gains; `sell_qty = int(position × 0.2)` for losses; `loss_aversion_lambda = 2.25`
+**Relevance to This Simulation:** The loss-averse agent generates the gain/loss realization asymmetry; other archetypes supply counterfactual market demand.
 
-#### §T3.5 Limitations
-Tax-loss harvesting seasonality is not modelled. The reference point is reset only on purchases, not on interim price observation.
+**Calibration Implication:** Treat 70% and 20% as scenario calibration values, not Odean estimates; require `DEI>1` and evaluate their sensitivity.
 
 ---
 
-### §T4 Break-Even Effect (Barberis & Xiong 2009; Thaler 1999)
+### Theory 4 — Value Correction and Momentum
 
-#### §T4.1 Citation
-Barberis, N., & Xiong, W. (2009). What Drives the Disposition Effect? An Analysis of a Long-Standing Preference-Based Explanation. *Journal of Finance*, 64(2), 751–784. doi:[10.1111/j.1540-6261.2009.01448.x](https://doi.org/10.1111/j.1540-6261.2009.01448.x)
+**Citation:** Jegadeesh, N., & Titman, S. (1993). Returns to buying winners and selling losers: Implications for stock market efficiency. *Journal of Finance*, 48(1), 65–91. https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
 
-Thaler, R. H. (1999). Mental Accounting Matters. *Journal of Behavioral Decision Making*, 12(3), 183–206. doi:[10.1002/(SICI)1099-0771(199909)12:3<183::AID-BDM318>3.0.CO;2-F](https://doi.org/10.1002/(SICI)1099-0771(199909)12:3<183::AID-BDM318>3.0.CO;2-F)
+**Core Insight:** Trend-following demand trades with recent performance, whereas a rational value benchmark trades against a material public price–fundamental gap.
 
-#### §T4.2 Core Claim
-Investors in a loss position are in the convex (risk-seeking) region of the value function and therefore accept gambles they would normally reject. Mental accounting keeps each position in a separate "account" evaluated against its purchase price.
+**Mathematical Formulation:** Momentum uses `sign(q)=sign(deviation)` above `entry_threshold`; rational value demand uses `sign(q)=-sign(deviation)` above 3%, with quantity capped at 500.
 
-#### §T4.3 Simulation Mapping
-`BreakEvenTrader` activates when current PnL falls below –5%, buying proportionally more shares as the loss deepens: `risky_qty = int(|pnl_pct| × risk_increase_factor × 5000)`. This escalation mirrors the break-even gambling described in Barberis & Xiong.
+**Empirical Evidence:** Jegadeesh and Titman document profitable winner-minus-loser strategies over intermediate horizons. The scenario translates the direction of this evidence to a round-level signed-deviation signal.
 
-#### §T4.4 Key Parameters
-`risk_increase_factor` (2.0), activation at `pnl_pct < –0.05`
+**Relevance to This Simulation:** `MomentumTrader` provides positive feedback and `RationalTrader` provides a symmetric correction benchmark, making the behavioral contribution identifiable.
 
-#### §T4.5 Limitations
-Position sizing ignores portfolio-level wealth; each agent evaluates only its own entry price, not total wealth.
+**Calibration Implication:** Use `entry_threshold=0.03`, `risk_aversion=0.7`, and equal order caps so sign rather than capacity distinguishes the two mechanisms.
 
 ---
 
-### §T5 Market-Making and Rational Benchmarks (Glosten & Milgrom 1985)
+### Theory 5 — Inventory-Constrained Liquidity Provision
 
-#### §T5.1 Citation
-Glosten, L. R., & Milgrom, P. R. (1985). Bid, Ask and Transaction Prices in a Specialist Market with Heterogeneously Informed Traders. *Journal of Financial Economics*, 14(1), 71–100. doi:[10.1016/0304-405X(85)90044-3](https://doi.org/10.1016/0304-405X(85)90044-3)
+**Citation:** Ho, T., & Stoll, H. R. (1981). Optimal dealer pricing under transactions and return uncertainty. *Journal of Financial Economics*, 9(1), 47–73. https://doi.org/10.1016/0304-405X(81)90020-9
 
-#### §T5.2 Core Claim
-A competitive market maker earns the bid-ask spread to compensate for adverse selection risk. Rational traders eliminate mispricings through arbitrage; their activity bounds the loss-aversion distortion.
+**Core Insight:** A dealer's optimal action depends on risky inventory and stochastic order flow; finite inventory-bearing capacity prevents unlimited liquidity provision.
 
-#### §T5.3 Simulation Mapping
-`RationalTrader` uses expected-utility logic: trade when `|deviation| > 0.03`, sizing `min(500, int(|dev| × risk_aversion × 3000))`. `MarketMaker` provides contrarian liquidity capped at `inventory_limit`, earning spread by selling into deviations. Together they set a rational-agent baseline against which loss-averse wealth penalties are measured.
+**Mathematical Formulation:** While `abs(position)<inventory_limit`, trade against the signed price deviation, with buy quantity clipped by cash and sell quantity clipped by inventory.
 
-#### §T5.4 Key Parameters
-`risk_aversion` (0.7), `inventory_limit` (2000), deviation threshold 0.03
+**Empirical Evidence:** The dealer model derives bid/ask behavior as a function of inventory, return variance, and transaction-arrival risk. This scenario implements its inventory-control direction without simulating a full order book.
 
-#### §T5.5 Limitations
-Neither agent models adverse selection explicitly; spread is a fixed emergent property of price impact, not a strategic bid-ask quote.
+**Relevance to This Simulation:** `MarketMaker` supplies counter-cyclical liquidity and provides a stabilizing comparison for loss-driven demand.
+
+**Calibration Implication:** Set `inventory_limit=2000`, cap each action at 300 shares, and test that the agent never trades beyond feasible cash or inventory.
 
 ---
 
@@ -328,7 +309,7 @@ Key `extras` fields in `players.yml`:
 | `loss_aversion_lambda` | LossAverseInvestor | Loss multiplier (default 2.25)                  |
 | `sell_gain_threshold`  | LossAverseInvestor | Gain threshold for winner sell (default 0.05)   |
 | `risk_increase_factor` | BreakEvenTrader    | Loss-escalation multiplier (default 2.0)        |
-| `risk_aversion`        | RationalTrader     | Expected-utility risk weight (default 0.5)      |
+| `risk_aversion`        | RationalTrader     | Expected-utility response weight (default 0.7)  |
 | `entry_threshold`      | MomentumTrader     | Minimum deviation to enter trend (default 0.03) |
 | `inventory_limit`      | MarketMaker        | Max absolute position (default 2000)            |
 | `initial_cash`         | All investors      | Starting cash endowment                         |
@@ -337,6 +318,16 @@ Key `extras` fields in `players.yml`:
 | `price_impact`         | Market             | λ coefficient                                   |
 | `mean_reversion`       | Market             | γ coefficient                                   |
 | `noise_std`            | Market             | ε standard deviation                            |
+| `gain_sell_fraction`   | LossAverseInvestor | Eligible winner fraction (default 0.70)         |
+| `loss_sell_fraction`   | LossAverseInvestor | Eligible loser fraction (default 0.20)          |
+| `loss_trigger`         | BreakEvenTrader    | Loss-domain trigger (default -0.05)             |
+| `deviation_threshold`  | RationalTrader     | Symmetric value gap trigger (default 0.03)      |
+| `sizing_scale`         | Three traders      | Signal-to-order conversion (3000 or 5000)       |
+| `base_size`            | All traders        | Per-round feasible order cap                    |
+| `random_seed`          | Market             | Reproducible market-noise seed                  |
+| `price_floor`          | Market             | Strictly positive price lower bound (0.01)      |
+| `shock_schedule`       | Market             | Controlled +6% / -20% identification stimuli    |
+| `quantity_tolerance`   | RuleLLM and Rag    | Hybrid adjustment band (default 0.20)           |
 
 ---
 

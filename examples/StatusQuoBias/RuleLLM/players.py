@@ -17,7 +17,7 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from .prompts import (
     RULELLM_INERTIAL_HOLDER_SYS,
     RULELLM_DEFAULT_FOLLOWER_SYS,

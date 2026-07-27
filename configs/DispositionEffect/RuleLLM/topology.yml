@@ -12,14 +12,13 @@ sources:
 connections:
   market:
     # Market broadcasts to all investors
-    - rulellm_disposition_biased_1
-    - rulellm_disposition_biased_2
-    - rulellm_disposition_biased_3
-    - rulellm_rational_1
-    - rulellm_rational_2
-    - rulellm_tax_aware_1
-    - rulellm_tax_aware_2
-    - rulellm_institutional_1
-    - rulellm_institutional_2
-    - rulellm_loss_averse_1
-    - rulellm_loss_averse_2
+    - rulellm_disposition_investor_1
+    - rulellm_disposition_investor_2
+    - rulellm_disposition_investor_3
+    - rulellm_rational_investor_1
+    - rulellm_rational_investor_2
+    - rulellm_tax_aware_investor_1
+    - rulellm_tax_aware_investor_2
+    - rulellm_institutional_investor_1
+    - rulellm_institutional_investor_2
+    - rulellm_index_holder

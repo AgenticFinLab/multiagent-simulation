@@ -41,49 +41,51 @@ Running `LLM/analysis.py` writes to `EXPERIMENT/ConfirmationBias/LLM/records/ana
 
 ---
 
-## §4 Dimension-by-Dimension Interpretation
+## §4 Variant-Specific Observable Phenomena
 
-### 4.1 Price vs Fundamental
+| Phenomenon                             | Description                                                                                                | How to Observe                                                                | Contrast with Rule Baseline                     |
+|----------------------------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|-------------------------------------------------|
+| Implicit belief from persona           | LLMBeliefAnchor has no `belief` state variable; bullish tilt emerges from prompt vocabulary                | Predominantly "buy" action in early rounds; `bias_amplitude_pct` lower        | Rule compounds an explicit belief scalar        |
+| Higher belief-flip frequency           | LLM reasoning switches direction more readily than Rule's `belief > 2.0` lock-in                           | `belief_flip_count` LLM > Rule; more sign changes in deviation series          | Rule locks direction until noise flips it       |
+| Rationalization toward fundamental     | LLM stabilizers "reason toward" the prompted `fundamental = 100`; correction_ratio rises                   | `correction_ratio` LLM > Rule; contrarian sells appear before deviation caps  | Rule stabilizers wait until 5 % threshold       |
+| Persona-consistent reasoning coherence | Each agent's `reasoning` field cites persona-appropriate vocabulary ("confirmation", "belief")             | Grep `reasoning` for persona keywords per agent class                          | Rule payloads carry no reasoning                |
+| Temperature-driven quantity variance   | At temperature = 0.3, LLMBeliefAnchor emits varying quantities even with identical deviation               | Compare quantity distributions across seeds under fixed market state           | Rule quantities are deterministic in deviation  |
 
-- LLM bias amplitude typically lower than Rule (no compounding belief state)
-- Compare `bias_amplitude_pct` LLM vs Rule baseline
-- If LLM amplitude ≈ Rule: LLM personas successfully replicate bias mechanism
-
-### 4.2 Deviation Time Series
-
-- Watch for oscillating deviation (LLM agents reversing more readily than Rule)
-- `bias_persistence_rounds` LLM < Rule expected (LLM switches direction more easily)
-- `belief_flip_count` LLM > Rule expected (LLM lacks locked belief state)
-
-### 4.3 Action Distribution Plot
-
-- `LLMBeliefAnchor`: should show predominantly "buy" in early rounds
-- If LLMBeliefAnchor shows high "hold" counts: persona not effectively inducing bias
-- `LLMContrarianTrader`: should show predominant "sell" when deviation > 0
+**Dimension-by-dimension diagnostic notes**:
+- **Price vs Fundamental**: LLM bias amplitude typically lower than Rule (no compounding belief state). If LLM amplitude ≈ Rule, LLM personas successfully replicate the bias mechanism.
+- **Deviation series**: Watch for oscillating deviation (LLM agents reversing more readily); `bias_persistence_rounds` LLM < Rule expected.
+- **Action distribution**: `LLMBeliefAnchor` should show predominantly "buy" in early rounds; high "hold" counts indicate the persona is not effectively inducing bias. `LLMContrarianTrader` should predominantly "sell" when deviation > 0.
+- **Rationality tendency**: LLM stabilizers with access to `fundamental` often reason toward it — this makes correction faster than in Rule.
 
 ---
 
-## §5 Variant-Specific Phenomena
+## §5 Scaling and Sensitivity Analysis
 
-### 5.1 Temperature Effect
+### Round Scaling
 
-At temperature=0.3, same market state → slight quantity variation.
-LLMBeliefAnchor may produce different buy quantities even with identical deviation.
+| Total Rounds | Expected Observable                                                | Phenomenon Clarity | Recommended for  |
+|--------------|--------------------------------------------------------------------|--------------------|------------------|
+| 100          | Bias signature present but noisy; `belief_flip_count` unreliable   | Low                | Smoke testing    |
+| 200          | Full Baseline → Correction arc; parse quality stable               | Medium             | Standard runs    |
+| 500          | Multiple bias episodes; persona replication signal tightens         | High               | Research quality |
 
-### 5.2 Implicit vs Explicit Bias
+### Agent Count Scaling
 
-Rule: explicit compounding `belief` variable
-LLM: implicit reasoning from persona + market state
+| Agent Count | Expected Observable                                                    | Environment Dynamics                                |
+|-------------|------------------------------------------------------------------------|-----------------------------------------------------|
+| 20          | Bias measurable but LLM cost dominates run time                        | Sparse orders; MAD variance elevated                |
+| 40          | Recommended: clean phase separation with tractable LLM budget          | Full mechanism observable                           |
+| 80          | Reduced variance across seeds; suitable for prompt-variation runs      | Baseline dynamics with statistical mass             |
 
-Test: Run LLM and Rule with same noise seed; compare `bias_amplitude_pct`.
-If LLM < Rule: implicit LLM reasoning is weaker than explicit belief state.
-If LLM ≈ Rule: persona instructions successfully simulate belief compounding.
+### Parameter Sensitivity (Variant-Specific)
 
-### 5.3 LLM Rationality Tendency
-
-LLMs with access to `fundamental` value often "reason toward" fundamental.
-This makes LLM stabilizing agents (BalancedAnalyst, ContrarianTrader) more effective —
-they see the "right answer" in the prompt (fundamental = 100.0).
+| Parameter                              | Change | Expected Effect on This Variant's Analysis                                            |
+|----------------------------------------|--------|---------------------------------------------------------------------------------------|
+| LLM temperature (sampling)             | +50 %  | Quantity variance widens; `belief_flip_count` rises further above Rule                |
+| Prompt persona strength                | Test   | Stronger confirmation vocabulary → `bias_amplitude_pct` approaches Rule               |
+| `analysis_threshold` (LLM stabilizer)  | −50 %  | LLM stabilizers engage earlier; `correction_ratio` rises further above Rule           |
+| `order_size` (LLMBeliefAnchor)         | +50 %  | Higher price pressure; `bias_amplitude_pct` grows even without belief compounding      |
+| Fundamental exposure in prompt         | Hide   | LLM "rationality tendency" weakens; `correction_ratio` drops toward Rule              |
 
 ---
 

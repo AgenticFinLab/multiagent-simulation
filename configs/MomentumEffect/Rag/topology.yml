@@ -10,18 +10,18 @@ sources:
 connections:
   market:
     - ragllm_momentum_trader
-    - ragllm_contrarian
-    - ragllm_technical
+    - ragllm_contrarian_trader
+    - ragllm_technical_trader
     - ragllm_trend_follower
-    - ragllm_fundamental
+    - ragllm_fundamental_anchor
 
   ragllm_momentum_trader:
     - market
-  ragllm_contrarian:
+  ragllm_contrarian_trader:
     - market
-  ragllm_technical:
+  ragllm_technical_trader:
     - market
   ragllm_trend_follower:
     - market
-  ragllm_fundamental:
+  ragllm_fundamental_anchor:
     - market

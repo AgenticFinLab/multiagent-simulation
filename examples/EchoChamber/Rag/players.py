@@ -3,34 +3,35 @@
 from __future__ import annotations
 
 import importlib
+import json
 import logging
+import math
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-import json as _json
-import re as _re
-
-from examples.llm_utils import (
-    is_retryable_llm_error,
-    parse_llm_response_with_thinking,
-)  # noqa: F401 (keep for reference)
+from masim.utils.llm_utils import is_retryable_llm_error
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
     KnowledgeStore,
     ResourceManager,
 )
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
@@ -39,66 +40,55 @@ from examples.EchoChamber.Rule.players import OpinionEnvironment
 
 logger = logging.getLogger(__name__)
 
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 
 def _parse_echo_chamber_response(response_text: str) -> Dict[str, Any]:
-    """Parse LLM response expecting EchoChamber fields.
+    """Parse the canonical tagged EchoChamber decision contract."""
+    analysis_match = re.search(r"<analysis>(.*?)</analysis>", response_text, re.DOTALL)
+    decision_match = re.search(r"<decision>(.*?)</decision>", response_text, re.DOTALL)
+    if analysis_match is None or not analysis_match.group(1).strip():
+        raise ValueError("Missing or empty <analysis> section")
+    if decision_match is None or not decision_match.group(1).strip():
+        raise ValueError("Missing or empty <decision> section")
 
-    Same tag/JSON extraction logic as ``parse_llm_response_with_thinking``
-    but validates for ``action_type``, ``intensity``, ``reasoning``.
-    """
-    analysis = ""
-    decision_json = None
-
-    analysis_match = _re.search(
-        r"<analysis>(.*?)</analysis>", response_text, _re.DOTALL
-    )
-    if not analysis_match:
-        analysis_match = _re.search(r"<think>(.*?)</think>", response_text, _re.DOTALL)
-    if analysis_match:
-        analysis = analysis_match.group(1).strip()
-
-    decision_match = _re.search(
-        r"<decision>(.*?)</decision>", response_text, _re.DOTALL
-    )
-    if decision_match:
-        decision_json = decision_match.group(1).strip()
-
-    if not decision_json:
-        code_match = _re.search(
-            r"```(?:json)?\s*(.*?)\s*```", response_text, _re.DOTALL
-        )
-        if code_match:
-            decision_json = code_match.group(1).strip()
-        else:
-            json_match = _re.search(r"\{[^{}]*\}", response_text, _re.DOTALL)
-            if json_match:
-                decision_json = json_match.group(0)
-
-    if not decision_json:
-        raise ValueError(f"No decision JSON found in response: {response_text[:100]}")
-
+    analysis = analysis_match.group(1).strip()
+    decision_json = decision_match.group(1).strip()
     try:
-        parsed = _json.loads(decision_json)
-    except _json.JSONDecodeError:
-        raise ValueError(f"Failed to parse decision JSON: {decision_json[:100]}")
+        parsed = json.loads(decision_json)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"Failed to parse decision JSON: {decision_json[:100]}"
+        ) from exc
+    if not isinstance(parsed, dict):
+        raise ValueError("Decision payload must be a JSON object")
 
     required_fields = ["action_type", "intensity", "reasoning"]
     missing = [f for f in required_fields if f not in parsed or parsed[f] is None]
     if missing:
         raise ValueError(f"Fields missing or null in LLM response: {missing}")
+    extra = sorted(set(parsed) - set(required_fields))
+    if extra:
+        raise ValueError(f"Unexpected decision fields: {extra}")
     action_type = str(parsed["action_type"]).lower()
     if action_type not in {"polarize", "neutral", "depolarize"}:
         raise ValueError(f"Invalid action_type: {parsed['action_type']!r}")
+    if isinstance(parsed["intensity"], bool):
+        raise ValueError(f"Invalid intensity: {parsed['intensity']!r}")
     try:
         intensity = float(parsed["intensity"])
     except (TypeError, ValueError) as exc:
         raise ValueError(f"Invalid intensity: {parsed['intensity']!r}") from exc
-    reasoning = str(parsed["reasoning"]).strip()
+    if not math.isfinite(intensity) or not 0.0 <= intensity <= 1.0:
+        raise ValueError(f"Intensity outside [0, 1]: {intensity!r}")
+    if not isinstance(parsed["reasoning"], str):
+        raise ValueError("Reasoning must be a string")
+    reasoning = parsed["reasoning"].strip()
     if not reasoning:
         raise ValueError("Empty reasoning")
 
     parsed["action_type"] = action_type
-    parsed["intensity"] = max(0.0, min(1.0, intensity))
+    parsed["intensity"] = intensity
     parsed["reasoning"] = reasoning
     parsed["analysis"] = analysis
     return parsed
@@ -139,7 +129,7 @@ class RagLLMSocialAgent(GeneralPlayer):
             folder=os.path.join(base_path, "opinion"),
             entry_limit=custom_state_hot_limit,
         )
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).resolve().parents[3]
         load_dotenv(project_root / ".env")
         llm_cfg = extras["llm"]
         lm_name = llm_cfg["lm_name"]
@@ -150,36 +140,20 @@ class RagLLMSocialAgent(GeneralPlayer):
             lm_name=lm_name, generation_config=generation_config
         )
         self.state.custom_state["llm_client"] = llm_client
-        private_knowledge = extras["private_knowledge"]
-        rag_cfg = private_knowledge["rag"]
-        await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
+        await self._initialize_rag()
 
-    async def _initialize_rag(
-        self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
-    ) -> None:
+    async def _initialize_rag(self) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
         knowledge_config = extras["knowledge"]
         if not knowledge_config:
-            knowledge_config = {
-                "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
-                "preprocessing": {
-                    "parser": "mineru",
-                    "output_position": rag_cfg["mineru_output_dir"],
-                },
-                "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"]
-                },
-            }
+            raise ValueError(f"[{self.identity}] extras.knowledge must not be empty")
         resource_manager = ResourceManager(knowledge_config)
         private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
-            private_knowledge = {
-                "from_global_resources": ["MinerU_processed"],
-                "local_resources": {"local_uri": "", "local_resources": []},
-                "rag": rag_cfg,
-            }
+            raise ValueError(
+                f"[{self.identity}] extras.private_knowledge must not be empty"
+            )
         agent_knowledge = resource_manager.resolve_agent_knowledge(
             agent_id=self.identity,
             private_knowledge=private_knowledge,
@@ -343,7 +317,8 @@ class RagLLMSocialAgent(GeneralPlayer):
         rag_store: Optional[KnowledgeStore] = self.state.custom_state["rag_store"]
         rag_cfg: Dict[str, Any] = self.state.custom_state["rag_cfg"]
         rag_context = ""
-        if rag_store and rag_store.is_built():
+        rag_query_disabled = self.state.custom_state.get("rag_query_disabled", False)
+        if not rag_query_disabled and rag_store.is_built():
             top_k = rag_cfg["top_k"]
             query = KnowledgeQuery(
                 text=(
@@ -354,12 +329,24 @@ class RagLLMSocialAgent(GeneralPlayer):
                 round_num=round_num,
                 agent_id=self.config.identity,
             )
-            result = rag_store.query(query)
-            rag_context = result.formatted_text
+            try:
+                result = rag_store.query(query)
+                rag_context = result.formatted_text
+            except RuntimeError as exc:
+                # Retrieval enriches the prompt, but it must not take down a
+                # long-running simulation when an external embedding endpoint
+                # is unavailable (for example an expired Ark endpoint/key).
+                self.state.custom_state["rag_query_disabled"] = True
+                logger.warning(
+                    "[%s] RAG retrieval failed; using fallback context for the "
+                    "rest of this actor's run: %s",
+                    self.identity,
+                    exc,
+                )
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
-        template = load_prompt("examples.EchoChamber.Rag.prompts:RAG_USER_TEMPLATE")
+        template = load_prompt(self.config.extras["llm"]["user_message"])
         return template.format(
             round=round_num,
             polarization=polarization,
@@ -380,18 +367,28 @@ class RagLLMSocialAgent(GeneralPlayer):
         env_data = self.state.custom_state["env_data"]
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         strategy_name = self.__class__.__name__
-        system_prompt = load_prompt(self._system_prompt_path)
+        llm_config = self.config.extras["llm"]
+        configured_system_prompt = llm_config["sys_message"]
+        if configured_system_prompt != self._system_prompt_path:
+            raise ValueError(
+                f"[{self.identity}] sys_message does not match the role prompt: "
+                f"{configured_system_prompt!r} != {self._system_prompt_path!r}"
+            )
+        system_prompt = load_prompt(configured_system_prompt)
         user_prompt = self._build_prompt(env_data)
+        max_retries = int(llm_config["max_retries"])
+        if max_retries < 1:
+            raise ValueError("extras.llm.max_retries must be at least 1")
         decision = None
-        for attempt in range(3):
+        last_error: Optional[Exception] = None
+        for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 infer_output = llm_client.run([infer_input])
-                decision = _parse_echo_chamber_response(
-                    infer_output.outputs[0].response
-                )
+                decision = _parse_echo_chamber_response(infer_output.response)
                 break
             except Exception as exc:
+                last_error = exc
                 parse_error = isinstance(exc, (ValueError, KeyError))
                 retryable_api_error = is_retryable_llm_error(exc)
                 if not parse_error and not retryable_api_error:
@@ -399,23 +396,23 @@ class RagLLMSocialAgent(GeneralPlayer):
                 logger.warning(
                     "[%s] LLM attempt %d failed: %s", self.identity, attempt + 1, exc
                 )
-                if attempt == 2:
-                    decision = None
         if decision is None:
             raise RuntimeError(
-                f"[{self.identity}] LLM failed after 3 attempts — cannot proceed without a valid decision."
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
         action_type = decision["action_type"]
         intensity = float(decision["intensity"])
         intensity = self._apply_intensity_constraints(intensity)
-        reasoning = str(decision.pop("reasoning"))[:120]
+        reasoning = str(decision.pop("reasoning"))
         analysis = str(decision.pop("analysis"))
         my_opinion = self.state.custom_state["my_opinion"]
         if action_type == "polarize":
-            shift = 0.05 * (1 if my_opinion >= 0 else -1)
-            my_opinion += shift
+            direction = 1 if my_opinion >= 0 else -1
+            polarize_step = float(self.config.extras["polarize_opinion_step"])
+            my_opinion += polarize_step * intensity * direction
         elif action_type == "depolarize":
-            my_opinion *= 0.95
+            depolarize_step = float(self.config.extras["depolarize_opinion_step"])
+            my_opinion *= 1.0 - depolarize_step * intensity
         my_opinion = self._clamp_opinion(my_opinion)
         self.state.custom_state["my_opinion"] = my_opinion
         logger.debug(

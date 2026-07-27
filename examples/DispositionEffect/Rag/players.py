@@ -64,14 +64,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import KnowledgeLoader, KnowledgeQuery, KnowledgeStore
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("DispositionEffectRag")
-RAG_FALLBACK_CONTEXT = "(No relevant knowledge retrieved this round.)"
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 _DECISION_PARAM_SKIP_KEYS = {
     "record_path",
     "initial_cash",
@@ -374,9 +374,8 @@ class BaseRagInvestor(GeneralPlayer):
                 )
                 raise
         else:
-            logger.warning(
-                "[%s] No documents loaded for RAG; index will be empty",
-                self.config.identity,
+            raise RuntimeError(
+                f"[{self.config.identity}] No documents loaded for required RAG index"
             )
 
     def _load_knowledge_documents(self, rag_config: Dict[str, Any]) -> list:
@@ -628,9 +627,10 @@ class BaseRagInvestor(GeneralPlayer):
             raise ValueError("purchase_price must be positive")
         gain_loss = (price - purchase_price) / purchase_price
 
-        if gain_loss > 0.05:
+        rag_config = self.config.extras["rag"]
+        if gain_loss > rag_config["query_gain_threshold"]:
             return f"profit taking strategy when gain is {gain_loss*100:.1f}%"
-        elif gain_loss < -0.05:
+        elif gain_loss < rag_config["query_loss_threshold"]:
             return f"loss realization decision when loss is {gain_loss*100:.1f}%"
         else:
             return "holding strategy for small price movements"
@@ -640,6 +640,7 @@ class BaseRagInvestor(GeneralPlayer):
         try:
             rag_config = self.config.extras["rag"]
             top_k = rag_config["top_k"]
+            context_char_limit = rag_config["context_char_limit"]
             round_num = self.state.custom_state["round"]
 
             query = KnowledgeQuery(
@@ -652,7 +653,7 @@ class BaseRagInvestor(GeneralPlayer):
 
             if result and result.chunks:
                 return "\n\n".join(
-                    f"[Knowledge {i+1}]: {chunk[:500]}"
+                    f"[Knowledge {i+1}]: {chunk[:context_char_limit]}"
                     for i, chunk in enumerate(result.chunks)
                 )
         except Exception as e:
@@ -670,7 +671,7 @@ class BaseRagInvestor(GeneralPlayer):
         strategy_name = self.__class__.__name__
 
         if market_data is None:
-            return self._hold_order(round_num, strategy_name)
+            return self._hold_order(round_num, strategy_name, purchase_price)
 
         price = market_data["price"]
         if purchase_price <= 0:
@@ -692,7 +693,7 @@ class BaseRagInvestor(GeneralPlayer):
         news_shock = market_data["news_shock"]
 
         # Format user prompt — {rag_context} placeholder filled here per §8.4 spec
-        injected_rag_context = rag_context if rag_context else RAG_FALLBACK_CONTEXT
+        injected_rag_context = rag_context if rag_context else _RAG_FALLBACK
         user_prompt = user_template.format(
             round=round_num,
             price=price,
@@ -711,7 +712,7 @@ class BaseRagInvestor(GeneralPlayer):
         )
 
         # Call LLM
-        max_retries = 3
+        max_retries = self.config.extras["llm"]["max_retries"]
         raw_decision = None
         last_error = None
         for attempt in range(max_retries):
@@ -719,7 +720,7 @@ class BaseRagInvestor(GeneralPlayer):
                 llm_input = InferInput(system_msg=sys_prompt, user_msg=user_prompt)
                 result = self.llm_client.run([llm_input])
                 raw_decision = parse_llm_response_with_thinking(
-                    result.outputs[0].response
+                    result.response
                 )
                 if raw_decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"invalid action: {raw_decision['action']}")
@@ -742,19 +743,14 @@ class BaseRagInvestor(GeneralPlayer):
 
         action = raw_decision["action"]
         bid_price = float(raw_decision["bid_price"])
-        quantity = float(raw_decision["quantity"])
+        requested_quantity = abs(float(raw_decision["quantity"]))
 
         if action == "buy":
-            quantity = min(quantity, int(cash / bid_price))
+            quantity = min(requested_quantity, int(cash / bid_price))
         elif action == "sell":
-            quantity = min(quantity, int(abs(position)))
+            quantity = -min(requested_quantity, int(abs(position)))
         else:
             quantity = 0.0
-
-        if action == "sell":
-            quantity = -abs(quantity)
-        elif action == "buy":
-            quantity = abs(quantity)
 
         move_reference = "Disposition" not in strategy_name
         if quantity > 0:
@@ -771,6 +767,9 @@ class BaseRagInvestor(GeneralPlayer):
                 self.update_reference_point(quantity, bid_price)
             else:
                 quantity = 0.0
+
+        if quantity == 0.0:
+            action = "hold"
 
         order = {
             "action": action,
@@ -790,14 +789,23 @@ class BaseRagInvestor(GeneralPlayer):
 
         return decision
 
-    def _hold_order(self, round_num: int, strategy_name: str) -> Dict[str, Any]:
-        return {
+    def _hold_order(
+        self, round_num: int, strategy_name: str, bid_price: float
+    ) -> Dict[str, Any]:
+        order = {
             "action": "hold",
-            "bid_price": 0.0,
+            "bid_price": bid_price,
             "quantity": 0.0,
             "reasoning": "No market data",
+            "analysis": f"Round {round_num}: market data unavailable; hold.",
             "strategy": strategy_name,
-            "rag_context": RAG_FALLBACK_CONTEXT,
+            "rag_context": _RAG_FALLBACK,
+        }
+        return {
+            **order,
+            "outbound_messages": [
+                {"payload": order, "content_type": "investor_bid"}
+            ],
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
@@ -853,6 +861,44 @@ class RagTaxAwareInvestor(BaseRagInvestor):
     """
 
 
+class RagIndexHolder(BaseRagInvestor):
+    """RAG-variant passive benchmark from simulation-bases.md §4.4.
+
+    The passive benchmark deliberately ignores retrieved advice and never
+    trades.  It still records retrieval context so the RAG analysis can audit
+    that the variant's knowledge pipeline was available.
+    """
+
+    async def decide(self) -> Dict[str, Any]:
+        market_data = self.state.custom_state["market_data"]
+        bid_price = (
+            market_data["price"]
+            if market_data is not None
+            else self.state.custom_state["purchase_price"]
+        )
+        rag_context = _RAG_FALLBACK
+        if market_data is not None:
+            rag_context = self._retrieve_context(
+                "passive buy-and-hold index investing strategy"
+            ) or _RAG_FALLBACK
+
+        order = {
+            "action": "hold",
+            "bid_price": bid_price,
+            "quantity": 0.0,
+            "reasoning": "Passive index benchmark does not trade.",
+            "analysis": "The §4.4 passive benchmark holds in every state.",
+            "strategy": self.__class__.__name__,
+            "rag_context": rag_context,
+        }
+        return {
+            **order,
+            "outbound_messages": [
+                {"payload": order, "content_type": "investor_bid"}
+            ],
+        }
+
+
 class RagInstitutionalInvestor(BaseRagInvestor):
     """
     RAG-enhanced institutional investor.
@@ -863,22 +909,13 @@ class RagInstitutionalInvestor(BaseRagInvestor):
     """
 
 
-class RagLossAverse(BaseRagInvestor):
-    """
-    RAG-enhanced extreme loss-averse investor.
-
-    Theory: simulation-bases.md §4.1 — DispositionInvestor
-    Theoretical basis: Prospect Theory loss aversion; RAG retrieves loss-aversion and disposition-effect studies.
-    See simulation-bases.md §4.1 for mathematical model.
-    """
-
-
 __all__ = [
     "Market",
     "BaseRagInvestor",
     "RagDispositionInvestor",
     "RagRationalInvestor",
     "RagTaxAwareInvestor",
+    "RagIndexHolder",
     "RagInstitutionalInvestor",
-    "RagLossAverse",
+    "_RAG_FALLBACK",
 ]

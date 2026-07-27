@@ -15,11 +15,12 @@ knowledge:
     embed_model: "openai/hunyuan-embedding"
     embed_api_key: "{{ HUNYUAN_API_KEY }}"
     embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-    chunk_size: 512
-    chunk_overlap: 64
-    top_k: 5
+    chunk_size: 512  # Source: retrieval operational contract; Rag/explain.md §4
+    chunk_overlap: 64  # Source: retrieval operational contract; Rag/explain.md §4
+    top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.EndowmentEffect.Rag.players:Market"
   num_instances: 1
@@ -31,39 +32,40 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/EndowmentEffect/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.05
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      initial_price: 100.0  # Source: cross-variant calibration; simulation-bases.md §3.1
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.02  # Source: cross-variant calibration; simulation-bases.md §3.1
+      mean_reversion: 0.05  # Source: cross-variant calibration; simulation-bases.md §3.1
+      noise_std: 0.01  # Source: cross-variant calibration; simulation-bases.md §3.1
+      custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
   persona: !include persona.yml
 
-endowedholder:
+ragllm_endowed_holder:
   name: "EndowedHolder"
   class: "examples.EndowmentEffect.Rag.players:RagLLMEndowedHolder"
   num_instances: 2
   config:
-    identity: "endowedholder"
+    identity: "ragllm_endowed_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/EndowmentEffect/Rag/records"
-      initial_cash: 800000.0
-      initial_position: 500
-      endowment_premium: 0.15
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 800000.0  # Source: initial portfolio calibration; simulation-bases.md §4.1
+      initial_position: 500  # Source: endowed inventory; simulation-bases.md §4.1
+      endowment_premium: 0.15  # Source: simulation-bases.md §4.1 and §6
+      base_size: 300  # Source: order-size calibration; simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
       llm:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_ENDOWED_HOLDER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: bounded inference retry policy; Rag/explain.md §4
         generation_config:
-          temperature: 0.6
-          max_tokens: 512
+          temperature: 0.6  # Source: role deliberation setting; simulation-bases.md §4.1
+          max_tokens: 512  # Source: tagged-response budget; Rag/explain.md §4
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -78,36 +80,37 @@ endowedholder:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512  # Source: retrieval operational contract; Rag/explain.md §4
+          chunk_overlap: 64  # Source: retrieval operational contract; Rag/explain.md §4
+          top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-statusquoseller:
+ragllm_status_quo_seller:
   name: "StatusQuoSeller"
   class: "examples.EndowmentEffect.Rag.players:RagLLMStatusQuoSeller"
   num_instances: 2
   config:
-    identity: "statusquoseller"
+    identity: "ragllm_status_quo_seller"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/EndowmentEffect/Rag/records"
-      initial_cash: 800000.0
-      initial_position: 500
-      status_quo_premium: 0.20
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 800000.0  # Source: initial portfolio calibration; simulation-bases.md §4.2
+      initial_position: 500  # Source: status-quo inventory; simulation-bases.md §4.2
+      status_quo_premium: 0.20  # Source: decision calibration; simulation-bases.md §4.2
+      base_size: 300  # Source: order-size calibration; simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
       llm:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_STATUS_QUO_SELLER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: bounded inference retry policy; Rag/explain.md §4
         generation_config:
-          temperature: 0.5
-          max_tokens: 512
+          temperature: 0.5  # Source: role deliberation setting; simulation-bases.md §4.2
+          max_tokens: 512  # Source: tagged-response budget; Rag/explain.md §4
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -122,36 +125,37 @@ statusquoseller:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512  # Source: retrieval operational contract; Rag/explain.md §4
+          chunk_overlap: 64  # Source: retrieval operational contract; Rag/explain.md §4
+          top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-rationalarbitrageur:
+ragllm_rational_arbitrageur:
   name: "RationalArbitrageur"
   class: "examples.EndowmentEffect.Rag.players:RagLLMRationalArbitrageur"
   num_instances: 2
   config:
-    identity: "rationalarbitrageur"
+    identity: "ragllm_rational_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/EndowmentEffect/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      arb_threshold: 0.05
-      base_size: 400
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0  # Source: initial portfolio calibration; simulation-bases.md §4.3
+      initial_position: 0  # Source: unbiased arbitrage start; simulation-bases.md §4.3
+      arb_threshold: 0.05  # Source: decision calibration; simulation-bases.md §4.3
+      base_size: 400  # Source: order-size calibration; simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
       llm:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_RATIONAL_ARBITRAGEUR_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: bounded inference retry policy; Rag/explain.md §4
         generation_config:
-          temperature: 0.4
-          max_tokens: 512
+          temperature: 0.4  # Source: disciplined-role setting; simulation-bases.md §4.3
+          max_tokens: 512  # Source: tagged-response budget; Rag/explain.md §4
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -166,36 +170,37 @@ rationalarbitrageur:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512  # Source: retrieval operational contract; Rag/explain.md §4
+          chunk_overlap: 64  # Source: retrieval operational contract; Rag/explain.md §4
+          top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-newbuyer:
+ragllm_new_buyer:
   name: "NewBuyer"
   class: "examples.EndowmentEffect.Rag.players:RagLLMNewBuyer"
   num_instances: 2
   config:
-    identity: "newbuyer"
+    identity: "ragllm_new_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/EndowmentEffect/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      buy_threshold: 0.03
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0  # Source: initial portfolio calibration; simulation-bases.md §4.4
+      initial_position: 0  # Source: no-ownership starting state; simulation-bases.md §4.4
+      buy_threshold: 0.03  # Source: decision calibration; simulation-bases.md §4.4
+      base_size: 300  # Source: order-size calibration; simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
       llm:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_NEW_BUYER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: bounded inference retry policy; Rag/explain.md §4
         generation_config:
-          temperature: 0.4
-          max_tokens: 512
+          temperature: 0.4  # Source: disciplined-role setting; simulation-bases.md §4.4
+          max_tokens: 512  # Source: tagged-response budget; Rag/explain.md §4
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -210,36 +215,38 @@ newbuyer:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512  # Source: retrieval operational contract; Rag/explain.md §4
+          chunk_overlap: 64  # Source: retrieval operational contract; Rag/explain.md §4
+          top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml
 
-noisetrader:
+ragllm_noise_trader:
   name: "NoiseTrader"
   class: "examples.EndowmentEffect.Rag.players:RagLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "ragllm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/EndowmentEffect/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      initial_cash: 500000.0  # Source: initial portfolio calibration; simulation-bases.md §4.5
+      initial_position: 0  # Source: noise-trader starting state; simulation-bases.md §4.5
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5 and §6
+      noise_size: 150  # Source: order-size calibration; simulation-bases.md §4.5.7
+      base_size: 150  # Source: order-size calibration; simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: operational history window; analysis-bases.md §4
       llm:
         sys_message: "examples.EndowmentEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
         user_message: "examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: bounded inference retry policy; Rag/explain.md §4
         generation_config:
-          temperature: 0.9
-          max_tokens: 512
+          temperature: 0.9  # Source: high-variance role setting; simulation-bases.md §4.5
+          max_tokens: 512  # Source: tagged-response budget; Rag/explain.md §4
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -254,7 +261,7 @@ noisetrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512  # Source: retrieval operational contract; Rag/explain.md §4
+          chunk_overlap: 64  # Source: retrieval operational contract; Rag/explain.md §4
+          top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
   persona: !include persona.yml

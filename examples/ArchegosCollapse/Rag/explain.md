@@ -19,27 +19,27 @@
 
 | Theory Component                                                   | Implementation                                                                                          |
 |--------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| TRS leverage rules → sim-bases §4 Rule-Based Behavior              | System prompt = `RAG_CONCENTRATED_FUND_SYS` = `RULELLM_CONCENTRATED_FUND_SYS` (identical rules/persona) |
+| TRS leverage rules → sim-bases §4.N.5.4 Mathematical Model         | System prompt = `RAG_CONCENTRATED_FUND_SYS` = `RULELLM_CONCENTRATED_FUND_SYS` (identical rules/persona) |
 | Historical case knowledge → sim-bases §8 (Historical Case Studies) | RAG knowledge base sources from Archegos collapse (March 2021) described in sim-bases §8                |
 | `{rag_context}` injection → sim-bases §4 Rag notes                 | `RAG_USER_TEMPLATE` contains `"Relevant Domain Knowledge:\n{rag_context}"` section                      |
 | No-retrieval fallback                                              | When retrieval fails: `"(No relevant knowledge retrieved this round.)"` replaces `{rag_context}`        |
 
-### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
+### PrimeBrokerFirstMover: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.2 — PrimeBrokerFirstMover)*
 
-| Theory Component                                    | Implementation                                                                       |
-|-----------------------------------------------------|--------------------------------------------------------------------------------------|
-| First-mover rules → sim-bases §4                    | `RAG_PRIME_BROKER1_SYS` = `RULELLM_PRIME_BROKER1_SYS` (deviation < −0.10 → SELL 40%) |
-| Historical precedent of broker races → sim-bases §8 | RAG may retrieve LTCM/Archegos prime broker behavior examples                        |
-| RAG augmentation modifying urgency                  | Retrieved "first-mover precedents" may reinforce faster/larger liquidation decisions |
+| Theory Component                                    | Implementation                                                                                             |
+|-----------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| First-mover rules → sim-bases §4                    | `RAG_PRIME_BROKER_FIRST_MOVER_SYS` = `RULELLM_PRIME_BROKER_FIRST_MOVER_SYS` (deviation < −0.10 → SELL 40%) |
+| Historical precedent of broker races → sim-bases §8 | RAG may retrieve LTCM/Archegos prime broker behavior examples                                              |
+| RAG augmentation modifying urgency                  | Retrieved "first-mover precedents" may reinforce faster/larger liquidation decisions                       |
 
-### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
+### PrimeBrokerDelayedLiquidator: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator)*
 
-| Theory Component                                            | Implementation                                                                       |
-|-------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Second-mover rules → sim-bases §4                           | `RAG_PRIME_BROKER2_SYS` = `RULELLM_PRIME_BROKER2_SYS` (deviation < −0.15 → SELL 35%) |
-| Learning from historical second-mover losses → sim-bases §8 | RAG may retrieve Credit Suisse/Nomura late-liquidation loss examples                 |
+| Theory Component                                            | Implementation                                                                                                           |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| Second-mover rules → sim-bases §4                           | `RAG_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS` = `RULELLM_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS` (deviation < −0.15 → SELL 35%) |
+| Learning from historical second-mover losses → sim-bases §8 | RAG may retrieve Credit Suisse/Nomura late-liquidation loss examples                                                     |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
@@ -138,15 +138,15 @@ Deviations from simulation-bases.md design: None in market mechanics.
 
 Key Configuration Parameters (`configs/ArchegosCollapse/Rag/players.yml`):
 
-| Parameter | Config Path | Value | Design Justification |
-|---|---|---|---|
-| `price_impact` | `extras.price_impact` | 0.03 | Identical to Rule/RuleLLM |
-| `mean_reversion` | `extras.mean_reversion` | 0.01 | Identical to Rule/RuleLLM |
-| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.Rag.prompts:RAG_*_SYS` | Module path for RAG system prompts (aliases to RuleLLM prompts) |
-| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE` | Module path for RAG user template |
-| `private_knowledge.rag.top_k` | `extras.private_knowledge.rag.top_k` | 5 | Number of chunks retrieved per round |
-| `embed_model` | `extras.private_knowledge.rag.embed_model` | `openai/hunyuan-embedding` | Embedding model for RAG retrieval |
-| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.5 | Low temperature — rules + knowledge |
+| Parameter                     | Config Path                                | Value                                                     | Design Justification                                            |
+|-------------------------------|--------------------------------------------|-----------------------------------------------------------|-----------------------------------------------------------------|
+| `price_impact`                | `extras.price_impact`                      | 0.03                                                      | Identical to Rule/RuleLLM                                       |
+| `mean_reversion`              | `extras.mean_reversion`                    | 0.01                                                      | Identical to Rule/RuleLLM                                       |
+| `sys_message`                 | `extras.llm.sys_message`                   | `examples.ArchegosCollapse.Rag.prompts:RAG_*_SYS`         | Module path for RAG system prompts (aliases to RuleLLM prompts) |
+| `user_message`                | `extras.llm.user_message`                  | `examples.ArchegosCollapse.Rag.prompts:RAG_USER_TEMPLATE` | Module path for RAG user template                               |
+| `private_knowledge.rag.top_k` | `extras.private_knowledge.rag.top_k`       | 5                                                         | Number of chunks retrieved per round                            |
+| `embed_model`                 | `extras.private_knowledge.rag.embed_model` | `openai/hunyuan-embedding`                                | Embedding model for RAG retrieval                               |
+| `temperature`                 | `extras.llm.generation_config.temperature` | 0.4-0.5                                                   | Low temperature — rules + knowledge                             |
 
 ---
 
@@ -169,12 +169,12 @@ Output location: `EXPERIMENT/ArchegosCollapse/Rag/`
 
 ## §8 Expected Behavior Patterns
 
-| Phase         | Rounds | Expected Agent Behavior                                                                                                          | Expected Price Dynamics                                                         |
-|---------------|--------|----------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| Pre-Cascade   | 1–15   | RAG retrieves contextual knowledge; agents follow rules; historical precedents referenced                                        | Price near 100; behavior near-identical to RuleLLM                              |
-| Cascade Onset | 10–20  | Historical Archegos/LTCM context may accelerate broker decisions; rules still binding                                            | Cascade onset similar to RuleLLM; potentially earlier if RAG reinforces urgency |
-| Peak Cascade  | 20–35  | PrimeBroker2 recalled Credit Suisse delays → may act more decisively; BlockTradeBuyer more aggressive with historical conviction | Cascade depth near RuleLLM; slight modification from knowledge                  |
-| Recovery      | 35–100 | Historical recovery patterns may guide BlockTradeBuyer and InformationTrader cover decisions                                     | Recovery speed may differ from RuleLLM if RAG context is strong                 |
+| Phase         | Rounds | Expected Agent Behavior                                                                                                                          | Expected Price Dynamics                                                         |
+|---------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| Pre-Cascade   | 1–15   | RAG retrieves contextual knowledge; agents follow rules; historical precedents referenced                                                        | Price near 100; behavior near-identical to RuleLLM                              |
+| Cascade Onset | 10–20  | Historical Archegos/LTCM context may accelerate broker decisions; rules still binding                                                            | Cascade onset similar to RuleLLM; potentially earlier if RAG reinforces urgency |
+| Peak Cascade  | 20–35  | PrimeBrokerDelayedLiquidator recalled Credit Suisse delays → may act more decisively; BlockTradeBuyer more aggressive with historical conviction | Cascade depth near RuleLLM; slight modification from knowledge                  |
+| Recovery      | 35–100 | Historical recovery patterns may guide BlockTradeBuyer and InformationTrader cover decisions                                                     | Recovery speed may differ from RuleLLM if RAG context is strong                 |
 
 ---
 

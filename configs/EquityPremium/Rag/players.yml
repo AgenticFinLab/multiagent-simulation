@@ -1,5 +1,5 @@
 # =============================================================================
-# EquityPremiumLLM Players Configuration
+# EquityPremium Rag Players Configuration
 # =============================================================================
 
 # =============================================================================
@@ -26,6 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Stock and Bond"
   class: "examples.EquityPremium.Rag.players:Market"
   num_instances: 1
@@ -36,37 +37,45 @@ market:
     group_tags:
       - market
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
-      # ~6% annual / 252 days
+      # Source: target §9 — ~6% annual / 252 (Mehra & Prescott 1985)
       stock_expected_return: 0.000238
-      # ~1% annual / 252 days
+      # Source: target §9 — ~1% annual / 252
       bond_return: 0.0000397
-      # ~15% annual vol / sqrt(252)
+      # Source: target §9 — ~15% annual vol / sqrt(252)
       stock_volatility: 0.00945
+      # Source: target §9 — normalization
       initial_stock_price: 100.0
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-ragllm_myopic:
+ragllm_myopic_loss_averse:
   name: "RAG Myopic Loss-Averse"
   class: "examples.EquityPremium.Rag.players:RagLLMMyopicLossAverse"
   # Expander → ragllm_myopic_1, ragllm_myopic_2, ragllm_myopic_3, ragllm_myopic_4, ragllm_myopic_5
   num_instances: 5
   config:
-    identity: "ragllm_myopic"
+    identity: "ragllm_myopic_loss_averse"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
-      # 50% cash
+      # Source: simulation-bases.md §4.1 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.1 — initial stock position
       initial_stock_shares: 50.0
-      # 25% bonds
+      # Source: simulation-bases.md §4.1 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -84,6 +93,7 @@ ragllm_myopic:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_MYOPIC_LOSS_AVERSE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -94,24 +104,31 @@ ragllm_myopic:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_long_term:
+ragllm_long_term_investor:
   name: "RAG Long-Term Investor"
   class: "examples.EquityPremium.Rag.players:RagLLMLongTermInvestor"
   # Expander → ragllm_long_term_1, ragllm_long_term_2
   num_instances: 2
   config:
-    identity: "ragllm_long_term"
+    identity: "ragllm_long_term_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.2 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.2 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.2 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -129,6 +146,7 @@ ragllm_long_term:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_LONG_HORIZON_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -139,23 +157,30 @@ ragllm_long_term:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_institutional:
+ragllm_institutional_investor:
   name: "RAG Institutional Investor"
   class: "examples.EquityPremium.Rag.players:RagLLMInstitutionalInvestor"
   num_instances: 1
   config:
-    identity: "ragllm_institutional"
+    identity: "ragllm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.3 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.3 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.3 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -173,6 +198,7 @@ ragllm_institutional:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_RISK_NEUTRAL_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -183,24 +209,31 @@ ragllm_institutional:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_risk_averse:
+ragllm_risk_averse_saver:
   name: "RAG Risk-Averse Saver"
   class: "examples.EquityPremium.Rag.players:RagLLMRiskAverseSaver"
   # Expander → ragllm_risk_averse_1, ragllm_risk_averse_2, ragllm_risk_averse_3
   num_instances: 3
   config:
-    identity: "ragllm_risk_averse"
+    identity: "ragllm_risk_averse_saver"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.4 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.4 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.4 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -218,6 +251,7 @@ ragllm_risk_averse:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_CONSERVATIVE_INVESTOR_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"
@@ -228,24 +262,31 @@ ragllm_risk_averse:
           max_new_tokens: 600
   persona: !include persona.yml
 
-ragllm_rational:
+ragllm_rational_optimizer:
   name: "RAG Rational Optimizer"
   class: "examples.EquityPremium.Rag.players:RagLLMRationalOptimizer"
   # Expander → ragllm_rational_1, ragllm_rational_2
   num_instances: 2
   config:
-    identity: "ragllm_rational"
+    identity: "ragllm_rational_optimizer"
     role: player
     steps_per_turn: 1
     group_tags:
       - ragllm_investors
     extras:
+      # Source: infrastructure
       record_path: "EXPERIMENT/EquityPremium/Rag/records"
+      # Source: target §9 — normalization
       initial_cash: 10000.0
+      # Source: simulation-bases.md §4.5 — 50% cash allocation
       initial_cash_ratio: 0.5
+      # Source: simulation-bases.md §4.5 — initial stock position
       initial_stock_shares: 50.0
+      # Source: simulation-bases.md §4.5 — 25% bonds
       initial_bond_ratio: 0.25
+      # Source: implementation-infrastructure
       custom_state_hot_limit: 3
+      # Source: RAG-wiring
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -263,6 +304,7 @@ ragllm_rational:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: LLM-wiring
       llm:
         sys_message: "examples.EquityPremium.Rag.prompts:RAGLLM_NOISE_TRADER_SYS"
         user_message: "examples.EquityPremium.Rag.prompts:RAGLLM_USER_TEMPLATE"

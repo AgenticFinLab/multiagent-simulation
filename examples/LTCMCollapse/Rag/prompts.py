@@ -1,4 +1,4 @@
-"""LTCMCollapse RAG prompts.
+"""Retrieval-augmented finance-market prompts.
 
 RAG uses the RuleLLM persona/rule system prompts and injects retrieved crisis
 knowledge into the user message through ``{rag_context}``.
@@ -12,6 +12,8 @@ from examples.LTCMCollapse.RuleLLM.prompts import (
     RULELLM_RISKMANAGER_PROMPT as RAG_RISKMANAGER_PROMPT,
 )
 
+RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
+
 RAG_USER_TEMPLATE = """Relevant crisis knowledge retrieved for this decision:
 {rag_context}
 
@@ -21,6 +23,8 @@ Current Market State (Round {round_num}):
 - Price Deviation: {deviation:+.2%}
 - Your Cash: ${cash:.2f}
 - Your Position: {position} shares
+- Initial Price: ${initial_price:.2f}
+- Initial Position: {initial_position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
 Use the retrieved knowledge as contextual evidence, but still follow your persona and decision rules.
@@ -35,4 +39,5 @@ __all__ = [
     "RAG_LIQUIDITYPROVIDER_PROMPT",
     "RAG_CENTRALBANK_PROMPT",
     "RAG_USER_TEMPLATE",
+    "RAG_FALLBACK",
 ]

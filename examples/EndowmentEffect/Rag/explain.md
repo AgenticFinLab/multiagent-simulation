@@ -1,110 +1,83 @@
-# EndowmentEffect Rag — Implementation Explanation
+# EndowmentEffect Rag — Implementation Guide
 
-## §1 Overview
+## 1. Overview
 
-The Rag variant augments the RuleLLM prompt structure with Retrieval-Augmented Generation (RAG). Each investor class retrieves relevant domain passages before reasoning, combines that context with the same persona/rule guidance used by RuleLLM, and returns canonical trading JSON. This allows retrieved knowledge to moderate or amplify the endowment effect depending on the retrieved content.
+The Rag variant combines the RuleLLM personas and decision rules with retrieved
+document context. `RagLLMInvestor` retrieves before inference, validates the
+model response, applies configured size and portfolio constraints, and sends a
+canonical order to the shared Rule `Market`.
 
-| Aspect             | Detail                                                                    |
-|--------------------|---------------------------------------------------------------------------|
-| Variant            | Rag (RAG-augmented LLM)                                                   |
-| Simulation         | EndowmentEffect                                                           |
-| Decision Mechanism | RAG-retrieved knowledge + RuleLLM-style persona/rule guidance |
-| Theory Reference   | `simulation-bases.md §4.1–§4.5`                                           |
-| Market Broadcast   | `price`, `fundamental`, `deviation`, `cash`, `position`, `round`          |
+## 2. Theory → Implementation Mapping
 
-## §2 Theory → Implementation Mapping
+| Design block | Rag class | Prompt/retrieval implementation |
+|---|---|---|
+| `simulation-bases.md §4.1` EndowedHolder | `RagLLMEndowedHolder` | ownership persona and premium rule; market-state retrieval query |
+| `simulation-bases.md §4.2` StatusQuoSeller | `RagLLMStatusQuoSeller` | inertia persona and high-action threshold; market-state retrieval query |
+| `simulation-bases.md §4.3` RationalArbitrageur | `RagLLMRationalArbitrageur` | symmetric fundamental rule; market-state retrieval query |
+| `simulation-bases.md §4.4` NewBuyer | `RagLLMNewBuyer` | no-ownership persona and entry rule; market-state retrieval query |
+| `simulation-bases.md §4.5` NoiseTrader | `RagLLMNoiseTrader` | intermittent-trading persona and rule; market-state retrieval query |
 
-### §2.1 RagLLMEndowedHolder (simulation-bases.md §4.1)
+The inherited prompts retain literal `== PERSONA ==` and
+`== DECISION RULES ==` sections. Retrieved passages are evidence for applying
+those rules; they do not replace them.
 
-| Theory Component                          | Implementation                                                                                            |
-|-------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| Endowment premium (Kahneman et al., 1990) | System prompt: ownership attachment persona; RAG retrieves Kahneman et al. (1990) passages on WTA/WTP gap |
-| Loss aversion suppresses selling          | Retrieved documents reinforce reluctance to sell below endowment premium                                  |
-| Historical anchoring                      | RAG may retrieve episodes of prolonged holding during overvaluation, reinforcing inertia                  |
+## 3. Environment and Round Flow
 
-### §2.2 RagLLMStatusQuoSeller (simulation-bases.md §4.2)
+`Market` is imported from `Rule/players.py` and implements the price update in
+`simulation-bases.md §3.1`. Each round broadcasts `price`, `fundamental`, and
+`deviation`. Investors retrieve context, request one decision, enforce cash and
+inventory constraints, and send an `order` payload back to the market.
 
-| Theory Component                               | Implementation                                                                                           |
-|------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| Status quo bias (Samuelson & Zeckhauser, 1988) | System prompt: inertia persona; RAG retrieves Samuelson & Zeckhauser (1988) passages                     |
-| Knowledge-informed inertia                     | Retrieved passages may strengthen or weaken inertia depending on market context retrieved                |
-| Adaptive threshold interpretation             | Retrieved passages may influence reasoning and sizing while the prompt still presents RuleLLM-style thresholds |
+## 4. Rag Architecture and I/O Contract
 
-### §2.3 RagLLMRationalArbitrageur (simulation-bases.md §4.3)
+`ResourceManager` resolves shared and agent-local paths. `KnowledgeStore`
+loads a local index, copies a shared index, or builds from processed documents.
+A file lock prevents concurrent actors from racing while publishing the shared
+index. Missing required documents or configuration fails fast.
 
-| Theory Component                             | Implementation                                                                                      |
-|----------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| Rational expectations benchmark (Muth, 1961) | System prompt: arbitrageur persona; RAG retrieves Muth (1961) and Shleifer & Vishny (1997) passages |
-| Retrieved evidence moderates aggressiveness  | If RAG retrieves evidence of persistent overvaluation, arbitrageur may delay entry                  |
-| Symmetric arbitrage                          | Persona instructs symmetric buy/sell; RAG provides market context for sizing                        |
+The model decision must contain exactly `action`, `bid_price`, `quantity`, and
+`reasoning`, with private reasoning parsed from `<analysis>`. Runtime payloads
+add `analysis`, `strategy`, `rag_context`, and `outbound_messages`.
+`_RAG_FALLBACK` is the stable context sentinel consumed by analysis.
 
-### §2.4 RagLLMNewBuyer (simulation-bases.md §4.4)
+## 5. Configuration
 
-| Theory Component                                         | Implementation                                                                           |
-|----------------------------------------------------------|------------------------------------------------------------------------------------------|
-| Rational WTP equals market value (Kahneman et al., 1990) | System prompt: unbiased buyer persona; RAG retrieves WTP rationality literature          |
-| Knowledge-informed entry                                 | Retrieved passages help LLM judge whether current deviation justifies buying             |
-| No ownership premium                                     | Persona explicitly lacks prior ownership; RAG provides external justification for action |
+`configs/EndowmentEffect/Rag/players.yml` supplies market parameters, initial
+portfolios, RuleLLM parameters, model settings, retry limits, and per-agent RAG
+settings. Required values are read directly. The simulator injects the top-level
+`knowledge` block into player extras before setup.
 
-### §2.5 RagLLMNoiseTrader (simulation-bases.md §4.5)
+## 6. Running Instructions
 
-| Theory Component                       | Implementation                                                                            |
-|----------------------------------------|-------------------------------------------------------------------------------------------|
-| Uninformed noise trading (Black, 1986) | System prompt: noise trader persona; RAG retrieves Black (1986) passages on noise trading |
-| Retrieved noise amplification          | RAG may retrieve market news that triggers random-direction trades, simulating noise      |
-| Constrained by portfolio               | LLM respects cash and position limits despite random direction                            |
-
-## §3 Market Mechanism
-
-*Formula source: simulation-bases.md §3.1*
-
-```
-P(t+1) = P(t) + λ × NetDemand(t) + γ × (F − P(t)) + ε(t)
-```
-
-Market class is imported from `Rule/players.py` (shared). All Rag investors submit orders to the same Market.
-
-## §4 Variant Architecture
-
-| Component      | Detail                                                                                  |
-|----------------|-----------------------------------------------------------------------------------------|
-| Base class     | `RagLLMInvestor` → `GeneralPlayer`                                                      |
-| Inference      | `LangChainAPIInference` + RAG knowledge retrieval                                       |
-| Context        | `price`, `fundamental`, `deviation`, `cash`, `position`, `round` + retrieved documents  |
-| Output parsing | JSON response with `action`, `bid_price`, `quantity`, `reasoning`, `analysis`; payload also records `rag_context` |
-| RAG retrieval  | Query built from market state; documents retrieved from endowment effect knowledge base |
-
-## §5 Config Reference
-
-Config file: `configs/EndowmentEffect/Rag/simulation.yml`
-
-LLM config under each player's `extras.llm`:
-- `lm_name`: model identifier
-- `generation_config`: temperature, max_tokens etc.
-
-RAG config under each player's `extras.private_knowledge.rag`:
-- `from_global_index_dir`: shared index names such as `rag_index`
-- `embed_type`, `embed_model`, `embed_api_key`, `embed_api_base`: embedding client configuration
-- `chunk_size`, `chunk_overlap`, `top_k`: retrieval construction and query settings
-
-## §6 Running Instructions
+From the repository root:
 
 ```bash
-python -m examples.EndowmentEffect.Rag.run_endowment_effect \
-    -c configs/EndowmentEffect/Rag/simulation.yml
+python -m examples.EndowmentEffect.Rag.run_endowmenteffect_rag \
+  -c configs/EndowmentEffect/Rag/simulation.yml
 ```
 
-## §7 Expected Behavior
+The embedding and inference backends require the environment variables named
+in the YAML templates. Index construction may dominate startup time; round
+execution starts after actor and knowledge-store setup.
 
-- **Knowledge-moderated endowment effect**: Retrieved Kahneman et al. passages tend to reinforce the endowment premium — expect strong volume suppression
-- **Higher variability**: RAG retrieval quality affects each round; MAD variance is higher than Rule
-- **MAD range**: 0.03–0.14 (retrieval can moderate or amplify deviation)
-- **VSR**: 0.40–0.70 (knowledge retrieval generally reinforces holding bias)
+## 7. Expected Behavior
 
-## §8 References
+The behavioral signature should remain comparable to RuleLLM: biased holders
+resist selling, fundamental agents counter mispricing, and noise trading adds
+background liquidity. Retrieval can moderate or reinforce those decisions, so
+directional claims require matched repeated runs rather than a single trace.
 
-See `simulation-bases.md §2` for full DOI citations for all theoretical foundations.
+## 8. Verification and Failure Modes
 
-## §9 Variant Comparison
+Syntax/import tests do not call external services. The Rag smoke test injects a
+fake knowledge store and fake model response to exercise prompt construction,
+decision validation, state serialization, action creation, and retrieval
+coverage. Full startup additionally requires processed documents or a valid
+shared index, embedding credentials, and inference credentials.
 
-See `simulation-bases.md §9` for Rule / LLM / RuleLLM / Rag comparison table.
+## 9. References and Variant Comparison
+
+Theory and DOI citations live in `simulation-bases.md §2`; parameter sources
+live in §6; metric definitions and calibration targets live in
+`analysis-bases.md §§2 and 6`; the four-variant comparison is in
+`simulation-bases.md §9`.

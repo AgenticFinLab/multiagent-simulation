@@ -31,16 +31,15 @@ from typing import Any, Dict
 import numpy as np
 
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 from examples.AnchoringEffect.Rule.analysis import (
     _load_data,
     analyze_anchoring,
 )
+from examples.AnchoringEffect.Rag.players import _RAG_FALLBACK
 
 VARIANT = "Rag"
-
-# Fallback string used when no documents are retrieved (Rag/players.py).
-_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def analyze_rag_knowledge_effect(
@@ -128,7 +127,26 @@ def main() -> None:
             f"Mean RAG retrieval failure rate: "
             f"{agg['mean_retrieval_failure_rate']:.1%}"
         )
-
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rag'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='AnchoringEffect',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

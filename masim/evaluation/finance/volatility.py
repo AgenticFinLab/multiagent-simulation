@@ -46,7 +46,10 @@ def calculate_volatility_persistence(
         }
     """
     if len(volatility) < max_lag + 1:
-        return {"vol_autocorr_1": 0.0, "vol_autocorr_5": 0.0, "half_life": 0.0}
+        # Insufficient data: return NaN rather than 0.0 to avoid confusing
+        # "not enough samples" with "measured zero autocorrelation".
+        nan = float("nan")
+        return {"vol_autocorr_1": nan, "vol_autocorr_5": nan, "half_life": nan}
 
     vol_series = [volatility[r] for r in sorted(volatility.keys())]
     acf = _calculate_acf(vol_series, max_lag=max_lag)
@@ -89,10 +92,11 @@ def calculate_return_clustering(
         }
     """
     if len(returns) < max_lag + 5:
+        nan = float("nan")
         return {
-            "return_autocorr_1": 0.0,
-            "sq_return_autocorr_1": 0.0,
-            "clustering_ratio": 0.0,
+            "return_autocorr_1": nan,
+            "sq_return_autocorr_1": nan,
+            "clustering_ratio": nan,
         }
 
     return_series = [returns[r] for r in sorted(returns.keys())]
@@ -137,10 +141,10 @@ def detect_volatility_regimes(
     """
     if len(volatility) < 5:
         return {
-            "avg_vol": 1.0,
+            "avg_vol": float("nan"),
             "high_vol_episodes": [],
             "low_vol_episodes": [],
-            "regime_persistence": 0.0,
+            "regime_persistence": float("nan"),
         }
 
     rounds = sorted(volatility.keys())

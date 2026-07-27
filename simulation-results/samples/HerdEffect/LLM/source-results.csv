@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason,result_path
-5,9,HerdEffect,LLM,SUCCESS,0,12380.974,2026-05-22T09:34:26,2026-05-22T13:00:47,config/simulation.yml,examples/HerdEffect/LLM/run_herd_llm.py,logs/HerdEffect__LLM.log,,200,200,,

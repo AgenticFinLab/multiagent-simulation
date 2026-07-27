@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -190,6 +190,8 @@ class RuleLLMInvestor(GeneralPlayer):
                 "reasoning": f"LLM fallback hold after retries: {last_error}",
                 "analysis": "",
                 "provides_liquidity": False,
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
 
         action = decision["action"]
@@ -240,6 +242,13 @@ class RuleLLMInvestor(GeneralPlayer):
             "provides_liquidity": bool(decision.get("provides_liquidity", False)),
             "liquidity_field_missing": liquidity_field_missing,
         }
+        # Propagate LLM-failure sentinel so downstream metrics can exclude
+        # synthetic hold rounds from action-distribution statistics.
+        if decision.get("_skipped"):
+            order["_skipped"] = True
+            order["_skipped_reason"] = decision.get(
+                "_skipped_reason", "llm_failed"
+            )
         validate_order(order)
         return {
             **order,

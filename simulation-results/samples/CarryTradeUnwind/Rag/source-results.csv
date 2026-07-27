@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,CarryTradeUnwind,Rag,SUCCESS,0,11810.698,2026-05-23T18:15:45,2026-05-23T21:32:36,config/simulation.yml,examples/CarryTradeUnwind/Rag/run_carrytradeunwind_rag.py,logs/CarryTradeUnwind__Rag.log,,200,200,

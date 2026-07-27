@@ -19,7 +19,7 @@
 | Theory | `simulation-bases.md §4.1` |
 | Class | `ConvergenceArbitrageur` in `players.py` |
 | Trigger | `abs(deviation) > extras["entry_spread"]` |
-| Sizing | `cash * leverage * abs(deviation) / price`, capped by `extras["max_position"]` |
+| Sizing | `cash * leverage * abs(deviation) / price`, capped by remaining room below `extras["max_position"]` |
 | State | `cash`, `position`, `price`, `fundamental`, `deviation` |
 | Config | `configs/LTCMCollapse/Rule/players.yml` key `convergencearbitrageur` |
 
@@ -30,8 +30,9 @@
 | Theory | `simulation-bases.md §4.2` |
 | Class | `LeverageTrader` |
 | Margin Trigger | `equity < abs(position * price) * extras["margin_call_threshold"]` |
-| Deleveraging | sells or buys `int(abs(position) * 0.3)` |
-| Opportunity Branch | buys when `deviation < -0.03` and no margin breach |
+| Equity | `abs(position * initial_price) * (1 / leverage_ratio + margin_call_threshold) + position * (price - initial_price)` |
+| Deleveraging | sells or buys `int(abs(position) * extras["delever_fraction"])`; a zero-lot close becomes `hold` |
+| Opportunity Branch | buys `base_size` when `deviation < -margin_call_threshold` and no margin breach |
 
 ### §2.3 RiskManager (simulation-bases.md §4.3)
 
@@ -39,8 +40,8 @@
 |---|---|
 | Theory | `simulation-bases.md §4.3` |
 | Class | `RiskManager` |
-| Trigger | `abs(deviation) > extras["var_limit"] * 3` |
-| Sizing | cuts 50% of absolute position |
+| Trigger | `abs(deviation) > max(extras["var_trigger"], extras["var_limit"] * extras["var_multiplier"])` |
+| Sizing | cuts `risk_cut_fraction` of absolute position |
 
 ### §2.4 LiquidityProvider (simulation-bases.md §4.4)
 
@@ -48,8 +49,8 @@
 |---|---|
 | Theory | `simulation-bases.md §4.4` |
 | Class | `LiquidityProvider` |
-| Stress Withdrawal | holds when `abs(deviation) > 0.05` |
-| Normal Liquidity | buys or sells up to 500 shares inside `inventory_limit` |
+| Stress Withdrawal | provision tapers as `max(0, 1 - abs(deviation) / stress_exit)` |
+| Normal Liquidity | buys or sells up to `base_size * provision_fraction` inside `inventory_limit` |
 
 ### §2.5 CentralBank (simulation-bases.md §4.5)
 
@@ -58,14 +59,14 @@
 | Theory | `simulation-bases.md §4.5` |
 | Class | `CentralBank` |
 | Trigger | `deviation < -extras["intervention_threshold"]` and probability draw succeeds |
-| Sizing | fixed buy quantity of 2,000 shares |
+| Sizing | `intervention_size` after a seeded rescue draw; otherwise a seeded `noise_size` background buy may occur |
 
 ## §3 Market Mechanism Implementation
 
 Formula source: `simulation-bases.md §3.1`.
 
 ```
-P(t+1) = max(P(t) + lambda * D(t) + gamma * [F - P(t)] + epsilon(t), 0.01)
+P(t+1) = max(P(t) + lambda * D(t) / M + gamma * [F - P(t)] + epsilon(t) + F*S(t), P_min)
 ```
 
 Implemented in `Market.perceive()`.
@@ -73,14 +74,17 @@ Implemented in `Market.perceive()`.
 | Symbol | Python Variable | Config Path | Value |
 |---|---|---|---:|
 | `lambda` | `price_impact` | `market.extras.price_impact` | 0.03 |
+| `M` | `market_depth` | `market.extras.market_depth` | 100.0 |
 | `gamma` | `mean_reversion` | `market.extras.mean_reversion` | 0.01 |
 | `F` | `fundamental` | `market.extras.fundamental_value` | 100.0 |
 | `epsilon` | `noise` | `market.extras.noise_std` | 0.015 |
 | `D(t)` | `net_demand` | computed from inbound orders | - |
+| `S(t)` | `shock_return` | `market.extras.shock_schedule` | rounds 20-23 |
+| `P_min` | `price_floor` | `market.extras.price_floor` | 0.01 |
 
 ## §4 Variant-Specific Features
 
-Rule mode is the deterministic reference. It contains no provider latency, prompt variance, or malformed-output risk. The only stochastic components are market noise and the probabilistic `CentralBank` rescue draw.
+Rule mode is the reproducible deterministic-policy reference. It contains no provider latency, prompt variance, or malformed-output risk. Market noise and central-bank draws are fixed by the identity/round seed.
 
 All investor thresholds are read from `config.extras`. The implemented order schema is standard: `{"type": "order", "action": ..., "quantity": ...}`.
 
@@ -119,8 +123,7 @@ Investors.act()
 
 ## §8 Validation Checklist
 
-- `scripts/run_example_matrix.py --dry-run --scenario LTCMCollapse --mechanism Rule` discovers one row.
-- `preflight_rows.py --row LTCMCollapse__Rule` reports zero failures.
+- `python examples/LTCMCollapse/Rule/run_ltcmcollapse_rule.py -c configs/LTCMCollapse/Rule/simulation.yml --dry-run` discovers one experiment row.
 - Runtime logic should remain stable unless a documented mechanism or contract defect is found.
 
 ## §9 References

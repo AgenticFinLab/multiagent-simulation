@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,ConfirmationBias,RuleLLM,SUCCESS,0,10420.83,2026-05-23T16:18:48,2026-05-23T19:12:29,config/simulation.yml,examples/ConfirmationBias/RuleLLM/run_confirmationbias_rulellm.py,logs/ConfirmationBias__RuleLLM.log,,200,200,

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,ArchegosCollapse,LLM,SUCCESS,0,3970.216,2026-05-23T16:18:39,2026-05-23T17:24:49,config/simulation.yml,examples/ArchegosCollapse/LLM/run_archegsoscollapse_llm.py,logs/ArchegosCollapse__LLM.log,,200,200,

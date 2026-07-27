@@ -230,5 +230,5 @@ Cross-references:
 - Rational Expectations → `simulation-bases.md §2.4`, §4 — RationalUpdater
 - Momentum → `simulation-bases.md §2.5`, §4 — MomentumTrader
 - Noise Trading → `simulation-bases.md §2.6`, §4 — NoiseTrader
-- Dual-section prompt format → `create-example-skill.md` — RuleLLM section
+- Dual-section prompt format → `implement-simulation-skill.md` — RuleLLM section
 - Rule–judgment balance (±20%) → `simulation-bases.md §9` — Variant Comparison Preview (RuleLLM column)

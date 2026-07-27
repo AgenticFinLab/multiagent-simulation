@@ -3,13 +3,13 @@
 # =============================================================================
 # Market as hub, all LLM investors communicate through market.
 #
-#         llm_momentum ──────┐
-#         llm_contrarian ────┤
-#         llm_risk_averse ───┼──▶ market ──┬──▶ llm_momentum
-#         llm_aggressive ────┤             ├──▶ llm_contrarian
-#         llm_noise ─────────┘             ├──▶ llm_risk_averse
-#                                          ├──▶ llm_aggressive
-#                    (orders: P,Q)         └──▶ llm_noise
+#         llm_momentum_investor ──────┐
+#         llm_contrarian_investor ────┤
+#         llm_risk_averse_investor ───┼──▶ market ──┬──▶ llm_momentum_investor
+#         llm_aggressive_investor ────┤             ├──▶ llm_contrarian_investor
+#         llm_noise_trader ─────────┘             ├──▶ llm_risk_averse_investor
+#                                          ├──▶ llm_aggressive_investor
+#                    (orders: P,Q)         └──▶ llm_noise_trader
 #                                               (market data: price, volume)
 #
 # Execution flow per round:
@@ -25,24 +25,24 @@ sources:
 connections:
   # Market → All LLM investors (price + volume broadcast)
   market:
-    - llm_momentum
-    - llm_contrarian
-    - llm_risk_averse
-    - llm_aggressive
-    - llm_noise
+    - llm_momentum_investor
+    - llm_contrarian_investor
+    - llm_risk_averse_investor
+    - llm_aggressive_investor
+    - llm_noise_trader
 
   # Each LLM investor → Market only (order submission)
-  llm_momentum:
+  llm_momentum_investor:
     - market
 
-  llm_contrarian:
+  llm_contrarian_investor:
     - market
 
-  llm_risk_averse:
+  llm_risk_averse_investor:
     - market
 
-  llm_aggressive:
+  llm_aggressive_investor:
     - market
 
-  llm_noise:
+  llm_noise_trader:
     - market

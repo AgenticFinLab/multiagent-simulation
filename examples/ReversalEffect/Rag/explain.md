@@ -24,7 +24,7 @@ missing text output cannot inflate effective market depth.
 | Contrarian reversal pressure | `RagLLMContrarianInvestor` uses contrarian rules plus retrieved context. |
 | RAG contract | Records `rag_context` and emits liquidity-aware canonical trading JSON. |
 
-### §2.2 MomentumInvestor (simulation-bases.md §4.2)
+### §2.2 MomentumChaser (simulation-bases.md §4.2)
 
 | Theory Component | Implementation |
 |---|---|

@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,LTCMCollapse,Rag,SUCCESS,0,2980.594,2026-05-23T18:28:34,2026-05-23T19:18:14,config/simulation.yml,examples/LTCMCollapse/Rag/run_ltcmcollapse_rag.py,logs/LTCMCollapse__Rag.log,,200,200,

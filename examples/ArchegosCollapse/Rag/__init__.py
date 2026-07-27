@@ -4,8 +4,8 @@ from examples.ArchegosCollapse.Rag.players import (
     Market,
     RagLLMInvestor,
     RagLLMConcentratedFund,
-    RagLLMPrimeBroker1,
-    RagLLMPrimeBroker2,
+    RagLLMPrimeBrokerFirstMover,
+    RagLLMPrimeBrokerDelayedLiquidator,
     RagLLMBlockTradeBuyer,
     RagLLMInformationTrader,
 )
@@ -14,8 +14,8 @@ __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMConcentratedFund",
-    "RagLLMPrimeBroker1",
-    "RagLLMPrimeBroker2",
+    "RagLLMPrimeBrokerFirstMover",
+    "RagLLMPrimeBrokerDelayedLiquidator",
     "RagLLMBlockTradeBuyer",
     "RagLLMInformationTrader",
 ]

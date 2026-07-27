@@ -1,6 +1,7 @@
 # DotComBubble Rule Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DotComBubble.Rule.players:Market"
   num_instances: 1
@@ -11,119 +12,125 @@ market:
     group_tags:
       - market
     extras:
+      # Source: simulation-bases.md §3 market persistence contract
       record_path: "EXPERIMENT/DotComBubble/Rule/records"
-      initial_price: 50.0
-      fundamental_value: 50.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.02
+      # Source: simulation-bases.md §6 Parameter Table
+      initial_price: 100.0
+      # Source: simulation-bases.md §6 Parameter Table
+      fundamental_value: 100.0
+      # Source: simulation-bases.md §6 Parameter Table
+      price_impact: 0.01
+      # Source: simulation-bases.md §6 Parameter Table
+      mean_reversion: 0.005
+      # Source: simulation-bases.md §6 Parameter Table
+      noise_std: 1.0
+      # Source: simulation-bases.md §3 bounded history requirement
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-neweconomyevangelist:
+rule_new_economy_evangelist:
   name: "NewEconomyEvangelist"
   class: "examples.DotComBubble.Rule.players:NewEconomyEvangelist"
   num_instances: 2
   config:
-    identity: "neweconomyevangelist"
+    identity: "rule_new_economy_evangelist"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DotComBubble/Rule/records"
+      # Source: simulation-bases.md §4.1.6 worked example, scaled run endowment
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.1.4 narrative-buyer inventory state
       initial_position: 0
-      max_pf_ratio: 10.0
-      base_buy_size: 400
-      narrative_strength: 0.8
-      custom_state_hot_limit: 3
+      # Source: simulation-bases.md §6 Parameter Table
       order_size: 600
   persona: !include persona.yml
 
-ipoflipper:
+rule_ipo_flipper:
   name: "IPOFlipper"
   class: "examples.DotComBubble.Rule.players:IPOFlipper"
   num_instances: 2
   config:
-    identity: "ipoflipper"
+    identity: "rule_ipo_flipper"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DotComBubble/Rule/records"
+      # Source: simulation-bases.md §4.2.4 cash constraint
       initial_cash: 800000.0
-      initial_position: 0
-      entry_threshold: 0.05
-      flip_return: 0.15
-      base_size: 300
-      custom_state_hot_limit: 3
+      # Source: simulation-bases.md §4.2.6 worked example
+      initial_position: 500
+      # Source: simulation-bases.md §6 Parameter Table
       flip_threshold: 0.05
+      # Source: simulation-bases.md §6 Parameter Table
       order_size: 700
   persona: !include persona.yml
 
-momentumfollower:
+rule_momentum_follower:
   name: "MomentumFollower"
   class: "examples.DotComBubble.Rule.players:MomentumFollower"
   num_instances: 2
   config:
-    identity: "momentumfollower"
+    identity: "rule_momentum_follower"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DotComBubble/Rule/records"
+      # Source: simulation-bases.md §4.3.6 worked example, scaled run endowment
       initial_cash: 800000.0
+      # Source: simulation-bases.md §4.3.4 initial inventory state
       initial_position: 0
-      entry_threshold: 0.03
-      base_size: 350
-      custom_state_hot_limit: 3
+      # Source: simulation-bases.md §6 Parameter Table
       momentum_threshold: 0.02
+      # Source: simulation-bases.md §6 Parameter Table
       order_size: 500
   persona: !include persona.yml
 
-skepticalvalueinvestor:
+rule_skeptical_value_investor:
   name: "SkepticalValueInvestor"
   class: "examples.DotComBubble.Rule.players:SkepticalValueInvestor"
   num_instances: 1
   config:
-    identity: "skepticalvalueinvestor"
+    identity: "rule_skeptical_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DotComBubble/Rule/records"
+      # Source: simulation-bases.md §4.4.4 cash constraint
       initial_cash: 1000000.0
-      initial_position: 0
-      buy_pf: 1.2
-      max_pf: 3.0
-      base_size: 300
-      custom_state_hot_limit: 3
+      # Source: simulation-bases.md §4.4.6 worked example
+      initial_position: 300
+      # Source: simulation-bases.md §6 Parameter Table
       order_size: 400
+      # Source: simulation-bases.md §6 Parameter Table
       value_buy_threshold: -0.10
+      # Source: simulation-bases.md §6 Parameter Table
       value_sell_threshold: 0.20
   persona: !include persona.yml
 
-shortseller:
+rule_short_seller:
   name: "ShortSeller"
   class: "examples.DotComBubble.Rule.players:ShortSeller"
   num_instances: 1
   config:
-    identity: "shortseller"
+    identity: "rule_short_seller"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/DotComBubble/Rule/records"
+      # Source: simulation-bases.md §4.5.4 cash constraint
       initial_cash: 1000000.0
-      initial_position: 0
-      short_threshold: 5.0
-      cover_threshold: 2.5
-      base_size: 300
-      custom_state_hot_limit: 3
+      # Source: simulation-bases.md §4.5.6 worked example
+      initial_position: 400
+      # Source: simulation-bases.md §6 Parameter Table
+      short_threshold: 0.15
+      # Source: simulation-bases.md §6 Parameter Table
+      cover_threshold: -0.05
+      # Source: simulation-bases.md §6 Parameter Table
       order_size: 400
   persona: !include persona.yml

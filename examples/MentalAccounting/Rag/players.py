@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.MentalAccounting.Rag.prompts import (
     RULELLM_MENTAL_ACCOUNTANT_SYS,
     RULELLM_HOUSE_MONEY_SYS,
@@ -43,6 +43,8 @@ from examples.MentalAccounting.Rule.players import (  # noqa: F401
 )
 
 logger = logging.getLogger("MentalAccounting.Rag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def safe_max_affordable(cash: float, price: float) -> int:
@@ -148,7 +150,7 @@ class RagLLMInvestor(GeneralPlayer):
         extras = self.config.extras
         record_path = extras["record_path"]
 
-        knowledge_config = extras.get("knowledge", {})
+        knowledge_config = extras["knowledge"]
         if not knowledge_config:
             knowledge_config = {
                 "backend": "local",
@@ -365,7 +367,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
 
         user_msg = RAG_USER_TEMPLATE.format(

@@ -14,12 +14,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from masim.format.order import validate_order
+from masim.format.order import normalize_action_quantity, validate_order
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.BlackMonday1987.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)
@@ -142,8 +142,8 @@ class LLMInvestor(GeneralPlayer):
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
+                result = llm_client.run([infer_input]).outputs[0]
+                response = result.response
                 parsed = parse_llm_response_with_thinking(response)
                 decision = _validate_decision(parsed, self.identity)
                 break
@@ -166,14 +166,18 @@ class LLMInvestor(GeneralPlayer):
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             ) from last_error
 
-        action_str = decision["action"]
-        bid_price = decision["bid_price"]
-        quantity = decision["quantity"]
+        action_str, quantity = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
+        bid_price = float(decision["bid_price"])
         if action_str == "buy":
             max_buy = cash / bid_price
             quantity = min(quantity, max_buy)
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
+
+        if quantity == 0:
+            action_str = "hold"
 
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * bid_price

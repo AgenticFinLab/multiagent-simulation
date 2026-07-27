@@ -22,9 +22,8 @@ All parameters are configured via players.yml config file.
 
 import os
 import random
-import math
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
@@ -107,13 +106,15 @@ class Market(GeneralPlayer):
         mean_reversion_rate = extras["mean_reversion"]
         fundamental_value = extras["fundamental_value"]
         noise_std = extras["noise_std"]
+        minimum_price = extras["minimum_price"]
 
         price_impact = price_impact_rate * net_demand
         mean_reversion = mean_reversion_rate * (fundamental_value - current_price)
         noise = random.gauss(0, noise_std)
 
         new_price = max(
-            1.0, current_price + price_impact + mean_reversion + noise + news_shock
+            minimum_price,
+            current_price + price_impact + mean_reversion + noise + news_shock,
         )
         price_return = (new_price - current_price) / current_price
 
@@ -249,6 +250,30 @@ class BaseInvestor(GeneralPlayer):
             source_id=self.identity,
         )
 
+    def _hold_order(self, round_num: int, strategy_name: str) -> Dict[str, Any]:
+        """Emit the explicit no-signal action required before the first broadcast."""
+        logger.debug(
+            "[%s] R%d (%s): Q=   +0.00 [NO MARKET DATA]",
+            self.config.identity,
+            round_num,
+            strategy_name,
+        )
+        return {
+            "bid_price": 0.0,
+            "quantity": 0.0,
+            "strategy": strategy_name,
+            "outbound_messages": [
+                {
+                    "payload": {
+                        "bid_price": 0.0,
+                        "quantity": 0.0,
+                        "strategy": strategy_name,
+                    },
+                    "content_type": "investor_bid",
+                }
+            ],
+        }
+
 
 # =============================================================================
 # DispositionInvestor - Exhibits Disposition Effect
@@ -266,6 +291,7 @@ class DispositionInvestor(BaseInvestor):
     Parameters from config extras:
         - gain_threshold, loss_threshold, loss_aversion
         - sell_fraction_gain, sell_fraction_loss
+        - reference_buy_band, cash_deployment_fraction, minimum_trade_quantity
 
     Theory: simulation-bases.md §4.1 — DispositionInvestor
     Theoretical basis: Kahneman & Tversky (1979) Prospect Theory; asymmetric gain/loss treatment with λ = 2.25.
@@ -286,20 +312,29 @@ class DispositionInvestor(BaseInvestor):
             return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
+        if price <= 0 or purchase_price <= 0:
+            raise ValueError("price and purchase_price must be positive")
 
         # Calculate gain/loss relative to reference point
-        if purchase_price > 0:
-            gain_loss = (price - purchase_price) / purchase_price
-        else:
-            gain_loss = 0
+        gain_loss = (price - purchase_price) / purchase_price
 
         gain_threshold = extras["gain_threshold"]
         loss_threshold = extras["loss_threshold"]
         sell_fraction_gain = extras["sell_fraction_gain"]
         sell_fraction_loss = extras["sell_fraction_loss"]
+        loss_aversion = extras["loss_aversion"]
 
         max_position = extras["max_position"]
         buy_fraction = extras["buy_fraction"]
+        reference_buy_band = extras["reference_buy_band"]
+        cash_deployment_fraction = extras["cash_deployment_fraction"]
+        minimum_trade_quantity = extras["minimum_trade_quantity"]
+        if loss_aversion <= 1.0:
+            raise ValueError("loss_aversion must be greater than 1")
+        if sell_fraction_gain <= loss_aversion * sell_fraction_loss:
+            raise ValueError(
+                "sell fractions must preserve the configured loss-aversion asymmetry"
+            )
 
         quantity = 0.0
         action = "HOLD"
@@ -313,14 +348,14 @@ class DispositionInvestor(BaseInvestor):
             # Reluctantly sell losers — only at extreme loss (convex value function)
             quantity = -position * sell_fraction_loss
             action = "SELL_LOSER"
-        elif -0.01 <= gain_loss < 0.01 and position < max_position:
-            # Buy ONLY when price is nearly exactly at reference point (±1%)
+        elif abs(gain_loss) < reference_buy_band and position < max_position:
+            # Buy only inside the configured reference-point band.
             # Odean: investors add to positions at perceived "fair value"
             # gain_threshold excluded — any rise toward threshold is sell territory
             target_qty = (max_position - position) * buy_fraction
-            affordable = (cash * 0.15) / price if price > 0 else 0
+            affordable = cash * cash_deployment_fraction / price
             quantity = min(target_qty, affordable)
-            if quantity >= 0.5:
+            if quantity >= minimum_trade_quantity:
                 action = "BUY"
             else:
                 quantity = 0.0
@@ -369,30 +404,6 @@ class DispositionInvestor(BaseInvestor):
             ],
         }
 
-    def _hold_order(self, round_num, strategy_name):
-        logger.debug(
-            "[%s] R%d (%s): Q=   +0.00 [NO DATA]",
-            self.config.identity,
-            round_num,
-            strategy_name,
-        )
-        return {
-            "bid_price": 0,
-            "quantity": 0,
-            "strategy": strategy_name,
-            "outbound_messages": [
-                {
-                    "payload": {
-                        "bid_price": 0,
-                        "quantity": 0,
-                        "strategy": strategy_name,
-                    },
-                    "content_type": "investor_bid",
-                }
-            ],
-        }
-
-
 # =============================================================================
 # RationalInvestor - Expected Utility Maximizer
 # =============================================================================
@@ -406,7 +417,7 @@ class RationalInvestor(BaseInvestor):
     NOT affected by sunk costs or reference points.
 
     Parameters from config extras:
-        - target_allocation, rebalance_threshold
+        - target_allocation, rebalance_threshold, rebalance_speed
 
     Theory: simulation-bases.md §4.2 — RationalInvestor
     Theoretical basis: Expected Utility Theory (von Neumann & Morgenstern, 1944); ignores purchase price.
@@ -426,14 +437,19 @@ class RationalInvestor(BaseInvestor):
             return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
+        if price <= 0:
+            raise ValueError("market price must be positive")
 
         target_allocation = extras["target_allocation"]
         rebalance_threshold = extras["rebalance_threshold"]
+        rebalance_speed = extras["rebalance_speed"]
 
         # Calculate current allocation
         equity_value = position * price
         total_value = cash + equity_value
-        current_alloc = equity_value / total_value if total_value > 0 else 0
+        if total_value <= 0:
+            raise ValueError("total portfolio value must be positive")
+        current_alloc = equity_value / total_value
 
         deviation = current_alloc - target_allocation
         quantity = 0.0
@@ -442,7 +458,7 @@ class RationalInvestor(BaseInvestor):
         if abs(deviation) > rebalance_threshold:
             target_equity = total_value * target_allocation
             target_position = target_equity / price
-            quantity = (target_position - position) * 0.5
+            quantity = (target_position - position) * rebalance_speed
 
         # Execute
         if quantity > 0:
@@ -487,24 +503,6 @@ class RationalInvestor(BaseInvestor):
             ],
         }
 
-    def _hold_order(self, round_num, strategy_name):
-        return {
-            "bid_price": 0,
-            "quantity": 0,
-            "strategy": strategy_name,
-            "outbound_messages": [
-                {
-                    "payload": {
-                        "bid_price": 0,
-                        "quantity": 0,
-                        "strategy": strategy_name,
-                    },
-                    "content_type": "investor_bid",
-                }
-            ],
-        }
-
-
 # =============================================================================
 # TaxAwareInvestor - Tax Loss Harvesting
 # =============================================================================
@@ -540,11 +538,9 @@ class TaxAwareInvestor(BaseInvestor):
             return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
-
-        if purchase_price > 0:
-            gain_loss = (price - purchase_price) / purchase_price
-        else:
-            gain_loss = 0
+        if price <= 0 or purchase_price <= 0:
+            raise ValueError("price and purchase_price must be positive")
+        gain_loss = (price - purchase_price) / purchase_price
 
         tax_loss_threshold = extras["tax_loss_threshold"]
         capital_gains_hold = extras["capital_gains_hold"]
@@ -605,24 +601,6 @@ class TaxAwareInvestor(BaseInvestor):
             ],
         }
 
-    def _hold_order(self, round_num, strategy_name):
-        return {
-            "bid_price": 0,
-            "quantity": 0,
-            "strategy": strategy_name,
-            "outbound_messages": [
-                {
-                    "payload": {
-                        "bid_price": 0,
-                        "quantity": 0,
-                        "strategy": strategy_name,
-                    },
-                    "content_type": "investor_bid",
-                }
-            ],
-        }
-
-
 # =============================================================================
 # IndexHolder - Passive Baseline
 # =============================================================================
@@ -644,7 +622,11 @@ class IndexHolder(BaseInvestor):
 
         strategy_name = self.__class__.__name__
 
-        price = market_data["price"] if market_data else 0
+        if market_data is None:
+            return self._hold_order(round_num, strategy_name)
+        price = market_data["price"]
+        if price <= 0:
+            raise ValueError("market price must be positive")
 
         # Pure hold - no trading
         quantity = 0.0
@@ -710,11 +692,9 @@ class InstitutionalInvestor(BaseInvestor):
             return self._hold_order(round_num, strategy_name)
 
         price = market_data["price"]
-
-        if purchase_price > 0:
-            gain_loss = (price - purchase_price) / purchase_price
-        else:
-            gain_loss = 0
+        if price <= 0 or purchase_price <= 0:
+            raise ValueError("price and purchase_price must be positive")
+        gain_loss = (price - purchase_price) / purchase_price
 
         gain_threshold = extras["gain_threshold"]
         loss_threshold = extras["loss_threshold"]
@@ -774,24 +754,6 @@ class InstitutionalInvestor(BaseInvestor):
                 }
             ],
         }
-
-    def _hold_order(self, round_num, strategy_name):
-        return {
-            "bid_price": 0,
-            "quantity": 0,
-            "strategy": strategy_name,
-            "outbound_messages": [
-                {
-                    "payload": {
-                        "bid_price": 0,
-                        "quantity": 0,
-                        "strategy": strategy_name,
-                    },
-                    "content_type": "investor_bid",
-                }
-            ],
-        }
-
 
 __all__ = [
     "Market",

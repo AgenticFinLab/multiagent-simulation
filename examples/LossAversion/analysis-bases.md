@@ -124,7 +124,7 @@ BER = mean(buy_quantity | pnl_pct < −0.05) / mean(buy_quantity | pnl_pct ∈ [
 
 **Red Flag Threshold**: BER < 1.0 (break-even effect absent) or BER > 6.0 (model instability)
 
-**Relationships**: High BER correlates with high VAF (break-even buying amplifies volatility). In Rag variant, BER may be lower if KB retrieves loss-amplification warnings.
+**Relationships**: High BER can lower VAF because break-even purchases are counter-cyclical, while it increases portfolio concentration and wealth risk. In Rag, BER may be lower if retrieval surfaces escalation risk.
 
 **Implementation Notes**: Requires trade records with PnL context. If `BreakEvenTrader` never activates (no loss > 5%), BER is undefined — check `risk_increase_factor` and noise settings.
 
@@ -189,18 +189,19 @@ VAF = std(price_returns_biased) / std(price_returns_rational_only)
 
 | VAF Value | Interpretation                                                 |
 |-----------|----------------------------------------------------------------|
-| 1.0       | No amplification — biased agents have no net volatility impact |
+| < 1.0     | Net moderation — loss holding and break-even buying are counter-cyclical |
+| 1.0       | No net volatility impact                                       |
 | 1.0–1.5   | Mild amplification                                             |
 | 1.5–2.5   | Moderate amplification (typical for loss-aversion simulations) |
 | > 2.5     | Severe amplification                                           |
 
 **Academic Basis**: Barber, B. M., & Odean, T. (2000). Trading Is Hazardous to Your Wealth. *Journal of Finance*, 55(2), 773–806. doi:[10.1111/0022-1082.00226](https://doi.org/10.1111/0022-1082.00226).
 
-**Normal Range**: 1.3–2.5
+**Normal Range**: 0.1–2.5; the direction depends on whether counter-cyclical break-even demand or momentum demand dominates.
 
-**Red Flag Threshold**: VAF < 1.0 (biased agents reduce volatility — unexpected) or VAF > 4.0 (simulation instability)
+**Red Flag Threshold**: VAF ≤ 0.1 (metric degeneracy) or VAF ≥ 4.0 (simulation instability)
 
-**Relationships**: Correlated with BER (break-even buying amplifies volatility). Higher in Rule variant; lower in Rag variant.
+**Relationships**: Break-even buying and loss holding can lower VAF, while momentum demand can raise it. The observed direction is an empirical result of the population mix.
 
 **Implementation Notes**: Rational benchmark requires a separate simulation run with only `RationalTrader` + `MarketMaker`. Alternatively use the Rule variant's last 10% of rounds when bias is exhausted as a proxy.
 
@@ -215,10 +216,11 @@ VAF = std(price_returns_biased) / std(price_returns_rational_only)
 **Formula**:
 
 ```
-WPI = mean(terminal_wealth_biased) / terminal_wealth_rational
+WPI = mean(terminal_wealth_biased / initial_wealth_biased)
+      / mean(terminal_wealth_rational / initial_wealth_rational)
 ```
 
-Where `terminal_wealth = cash + position × final_price`.
+Where `terminal_wealth = cash + position × final_price`. Initial-wealth normalization is mandatory because archetypes have different starting endowments.
 
 **Python function**: `wealth_penalty_index(agent_states, final_price, biased_types, rational_type)`
 
@@ -310,7 +312,7 @@ SRR ↔ DEI (frequency vs. proportion operationalisation of same effect)
 
 | Variant | LAI     | DEI     | BER     | VAF     | WPI       | NCE       |
 |---------|---------|---------|---------|---------|-----------|-----------|
-| Rule    | 2.0–2.8 | 1.5–2.5 | 1.5–3.5 | 1.5–2.5 | 0.75–0.90 | —         |
+| Rule    | 2.0–2.8 | 1.5–3.5 | > 1.0   | 0.1–2.5 | 0.75–0.95 | —         |
 | LLM     | 1.6–2.4 | 1.2–2.0 | 1.2–2.5 | 1.2–2.0 | 0.80–0.93 | 0.15–0.40 |
 | RuleLLM | 1.8–2.5 | 1.3–2.2 | 1.3–3.0 | 1.3–2.2 | 0.78–0.92 | 0.10–0.30 |
 | Rag     | 1.4–2.0 | 1.0–1.8 | 1.0–2.0 | 1.2–1.8 | 0.85–0.95 | 0.30–0.60 |
@@ -351,7 +353,7 @@ SRR ↔ DEI (frequency vs. proportion operationalisation of same effect)
 | WPI > 1.0 | Biased agents outperform rational                           | Check `risk_aversion` — may be too conservative     |
 | BER < 1.0 | BreakEvenTrader never activates                             | Ensure `noise_std` causes sufficient –5% PnL events |
 | NCE > 0.9 | LLM ignores system prompt role                              | Strengthen loss-aversion framing in system prompt   |
-| VAF < 1.0 | Market maker over-dampening                                 | Reduce `inventory_limit` or `mean_reversion`        |
+| VAF ≤ 0.1 | Degenerate activity/inactivity volatility comparison          | Inspect stimulus exclusion and active-round counts  |
 
 ---
 

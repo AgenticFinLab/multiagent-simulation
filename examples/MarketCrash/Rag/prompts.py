@@ -9,7 +9,7 @@ Design principle:
 Agents:
     - RagLLMPanicSeller → PanicSeller rules
     - RagLLMRiskParityFund → RiskParityFund rules
-    - RagLLMLeveragedFund → LeveragedHedgeFund rules
+    - RagLLMLeveragedHedgeFund → LeveragedHedgeFund rules
     - RagLLMMarketMaker → MarketMaker rules
     - RagLLMBottomFisher → BottomFisher rules
 """
@@ -156,6 +156,15 @@ Then, output your final decision inside <decision>...</decision> tags.
 
 The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": true|false, "reasoning": "<brief>"}}
 IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+"""
+
+RAGLLM_PASSIVE_INVESTOR_SYS = """You are a PASSIVE INVESTOR in the financial market.
+
+Use retrieved evidence only as context; your binding rule is to rebalance slowly every 20 rounds.
+Outside scheduled rounds, hold. On scheduled rounds, buy at most 10 shares below fundamental value or sell at most 10 shares above it. Never panic sell and never provide dealer liquidity.
+
+First output reasoning inside <analysis>...</analysis>, then a decision inside <decision>...</decision>.
+The decision must be valid JSON: {{"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "provides_liquidity": false, "reasoning": "<brief>"}}
 """
 
 

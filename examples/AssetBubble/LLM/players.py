@@ -43,7 +43,11 @@ from dotenv import load_dotenv
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
+from masim.format.order import (
+    normalize_action_quantity,
+    signed_order_quantity,
+    validate_order,
+)
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -51,7 +55,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("AssetBubbleLLM")
 
@@ -61,6 +65,13 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _infer_response_text(infer_output: Any) -> str:
+    """Read response text from current or legacy lmbase output objects."""
+    if hasattr(infer_output, "response"):
+        return infer_output.response
+    return infer_output.outputs[0].response
 
 
 class Market(GeneralPlayer):
@@ -93,6 +104,14 @@ class Market(GeneralPlayer):
                 folder=os.path.join(base_path, "price"),
                 entry_limit=custom_state_hot_limit,
             )
+            self.state.custom_state["fundamental_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "fundamental"),
+                entry_limit=custom_state_hot_limit,
+            )
+            self.state.custom_state["volume_history"] = HistoryBuffer(
+                folder=os.path.join(base_path, "volume"),
+                entry_limit=custom_state_hot_limit,
+            )
             self.state.custom_state["valuation_ratio_history"] = HistoryBuffer(
                 folder=os.path.join(base_path, "valuation_ratio"),
                 entry_limit=custom_state_hot_limit,
@@ -106,7 +125,7 @@ class Market(GeneralPlayer):
                     {
                         "investor": inb.sender_id,
                         "price": order["bid_price"],
-                        "quantity": order["quantity"],
+                        "quantity": signed_order_quantity(order),
                         "strategy": order["strategy"],
                         "reasoning": order["reasoning"],
                     }
@@ -155,6 +174,8 @@ class Market(GeneralPlayer):
         self.state.custom_state["price"] = new_price
         self.state.custom_state["fundamental"] = new_fundamental
         self.state.custom_state["price_history"].append(new_price)
+        self.state.custom_state["fundamental_history"].append(new_fundamental)
+        self.state.custom_state["volume_history"].append(total_volume)
         self.state.custom_state["valuation_ratio_history"].append(valuation_ratio)
 
         # Log
@@ -368,9 +389,9 @@ Respond with ONLY valid JSON:
         last_error = None
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
+            infer_output = llm_client.run([infer_input]).outputs[0]
             try:
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
+                decision = self._parse_llm_response(_infer_response_text(infer_output))
                 break
             except Exception as exc:
                 last_error = exc
@@ -382,9 +403,11 @@ Respond with ONLY valid JSON:
                 f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
             )
 
-        action = decision["action"]
+        action, quantity_magnitude = normalize_action_quantity(
+            decision["action"], decision["quantity"]
+        )
         bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
+        quantity = -quantity_magnitude if action == "sell" else quantity_magnitude
 
         # Guard: LLMs sometimes output bid_price=0 for hold actions.
         # Use the current market price so recorded bids stay meaningful.
@@ -393,14 +416,14 @@ Respond with ONLY valid JSON:
         quantity = self._apply_constraints(bid_price, quantity, market_data["price"])
 
         # Execute trade
-        if action == "buy" and quantity > 0:
+        if quantity > 0:
             cost = quantity * bid_price
             self.state.custom_state["cash"] -= cost
             self.state.custom_state["position"] += quantity
-        elif action == "sell" and quantity > 0:
-            proceeds = quantity * bid_price
+        elif quantity < 0:
+            proceeds = abs(quantity) * bid_price
             self.state.custom_state["cash"] += proceeds
-            self.state.custom_state["position"] -= quantity
+            self.state.custom_state["position"] += quantity
 
         logger.debug(
             f"[{self.identity:20s}] R{round_num} ({strategy_name:15s}): "
@@ -437,7 +460,7 @@ Respond with ONLY valid JSON:
         )
 
 
-class LLMGreaterFoolSpeculator(LLMInvestor):
+class LLMMomentumSpeculator(LLMInvestor):
     """LLM aggressive momentum trader. Theory: simulation-bases.md §4.1 — MomentumSpeculator."""
 
     pass
@@ -449,20 +472,20 @@ class LLMRationalArbitrageur(LLMInvestor):
     pass
 
 
-class LLMSentimentTrader(LLMInvestor):
-    """LLM sentiment trader. Theory: simulation-bases.md §4.3 — NoiseTrader."""
+class LLMNoiseTrader(LLMInvestor):
+    """LLM sentiment/noise trader. Theory: simulation-bases.md §4.3 — NoiseTrader."""
 
     pass
 
 
-class LLMValueInvestor(LLMInvestor):
-    """LLM value investor. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
+class LLMFundamentalInvestor(LLMInvestor):
+    """LLM value/fundamental investor. Theory: simulation-bases.md §4.4 — FundamentalInvestor."""
 
     pass
 
 
-class LLMLeveragedSpeculator(LLMInvestor):
-    """LLM leveraged speculator. Theory: simulation-bases.md §4.5 — LeveragedBuyer."""
+class LLMLeveragedBuyer(LLMInvestor):
+    """LLM leveraged buyer. Theory: simulation-bases.md §4.5 — LeveragedBuyer."""
 
     pass
 

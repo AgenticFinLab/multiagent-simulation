@@ -19,53 +19,27 @@ from typing import Any, Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 
+from masim.evaluation.data_loader import batch_to_rounds, load_data
+from masim.evaluation.finance import (
+    calculate_autocorrelation,
+    calculate_max_drawdown,
+)
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data loading (thin adapters over ``masim.evaluation``)
 # ---------------------------------------------------------------------------
 
 
 def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert batch store list to {round_num: value}, round_num is 1-based."""
-    return {i + 1: v for i, v in enumerate(values)}
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.batch_to_rounds``."""
+    return batch_to_rounds(values)
 
 
 def _load_data(results) -> Dict[str, Any]:
-    """Load price/fundamental batch stores and investor turn payloads.
-
-    Returns
-    -------
-    dict with keys:
-        market_prices       : {round_num: float}
-        fundamentals        : {round_num: float}
-        investor_payloads   : {player_id: {round_num: dict}}
-    """
-    market_prices: Dict[int, float] = {}
-    fundamentals: Dict[int, float] = {}
-
-    for player in results.players_by_role("coordinator").values():
-        if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
-        if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
-
-    investor_bids: Dict[str, Dict[int, float]] = {}
-    investor_payloads: Dict[str, Dict[int, dict]] = {}
-    for pid, player in results.players_by_role("player").items():
-        bid = player.turns.field("bid_price")
-        if bid:
-            investor_bids[pid] = bid
-        payloads = player.turns.payloads()
-        if payloads:
-            investor_payloads[pid] = payloads
-
-    return {
-        "market_prices": market_prices,
-        "fundamentals": fundamentals,
-        "investor_bids": investor_bids,
-        "investor_payloads": investor_payloads,
-    }
+    """Legacy alias. Delegates to ``masim.evaluation.data_loader.load_data``."""
+    return load_data(results)
 
 
 # ---------------------------------------------------------------------------
@@ -81,10 +55,10 @@ def _compute_peak_deviation(
     Returns (peak_positive, trough_negative) as absolute fractions.
     """
     if not prices_list or fundamental <= 0:
-        return (0.0, 0.0)
+        return (float("nan"), float("nan"))
     deviations = [(p - fundamental) / fundamental for p in prices_list]
-    peak = max(deviations) if deviations else 0.0
-    trough = min(deviations) if deviations else 0.0
+    peak = max(deviations) if deviations else float("nan")
+    trough = min(deviations) if deviations else float("nan")
     return (float(peak), float(trough))
 
 
@@ -93,8 +67,13 @@ def _compute_leverage_amplitude_index(peak: float, trough: float) -> float:
 
     analysis-bases.md §2.1 — Geanakoplos (2010).
     """
+    if not np.isfinite(peak) or not np.isfinite(trough):
+        return float("nan")
     if abs(trough) < 1e-12:
-        return float("inf") if peak > 0 else 0.0
+        # No downside amplitude observed:
+        # - peak > 0  → truly unbounded asymmetry (inf is faithful)
+        # - peak == 0 → no cycle observed at all → undefined, NOT "zero LAI"
+        return float("inf") if peak > 0 else float("nan")
     return abs(peak) / abs(trough)
 
 
@@ -109,7 +88,7 @@ def _compute_minsky_fragility_score(
     Approximation: count consecutive rounds where |δ|<0.02 before each bust onset.
     """
     if not prices_list or fundamental <= 0:
-        return 0.0
+        return float("nan")
     deviations = [(p - fundamental) / fundamental for p in prices_list]
     # Find bust onsets: first round crossing crisis_threshold after stable
     bust_onsets: List[int] = []
@@ -122,7 +101,10 @@ def _compute_minsky_fragility_score(
             in_crisis = False
 
     if not bust_onsets:
-        return 0.0
+        # No bust occurred in this run: MFS is genuinely undefined
+        # (there is no "stable-rounds-before-bust" to average). Report NaN
+        # rather than 0.0 to avoid the "zero fragility" null-hypothesis mask.
+        return float("nan")
 
     scores: List[float] = []
     for onset in bust_onsets:
@@ -133,20 +115,22 @@ def _compute_minsky_fragility_score(
             else:
                 break
         scores.append(float(stable))
-    return float(np.mean(scores)) if scores else 0.0
+    return float(np.mean(scores)) if scores else float("nan")
 
 
 def _compute_credit_contraction_speed(prices_list: List[float]) -> float:
     """CCS — price units per round from peak to trough. analysis-bases.md §2.3."""
     if len(prices_list) < 2:
-        return 0.0
+        return float("nan")
     peak_val = max(prices_list)
     peak_idx = prices_list.index(peak_val)
     post_peak = prices_list[peak_idx:]
     trough_val = min(post_peak)
     trough_idx = peak_idx + post_peak.index(trough_val)
     if trough_idx == peak_idx:
-        return 0.0
+        # Peak is the last observation → no post-peak contraction observed.
+        # CCS is undefined here, not "zero speed".
+        return float("nan")
     return float((peak_val - trough_val) / (trough_idx - peak_idx))
 
 
@@ -158,11 +142,14 @@ def _compute_counter_cyclical_offset_ratio(
 ) -> float:
     """CCOR — stabilizer buy / destabilizer sell during bust. analysis-bases.md §2.4."""
     if not prices_list or fundamental <= 0:
-        return 0.0
+        return float("nan")
     deviations = [(p - fundamental) / fundamental for p in prices_list]
     bust_rounds = {i + 1 for i, d in enumerate(deviations) if d < bust_threshold}
     if not bust_rounds:
-        return 0.0
+        # No bust rounds → CCOR is undefined (nothing to counter-cycle against).
+        # Emitting 0.0 here would falsely register "no stabilization" against a
+        # non-existent bust; NaN is the honest signal.
+        return float("nan")
 
     stabilizer_buy = 0.0
     destabilizer_sell = 0.0
@@ -194,7 +181,10 @@ def _compute_counter_cyclical_offset_ratio(
                     destabilizer_sell += qty
 
     if destabilizer_sell < 1e-6:
-        return float("inf") if stabilizer_buy > 0 else 0.0
+        # No destabilizer sold during bust:
+        # - stabilizer_buy > 0 → infinite counter-cyclical dominance (faithful)
+        # - stabilizer_buy == 0 → nobody acted during bust → ratio undefined
+        return float("inf") if stabilizer_buy > 0 else float("nan")
     return float(stabilizer_buy / destabilizer_sell)
 
 
@@ -203,79 +193,71 @@ def _compute_phase_duration_ratio(
 ) -> float:
     """PDR — expansion rounds / contraction rounds. analysis-bases.md §2.5."""
     if not prices_list or fundamental <= 0:
-        return 0.0
+        return float("nan")
     deviations = [(p - fundamental) / fundamental for p in prices_list]
     expansion = sum(1 for d in deviations if d > threshold)
     contraction = sum(1 for d in deviations if d < -threshold)
     if contraction == 0:
-        return float("inf") if expansion > 0 else 1.0
+        # No contraction phase:
+        # - expansion > 0 → truly unbounded expansion/contraction ratio (inf)
+        # - expansion == 0 → neither phase observed → undefined, NOT "balanced 1.0"
+        #   (returning 1.0 here would collide with the "balanced cycle" null.)
+        return float("inf") if expansion > 0 else float("nan")
     return float(expansion / contraction)
 
 
 def _compute_max_drawdown(prices_list: List[float]) -> float:
-    """Maximum peak-to-trough drawdown (%, positive value)."""
-    arr = np.array(prices_list)
-    if len(arr) < 2:
+    """Maximum peak-to-trough drawdown (%, positive value).
+
+    Thin adapter over ``masim.evaluation.finance.calculate_max_drawdown``;
+    ``abs()`` reverts the shared helper's signed convention to the legacy
+    positive magnitude expected by this scenario's calibration table.
+    """
+    if len(prices_list) < 2:
         return 0.0
-    peak = arr[0]
-    max_dd = 0.0
-    for price in arr:
-        if price > peak:
-            peak = price
-        dd = (peak - price) / peak if peak > 0 else 0.0
-        if dd > max_dd:
-            max_dd = dd
-    return float(max_dd * 100)
+    return float(abs(calculate_max_drawdown(list(prices_list))[0]))
 
 
 def _compute_peak_rolling_volatility(
     prices_list: List[float], window: int = 10
 ) -> float:
     """Peak rolling volatility of returns (std dev per window, %)."""
-    arr = np.array(prices_list)
-    if len(arr) < 2:
-        return 0.0
-    returns = np.diff(arr) / arr[:-1] * 100
-    peak_vol = 0.0
-    for i in range(len(returns)):
-        start = max(0, i - window + 1)
-        vol = float(np.std(returns[start : i + 1]))
-        if vol > peak_vol:
-            peak_vol = vol
-    return peak_vol
+    vols = _compute_rolling_volatility(prices_list, window=window)
+    return max(vols) if vols else 0.0
 
 
 def _compute_rolling_volatility(
     prices_list: List[float], window: int = 10
 ) -> List[float]:
-    """Rolling volatility time series."""
-    arr = np.array(prices_list)
+    """Rolling volatility of returns (percent).
+
+    Kept local because ``masim.evaluation.finance.calculate_rolling_volatility``
+    operates on prices (not returns) and does not multiply by 100.
+    """
+    arr = np.asarray(prices_list, dtype=float)
     if len(arr) < 2:
         return []
-    returns = np.diff(arr) / arr[:-1] * 100
-    vols = []
-    for i in range(len(returns)):
+    returns_pct = np.diff(arr) / arr[:-1] * 100.0
+    vols: List[float] = []
+    for i in range(len(returns_pct)):
         start = max(0, i - window + 1)
-        vols.append(float(np.std(returns[start : i + 1])))
+        vols.append(float(np.std(returns_pct[start : i + 1])))
     return vols
 
 
 def _compute_autocorrelation(prices_list: List[float], lag: int = 1) -> float:
-    """Lag-1 autocorrelation of returns."""
-    arr = np.array(prices_list)
-    if len(arr) < lag + 2:
+    """Lag-N autocorrelation of returns.
+
+    Thin adapter over ``masim.evaluation.finance.calculate_autocorrelation``.
+    """
+    if len(prices_list) < lag + 2:
         return 0.0
+    arr = np.asarray(prices_list, dtype=float)
     returns = np.diff(arr) / arr[:-1]
-    n = len(returns)
-    if n <= lag:
+    acf = calculate_autocorrelation(list(returns), max_lag=lag)
+    if not acf or len(acf) < lag:
         return 0.0
-    mu = np.mean(returns)
-    centered = returns - mu
-    autocov = np.mean(centered[: n - lag] * centered[lag:])
-    var = np.var(centered)
-    if var < 1e-12:
-        return 0.0
-    return float(autocov / var)
+    return float(acf[lag - 1])
 
 
 def _compute_agent_vwap(
@@ -301,7 +283,7 @@ def _compute_agent_vwap(
             elif action == "sell":
                 total_sell += qty
         vwap_data[aid] = {
-            "vwap": pv_sum / total_vol if total_vol > 0 else 0.0,
+            "vwap": pv_sum / total_vol if total_vol > 0 else float("nan"),
             "total_volume": total_vol,
             "total_buy": total_buy,
             "total_sell": total_sell,
@@ -968,6 +950,26 @@ def main():
     results = load_results(config)
     data = _load_data(results)
     summary = analyze_credit_cycle(data, config, output_dir)
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        data,
+        config,
+        output_dir,
+        scenario='CreditCycle',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
     return summary
 
 

@@ -20,8 +20,19 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-from examples.standard_rule_analysis import _load_data, _series
+from masim.evaluation.data_loader import _load_data, aligned_prices_and_fundamentals
+from masim.evaluation.finance.timeseries import _returns, calculate_max_drawdown
 from masim.utils import load_config, load_results
+from masim.evaluation import write_universal_summary
+
+__all__ = [
+    "ValidationResult",
+    "load_simulation_data",
+    "calculate_metrics",
+    "validate_metrics",
+    "create_visualizations",
+    "main",
+]
 
 
 @dataclass(frozen=True)
@@ -52,37 +63,26 @@ def load_simulation_data(config: dict) -> dict:
         contexts = player.turns.field("rag_context")
         if contexts:
             rag_contexts[pid] = contexts
-    prices = _series(raw["market_prices"])
-    fundamentals = _series(raw["fundamentals"])
-    if not prices:
-        raise ValueError("No market price data recorded")
-    if not fundamentals:
-        raise ValueError("No fundamental data recorded")
-    if len(prices) != len(fundamentals):
-        raise ValueError("Price and fundamental series lengths differ")
+    rounds, prices, fundamentals = aligned_prices_and_fundamentals(raw)
     return {
+        "rounds": rounds,
         "prices": prices,
         "fundamentals": fundamentals,
         "rag_contexts": rag_contexts,
+        "agent_records": raw["investor_payloads"],
     }
 
 
-def _returns(prices: np.ndarray) -> np.ndarray:
-    if len(prices) < 2:
-        raise ValueError("At least two prices are required to calculate returns")
-    if np.any(prices[:-1] == 0):
-        raise ValueError("Price series contains zero before return calculation")
-    return np.diff(prices) / prices[:-1]
-
-
-def _max_drawdown_pct(prices: np.ndarray) -> float:
-    peak = prices[0]
-    max_drawdown = 0.0
-    for price in prices:
-        peak = max(peak, price)
-        drawdown = (peak - price) / peak
-        max_drawdown = max(max_drawdown, drawdown)
-    return float(max_drawdown * 100)
+def _universal_data(data: dict) -> dict:
+    """Return canonical series shapes expected by the universal evaluator."""
+    rounds = data["rounds"]
+    normalized = dict(data)
+    normalized["prices"] = [float(value) for value in data["prices"]]
+    normalized["fundamentals"] = {
+        int(round_num): float(value)
+        for round_num, value in zip(rounds, data["fundamentals"])
+    }
+    return normalized
 
 
 def _cascade_onset_round(deviation: np.ndarray, threshold: float = -0.03) -> int | None:
@@ -121,10 +121,22 @@ def calculate_metrics(data: dict) -> dict:
     final_deviation = float(deviation[-1] * 100)
     max_abs_deviation = float(np.max(np.abs(deviation)) * 100)
     mean_abs_deviation = float(np.mean(np.abs(deviation)) * 100)
-    max_drawdown = _max_drawdown_pct(prices)
-    volatility = float(np.std(returns) * np.sqrt(252) * 100)
+    max_drawdown = abs(calculate_max_drawdown(prices.tolist())[0])
     onset_round = _cascade_onset_round(deviation)
     half_life = _recovery_half_life_rounds(deviation)
+    if onset_round is None:
+        stress_return_std = None
+    else:
+        stress_start = max(onset_round - 2, 0)
+        stress_end = (
+            len(returns)
+            if half_life is None
+            else min(len(returns), stress_start + half_life)
+        )
+        if stress_end <= stress_start:
+            raise ValueError("Stress window contains no returns")
+        stress_return_std = float(np.std(returns[stress_start:stress_end]) * 100)
+    full_run_return_std = float(np.std(returns) * 100)
 
     return {
         "price_metrics": {
@@ -142,8 +154,13 @@ def calculate_metrics(data: dict) -> dict:
             "recovery_half_life_rounds": half_life,
         },
         "volatility": {
-            "annualized_pct": volatility,
-            "return_std_pct": float(np.std(returns) * 100),
+            "annualized_pct": (
+                None
+                if stress_return_std is None
+                else stress_return_std * float(np.sqrt(252))
+            ),
+            "return_std_pct": stress_return_std,
+            "full_run_return_std_pct": full_run_return_std,
         },
     }
 
@@ -156,27 +173,38 @@ def validate_metrics(metrics: dict) -> ValidationResult:
     final_abs_deviation = abs(metrics["deviation_metrics"]["final_deviation_pct"])
     half_life = metrics["deviation_metrics"]["recovery_half_life_rounds"]
 
-    deviation_score = min(max_deviation / 5.0, 1.0)
-    volatility_score = min(volatility / 1.0, 1.0)
-    recovery_score = 1.0 if final_abs_deviation <= max_deviation else 0.0
-    half_life_score = 1.0 if half_life is not None else 0.4
+    drawdown = metrics["price_metrics"]["max_drawdown_pct"]
+    min_price = metrics["price_metrics"]["min"]
+    deviation_score = 1.0 if 5.0 <= max_deviation <= 60.0 else 0.0
+    drawdown_score = 1.0 if 5.0 <= drawdown <= 60.0 else 0.0
+    volatility_score = (
+        1.0 if volatility is not None and 1.0 <= volatility <= 12.0 else 0.0
+    )
+    recovery_score = 1.0 if final_abs_deviation <= max_deviation and min_price > 0 else 0.0
+    half_life_score = 1.0 if half_life is not None else 0.0
 
     criteria = {
         "price_dislocation": {
             "observed": round(max_deviation, 3),
-            "expected": ">= 5% max absolute deviation",
+            "expected": "5% to 60% max absolute deviation",
             "score": round(deviation_score, 3),
             "assessment": "pass" if deviation_score >= 1.0 else "weak",
         },
+        "finite_drawdown": {
+            "observed": round(drawdown, 3),
+            "expected": "5% to 60% maximum drawdown",
+            "score": round(drawdown_score, 3),
+            "assessment": "pass" if drawdown_score == 1.0 else "fail",
+        },
         "stress_volatility": {
-            "observed": round(volatility, 3),
-            "expected": ">= 1% return std during stress",
+            "observed": None if volatility is None else round(volatility, 3),
+            "expected": "1% to 12% return std during stress",
             "score": round(volatility_score, 3),
             "assessment": "pass" if volatility_score >= 1.0 else "weak",
         },
         "recovery_direction": {
             "observed": round(final_abs_deviation, 3),
-            "expected": "final absolute deviation no worse than max deviation",
+            "expected": "positive prices and final absolute deviation no worse than max",
             "score": round(recovery_score, 3),
             "assessment": "pass" if recovery_score >= 1.0 else "fail",
         },
@@ -184,23 +212,25 @@ def validate_metrics(metrics: dict) -> ValidationResult:
             "observed": half_life,
             "expected": "finite if a negative trough occurs",
             "score": round(half_life_score, 3),
-            "assessment": "pass" if half_life is not None else "not_observed",
+            "assessment": "pass" if half_life is not None else "fail",
         },
     }
 
     score = (
-        0.35 * deviation_score
-        + 0.25 * volatility_score
-        + 0.25 * recovery_score
+        0.25 * deviation_score
+        + 0.20 * drawdown_score
+        + 0.20 * volatility_score
+        + 0.20 * recovery_score
         + 0.15 * half_life_score
     )
+    is_valid = all(item["assessment"] == "pass" for item in criteria.values())
     return ValidationResult(
-        is_valid=score >= 0.5,
+        is_valid=is_valid,
         score=score,
         criteria=criteria,
         interpretation=(
             "LTCM stress mechanism is sufficiently visible."
-            if score >= 0.5
+            if is_valid
             else "LTCM stress mechanism is weak under current metrics."
         ),
     )
@@ -298,7 +328,7 @@ def _write_summary(
 
     status = "VALID" if validation.is_valid else "INVALID"
     print(f"=== LTCMCOLLAPSE SIMULATION VALIDATION: {status} ===")
-    print(f"Overall Fit Score: {validation.score * 100:.1f}% (threshold: 50%)")
+    print(f"Overall Fit Score: {validation.score * 100:.1f}% (all five gates required)")
     for index, (name, criterion) in enumerate(validation.criteria.items(), start=1):
         print(f"[{index}] {name}")
         print(f"Observed: {criterion['observed']}")
@@ -326,6 +356,31 @@ def main() -> None:
     analysis_path.mkdir(parents=True, exist_ok=True)
     create_visualizations(data, str(analysis_path))
     _write_summary(analysis_path, metrics, validation)
+    summary = {
+        "metrics": metrics,
+        "validation": validation.to_dict(),
+    }
+    # Compute the 36-metric Layer A baseline and write summary.json
+    # + four universal PNG dashboards. The variant is derived from
+    # the config path so shared-main re-exports still report right.
+    _variant = 'Rule'
+    _cfg_path = locals().get('args', None)
+    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
+    if isinstance(_cfg_path, str):
+        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
+            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
+                _variant = _v
+                break
+    _universal = write_universal_summary(
+        _universal_data(data),
+        config,
+        analysis_path,
+        scenario='LTCMCollapse',
+        variant=_variant,
+        extra_summary={'scenario_metrics': summary}
+            if isinstance(summary, dict) else None,
+    )
+
 
 
 if __name__ == "__main__":

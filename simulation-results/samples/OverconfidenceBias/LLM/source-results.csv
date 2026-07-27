@@ -1,2 +1,0 @@
-index,total,scenario,mechanism,status,exit_code,duration_seconds,started_at,ended_at,config,runner,log_path,failure_summary,max_round,total_rounds,timeout_reason
-1,1,OverconfidenceBias,LLM,SUCCESS,0,2290.173,2026-05-23T18:03:16,2026-05-23T18:41:26,config/simulation.yml,examples/OverconfidenceBias/LLM/run_overconfidencebias_llm.py,logs/OverconfidenceBias__LLM.log,,200,200,

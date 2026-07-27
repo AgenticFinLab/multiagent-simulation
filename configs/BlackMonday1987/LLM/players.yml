@@ -9,6 +9,7 @@
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.BlackMonday1987.LLM.players:Market"
   num_instances: 1
@@ -19,36 +20,43 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"  # Source: infrastructure
       # Market dynamics parameters (identical to Rule variant)
+      # Source: target §9 `fundamental value` row (normalization)
       fundamental_value: 250.0
+      # Source: target §8.1 (initial index price, normalization)
       initial_price: 250.0
+      # Source: target §9 `price impact` row (Kyle 1985; Brady 1988)
       price_impact: 0.05
+      # Source: target §9 `mean reversion` row (Shleifer & Vishny 1997)
       mean_reversion: 0.01
+      # Source: simulation-bases.md §3.1 σ row (Roll 1984)
       noise_std: 0.02
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Portfolio Insurers — LLM with mechanical hedger persona
 # Theory: Leland & Rubinstein (1976), Brady Commission (1988)
 # -----------------------------------------------------------------------------
-portfolio_insurer:
+llm_portfolio_insurer:
   name: "Portfolio Insurer"
   class: "examples.BlackMonday1987.LLM.players:LLMPortfolioInsurer"
   # Expander → portfolio_insurer_1, portfolio_insurer_2
   num_instances: 2
   config:
-    identity: "portfolio_insurer"
+    identity: "llm_portfolio_insurer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 1000.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       llm:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_PORTFOLIO_INSURER_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
@@ -63,22 +71,24 @@ portfolio_insurer:
 # Index Arbitrageurs — LLM with futures-spot spread persona
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-index_arbitrageur:
+llm_index_arbitrageur:
   name: "Index Arbitrageur"
   class: "examples.BlackMonday1987.LLM.players:LLMIndexArbitrageur"
   # Expander → index_arbitrageur_1, index_arbitrageur_2
   num_instances: 2
   config:
-    identity: "index_arbitrageur"
+    identity: "llm_index_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 500.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       llm:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_INDEX_ARBITRAGEUR_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
@@ -93,22 +103,24 @@ index_arbitrageur:
 # Program Traders — LLM with automated sell program persona
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-program_trader:
+llm_program_trader:
   name: "Program Trader"
   class: "examples.BlackMonday1987.LLM.players:LLMProgramTrader"
   # Expander → program_trader_1, program_trader_2
   num_instances: 2
   config:
-    identity: "program_trader"
+    identity: "llm_program_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 800.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       llm:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_PROGRAM_TRADER_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
@@ -123,21 +135,23 @@ program_trader:
 # Value Investors — LLM with fundamental analysis persona (benchmark)
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-value_investor:
+llm_value_investor:
   name: "Value Investor"
   class: "examples.BlackMonday1987.LLM.players:LLMValueInvestor"
   num_instances: 1
   config:
-    identity: "value_investor"
+    identity: "llm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       llm:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_VALUE_INVESTOR_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"
@@ -152,22 +166,24 @@ value_investor:
 # Noise Traders — LLM with casual random-trader persona
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+llm_noise_trader:
   name: "Noise Trader"
   class: "examples.BlackMonday1987.LLM.players:LLMNoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/LLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 100000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       llm:
         sys_message: "examples.BlackMonday1987.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.BlackMonday1987.LLM.prompts:LLM_USER_TEMPLATE"

@@ -30,7 +30,7 @@ Style: Extremely fast, momentum-sensitive. You amplify price trends.
 Risk tolerance: Medium-high. You take large positions based on short-term signals.
 Emotional state: Excited by momentum, quick to reverse when trend changes.
 
-== DECISION RULES (from HighFrequencyTrader, HFT feedback loops) ==
+== DECISION RULES ==
 
 Step 1 — Compute short-term momentum:
     Use the last `lookback` prices from recent_prices.
@@ -90,7 +90,7 @@ Style: Provides two-sided quotes in calm markets, withdraws in stressed markets.
 Risk tolerance: Low in high volatility, medium in normal markets.
 Emotional state: Calm in normal conditions, anxious when volatility spikes.
 
-== DECISION RULES (from MarketMaker, liquidity provision under stress) ==
+== DECISION RULES ==
 
 Step 1 — Check volatility condition:
     current_volatility = abs(return_pct / 100)
@@ -139,7 +139,7 @@ Style: Mechanical, rule-based. No discretion — follow the algorithm.
 Risk tolerance: Medium. You follow the system, regardless of market noise.
 Emotional state: Neutral and systematic. No emotional bias.
 
-== DECISION RULES (from AlgorithmicTrader, trend-following algorithm) ==
+== DECISION RULES ==
 
 Step 1 — Compute trend signal:
     Use the last `lookback` prices from recent_prices.
@@ -182,7 +182,7 @@ Style: Passive unless stop-loss is triggered. Then sells everything.
 Risk tolerance: Very low. Capital preservation is the absolute priority.
 Emotional state: Calm when positions are safe. Panics when stop-loss triggers.
 
-== DECISION RULES (from StopLossTrader, stop-loss cascade) ==
+== DECISION RULES ==
 
 Step 1 — Compute stop-loss price:
     recent_high = max of last 10 prices (or current price if fewer available)
@@ -227,7 +227,7 @@ Style: Contrarian. You buy during crashes, providing recovery force.
 Risk tolerance: Medium. You rely on fundamental analysis.
 Emotional state: Calm and analytical. Excited by buying opportunities during crashes.
 
-== DECISION RULES (from FundamentalTrader, value investing) ==
+== DECISION RULES ==
 
 Step 1 — Compute value deviation:
     deviation = (fundamental_value - current_price) / fundamental_value

@@ -6,26 +6,37 @@ from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import numpy as np
 import streamlit as st
 from typing import Callable, Optional
 
 matplotlib.use("Agg")
 
+# Agent icon library (kebab-case PNGs keyed by player base id).
+ICON_ROOT = (
+    Path(__file__).resolve().parents[3]
+    / "examples"
+    / "AGENT_POOL"
+    / "agent_images"
+    / "icons"
+)
+
 from ..config_loader import (
-    discover_scenario_groups,
     get_scenario_info,
     get_agents_info,
     get_topology_info,
     get_market_type,
     get_market_description,
+    get_market_archetype,
+    get_market_icon_path,
     get_diagram_path,
     scenario_display_name,
-    CONFIGS_DIR,
-    EXPERIMENT_DIR,
+    _resolve_display_key,
     _configs_path,
-    _experiment_path,
 )
+from ..customized.team_namespace import strip_team_prefix
+from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
 
 
 def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -> str:
@@ -39,82 +50,72 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
     """
     with st.sidebar:
         st.title("MASIM Simulator")
+        project_name = st.session_state.get("project_name", "")
+        project_id = st.session_state.get("project_id", "")
+        if project_name:
+            label = (
+                f"{project_name}-{project_id}" if project_id else project_name
+            )
+            st.caption(f"Project: {label}")
         st.markdown("---")
 
         # ------------------------------------------------------------------
-        # Scenario selection
+        # Committed-scenario display (read-only)
         # ------------------------------------------------------------------
-        st.header("Select Scenario")
-
-        groups = discover_scenario_groups()
-        group_names = list(groups.keys())
-
-        if not group_names:
-            st.warning("No scenarios found in configs/")
+        # The scenario (and variant) is committed back in Stage 1 (scenario
+        # picker -> "Choose how to run it"), so the sidebar never offers a
+        # scenario / variant picker here. We simply show the committed
+        # scenario -- or the customized bundle -- read-only, then render its
+        # config detail below as a brief introduction.
+        active = st.session_state.get("selected_scenario", "")
+        if active.startswith("CUSTOMIZED_SIMULATION/"):
+            customized_id = active.split("/", 1)[1] if "/" in active else active
+            # Team-namespaced bundles carry a ``team-{slug}-`` prefix that
+            # must be peeled off before the ``Default-`` shape check;
+            # otherwise the multi-team deployment would fall through to
+            # the generic customized-bundle branch and miss the read-only
+            # metadata rendering path.  ``strip_team_prefix`` is a no-op
+            # for legacy (unprefixed) bundles.
+            bundle_kind_key = strip_team_prefix(customized_id)
+            if bundle_kind_key.startswith("Default-"):
+                # A rounds-adjusted copy of a shipped scenario. There is no
+                # user-built roster to edit, so we simply render the bundle's
+                # own config below in the standard read-only display mode.
+                # The bundle is metadata-identical to the source scenario, so
+                # show that scenario's display name (not the raw bundle id).
+                selected_scenario = active
+                st.session_state.selected_scenario = active
+                st.subheader(scenario_display_name(_resolve_display_key(active)))
+            elif "/Default/" in customized_id:
+                # Build-a-Project Default bundle:
+                # {slug}-{id}-{Scenario}/Default/{variant}
+                # Treat as a shipped-scenario view with full sidebar rendering.
+                selected_scenario = active
+                st.session_state.selected_scenario = active
+                display_key = _resolve_display_key(active)
+                st.subheader(scenario_display_name(display_key))
+            else:
+                # Plain user-built customized bundle. After Stage-2 Launch we
+                # want the simulation workspace to look and behave exactly
+                # like Experience mode: a read-only view showing Scenario
+                # Info, Network Topology, Agent cards, and the Bases links —
+                # NOT a mini "edit roster" panel. Any post-launch tweak has
+                # to go through creating a new customized bundle, mirroring
+                # how Explore never lets the user rewire a running scenario.
+                selected_scenario = active
+                st.session_state.selected_scenario = active
+                display_key = _resolve_display_key(active)
+                st.subheader(scenario_display_name(display_key))
+        elif active:
+            # A shipped scenario committed in Stage 1. Show its name here;
+            # the read-only detail block below acts as the brief intro.
+            selected_scenario = active
+            st.session_state.selected_scenario = active
+            st.subheader(scenario_display_name(active))
+        else:
+            st.warning("No scenario selected. Use the top bar to pick one.")
             st.session_state.selected_scenario = ""
             return ""
-
-        # --- Scenario Group selector ---
-        # Auto-generate display names for groups
-        group_display = [scenario_display_name(g) for g in group_names]
-
-        default_group_idx = 0
-        if "selected_scenario" in st.session_state:
-            cur = st.session_state.selected_scenario
-            cur_group = cur.split("/")[0] if "/" in cur else cur
-            if cur_group in group_names:
-                default_group_idx = group_names.index(cur_group)
-
-        selected_group_display = st.selectbox(
-            "Scenario Group",
-            options=group_display,
-            index=default_group_idx,
-            key="scenario_group_select",
-        )
-        selected_group = group_names[group_display.index(selected_group_display)]
-
-        # --- Variant selector ---
-        variant_keys = groups[selected_group]
-        variant_labels = []
-        for vk in variant_keys:
-            if "/" in vk:
-                variant_labels.append(vk.split("/", 1)[1])
-            else:
-                variant_labels.append(vk)
-
-        default_variant_idx = 0
-        if "selected_scenario" in st.session_state:
-            cur = st.session_state.selected_scenario
-            if cur in variant_keys:
-                default_variant_idx = variant_keys.index(cur)
-
-        if len(variant_keys) > 1:
-            selected_variant_label = st.selectbox(
-                "Variant",
-                options=variant_labels,
-                index=default_variant_idx,
-                key="variant_select",
-            )
-            selected_scenario = variant_keys[
-                variant_labels.index(selected_variant_label)
-            ]
-        else:
-            selected_scenario = variant_keys[0]
-            st.caption(f"Variant: {variant_labels[0]}")
-
-        # Reset simulation state when scenario changes
-        if st.session_state.get("selected_scenario") != selected_scenario:
-            st.session_state.simulation_running = False
-            st.session_state.simulation_completed = False
-            st.session_state.current_page = "Simulation"
-            # Reset replay state so the new scenario starts fresh
-            st.session_state.replay_active = False
-            st.session_state.replay_rounds = []
-            st.session_state.replay_index = 0
-            st.session_state.viewed_round_idx = 0
-            st.session_state.sys_messages = []
-
-        st.session_state.selected_scenario = selected_scenario
 
         # ------------------------------------------------------------------
         # Scenario Info — compact caption style
@@ -175,36 +176,69 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         )
 
         # ------------------------------------------------------------------
-        # Network Topology — use pre-saved diagram from EXPERIMENT/ if
-        # available; otherwise generate from config and cache the preview.
+        # Network Topology — dynamic D3 force-directed diagram matching the
+        # Experience-mode preview and the Project-mode Default preview.
+        # Falls back to the legacy static preview only when no topology is
+        # available for the scenario.
         # ------------------------------------------------------------------
         st.markdown("---")
-        st.markdown("**Network Topology**")
 
-        diagram_path = get_diagram_path(selected_scenario)
-        if diagram_path is not None:
-            st.image(str(diagram_path), use_container_width=True)
+        topo = get_topology_info(selected_scenario)
+        agents_for_topo = get_agents_info(selected_scenario)
+        if topo.get("nodes"):
+            # Give the market hub the same coordinator icon the user saw
+            # on the Stage-1 scenario card / Stage-2 header, so the
+            # market family is identifiable inside the topology as well.
+            _display_key = _resolve_display_key(selected_scenario)
+            _scenario_base = _display_key.split("/", 1)[0]
+            _hub_icons = {"market": market_icon_uri(_scenario_base)}
+            render_d3_topology_with_expand(
+                topo,
+                agents_for_topo,
+                height=320,
+                icon_uris=_hub_icons,
+                key=f"workspace_{selected_scenario}",
+                title="Network Topology",
+                dialog_caption=selected_scenario,
+            )
         else:
-            # Generate a full NetworkX topology preview from topology.yml +
-            # players.yml and cache it so repeated loads are instant.
-            preview_path = _get_or_create_topology_preview(selected_scenario)
-            if preview_path is not None:
-                st.image(str(preview_path), use_container_width=True)
+            st.markdown("**Network Topology**")
+            icon_preview = _get_or_create_icon_topology_preview(selected_scenario)
+            if icon_preview is not None:
+                st.image(str(icon_preview), width="stretch")
             else:
-                # Last-resort lightweight fallback (no topology.yml)
-                topo = get_topology_info(selected_scenario)
-                fig = _render_topology_figure(topo)
-                buf = io.BytesIO()
-                fig.savefig(
-                    buf,
-                    format="png",
-                    bbox_inches="tight",
-                    dpi=110,
-                    facecolor=fig.get_facecolor(),
-                )
-                buf.seek(0)
-                st.image(buf, use_container_width=True)
-                plt.close(fig)
+                diagram_path = get_diagram_path(selected_scenario)
+                if diagram_path is not None:
+                    st.image(str(diagram_path), width="stretch")
+                else:
+                    preview_path = _get_or_create_topology_preview(selected_scenario)
+                    if preview_path is not None:
+                        st.image(str(preview_path), width="stretch")
+                    else:
+                        fig = _render_topology_figure(topo)
+                        buf = io.BytesIO()
+                        fig.savefig(
+                            buf,
+                            format="png",
+                            bbox_inches="tight",
+                            dpi=110,
+                            facecolor=fig.get_facecolor(),
+                        )
+                        buf.seek(0)
+                        st.image(buf, width="stretch")
+                        plt.close(fig)
+
+        # Market coordinator profile — click to open the archetype .md
+        # (examples/AGENT_POOL/market/{stem}.md) in a modal, mirroring the
+        # drill-through available on the "Choose how to run it" page.
+        if st.button(
+            "📄 View market profile",
+            width="stretch",
+            key="sidebar_view_market_profile",
+            help="Open the market coordinator archetype definition (.md).",
+        ):
+            from .agent_market import _show_market_archetype_dialog
+            _show_market_archetype_dialog(selected_scenario)
 
         # ------------------------------------------------------------------
         # Agent cards — show Principle + Instances + Key Params only
@@ -217,16 +251,29 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
             st.info("No agent configuration found")
         else:
             for agent in agents:
-                _render_agent_card(agent)
+                _render_agent_card(agent, selected_scenario)
 
-        # Documentation button — opens full explain.md page
+        # Bases documents — open the full simulation / analysis bases pages
         st.markdown("")
         if st.button(
-            "📖 Full Documentation",
-            use_container_width=True,
-            key="docs_btn",
-            help="Read the academic background and model details for this scenario",
+            "📖 Simulation Bases",
+            width="stretch",
+            key="sim_bases_btn",
+            help="Read the simulation theory and modeling bases (simulation-bases.md)",
         ):
+            st.session_state.previous_page = st.session_state.get("current_page", "Simulation")
+            st.session_state.docs_target = "simulation_bases"
+            st.session_state.current_page = "Docs"
+            st.rerun()
+
+        if st.button(
+            "📊 Analysis Bases",
+            width="stretch",
+            key="analysis_bases_btn",
+            help="Read the analysis metrics and evaluation bases (analysis-bases.md)",
+        ):
+            st.session_state.previous_page = st.session_state.get("current_page", "Simulation")
+            st.session_state.docs_target = "analysis_bases"
             st.session_state.current_page = "Docs"
             st.rerun()
 
@@ -241,11 +288,13 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
 # ---------------------------------------------------------------------------
 
 
-def _render_agent_card(agent: dict):
+def _render_agent_card(agent: dict, selected_scenario: str = ""):
     """Render a compact agent card with Theory, Principle, Instances, and key params.
 
     Args:
         agent: Agent info dict from get_agents_info
+        selected_scenario: Active scenario key, used to resolve the market
+            coordinator archetype when the card represents the coordinator.
     """
     icon = "🏦" if agent.get("role") == "coordinator" else "👤"
     instances = agent.get("instances", 1)
@@ -254,6 +303,7 @@ def _render_agent_card(agent: dict):
     )
     theory = agent.get("theory", "")
     principle = agent.get("principle", "")
+    is_coordinator = agent.get("role") == "coordinator"
 
     with st.expander(f"{icon} {agent.get('name', 'Unknown')}"):
         if theory:
@@ -278,6 +328,21 @@ def _render_agent_card(agent: dict):
                 display_key = key.replace("_", " ").title()
                 st.caption(f"  • {display_key}: {value}")
 
+        # Profile drill-through — open the agent/coordinator .md in a modal.
+        st.markdown("")
+        if st.button(
+            "📄 View profile",
+            width="stretch",
+            key=f"sidebar_view_profile_{agent.get('id', agent.get('name', ''))}",
+            help="Open this agent's design profile (.md).",
+        ):
+            if is_coordinator:
+                from .agent_market import _show_market_archetype_dialog
+                _show_market_archetype_dialog(selected_scenario)
+            else:
+                from .agent_market import _show_agent_profile_dialog
+                _show_agent_profile_dialog(agent)
+
 
 # ---------------------------------------------------------------------------
 # Pre-simulation topology preview (NetworkX, full quality)
@@ -289,8 +354,8 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
 
     The preview is built from topology.yml + players.yml (with num_instances
     expansion so every concrete agent instance appears as its own node).
-    It is stored at EXPERIMENT/{scenario}/records/diagrams/topology_preview.png
-    and regenerated only when the source config files change (mtime hash).
+    It is cached at ``.cache/topology/{scenario}/topology_preview.png`` under the
+    project root and regenerated only when the source config files change.
 
     Args:
         scenario_name: Scenario directory name.
@@ -300,6 +365,9 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
     """
     import yaml
 
+    # A rounds-adjusted Default bundle shares the source scenario's topology,
+    # so cache/render the preview against the original scenario key.
+    scenario_name = _resolve_display_key(scenario_name)
     topology_path = _configs_path(scenario_name) / "topology.yml"
     players_path = _configs_path(scenario_name) / "players.yml"
 
@@ -312,7 +380,10 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
         hash_src += _file_content_hash(players_path)
     config_fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
 
-    preview_dir = _experiment_path(scenario_name) / "records" / "diagrams"
+    # Cache in a project-local .cache directory (lightweight, gitignore-safe)
+    _project_root = Path(__file__).resolve().parents[3]
+    safe_name = scenario_name.replace("/", "_").replace("\\", "_")
+    preview_dir = _project_root / ".cache" / "topology" / safe_name
     preview_path = preview_dir / "topology_preview.png"
     fingerprint_path = preview_dir / ".topology_preview_hash"
 
@@ -389,6 +460,295 @@ def _get_or_create_topology_preview(scenario_name: str) -> Optional[Path]:
 def _file_content_hash(path: Path) -> str:
     """Return hex digest of file contents for change detection."""
     return hashlib.md5(path.read_bytes()).hexdigest()
+
+
+def _load_yaml_lenient(path: Path) -> dict:
+    """Load a config YAML, ignoring custom tags such as ``!include``.
+
+    The topology preview only needs structural data (num_instances,
+    connections), so unknown tags (e.g. ``persona: !include persona.yml``)
+    are safely resolved to None instead of raising.
+    """
+    import yaml
+
+    class _LenientLoader(yaml.SafeLoader):
+        pass
+
+    _LenientLoader.add_constructor(
+        "!include", lambda loader, node: None
+    )
+    _LenientLoader.add_multi_constructor(
+        "", lambda loader, tag_suffix, node: None
+    )
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.load(f, Loader=_LenientLoader) or {}
+
+
+def _icon_for_base(base_key: str, scenario_name: Optional[str] = None) -> Optional[Path]:
+    """Map a player base id (snake_case) to its agent icon PNG, if any.
+
+    Investor players resolve to ``agent_images/icons/finance-{base}.png``
+    (kebab-cased). For the market coordinator, when ``scenario_name`` is
+    provided, resolves the scenario's bound archetype (via
+    :func:`config_loader.get_market_archetype`) and returns the matching
+    ``agent_images/icons/market/{archetype-stem}.png``. Returns ``None`` if
+    no icon can be found (the caller then falls back to a labelled shape).
+    """
+    if not base_key:
+        return None
+    if base_key == "market" or base_key.endswith("_environment"):
+        if scenario_name:
+            p = get_market_icon_path(scenario_name)
+            if p is not None:
+                # get_market_icon_path returns a relative Path rooted at
+                # ``examples/...``; resolve against the project root so it
+                # matches the absolute paths used elsewhere.
+                abs_p = (
+                    Path(__file__).resolve().parents[3] / p
+                    if not p.is_absolute()
+                    else p
+                )
+                if abs_p.exists():
+                    return abs_p
+        return None
+    candidate = ICON_ROOT / f"finance-{base_key.replace('_', '-')}.png"
+    return candidate if candidate.exists() else None
+
+
+def _get_or_create_icon_topology_preview(scenario_name: str) -> Optional[Path]:
+    """Render a star-topology diagram whose nodes are agent icons.
+
+    Each concrete investor instance is drawn as its agent icon (mapped from
+    the player base id); the market hub is a labelled gold circle. Nodes with
+    no matching icon fall back to a coloured circle. The image is cached at
+    ``.cache/topology/{scenario_hash}/topology_icons.png`` under the project
+    root and rebuilt only when topology.yml / players.yml change.
+
+    Args:
+        scenario_name: Scenario key (rounds-adjusted Default bundles resolve
+            to their source scenario).
+
+    Returns:
+        Path to the icon preview PNG, or None if topology.yml is missing.
+    """
+    scenario_name = _resolve_display_key(scenario_name)
+    topology_path = _configs_path(scenario_name) / "topology.yml"
+    players_path = _configs_path(scenario_name) / "players.yml"
+    if not topology_path.exists():
+        return None
+
+    # Fingerprint config so edits invalidate the cached image.
+    hash_src = _file_content_hash(topology_path)
+    if players_path.exists():
+        hash_src += _file_content_hash(players_path)
+    fingerprint = hashlib.md5(hash_src.encode()).hexdigest()[:8]
+
+    # Cache in a project-local .cache directory (lightweight, gitignore-safe)
+    _project_root = Path(__file__).resolve().parents[3]
+    safe_name = scenario_name.replace("/", "_").replace("\\", "_")
+    preview_dir = _project_root / ".cache" / "topology" / safe_name
+    preview_path = preview_dir / "topology_icons.png"
+    fingerprint_path = preview_dir / ".topology_icons_hash"
+    if (
+        preview_path.exists()
+        and fingerprint_path.exists()
+        and fingerprint_path.read_text().strip() == fingerprint
+    ):
+        return preview_path
+
+    try:
+        topo_cfg = _load_yaml_lenient(topology_path)
+
+        instances: dict = {}
+        if players_path.exists():
+            players_cfg = _load_yaml_lenient(players_path)
+            for pid, pcfg in players_cfg.items():
+                if isinstance(pcfg, dict):
+                    n = pcfg.get("num_instances", 1)
+                    instances[pid] = int(n) if n else 1
+
+        raw_connections: dict = topo_cfg.get("connections", {})
+        raw_sources: list = topo_cfg.get("sources", [])
+        hub = raw_sources[0] if raw_sources else "market"
+
+        def _expand(node: str) -> list:
+            n = instances.get(node, 1)
+            return [node] if n <= 1 else [f"{node}_{i}" for i in range(1, n + 1)]
+
+        # Collect every concrete node referenced by the topology.
+        node_set: set = set()
+        for src, targets in raw_connections.items():
+            node_set.update(_expand(src))
+            if isinstance(targets, list):
+                for tgt in targets:
+                    node_set.update(_expand(tgt))
+        investor_nodes = sorted(n for n in node_set if n != hub)
+        if not investor_nodes:
+            return None
+
+        preview_dir.mkdir(parents=True, exist_ok=True)
+        fig = _render_icon_topology_figure(
+            hub, investor_nodes, raw_connections, scenario_name
+        )
+        fig.savefig(
+            str(preview_path),
+            dpi=150,
+            facecolor="#ffffff",
+            bbox_inches="tight",
+            pad_inches=0.1,
+        )
+        plt.close(fig)
+        fingerprint_path.write_text(fingerprint)
+        return preview_path
+
+    except Exception as e:
+        print(f"[topology_icons] Failed to generate icon preview for {scenario_name}: {e}")
+        return None
+
+
+def _base_of_node(node: str) -> str:
+    """Strip a trailing ``_<n>`` instance suffix to recover the base player id."""
+    import re
+
+    return re.sub(r"_\d+$", "", node)
+
+
+def _place_node_icon(ax, img_path: Path, x: float, y: float, half: float) -> None:
+    """Draw an agent icon centered at (x, y) with the given data half-size."""
+    img = mpimg.imread(str(img_path))
+    ax.imshow(
+        img,
+        extent=(x - half, x + half, y - half, y + half),
+        zorder=5,
+        interpolation="antialiased",
+    )
+
+
+def _render_icon_topology_figure(
+    hub: str,
+    investor_nodes: list,
+    connections: dict,
+    scenario_name: str,
+):
+    """Build the matplotlib figure for the icon star topology.
+
+    Args:
+        hub: hub node id (typically ``market``).
+        investor_nodes: concrete investor instance ids on the ring.
+        connections: raw base-key connection map (for edge direction hints).
+        scenario_name: scenario key used to resolve the market archetype
+            icon and per-investor icons (via ``_icon_for_base``).
+
+    Returns:
+        matplotlib Figure (caller is responsible for saving/closing).
+    """
+    n_inv = len(investor_nodes)
+    radius = max(1.2, 0.16 * n_inv)
+    icon_half = min(0.18, max(0.08, 0.85 * np.pi * radius / max(n_inv, 1) / 2))
+
+    pos = {hub: np.array([0.0, 0.0])}
+    for i, node in enumerate(investor_nodes):
+        angle = 2 * np.pi * i / max(n_inv, 1) - np.pi / 2
+        pos[node] = np.array([radius * np.cos(angle), radius * np.sin(angle)])
+
+    fig_size = max(5.0, radius * 2.4)
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+    fig.patch.set_facecolor("#ffffff")
+    ax.set_facecolor("#ffffff")
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+    # Edges: hub <-> each investor.
+    hub_pos = pos[hub]
+    for node in investor_nodes:
+        p = pos[node]
+        ax.plot(
+            [hub_pos[0], p[0]],
+            [hub_pos[1], p[1]],
+            color="#9aa4b2",
+            lw=1.0,
+            alpha=0.7,
+            zorder=1,
+        )
+
+    # Hub node — market archetype icon if available, else labelled gold box.
+    from matplotlib.patches import FancyBboxPatch
+
+    hub_icon_path = _icon_for_base("market", scenario_name)
+    hub_r = icon_half * 1.15
+    if hub_icon_path is not None:
+        # Draw the market coordinator icon as the hub. Size is slightly
+        # larger than investor icons to emphasise the coordinator role.
+        try:
+            _place_node_icon(
+                ax, hub_icon_path, hub_pos[0], hub_pos[1], icon_half * 1.25
+            )
+        except Exception:
+            hub_icon_path = None  # fall through to gold box
+    if hub_icon_path is None:
+        box_w = hub_r * 2.6
+        box_h = hub_r * 1.6
+        ax.add_patch(
+            FancyBboxPatch(
+                (hub_pos[0] - box_w / 2, hub_pos[1] - box_h / 2),
+                box_w,
+                box_h,
+                boxstyle="round,pad=0.02,rounding_size=0.05",
+                linewidth=1.5,
+                edgecolor="#f0a500",
+                facecolor="#f0a500",
+                zorder=6,
+            )
+        )
+        ax.text(
+            hub_pos[0],
+            hub_pos[1],
+            "Market",
+            ha="center",
+            va="center",
+            fontsize=8,
+            fontweight="bold",
+            color="#0e1117",
+            zorder=7,
+        )
+
+    # Investor nodes — agent icon or coloured-circle fallback.
+    import re
+
+    for node in investor_nodes:
+        p = pos[node]
+        base = _base_of_node(node)
+        icon_path = _icon_for_base(base, scenario_name)
+        if icon_path is not None:
+            try:
+                _place_node_icon(ax, icon_path, p[0], p[1], icon_half)
+            except Exception:
+                ax.add_patch(plt.Circle(p, icon_half, color="#3a86ff", zorder=5))
+        else:
+            ax.add_patch(plt.Circle(p, icon_half, color="#3a86ff", zorder=5))
+
+        # Label from the base id (clean map lookup); append the instance
+        # number when the player was expanded into multiple instances.
+        label = _shorten_node_label(base)
+        suffix = re.match(r".*_(\d+)$", node)
+        if suffix:
+            label = f"{label} {suffix.group(1)}"
+        ax.text(
+            p[0],
+            p[1] - icon_half - 0.08,
+            label,
+            ha="center",
+            va="top",
+            fontsize=6.5 if len(label) > 10 else 7.5,
+            color="#0e1117",
+            zorder=7,
+        )
+
+    lim = radius + icon_half + 0.4
+    ax.set_xlim(-lim, lim)
+    ax.set_ylim(-lim, lim)
+    plt.tight_layout(pad=0.2)
+    return fig
 
 
 # ---------------------------------------------------------------------------

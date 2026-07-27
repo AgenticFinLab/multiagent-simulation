@@ -4,13 +4,13 @@
 # Market as hub, all investors communicate through market.
 # NO HerdingInvestor - herding EMERGES from positive feedback dynamics.
 #
-#         investor_momentum ──────┐
-#         investor_contrarian ────┤
-#         investor_risk_averse ───┼──▶ market ──┬──▶ investor_momentum
-#         investor_aggressive ────┤             ├──▶ investor_contrarian
-#         investor_noise ─────────┘             ├──▶ investor_risk_averse
-#                                               ├──▶ investor_aggressive
-#                    (orders: P,Q)              └──▶ investor_noise
+#         rule_momentum_investor ──────┐
+#         rule_contrarian_investor ────┤
+#         rule_risk_averse_investor ───┼──▶ market ──┬──▶ rule_momentum_investor
+#         rule_aggressive_investor ────┤             ├──▶ rule_contrarian_investor
+#         rule_noise_trader ─────────┘             ├──▶ rule_risk_averse_investor
+#                                               ├──▶ rule_aggressive_investor
+#                    (orders: P,Q)              └──▶ rule_noise_trader
 #                                                    (market data: price, volume)
 #
 # Execution flow per round:
@@ -26,24 +26,24 @@ sources:
 connections:
   # Market → All investors (price + volume broadcast)
   market:
-    - investor_momentum
-    - investor_contrarian
-    - investor_risk_averse
-    - investor_aggressive
-    - investor_noise
+    - rule_momentum_investor
+    - rule_contrarian_investor
+    - rule_risk_averse_investor
+    - rule_aggressive_investor
+    - rule_noise_trader
 
   # Each investor → Market only (order submission)
-  investor_momentum:
+  rule_momentum_investor:
     - market
 
-  investor_contrarian:
+  rule_contrarian_investor:
     - market
 
-  investor_risk_averse:
+  rule_risk_averse_investor:
     - market
 
-  investor_aggressive:
+  rule_aggressive_investor:
     - market
 
-  investor_noise:
+  rule_noise_trader:
     - market

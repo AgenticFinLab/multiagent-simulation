@@ -3,11 +3,11 @@
 # =============================================================================
 # Market as hub, all investors communicate through market.
 #
-#         procyclicallender ──────────┐
-#         minskyborrower ─────────────┤
-#         countercyclicallender ──────┼──▶ market ──▶ all investors
-#         valueinvestor ──────────────┤
-#         noisetrader ────────────────┘
+#         rule_pro_cyclical_lender ──────────┐
+#         rule_minsky_borrower ─────────────┤
+#         rule_counter_cyclical_lender ──────┼──▶ market ──▶ all investors
+#         rule_value_investor ──────────────┤
+#         rule_noise_trader ────────────────┘
 #
 # Execution flow per round:
 #   Level 0: market executes (broadcasts price + credit conditions)
@@ -22,24 +22,24 @@ sources:
 connections:
   # Market → All investors (price + credit data broadcast)
   market:
-    - procyclicallender
-    - minskyborrower
-    - countercyclicallender
-    - valueinvestor
-    - noisetrader
+    - rule_pro_cyclical_lender
+    - rule_minsky_borrower
+    - rule_counter_cyclical_lender
+    - rule_value_investor
+    - rule_noise_trader
 
   # Each investor → Market only (order submission)
-  procyclicallender:
+  rule_pro_cyclical_lender:
     - market
 
-  minskyborrower:
+  rule_minsky_borrower:
     - market
 
-  countercyclicallender:
+  rule_counter_cyclical_lender:
     - market
 
-  valueinvestor:
+  rule_value_investor:
     - market
 
-  noisetrader:
+  rule_noise_trader:
     - market

@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - short_vol_trader_1
-    - vol_e_t_n_manager_2
-    - long_vol_hedger_3
-    - vol_arbitrageur_4
-    - equity_trader_5
+    - llm_short_vol_trader
+    - llm_vol_etn_manager
+    - llm_long_vol_hedger
+    - llm_vol_arbitrageur
+    - llm_equity_trader
 
-  short_vol_trader_1:
+  llm_short_vol_trader:
     - market
 
-  vol_e_t_n_manager_2:
+  llm_vol_etn_manager:
     - market
 
-  long_vol_hedger_3:
+  llm_long_vol_hedger:
     - market
 
-  vol_arbitrageur_4:
+  llm_vol_arbitrageur:
     - market
 
-  equity_trader_5:
+  llm_equity_trader:
     - market

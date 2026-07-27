@@ -20,7 +20,7 @@ from examples.LTCMCollapse.LLM.prompts import (
 )
 from examples.LTCMCollapse.Rule.players import Market
 from examples.LTCMCollapse.Rule.players import _build_order, _require_positive
-from examples.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 
 logger = logging.getLogger("LTCMCollapse.LLM")
 
@@ -160,6 +160,7 @@ class LLMInvestor(GeneralPlayer):
             str(decision_payload["reasoning"]),
         )
         order["analysis"] = str(decision_payload["analysis"])
+        decision_payload["outbound_messages"] = [{"payload": order, "content_type": "order"}]
         return Action(
             action_type="order",
             payload={

@@ -8,13 +8,13 @@ not use financial order fields.
 
 ## §2 Theory -> Implementation Mapping
 
-| Social Role | Theory Component | Implementation |
+| Social Role | Theory Component | Implementation Trace |
 |---|---|---|
-| `RagLLMIdeologue` | `simulation-bases.md §4.1` | RuleLLM prompt plus retrieved echo-chamber context. |
-| `RagLLMConformist` | `simulation-bases.md §4.2` | RuleLLM prompt plus retrieved conformity/herding context. |
-| `RagLLMCriticalThinker` | `simulation-bases.md §4.3` | RuleLLM prompt plus retrieved evidence-evaluation context. |
-| `RagLLMBridgeBuilder` | `simulation-bases.md §4.4` | RuleLLM prompt plus retrieved cross-cutting exposure context. |
-| `RagLLMPassiveFollower` | `simulation-bases.md §4.5` | RuleLLM prompt plus retrieved low-engagement communication context. |
+| `RagLLMIdeologue` | `simulation-bases.md §4.1` | `players.py:RagLLMIdeologue`; `prompts.py:RAG_IDEOLOGUE_SYS`; shared `RagLLMSocialAgent.decide`. |
+| `RagLLMConformist` | `simulation-bases.md §4.2` | `players.py:RagLLMConformist`; `prompts.py:RAG_CONFORMIST_SYS`; shared `RagLLMSocialAgent.decide`. |
+| `RagLLMCriticalThinker` | `simulation-bases.md §4.3` | `players.py:RagLLMCriticalThinker`; `prompts.py:RAG_CRITICAL_SYS`; shared `RagLLMSocialAgent.decide`. |
+| `RagLLMBridgeBuilder` | `simulation-bases.md §4.4` | `players.py:RagLLMBridgeBuilder`; `prompts.py:RAG_BRIDGE_SYS`; shared `RagLLMSocialAgent.decide`. |
+| `RagLLMPassiveFollower` | `simulation-bases.md §4.5` | `players.py:RagLLMPassiveFollower`; `prompts.py:RAG_PASSIVE_SYS`; shared `RagLLMSocialAgent.decide`. |
 
 ## §3 Environment Mechanism
 
@@ -23,9 +23,11 @@ only model reasoning, not the environment update equation.
 
 ## §4 Variant Architecture
 
-`RagLLMSocialAgent` initializes or loads a per-agent RAG index, retrieves
-context each round, records `rag_context`, validates `action_type`, `intensity`,
-and `reasoning`, and emits `social_action`.
+`RagLLMSocialAgent._initialize_rag` initializes or loads a per-agent index;
+`_build_prompt` retrieves context; `_parse_echo_chamber_response` enforces the
+canonical tagged JSON contract; and `decide` records `rag_context` and emits
+`social_action`. `OpinionEnvironment` is reused from the Rule variant so the
+state transition remains identical across variants.
 
 ## §5 Config Reference
 

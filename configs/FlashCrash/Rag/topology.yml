@@ -11,23 +11,23 @@ sources:
 
 connections:
   market:
-    - ragllm_hft
+    - ragllm_high_frequency_trader
     - ragllm_market_maker
-    - ragllm_algo
-    - ragllm_stop_loss
-    - ragllm_fundamental
+    - ragllm_algorithmic_trader
+    - ragllm_stop_loss_trader
+    - ragllm_fundamental_trader
 
-  ragllm_hft:
+  ragllm_high_frequency_trader:
     - market
 
   ragllm_market_maker:
     - market
 
-  ragllm_algo:
+  ragllm_algorithmic_trader:
     - market
 
-  ragllm_stop_loss:
+  ragllm_stop_loss_trader:
     - market
 
-  ragllm_fundamental:
+  ragllm_fundamental_trader:
     - market

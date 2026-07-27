@@ -15,6 +15,7 @@ Rag analysis compares historically informed LLM behavior with Rule, LLM, and Rul
 | Price trough | `analysis-bases.md §2.5` | imported `calculate_metrics(data)` | lowest RAG price |
 | Final recovery | `analysis-bases.md §2.6` | imported `calculate_metrics(data)` | stabilization |
 | LLM output quality | `analysis-bases.md §2.7` | `audit_llm_output_quality.py` | parse failures, contract failures, action validity |
+| Retrieval coverage | `analysis-bases.md §2.7` | `analyze_rag_knowledge_effect(rag_contexts)` | success/failure rates and 70% target per agent |
 
 ## §3 Variant-Specific Notes
 
@@ -31,7 +32,7 @@ RAG success requires more than `exit=0`: embedding access, context injection, pa
 
 ## §5 Output Files
 
-The current `analysis.py` imports Rule analysis functions. RAG-specific quality checks are produced by post-run output quality review.
+The current `analysis.py` imports Rule orchestration functions and writes `rag_stats.json` with per-agent retrieval success/failure rates and target status.
 
 ## §6 Cross-Variant Comparison
 

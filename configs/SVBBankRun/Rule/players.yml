@@ -1,4 +1,5 @@
 market:
+  archetype: deposit-bank-run-diamond-dybvig  # -> AGENT_POOL/market/deposit-bank-run-diamond-dybvig.md
   name: "Market"
   class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1
@@ -9,105 +10,105 @@ market:
     steps_per_turn: 1
     group_tags: [market]
     extras:
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.025
-      mean_reversion: 0.01
-      noise_std: 0.015
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row; normalization (simulation-bases.md §6)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row; normalization; equal to initial_price so starting deviation is zero (simulation-bases.md §6)
+      price_impact: 0.025  # Source: target §9 market.extras.price_impact row; Diamond and Dybvig (1983), 10.1086/261155
+      mean_reversion: 0.01  # Source: target §9 market.extras.mean_reversion row; Bagehot (1873) via Freixas et al. (2000), 10.1023/A:1026527607455
+      noise_std: 0.015  # Source: target §9 market.extras.noise_std row; Rule/players.py Market.perceive
 
-depositor:
+rule_depositor:
   name: "Depositor"
   class: "examples.SVBBankRun.Rule.players:Depositor"
-  num_instances: 4
+  num_instances: 4  # Source: target §9 depositor.num_instances row
   persona: !include persona.yml
   config:
-    identity: "depositor"
+    identity: "rule_depositor"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 1000000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      withdrawal_threshold: 0.1
-      social_influence: 0.5
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0  # Source: target §9 depositor.extras.initial_cash row
+      initial_position: 600  # Source: target §9 depositor.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      withdrawal_threshold: 0.1  # Source: target §9 depositor.extras.withdrawal_threshold row; Diamond and Dybvig (1983), 10.1086/261155
+      social_influence: 0.5  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
+      base_size: 300  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-socialmediainfluencer:
+rule_social_media_influencer:
   name: "SocialMediaInfluencer"
   class: "examples.SVBBankRun.Rule.players:SocialMediaInfluencer"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 socialmediainfluencer.num_instances row
   persona: !include persona.yml
   config:
-    identity: "socialmediainfluencer"
+    identity: "rule_social_media_influencer"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 800000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      amplification_factor: 2.0
-      base_size: 500
-      custom_state_hot_limit: 3
+      initial_cash: 800000.0  # Source: target §9 socialmediainfluencer.extras.initial_cash row
+      initial_position: 500  # Source: target §9 socialmediainfluencer.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      amplification_factor: 2.0  # Source: target §9 socialmediainfluencer.extras.amplification_factor row; Bikhchandani et al. (1992), 10.1086/261849
+      base_size: 500  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-bankmanager:
+rule_bank_manager:
   name: "BankManager"
   class: "examples.SVBBankRun.Rule.players:BankManager"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 bankmanager.num_instances row
   persona: !include persona.yml
   config:
-    identity: "bankmanager"
+    identity: "rule_bank_manager"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 3000000.0
-      initial_position: 800
-      initial_price: 100.0
-      fundamental_value: 100.0
-      duration_gap: 0.5
-      stabilize_size: 400
-      custom_state_hot_limit: 3
+      initial_cash: 3000000.0  # Source: target §9 bankmanager.extras.initial_cash row
+      initial_position: 800  # Source: target §9 bankmanager.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      duration_gap: 0.5  # Source: target §9 bankmanager.extras.duration_gap row (informational; not consumed in Rule)
+      stabilize_size: 400  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-regulator:
+rule_regulator:
   name: "Regulator"
   class: "examples.SVBBankRun.Rule.players:Regulator"
-  num_instances: 1
+  num_instances: 1  # Source: target §9 regulator.num_instances row
   persona: !include persona.yml
   config:
-    identity: "regulator"
+    identity: "rule_regulator"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 10000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      intervention_threshold: 0.5
-      guarantee_probability: 0.4
-      intervention_size: 2000
-      custom_state_hot_limit: 3
+      initial_cash: 10000000.0  # Source: target §9 regulator.extras.initial_cash row
+      initial_position: 0  # Source: target §9 regulator.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      intervention_threshold: 0.5  # Source: target §9 regulator.extras.intervention_threshold row; Bagehot (1873)
+      guarantee_probability: 0.4  # Source: target §9 regulator.extras.guarantee_probability row; Freixas et al. (2000), 10.1023/A:1026527607455
+      intervention_size: 2000  # Source: target §9 regulator.extras.intervention_size row (config extra; runtime code uses literal 2000)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)
 
-bondtrader:
+rule_bond_trader:
   name: "BondTrader"
   class: "examples.SVBBankRun.Rule.players:BondTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 bondtrader.num_instances row
   persona: !include persona.yml
   config:
-    identity: "bondtrader"
+    identity: "rule_bond_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 2000000.0
-      initial_position: 400
-      initial_price: 100.0
-      fundamental_value: 100.0
-      yield_sensitivity: 0.5
-      position_size: 350
-      custom_state_hot_limit: 3
+      initial_cash: 2000000.0  # Source: target §9 bondtrader.extras.initial_cash row
+      initial_position: 400  # Source: target §9 bondtrader.extras.initial_position row
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price row (broadcast copy)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value row (broadcast copy)
+      yield_sensitivity: 0.5  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
+      position_size: 350  # Source: target §9 legacy descriptive extras (not consumed by current Rule formula)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing)

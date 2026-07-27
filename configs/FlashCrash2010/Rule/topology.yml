@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - hftmarketmaker
-    - momentumchaser
-    - fundamentaltrader
-    - stoplosstrader
-    - noisetrader
+    - rule_hft_market_maker
+    - rule_momentum_chaser
+    - rule_fundamental_trader
+    - rule_stop_loss_trader
+    - rule_noise_trader
 
-  hftmarketmaker:
+  rule_hft_market_maker:
     - market
 
-  momentumchaser:
+  rule_momentum_chaser:
     - market
 
-  fundamentaltrader:
+  rule_fundamental_trader:
     - market
 
-  stoplosstrader:
+  rule_stop_loss_trader:
     - market
 
-  noisetrader:
+  rule_noise_trader:
     - market

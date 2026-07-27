@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - peripherybondseller
-    - creditorpanicker
-    - corebondbuyer
-    - ecbintervenor
-    - hedgedfund
+    - ragllm_periphery_bond_seller
+    - ragllm_creditor_panicker
+    - ragllm_core_bond_buyer
+    - ragllm_ecb_intervenor
+    - ragllm_hedged_fund
 
-  peripherybondseller:
+  ragllm_periphery_bond_seller:
     - market
 
-  creditorpanicker:
+  ragllm_creditor_panicker:
     - market
 
-  corebondbuyer:
+  ragllm_core_bond_buyer:
     - market
 
-  ecbintervenor:
+  ragllm_ecb_intervenor:
     - market
 
-  hedgedfund:
+  ragllm_hedged_fund:
     - market

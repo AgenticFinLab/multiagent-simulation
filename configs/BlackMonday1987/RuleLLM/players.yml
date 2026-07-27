@@ -9,6 +9,7 @@
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.BlackMonday1987.RuleLLM.players:Market"
   num_instances: 1
@@ -19,38 +20,48 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"  # Source: infrastructure
+      # Source: target §9 `fundamental value` row (normalization)
       fundamental_value: 250.0
+      # Source: target §8.1 (initial index price, normalization)
       initial_price: 250.0
+      # Source: target §9 `price impact` row (Kyle 1985; Brady 1988)
       price_impact: 0.05
+      # Source: target §9 `mean reversion` row (Shleifer & Vishny 1997)
       mean_reversion: 0.01
+      # Source: simulation-bases.md §3.1 σ row (Roll 1984)
       noise_std: 0.02
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # Portfolio Insurers — RuleLLM with explicit hedge rules
 # Theory: Leland & Rubinstein (1976), Brady Commission (1988)
 # -----------------------------------------------------------------------------
-portfolio_insurer:
+rulellm_portfolio_insurer:
   name: "Portfolio Insurer"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMPortfolioInsurer"
   # Expander → portfolio_insurer_1, portfolio_insurer_2
   num_instances: 2
   config:
-    identity: "portfolio_insurer"
+    identity: "rulellm_portfolio_insurer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 1000.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
       # Rule parameters for RuleLLM
+      # Source: target §9 `rebalance threshold` row (Leland 1980; Brady 1988)
       rebalance_threshold: 0.02
+      # Source: target §9 `hedge ratio` row (Brady 1988)
       hedge_ratio: 0.5
+      # Source: simulation-bases.md §4.x agent base_size spec
       base_size: 100.0
       llm:
         sys_message: "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_PORTFOLIO_INSURER_SYS"
@@ -66,24 +77,29 @@ portfolio_insurer:
 # Index Arbitrageurs — RuleLLM with explicit arb spread rules
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-index_arbitrageur:
+rulellm_index_arbitrageur:
   name: "Index Arbitrageur"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMIndexArbitrageur"
   # Expander → index_arbitrageur_1, index_arbitrageur_2
   num_instances: 2
   config:
-    identity: "index_arbitrageur"
+    identity: "rulellm_index_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 500.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
+      # Source: target §9 `arbitrage threshold` row (Stoll & Whaley 1990)
       arb_threshold: 0.01
+      # Source: simulation-bases.md §4.2 IndexArbitrageur behavioral spec
       arb_strength: 0.8
+      # Source: simulation-bases.md §4.x agent base_size spec
       base_size: 80.0
       llm:
         sys_message: "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_INDEX_ARBITRAGEUR_SYS"
@@ -99,24 +115,29 @@ index_arbitrageur:
 # Program Traders — RuleLLM with explicit trigger rules
 # Theory: Brady Commission (1988)
 # -----------------------------------------------------------------------------
-program_trader:
+rulellm_program_trader:
   name: "Program Trader"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMProgramTrader"
   # Expander → program_trader_1, program_trader_2
   num_instances: 2
   config:
-    identity: "program_trader"
+    identity: "rulellm_program_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 500000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 800.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
+      # Source: target §9 `program trigger threshold` row (Brady 1988; De Long et al 1990)
       trigger_threshold: 0.01
+      # Source: target §9 `feedback strength` row (De Long et al 1990)
       feedback_strength: 1.2
+      # Source: simulation-bases.md §4.x agent base_size spec
       base_size: 60.0
       llm:
         sys_message: "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_PROGRAM_TRADER_SYS"
@@ -132,22 +153,26 @@ program_trader:
 # Value Investors — RuleLLM with explicit value thresholds
 # Theory: Graham (1949)
 # -----------------------------------------------------------------------------
-value_investor:
+rulellm_value_investor:
   name: "Value Investor"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMValueInvestor"
   num_instances: 1
   config:
-    identity: "value_investor"
+    identity: "rulellm_value_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 1000000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
+      # Source: target §9 `value discount` row (Shleifer & Vishny 1997)
       value_discount: 0.15
+      # Source: simulation-bases.md §4.x agent base_size spec
       base_size: 40.0
       llm:
         sys_message: "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_VALUE_INVESTOR_SYS"
@@ -163,24 +188,29 @@ value_investor:
 # Noise Traders — RuleLLM with random-trader persona
 # Theory: Black (1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+rulellm_noise_trader:
   name: "Noise Trader"
   class: "examples.BlackMonday1987.RuleLLM.players:RuleLLMNoiseTrader"
   # Expander → noise_trader_1, noise_trader_2
   num_instances: 2
   config:
-    identity: "noise_trader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"
+      record_path: "EXPERIMENT/BlackMonday1987/RuleLLM/records"  # Source: infrastructure
+      # Source: simulation-bases.md §4.x agent initial_cash spec
       initial_cash: 100000.0
+      # Source: simulation-bases.md §4.x agent initial_position spec
       initial_position: 0.0
-      custom_state_hot_limit: 3
+      custom_state_hot_limit: 3  # Source: infrastructure
+      # Source: target §9 `trade probability` row (Black 1986)
       trade_probability: 0.05
+      # Source: simulation-bases.md §4.5 NoiseTrader min_order spec
       min_order: 50.0
+      # Source: simulation-bases.md §4.5 NoiseTrader max_order spec
       max_order: 200.0
       llm:
         sys_message: "examples.BlackMonday1987.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"

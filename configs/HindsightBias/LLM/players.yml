@@ -1,6 +1,7 @@
 # HindsightBias LLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.HindsightBias.LLM.players:Market"
   num_instances: 1
@@ -11,34 +12,34 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/HindsightBias/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HindsightBias/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.03  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
-hindsightoverconfident:
+llm_hindsight_overconfident:
   name: "HindsightOverconfident"
   class: "examples.HindsightBias.LLM.players:LLMHindsightOverconfident"
   num_instances: 3
   config:
-    identity: "hindsightoverconfident"
+    identity: "llm_hindsight_overconfident"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HindsightBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      hindsight_inflation: 1.5
-      max_order: 800
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HindsightBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      hindsight_inflation: 1.5  # Source: simulation-bases.md §4.1.7
+      max_order: 800  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HindsightBias.LLM.prompts:LLM_HINDSIGHTOVERCONFIDENT_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -49,25 +50,25 @@ hindsightoverconfident:
           max_tokens: 600
   persona: !include persona.yml
 
-outcomelearner:
+llm_outcome_learner:
   name: "OutcomeLearner"
   class: "examples.HindsightBias.LLM.players:LLMOutcomeLearner"
   num_instances: 3
   config:
-    identity: "outcomelearner"
+    identity: "llm_outcome_learner"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HindsightBias/LLM/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      success_attribution: 1.3
-      max_order: 800
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HindsightBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1200000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      success_attribution: 1.3  # Source: simulation-bases.md §4.2.7
+      max_order: 800  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HindsightBias.LLM.prompts:LLM_OUTCOMELEARNER_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -78,25 +79,25 @@ outcomelearner:
           max_tokens: 600
   persona: !include persona.yml
 
-processevaluator:
+llm_process_evaluator:
   name: "ProcessEvaluator"
   class: "examples.HindsightBias.LLM.players:LLMProcessEvaluator"
   num_instances: 2
   config:
-    identity: "processevaluator"
+    identity: "llm_process_evaluator"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HindsightBias/LLM/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      process_weight: 0.8
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HindsightBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      process_weight: 0.8  # Source: simulation-bases.md §4.3.7
+      max_order: 500  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HindsightBias.LLM.prompts:LLM_PROCESSEVALUATOR_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -107,25 +108,25 @@ processevaluator:
           max_tokens: 600
   persona: !include persona.yml
 
-contrarianskeptic:
+llm_contrarian_skeptic:
   name: "ContrarianSkeptic"
   class: "examples.HindsightBias.LLM.players:LLMContrarianSkeptic"
   num_instances: 1
   config:
-    identity: "contrarianskeptic"
+    identity: "llm_contrarian_skeptic"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HindsightBias/LLM/records"
-      initial_cash: 2000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      skepticism_level: 0.6
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HindsightBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      skepticism_level: 0.6  # Source: simulation-bases.md §4.4.7
+      max_order: 500  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HindsightBias.LLM.prompts:LLM_CONTRARIANSKEPTIC_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -136,25 +137,25 @@ contrarianskeptic:
           max_tokens: 600
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.HindsightBias.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/HindsightBias/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/HindsightBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 200  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
+      max_order: 500  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.HindsightBias.LLM.prompts:LLM_NOISETRADER_PROMPT"
         user_message: "examples.HindsightBias.LLM.prompts:LLM_USER_TEMPLATE"

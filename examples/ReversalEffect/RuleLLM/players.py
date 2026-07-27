@@ -45,7 +45,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -320,7 +320,7 @@ Respond with ONLY valid JSON:
     def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
         """Parse LLM response with analysis and decision sections.
 
-        Delegates to shared utility in examples/llm_utils.py
+        Delegates to shared utility in masim.utils.llm_utils.py
         """
         decision = parse_llm_response_with_thinking(response_text)
         if "provides_liquidity" not in decision or decision["provides_liquidity"] is None:
@@ -376,6 +376,7 @@ Respond with ONLY valid JSON:
                 f"Skipping trade this round."
             )
             order = {
+                "action": "hold",
                 "bid_price": market_data["price"],
                 "quantity": 0.0,
                 "strategy": strategy_name,
@@ -383,6 +384,8 @@ Respond with ONLY valid JSON:
                 "reasoning": f"LLM parse failed: held position",
                 "analysis": "",
                 "provides_liquidity": False,
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
             return {
                 **order,

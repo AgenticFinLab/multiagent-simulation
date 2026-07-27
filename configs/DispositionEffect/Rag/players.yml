@@ -1,11 +1,31 @@
-# =============================================================================
-# DispositionEffect Rag Players Configuration
-# =============================================================================
-# RAG-augmented investors with knowledge retrieval capabilities.
-# Uses RuleLLM prompts + runtime RAG context injection.
-# =============================================================================
+# DispositionEffect Rag players. Defaults trace to simulation-bases.md §4/§6.
+
+knowledge:
+  llm_generation: &llm_generation
+    temperature: 0.3  # Source: variant implementation setting; explain.md §3
+    max_new_tokens: 500  # Source: variant implementation setting; explain.md §3
+  rag_defaults: &rag_defaults
+    docs_dir: "examples/DispositionEffect"  # Source: local theory corpus; simulation-bases.md
+    url_csv: ""  # Source: disabled fallback; local theory corpus is authoritative
+    urls: []  # Source: disabled fallback; makes the smoke run network-independent
+    agent_autonomous: false  # Source: explain.md §4
+    catalog_path: ""  # Source: unused when agent_autonomous is false
+    llm_suggested: false  # Source: explain.md §4
+    llm_suggested_n_urls: 5  # Source: explain.md §4
+    docs_save_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/documents"  # Source: explain.md §6
+    top_k: 5  # Source: explain.md §4
+    query_gain_threshold: 0.05  # Source: simulation-bases.md §4 retrieval context
+    query_loss_threshold: -0.05  # Source: simulation-bases.md §4 retrieval context
+    context_char_limit: 500  # Source: explain.md §4
+    embed_type: "huggingface"  # Source: local reproducible embedding backend
+    embed_model: "BAAI/bge-small-en-v1.5"  # Source: KnowledgeStore default model
+    embed_api_base: ""  # Source: unused by local HuggingFace embeddings
+    chunk_size: 512  # Source: explain.md §4
+    chunk_overlap: 64  # Source: explain.md §4
+    knowledge_sources: []  # Source: disabled legacy input
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DispositionEffect.Rag.players:Market"
   num_instances: 1
@@ -13,305 +33,165 @@ market:
     identity: "market"
     role: coordinator
     steps_per_turn: 1
-    group_tags:
-      - market
+    group_tags: [market]
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.1
-      mean_reversion: 0.01
-      noise_std: 1.0
-      news_probability: 0.05
-      news_impact_range: 3.0
-      custom_state_hot_limit: 3
+      record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"  # Source: simulation.yml
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.05  # Source: simulation-bases.md §6
+      noise_std: 0.6  # Source: simulation-bases.md §6
+      news_probability: 0.15  # Source: simulation-bases.md §6
+      news_impact_range: 4.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
-# RAG Disposition Investor
-rag_disposition:
+ragllm_disposition_investor:
   name: "RAG Disposition Investor"
   class: "examples.DispositionEffect.Rag.players:RagDispositionInvestor"
   num_instances: 3
   config:
-    identity: "rag_disposition"
+    identity: "ragllm_disposition_investor"
     role: player
     steps_per_turn: 1
-    group_tags:
-      - rag_investors
+    group_tags: [rag_investors]
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      max_position: 200.0
-      custom_state_hot_limit: 3
-      gain_threshold: 0.03
-      loss_threshold: -0.10
-      sell_fraction_gain: 0.5
-      sell_fraction_loss: 0.15
-      buy_fraction: 0.15
+      record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"  # Source: simulation.yml
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.1
+      initial_position: 30.0  # Source: simulation-bases.md §4.1
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 30.0  # Source: simulation-bases.md §4.1
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      gain_threshold: 0.03  # Source: simulation-bases.md §6
+      loss_threshold: -0.10  # Source: simulation-bases.md §6
+      loss_aversion: 2.25  # Source: simulation-bases.md §6
+      sell_fraction_gain: 0.5  # Source: simulation-bases.md §6
+      sell_fraction_loss: 0.15  # Source: simulation-bases.md §6
+      buy_fraction: 0.15  # Source: simulation-bases.md §4.1
       llm:
-        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_DISPOSITION_BIASED_SYS"
-        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+        sys_message: "examples.DispositionEffect.Rag.prompts:RAG_DISPOSITION_BIASED_SYS"  # Source: explain.md §3
+        user_message: "examples.DispositionEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: explain.md §3
+        lm_type: "api"  # Source: explain.md §4
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: variant runtime choice
+        max_retries: 3  # Source: explain.md §4
+        generation_config: *llm_generation
       rag:
-        # ===================================================================
-        # RAG Knowledge Configuration
-        # ===================================================================
-        # Index persistence directory (for resume support)
-        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_disposition"
-        
-        # -------------------------------------------------------------------
-        # Knowledge Source Options (priority order: first available wins)
-        # -------------------------------------------------------------------
-        
-        # Option 1: Local directory with PDF/Markdown files
-        docs_dir: &docs_dir_disposition "examples/document-sources/files"
-        
-        # Option 2: CSV file with URLs (columns: source_type, url, book_title)
-        url_csv: "examples/document-sources/finance_books.csv"
-        
-        # Option 3: Explicit list of URLs to fetch (public platforms)
-        urls:
-          - "https://en.wikipedia.org/wiki/Disposition_effect"
-          - "https://en.wikipedia.org/wiki/Prospect_theory"
-          - "https://www.investopedia.com/terms/d/disposition-effect.asp"
-        
-        # Option 4: Agent-autonomous selection (uses agent identity to select docs)
-        agent_autonomous: false
-        catalog_path: "examples/document-sources/finance_books.csv"
-        
-        # Option 5: LLM-suggested document discovery
-        llm_suggested: false
-        llm_suggested_n_urls: 5
-        
-        # Directory to cache downloaded documents (reference docs_dir anchor)
-        docs_save_dir: *docs_dir_disposition
-        
-        # -------------------------------------------------------------------
-        # Retrieval Configuration
-        # -------------------------------------------------------------------
-        top_k: 5  # Number of chunks to retrieve per query
-        
-        # -------------------------------------------------------------------
-        # Embedding Configuration
-        # -------------------------------------------------------------------
-        # Using Doubao embedding via ARK API
-        embed_type: "litellm"
-        embed_model: "openai/hunyuan-embedding"
-        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-        
-        # Chunking parameters
-        chunk_size: 512
-        chunk_overlap: 64
-        
-        # Legacy: simple list of sources (backward compatibility)
-        knowledge_sources: []
+        <<: *rag_defaults
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_disposition_investor"  # Source: explain.md §6
   persona: !include persona.yml
 
-# RAG Rational Investor
-rag_rational:
+ragllm_rational_investor:
   name: "RAG Rational Investor"
   class: "examples.DispositionEffect.Rag.players:RagRationalInvestor"
   num_instances: 2
   config:
-    identity: "rag_rational"
+    identity: "ragllm_rational_investor"
     role: player
     steps_per_turn: 1
-    group_tags:
-      - rag_investors
+    group_tags: [rag_investors]
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      target_allocation: 0.5
-      rebalance_threshold: 0.1
+      record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"  # Source: simulation.yml
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.2
+      initial_position: 30.0  # Source: simulation-bases.md §4.2
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      target_allocation: 0.5  # Source: simulation-bases.md §6
+      rebalance_threshold: 0.1  # Source: simulation-bases.md §4.2
       llm:
-        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_RATIONAL_SYS"
-        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+        sys_message: "examples.DispositionEffect.Rag.prompts:RAG_RATIONAL_SYS"  # Source: explain.md §3
+        user_message: "examples.DispositionEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: explain.md §3
+        lm_type: "api"  # Source: explain.md §4
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: variant runtime choice
+        max_retries: 3  # Source: explain.md §4
+        generation_config: *llm_generation
       rag:
-        # ===================================================================
-        # RAG Knowledge Configuration (Rational Investor)
-        # ===================================================================
-        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_rational"
-        docs_dir: &docs_dir_rational "examples/document-sources/files"
-        url_csv: "examples/document-sources/finance_books.csv"
-        urls:
-          - "https://en.wikipedia.org/wiki/Rational_choice_theory"
-          - "https://en.wikipedia.org/wiki/Expected_utility_hypothesis"
-          - "https://www.investopedia.com/terms/r/rationalbehavior.asp"
-        agent_autonomous: false
-        catalog_path: "examples/document-sources/finance_books.csv"
-        llm_suggested: false
-        llm_suggested_n_urls: 5
-        docs_save_dir: *docs_dir_rational
-        top_k: 5
-        embed_type: "litellm"
-        embed_model: "openai/hunyuan-embedding"
-        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-        chunk_size: 512
-        chunk_overlap: 64
-        knowledge_sources: []
+        <<: *rag_defaults
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_rational_investor"  # Source: explain.md §6
   persona: !include persona.yml
 
-# RAG Tax Aware Investor
-rag_tax_aware:
+ragllm_tax_aware_investor:
   name: "RAG Tax Aware Investor"
   class: "examples.DispositionEffect.Rag.players:RagTaxAwareInvestor"
   num_instances: 2
   config:
-    identity: "rag_tax_aware"
+    identity: "ragllm_tax_aware_investor"
     role: player
     steps_per_turn: 1
-    group_tags:
-      - rag_investors
+    group_tags: [rag_investors]
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      tax_loss_threshold: -0.05
-      capital_gains_hold: 0.20
-      tax_harvest_fraction: 0.5
+      record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"  # Source: simulation.yml
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.3
+      initial_position: 30.0  # Source: simulation-bases.md §4.3
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      tax_loss_threshold: -0.05  # Source: simulation-bases.md §6
+      capital_gains_hold: 0.15  # Source: simulation-bases.md §6
+      tax_harvest_fraction: 0.5  # Source: simulation-bases.md §6
       llm:
-        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_TAX_AWARE_SYS"
-        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+        sys_message: "examples.DispositionEffect.Rag.prompts:RAG_TAX_AWARE_SYS"  # Source: explain.md §3
+        user_message: "examples.DispositionEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: explain.md §3
+        lm_type: "api"  # Source: explain.md §4
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: variant runtime choice
+        max_retries: 3  # Source: explain.md §4
+        generation_config: *llm_generation
       rag:
-        # ===================================================================
-        # RAG Knowledge Configuration (Tax-Aware Investor)
-        # ===================================================================
-        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_tax_aware"
-        docs_dir: &docs_dir_tax "examples/document-sources/files"
-        url_csv: "examples/document-sources/finance_books.csv"
-        urls:
-          - "https://en.wikipedia.org/wiki/Tax_loss_harvesting"
-          - "https://en.wikipedia.org/wiki/Capital_gains_tax"
-        agent_autonomous: false
-        catalog_path: "examples/document-sources/finance_books.csv"
-        llm_suggested: false
-        llm_suggested_n_urls: 5
-        docs_save_dir: *docs_dir_tax
-        top_k: 5
-        embed_type: "litellm"
-        embed_model: "openai/hunyuan-embedding"
-        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-        chunk_size: 512
-        chunk_overlap: 64
-        knowledge_sources: []
+        <<: *rag_defaults
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_tax_aware_investor"  # Source: explain.md §6
   persona: !include persona.yml
 
-# RAG Institutional Investor
-rag_institutional:
+ragllm_index_holder:
+  name: "RAG Index Holder"
+  class: "examples.DispositionEffect.Rag.players:RagIndexHolder"
+  num_instances: 1
+  config:
+    identity: "ragllm_index_holder"
+    role: player
+    steps_per_turn: 1
+    group_tags: [rag_investors]
+    extras:
+      record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"  # Source: simulation.yml
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.4
+      initial_position: 50.0  # Source: simulation-bases.md §4.4
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      llm:
+        sys_message: "examples.DispositionEffect.Rag.prompts:RAG_INDEX_HOLDER_SYS"  # Source: explain.md §3
+        user_message: "examples.DispositionEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: explain.md §3
+        lm_type: "api"  # Source: explain.md §4
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: variant runtime choice
+        max_retries: 3  # Source: explain.md §4
+        generation_config: *llm_generation
+      rag:
+        <<: *rag_defaults
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_index_holder"  # Source: explain.md §6
+  persona: !include persona.yml
+
+ragllm_institutional_investor:
   name: "RAG Institutional Investor"
   class: "examples.DispositionEffect.Rag.players:RagInstitutionalInvestor"
   num_instances: 2
   config:
-    identity: "rag_institutional"
+    identity: "ragllm_institutional_investor"
     role: player
     steps_per_turn: 1
-    group_tags:
-      - rag_investors
+    group_tags: [rag_investors]
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      gain_threshold: 0.25
-      loss_threshold: -0.15
-      sell_fraction: 0.4
+      record_path: "${DISPOSITION_RAG_OUTPUT_DIR:-EXPERIMENT/DispositionEffect/Rag}/records"  # Source: simulation.yml
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.5
+      initial_position: 30.0  # Source: simulation-bases.md §4.5
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      gain_threshold: 0.25  # Source: simulation-bases.md §6
+      loss_threshold: -0.15  # Source: simulation-bases.md §6
+      sell_fraction: 0.4  # Source: simulation-bases.md §6
       llm:
-        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_INSTITUTIONAL_SYS"
-        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+        sys_message: "examples.DispositionEffect.Rag.prompts:RAG_INSTITUTIONAL_SYS"  # Source: explain.md §3
+        user_message: "examples.DispositionEffect.Rag.prompts:RAG_USER_TEMPLATE"  # Source: explain.md §3
+        lm_type: "api"  # Source: explain.md §4
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: variant runtime choice
+        max_retries: 3  # Source: explain.md §4
+        generation_config: *llm_generation
       rag:
-        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_institutional"
-        docs_dir: &docs_dir_institutional "examples/document-sources/files"
-        url_csv: "examples/document-sources/finance_books.csv"
-        urls:
-          - "https://en.wikipedia.org/wiki/Institutional_investor"
-          - "https://en.wikipedia.org/wiki/Risk_management"
-        agent_autonomous: false
-        catalog_path: "examples/document-sources/finance_books.csv"
-        llm_suggested: false
-        llm_suggested_n_urls: 5
-        docs_save_dir: *docs_dir_institutional
-        top_k: 5
-        embed_type: "litellm"
-        embed_model: "openai/hunyuan-embedding"
-        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-        chunk_size: 512
-        chunk_overlap: 64
-        knowledge_sources: []
-  persona: !include persona.yml
-
-# RAG Loss-Averse Investor
-rag_loss_averse:
-  name: "RAG Loss-Averse Investor"
-  class: "examples.DispositionEffect.Rag.players:RagLossAverse"
-  num_instances: 2
-  config:
-    identity: "rag_loss_averse"
-    role: player
-    steps_per_turn: 1
-    group_tags:
-      - rag_investors
-    extras:
-      record_path: "EXPERIMENT/DispositionEffect/Rag/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      gain_threshold: 0.03
-      loss_threshold: -0.10
-      sell_fraction_gain: 0.5
-      sell_fraction_loss: 0.15
-      llm:
-        sys_message: "examples.DispositionEffect.Rag.prompts:RULELLM_LOSS_AVERSE_SYS"
-        user_message: "examples.DispositionEffect.Rag.prompts:LLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
-      rag:
-        persist_dir: "EXPERIMENT/DispositionEffect/Rag/rag_index/rag_loss_averse"
-        docs_dir: &docs_dir_loss_averse "examples/document-sources/files"
-        url_csv: "examples/document-sources/finance_books.csv"
-        urls:
-          - "https://en.wikipedia.org/wiki/Loss_aversion"
-          - "https://en.wikipedia.org/wiki/Prospect_theory"
-        agent_autonomous: false
-        catalog_path: "examples/document-sources/finance_books.csv"
-        llm_suggested: false
-        llm_suggested_n_urls: 5
-        docs_save_dir: *docs_dir_loss_averse
-        top_k: 5
-        embed_type: "litellm"
-        embed_model: "openai/hunyuan-embedding"
-        embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-        chunk_size: 512
-        chunk_overlap: 64
-        knowledge_sources: []
+        <<: *rag_defaults
+        persist_dir: "${DISPOSITION_RAG_CACHE_DIR:-EXPERIMENT/DispositionEffect/Rag}/rag_index/ragllm_institutional_investor"  # Source: explain.md §6
   persona: !include persona.yml

@@ -1,36 +1,46 @@
-"""EndowmentEffect Rag — RAG-augmented LLM simulation of endowment effect dynamics."""
+"""RAG-grounded investors for the EndowmentEffect market variant.
+
+The language model proposes an order after retrieval.  This module enforces the
+runtime contract: configured prompts and retry limits, valid decision fields,
+finite prices and quantities, and cash/inventory constraints.
+"""
 
 from __future__ import annotations
 
+import copy
 import importlib
 import logging
+import math
 import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
+from filelock import FileLock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from masim.knowledge import (
     KnowledgeLoader,
     KnowledgeQuery,
     KnowledgeStore,
     ResourceManager,
 )
-from masim.player.base import Action, Observation, StepResult
+from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 from examples.EndowmentEffect.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger(__name__)
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -42,8 +52,6 @@ def load_prompt(prompt_path: str) -> str:
 
 class RagLLMInvestor(GeneralPlayer):
     """Base RAG-augmented LLM investor for EndowmentEffect."""
-
-    _system_prompt_path: str = ""
 
     async def perceive(self, observation: Observation, prev_result=None) -> None:
         if "cash" not in self.state.custom_state:
@@ -62,50 +70,38 @@ class RagLLMInvestor(GeneralPlayer):
         self.state.custom_state["position"] = int(extras["initial_position"])
         self.state.custom_state["price_history"] = []
         self.state.custom_state["market_data"] = {}
+        base_path = os.path.join(extras["record_path"], self.config.identity)
         self.state.custom_state["history_buffer"] = HistoryBuffer(
-            folder=f"EndowmentEffect/Rag/{self.__class__.__name__}", entry_limit=200
+            folder=os.path.join(base_path, "llm_history"),
+            entry_limit=int(extras["custom_state_hot_limit"]),
         )
-        project_root = Path(__file__).parent.parent.parent
-        load_dotenv(project_root / ".env")
+        load_dotenv()
         llm_cfg = extras["llm"]
+        if llm_cfg["lm_type"] != "api":
+            raise ValueError("EndowmentEffect Rag requires llm.lm_type: api")
         lm_name = llm_cfg["lm_name"]
         generation_config = llm_cfg["generation_config"]
         self.state.custom_state["lm_name"] = lm_name
         self.state.custom_state["generation_config"] = generation_config
+        self.state.custom_state["llm_params"] = llm_cfg
         llm_client = LangChainAPIInference(
             lm_name=lm_name, generation_config=generation_config
         )
         self.state.custom_state["llm_client"] = llm_client
         private_knowledge = extras["private_knowledge"]
         rag_cfg = private_knowledge["rag"]
-        await self._initialize_rag(rag_cfg, llm_client, llm_cfg)
+        await self._initialize_rag(rag_cfg)
 
-    async def _initialize_rag(
-        self, rag_cfg: Dict[str, Any], llm_client: Any, llm_config: Dict[str, Any]
-    ) -> None:
+    async def _initialize_rag(self, rag_cfg: Dict[str, Any]) -> None:
         extras = self.config.extras
         record_path = extras["record_path"]
         knowledge_config = extras["knowledge"]
         if not knowledge_config:
-            knowledge_config = {
-                "backend": "local",
-                "global_uri": rag_cfg["docs_dir"],
-                "preprocessing": {
-                    "parser": "mineru",
-                    "output_position": rag_cfg["mineru_output_dir"],
-                },
-                "rag": {
-                    "output_position": rag_cfg["shared_rag_index_dir"]
-                },
-            }
+            raise ValueError("Rag player requires the shared knowledge configuration")
         resource_manager = ResourceManager(knowledge_config)
         private_knowledge = extras["private_knowledge"]
         if not private_knowledge:
-            private_knowledge = {
-                "from_global_resources": ["MinerU_processed"],
-                "local_resources": {"local_uri": "", "local_resources": []},
-                "rag": rag_cfg,
-            }
+            raise ValueError("Rag player requires private_knowledge configuration")
         agent_knowledge = resource_manager.resolve_agent_knowledge(
             agent_id=self.identity,
             private_knowledge=private_knowledge,
@@ -152,35 +148,40 @@ class RagLLMInvestor(GeneralPlayer):
         shared_rag_dirs = resolved_rag["shared_rag_index_dirs"]
         if not shared_rag_dirs and os.path.isdir(shared_rag_dir):
             shared_rag_dirs = [shared_rag_dir]
-        for s_dir in shared_rag_dirs:
-            if os.path.isdir(s_dir):
-                shared_files = [f for f in os.listdir(s_dir) if not f.startswith(".")]
-                if shared_files:
-                    try:
-                        for item in shared_files:
-                            src = os.path.join(s_dir, item)
-                            dst = os.path.join(local_rag_dir, item)
-                            if os.path.isdir(src):
-                                shutil.copytree(src, dst, dirs_exist_ok=True)
-                            else:
-                                shutil.copy2(src, dst)
-                        rag_store.load(local_rag_dir)
-                        self.state.custom_state["rag_store"] = rag_store
-                        self.state.custom_state["rag_cfg"] = resolved_rag
-                        return
-                    except Exception as exc:
-                        logger.warning(
-                            "[%s] Shared copy failed: %s", self.identity, exc
-                        )
-        loader = KnowledgeLoader()
-        if os.path.isdir(processed_dir) and os.listdir(processed_dir):
-            docs = loader.load_from_dir(processed_dir)
-        else:
-            raise RuntimeError(
-                f"[{self.identity}] No processed documents in {processed_dir}."
-            )
-        rag_store.build(docs)
-        try:
+        os.makedirs(record_path, exist_ok=True)
+        lock_path = os.path.join(record_path, f".{Path(shared_rag_dir).name}.lock")
+        with FileLock(lock_path, timeout=900):
+            for s_dir in shared_rag_dirs:
+                if os.path.isdir(s_dir):
+                    shared_files = [
+                        item for item in os.listdir(s_dir) if not item.startswith(".")
+                    ]
+                    if shared_files:
+                        try:
+                            for item in shared_files:
+                                src = os.path.join(s_dir, item)
+                                dst = os.path.join(local_rag_dir, item)
+                                if os.path.isdir(src):
+                                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                                else:
+                                    shutil.copy2(src, dst)
+                            rag_store.load(local_rag_dir)
+                            self.state.custom_state["rag_store"] = rag_store
+                            self.state.custom_state["rag_cfg"] = resolved_rag
+                            return
+                        except Exception as exc:
+                            logger.warning(
+                                "[%s] Shared copy failed: %s", self.identity, exc
+                            )
+            loader = KnowledgeLoader()
+            if os.path.isdir(processed_dir) and os.listdir(processed_dir):
+                docs = loader.load_from_dir(processed_dir)
+            else:
+                raise RuntimeError(
+                    f"[{self.identity}] No processed documents in {processed_dir}."
+                )
+            rag_store.build(docs)
+            os.makedirs(shared_rag_dir, exist_ok=True)
             for item in os.listdir(local_rag_dir):
                 if item.startswith("."):
                     continue
@@ -190,8 +191,6 @@ class RagLLMInvestor(GeneralPlayer):
                     shutil.copytree(src, dst, dirs_exist_ok=True)
                 else:
                     shutil.copy2(src, dst)
-        except Exception as exc:
-            logger.warning("[%s] Copy to shared failed: %s", self.identity, exc)
         self.state.custom_state["rag_store"] = rag_store
         self.state.custom_state["rag_cfg"] = resolved_rag
 
@@ -201,7 +200,9 @@ class RagLLMInvestor(GeneralPlayer):
             custom = dict(self.state.custom_state)
             for key in ("llm_client", "rag_store"):
                 custom.pop(key, None)
-            state["state"].custom_state = custom
+            player_state = copy.copy(self.state)
+            player_state.custom_state = custom
+            state["state"] = player_state
         return state
 
     def __setstate__(self, state: Dict) -> None:
@@ -217,11 +218,7 @@ class RagLLMInvestor(GeneralPlayer):
                 rag_cfg = custom["rag_cfg"]
                 local_rag_dir = rag_cfg["local_index_dir"]
                 if not local_rag_dir:
-                    local_ws = rag_cfg["local_workspace_dir"]
-                    if local_ws:
-                        local_rag_dir = os.path.join(local_ws, "rag_index")
-                if not local_rag_dir:
-                    return
+                    raise ValueError("RAG local_index_dir must not be empty")
                 embed_type = rag_cfg["embed_type"]
                 embed_api_key = rag_cfg["embed_api_key"]
                 if not embed_api_key:
@@ -271,9 +268,9 @@ class RagLLMInvestor(GeneralPlayer):
             result = rag_store.query(query)
             rag_context = result.formatted_text
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
         self.state.custom_state["last_rag_context"] = rag_context
-        template = load_prompt("examples.EndowmentEffect.Rag.prompts:RAG_USER_TEMPLATE")
+        template = load_prompt(self.config.extras["llm"]["user_message"])
         return template.format(
             round=round_num,
             price=price,
@@ -288,25 +285,43 @@ class RagLLMInvestor(GeneralPlayer):
     async def decide(self) -> Dict:
         market_data = self.state.custom_state["market_data"]
         price = market_data["price"]
+        if not math.isfinite(price) or price <= 0:
+            raise ValueError(f"[{self.identity}] Market price must be positive and finite")
         cash = self.state.custom_state["cash"]
         position = self.state.custom_state["position"]
-        system_prompt = load_prompt(self._system_prompt_path)
+        llm_cfg = self.config.extras["llm"]
+        system_prompt = load_prompt(llm_cfg["sys_message"])
         user_prompt = self._build_prompt(market_data)
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
         decision = None
         last_error = None
-        for attempt in range(3):
+        max_retries = int(llm_cfg["max_retries"])
+        if max_retries < 1:
+            raise ValueError("extras.llm.max_retries must be at least 1")
+        for attempt in range(max_retries):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"Invalid action: {decision['action']}")
+                parsed = parse_llm_response_with_thinking(result.response)
+                if parsed["action"] not in ("buy", "sell", "hold"):
+                    raise ValueError(f"Invalid action: {parsed['action']}")
+                bid_price = float(parsed["bid_price"])
+                quantity = float(parsed["quantity"])
+                if not math.isfinite(bid_price) or bid_price <= 0:
+                    raise ValueError(f"Invalid bid_price: {parsed['bid_price']}")
+                if not math.isclose(bid_price, price, rel_tol=1e-6, abs_tol=0.01):
+                    raise ValueError("bid_price must equal the current market price")
+                if not math.isfinite(quantity) or quantity < 0:
+                    raise ValueError(f"Invalid quantity: {parsed['quantity']}")
+                if not str(parsed["reasoning"]).strip():
+                    raise ValueError("Missing reasoning")
+                if not str(parsed["analysis"]).strip():
+                    raise ValueError("Missing <analysis> content")
+                decision = parsed
                 break
             except Exception as exc:
                 last_error = exc
-                if attempt < 2:
+                if attempt < max_retries - 1:
                     logger.debug(
                         "[%s] LLM parse failed (attempt %d), retrying...",
                         self.identity,
@@ -315,15 +330,23 @@ class RagLLMInvestor(GeneralPlayer):
 
         if decision is None:
             raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
             )
 
         action_str = decision["action"]
-        quantity = max(0, int(decision["quantity"]))
+        bid_price = float(decision["bid_price"])
+        quantity = min(
+            int(float(decision["quantity"])),
+            int(self.config.extras["base_size"]),
+        )
         if action_str == "buy":
-            quantity = min(quantity, int(cash / price) if price > 0 else 0)
+            quantity = min(quantity, int(cash / price))
         elif action_str == "sell":
             quantity = min(quantity, max(position, 0))
+        else:
+            quantity = 0
+        if quantity == 0:
+            action_str = "hold"
         if action_str == "buy" and quantity > 0:
             self.state.custom_state["cash"] -= quantity * price
             self.state.custom_state["position"] += quantity
@@ -333,7 +356,7 @@ class RagLLMInvestor(GeneralPlayer):
         rag_context = self.state.custom_state["last_rag_context"]
         order = {
             "action": action_str,
-            "bid_price": price,
+            "bid_price": bid_price,
             "quantity": quantity,
             "reasoning": decision["reasoning"],
             "analysis": decision["analysis"],
@@ -341,13 +364,7 @@ class RagLLMInvestor(GeneralPlayer):
             "rag_context": rag_context,
         }
         return {
-            "action": action_str,
-            "bid_price": price,
-            "quantity": quantity,
-            "reasoning": decision["reasoning"],
-            "analysis": decision["analysis"],
-            "strategy": self.__class__.__name__,
-            "rag_context": rag_context,
+            **order,
             "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
@@ -360,39 +377,21 @@ class RagLLMInvestor(GeneralPlayer):
 class RagLLMEndowedHolder(RagLLMInvestor):
     """RAG-augmented endowed holder — ownership premium with historical ownership bias literature. Theory: simulation-bases.md §4.1."""
 
-    _system_prompt_path = "examples.EndowmentEffect.Rag.prompts:RAG_ENDOWED_HOLDER_SYS"
-
-
 class RagLLMStatusQuoSeller(RagLLMInvestor):
     """RAG-augmented status quo seller — inertia-driven holding with status quo bias literature. Theory: simulation-bases.md §4.2."""
-
-    _system_prompt_path = (
-        "examples.EndowmentEffect.Rag.prompts:RAG_STATUS_QUO_SELLER_SYS"
-    )
-
 
 class RagLLMRationalArbitrageur(RagLLMInvestor):
     """RAG-augmented rational arbitrageur — fundamental gap trading with arbitrage limit literature. Theory: simulation-bases.md §4.3."""
 
-    _system_prompt_path = (
-        "examples.EndowmentEffect.Rag.prompts:RAG_RATIONAL_ARBITRAGEUR_SYS"
-    )
-
-
 class RagLLMNewBuyer(RagLLMInvestor):
     """RAG-augmented new buyer — unbiased fundamental evaluation with buyer behavior literature. Theory: simulation-bases.md §4.4."""
-
-    _system_prompt_path = "examples.EndowmentEffect.Rag.prompts:RAG_NEW_BUYER_SYS"
-
 
 class RagLLMNoiseTrader(RagLLMInvestor):
     """RAG-augmented noise trader — random uninformed trading with noise trading literature. Theory: simulation-bases.md §4.5."""
 
-    _system_prompt_path = "examples.EndowmentEffect.Rag.prompts:RAG_NOISE_TRADER_SYS"
-
-
 __all__ = [
     "Market",
+    "_RAG_FALLBACK",
     "RagLLMInvestor",
     "RagLLMEndowedHolder",
     "RagLLMStatusQuoSeller",

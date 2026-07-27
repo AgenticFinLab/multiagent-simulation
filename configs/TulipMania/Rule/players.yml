@@ -1,4 +1,5 @@
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.TulipMania.Rule.players:Market"
   num_instances: 1
@@ -9,103 +10,103 @@ market:
     steps_per_turn: 1
     group_tags: [market]
     extras:
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.008
-      noise_std: 0.015
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; normalization (simulation-bases.md §6)
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; normalization, equal to initial_price so starting deviation is zero (simulation-bases.md §6)
+      price_impact: 0.02  # Source: target §9 market.extras.price_impact; Shiller (2003), 10.1257/089533003321164967; simulation-bases.md §6
+      mean_reversion: 0.008  # Source: target §9 market.extras.mean_reversion; Garber (1990), 10.1257/jep.4.2.35; simulation-bases.md §6
+      noise_std: 0.015  # Source: target §9 market.extras.noise_std; Rule/players.py Market.perceive
 
-trendchaser:
+rule_trend_chaser:
   name: "TrendChaser"
   class: "examples.TulipMania.Rule.players:TrendChaser"
-  num_instances: 4
+  num_instances: 4  # Source: target §9 trendchaser.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 4)
   persona: !include persona.yml
   config:
-    identity: "trendchaser"
+    identity: "rule_trend_chaser"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 1000000.0
-      initial_position: 300
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trend_threshold: 0.01
-      chase_size: 400
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0  # Source: target §9 trendchaser.extras.initial_cash; normalization
+      initial_position: 300  # Source: target §9 trendchaser.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      trend_threshold: 0.01  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses TrendChaser activation threshold 0.02 per Shiller 2003, 10.1257/089533003321164967)
+      chase_size: 400  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses TrendChaser quantity cap 800 / slope 5000)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-socialprooffollower:
+rule_social_proof_follower:
   name: "SocialProofFollower"
   class: "examples.TulipMania.Rule.players:SocialProofFollower"
-  num_instances: 3
+  num_instances: 3  # Source: target §9 socialprooffollower.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 3)
   persona: !include persona.yml
   config:
-    identity: "socialprooffollower"
+    identity: "rule_social_proof_follower"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 800000.0
-      initial_position: 400
-      initial_price: 100.0
-      fundamental_value: 100.0
-      crowd_threshold: 0.3
-      follow_size: 350
-      custom_state_hot_limit: 3
+      initial_cash: 800000.0  # Source: target §9 socialprooffollower.extras.initial_cash; normalization
+      initial_position: 400  # Source: target §9 socialprooffollower.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      crowd_threshold: 0.3  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses SocialProofFollower activation threshold 0.02 per Bikhchandani, Hirshleifer, and Welch 1992, 10.1086/261849)
+      follow_size: 350  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses SocialProofFollower quantity cap 800 / slope 5000)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-intrinsicvaluetrader:
+rule_intrinsic_value_trader:
   name: "IntrinsicValueTrader"
   class: "examples.TulipMania.Rule.players:IntrinsicValueTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 intrinsicvaluetrader.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 2)
   persona: !include persona.yml
   config:
-    identity: "intrinsicvaluetrader"
+    identity: "rule_intrinsic_value_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 1500000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      overvalue_threshold: 0.2
-      position_size: 350
-      custom_state_hot_limit: 3
+      initial_cash: 1500000.0  # Source: target §9 intrinsicvaluetrader.extras.initial_cash; normalization
+      initial_position: 600  # Source: target §9 intrinsicvaluetrader.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      overvalue_threshold: 0.2  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses IntrinsicValueTrader activation threshold 0.05 per Garber 1990, 10.1257/jep.4.2.35)
+      position_size: 350  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses IntrinsicValueTrader quantity cap 500 / slope 3000)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-earlyexittrader:
+rule_early_exit_trader:
   name: "EarlyExitTrader"
   class: "examples.TulipMania.Rule.players:EarlyExitTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 earlyexittrader.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 2)
   persona: !include persona.yml
   config:
-    identity: "earlyexittrader"
+    identity: "rule_early_exit_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      exit_threshold: 0.4
-      exit_size: 400
-      custom_state_hot_limit: 3
+      initial_cash: 1200000.0  # Source: target §9 earlyexittrader.extras.initial_cash; normalization
+      initial_position: 500  # Source: target §9 earlyexittrader.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      exit_threshold: 0.4  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses EarlyExitTrader activation threshold 0.05 per Kindleberger and Aliber 2005, 10.1057/9780230628045)
+      exit_size: 400  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses EarlyExitTrader quantity cap 500 / slope 3000)
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.TulipMania.Rule.players:NoiseTrader"
-  num_instances: 2
+  num_instances: 2  # Source: target §9 noisetrader.num_instances; configs/TulipMania/Rule/players.yml (§7 Agent Roster: 2)
   persona: !include persona.yml
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags: [investors]
     extras:
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 100
-      custom_state_hot_limit: 3
+      initial_cash: 500000.0  # Source: target §9 noisetrader.extras.initial_cash; normalization
+      initial_position: 200  # Source: target §9 noisetrader.extras.initial_position; normalization
+      initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
+      fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
+      trade_probability: 0.3  # Source: target §9 NoiseTrader trade probability row; Rule/players.py NoiseTrader._make_decision; simulation-bases.md §4.5
+      noise_size: 100  # Source: target §9 NoiseTrader min order size row (lower bound of uniform draw 100–500); Rule/players.py NoiseTrader._make_decision; simulation-bases.md §4.5
+      custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)

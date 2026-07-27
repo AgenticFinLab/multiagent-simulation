@@ -25,24 +25,24 @@
 | Position size range 40%–60% → sim-bases §4 LLM Persona        | No hardcoded rule; LLM must infer sell size from context and persona framing            |
 | Prompt constant → `prompts.py`                                | `LLM_CONCENTRATED_FUND_SYS` loaded via `extras.llm.sys_message` in `players.yml`        |
 
-### PrimeBroker1: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.2 — PrimeBroker1)*
+### PrimeBrokerFirstMover: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.2 — PrimeBrokerFirstMover)*
 
-| Theory Component                                              | Implementation                                                                         |
-|---------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| First-mover competitive psychology → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER1_SYS`: "speed is paramount"; "first to act preserves the most value" |
-| Aggressive, decisive action → sim-bases §4 LLM Persona        | "you liquidate aggressively and quickly"; "act decisively when risk thresholds breach" |
-| Sell 32%–48% of position → sim-bases §4 LLM Persona           | LLM infers quantity from persona; no formula in prompt                                 |
-| Prompt constant                                               | `LLM_PRIME_BROKER1_SYS` in `prompts.py`                                                |
+| Theory Component                                              | Implementation                                                                                    |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| First-mover competitive psychology → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER_FIRST_MOVER_SYS`: "speed is paramount"; "first to act preserves the most value" |
+| Aggressive, decisive action → sim-bases §4 LLM Persona        | "you liquidate aggressively and quickly"; "act decisively when risk thresholds breach"            |
+| Sell 32%–48% of position → sim-bases §4 LLM Persona           | LLM infers quantity from persona; no formula in prompt                                            |
+| Prompt constant                                               | `LLM_PRIME_BROKER_FIRST_MOVER_SYS` in `prompts.py`                                                |
 
-### PrimeBroker2: Theory → Implementation Mapping
-*(Theory defined in simulation-bases.md §4.3 — PrimeBroker2)*
+### PrimeBrokerDelayedLiquidator: Theory → Implementation Mapping
+*(Theory defined in simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator)*
 
-| Theory Component                                   | Implementation                                                          |
-|----------------------------------------------------|-------------------------------------------------------------------------|
-| Second-mover reluctance → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER2_SYS`: "slower decision process, reluctant initially" |
-| Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"               |
-| Amplifying role → sim-bases §4                     | "your selling accelerates the cascade triggered by the first broker"    |
+| Theory Component                                   | Implementation                                                                            |
+|----------------------------------------------------|-------------------------------------------------------------------------------------------|
+| Second-mover reluctance → sim-bases §4 LLM Persona | `LLM_PRIME_BROKER_DELAYED_LIQUIDATOR_SYS`: "slower decision process, reluctant initially" |
+| Accepts price penalty → sim-bases §4 LLM Persona   | "accepts price penalties to complete liquidation quickly"                                 |
+| Amplifying role → sim-bases §4                     | "your selling extends liquidation pressure started by the first broker"                   |
 
 ### BlockTradeBuyer: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.4 — BlockTradeBuyer)*
@@ -51,16 +51,16 @@
 |-----------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Opportunistic discount-seeking → sim-bases §4 LLM Persona | `LLM_BLOCK_TRADE_BUYER_SYS`: "wait for dislocations — when forced sellers must unload"    |
 | Deploy fixed capital ratio → sim-bases §4 LLM Persona     | "deploy capital aggressively"; LLM decides actual ratio based on perceived discount depth |
-| Stabilizing force → sim-bases §4                          | "you are the stabilizing force that ultimately limits the cascade"                        |
+| Stabilizing force → sim-bases §4                          | "you are the stabilizing buyer that limits forced-selling pressure"                       |
 
 ### InformationTrader: Theory → Implementation Mapping
 *(Theory defined in simulation-bases.md §4.5 — InformationTrader)*
 
-| Theory Component                                           | Implementation                                                                          |
-|------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| Order-flow detection capability → sim-bases §4 LLM Persona | `LLM_INFORMATION_TRADER_SYS`: "you specialize in reading unusual order flow patterns"   |
-| Front-run then rebuild pattern → sim-bases §4 LLM Persona  | "sell exposure ahead of the selling wave"; "buy back exposure when stabilized"          |
-| Amplifies then aids price discovery → sim-bases §4         | "your front-running amplifies the initial decline but helps price discovery"            |
+| Theory Component                                           | Implementation                                                                        |
+|------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| Order-flow detection capability → sim-bases §4 LLM Persona | `LLM_INFORMATION_TRADER_SYS`: "you specialize in reading unusual order flow patterns" |
+| Front-run then rebuild pattern → sim-bases §4 LLM Persona  | "sell exposure ahead of the selling wave"; "buy back exposure when stabilized"        |
+| Amplifies then aids price discovery → sim-bases §4         | "your front-running amplifies the initial decline but helps price discovery"          |
 
 ---
 
@@ -134,8 +134,8 @@ silently substitute a hold action.
 ║    → returns order dict                                               ║
 ║                                                                       ║
 ║  ConcentratedFund:  denial? → hold / panic? → SELL large block       ║
-║  PrimeBroker1:      speed urgency → SELL aggressively                ║
-║  PrimeBroker2:      delayed but ultimately SELL at worse price       ║
+║  PrimeBrokerFirstMover:      speed urgency → SELL aggressively                ║
+║  PrimeBrokerDelayedLiquidator:      delayed but ultimately SELL at worse price       ║
 ║  BlockTradeBuyer:   discount-seeking → BUY on dislocation            ║
 ║  InformationTrader: signal detection → SELL / rebuild exposure → BUY ║
 ║         │                                                             ║
@@ -158,14 +158,14 @@ LLM API Call Flow:
 
 Key Configuration Parameters (`configs/ArchegosCollapse/LLM/players.yml`):
 
-| Parameter | Config Path | Value | Design Justification |
-|---|---|---|---|
-| `price_impact` | `extras.price_impact` | 0.03 | Same as Rule — comparable cascade mechanics |
-| `mean_reversion` | `extras.mean_reversion` | 0.01 | Same as Rule — enables cascade persistence |
-| `sys_message` | `extras.llm.sys_message` | `examples.ArchegosCollapse.LLM.prompts:LLM_*_SYS` | Module path for LLM persona; loaded by `load_prompt()` |
-| `user_message` | `extras.llm.user_message` | `examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE` | Module path for market-state user template |
-| `lm_name` | `extras.llm.lm_name` | `ark/doubao-seed-2-0-mini-260428` | ByteDance Ark Doubao model |
-| `temperature` | `extras.llm.generation_config.temperature` | 0.4-0.7 | Agent-specific stochasticity — reproduces persona variability |
+| Parameter        | Config Path                                | Value                                                     | Design Justification                                          |
+|------------------|--------------------------------------------|-----------------------------------------------------------|---------------------------------------------------------------|
+| `price_impact`   | `extras.price_impact`                      | 0.03                                                      | Same as Rule — comparable cascade mechanics                   |
+| `mean_reversion` | `extras.mean_reversion`                    | 0.01                                                      | Same as Rule — enables cascade persistence                    |
+| `sys_message`    | `extras.llm.sys_message`                   | `examples.ArchegosCollapse.LLM.prompts:LLM_*_SYS`         | Module path for LLM persona; loaded by `load_prompt()`        |
+| `user_message`   | `extras.llm.user_message`                  | `examples.ArchegosCollapse.LLM.prompts:LLM_USER_TEMPLATE` | Module path for market-state user template                    |
+| `lm_name`        | `extras.llm.lm_name`                       | `ark/doubao-seed-2-0-mini-260428`                         | ByteDance Ark Doubao model                                    |
+| `temperature`    | `extras.llm.generation_config.temperature` | 0.4-0.7                                                   | Agent-specific stochasticity — reproduces persona variability |
 
 ---
 
@@ -188,13 +188,13 @@ Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 
 ## §8 Expected Behavior Patterns
 
-| Phase        | Rounds | Expected Agent Behavior                                                                    | Expected Price Dynamics                                         |
-|--------------|--------|--------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| Pre-Cascade  | 1–15   | ConcentratedFund holds despite pressure (denial); PrimeBrokers monitor; InfoTrader watches | Price near 100 with noise; LLM may hold longer than Rule        |
-| Denial Phase | 5–20   | ConcentratedFund resists selling; LLM persona produces "this is temporary" reasoning       | Slower cascade onset vs Rule; deviation builds gradually        |
-| Panic Onset  | 15–30  | ConcentratedFund finally sells large block; PrimeBroker1 liquidates; InfoTrader shorts     | Sharp drop; cascade onset round later and more variable vs Rule |
-| Peak Cascade | 25–45  | PrimeBroker2 forced to sell at worse prices; LLM may show "panic" reasoning patterns       | Deeper trough if denial delayed selling; deviation −20% to −40% |
-| Recovery     | 40–100 | BlockTradeBuyer deploys aggressively; InfoTrader covers; LLM "recovery" reasoning          | Gradual mean reversion; LLM recovery timing more variable       |
+| Phase        | Rounds | Expected Agent Behavior                                                                              | Expected Price Dynamics                                         |
+|--------------|--------|------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| Pre-Cascade  | 1–15   | ConcentratedFund holds despite pressure (denial); PrimeBrokers monitor; InfoTrader watches           | Price near 100 with noise; LLM may hold longer than Rule        |
+| Denial Phase | 5–20   | ConcentratedFund resists selling; LLM persona produces "this is temporary" reasoning                 | Slower cascade onset vs Rule; deviation builds gradually        |
+| Panic Onset  | 15–30  | ConcentratedFund finally sells large block; PrimeBrokerFirstMover liquidates; InfoTrader shorts      | Sharp drop; cascade onset round later and more variable vs Rule |
+| Peak Cascade | 25–45  | PrimeBrokerDelayedLiquidator forced to sell at worse prices; LLM may show "panic" reasoning patterns | Deeper trough if denial delayed selling; deviation −20% to −40% |
+| Recovery     | 40–100 | BlockTradeBuyer deploys aggressively; InfoTrader covers; LLM "recovery" reasoning                    | Gradual mean reversion; LLM recovery timing more variable       |
 
 ---
 
@@ -203,8 +203,8 @@ Output location: `EXPERIMENT/ArchegosCollapse/LLM/`
 *Do not repeat citations from simulation-bases.md §2. Cross-references only:*
 
 - TRS leverage / ConcentratedFund denial psychology → `simulation-bases.md §2, §4 — ConcentratedFund LLM Persona`
-- First-mover prime broker competitive psychology → `simulation-bases.md §2, §4 — PrimeBroker1 LLM Persona`
-- Second-mover acceptance of price penalty → `simulation-bases.md §2, §4 — PrimeBroker2 LLM Persona`
+- First-mover prime broker competitive psychology → `simulation-bases.md §2, §4 — PrimeBrokerFirstMover LLM Persona`
+- Second-mover acceptance of price penalty → `simulation-bases.md §2, §4 — PrimeBrokerDelayedLiquidator LLM Persona`
 - Opportunistic block buyer at discount → `simulation-bases.md §2, §4 — BlockTradeBuyer LLM Persona`
 - Order-flow detection short-then-cover → `simulation-bases.md §2, §4 — InformationTrader LLM Persona`
 - Price formula → `simulation-bases.md §3.1`

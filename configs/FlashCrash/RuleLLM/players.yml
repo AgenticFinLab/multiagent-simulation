@@ -9,6 +9,7 @@
 
 # Market (rule-based, identical to FlashCrash)
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.FlashCrash.RuleLLM.players:Market"
   num_instances: 1
@@ -19,46 +20,46 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.3
-      low_liquidity_threshold: 50.0
-      high_impact_multiplier: 3.0
-      base_liquidity: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"  # Source: infrastructure
+      fundamental_value: 100.0  # Source: target §9 — normalization
+      initial_price: 100.0  # Source: target §9 — normalization
+      base_price_impact: 0.05  # Source: target §9 — simulation-bases.md §3
+      mean_reversion: 0.02  # Source: target §9 — simulation-bases.md §3
+      noise_std: 0.3  # Source: target §9 — simulation-bases.md §3
+      low_liquidity_threshold: 50.0  # Source: target §9 — simulation-bases.md §3
+      high_impact_multiplier: 3.0  # Source: target §9 — simulation-bases.md §3
+      base_liquidity: 50.0  # Source: target §9 — simulation-bases.md §3
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
 # Hybrid HFT (Momentum detection + LLM rapid reasoning)
-rulellm_hft:
+rulellm_high_frequency_trader:
   name: "RuleLLM HFT"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMHighFrequencyTrader"
   num_instances: 3
   config:
-    identity: "rulellm_hft"
+    identity: "rulellm_high_frequency_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      lookback: 2
-      momentum_sensitivity: 3.0
-      base_position_size: 40.0
-      speed_advantage: 1.5
-      llm:
-        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_HFT_SYS"
-        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      lookback: 2  # Source: target §9 — simulation-bases.md §4.1; range [2, 5]
+      momentum_sensitivity: 3.0  # Source: target §9 — Kirilenko et al. (2017); range [0.5, 3.0]
+      base_position_size: 40.0  # Source: target §9 — simulation-bases.md §4.1; range [20, 60]
+      speed_advantage: 1.5  # Source: target §9 — simulation-bases.md §4.1; range [1.2, 2.0]
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_HFT_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.3  # Source: LLM-wiring — HFT moderate creativity
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 # Hybrid Market Maker (Liquidity provision + LLM risk reasoning)
@@ -73,107 +74,107 @@ rulellm_market_maker:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      volatility_threshold: 0.02
-      base_liquidity: 30.0
-      spread_sensitivity: 0.5
-      llm:
-        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"
-        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      volatility_threshold: 0.02  # Source: target §9 — Grossman & Miller (1988); range [0.005, 0.02]
+      base_liquidity: 30.0  # Source: target §9 — simulation-bases.md §3; range [30, 100]
+      spread_sensitivity: 0.5  # Source: simulation-bases.md §4.2 — market-maker inventory sizing
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.3  # Source: LLM-wiring — MM moderate
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 # Hybrid Algorithmic Trader (Trend-following + LLM systematic reasoning)
-rulellm_algo:
+rulellm_algorithmic_trader:
   name: "RuleLLM Algorithmic Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMAlgorithmicTrader"
   num_instances: 2
   config:
-    identity: "rulellm_algo"
+    identity: "rulellm_algorithmic_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      lookback: 3
-      trend_sensitivity: 2.0
-      base_position_size: 25.0
-      trend_multiplier: 10
-      llm:
-        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_ALGO_SYS"
-        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.2
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      lookback: 3  # Source: target §9 — simulation-bases.md §4.3; range [3, 10]
+      trend_sensitivity: 2.0  # Source: target §9 — De Long et al. (1990); range [0.5, 2.0]
+      base_position_size: 25.0  # Source: target §9 — simulation-bases.md §4.3
+      trend_multiplier: 10  # Source: target §9 — simulation-bases.md §4.3; range [5, 15]
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_ALGO_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.2  # Source: LLM-wiring — Algo conservative
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 # Hybrid Stop-Loss Trader (Cascade rules + LLM risk management reasoning)
-rulellm_stop_loss:
+rulellm_stop_loss_trader:
   name: "RuleLLM Stop-Loss Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMStopLossTrader"
-  num_instances: 3
+  num_instances: 5
   config:
-    identity: "rulellm_stop_loss"
+    identity: "rulellm_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
-      stop_loss_percent: 0.05
-      initial_buy_price: 100.0
-      llm:
-        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_STOP_LOSS_SYS"
-        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.2
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 50.0  # Source: target §9 — simulation-bases.md §4.4; range [20, 100]
+      custom_state_hot_limit: 3  # Source: infrastructure
+      stop_loss_percent: 0.05  # Source: target §9 — Brunnermeier & Pedersen (2005); range [0.02, 0.10]
+      initial_buy_price: 100.0  # Source: target §9 — normalization (entry price = initial_price)
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_STOP_LOSS_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.2  # Source: LLM-wiring — SL conservative
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml
 
 # Hybrid Fundamental Trader (Value deviation + LLM analytical reasoning)
-rulellm_fundamental:
+rulellm_fundamental_trader:
   name: "RuleLLM Fundamental Trader"
   class: "examples.FlashCrash.RuleLLM.players:RuleLLMFundamentalTrader"
   num_instances: 2
   config:
-    identity: "rulellm_fundamental"
+    identity: "rulellm_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
-      custom_state_hot_limit: 3
-      value_threshold: 0.10
-      base_position_size: 30.0
-      value_sensitivity: 1.0
-      value_multiplier: 10
-      llm:
-        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_FUNDAMENTAL_SYS"
-        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
-        lm_type: "api"
-        lm_name: "ark/doubao-seed-2-0-mini-260428"
-        generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+      record_path: "EXPERIMENT/FlashCrash/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 10000.0  # Source: target §9 — normalization
+      initial_position: 0.0  # Source: target §9 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      value_threshold: 0.10  # Source: target §9 — Shiller (1981); range [0.03, 0.10]
+      base_position_size: 30.0  # Source: target §9 — simulation-bases.md §4.5
+      value_sensitivity: 1.0  # Source: target §9 — simulation-bases.md §4.5; range [0.5, 2.0]
+      value_multiplier: 10  # Source: target §9 — simulation-bases.md §4.5; range [5, 15]
+      llm:  # Source: LLM-wiring
+        sys_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_FUNDAMENTAL_SYS"  # Source: LLM-wiring
+        user_message: "examples.FlashCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"  # Source: LLM-wiring
+        lm_type: "api"  # Source: LLM-wiring
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: LLM-wiring
+        generation_config:  # Source: LLM-wiring
+          temperature: 0.3  # Source: LLM-wiring — FT moderate
+          max_new_tokens: 500  # Source: LLM-wiring
   persona: !include persona.yml

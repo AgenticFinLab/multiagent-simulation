@@ -1,6 +1,7 @@
 # RepresentativenessBias LLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.RepresentativenessBias.LLM.players:Market"
   num_instances: 1
@@ -20,25 +21,25 @@ market:
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-patternmatcher:
+llm_pattern_matcher:
   name: "PatternMatcher"
   class: "examples.RepresentativenessBias.LLM.players:LLMPatternMatcher"
   num_instances: 2
   config:
-    identity: "patternmatcher"
+    identity: "llm_pattern_matcher"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      streak_sensitivity: 2.0
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      streak_sensitivity: 2.0  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      base_size: 400  # Source: AGENT_POOL/finance/pattern-matcher.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/pattern-matcher.md §6
       llm:
         sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_PATTERN_MATCHER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -49,25 +50,25 @@ patternmatcher:
           max_tokens: 512
   persona: !include persona.yml
 
-categoryovergeneralizer:
+llm_category_overgeneralizer:
   name: "CategoryOvergeneralizer"
   class: "examples.RepresentativenessBias.LLM.players:LLMCategoryOvergeneralizer"
   num_instances: 2
   config:
-    identity: "categoryovergeneralizer"
+    identity: "llm_category_overgeneralizer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      sample_size: 2
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      sample_size: 2  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      base_size: 350  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/category-overgeneralizer.md §6
       llm:
         sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_CATEGORY_OVERGENERALIZER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -78,25 +79,25 @@ categoryovergeneralizer:
           max_tokens: 512
   persona: !include persona.yml
 
-bayesianupdater:
+llm_bayesian_updater:
   name: "BayesianUpdater"
   class: "examples.RepresentativenessBias.LLM.players:LLMBayesianUpdater"
   num_instances: 1
   config:
-    identity: "bayesianupdater"
+    identity: "llm_bayesian_updater"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      base_rate_weight: 0.7
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      initial_cash: 1200000.0  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      base_rate_weight: 0.7  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      base_size: 300  # Source: AGENT_POOL/finance/bayesian-updater.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/bayesian-updater.md §6
       llm:
         sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_BAYESIAN_UPDATER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -107,25 +108,25 @@ bayesianupdater:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarianstatistical:
+llm_contrarian_statistical:
   name: "ContrarianStatistical"
   class: "examples.RepresentativenessBias.LLM.players:LLMContrarianStatistical"
   num_instances: 1
   config:
-    identity: "contrarianstatistical"
+    identity: "llm_contrarian_statistical"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      contrarian_threshold: 0.04
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      initial_position: 500  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      contrarian_threshold: 0.04  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      base_size: 350  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-statistical.md §6
       llm:
         sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_CONTRARIAN_STATISTICAL_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -136,25 +137,25 @@ contrarianstatistical:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.RepresentativenessBias.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/RepresentativenessBias/LLM/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_cash: 500000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_position: 200  # Source: AGENT_POOL/finance/noise-trader.md §6
+      initial_price: 100.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      fundamental_value: 100.0  # Source: AGENT_POOL/finance/noise-trader.md §6
+      trade_probability: 0.3  # Source: AGENT_POOL/finance/noise-trader.md §6
+      noise_size: 150  # Source: AGENT_POOL/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
       llm:
         sys_message: "examples.RepresentativenessBias.LLM.prompts:LLM_NOISE_TRADER_PROMPT"
         user_message: "examples.RepresentativenessBias.LLM.prompts:LLM_USER_TEMPLATE"

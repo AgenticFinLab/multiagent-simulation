@@ -9,10 +9,10 @@ Theoretical Foundation:
 
 Key Dynamics:
     - ConcentratedFund: Holds large positions via TRS; forced to sell on margin call
-    - PrimeBroker1: First-mover liquidator — sells quickly, receives better prices
-    - PrimeBroker2: Delayed liquidator — faces worse prices due to cascade
+    - PrimeBrokerFirstMover: First-mover liquidator — sells quickly, receives better prices
+    - PrimeBrokerDelayedLiquidator: Delayed liquidator — faces worse prices due to cascade
     - BlockTradeBuyer: Opportunistic buyer at discount during fire sale
-    - InformationTrader: Detects liquidation signals and front-runs the cascade
+    - InformationTrader: Detects liquidation signals and trades ahead of selling pressure
 
 All parameters are configured via players.yml config file.
 """
@@ -54,8 +54,15 @@ class Market(GeneralPlayer):
             self.state.custom_state["price"] = extras["initial_price"]
             self.state.custom_state["fundamental"] = extras["fundamental_value"]
             self.state.custom_state["price_impact"] = extras["price_impact"]
+            self.state.custom_state["demand_scale"] = extras["demand_scale"]
             self.state.custom_state["mean_reversion"] = extras["mean_reversion"]
             self.state.custom_state["noise_std"] = extras["noise_std"]
+            self.state.custom_state["initial_shock_round"] = extras[
+                "initial_shock_round"
+            ]
+            self.state.custom_state["initial_shock_quantity"] = extras[
+                "initial_shock_quantity"
+            ]
             self.state.custom_state["price_history"] = HistoryBuffer(
                 folder=os.path.join(record_path, "market", "price"),
                 entry_limit=hot_limit,
@@ -69,17 +76,24 @@ class Market(GeneralPlayer):
         current_price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         price_impact = self.state.custom_state["price_impact"]
+        demand_scale = self.state.custom_state["demand_scale"]
         mean_reversion = self.state.custom_state["mean_reversion"]
         noise_std = self.state.custom_state["noise_std"]
+        initial_shock_round = self.state.custom_state["initial_shock_round"]
+        initial_shock_quantity = self.state.custom_state["initial_shock_quantity"]
+        if demand_scale <= 0:
+            raise ValueError("demand_scale must be positive")
 
         buy_qty = sum(o["quantity"] for o in orders if o["action"] == "buy")
         sell_qty = sum(o["quantity"] for o in orders if o["action"] == "sell")
+        if round_num == initial_shock_round:
+            sell_qty += initial_shock_quantity
         net_demand = buy_qty - sell_qty
 
         noise = random.gauss(0, noise_std)
         new_price = (
             current_price
-            + price_impact * net_demand
+            + price_impact * net_demand / demand_scale
             + mean_reversion * (fundamental - current_price)
             + noise
         )
@@ -134,14 +148,13 @@ class Market(GeneralPlayer):
 
 class ConcentratedFund(GeneralPlayer):
     """
-    TRS-leveraged concentrated fund (Archegos-style).
+    TRS-leveraged concentrated fund (TRS-based).
 
     Theory: simulation-bases.md §4.1 — ConcentratedFund
-    Theoretical basis: Total Return Swap Leverage (Becketti, 2021); Hidden Leverage
-    (SEC, 2021 Archegos Report).
+    Theoretical basis: Total Return Swap Leverage (Becketti, 2021); Hidden leverage and TRS exposure (Becketti, 2021; FSB, 2022).
     Forced to sell when price drops below margin threshold.
     Sells trs_sell_ratio * position when margin call triggered.
-    See simulation-bases.md §4.1.4.3 for mathematical model.
+    See simulation-bases.md §4.1.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -222,16 +235,16 @@ class ConcentratedFund(GeneralPlayer):
         )
 
 
-class PrimeBroker1(GeneralPlayer):
+class PrimeBrokerFirstMover(GeneralPlayer):
     """
     First-mover prime broker liquidator.
 
-    Theory: simulation-bases.md §4.2 — PrimeBroker1
+    Theory: simulation-bases.md §4.2 — PrimeBrokerFirstMover
     Theoretical basis: Creditor Run / Liquidation Race (Gorton & Metrick, 2012).
     Acts when price drops below liquidation_threshold.
     Sells liquidation_sell_ratio * position per round at market price.
     First-mover advantage: receives full market price (no price_penalty).
-    See simulation-bases.md §4.2.4.3 for mathematical model.
+    See simulation-bases.md §4.2.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -289,7 +302,7 @@ class PrimeBroker1(GeneralPlayer):
             "bid_price": price,
             "quantity": quantity,
             "investor": self.identity,
-            "strategy": "PrimeBroker1",
+            "strategy": "PrimeBrokerFirstMover",
             "reasoning": "first-mover liquidation threshold rule",
         }
         validate_order(order)
@@ -315,16 +328,16 @@ class PrimeBroker1(GeneralPlayer):
         )
 
 
-class PrimeBroker2(GeneralPlayer):
+class PrimeBrokerDelayedLiquidator(GeneralPlayer):
     """
     Delayed second-mover prime broker.
 
-    Theory: simulation-bases.md §4.3 — PrimeBroker2
+    Theory: simulation-bases.md §4.3 — PrimeBrokerDelayedLiquidator
     Theoretical basis: Creditor Run / Liquidation Race (Gorton & Metrick, 2012).
-    Higher threshold required before acting (waits longer than PrimeBroker1).
-    Faces worse prices due to first-mover's cascade selling pressure.
+    Higher threshold required before acting (waits longer than PrimeBrokerFirstMover).
+    Faces worse prices due to first-mover's prior liquidation selling pressure.
     Effective price = market_price * price_penalty.
-    See simulation-bases.md §4.3.4.3 for mathematical model.
+    See simulation-bases.md §4.3.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -386,7 +399,7 @@ class PrimeBroker2(GeneralPlayer):
             "price_penalty": price_penalty,
             "effective_price": price * price_penalty,
             "investor": self.identity,
-            "strategy": "PrimeBroker2",
+            "strategy": "PrimeBrokerDelayedLiquidator",
             "reasoning": "second-mover liquidation threshold rule",
         }
         validate_order(order)
@@ -414,13 +427,13 @@ class PrimeBroker2(GeneralPlayer):
 
 class BlockTradeBuyer(GeneralPlayer):
     """
-    Opportunistic block trade buyer purchasing at fire-sale discount.
+    Opportunistic block trade buyer purchasing at distressed block discount.
 
     Theory: simulation-bases.md §4.4 — BlockTradeBuyer
     Theoretical basis: Fire-Sale Arbitrage / Liquidity Provider (Shleifer & Vishny, 1992).
     Buys when price drops below discount_threshold (relative to fundamental).
     Deploys buy_ratio of available cash per round.
-    See simulation-bases.md §4.4.4.3 for mathematical model.
+    See simulation-bases.md §4.4.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -477,7 +490,7 @@ class BlockTradeBuyer(GeneralPlayer):
             "quantity": quantity,
             "investor": self.identity,
             "strategy": "BlockTradeBuyer",
-            "reasoning": "fire-sale discount buying rule",
+            "reasoning": "distressed block discount buying rule",
         }
         validate_order(order)
 
@@ -508,10 +521,10 @@ class InformationTrader(GeneralPlayer):
 
     Theory: simulation-bases.md §4.5 — InformationTrader
     Theoretical basis: Informed Trading / Front-Running (Kyle, 1985; Brunnermeier & Pedersen, 2005).
-    Detects cascade signal when deviation < detection_threshold with
+    Detects distress signal when deviation < detection_threshold with
     probability detection_ability. Sells front_run_size shares.
     Covers short when deviation recovers above cover_threshold.
-    See simulation-bases.md §4.5.4.3 for mathematical model.
+    See simulation-bases.md §4.5.5.4 for mathematical model.
     """
 
     async def perceive(
@@ -620,8 +633,8 @@ class InformationTrader(GeneralPlayer):
 __all__ = [
     "Market",
     "ConcentratedFund",
-    "PrimeBroker1",
-    "PrimeBroker2",
+    "PrimeBrokerFirstMover",
+    "PrimeBrokerDelayedLiquidator",
     "BlockTradeBuyer",
     "InformationTrader",
 ]

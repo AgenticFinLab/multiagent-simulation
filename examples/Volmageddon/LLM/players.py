@@ -18,7 +18,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
-from examples.llm_utils import parse_llm_quantity_response_with_thinking
+from masim.utils.llm_utils import parse_llm_quantity_response_with_thinking
 
 from .prompts import (
     LLM_EQUITY_TRADER_SYS,

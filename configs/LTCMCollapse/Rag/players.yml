@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: bond-yield-spread-inverse  # -> AGENT_POOL/market/bond-yield-spread-inverse.md
   name: "Market"
   class: "examples.LTCMCollapse.Rag.players:Market"
   num_instances: 1
@@ -30,36 +31,66 @@ market:
     group_tags:
       - market
     extras:
+      # Source: target §10.2 runtime-output contract
       record_path: "EXPERIMENT/LTCMCollapse/Rag/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       price_impact: 0.03
+      # Source: target §9 / simulation-bases.md §4.N.6
       mean_reversion: 0.01
+      # Source: target §9 / simulation-bases.md §4.N.6
       noise_std: 0.015
+      # Source: target §9 / normalized order-flow calibration
+      market_depth: 100.0
+      # Source: target §9 / reproducibility invariant
+      random_seed: 20260720
+      # Source: target §9 / numerical invariant
+      price_floor: 0.01
+      # Source: target §9 / controlled identification stimulus
+      shock_schedule:
+        20: -0.06
+        21: -0.05
+        22: -0.04
+        23: -0.03
+      # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
-convergencearbitrageur:
+ragllm_convergence_arbitrageur:
   name: "ConvergenceArbitrageur"
   class: "examples.LTCMCollapse.Rag.players:RagLLMConvergenceArbitrageur"
   num_instances: 2
   config:
-    identity: "convergencearbitrageur"
+    identity: "ragllm_convergence_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: target §10.2 runtime-output contract
       record_path: "EXPERIMENT/LTCMCollapse/Rag/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 2000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       entry_spread: 0.03
+      # Source: target §9 / simulation-bases.md §4.N.6
       leverage: 15
+      # Source: target §9 / simulation-bases.md §4.N.6
       max_position: 5000
+      # Source: target §9 / simulation-bases.md §4.N.6
       base_size: 400
+      # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -77,6 +108,7 @@ convergencearbitrageur:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CONVERGENCEARBITRAGEUR_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
@@ -87,26 +119,38 @@ convergencearbitrageur:
           max_tokens: 600
   persona: !include persona.yml
 
-leveragetrader:
+ragllm_leverage_trader:
   name: "LeverageTrader"
   class: "examples.LTCMCollapse.Rag.players:RagLLMLeverageTrader"
   num_instances: 2
   config:
-    identity: "leveragetrader"
+    identity: "ragllm_leverage_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: target §10.2 runtime-output contract
       record_path: "EXPERIMENT/LTCMCollapse/Rag/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 3000000.0
-      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 5000
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       leverage_ratio: 25
+      # Source: target §9 / simulation-bases.md §4.N.6
       margin_call_threshold: 0.04
+      # Source: target §9 / simulation-bases.md §4.2.6
+      delever_fraction: 0.3
+      # Source: target §9 / simulation-bases.md §4.N.6
       base_size: 500
+      # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -124,6 +168,7 @@ leveragetrader:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LEVERAGETRADER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
@@ -134,25 +179,40 @@ leveragetrader:
           max_tokens: 600
   persona: !include persona.yml
 
-riskmanager:
+ragllm_risk_manager:
   name: "RiskManager"
   class: "examples.LTCMCollapse.Rag.players:RagLLMRiskManager"
   num_instances: 2
   config:
-    identity: "riskmanager"
+    identity: "ragllm_risk_manager"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: target §10.2 runtime-output contract
       record_path: "EXPERIMENT/LTCMCollapse/Rag/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 1500000.0
-      initial_position: 500
+      # Source: target §9 / simulation-bases.md §4.N.6
+      initial_position: 3000
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       var_trigger: 0.06
+      # Source: target §9 / simulation-bases.md §4.3.6
+      var_limit: 0.05
+      # Source: target §9 / simulation-bases.md §4.3.6
+      var_multiplier: 3.0
+      # Source: target §9 / simulation-bases.md §4.3.6
+      risk_cut_fraction: 0.5
+      # Source: target §9 / simulation-bases.md §4.N.6
       base_size: 300
+      # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -170,6 +230,7 @@ riskmanager:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_RISKMANAGER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
@@ -180,26 +241,36 @@ riskmanager:
           max_tokens: 600
   persona: !include persona.yml
 
-liquidityprovider:
+ragllm_liquidity_provider:
   name: "LiquidityProvider"
   class: "examples.LTCMCollapse.Rag.players:RagLLMLiquidityProvider"
   num_instances: 2
   config:
-    identity: "liquidityprovider"
+    identity: "ragllm_liquidity_provider"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: target §10.2 runtime-output contract
       record_path: "EXPERIMENT/LTCMCollapse/Rag/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 1000000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_position: 1000
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       inventory_limit: 2000
+      # Source: target §9 / simulation-bases.md §4.N.6
       stress_exit: 0.4
+      # Source: target §9 / simulation-bases.md §4.N.6
       base_size: 400
+      # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -217,6 +288,7 @@ liquidityprovider:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_LIQUIDITYPROVIDER_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"
@@ -227,25 +299,42 @@ liquidityprovider:
           max_tokens: 600
   persona: !include persona.yml
 
-centralbank:
+ragllm_central_bank:
   name: "CentralBank"
   class: "examples.LTCMCollapse.Rag.players:RagLLMCentralBank"
   num_instances: 2
   config:
-    identity: "centralbank"
+    identity: "ragllm_central_bank"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
+      # Source: target §10.2 runtime-output contract
       record_path: "EXPERIMENT/LTCMCollapse/Rag/records"
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_cash: 500000.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_position: 200
+      # Source: target §9 / simulation-bases.md §4.N.6
       initial_price: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       fundamental_value: 100.0
+      # Source: target §9 / simulation-bases.md §4.N.6
       trade_probability: 0.3
+      # Source: target §9 / simulation-bases.md §4.N.6
       noise_size: 150
+      # Source: target §9 / simulation-bases.md §4.5.6
+      intervention_threshold: 0.1
+      # Source: target §9 / simulation-bases.md §4.5.6
+      rescue_probability: 0.5
+      # Source: target §9 / bounded crisis-support calibration
+      intervention_size: 2000
+      # Source: target §9 / reproducibility invariant
+      random_seed: 20260720
+      # Source: target §10.2 runtime-output contract
       custom_state_hot_limit: 3
+      # Source: target §10.1 capability contract and target §9
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -263,6 +352,7 @@ centralbank:
           chunk_size: 512
           chunk_overlap: 64
           top_k: 5
+      # Source: target §10.1 capability contract and target §9
       llm:
         sys_message: "examples.LTCMCollapse.Rag.prompts:RAG_CENTRALBANK_PROMPT"
         user_message: "examples.LTCMCollapse.Rag.prompts:RAG_USER_TEMPLATE"

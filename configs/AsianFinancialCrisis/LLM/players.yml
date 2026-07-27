@@ -11,6 +11,7 @@
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
+  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.AsianFinancialCrisis.LLM.players:Market"
   num_instances: 1
@@ -21,37 +22,37 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.02
-      noise_std: 0.02
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
+      fundamental_value: 100.0   # Source: target §9 F (normalization, 100-scale crisis index)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation)
+      price_impact: 0.04         # Source: target §9 lambda; Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (crisis thin-liquidity calibration)
+      mean_reversion: 0.02       # Source: target §9 gamma; Brunnermeier & Pedersen (2009), https://doi.org/10.1093/rfs/hhn098
+      noise_std: 0.02            # Source: target §9 sigma; Black (1986), https://doi.org/10.1111/j.1540-6261.1986.tb04513.x
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring-buffer per masim.core state contract)
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
 # LLM HotMoneyFunder — short-term capital reversal
 # Theory: Radelet & Sachs (1998): hot money reversal mechanics
 # -----------------------------------------------------------------------------
-hot_money_funder:
+llm_hot_money_funder:
   name: "Hot Money Funder"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMHotMoneyFunder"
-  # Expander → hot_money_funder_1, hot_money_funder_2
+  # Expander → llm_hot_money_funder_1, llm_hot_money_funder_2
   num_instances: 2
   config:
-    identity: "hot_money_funder"
+    identity: "llm_hot_money_funder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-      initial_cash: 800000.0
-      initial_position: 3000.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 800000.0       # Source: target §7 hot-money-funder Intent line + §6.1 quantitative arc (leveraged foreign creditor scale)
+      initial_position: 3000.0     # Source: target §7 hot-money-funder Intent line (carries a short-term-loan funded position at simulation start)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       llm:
         sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_HOT_MONEY_FUNDER_SYS"
         user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
@@ -66,24 +67,24 @@ hot_money_funder:
 # LLM ContagionTrader — cross-border correlated seller
 # Theory: Kaminsky & Reinhart (1999): contagion mechanics
 # -----------------------------------------------------------------------------
-contagion_trader:
+llm_contagion_trader:
   name: "Contagion Trader"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMContagionTrader"
-  # Expander → contagion_trader_1, contagion_trader_2
+  # Expander → llm_contagion_trader_1, llm_contagion_trader_2
   num_instances: 2
   config:
-    identity: "contagion_trader"
+    identity: "llm_contagion_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-      initial_cash: 600000.0
-      initial_position: 4000.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 600000.0       # Source: target §7 contagion-trader Intent line + §6.1 quantitative arc (cross-border fund scale)
+      initial_position: 4000.0     # Source: target §7 contagion-trader Intent line (carries a large cross-border position at simulation start)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       llm:
         sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_CONTAGION_TRADER_SYS"
         user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
@@ -98,23 +99,23 @@ contagion_trader:
 # LLM IMFRescuer — conditional emergency liquidity provider
 # Theory: Corsetti, Pesenti & Roubini (1999): IMF conditionality
 # -----------------------------------------------------------------------------
-imf_rescuer:
+llm_imf_rescuer:
   name: "IMF Rescuer"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMIMFRescuer"
   num_instances: 1
   config:
-    identity: "imf_rescuer"
+    identity: "llm_imf_rescuer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-      initial_cash: 5000000.0
-      initial_position: 0.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 5000000.0       # Source: target §7 imf-rescuer Intent line + §6.1 quantitative arc (official-sector deep pockets, >100bn USD IMF package scale)
+      initial_position: 0.0     # Source: target §7 imf-rescuer Intent line (official rescuer starts with zero market exposure)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       llm:
         sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_IMF_RESCUER_SYS"
         user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
@@ -129,24 +130,24 @@ imf_rescuer:
 # LLM ValueContrarian — fundamental value crisis buyer
 # Theory: Fundamental value investing; long-run mean reversion
 # -----------------------------------------------------------------------------
-value_contrarian:
+llm_value_contrarian:
   name: "Value Contrarian"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMValueContrarian"
-  # Expander → value_contrarian_1, value_contrarian_2
+  # Expander → llm_value_contrarian_1, llm_value_contrarian_2
   num_instances: 2
   config:
-    identity: "value_contrarian"
+    identity: "llm_value_contrarian"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 1000000.0       # Source: target §7 value-contrarian Intent line + §2.4 (patient capital scale, distressed-asset investor)
+      initial_position: 500.0     # Source: target §7 value-contrarian Intent line (small pre-crisis holding as anchor position)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       llm:
         sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_VALUE_CONTRARIAN_SYS"
         user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"
@@ -161,24 +162,24 @@ value_contrarian:
 # LLM NoiseTrader — background liquidity provider
 # Theory: Noise trader model (Black, 1986)
 # -----------------------------------------------------------------------------
-noise_trader:
+llm_noise_trader:
   name: "Noise Trader"
   class: "examples.AsianFinancialCrisis.LLM.players:LLMNoiseTrader"
-  # Expander → noise_trader_1, noise_trader_2, noise_trader_3
+  # Expander → llm_noise_trader_1, llm_noise_trader_2, llm_noise_trader_3
   num_instances: 3
   config:
-    identity: "noise_trader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"
-      initial_cash: 200000.0
-      initial_position: 1000.0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/AsianFinancialCrisis/LLM/records"  # Source: implementation infrastructure (record path)
+      initial_cash: 200000.0       # Source: target §7 noise-trader Intent line + §4.5 (retail/liquidity-motivated scale, small vs. crisis-driver agents)
+      initial_position: 1000.0     # Source: target §7 noise-trader Intent line (small background inventory)
+      initial_price: 100.0       # Source: target §9 P(0); Radelet & Sachs (1998), https://doi.org/10.1353/eca.1998.0009 (pre-crisis level normalisation; mirrors Market block)
+      fundamental_value: 100.0   # Source: target §9 F (normalization; mirrors Market block for agent-side deviation calc)
+      custom_state_hot_limit: 3  # Source: implementation infrastructure (hot-state ring buffer)
       llm:
         sys_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.AsianFinancialCrisis.LLM.prompts:LLM_USER_TEMPLATE"

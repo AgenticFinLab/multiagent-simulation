@@ -15,11 +15,12 @@ knowledge:
     embed_model: "openai/hunyuan-embedding"
     embed_api_key: "{{ HUNYUAN_API_KEY }}"
     embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-    chunk_size: 512
-    chunk_overlap: 64
-    top_k: 5
+    chunk_size: 512                   # Source: simulation-bases.md §6 — retrieval calibration
+    chunk_overlap: 64                 # Source: simulation-bases.md §6 — retrieval calibration
+    top_k: 5                          # Source: simulation-bases.md §6 — retrieval calibration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.LossAversion.Rag.players:Market"
   num_instances: 1
@@ -31,34 +32,42 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/LossAversion/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.03
-      mean_reversion: 0.01
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      initial_price: 100.0              # Source: target §9 — normalization
+      fundamental_value: 100.0          # Source: target §9 — public benchmark
+      price_impact: 0.0002              # Source: target §9 / simulation-bases.md §6
+      mean_reversion: 0.01              # Source: target §9 / simulation-bases.md §6
+      noise_std: 0.015                  # Source: target §9 / simulation-bases.md §6
+      random_seed: 20260716             # Source: target §9 — reproducible common market path
+      price_floor: 0.01                 # Source: target §9 — strictly positive price invariant
+      shock_schedule:
+        20: 0.06                        # Source: target §9 — controlled gain-domain stimulus
+        80: -0.20                       # Source: target §9 — controlled loss-domain stimulus
+      custom_state_hot_limit: 3         # Source: simulation-bases.md §6
   persona: !include persona.yml
 
-lossaverseinvestor:
+ragllm_loss_averse_investor:
   name: "LossAverseInvestor"
   class: "examples.LossAversion.Rag.players:RagLLMLossAverseInvestor"
   num_instances: 3
   config:
-    identity: "lossaverseinvestor"
+    identity: "ragllm_loss_averse_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/LossAversion/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      loss_aversion_lambda: 2.25
-      sell_gain_threshold: 0.05
-      base_size: 400
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0            # Source: target §9 — normalization
+      initial_position: 500              # Source: target §9 — normalization
+      initial_price: 100.0               # Source: target §9 — reference point
+      fundamental_value: 100.0           # Source: target §9 — public benchmark
+      loss_aversion_lambda: 2.25         # Source: target §9 / Kahneman & Tversky (1979)
+      sell_gain_threshold: 0.05          # Source: target §9 — trigger calibration
+      gain_sell_fraction: 0.70           # Source: target §9 — configured disposition benchmark
+      loss_sell_fraction: 0.20           # Source: target §9 — configured disposition benchmark
+      base_size: 400                     # Source: target §9 — order-cap calibration
+      quantity_tolerance: 0.20           # Source: target §9 — hybrid quantity band
+      custom_state_hot_limit: 3          # Source: simulation-bases.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -73,38 +82,41 @@ lossaverseinvestor:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512                # Source: simulation-bases.md §6 — retrieval calibration
+          chunk_overlap: 64              # Source: simulation-bases.md §6 — retrieval calibration
+          top_k: 5                       # Source: simulation-bases.md §6 — retrieval calibration
       llm:
         sys_message: "examples.LossAversion.Rag.prompts:RULELLM_LOSS_AVERSE_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
-          temperature: 0.7
-          max_tokens: 600
+          temperature: 0.7               # Source: simulation-bases.md §6 — model calibration
+          max_tokens: 600                # Source: simulation-bases.md §6 — bounded response budget
   persona: !include persona.yml
 
-breakeventrader:
+ragllm_break_even_trader:
   name: "BreakEvenTrader"
   class: "examples.LossAversion.Rag.players:RagLLMBreakEvenTrader"
   num_instances: 2
   config:
-    identity: "breakeventrader"
+    identity: "ragllm_break_even_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/LossAversion/Rag/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      risk_increase_factor: 2.0
-      base_size: 350
-      custom_state_hot_limit: 3
+      initial_cash: 1200000.0            # Source: target §9 — normalization
+      initial_position: 500              # Source: target §9 — normalization
+      initial_price: 100.0               # Source: target §9 — break-even reference
+      fundamental_value: 100.0           # Source: target §9 — public benchmark
+      risk_increase_factor: 2.0          # Source: target §9 / Tversky & Kahneman (1992)
+      loss_trigger: -0.05                # Source: target §9 — loss-domain activation
+      sizing_scale: 5000                 # Source: target §9 — PnL-to-quantity calibration
+      base_size: 350                     # Source: target §9 — order-cap calibration
+      quantity_tolerance: 0.20           # Source: target §9 — hybrid quantity band
+      custom_state_hot_limit: 3          # Source: simulation-bases.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -119,38 +131,41 @@ breakeventrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512                # Source: simulation-bases.md §6 — retrieval calibration
+          chunk_overlap: 64              # Source: simulation-bases.md §6 — retrieval calibration
+          top_k: 5                       # Source: simulation-bases.md §6 — retrieval calibration
       llm:
         sys_message: "examples.LossAversion.Rag.prompts:RULELLM_BREAK_EVEN_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
-          temperature: 0.8
-          max_tokens: 600
+          temperature: 0.8               # Source: simulation-bases.md §6 — model calibration
+          max_tokens: 600                # Source: simulation-bases.md §6 — bounded response budget
   persona: !include persona.yml
 
-rationaltrader:
+ragllm_rational_trader:
   name: "RationalTrader"
   class: "examples.LossAversion.Rag.players:RagLLMRationalTrader"
   num_instances: 2
   config:
-    identity: "rationaltrader"
+    identity: "ragllm_rational_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/LossAversion/Rag/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      risk_aversion: 0.7
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 1500000.0            # Source: target §9 — normalization
+      initial_position: 500              # Source: target §9 — normalization
+      initial_price: 100.0               # Source: target §9 — account state
+      fundamental_value: 100.0           # Source: target §9 — public benchmark
+      risk_aversion: 0.7                 # Source: target §9 — stabilizing response scale
+      deviation_threshold: 0.03          # Source: target §9 — symmetric inactive band
+      sizing_scale: 3000                 # Source: target §9 — deviation-to-quantity calibration
+      base_size: 300                     # Source: target §9 — order-cap calibration
+      quantity_tolerance: 0.20           # Source: target §9 — hybrid quantity band
+      custom_state_hot_limit: 3          # Source: simulation-bases.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -165,38 +180,40 @@ rationaltrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512                # Source: simulation-bases.md §6 — retrieval calibration
+          chunk_overlap: 64              # Source: simulation-bases.md §6 — retrieval calibration
+          top_k: 5                       # Source: simulation-bases.md §6 — retrieval calibration
       llm:
         sys_message: "examples.LossAversion.Rag.prompts:RULELLM_RATIONAL_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
-          temperature: 0.3
-          max_tokens: 600
+          temperature: 0.3               # Source: simulation-bases.md §6 — model calibration
+          max_tokens: 600                # Source: simulation-bases.md §6 — bounded response budget
   persona: !include persona.yml
 
-momentumtrader:
+ragllm_momentum_trader:
   name: "MomentumTrader"
   class: "examples.LossAversion.Rag.players:RagLLMMomentumTrader"
   num_instances: 2
   config:
-    identity: "momentumtrader"
+    identity: "ragllm_momentum_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/LossAversion/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      entry_threshold: 0.03
-      base_size: 300
-      custom_state_hot_limit: 3
+      initial_cash: 1000000.0            # Source: target §9 — normalization
+      initial_position: 500              # Source: target §9 — normalization
+      initial_price: 100.0               # Source: target §9 — account state
+      fundamental_value: 100.0           # Source: target §9 — public benchmark
+      entry_threshold: 0.03              # Source: target §9 / Jegadeesh & Titman (1993)
+      sizing_scale: 3000                 # Source: target §9 — deviation-to-quantity calibration
+      base_size: 300                     # Source: target §9 — order-cap calibration
+      quantity_tolerance: 0.20           # Source: target §9 — hybrid quantity band
+      custom_state_hot_limit: 3          # Source: simulation-bases.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -211,37 +228,39 @@ momentumtrader:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512                # Source: simulation-bases.md §6 — retrieval calibration
+          chunk_overlap: 64              # Source: simulation-bases.md §6 — retrieval calibration
+          top_k: 5                       # Source: simulation-bases.md §6 — retrieval calibration
       llm:
         sys_message: "examples.LossAversion.Rag.prompts:RULELLM_MOMENTUM_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
-          temperature: 0.7
-          max_tokens: 600
+          temperature: 0.7               # Source: simulation-bases.md §6 — model calibration
+          max_tokens: 600                # Source: simulation-bases.md §6 — bounded response budget
   persona: !include persona.yml
 
-marketmaker:
+ragllm_market_maker:
   name: "MarketMaker"
   class: "examples.LossAversion.Rag.players:RagLLMMarketMaker"
   num_instances: 2
   config:
-    identity: "marketmaker"
+    identity: "ragllm_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
       record_path: "EXPERIMENT/LossAversion/Rag/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      inventory_limit: 2000
-      custom_state_hot_limit: 3
+      initial_cash: 500000.0             # Source: target §9 — normalization
+      initial_position: 200               # Source: target §9 — starting dealer inventory
+      initial_price: 100.0                # Source: target §9 — account state
+      fundamental_value: 100.0            # Source: target §9 — public benchmark
+      inventory_limit: 2000               # Source: target §9 / Ho & Stoll (1981)
+      base_size: 300                      # Source: target §9 — dealer order cap
+      quantity_tolerance: 0.20            # Source: target §9 — hybrid quantity band
+      custom_state_hot_limit: 3           # Source: simulation-bases.md §6
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -256,15 +275,15 @@ marketmaker:
           embed_model: "openai/hunyuan-embedding"
           embed_api_key: "{{ HUNYUAN_API_KEY }}"
           embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"
-          chunk_size: 512
-          chunk_overlap: 64
-          top_k: 5
+          chunk_size: 512                # Source: simulation-bases.md §6 — retrieval calibration
+          chunk_overlap: 64              # Source: simulation-bases.md §6 — retrieval calibration
+          top_k: 5                       # Source: simulation-bases.md §6 — retrieval calibration
       llm:
         sys_message: "examples.LossAversion.Rag.prompts:RULELLM_MARKET_MAKER_PROMPT"
         user_message: "examples.LossAversion.Rag.prompts:RAG_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
-          temperature: 0.95
-          max_tokens: 600
+          temperature: 0.95              # Source: simulation-bases.md §6 — model calibration
+          max_tokens: 600                # Source: simulation-bases.md §6 — bounded response budget
   persona: !include persona.yml

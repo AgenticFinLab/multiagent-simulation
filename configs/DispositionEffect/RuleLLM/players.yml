@@ -9,6 +9,7 @@
 
 # Market (rule-based, identical to DispositionEffect)
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DispositionEffect.RuleLLM.players:Market"
   num_instances: 1
@@ -19,166 +20,173 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.1
-      mean_reversion: 0.01
-      noise_std: 1.0
-      news_probability: 0.05
-      news_impact_range: 3.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"  # Source: simulation.yml setting.record_path
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.05  # Source: simulation-bases.md §6
+      noise_std: 0.6  # Source: simulation-bases.md §6
+      minimum_price: 1.0  # Source: simulation-bases.md §3 positivity constraint
+      news_probability: 0.15  # Source: simulation-bases.md §6
+      news_impact_range: 4.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
   persona: !include persona.yml
 
 # RuleLLM Disposition Biased (Prospect Theory)
-rulellm_disposition_biased:
+rulellm_disposition_investor:
   name: "RuleLLM Disposition Biased"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMDispositionBiased"
   num_instances: 3
   config:
-    identity: "rulellm_disposition_biased"
+    identity: "rulellm_disposition_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      max_position: 200.0
-      custom_state_hot_limit: 3
-      gain_threshold: 0.03
-      loss_threshold: -0.10
-      sell_fraction_gain: 0.5
-      sell_fraction_loss: 0.15
-      buy_fraction: 0.15
+      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"  # Source: simulation.yml setting.record_path
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.1.6
+      initial_position: 30.0  # Source: simulation-bases.md §4.1.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      max_position: 30.0  # Source: simulation-bases.md §4.1.4
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      gain_threshold: 0.03  # Source: simulation-bases.md §6
+      loss_threshold: -0.10  # Source: simulation-bases.md §6
+      loss_aversion: 2.25  # Source: simulation-bases.md §6
+      sell_fraction_gain: 0.5  # Source: simulation-bases.md §6
+      sell_fraction_loss: 0.15  # Source: simulation-bases.md §6
+      buy_fraction: 0.15  # Source: simulation-bases.md §4.1.4
+      reference_buy_band: 0.01  # Source: simulation-bases.md §4.1.3
+      cash_deployment_fraction: 0.15  # Source: simulation-bases.md §4.1.4
+      minimum_trade_quantity: 0.5  # Source: implementation granularity constraint
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_DISPOSITION_BIASED_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability constraint
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: RuleLLM low-variance execution requirement
+          max_new_tokens: 500  # Source: canonical response budget
   persona: !include persona.yml
 
 # RuleLLM Rational Investor (Expected Utility)
-rulellm_rational:
+rulellm_rational_investor:
   name: "RuleLLM Rational Investor"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMRationalInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_rational"
+    identity: "rulellm_rational_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      target_allocation: 0.5
-      rebalance_threshold: 0.1
+      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"  # Source: simulation.yml setting.record_path
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.2.6
+      initial_position: 30.0  # Source: simulation-bases.md §4.2.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      target_allocation: 0.5  # Source: simulation-bases.md §6
+      rebalance_threshold: 0.1  # Source: simulation-bases.md §4.2.5
+      rebalance_speed: 0.5  # Source: simulation-bases.md §4.2.4
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_RATIONAL_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability constraint
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: RuleLLM low-variance execution requirement
+          max_new_tokens: 500  # Source: canonical response budget
   persona: !include persona.yml
 
 # RuleLLM Tax Aware Investor
-rulellm_tax_aware:
+rulellm_tax_aware_investor:
   name: "RuleLLM Tax Aware Investor"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMTaxAwareInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_tax_aware"
+    identity: "rulellm_tax_aware_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      tax_loss_threshold: -0.05
-      capital_gains_hold: 0.20
-      tax_harvest_fraction: 0.5
+      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"  # Source: simulation.yml setting.record_path
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.3.6
+      initial_position: 30.0  # Source: simulation-bases.md §4.3.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      tax_loss_threshold: -0.05  # Source: simulation-bases.md §6
+      capital_gains_hold: 0.15  # Source: simulation-bases.md §6
+      tax_harvest_fraction: 0.5  # Source: simulation-bases.md §6
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_TAX_AWARE_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability constraint
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: RuleLLM low-variance execution requirement
+          max_new_tokens: 500  # Source: canonical response budget
   persona: !include persona.yml
 
 # RuleLLM Institutional Investor
-rulellm_institutional:
+rulellm_institutional_investor:
   name: "RuleLLM Institutional Investor"
   class: "examples.DispositionEffect.RuleLLM.players:RuleLLMInstitutionalInvestor"
   num_instances: 2
   config:
-    identity: "rulellm_institutional"
+    identity: "rulellm_institutional_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      gain_threshold: 0.25
-      loss_threshold: -0.15
-      sell_fraction: 0.4
+      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"  # Source: simulation.yml setting.record_path
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.5.6
+      initial_position: 30.0  # Source: simulation-bases.md §4.5.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
+      gain_threshold: 0.25  # Source: simulation-bases.md §6
+      loss_threshold: -0.15  # Source: simulation-bases.md §6
+      sell_fraction: 0.4  # Source: simulation-bases.md §6
       llm:
         sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_INSTITUTIONAL_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability constraint
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: RuleLLM low-variance execution requirement
+          max_new_tokens: 500  # Source: canonical response budget
   persona: !include persona.yml
 
-# RuleLLM Loss Averse Investor
-rulellm_loss_averse:
-  name: "RuleLLM Loss Averse Investor"
-  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMLossAverse"
-  num_instances: 2
+# RuleLLM passive benchmark
+rulellm_index_holder:
+  name: "RuleLLM Index Holder"
+  class: "examples.DispositionEffect.RuleLLM.players:RuleLLMIndexHolder"
+  num_instances: 1
   config:
-    identity: "rulellm_loss_averse"
+    identity: "rulellm_index_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      initial_purchase_price: 100.0
-      custom_state_hot_limit: 3
-      gain_threshold: 0.03
-      loss_threshold: -0.10
-      sell_fraction_gain: 0.5
-      sell_fraction_loss: 0.15
+      record_path: "EXPERIMENT/DispositionEffect/RuleLLM/records"  # Source: simulation.yml setting.record_path
+      initial_cash: 10000.0  # Source: simulation-bases.md §4.4.6
+      initial_position: 50.0  # Source: simulation-bases.md §4.4.6
+      initial_purchase_price: 100.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: simulation.yml round_history_limit
       llm:
-        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_LOSS_AVERSE_SYS"
+        sys_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_INDEX_HOLDER_SYS"
         user_message: "examples.DispositionEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
         lm_name: "ark/doubao-seed-2-0-mini-260428"
+        max_retries: 3  # Source: implementation reliability constraint
         generation_config:
-          temperature: 0.3
-          max_new_tokens: 500
+          temperature: 0.3  # Source: RuleLLM low-variance execution requirement
+          max_new_tokens: 500  # Source: canonical response budget
   persona: !include persona.yml

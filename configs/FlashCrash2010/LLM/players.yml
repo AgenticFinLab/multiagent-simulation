@@ -1,6 +1,7 @@
 # FlashCrash2010 LLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.FlashCrash2010.LLM.players:Market"
   num_instances: 1
@@ -11,38 +12,38 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"
-      initial_price: 40.0
-      fundamental_value: 40.0
-      base_depth: 10000
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"  # Source: AGENT_POOL/finance/market.md §6
+      initial_price: 40.0  # Source: AGENT_POOL/finance/market.md §6
+      fundamental_value: 40.0  # Source: AGENT_POOL/finance/market.md §6
+      base_depth: 10000  # Source: AGENT_POOL/finance/market.md §6
+      price_impact: 0.05  # Source: AGENT_POOL/finance/market.md §6
+      mean_reversion: 0.02  # Source: AGENT_POOL/finance/market.md §6
+      noise_std: 0.01  # Source: AGENT_POOL/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
   persona: !include persona.yml
 
-hftmarketmaker:
+llm_hft_market_maker:
   name: "HFTMarketMaker"
   class: "examples.FlashCrash2010.LLM.players:LLMHFTMarketMaker"
   num_instances: 3
   config:
-    identity: "hftmarketmaker"
+    identity: "llm_hft_market_maker"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      normal_spread: 0.0001
-      stress_spread: 0.005
-      inventory_limit: 1000
-      withdrawal_threshold: 0.02
-      mm_qty: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      initial_price: 40.0  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      fundamental_value: 40.0  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      normal_spread: 0.0001  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      stress_spread: 0.005  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      inventory_limit: 1000  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      withdrawal_threshold: 0.02  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      mm_qty: 500  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/llm-hft-market-maker.md §6
       llm:
         sys_message: "examples.FlashCrash2010.LLM.prompts:LLM_HFT_MARKET_MAKER_SYS"
         user_message: "examples.FlashCrash2010.LLM.prompts:LLM_USER_TEMPLATE"
@@ -53,26 +54,26 @@ hftmarketmaker:
           max_tokens: 512
   persona: !include persona.yml
 
-momentumchaser:
+llm_momentum_chaser:
   name: "MomentumChaser"
   class: "examples.FlashCrash2010.LLM.players:LLMMomentumChaser"
   num_instances: 2
   config:
-    identity: "momentumchaser"
+    identity: "llm_momentum_chaser"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      entry_threshold: 0.001
-      position_multiplier: 10000
-      max_size: 1000
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      initial_cash: 500000.0  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      initial_price: 40.0  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      fundamental_value: 40.0  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      entry_threshold: 0.001  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      position_multiplier: 10000  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      max_size: 1000  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/llm-momentum-chaser.md §6
       llm:
         sys_message: "examples.FlashCrash2010.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"
         user_message: "examples.FlashCrash2010.LLM.prompts:LLM_USER_TEMPLATE"
@@ -83,25 +84,25 @@ momentumchaser:
           max_tokens: 512
   persona: !include persona.yml
 
-fundamentaltrader:
+llm_fundamental_trader:
   name: "FundamentalTrader"
   class: "examples.FlashCrash2010.LLM.players:LLMFundamentalTrader"
   num_instances: 2
   config:
-    identity: "fundamentaltrader"
+    identity: "llm_fundamental_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"
-      initial_cash: 2000000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      value_trigger: 0.05
-      order_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      initial_cash: 2000000.0  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      initial_price: 40.0  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      fundamental_value: 40.0  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      value_trigger: 0.05  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      order_size: 500  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/llm-fundamental-trader.md §6
       llm:
         sys_message: "examples.FlashCrash2010.LLM.prompts:LLM_FUNDAMENTAL_SYS"
         user_message: "examples.FlashCrash2010.LLM.prompts:LLM_USER_TEMPLATE"
@@ -112,26 +113,26 @@ fundamentaltrader:
           max_tokens: 512
   persona: !include persona.yml
 
-stoplosstrader:
+llm_stop_loss_trader:
   name: "StopLossTrader"
   class: "examples.FlashCrash2010.LLM.players:LLMStopLossTrader"
   num_instances: 3
   config:
-    identity: "stoplosstrader"
+    identity: "llm_stop_loss_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 1000
-      initial_price: 40.0
-      fundamental_value: 40.0
-      entry_price: 40.0
-      stop_percentage: 0.03
-      position_size: 1000
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      initial_position: 1000  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      initial_price: 40.0  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      fundamental_value: 40.0  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      entry_price: 40.0  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      stop_percentage: 0.03  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      position_size: 1000  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/llm-stop-loss-trader.md §6
       llm:
         sys_message: "examples.FlashCrash2010.LLM.prompts:LLM_STOP_LOSS_SYS"
         user_message: "examples.FlashCrash2010.LLM.prompts:LLM_USER_TEMPLATE"
@@ -142,26 +143,26 @@ stoplosstrader:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.FlashCrash2010.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 40.0
-      fundamental_value: 40.0
-      trade_probability: 0.05
-      min_order: 100
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FlashCrash2010/LLM/records"  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      initial_cash: 500000.0  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      initial_position: 0  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      initial_price: 40.0  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      fundamental_value: 40.0  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      trade_probability: 0.05  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      min_order: 100  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      max_order: 500  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/llm-noise-trader.md §6
       llm:
         sys_message: "examples.FlashCrash2010.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.FlashCrash2010.LLM.prompts:LLM_USER_TEMPLATE"

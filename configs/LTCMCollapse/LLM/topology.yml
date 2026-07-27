@@ -7,23 +7,23 @@ sources:
 
 connections:
   market:
-    - convergencearbitrageur
-    - leveragetrader
-    - riskmanager
-    - liquidityprovider
-    - centralbank
+    - llm_convergence_arbitrageur
+    - llm_leverage_trader
+    - llm_risk_manager
+    - llm_liquidity_provider
+    - llm_central_bank
 
-  convergencearbitrageur:
+  llm_convergence_arbitrageur:
     - market
 
-  leveragetrader:
+  llm_leverage_trader:
     - market
 
-  riskmanager:
+  llm_risk_manager:
     - market
 
-  liquidityprovider:
+  llm_liquidity_provider:
     - market
 
-  centralbank:
+  llm_central_bank:
     - market

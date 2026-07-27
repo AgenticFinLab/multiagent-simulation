@@ -27,7 +27,7 @@ from typing import Any, Dict, Optional
 from masim.player.general import GeneralPlayer
 from masim.player.base import Action, Observation, StepResult
 from masim.utils.history import HistoryBuffer
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
@@ -297,6 +297,8 @@ Respond with ONLY valid JSON:
                 "quantity": 0,
                 "reasoning": "LLM parse failed: held position",
                 "analysis": "",
+                "_skipped": True,
+                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
             }
 
         bid_price = float(decision["bid_price"])
@@ -331,6 +333,13 @@ Respond with ONLY valid JSON:
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
         }
+        # Propagate LLM-failure sentinels so downstream metrics can exclude
+        # synthetic hold rounds from action-distribution / entropy statistics.
+        if decision.get("_skipped"):
+            order["_skipped"] = True
+            order["_skipped_reason"] = decision.get(
+                "_skipped_reason", "llm_failed"
+            )
         return {
             **order,
             "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],

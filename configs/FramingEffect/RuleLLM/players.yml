@@ -1,6 +1,7 @@
 # FramingEffect RuleLLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.FramingEffect.RuleLLM.players:Market"
   num_instances: 1
@@ -11,33 +12,33 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"  # Source: infrastructure
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      price_impact: 0.05  # Source: target §9 row 3 — LeBaron (2006) ABM calibration
+      mean_reversion: 0.02  # Source: target §9 row 4 — Summers (1986) variance bounds
+      noise_std: 0.01  # Source: target §9 row 5 — Shiller (1981) excess volatility
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
-gainframefollower:
+rulellm_gain_frame_follower:
   name: "GainFrameFollower"
   class: "examples.FramingEffect.RuleLLM.players:RuleLLMGainFrameFollower"
   num_instances: 2
   config:
-    identity: "gainframefollower"
+    identity: "rulellm_gain_frame_follower"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_GAIN_FRAME_FOLLOWER_SYS"
         user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -47,24 +48,24 @@ gainframefollower:
           max_tokens: 512
   persona: !include persona.yml
 
-lossframereactor:
+rulellm_loss_frame_reactor:
   name: "LossFrameReactor"
   class: "examples.FramingEffect.RuleLLM.players:RuleLLMLossFrameReactor"
   num_instances: 2
   config:
-    identity: "lossframereactor"
+    identity: "rulellm_loss_frame_reactor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_LOSS_FRAME_REACTOR_SYS"
         user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -74,24 +75,24 @@ lossframereactor:
           max_tokens: 512
   persona: !include persona.yml
 
-frameinvarianttrader:
+rulellm_frame_invariant_trader:
   name: "FrameInvariantTrader"
   class: "examples.FramingEffect.RuleLLM.players:RuleLLMFrameInvariantTrader"
   num_instances: 1
   config:
-    identity: "frameinvarianttrader"
+    identity: "rulellm_frame_invariant_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_FRAME_INVARIANT_TRADER_SYS"
         user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -101,24 +102,24 @@ frameinvarianttrader:
           max_tokens: 512
   persona: !include persona.yml
 
-arbitrageframer:
+rulellm_arbitrage_framer:
   name: "ArbitrageFramer"
   class: "examples.FramingEffect.RuleLLM.players:RuleLLMArbitrageFramer"
   num_instances: 1
   config:
-    identity: "arbitrageframer"
+    identity: "rulellm_arbitrage_framer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_ARBITRAGE_FRAMER_SYS"
         user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"
@@ -128,24 +129,24 @@ arbitrageframer:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+rulellm_noise_trader:
   name: "NoiseTrader"
   class: "examples.FramingEffect.RuleLLM.players:RuleLLMNoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rulellm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      custom_state_hot_limit: 3
-      llm:
+      record_path: "EXPERIMENT/FramingEffect/RuleLLM/records"  # Source: infrastructure
+      initial_cash: 500000.0  # Source: target §9 row 6 — normalization (reduced for noise role)
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      custom_state_hot_limit: 3  # Source: infrastructure
+      llm:  # Source: LLM-wiring infrastructure
         sys_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.FramingEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
         lm_type: "api"

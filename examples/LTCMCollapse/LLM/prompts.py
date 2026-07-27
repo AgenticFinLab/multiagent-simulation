@@ -1,4 +1,4 @@
-"""LTCMCollapse LLM prompts.
+"""Persona-only finance-market LLM prompts.
 
 The LLM variant uses persona-only prompts. Explicit executable rules belong in
 Rule and RuleLLM.

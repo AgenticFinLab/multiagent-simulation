@@ -5,7 +5,7 @@
 #
 #         llm_gullible_spreader ────────┐
 #         llm_distorting_relayer ───────┤
-#         llm_skeptical_evaluator ──────┼──▶ environment ──▶ all agents
+#         llm_skeptical_evaluator ──────┼──▶ llm_information_environment ──▶ all agents
 #         llm_fact_checker ─────────────┤             (belief, distortion, truth)
 #         llm_uninformed_bystander ─────┘
 # =============================================================================
@@ -13,10 +13,10 @@
 type: "star"
 
 sources:
-  - environment
+  - llm_information_environment
 
 connections:
-  environment:
+  llm_information_environment:
     - llm_gullible_spreader
     - llm_distorting_relayer
     - llm_skeptical_evaluator
@@ -24,16 +24,16 @@ connections:
     - llm_uninformed_bystander
 
   llm_gullible_spreader:
-    - environment
+    - llm_information_environment
 
   llm_distorting_relayer:
-    - environment
+    - llm_information_environment
 
   llm_skeptical_evaluator:
-    - environment
+    - llm_information_environment
 
   llm_fact_checker:
-    - environment
+    - llm_information_environment
 
   llm_uninformed_bystander:
-    - environment
+    - llm_information_environment

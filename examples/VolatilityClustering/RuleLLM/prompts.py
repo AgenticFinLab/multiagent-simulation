@@ -28,7 +28,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from Fundamentalist) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the Fundamentalist strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -57,7 +57,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from TrendFollower) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the TrendFollower strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -86,7 +86,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from NoiseTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the NoiseTrader strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -115,7 +115,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from SlowAdapter) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the SlowAdapter strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant
@@ -144,7 +144,7 @@ Style: Disciplined, rule-guided, with room for qualitative judgment.
 Risk tolerance: Moderate — rules provide guardrails.
 Emotional state: Composed and analytical.
 
-== DECISION RULES (from VolatilityTrader) ==
+== DECISION RULES ==
 
 Apply the quantitative decision rules from the VolatilityTrader strategy:
 - Follow the mathematical formulas and thresholds from the rule-based variant

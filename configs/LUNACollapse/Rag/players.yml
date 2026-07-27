@@ -20,6 +20,7 @@ knowledge:
     top_k: 5
 
 market:
+  archetype: crypto-algostable-depeg  # -> AGENT_POOL/market/crypto-algostable-depeg.md
   name: "Market"
   class: "examples.LUNACollapse.Rag.players:Market"
   num_instances: 1
@@ -30,34 +31,42 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/LUNACollapse/Rag/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.04
-      mean_reversion: 0.005
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LUNACollapse/Rag/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.04  # Source: simulation-bases.md §6
+      mean_reversion: 0.005  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      market_depth: 100.0  # Source: target §9 / simulation-bases.md §3.1
+      random_seed: 20260720  # Source: target §9 reproducibility invariant
+      price_floor: 0.01  # Source: target §9 positive-price invariant
+      shock_schedule:  # Source: target §6.1 / §9 controlled May 2022 depeg stimulus
+        20: -0.06
+        21: -0.05
+        22: -0.04
+        23: -0.03
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
-stablecoinholder:
+ragllm_stablecoin_holder:
   name: "StablecoinHolder"
   class: "examples.LUNACollapse.Rag.players:RagLLMStablecoinHolder"
   num_instances: 3
   config:
-    identity: "stablecoinholder"
+    identity: "ragllm_stablecoin_holder"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LUNACollapse/Rag/records"
-      initial_cash: 1000000.0
-      initial_position: 1000
-      initial_price: 100.0
-      fundamental_value: 100.0
-      redemption_threshold: 0.05
-      base_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LUNACollapse/Rag/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 1000  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      redemption_threshold: 0.05  # Source: simulation-bases.md §4.1.7
+      base_size: 500  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -85,25 +94,25 @@ stablecoinholder:
           max_tokens: 600
   persona: !include persona.yml
 
-arbitrageur:
+ragllm_arbitrageur:
   name: "Arbitrageur"
   class: "examples.LUNACollapse.Rag.players:RagLLMArbitrageur"
   num_instances: 2
   config:
-    identity: "arbitrageur"
+    identity: "ragllm_arbitrageur"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LUNACollapse/Rag/records"
-      initial_cash: 1500000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      arb_threshold: 0.02
-      base_size: 600
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LUNACollapse/Rag/records"  # Source: framework infrastructure
+      initial_cash: 1500000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      arb_threshold: 0.02  # Source: simulation-bases.md §4.2.7
+      base_size: 600  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -131,25 +140,25 @@ arbitrageur:
           max_tokens: 600
   persona: !include persona.yml
 
-defilender:
+ragllm_de_fi_lender:
   name: "DeFiLender"
   class: "examples.LUNACollapse.Rag.players:RagLLMDeFiLender"
   num_instances: 2
   config:
-    identity: "defilender"
+    identity: "ragllm_de_fi_lender"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LUNACollapse/Rag/records"
-      initial_cash: 2000000.0
-      initial_position: 800
-      initial_price: 100.0
-      fundamental_value: 100.0
-      liquidation_threshold: 0.15
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LUNACollapse/Rag/records"  # Source: framework infrastructure
+      initial_cash: 2000000.0  # Source: simulation-bases.md §6
+      initial_position: 800  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      liquidation_threshold: 0.15  # Source: simulation-bases.md §4.3.7
+      base_size: 400  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -177,25 +186,25 @@ defilender:
           max_tokens: 600
   persona: !include persona.yml
 
-anchordepositor:
+ragllm_anchor_depositor:
   name: "AnchorDepositor"
   class: "examples.LUNACollapse.Rag.players:RagLLMAnchorDepositor"
   num_instances: 2
   config:
-    identity: "anchordepositor"
+    identity: "ragllm_anchor_depositor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LUNACollapse/Rag/records"
-      initial_cash: 800000.0
-      initial_position: 600
-      initial_price: 100.0
-      fundamental_value: 100.0
-      yield_threshold: 0.05
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LUNACollapse/Rag/records"  # Source: framework infrastructure
+      initial_cash: 800000.0  # Source: simulation-bases.md §6
+      initial_position: 600  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      yield_threshold: 0.05  # Source: simulation-bases.md §4.4.7
+      base_size: 350  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"
@@ -223,25 +232,25 @@ anchordepositor:
           max_tokens: 600
   persona: !include persona.yml
 
-valuebuyer:
+ragllm_value_buyer:
   name: "ValueBuyer"
   class: "examples.LUNACollapse.Rag.players:RagLLMValueBuyer"
   num_instances: 1
   config:
-    identity: "valuebuyer"
+    identity: "ragllm_value_buyer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/LUNACollapse/Rag/records"
-      initial_cash: 3000000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      discount_threshold: 0.30
-      base_size: 200
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/LUNACollapse/Rag/records"  # Source: framework infrastructure
+      initial_cash: 3000000.0  # Source: simulation-bases.md §6
+      initial_position: 200  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      discount_threshold: 0.30  # Source: simulation-bases.md §4.5.7
+      base_size: 200  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       private_knowledge:
         from_global_resources:
           - "MinerU_processed"

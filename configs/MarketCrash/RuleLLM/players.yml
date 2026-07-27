@@ -3,8 +3,9 @@
 # =============================================================================
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
-  class: "examples.MarketCrash.RuleLLM.players:Market"
+  class: "examples.MarketCrash.Rule.players:Market"
   num_instances: 1
   config:
     identity: "market"
@@ -13,19 +14,23 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      base_price_impact: 0.08
-      mean_reversion: 0.01
-      noise_std: 0.5
-      liquidity_decay: 0.1
-      liquidity_recovery: 0.05
-      min_liquidity: 0.1
-      custom_state_hot_limit: 3
-      base_liquidity: 50.0
-      high_impact_multiplier: 3.0
-      low_liquidity_threshold: 30.0
+      initial_volatility: 4.0  # Source: finance-market-crash.md §9
+      stress_impact_multiplier: 1.5  # Source: finance-market-crash.md §9
+      max_abs_return: 0.08  # Source: finance-market-crash.md §9
+      initial_liquidity: 1.0  # Source: normalized market capacity
+      random_seed: 20260721  # Source: reproducibility invariant
+      price_floor: 30.0  # Source: finance-market-crash.md §9
+      price_ceiling: 120.0  # Source: finance-market-crash.md §9
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"  # Source: framework infrastructure
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      base_price_impact: 0.08  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.5  # Source: simulation-bases.md §6
+      liquidity_decay: 0.1  # Source: simulation-bases.md §6
+      liquidity_recovery: 0.05  # Source: simulation-bases.md §6
+      min_liquidity: 0.1  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
 rulellm_panic_seller:
@@ -40,10 +45,10 @@ rulellm_panic_seller:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_PANIC_SELLER_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -54,22 +59,22 @@ rulellm_panic_seller:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_risk_parity:
+rulellm_risk_parity_fund:
   name: "RuleLLM Risk Parity Fund"
   class: "examples.MarketCrash.RuleLLM.players:RuleLLMRiskParityFund"
   # Expander → rulellm_risk_parity_1, rulellm_risk_parity_2
   num_instances: 2
   config:
-    identity: "rulellm_risk_parity"
+    identity: "rulellm_risk_parity_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 50.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 50.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_RISK_PARITY_FUND_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -80,22 +85,22 @@ rulellm_risk_parity:
           max_new_tokens: 500
   persona: !include persona.yml
 
-rulellm_leveraged_fund:
-  name: "RuleLLM Leveraged Fund"
-  class: "examples.MarketCrash.RuleLLM.players:RuleLLMLeveragedFund"
-  # Expander → rulellm_leveraged_fund_1, rulellm_leveraged_fund_2, rulellm_leveraged_fund_3
+rulellm_leveraged_hedge_fund:
+  name: "RuleLLM Leveraged Hedge Fund"
+  class: "examples.MarketCrash.RuleLLM.players:RuleLLMLeveragedHedgeFund"
+  # Expander creates three leveraged-hedge-fund instances.
   num_instances: 3
   config:
-    identity: "rulellm_leveraged_fund"
+    identity: "rulellm_leveraged_hedge_fund"
     role: player
     steps_per_turn: 1
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 80.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 80.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_LEVERAGED_HEDGE_FUND_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -118,10 +123,10 @@ rulellm_market_maker:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 30.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 30.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_MARKET_MAKER_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -129,6 +134,32 @@ rulellm_market_maker:
         lm_name: "ark/doubao-seed-2-0-mini-260428"
         generation_config:
           temperature: 0.3
+          max_new_tokens: 500
+  persona: !include persona.yml
+
+rulellm_passive_investor:
+  name: "RuleLLM Passive Investor"
+  class: "examples.MarketCrash.RuleLLM.players:RuleLLMPassiveInvestor"
+  num_instances: 1
+  config:
+    identity: "rulellm_passive_investor"
+    role: player
+    steps_per_turn: 1
+    group_tags:
+      - rulellm_investors
+    extras:
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
+      initial_cash: 10000.0
+      initial_position: 50.0
+      rebalance_frequency: 20
+      custom_state_hot_limit: 3
+      llm:
+        sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_PASSIVE_INVESTOR_SYS"
+        user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
+        lm_type: "api"
+        lm_name: "ark/doubao-seed-2-0-mini-260428"
+        generation_config:
+          temperature: 0.2
           max_new_tokens: 500
   persona: !include persona.yml
 
@@ -143,10 +174,10 @@ rulellm_bottom_fisher:
     group_tags:
       - rulellm_investors
     extras:
-      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"
-      initial_cash: 10000.0
-      initial_position: 10.0
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/MarketCrash/RuleLLM/records"  # Source: framework infrastructure
+      initial_cash: 10000.0  # Source: simulation-bases.md §6
+      initial_position: 10.0  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_BOTTOM_FISHER_SYS"
         user_message: "examples.MarketCrash.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

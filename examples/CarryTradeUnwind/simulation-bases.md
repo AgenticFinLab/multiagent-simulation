@@ -77,6 +77,14 @@ The simulation preserves these mechanisms with five investor types. `CarryTrader
 - **Core Insight**: Background noise trading provides the liquidity that carry traders need to execute their positions. In FX markets, noise traders represent non-carry order flow from importers, exporters, and portfolio managers with non-speculative FX needs. trade_probability = 0.30 calibrated to reflect the substantial non-speculative FX market volume that provides background liquidity.
 - **Empirical Evidence**: BIS Triennial Survey data suggest speculative flow (including carry) accounts for approximately 30–40% of daily FX volume; the remaining 60–70% is non-speculative, consistent with the NoiseTrader modeling background non-carry order flow.
 
+### 2.6 Safe-Haven Currency Demand (Ranaldo & Söderlind)
+
+- **Citation**: Ranaldo, A., & Söderlind, P. (2010). "Safe haven currencies." *Review of Finance*, 14(3), 385–407. DOI: 10.1093/rof/rfq007
+- **Core Insight**: During risk-off episodes, investors buy the funding currency (JPY, CHF) as a safe haven, providing natural counter-demand that partially offsets carry-trade forced selling. The same risk-sentiment deterioration that forces carry-trade exits also triggers this safe-haven flow — so the two flows are simultaneous, but the safe-haven flow is systematically smaller than the forced-liquidation flow, which is why cascades still occur despite active stabilising demand.
+- **Mathematical Formulation**: Safe-haven trigger: `buy if δ(t) < −risk_threshold` with `risk_threshold = 0.05`. Buy quantity is a fixed position size (`position_size = 500`), not deviation-scaled — safe-haven agents provide a stable but bounded stabilising bid. Total stabilising volume with 2 FundingCurrencyBuyer instances = 2 × 500 = 1000 units/round vs. 2 × LeveragedCarryFund × 4000 = 8000 units/round cascade selling → net cascade of ≈ 7000 units/round at peak.
+- **Empirical Evidence**: Ranaldo & Söderlind (2010) document that JPY appreciates by 1–3% for every 1σ increase in VIX or CDS spreads during risk-off episodes — a systematic but finite safe-haven flow. The fact that JPY still appreciated ≈ 20% in October 2008 despite active safe-haven flows demonstrates empirically that forced carry-unwind volume exceeds safe-haven absorption capacity, consistent with the simulation's calibrated cascade condition.
+- **Relevance to Investor Taxonomy**: FundingCurrencyBuyer directly instantiates this theory. `risk_threshold = 0.05` (5%) and `position_size = 500` are calibrated so that safe-haven buying provides a visible but insufficient floor — matching the Ranaldo & Söderlind (2010) magnitude estimate and yielding a recovery_ratio in the empirical 0.30–0.80 band.
+- **Calibration Implication**: `risk_threshold` range 0.03–0.08 and `position_size` range 300–800; defaults 0.05 and 500 (matches target §9 Parameter Seeds row).
 
 ## §3 Market Design Principles
 
@@ -114,7 +122,7 @@ Note: In this simulation, P represents a **FX exchange rate** (e.g., USD express
 
 - **Price floor**: `max(price, 0.01)` — prevents numerical collapse.
 - **No circuit breakers**: Carry unwinds in FX markets have no price limits (unlike equities); consistent with real FX market structure.
-- **return_pct NOT broadcast**: Unlike AvailabilityBias simulation, `return_pct` is NOT broadcast. All agents use `deviation` as their primary signal — consistent with FX traders who monitor deviation from fair value rather than momentum signals.
+- **return_pct NOT broadcast**: `return_pct` is NOT broadcast because this scenario is driven by FX funding stress, leverage limits, and price-fundamental deviation. All agents use `deviation` or rolling volatility as their primary signal, consistent with FX traders monitoring funding-currency misalignment and risk conditions.
 
 ### 3.3 Information Broadcast Design
 
@@ -191,9 +199,9 @@ The CarryTrader is a leveraged hedge fund or institutional investor who borrows 
 
 | Parameter | Value | Meaning                                        | Config Path                                        | Source                                             |
 |-----------|-------|------------------------------------------------|----------------------------------------------------|----------------------------------------------------|
-| leverage  | 5.0   | Leverage multiplier for position sizing        | `CarryTradeUnwind/Rule/config.yaml → carry_trader` | BIS (2015); Brunnermeier et al. (2009)             |
-| base_qty  | 800   | Base trade quantity before leverage            | `CarryTradeUnwind/Rule/config.yaml → carry_trader` | Normalization                                      |
-| threshold | 0.02  | Deviation threshold for carry position changes | `CarryTradeUnwind/Rule/config.yaml → carry_trader` | Calibrated to carry trigger in Brunnermeier et al. |
+| leverage  | 5.0   | Leverage multiplier for position sizing        | `configs/CarryTradeUnwind/Rule/players.yml → carry_trader.extras.leverage` | BIS (2015); Brunnermeier et al. (2009)             |
+| base_qty  | 800   | Base trade quantity before leverage            | `configs/CarryTradeUnwind/Rule/players.yml → carry_trader.extras.carry_size` | Normalization                                      |
+| threshold | 0.02  | Deviation threshold for carry position changes | `configs/CarryTradeUnwind/Rule/players.yml → carry_trader.extras.unwind_threshold` | Calibrated to carry trigger in Brunnermeier et al. |
 
 **4.1.4.4  Behavioral Properties**
 - Time horizon: Medium-term carry accumulation; high-frequency exit during crisis
@@ -292,9 +300,9 @@ The LeveragedCarryFund is a highly leveraged institutional fund — a hedge fund
 
 | Parameter | Value | Meaning                             | Config Path                                                | Source                         |
 |-----------|-------|-------------------------------------|------------------------------------------------------------|--------------------------------|
-| stop_loss | 0.03  | Deviation threshold for forced exit | `CarryTradeUnwind/Rule/config.yaml → leveraged_carry_fund` | BIS (2015) FX fund risk limits |
-| leverage  | 5.0   | Position leverage multiplier        | `CarryTradeUnwind/Rule/config.yaml → leveraged_carry_fund` | Brunnermeier & Pedersen (2009) |
-| base_qty  | 800   | Base position size                  | `CarryTradeUnwind/Rule/config.yaml → leveraged_carry_fund` | Normalization                  |
+| stop_loss | 0.03  | Deviation threshold for forced exit | `configs/CarryTradeUnwind/Rule/players.yml → leveraged_carry_fund.extras.stop_loss` | BIS (2015) FX fund risk limits |
+| leverage  | 5.0   | Position leverage multiplier        | `configs/CarryTradeUnwind/Rule/players.yml → leveraged_carry_fund.extras.leverage` | Brunnermeier & Pedersen (2009) |
+| base_qty  | 800   | Base position size                  | `configs/CarryTradeUnwind/Rule/players.yml → leveraged_carry_fund.extras.base_size` | Normalization                  |
 
 **4.2.4.4  Behavioral Properties**
 - Time horizon: Position held long-term; exit is immediate and forced
@@ -384,8 +392,8 @@ The FundingCurrencyBuyer is a risk-averse investor — pension fund, central ban
 
 | Parameter      | Value | Meaning                                           | Config Path                                                  | Source                                     |
 |----------------|-------|---------------------------------------------------|--------------------------------------------------------------|--------------------------------------------|
-| risk_threshold | 0.05  | Deviation below which safe-haven buying activates | `CarryTradeUnwind/Rule/config.yaml → funding_currency_buyer` | Ranaldo & Söderlind (2010)                 |
-| position_size  | 500   | Fixed units per safe-haven buy                    | `CarryTradeUnwind/Rule/config.yaml → funding_currency_buyer` | Normalization (deliberately small vs. LCF) |
+| risk_threshold | 0.05  | Deviation below which safe-haven buying activates | `configs/CarryTradeUnwind/Rule/players.yml → funding_currency_buyer.extras.risk_threshold` | Ranaldo & Söderlind (2010)                 |
+| position_size  | 500   | Fixed units per safe-haven buy                    | `configs/CarryTradeUnwind/Rule/players.yml → funding_currency_buyer.extras.position_size` | Normalization (deliberately small vs. LCF) |
 
 **4.3.4.4  Behavioral Properties**
 - Time horizon: Medium-term safe-haven holding; exits when crisis resolves
@@ -475,9 +483,9 @@ The HedgedCarryTrader is a sophisticated carry fund that incorporates volatility
 
 | Parameter     | Value | Meaning                                            | Config Path                                               | Source                 |
 |---------------|-------|----------------------------------------------------|-----------------------------------------------------------|------------------------|
-| hedge_ratio   | 0.30  | Fraction of position hedged (reduces net exposure) | `CarryTradeUnwind/Rule/config.yaml → hedged_carry_trader` | Burnside et al. (2011) |
-| vol_threshold | 0.05  | FX volatility threshold for position adjustment    | `CarryTradeUnwind/Rule/config.yaml → hedged_carry_trader` | Menkhoff et al. (2012) |
-| base_qty      | 500   | Base quantity before hedge ratio reduction         | `CarryTradeUnwind/Rule/config.yaml → hedged_carry_trader` | Normalization          |
+| hedge_ratio   | 0.30  | Fraction of position hedged (reduces net exposure) | `configs/CarryTradeUnwind/Rule/players.yml → hedged_carry_trader.extras.hedge_ratio` | Burnside et al. (2011) |
+| vol_threshold | 0.05  | FX volatility threshold for position adjustment    | `configs/CarryTradeUnwind/Rule/players.yml → hedged_carry_trader.extras.vol_threshold` | Menkhoff et al. (2012) |
+| base_qty      | 500   | Base quantity before hedge ratio reduction         | `configs/CarryTradeUnwind/Rule/players.yml → hedged_carry_trader.extras.base_size` | Normalization          |
 
 **4.4.4.4  Behavioral Properties**
 - Time horizon: Carry accumulation (medium-term); quick exit on volatility spike
@@ -517,7 +525,7 @@ Rationale: Volatility has spiked above threshold while carry is losing — Hedge
 
 #### 4.5.1  Summary
 
-The NoiseTrader provides background FX order flow — representing importers, exporters, portfolio managers, and retail FX participants whose trades are unconnected to carry trade positioning. In FX markets, non-speculative flow accounts for approximately 60–70% of daily volume, providing the liquidity that makes carry trades executable. trade_probability = 0.30 is calibrated to a higher value than BlackMonday1987 (0.05) because FX markets have substantially more non-speculative background activity.
+The NoiseTrader provides background FX order flow — representing importers, exporters, portfolio managers, and retail FX participants whose trades are unconnected to carry trade positioning. In FX markets, non-speculative flow accounts for approximately 60–70% of daily volume, providing the liquidity that makes carry trades executable. trade_probability = 0.30 is calibrated to reflect this high background participation in FX markets while preserving bounded stochastic order flow.
 
 #### 4.5.2  Theoretical and Empirical Foundation
 

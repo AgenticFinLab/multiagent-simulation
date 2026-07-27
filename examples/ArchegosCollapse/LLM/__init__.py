@@ -4,8 +4,8 @@ from examples.ArchegosCollapse.LLM.players import (
     Market,
     LLMInvestor,
     LLMConcentratedFund,
-    LLMPrimeBroker1,
-    LLMPrimeBroker2,
+    LLMPrimeBrokerFirstMover,
+    LLMPrimeBrokerDelayedLiquidator,
     LLMBlockTradeBuyer,
     LLMInformationTrader,
 )
@@ -14,8 +14,8 @@ __all__ = [
     "Market",
     "LLMInvestor",
     "LLMConcentratedFund",
-    "LLMPrimeBroker1",
-    "LLMPrimeBroker2",
+    "LLMPrimeBrokerFirstMover",
+    "LLMPrimeBrokerDelayedLiquidator",
     "LLMBlockTradeBuyer",
     "LLMInformationTrader",
 ]

@@ -1,6 +1,7 @@
 # OverconfidenceBias LLM Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.OverconfidenceBias.LLM.players:Market"
   num_instances: 1
@@ -11,34 +12,34 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.02
-      mean_reversion: 0.01
-      noise_std: 0.015
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"  # Source: framework infrastructure
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      price_impact: 0.02  # Source: simulation-bases.md §6
+      mean_reversion: 0.01  # Source: simulation-bases.md §6
+      noise_std: 0.015  # Source: simulation-bases.md §6
+      custom_state_hot_limit: 3  # Source: framework infrastructure
   persona: !include persona.yml
 
-overconfidenttrader:
+llm_overconfident_trader:
   name: "OverconfidentTrader"
   class: "examples.OverconfidenceBias.LLM.players:LLMOverconfidentTrader"
   num_instances: 2
   config:
-    identity: "overconfidenttrader"
+    identity: "llm_overconfident_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      precision_overestimate: 2.0
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      precision_overestimate: 2.0  # Source: simulation-bases.md §4.1.7
+      base_size: 400  # Source: simulation-bases.md §4.1.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_OVERCONFIDENT_TRADER_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -49,25 +50,25 @@ overconfidenttrader:
           max_tokens: 512
   persona: !include persona.yml
 
-selfattributor:
+llm_self_attributor:
   name: "SelfAttributor"
   class: "examples.OverconfidenceBias.LLM.players:LLMSelfAttributor"
   num_instances: 2
   config:
-    identity: "selfattributor"
+    identity: "llm_self_attributor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      confidence_boost: 0.5
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      confidence_boost: 0.5  # Source: simulation-bases.md §4.2.7
+      base_size: 400  # Source: simulation-bases.md §4.2.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_SELF_ATTRIBUTOR_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -78,25 +79,25 @@ selfattributor:
           max_tokens: 512
   persona: !include persona.yml
 
-calibratedtrader:
+llm_calibrated_trader:
   name: "CalibratedTrader"
   class: "examples.OverconfidenceBias.LLM.players:LLMCalibratedTrader"
   num_instances: 1
   config:
-    identity: "calibratedtrader"
+    identity: "llm_calibrated_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-      initial_cash: 1200000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_threshold: 0.03
-      base_size: 300
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1200000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      trade_threshold: 0.03  # Source: simulation-bases.md §4.3.7
+      base_size: 300  # Source: simulation-bases.md §4.3.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_CALIBRATED_TRADER_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -107,25 +108,25 @@ calibratedtrader:
           max_tokens: 512
   persona: !include persona.yml
 
-contrarianinvestor:
+llm_contrarian_investor:
   name: "ContrarianInvestor"
   class: "examples.OverconfidenceBias.LLM.players:LLMContrarianInvestor"
   num_instances: 1
   config:
-    identity: "contrarianinvestor"
+    identity: "llm_contrarian_investor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-      initial_cash: 1000000.0
-      initial_position: 500
-      initial_price: 100.0
-      fundamental_value: 100.0
-      contrarian_threshold: 0.04
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 1000000.0  # Source: simulation-bases.md §6
+      initial_position: 500  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      contrarian_threshold: 0.04  # Source: simulation-bases.md §4.4.7
+      base_size: 350  # Source: simulation-bases.md §4.4.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_CONTRARIAN_INVESTOR_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"
@@ -136,25 +137,25 @@ contrarianinvestor:
           max_tokens: 512
   persona: !include persona.yml
 
-noisetrader:
+llm_noise_trader:
   name: "NoiseTrader"
   class: "examples.OverconfidenceBias.LLM.players:LLMNoiseTrader"
   num_instances: 2
   config:
-    identity: "noisetrader"
+    identity: "llm_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"
-      initial_cash: 500000.0
-      initial_position: 200
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      noise_size: 150
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/OverconfidenceBias/LLM/records"  # Source: framework infrastructure
+      initial_cash: 500000.0  # Source: simulation-bases.md §6
+      initial_position: 200  # Source: simulation-bases.md §6
+      initial_price: 100.0  # Source: simulation-bases.md §6
+      fundamental_value: 100.0  # Source: simulation-bases.md §6
+      trade_probability: 0.3  # Source: simulation-bases.md §4.5.7
+      noise_size: 150  # Source: simulation-bases.md §4.5.7
+      custom_state_hot_limit: 3  # Source: framework infrastructure
       llm:
         sys_message: "examples.OverconfidenceBias.LLM.prompts:LLM_NOISE_TRADER_PROMPT"
         user_message: "examples.OverconfidenceBias.LLM.prompts:LLM_USER_TEMPLATE"

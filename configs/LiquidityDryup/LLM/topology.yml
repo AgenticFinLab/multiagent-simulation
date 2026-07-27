@@ -6,18 +6,18 @@ sources:
 connections:
   market:
     - llm_market_maker
-    - llm_liquidity_demander
-    - llm_arbitrageur
-    - llm_value
-    - llm_forced_seller
+    - llm_liquidity_seeker
+    - llm_value_trader
+    - llm_momentum_trader
+    - llm_noise_trader
 
   llm_market_maker:
     - market
-  llm_liquidity_demander:
+  llm_liquidity_seeker:
     - market
-  llm_arbitrageur:
+  llm_value_trader:
     - market
-  llm_value:
+  llm_momentum_trader:
     - market
-  llm_forced_seller:
+  llm_noise_trader:
     - market

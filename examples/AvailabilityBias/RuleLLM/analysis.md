@@ -25,32 +25,72 @@
 
 RuleLLM analysis focuses on whether explicit formulas constrain persona variability while preserving the same market mechanism.
 
-## §4 Phase Analysis
+## §4 Variant-Specific Observable Phenomena
 
-Bias onset should follow the Rule thresholds with stochastic wording and minor quantity variation from LLM decisions.
+RuleLLM injects the Rule formulas (recency weight, media response, systematic
+correction gain, value anchor) into the LLM prompt. The model uses the given
+formulas to derive its order size while providing narrative characterization.
 
-## §5 Cross-Variant Comparison
+| Phenomenon                     | Description                                                                                          | How to Observe                                                                        | Contrast with Rule Baseline                                     |
+|--------------------------------|------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| Formula-grounded reasoning     | `<analysis>` sections reproduce the Rule computation with occasional persona commentary              | Reasoning traces at bias onset and correction                                         | Rule provides no verbal trace                                   |
+| Bounded persona modulation     | Order sizes stay within ±20% of the Rule quantity even when persona voice varies                     | Bid-cloud dispersion in `00_investor_bids.png` around Rule bids                       | LLM can shift sizes by 100% or more                             |
+| Rule-preserving timing         | Bias onset, `BPS`, and `SR` cluster tightly around Rule                                              | `summary.json` metric distributions over 10 trials                                    | LLM shows wide distributions                                    |
+| Explicit calculation traces    | Recency weight and media response applied in prompt-embedded formulas                                | `<analysis>` fields reference config parameters                                       | Rule executes silently                                          |
+| Narrative-consistent correction | SystematicAnalyst and ValueTrader personas cite anchoring rules; `SR` remains in [0.4, 0.8]         | Reasoning traces plus `summary.json → metrics.stabilization_ratio`                    | Rule stays there by construction                                |
 
-RuleLLM should be compared against Rule for formula adherence and against LLM for reduction of persona drift.
+## §5 Scaling and Sensitivity Analysis
 
-## §6 Expected Results
+### Round Scaling
 
-### §6.1 Stylised Facts
+| Total Rounds | Expected Observable                                                       | Phenomenon Clarity | Recommended Use   |
+|--------------|---------------------------------------------------------------------------|--------------------|-------------------|
+| 100          | Bias episode visible; metric means close to Rule                          | High               | Standard runs     |
+| 200          | Full cycle plus stability audit; tight variance around Rule               | Very High          | Publication runs  |
+| 500          | Multi-cycle robustness; verify rule anchor holds long-term                | High               | Robustness checks |
 
-RuleLLM should produce bounded availability-bias episodes and explicit calculation traces in reasoning.
+### Agent Count Scaling
 
-### §6.2 Calibration Targets
+| Agent Count      | Expected Observable                                                       | Environment Dynamics                                       |
+|------------------|---------------------------------------------------------------------------|------------------------------------------------------------|
+| 10 (min viable)  | Bias episode forms; rule-clamped sizes limit runaway effects              | Rule anchor dominates when few agents contribute            |
+| 20 (recommended) | Standard channel separation; hybrid effects clearly visible               | Reference configuration                                    |
+| 40+              | LLM variance averages out; metrics converge tightly around Rule            | RuleLLM approaches pure Rule in aggregate                   |
 
-Same targets as `analysis-bases.md §6.2`; successful samples must have parse-valid decisions without fallback-hold substitution.
+### Parameter Sensitivity (Variant-Specific)
 
-### §6.3 Cross-Variant Predictions
+| Parameter                                | Change | Expected Effect on This Variant's Analysis                                                                             |
+|------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------|
+| `temperature` (LLM)                      | +50%   | Wider narrative variety; sizing spread widens toward ±20% clamp; metric variance grows toward pure LLM                |
+| `temperature` (LLM)                      | −50%   | Metric distributions collapse toward Rule                                                                             |
+| Removing rule text from prompt           | Any    | RuleLLM degrades toward pure LLM behavior; a canary for prompt correctness                                            |
+| `RecentEventOverweighter.recency_weight` | +50%   | Rule's amplitude rises; RuleLLM tracks it closely                                                                     |
+| `SystematicAnalyst.correction_gain`      | +50%   | `SR` rises; LLM commentary should acknowledge the stronger correction                                                 |
 
-RuleLLM is expected to be more disciplined than LLM and more stochastic than Rule.
+## §6 Output Files Reference
 
-### §6.4 Validation Failure Signs
+`RuleLLM/analysis.py` imports the Rule analysis pipeline. Outputs are in
+`EXPERIMENT/AvailabilityBias/RuleLLM/analysis/`.
 
-Reasoning that omits formulas, invalid action JSON, or SystematicAnalyst use of recency salience indicates a contract or quality issue.
+| Output File                             | Generated By          | Contents                                                                                                             | How to Interpret                                                                                                    |
+|-----------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `summary.json`                          | shared Rule analysis  | All Rule metrics: `peak_deviation`, `bias_persistence`, `bias_magnitude`, `return_autocorr_lag1`, `stabilization_ratio` | Distribution should be tighter than LLM and centered near Rule; validation score comparable to Rule                 |
+| `00_investor_bids.png`                  | shared Rule analysis  | Market price + individual bids                                                                                       | RuleLLM bid cloud should hug the Rule deterministic path more tightly than LLM's                                    |
+| `01_availability_bias_dynamics.png`     | shared Rule analysis  | Price + deviation                                                                                                    | Onset round within 1–2 rounds of Rule                                                                               |
+| `02_availability_bias_analysis.png`     | shared Rule analysis  | Volume decomposition + rolling AC1                                                                                   | AC1 distribution tight; SR stays in [0.4, 0.8]                                                                      |
+| `03_summary.png`                        | shared Rule analysis  | Fit summary                                                                                                          | Overall validation score comparable to Rule                                                                         |
 
-## §7 Visualization Catalogue
+## §7 Cross-Variant Comparison Notes
 
-The imported analysis writes `summary.json`, `00_investor_bids.png`, `01_availability_bias_dynamics.png`, `02_availability_bias_analysis.png`, and `03_summary.png`.
+RuleLLM tests the hypothesis that explicit rule text embedded in the prompt
+suffices to keep a stochastic model close to the deterministic baseline
+(`analysis-bases.md §5`, `§6.3`).
+
+| Comparison Axis           | RuleLLM's Expected Position                                    | Reason                                                                             |
+|---------------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------|
+| Onset speed               | Very close to Rule                                             | Rule branches given verbatim in prompt                                             |
+| Peak `PDF`                | Distribution centered near Rule; std smaller than LLM          | Rule-clamped sizing bounds behavior                                                |
+| Persistence `BPS`         | Between Rule and LLM; usually near Rule                        | Formula anchoring survives most persona variation                                  |
+| Stabilization `SR`        | Within [0.4, 0.8] with high probability                        | Systematic/value formulas are in the prompt                                        |
+| Behavioral realism        | Higher than Rule; lower than LLM                               | Narrative present but constrained                                                  |
+| Reproducibility           | Higher than LLM; lower than Rule                               | Sampling variance survives even under rule anchor                                  |

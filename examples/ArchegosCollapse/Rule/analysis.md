@@ -15,15 +15,15 @@
 
 All metrics are defined in `../analysis-bases.md §2`. The Rule variant's `analysis.py` is the authoritative implementation — all other variants import from it.
 
-| Metric                     | Function              | analysis-bases.md Ref | Rule-Specific Notes                                                            |
-|----------------------------|-----------------------|-----------------------|--------------------------------------------------------------------------------|
-| **Price Deviation**        | `calculate_metrics()` | `analysis-bases.md §2.1` | Deterministic cascade; deviation follows predictable plunge-then-recovery      |
-| **Maximum Drawdown**       | `calculate_metrics()` | `analysis-bases.md §2.2` | Calibration target 20–50%; Rule shows cleanest drawdown matching cascade rules |
-| **Cascade Volatility**     | `calculate_metrics()` | `analysis-bases.md §2.3` | Rolling std of returns; expect 2%–8% per round during cascade phase            |
-| **Return Autocorrelation** | `calculate_metrics()` | `analysis-bases.md §2.4` | AC1 > 0 during cascade (self-reinforcing); AC1 < 0 during recovery             |
-| **Agent-Type Volume**      | `calculate_metrics()` | `analysis-bases.md §2.5` | PrimeBroker1 sells earlier/higher prices than PrimeBroker2; verifiable         |
-| **Cascade Onset Round**    | `calculate_metrics()` | `analysis-bases.md §2.6` | First round `deviation < -0.10`; Rule: expected rounds 10–30                   |
-| **Recovery Half-Life**     | `calculate_metrics()` | `analysis-bases.md §2.7` | Recovery after trough; validates BlockTradeBuyer and mean-reversion dynamics   |
+| Metric                     | Function              | analysis-bases.md Ref    | Rule-Specific Notes                                                                             |
+|----------------------------|-----------------------|--------------------------|-------------------------------------------------------------------------------------------------|
+| **Price Deviation**        | `calculate_metrics()` | `analysis-bases.md §2.1` | Deterministic cascade; deviation follows predictable plunge-then-recovery                       |
+| **Maximum Drawdown**       | `calculate_metrics()` | `analysis-bases.md §2.2` | Calibration target 20–50%; Rule shows cleanest drawdown matching cascade rules                  |
+| **Cascade Volatility**     | `calculate_metrics()` | `analysis-bases.md §2.3` | Rolling std of returns; expect 2%–8% per round during cascade phase                             |
+| **Return Autocorrelation** | `calculate_metrics()` | `analysis-bases.md §2.4` | AC1 > 0 during cascade (self-reinforcing); AC1 < 0 during recovery                              |
+| **Agent-Type Volume**      | `calculate_metrics()` | `analysis-bases.md §2.5` | PrimeBrokerFirstMover sells earlier/higher prices than PrimeBrokerDelayedLiquidator; verifiable |
+| **Cascade Onset Round**    | `calculate_metrics()` | `analysis-bases.md §2.6` | First round `deviation < -0.10`; Rule: expected rounds 10–30                                    |
+| **Recovery Half-Life**     | `calculate_metrics()` | `analysis-bases.md §2.7` | Recovery after trough; validates BlockTradeBuyer and mean-reversion dynamics                    |
 
 ---
 
@@ -53,7 +53,7 @@ Rule variant shows a clean, threshold-triggered plunge followed by gradual recov
 - Output: subplot 3 (Returns), subplot 4 (Return distribution); `metrics.json`
 
 **Variant-Specific Interpretation:**
-In Rule variant, PrimeBroker1 sells at higher prices than PrimeBroker2 (provable from round-over-round records). BlockTradeBuyer's activation is exact — always starts at the round where `deviation < -0.10`. InformationTrader activity is variable (probabilistic detection).
+In Rule variant, PrimeBrokerFirstMover sells at higher prices than PrimeBrokerDelayedLiquidator (provable from round-over-round records). BlockTradeBuyer's activation is exact — always starts at the round where `deviation < -0.10`. InformationTrader activity is variable (probabilistic detection).
 
 ---
 
@@ -83,12 +83,12 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 
 ## §4 Variant-Specific Observable Phenomena
 
-| Phenomenon                       | Description                                                               | How to Observe                                   | Contrast with LLM/RuleLLM                  |
-|----------------------------------|---------------------------------------------------------------------------|--------------------------------------------------|--------------------------------------------|
-| **Clean Threshold Activation**   | PrimeBroker1 sells exactly at deviation = −0.10 round                     | Order records: first PrimeBroker1 sell round     | LLM: sells earlier or later due to persona |
-| **Deterministic Cascade Shape**  | Price drop follows same curve in each run (given same initial conditions) | Price vs fundamental chart overlay across runs   | LLM: variable cascade shape across runs    |
-| **First-Mover Price Advantage**  | PrimeBroker1 avg sell price > PrimeBroker2 avg sell price                 | Per-agent effective price in order records       | Both Rule and LLM should show this pattern |
-| **BlockTradeBuyer Floor Effect** | Price reversal visible exactly at BlockTradeBuyer activation round        | Returns turn positive; Block buyer volume spikes | LLM: floor timing more variable            |
+| Phenomenon                       | Description                                                                        | How to Observe                                        | Contrast with LLM/RuleLLM                  |
+|----------------------------------|------------------------------------------------------------------------------------|-------------------------------------------------------|--------------------------------------------|
+| **Clean Threshold Activation**   | PrimeBrokerFirstMover sells exactly at deviation = −0.10 round                     | Order records: first PrimeBrokerFirstMover sell round | LLM: sells earlier or later due to persona |
+| **Deterministic Cascade Shape**  | Price drop follows same curve in each run (given same initial conditions)          | Price vs fundamental chart overlay across runs        | LLM: variable cascade shape across runs    |
+| **First-Mover Price Advantage**  | PrimeBrokerFirstMover avg sell price > PrimeBrokerDelayedLiquidator avg sell price | Per-agent effective price in order records            | Both Rule and LLM should show this pattern |
+| **BlockTradeBuyer Floor Effect** | Price reversal visible exactly at BlockTradeBuyer activation round                 | Returns turn positive; Block buyer volume spikes      | LLM: floor timing more variable            |
 
 ---
 
@@ -104,11 +104,11 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 
 ### Agent Count Scaling
 
-| Agent Count            | Expected Observable                                             |
-|------------------------|-----------------------------------------------------------------|
-| **3–5 total**          | Insufficient destabilizing pressure; cascade may not develop    |
-| **5 agents (default)** | Calibrated — clean cascade; PrimeBroker1/2 asymmetry observable |
-| **10+ agents**         | Amplified cascade; deeper drawdown; recovery slower             |
+| Agent Count            | Expected Observable                                                      |
+|------------------------|--------------------------------------------------------------------------|
+| **3–5 total**          | Insufficient destabilizing pressure; cascade may not develop             |
+| **5 agents (default)** | Calibrated — clean cascade; PrimeBrokerFirstMover/2 asymmetry observable |
+| **10+ agents**         | Amplified cascade; deeper drawdown; recovery slower                      |
 
 ### Parameter Sensitivity
 
@@ -116,7 +116,7 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 |-------------------------|---------------------|----------------------------------------------------------------------|
 | `price_impact` (λ)      | 0.03 → 0.06         | Deeper cascade; higher drawdown; faster cascade onset                |
 | `margin_threshold`      | −0.15 → −0.10       | Earlier ConcentratedFund sell; cascade starts sooner                 |
-| `liquidation_threshold` | −0.10 → −0.15 (PB1) | PrimeBroker1 delays; first-mover advantage weakens                   |
+| `liquidation_threshold` | −0.10 → −0.15 (PB1) | PrimeBrokerFirstMover delays; first-mover advantage weakens          |
 | `mean_reversion` (γ)    | 0.01 → 0.03         | Faster recovery; shorter cascade duration                            |
 | `discount_threshold`    | −0.10 → −0.20       | BlockTradeBuyer activates later; deeper trough before floor kicks in |
 
@@ -126,13 +126,13 @@ Rule is the deterministic reference. All other variants are evaluated relative t
 
 All outputs written to `EXPERIMENT/ArchegosCollapse/Rule/records/analysis/`.
 
-| Output File                      | Generated By              | Contents                                           | Interpretation                                  |
-|----------------------------------|---------------------------|----------------------------------------------------|-------------------------------------------------|
-| `summary.json` | `analyze_archegos_collapse()` | Metrics, validation score, criteria, and interpretation | Machine-readable cross-variant comparison input |
-| `00_investor_bids.png` | `_create_visualizations()` | Market price and investor bid curves | Headline order-path visualization |
-| `01_archegoscollapse_dynamics.png` | `_create_visualizations()` | Price, fundamental value, and deviation | Cascade path verification |
-| `02_archegoscollapse_analysis.png` | `_create_visualizations()` | Rolling volatility and autocorrelation | Self-reinforcement analysis |
-| `03_summary.png` | `_create_visualizations()` | Agent VWAP and volume summary | First-mover advantage and participation check |
+| Output File                        | Generated By                  | Contents                                                | Interpretation                                  |
+|------------------------------------|-------------------------------|---------------------------------------------------------|-------------------------------------------------|
+| `summary.json`                     | `analyze_archegos_collapse()` | Metrics, validation score, criteria, and interpretation | Machine-readable cross-variant comparison input |
+| `00_investor_bids.png`             | `_create_visualizations()`    | Market price and investor bid curves                    | Headline order-path visualization               |
+| `01_archegoscollapse_dynamics.png` | `_create_visualizations()`    | Price, fundamental value, and deviation                 | Cascade path verification                       |
+| `02_archegoscollapse_analysis.png` | `_create_visualizations()`    | Rolling volatility and autocorrelation                  | Self-reinforcement analysis                     |
+| `03_summary.png`                   | `_create_visualizations()`    | Agent VWAP and volume summary                           | First-mover advantage and participation check   |
 
 ---
 

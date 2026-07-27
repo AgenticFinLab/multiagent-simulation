@@ -21,11 +21,13 @@ setup_logging()
 logger = logging.getLogger("LiquidityDryup")
 
 
-async def run_simulation(config_path: str):
+async def run_simulation(config_path: str, rounds: int | None = None):
     """Run the liquidity dry-up simulation."""
 
     yaml_config = load_config(config_path)
     config = SimulationConfig(**yaml_config)
+    if rounds is not None:
+        config.setting["total_rounds"] = rounds
 
     logger.info("=" * 70)
     logger.info("LIQUIDITY DRY-UP SIMULATION")
@@ -35,10 +37,10 @@ async def run_simulation(config_path: str):
     logger.info("")
     logger.info("Investor Types:")
     logger.info("  - MarketMaker:        Provides liquidity, withdraws in stress")
-    logger.info("  - LiquidityDemander:  Takes liquidity, suffers from dry-up")
-    logger.info("  - Arbitrageur:        Profits from mispricings")
-    logger.info("  - ValueInvestor:      Patient buyer during extreme mispricings")
-    logger.info("  - ForcedSeller:       Must sell regardless of conditions")
+    logger.info("  - LiquiditySeeker: Takes liquidity and suffers from dry-up")
+    logger.info("  - ValueTrader:     Trades dislocations and provides crisis liquidity")
+    logger.info("  - MomentumTrader:  Amplifies recent returns")
+    logger.info("  - NoiseTrader:     Creates uninformed order flow")
     logger.info("")
     logger.info("Liquidity Spiral:")
     logger.info("  1. Stress event → Market makers reduce quotes")
@@ -87,9 +89,16 @@ def parse_args():
         required=True,
         help="Path to simulation configuration file (YAML)",
     )
+    parser.add_argument(
+        "-r",
+        "--rounds",
+        type=int,
+        default=None,
+        help="Override total rounds (use 5 for a smoke run)",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(run_simulation(args.config))
+    asyncio.run(run_simulation(args.config, args.rounds))

@@ -52,7 +52,7 @@ from dotenv import load_dotenv
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-from examples.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking
 from examples.LiquidityDryup.Rag.prompts import (
     RAGLLM_MARKET_MAKER_SYS,
     RAGLLM_LIQUIDITY_SEEKER_SYS,
@@ -73,6 +73,8 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
 logger = logging.getLogger("LiquidityDryupRag")
+
+_RAG_FALLBACK = "(No relevant knowledge retrieved this round.)"
 
 
 # =============================================================================
@@ -620,7 +622,7 @@ class RagLLMInvestor(GeneralPlayer):
             rag_context = result.formatted_text
 
         if not rag_context:
-            rag_context = "(No relevant knowledge retrieved this round.)"
+            rag_context = _RAG_FALLBACK
 
         llm_config = self.config.extras["llm"]  # noqa: F841
         self.state.custom_state["last_rag_context"] = rag_context
@@ -761,26 +763,26 @@ class RagLLMMarketMaker(RagLLMInvestor):
     _system_prompt = RAGLLM_MARKET_MAKER_SYS
 
 
-class RagLLMLiquidityDemander(RagLLMInvestor):
-    """RAG-augmented: LiquidityDemander rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2"""
+class RagLLMLiquiditySeeker(RagLLMInvestor):
+    """RAG-augmented liquidity-seeker rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.2"""
 
     _system_prompt = RAGLLM_LIQUIDITY_SEEKER_SYS
 
 
-class RagLLMArbitrageur(RagLLMInvestor):
-    """RAG-augmented: Arbitrageur rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3"""
+class RagLLMValueTrader(RagLLMInvestor):
+    """RAG-augmented value-trader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.3"""
 
     _system_prompt = RAGLLM_VALUE_TRADER_SYS
 
 
-class RagLLMValueInvestor(RagLLMInvestor):
-    """RAG-augmented: ValueInvestor rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.4"""
+class RagLLMMomentumTrader(RagLLMInvestor):
+    """RAG-augmented momentum-trader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.4"""
 
     _system_prompt = RAGLLM_MOMENTUM_TRADER_SYS
 
 
-class RagLLMForcedSeller(RagLLMInvestor):
-    """RAG-augmented: ForcedSeller rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5"""
+class RagLLMNoiseTrader(RagLLMInvestor):
+    """RAG-augmented noise-trader rules + LLM + retrieved knowledge. Theory: simulation-bases.md §4.5"""
 
     _system_prompt = RAGLLM_NOISE_TRADER_SYS
 
@@ -789,8 +791,8 @@ __all__ = [
     "Market",
     "RagLLMInvestor",
     "RagLLMMarketMaker",
-    "RagLLMLiquidityDemander",
-    "RagLLMArbitrageur",
-    "RagLLMValueInvestor",
-    "RagLLMForcedSeller",
+    "RagLLMLiquiditySeeker",
+    "RagLLMValueTrader",
+    "RagLLMMomentumTrader",
+    "RagLLMNoiseTrader",
 ]

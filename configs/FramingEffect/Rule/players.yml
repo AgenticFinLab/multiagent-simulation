@@ -1,6 +1,7 @@
 # FramingEffect Rule Agent Configuration
 
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.FramingEffect.Rule.players:Market"
   num_instances: 1
@@ -11,117 +12,117 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/FramingEffect/Rule/records"
-      initial_price: 100.0
-      fundamental_value: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      noise_std: 0.01
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/Rule/records"  # Source: infrastructure
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      price_impact: 0.05  # Source: target §9 row 3 — LeBaron (2006) ABM calibration
+      mean_reversion: 0.02  # Source: target §9 row 4 — Summers (1986) variance bounds
+      noise_std: 0.01  # Source: target §9 row 5 — Shiller (1981) excess volatility
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
-gainframefollower:
+rule_gain_frame_follower:
   name: "GainFrameFollower"
   class: "examples.FramingEffect.Rule.players:GainFrameFollower"
   num_instances: 2
   config:
-    identity: "gainframefollower"
+    identity: "rule_gain_frame_follower"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      gain_weight: 1.5
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      gain_weight: 1.5  # Source: simulation-bases.md §4.1 — Prospect Theory λ≈2.25 calibration
+      base_size: 400  # Source: simulation-bases.md §4.1 — framing_scale proportional
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
-lossframereactor:
+rule_loss_frame_reactor:
   name: "LossFrameReactor"
   class: "examples.FramingEffect.Rule.players:LossFrameReactor"
   num_instances: 2
   config:
-    identity: "lossframereactor"
+    identity: "rule_loss_frame_reactor"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      loss_weight: 1.8
-      base_size: 350
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      loss_weight: 1.8  # Source: simulation-bases.md §4.2 — loss aversion λ≈2.25
+      base_size: 350  # Source: simulation-bases.md §4.2 — framing_scale proportional
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
-frameinvarianttrader:
+rule_frame_invariant_trader:
   name: "FrameInvariantTrader"
   class: "examples.FramingEffect.Rule.players:FrameInvariantTrader"
   num_instances: 1
   config:
-    identity: "frameinvarianttrader"
+    identity: "rule_frame_invariant_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      value_trigger: 0.04
-      base_size: 400
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      value_trigger: 0.04  # Source: target §9 row 10 — Shleifer & Vishny (1997)
+      base_size: 400  # Source: target §9 row 11 — limits to arbitrage calibration
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
-arbitrageframer:
+rule_arbitrage_framer:
   name: "ArbitrageFramer"
   class: "examples.FramingEffect.Rule.players:ArbitrageFramer"
   num_instances: 1
   config:
-    identity: "arbitrageframer"
+    identity: "rule_arbitrage_framer"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/Rule/records"
-      initial_cash: 1000000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      spread_threshold: 0.05
-      position_size: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 1000000.0  # Source: target §9 row 6 — normalization
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      spread_threshold: 0.05  # Source: target §9 row 10 — Shleifer & Vishny (1997)
+      position_size: 500  # Source: target §9 row 11 — limits to arbitrage calibration
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml
 
-noisetrader:
+rule_noise_trader:
   name: "NoiseTrader"
   class: "examples.FramingEffect.Rule.players:NoiseTrader"
   num_instances: 1
   config:
-    identity: "noisetrader"
+    identity: "rule_noise_trader"
     role: player
     steps_per_turn: 1
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/FramingEffect/Rule/records"
-      initial_cash: 500000.0
-      initial_position: 0
-      initial_price: 100.0
-      fundamental_value: 100.0
-      trade_probability: 0.3
-      min_order: 100
-      max_order: 500
-      custom_state_hot_limit: 3
+      record_path: "EXPERIMENT/FramingEffect/Rule/records"  # Source: infrastructure
+      initial_cash: 500000.0  # Source: target §9 row 6 — normalization (reduced for noise role)
+      initial_position: 0  # Source: target §9 row 7 — normalization
+      initial_price: 100.0  # Source: target §9 row 1 — normalization
+      fundamental_value: 100.0  # Source: target §9 row 2 — normalization
+      trade_probability: 0.3  # Source: target §9 row 12 — Black (1986) noise trader model
+      min_order: 100  # Source: simulation-bases.md §4.5 — noise trader qty range
+      max_order: 500  # Source: simulation-bases.md §4.5 — noise trader qty range
+      custom_state_hot_limit: 3  # Source: infrastructure
   persona: !include persona.yml

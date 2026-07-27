@@ -16,6 +16,7 @@
 # Market (Coordinator) - Rule-Based with GARCH Volatility
 # -----------------------------------------------------------------------------
 market:
+  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.VolatilityClustering.LLM.players:Market"
   num_instances: 1
@@ -27,15 +28,15 @@ market:
       - market
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/LLM/records"
-      fundamental_value: 100.0
-      initial_price: 100.0
-      price_impact: 0.05
-      mean_reversion: 0.02
-      garch_omega: 0.0001
-      garch_alpha: 0.15
-      garch_beta: 0.80
-      min_volatility: 0.5
-      max_volatility: 10.0
+      fundamental_value: 100.0  # Source: target §9 fundamental_value row; normalization
+      initial_price: 100.0  # Source: target §9 initial_price row; normalization
+      price_impact: 0.05  # Source: target §9 price_impact row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
+      mean_reversion: 0.02  # Source: target §9 mean_reversion row; Brock and Hommes (1998) 10.1016/S0165-1889(98)00011-6
+      garch_omega: 0.0001  # Source: target §9 GARCH_omega row; Engle (1982) 10.2307/1912773
+      garch_alpha: 0.15  # Source: target §9 GARCH_alpha row; Engle (1982) 10.2307/1912773; Bollerslev (1986) 10.1016/0304-4076(86)90063-1
+      garch_beta: 0.80  # Source: target §9 GARCH_beta row; Bollerslev (1986) 10.1016/0304-4076(86)90063-1
+      min_volatility: 0.5  # Source: target §9 min_volatility row; numerical stability bound
+      max_volatility: 10.0  # Source: target §9 max_volatility row; numerical stability bound
       custom_state_hot_limit: 3
   persona: !include persona.yml
 
@@ -55,10 +56,11 @@ llm_fundamentalist:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
+      agent_type: "fundamentalist"  # Source: target §4.1 I/O Contract agent_type field
       custom_state_hot_limit: 3
-      llm:
+      llm:  # Source: target §10.1 LLM variant declaration
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_FUNDAMENTALIST_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -84,10 +86,11 @@ llm_trend_follower:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
+      agent_type: "trend_follower"  # Source: target §4.2 I/O Contract agent_type field
       custom_state_hot_limit: 3
-      llm:
+      llm:  # Source: target §10.1 LLM variant declaration
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_TREND_FOLLOWER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -113,10 +116,11 @@ llm_noise_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
+      agent_type: "noise_trader"  # Source: target §4.3 I/O Contract agent_type field
       custom_state_hot_limit: 3
-      llm:
+      llm:  # Source: target §10.1 LLM variant declaration
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_NOISE_TRADER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -141,10 +145,11 @@ llm_slow_adapter:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
+      agent_type: "slow_adapter"  # Source: target §4.4 I/O Contract agent_type field
       custom_state_hot_limit: 3
-      llm:
+      llm:  # Source: target §10.1 LLM variant declaration
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_SLOW_ADAPTER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
@@ -169,10 +174,11 @@ llm_volatility_trader:
       - investors
     extras:
       record_path: "EXPERIMENT/VolatilityClustering/LLM/records"
-      initial_cash: 10000.0
-      initial_position: 0.0
+      initial_cash: 10000.0  # Source: target §9 initial_cash row; normalization
+      initial_position: 0.0  # Source: target §9 initial_position row; normalization
+      agent_type: "volatility_trader"  # Source: target §4.5 I/O Contract agent_type field
       custom_state_hot_limit: 3
-      llm:
+      llm:  # Source: target §10.1 LLM variant declaration
         sys_message: "examples.VolatilityClustering.LLM.prompts:LLM_VOLATILITY_TRADER_SYS"
         user_message: "examples.VolatilityClustering.LLM.prompts:LLM_USER_TEMPLATE"
         lm_type: "api"
