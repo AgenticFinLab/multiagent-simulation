@@ -514,15 +514,16 @@ def render_variant_choice() -> None:
     if _rounds_key not in st.session_state:
         st.session_state[_rounds_key] = shipped_rounds if shipped_rounds > 0 else 1
     with logo_col:
-        _logo_path = PROJECT_ROOT / "logo.jpg"
-        if _logo_path.exists():
-            _logo_uri = _image_data_uri(_logo_path)
-            if _logo_uri:
-                st.markdown(
-                    f'<div class="variant-choice-logo-wrap">'
-                    f'<img src="{_logo_uri}" alt="Project logo"></div>',
-                    unsafe_allow_html=True,
-                )
+        if not is_experience:
+            _logo_path = PROJECT_ROOT / "logo.jpg"
+            if _logo_path.exists():
+                _logo_uri = _image_data_uri(_logo_path)
+                if _logo_uri:
+                    st.markdown(
+                        f'<div class="variant-choice-logo-wrap">'
+                        f'<img src="{_logo_uri}" alt="Project logo"></div>',
+                        unsafe_allow_html=True,
+                    )
     with features_col:
         feats = scenario_market_features(selected_base)
         st.metric(
