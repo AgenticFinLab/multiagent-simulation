@@ -234,6 +234,11 @@ def render_team_gate() -> None:
         )
         st.markdown("<div style='height:1.2rem'></div>", unsafe_allow_html=True)
 
+        # --- Prefill from quick-select (must happen BEFORE widget renders) ---
+        _prefill = st.session_state.pop("_prefill_team", "")
+        if _prefill:
+            st.session_state["team_gate_input"] = _prefill
+
         with st.container(border=True):
             st.markdown(
                 "#### 🏷️ Choose your team name",
@@ -312,7 +317,7 @@ def render_team_gate() -> None:
                             key=f"_quick_team_{team}",
                             use_container_width=True,
                         ):
-                            st.session_state["team_gate_input"] = team
+                            st.session_state["_prefill_team"] = team
                             st.rerun()
 
         st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
