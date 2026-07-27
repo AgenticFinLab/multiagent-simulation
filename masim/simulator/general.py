@@ -156,6 +156,7 @@ class GeneralSimulator(BaseSimulator):
             actor_name = get_actor_name(self.config.setting["name"], player_id)
             handle = RemotePlayerPersona.options(
                 **actor_options,
+                num_cpus=0,  # I/O-bound actors: don't reserve CPU scheduling slots
                 name=actor_name,
                 lifetime="detached",
                 namespace=self.config.ray["namespace"],
