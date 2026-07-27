@@ -746,6 +746,13 @@ class GeneralSimulator(BaseSimulator):
         """Shutdown simulation and release resources."""
         logger.info("Shutting down simulation: %s", self.simulation_id)
 
+        # Flush remaining round-result history to disk.  SimulationRunner calls
+        # run_round() individually (bypassing GeneralSimulator.run()), so the
+        # in-run() flush may never execute.  Calling flush() here guarantees
+        # data integrity regardless of the execution path.  The method is
+        # idempotent — a double call (from run() + shutdown()) is harmless.
+        self.history.flush()
+
         # Personas use detached lifetime, so invoking their shutdown method does
         # not terminate the actor process.  Always kill them afterwards; leaving
         # detached actors around leaks workers and IPC resources across runs and
