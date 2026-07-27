@@ -1189,10 +1189,65 @@ def _render_action_buttons(scenario_name: str):
     # Show saved data round count when experiment data exists on disk.
     if data_exists and not st.session_state.simulation_running:
         from masim.interface.data_loader import count_experiment_rounds
+        from masim.interface.config_loader import _experiment_path
 
         saved_rounds = count_experiment_rounds(scenario_name)
         if saved_rounds > 0:
-            st.caption(f"📊 已保存数据: {saved_rounds} rounds")
+            # Get last modified time of the experiment data
+            exp_path = _experiment_path(scenario_name)
+            _last_modified = ""
+            try:
+                import os
+                # Find the newest file in the experiment directory
+                newest_mtime = 0.0
+                for dirpath, _dirs, files in os.walk(exp_path):
+                    for f in files:
+                        fp = os.path.join(dirpath, f)
+                        mt = os.path.getmtime(fp)
+                        if mt > newest_mtime:
+                            newest_mtime = mt
+                if newest_mtime > 0:
+                    from datetime import datetime
+                    _last_modified = datetime.fromtimestamp(newest_mtime).strftime(
+                        "%Y-%m-%d %H:%M"
+                    )
+            except Exception:
+                pass
+
+            info_col, btn_col = st.columns([4, 1])
+            with info_col:
+                time_str = f"  |  最后更新: {_last_modified}" if _last_modified else ""
+                st.caption(f"📊 已保存数据: {saved_rounds} rounds{time_str}")
+            with btn_col:
+                if st.button(
+                    "🗑️ 清除数据",
+                    key="delete_experiment_data",
+                    type="secondary",
+                    help="删除当前场景的实验数据，以便重新运行",
+                ):
+                    st.session_state._confirm_delete = True
+
+            # Confirmation dialog
+            if st.session_state.get("_confirm_delete"):
+                st.warning(
+                    f"确定要删除 **{scenario_name}** 的 {saved_rounds} rounds 实验数据吗？"
+                    " 此操作不可撤销。"
+                )
+                c1, c2, c3 = st.columns([1, 1, 4])
+                with c1:
+                    if st.button("✅ 确认删除", key="confirm_del_yes", type="primary"):
+                        import shutil
+                        try:
+                            shutil.rmtree(exp_path)
+                            exp_path.mkdir(parents=True, exist_ok=True)
+                            st.session_state._confirm_delete = False
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"删除失败: {e}")
+                with c2:
+                    if st.button("❌ 取消", key="confirm_del_no"):
+                        st.session_state._confirm_delete = False
+                        st.rerun()
 
 
 # ---------------------------------------------------------------------------
