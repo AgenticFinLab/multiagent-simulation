@@ -49,26 +49,48 @@ import streamlit as st
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]  # components → interface → masim → root
 _CUSTOMIZED_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
+_TEAM_REGISTRY = _PROJECT_ROOT / "configs" / ".team_registry"
 _BUNDLE_NAME_RE = re.compile(r"^(.+)-([0-9a-fA-F]{8})-([^-]+)$")
 _TEAM_IN_SLUG_RE = re.compile(r"^team-([A-Za-z0-9_]+)-(.+)$")
 
 
 def _discover_existing_teams() -> list[str]:
-    """Scan disk for team slugs that already have bundles."""
+    """Return all known team slugs (from registry + disk scan)."""
     teams: set[str] = set()
-    if not _CUSTOMIZED_DIR.exists():
-        return []
-    for entry in _CUSTOMIZED_DIR.iterdir():
-        if not entry.is_dir():
-            continue
-        m = _BUNDLE_NAME_RE.match(entry.name)
-        if not m:
-            continue
-        raw_slug = m.group(1)
-        tm = _TEAM_IN_SLUG_RE.match(raw_slug)
-        if tm:
-            teams.add(tm.group(1))
+    # Source 1: registry file (teams that have logged in at least once)
+    if _TEAM_REGISTRY.exists():
+        for line in _TEAM_REGISTRY.read_text().splitlines():
+            name = line.strip()
+            if name:
+                teams.add(name)
+    # Source 2: bundles on disk (fallback for teams not yet in registry)
+    if _CUSTOMIZED_DIR.exists():
+        for entry in _CUSTOMIZED_DIR.iterdir():
+            if not entry.is_dir():
+                continue
+            m = _BUNDLE_NAME_RE.match(entry.name)
+            if not m:
+                continue
+            raw_slug = m.group(1)
+            tm = _TEAM_IN_SLUG_RE.match(raw_slug)
+            if tm:
+                teams.add(tm.group(1))
     return sorted(teams)
+
+
+def _register_team(slug: str) -> None:
+    """Append a team slug to the registry file (idempotent)."""
+    existing = set()
+    if _TEAM_REGISTRY.exists():
+        existing = {
+            line.strip()
+            for line in _TEAM_REGISTRY.read_text().splitlines()
+            if line.strip()
+        }
+    if slug not in existing:
+        _TEAM_REGISTRY.parent.mkdir(parents=True, exist_ok=True)
+        with _TEAM_REGISTRY.open("a") as f:
+            f.write(slug + "\n")
 
 __all__ = [
     "TEAM_NAME_KEY",
@@ -179,6 +201,7 @@ def bootstrap_team_from_query() -> None:
     slug, err = validate_team_name(str(raw))
     if slug and not err:
         st.session_state[TEAM_NAME_KEY] = slug
+        _register_team(slug)
 
 
 def render_team_gate() -> None:
@@ -249,6 +272,7 @@ def render_team_gate() -> None:
                 # or link-copy keeps the identity.  Setting a query param
                 # value triggers a rerun automatically in Streamlit ≥1.30.
                 st.session_state[TEAM_NAME_KEY] = slug
+                _register_team(slug)
                 try:
                     st.query_params[_QUERY_KEY] = slug
                 except Exception:
@@ -277,7 +301,7 @@ def render_team_gate() -> None:
                 st.markdown(
                     "<div style='margin-top:0.8rem;'>"
                     "<span style='font-size:0.85rem;color:#4a4a4a;'>"
-                    "📋 <b>已有团队</b>（点击直接进入）:</span></div>",
+                    "📋 <b>已有团队</b>（点击填入上方输入框）:</span></div>",
                     unsafe_allow_html=True,
                 )
                 cols = st.columns(min(len(existing), 4))
@@ -288,11 +312,7 @@ def render_team_gate() -> None:
                             key=f"_quick_team_{team}",
                             use_container_width=True,
                         ):
-                            st.session_state[TEAM_NAME_KEY] = team
-                            try:
-                                st.query_params[_QUERY_KEY] = team
-                            except Exception:
-                                pass
+                            st.session_state["team_gate_input"] = team
                             st.rerun()
 
         st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
