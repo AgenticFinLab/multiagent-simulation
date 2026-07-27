@@ -601,6 +601,10 @@ class GeneralSimulator(BaseSimulator):
 
             logger.debug("        Round %d complete", round_num)
 
+        # Flush remaining items (hot deque + pending_cold) to disk so that
+        # load_rounds() and count_experiment_rounds() see the complete dataset.
+        self.history.flush()
+
         self.status = SimulatorStatus.TERMINATED
         logger.info("Simulation completed successfully")
 

@@ -46,8 +46,11 @@ python -c "import masim, lmbase, ray, streamlit; print('OK')"
 在 `multiagent-simulation/` 目录下创建 `.env`：
 
 ```
-DEEPSEEK_API_KEY=sk-xxx
+ARK_API_KEY_1=ark-xxx
+ARK_API_KEY_2=ark-yyy
 ```
+
+所有场景默认使用火山引擎（`ark/doubao-seed-2-0-mini-260428`），程序会自动从编号 key 中随机选取，分散限流压力。只有一个 key 时写 `ARK_API_KEY=ark-xxx` 即可。
 
 Rule 引擎不需要 API Key，可跳过此步。
 
