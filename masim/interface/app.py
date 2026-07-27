@@ -32,6 +32,12 @@ from masim.interface.components.agent_market import (
     render_variant_choice,
 )
 from masim.interface.components.welcome import render_welcome
+from masim.interface.components.team_gate import (
+    TEAM_NAME_KEY,
+    bootstrap_team_from_query,
+    current_team,
+    render_team_gate,
+)
 from masim.interface.locale import t
 
 # Page configuration
@@ -101,9 +107,25 @@ if "project_dir" not in st.session_state:
 if "selected_market_agents" not in st.session_state:
     st.session_state.selected_market_agents = []
 
+# Multi-team deployment: every session must identify a team so bundles are
+# namespaced on disk.  ``team_name`` is empty until the user passes the
+# team gate; ``bootstrap_team_from_query`` adopts a valid ``?team=<slug>``
+# URL parameter (idempotent, silent on invalid input) so a bookmarked link
+# skips the gate.
+if TEAM_NAME_KEY not in st.session_state:
+    st.session_state[TEAM_NAME_KEY] = ""
+bootstrap_team_from_query()
+
 
 def main():
     """Main application entry point."""
+    # Gate: every session must pick a team name before any workflow page is
+    # rendered.  The gate writes to session state AND the URL query params,
+    # so a reload keeps the identity without re-prompting.
+    if not current_team():
+        render_team_gate()
+        return
+
     workflow_stage = st.session_state.workflow_stage
     if workflow_stage == "welcome":
         render_welcome()

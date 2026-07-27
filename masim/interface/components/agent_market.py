@@ -33,6 +33,7 @@ from ..customized import (
     apply_customized_modifications,
     apply_default_bundle_overrides,
     clear_roster,
+    compose_bundle_name,
     copy_default_scenario_bundle,
     duplicate_entry,
     entries_for_type,
@@ -59,6 +60,7 @@ from ..customized import (
     write_default_scenario_bundle,
 )
 from ..customized.handbook_params import ParamSpec
+from .team_gate import current_team
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -1082,7 +1084,9 @@ def render_variant_choice() -> None:
                 project_slug = st.session_state.get("project_slug", "")
                 project_id = st.session_state.get("project_id", "0000")
                 if project_slug:
-                    bundle_name = f"{project_slug}-{project_id}-{selected_base}"
+                    bundle_name = compose_bundle_name(
+                        project_slug, project_id, selected_base, current_team()
+                    )
                     st.session_state["customized_bundle_name"] = bundle_name
                 st.session_state.workflow_stage = "customize"
                 st.rerun()
@@ -1102,7 +1106,9 @@ def _initialize_bundle_on_entry(scenario_base: str) -> None:
         return
 
     project_id = st.session_state.get("project_id", "0000")
-    bundle_name = f"{project_slug}-{project_id}-{scenario_base}"
+    bundle_name = compose_bundle_name(
+        project_slug, project_id, scenario_base, current_team()
+    )
 
     # Re-entry guard: same project + same scenario → reuse existing folder.
     existing_bundle = st.session_state.get("customized_bundle_name", "")
@@ -1184,6 +1190,7 @@ def _launch_default_variant(scenario_key: str) -> None:
                 project_root=PROJECT_ROOT,
                 market_extras_override=market_over or None,
                 agent_extras_overrides=agent_over or None,
+                team_name=current_team(),
             )
             launch_key = f"CUSTOMIZED_SIMULATION/{result.customized_id}"
             customized_id = result.customized_id
@@ -1234,7 +1241,9 @@ def render_default_config() -> None:
     # ── Resolve project bundle name ──────────────────────────────────────
     project_slug = st.session_state.get("project_slug", "project")
     project_id = st.session_state.get("project_id", "0000")
-    bundle_name = f"{project_slug}-{project_id}-{base}"
+    bundle_name = compose_bundle_name(
+        project_slug, project_id, base, current_team()
+    )
 
     # ── Copy scenario to bundle on first entry ────────────────────────────
     # Idempotent: only copies if the bundle doesn't already exist.
@@ -4365,7 +4374,9 @@ def _write_customized_bundle(
         # Fallback: compute the bundle name from session state.
         project_slug = st.session_state.get("project_slug", "project")
         project_id = st.session_state.get("project_id", "0000")
-        bundle_name = f"{project_slug}-{project_id}-{scenario_base}"
+        bundle_name = compose_bundle_name(
+            project_slug, project_id, scenario_base, current_team()
+        )
         st.session_state["customized_bundle_name"] = bundle_name
 
     roster_archetypes = [a["agent_type"] for a in selected_agents]

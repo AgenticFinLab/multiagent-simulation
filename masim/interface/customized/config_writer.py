@@ -1005,6 +1005,7 @@ def write_default_scenario_bundle(
     project_root: Path,
     market_extras_override: Optional[dict[str, Any]] = None,
     agent_extras_overrides: Optional[dict[str, dict[str, Any]]] = None,
+    team_name: str = "",
 ) -> CustomizedBundleResult:
     """Materialise a rounds/params-adjusted copy of a shipped scenario/variant.
 
@@ -1013,14 +1014,23 @@ def write_default_scenario_bundle(
     config *verbatim* and lets the caller override ``total_rounds``, the
     market coordinator's ``extras`` block, and per-agent ``extras`` blocks.
     The copy lives under
-    ``configs/CUSTOMIZED_SIMULATION/Default-{scenario}-{variant}-r{N}`` so the
-    shipped YAML is never mutated and the run stays reproducible.
+    ``configs/CUSTOMIZED_SIMULATION/[team-{team}-]Default-{scenario}-{variant}-r{N}``
+    so the shipped YAML is never mutated and the run stays reproducible.
 
-    The folder name is deterministic in ``(scenario, variant, N)``: the same
-    triple always overwrites the same bundle, so no duplicate folders
-    accumulate. When ``market_extras_override`` or ``agent_extras_overrides``
-    is supplied the players.yml inside that folder is rewritten in-place to
-    reflect the edited values (still using the shipped roster).
+    The folder name is deterministic in ``(team, scenario, variant, N)``:
+    the same tuple always overwrites the same bundle, so no duplicate
+    folders accumulate.  When ``market_extras_override`` or
+    ``agent_extras_overrides`` is supplied the players.yml inside that
+    folder is rewritten in-place to reflect the edited values (still using
+    the shipped roster).
+
+    The optional ``team_name`` prefix is essential for multi-team
+    deployments: without it, two teams that adjust the same
+    ``(scenario, variant, rounds)`` triple with different extras would
+    clobber each other's on-disk bundle.  The prefix marker matches
+    :mod:`masim.interface.customized.team_namespace` and is stripped by
+    ``sidebar.py`` and ``config_loader._resolve_display_key`` before the
+    UI decodes the bundle back into ``{scenario}/{variant}`` for display.
 
     Args:
         scenario_name: scenario base name (e.g. ``"AssetBubble"``).
@@ -1034,6 +1044,10 @@ def write_default_scenario_bundle(
             ``agent_block_key`` MUST match a top-level key already present
             in players.yml; unknown keys are silently ignored to keep the
             call resilient to Streamlit widget-state churn.
+        team_name: optional team slug (as produced by ``team_gate``).  When
+            non-empty, the bundle folder gets the ``team-{team_name}-``
+            prefix so it is namespaced to that team.  Defaults to ``""``
+            for CLI / pre-gate callers.
 
     Returns:
         :class:`CustomizedBundleResult` with absolute paths of the copied
@@ -1053,7 +1067,16 @@ def write_default_scenario_bundle(
             f"'{scenario_name}/{variant}': {base_simulation}"
         )
 
-    cid = f"Default-{scenario_name}-{variant}-r{int(total_rounds)}"
+    base_cid = f"Default-{scenario_name}-{variant}-r{int(total_rounds)}"
+    # Team-namespace the bundle folder so concurrent teams cannot clobber
+    # each other's ``(scenario, variant, rounds)`` bundle.  Uses the same
+    # ``team-{slug}-`` literal marker as
+    # :mod:`masim.interface.customized.team_namespace` so downstream
+    # decoders (sidebar, ``_resolve_display_key``) recognise it.
+    if team_name:
+        cid = f"team-{team_name}-{base_cid}"
+    else:
+        cid = base_cid
     configs_parent = project_root / "configs" / "CUSTOMIZED_SIMULATION"
     examples_parent = project_root / "examples" / "CUSTOMIZED_SIMULATION"
     config_dir = configs_parent / cid

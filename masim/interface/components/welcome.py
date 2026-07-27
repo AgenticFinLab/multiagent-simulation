@@ -20,6 +20,13 @@ from typing import Any, Optional
 
 import streamlit as st
 
+from ..customized.team_namespace import (
+    is_visible_to_team,
+    owning_team_of,
+    strip_team_prefix,
+)
+from .team_gate import current_team
+
 # Project root: masim/interface/components/welcome.py → up 4 levels.
 _PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 _LOGO_PATH = _PROJECT_ROOT / "logo.jpg"
@@ -111,31 +118,61 @@ def _list_existing_projects() -> list[dict[str, Any]]:
     if not _CUSTOMIZED_CONFIGS_DIR.exists():
         return []
 
-    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    # Filter: viewer sees their own bundles + legacy shared bundles.  The
+    # team gate guarantees a non-empty ``viewer_team`` in the running app;
+    # CLI / test callers may see everything (see :func:`is_visible_to_team`).
+    viewer_team = current_team()
+
+    # Grouping key now includes the owning team so a legacy shared bundle
+    # and a team's forked customization don't collapse into a single row
+    # (they may legitimately show different scenarios / mtimes and users
+    # need to tell them apart).
+    grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
     for entry in _CUSTOMIZED_CONFIGS_DIR.iterdir():
         if not entry.is_dir():
             continue
         match = _BUNDLE_NAME_RE.match(entry.name)
         if not match:
             continue
-        slug, pid, scenario = match.group(1), match.group(2), match.group(3)
+        raw_slug, pid, scenario = match.group(1), match.group(2), match.group(3)
+
+        # Hide bundles owned by other teams.  ``owning_team_of`` returns
+        # ``None`` for legacy (unprefixed) bundles, which the predicate
+        # treats as universally visible for backward compatibility.
+        if not is_visible_to_team(raw_slug, viewer_team):
+            continue
+
+        owner = owning_team_of(raw_slug) or ""
+        # Strip the ``team-{team}-`` prefix from the slug so downstream
+        # code (examples/<slug>/project_meta.json lookup, chip display,
+        # bundle-name recomposition) sees the friendly project slug.
+        display_slug = strip_team_prefix(raw_slug, owner)
+
         try:
             mtime = entry.stat().st_mtime
         except OSError:
             mtime = 0.0
         record = grouped.setdefault(
-            (slug, pid),
-            {"slug": slug, "project_id": pid,
-             "scenarios": [], "latest_mtime": 0.0},
+            (display_slug, pid, owner),
+            {
+                "slug": display_slug,
+                "project_id": pid,
+                "team": owner,               # "" for legacy / shared
+                "is_legacy": owner == "",    # convenience flag for UI
+                "scenarios": [],
+                "latest_mtime": 0.0,
+            },
         )
         record["scenarios"].append(scenario)
         if mtime > record["latest_mtime"]:
             record["latest_mtime"] = mtime
 
     result: list[dict[str, Any]] = []
-    for (slug, pid), rec in grouped.items():
+    for (slug, pid, _owner), rec in grouped.items():
         # Prefer the friendlier project_name from examples/<slug>/meta;
-        # fall back to the slug (underscores rewritten as spaces).
+        # fall back to the slug (underscores rewritten as spaces).  The
+        # meta folder itself is NOT team-namespaced so this read works
+        # for both legacy and team-owned rows using the stripped slug.
         display_name = slug.replace("_", " ")
         meta_path = _EXAMPLES_DIR / slug / "project_meta.json"
         if meta_path.exists():
@@ -148,6 +185,8 @@ def _list_existing_projects() -> list[dict[str, Any]]:
             "display_name": display_name,
             "slug": slug,
             "project_id": pid,
+            "team": rec["team"],
+            "is_legacy": rec["is_legacy"],
             "scenarios": sorted(set(rec["scenarios"])),
             "latest_mtime": rec["latest_mtime"],
         })

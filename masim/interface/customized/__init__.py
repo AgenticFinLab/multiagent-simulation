@@ -76,6 +76,16 @@ from .roster import (
     unique_agent_types,
     update_entry,
 )
+from .team_namespace import (
+    TEAM_PREFIX_LITERAL,
+    TEAM_NAME_IN_SLUG_RE,
+    apply_team_prefix,
+    compose_bundle_name,
+    is_team_prefixed,
+    is_visible_to_team,
+    owning_team_of,
+    strip_team_prefix,
+)
 
 __all__ = [
     # handbook params
@@ -132,4 +142,13 @@ __all__ = [
     "total_instances",
     "unique_agent_types",
     "update_entry",
+    # team namespace (multi-team deployment)
+    "TEAM_PREFIX_LITERAL",
+    "TEAM_NAME_IN_SLUG_RE",
+    "apply_team_prefix",
+    "compose_bundle_name",
+    "is_team_prefixed",
+    "is_visible_to_team",
+    "owning_team_of",
+    "strip_team_prefix",
 ]

@@ -35,6 +35,7 @@ from ..config_loader import (
     _resolve_display_key,
     _configs_path,
 )
+from ..customized.team_namespace import strip_team_prefix
 from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
 
 
@@ -69,7 +70,14 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
         active = st.session_state.get("selected_scenario", "")
         if active.startswith("CUSTOMIZED_SIMULATION/"):
             customized_id = active.split("/", 1)[1] if "/" in active else active
-            if customized_id.startswith("Default-"):
+            # Team-namespaced bundles carry a ``team-{slug}-`` prefix that
+            # must be peeled off before the ``Default-`` shape check;
+            # otherwise the multi-team deployment would fall through to
+            # the generic customized-bundle branch and miss the read-only
+            # metadata rendering path.  ``strip_team_prefix`` is a no-op
+            # for legacy (unprefixed) bundles.
+            bundle_kind_key = strip_team_prefix(customized_id)
+            if bundle_kind_key.startswith("Default-"):
                 # A rounds-adjusted copy of a shipped scenario. There is no
                 # user-built roster to edit, so we simply render the bundle's
                 # own config below in the standard read-only display mode.

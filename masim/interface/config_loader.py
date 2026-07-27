@@ -131,9 +131,15 @@ def _resolve_display_key(scenario_key: str) -> str:
             bundle_name = tail_parts[0]
             scenario = bundle_name.rsplit("-", 1)[-1]
             return f"{scenario}/Rule"
-        # Legacy format: CUSTOMIZED_SIMULATION/Default-{S}-{V}-rN
-        if tail.startswith("Default-"):
-            body = re.sub(r"-r\d+$", "", tail[len("Default-"):])
+        # Legacy format: CUSTOMIZED_SIMULATION/[team-{team}-]Default-{S}-{V}-rN
+        # Multi-team deployments prefix the deterministic Default bundle id
+        # with ``team-{team_name}-``; peel that off first so the shape check
+        # below matches both single-team and multi-team layouts.  The import
+        # is deferred to avoid a circular import at module load.
+        from .customized.team_namespace import strip_team_prefix
+        stripped_tail = strip_team_prefix(tail)
+        if stripped_tail.startswith("Default-"):
+            body = re.sub(r"-r\d+$", "", stripped_tail[len("Default-"):])
             if "-" in body:
                 scenario, variant = body.rsplit("-", 1)
                 return f"{scenario}/{variant}"
