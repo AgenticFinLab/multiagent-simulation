@@ -22,6 +22,7 @@ from masim.interface.config_loader import (
 from masim.interface.data_loader import has_experiment_data, load_rounds
 from masim.interface.components.sidebar import render_sidebar
 from masim.interface.components.analysis_view import render_analysis_page
+from masim.interface.components.reasoning_view import render_reasoning_page
 from masim.interface.components.docs_view import render_docs_page
 from masim.interface.components.agent_market import (
     render_back_to_stage1_bar,
@@ -171,6 +172,8 @@ def main():
         render_analysis_page(selected_scenario)
     elif st.session_state.current_page == "Docs":
         render_docs_page(selected_scenario)
+    elif st.session_state.current_page == "Reasoning":
+        render_reasoning_page(selected_scenario)
     else:
         render_back_to_stage1_bar(
             key_suffix="workspace",
@@ -1030,6 +1033,11 @@ def _render_action_buttons(scenario_name: str):
         st.session_state.current_page = "Analysis"
         st.rerun()
 
+    def _go_reasoning():
+        st.session_state.previous_page = st.session_state.current_page
+        st.session_state.current_page = "Reasoning"
+        st.rerun()
+
     def _defer(action: str):
         # Record the intent and rerun; the blocking run is launched at full
         # page width in render_simulation_page so its spinner isn't cramped
@@ -1121,6 +1129,13 @@ def _render_action_buttons(scenario_name: str):
     elif st.session_state.simulation_completed:
         if analysis_fresh or analysis_runnable:
             buttons.append(_analysis_button("primary"))
+        if data_exists:
+            buttons.append((
+                t("simulation.view_reasoning"),
+                "secondary",
+                t("simulation.view_reasoning_help"),
+                _go_reasoning,
+            ))
         buttons.append((t("simulation.reset"), "secondary", None, _reset_simulation))
 
     elif data_exists:
@@ -1131,6 +1146,12 @@ def _render_action_buttons(scenario_name: str):
             lambda: _defer("replay"),
         ))
         buttons.append(_analysis_button("secondary"))
+        buttons.append((
+            t("simulation.view_reasoning"),
+            "secondary",
+            t("simulation.view_reasoning_help"),
+            _go_reasoning,
+        ))
         buttons.append((
             t("simulation.rerun"),
             "secondary",

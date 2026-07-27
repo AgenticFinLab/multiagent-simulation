@@ -57,6 +57,8 @@ simulation:
   rerun_help: "开始新的仿真（将覆盖现有数据）"
   continue_help: "从暂停位置继续重放"
   view_analysis_running_help: "仿真运行时跳转到分析页面"
+  view_reasoning: "🧠 决策理由"
+  view_reasoning_help: "查看每个智能体每轮的决策理由"
 
   # Metrics
   stock_price: "股票价格"
@@ -126,6 +128,18 @@ docs:
   back: "← 返回"
   no_docs: "未找到 **{name}** 的文档文件。"
   expected_path: "预期位置：`examples/{scenario}/explain.md`"
+
+# Reasoning page
+reasoning:
+  title: "决策理由 — {name}"
+  back: "← 返回"
+  no_data: "没有可用的实验数据。请先运行仿真。"
+  select_round: "选择回合"
+  filter_agent: "筛选智能体"
+  all_agents: "全部智能体"
+  no_agents: "该回合未找到智能体数据。"
+  rule_no_reasoning: "规则型智能体 — 无文本决策记录。"
+  market_state: "市场状态"
 
 # Error messages
 errors:

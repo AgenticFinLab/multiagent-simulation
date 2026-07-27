@@ -57,6 +57,8 @@ simulation:
   rerun_help: "Start a fresh simulation (overwrites existing data)"
   continue_help: "Resume the replay from where it was paused"
   view_analysis_running_help: "Jump to analysis page while simulation continues"
+  view_reasoning: "🧠 Agent Reasoning"
+  view_reasoning_help: "View each agent's per-round decision reasoning"
 
   # Metrics
   stock_price: "Stock Price"
@@ -126,6 +128,18 @@ docs:
   back: "← Back"
   no_docs: "No documentation file found for **{name}**."
   expected_path: "Expected at: `examples/{scenario}/explain.md`"
+
+# Reasoning page
+reasoning:
+  title: "Agent Reasoning — {name}"
+  back: "← Back"
+  no_data: "No experiment data available. Please run a simulation first."
+  select_round: "Select round"
+  filter_agent: "Filter by agent"
+  all_agents: "All agents"
+  no_agents: "No agents found for this round."
+  rule_no_reasoning: "Rule-based agent — no textual reasoning recorded."
+  market_state: "Market State"
 
 # Error messages
 errors:
