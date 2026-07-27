@@ -39,8 +39,36 @@ Design constraints (per product decisions)
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 import streamlit as st
+
+# ---------------------------------------------------------------------------
+# Internal: discover teams already on disk
+# ---------------------------------------------------------------------------
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[3]  # components → interface → masim → root
+_CUSTOMIZED_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
+_BUNDLE_NAME_RE = re.compile(r"^(.+)-([0-9a-fA-F]{8})-([^-]+)$")
+_TEAM_IN_SLUG_RE = re.compile(r"^team-([A-Za-z0-9_]+)-(.+)$")
+
+
+def _discover_existing_teams() -> list[str]:
+    """Scan disk for team slugs that already have bundles."""
+    teams: set[str] = set()
+    if not _CUSTOMIZED_DIR.exists():
+        return []
+    for entry in _CUSTOMIZED_DIR.iterdir():
+        if not entry.is_dir():
+            continue
+        m = _BUNDLE_NAME_RE.match(entry.name)
+        if not m:
+            continue
+        raw_slug = m.group(1)
+        tm = _TEAM_IN_SLUG_RE.match(raw_slug)
+        if tm:
+            teams.add(tm.group(1))
+    return sorted(teams)
 
 __all__ = [
     "TEAM_NAME_KEY",
@@ -242,6 +270,30 @@ def render_team_gate() -> None:
                 "</div>",
                 unsafe_allow_html=True,
             )
+
+            # --- Existing teams quick-select ---
+            existing = _discover_existing_teams()
+            if existing:
+                st.markdown(
+                    "<div style='margin-top:0.8rem;'>"
+                    "<span style='font-size:0.85rem;color:#4a4a4a;'>"
+                    "📋 <b>已有团队</b>（点击直接进入）:</span></div>",
+                    unsafe_allow_html=True,
+                )
+                cols = st.columns(min(len(existing), 4))
+                for i, team in enumerate(existing):
+                    with cols[i % min(len(existing), 4)]:
+                        if st.button(
+                            team,
+                            key=f"_quick_team_{team}",
+                            use_container_width=True,
+                        ):
+                            st.session_state[TEAM_NAME_KEY] = team
+                            try:
+                                st.query_params[_QUERY_KEY] = team
+                            except Exception:
+                                pass
+                            st.rerun()
 
         st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
         st.caption(
