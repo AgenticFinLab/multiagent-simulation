@@ -1132,14 +1132,15 @@ def _initialize_bundle_on_entry(scenario_base: str) -> None:
 def _launch_default_variant(scenario_key: str) -> None:
     """Send the user to the workspace with a default variant.
 
-    Zero-copy fast path: if the user left both the round count and the
-    market/agent extras untouched, the shipped ``configs/<Scenario>/<Variant>/``
-    directory is launched directly.  Any deviation — an edited round count,
-    a market extras change, or a per-agent extras change — triggers
-    :func:`write_default_scenario_bundle` to produce a reproducible copy
-    under ``configs/CUSTOMIZED_SIMULATION/Default-<Scenario>-<Variant>-rN/``
-    with the requested overrides baked in.  The shipped YAML is never
-    mutated.
+    Creates a team-namespaced bundle under ``CUSTOMIZED_SIMULATION/`` using
+    the same nested ``{bundle}/Default/{Variant}/`` structure as Project
+    mode, then applies any round-count or extras overrides.  This guarantees
+    that every run — even an unmodified Experience-mode launch — writes to
+    its own EXPERIMENT subtree with a unique Ray namespace, giving full
+    multi-team isolation.
+
+    When no team is set (local dev), the shipped config is used directly as
+    a zero-copy fast path.
     """
     base = scenario_key.split("/", 1)[0]
     variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
@@ -1172,30 +1173,50 @@ def _launch_default_variant(scenario_key: str) -> None:
     )
     extras_changed = bool(market_over) or bool(agent_over)
 
+    # In multi-team deployments, ALWAYS create a team-namespaced bundle so
+    # that the record_path is isolated per-team — even when rounds/extras
+    # are unchanged.  Without this, the zero-copy fast path would let all
+    # teams write to the same shipped EXPERIMENT/{Scenario}/{Variant}/ dir.
+    needs_bundle = rounds_changed or extras_changed or bool(current_team())
+
     launch_key = scenario_key
     customized_id = None
-    if rounds_changed or extras_changed:
+    if needs_bundle:
         target_rounds = (
             int(edited_rounds)
-            if edited_rounds is not None
+            if edited_rounds is not None and int(edited_rounds) > 0
             else shipped_rounds
         )
         if target_rounds < 1:
             target_rounds = shipped_rounds if shipped_rounds > 0 else 1
+
+        # Deterministic bundle name — same nested format as Project mode.
+        # slug="exp", project_id="00000000" marks Experience-mode bundles;
+        # the team prefix and scenario suffix ensure uniqueness per team.
+        bundle_name = compose_bundle_name(
+            "exp", "00000000", base, current_team()
+        )
         try:
-            result = write_default_scenario_bundle(
+            result = copy_default_scenario_bundle(
                 scenario_name=base,
                 variant=variant,
-                total_rounds=target_rounds,
+                bundle_name=bundle_name,
                 project_root=PROJECT_ROOT,
-                market_extras_override=market_over or None,
-                agent_extras_overrides=agent_over or None,
-                team_name=current_team(),
             )
-            launch_key = f"CUSTOMIZED_SIMULATION/{result.customized_id}"
-            customized_id = result.customized_id
+            # Apply round/extras overrides on top of the copied bundle.
+            if rounds_changed or extras_changed:
+                apply_default_bundle_overrides(
+                    config_dir=result.config_dir,
+                    total_rounds=target_rounds,
+                    market_extras_override=market_over or None,
+                    agent_extras_overrides=agent_over or None,
+                )
+            launch_key = (
+                f"CUSTOMIZED_SIMULATION/{bundle_name}/Default/{variant}"
+            )
+            customized_id = bundle_name
         except (FileNotFoundError, ValueError) as exc:
-            st.error(f"Could not apply the adjusted parameters: {exc}")
+            st.error(f"Could not prepare scenario bundle: {exc}")
             return
 
     st.session_state.selected_scenario = launch_key
@@ -1934,8 +1955,20 @@ def _profile_intro(markdown: str, display_name: str) -> str:
 def _image_data_uri(path: Path) -> str:
     if not path.exists():
         return ""
-    mime = "image/png" if path.suffix.lower() == ".png" else "image/svg+xml"
-    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    data = path.read_bytes()
+    # Detect actual format via magic bytes (extension can be misleading).
+    if data[:8].startswith(b"\x89PNG\r\n\x1a\n"):
+        mime = "image/png"
+    elif data[:3] in (b"\xff\xd8\xff", b"\xff\xd8"):
+        mime = "image/jpeg"
+    elif path.suffix.lower() == ".svg" or b"<svg" in data[:512]:
+        mime = "image/svg+xml"
+    else:
+        # Fallback based on extension.
+        ext = path.suffix.lower()
+        mime = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                ".svg": "image/svg+xml", ".webp": "image/webp"}.get(ext, "image/png")
+    encoded = base64.b64encode(data).decode("ascii")
     return f"data:{mime};base64,{encoded}"
 
 

@@ -590,6 +590,8 @@ def initialize_customized_folder(
         for yml in dst_variant.glob("*.yml"):
             text = yml.read_text(encoding="utf-8")
             text = _retarget_record_paths(text, record_sub)
+            if yml.name == "simulation.yml":
+                text = _set_ray_namespace(text, record_sub)
             yml.write_text(text, encoding="utf-8")
 
     # --- Copy ALL variant subdirectories from examples/{scenario}/ ---
@@ -917,6 +919,7 @@ def write_customized_bundle(
     # --- simulation.yml: copy verbatim and rewrite the record/comm paths
     simulation_text = base_simulation.read_text(encoding="utf-8")
     simulation_text = _retarget_record_paths(simulation_text, cid)
+    simulation_text = _set_ray_namespace(simulation_text, cid)
     # Honour a user-adjusted round count (from the variant_choice page)
     # by baking it into the generated config, keeping the run reproducible.
     if total_rounds is not None:
@@ -1092,6 +1095,7 @@ def write_default_scenario_bundle(
         text = _retarget_record_paths(yml.read_text(encoding="utf-8"), cid)
         if yml.name == "simulation.yml":
             text = _set_total_rounds(text, int(total_rounds))
+            text = _set_ray_namespace(text, cid)
         if yml.name == "players.yml" and (
             market_extras_override or agent_extras_overrides
         ):
@@ -1228,6 +1232,8 @@ def copy_default_scenario_bundle(
         text = yml.read_text(encoding="utf-8")
         # Re-target record paths so the bundle writes its own data
         text = _retarget_record_paths(text, record_sub)
+        if yml.name == "simulation.yml":
+            text = _set_ray_namespace(text, record_sub)
         (config_dir / yml.name).write_text(text, encoding="utf-8")
 
     # Copy examples (code, .md, .py files — skip __pycache__)
@@ -2104,6 +2110,31 @@ def _set_total_rounds(text: str, total_rounds: int) -> str:
     )
     if n == 0:
         raise ValueError("Could not locate 'total_rounds' in simulation.yml")
+    return new_text
+
+
+_RAY_NAMESPACE_RE = re.compile(
+    r'^(\s*namespace\s*:\s*)"?([^"\n]+?)"?\s*$', re.MULTILINE
+)
+
+
+def _set_ray_namespace(text: str, cid: str) -> str:
+    """Append bundle id to the Ray namespace for per-team actor isolation.
+
+    Prevents actor-name collisions when multiple teams run the same base
+    scenario concurrently on a shared Ray cluster.  The original namespace
+    is preserved as a prefix so downstream log analysis can still identify
+    the scenario source.
+    """
+    def _sub(m: re.Match) -> str:
+        original_ns = m.group(2).strip()
+        return f'{m.group(1)}"{original_ns}__{cid}"'
+
+    new_text, n = _RAY_NAMESPACE_RE.subn(_sub, text, count=1)
+    if n == 0:
+        # Graceful fallback — if the key is missing the simulator will use
+        # its own default; do not fail the bundle creation.
+        return text
     return new_text
 
 

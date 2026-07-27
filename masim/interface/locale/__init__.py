@@ -82,19 +82,21 @@ def get_locale() -> str:
 def set_locale(locale_name: str) -> None:
     """Set the current locale.
 
+    Only writes to session_state (per-session) to avoid leaking locale
+    changes to other concurrent sessions sharing the same Streamlit process.
+
     Args:
         locale_name: Locale name (e.g., "zh_CN", "en_US")
     """
-    global _current_locale
-    _current_locale = locale_name
-
-    # Also set in Streamlit session state if available
+    # Store in Streamlit session state (per-session, no cross-session leakage).
     try:
         import streamlit as st
 
         st.session_state.locale = locale_name
     except Exception:
-        pass
+        # Fallback for non-Streamlit callers (CLI, tests).
+        global _current_locale
+        _current_locale = locale_name
 
 
 def _get_nested(data: Dict[str, Any], key: str, default: str = "") -> str:

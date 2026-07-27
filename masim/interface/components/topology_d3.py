@@ -21,6 +21,13 @@ import streamlit as st
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _ICON_ROOT = _PROJECT_ROOT / "examples" / "AGENT_POOL" / "agent_images" / "icons"
 
+# Bundled D3.js (offline-safe — avoids CDN dependency which may be blocked
+# on Chinese cloud / air-gapped servers).
+_D3_JS_PATH = Path(__file__).resolve().parent.parent / "assets" / "d3.v7.min.js"
+_D3_JS_INLINE: str = ""
+if _D3_JS_PATH.exists():
+    _D3_JS_INLINE = _D3_JS_PATH.read_text(encoding="utf-8")
+
 # Variant prefixes that may appear on identity strings in scenario configs.
 # Every non-Rule variant identity is expected to follow ``{variant}_{archetype}``
 # (Rule identities also carry the ``rule_`` prefix). Assets (icons, .md profiles)
@@ -302,14 +309,23 @@ def render_d3_topology_with_expand(
 def _build_html(graph_json: str, height: int) -> str:
     """Generate self-contained HTML with embedded D3.js force graph.
 
-    Uses a CDN with an onerror fallback that displays a graceful offline
-    message instead of a blank/broken graph when the network is unavailable.
+    Prefers the locally-bundled D3.js for offline / firewall-restricted
+    environments.  Falls back to a CDN fetch only when the local asset is
+    unavailable (with an onerror graceful-degradation message).
     """
+    if _D3_JS_INLINE:
+        d3_script_tag = f"<script>{_D3_JS_INLINE}</script>"
+    else:
+        d3_script_tag = (
+            '<script src="https://d3js.org/d3.v7.min.js" '
+            """onerror="document.getElementById('d3-error').style.display='flex';"""
+            """document.getElementById('d3-graph').style.display='none';"></script>"""
+        )
     return f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<script src="https://d3js.org/d3.v7.min.js" onerror="document.getElementById('d3-error').style.display='flex';document.getElementById('d3-graph').style.display='none';"></script>
+{d3_script_tag}
 <style>
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   body {{ background: transparent; overflow: hidden; }}
