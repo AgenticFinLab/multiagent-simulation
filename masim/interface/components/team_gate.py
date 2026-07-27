@@ -190,8 +190,12 @@ def render_team_gate() -> None:
             st.caption(
                 "Pick a short English handle for your team — this becomes "
                 "your workspace identity so your projects stay separate "
-                "from other teams'. You'll see the same projects again on "
-                "any device by re-entering the same name."
+                "from other teams'."
+            )
+
+            st.markdown(
+                f"**命名规则**: {TEAM_NAME_MIN}-{TEAM_NAME_MAX} 个字符，"
+                "仅允许英文字母、数字和下划线 `_`（不能包含空格、连字符或中文）"
             )
 
             with st.form("team_gate_form", clear_on_submit=False):
@@ -199,11 +203,7 @@ def render_team_gate() -> None:
                     "Team name",
                     key="team_gate_input",
                     max_chars=TEAM_NAME_MAX,
-                    placeholder="e.g. redwolf, bluefox3, teamA",
-                    help=(
-                        f"{TEAM_NAME_MIN}-{TEAM_NAME_MAX} characters; "
-                        "letters, digits and '_' only (no spaces or hyphens)."
-                    ),
+                    placeholder="e.g. redwolf",
                     label_visibility="collapsed",
                 )
                 submitted = st.form_submit_button(
@@ -228,6 +228,20 @@ def render_team_gate() -> None:
                     # state assignment is enough for this browser tab.
                     pass
                 st.rerun()
+
+            # --- Examples section ---
+            st.markdown(
+                "<div style='margin-top:0.6rem;padding:0.6rem 0.8rem;"
+                "background:#f0f4f8;border-radius:6px;font-size:0.85rem;'>"
+                "✅ <b>有效示例</b>: <code>redwolf</code> · "
+                "<code>team_alpha</code> · <code>bluefox3</code> · "
+                "<code>GroupA</code><br>"
+                "❌ <b>无效示例</b>: <code>red-wolf</code>(含连字符) · "
+                "<code>ab</code>(太短) · <code>_team</code>(下划线开头) · "
+                "<code>我的团队</code>(中文)"
+                "</div>",
+                unsafe_allow_html=True,
+            )
 
         st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
         st.caption(
