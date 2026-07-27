@@ -1023,6 +1023,7 @@ def _render_action_buttons(scenario_name: str):
     def _go_analysis():
         st.session_state.previous_page = st.session_state.current_page
         st.session_state.current_page = "Analysis"
+        st.session_state._confirm_delete = False
         st.rerun()
 
     def _run_analysis():
@@ -1031,11 +1032,13 @@ def _render_action_buttons(scenario_name: str):
         st.session_state.previous_page = st.session_state.current_page
         st.session_state.force_analysis_rerun = True
         st.session_state.current_page = "Analysis"
+        st.session_state._confirm_delete = False
         st.rerun()
 
     def _go_reasoning():
         st.session_state.previous_page = st.session_state.current_page
         st.session_state.current_page = "Reasoning"
+        st.session_state._confirm_delete = False
         st.rerun()
 
     def _defer(action: str):
@@ -1137,9 +1140,13 @@ def _render_action_buttons(scenario_name: str):
                     t("simulation.reset"),
                     "secondary",
                     None,
-                    lambda: (_stop_simulation(), _reset_simulation()),
+                    _stop_and_reset,
                 ))
     elif st.session_state.simulation_completed:
+        # After user deletes data, completed state is stale — reset to idle.
+        if not data_exists:
+            st.session_state.simulation_completed = False
+            st.rerun()
         if analysis_fresh or analysis_runnable:
             buttons.append(_analysis_button("primary"))
         if data_exists:
@@ -1184,7 +1191,8 @@ def _render_action_buttons(scenario_name: str):
     # in render_simulation_page). Grey out the whole toolbar so the primary
     # trigger button can't be clicked again while the simulation starts.
     pending = bool(st.session_state.get("pending_action"))
-    _render_toolbar(buttons, disabled=pending)
+    confirming_delete = bool(st.session_state.get("_confirm_delete"))
+    _render_toolbar(buttons, disabled=pending or confirming_delete)
 
     # Show saved data round count when experiment data exists on disk.
     if data_exists and not st.session_state.simulation_running:
@@ -1236,10 +1244,10 @@ def _render_action_buttons(scenario_name: str):
                 else "不完整的实验数据"
             )
             st.warning(
-                f"确定要删除 **{scenario_name}** 的 {_del_label} 吗？"
+                f"确定要删除 **EXPERIMENT/{scenario_name}** 的 {_del_label} 吗？"
                 " 此操作不可撤销。"
             )
-            c1, c2, c3 = st.columns([1, 1, 4])
+            c1, c2, _ = st.columns([1, 1, 4])
             with c1:
                 if st.button("✅ 确认删除", key="confirm_del_yes", type="primary"):
                     import shutil
@@ -1282,6 +1290,7 @@ def _start_replay(scenario_name: str, info: dict):  # noqa: ARG001
     st.session_state.replay_index = 0
     st.session_state.viewed_round_idx = 0
     st.session_state.replay_active = True
+    st.session_state._confirm_delete = False
 
     _sys_notice(f"Loading {len(rounds)} saved rounds for {scenario_name}…", "info")
     st.rerun()
@@ -1305,6 +1314,7 @@ def _start_simulation(scenario_name: str, info: dict):
     st.session_state.replay_index = 0
     st.session_state.viewed_round_idx = 0
     st.session_state.replay_active = False
+    st.session_state._confirm_delete = False
 
     config_path = info.get("config_path") or str(
         _configs_path(scenario_name) / "simulation.yml"
@@ -1560,6 +1570,23 @@ def _stop_simulation():
     st.rerun()
 
 
+def _stop_and_reset():
+    """Stop any running simulation/replay AND reset to idle in one step.
+
+    Unlike calling _stop_simulation() then _reset_simulation() (which fails
+    because _stop_simulation calls st.rerun), this performs both operations
+    atomically before a single rerun.
+    """
+    # Kill the background subprocess if one exists
+    if st.session_state.runner:
+        st.session_state.runner.stop()
+    sim_progress = st.session_state.get("_sim_progress")
+    process = sim_progress.get("_process") if sim_progress else None
+    _terminate_process_tree(process)
+    # Full reset
+    _reset_simulation()
+
+
 def _reset_simulation():
     """Reset simulation state to idle."""
     st.session_state.simulation_running = False
@@ -1571,6 +1598,7 @@ def _reset_simulation():
     st.session_state.replay_active = False
     st.session_state._sim_progress = None
     st.session_state.runner = None
+    st.session_state._confirm_delete = False
     st.session_state.current_page = "Simulation"
     st.rerun()
 
