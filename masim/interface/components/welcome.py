@@ -634,7 +634,7 @@ def render_welcome() -> None:
             )
             st.caption(
                 "This becomes the main identifier for this session. "
-                "A run environment is created at `examples/<name>/`."
+                "Your customized scenarios will be saved under your team's namespace."
             )
 
             # --- Existing projects picker (live filter as user types) ---
@@ -802,7 +802,7 @@ def render_welcome() -> None:
                     "will reuse existing folder" if existing
                     else "will be created"
                 )
-                st.caption(f"\u2192 `examples/{slug_preview}/` ({note})")
+                st.caption(f"\u2192 Project ID: `{slug_preview}` ({note})")
 
             if st.button(
                 "Create & continue \u2192",
