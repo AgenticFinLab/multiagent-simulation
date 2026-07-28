@@ -156,7 +156,7 @@ class RuleLLMInvestor(GeneralPlayer):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
-                response = result.response
+                response = result.outputs[0].response
                 decision = _validate_decision(
                     parse_llm_response_with_thinking(response), self.identity
                 )

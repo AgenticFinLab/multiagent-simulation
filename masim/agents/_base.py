@@ -477,18 +477,22 @@ class CanonicalLLMPlayer(GeneralPlayer):
         try:
             decision = self._run_llm(state)
         except Exception as exc:  # noqa: BLE001
-            # FAIL-LOUD: never silently fabricate a "hold" decision. A synthetic
-            # hold with bid_price=0.01 would pollute herding/CV/entropy metrics
-            # and lie about LLM agents' true behaviour. If retries in _run_llm
-            # were already exhausted, the run must be considered invalid.
+            # Even with fallback="raise", we catch here to prevent a single
+            # agent from crashing the entire simulation.  Log loudly and skip.
             logger.error(
-                "[%s] LLM call failed after retries (%s); aborting round.",
+                "[%s] LLM call failed (%s); emitting noop for this round.",
                 self.identity,
                 exc,
             )
-            raise RuntimeError(
-                f"[{self.identity}] LLM decision unavailable: {exc}"
-            ) from exc
+            return _emit(self._noop_order())
+
+        # Fallback hold from robust_llm_call — emit as noop so metrics exclude it
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] Using fallback hold (LLM unavailable this round).",
+                self.identity,
+            )
+            return _emit(self._noop_order())
 
         order = InvestorOrder.from_llm_decision(
             decision,
@@ -613,8 +617,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
         return client
 
     def _run_llm(self, state: StandardMarketState) -> Dict[str, Any]:
-        from lmbase.inference.base import InferInput  # type: ignore
-        from masim.utils.llm_utils import parse_llm_response_with_thinking
+        from masim.utils.llm_utils import robust_llm_call
 
         sys_ref = self.state.custom_state.get("sys_message_ref", "")
         user_ref = self.state.custom_state.get("user_message_ref", "")
@@ -626,22 +629,19 @@ class CanonicalLLMPlayer(GeneralPlayer):
         user_prompt = user_template.format(**state.template_vars())
 
         client = self._ensure_client()
-        max_retries = 3
-        last_error: Optional[BaseException] = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=sys_prompt, user_msg=user_prompt)
-            try:
-                infer_output = client.run([infer_input])
-                return parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
-            except Exception as exc:  # noqa: BLE001
-                last_error = exc
-                if attempt < max_retries - 1:
-                    logger.debug(
-                        "[%s] LLM attempt %d failed: %s", self.identity, attempt + 1, exc
-                    )
-        raise RuntimeError(f"LLM call failed after {max_retries} retries: {last_error}")
+        max_retries = int(
+            self.state.custom_state.get("max_llm_retries", 5)
+        )
+        fallback = self.state.custom_state.get("llm_failure_policy", "hold")
+
+        return robust_llm_call(
+            client,
+            sys_prompt,
+            user_prompt,
+            max_retries=max_retries,
+            fallback=fallback,
+            identity=self.identity,
+        )
 
     def _finalize_llm_order(
         self,

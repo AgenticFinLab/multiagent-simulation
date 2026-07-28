@@ -291,7 +291,7 @@ class RagLLMInvestor(GeneralPlayer):
             try:
                 infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
                 result = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(result.response)
+                decision = parse_llm_response_with_thinking(result.outputs[0].response)
                 if decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"Invalid action: {decision['action']}")
                 proposed_price = float(decision["bid_price"])

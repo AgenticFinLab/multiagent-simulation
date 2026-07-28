@@ -720,7 +720,7 @@ class BaseRagInvestor(GeneralPlayer):
                 llm_input = InferInput(system_msg=sys_prompt, user_msg=user_prompt)
                 result = self.llm_client.run([llm_input])
                 raw_decision = parse_llm_response_with_thinking(
-                    result.response
+                    result.outputs[0].response
                 )
                 if raw_decision["action"] not in ("buy", "sell", "hold"):
                     raise ValueError(f"invalid action: {raw_decision['action']}")

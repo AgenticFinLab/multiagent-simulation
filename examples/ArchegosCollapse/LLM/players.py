@@ -3,32 +3,32 @@
 Archegos collapse simulation with LLM-driven investors using behavioral personas.
 Market dynamics are rule-based; investor decisions are LLM-generated.
 
+Uses the centralized robust_llm_call pipeline from masim.utils.llm_utils for
+automatic retry, backoff, error discrimination, and fallback hold.
+
 Environment Variables:
     ARK_API_KEY: ByteDance Doubao API key (required for LLM calls)
 """
 
-import asyncio
 import importlib
 import logging
 import os
-import random
 import sys
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 
 from lmbase.inference.api_call import LangChainAPIInference
-from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 from masim.format.order import normalize_action_quantity, validate_order
+from masim.utils.llm_utils import robust_llm_call_async
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
-from examples.ArchegosCollapse.Rule.players import Market
+from examples.ArchegosCollapse.Rule.players import Market  # noqa: E402
 
 logger = logging.getLogger("ArchegosCollapse.LLM")
 
@@ -40,33 +40,34 @@ def load_prompt(prompt_path: str) -> str:
     return getattr(module, var_name)
 
 
-def _validate_decision(decision: Dict[str, Any], identity: str) -> Dict[str, Any]:
-    """Validate canonical trading decision fields before portfolio mutation."""
-    action = decision["action"]
+def _validate_decision(decision: Dict[str, Any]) -> None:
+    """Validate canonical trading decision fields.
+
+    Raises ValueError if the decision is malformed. Used as validate_fn
+    parameter to robust_llm_call_async.
+    """
+    action = decision.get("action", "")
     if action not in {"buy", "sell", "hold"}:
-        raise ValueError(f"[{identity}] invalid action: {action}")
-    bid_price = float(decision["bid_price"])
+        raise ValueError(f"invalid action: {action}")
+    bid_price = float(decision.get("bid_price", 0))
     if bid_price <= 0:
-        raise ValueError(f"[{identity}] invalid bid_price: {bid_price}")
-    quantity = float(decision["quantity"])
+        raise ValueError(f"invalid bid_price: {bid_price}")
+    quantity = float(decision.get("quantity", 0))
     if quantity < 0:
-        raise ValueError(f"[{identity}] invalid quantity: {quantity}")
-    reasoning = str(decision["reasoning"]).strip()
+        raise ValueError(f"invalid quantity: {quantity}")
+    reasoning = str(decision.get("reasoning", "")).strip()
     if not reasoning:
-        raise ValueError(f"[{identity}] empty reasoning")
-    if action == "hold":
-        quantity = 0.0
-    return {
-        **decision,
-        "action": action,
-        "bid_price": bid_price,
-        "quantity": quantity,
-        "reasoning": reasoning,
-    }
+        raise ValueError("empty reasoning")
 
 
 class LLMInvestor(GeneralPlayer):
-    """Base class for LLM-powered investors in the ArchegosCollapse scenario."""
+    """Base class for LLM-powered investors in the ArchegosCollapse scenario.
+
+    Uses masim.utils.llm_utils.robust_llm_call_async for centralized
+    retry/backoff/fallback. Scenario-specific logic is limited to:
+    - Prompt loading (sys_message / user_message from extras["llm"])
+    - Portfolio bookkeeping (cash/position mutation after decision)
+    """
 
     async def perceive(
         self,
@@ -147,40 +148,37 @@ class LLMInvestor(GeneralPlayer):
             portfolio_value=cash + position * market_data["price"],
         )
 
-        max_retries = 3
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            try:
-                infer_output = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
-                decision = _validate_decision(decision, self.identity)
-                break
-            except Exception as exc:
-                last_error = exc
-                parse_error = isinstance(exc, (ValueError, KeyError))
-                retryable_api_error = is_retryable_llm_error(exc)
-                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
-                    delay = min(4.0, 0.75 * (2**attempt)) + random.uniform(0.0, 0.5)
-                    logger.debug(
-                        "[%s] LLM call/parse failed, retrying in %.2fs: %s",
-                        self.identity,
-                        delay,
-                        exc,
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                if not parse_error and not retryable_api_error:
-                    raise
+        # --- Centralized robust LLM call ---
+        decision = await robust_llm_call_async(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            validate_fn=_validate_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
-            )
+        # Fallback hold — skip portfolio mutation, emit noop
+        if decision.get("_fallback"):
+            logger.warning("[%s] R%d: fallback hold", self.identity, round_num)
+            order = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": decision["reasoning"],
+                "analysis": "",
+                "_skipped": True,
+            }
+            validate_order(order)
+            return {
+                **order,
+                "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+            }
 
+        # --- Normal path: apply portfolio constraints ---
         action, quantity = normalize_action_quantity(
             decision["action"], decision["quantity"]
         )

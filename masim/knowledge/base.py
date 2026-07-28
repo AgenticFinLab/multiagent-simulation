@@ -614,8 +614,8 @@ class BaseKnowledgeLoader(ABC):
 
         llm_client : Any
             An LLM client object with a .run([InferInput]) method that
-            returns an object with a .response str attribute. In practice,
-            a LangChainAPIInference instance.
+            returns an InferBatchOutput with .outputs[0].response str.
+            In practice, a LangChainAPIInference instance.
 
         n_urls : int
             Number of URLs to ask the LLM to suggest. Default 5.
