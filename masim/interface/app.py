@@ -1313,11 +1313,11 @@ def _start_simulation(scenario_name: str, info: dict):
     """
     # --- Cross-process concurrency limit ---
     # On an 8-core server, each simulation (Ray subprocess) uses 2-4 cores.
-    # Allow at most 2 concurrent simulations across ALL Streamlit workers.
+    # Allow at most 4 concurrent simulations across ALL Streamlit workers.
     import os
     import tempfile
 
-    MAX_CONCURRENT_SIMS = 2
+    MAX_CONCURRENT_SIMS = 4
     _SIM_SLOT_DIR = Path(tempfile.gettempdir()) / "masim_sim_slots"
     _SIM_SLOT_DIR.mkdir(exist_ok=True)
 

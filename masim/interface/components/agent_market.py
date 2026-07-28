@@ -8,13 +8,17 @@ import html
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 from urllib.parse import quote  # noqa: F401 – kept for potential external use
 
 import streamlit as st
 
 from ..config_loader import (
+    CATEGORY_DESCRIPTIONS,
+    CATEGORY_LABELS,
+    CATEGORY_ORDER,
     discover_scenario_groups,
+    discover_scenarios_by_category,
     get_agents_info,
     get_finance_scenario_content,
     get_finance_scenario_path,
@@ -23,8 +27,10 @@ from ..config_loader import (
     get_market_icon_path,
     get_market_type,
     get_phenomenon_description,
+    get_rulellm_prompt_for_agent,
     get_scenario_info,
     get_topology_info,
+    resolve_scenario_rulellm_prompts,
     scenario_display_name,
 )
 from ..customized import (
@@ -84,7 +90,32 @@ _DOMAIN_ROOTS: list[tuple[str, Path]] = [
     ("opinion", OPINION_ROOT),
 ]
 
-VARIANT_DISPLAY = {"Rule": "Rule", "LLM": "LLM", "RuleLLM": "RuleLLM", "Rag": "RAG"}
+VARIANT_DISPLAY = {
+    "Rule": "Rule",
+    "LLM": "LLM",
+    "RuleLLM": "RuleLLM (📖 sample)",
+    "Rag": "RAG",
+}
+
+# Tooltip / help text for the disabled Rag engine — visible when hovering
+# the greyed-out button so students understand *why* it is unavailable.
+DISABLED_ENGINE_HELP: Dict[str, str] = {
+    "Rag": (
+        "🔒 Retrieval-Augmented Generation (RAG) is temporarily unavailable "
+        "in this teaching build. It will return once the knowledge-base "
+        "backend is finalised."
+    ),
+}
+
+# Explanatory text shown near the RuleLLM engine wherever it is selectable —
+# tells students RuleLLM is a read-only sample, not something to edit.
+RULELLM_SAMPLE_NOTICE = (
+    "🔒 **RuleLLM is a read-only teaching sample.** It shows how the "
+    "quantitative rules from the Rule engine are embedded inside an LLM "
+    "prompt (see the `== DECISION RULES ==` block). Prompts, parameters "
+    "and agent counts are locked so the sample stays faithful — pick "
+    "**Rule** or **LLM** if you want to modify the configuration."
+)
 
 # Subtle brand-aligned tint per decision engine, used to color the Default
 # launch buttons on the variant_choice page. Each entry is
@@ -211,13 +242,37 @@ def render_entry_choice() -> None:
 
     selected_base = st.session_state.get("selected_scenario_base", "")
 
-    # --- Scenario card grid -------------------------------------------
-    cols_per_row = 3
-    for start in range(0, len(group_names), cols_per_row):
-        row = st.columns(cols_per_row, gap="medium")
-        for col, base in zip(row, group_names[start : start + cols_per_row]):
-            with col:
-                _render_scenario_card(base, None, selected_base)
+    # --- Category tabs (lazy-loaded scenario cards) --------------------
+    # Only the currently-active tab renders its 4 cards, so first-paint
+    # cost is 4 cards instead of 12.  Tabs also organise the pedagogy:
+    # Behavioral Biases / Market Mechanisms / Historical Crises.
+    scenarios_by_cat = discover_scenarios_by_category()
+    active_categories = [c for c in CATEGORY_ORDER if scenarios_by_cat.get(c)]
+
+    if not active_categories:
+        st.warning(
+            "No curated scenarios matched the visibility whitelist. "
+            "Check `_SCENARIO_CATEGORIES` in `config_loader.py`."
+        )
+        return
+
+    tab_labels = [CATEGORY_LABELS[c] for c in active_categories]
+    tabs = st.tabs(tab_labels)
+    for cat_key, tab in zip(active_categories, tabs):
+        with tab:
+            caption = CATEGORY_DESCRIPTIONS.get(cat_key, "")
+            if caption:
+                st.caption(caption)
+            bases_in_cat = scenarios_by_cat[cat_key]
+            # 4 cards per row — matches the typical 4-per-category layout.
+            cols_per_row = 4
+            for start in range(0, len(bases_in_cat), cols_per_row):
+                row = st.columns(cols_per_row, gap="medium")
+                for col, base in zip(
+                    row, bases_in_cat[start : start + cols_per_row]
+                ):
+                    with col:
+                        _render_scenario_card(base, None, selected_base)
 
     # Re-read after the loop in case a click changed the selection.
     # Clicking a card sets the selection AND advances to the
@@ -1010,20 +1065,28 @@ def render_variant_choice() -> None:
             for col, key in zip(chip_cols, variant_keys):
                 variant = key.split("/", 1)[1] if "/" in key else key
                 _is_disabled = variant in _DISABLED_ENGINES
+                if _is_disabled:
+                    _help = DISABLED_ENGINE_HELP.get(
+                        variant, "暂时禁用 (temporarily disabled)"
+                    )
+                elif variant == "RuleLLM":
+                    _help = (
+                        f"📖 Run {scenario_display_name(selected_base)} "
+                        f"using the read-only RuleLLM sample — showcases how "
+                        f"quantitative rules are embedded in the LLM prompt."
+                    )
+                else:
+                    _help = (
+                        f"Run {scenario_display_name(selected_base)} with "
+                        f"the {variant} decision engine."
+                    )
                 with col:
                     if st.button(
                         VARIANT_DISPLAY.get(variant, variant),
                         key=f"stage2_default_{variant}",
                         width="stretch",
                         disabled=_is_disabled,
-                        help=(
-                            "暂时禁用 (temporarily disabled)"
-                            if _is_disabled
-                            else (
-                                f"Run {scenario_display_name(selected_base)} "
-                                f"with the {variant} decision engine."
-                            )
-                        ),
+                        help=_help,
                     ):
                         _launch_default_variant(key)
     else:
@@ -1046,20 +1109,29 @@ def render_variant_choice() -> None:
                 for col, key in zip(chip_cols, variant_keys):
                     variant = key.split("/", 1)[1] if "/" in key else key
                     _is_disabled = variant in _DISABLED_ENGINES
+                    if _is_disabled:
+                        _help = DISABLED_ENGINE_HELP.get(
+                            variant, "暂时禁用 (temporarily disabled)"
+                        )
+                    elif variant == "RuleLLM":
+                        _help = (
+                            f"📖 Configure {scenario_display_name(selected_base)} "
+                            f"with the read-only RuleLLM sample — parameters "
+                            f"and prompt are locked; only viewing / launching "
+                            f"is allowed."
+                        )
+                    else:
+                        _help = (
+                            f"Configure {scenario_display_name(selected_base)} "
+                            f"with the {variant} engine, then launch."
+                        )
                     with col:
                         if st.button(
                             VARIANT_DISPLAY.get(variant, variant),
                             key=f"stage2_default_{variant}",
                             width="stretch",
                             disabled=_is_disabled,
-                            help=(
-                                "暂时禁用 (temporarily disabled)"
-                                if _is_disabled
-                                else (
-                                    f"Configure {scenario_display_name(selected_base)} "
-                                    f"with the {variant} engine, then launch."
-                                )
-                            ),
+                            help=_help,
                         ):
                             st.session_state.default_config_key = key
                             st.session_state.workflow_stage = "default_config"
@@ -1290,10 +1362,20 @@ def render_default_config() -> None:
 
     # ── Title ─────────────────────────────────────────────────────────────
     st.title(f"{scenario_display_name(base)} · {VARIANT_DISPLAY.get(variant, variant)}")
-    st.caption(
-        "Review and adjust the market environment and agent parameters below. "
-        "Click **Confirm & Launch** at the bottom to start the simulation."
-    )
+    is_rulellm = (variant == "RuleLLM")
+    if is_rulellm:
+        st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
+        st.caption(
+            "This page is a read-only teaching sample: parameters and prompts "
+            "are locked, but you can still click **Confirm & Launch** to run "
+            "the sample simulation and see how the rule-embedded prompt "
+            "drives agent behavior."
+        )
+    else:
+        st.caption(
+            "Review and adjust the market environment and agent parameters below. "
+            "Click **Confirm & Launch** at the bottom to start the simulation."
+        )
 
     st.divider()
 
@@ -1320,6 +1402,7 @@ def render_default_config() -> None:
                 f"Number of simulation rounds. Shipped default: "
                 f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}."
             ),
+            disabled=is_rulellm,
         )
         st.session_state[_rounds_key] = int(edited_rounds)
 
@@ -1351,6 +1434,7 @@ def render_default_config() -> None:
             extras=market_extras,
             override_slot=market_override,
             key_prefix=f"dc_{base}_market",
+            disabled=is_rulellm,
         )
         if not market_override:
             edits.pop("__market__", None)
@@ -1496,11 +1580,22 @@ def _show_default_edit_dialog(
     edits: dict[str, dict[str, Any]],
     is_llm_variant: bool,
 ) -> None:
-    """Dialog overlay for editing a Default-config agent's parameters."""
+    """Dialog overlay for editing a Default-config agent's parameters.
+
+    When ``variant == "RuleLLM"``, everything is rendered read-only (sample
+    view) — the dialog serves as a teaching example that shows how the
+    quantitative Rule engine's decision rules get embedded inside an LLM
+    prompt. Save is disabled and the persona textarea is force-loaded from
+    the actual scenario RuleLLM configs so students see the real
+    ``==DECISION RULES==`` block.
+    """
     display_name = block_info.get("name") or block_key
     extras = block_info.get("extras") or {}
+    is_rulellm = (variant == "RuleLLM")
 
     st.subheader(display_name)
+    if is_rulellm:
+        st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
 
     # ── Parameters (extras) ───────────────────────────────────────────
     if extras:
@@ -1510,6 +1605,7 @@ def _show_default_edit_dialog(
             extras=extras,
             override_slot=override_slot,
             key_prefix=f"dc_{base}_{block_key}",
+            disabled=is_rulellm,
         )
         if not override_slot:
             edits.pop(block_key, None)
@@ -1524,6 +1620,11 @@ def _show_default_edit_dialog(
                 "Edit the agent's persona below. The output format instruction "
                 "is appended automatically — you only need to adjust the "
                 "persona description."
+                if not is_rulellm else
+                "Read-only sample. Below is the actual RuleLLM system prompt "
+                "for this agent in this scenario — notice how the "
+                "`== DECISION RULES ==` block encodes the same quantitative "
+                "logic that the pure Rule engine uses."
             )
 
             llm_edits: dict[str, dict[str, Any]] = edits.setdefault("__llm__", {})
@@ -1535,6 +1636,15 @@ def _show_default_edit_dialog(
             if not prompt_text and sys_ref:
                 prompt_text = _resolve_prompt_text(sys_ref)
 
+            # For RuleLLM, override with the actual scenario RuleLLM prompt
+            # (bypasses the customized/agent_catalog.py:199-202 mirror bug
+            # that pastes plain-LLM prompts onto RuleLLM blocks).
+            if is_rulellm:
+                _prompt_data = get_rulellm_prompt_for_agent(base, block_key)
+                real_sys = (_prompt_data or {}).get("sys", "") if _prompt_data else ""
+                if real_sys:
+                    prompt_text = real_sys
+
             # Strip the format tail so users only see persona
             persona_only = _extract_persona_section(prompt_text)
 
@@ -1543,13 +1653,19 @@ def _show_default_edit_dialog(
                 value=agent_llm_edits.get("persona_prompt", persona_only),
                 height=220,
                 key=f"dc_llm_prompt_{base}_{block_key}",
-                help="Edit the agent's persona content.",
+                help=(
+                    "Read-only — this is a teaching sample."
+                    if is_rulellm else
+                    "Edit the agent's persona content."
+                ),
                 label_visibility="collapsed",
+                disabled=is_rulellm,
             )
-            if edited_prompt.strip() != persona_only.strip():
-                agent_llm_edits["persona_prompt"] = edited_prompt.strip()
-            else:
-                agent_llm_edits.pop("persona_prompt", None)
+            if not is_rulellm:
+                if edited_prompt.strip() != persona_only.strip():
+                    agent_llm_edits["persona_prompt"] = edited_prompt.strip()
+                else:
+                    agent_llm_edits.pop("persona_prompt", None)
 
             # Locked format display
             st.info(
@@ -1580,11 +1696,13 @@ def _show_default_edit_dialog(
                     value=current_temp,
                     step=0.05,
                     key=f"dc_llm_temp_{base}_{block_key}",
+                    disabled=is_rulellm,
                 )
-                if abs(new_temp - float(gen_cfg.get("temperature", 0.7))) > 0.01:
-                    agent_llm_edits["temperature"] = round(new_temp, 2)
-                else:
-                    agent_llm_edits.pop("temperature", None)
+                if not is_rulellm:
+                    if abs(new_temp - float(gen_cfg.get("temperature", 0.7))) > 0.01:
+                        agent_llm_edits["temperature"] = round(new_temp, 2)
+                    else:
+                        agent_llm_edits.pop("temperature", None)
             with pcol2:
                 current_tokens = int(
                     agent_llm_edits.get(
@@ -1598,11 +1716,13 @@ def _show_default_edit_dialog(
                     value=current_tokens,
                     step=64,
                     key=f"dc_llm_tokens_{base}_{block_key}",
+                    disabled=is_rulellm,
                 )
-                if int(new_tokens) != int(gen_cfg.get("max_tokens", 512)):
-                    agent_llm_edits["max_tokens"] = int(new_tokens)
-                else:
-                    agent_llm_edits.pop("max_tokens", None)
+                if not is_rulellm:
+                    if int(new_tokens) != int(gen_cfg.get("max_tokens", 512)):
+                        agent_llm_edits["max_tokens"] = int(new_tokens)
+                    else:
+                        agent_llm_edits.pop("max_tokens", None)
 
             current_model = agent_llm_edits.get(
                 "lm_name", llm_cfg.get("lm_name", "")
@@ -1612,11 +1732,13 @@ def _show_default_edit_dialog(
                 value=current_model,
                 key=f"dc_llm_model_{base}_{block_key}",
                 help="LLM endpoint identifier (e.g. ark/doubao-seed-2-0-mini-260428).",
+                disabled=is_rulellm,
             )
-            if new_model.strip() != llm_cfg.get("lm_name", ""):
-                agent_llm_edits["lm_name"] = new_model.strip()
-            else:
-                agent_llm_edits.pop("lm_name", None)
+            if not is_rulellm:
+                if new_model.strip() != llm_cfg.get("lm_name", ""):
+                    agent_llm_edits["lm_name"] = new_model.strip()
+                else:
+                    agent_llm_edits.pop("lm_name", None)
 
             # Prune empty per-agent dicts
             if not agent_llm_edits:
@@ -1625,7 +1747,15 @@ def _show_default_edit_dialog(
                 edits.pop("__llm__", None)
 
     # ── Save button ────────────────────────────────────────────────────
-    if st.button("保存", key="dc_edit_save", type="primary", use_container_width=True):
+    if st.button(
+        "保存",
+        key="dc_edit_save",
+        type="primary",
+        use_container_width=True,
+        disabled=is_rulellm,
+        help=("RuleLLM 只作为教学样例展示，无可保存的修改。"
+              if is_rulellm else None),
+    ):
         st.session_state[f"dc_edited_{block_key}"] = True
         st.rerun()
 
@@ -1635,8 +1765,14 @@ def _render_extras_grid(
     extras: dict[str, Any],
     override_slot: dict[str, Any],
     key_prefix: str,
+    disabled: bool = False,
 ) -> None:
-    """Render a responsive grid of parameter widgets for an extras dict."""
+    """Render a responsive grid of parameter widgets for an extras dict.
+
+    When ``disabled=True`` (e.g. RuleLLM sample view), each widget is
+    greyed-out and no overrides are recorded — the current values are
+    shown for reference only.
+    """
     cols_per_row = 3
     keys = list(extras.keys())
     for row_start in range(0, len(keys), cols_per_row):
@@ -1655,6 +1791,7 @@ def _render_extras_grid(
                         value=bool(current_val),
                         key=widget_key,
                         help=f"Default: {default_val}",
+                        disabled=disabled,
                     )
                 elif isinstance(default_val, (int, float)):
                     new_val = st.number_input(
@@ -1671,6 +1808,7 @@ def _render_extras_grid(
                         ),
                         key=widget_key,
                         help=f"Default: {default_val}",
+                        disabled=disabled,
                     )
                 else:
                     new_val = st.text_input(
@@ -1678,8 +1816,12 @@ def _render_extras_grid(
                         value=str(current_val),
                         key=widget_key,
                         help=f"Default: {default_val!r}",
+                        disabled=disabled,
                     )
 
+                if disabled:
+                    # Don't record any overrides while in read-only mode.
+                    continue
                 coerced = _coerce_extras_value(default_val, new_val)
                 if coerced != default_val:
                     override_slot[extras_key] = coerced
@@ -2615,7 +2757,10 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
         return
 
     agent_type = agent["agent_type"]
-    all_engines = [e for e in ALL_ENGINES if e not in _DISABLED_ENGINES]
+    # Keep Rag in the button row so students still SEE it exists, but it will
+    # be rendered disabled with a tooltip explaining why it is unavailable.
+    all_engines = list(ALL_ENGINES)
+    selectable_engines = [e for e in all_engines if e not in _DISABLED_ENGINES]
     specs = _load_param_specs(agent)
 
     st.markdown('<div class="market-kicker">Edit roster entry</div>', unsafe_allow_html=True)
@@ -2636,32 +2781,50 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
             "**My Roster** list. Leave empty to fall back to the "
             "archetype's default name."
         ),
+        disabled=st.session_state.get(f"entry_{entry_id}_engine") == "RuleLLM",
     )
 
     # ---- Engine selector ------------------------------------------------
     engine_key = f"entry_{entry_id}_engine"
     if engine_key not in st.session_state:
-        default_engine = entry.engine if entry.engine in all_engines else all_engines[0]
-        st.session_state[engine_key] = default_engine
-    elif st.session_state[engine_key] not in all_engines:
-        st.session_state[engine_key] = all_engines[0]
-
-    st.segmented_control(
-        "Decision engine",
-        options=all_engines,
-        format_func=lambda v: VARIANT_DISPLAY.get(v, v),
-        key=engine_key,
-        help=(
-            "Choose the decision-making engine. Rule = deterministic logic; "
-            "LLM = persona-driven prompt; RuleLLM = hybrid."
-        ),
-    )
-    if _DISABLED_ENGINES:
-        st.caption(
-            f"{'、'.join(VARIANT_DISPLAY.get(e, e) for e in sorted(_DISABLED_ENGINES))}"
-            " 暂时禁用"
+        default_engine = (
+            entry.engine if entry.engine in selectable_engines else selectable_engines[0]
         )
+        st.session_state[engine_key] = default_engine
+    elif st.session_state[engine_key] not in selectable_engines:
+        st.session_state[engine_key] = selectable_engines[0]
+
+    # Render engine picker as an explicit row of buttons so we can disable
+    # specific engines (Rag) individually — segmented_control does not
+    # support per-option disabled state.
+    st.markdown("**Decision engine**")
+    current_engine = st.session_state[engine_key]
+    engine_cols = st.columns(len(all_engines))
+    for _idx, _eng in enumerate(all_engines):
+        _is_disabled = _eng in _DISABLED_ENGINES
+        _is_current = (_eng == current_engine)
+        _label = ("● " if _is_current else "○ ") + VARIANT_DISPLAY.get(_eng, _eng)
+        _help = DISABLED_ENGINE_HELP.get(
+            _eng,
+            "Rule = deterministic logic; LLM = persona-driven prompt; "
+            "RuleLLM = read-only sample (rules embedded in LLM prompt).",
+        )
+        with engine_cols[_idx]:
+            if st.button(
+                _label,
+                key=f"entry_{entry_id}_engine_btn_{_eng}",
+                type=("primary" if _is_current and not _is_disabled else "secondary"),
+                width="stretch",
+                disabled=_is_disabled,
+                help=_help,
+            ):
+                st.session_state[engine_key] = _eng
+                st.rerun()
+
     engine = st.session_state[engine_key]
+    is_rulellm = (engine == "RuleLLM")
+    if is_rulellm:
+        st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
 
     # ---- Instance count -------------------------------------------------
     ninst_key = f"entry_{entry_id}_ninst"
@@ -2679,6 +2842,7 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
             "share the same class, engine, and parameter values but act "
             "independently. **Config key:** `num_instances`."
         ),
+        disabled=is_rulellm,
     )
 
     # ---- Per-parameter widgets -----------------------------------------
@@ -2695,6 +2859,7 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
                 entry_id=entry_id,
                 spec=spec,
                 persisted=persisted_params,
+                disabled=is_rulellm,
             )
             edited[spec.symbol] = value
 
@@ -2706,17 +2871,25 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
             engine=engine,
             persisted=persisted_params,
             edited=edited,
+            disabled=is_rulellm,
         )
 
     # ---- Action buttons -------------------------------------------------
     st.divider()
     btn_save, btn_reset, btn_del, btn_close = st.columns([3, 1, 1, 1])
+    _save_help = (
+        DISABLED_ENGINE_HELP.get("Rag") if engine == "Rag"
+        else ("RuleLLM is a read-only sample — nothing to save."
+              if is_rulellm else None)
+    )
     with btn_save:
         if st.button(
             "Save changes",
             type="primary",
             width="stretch",
             key=f"entry_{entry_id}_save",
+            disabled=is_rulellm,
+            help=_save_help,
         ):
             update_entry(
                 roster,
@@ -2738,9 +2911,12 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
             width="stretch",
             key=f"entry_{entry_id}_reset",
             help=(
+                "RuleLLM is a read-only sample — nothing to reset."
+                if is_rulellm else
                 "Clear this entry's parameter overrides and revert to "
                 "handbook defaults. Engine and instance count are kept."
             ),
+            disabled=is_rulellm,
         ):
             update_entry(roster, entry_id, params={})
             # Also drop every entry-scoped widget so their defaults
@@ -2785,11 +2961,15 @@ def _render_entry_param_widget(
     entry_id: str,
     spec: ParamSpec,
     persisted: dict[str, Any],
+    disabled: bool = False,
 ) -> Any:
     """Render one editable widget for a parameter spec, scoped to an entry.
 
     Widget key format: ``entry_{entry_id}_input_{symbol}`` — unique across
     the app so two entries of the same archetype never share state.
+
+    When ``disabled=True`` (e.g. RuleLLM sample view), the widget is
+    rendered greyed-out but still shows the current handbook default.
     """
     widget_key = f"entry_{entry_id}_input_{spec.symbol}"
     initial = persisted.get(spec.symbol, spec.default_value)
@@ -2808,11 +2988,15 @@ def _render_entry_param_widget(
             index=index,
             key=widget_key,
             help=help_text,
+            disabled=disabled,
         )
 
     if spec.kind == "int":
         coerced = int(initial) if isinstance(initial, (int, float)) else 0
-        kwargs: dict[str, Any] = {"step": 1, "key": widget_key, "help": help_text}
+        kwargs: dict[str, Any] = {
+            "step": 1, "key": widget_key, "help": help_text,
+            "disabled": disabled,
+        }
         if spec.numeric_low is not None and spec.numeric_low != float("-inf"):
             kwargs["min_value"] = int(spec.numeric_low)
         if spec.numeric_high is not None and spec.numeric_high != float("inf"):
@@ -2821,7 +3005,10 @@ def _render_entry_param_widget(
 
     if spec.kind == "float":
         coerced_f = float(initial) if isinstance(initial, (int, float)) else 0.0
-        kwargs = {"key": widget_key, "help": help_text, "format": "%.6g"}
+        kwargs = {
+            "key": widget_key, "help": help_text, "format": "%.6g",
+            "disabled": disabled,
+        }
         if spec.numeric_low is not None and spec.numeric_low != float("-inf"):
             kwargs["min_value"] = float(spec.numeric_low)
         if spec.numeric_high is not None and spec.numeric_high != float("inf"):
@@ -2833,6 +3020,7 @@ def _render_entry_param_widget(
         value=str(initial) if initial is not None else "",
         key=widget_key,
         help=help_text,
+        disabled=disabled,
     )
 
 
@@ -2843,6 +3031,7 @@ def _render_entry_llm_extras(
     engine: str,
     persisted: dict[str, Any],
     edited: dict[str, Any],
+    disabled: bool = False,
 ) -> None:
     """Render LLM hyperparameters and editable prompt textareas for an entry.
 
@@ -2851,6 +3040,13 @@ def _render_entry_llm_extras(
     ``userprompt``.  Values are written into ``edited`` under the
     reserved ``__llm_*__`` sentinels so they round-trip with the rest of
     the entry's params on the next Save.
+
+    When ``disabled=True`` (RuleLLM read-only sample), all widgets are
+    greyed-out AND the persona prompt is force-loaded from the actual
+    scenario RuleLLM players.yml (via
+    :func:`get_rulellm_prompt_for_agent`) so the student sees the real
+    ``==DECISION RULES==`` block instead of the mirrored plain-LLM prompt
+    that ``customized/agent_catalog.py`` would otherwise return.
 
     IMPORTANT: the key names above must stay in lock-step with the
     ``_llm_widget_map`` inside :func:`_build_selections_from_session` —
@@ -2878,8 +3074,27 @@ def _render_entry_llm_extras(
         sys_default = shipped_sys
     if not usr_default and shipped_user:
         usr_default = shipped_user
-    has_shipped_sys = bool(shipped_sys)
-    has_shipped_user = bool(shipped_user)
+
+    # For RuleLLM samples, override BOTH the persona and per-round templates
+    # with the actual scenario-specific text from configs/{Scenario}/RuleLLM
+    # so the student sees the real "==DECISION RULES==" block. The mirrored
+    # prompts returned by get_default_prompts() come from the plain LLM
+    # variant (customized/agent_catalog.py:199-202) and lack scenario rules.
+    if engine == "RuleLLM":
+        scenario_base = st.session_state.get("selected_scenario_base", "")
+        if scenario_base:
+            _prompt_data = get_rulellm_prompt_for_agent(
+                scenario_base, agent["agent_type"]
+            )
+            real_sys = (_prompt_data or {}).get("sys", "") if _prompt_data else ""
+            real_usr = (_prompt_data or {}).get("user", "") if _prompt_data else ""
+            if real_sys:
+                sys_default = real_sys
+            if real_usr:
+                usr_default = real_usr
+
+    has_shipped_sys = bool(shipped_sys) or engine == "RuleLLM"
+    has_shipped_user = bool(shipped_user) or engine == "RuleLLM"
 
     edited["__llm_lm_name__"] = st.text_input(
         "Model identifier",
@@ -2890,6 +3105,7 @@ def _render_entry_llm_extras(
             "example `ark/doubao-seed-2-0-mini-260428`, "
             "`openai/gpt-4o-mini`. **Config key:** `lm_name`."
         ),
+        disabled=disabled,
     )
     col_t, col_n = st.columns(2)
     with col_t:
@@ -2905,6 +3121,7 @@ def _render_entry_llm_extras(
                 "Sampling randomness. 0.0 = deterministic; 0.7 = balanced; "
                 ">1.0 = highly creative. **Config key:** `temperature`."
             ),
+            disabled=disabled,
         )
     with col_n:
         edited["__llm_max_tokens__"] = st.number_input(
@@ -2918,6 +3135,7 @@ def _render_entry_llm_extras(
                 "Hard cap on response length per decision. "
                 "**Config key:** `max_tokens`."
             ),
+            disabled=disabled,
         )
 
     sys_placeholder = (
@@ -2970,6 +3188,7 @@ def _render_entry_llm_extras(
                 "— those are locked and appended automatically. "
                 "**Config key:** `llm.sys_message` (persona portion)."
             ),
+            disabled=disabled,
         )
 
         # Locked format contract — visible so the user knows exactly what
@@ -3036,6 +3255,7 @@ def _render_entry_llm_extras(
                 "runtime, so only use the ones the scenario provides. "
                 "**Config key:** `llm.user_message`."
             ),
+            disabled=disabled,
         )
 
 
@@ -3529,6 +3749,11 @@ def render_customize() -> None:
     # Only search / grid widgets trigger fragment-local reruns.
     # Full-page reruns (sidebar preview, Load default, Clear, Launch)
     # still happen through their own buttons outside this scope.
+    #
+    # LAZY LOADING: agents are split by domain into ``st.tabs()`` — only
+    # the ACTIVE tab renders its cards on each rerun, so the landing view
+    # only pays the image-decode / roster-check cost for one domain at a
+    # time. Domains that have zero agents in the catalog are hidden.
     @st.fragment
     def _agent_grid_fragment() -> None:
         controls, count = st.columns([4, 1])
@@ -3564,15 +3789,41 @@ def render_customize() -> None:
 
         if not filtered:
             st.info("No agents match this search.")
-        else:
+            return
+
+        # Group by domain for tab-based lazy loading.
+        _DOMAIN_LABELS = {
+            "finance": "🏦 Finance Agents",
+            "opinion": "💬 Opinion Agents",
+        }
+        _DOMAIN_ORDER = ["finance", "opinion"]
+        by_domain: dict[str, list[dict[str, Any]]] = {}
+        for agent in filtered:
+            by_domain.setdefault(agent.get("domain", "finance"), []).append(agent)
+        active_domains = [d for d in _DOMAIN_ORDER if by_domain.get(d)]
+
+        def _render_grid(agents: list[dict[str, Any]]) -> None:
             grid_columns_per_row = 6
-            for start in range(0, len(filtered), grid_columns_per_row):
+            for start in range(0, len(agents), grid_columns_per_row):
                 columns = st.columns(grid_columns_per_row, gap="small")
                 for column, agent in zip(
-                    columns, filtered[start : start + grid_columns_per_row]
+                    columns, agents[start : start + grid_columns_per_row]
                 ):
                     with column:
                         _render_agent_card(agent)
+
+        if len(active_domains) <= 1:
+            # Single-domain result set — no need for tabs; render inline.
+            _render_grid(by_domain.get(active_domains[0], []) if active_domains else [])
+            return
+
+        tab_labels = [
+            f"{_DOMAIN_LABELS[d]} ({len(by_domain[d])})" for d in active_domains
+        ]
+        tabs = st.tabs(tab_labels)
+        for domain, tab in zip(active_domains, tabs):
+            with tab:
+                _render_grid(by_domain[domain])
 
     _agent_grid_fragment()
 

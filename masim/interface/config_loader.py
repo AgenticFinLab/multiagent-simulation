@@ -30,6 +30,47 @@ _HIDDEN_VARIANTS: set[str] = set()
 _EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION"}
 
 
+# ─── Curated scenario visibility (Plan A: whitelist) ──────────────────────
+# 12 精选场景，按教学模块分组。修改此 dict 即可增删可见场景；
+# 隐藏的场景在磁盘保留，历史实验数据完好，可随时切换回来。
+_SCENARIO_CATEGORIES: Dict[str, str] = {
+    # 🧠 行为偏差 Behavioral Biases
+    "HerdEffect":           "behavioral",
+    "DispositionEffect":    "behavioral",
+    "OverconfidenceBias":   "behavioral",
+    "AnchoringEffect":      "behavioral",
+    # 💥 市场机制 Market Mechanisms
+    "AssetBubble":          "mechanism",
+    "MomentumEffect":       "mechanism",
+    "FlashCrash2010":       "mechanism",
+    "HerdingInformation":   "mechanism",
+    # 📉 历史危机 Historical Crises
+    "DotComBubble":         "crisis",
+    "GFC2008":              "crisis",
+    "GameStopShortSqueeze": "crisis",
+    "SVBBankRun":           "crisis",
+}
+_VISIBLE_SCENARIOS: set[str] = set(_SCENARIO_CATEGORIES.keys())
+
+# Ordered categories with display labels (order = tab order in UI).
+CATEGORY_ORDER: List[str] = ["behavioral", "mechanism", "crisis"]
+CATEGORY_LABELS: Dict[str, str] = {
+    "behavioral": "🧠 Behavioral Biases",
+    "mechanism":  "💥 Market Mechanisms",
+    "crisis":     "📉 Historical Crises",
+}
+CATEGORY_DESCRIPTIONS: Dict[str, str] = {
+    "behavioral": "Named cognitive & psychological biases that distort investor decisions.",
+    "mechanism":  "Market microstructure phenomena and canonical price patterns.",
+    "crisis":     "Famous historical financial crises and market events.",
+}
+
+
+def scenario_category(base_name: str) -> Optional[str]:
+    """Return the teaching category for a scenario base name, or None if hidden."""
+    return _SCENARIO_CATEGORIES.get(base_name)
+
+
 def _configs_path(scenario_key: str) -> Path:
     """Return the configs/ subdirectory for a scenario key.
 
@@ -153,8 +194,13 @@ def discover_scenarios() -> List[str]:
     """Discover all available simulation scenarios from configs directory.
 
     Scans configs/ at depth-2 for simulation.yml files.  Returns a sorted
-    list of slash-separated keys like 'AssetBubble/Rule'.  Rag variants
-    and TEMPLATES are excluded.
+    list of slash-separated keys like 'AssetBubble/Rule'.  TEMPLATES and
+    CUSTOMIZED_SIMULATION are excluded.
+
+    ⚠️  Curation: only scenarios listed in ``_VISIBLE_SCENARIOS`` (the
+    12 pedagogically-selected scenarios) are returned. Hidden scenarios
+    remain on disk untouched — remove them from ``_SCENARIO_CATEGORIES``
+    at the top of this module to re-expose them.
     """
     if not CONFIGS_DIR.exists():
         return []
@@ -166,6 +212,10 @@ def discover_scenarios() -> List[str]:
             or item.name.startswith("_")
             or item.name in _EXCLUDED_DIRS
         ):
+            continue
+        # Curation whitelist: only pedagogically-selected scenarios appear
+        # in the UI. Hidden scenarios remain on disk for later re-exposure.
+        if item.name not in _VISIBLE_SCENARIOS:
             continue
         # Depth-1: flat scenario (e.g. configs/Demo/simulation.yml)
         if (item / "simulation.yml").exists():
@@ -199,6 +249,28 @@ def discover_scenario_groups() -> Dict[str, List[str]]:
     return groups
 
 
+def discover_scenarios_by_category() -> Dict[str, List[str]]:
+    """Return an ordered mapping of category → list of base scenario names.
+
+    Uses the ``CATEGORY_ORDER`` sequence so categories always render in the
+    same order.  Only scenarios that pass ``discover_scenarios()`` (i.e. are
+    both whitelisted AND present on disk with a valid simulation.yml) are
+    included, so a stale whitelist entry with no config directory is
+    silently dropped.
+    """
+    from collections import OrderedDict
+
+    groups = discover_scenario_groups()
+    result: Dict[str, List[str]] = OrderedDict(
+        (cat, []) for cat in CATEGORY_ORDER
+    )
+    for base in groups.keys():
+        cat = scenario_category(base)
+        if cat and cat in result:
+            result[cat].append(base)
+    return result
+
+
 @st.cache_data(ttl=300)
 def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
     """Get basic information about a scenario.
@@ -217,6 +289,8 @@ def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
         "display_name": scenario_display_name(scenario_name),
         "description": "",
         "is_llm": variant in ("LLM", "RuleLLM", "Rag"),
+        "is_rulellm": variant == "RuleLLM",
+        "is_rag": variant == "Rag",
         "config_path": str(config_path),
         "exists": config_path.exists(),
     }
@@ -1364,3 +1438,109 @@ def get_analysis_freshness(scenario_name: str) -> str:
     if data_mtime is None:
         return "fresh"
     return "fresh" if analysis_mtime >= data_mtime else "stale"
+
+
+# ---------------------------------------------------------------------------
+# RuleLLM prompt resolution — read scenario-specific ``==PERSONA==`` and
+# ``==DECISION RULES==`` prompts straight from ``examples/{Scenario}/RuleLLM/
+# prompts.py`` so the Customize flow can display the *real* hybrid prompt
+# (not the mirrored LLM persona from ``agent_catalog.py``).
+# ---------------------------------------------------------------------------
+@st.cache_data(ttl=300)
+def resolve_scenario_rulellm_prompts(
+    scenario_base: str,
+) -> Dict[str, Dict[str, str]]:
+    """Return per-agent RuleLLM prompt text for a scenario.
+
+    Reads ``configs/{scenario_base}/RuleLLM/players.yml`` (permissive parse
+    with ``!include`` tolerated), extracts each agent's
+    ``config.extras.llm.sys_message`` and ``.user_message`` module refs, and
+    dereferences them via ``importlib`` to the actual multi-line prompt
+    strings.  These strings contain both the ``== PERSONA ==`` and
+    ``== DECISION RULES ==`` sections that make RuleLLM pedagogically
+    distinctive.
+
+    Args:
+        scenario_base: Bare scenario name (e.g. ``"AnchoringEffect"``).
+
+    Returns:
+        Mapping of agent block key → ``{"sys": <text>, "user": <text>}``.
+        Empty dict if the scenario has no RuleLLM variant or players.yml is
+        missing / malformed.  Missing individual entries are skipped.
+    """
+    if not scenario_base:
+        return {}
+    players = _load_players_yml_lenient(f"{scenario_base}/RuleLLM")
+    if not players:
+        return {}
+
+    out: Dict[str, Dict[str, str]] = {}
+    for block_key, block in players.items():
+        if not isinstance(block, dict) or block_key == "market":
+            continue
+        extras = (
+            block.get("config", {}).get("extras", {})
+            if isinstance(block.get("config"), dict)
+            else {}
+        )
+        llm_cfg = extras.get("llm") if isinstance(extras, dict) else None
+        if not isinstance(llm_cfg, dict):
+            continue
+        sys_ref = llm_cfg.get("sys_message", "")
+        user_ref = llm_cfg.get("user_message", "")
+        entry: Dict[str, str] = {}
+        for label, ref in (("sys", sys_ref), ("user", user_ref)):
+            if not isinstance(ref, str) or ":" not in ref:
+                continue
+            mod_path, attr = ref.split(":", 1)
+            try:
+                import importlib
+
+                mod = importlib.import_module(mod_path)
+                val = getattr(mod, attr, None)
+                if isinstance(val, str) and val:
+                    entry[label] = val
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    "Failed to resolve RuleLLM prompt %s for %s/%s: %s",
+                    ref, scenario_base, block_key, exc,
+                )
+        if entry:
+            out[block_key] = entry
+    return out
+
+
+def get_rulellm_prompt_for_agent(
+    scenario_base: str, agent_class_or_key: str
+) -> Optional[Dict[str, str]]:
+    """Best-effort lookup of the RuleLLM sys/user prompt for a single agent.
+
+    Tries several match strategies against the keys of
+    :func:`resolve_scenario_rulellm_prompts` because the identifier used
+    in the Customize flow may be a class name (e.g. ``RuleLLMAnchoredTrader``),
+    an archetype token, or the raw players.yml block key.
+    """
+    prompts_by_key = resolve_scenario_rulellm_prompts(scenario_base)
+    if not prompts_by_key:
+        return None
+    # 1. Exact key match.
+    if agent_class_or_key in prompts_by_key:
+        return prompts_by_key[agent_class_or_key]
+    # 2. Case-insensitive contains match on both directions, normalising
+    #    separators (kebab vs snake) and the common ``rulellm_`` prefix so
+    #    e.g. the catalog stem ``high-frequency-trader`` matches the block
+    #    key ``rulellm_high_frequency_trader``.
+    def _norm(s: str) -> str:
+        s = s.lower().replace("-", "_")
+        if s.startswith("rulellm_"):
+            s = s[len("rulellm_"):]
+        return s
+
+    ident_norm = _norm(agent_class_or_key)
+    for block_key, entry in prompts_by_key.items():
+        bkl = _norm(block_key)
+        if not ident_norm or not bkl:
+            continue
+        if ident_norm == bkl or ident_norm in bkl or bkl in ident_norm:
+            return entry
+    return None
