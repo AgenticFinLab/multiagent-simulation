@@ -7,6 +7,8 @@ import re
 from typing import Any, Dict, List, Optional
 import yaml
 
+import streamlit as st
+
 logger = logging.getLogger(__name__)
 
 
@@ -146,6 +148,7 @@ def _resolve_display_key(scenario_key: str) -> str:
     return scenario_key
 
 
+@st.cache_data(ttl=300)
 def discover_scenarios() -> List[str]:
     """Discover all available simulation scenarios from configs directory.
 
@@ -196,6 +199,7 @@ def discover_scenario_groups() -> Dict[str, List[str]]:
     return groups
 
 
+@st.cache_data(ttl=300)
 def get_scenario_info(scenario_name: str) -> Dict[str, Any]:
     """Get basic information about a scenario.
 
@@ -1284,10 +1288,13 @@ def get_analysis_path(scenario_name: str) -> Optional[Path]:
     return analysis_path if analysis_path.exists() else None
 
 
+@st.cache_data(ttl=15)
 def _dir_latest_mtime(
     root: Optional[Path], exclude: Optional[Path] = None
 ) -> Optional[float]:
     """Return the newest file mtime under *root* (recursive).
+
+    Cached for 15 seconds to avoid repeated rglob() on every Streamlit rerun.
 
     Args:
         root: Directory to scan; None/absent yields None.
@@ -1317,6 +1324,7 @@ def _dir_latest_mtime(
     return latest
 
 
+@st.cache_data(ttl=15)
 def get_analysis_freshness(scenario_name: str) -> str:
     """Classify analysis output relative to the underlying experiment data.
 

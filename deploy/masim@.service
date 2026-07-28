@@ -1,0 +1,41 @@
+# MASIM Multi-Instance Systemd Service Template
+# Install: sudo cp deploy/masim@.service /etc/systemd/system/
+# Enable:  sudo systemctl enable masim@8502 masim@8503 masim@8504 masim@8505
+# Start:   sudo systemctl start masim@8502 masim@8503 masim@8504 masim@8505
+#
+# Each instance runs on the port specified by %i (the part after @).
+# All instances share the same project, venv, and data directories.
+
+[Unit]
+Description=MASIM Streamlit Instance (port %i)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/masim/multiagent-simulation
+Environment="PATH=/opt/masim/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+Environment="PYTHONPATH=/opt/masim/multiagent-simulation"
+Environment="STREAMLIT_SERVER_PORT=%i"
+Environment="STREAMLIT_SERVER_ADDRESS=127.0.0.1"
+Environment="STREAMLIT_SERVER_HEADLESS=true"
+
+ExecStart=/opt/masim/venv/bin/python -m streamlit run masim/interface/app.py \
+    --server.port=%i \
+    --server.address=127.0.0.1 \
+    --server.headless=true \
+    --server.enableCORS=false \
+    --server.fileWatcherType=none
+
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=masim-%i
+
+# Resource limits per instance
+LimitNOFILE=65536
+MemoryMax=6G
+
+[Install]
+WantedBy=multi-user.target

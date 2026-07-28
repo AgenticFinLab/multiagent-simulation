@@ -38,6 +38,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import streamlit as st
+
 # Import path helper for nested scenario support
 from masim.interface.config_loader import _experiment_path
 
@@ -153,6 +155,7 @@ class RoundData:
 # ---------------------------------------------------------------------------
 
 
+@st.cache_data(ttl=10)
 def has_experiment_data(scenario_name: str) -> bool:
     """Return True if communication or history data exists for the scenario.
 
@@ -171,6 +174,7 @@ def has_experiment_data(scenario_name: str) -> bool:
     return has_comm or has_hist
 
 
+@st.cache_data(ttl=10)
 def count_experiment_rounds(scenario_name: str) -> int:
     """Count the number of recorded rounds in saved experiment data.
 

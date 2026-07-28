@@ -1,0 +1,20 @@
+# Streamlit server configuration optimized for multi-user production deployment.
+# Placed in .streamlit/config.toml (project-level, auto-loaded by Streamlit).
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = true
+maxUploadSize = 50
+# Reduce WebSocket reconnect churn under load
+enableWebsocketCompression = true
+
+[browser]
+gatherUsageStats = false
+
+[runner]
+# Reduce rerun overhead
+fastReruns = true
+
+[theme]
+# Keep default — no overhead from custom theme loading

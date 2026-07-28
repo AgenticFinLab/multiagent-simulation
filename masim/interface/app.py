@@ -1197,23 +1197,14 @@ def _render_action_buttons(scenario_name: str):
     # Show saved data round count when experiment data exists on disk.
     if data_exists and not st.session_state.simulation_running:
         from masim.interface.data_loader import count_experiment_rounds
-        from masim.interface.config_loader import _experiment_path
+        from masim.interface.config_loader import _experiment_path, _dir_latest_mtime
 
         saved_rounds = count_experiment_rounds(scenario_name)
-        # Get last modified time of the experiment data
         exp_path = _experiment_path(scenario_name)
         _last_modified = ""
         try:
-            import os
-            # Find the newest file in the experiment directory
-            newest_mtime = 0.0
-            for dirpath, _dirs, files in os.walk(exp_path):
-                for f in files:
-                    fp = os.path.join(dirpath, f)
-                    mt = os.path.getmtime(fp)
-                    if mt > newest_mtime:
-                        newest_mtime = mt
-            if newest_mtime > 0:
+            newest_mtime = _dir_latest_mtime(exp_path)
+            if newest_mtime:
                 from datetime import datetime
                 _last_modified = datetime.fromtimestamp(newest_mtime).strftime(
                     "%Y-%m-%d %H:%M"
@@ -1254,6 +1245,19 @@ def _render_action_buttons(scenario_name: str):
                     try:
                         shutil.rmtree(exp_path)
                         exp_path.mkdir(parents=True, exist_ok=True)
+                        # Clear data-related caches after deletion
+                        from masim.interface.data_loader import (
+                            has_experiment_data,
+                            count_experiment_rounds,
+                        )
+                        from masim.interface.config_loader import (
+                            get_analysis_freshness,
+                            _dir_latest_mtime,
+                        )
+                        has_experiment_data.clear()
+                        count_experiment_rounds.clear()
+                        get_analysis_freshness.clear()
+                        _dir_latest_mtime.clear()
                         st.session_state._confirm_delete = False
                         st.rerun()
                     except Exception as e:
@@ -1307,6 +1311,35 @@ def _start_simulation(scenario_name: str, info: dict):
     The live-progress pump in :func:`render_simulation_page` polls a shared
     dict, while Ray remains confined to the child process.
     """
+    # --- Cross-process concurrency limit ---
+    # On an 8-core server, each simulation (Ray subprocess) uses 2-4 cores.
+    # Allow at most 2 concurrent simulations across ALL Streamlit workers.
+    import os
+    import tempfile
+
+    MAX_CONCURRENT_SIMS = 2
+    _SIM_SLOT_DIR = Path(tempfile.gettempdir()) / "masim_sim_slots"
+    _SIM_SLOT_DIR.mkdir(exist_ok=True)
+
+    # Count active slots (lock files whose owning PID is still alive)
+    active = 0
+    for slot_file in _SIM_SLOT_DIR.glob("sim_*.lock"):
+        try:
+            pid = int(slot_file.read_text().strip())
+            if psutil.pid_exists(pid):
+                active += 1
+            else:
+                slot_file.unlink(missing_ok=True)  # stale slot
+        except (ValueError, OSError):
+            slot_file.unlink(missing_ok=True)
+
+    if active >= MAX_CONCURRENT_SIMS:
+        st.warning(
+            f"⚠️ 服务器当前已有 {active} 个模拟在运行（上限 {MAX_CONCURRENT_SIMS}），"
+            "请稍后再试。"
+        )
+        return
+
     st.session_state.simulation_running = True
     st.session_state.simulation_completed = False
     st.session_state.sys_messages = []
@@ -1443,6 +1476,8 @@ def _run_simulation_worker(
     scenario_name: str,
 ) -> None:
     """Supervise ``masim.interface.simulation_worker`` as a child process."""
+    import tempfile
+
     command = [
         sys.executable,
         "-m",
@@ -1455,6 +1490,7 @@ def _run_simulation_worker(
     worker_log = project_root / ".streamlit_simulation_worker.log"
     worker_error = ""
     terminal_event = ""
+    slot_file = None
 
     with worker_log.open("a", encoding="utf-8") as error_log:
         process = subprocess.Popen(
@@ -1470,45 +1506,59 @@ def _run_simulation_worker(
         )
         progress["_process"] = process
 
-        assert process.stdout is not None
-        for raw_line in process.stdout:
-            line = raw_line.strip()
-            if not line.startswith("MASIM_EVENT "):
-                continue
-            try:
-                event = json.loads(line[len("MASIM_EVENT "):])
-            except json.JSONDecodeError:
-                continue
+        # Register simulation slot for cross-process concurrency limiting
+        try:
+            _slot_dir = Path(tempfile.gettempdir()) / "masim_sim_slots"
+            _slot_dir.mkdir(exist_ok=True)
+            slot_file = _slot_dir / f"sim_{process.pid}.lock"
+            slot_file.write_text(str(process.pid))
+        except OSError:
+            pass
 
-            event_type = event.get("type")
-            if event_type == "setup":
-                progress["phase"] = "setup"
-                progress["message"] = event.get(
-                    "message", "Setting up simulation…"
-                )
-            elif event_type == "running":
-                total = int(event.get("total_rounds") or 0)
-                current = int(event.get("current_round") or 0)
-                progress["phase"] = "running"
-                progress["total_rounds"] = total
-                progress["current_round"] = current
-                progress["message"] = event.get(
-                    "message", f"Running — Round {current}/{total}"
-                )
-            elif event_type == "error":
-                worker_error = str(event.get("error") or "Simulation failed")
-                terminal_event = "error"
-                break
-            elif event_type == "done":
-                terminal_event = "done"
-                break
+        try:
+            assert process.stdout is not None
+            for raw_line in process.stdout:
+                line = raw_line.strip()
+                if not line.startswith("MASIM_EVENT "):
+                    continue
+                try:
+                    event = json.loads(line[len("MASIM_EVENT "):])
+                except json.JSONDecodeError:
+                    continue
 
-        # The worker has emitted its terminal event, so its useful work is
-        # complete.  Close its complete process tree now; waiting only for the
-        # driver leaves Ray's Windows child processes orphaned.
-        _terminate_process_tree(process)
-        return_code = process.wait()
-        progress["_process"] = None
+                event_type = event.get("type")
+                if event_type == "setup":
+                    progress["phase"] = "setup"
+                    progress["message"] = event.get(
+                        "message", "Setting up simulation…"
+                    )
+                elif event_type == "running":
+                    total = int(event.get("total_rounds") or 0)
+                    current = int(event.get("current_round") or 0)
+                    progress["phase"] = "running"
+                    progress["total_rounds"] = total
+                    progress["current_round"] = current
+                    progress["message"] = event.get(
+                        "message", f"Running — Round {current}/{total}"
+                    )
+                elif event_type == "error":
+                    worker_error = str(event.get("error") or "Simulation failed")
+                    terminal_event = "error"
+                    break
+                elif event_type == "done":
+                    terminal_event = "done"
+                    break
+
+            _terminate_process_tree(process)
+            return_code = process.wait()
+            progress["_process"] = None
+        finally:
+            # Always clean up the simulation slot
+            if slot_file is not None:
+                try:
+                    slot_file.unlink(missing_ok=True)
+                except OSError:
+                    pass
 
     if worker_error or (terminal_event != "done" and return_code != 0):
         progress["phase"] = "error"
