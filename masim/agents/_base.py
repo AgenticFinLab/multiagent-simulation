@@ -92,7 +92,13 @@ def _load_module_by_file(module_path: str) -> ModuleType:
             f"Cannot locate module {module_path!r} on-disk; "
             f"expected {file_path} to exist."
         )
-    digest = hashlib.md5(str(file_path).encode("utf-8")).hexdigest()[:12]
+    # Include mtime in the cache key so that Save-to-disk edits (which rewrite
+    # prompts.py under the same path) invalidate the cached module. Without
+    # this, a UI Save + Launch cycle would keep serving the pre-edit prompts
+    # from sys.modules until the interpreter is restarted.
+    mtime_ns = file_path.stat().st_mtime_ns
+    cache_key = f"{file_path}:{mtime_ns}"
+    digest = hashlib.md5(cache_key.encode("utf-8")).hexdigest()[:12]
     unique_name = f"_masim_bundle_{digest}"
     cached = sys.modules.get(unique_name)
     if cached is not None:
@@ -136,6 +142,16 @@ def _load_dotted(reference: str) -> str:
     except (ModuleNotFoundError, ImportError):
         module = _load_module_by_file(module_path)
     return getattr(module, var_name)
+
+
+# Public alias — shipped ``examples/*/LLM/players.py`` files import this to
+# resolve their ``sys_message`` / ``user_message`` references. Using the
+# canonical loader means shipped scenarios get the same
+# ``import_module → _load_module_by_file`` fallback that Customized bundles
+# rely on, so a UI Save that rewrites a hyphenated bundle's ``prompts.py``
+# still loads correctly regardless of whether the bundle's directory name is
+# a valid Python identifier.
+load_prompt = _load_dotted
 
 
 def _scenario_from_sys_ref(sys_ref: str) -> str:

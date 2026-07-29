@@ -209,6 +209,7 @@ def count_experiment_rounds(scenario_name: str) -> int:
     return len(round_nums)
 
 
+@st.cache_data(ttl=30, show_spinner=False)
 def load_rounds(scenario_name: str) -> List[RoundData]:
     """Load and reconstruct per-round data from saved EXPERIMENT files.
 

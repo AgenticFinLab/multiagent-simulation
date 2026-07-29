@@ -1,8 +1,13 @@
-# MASIM Multi-Instance Systemd Service Template
+# MASIM Systemd Service Template
 # Install: sudo cp deploy/masim@.service /etc/systemd/system/
-# Enable:  sudo systemctl enable masim@8502 masim@8503 masim@8504 masim@8505
-# Start:   sudo systemctl start masim@8502 masim@8503 masim@8504 masim@8505
+# Enable:  sudo systemctl enable masim@8502
+# Start:   sudo systemctl start masim@8502
 #
+# 8C/32G 专用服务器（≤4 用户）只需 1 个实例 (8502)，MemoryMax=28G。
+# 服务器不跑其他业务，留 4G 给系统 (kernel+nginx+sshd+buffer) 已足够；
+# 剩余 28G 全给 masim cgroup，保证 4 并发模拟 + LLM 有充足余量。
+# 单进程可安全承载多用户：Streamlit session_state 按 WebSocket 隔离，
+# 模拟走 subprocess，Ray 由子进程内部启动，团队目录已命名空间化。
 # Each instance runs on the port specified by %i (the part after @).
 # All instances share the same project, venv, and data directories.
 
@@ -34,9 +39,9 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=masim-%i
 
-# Resource limits per instance
+# Resource limits (Streamlit parent + all subprocess children share this ceiling)
 LimitNOFILE=65536
-MemoryMax=6G
+MemoryMax=28G
 
 [Install]
 WantedBy=multi-user.target

@@ -2,9 +2,9 @@
 # ==============================================================================
 # MASIM 完整部署流程 — 华为云 ECS (8 CPU / 32G RAM)
 # ==============================================================================
-# 架构:  Browser → Nginx:80 → ip_hash → 4×Streamlit (8502-8505)
-# 限制:  最多 10 个并发用户 (Nginx limit_conn)
-#        最多 4 个并行模拟 (文件锁信号量)
+# 架构:  Browser → Nginx:80 → Streamlit (8502)
+# 限制:  最多 4 个并发用户 (Nginx limit_conn)
+#        最多 4 个并行模拟 (文件锁信号量) — 每个人可同时跑自己的
 # ==============================================================================
 # 使用方式:
 #   方式一: 直接作为脚本执行  →  bash deploy/DEPLOY_GUIDE.sh
@@ -62,7 +62,7 @@ else
     echo "→ 旧服务 masim 未在运行，跳过"
 fi
 
-# 停止可能存在的新模板实例（用于重复部署场景）
+# 停止可能存在的旧多实例（历史遗留）
 for port in 8502 8503 8504 8505; do
     if systemctl is-active --quiet masim@${port} 2>/dev/null; then
         sudo systemctl stop masim@${port}
@@ -85,18 +85,11 @@ git pull origin main
 echo ""
 
 # 关键文件验证
-echo "--- 验证关键改动 ---"
-grep -q "MAX_CONCURRENT_SIMS = 4" masim/interface/app.py && \
-    echo "  ✓ 并发模拟限制 = 4" || echo "  ✗ MAX_CONCURRENT_SIMS 未更新!"
-
-grep -q "limit_conn_zone" deploy/masim-nginx.conf && \
-    echo "  ✓ Nginx limit_conn 配置已就位" || echo "  ✗ Nginx限流配置缺失!"
-
-grep -q "robust_llm_call" masim/utils/llm_utils.py && \
-    echo "  ✓ LLM 鲁棒性模块已就位" || echo "  ✗ llm_utils 缺失!"
-
-grep -q "cache_data" masim/interface/config_loader.py && \
-    echo "  ✓ 缓存优化已就位" || echo "  ✗ 缓存代码缺失!"
+echo "--- 验证关键文件 ---"
+[ -f masim/interface/app.py ] && echo "  ✓ app.py" || echo "  ✗ app.py 缺失!"
+[ -f masim/interface/components/online_badge.py ] && echo "  ✓ online_badge.py" || echo "  ✗ online_badge.py 缺失!"
+[ -f deploy/masim-nginx.conf ] && echo "  ✓ masim-nginx.conf" || echo "  ✗ nginx配置缺失!"
+[ -f deploy/masim@.service ] && echo "  ✓ masim@.service" || echo "  ✗ service文件缺失!"
 
 echo ""
 
@@ -116,7 +109,7 @@ echo "✓ Python 依赖已更新"
 echo ""
 
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║ Phase 4: 部署 systemd 服务模板 (4 个 Streamlit worker)                       ║
+# ║ Phase 4: 部署 systemd 服务 (1 个 Streamlit 实例)                             ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 echo "=========================================="
@@ -127,14 +120,19 @@ echo "=========================================="
 sudo cp deploy/masim@.service /etc/systemd/system/
 sudo systemctl daemon-reload
 
-# 设置开机自启 (4 个实例，分别监听 8502-8505)
-sudo systemctl enable masim@8502 masim@8503 masim@8504 masim@8505
+# 禁用多余的旧实例 (从多实例架构升级到单实例)
+for port in 8503 8504 8505; do
+    sudo systemctl disable masim@${port} 2>/dev/null || true
+done
 
-echo "✓ systemd 模板已安装，4 个实例已启用"
+# 启用单实例
+sudo systemctl enable masim@8502
+
+echo "✓ systemd 模板已安装，masim@8502 已启用"
 echo ""
 
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║ Phase 5: 部署 Nginx 配置 (负载均衡 + 10人并发限制)                            ║
+# ║ Phase 5: 部署 Nginx 配置 (4人并发限制)                                        ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 echo "=========================================="
@@ -148,10 +146,7 @@ sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
 if grep -q "sites-enabled" /etc/nginx/nginx.conf; then
     echo "  ✓ nginx.conf 已包含 sites-enabled"
 else
-    echo "  ⚠ 需要手动在 /etc/nginx/nginx.conf 的 http{} 块末尾加入:"
-    echo "    include /etc/nginx/sites-enabled/*;"
-    echo "  加完后再继续。"
-    # 如果作为脚本运行，自动添加:
+    echo "  → 添加 sites-enabled include..."
     sudo sed -i '/http {/a\    include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf 2>/dev/null || true
 fi
 
@@ -171,23 +166,29 @@ echo "✓ Nginx 配置已部署"
 echo ""
 
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
-# ║ Phase 6: 启动所有服务                                                        ║
+# ║ Phase 6: 写入环境变量 & 启动服务                                              ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 echo "=========================================="
 echo " Phase 6: 启动服务"
 echo "=========================================="
 
-# 启动 4 个 Streamlit worker
-sudo systemctl start masim@8502
-sudo systemctl start masim@8503
-sudo systemctl start masim@8504
-sudo systemctl start masim@8505
+# 写入容量配置
+sudo mkdir -p /opt/masim
+cat <<EOF | sudo tee /opt/masim/masim.env > /dev/null
+# MASIM 服务器容量配置 (8C/32G, 4 用户, 4 并发模拟)
+MASIM_MAX_USERS=4
+MASIM_MAX_CONCURRENT_SIMS=4
+EOF
+echo "✓ 环境变量已写入 /opt/masim/masim.env"
 
-# 重载 Nginx (不是 restart，已有连接不断)
+# 启动 Streamlit
+sudo systemctl start masim@8502
+
+# 重载 Nginx
 sudo systemctl reload nginx
 
-echo "✓ 4 个 Streamlit worker 已启动"
+echo "✓ masim@8502 已启动"
 echo "✓ Nginx 已重载"
 echo ""
 
@@ -207,29 +208,25 @@ sleep 5
 echo ""
 echo "--- 7.1 Systemd 服务状态 ---"
 ALL_OK=true
-for port in 8502 8503 8504 8505; do
-    if systemctl is-active --quiet masim@${port}; then
-        echo "  ✓ masim@${port} — 运行中"
-    else
-        echo "  ✗ masim@${port} — 失败!"
-        echo "    最近日志:"
-        journalctl -u masim@${port} --no-pager -n 5 | sed 's/^/    /'
-        ALL_OK=false
-    fi
-done
+if systemctl is-active --quiet masim@8502; then
+    echo "  ✓ masim@8502 — 运行中"
+else
+    echo "  ✗ masim@8502 — 失败!"
+    echo "    最近日志:"
+    journalctl -u masim@8502 --no-pager -n 5 | sed 's/^/    /'
+    ALL_OK=false
+fi
 
 # 7.2 端口直连
 echo ""
-echo "--- 7.2 各端口直连测试 ---"
-for port in 8502 8503 8504 8505; do
-    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${port}/_stcore/health 2>/dev/null || echo "000")
-    if [ "$code" = "200" ]; then
-        echo "  ✓ 127.0.0.1:${port} → HTTP ${code}"
-    else
-        echo "  ✗ 127.0.0.1:${port} → HTTP ${code} (期望200)"
-        ALL_OK=false
-    fi
-done
+echo "--- 7.2 端口直连测试 ---"
+code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:8502/_stcore/health 2>/dev/null || echo "000")
+if [ "$code" = "200" ]; then
+    echo "  ✓ 127.0.0.1:8502 → HTTP ${code}"
+else
+    echo "  ✗ 127.0.0.1:8502 → HTTP ${code} (期望200)"
+    ALL_OK=false
+fi
 
 # 7.3 Nginx 代理
 echo ""
@@ -246,7 +243,9 @@ fi
 echo ""
 echo "--- 7.4 并发限制配置确认 ---"
 grep "limit_conn masim_total" /etc/nginx/sites-available/masim | sed 's/^/  /'
-echo "  → 超过 10 个并发连接时，新访客将看到 503 页面"
+echo "  → 超过 4 个并发连接时，新访客将看到 503 页面"
+grep "MASIM_MAX_CONCURRENT_SIMS" /opt/masim/masim.env | sed 's/^/  /'
+echo "  → 4 个用户可同时各自跑一个模拟，互不排队"
 
 # 7.5 防火墙 / 安全组提醒
 echo ""
@@ -266,11 +265,12 @@ echo " 部署完成!"
 echo "=========================================="
 echo ""
 echo " 架构:"
-echo "   Browser → Nginx:80 (ip_hash) → Streamlit ×4 (8502-8505)"
+echo "   Browser → Nginx:80 → Streamlit (8502)"
 echo ""
 echo " 限制:"
-echo "   • 最多 10 个并发用户 (Nginx limit_conn)"
+echo "   • 最多 4 个并发用户 (Nginx limit_conn)"
 echo "   • 最多 4 个并行模拟 (文件锁 /tmp/masim_sim_slots/)"
+echo "   • 单实例内存上限 28G (systemd MemoryMax)"
 echo ""
 echo " 访问地址:"
 echo "   http://<公网IP>/"
@@ -278,15 +278,13 @@ echo ""
 echo " ┌──────────────────────────────────────────────────────────────┐"
 echo " │ 日常运维命令                                                   │"
 echo " ├──────────────────────────────────────────────────────────────┤"
-echo " │ 查看状态:   systemctl status 'masim@*'                        │"
+echo " │ 查看状态:   systemctl status masim@8502                       │"
 echo " │ 查看日志:   journalctl -u masim@8502 -f                       │"
-echo " │ 重启全部:   systemctl restart masim@8502 masim@8503 \          │"
-echo " │             masim@8504 masim@8505                             │"
-echo " │ 停止全部:   systemctl stop masim@8502 masim@8503 \             │"
-echo " │             masim@8504 masim@8505                             │"
-echo " │ 更新代码:   cd /opt/masim/multiagent-simulation && \           │"
-echo " │             git pull && systemctl restart masim@8502 \         │"
-echo " │             masim@8503 masim@8504 masim@8505                  │"
+echo " │ 重启:       systemctl restart masim@8502                      │"
+echo " │ 停止:       systemctl stop masim@8502                         │"
+echo " │ 更新代码:   cd /opt/masim/multiagent-simulation && \\           │"
+echo " │             git pull && systemctl restart masim@8502           │"
+echo " │ 调整容量:   sudo bash deploy/set-max-users.sh <N>             │"
 echo " │ Nginx重载:  nginx -t && systemctl reload nginx                │"
 echo " └──────────────────────────────────────────────────────────────┘"
 echo ""

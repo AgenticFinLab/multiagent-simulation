@@ -1,19 +1,24 @@
 #!/usr/bin/env bash
 # ============================================================
-# set-max-users.sh — 一键设置 MASIM 服务器容量
+# set-max-users.sh — 一键设置 MASIM 服务器容量 (单实例架构)
 #
 # 用法:
 #   sudo bash deploy/set-max-users.sh <最大用户数> [最大并发模拟数]
 #
 # 示例:
-#   sudo bash deploy/set-max-users.sh 6        # 6人，默认3个并发模拟
-#   sudo bash deploy/set-max-users.sh 4 2      # 4人，2个并发模拟
-#   sudo bash deploy/set-max-users.sh 20 6     # 20人，6个并发模拟
+#   sudo bash deploy/set-max-users.sh 4        # 4人，默认4个并发模拟
+#   sudo bash deploy/set-max-users.sh 6 4      # 6人，4个并发模拟
+#   sudo bash deploy/set-max-users.sh 8 4      # 8人，4个并发模拟
 #
 # 自动完成:
 #   1. 生成 Nginx 配置（连接数上限 + 503 满载提示页）
-#   2. 写入环境变量文件（Streamlit 读取的并发模拟上限）
-#   3. Reload Nginx + 重启 Streamlit 实例
+#   2. 写入环境变量文件（Streamlit 读取的并发模拟上限 + 在线徽章分母）
+#   3. Reload Nginx + 重启单实例 Streamlit (masim@8502)
+#
+# 说明:
+#   - 单实例架构下无需 ip_hash，所有连接直达 8502。
+#   - 默认并发模拟数 = 用户数 (每个人可以同时跑自己的模拟)。
+#     可用第二个参数手动覆盖，例如 8 用户 / 4 模拟以节省资源。
 # ============================================================
 
 set -euo pipefail
@@ -23,17 +28,16 @@ if [ $# -lt 1 ] || ! [[ "$1" =~ ^[0-9]+$ ]] || [ "$1" -lt 1 ]; then
     echo "用法: sudo bash $0 <最大用户数> [最大并发模拟数]"
     echo ""
     echo "示例:"
-    echo "  sudo bash $0 6        # 6人上限，默认3个并发模拟"
-    echo "  sudo bash $0 4 2      # 4人上限，2个并发模拟"
-    echo "  sudo bash $0 20 8     # 20人上限，8个并发模拟"
+    echo "  sudo bash $0 4        # 4人上限，默认4个并发模拟"
+    echo "  sudo bash $0 6 4      # 6人上限，4个并发模拟"
+    echo "  sudo bash $0 8 4      # 8人上限，4个并发模拟"
     exit 1
 fi
 
 MAX_USERS="$1"
 
-# 默认并发模拟数 = max(1, 用户数/2)，可手动覆盖
-DEFAULT_SIMS=$(( MAX_USERS / 2 ))
-[ "$DEFAULT_SIMS" -lt 1 ] && DEFAULT_SIMS=1
+# 默认并发模拟数 = 用户数 (每人可以同时开自己的)
+DEFAULT_SIMS="$MAX_USERS"
 MAX_SIMS="${2:-$DEFAULT_SIMS}"
 
 # --- 权限检查 ---
@@ -85,19 +89,12 @@ else
     exit 1
 fi
 
-# Streamlit 实例（需要重启才能读到新的环境变量）
-RESTARTED=0
-for port in 8502 8503 8504 8505; do
-    if systemctl is-active --quiet "masim@$port"; then
-        systemctl restart "masim@$port"
-        RESTARTED=$((RESTARTED + 1))
-    fi
-done
-
-if [ "$RESTARTED" -gt 0 ]; then
-    echo "      Streamlit restart ✓ ($RESTARTED 个实例)"
+# Streamlit 单实例 (需要重启才能读到新的环境变量)
+if systemctl is-active --quiet "masim@8502"; then
+    systemctl restart "masim@8502"
+    echo "      Streamlit restart ✓ (masim@8502)"
 else
-    echo "      (未检测到运行中的 Streamlit 实例)"
+    echo "      (masim@8502 未运行，跳过重启)"
 fi
 
 # --- 完成 ---

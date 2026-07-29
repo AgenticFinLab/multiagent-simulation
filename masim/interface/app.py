@@ -39,6 +39,7 @@ from masim.interface.components.team_gate import (
     current_team,
     render_team_gate,
 )
+from masim.interface.components.online_badge import render_online_badge
 from masim.interface.locale import t
 
 # Page configuration
@@ -120,6 +121,9 @@ bootstrap_team_from_query()
 
 def main():
     """Main application entry point."""
+    # Persistent online-user badge (top-right corner, all pages)
+    render_online_badge()
+
     # Gate: every session must pick a team name before any workflow page is
     # rendered.  The gate writes to session state AND the URL query params,
     # so a reload keeps the identity without re-prompting.
