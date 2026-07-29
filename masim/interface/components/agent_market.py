@@ -66,6 +66,7 @@ from ..customized import (
     write_customized_bundle,
 )
 from ..customized.handbook_params import ParamSpec
+from ..customized.config_writer import _INFRA_EXTRAS_KEYS
 from .team_gate import current_team
 
 
@@ -1617,21 +1618,38 @@ def _show_default_edit_dialog(
     # user can compare pending changes before clicking Save. The slot is
     # flushed to disk (or discarded) when the Save/Cancel buttons run.
     override_slot: dict[str, Any] = dict(edits.get(block_key) or {})
-    if extras:
+
+    # Always resolve handbook specs — they define the canonical set of
+    # editable params for every archetype.  When players.yml extras are
+    # sparse (common for LLM variants), handbook defaults fill the gaps
+    # so users always see the full set of core behavioural parameters.
+    _archetype = _canonical_archetype(block_key)
+    _md_stem = _archetype.replace("_", "-")
+    _specs_dict: dict[str, ParamSpec] | None = None
+    for _domain, _root in _DOMAIN_ROOTS:
+        _handbook = _root / f"{_md_stem}.md"
+        if _handbook.exists():
+            _specs_list = parse_parameters_file(_handbook)
+            if _specs_list:
+                _specs_dict = {s.symbol: s for s in _specs_list}
+            break
+
+    # Merge: yml extras take priority; handbook defaults fill the rest.
+    _merged_extras: dict[str, Any] = dict(extras)  # start with yml values
+    if _specs_dict:
+        for sym, spec in _specs_dict.items():
+            if sym not in _merged_extras and sym not in _INFRA_EXTRAS_KEYS:
+                # Use handbook default if available
+                if spec.default_value is not None:
+                    _merged_extras[sym] = spec.default_value
+                elif spec.default:
+                    # Fallback: raw string from the table
+                    _merged_extras[sym] = spec.default
+
+    if _merged_extras:
         st.markdown("**Parameters**")
-        # Resolve handbook ParamSpec for richer tooltips
-        _archetype = _canonical_archetype(block_key)
-        _md_stem = _archetype.replace("_", "-")
-        _specs_dict: dict[str, ParamSpec] | None = None
-        for _domain, _root in _DOMAIN_ROOTS:
-            _handbook = _root / f"{_md_stem}.md"
-            if _handbook.exists():
-                _specs_list = parse_parameters_file(_handbook)
-                if _specs_list:
-                    _specs_dict = {s.symbol: s for s in _specs_list}
-                break
         _render_extras_grid(
-            extras=extras,
+            extras=_merged_extras,
             override_slot=override_slot,
             key_prefix=f"dc_{base}_{block_key}",
             disabled=is_rulellm,

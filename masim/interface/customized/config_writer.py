@@ -1639,12 +1639,18 @@ def _apply_market_extras_override(
 
     For each key in ``overrides``, finds the corresponding line in the
     market block (matching ``<key>: <value>``) and rewrites its value.
+    Keys that do NOT already exist in the block are APPENDED under the
+    ``extras:`` section with matching indentation.
+
     This preserves comments, indentation, and ordering of the original.
 
     String values are quoted to prevent YAML injection (e.g. values
     containing ``:``, ``#``, or other special characters).
     """
     lines = market_block.splitlines()
+    matched_keys: set[str] = set()
+    extras_indent: str = ""  # indent of items under extras:
+
     for key, new_value in overrides.items():
         pattern = re.compile(
             rf"^(\s+{re.escape(key)}\s*:\s*)(.+)$"
@@ -1652,25 +1658,69 @@ def _apply_market_extras_override(
         for i, line in enumerate(lines):
             m = pattern.match(line)
             if m:
-                # Format the value appropriately.
-                # Note: check bool BEFORE int since bool is a subclass of int.
-                if isinstance(new_value, bool):
-                    formatted = "true" if new_value else "false"
-                elif isinstance(new_value, float):
-                    formatted = f"{new_value}"
-                elif isinstance(new_value, int):
-                    formatted = str(new_value)
-                else:
-                    # String values: quote to prevent YAML injection.
-                    s = str(new_value)
-                    if any(c in s for c in (':', '#', '{', '}', '[', ']', ',', '&', '*', '?', '|', '-', '<', '>', '=', '!', '%', '@', '`', '"', "'")):
-                        # Use double-quotes with escaped inner double-quotes.
-                        formatted = '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
-                    else:
-                        formatted = s
+                formatted = _format_yaml_value(new_value)
                 lines[i] = f"{m.group(1)}{formatted}"
+                matched_keys.add(key)
+                # Capture indentation for later append.
+                if not extras_indent:
+                    extras_indent = re.match(r"^(\s+)", line).group(1)  # type: ignore[union-attr]
                 break
+
+    # Append keys that weren't found in existing lines.
+    missing_keys = set(overrides.keys()) - matched_keys
+    if missing_keys:
+        # Determine the correct indentation: look for the extras: line
+        # or use the indent from a matched key.
+        if not extras_indent:
+            for line in lines:
+                em = re.match(r"^(\s+)extras:\s*$", line)
+                if em:
+                    extras_indent = em.group(1) + "  "
+                    break
+            if not extras_indent:
+                extras_indent = "      "  # fallback: 6 spaces
+
+        # Find the last line of the extras block to insert after it.
+        insert_idx: int | None = None
+        in_extras = False
+        for i, line in enumerate(lines):
+            if re.match(r"^\s+extras:\s*$", line):
+                in_extras = True
+                continue
+            if in_extras:
+                # Still inside extras if indent is deeper than extras_indent
+                # or at same level as extras items.
+                if line.strip() == "" or line.startswith(extras_indent):
+                    insert_idx = i + 1
+                else:
+                    # Left the extras section
+                    insert_idx = i
+                    break
+        if insert_idx is None:
+            insert_idx = len(lines)
+
+        new_lines: list[str] = []
+        for key in missing_keys:
+            formatted = _format_yaml_value(overrides[key])
+            new_lines.append(f"{extras_indent}{key}: {formatted}")
+        lines[insert_idx:insert_idx] = new_lines
+
     return "\n".join(lines)
+
+
+def _format_yaml_value(value: Any) -> str:
+    """Format a Python value for inline YAML output."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    elif isinstance(value, float):
+        return f"{value}"
+    elif isinstance(value, int):
+        return str(value)
+    else:
+        s = str(value)
+        if any(c in s for c in (':', '#', '{', '}', '[', ']', ',', '&', '*', '?', '|', '-', '<', '>', '=', '!', '%', '@', '`', '"', "'")):
+            return '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
+        return s
 
 
 _HEADER_PLAYERS = """\
