@@ -228,55 +228,58 @@ class InvestorOrder:
         *,
         investor: str,
         strategy: str,
-        market_price: float,
     ) -> "InvestorOrder":
-        """Build an order from a parsed LLM ``<decision>`` JSON payload.
+        """Build an order from a validated LLM ``<decision>`` JSON payload.
 
-        The LLM path is the primary consumer of this classmethod: it takes
-        the dict returned by
-        :func:`masim.utils.llm_utils.parse_llm_response_with_thinking` and
-        turns it into an :class:`InvestorOrder`. ``market_price`` is used as
-        a fallback for a missing / non-positive ``bid_price``.
+        Preconditions
+        -------------
+        ``decision`` MUST already have been validated by the category
+        validator registered in :data:`masim.format.SCENARIO_ORDER_FORMAT`
+        (this is what :func:`masim.utils.llm_utils.robust_llm_call` does via
+        its ``validate_fn`` parameter — a failing decision triggers a retry,
+        so by the time this factory runs, every required field is present
+        and well-typed).  Consequently this factory performs NO silent
+        defaulting: missing ``bid_price`` is not filled with ``market_price``,
+        and quantity sign / zero-out drift is not silently rewritten.
+
+        Extras preservation
+        -------------------
+        Any field in ``decision`` that is not part of the canonical order
+        schema (e.g. ``provides_liquidity`` for the maker/taker category) is
+        preserved in :attr:`extras` so downstream consumers that know the
+        category can read it back out via :meth:`to_dict`.
         """
-        raw_action = str(decision.get("action", HOLD)).lower().strip()
-        if raw_action not in INVESTOR_ORDER_ACTION_VALUES:
-            raw_action = HOLD
+        action = str(decision["action"]).lower().strip()
+        quantity = float(decision.get("quantity", 0.0) or 0.0)
 
-        try:
-            quantity = float(decision.get("quantity") or 0.0)
-        except (TypeError, ValueError):
-            quantity = 0.0
-        if quantity < 0:
-            quantity = 0.0
-
-        try:
-            bid_price = float(decision.get("bid_price") or 0.0)
-        except (TypeError, ValueError):
-            bid_price = 0.0
-        if bid_price <= 0:
-            bid_price = float(market_price)
+        # ``bid_price`` is only part of some categories (limit_order,
+        # maker_taker_order); it is absent from participation_order. The
+        # validator has already enforced this — here we simply mirror what
+        # the validator accepted, defaulting to 0.0 when the field is not in
+        # the schema at all (participation_order market coordinators ignore
+        # bid_price anyway).
+        bid_price_raw = decision.get("bid_price")
+        bid_price = float(bid_price_raw) if bid_price_raw is not None else 0.0
 
         reasoning = str(decision.get("reasoning", ""))[:200]
         analysis = str(decision.get("analysis", ""))[:1000]
 
-        if raw_action == HOLD or quantity <= 0:
-            return cls(
-                action=HOLD,
-                quantity=0.0,
-                bid_price=cls._normalise_price(bid_price),
-                investor=investor,
-                strategy=strategy,
-                reasoning=reasoning,
-                analysis=analysis,
-            )
+        # Everything the validator accepted that is NOT part of the base
+        # schema (action / bid_price / quantity / reasoning / analysis) is
+        # forwarded through ``extras`` so category-specific extensions
+        # survive the round-trip to the wire.
+        _KNOWN = {"action", "bid_price", "quantity", "reasoning", "analysis"}
+        extras = {k: v for k, v in decision.items() if k not in _KNOWN}
+
         return cls(
-            action=raw_action,
+            action=action,
             quantity=cls._normalise_quantity(quantity),
             bid_price=cls._normalise_price(bid_price),
             investor=investor,
             strategy=strategy,
             reasoning=reasoning,
             analysis=analysis,
+            extras=extras,
         )
 
     @classmethod

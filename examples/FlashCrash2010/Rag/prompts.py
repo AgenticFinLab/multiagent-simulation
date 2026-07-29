@@ -15,6 +15,11 @@ Agents:
     - RAG Fundamental Trader → Value deviation rules + RAG
     - RAG Stop-Loss Trader   → Stop-loss trigger rules + RAG
     - RAG Noise Trader       → Random trading rules + RAG
+
+The system-prompt constants are re-exported from
+``examples.FlashCrash2010.RuleLLM.prompts`` — they already have the
+``maker_taker_order`` FORMAT_TAIL concatenated at definition site there,
+so this module only needs to define the RAG-augmented user template.
 """
 
 from examples.FlashCrash2010.RuleLLM.prompts import (  # noqa: F401
@@ -49,12 +54,7 @@ RAG_USER_TEMPLATE = """
 - Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-Apply your DECISION RULES, informed by the relevant knowledge above, and output your trade decision.
-
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>", "provides_liquidity": true|false}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
-IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
+Apply your DECISION RULES, informed by the relevant knowledge above, and make your trading decision as instructed in your system prompt.
 """
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

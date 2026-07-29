@@ -1,6 +1,10 @@
 """HerdingInformation Rag Prompts
 
 System prompts for RAG-augmented LLM agents in the HerdingInformation simulation.
+
+The RAG variant reuses the RuleLLM persona/decision-rule constants and inherits
+the same definition-site FORMAT_TAIL concatenation, since the retrieved context
+is injected via the user template rather than by altering the system prompt.
 """
 
 from examples.HerdingInformation.RuleLLM.prompts import (
@@ -24,8 +28,6 @@ Cash Available: ${cash:.2f}
 Position:       {position} shares
 Portfolio Value: ${portfolio_value:.2f}
 
-Using the retrieved context and your trading rules, make your decision.
-
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Make your trading decision as instructed in your system prompt."""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

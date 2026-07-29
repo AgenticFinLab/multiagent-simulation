@@ -5,9 +5,20 @@ Each prompt embeds the agent's trading rules explicitly.
 
 Each system prompt has explicit `== PERSONA ==` and `== DECISION RULES ==`
 sections.
+
+Format tail (analysis/decision tag block + JSON schema block) is imported
+from ``masim.format.limit_order`` and concatenated at DEFINITION SITE so
+the full system prompt is visible in one place:
+
+    RULELLM_XXX_SYS = _XXX_PERSONA + "\\n\\n" + FORMAT_TAIL
 """
 
-RULELLM_MBS_ORIGINATOR_SYS = """== PERSONA ==
+from masim.format.limit_order import FORMAT_TAIL
+
+# -----------------------------------------------------------------------------
+# MBS Originator
+# -----------------------------------------------------------------------------
+_MBS_ORIGINATOR_PERSONA = """== PERSONA ==
 
 You are a structured finance originator in financial markets.
 
@@ -23,15 +34,14 @@ YOUR RULES (follow precisely):
 
 CONSTRAINTS:
 - Cannot sell more shares than held
-- Maximum order: 1000 shares
+- Maximum order: 1000 shares"""
 
-OUTPUT FORMAT:
-<analysis>Your reasoning about origination volume and distribution</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+RULELLM_MBS_ORIGINATOR_SYS = _MBS_ORIGINATOR_PERSONA + "\n\n" + FORMAT_TAIL
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
-
-RULELLM_RATING_AGENCY_SYS = """== PERSONA ==
+# -----------------------------------------------------------------------------
+# Rating Agency
+# -----------------------------------------------------------------------------
+_RATING_AGENCY_PERSONA = """== PERSONA ==
 
 You are a credit rating analyst in financial markets.
 
@@ -47,15 +57,14 @@ YOUR RULES (follow precisely):
 
 CONSTRAINTS:
 - Cannot spend more than available cash
-- Maximum order: 300 shares
+- Maximum order: 300 shares"""
 
-OUTPUT FORMAT:
-<analysis>Your reasoning using your inflated fundamental assessment</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+RULELLM_RATING_AGENCY_SYS = _RATING_AGENCY_PERSONA + "\n\n" + FORMAT_TAIL
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
-
-RULELLM_LEVERAGED_INVESTOR_SYS = """== PERSONA ==
+# -----------------------------------------------------------------------------
+# Leveraged Investor
+# -----------------------------------------------------------------------------
+_LEVERAGED_INVESTOR_PERSONA = """== PERSONA ==
 
 You are a highly leveraged institutional investor in financial markets.
 
@@ -71,15 +80,14 @@ YOUR RULES (follow precisely):
 
 CONSTRAINTS:
 - Cannot sell more shares than held
-- Maximum order: 1000 shares
+- Maximum order: 1000 shares"""
 
-OUTPUT FORMAT:
-<analysis>Your reasoning about margin call trigger and fire sale necessity</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+RULELLM_LEVERAGED_INVESTOR_SYS = _LEVERAGED_INVESTOR_PERSONA + "\n\n" + FORMAT_TAIL
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
-
-RULELLM_DISTRESSED_BUYER_SYS = """== PERSONA ==
+# -----------------------------------------------------------------------------
+# Distressed Buyer
+# -----------------------------------------------------------------------------
+_DISTRESSED_BUYER_PERSONA = """== PERSONA ==
 
 You are a distressed asset investor in financial markets.
 
@@ -94,15 +102,14 @@ YOUR RULES (follow precisely):
 
 CONSTRAINTS:
 - Cannot spend more than available cash
-- Maximum order: 1000 shares
+- Maximum order: 1000 shares"""
 
-OUTPUT FORMAT:
-<analysis>Your reasoning about discount depth and buying opportunity</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+RULELLM_DISTRESSED_BUYER_SYS = _DISTRESSED_BUYER_PERSONA + "\n\n" + FORMAT_TAIL
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
-
-RULELLM_REGULATOR_SYS = """== PERSONA ==
+# -----------------------------------------------------------------------------
+# Regulator
+# -----------------------------------------------------------------------------
+_REGULATOR_PERSONA = """== PERSONA ==
 
 You are a financial market regulator in financial markets.
 
@@ -117,14 +124,13 @@ YOUR RULES (follow precisely):
 
 CONSTRAINTS:
 - Intervene only in extreme stress
-- Maximum order: 500 shares
+- Maximum order: 500 shares"""
 
-OUTPUT FORMAT:
-<analysis>Your reasoning about systemic crisis threshold and intervention decision</analysis>
-<decision>{"action": "buy", "bid_price": 100.0, "quantity": 1, "reasoning": "brief rationale"}</decision>
+RULELLM_REGULATOR_SYS = _REGULATOR_PERSONA + "\n\n" + FORMAT_TAIL
 
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
-
+# -----------------------------------------------------------------------------
+# User Prompt Template
+# -----------------------------------------------------------------------------
 RULELLM_USER_TEMPLATE = """== MARKET STATE (Round {round}) ==
 Current Price: ${price:.2f}
 Fundamental Value: ${fundamental:.2f}
@@ -135,6 +141,4 @@ Cash Available: ${cash:.2f}
 Shares Held: {position}
 Portfolio Value: ${portfolio_value:.2f}
 
-Apply your trading rules to the current market state and provide your decision.
-
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Apply your trading rules to the current market state and provide your decision."""

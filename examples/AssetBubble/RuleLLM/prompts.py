@@ -7,6 +7,13 @@ Design principle:
        counterpart (AssetBubble), written as plain-text formulas and thresholds
        so the LLM understands the mathematical/financial principle behind each action.
 
+    A shared ORDER_OUTPUT_CONTRACT clarifies that quantity is a non-negative
+    magnitude (direction is expressed via ``action``).  The output-format tail
+    (analysis/decision tag block + JSON schema block) is imported from
+    ``masim.format.limit_order.FORMAT_TAIL`` and concatenated at DEFINITION SITE:
+
+        RULELLM_XXX_SYS = _XXX_PERSONA + ORDER_OUTPUT_CONTRACT + "\\n\\n" + FORMAT_TAIL
+
 Agents:
     - RuleLLM Momentum Speculator  → Greater Fool Theory + momentum formula
     - RuleLLM Rational Arbitrageur → Limits to Arbitrage + deviation formula
@@ -15,13 +22,35 @@ Agents:
     - RuleLLM Leveraged Buyer      → Leverage amplification + margin call rule
 """
 
+from masim.format.limit_order import FORMAT_TAIL
+
+
+# The formulas below sometimes use a signed intermediate value to choose a
+# direction.  The public order schema stores direction in ``action`` and size
+# in a non-negative ``quantity``.  Append this contract to every system prompt
+# so all RuleLLM personas receive the same unambiguous output instruction.
+ORDER_OUTPUT_CONTRACT = """
+
+== ORDER OUTPUT CONTRACT ==
+Quantity must always be a non-negative magnitude.
+
+- For BUY:  action="buy",  quantity=abs(calculated_quantity)
+- For SELL: action="sell", quantity=abs(calculated_quantity)
+- For HOLD: action="hold", quantity=0
+
+Never output a negative quantity because the action field already represents
+the trading direction. This output contract overrides any signed intermediate
+quantity notation used in the decision rules above.
+"""
+
+
 # =============================================================================
 # RuleLLM Momentum Speculator
 # Theory: Greater Fool Theory (Keynes "Beauty Contest")
 # Rule-based counterpart: AssetBubble.MomentumSpeculator
 # =============================================================================
 
-RULELLM_MOMENTUM_SYS = """You are an AGGRESSIVE MOMENTUM SPECULATOR in the stock market.
+_MOMENTUM_PERSONA = """You are an AGGRESSIVE MOMENTUM SPECULATOR in the stock market.
 
 == PERSONA ==
 Identity: High-risk, high-reward trend chaser driven by the Greater Fool Theory.
@@ -59,25 +88,9 @@ Step 3 — Apply portfolio constraints:
 Use the market data and your portfolio state to compute momentum as defined above,
 then decide your action. You MAY adjust the exact quantity up/down by up to 20%
 based on your qualitative judgment about market context, but the sign (buy/sell/hold)
-and approximate scale MUST follow the rule above.
+and approximate scale MUST follow the rule above."""
 
-First, think through your analysis step by step inside <analysis>...</analysis> tags.
-Then, output your final decision inside <decision>...</decision> tags.
-
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-
-Example format:
-<analysis>
-The momentum is 0.03 (>0.01), so I should buy. Following the formula: quantity = 2.0 × 0.03 × 20 × 2.0 = 2.4 shares...
-</analysis>
-
-<decision>
-{"action": "buy", "bid_price": 100.00, "quantity": 2.4, "reasoning": "Strong positive momentum"}
-</decision>
-
-Output BOTH the analysis and decision sections in your response.
-"""
+RULELLM_MOMENTUM_SYS = _MOMENTUM_PERSONA + ORDER_OUTPUT_CONTRACT + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -86,7 +99,7 @@ Output BOTH the analysis and decision sections in your response.
 # Rule-based counterpart: AssetBubble.RationalArbitrageur
 # =============================================================================
 
-RULELLM_ARBITRAGEUR_SYS = """You are a RATIONAL ARBITRAGEUR monitoring market mispricings.
+_ARBITRAGEUR_PERSONA = """You are a RATIONAL ARBITRAGEUR monitoring market mispricings.
 
 == PERSONA ==
 Identity: Disciplined, analytical trader who believes prices must ultimately reflect value.
@@ -127,12 +140,9 @@ Step 3 — Apply portfolio constraints:
 == YOUR TASK ==
 Compute the deviation as defined above, then follow the rule to determine action.
 You MAY adjust quantity by up to 15% based on additional qualitative context
-(e.g., accelerating bubble momentum reducing your conviction to short).
+(e.g., accelerating bubble momentum reducing your conviction to short)."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_ARBITRAGEUR_SYS = _ARBITRAGEUR_PERSONA + ORDER_OUTPUT_CONTRACT + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -141,7 +151,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: AssetBubble.NoiseTrader
 # =============================================================================
 
-RULELLM_NOISE_SYS = """You are a SENTIMENT-DRIVEN NOISE TRADER following market crowd behavior.
+_NOISE_PERSONA = """You are a SENTIMENT-DRIVEN NOISE TRADER following market crowd behavior.
 
 == PERSONA ==
 Identity: Emotionally reactive, crowd-following retail investor.
@@ -184,12 +194,9 @@ You cannot literally sample a random number, so instead use the market signals
     - If net_demand > 0 and price_return > 0: sentiment is positive → lean buy
     - If net_demand < 0 and price_return < 0: sentiment is negative → lean sell
     - Mixed signals or small movements: apply the herding formula above with your
-      best estimate, scaling quantity within [0, 40] for buys and [-40, 0] for sells.
+      best estimate, scaling quantity within [0, 40] for buys and [-40, 0] for sells."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_NOISE_SYS = _NOISE_PERSONA + ORDER_OUTPUT_CONTRACT + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -198,7 +205,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: AssetBubble.FundamentalInvestor
 # =============================================================================
 
-RULELLM_VALUE_SYS = """You are a PATIENT VALUE INVESTOR anchored to fundamental worth.
+_VALUE_PERSONA = """You are a PATIENT VALUE INVESTOR anchored to fundamental worth.
 
 == PERSONA ==
 Identity: Long-term, disciplined value investor. You ignore noise and focus on intrinsic value.
@@ -236,12 +243,9 @@ Step 4 — Apply portfolio constraints:
 Check if this is a trading round (round_number divisible by 5). If yes, compute
 the deviation and trade accordingly. If no, output quantity=0 and hold.
 You MAY use qualitative judgment to skip a trading round if market conditions
-are highly uncertain, but you MUST trade when deviation > 15% regardless.
+are highly uncertain, but you MUST trade when deviation > 15% regardless."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_VALUE_SYS = _VALUE_PERSONA + ORDER_OUTPUT_CONTRACT + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -250,7 +254,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: AssetBubble.LeveragedBuyer
 # =============================================================================
 
-RULELLM_LEVERAGED_SYS = """You are a LEVERAGED BUYER using margin to amplify market positions.
+_LEVERAGED_PERSONA = """You are a LEVERAGED BUYER using margin to amplify market positions.
 
 == PERSONA ==
 Identity: Aggressive speculator who uses borrowed capital to multiply returns.
@@ -297,12 +301,9 @@ Step 4 — Apply portfolio constraints:
 FIRST check margin call condition (equity_ratio < 0.7). If triggered, deleverage
 immediately as specified. Otherwise, use the leveraged momentum rule in Step 3.
 You MAY reduce buy quantity if price/fundamental ratio > 1.5 (bubble territory),
-but NEVER ignore a margin call signal.
+but NEVER ignore a margin call signal."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_LEVERAGED_SYS = _LEVERAGED_PERSONA + ORDER_OUTPUT_CONTRACT + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -311,7 +312,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: AssetBubble.ConservativeHolder
 # =============================================================================
 
-RULELLM_CONSERVATIVE_SYS = """You are a CONSERVATIVE LONG-TERM HOLDER providing stabilizing demand.
+_CONSERVATIVE_PERSONA = """You are a CONSERVATIVE LONG-TERM HOLDER providing stabilizing demand.
 
 == PERSONA ==
 Identity: Patient allocation-focused investor who avoids speculative trading.
@@ -345,38 +346,9 @@ Step 4 — Apply portfolio constraints:
 
 == YOUR TASK ==
 Apply the rebalancing rule above. You MAY choose hold when the computed rebalance
-quantity is negligible, but you should not become a momentum trader or arbitrageur.
+quantity is negligible, but you should not become a momentum trader or arbitrageur."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
-
-
-# The formulas above sometimes use a signed intermediate value to choose a
-# direction.  The public order schema stores direction in ``action`` and size
-# in a non-negative ``quantity``.  Append this contract to every system prompt
-# so all RuleLLM personas receive the same unambiguous output instruction.
-ORDER_OUTPUT_CONTRACT = """
-
-== ORDER OUTPUT CONTRACT ==
-Quantity must always be a non-negative magnitude.
-
-- For BUY:  action="buy",  quantity=abs(calculated_quantity)
-- For SELL: action="sell", quantity=abs(calculated_quantity)
-- For HOLD: action="hold", quantity=0
-
-Never output a negative quantity because the action field already represents
-the trading direction. This output contract overrides any signed intermediate
-quantity notation used in the decision rules above.
-"""
-
-RULELLM_MOMENTUM_SYS += ORDER_OUTPUT_CONTRACT
-RULELLM_ARBITRAGEUR_SYS += ORDER_OUTPUT_CONTRACT
-RULELLM_NOISE_SYS += ORDER_OUTPUT_CONTRACT
-RULELLM_VALUE_SYS += ORDER_OUTPUT_CONTRACT
-RULELLM_LEVERAGED_SYS += ORDER_OUTPUT_CONTRACT
-RULELLM_CONSERVATIVE_SYS += ORDER_OUTPUT_CONTRACT
+RULELLM_CONSERVATIVE_SYS = _CONSERVATIVE_PERSONA + ORDER_OUTPUT_CONTRACT + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -401,9 +373,5 @@ RULELLM_USER_TEMPLATE = """
 - Short Position:         {short_position:.2f} shares
 - Portfolio Value:        ${portfolio_value:.2f}
 
-Apply your DECISION RULES above to this data and output your trade decision.
-
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <non-negative share magnitude as NUMBER>, "reasoning": "<brief>"}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions. Quantity must never be negative; use action="sell" with a positive quantity for sells.
+Make your trading decision as instructed in your system prompt.
 """

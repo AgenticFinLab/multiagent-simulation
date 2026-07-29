@@ -1379,17 +1379,26 @@ def extract_default_players(
     scenario_name: str,
     variant: str,
     project_root: Path,
+    players_yml_path: Optional[Path] = None,
 ) -> dict[str, dict[str, Any]]:
-    """Read every top-level block from a shipped ``players.yml`` file.
+    """Read every top-level block from a ``players.yml`` file.
 
     Returns a mapping ``{block_key: {"name", "class", "num_instances",
-    "role", "extras": {...}}}`` covering both the market coordinator block
-    (first top-level key) and each investor block that follows. The
-    ``extras`` sub-dict strips infrastructure-only keys (``record_path``,
-    ``custom_state_hot_limit``) that are managed by the runner rather than
-    the user. Returns an empty dict when the scenario has no shipped
-    players.yml for this variant (defensive; also lets the UI hide the
-    editor cleanly instead of crashing).
+    "role", "extras": {...}, "llm": {...}}}`` covering both the market
+    coordinator block (first top-level key) and each investor block that
+    follows. The ``extras`` sub-dict strips infrastructure-only keys
+    (``record_path``, ``custom_state_hot_limit``) that are managed by the
+    runner rather than the user. Returns an empty dict when the file does
+    not exist (defensive; also lets the UI hide the editor cleanly instead
+    of crashing).
+
+    Args:
+        players_yml_path: explicit YAML path to read. When ``None``, falls
+            back to ``configs/{scenario_name}/{variant}/players.yml`` under
+            ``project_root``. Callers that have already created a Default
+            bundle should pass ``bundle.players_yaml`` so the UI reflects
+            on-disk edits made via the Save button in the edit dialog
+            (definition-site concat model — no in-memory sentinel).
 
     Used by the *Default* section of the Streamlit interface to build the
     agent-parameter editor panel: every listed extras key becomes a
@@ -1397,7 +1406,10 @@ def extract_default_players(
     with an associated session-state override slot.
     """
     project_root = Path(project_root).resolve()
-    players_path = project_root / "configs" / scenario_name / variant / "players.yml"
+    if players_yml_path is None:
+        players_path = project_root / "configs" / scenario_name / variant / "players.yml"
+    else:
+        players_path = Path(players_yml_path)
     if not players_path.exists():
         return {}
 

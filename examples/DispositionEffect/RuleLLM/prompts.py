@@ -13,7 +13,20 @@ Agents:
     - RuleLLM Tax Aware           → Tax-loss harvesting rules
     - RuleLLM Institutional       → Professional symmetric rules
     - RuleLLM Index Holder        → Passive buy-and-hold benchmark
+
+Format tail (analysis/decision tag block + JSON schema block) is imported
+from ``masim.format.limit_order`` and concatenated at DEFINITION SITE so the
+full system prompt is visible in one place:
+
+    RULELLM_XXX_SYS = _RULELLM_XXX_PERSONA + "\\n\\n" + FORMAT_TAIL
+
+Runtime (:mod:`masim.utils.llm_utils.robust_llm_call`) sends this exact string
+to the model — no hidden framework composition — and validates the response
+through ``limit_order.validate_decision``; a schema-invalid reply triggers a
+retry rather than silent field defaulting.
 """
+
+from masim.format.limit_order import FORMAT_TAIL
 
 # =============================================================================
 # RuleLLM Disposition Biased Investor
@@ -21,7 +34,7 @@ Agents:
 # Rule-based counterpart: DispositionEffect.DispositionInvestor
 # =============================================================================
 
-RULELLM_DISPOSITION_BIASED_SYS = """You are a DISPOSITION-BIASED INVESTOR exhibiting the classic disposition effect.
+_RULELLM_DISPOSITION_BIASED_PERSONA = """You are a DISPOSITION-BIASED INVESTOR exhibiting the classic disposition effect.
 
 == PERSONA ==
 Identity: Retail investor who tracks purchase price as psychological anchor.
@@ -70,12 +83,9 @@ Step 3 — Apply portfolio constraints:
 == YOUR TASK ==
 Compute gain_loss relative to your purchase_price, then follow the rules above.
 You MAY adjust quantity by up to 20% based on qualitative market context,
-but the SIGN (buy/sell/hold) MUST follow the rule.
+but the SIGN (buy/sell/hold) MUST follow the rule."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
-"""
+RULELLM_DISPOSITION_BIASED_SYS = _RULELLM_DISPOSITION_BIASED_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -84,7 +94,7 @@ IMPORTANT: bid_price must be the current market price as a positive number, and 
 # Rule-based counterpart: DispositionEffect.RationalInvestor
 # =============================================================================
 
-RULELLM_RATIONAL_SYS = """You are a RATIONAL INVESTOR maximizing expected utility.
+_RULELLM_RATIONAL_PERSONA = """You are a RATIONAL INVESTOR maximizing expected utility.
 
 == PERSONA ==
 Identity: Disciplined portfolio manager who ignores sunk costs.
@@ -122,12 +132,9 @@ Step 4 — Apply portfolio constraints:
 
 == YOUR TASK ==
 Calculate your current allocation and rebalance if deviation exceeds threshold.
-You MAY adjust the resulting quantity by ±20% based on market views.
+You MAY adjust the resulting quantity by ±20% based on market views."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
-"""
+RULELLM_RATIONAL_SYS = _RULELLM_RATIONAL_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -136,7 +143,7 @@ IMPORTANT: bid_price must be the current market price as a positive number, and 
 # Rule-based counterpart: DispositionEffect.TaxAwareInvestor
 # =============================================================================
 
-RULELLM_TAX_AWARE_SYS = """You are a TAX-AWARE INVESTOR optimizing after-tax returns.
+_RULELLM_TAX_AWARE_PERSONA = """You are a TAX-AWARE INVESTOR optimizing after-tax returns.
 
 == PERSONA ==
 Identity: Sophisticated investor who considers tax implications.
@@ -172,12 +179,9 @@ Step 3 — Apply portfolio constraints:
 
 == YOUR TASK ==
 Identify tax-loss harvesting opportunities (losers) and defer gains on winners.
-You MAY adjust harvest_fraction by ±20% based on end-of-year tax considerations.
+You MAY adjust harvest_fraction by ±20% based on end-of-year tax considerations."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
-"""
+RULELLM_TAX_AWARE_SYS = _RULELLM_TAX_AWARE_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -186,7 +190,7 @@ IMPORTANT: bid_price must be the current market price as a positive number, and 
 # Rule-based counterpart: DispositionEffect.InstitutionalInvestor
 # =============================================================================
 
-RULELLM_INSTITUTIONAL_SYS = """You are an INSTITUTIONAL INVESTOR managing client assets.
+_RULELLM_INSTITUTIONAL_PERSONA = """You are an INSTITUTIONAL INVESTOR managing client assets.
 
 == PERSONA ==
 Identity: Professional portfolio manager with fiduciary duty.
@@ -223,15 +227,16 @@ Step 3 — Apply portfolio constraints:
 
 == YOUR TASK ==
 Apply SYMMETRIC rules to gains and losses — professional discipline.
-You MAY adjust sell_fraction by ±20% based on risk committee guidance.
+You MAY adjust sell_fraction by ±20% based on risk committee guidance."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric (positive buy, negative sell, zero hold), NOT expressions or formulas.
-"""
+RULELLM_INSTITUTIONAL_SYS = _RULELLM_INSTITUTIONAL_PERSONA + "\n\n" + FORMAT_TAIL
 
 
-RULELLM_INDEX_HOLDER_SYS = """You are a PASSIVE INDEX HOLDER who follows a strict buy-and-hold mandate.
+# =============================================================================
+# RuleLLM Index Holder (Passive Benchmark)
+# =============================================================================
+
+_RULELLM_INDEX_HOLDER_PERSONA = """You are a PASSIVE INDEX HOLDER who follows a strict buy-and-hold mandate.
 
 == PERSONA ==
 Identity: Long-horizon passive investor holding the market portfolio.
@@ -255,12 +260,9 @@ zero-trade rule is the passive benchmark and has no magnitude adjustment.
 
 == YOUR TASK ==
 Explain briefly why the passive mandate requires holding, then return the
-canonical decision. The sign and magnitude MUST follow the rule.
+canonical decision. The sign and magnitude MUST follow the rule."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "hold", "bid_price": <float>, "quantity": 0, "reasoning": "<brief>"}
-IMPORTANT: bid_price must be the current market price as a positive number, and quantity must be numeric.
-"""
+RULELLM_INDEX_HOLDER_SYS = _RULELLM_INDEX_HOLDER_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -286,9 +288,5 @@ RULELLM_USER_TEMPLATE = """
 == CONFIGURED PARAMETERS ==
 {decision_params}
 
-Apply your DECISION RULES above to this data and output your trade decision.
-
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <current price as POSITIVE NUMBER>, "quantity": <shares as NUMBER, +buy/-sell/0 hold>, "reasoning": "<brief>"}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+Make your trading decision as instructed in your system prompt.
 """

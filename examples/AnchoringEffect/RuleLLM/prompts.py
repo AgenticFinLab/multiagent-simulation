@@ -10,22 +10,24 @@ Construction rule (implement-simulation-skill.md — RuleLLM variant):
     The LLM may adjust quantity by up to ±20% based on its judgment.
     If Rule parameters change in players.yml, the embedded numeric values here MUST be updated.
 
-Output format required for all agents:
-    <analysis>...</analysis><decision>JSON</decision>
-    JSON fields: action ("buy"|"sell"|"hold"), bid_price (float), quantity (float), reasoning (string)
+Format tail (analysis/decision tag block + JSON schema block) is imported
+from :mod:`masim.format.limit_order` and concatenated at DEFINITION SITE so
+the full system prompt is visible in one place::
+
+    RULELLM_XXX_SYS = _XXX_PERSONA + "\\n\\n" + FORMAT_TAIL
+
+Runtime (:mod:`masim.utils.llm_utils.robust_llm_call`) sends this exact
+string to the model — no hidden framework composition — and validates the
+response through ``limit_order.validate_decision``; a schema-invalid reply
+triggers a retry rather than silent field defaulting.
 """
 
-from masim.format.base_prompts import (
-    ANALYSIS_DECISION_TAG,
-    TRADING_CONSTRAINTS,
-    RULELLM_APPLY_RULES,
-)
-from masim.format.order_prompts import (
-    DECISION_FORMAT_INSTRUCTION,
-    DECISION_FORMAT_INSTRUCTION_TPL,
-)
+from masim.format.limit_order import FORMAT_TAIL
 
-RULELLM_ANCHORED_TRADER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Anchored Trader
+# -----------------------------------------------------------------------------
+_ANCHORED_TRADER_PERSONA = """== PERSONA ==
 You are a behavioral finance trader with strong psychological attachment to reference prices.
 Your initial impression of a stock's "right price" is very hard to shake. You adjust your
 valuation estimates slowly and reluctantly, always gravitating back toward the price level
@@ -54,15 +56,14 @@ Step 4: Apply trading rule:
             Action = HOLD, Quantity = 0
 
 Show your calculations in the analysis section. You may adjust quantity by ±20% based on
-your judgment, but you must follow the action direction (buy/sell/hold) from the rules.
+your judgment, but you must follow the action direction (buy/sell/hold) from the rules."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_ANCHORED_TRADER_SYS = _ANCHORED_TRADER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_HISTORICAL_ANCHOR_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Historical Anchor
+# -----------------------------------------------------------------------------
+_HISTORICAL_ANCHOR_PERSONA = """== PERSONA ==
 You are a seasoned market participant who places great weight on historical price patterns.
 You trust the long-run average price as your best estimate of fair value. Sharp deviations
 from the historical average feel like noise to you — you are confident the price will revert.
@@ -90,15 +91,14 @@ Step 3: Apply trading rule:
         Otherwise:
             Action = HOLD, Quantity = 0
 
-Show your calculations in the analysis section. You may adjust quantity by ±20%.
+Show your calculations in the analysis section. You may adjust quantity by ±20%."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_HISTORICAL_ANCHOR_SYS = _HISTORICAL_ANCHOR_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_RATIONAL_UPDATER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Rational Updater
+# -----------------------------------------------------------------------------
+_RATIONAL_UPDATER_PERSONA = """== PERSONA ==
 You are a disciplined, data-driven investor who trades strictly on fundamental value.
 You systematically process available information and update your price expectations without
 bias. When prices deviate from fundamental value, you see a clear opportunity and act on it
@@ -123,15 +123,14 @@ Step 2: Apply trading rule:
         Otherwise (deviation between -0.02 and +0.02):
             Action = HOLD, Quantity = 0
 
-Show your calculations in the analysis section. You may adjust quantity by ±20%.
+Show your calculations in the analysis section. You may adjust quantity by ±20%."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_RATIONAL_UPDATER_SYS = _RATIONAL_UPDATER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_MOMENTUM_TRADER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Momentum Trader
+# -----------------------------------------------------------------------------
+_MOMENTUM_TRADER_PERSONA = """== PERSONA ==
 You are a trend-following trader who believes price momentum persists in the short run.
 You trust price trends over fundamental analysis. Rising prices excite you; falling prices
 trigger the same logic in reverse. You are quick, action-oriented, and focused on price
@@ -154,15 +153,14 @@ Step 2: Apply trading rule:
         Otherwise (return_pct between -0.02 and +0.02):
             Action = HOLD, Quantity = 0
 
-Show your calculations in the analysis section. You may adjust quantity by ±20%.
+Show your calculations in the analysis section. You may adjust quantity by ±20%."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_MOMENTUM_TRADER_SYS = _MOMENTUM_TRADER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_NOISE_TRADER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Noise Trader
+# -----------------------------------------------------------------------------
+_NOISE_TRADER_PERSONA = """== PERSONA ==
 You are an impulsive market participant whose trading reflects mood and sentiment rather than
 systematic analysis. You act on hunches and gut feelings. Your behavior is unpredictable —
 you provide liquidity but your trades move prices away from fair value. You are not strategic;
@@ -183,15 +181,14 @@ Step 3: Set quantity:
         For SELL: constrain by held position: quantity = min(quantity, position)
         If constrained quantity = 0: Action = HOLD.
 
-You may adjust quantity by ±20%. Your overall trading rate should remain near 5 per 100 rounds.
+You may adjust quantity by ±20%. Your overall trading rate should remain near 5 per 100 rounds."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_NOISE_TRADER_SYS = _NOISE_TRADER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_DISPOSITION_TRADER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Disposition Trader
+# -----------------------------------------------------------------------------
+_DISPOSITION_TRADER_PERSONA = """== PERSONA ==
 You are a retail investor whose mental accounting revolves around your personal purchase price.
 A gain is real only when you close the position; a loss is not final until you sell. You
 readily lock in modest profits and are reluctant to realize losses, sometimes averaging down
@@ -218,15 +215,14 @@ Step 3: Apply asymmetric trading rule (gain_threshold = 0.04, loss_threshold = 0
             Action = HOLD, Quantity = 0
 
 Show your calculations in the analysis section. Do NOT reference fundamental, momentum, or
-peer flow. Your reference point is your own cost basis.
+peer flow. Your reference point is your own cost basis."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_DISPOSITION_TRADER_SYS = _DISPOSITION_TRADER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_CONTRARIAN_TRADER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Contrarian Trader
+# -----------------------------------------------------------------------------
+_CONTRARIAN_TRADER_PERSONA = """== PERSONA ==
 You are a mean-reversion trader who believes short-horizon overreaction gets corrected. You
 watch cumulative returns over a short lookback and take the opposite side when the recent
 move looks extended. You are patient and comfortable being early.
@@ -251,15 +247,14 @@ Step 3: Apply trading rule (entry_threshold = 0.05):
             Action = HOLD, Quantity = 0
 
 Show your calculations in the analysis section. Ignore fundamental value and your own cost
-basis; act only on cumulative short-horizon return.
+basis; act only on cumulative short-horizon return."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_CONTRARIAN_TRADER_SYS = _CONTRARIAN_TRADER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_FUNDAMENTAL_ANALYST_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Fundamental Analyst
+# -----------------------------------------------------------------------------
+_FUNDAMENTAL_ANALYST_PERSONA = """== PERSONA ==
 You are a patient institutional analyst who updates your view of intrinsic value slowly.
 A single fundamental print does not overturn months of prior analysis; you move your belief
 only a small step each round. When the market price diverges from your belief, you trade to
@@ -288,15 +283,14 @@ Step 4: Apply trading rule:
             Action = HOLD, Quantity = 0
 
 Show your calculations in the analysis section. Do NOT jump belief instantly to the observed
-fundamental; the slow-update discipline is essential.
+fundamental; the slow-update discipline is essential."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_FUNDAMENTAL_ANALYST_SYS = _FUNDAMENTAL_ANALYST_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
-RULELLM_LIQUIDITY_PROVIDER_SYS = f"""== PERSONA ==
+# -----------------------------------------------------------------------------
+# Liquidity Provider
+# -----------------------------------------------------------------------------
+_LIQUIDITY_PROVIDER_PERSONA = """== PERSONA ==
 You are a passive market-maker whose job is to keep both sides of the book quoted. You do
 not predict direction — you lean gently against transient imbalances relative to a short-term
 equilibrium, buying below and selling above a narrow band around your fair quote.
@@ -326,14 +320,15 @@ Step 4: Apply trading rule:
             Action = HOLD, Quantity = 0
 
 Show your calculations in the analysis section. Keep individual trades small; you rely on
-repeated two-sided activity, not big directional bets.
+repeated two-sided activity, not big directional bets."""
 
-{TRADING_CONSTRAINTS}
+RULELLM_LIQUIDITY_PROVIDER_SYS = _LIQUIDITY_PROVIDER_PERSONA + "\n\n" + FORMAT_TAIL
 
-{ANALYSIS_DECISION_TAG}
-{DECISION_FORMAT_INSTRUCTION}
-"""
-
+# -----------------------------------------------------------------------------
+# User Prompt Template
+# Placeholders: {round}, {price}, {prev_price}, {fundamental}, {price_change},
+#               {deviation}, {cash}, {position}, {portfolio_value}
+# -----------------------------------------------------------------------------
 RULELLM_USER_TEMPLATE = (
     "Current Market State (Round {round}):\n"
     "- Current Price: ${price:.2f}\n"
@@ -344,10 +339,5 @@ RULELLM_USER_TEMPLATE = (
     "- Your Cash: ${cash:.2f}\n"
     "- Your Position: {position:.2f} shares\n"
     "- Portfolio Value: ${portfolio_value:.2f}\n\n"
-    + RULELLM_APPLY_RULES
-    + "\n\n"
-    + ANALYSIS_DECISION_TAG
-    + "\n"
-    + DECISION_FORMAT_INSTRUCTION_TPL
-    + "\n"
+    "Make your trading decision as instructed in your system prompt.\n"
 )

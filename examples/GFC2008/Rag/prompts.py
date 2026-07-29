@@ -1,6 +1,10 @@
 """GFC2008 Rag Prompts
 
 RAG variant prompts: imports system prompts from RuleLLM and adds RAG user template.
+
+The re-exported ``*_SYS`` constants already carry the ``limit_order`` FORMAT_TAIL
+concatenated at definition site inside :mod:`examples.GFC2008.RuleLLM.prompts`,
+so no additional format composition is needed here.
 """
 
 from examples.GFC2008.RuleLLM.prompts import (
@@ -24,8 +28,6 @@ Cash Available: ${cash:.2f}
 Shares Held: {position}
 Portfolio Value: ${portfolio_value:.2f}
 
-Using the retrieved knowledge and your trading rules, provide your decision.
-
-Output format requirement: the <decision> JSON must include action ("buy", "sell", or "hold"), bid_price (current or limit price as a number), quantity (number of shares/contracts), and reasoning (brief string)."""
+Using the retrieved knowledge and your trading rules, provide your decision."""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

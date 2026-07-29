@@ -1332,8 +1332,14 @@ def render_default_config() -> None:
     st.divider()
 
     # ── Load player data ──────────────────────────────────────────────────
+    # Read from the *bundle*'s players.yml so the UI reflects on-disk edits
+    # persisted by the Save button in the edit dialog. The bundle is created
+    # by :func:`copy_default_scenario_bundle` above (idempotent).
     players = extract_default_players(
-        scenario_name=base, variant=variant, project_root=PROJECT_ROOT
+        scenario_name=base,
+        variant=variant,
+        project_root=PROJECT_ROOT,
+        players_yml_path=bundle.players_yaml,
     )
     if not players:
         st.info("No configurable parameters for this scenario.")
@@ -1380,6 +1386,7 @@ def render_default_config() -> None:
                         block_info=block_info,
                         edits=edits,
                         is_llm_variant=is_llm_variant,
+                        bundle=bundle,
                     )
         st.divider()
 
@@ -1393,14 +1400,17 @@ def _resolve_prompt_text(module_ref: str) -> str:
     Used to load the actual prompt text from e.g.
     'examples.AnchoringEffect.LLM.prompts:LLM_ANCHORED_TRADER_SYS'.
     Returns the resolved string, or the raw reference if import fails.
+
+    Delegates to :func:`masim.agents._base._load_dotted` so shipped and
+    CUSTOMIZED_SIMULATION bundle references (whose directory names contain
+    hyphens illegal in Python import syntax) both resolve through the same
+    file-path-fallback code path.
     """
     if ":" not in module_ref:
         return module_ref
-    module_path, var_name = module_ref.rsplit(":", 1)
     try:
-        import importlib
-        mod = importlib.import_module(module_path)
-        value = getattr(mod, var_name, None)
+        from masim.agents._base import _load_dotted
+        value = _load_dotted(module_ref)
         if isinstance(value, str):
             return value
     except Exception:
@@ -1432,10 +1442,15 @@ def _render_default_agent_card(
     block_info: dict[str, Any],
     edits: dict[str, dict[str, Any]],
     is_llm_variant: bool,
+    bundle,  # CustomizedBundleResult
 ) -> None:
     """Render one agent card in the Default config grid (Customized-style).
 
     Shows: icon image → agent name → edited badge → Edit button (opens dialog).
+    The "✓ 已修改" badge is derived by comparing the bundle's on-disk files
+    against the shipped originals — no in-memory sentinel is consulted. This
+    matches the direct-disk-write Save model documented above the
+    :func:`_save_default_agent_edits_to_disk` helper.
     """
     archetype = _canonical_archetype(block_key)
     icon_path = ICON_ROOT / f"finance-{archetype.replace('_', '-')}.png"
@@ -1462,12 +1477,24 @@ def _render_default_agent_card(
         unsafe_allow_html=True,
     )
 
-    # --- Edited indicator ---
-    has_edits = (
-        bool(edits.get(block_key))
-        or bool(edits.get("__llm__", {}).get(block_key))
-        or st.session_state.get(f"dc_edited_{block_key}", False)
-    )
+    # --- Edited indicator (disk-derived) ---
+    has_edits = False
+    llm_cfg_for_badge = block_info.get("llm") if is_llm_variant else None
+    sys_ref_for_badge = (llm_cfg_for_badge or {}).get("sys_message", "")
+    extras_keys_for_badge = tuple((block_info.get("extras") or {}).keys())
+    try:
+        has_edits = _is_default_agent_edited_on_disk(
+            bundle=bundle,
+            base=base,
+            variant=variant,
+            block_key=block_key,
+            sys_ref=sys_ref_for_badge,
+            extras_keys=extras_keys_for_badge,
+        )
+    except Exception:
+        # Defensive: never let a badge-compute crash the entire config page.
+        has_edits = False
+
     if has_edits:
         st.markdown(
             "<div style='text-align:center;margin:2px 0;'>"
@@ -1490,6 +1517,7 @@ def _render_default_agent_card(
             block_info=block_info,
             edits=edits,
             is_llm_variant=is_llm_variant,
+            bundle=bundle,
         )
 
 
@@ -1502,14 +1530,25 @@ def _show_default_edit_dialog(
     block_info: dict[str, Any],
     edits: dict[str, dict[str, Any]],
     is_llm_variant: bool,
+    bundle,  # CustomizedBundleResult
 ) -> None:
     """Dialog overlay for editing a Default-config agent's parameters.
+
+    On Save, every edit is written *directly* to the bundle's on-disk
+    ``prompts.py`` and ``players.yml`` via
+    :func:`_save_default_agent_edits_to_disk`. No in-memory sentinel is
+    kept between reruns; widget default values are re-read from those
+    files on every dialog open. The persona edit is confined to the
+    ``_XXX_PERSONA`` triple-quoted block so the definition-site concat
+    line (``LLM_XXX_SYS = _XXX_PERSONA + "\\n\\n" + FORMAT_TAIL``) stays
+    intact — the reader still sees the entire prompt composition in one
+    place.
 
     When ``variant == "RuleLLM"``, everything is rendered read-only (sample
     view) — the dialog serves as a teaching example that shows how the
     quantitative Rule engine's decision rules get embedded inside an LLM
-    prompt. Save is disabled and the persona textarea is force-loaded from
-    the actual scenario RuleLLM configs so students see the real
+    prompt. Save is disabled and the persona textarea is force-loaded
+    from the actual scenario RuleLLM configs so students see the real
     ``==DECISION RULES==`` block.
     """
     display_name = block_info.get("name") or block_key
@@ -1521,153 +1560,137 @@ def _show_default_edit_dialog(
         st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
 
     # ── Parameters (extras) ───────────────────────────────────────────
+    # Extras are still edited via a session-scoped override slot so the
+    # user can compare pending changes before clicking Save. The slot is
+    # flushed to disk (or discarded) when the Save/Cancel buttons run.
+    override_slot: dict[str, Any] = dict(edits.get(block_key) or {})
     if extras:
         st.markdown("**Parameters**")
-        override_slot = edits.setdefault(block_key, {})
         _render_extras_grid(
             extras=extras,
             override_slot=override_slot,
             key_prefix=f"dc_{base}_{block_key}",
             disabled=is_rulellm,
         )
-        if not override_slot:
-            edits.pop(block_key, None)
         st.divider()
 
     # ── LLM Prompt & Model (only for LLM/RuleLLM/Rag engines) ────────
-    if is_llm_variant:
-        llm_cfg = block_info.get("llm")
-        if llm_cfg:
-            st.markdown("**Persona Prompt**")
-            st.caption(
-                "Edit the agent's persona below. The output format instruction "
-                "is appended automatically — you only need to adjust the "
-                "persona description."
-                if not is_rulellm else
-                "Read-only sample. Below is the actual RuleLLM system prompt "
-                "for this agent in this scenario — notice how the "
-                "`== DECISION RULES ==` block encodes the same quantitative "
-                "logic that the pure Rule engine uses."
-            )
+    # Locals captured at widget-mount time; consumed by the Save handler.
+    persona_edit_body: str | None = None
+    temperature_edit: float | None = None
+    max_new_tokens_edit: int | None = None
+    lm_name_edit: str | None = None
+    llm_cfg = block_info.get("llm") if is_llm_variant else None
 
-            llm_edits: dict[str, dict[str, Any]] = edits.setdefault("__llm__", {})
-            agent_llm_edits = llm_edits.setdefault(block_key, {})
+    if is_llm_variant and llm_cfg:
+        st.markdown("**Persona Prompt**")
+        st.caption(
+            "Edit the agent's persona below. The output format instruction "
+            "is appended automatically at the definition site inside "
+            "prompts.py — you only need to adjust the persona description."
+            if not is_rulellm else
+            "Read-only sample. Below is the actual RuleLLM system prompt "
+            "for this agent in this scenario — notice how the "
+            "`== DECISION RULES ==` block encodes the same quantitative "
+            "logic that the pure Rule engine uses."
+        )
 
-            # Resolve the current system prompt text
-            sys_ref = llm_cfg.get("sys_message", "")
-            prompt_text = agent_llm_edits.get("persona_prompt", "")
-            if not prompt_text and sys_ref:
-                prompt_text = _resolve_prompt_text(sys_ref)
+        sys_ref = llm_cfg.get("sys_message", "")
 
-            # For RuleLLM, override with the actual scenario RuleLLM prompt
-            # (bypasses the customized/agent_catalog.py:199-202 mirror bug
-            # that pastes plain-LLM prompts onto RuleLLM blocks).
-            if is_rulellm:
-                _prompt_data = get_rulellm_prompt_for_agent(base, block_key)
-                real_sys = (_prompt_data or {}).get("sys", "") if _prompt_data else ""
-                if real_sys:
-                    prompt_text = real_sys
+        # --- Resolve the persona body to prefill the textarea ---
+        # Priority: bundle prompts.py (already edited) → shipped prompts.py.
+        # For RuleLLM sample view, always show the full shipped RuleLLM
+        # system prompt (persona + embedded rules) verbatim.
+        if is_rulellm:
+            _prompt_data = get_rulellm_prompt_for_agent(base, block_key)
+            initial_persona = (_prompt_data or {}).get("sys", "") if _prompt_data else ""
+        else:
+            bundle_body, _ = _read_bundle_persona_body(bundle.example_dir, sys_ref)
+            if bundle_body:
+                initial_persona = bundle_body
+            else:
+                public_const = _public_const_from_sys_ref(sys_ref)
+                initial_persona = _read_shipped_persona_body(base, variant, public_const)
 
-            # Strip the format tail so users only see persona
-            persona_only = _extract_persona_section(prompt_text)
+        edited_prompt = st.text_area(
+            "Persona Prompt",
+            value=initial_persona,
+            height=220,
+            key=f"dc_llm_prompt_{base}_{block_key}",
+            help=(
+                "Read-only — this is a teaching sample."
+                if is_rulellm else
+                "Edit the agent's persona content."
+            ),
+            label_visibility="collapsed",
+            disabled=is_rulellm,
+        )
+        if not is_rulellm:
+            # Preserve the exact persona-body string on Save when it
+            # differs from what is currently on disk. Whitespace-only
+            # changes are ignored to avoid noisy diffs.
+            if edited_prompt.strip() != (initial_persona or "").strip():
+                persona_edit_body = edited_prompt
 
-            edited_prompt = st.text_area(
-                "Persona Prompt",
-                value=agent_llm_edits.get("persona_prompt", persona_only),
-                height=220,
-                key=f"dc_llm_prompt_{base}_{block_key}",
-                help=(
-                    "Read-only — this is a teaching sample."
-                    if is_rulellm else
-                    "Edit the agent's persona content."
-                ),
-                label_visibility="collapsed",
+        # Locked format display — mirrors what's actually concatenated
+        # at the def-site in prompts.py (FORMAT_TAIL from
+        # masim.format.<category>).
+        st.info(
+            "**Output format** (locked — concatenated at the def-site in "
+            "prompts.py as `LLM_XXX_SYS = _XXX_PERSONA + \"\\n\\n\" + "
+            "FORMAT_TAIL`):\n\n"
+            "```\n"
+            '<analysis>...</analysis><decision>JSON</decision>\n'
+            "JSON schema: see masim/format/{limit_order|maker_taker_order|"
+            "participation_order}.py\n"
+            "```",
+            icon="\U0001f512",
+        )
+
+        st.divider()
+
+        # Model & Generation parameters
+        st.markdown("**Model & Generation**")
+        gen_cfg = llm_cfg.get("generation_config") or {}
+        pcol1, pcol2 = st.columns(2)
+        with pcol1:
+            current_temp = float(gen_cfg.get("temperature", 0.7))
+            new_temp = st.slider(
+                "Temperature",
+                min_value=0.0,
+                max_value=2.0,
+                value=current_temp,
+                step=0.05,
+                key=f"dc_llm_temp_{base}_{block_key}",
                 disabled=is_rulellm,
             )
-            if not is_rulellm:
-                if edited_prompt.strip() != persona_only.strip():
-                    agent_llm_edits["persona_prompt"] = edited_prompt.strip()
-                else:
-                    agent_llm_edits.pop("persona_prompt", None)
-
-            # Locked format display
-            st.info(
-                "**Output format** (locked — appended automatically):\n\n"
-                "```\n"
-                '<analysis>...</analysis><decision>JSON</decision>\n'
-                "JSON: {action, bid_price, quantity, reasoning}\n"
-                "```",
-                icon="\U0001f512",
-            )
-
-            st.divider()
-
-            # Model & Generation parameters
-            st.markdown("**Model & Generation**")
-            gen_cfg = llm_cfg.get("generation_config") or {}
-            pcol1, pcol2 = st.columns(2)
-            with pcol1:
-                current_temp = float(
-                    agent_llm_edits.get(
-                        "temperature", gen_cfg.get("temperature", 0.7)
-                    )
-                )
-                new_temp = st.slider(
-                    "Temperature",
-                    min_value=0.0,
-                    max_value=2.0,
-                    value=current_temp,
-                    step=0.05,
-                    key=f"dc_llm_temp_{base}_{block_key}",
-                    disabled=is_rulellm,
-                )
-                if not is_rulellm:
-                    if abs(new_temp - float(gen_cfg.get("temperature", 0.7))) > 0.01:
-                        agent_llm_edits["temperature"] = round(new_temp, 2)
-                    else:
-                        agent_llm_edits.pop("temperature", None)
-            with pcol2:
-                current_tokens = int(
-                    agent_llm_edits.get(
-                        "max_tokens", gen_cfg.get("max_tokens", 512)
-                    )
-                )
-                new_tokens = st.number_input(
-                    "Max Tokens",
-                    min_value=64,
-                    max_value=4096,
-                    value=current_tokens,
-                    step=64,
-                    key=f"dc_llm_tokens_{base}_{block_key}",
-                    disabled=is_rulellm,
-                )
-                if not is_rulellm:
-                    if int(new_tokens) != int(gen_cfg.get("max_tokens", 512)):
-                        agent_llm_edits["max_tokens"] = int(new_tokens)
-                    else:
-                        agent_llm_edits.pop("max_tokens", None)
-
-            current_model = agent_llm_edits.get(
-                "lm_name", llm_cfg.get("lm_name", "")
-            )
-            new_model = st.text_input(
-                "Model Name",
-                value=current_model,
-                key=f"dc_llm_model_{base}_{block_key}",
-                help="LLM endpoint identifier (e.g. ark/doubao-seed-2-0-mini-260428).",
+            if not is_rulellm and abs(new_temp - current_temp) > 1e-6:
+                temperature_edit = round(new_temp, 2)
+        with pcol2:
+            # Shipped YAML uses ``max_new_tokens`` (not ``max_tokens``).
+            current_tokens = int(gen_cfg.get("max_new_tokens", 512))
+            new_tokens = st.number_input(
+                "Max New Tokens",
+                min_value=64,
+                max_value=4096,
+                value=current_tokens,
+                step=64,
+                key=f"dc_llm_tokens_{base}_{block_key}",
                 disabled=is_rulellm,
             )
-            if not is_rulellm:
-                if new_model.strip() != llm_cfg.get("lm_name", ""):
-                    agent_llm_edits["lm_name"] = new_model.strip()
-                else:
-                    agent_llm_edits.pop("lm_name", None)
+            if not is_rulellm and int(new_tokens) != current_tokens:
+                max_new_tokens_edit = int(new_tokens)
 
-            # Prune empty per-agent dicts
-            if not agent_llm_edits:
-                llm_edits.pop(block_key, None)
-            if not llm_edits:
-                edits.pop("__llm__", None)
+        current_model = llm_cfg.get("lm_name", "")
+        new_model = st.text_input(
+            "Model Name",
+            value=current_model,
+            key=f"dc_llm_model_{base}_{block_key}",
+            help="LLM endpoint identifier (e.g. ark/doubao-seed-2-0-mini-260428).",
+            disabled=is_rulellm,
+        )
+        if not is_rulellm and new_model.strip() != current_model:
+            lm_name_edit = new_model.strip()
 
     # ── Save button ────────────────────────────────────────────────────
     if st.button(
@@ -1679,8 +1702,28 @@ def _show_default_edit_dialog(
         help=("RuleLLM 只作为教学样例展示，无可保存的修改。"
               if is_rulellm else None),
     ):
-        st.session_state[f"dc_edited_{block_key}"] = True
-        st.rerun()
+        try:
+            _save_default_agent_edits_to_disk(
+                bundle=bundle,
+                base=base,
+                variant=variant,
+                block_key=block_key,
+                sys_ref=(llm_cfg or {}).get("sys_message", ""),
+                persona_body=persona_edit_body,
+                temperature=temperature_edit,
+                max_new_tokens=max_new_tokens_edit,
+                lm_name=lm_name_edit,
+                extras_override=(override_slot or None),
+            )
+        except Exception as exc:
+            st.error(f"保存失败: {exc}")
+            return
+
+        # Clear the in-memory extras slot — disk is now the source of truth.
+        edits.pop(block_key, None)
+        # Close the dialog and refresh the grid so the badge picks up the
+        # freshly-written disk state on the next render.
+        st.rerun(scope="fragment")
 
 
 def _render_extras_grid(
@@ -1766,7 +1809,15 @@ def _render_launch_button(scenario_key: str) -> None:
 
 
 def _launch_from_default_config(scenario_key: str) -> None:
-    """Apply parameter edits to the bundle and enter the workspace."""
+    """Apply parameter edits to the bundle and enter the workspace.
+
+    LLM persona / generation / lm_name / per-agent extras edits have
+    already been written to the bundle by the Save button inside
+    :func:`_show_default_edit_dialog` (direct-disk-write model). This
+    launch handler only flushes the still-in-memory ``__market__`` extras
+    and the rounds edit — Confirm & Launch is the point at which those
+    two become permanent.
+    """
     base = scenario_key.split("/", 1)[0]
     variant = scenario_key.split("/", 1)[1] if "/" in scenario_key else "Rule"
 
@@ -1789,37 +1840,19 @@ def _launch_from_default_config(scenario_key: str) -> None:
     session_key = _default_extras_session_key(base)
     default_extras = st.session_state.get(session_key, {}) or {}
     market_over = default_extras.get("__market__") or {}
-    llm_over = default_extras.get("__llm__") or {}
-    agent_over = {
-        k: v for k, v in default_extras.items()
-        if k not in ("__market__", "__llm__") and v
-    }
 
-    # Write edits into the bundle's config files
+    # Flush market extras + rounds. Per-agent extras and LLM edits are
+    # already on disk via the Save button.
     try:
         apply_default_bundle_overrides(
             config_dir=bundle.config_dir,
             total_rounds=edited_rounds,
             market_extras_override=market_over or None,
-            agent_extras_overrides=agent_over or None,
+            agent_extras_overrides=None,
         )
     except Exception as exc:
         st.error(f"Failed to apply parameter changes: {exc}")
         return
-
-    # Apply LLM overrides (prompts + generation params) if any
-    if llm_over:
-        try:
-            _apply_llm_overrides_to_bundle(
-                config_dir=bundle.config_dir,
-                example_dir=bundle.example_dir,
-                llm_edits=llm_over,
-                scenario_name=base,
-                variant=variant,
-            )
-        except Exception as exc:
-            st.error(f"Failed to apply LLM overrides: {exc}")
-            return
 
     # Transition to workspace — launch from the bundle
     launch_key = f"CUSTOMIZED_SIMULATION/{bundle.customized_id}/Default/{variant}"
@@ -1829,110 +1862,6 @@ def _launch_from_default_config(scenario_key: str) -> None:
     st.session_state.current_page = "Simulation"
     st.session_state.customized_dir_id = bundle.customized_id
     st.rerun()
-
-
-def _apply_llm_overrides_to_bundle(
-    *,
-    config_dir: "Path",
-    example_dir: "Path",
-    llm_edits: dict[str, dict[str, Any]],
-    scenario_name: str,
-    variant: str,
-) -> None:
-    """Apply LLM prompt/param edits to the bundle's players.yml and prompts.py.
-
-    For each agent in llm_edits:
-      - temperature / max_tokens / lm_name → patched in-place in players.yml
-      - persona_prompt → written to a custom prompts.py that the players.yml
-        sys_message reference will point to (rewired).
-
-    The output format instruction is automatically appended to each edited
-    persona so the model output stays parseable.
-    """
-    import re as _re
-    from pathlib import Path
-
-    players_path = config_dir / "players.yml"
-    if not players_path.exists():
-        return
-
-    players_text = players_path.read_text(encoding="utf-8")
-    prompts_written: dict[str, str] = {}  # var_name -> full prompt text
-
-    for block_key, agent_edits in llm_edits.items():
-        if not agent_edits:
-            continue
-
-        # --- Patch generation_config fields in players.yml ---
-        if "temperature" in agent_edits:
-            # Replace temperature: <old> for this agent block
-            players_text = _patch_llm_yaml_field(
-                players_text, block_key, "temperature",
-                str(agent_edits["temperature"]),
-            )
-        if "max_tokens" in agent_edits:
-            players_text = _patch_llm_yaml_field(
-                players_text, block_key, "max_tokens",
-                str(agent_edits["max_tokens"]),
-            )
-        if "lm_name" in agent_edits:
-            players_text = _patch_llm_yaml_field(
-                players_text, block_key, "lm_name",
-                f'"{agent_edits["lm_name"]}"',
-            )
-
-        # --- Build custom prompt if persona was edited ---
-        if "persona_prompt" in agent_edits:
-            # Build a variable name from block_key
-            var_name = f"CUSTOM_{block_key.upper()}_SYS"
-            # Compose full prompt: edited persona + locked format tail
-            from masim.format.base_prompts import (
-                ANALYSIS_DECISION_TAG,
-                TRADING_CONSTRAINTS,
-            )
-            from masim.format.order_prompts import DECISION_FORMAT_INSTRUCTION
-
-            full_prompt = (
-                agent_edits["persona_prompt"].rstrip()
-                + "\n\n"
-                + TRADING_CONSTRAINTS
-                + "\n\n"
-                + ANALYSIS_DECISION_TAG
-                + "\n"
-                + DECISION_FORMAT_INSTRUCTION
-                + "\n"
-            )
-            prompts_written[var_name] = full_prompt
-
-            # Rewrite sys_message reference in players.yml to point to
-            # the custom prompts module
-            bundle_module = _bundle_prompts_module_path(config_dir)
-            new_ref = f"{bundle_module}:{var_name}"
-            players_text = _patch_llm_yaml_field(
-                players_text, block_key, "sys_message",
-                f'"{new_ref}"',
-            )
-
-    # Write back players.yml
-    players_path.write_text(players_text, encoding="utf-8")
-
-    # Write custom prompts.py if any personas were edited
-    if prompts_written:
-        prompts_py_path = example_dir / "prompts.py"
-        # Build the module file
-        lines = [
-            '"""Custom prompts generated by Default config editor."""\n\n',
-        ]
-        for var_name, prompt_text in prompts_written.items():
-            # Use triple-quoted string
-            escaped = prompt_text.replace('\\', '\\\\').replace('"""', '\\"\\"\\"')
-            lines.append(f'{var_name} = """{escaped}"""\n\n')
-        prompts_py_path.parent.mkdir(parents=True, exist_ok=True)
-        prompts_py_path.write_text("".join(lines), encoding="utf-8")
-        # Ensure __init__.py exists for import
-        init_path = example_dir / "__init__.py"
-        if not init_path.exists():
-            init_path.write_text("", encoding="utf-8")
 
 
 def _patch_llm_yaml_field(
@@ -1979,18 +1908,368 @@ def _patch_llm_yaml_field(
     return text[:block_start] + new_section + text[block_end:]
 
 
-def _bundle_prompts_module_path(config_dir: "Path") -> str:
-    """Derive the Python import path for the bundle's custom prompts.py.
+# ---------------------------------------------------------------------------
+# Default-mode Save handler — direct disk-persistence for prompts.py + players.yml
+# ---------------------------------------------------------------------------
+#
+# The Default-mode edit dialog (:func:`_show_default_edit_dialog`) now writes
+# every persona / generation-config / extras edit directly to the bundle's
+# on-disk files the moment the user clicks "保存". No in-memory sentinel
+# (``dc_edited_{block_key}``, ``edits["__llm__"]``) survives across reruns;
+# the "✓ 已修改" badge is computed by comparing bundle files against the
+# shipped originals. This makes the persona edit visible in ONE place —
+# ``examples/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/prompts.py`` —
+# and preserves the definition-site concat pattern
+# ``LLM_XXX_SYS = _XXX_PERSONA + "\n\n" + FORMAT_TAIL`` so anyone reading
+# prompts.py sees the entire final prompt at a glance.
 
-    Returns the short module path ``"prompts"`` because bundle folder names
-    contain hyphens (e.g. ``MYTest-a4fc6d93-AnchoringEffect``) which are
-    illegal in Python import syntax.  At runtime,
-    :func:`SimulationRunner._customized_bundle_import_root` adds the
-    variant-level directory to ``sys.path``, so
-    ``importlib.import_module("prompts")`` resolves to the correct file
-    without needing a fully-qualified dotted path.
+def _shipped_prompts_py_path(base: str, variant: str) -> Path:
+    """Absolute path to the shipped scenario's prompts.py for this variant."""
+    return PROJECT_ROOT / "examples" / base / variant / "prompts.py"
+
+
+def _shipped_players_yml_path(base: str, variant: str) -> Path:
+    """Absolute path to the shipped scenario's players.yml for this variant."""
+    return PROJECT_ROOT / "configs" / base / variant / "players.yml"
+
+
+def _public_const_from_sys_ref(sys_ref: str) -> str:
+    """Extract ``LLM_MOMENTUM_SYS`` from ``examples.X.Y.prompts:LLM_MOMENTUM_SYS``."""
+    return sys_ref.rsplit(":", 1)[-1] if ":" in sys_ref else sys_ref
+
+
+def _persona_var_for_public_const(
+    prompts_text: str, public_const: str
+) -> str | None:
+    """Locate the private persona variable used to compose ``public_const``.
+
+    Scans ``prompts_text`` for a line matching the definition-site concat
+    pattern::
+
+        LLM_MOMENTUM_SYS = _MOMENTUM_PERSONA + "\\n\\n" + FORMAT_TAIL
+
+    and returns ``"_MOMENTUM_PERSONA"``. Returns ``None`` when no such
+    assignment exists — signalling the file no longer follows the standard
+    def-site pattern (in which case the caller should raise).
     """
-    return "prompts"
+    pat = re.compile(
+        rf"^{re.escape(public_const)}\s*=\s*(_[A-Z][A-Z0-9_]*)\s*\+",
+        flags=re.MULTILINE,
+    )
+    m = pat.search(prompts_text)
+    return m.group(1) if m else None
+
+
+def _read_persona_body(prompts_text: str, persona_var: str) -> str | None:
+    """Return the *inner* body of ``<persona_var> = \"\"\"...\"\"\"``.
+
+    ``None`` when the variable is not found or is not assigned via a
+    triple-quoted string literal.
+    """
+    pat = re.compile(
+        rf'^{re.escape(persona_var)}\s*=\s*"""(.*?)"""',
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    m = pat.search(prompts_text)
+    return m.group(1) if m else None
+
+
+def _replace_persona_body(
+    prompts_text: str, persona_var: str, new_body: str
+) -> str:
+    """Replace the triple-quoted body of ``<persona_var>``.
+
+    ``new_body`` should NOT include the surrounding ``\"\"\"`` fences.
+    Raises :class:`ValueError` when no assignment site is located — silent
+    no-op would let a Save click appear successful while nothing was
+    written, which is exactly the class of bug this refactor eradicates.
+    """
+    pat = re.compile(
+        rf'(^{re.escape(persona_var)}\s*=\s*""")(.*?)(""")',
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    new_text, count = pat.subn(
+        lambda m: m.group(1) + new_body + m.group(3), prompts_text
+    )
+    if count == 0:
+        raise ValueError(
+            f"_replace_persona_body: cannot locate assignment site for "
+            f"{persona_var!r} in prompts.py — the file no longer follows "
+            f"the definition-site concat convention "
+            f"(expected: '{persona_var} = \"\"\"...\"\"\"')."
+        )
+    return new_text
+
+
+def _bundle_sys_message_ref(
+    bundle_name: str, variant: str, public_const: str
+) -> str:
+    """Compose a bundle-scoped dotted sys_message reference.
+
+    Format::
+
+        examples.CUSTOMIZED_SIMULATION.{bundle}.Default.{variant}.prompts:LLM_XXX_SYS
+
+    The bundle name contains hyphens which are illegal for Python
+    ``import`` syntax; the file-based prompt loader introduced in Step 5
+    parses this string as a filesystem path (each dot becomes a directory
+    separator, the last segment before ``:`` is the ``prompts.py`` file)
+    and loads via :func:`importlib.util.spec_from_file_location`.
+    """
+    return (
+        f"examples.CUSTOMIZED_SIMULATION.{bundle_name}."
+        f"Default.{variant}.prompts:{public_const}"
+    )
+
+
+def _save_default_agent_edits_to_disk(
+    *,
+    bundle,  # CustomizedBundleResult
+    base: str,
+    variant: str,
+    block_key: str,
+    sys_ref: str,
+    persona_body: str | None,
+    temperature: float | None,
+    max_new_tokens: int | None,
+    lm_name: str | None,
+    extras_override: dict[str, Any] | None,
+) -> None:
+    """Persist a single Save click to bundle disk files.
+
+    - ``persona_body``: inner text of ``_XXX_PERSONA = \"\"\"...\"\"\"``
+      (no surrounding fences). ``None`` skips the persona rewrite. When
+      given, ``players.yml``'s ``sys_message`` for this agent is also
+      re-pointed to the bundle's own prompts.py so the runtime picks up
+      the edited persona.
+    - ``temperature`` / ``max_new_tokens`` / ``lm_name``: generation
+      config edits; ``None`` skips that field. YAML field names match the
+      shipped format (``max_new_tokens``, not ``max_tokens``).
+    - ``extras_override``: agent-block extras (numeric parameters). When
+      non-empty, delegates to :func:`apply_default_bundle_overrides` so
+      market-level and agent-level extras use the same tested code path.
+
+    All disk writes happen inside this function — the caller should NOT
+    write to ``bundle.example_dir`` or ``bundle.config_dir`` directly.
+    """
+    prompts_py = bundle.example_dir / "prompts.py"
+    players_yml = bundle.config_dir / "players.yml"
+
+    # ── Persona edit ────────────────────────────────────────────────────
+    if persona_body is not None:
+        if not prompts_py.exists():
+            raise FileNotFoundError(
+                f"Bundle prompts.py not found at {prompts_py}. "
+                f"Did copy_default_scenario_bundle run?"
+            )
+        prompts_text = prompts_py.read_text(encoding="utf-8")
+        public_const = _public_const_from_sys_ref(sys_ref)
+        persona_var = _persona_var_for_public_const(prompts_text, public_const)
+        if persona_var is None:
+            raise ValueError(
+                f"Cannot locate persona variable for {public_const!r} in "
+                f"{prompts_py}. Expected pattern: "
+                f"'{public_const} = _XXX_PERSONA + \"\\n\\n\" + FORMAT_TAIL'."
+            )
+        prompts_text = _replace_persona_body(
+            prompts_text, persona_var, persona_body
+        )
+        prompts_py.write_text(prompts_text, encoding="utf-8")
+
+    # ── players.yml patches ─────────────────────────────────────────────
+    players_text = players_yml.read_text(encoding="utf-8") if players_yml.exists() else ""
+    dirty = False
+
+    if persona_body is not None and players_text:
+        public_const = _public_const_from_sys_ref(sys_ref)
+        new_ref = _bundle_sys_message_ref(
+            bundle.customized_id, variant, public_const
+        )
+        players_text = _patch_llm_yaml_field(
+            players_text, block_key, "sys_message", f'"{new_ref}"'
+        )
+        dirty = True
+
+    if temperature is not None and players_text:
+        players_text = _patch_llm_yaml_field(
+            players_text, block_key, "temperature", f"{float(temperature)}"
+        )
+        dirty = True
+
+    if max_new_tokens is not None and players_text:
+        players_text = _patch_llm_yaml_field(
+            players_text, block_key, "max_new_tokens", str(int(max_new_tokens))
+        )
+        dirty = True
+
+    if lm_name is not None and players_text:
+        players_text = _patch_llm_yaml_field(
+            players_text, block_key, "lm_name", f'"{lm_name}"'
+        )
+        dirty = True
+
+    if dirty:
+        players_yml.write_text(players_text, encoding="utf-8")
+
+    # ── Agent extras (numeric parameters) ───────────────────────────────
+    if extras_override:
+        apply_default_bundle_overrides(
+            config_dir=bundle.config_dir,
+            total_rounds=_current_total_rounds(bundle.config_dir),
+            agent_extras_overrides={block_key: dict(extras_override)},
+        )
+
+
+def _current_total_rounds(config_dir: Path) -> int:
+    """Read the current ``total_rounds`` from a bundle's simulation.yml.
+
+    Used to feed :func:`apply_default_bundle_overrides` when only extras
+    (not rounds) are being persisted; the callee requires a value but
+    accepts the file's current value as a no-op patch.
+    """
+    import yaml as _yaml
+    sim = config_dir / "simulation.yml"
+    if not sim.exists():
+        return 1
+    try:
+        data = _yaml.safe_load(sim.read_text(encoding="utf-8"))
+    except _yaml.YAMLError:
+        return 1
+    if isinstance(data, dict):
+        tr = data.get("total_rounds")
+        if isinstance(tr, int) and tr >= 1:
+            return tr
+    return 1
+
+
+def _read_bundle_persona_body(
+    example_dir: Path, sys_ref: str
+) -> tuple[str, str]:
+    """Read the persona body currently living in a bundle's prompts.py.
+
+    Returns ``(persona_body, persona_var)`` — persona_var is the private
+    variable name so the caller can rewrite the same site on Save. Both
+    values are empty strings when the file / assignment cannot be found;
+    the dialog uses this as a signal to fall back to the shipped copy.
+    """
+    prompts_py = example_dir / "prompts.py"
+    if not prompts_py.exists():
+        return "", ""
+    text = prompts_py.read_text(encoding="utf-8")
+    public_const = _public_const_from_sys_ref(sys_ref)
+    persona_var = _persona_var_for_public_const(text, public_const)
+    if not persona_var:
+        return "", ""
+    body = _read_persona_body(text, persona_var) or ""
+    return body, persona_var
+
+
+def _read_shipped_persona_body(
+    base: str, variant: str, public_const: str
+) -> str:
+    """Read the same-named persona body from the shipped prompts.py.
+
+    Used both as a fallback when the bundle file has drifted from the
+    def-site pattern and by :func:`_is_default_agent_edited_on_disk` to
+    compute the "✓ 已修改" badge.
+    """
+    shipped = _shipped_prompts_py_path(base, variant)
+    if not shipped.exists():
+        return ""
+    text = shipped.read_text(encoding="utf-8")
+    persona_var = _persona_var_for_public_const(text, public_const)
+    if not persona_var:
+        return ""
+    return _read_persona_body(text, persona_var) or ""
+
+
+def _read_agent_block_yaml_fields(
+    players_text: str, block_key: str, fields: tuple[str, ...]
+) -> dict[str, str]:
+    """Extract literal RHS values of specified fields inside an agent block.
+
+    Values are returned as raw strings (whatever appears after the ``:``
+    up to end-of-line) so callers can do lexical equality checks between
+    bundle and shipped copies without needing full YAML parsing.
+    """
+    block_pat = re.compile(rf"^{re.escape(block_key)}\s*:", flags=re.MULTILINE)
+    m = block_pat.search(players_text)
+    if not m:
+        return {}
+    start = m.end()
+    nxt = re.search(r"^\S+\s*:", players_text[start:], flags=re.MULTILINE)
+    end = start + nxt.start() if nxt else len(players_text)
+    section = players_text[start:end]
+    out: dict[str, str] = {}
+    for field in fields:
+        fm = re.search(
+            rf"^\s+{re.escape(field)}\s*:\s*(.+?)\s*$",
+            section, flags=re.MULTILINE,
+        )
+        if fm:
+            out[field] = fm.group(1).strip()
+    return out
+
+
+def _is_default_agent_edited_on_disk(
+    *,
+    bundle,  # CustomizedBundleResult
+    base: str,
+    variant: str,
+    block_key: str,
+    sys_ref: str,
+    extras_keys: tuple[str, ...] = (),
+) -> bool:
+    """True when the bundle's on-disk state diverges from shipped defaults.
+
+    Compares four dimensions:
+    1. persona body (``_XXX_PERSONA`` triple-quoted content)
+    2. generation config (``temperature``, ``max_new_tokens``, ``lm_name``)
+    3. ``sys_message`` reference (differs when persona is edited — the
+       reference is re-pointed at the bundle's own prompts.py)
+    4. per-agent numeric extras (``initial_cash``, etc.) when
+       ``extras_keys`` is provided
+
+    Any single divergence flips the badge on. Returns ``False`` cleanly
+    when either file is missing.
+    """
+    public_const = _public_const_from_sys_ref(sys_ref)
+
+    # 1) Persona body
+    bundle_body, _ = _read_bundle_persona_body(bundle.example_dir, sys_ref)
+    shipped_body = _read_shipped_persona_body(base, variant, public_const)
+    if (bundle_body or "").strip() != (shipped_body or "").strip():
+        return True
+
+    # 2 & 3) YAML-level fields
+    bundle_players = bundle.config_dir / "players.yml"
+    shipped_players = _shipped_players_yml_path(base, variant)
+    if not bundle_players.exists() or not shipped_players.exists():
+        return False
+    b_text = bundle_players.read_text(encoding="utf-8")
+    s_text = shipped_players.read_text(encoding="utf-8")
+
+    yaml_fields = ("temperature", "max_new_tokens", "lm_name", "sys_message")
+    b_vals = _read_agent_block_yaml_fields(b_text, block_key, yaml_fields)
+    s_vals = _read_agent_block_yaml_fields(s_text, block_key, yaml_fields)
+    # sys_message is expected to be re-pointed at the bundle when persona
+    # is edited — we already caught persona changes above. So here we
+    # only care about drift in the *shipped* → *shipped* case: if the
+    # bundle's sys_message no longer points at the shipped ref while the
+    # persona body itself matches, that's still an edit (persona was set
+    # then reverted). Treat any inequality as edited.
+    if b_vals != s_vals:
+        return True
+
+    # 4) Per-agent numeric extras
+    if extras_keys:
+        b_ext = _read_agent_block_yaml_fields(b_text, block_key, extras_keys)
+        s_ext = _read_agent_block_yaml_fields(s_text, block_key, extras_keys)
+        if b_ext != s_ext:
+            return True
+
+    return False
+
 
 
 def _field_from_summary_table(markdown: str, field: str) -> str:

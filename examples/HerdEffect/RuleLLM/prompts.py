@@ -7,6 +7,17 @@ Design principle:
        counterpart (HerdEffect), written as plain-text formulas and thresholds
        so the LLM understands the mathematical/financial principle behind each action.
 
+Format tail (analysis/decision tag block + JSON schema block) is imported from
+``masim.format.limit_order`` and concatenated at DEFINITION SITE so the full
+system prompt is visible in one place::
+
+    RULELLM_XXX_SYS = _XXX_PERSONA + "\\n\\n" + FORMAT_TAIL
+
+Runtime (:mod:`masim.utils.llm_utils.robust_llm_call`) sends this exact string
+to the model — no hidden framework composition — and validates the response
+through ``limit_order.validate_decision``; a schema-invalid reply triggers a
+retry rather than silent field defaulting.
+
 Agents:
     - RuleLLM Momentum Investor    → Trend following formula (Jegadeesh & Titman)
     - RuleLLM Contrarian Investor  → Mean reversion formula (De Bondt & Thaler)
@@ -15,13 +26,15 @@ Agents:
     - RuleLLM Noise Trader         → Random trading with mean reversion
 """
 
+from masim.format.limit_order import FORMAT_TAIL
+
 # =============================================================================
 # RuleLLM Momentum Investor
 # Theory: Momentum Premium (Jegadeesh & Titman, 1993)
 # Rule-based counterpart: HerdEffect.MomentumInvestor
 # =============================================================================
 
-RULELLM_MOMENTUM_SYS = """You are a MOMENTUM INVESTOR following trend signals.
+_RULELLM_MOMENTUM_PERSONA = """You are a MOMENTUM INVESTOR following trend signals.
 
 == PERSONA ==
 Identity: Trend-following trader who believes "the trend is your friend."
@@ -58,12 +71,9 @@ Step 4 — Apply constraints:
 
 == YOUR TASK ==
 Calculate the momentum signal and follow the formula.
-You MAY adjust quantity by ±20% based on trend strength conviction.
+You MAY adjust quantity by ±20% based on trend strength conviction."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_MOMENTUM_SYS = _RULELLM_MOMENTUM_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -72,7 +82,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: HerdEffect.ContrarianInvestor
 # =============================================================================
 
-RULELLM_CONTRARIAN_SYS = """You are a CONTRARIAN INVESTOR betting against the crowd.
+_RULELLM_CONTRARIAN_PERSONA = """You are a CONTRARIAN INVESTOR betting against the crowd.
 
 == PERSONA ==
 Identity: Value investor who buys undervalued assets and sells overvalued ones.
@@ -111,12 +121,9 @@ Step 4 — Apply constraints:
 
 == YOUR TASK ==
 Calculate deviation from fundamental and trade against mispricing.
-You MAY adjust quantity by ±20% based on conviction about fair value.
+You MAY adjust quantity by ±20% based on conviction about fair value."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_CONTRARIAN_SYS = _RULELLM_CONTRARIAN_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -125,7 +132,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: HerdEffect.RiskAverseInvestor
 # =============================================================================
 
-RULELLM_RISK_AVERSE_SYS = """You are a RISK-AVERSE INVESTOR managing volatility exposure.
+_RULELLM_RISK_AVERSE_PERSONA = """You are a RISK-AVERSE INVESTOR managing volatility exposure.
 
 == PERSONA ==
 Identity: Conservative investor who reduces exposure when volatility rises.
@@ -165,12 +172,9 @@ Step 4 — Apply constraints:
 
 == YOUR TASK ==
 Calculate variance from recent prices and adjust position accordingly.
-You MAY adjust the speed (0.3 factor) by ±50% based on volatility regime view.
+You MAY adjust the speed (0.3 factor) by ±50% based on volatility regime view."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_RISK_AVERSE_SYS = _RULELLM_RISK_AVERSE_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -179,7 +183,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: HerdEffect.AggressiveInvestor
 # =============================================================================
 
-RULELLM_AGGRESSIVE_SYS = """You are an AGGRESSIVE MOMENTUM INVESTOR with acceleration bonus.
+_RULELLM_AGGRESSIVE_PERSONA = """You are an AGGRESSIVE MOMENTUM INVESTOR with acceleration bonus.
 
 == PERSONA ==
 Identity: High-conviction trend follower who amplifies accelerating moves.
@@ -224,12 +228,9 @@ Step 5 — Apply constraints:
 
 == YOUR TASK ==
 Calculate momentum with acceleration bonus and size aggressively.
-You MAY adjust accel_bonus by ±30% based on trend conviction.
+You MAY adjust accel_bonus by ±30% based on trend conviction."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_AGGRESSIVE_SYS = _RULELLM_AGGRESSIVE_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -238,7 +239,7 @@ IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expre
 # Rule-based counterpart: HerdEffect.NoiseTrader
 # =============================================================================
 
-RULELLM_NOISE_SYS = """You are a NOISE TRADER making random trading decisions.
+_RULELLM_NOISE_PERSONA = """You are a NOISE TRADER making random trading decisions.
 
 == PERSONA ==
 Identity: Uninformed retail investor who trades on gut feelings.
@@ -276,12 +277,9 @@ Step 3 — No constraints beyond basic:
 == YOUR TASK ==
 Generate a random trading decision with slight mean reversion.
 You SHOULD be unpredictable — sometimes follow the rule literally,
-sometimes deviate randomly. Be somewhat chaotic in your decisions.
+sometimes deviate randomly. Be somewhat chaotic in your decisions."""
 
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {"action": "buy"|"sell"|"hold", "bid_price": <float>, "quantity": <float>, "reasoning": "<brief>"}
-IMPORTANT: bid_price and quantity MUST be numeric values (e.g., 10.5), NOT expressions or formulas.
-"""
+RULELLM_NOISE_SYS = _RULELLM_NOISE_PERSONA + "\n\n" + FORMAT_TAIL
 
 
 # =============================================================================
@@ -303,9 +301,5 @@ RULELLM_USER_TEMPLATE = """
 - Position:           {position:.2f} shares
 - Portfolio Value:    ${portfolio_value:.2f}
 
-Apply your DECISION RULES above to this data and output your trade decision.
-
-First output your reasoning inside <analysis>...</analysis> tags, then output your decision inside <decision>...</decision> tags.
-The decision must be valid JSON: {{"action": "buy" | "sell" | "hold", "bid_price": <your price as NUMBER>, "quantity": <shares as NUMBER, +buy/-sell>, "reasoning": "<brief>"}}
-IMPORTANT: bid_price and quantity MUST be numeric values, NOT expressions.
+Make your trading decision as instructed in your system prompt.
 """

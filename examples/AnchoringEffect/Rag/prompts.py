@@ -8,19 +8,17 @@ Construction rule (implement-simulation-skill.md — Rag variant):
     User prompt template adds {rag_context} placeholder after portfolio state.
     If no documents are retrieved, inject: "(No relevant knowledge retrieved this round.)"
 
-Output format required for all agents:
-    <analysis>...</analysis><decision>JSON</decision>
-    JSON fields: action ("buy"|"sell"|"hold"), bid_price (float), quantity (float), reasoning (string)
-"""
+Format tail (analysis/decision tag block + JSON schema block) is imported
+from :mod:`masim.format.limit_order` and concatenated at DEFINITION SITE of
+each RuleLLM system prompt (which this module re-exports)::
 
-from masim.format.base_prompts import (
-    ANALYSIS_DECISION_TAG,
-    RAG_APPLY_RULES_WITH_KNOWLEDGE,
-)
-from masim.format.order_prompts import (
-    DECISION_FORMAT_INSTRUCTION,
-    DECISION_FORMAT_INSTRUCTION_TPL,
-)
+    RAG_XXX_SYS = RULELLM_XXX_SYS   # already _XXX_PERSONA + "\\n\\n" + FORMAT_TAIL
+
+Runtime (:mod:`masim.utils.llm_utils.robust_llm_call`) sends this exact
+string to the model — no hidden framework composition — and validates the
+response through ``limit_order.validate_decision``; a schema-invalid reply
+triggers a retry rather than silent field defaulting.
+"""
 
 from examples.AnchoringEffect.RuleLLM.prompts import (
     RULELLM_ANCHORED_TRADER_SYS,
@@ -34,8 +32,9 @@ from examples.AnchoringEffect.RuleLLM.prompts import (
     RULELLM_LIQUIDITY_PROVIDER_SYS,
 )
 
-# RAG system prompts are identical to RuleLLM system prompts.
-# The variant-specific knowledge injection is handled in the user template.
+# RAG system prompts are identical to RuleLLM system prompts (persona +
+# decision rules + FORMAT_TAIL). The variant-specific knowledge injection is
+# handled in the user template via the {rag_context} placeholder.
 RAG_ANCHORED_TRADER_SYS = RULELLM_ANCHORED_TRADER_SYS
 RAG_HISTORICAL_ANCHOR_SYS = RULELLM_HISTORICAL_ANCHOR_SYS
 RAG_RATIONAL_UPDATER_SYS = RULELLM_RATIONAL_UPDATER_SYS
@@ -46,6 +45,11 @@ RAG_CONTRARIAN_TRADER_SYS = RULELLM_CONTRARIAN_TRADER_SYS
 RAG_FUNDAMENTAL_ANALYST_SYS = RULELLM_FUNDAMENTAL_ANALYST_SYS
 RAG_LIQUIDITY_PROVIDER_SYS = RULELLM_LIQUIDITY_PROVIDER_SYS
 
+# -----------------------------------------------------------------------------
+# User Prompt Template
+# Placeholders: {round}, {price}, {prev_price}, {fundamental}, {price_change},
+#               {deviation}, {cash}, {position}, {portfolio_value}, {rag_context}
+# -----------------------------------------------------------------------------
 RAG_USER_TEMPLATE = (
     "Current Market State (Round {round}):\n"
     "- Current Price: ${price:.2f}\n"
@@ -58,10 +62,6 @@ RAG_USER_TEMPLATE = (
     "- Portfolio Value: ${portfolio_value:.2f}\n\n"
     "Relevant Domain Knowledge:\n"
     "{rag_context}\n\n"
-    + RAG_APPLY_RULES_WITH_KNOWLEDGE
-    + "\n\n"
-    + ANALYSIS_DECISION_TAG
-    + "\n"
-    + DECISION_FORMAT_INSTRUCTION_TPL
-    + "\n"
+    "Make your trading decision as instructed in your system prompt, "
+    "incorporating the domain knowledge above where relevant.\n"
 )

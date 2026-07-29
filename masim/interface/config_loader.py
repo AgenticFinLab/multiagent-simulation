@@ -1492,12 +1492,10 @@ def resolve_scenario_rulellm_prompts(
         for label, ref in (("sys", sys_ref), ("user", user_ref)):
             if not isinstance(ref, str) or ":" not in ref:
                 continue
-            mod_path, attr = ref.split(":", 1)
             try:
-                import importlib
+                from masim.agents._base import _load_dotted
 
-                mod = importlib.import_module(mod_path)
-                val = getattr(mod, attr, None)
+                val = _load_dotted(ref)
                 if isinstance(val, str) and val:
                     entry[label] = val
             except Exception as exc:  # noqa: BLE001

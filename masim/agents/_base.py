@@ -36,9 +36,14 @@ to match what :func:`~masim.format.order.validate_order` enforces.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import importlib
+import importlib.util
 import logging
 import os
+import sys
+from pathlib import Path
+from types import ModuleType
 from typing import Any, Dict, Optional, Union
 
 from masim.player.base import Action, Observation, StepResult
@@ -61,19 +66,124 @@ logger = logging.getLogger("masim.agents")
 # ---------------------------------------------------------------------------
 
 
+def _project_root() -> Path:
+    """Return the project root (parent of ``masim/``)."""
+    # masim/agents/_base.py → parents[0]=agents, [1]=masim, [2]=project root
+    return Path(__file__).resolve().parents[2]
+
+
+def _load_module_by_file(module_path: str) -> ModuleType:
+    """Load a module by resolving its dotted path to a file under project root.
+
+    Necessary for ``CUSTOMIZED_SIMULATION`` bundles whose directory names
+    contain hyphens (e.g. ``team-foo-bar-a4fc6d93-HerdEffect``) — those names
+    are illegal in Python ``import`` syntax, so :func:`importlib.import_module`
+    cannot resolve them.  We map the dotted path to
+    ``<project_root>/<part1>/<part2>/…/<partN>.py`` and load it via
+    :func:`importlib.util.spec_from_file_location`, cached in :data:`sys.modules`
+    under a stable synthetic name derived from the file path (so re-loads of
+    the same bundle return the same module instance).
+    """
+    root = _project_root()
+    parts = module_path.split(".")
+    file_path = root.joinpath(*parts).with_suffix(".py")
+    if not file_path.exists():
+        raise ModuleNotFoundError(
+            f"Cannot locate module {module_path!r} on-disk; "
+            f"expected {file_path} to exist."
+        )
+    digest = hashlib.md5(str(file_path).encode("utf-8")).hexdigest()[:12]
+    unique_name = f"_masim_bundle_{digest}"
+    cached = sys.modules.get(unique_name)
+    if cached is not None:
+        return cached
+    spec = importlib.util.spec_from_file_location(unique_name, str(file_path))
+    if spec is None or spec.loader is None:
+        raise ImportError(
+            f"Could not build import spec for {file_path} (module {module_path!r})"
+        )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[unique_name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(unique_name, None)
+        raise
+    return module
+
+
 def _load_dotted(reference: str) -> str:
     """Resolve a ``module:VARIABLE`` reference and return the variable's value.
 
     Used by :class:`CanonicalLLMPlayer` to load prompt strings from a Python
     module attribute. The reference must contain exactly one ``:`` separator.
+
+    Two lookup strategies are tried in order:
+
+    1. Standard :func:`importlib.import_module` — works for shipped scenarios
+       (``examples.HerdEffect.LLM.prompts``) and any importable package path.
+    2. File-path fallback via :func:`_load_module_by_file` — required for
+       ``CUSTOMIZED_SIMULATION`` bundle references whose directory names
+       contain hyphens and are therefore not valid Python identifiers.
     """
     if ":" not in reference:
         raise ValueError(
             f"Prompt reference must use 'module:VARIABLE' form, got {reference!r}"
         )
     module_path, var_name = reference.rsplit(":", 1)
-    module = importlib.import_module(module_path)
+    try:
+        module = importlib.import_module(module_path)
+    except (ModuleNotFoundError, ImportError):
+        module = _load_module_by_file(module_path)
     return getattr(module, var_name)
+
+
+def _scenario_from_sys_ref(sys_ref: str) -> str:
+    """Extract the scenario slug from an LLM sys_message reference.
+
+    Two reference shapes are supported — the return value is what
+    :func:`masim.format.get_order_format` looks up in
+    :data:`masim.format.SCENARIO_ORDER_FORMAT`:
+
+    Shipped scenario::
+
+        "examples.HerdEffect.LLM.prompts:LLM_MOMENTUM_SYS"
+        → "HerdEffect"
+
+    CUSTOMIZED_SIMULATION bundle (Build a Project)::
+
+        "examples.CUSTOMIZED_SIMULATION.team-sijiatest-MyTest-a4fc6d93-HerdEffect.Default.LLM.prompts:LLM_MOMENTUM_SYS"
+        → "HerdEffect"   (last hyphen-segment of the bundle name)
+
+    Any other shape raises :class:`RuntimeError` — silent fallback would
+    defeat the strict-validation regime that the whole refactor is built on.
+    """
+    if not sys_ref or ":" not in sys_ref:
+        raise RuntimeError(
+            f"Cannot derive scenario from sys_message reference "
+            f"(missing ':' separator): {sys_ref!r}"
+        )
+    module_path = sys_ref.rsplit(":", 1)[0]
+    parts = module_path.split(".")
+    # Shipped:   examples.<Scenario>.<Variant>.prompts
+    # Bundle:    examples.CUSTOMIZED_SIMULATION.<bundle>.Default.<Variant>.prompts
+    if len(parts) >= 4 and parts[0] == "examples":
+        if parts[1] == "CUSTOMIZED_SIMULATION":
+            # bundle segment is index 2, scenario = last hyphen-segment
+            bundle = parts[2]
+            if "-" in bundle:
+                return bundle.rsplit("-", 1)[1]
+            raise RuntimeError(
+                f"CUSTOMIZED_SIMULATION bundle name is missing the "
+                f"trailing '-<Scenario>' segment: {bundle!r} in {sys_ref!r}"
+            )
+        return parts[1]
+    raise RuntimeError(
+        f"Unrecognised sys_message reference shape: {sys_ref!r}. "
+        f"Expected 'examples.<Scenario>.<Variant>.prompts:CONST' or "
+        f"'examples.CUSTOMIZED_SIMULATION.<bundle>.Default.<Variant>."
+        f"prompts:CONST'."
+    )
 
 
 def _coerce_to_order(
@@ -498,7 +608,6 @@ class CanonicalLLMPlayer(GeneralPlayer):
             decision,
             investor=self.identity,
             strategy=self.STRATEGY,
-            market_price=state.price,
         )
         # Apply cash/inventory clipping through the same finaliser used by
         # Rule agents — reuse of the code path guarantees Rule / LLM parity
@@ -618,6 +727,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
     def _run_llm(self, state: StandardMarketState) -> Dict[str, Any]:
         from masim.utils.llm_utils import robust_llm_call
+        from masim.format import get_order_format
 
         sys_ref = self.state.custom_state.get("sys_message_ref", "")
         user_ref = self.state.custom_state.get("user_message_ref", "")
@@ -627,6 +737,13 @@ class CanonicalLLMPlayer(GeneralPlayer):
         sys_prompt = _load_dotted(sys_ref)
         user_template = _load_dotted(user_ref)
         user_prompt = user_template.format(**state.template_vars())
+
+        # Scenario-aware strict schema validation: the LLM must return a
+        # decision-dict that matches the category advertised in the prompt's
+        # FORMAT_TAIL.  If it doesn't, robust_llm_call retries (up to
+        # max_retries).  There is NO silent defaulting anywhere downstream.
+        scenario = _scenario_from_sys_ref(sys_ref)
+        order_format = get_order_format(scenario)
 
         client = self._ensure_client()
         max_retries = int(
@@ -638,6 +755,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
             client,
             sys_prompt,
             user_prompt,
+            validate_fn=order_format.validate_decision,
             max_retries=max_retries,
             fallback=fallback,
             identity=self.identity,

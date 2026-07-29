@@ -1,4 +1,12 @@
-"""DotComBubble Rag Prompts — reuses RuleLLM system prompts + RAG context template."""
+"""DotComBubble Rag Prompts — reuses RuleLLM system prompts + RAG context template.
+
+The RuleLLM ``prompts.py`` composes each ``RULELLM_XXX_SYS`` at definition site
+as ``_XXX_PERSONA + "\\n\\n" + FORMAT_TAIL`` (where ``FORMAT_TAIL`` comes from
+``masim.format.limit_order``). Aliasing here preserves that full composition —
+no additional framework-side concatenation is performed at runtime.
+"""
+
+from masim.format.limit_order import FORMAT_TAIL  # noqa: F401  (re-exported for parity)
 
 from examples.DotComBubble.RuleLLM.prompts import (  # noqa: F401
     RULELLM_NEW_ECONOMY_EVANGELIST_SYS,
@@ -26,13 +34,6 @@ Relevant Domain Knowledge:
 {rag_context}
 
 Apply your trading rules and the domain knowledge above to decide your action.
-Respond with <analysis>...</analysis> and a <decision> JSON object containing
-action, bid_price, quantity, and reasoning.
-IMPORTANT: bid_price must be strictly positive; for hold, use the current price
-as bid_price; never output bid_price: 0.
-
-Output format requirement: action must be "buy", "sell", or "hold"; bid_price
-must be a number; quantity must be a number of shares; reasoning must be a
-non-empty string."""
+"""
 
 LLM_USER_TEMPLATE = RAG_USER_TEMPLATE

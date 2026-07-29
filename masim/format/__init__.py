@@ -72,6 +72,82 @@ from .base_prompts import (
     RAG_APPLY_RULES_WITH_KNOWLEDGE,
 )
 
+# ---------------------------------------------------------------------------
+# Order-format categories
+# ---------------------------------------------------------------------------
+#
+# Every LLM prompt in `examples/<Scenario>/LLM/prompts.py` composes its
+# system message as
+#
+#     LLM_XXX_SYS = _XXX_PERSONA + "\n\n" + FORMAT_TAIL
+#
+# where ``FORMAT_TAIL`` is imported from one of these three category modules.
+# The category to use is looked up by scenario slug in
+# :data:`SCENARIO_ORDER_FORMAT`; runtime code (:mod:`masim.agents._base`) uses
+# :func:`get_order_format` to plug ``validate_decision`` into
+# :func:`masim.utils.llm_utils.robust_llm_call` so a schema-invalid LLM
+# response is *retried*, never silently defaulted.
+from . import limit_order, maker_taker_order, participation_order
+from types import ModuleType
+from typing import Any as _Any, Mapping as _Mapping
+
+SCENARIO_ORDER_FORMAT: dict[str, str] = {
+    # 🧠 Behavioral Biases — canonical limit-order market
+    "HerdEffect":           "limit_order",
+    "DispositionEffect":    "limit_order",
+    "OverconfidenceBias":   "limit_order",
+    "AnchoringEffect":      "limit_order",
+    # 💥 Market Mechanisms
+    "AssetBubble":          "limit_order",
+    "MomentumEffect":       "limit_order",
+    "FlashCrash2010":       "maker_taker_order",  # HFT: needs provides_liquidity
+    "HerdingInformation":   "limit_order",
+    # 📉 Historical Crises
+    "DotComBubble":         "limit_order",
+    "GFC2008":              "limit_order",
+    "GameStopShortSqueeze": "limit_order",
+    "SVBBankRun":           "participation_order",  # bank-run proxy: no bid_price
+}
+
+_ORDER_FORMAT_MODULES: dict[str, ModuleType] = {
+    "limit_order": limit_order,
+    "maker_taker_order": maker_taker_order,
+    "participation_order": participation_order,
+}
+
+
+def get_order_format(scenario_or_name: str) -> ModuleType:
+    """Return the category module for a scenario slug OR a raw category name.
+
+    Callers can pass either a scenario slug ("HerdEffect") or the category
+    name directly ("limit_order"). Raises :class:`KeyError` if neither
+    matches — no silent fallback, so a missing registry entry surfaces
+    immediately.
+    """
+    if scenario_or_name in _ORDER_FORMAT_MODULES:
+        return _ORDER_FORMAT_MODULES[scenario_or_name]
+    if scenario_or_name in SCENARIO_ORDER_FORMAT:
+        return _ORDER_FORMAT_MODULES[SCENARIO_ORDER_FORMAT[scenario_or_name]]
+    raise KeyError(
+        f"No order-format category registered for {scenario_or_name!r}. "
+        f"Known scenarios: {sorted(SCENARIO_ORDER_FORMAT)}; "
+        f"known categories: {sorted(_ORDER_FORMAT_MODULES)}."
+    )
+
+
+def validate_llm_decision(
+    scenario_or_name: str, decision: _Mapping[str, _Any]
+) -> None:
+    """Dispatch a decision-dict to the correct category validator.
+
+    This is what :func:`masim.utils.llm_utils.robust_llm_call` receives as
+    ``validate_fn`` (bound to the current scenario at agent-setup time).
+    Every category validator raises :class:`ValueError` on any missing /
+    malformed field, so the LLM is retried until it emits a fully-specified
+    decision. Silent defaulting is forbidden by design.
+    """
+    get_order_format(scenario_or_name).validate_decision(decision)
+
 __all__ = [
     # Schema constants — investor orders
     "INVESTOR_ORDER_REQUIRED_FIELDS",
@@ -118,4 +194,11 @@ __all__ = [
     "MARKET_ACTION_QUESTION",
     "RULELLM_APPLY_RULES",
     "RAG_APPLY_RULES_WITH_KNOWLEDGE",
+    # Order-format categories (definition-site concatenation model)
+    "limit_order",
+    "maker_taker_order",
+    "participation_order",
+    "SCENARIO_ORDER_FORMAT",
+    "get_order_format",
+    "validate_llm_decision",
 ]

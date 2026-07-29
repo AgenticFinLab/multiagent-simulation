@@ -454,7 +454,14 @@ def load_class(path: str) -> type:
         module_path, cls_name = path.split(":", 1)
     else:
         module_path, cls_name = path.rsplit(".", 1)
-    module = importlib.import_module(module_path)
+    try:
+        module = importlib.import_module(module_path)
+    except (ModuleNotFoundError, ImportError):
+        # Fallback for CUSTOMIZED_SIMULATION bundle paths whose directory
+        # names contain hyphens (illegal in Python import syntax).
+        from masim.agents._base import _load_module_by_file
+
+        module = _load_module_by_file(module_path)
     return getattr(module, cls_name)
 
 

@@ -1,7 +1,23 @@
 """OverconfidenceBias Rag Prompts.
 
-Re-exports system prompts from RuleLLM and adds RAG user template.
+Re-exports RuleLLM system prompts (already composed as
+``_PERSONA + "\\n\\n" + FORMAT_TAIL`` at definition site in
+:mod:`examples.OverconfidenceBias.RuleLLM.prompts`) and adds a RAG-aware
+user template that injects retrieved knowledge.
+
+Format tail convention: every scenario's system-prompt constant is built by
+concatenating a private ``_XXX_PERSONA`` string with
+:data:`masim.format.limit_order.FORMAT_TAIL` at DEFINITION SITE. Because the
+persona + tail are already baked into ``RULELLM_XXX_SYS``, this module does
+not need to touch ``FORMAT_TAIL`` directly — it only imports it to make the
+convention explicit and to satisfy static analysis if a future prompt is
+added here.
+
+Public constant names retain the historical ``_SYS`` suffix because
+``players.py`` binds against those names.
 """
+
+from masim.format.limit_order import FORMAT_TAIL  # noqa: F401  (format-tail convention)
 
 from examples.OverconfidenceBias.RuleLLM.prompts import (
     RULELLM_OVERCONFIDENT_TRADER_SYS,
@@ -22,15 +38,7 @@ Current Market State (Round {round_num}):
 - Your Position: {position} shares
 - Portfolio Value: ${portfolio_value:.2f}
 
-Apply your DECISION RULES, informed by the relevant knowledge above.
-
-Required output:
-<analysis>brief calculation, retrieved-knowledge use, and rationale</analysis>
-<decision>{{"action": "buy"|"sell"|"hold", "bid_price": {price:.2f},
-"quantity": non-negative integer, "reasoning": "brief rationale"}}</decision>
-IMPORTANT: bid_price must be strictly positive. For hold, use the current price shown above as bid_price; never output bid_price: 0.
-IMPORTANT: always include both <analysis> and <decision>; analysis without a decision is invalid.
-IMPORTANT: keep quantity within the rule's configured base/noise size and feasible cash/inventory.
+Make your trading decision as instructed in your system prompt, informed by the relevant knowledge above.
 """
 
 __all__ = [
