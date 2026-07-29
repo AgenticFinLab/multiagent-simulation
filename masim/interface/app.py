@@ -30,7 +30,6 @@ from masim.interface.components.agent_market import (
     render_default_config,
     render_scenario_setup,
     render_selected_market_strip,
-    render_simulation_provenance,
     render_variant_choice,
 )
 from masim.interface.components.welcome import render_welcome
@@ -211,8 +210,6 @@ def render_simulation_page(scenario_name: str):
     # (rather than crammed into a narrow side column), so each button gets a
     # consistent, comfortable width.
     _render_action_buttons(scenario_name)
-    # "Check" button — opens a dialog with bundle provenance verification.
-    render_simulation_provenance(scenario_name)
 
     info = get_scenario_info(scenario_name)
 

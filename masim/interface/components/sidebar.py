@@ -34,9 +34,95 @@ from ..config_loader import (
     scenario_display_name,
     _resolve_display_key,
     _configs_path,
+    probe_bundle_provenance,
 )
 from ..customized.team_namespace import strip_team_prefix
 from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
+
+
+def _try_relative_to_project(path: Path) -> str:
+    """Format a Path relative to the project root for compact display."""
+    try:
+        project_root = Path(__file__).resolve().parents[3]
+        return str(path.resolve().relative_to(project_root))
+    except (ValueError, OSError):
+        return str(path)
+
+
+@st.dialog("Bundle 完整性检查", width="large")
+def _bundle_check_dialog(scenario_key: str) -> None:
+    """Dialog showing bundle file existence and reference integrity."""
+    try:
+        prov = probe_bundle_provenance(scenario_key)
+    except Exception as exc:  # noqa: BLE001
+        st.error(f"无法读取信息: {exc}")
+        return
+
+    kind_label = {
+        "Default": "Default 配置副本",
+        "Customized-agents": "自定义 Agent 配置",
+        "Shipped": "内置场景",
+    }.get(prov["kind"], prov["kind"])
+    bundle_hint = (
+        f" · `{prov['bundle_name']}`"
+        if prov["is_customized"] and prov["bundle_name"]
+        else ""
+    )
+    st.caption(f"{kind_label}{bundle_hint}")
+
+    # ── File existence ────────────────────────────────────────────
+    st.markdown("**配置文件：**")
+    rows: list[str] = []
+    for logical in ("simulation.yml", "players.yml", "topology.yml", "persona.yml"):
+        entry = prov["files"].get(logical, {})
+        path = entry.get("path")
+        exists = entry.get("exists", False)
+        if path is None:
+            continue
+        mark = "✅" if exists else ("—" if logical in ("topology.yml", "persona.yml") else "❌")
+        rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
+    for logical in ("players.py", "prompts.py"):
+        entry = prov["files"].get(logical, {})
+        path = entry.get("path")
+        exists = entry.get("exists", False)
+        if path is None:
+            continue
+        if logical == "prompts.py" and prov["variant"] not in ("LLM", "RuleLLM", "Rag"):
+            if not exists:
+                continue
+        mark = "✅" if exists else ("—" if logical == "prompts.py" else "❌")
+        rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
+    st.markdown("\n".join(rows) if rows else "_(无路径信息)_")
+
+    # ── Reference integrity ───────────────────────────────────────
+    st.markdown("**引用完整性：**")
+    n_class = len(prov["class_refs"])
+    n_class_ok = sum(1 for r in prov["class_refs"] if r["ok"])
+    n_sys = len(prov["sys_message_refs"])
+    n_sys_ok = sum(1 for r in prov["sys_message_refs"] if r["ok"])
+
+    class_icon = "✅" if n_class == 0 or n_class_ok == n_class else "❌"
+    sys_icon = "✅" if n_sys == 0 or n_sys_ok == n_sys else "❌"
+    record_icon = "✅" if prov["record_path_ok"] else "❌"
+
+    lines = [f"- {class_icon} Agent 类引用 {n_class_ok}/{n_class} 有效"]
+    if n_sys > 0:
+        lines.append(f"- {sys_icon} Prompt 引用 {n_sys_ok}/{n_sys} 有效")
+    if prov["record_path"]:
+        lines.append(f"- {record_icon} 数据存储路径 `{prov['record_path']}`")
+    else:
+        lines.append("- ❌ 数据存储路径未配置")
+    st.markdown("\n".join(lines))
+
+    # ── Overall status ────────────────────────────────────────────
+    if prov["retarget_ok"]:
+        st.success("✅ Bundle 完整，可正常运行。")
+    else:
+        st.error("❌ 检测到问题，模拟运行可能出错：")
+        for issue in prov["issues"][:6]:
+            st.markdown(f"- {issue}")
+        if len(prov["issues"]) > 6:
+            st.caption(f"（另有 {len(prov['issues']) - 6} 条同类问题省略）")
 
 
 def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -> str:
@@ -132,6 +218,18 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                 f"Results: {_result_path}",
                 language=None,
             )
+
+        # ------------------------------------------------------------------
+        # Bundle integrity check — only for customized bundles
+        # ------------------------------------------------------------------
+        if selected_scenario.startswith("CUSTOMIZED_SIMULATION/"):
+            if st.button(
+                "🔍 Check",
+                key="sidebar_bundle_check",
+                help="核验 bundle 文件完整性",
+                use_container_width=True,
+            ):
+                _bundle_check_dialog(selected_scenario)
 
         # ------------------------------------------------------------------
         # Scenario Info — compact caption style

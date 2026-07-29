@@ -30,7 +30,6 @@ from ..config_loader import (
     get_rulellm_prompt_for_agent,
     get_scenario_info,
     get_topology_info,
-    probe_bundle_provenance,
     resolve_scenario_rulellm_prompts,
     scenario_display_name,
 )
@@ -5205,112 +5204,6 @@ def _write_customized_bundle(
         icon="\u2728",
     )
     return f"CUSTOMIZED_SIMULATION/{result.customized_id}/Customized-agents"
-
-
-def _try_relative_to_project(path: Path) -> str:
-    """Format a Path relative to the project root for compact display."""
-    try:
-        # Two levels above masim/interface/components/ = project root
-        project_root = Path(__file__).resolve().parents[3]
-        return str(path.resolve().relative_to(project_root))
-    except (ValueError, OSError):
-        return str(path)
-
-
-@st.dialog("Bundle Check", width="large")
-def _simulation_provenance_dialog(scenario_key: str) -> None:
-    """Dialog showing on-disk provenance and retarget verification."""
-    try:
-        prov = probe_bundle_provenance(scenario_key)
-    except Exception as exc:  # noqa: BLE001
-        st.error(f"无法读取 provenance 信息: {exc}")
-        return
-
-    badge = "✅" if prov["retarget_ok"] else "⚠️"
-    kind_label = {
-        "Default": "Default 副本",
-        "Customized-agents": "Customized-agents 副本",
-        "Shipped": "内置 shipped 场景",
-    }.get(prov["kind"], prov["kind"])
-    bundle_hint = (
-        f" · `{prov['bundle_name']}`"
-        if prov["is_customized"] and prov["bundle_name"]
-        else ""
-    )
-    st.caption(f"{badge} {kind_label}{bundle_hint}")
-
-    # ── Files section ────────────────────────────────────────────
-    st.markdown("**运行时加载路径：**")
-    rows: list[str] = []
-    for logical in ("simulation.yml", "players.yml", "topology.yml", "persona.yml"):
-        entry = prov["files"].get(logical, {})
-        path = entry.get("path")
-        exists = entry.get("exists", False)
-        if path is None:
-            continue
-        mark = "✅" if exists else ("—" if logical in ("topology.yml", "persona.yml") else "❌")
-        rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
-    for logical in ("players.py", "prompts.py"):
-        entry = prov["files"].get(logical, {})
-        path = entry.get("path")
-        exists = entry.get("exists", False)
-        if path is None:
-            continue
-        if logical == "prompts.py" and prov["variant"] not in ("LLM", "RuleLLM", "Rag"):
-            if not exists:
-                continue
-        mark = "✅" if exists else ("—" if logical == "prompts.py" else "❌")
-        rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
-    st.markdown("\n".join(rows) if rows else "_(无路径信息)_")
-
-    # ── Retarget verification ────────────────────────────────────
-    st.markdown("**引用完整性核验：**")
-    n_class = len(prov["class_refs"])
-    n_class_ok = sum(1 for r in prov["class_refs"] if r["ok"])
-    n_sys = len(prov["sys_message_refs"])
-    n_sys_ok = sum(1 for r in prov["sys_message_refs"] if r["ok"])
-    class_badge = "✅" if n_class == 0 or n_class_ok == n_class else "⚠️"
-    sys_badge = "✅" if n_sys == 0 or n_sys_ok == n_sys else "⚠️"
-    record_badge = "✅" if prov["record_path_ok"] else "⚠️"
-
-    st.markdown(
-        f"- {class_badge} `class:` 引用 {n_class_ok}/{n_class} 指向 "
-        f"`{prov['expected_module_prefix']}…`\n"
-        f"- {sys_badge} `sys_message:` 引用 {n_sys_ok}/{n_sys} 指向 "
-        f"`{prov['expected_module_prefix']}…`"
-        + (
-            f"\n- {record_badge} `record_path` = `{prov['record_path']}`"
-            if prov["record_path"]
-            else f"\n- ⚠️ `record_path` 未在 `simulation.yml` 中找到"
-        )
-    )
-
-    if prov["retarget_ok"]:
-        if prov["is_customized"]:
-            st.success(
-                "所有引用均指向 bundle-local — 修改已完整落盘，运行不会 fallback 到 shipped。"
-            )
-        else:
-            st.info(
-                f"内置 shipped 场景 `{prov['scenario_key']}`，引用指向源码规范位置。"
-            )
-    else:
-        st.error(
-            "**检测到 retarget 不一致** — 部分引用仍指向 shipped 或错误的 bundle,"
-            "运行时可能读取到并非用户修改后的配置。请检查:"
-        )
-        for issue in prov["issues"][:6]:
-            st.markdown(f"- {issue}")
-        if len(prov["issues"]) > 6:
-            st.caption(f"（另有 {len(prov['issues']) - 6} 条同类问题省略）")
-
-
-def render_simulation_provenance(scenario_key: str) -> None:
-    """Render a 'Check' button; clicking opens the provenance dialog."""
-    if not scenario_key:
-        return
-    if st.button("Check", key="sim_provenance_check", help="查看配置来源与 bundle 完整性核验"):
-        _simulation_provenance_dialog(scenario_key)
 
 
 def render_selected_market_strip() -> None:
