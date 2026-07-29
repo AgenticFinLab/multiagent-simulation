@@ -145,14 +145,20 @@ _DISABLED_ENGINES: set[str] = {"Rag"}
 
 
 def _agent_catalog_signature() -> tuple[tuple[str, int], ...]:
-    """Return a lightweight cache key for avatar metadata and PNG changes."""
+    """Return a lightweight cache key for avatar metadata and PNG changes.
+
+    Also incorporates the whitelist size so that any change to
+    ``_SCENARIO_AGENT_STEMS`` automatically invalidates the catalog cache.
+    """
     paths: list[Path] = []
     if ICON_ROOT.exists():
         paths.extend(sorted(ICON_ROOT.glob("*.png")))
     for _domain, root in _DOMAIN_ROOTS:
         if root.exists():
             paths.extend(sorted(root.glob("*.md")))
-    return tuple((str(path), path.stat().st_mtime_ns) for path in paths)
+    sig = tuple((str(path), path.stat().st_mtime_ns) for path in paths)
+    # Append whitelist size as a synthetic entry to invalidate on changes.
+    return sig + (("__whitelist_len__", len(_SCENARIO_AGENT_STEMS)),)
 
 
 def _scenario_probe_key(base: str, groups: dict) -> str:
