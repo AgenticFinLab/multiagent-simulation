@@ -714,11 +714,11 @@ def render_welcome() -> None:
                                     f"**{proj['display_name']}** \u2009`{pid}`"
                                     if pid else f"**{proj['display_name']}**"
                                 )
-                                this_key = f"{proj['slug']}::{pid}"
+                                this_key = f"{proj['slug']}::{pid}::{proj.get('team') or ''}"
                                 is_selected = (selected_key == this_key)
                                 if st.button(
                                     chip_label,
-                                    key=f"welcome_pick_project_{proj['slug']}_{pid or 'nopid'}",
+                                    key=f"welcome_pick_project_{proj['slug']}_{pid or 'nopid'}_{proj.get('team') or 'shared'}",
                                     type="primary" if is_selected else "secondary",
                                     help=(
                                         f"Reuse '{proj['display_name']}' "
@@ -775,7 +775,10 @@ def render_welcome() -> None:
                     # means the user is starting a fresh project, so we
                     # drop selection and the adopted id.
                     if selected_key:
-                        sel_slug, _, sel_pid = selected_key.partition("::")
+                        # Format: "slug::pid::team" (team may be empty)
+                        _parts = selected_key.split("::")
+                        sel_slug = _parts[0] if _parts else ""
+                        sel_pid = _parts[1] if len(_parts) > 1 else ""
                         sel_display = next(
                             (
                                 p["display_name"]
