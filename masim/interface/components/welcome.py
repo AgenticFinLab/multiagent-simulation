@@ -939,35 +939,3 @@ def render_welcome() -> None:
                 st.session_state["project_id"] = _read_project_id(slug_preview)
                 st.session_state.workflow_stage = "scenario_setup"
                 st.rerun()
-
-    # --- Admin: purge all team data ------------------------------------------
-    st.markdown("---")
-    with st.expander("⚠️ Admin: 清除所有数据", expanded=False):
-        st.markdown(
-            "删除**所有 team** 的配置、模拟结果和注册信息。此操作不可逆。"
-        )
-        confirm_input = st.text_input(
-            "输入 `DELETE ALL` 确认",
-            key="_admin_purge_confirm",
-            placeholder="DELETE ALL",
-        )
-        if st.button(
-            "🗑️ 确认清除全部数据",
-            key="_admin_purge_btn",
-            type="primary",
-            disabled=(confirm_input.strip() != "DELETE ALL"),
-        ):
-            with st.spinner("正在清除..."):
-                result = _purge_all_data()
-            st.success(
-                f"清除完成: "
-                f"{result.get('configs_bundles', 0)} 个配置 bundle, "
-                f"{result.get('examples_bundles', 0)} 个 example bundle, "
-                f"{result.get('experiment_size_mb', 0)} MB 实验数据, "
-                f"{result.get('teams_removed', 0)} 个 team 注册。"
-            )
-            # Reset current session team so user re-enters team gate
-            from .team_gate import TEAM_NAME_KEY
-            st.session_state[TEAM_NAME_KEY] = ""
-            st.session_state.workflow_stage = "welcome"
-            st.session_state.mode = ""

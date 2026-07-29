@@ -417,6 +417,9 @@ def render_team_gate() -> None:
                 # --- Manage / delete teams (destructive) ---
                 _render_team_delete_panel(existing)
 
+            # --- Purge ALL team data (admin) ---
+            _render_purge_all_panel()
+
         st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
         st.caption(
             "🔒 Team names are used only to namespace files on the server. "
