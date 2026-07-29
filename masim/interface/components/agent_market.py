@@ -84,6 +84,14 @@ OPINION_ROOT = AGENT_POOL_ROOT / "opinion"
 PROFILE_ROOT = FINANCE_ROOT
 
 
+def _try_relative_to_project(path: Path) -> str:
+    """Format a Path relative to the project root for compact display."""
+    try:
+        return str(path.resolve().relative_to(PROJECT_ROOT))
+    except (ValueError, OSError):
+        return str(path)
+
+
 # All domain directories to scan for agent profiles.
 _DOMAIN_ROOTS: list[tuple[str, Path]] = [
     ("finance", FINANCE_ROOT),
