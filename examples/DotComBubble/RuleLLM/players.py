@@ -21,6 +21,7 @@ from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     robust_llm_call,
 )
+from masim.format import get_order_format
 from examples.DotComBubble.Rule.players import Market, _build_order  # noqa: F401
 
 logger = logging.getLogger(__name__)
@@ -164,7 +165,7 @@ class RuleLLMInvestor(GeneralPlayer):
             system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
-            validate_fn=_validate_and_normalize,
+            validate_fn=get_order_format("DotComBubble").validate_decision,
             max_retries=max_attempts,
             fallback="hold",
             identity=self.identity,

@@ -20,8 +20,8 @@ from examples.GameStopShortSqueeze.Rule.players import Market, _build_order  # n
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     robust_llm_call,
-    validate_bid_qty_decision,
 )
+from masim.format import get_order_format
 from examples.GameStopShortSqueeze.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("GameStopShortSqueeze.RuleLLM")
@@ -124,7 +124,7 @@ class RuleLLMInvestor(GeneralPlayer):
             system_msg,
             user_msg,
             parse_fn=parse_llm_response_with_thinking,
-            validate_fn=validate_bid_qty_decision,
+            validate_fn=get_order_format("GameStopShortSqueeze").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

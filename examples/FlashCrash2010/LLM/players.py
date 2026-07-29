@@ -9,7 +9,6 @@ All parameters are configured via players.yml config file.
 
 from __future__ import annotations
 
-import importlib
 import logging
 import os
 import sys
@@ -29,12 +28,14 @@ from masim.format.order import validate_order
 from examples.FlashCrash2010.Rule.players import Market  # noqa: F401
 
 logger = logging.getLogger("FlashCrash2010.LLM")
+from masim.format import get_order_format
 
 
-def load_prompt(prompt_path: str) -> str:
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 def agent_type_for_strategy(strategy_name: str) -> str:
@@ -151,6 +152,7 @@ class LLMInvestor(GeneralPlayer):
             system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
+            validate_fn=get_order_format("FlashCrash2010").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

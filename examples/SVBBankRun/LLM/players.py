@@ -28,6 +28,7 @@ from examples.SVBBankRun.decision import (
     fallback_hold_decision,
     parse_svbbankrun_decision,
 )
+from masim.format import get_order_format
 from .prompts import (
     LLM_DEPOSITOR_SYS,
     LLM_SOCIAL_MEDIA_INFLUENCER_SYS,
@@ -131,6 +132,7 @@ class LLMInvestor(GeneralPlayer):
             system_prompt,
             user_prompt,
             parse_fn=parse_svbbankrun_decision,
+            validate_fn=get_order_format("SVBBankRun").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

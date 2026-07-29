@@ -64,6 +64,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 
 logger = logging.getLogger("AssetBubbleRuleLLM")
+from masim.format import get_order_format
 
 NON_RETRYABLE_API_MARKERS = (
     "AccountOverdue",
@@ -435,6 +436,7 @@ Quantity must never be negative. Use action="sell" with a positive quantity for 
             system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
+            validate_fn=get_order_format("AssetBubble").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

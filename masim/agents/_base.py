@@ -741,6 +741,35 @@ class CanonicalLLMPlayer(GeneralPlayer):
         self.state.custom_state["llm_client"] = client
         return client
 
+    def _order_format_category(self) -> str:
+        """Return this LLM agent's order-format category name.
+
+        The category (``"limit_order"`` / ``"maker_taker_order"`` /
+        ``"participation_order"``) is derived from ``sys_message_ref`` via
+        :func:`_scenario_from_sys_ref` + :func:`masim.format.get_order_format`
+        and cached in ``custom_state`` so subsequent calls (e.g. from
+        :meth:`_finalize_llm_order`) are O(1).
+
+        Raises :class:`RuntimeError` if ``sys_message_ref`` is missing —
+        there is no silent fallback here because downstream branch logic
+        (bid_price validation) depends on knowing the exact category.
+        """
+        cached = self.state.custom_state.get("order_format_category")
+        if isinstance(cached, str) and cached:
+            return cached
+        from masim.format import get_order_format
+
+        sys_ref = self.state.custom_state.get("sys_message_ref", "")
+        if not sys_ref:
+            raise RuntimeError(
+                "Cannot determine order-format category: "
+                "extras.llm.sys_message is empty."
+            )
+        scenario = _scenario_from_sys_ref(sys_ref)
+        category = get_order_format(scenario).NAME
+        self.state.custom_state["order_format_category"] = category
+        return category
+
     def _run_llm(self, state: StandardMarketState) -> Dict[str, Any]:
         from masim.utils.llm_utils import robust_llm_call
         from masim.format import get_order_format
@@ -760,6 +789,11 @@ class CanonicalLLMPlayer(GeneralPlayer):
         # max_retries).  There is NO silent defaulting anywhere downstream.
         scenario = _scenario_from_sys_ref(sys_ref)
         order_format = get_order_format(scenario)
+        # Warm the category cache so _finalize_llm_order avoids re-parsing
+        # sys_ref on every order.
+        self.state.custom_state.setdefault(
+            "order_format_category", order_format.NAME
+        )
 
         client = self._ensure_client()
         max_retries = int(
@@ -788,10 +822,50 @@ class CanonicalLLMPlayer(GeneralPlayer):
         dict-normalisation step (the LLM path already lands in
         :class:`InvestorOrder` via
         :meth:`InvestorOrder.from_llm_decision`).
+
+        Bid-price semantics are **category-aware** (no silent fallback):
+
+        * ``limit_order`` / ``maker_taker_order`` — every non-hold order MUST
+          carry ``bid_price > 0``.  The category ``validate_decision`` already
+          enforces this at LLM output, so any ``BUY``/``SELL`` reaching this
+          method with ``bid_price <= 0`` indicates a bug (the validator failed
+          or the parser dropped the field silently).  We raise
+          :class:`ValueError` immediately rather than paper over it with
+          ``state.price``.
+        * ``participation_order`` — this category intentionally omits
+          ``bid_price`` at the LLM/schema layer (see
+          :mod:`masim.format.participation_order`); the order aggregates
+          participation counts, not prices.  We record ``state.price`` on the
+          finalised order **explicitly** so downstream cash bookkeeping still
+          has a numeric reference, and document the substitution here.
         """
         original_action = order.action
         original_quantity = float(order.quantity or 0.0)
-        bid_price = float(order.bid_price) if order.bid_price > 0 else float(state.price)
+        category = self._order_format_category()
+
+        if category == "participation_order":
+            # bid_price is intentionally not part of participation-order
+            # schemas; use state.price as an accounting reference so cash /
+            # inventory clipping below still has a numeric price to work with.
+            # This substitution is explicit (not a silent default) — the
+            # category itself declares bid_price meaningless.
+            bid_price = float(state.price)
+        else:
+            # limit_order / maker_taker_order: bid_price must arrive positive
+            # for every non-hold action. A zero/negative bid_price here means
+            # the LLM validator or InvestorOrder.from_llm_decision let a bogus
+            # value through — fail loudly.
+            if original_action in (BUY, SELL) and float(order.bid_price) <= 0:
+                raise ValueError(
+                    f"CanonicalLLMPlayer._finalize_llm_order[{category}]: "
+                    f"{original_action} order arrived with "
+                    f"bid_price={order.bid_price!r}. Non-hold orders in the "
+                    f"{category} category MUST carry bid_price > 0 — the LLM "
+                    f"schema validator ({category}.validate_decision) is "
+                    f"supposed to enforce this. No silent state.price "
+                    f"fallback here."
+                )
+            bid_price = float(order.bid_price)
 
         action = original_action
         quantity = original_quantity
@@ -824,7 +898,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
             order,
             action=action,
             quantity=float(quantity),
-            bid_price=float(bid_price if bid_price > 0 else state.price),
+            bid_price=float(bid_price),
         )
         if clipped or clipped_to_hold:
             finalized = dataclasses.replace(
@@ -834,17 +908,16 @@ class CanonicalLLMPlayer(GeneralPlayer):
                 clipped_intended_quantity=float(original_quantity),
                 clipped_reason=clipped_reason or "unspecified",
             )
-        # Mirror CanonicalRulePlayer._finalize_order: refuse to emit a non-hold
-        # order with bid_price <= 0. LLM output that fails this check indicates
-        # the parsing/from_llm_decision step let a bogus price through, which
-        # would otherwise silently corrupt cash bookkeeping downstream.
+        # Defence-in-depth: even after category-aware handling above, refuse
+        # to emit a non-hold order without a positive bid_price. Reaching
+        # this branch would indicate an upstream logic bug (e.g. state.price
+        # was non-positive on a participation_order finalisation).
         if finalized.action in (BUY, SELL) and float(finalized.bid_price) <= 0:
             raise ValueError(
                 f"CanonicalLLMPlayer._finalize_llm_order: {finalized.action} "
-                f"order emerges with bid_price={finalized.bid_price!r}. "
-                f"state.price={state.price!r}, original bid_price="
-                f"{order.bid_price!r}. Every non-hold order requires a "
-                f"positive bid_price."
+                f"order emerges with bid_price={finalized.bid_price!r} "
+                f"(category={category}). state.price={state.price!r}, "
+                f"original bid_price={order.bid_price!r}."
             )
         validate_order(finalized.to_dict())
         return finalized

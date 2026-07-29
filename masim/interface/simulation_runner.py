@@ -117,60 +117,17 @@ _EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION", "
 
 
 # ---------------------------------------------------------------------------
-# Customized-bundle import support
-# ---------------------------------------------------------------------------
-
-
-def _customized_bundle_import_root(config_path: str | Path) -> Optional[Path]:
-    """Return the examples directory paired with a customized config.
-
-    Customized bundles deliberately use short, bundle-local module paths such
-    as ``Rule.players:Market``.  Direct entry-point scripts add the matching
-    examples directory to ``sys.path`` themselves, but the Streamlit simulation
-    worker starts through :class:`SimulationRunner` and therefore needs the same
-    import root installed here before player classes are loaded.
-    """
-    try:
-        relative = Path(config_path).resolve().relative_to(_CONFIGS_DIR.resolve())
-    except (OSError, ValueError):
-        return None
-
-    if not relative.parts or relative.parts[0] != "CUSTOMIZED_SIMULATION":
-        return None
-
-    candidate = (_EXAMPLES_DIR / relative.parent).resolve()
-    return candidate if candidate.is_dir() else None
-
-
-def _prepend_python_path(path: Path, ray_config: Optional[Dict[str, Any]] = None) -> None:
-    """Expose *path* to this process and to Ray worker processes."""
-    path_str = str(path)
-    if path_str in sys.path:
-        sys.path.remove(path_str)
-    sys.path.insert(0, path_str)
-
-    existing_process_path = os.environ.get("PYTHONPATH", "")
-    process_entries = [
-        entry for entry in existing_process_path.split(os.pathsep) if entry
-    ]
-    process_entries = [entry for entry in process_entries if entry != path_str]
-    os.environ["PYTHONPATH"] = os.pathsep.join([path_str, *process_entries])
-
-    if ray_config is None:
-        return
-    runtime_env = ray_config.setdefault("runtime_env", {})
-    env_vars = runtime_env.setdefault("env_vars", {})
-    existing_worker_path = str(env_vars.get("PYTHONPATH", ""))
-    worker_entries = [
-        entry for entry in existing_worker_path.split(os.pathsep) if entry
-    ]
-    worker_entries = [entry for entry in worker_entries if entry != path_str]
-    env_vars["PYTHONPATH"] = os.pathsep.join([path_str, *worker_entries])
-
-
-# ---------------------------------------------------------------------------
 # Scenario & agent discovery utilities
 # ---------------------------------------------------------------------------
+
+
+# NOTE: The former _customized_bundle_import_root / _prepend_python_path
+# helpers (which injected examples/CUSTOMIZED_SIMULATION/{bundle}/ into
+# sys.path + PYTHONPATH + Ray runtime_env for short-path imports like
+# "Rule.players:Market") were deleted. All yaml references in bundles are
+# now full dotted paths (examples.CUSTOMIZED_SIMULATION.{bundle}.Default.…)
+# and the file-based fallback in masim.agents._base._load_module_by_file /
+# masim.utils.config.load_class resolves them without any sys.path mutation.
 
 
 def discover_available_scenarios() -> List[str]:
@@ -370,10 +327,6 @@ class SimulationRunner:
 
             yaml_config = load_config(self.config_path)
             self.config = SimulationConfig(**yaml_config)
-
-            bundle_import_root = _customized_bundle_import_root(self.config_path)
-            if bundle_import_root is not None:
-                _prepend_python_path(bundle_import_root, self.config.ray)
 
             self.status.total_rounds = self.config.setting.get("total_rounds", 0)
 

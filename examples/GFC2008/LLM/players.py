@@ -3,7 +3,6 @@
 LLM-driven agents for the GFC2008 simulation using LangChainAPIInference.
 """
 
-import importlib
 import logging
 from typing import Any, Dict, Optional
 
@@ -17,23 +16,18 @@ from examples.GFC2008.Rule.players import Market, _build_order
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     robust_llm_call,
-    validate_bid_qty_decision,
 )
+from masim.format import get_order_format
 from examples.GFC2008.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("GFC2008.LLM")
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt constant from 'module:VAR' path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
-
-
-def _validate_gfc2008_decision(decision: Dict[str, Any]) -> None:
-    """Raise ValueError if the parsed decision fails GFC2008 contract checks."""
-    validate_bid_qty_decision(decision)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 class LLMInvestor(GeneralPlayer):
@@ -114,7 +108,7 @@ class LLMInvestor(GeneralPlayer):
             system_msg,
             user_msg,
             parse_fn=parse_llm_response_with_thinking,
-            validate_fn=_validate_gfc2008_decision,
+            validate_fn=get_order_format("GFC2008").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

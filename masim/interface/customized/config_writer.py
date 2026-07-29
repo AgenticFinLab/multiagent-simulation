@@ -1214,6 +1214,12 @@ def copy_default_scenario_bundle(
         text = yml.read_text(encoding="utf-8")
         # Re-target record paths so the bundle writes its own data
         text = _retarget_record_paths(text, record_sub)
+        # Re-target every dotted reference to shipped examples so class /
+        # sys_message / user_message all point at this bundle's own copies
+        # of players.py and prompts.py from the first run onwards. The
+        # bundle is now fully self-contained; there is no "run against
+        # shipped until you Save" step anymore.
+        text = _retarget_scenario_references(text, scenario_name, cid)
         if yml.name == "simulation.yml":
             text = _set_ray_namespace(text, record_sub)
         (config_dir / yml.name).write_text(text, encoding="utf-8")
@@ -1761,21 +1767,24 @@ def _build_llm_extras(
     """Translate the persisted ``__llm_*__`` overrides into ``extras.llm``.
 
     The result mirrors the schema the canonical
-    :class:`masim.agents._base.CanonicalLLMPlayer` consumes:
+    :class:`masim.agents._base.CanonicalLLMPlayer` consumes::
 
         extras:
           llm:
             lm_name: <model id>
             generation_config: {temperature, max_tokens}
-            sys_message: "prompts:<KEY>_SYS"
-            user_message: "prompts:<KEY>_USER"
+            sys_message: "examples.CUSTOMIZED_SIMULATION.{cid}.Customized-agents.prompts:<KEY>_SYS"
+            user_message: "examples.CUSTOMIZED_SIMULATION.{cid}.Customized-agents.prompts:<KEY>_USER"
 
-    The short module path ``prompts`` (rather than a fully-qualified dotted
-    path) is used because bundle folder names contain hyphens (e.g.
-    ``MYTest-a4fc6d93-AnchoringEffect``) which are illegal in Python import
-    syntax.  At runtime, :func:`SimulationRunner._customized_bundle_import_root`
-    adds the bundle's ``Customized-agents/`` directory to ``sys.path``, so
-    ``importlib.import_module("prompts")`` resolves to the correct file.
+    The reference is a full bundle-local dotted path (not the legacy short
+    ``prompts:CONST`` form that relied on ``sys.path`` being pre-loaded).
+    Bundle folder names contain hyphens which are illegal in Python
+    ``import`` syntax, so ``importlib.import_module`` will always fail on
+    these references; the file-based fallback inside
+    :func:`masim.agents._base._load_module_by_file` maps each dot to a
+    directory separator and loads the resulting ``prompts.py`` via
+    :func:`importlib.util.spec_from_file_location`. This keeps the loader
+    contract single-source and eliminates the earlier sys.path side effect.
     """
     lm_name = str(
         llm_overrides.get(_LLM_LM_KEY, "ark/doubao-seed-2-0-mini-260428")
@@ -1784,9 +1793,13 @@ def _build_llm_extras(
     max_tokens = int(llm_overrides.get(_LLM_TOKENS_KEY, 512))
 
     if has_prompts_module:
-        # Use short module path — the bundle's Customized-agents/ dir is on
-        # sys.path at runtime (see simulation_runner._customized_bundle_import_root).
-        prompt_module = "prompts"
+        # Full bundle-local dotted path; file-based fallback in
+        # masim.agents._base._load_module_by_file resolves it without any
+        # sys.path mutation, so the reference is safe even when the
+        # bundle directory name contains hyphens.
+        prompt_module = (
+            f"examples.CUSTOMIZED_SIMULATION.{cid}.Customized-agents.prompts"
+        )
         stem = _prompt_var_stem(archetype)
         sys_ref = f"{prompt_module}:{stem}_SYS"
         user_ref = f"{prompt_module}:{stem}_USER"
@@ -2071,6 +2084,39 @@ def _slice_top_level_block(text: str, key: str) -> str:
 _RECORD_PATH_RE = re.compile(
     r'(record_path|storage_path|checkpoint_dir)\s*:\s*"?(EXPERIMENT/[^"\n]+)"?'
 )
+
+
+def _retarget_scenario_references(
+    text: str, scenario_name: str, cid: str
+) -> str:
+    """Rewrite ``examples.{scenario_name}.*`` to ``examples.CUSTOMIZED_SIMULATION.{cid}.Default.*``.
+
+    Applied to every yaml file at copy time so the bundle is completely
+    self-contained: ``class:`` and ``sys_message:`` / ``user_message:``
+    references point at the bundle's own copies of ``players.py`` and
+    ``prompts.py`` from the very first run. There is no "shipped vs bundle"
+    dichotomy — the bundle IS the project.
+
+    Uses a word-boundary regex so that:
+    - ``examples.HerdEffect.LLM.players:Market`` becomes
+      ``examples.CUSTOMIZED_SIMULATION.<cid>.Default.LLM.players:Market``
+    - ``examples.HerdEffectFoo.…`` (hypothetical sibling with matching
+      prefix) is NOT touched — we anchor on the exact scenario segment.
+    - ``EXPERIMENT/CUSTOMIZED_SIMULATION/<cid>/Default/LLM/records`` and
+      other non-dotted paths are NOT touched.
+
+    The hyphenated ``cid`` is illegal in Python ``import`` syntax; the
+    bundle-local references only load correctly through the file-based
+    fallback in :func:`masim.agents._base._load_module_by_file` and
+    :func:`masim.utils.config.load_class`, both of which understand the
+    dotted-to-filesystem mapping. Loaders MUST already be file-based
+    before a bundle produced by this function can run.
+    """
+    pattern = re.compile(
+        r"(?<![A-Za-z0-9_])examples\." + re.escape(scenario_name) + r"\."
+    )
+    replacement = f"examples.CUSTOMIZED_SIMULATION.{cid}.Default."
+    return pattern.sub(replacement, text)
 
 
 def _retarget_record_paths(text: str, cid: str) -> str:

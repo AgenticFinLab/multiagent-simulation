@@ -8,9 +8,7 @@ order-size limits.  See ``simulation-bases.md §4.1–§4.5``.
 from __future__ import annotations
 
 import copy
-import importlib
 import logging
-import math
 import os
 from typing import Dict
 
@@ -25,17 +23,17 @@ from masim.utils.history import HistoryBuffer
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     robust_llm_call,
-    validate_bid_qty_decision,
 )
+from masim.format import get_order_format
 
 logger = logging.getLogger(__name__)
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt constant from 'module:VAR' path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 class LLMInvestor(GeneralPlayer):
@@ -128,21 +126,12 @@ class LLMInvestor(GeneralPlayer):
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
 
-        def _validate_dotcombubble_llm(parsed):
-            validate_bid_qty_decision(parsed)
-            proposed_quantity = float(parsed["quantity"])
-            if not math.isfinite(proposed_quantity) or proposed_quantity < 0:
-                raise ValueError(f"Invalid quantity: {parsed['quantity']}")
-            proposed_price = float(parsed["bid_price"])
-            if not math.isfinite(proposed_price):
-                raise ValueError(f"Invalid bid_price: {parsed['bid_price']}")
-
         decision = robust_llm_call(
             llm_client,
             system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
-            validate_fn=_validate_dotcombubble_llm,
+            validate_fn=get_order_format("DotComBubble").validate_decision,
             max_retries=int(llm_cfg["max_retries"]),
             fallback="hold",
             identity=self.identity,

@@ -37,7 +37,6 @@ import os
 import json
 import random
 import re
-import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 
@@ -58,15 +57,16 @@ from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     robust_llm_call,
 )
+from masim.format import get_order_format
 
 logger = logging.getLogger("HerdEffectLLM")
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from module path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 class Market(GeneralPlayer):
@@ -365,6 +365,7 @@ Respond with ONLY valid JSON:
             system_prompt,
             user_prompt,
             parse_fn=self._parse_llm_response,
+            validate_fn=get_order_format("HerdEffect").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

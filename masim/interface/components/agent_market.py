@@ -2001,25 +2001,12 @@ def _replace_persona_body(
     return new_text
 
 
-def _bundle_sys_message_ref(
-    bundle_name: str, variant: str, public_const: str
-) -> str:
-    """Compose a bundle-scoped dotted sys_message reference.
-
-    Format::
-
-        examples.CUSTOMIZED_SIMULATION.{bundle}.Default.{variant}.prompts:LLM_XXX_SYS
-
-    The bundle name contains hyphens which are illegal for Python
-    ``import`` syntax; the file-based prompt loader introduced in Step 5
-    parses this string as a filesystem path (each dot becomes a directory
-    separator, the last segment before ``:`` is the ``prompts.py`` file)
-    and loads via :func:`importlib.util.spec_from_file_location`.
-    """
-    return (
-        f"examples.CUSTOMIZED_SIMULATION.{bundle_name}."
-        f"Default.{variant}.prompts:{public_const}"
-    )
+# NOTE: The former _bundle_sys_message_ref helper was removed. Bundle-local
+# sys_message / user_message references are now composed once at bundle
+# creation time inside
+# ``masim.interface.customized.config_writer._retarget_scenario_references``.
+# There is no longer a "compose the retarget at Save time" flow — Save only
+# rewrites the persona body inside the bundle's own prompts.py.
 
 
 def _save_default_agent_edits_to_disk(
@@ -2077,18 +2064,15 @@ def _save_default_agent_edits_to_disk(
         prompts_py.write_text(prompts_text, encoding="utf-8")
 
     # ── players.yml patches ─────────────────────────────────────────────
+    # NOTE: sys_message is NOT retargeted here anymore.
+    # ``copy_default_scenario_bundle`` already rewrites every
+    # ``examples.<ScenarioName>.…`` reference to
+    # ``examples.CUSTOMIZED_SIMULATION.{bundle}.Default.…`` when the bundle
+    # is created, so the yaml's sys_message points at the bundle's own
+    # prompts.py from run 1. A Save that rewrites the persona body writes
+    # directly into that bundle-local prompts.py — no yaml patch needed.
     players_text = players_yml.read_text(encoding="utf-8") if players_yml.exists() else ""
     dirty = False
-
-    if persona_body is not None and players_text:
-        public_const = _public_const_from_sys_ref(sys_ref)
-        new_ref = _bundle_sys_message_ref(
-            bundle.customized_id, variant, public_const
-        )
-        players_text = _patch_llm_yaml_field(
-            players_text, block_key, "sys_message", f'"{new_ref}"'
-        )
-        dirty = True
 
     if temperature is not None and players_text:
         players_text = _patch_llm_yaml_field(
@@ -2249,15 +2233,16 @@ def _is_default_agent_edited_on_disk(
     b_text = bundle_players.read_text(encoding="utf-8")
     s_text = shipped_players.read_text(encoding="utf-8")
 
-    yaml_fields = ("temperature", "max_new_tokens", "lm_name", "sys_message")
+    yaml_fields = ("temperature", "max_new_tokens", "lm_name")
     b_vals = _read_agent_block_yaml_fields(b_text, block_key, yaml_fields)
     s_vals = _read_agent_block_yaml_fields(s_text, block_key, yaml_fields)
-    # sys_message is expected to be re-pointed at the bundle when persona
-    # is edited — we already caught persona changes above. So here we
-    # only care about drift in the *shipped* → *shipped* case: if the
-    # bundle's sys_message no longer points at the shipped ref while the
-    # persona body itself matches, that's still an edit (persona was set
-    # then reverted). Treat any inequality as edited.
+    # sys_message is intentionally excluded from this comparison because
+    # ``copy_default_scenario_bundle`` retargets every sys_message from
+    # ``examples.<Scenario>.…`` to
+    # ``examples.CUSTOMIZED_SIMULATION.{bundle}.Default.…`` at bundle
+    # creation time, so a fresh (unedited) bundle would otherwise be
+    # flagged as "edited" purely because of the retargeting bookkeeping.
+    # Actual persona edits are caught by the persona-body compare above.
     if b_vals != s_vals:
         return True
 

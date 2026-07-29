@@ -31,6 +31,7 @@ Two public surfaces
 
 from __future__ import annotations
 
+import math
 from typing import Any, Mapping, Set
 
 NAME: str = "maker_taker_order"
@@ -128,6 +129,11 @@ def validate_decision(decision: Mapping[str, Any]) -> None:
             f"maker_taker_order 'bid_price' must be numeric, got "
             f"{decision['bid_price']!r}"
         ) from exc
+    if not math.isfinite(bid_price):
+        raise ValueError(
+            f"maker_taker_order 'bid_price' must be a finite number, got "
+            f"{bid_price}"
+        )
     if bid_price <= 0:
         raise ValueError(
             f"maker_taker_order 'bid_price' must be strictly positive, got "
@@ -141,6 +147,11 @@ def validate_decision(decision: Mapping[str, Any]) -> None:
             f"maker_taker_order 'quantity' must be numeric, got "
             f"{decision['quantity']!r}"
         ) from exc
+    if not math.isfinite(quantity):
+        raise ValueError(
+            f"maker_taker_order 'quantity' must be a finite number, got "
+            f"{quantity}"
+        )
     if quantity < 0:
         raise ValueError(
             f"maker_taker_order 'quantity' must be non-negative, got "

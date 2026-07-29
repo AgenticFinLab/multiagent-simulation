@@ -31,6 +31,7 @@ Two public surfaces
 
 from __future__ import annotations
 
+import math
 from typing import Any, Mapping, Set
 
 NAME: str = "participation_order"
@@ -103,6 +104,11 @@ def validate_decision(decision: Mapping[str, Any]) -> None:
         raise ValueError(
             f"participation_order 'quantity' must be numeric, got {q_raw!r}"
         ) from exc
+    if not math.isfinite(q_float):
+        raise ValueError(
+            f"participation_order 'quantity' must be a finite number, got "
+            f"{q_float}"
+        )
     if q_float < 0:
         raise ValueError(
             f"participation_order 'quantity' must be non-negative, got "

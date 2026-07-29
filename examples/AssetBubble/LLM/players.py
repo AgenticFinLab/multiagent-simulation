@@ -36,7 +36,6 @@ import json
 import random
 import re
 import sys
-import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 
@@ -58,13 +57,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 
 logger = logging.getLogger("AssetBubbleLLM")
+from masim.format import get_order_format
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from module path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 def _infer_response_text(infer_output: Any) -> str:
@@ -389,6 +389,7 @@ Respond with ONLY valid JSON:
             system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
+            validate_fn=get_order_format("AssetBubble").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

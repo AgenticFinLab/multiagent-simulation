@@ -38,6 +38,7 @@ from .prompts import (
 from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 
 logger = logging.getLogger("MomentumEffectLLM")
+from masim.format import get_order_format
 
 
 # =============================================================================
@@ -258,6 +259,7 @@ class LLMInvestor(GeneralPlayer):
             self._system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
+            validate_fn=get_order_format("MomentumEffect").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

@@ -7,7 +7,6 @@ Design:
 - Investors: LLM-driven with personas from prompts.py
 """
 
-import importlib
 import logging
 
 from lmbase.inference.api_call import LangChainAPIInference
@@ -20,8 +19,8 @@ from examples.GameStopShortSqueeze.Rule.players import Market, _build_order  # n
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     robust_llm_call,
-    validate_bid_qty_decision,
 )
+from masim.format import get_order_format
 from examples.GameStopShortSqueeze.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("GameStopShortSqueeze.LLM")
@@ -34,11 +33,11 @@ PARAMETER_KEYS = (
 )
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt constant from 'module:VAR' path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 def _format_decision_params(params):
@@ -124,7 +123,7 @@ class LLMInvestor(GeneralPlayer):
             system_msg,
             user_msg,
             parse_fn=parse_llm_response_with_thinking,
-            validate_fn=validate_bid_qty_decision,
+            validate_fn=get_order_format("GameStopShortSqueeze").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

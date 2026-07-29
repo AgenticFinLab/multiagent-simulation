@@ -36,8 +36,8 @@ from masim.utils.llm_utils import (
     is_retryable_llm_error,
     parse_llm_response_with_thinking,
     robust_llm_call,
-    validate_bid_qty_decision,
 )
+from masim.format import get_order_format
 from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
     Market,
     _build_order,
@@ -147,7 +147,7 @@ class LLMInvestor(GeneralPlayer):
             self._system_prompt,
             user_prompt,
             parse_fn=parse_llm_response_with_thinking,
-            validate_fn=validate_bid_qty_decision,
+            validate_fn=get_order_format("OverconfidenceBias").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

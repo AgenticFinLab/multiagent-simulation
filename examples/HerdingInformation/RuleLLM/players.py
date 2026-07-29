@@ -21,6 +21,7 @@ from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_c
 from examples.HerdingInformation.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("HerdingInformation.RuleLLM")
+from masim.format import get_order_format
 
 
 def load_prompt(prompt_path: str) -> str:
@@ -104,6 +105,7 @@ class RuleLLMInvestor(GeneralPlayer):
             system_msg,
             user_msg,
             parse_fn=parse_llm_response_with_thinking,
+            validate_fn=get_order_format("HerdingInformation").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,

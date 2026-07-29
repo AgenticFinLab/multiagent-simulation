@@ -7,7 +7,6 @@ Design:
 - Investors: LLM-driven with personas from prompts.py
 """
 
-import importlib
 import logging
 
 from lmbase.inference.api_call import LangChainAPIInference
@@ -21,13 +20,14 @@ from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_c
 from examples.HerdingInformation.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("HerdingInformation.LLM")
+from masim.format import get_order_format
 
 
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt constant from 'module:VAR' path."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
+# Re-export the canonical prompt loader from masim.agents._base — this
+# gives shipped scenarios the same import_module -> file-based fallback
+# that Customized bundles depend on (hyphenated bundle dir names are
+# illegal in Python import syntax and require file loading).
+from masim.agents._base import load_prompt  # noqa: F401
 
 
 class LLMInvestor(GeneralPlayer):
@@ -104,6 +104,7 @@ class LLMInvestor(GeneralPlayer):
             system_msg,
             user_msg,
             parse_fn=parse_llm_response_with_thinking,
+            validate_fn=get_order_format("HerdingInformation").validate_decision,
             max_retries=5,
             fallback="hold",
             identity=self.identity,
