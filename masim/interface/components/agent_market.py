@@ -1556,6 +1556,31 @@ def _show_default_edit_dialog(
     is_rulellm = (variant == "RuleLLM")
 
     st.subheader(display_name)
+    # ── Read/write provenance banner ─────────────────────────────────
+    # Surface exactly where a Save click lands on disk and where the
+    # simulation runtime reads that data back at run-time. Anti-drift
+    # aid so the user (and any future code editor) can visually verify
+    # the disk contract on every dialog open.
+    if is_rulellm:
+        st.caption(
+            "📖 **只读教学样例** · 展示内容来自 shipped scenario 的 RuleLLM 变体："
+            "`configs/{Scenario}/RuleLLM/players.yml` 的 `sys_message` 引用 → "
+            "shipped `examples/{Scenario}/RuleLLM/prompts.py`。"
+            " 本弹窗不会写入任何文件（Save 按钮已禁用）。"
+        )
+    else:
+        st.caption(
+            "💾 **保存位置 & 📖 模拟读取路径**（两者一致 — bundle 创建时已重写引用，"
+            "无 in-memory 中间层）：\n\n"
+            "- Persona 正文 → "
+            "`examples/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/prompts.py` "
+            "（`_XXX_PERSONA = \"\"\"…\"\"\"` 三引号块）\n"
+            "- Temperature / Max New Tokens / Model Name → "
+            "`configs/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/players.yml`\n"
+            "- Parameters（数值 extras）→ 同上 `players.yml` 的该 agent extras 块\n\n"
+            "运行时 `SimulationRunner` 只从以上 bundle-local 路径读取，**不会 fallback 到 "
+            "shipped `examples/{Scenario}/`**。"
+        )
     if is_rulellm:
         st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
 
@@ -1721,9 +1746,15 @@ def _show_default_edit_dialog(
 
         # Clear the in-memory extras slot — disk is now the source of truth.
         edits.pop(block_key, None)
-        # Close the dialog and refresh the grid so the badge picks up the
-        # freshly-written disk state on the next render.
-        st.rerun(scope="fragment")
+        # Close the dialog and refresh the parent grid so the "✓ 已修改"
+        # badge on the agent card picks up the freshly-written disk state
+        # on the next render. We MUST use app-scoped rerun (the default);
+        # ``scope="fragment"`` would only re-execute the dialog body,
+        # leaving the dialog open and the outer card badge stale — which
+        # looked to users like Save "无反应". See sibling Save handlers
+        # at line 1864 (_launch_from_default_config) and line 3099
+        # (roster "Save changes") for the same close-and-refresh pattern.
+        st.rerun()
 
 
 def _render_extras_grid(
