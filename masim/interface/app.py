@@ -30,6 +30,7 @@ from masim.interface.components.agent_market import (
     render_default_config,
     render_scenario_setup,
     render_selected_market_strip,
+    render_simulation_provenance,
     render_variant_choice,
 )
 from masim.interface.components.welcome import render_welcome
@@ -229,6 +230,13 @@ def render_simulation_page(scenario_name: str):
     st.divider()
 
     render_selected_market_strip()
+
+    # Provenance banner: shows the exact configs/examples files this
+    # simulation will load AND a live verification badge indicating that
+    # the bundle-local retarget from shipped ``examples/{Scenario}/`` is
+    # consistent — so both the user and the code can confirm that edits
+    # made in Build a Project actually landed in the bundle.
+    render_simulation_provenance(scenario_name)
 
     if not info.get("exists"):
         st.error(f"Scenario configuration not found: {scenario_name}")

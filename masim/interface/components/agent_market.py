@@ -30,6 +30,7 @@ from ..config_loader import (
     get_rulellm_prompt_for_agent,
     get_scenario_info,
     get_topology_info,
+    probe_bundle_provenance,
     resolve_scenario_rulellm_prompts,
     scenario_display_name,
 )
@@ -1299,6 +1300,15 @@ def render_default_config() -> None:
             "Review and adjust the market environment and agent parameters below. "
             "Click **Confirm & Launch** at the bottom to start the simulation."
         )
+        # Page-level read/write contract summary (mirrors per-dialog banners).
+        st.caption(
+            "💾 本页所有编辑都**直接写入 bundle 磁盘文件**："
+            "`configs/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/` "
+            "（`players.yml` / `simulation.yml` / `market.yml`）与 "
+            "`examples/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/prompts.py`。"
+            "📖 Confirm & Launch 后 `SimulationRunner` 从这些 bundle-local 路径直接读取，"
+            "shipped `examples/{Scenario}/` 不参与运行。"
+        )
 
     st.divider()
 
@@ -2394,6 +2404,11 @@ def _show_agent_profile_dialog(agent: dict) -> None:
             md_path = candidate
             break
     if md_path and md_path.exists():
+        try:
+            _rel = md_path.relative_to(PROJECT_ROOT)
+        except ValueError:
+            _rel = md_path
+        st.caption(f"📖 只读预览 · 读自：`{_rel}` · 本弹窗不写入任何文件。")
         st.markdown(md_path.read_text(encoding="utf-8"))
     else:
         st.caption(
@@ -2918,6 +2933,13 @@ def _show_catalog_agent_profile_dialog(agent: dict[str, Any]) -> None:
         st.markdown(f"### {agent['display_name']}")
         st.caption(agent.get("archetype", agent["agent_type"]))
     st.divider()
+    _prof_path = agent.get("profile_file")
+    if _prof_path:
+        try:
+            _rel = Path(_prof_path).relative_to(PROJECT_ROOT)
+        except (TypeError, ValueError):
+            _rel = _prof_path
+        st.caption(f"📖 只读预览 · 读自：`{_rel}` · 本弹窗不写入任何文件。")
     st.markdown(agent.get("profile_markdown") or "Profile content is unavailable.")
 
 
@@ -2981,6 +3003,21 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
     st.subheader(agent["display_name"])
     header_bits = [f"`{agent_type}`", f"Entry ID `{entry_id}`"]
     st.caption(" · ".join(header_bits))
+    # ── Read/write provenance banner (two-stage) ─────────────────────
+    # Customize flow saves happen in TWO stages; make both visible plus
+    # the runtime read path so users can trace their edit end-to-end.
+    st.caption(
+        "💾 **保存**（分两步，请留意）：\n\n"
+        "1. 本弹窗点 **Save changes**：立即把 roster 草稿写入 "
+        "`configs/CUSTOMIZED_SIMULATION/{bundle}/selection_state.json`"
+        "（仅是草稿，此时**尚未生成** bundle 的 yaml / prompts.py）。\n"
+        "2. 主页点 **Confirm & Launch**：依据草稿生成 "
+        "`examples/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/prompts.py` "
+        "+ `configs/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/*.yml`。\n\n"
+        "📖 **模拟读取**：`SimulationRunner` 只从 "
+        "`.../Customized-agents/` 路径读取（与 Default 变体的 `.../Default/{variant}/` "
+        "完全独立），**不再引用 shipped `examples/{Scenario}/`**。"
+    )
 
     # ---- Engine selector (initialised FIRST so the RuleLLM read-only lock is
     # available to every widget below — including the label input directly
@@ -3959,6 +3996,19 @@ def render_customize() -> None:
                 ),
             )
             st.session_state[_rounds_key] = int(edited_rounds)
+
+    # Page-level read/write contract summary (mirrors the per-dialog
+    # provenance banner rendered inside _render_entry_edit_panel).
+    st.caption(
+        "💾 **两阶段保存**："
+        "① 编辑每个 roster entry → **Save changes** 立即写入 "
+        "`configs/CUSTOMIZED_SIMULATION/{bundle}/selection_state.json` 草稿；"
+        "② 页面底部 **Confirm & Launch** → 生成真正的 bundle "
+        "`examples/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/prompts.py` "
+        "+ `configs/CUSTOMIZED_SIMULATION/{bundle}/Customized-agents/*.yml`。"
+        "📖 模拟运行时只读 `.../Customized-agents/`，与 Default 变体的 "
+        "`.../Default/{variant}/` 完全独立，不再引用 shipped example。"
+    )
 
     # Pre-compute the Default preset targets. The selection snapshot
     # (selected_agents_now / selected_types_now) was already computed above,
@@ -5133,6 +5183,124 @@ def _write_customized_bundle(
         icon="\u2728",
     )
     return f"CUSTOMIZED_SIMULATION/{result.customized_id}/Customized-agents"
+
+
+def _try_relative_to_project(path: Path) -> str:
+    """Format a Path relative to the project root for compact display."""
+    try:
+        # Two levels above masim/interface/components/ = project root
+        project_root = Path(__file__).resolve().parents[3]
+        return str(path.resolve().relative_to(project_root))
+    except (ValueError, OSError):
+        return str(path)
+
+
+def render_simulation_provenance(scenario_key: str) -> None:
+    """Render a compact provenance banner on the Simulation page.
+
+    Shows the exact on-disk config/example files the running simulation
+    will load, plus a live verification badge indicating whether the
+    bundle is properly retargeted away from shipped examples — i.e.
+    whether the user's edits in Build a Project actually landed in the
+    bundle instead of silently reading from shipped defaults.
+
+    The banner is collapsed by default (via ``st.expander``) so it does
+    not distract during normal operation, but the ✅/⚠️ badge in the
+    header stays visible so problems surface immediately.
+    """
+    if not scenario_key:
+        return
+    try:
+        prov = probe_bundle_provenance(scenario_key)
+    except Exception as exc:  # noqa: BLE001 — defensive: never break the sim page
+        st.caption(f"⚠️ 无法读取 provenance 信息 ({exc})")
+        return
+
+    badge = "✅" if prov["retarget_ok"] else "⚠️"
+    kind_label = {
+        "Default": "Default 副本",
+        "Customized-agents": "Customized-agents 副本",
+        "Shipped": "内置 shipped 场景",
+    }.get(prov["kind"], prov["kind"])
+    bundle_hint = (
+        f" · bundle `{prov['bundle_name']}`"
+        if prov["is_customized"] and prov["bundle_name"]
+        else ""
+    )
+    header = f"📁 配置来源 · Bundle 落盘核验 {badge} · {kind_label}{bundle_hint}"
+
+    with st.expander(header, expanded=not prov["retarget_ok"]):
+        # ── Files section ────────────────────────────────────────────
+        st.markdown("**运行时将从这些路径加载：**")
+        rows: list[str] = []
+        # Order matters: configs first (what the runner opens), then code.
+        for logical in ("simulation.yml", "players.yml", "topology.yml", "persona.yml"):
+            entry = prov["files"].get(logical, {})
+            path = entry.get("path")
+            exists = entry.get("exists", False)
+            if path is None:
+                continue
+            mark = "✅" if exists else ("—" if logical in ("topology.yml", "persona.yml") else "❌")
+            rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
+        # Only surface players.py / prompts.py when relevant (LLM variants
+        # need prompts.py; every variant has players.py under examples/).
+        for logical in ("players.py", "prompts.py"):
+            entry = prov["files"].get(logical, {})
+            path = entry.get("path")
+            exists = entry.get("exists", False)
+            if path is None:
+                continue
+            # prompts.py only meaningful for LLM/RuleLLM variants
+            if logical == "prompts.py" and prov["variant"] not in ("LLM", "RuleLLM", "Rag"):
+                if not exists:
+                    continue
+            mark = "✅" if exists else ("—" if logical == "prompts.py" else "❌")
+            rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
+        st.markdown("\n".join(rows) if rows else "_(无路径信息)_")
+
+        # ── Retarget verification ────────────────────────────────────
+        st.markdown("**引用完整性核验：**")
+        n_class = len(prov["class_refs"])
+        n_class_ok = sum(1 for r in prov["class_refs"] if r["ok"])
+        n_sys = len(prov["sys_message_refs"])
+        n_sys_ok = sum(1 for r in prov["sys_message_refs"] if r["ok"])
+        class_badge = "✅" if n_class == 0 or n_class_ok == n_class else "⚠️"
+        sys_badge = "✅" if n_sys == 0 or n_sys_ok == n_sys else "⚠️"
+        record_badge = "✅" if prov["record_path_ok"] else "⚠️"
+
+        st.markdown(
+            f"- {class_badge} `class:` 引用 {n_class_ok}/{n_class} 指向 "
+            f"`{prov['expected_module_prefix']}…`\n"
+            f"- {sys_badge} `sys_message:` 引用 {n_sys_ok}/{n_sys} 指向 "
+            f"`{prov['expected_module_prefix']}…`"
+            + (
+                f"\n- {record_badge} `record_path` = `{prov['record_path']}`"
+                f" (期望以 `{prov['expected_record_prefix']}` 开头)"
+                if prov["record_path"]
+                else f"\n- ⚠️ `record_path` 未在 `simulation.yml` 中找到"
+            )
+        )
+
+        if prov["retarget_ok"]:
+            if prov["is_customized"]:
+                st.success(
+                    "所有引用均已重写为 bundle-local — 用户在 Build a Project 中的修改已"
+                    "完整落盘,运行时不会 fallback 到 shipped `examples/{Scenario}/`。"
+                )
+            else:
+                st.info(
+                    "内置 shipped 场景,引用指向 `examples.{Scenario}.` 规范位置。"
+                    "本次运行不涉及用户编辑,配置来自仓库源码。"
+                )
+        else:
+            st.error(
+                "**检测到 retarget 不一致** — 部分引用仍指向 shipped 或错误的 bundle,"
+                "运行时可能读取到并非用户修改后的配置。请检查:"
+            )
+            for issue in prov["issues"][:6]:
+                st.markdown(f"- {issue}")
+            if len(prov["issues"]) > 6:
+                st.caption(f"（另有 {len(prov['issues']) - 6} 条同类问题省略）")
 
 
 def render_selected_market_strip() -> None:

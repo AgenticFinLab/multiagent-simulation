@@ -1508,6 +1508,272 @@ def resolve_scenario_rulellm_prompts(
     return out
 
 
+# ---------------------------------------------------------------------------
+# Bundle provenance — surfaces "where do configs load from / did my edits
+# actually make it into the bundle" for the Simulation page banner.
+# ---------------------------------------------------------------------------
+
+
+def _split_customized_key(scenario_key: str) -> Optional[Dict[str, str]]:
+    """Parse a ``CUSTOMIZED_SIMULATION/...`` key into its components.
+
+    Returns a dict with ``bundle``, ``kind`` (``Default`` or ``Customized-agents``),
+    ``variant`` (``Rule``/``LLM``/``RuleLLM``/``Rag`` for Default bundles; empty
+    for Customized-agents) and ``expected_module_prefix`` — the dotted path
+    that class/sys_message refs SHOULD start with when the bundle has been
+    correctly retargeted from shipped ``examples.{Scenario}.`` refs.
+    """
+    if not scenario_key.startswith("CUSTOMIZED_SIMULATION/"):
+        return None
+    tail = scenario_key.split("/", 1)[1]
+    parts = tail.split("/")
+    if len(parts) < 2:
+        return None
+    bundle = parts[0]
+    kind = parts[1]
+    if kind == "Default" and len(parts) >= 3:
+        variant = parts[2]
+        prefix = f"examples.CUSTOMIZED_SIMULATION.{bundle}.Default.{variant}."
+        return {
+            "bundle": bundle,
+            "kind": "Default",
+            "variant": variant,
+            "expected_module_prefix": prefix,
+        }
+    if kind == "Customized-agents":
+        # Customized-agents bundles use a sys.path prelude, so class refs
+        # become the *short form* (e.g. ``Rule.players:Market``) with no
+        # ``examples.`` prefix; sys_message refs however retain the full
+        # ``examples.CUSTOMIZED_SIMULATION.{bundle}.Customized-agents.`` path.
+        prefix = f"examples.CUSTOMIZED_SIMULATION.{bundle}.Customized-agents."
+        return {
+            "bundle": bundle,
+            "kind": "Customized-agents",
+            "variant": "",
+            "expected_module_prefix": prefix,
+        }
+    return None
+
+
+def _iter_yaml_refs(node: Any, keys: tuple[str, ...]):
+    """Yield every string value found under any of ``keys`` in a nested
+    dict/list structure (skips ``None`` and non-str values).
+    """
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k in keys and isinstance(v, str) and v:
+                yield k, v
+            yield from _iter_yaml_refs(v, keys)
+    elif isinstance(node, list):
+        for item in node:
+            yield from _iter_yaml_refs(item, keys)
+
+
+def _load_yaml_ignore_includes(path: Path) -> Any:
+    """Load a YAML file after stripping ``!include`` directives so refs can
+    be inspected without importing external files.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    stripped_lines: List[str] = []
+    for line in text.split("\n"):
+        if "!include" in line:
+            key = line.split(":", 1)[0]
+            stripped_lines.append(f"{key}: {{}}")
+        else:
+            stripped_lines.append(line)
+    try:
+        return yaml.safe_load("\n".join(stripped_lines))
+    except yaml.YAMLError as exc:
+        logger.warning("probe_bundle_provenance: yaml parse failed for %s: %s", path, exc)
+        return None
+
+
+def probe_bundle_provenance(scenario_key: str) -> Dict[str, Any]:
+    """Inspect on-disk configs/examples for a scenario and report a compact
+    provenance record for the Simulation page.
+
+    Returns a dict with:
+      * ``scenario_key``          — echo of input
+      * ``is_customized``         — bool, True for CUSTOMIZED_SIMULATION/…
+      * ``bundle_name``           — bundle folder (customized only)
+      * ``kind``                  — ``"Default" | "Customized-agents" | "Shipped"``
+      * ``variant``               — engine variant (``Rule|LLM|RuleLLM|Rag``)
+      * ``configs_dir`` / ``examples_dir`` — resolved directories (absolute)
+      * ``files``                 — dict of {logical_name → {"path": Path, "exists": bool}}
+      * ``expected_module_prefix``— dotted prefix class/sys_message SHOULD carry
+      * ``expected_record_prefix``— filesystem prefix the record_path SHOULD carry
+      * ``class_refs`` / ``sys_message_refs`` — list of {"block", "ref", "ok"}
+      * ``record_path``           — value read from simulation.yml (may be "")
+      * ``record_path_ok``        — bool, does record_path point at expected subtree
+      * ``retarget_ok``           — bool, overall: all class + sys_message + record_path OK
+      * ``issues``                — human-readable list of mismatch descriptions
+
+    For shipped scenarios (non-CUSTOMIZED_SIMULATION), ``retarget_ok`` reflects
+    whether refs point at the canonical ``examples.{Scenario}.`` prefix.
+    """
+    # ── Resolve key → configs/examples paths + expected prefixes ──────────
+    parts = scenario_key.split("/")
+    customized = _split_customized_key(scenario_key)
+    is_customized = customized is not None
+
+    configs_dir = CONFIGS_DIR / scenario_key
+    examples_dir = EXAMPLES_DIR / scenario_key
+
+    if is_customized:
+        bundle_name = customized["bundle"]
+        kind = customized["kind"]
+        variant = customized["variant"] or (parts[-1] if parts else "")
+        expected_module_prefix = customized["expected_module_prefix"]
+        # record_path in simulation.yml is a filesystem-relative string,
+        # not a dotted module path, so use ``/`` separators.
+        if kind == "Default":
+            expected_record_prefix = (
+                f"EXPERIMENT/CUSTOMIZED_SIMULATION/{bundle_name}/Default/{variant}"
+            )
+        else:
+            expected_record_prefix = (
+                f"EXPERIMENT/CUSTOMIZED_SIMULATION/{bundle_name}/Customized-agents"
+            )
+    else:
+        bundle_name = ""
+        kind = "Shipped"
+        # Shipped scenario key like ``HerdEffect/LLM`` — dotted form
+        # ``examples.HerdEffect.LLM.``.
+        dotted = scenario_key.replace("/", ".")
+        variant = parts[-1] if len(parts) > 1 else ""
+        expected_module_prefix = f"examples.{dotted}."
+        expected_record_prefix = f"EXPERIMENT/{scenario_key}"
+
+    # ── File inventory ────────────────────────────────────────────────────
+    files: Dict[str, Dict[str, Any]] = {}
+    for logical_name, rel in (
+        ("simulation.yml", "simulation.yml"),
+        ("players.yml", "players.yml"),
+        ("topology.yml", "topology.yml"),
+        ("persona.yml", "persona.yml"),
+    ):
+        p = configs_dir / rel
+        files[logical_name] = {"path": p, "exists": p.exists()}
+    for logical_name, rel in (
+        ("players.py", "players.py"),
+        ("prompts.py", "prompts.py"),
+    ):
+        p = examples_dir / rel
+        files[logical_name] = {"path": p, "exists": p.exists()}
+
+    # ── Parse players.yml for class / sys_message refs ────────────────────
+    class_refs: List[Dict[str, Any]] = []
+    sys_refs: List[Dict[str, Any]] = []
+    issues: List[str] = []
+
+    players_path = configs_dir / "players.yml"
+    if players_path.exists():
+        players_data = _load_yaml_ignore_includes(players_path)
+        if isinstance(players_data, dict):
+            for block_key, block in players_data.items():
+                if not isinstance(block, dict):
+                    continue
+                cls = block.get("class")
+                if isinstance(cls, str) and cls:
+                    ok = _ref_ok(cls, kind, expected_module_prefix, is_class=True)
+                    class_refs.append({"block": block_key, "ref": cls, "ok": ok})
+                    if not ok:
+                        issues.append(
+                            f"class: 引用 `{cls}` 未指向预期前缀 "
+                            f"`{expected_module_prefix}` (block: `{block_key}`)"
+                        )
+                # sys_message lives under extras.llm.{block}.sys_message
+                for key, ref in _iter_yaml_refs(block, ("sys_message",)):
+                    ok = _ref_ok(ref, kind, expected_module_prefix, is_class=False)
+                    sys_refs.append({"block": block_key, "ref": ref, "ok": ok})
+                    if not ok:
+                        issues.append(
+                            f"sys_message: 引用 `{ref}` 未指向预期前缀 "
+                            f"`{expected_module_prefix}` (block: `{block_key}`)"
+                        )
+
+    # ── Parse simulation.yml for record_path ──────────────────────────────
+    record_path = ""
+    record_path_ok = True
+    sim_path = configs_dir / "simulation.yml"
+    if sim_path.exists():
+        sim_data = _load_yaml_ignore_includes(sim_path)
+        if isinstance(sim_data, dict):
+            setting = sim_data.get("setting", {}) if isinstance(sim_data.get("setting"), dict) else {}
+            record_path = str(setting.get("record_path", "") or "")
+            if record_path:
+                # Normalise separators so Windows-style paths also match.
+                norm_expected = expected_record_prefix.replace("\\", "/")
+                norm_record = record_path.replace("\\", "/")
+                record_path_ok = norm_record.startswith(norm_expected)
+                if not record_path_ok:
+                    issues.append(
+                        f"record_path 指向 `{record_path}`, 期望以 "
+                        f"`{expected_record_prefix}` 开头"
+                    )
+
+    retarget_ok = (
+        all(r["ok"] for r in class_refs)
+        and all(r["ok"] for r in sys_refs)
+        and record_path_ok
+    )
+
+    # A bundle without simulation.yml or players.yml can't run at all —
+    # trivial ``retarget_ok=True`` would be misleading, so flag it as a
+    # concrete provenance failure that surfaces in the banner.
+    for essential in ("simulation.yml", "players.yml"):
+        if not files[essential]["exists"]:
+            retarget_ok = False
+            issues.append(
+                f"`{essential}` 不存在于 `{configs_dir}` — bundle 可能未创建、"
+                "被清理或路径错误。"
+            )
+
+    return {
+        "scenario_key": scenario_key,
+        "is_customized": is_customized,
+        "bundle_name": bundle_name,
+        "kind": kind,
+        "variant": variant,
+        "configs_dir": configs_dir,
+        "examples_dir": examples_dir,
+        "files": files,
+        "expected_module_prefix": expected_module_prefix,
+        "expected_record_prefix": expected_record_prefix,
+        "class_refs": class_refs,
+        "sys_message_refs": sys_refs,
+        "record_path": record_path,
+        "record_path_ok": record_path_ok,
+        "retarget_ok": retarget_ok,
+        "issues": issues,
+    }
+
+
+def _ref_ok(
+    ref: str,
+    kind: str,
+    expected_module_prefix: str,
+    *,
+    is_class: bool,
+) -> bool:
+    """Validate a single class/sys_message dotted ref against the expected
+    bundle-local prefix.
+
+    Customized-agents bundles rewrite ``class:`` to the *short* form
+    (e.g. ``Rule.players:Market``) via sys.path injection, so a class ref
+    lacking any ``examples.`` prefix is legitimate there.  ``sys_message``
+    refs remain fully-qualified in every layout.
+    """
+    if kind == "Customized-agents" and is_class:
+        # Short form is expected; a stray ``examples.{Scenario}.`` prefix
+        # would be a retarget failure (would import from shipped code).
+        return not ref.startswith("examples.") or ref.startswith(expected_module_prefix)
+    return ref.startswith(expected_module_prefix)
+
+
 def get_rulellm_prompt_for_agent(
     scenario_base: str, agent_class_or_key: str
 ) -> Optional[Dict[str, str]]:
