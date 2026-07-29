@@ -233,8 +233,11 @@ def _list_existing_projects() -> list[dict[str, Any]]:
             mtime = entry.stat().st_mtime
         except OSError:
             mtime = 0.0
+        # Group by case-folded slug so that filesystem casing variants
+        # (e.g. MYTest vs MyTest) collapse into one project row.
+        group_key = (display_slug.lower(), pid.lower(), owner)
         record = grouped.setdefault(
-            (display_slug, pid, owner),
+            group_key,
             {
                 "slug": display_slug,
                 "project_id": pid,
@@ -247,15 +250,21 @@ def _list_existing_projects() -> list[dict[str, Any]]:
         record["scenarios"].append(scenario)
         if mtime > record["latest_mtime"]:
             record["latest_mtime"] = mtime
+            # Keep the slug casing from the most-recently-modified bundle.
+            record["slug"] = display_slug
 
     result: list[dict[str, Any]] = []
-    for (slug, pid, _owner), rec in grouped.items():
+    for (_slug_lower, _pid_lower, _owner), rec in grouped.items():
+        # Use the original-casing slug preserved in the record (not the
+        # lowercased grouping key) for filesystem lookups and display.
+        orig_slug = rec["slug"]
+        orig_pid = rec["project_id"]
         # Prefer the friendlier project_name from examples/<slug>/meta;
         # fall back to the slug (underscores rewritten as spaces).  The
         # meta folder itself is NOT team-namespaced so this read works
         # for both legacy and team-owned rows using the stripped slug.
-        display_name = slug.replace("_", " ")
-        meta_path = _EXAMPLES_DIR / slug / "project_meta.json"
+        display_name = orig_slug.replace("_", " ")
+        meta_path = _EXAMPLES_DIR / orig_slug / "project_meta.json"
         if meta_path.exists():
             try:
                 meta = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -264,8 +273,8 @@ def _list_existing_projects() -> list[dict[str, Any]]:
                 pass
         result.append({
             "display_name": display_name,
-            "slug": slug,
-            "project_id": pid,
+            "slug": orig_slug,
+            "project_id": orig_pid,
             "team": rec["team"],
             "is_legacy": rec["is_legacy"],
             "scenarios": sorted(set(rec["scenarios"])),
