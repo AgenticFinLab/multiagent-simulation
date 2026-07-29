@@ -2641,45 +2641,34 @@ def _kebab_to_title(stem: str) -> str:
 
 
 # ─── Agent whitelist ──────────────────────────────────────────────────────
-# Only archetypes actually used by the 12 shipped scenarios are exposed in
-# the "Select & Setup Agents" grid.  Derived from configs/{Scenario}/
-# {Rule,LLM}/players.yml — the union of all agent block keys with
-# rule_/llm_ prefix stripped and underscores converted to hyphens.
+# Curated set of archetypes shown in "Select & Setup Agents".  Kept to a
+# manageable count so the grid isn't overwhelming.  Each represents a
+# genuinely distinct, well-understood behavioural role:
+#
+#   Core 5 (universal investor archetypes):
+#     momentum, aggressive, noise, contrarian, risk-averse
+#
+#   Supplementary 7 (distinct mechanisms / well-known biases):
+#     fundamental (value anchor), disposition (loss-aversion bias),
+#     overconfident (confidence bias), stop-loss (mechanical selling),
+#     market-maker (liquidity provision), short-seller (price discovery),
+#     trend-follower (systematic/technical trading)
+#
 _SCENARIO_AGENT_STEMS: frozenset[str] = frozenset({
-    # HerdEffect
-    "momentum-investor", "contrarian-investor", "risk-averse-investor",
-    "aggressive-investor", "noise-trader",
-    # DispositionEffect
-    "disposition-investor", "rational-investor", "tax-aware-investor",
-    "index-holder", "institutional-investor", "loss-averse",
-    # OverconfidenceBias
-    "overconfident-trader", "self-attributor", "calibrated-trader",
-    # AnchoringEffect
-    "anchored-trader", "historical-anchor", "rational-updater",
-    "momentum-trader", "disposition-trader", "contrarian-trader",
-    "fundamental-analyst", "liquidity-provider",
-    # AssetBubble
-    "momentum-speculator", "rational-arbitrageur", "fundamental-investor",
-    "leveraged-buyer", "conservative-holder",
-    # MomentumEffect
-    "index-fund", "market-maker", "technical-trader", "fundamental-trader",
-    "trend-follower", "fundamental-anchor",
-    # FlashCrash2010
-    "hft-market-maker", "momentum-chaser", "stop-loss-trader",
-    # HerdingInformation
-    "cascade-follower", "reputation-herder", "independent-thinker",
-    "contrarian",
-    # DotComBubble
-    "new-economy-evangelist", "ipo-flipper", "momentum-follower",
-    "skeptical-value-investor", "short-seller",
-    # GFC2008
-    "mbs-originator", "leveraged-investor", "rating-agency",
-    "distressed-buyer", "regulator",
-    # GameStopShortSqueeze
-    "retail-coordinated", "short-seller-hf", "market-maker-gamma",
-    "institutional-value", "momentum-retail",
-    # SVBBankRun
-    "depositor", "social-media-influencer", "bank-manager", "bond-trader",
+    # ── Core (user-specified) ──
+    "momentum-investor",        # 动量型 — trend following
+    "aggressive-investor",      # 激进型 — amplified momentum
+    "noise-trader",             # 噪音型 — random / uninformed
+    "contrarian-investor",      # 反向操作型 — mean reversion
+    "risk-averse-investor",     # 风险感知型 — volatility-sensitive
+    # ── Supplementary ──
+    "fundamental-investor",     # 基本面型 — value / intrinsic worth
+    "disposition-investor",     # 处置效应型 — holds losers, sells winners
+    "overconfident-trader",     # 过度自信型 — overestimation bias
+    "stop-loss-trader",         # 止损型 — mechanical exit (flash crash)
+    "market-maker",             # 做市商 — two-sided liquidity
+    "short-seller",             # 做空型 — bets against overvaluation
+    "trend-follower",           # 趋势跟踪型 — systematic / technical
 })
 
 
