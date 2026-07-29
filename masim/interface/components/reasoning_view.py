@@ -57,6 +57,7 @@ def render_reasoning_page(scenario_name: str):
                 "previous_page", "Simulation"
             )
             st.rerun()
+            return  # guard: st.rerun() should halt, but return to be safe
     with col_title:
         display_name = scenario_display_name(scenario_name)
         st.title(t("reasoning.title").replace("{name}", display_name))

@@ -2903,6 +2903,7 @@ def render_back_to_stage1_bar(
     key_suffix: str,
     reset_runtime: bool = False,
     target_stage: str = "scenario_setup",
+    disabled: bool = False,
 ) -> None:
     """Render a small "Back" button at the top of any post-Stage-1 page.
 
@@ -2915,6 +2916,8 @@ def render_back_to_stage1_bar(
             (default) goes all the way back to the scenario picker;
             ``"variant_choice"`` returns to the "Choose how to run it"
             page while keeping the committed scenario.
+        disabled: when True, the button is greyed out and non-clickable
+            (e.g. while a simulation is actively running).
     """
     if target_stage == "variant_choice":
         label = "← Back"
@@ -2929,6 +2932,7 @@ def render_back_to_stage1_bar(
             key=f"main_back_to_stage1_{key_suffix}",
             width="stretch",
             help=help_text,
+            disabled=disabled,
         ):
             st.session_state.workflow_stage = target_stage
             # Only forget the chosen scenario when going all the way back

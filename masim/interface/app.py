@@ -179,10 +179,15 @@ def main():
     elif st.session_state.current_page == "Reasoning":
         render_reasoning_page(selected_scenario)
     else:
+        _sim_busy = (
+            st.session_state.get("simulation_running", False)
+            or st.session_state.get("replay_active", False)
+        )
         render_back_to_stage1_bar(
             key_suffix="workspace",
             reset_runtime=True,
             target_stage="variant_choice",
+            disabled=_sim_busy,
         )
         render_simulation_page(selected_scenario)
 
