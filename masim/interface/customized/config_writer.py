@@ -1010,57 +1010,39 @@ def write_default_scenario_bundle(
     agent_extras_overrides: Optional[dict[str, dict[str, Any]]] = None,
     team_name: str = "",
 ) -> CustomizedBundleResult:
-    """Materialise a rounds/params-adjusted copy of a shipped scenario/variant.
+    """DEPRECATED — produces the rejected flat ``Default-{S}-{V}-rN`` layout.
 
-    Unlike :func:`write_customized_bundle` (which rebuilds the roster from
-    the user's agent picks), this copies the shipped ``{scenario}/{variant}``
-    config *verbatim* and lets the caller override ``total_rounds``, the
-    market coordinator's ``extras`` block, and per-agent ``extras`` blocks.
-    The copy lives under
-    ``configs/CUSTOMIZED_SIMULATION/[team-{team}-]Default-{scenario}-{variant}-r{N}``
-    so the shipped YAML is never mutated and the run stays reproducible.
+    All ``CUSTOMIZED_SIMULATION`` bundles must use the unified nested
+    format ``{bundle}/Default/{V}/`` (see
+    :func:`copy_default_scenario_bundle`).  The flat layout this function
+    used to emit is explicitly rejected by the current architecture — its
+    folder name does not match ``_BUNDLE_NAME_RE`` (``variant`` is not a
+    hex-8 project id), so team-scanning helpers in
+    :mod:`masim.interface.components.team_gate` cannot see it, and
+    sidebar/analysis decoders will misread it as a display key.
 
-    The folder name is deterministic in ``(team, scenario, variant, N)``:
-    the same tuple always overwrites the same bundle, so no duplicate
-    folders accumulate.  When ``market_extras_override`` or
-    ``agent_extras_overrides`` is supplied the players.yml inside that
-    folder is rewritten in-place to reflect the edited values (still using
-    the shipped roster).
-
-    The optional ``team_name`` prefix is essential for multi-team
-    deployments: without it, two teams that adjust the same
-    ``(scenario, variant, rounds)`` triple with different extras would
-    clobber each other's on-disk bundle.  The prefix marker matches
-    :mod:`masim.interface.customized.team_namespace` and is stripped by
-    ``sidebar.py`` and ``config_loader._resolve_display_key`` before the
-    UI decodes the bundle back into ``{scenario}/{variant}`` for display.
-
-    Args:
-        scenario_name: scenario base name (e.g. ``"AssetBubble"``).
-        variant: engine variant folder (e.g. ``"Rule"``).
-        total_rounds: the user-adjusted round count to bake in.
-        project_root: repo root (parent of ``configs/`` and ``examples/``).
-        market_extras_override: optional ``{extras_key: new_value}`` dict for
-            the market coordinator block (top-level key in players.yml).
-        agent_extras_overrides: optional
-            ``{agent_block_key: {extras_key: new_value}}`` dict. Each
-            ``agent_block_key`` MUST match a top-level key already present
-            in players.yml; unknown keys are silently ignored to keep the
-            call resilient to Streamlit widget-state churn.
-        team_name: optional team slug (as produced by ``team_gate``).  When
-            non-empty, the bundle folder gets the ``team-{team_name}-``
-            prefix so it is namespaced to that team.  Defaults to ``""``
-            for CLI / pre-gate callers.
-
-    Returns:
-        :class:`CustomizedBundleResult` with absolute paths of the copied
-        artifacts.
+    The function is kept as a stub only so accidental re-imports fail
+    loudly instead of silently reintroducing the deprecated format.  It
+    has zero live callers as of this refactor — the runtime path for
+    rounds/extras overrides now goes through
+    :func:`copy_default_scenario_bundle` followed by
+    :func:`apply_customized_modifications`.
 
     Raises:
-        FileNotFoundError: the scenario/variant folder or its
-            ``simulation.yml`` is missing.
-        ValueError: ``simulation.yml`` has no ``total_rounds`` key.
+        RuntimeError: always, with a pointer to the replacement API.
     """
+    raise RuntimeError(
+        "write_default_scenario_bundle is deprecated dead code — it emitted "
+        "the rejected flat 'Default-{S}-{V}-rN' bundle layout. Use "
+        "copy_default_scenario_bundle (nested '{bundle}/Default/{V}/') "
+        "followed by apply_customized_modifications for total_rounds / "
+        "extras overrides."
+    )
+    # ------------------------------------------------------------------
+    # Original body preserved for reference — the unreachable code below
+    # is what used to produce the flat layout.  Kept so future readers can
+    # diff intent, but never executed.
+    # ------------------------------------------------------------------
     project_root = Path(project_root).resolve()
     base_path = project_root / "configs" / scenario_name / variant
     base_simulation = base_path / "simulation.yml"

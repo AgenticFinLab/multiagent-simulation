@@ -52,6 +52,12 @@ import streamlit as st
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]  # components → interface → masim → root
 _CUSTOMIZED_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
 _EXPERIMENT_CUSTOMIZED_DIR = _PROJECT_ROOT / "EXPERIMENT" / "CUSTOMIZED_SIMULATION"
+# ``examples/CUSTOMIZED_SIMULATION`` is populated as a side-effect of
+# ``initialize_customized_folder`` / ``copy_default_scenario_bundle``
+# (both live in ``masim/interface/customized/config_writer.py``) — every
+# customize-bundle snapshot has a matching subtree here.  Must be included
+# in team deletion, otherwise soft-delete leaves orphan snapshots behind.
+_EXAMPLES_CUSTOMIZED_DIR = _PROJECT_ROOT / "examples" / "CUSTOMIZED_SIMULATION"
 _TEAM_REGISTRY = _PROJECT_ROOT / "configs" / ".team_registry"
 # Soft-delete quarantine: deleted team assets are MOVED here (never `rm`-ed)
 # so an accidental click can be recovered manually.  Timestamped subdirs
@@ -118,13 +124,16 @@ def _collect_team_paths(slug: str) -> list[Path]:
     Covers:
     * ``configs/CUSTOMIZED_SIMULATION/team-{slug}-*`` — source bundles.
     * ``EXPERIMENT/CUSTOMIZED_SIMULATION/team-{slug}-*`` — run outputs.
+    * ``examples/CUSTOMIZED_SIMULATION/team-{slug}-*`` — snapshot copies
+      produced by ``initialize_customized_folder`` /
+      ``copy_default_scenario_bundle`` (missed by earlier revisions).
 
     The scan uses the strict ``TEAM_NAME_IN_SLUG_RE`` decode so we never
     delete a legacy or another-team directory whose name happens to start
     with the same characters.  Returns an empty list when nothing matches.
     """
     hits: list[Path] = []
-    for root in (_CUSTOMIZED_DIR, _EXPERIMENT_CUSTOMIZED_DIR):
+    for root in (_CUSTOMIZED_DIR, _EXPERIMENT_CUSTOMIZED_DIR, _EXAMPLES_CUSTOMIZED_DIR):
         if not root.exists():
             continue
         for entry in root.iterdir():
@@ -504,6 +513,19 @@ def _render_team_delete_panel(existing: list[str]) -> None:
                                 st.query_params.pop(_QUERY_KEY, None)
                             except Exception:
                                 pass
+                        # Independent of ``current_team()`` also drop the
+                        # ``?team=`` URL query if it happens to STILL
+                        # point at the deleted slug — e.g. a stale link
+                        # a user pasted from Slack.  Leaving it in place
+                        # would immediately re-materialise the deleted
+                        # team on the next rerun via
+                        # ``bootstrap_team_from_query``.
+                        else:
+                            try:
+                                if st.query_params.get(_QUERY_KEY, "") == team:
+                                    st.query_params.pop(_QUERY_KEY, None)
+                            except Exception:
+                                pass
                         st.session_state.pop(_pending_key, None)
                         st.session_state.pop(
                             "_team_delete_confirm_input", None
@@ -513,6 +535,20 @@ def _render_team_delete_panel(existing: list[str]) -> None:
                         # doesn't repopulate it on next rerun.
                         if st.session_state.get("_prefill_team") == team:
                             st.session_state.pop("_prefill_team", None)
+                        # Wipe transient welcome-page chip pointers so a
+                        # subsequent welcome render cannot repopulate the
+                        # project-name input from a project that no
+                        # longer has any on-disk bundles.  These keys are
+                        # normally single-use (popped on read in
+                        # ``welcome.py``) but a race between deletion and
+                        # the next welcome render can leave them stuck
+                        # for one extra rerun.
+                        for _stale in (
+                            "_welcome_pending_name",
+                            "_welcome_pending_id",
+                            "_welcome_selected_project",
+                        ):
+                            st.session_state.pop(_stale, None)
                         try:
                             rel = quarantine_root.relative_to(_PROJECT_ROOT)
                             location = str(rel)

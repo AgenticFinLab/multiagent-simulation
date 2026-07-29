@@ -1,7 +1,7 @@
 market:
   archetype: deposit-bank-run-diamond-dybvig  # -> AGENT_POOL/market/deposit-bank-run-diamond-dybvig.md
   name: "Market"
-  class: "examples.SVBBankRun.Rule.players:Market"
+  class: "examples.SVBBankRun.LLM.players:Market"
   num_instances: 1
   persona: !include ../LLM/persona.yml
   config:

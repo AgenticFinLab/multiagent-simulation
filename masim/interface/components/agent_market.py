@@ -348,142 +348,24 @@ def _coerce_extras_value(default_value: Any, new_value: Any) -> Any:
 
 
 def _render_default_param_editor(scenario_base: str) -> None:
-    """Render the Default-mode market + agent parameter editor.
+    """DEPRECATED — dead code retained only to guard against re-import.
 
-    Shows one expander per top-level block in ``configs/<base>/Rule/players.yml``
-    (market coordinator first, then every investor).  Each block exposes
-    its ``extras`` fields as ``st.number_input`` widgets (numeric) or
-    ``st.text_input`` widgets (strings).  Edits are persisted under
-    ``st.session_state[default_extras_<base>][<block_key>][<field>]``.
+    Historically this function drove the Default-mode parameter editor,
+    but the actual live path is :func:`_render_default_config_page`
+    (which routes through :func:`_render_extras_grid` and
+    :func:`_show_default_edit_dialog` — both correctly propagate
+    ``disabled=is_rulellm`` so RuleLLM samples stay read-only).
 
-    When the user picks a Default engine, ``_launch_default_variant``
-    checks whether *anything* under that session key is non-empty and,
-    if so, materialises a rounds/params-adjusted bundle via
-    :func:`write_default_scenario_bundle`.
-
-    Silently no-ops if the scenario has no shipped ``Rule/players.yml``
-    (e.g. rare LLM-only scenarios) — Default launch still works, users
-    simply cannot tweak parameters without the reference variant.
+    The previous body did NOT propagate the RuleLLM lock (widgets had no
+    ``disabled=`` kwarg), so leaving it callable would silently break the
+    read-only teaching contract if anyone re-wired it.  It now raises to
+    make accidental reuse fail loudly.
     """
-    players = extract_default_players(
-        scenario_name=scenario_base, variant="Rule", project_root=PROJECT_ROOT
+    raise RuntimeError(
+        "_render_default_param_editor is deprecated dead code. Use "
+        "_render_default_config_page (which correctly propagates the "
+        "RuleLLM read-only lock through _render_extras_grid)."
     )
-    if not players:
-        return
-
-    session_key = _default_extras_session_key(scenario_base)
-    edits: dict[str, dict[str, Any]] = st.session_state.setdefault(
-        session_key, {}
-    )
-
-    with st.expander(
-        "Advanced parameters — market & agent extras", expanded=False
-    ):
-        st.caption(
-            "Fine-tune the shipped roster before launching.  Any edit "
-            "here produces a reproducible copy under "
-            "`configs/CUSTOMIZED_SIMULATION/Default-…/` — the shipped "
-            "YAML is never mutated."
-        )
-        if st.button(
-            "Reset to shipped defaults",
-            key=f"default_extras_reset_{scenario_base}",
-            help="Discard all edits below and relaunch with the shipped values.",
-        ):
-            st.session_state.pop(session_key, None)
-            # Clear each per-widget session slot too so the next rerun
-            # reflects the reset. Widget keys follow the naming below.
-            for block_key, block_info in players.items():
-                for extras_key in (block_info.get("extras") or {}):
-                    st.session_state.pop(
-                        f"defx_{scenario_base}_{block_key}_{extras_key}",
-                        None,
-                    )
-            st.rerun()
-
-        for block_key, block_info in players.items():
-            extras = block_info.get("extras") or {}
-            if not extras:
-                continue
-            is_market = block_key == next(iter(players))
-            override_slot = (
-                edits.setdefault("__market__", {})
-                if is_market
-                else edits.setdefault(block_key, {})
-            )
-            role_tag = (
-                "market coordinator"
-                if is_market
-                else f"{block_info.get('num_instances', 1)} instance"
-                + ("s" if int(block_info.get("num_instances", 1)) > 1 else "")
-            )
-            label = f"**{block_info.get('name') or block_key}**  · {role_tag}"
-            st.markdown(label)
-
-            cols_per_row = 3
-            keys = list(extras.keys())
-            for row_start in range(0, len(keys), cols_per_row):
-                row_keys = keys[row_start : row_start + cols_per_row]
-                cols = st.columns(len(row_keys))
-                for col, extras_key in zip(cols, row_keys):
-                    with col:
-                        default_val = extras[extras_key]
-                        current_val = override_slot.get(extras_key, default_val)
-                        widget_key = (
-                            f"defx_{scenario_base}_{block_key}_{extras_key}"
-                        )
-                        pretty = extras_key.replace("_", " ").title()
-                        # bool subclasses int -> check bool first.
-                        if isinstance(default_val, bool):
-                            new_val = st.checkbox(
-                                pretty,
-                                value=bool(current_val),
-                                key=widget_key,
-                                help=f"Default: {default_val}",
-                            )
-                        elif isinstance(default_val, (int, float)):
-                            new_val = st.number_input(
-                                pretty,
-                                value=(
-                                    float(current_val)
-                                    if isinstance(default_val, float)
-                                    else int(current_val)
-                                ),
-                                format=(
-                                    "%.6g"
-                                    if isinstance(default_val, float)
-                                    else "%d"
-                                ),
-                                key=widget_key,
-                                help=f"Default: {default_val}",
-                            )
-                        else:
-                            new_val = st.text_input(
-                                pretty,
-                                value=str(current_val),
-                                key=widget_key,
-                                help=f"Default: {default_val!r}",
-                            )
-                        # Only persist a slot when the value actually
-                        # deviates from the shipped default — keeps the
-                        # override dict tight and lets the launcher
-                        # short-circuit to zero-copy when nothing changed.
-                        coerced = _coerce_extras_value(default_val, new_val)
-                        if coerced != default_val:
-                            override_slot[extras_key] = coerced
-                        else:
-                            override_slot.pop(extras_key, None)
-
-            # Prune empty per-block dicts so the launcher can detect a
-            # fully-reset override state with a truthiness check.
-            if not override_slot:
-                if is_market:
-                    edits.pop("__market__", None)
-                else:
-                    edits.pop(block_key, None)
-
-        # Persist back the pruned dict.
-        st.session_state[session_key] = edits
 
 
 def render_variant_choice() -> None:
@@ -524,6 +406,24 @@ def render_variant_choice() -> None:
             st.markdown("**Stage 2.** Default or customize")
         st.markdown("---")
         if st.button("← Back", width="stretch"):
+            # Purge scenario-scoped ephemeral state before returning to
+            # Stage 1.  Without this cleanup, revisiting a different
+            # scenario in the same session leaves stale ``variant_rounds_*``
+            # / ``default_extras_*`` widget keys behind — the next scenario
+            # then shows the previous one's rounds/extras until the user
+            # manually re-edits, and any launch keeps writing to the
+            # stale bundle.  We deliberately preserve mode/project/team
+            # keys and the workflow_stage transition below.
+            _outgoing_base = st.session_state.get("selected_scenario_base", "")
+            if _outgoing_base:
+                _scenario_scoped_keys = [
+                    f"variant_rounds_{_outgoing_base}",
+                    f"default_extras_{_outgoing_base}",
+                    f"widget_customize_variant_rounds_{_outgoing_base}",
+                    f"dc_rounds_{_outgoing_base}",
+                ]
+                for _k in _scenario_scoped_keys:
+                    st.session_state.pop(_k, None)
             st.session_state.workflow_stage = "scenario_setup"
             st.session_state.pop("selected_scenario_base", None)
             st.rerun()
@@ -892,10 +792,20 @@ def render_variant_choice() -> None:
             # switch.  The label carries a live count so users know
             # what's inside without opening it.
             if player_agents:
-                total_instances = sum(a["instances"] for a in player_agents)
+                # NOTE: use a distinct local name so we don't shadow the
+                # imported ``total_instances`` helper (masim.interface.
+                # customized.roster.total_instances) inside this scope.
+                # Shadowing was harmless in practice — no other call sites
+                # here need the helper — but it made static readers assume
+                # ``total_instances`` was the function everywhere in the
+                # file and set a trap for future maintainers who add a
+                # helper call inside this branch.
+                total_instance_count = sum(
+                    a["instances"] for a in player_agents
+                )
                 _agents_label = (
                     f"Agents in this scenario — "
-                    f"{len(player_agents)} types · {total_instances} instances"
+                    f"{len(player_agents)} types · {total_instance_count} instances"
                 )
             else:
                 _agents_label = "Agents in this scenario"
@@ -903,7 +813,7 @@ def render_variant_choice() -> None:
                 if player_agents:
                     st.caption(
                         f"{len(player_agents)} agent types, "
-                        f"{total_instances} total instances — click any agent name "
+                        f"{total_instance_count} total instances — click any agent name "
                         "to view its design profile"
                     )
                     # Scoped CSS:
@@ -1238,7 +1148,9 @@ def _launch_default_variant(scenario_key: str) -> None:
     edited_rounds = st.session_state.get(f"variant_rounds_{base}")
 
     # Pick up any market/agent extras edits produced by the Default
-    # parameter editor (``_render_default_param_editor``).  Structure:
+    # parameter editor (see ``_render_default_config_page`` /
+    # ``_render_extras_grid`` — both correctly propagate ``disabled=is_rulellm``
+    # so RuleLLM samples stay read-only).  Structure:
     # ``{"__market__": {extras_key: value}, "<agent_key>": {...}}``.
     default_extras = st.session_state.get(
         _default_extras_session_key(base), {}
@@ -2779,6 +2691,24 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
     header_bits = [f"`{agent_type}`", f"Entry ID `{entry_id}`"]
     st.caption(" · ".join(header_bits))
 
+    # ---- Engine selector (initialised FIRST so the RuleLLM read-only lock is
+    # available to every widget below — including the label input directly
+    # underneath.  Historically the label was rendered before ``engine_key``
+    # was seeded, so on the first frame after opening a RuleLLM entry the
+    # label input was NOT disabled, letting users type into what should be
+    # a read-only teaching sample and breaking the lock contract.
+    engine_key = f"entry_{entry_id}_engine"
+    if engine_key not in st.session_state:
+        default_engine = (
+            entry.engine if entry.engine in selectable_engines else selectable_engines[0]
+        )
+        st.session_state[engine_key] = default_engine
+    elif st.session_state[engine_key] not in selectable_engines:
+        st.session_state[engine_key] = selectable_engines[0]
+
+    engine = st.session_state[engine_key]
+    is_rulellm = (engine == "RuleLLM")
+
     # ---- Optional label -------------------------------------------------
     label_key = f"entry_{entry_id}_label"
     if label_key not in st.session_state:
@@ -2792,24 +2722,15 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
             "**My Roster** list. Leave empty to fall back to the "
             "archetype's default name."
         ),
-        disabled=st.session_state.get(f"entry_{entry_id}_engine") == "RuleLLM",
+        disabled=is_rulellm,
     )
 
-    # ---- Engine selector ------------------------------------------------
-    engine_key = f"entry_{entry_id}_engine"
-    if engine_key not in st.session_state:
-        default_engine = (
-            entry.engine if entry.engine in selectable_engines else selectable_engines[0]
-        )
-        st.session_state[engine_key] = default_engine
-    elif st.session_state[engine_key] not in selectable_engines:
-        st.session_state[engine_key] = selectable_engines[0]
-
+    # ---- Engine selector buttons ---------------------------------------
     # Render engine picker as an explicit row of buttons so we can disable
     # specific engines (Rag) individually — segmented_control does not
     # support per-option disabled state.
     st.markdown("**Decision engine**")
-    current_engine = st.session_state[engine_key]
+    current_engine = engine
     engine_cols = st.columns(len(all_engines))
     for _idx, _eng in enumerate(all_engines):
         _is_disabled = _eng in _DISABLED_ENGINES
@@ -2832,8 +2753,6 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
                 st.session_state[engine_key] = _eng
                 st.rerun()
 
-    engine = st.session_state[engine_key]
-    is_rulellm = (engine == "RuleLLM")
     if is_rulellm:
         st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
 
@@ -2925,13 +2844,22 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
                 "RuleLLM is a read-only sample — nothing to reset."
                 if is_rulellm else
                 "Clear this entry's parameter overrides and revert to "
-                "handbook defaults. Engine and instance count are kept."
+                "handbook defaults. Engine, instance count, and preset "
+                "label are kept."
             ),
             disabled=is_rulellm,
         ):
             update_entry(roster, entry_id, params={})
             # Also drop every entry-scoped widget so their defaults
-            # repopulate from the handbook on the next open.
+            # repopulate from the handbook on the next open.  We
+            # deliberately DO NOT delete ``entry_{id}_label`` /
+            # ``entry_{id}_engine`` / ``entry_{id}_instances`` — those
+            # three carry cross-reset intent (the user's preset label
+            # and engine/instance picks) and the help text above
+            # explicitly promises they are preserved.  Silent LLM
+            # prompt widgets (``entry_{id}_llm_*``) DO get dropped
+            # because they are considered part of the "parameter
+            # overrides" a reset is expected to clear.
             for wkey in list(st.session_state.keys()):
                 if wkey.startswith(f"entry_{entry_id}_input_") or (
                     wkey.startswith(f"entry_{entry_id}_llm_")
@@ -3572,8 +3500,13 @@ def render_customize() -> None:
     if not scenario_base:
         # Defensive: a customize stage with no scenario locked is
         # nonsensical — send the user back to Stage 1.
+        # NOTE: ``st.rerun()`` does NOT abort the current run, so we MUST
+        # ``return`` immediately; otherwise everything below (state restore,
+        # legacy migration, sidebar render, etc.) would execute with an
+        # empty ``scenario_base`` and can pollute session state.
         st.session_state.workflow_stage = "scenario_setup"
         st.rerun()
+        return
 
     # --- Restore persisted selection state on fresh session entry ---
     # If a bundle exists but no roster has been loaded in memory (e.g.
@@ -4859,6 +4792,14 @@ def render_selected_market_strip() -> None:
         _render_market_chips(agents)
     with action:
         if st.button("Edit market", width="stretch"):
+            # The legacy flat ``selected_market_agents`` list is only a
+            # sidebar-chip cache; the authoritative source of truth for
+            # Stage 2 is the roster (``get_roster``).  We MUST clear the
+            # cache before jumping into Customize, otherwise the one-time
+            # legacy-flat-selection migration in ``render_customize``
+            # (lines ~3491-3540) fires again on top of an already-populated
+            # roster and double-counts every previously selected agent.
+            st.session_state["selected_market_agents"] = []
             st.session_state.workflow_stage = "customize"
             st.session_state.current_page = "Simulation"
             st.rerun()

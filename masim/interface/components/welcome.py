@@ -553,6 +553,14 @@ def render_welcome() -> None:
             st.session_state.project_name = ""
             st.session_state.project_slug = ""
             st.session_state.project_dir = ""
+            # Also clear ``project_id`` — otherwise a user who first
+            # created a project (which set project_id to a stable 8-hex),
+            # then bounced back here to try Experience mode, would carry
+            # the previous project's id into Experience.  Downstream
+            # bundle-name composition (``compose_bundle_name``) treats
+            # ``project_id`` as authoritative and would tag Experience
+            # runs with a phantom project owner in the folder name.
+            st.session_state.project_id = ""
             st.session_state.workflow_stage = "scenario_setup"
             st.rerun()
 
