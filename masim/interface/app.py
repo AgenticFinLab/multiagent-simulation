@@ -211,6 +211,8 @@ def render_simulation_page(scenario_name: str):
     # (rather than crammed into a narrow side column), so each button gets a
     # consistent, comfortable width.
     _render_action_buttons(scenario_name)
+    # "Check" button — opens a dialog with bundle provenance verification.
+    render_simulation_provenance(scenario_name)
 
     info = get_scenario_info(scenario_name)
 
@@ -230,13 +232,6 @@ def render_simulation_page(scenario_name: str):
     st.divider()
 
     render_selected_market_strip()
-
-    # Provenance banner: shows the exact configs/examples files this
-    # simulation will load AND a live verification badge indicating that
-    # the bundle-local retarget from shipped ``examples/{Scenario}/`` is
-    # consistent — so both the user and the code can confirm that edits
-    # made in Build a Project actually landed in the bundle.
-    render_simulation_provenance(scenario_name)
 
     if not info.get("exists"):
         st.error(f"Scenario configuration not found: {scenario_name}")

@@ -36,7 +36,6 @@ to match what :func:`~masim.format.order.validate_order` enforces.
 from __future__ import annotations
 
 import dataclasses
-import hashlib
 import importlib
 import importlib.util
 import logging
@@ -72,6 +71,9 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+_bundle_module_cache: dict[str, ModuleType] = {}
+
+
 def _load_module_by_file(module_path: str) -> ModuleType:
     """Load a module by resolving its dotted path to a file under project root.
 
@@ -80,9 +82,20 @@ def _load_module_by_file(module_path: str) -> ModuleType:
     are illegal in Python ``import`` syntax, so :func:`importlib.import_module`
     cannot resolve them.  We map the dotted path to
     ``<project_root>/<part1>/<part2>/…/<partN>.py`` and load it via
-    :func:`importlib.util.spec_from_file_location`, cached in :data:`sys.modules`
-    under a stable synthetic name derived from the file path (so re-loads of
-    the same bundle return the same module instance).
+    :func:`importlib.util.spec_from_file_location`.
+
+    **NOT registered in sys.modules** — this is intentional.  Ray workers are
+    separate processes that don't share sys.modules with the driver.  If the
+    module were registered there, cloudpickle would serialize classes by
+    reference (just storing module-name + class-name), and workers would crash
+    with ``ModuleNotFoundError`` when they tried to reimport.  By keeping the
+    module out of sys.modules, cloudpickle detects it as "dynamic" and pickles
+    classes **by value** (full bytecode), which workers can deserialize without
+    any special import hooks.
+
+    Cached in a private module-level dict keyed on ``file_path:mtime_ns`` so
+    repeated calls within the same process (e.g. multiple players sharing one
+    ``players.py``) reuse the same module object and honour Save-to-disk edits.
     """
     root = _project_root()
     parts = module_path.split(".")
@@ -95,26 +108,23 @@ def _load_module_by_file(module_path: str) -> ModuleType:
     # Include mtime in the cache key so that Save-to-disk edits (which rewrite
     # prompts.py under the same path) invalidate the cached module. Without
     # this, a UI Save + Launch cycle would keep serving the pre-edit prompts
-    # from sys.modules until the interpreter is restarted.
+    # until the interpreter is restarted.
     mtime_ns = file_path.stat().st_mtime_ns
     cache_key = f"{file_path}:{mtime_ns}"
-    digest = hashlib.md5(cache_key.encode("utf-8")).hexdigest()[:12]
-    unique_name = f"_masim_bundle_{digest}"
-    cached = sys.modules.get(unique_name)
+    cached = _bundle_module_cache.get(cache_key)
     if cached is not None:
         return cached
-    spec = importlib.util.spec_from_file_location(unique_name, str(file_path))
+    spec = importlib.util.spec_from_file_location(module_path, str(file_path))
     if spec is None or spec.loader is None:
         raise ImportError(
             f"Could not build import spec for {file_path} (module {module_path!r})"
         )
     module = importlib.util.module_from_spec(spec)
-    sys.modules[unique_name] = module
-    try:
-        spec.loader.exec_module(module)
-    except Exception:
-        sys.modules.pop(unique_name, None)
-        raise
+    # Set a readable __name__ matching the original dotted path (tracebacks)
+    # but do NOT register in sys.modules — keeps cloudpickle in by-value mode.
+    module.__name__ = module_path
+    spec.loader.exec_module(module)
+    _bundle_module_cache[cache_key] = module
     return module
 
 
