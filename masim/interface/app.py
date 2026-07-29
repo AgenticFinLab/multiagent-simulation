@@ -1246,14 +1246,6 @@ def _render_action_buttons(scenario_name: str):
                         shutil.rmtree(exp_path)
                         exp_path.mkdir(parents=True, exist_ok=True)
                         # Clear data-related caches after deletion
-                        from masim.interface.data_loader import (
-                            has_experiment_data,
-                            count_experiment_rounds,
-                        )
-                        from masim.interface.config_loader import (
-                            get_analysis_freshness,
-                            _dir_latest_mtime,
-                        )
                         has_experiment_data.clear()
                         count_experiment_rounds.clear()
                         get_analysis_freshness.clear()
