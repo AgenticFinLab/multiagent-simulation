@@ -1755,8 +1755,15 @@ def _build_llm_extras(
           llm:
             lm_name: <model id>
             generation_config: {temperature, max_tokens}
-            sys_message: "examples.CUSTOMIZED_SIMULATION.<cid>.prompts:<KEY>_SYS"
-            user_message: "examples.CUSTOMIZED_SIMULATION.<cid>.prompts:<KEY>_USER"
+            sys_message: "prompts:<KEY>_SYS"
+            user_message: "prompts:<KEY>_USER"
+
+    The short module path ``prompts`` (rather than a fully-qualified dotted
+    path) is used because bundle folder names contain hyphens (e.g.
+    ``MYTest-a4fc6d93-AnchoringEffect``) which are illegal in Python import
+    syntax.  At runtime, :func:`SimulationRunner._customized_bundle_import_root`
+    adds the bundle's ``Customized-agents/`` directory to ``sys.path``, so
+    ``importlib.import_module("prompts")`` resolves to the correct file.
     """
     lm_name = str(
         llm_overrides.get(_LLM_LM_KEY, "ark/doubao-seed-2-0-mini-260428")
@@ -1765,7 +1772,9 @@ def _build_llm_extras(
     max_tokens = int(llm_overrides.get(_LLM_TOKENS_KEY, 512))
 
     if has_prompts_module:
-        prompt_module = f"examples.CUSTOMIZED_SIMULATION.{cid}.prompts"
+        # Use short module path — the bundle's Customized-agents/ dir is on
+        # sys.path at runtime (see simulation_runner._customized_bundle_import_root).
+        prompt_module = "prompts"
         stem = _prompt_var_stem(archetype)
         sys_ref = f"{prompt_module}:{stem}_SYS"
         user_ref = f"{prompt_module}:{stem}_USER"

@@ -13,6 +13,7 @@ import base64
 import json
 import re
 import shutil
+import tempfile
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -85,6 +86,86 @@ def _slugify(name: str) -> str:
     slug = re.sub(r"\s+", "_", slug)        # whitespace → underscore
     slug = re.sub(r"_+", "_", slug)         # collapse repeats
     return slug.strip("_-")
+
+
+def _purge_all_data() -> dict[str, Any]:
+    """Delete ALL team data from the system. Returns a summary dict.
+
+    Targets:
+    - configs/CUSTOMIZED_SIMULATION/*
+    - examples/CUSTOMIZED_SIMULATION/*
+    - EXPERIMENT/* (all simulation results)
+    - configs/.team_registry
+    - configs/.deleted_teams/
+    - /tmp/masim_sim_slots/
+    """
+    summary: dict[str, Any] = {}
+
+    # 1. configs/CUSTOMIZED_SIMULATION
+    if _CUSTOMIZED_CONFIGS_DIR.exists():
+        entries = [e for e in _CUSTOMIZED_CONFIGS_DIR.iterdir() if e.is_dir()]
+        summary["configs_bundles"] = len(entries)
+        for entry in entries:
+            shutil.rmtree(entry, ignore_errors=True)
+        # Also remove any stale files (selection_state.json at top level, etc.)
+        for f in _CUSTOMIZED_CONFIGS_DIR.iterdir():
+            if f.is_file():
+                f.unlink(missing_ok=True)
+    else:
+        summary["configs_bundles"] = 0
+
+    # 2. examples/CUSTOMIZED_SIMULATION
+    examples_custom = _PROJECT_ROOT / "examples" / "CUSTOMIZED_SIMULATION"
+    if examples_custom.exists():
+        entries = [e for e in examples_custom.iterdir() if e.is_dir()]
+        summary["examples_bundles"] = len(entries)
+        shutil.rmtree(examples_custom, ignore_errors=True)
+        examples_custom.mkdir(parents=True, exist_ok=True)
+    else:
+        summary["examples_bundles"] = 0
+
+    # 3. EXPERIMENT/ (all simulation records)
+    experiment_dir = _PROJECT_ROOT / "EXPERIMENT"
+    if experiment_dir.exists():
+        # Calculate size for reporting
+        total_size = sum(
+            f.stat().st_size
+            for f in experiment_dir.rglob("*")
+            if f.is_file()
+        )
+        summary["experiment_size_mb"] = round(total_size / (1024 * 1024), 1)
+        shutil.rmtree(experiment_dir, ignore_errors=True)
+        experiment_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        summary["experiment_size_mb"] = 0
+
+    # 4. configs/.team_registry
+    registry = _PROJECT_ROOT / "configs" / ".team_registry"
+    if registry.exists():
+        teams = [
+            line.strip()
+            for line in registry.read_text().splitlines()
+            if line.strip()
+        ]
+        summary["teams_removed"] = len(teams)
+        registry.unlink()
+    else:
+        summary["teams_removed"] = 0
+
+    # 5. configs/.deleted_teams/ (quarantine area)
+    deleted_teams_dir = _PROJECT_ROOT / "configs" / ".deleted_teams"
+    if deleted_teams_dir.exists():
+        shutil.rmtree(deleted_teams_dir, ignore_errors=True)
+
+    # 6. /tmp/masim_sim_slots/ (simulation lock files)
+    sim_slots = Path(tempfile.gettempdir()) / "masim_sim_slots"
+    if sim_slots.exists():
+        shutil.rmtree(sim_slots, ignore_errors=True)
+
+    # 7. Clear Streamlit caches to avoid stale scenario discovery
+    st.cache_data.clear()
+
+    return summary
 
 
 @st.cache_data(show_spinner=False)
@@ -858,3 +939,35 @@ def render_welcome() -> None:
                 st.session_state["project_id"] = _read_project_id(slug_preview)
                 st.session_state.workflow_stage = "scenario_setup"
                 st.rerun()
+
+    # --- Admin: purge all team data ------------------------------------------
+    st.markdown("---")
+    with st.expander("⚠️ Admin: 清除所有数据", expanded=False):
+        st.markdown(
+            "删除**所有 team** 的配置、模拟结果和注册信息。此操作不可逆。"
+        )
+        confirm_input = st.text_input(
+            "输入 `DELETE ALL` 确认",
+            key="_admin_purge_confirm",
+            placeholder="DELETE ALL",
+        )
+        if st.button(
+            "🗑️ 确认清除全部数据",
+            key="_admin_purge_btn",
+            type="primary",
+            disabled=(confirm_input.strip() != "DELETE ALL"),
+        ):
+            with st.spinner("正在清除..."):
+                result = _purge_all_data()
+            st.success(
+                f"清除完成: "
+                f"{result.get('configs_bundles', 0)} 个配置 bundle, "
+                f"{result.get('examples_bundles', 0)} 个 example bundle, "
+                f"{result.get('experiment_size_mb', 0)} MB 实验数据, "
+                f"{result.get('teams_removed', 0)} 个 team 注册。"
+            )
+            # Reset current session team so user re-enters team gate
+            from .team_gate import TEAM_NAME_KEY
+            st.session_state[TEAM_NAME_KEY] = ""
+            st.session_state.workflow_stage = "welcome"
+            st.session_state.mode = ""

@@ -1982,19 +1982,15 @@ def _patch_llm_yaml_field(
 def _bundle_prompts_module_path(config_dir: "Path") -> str:
     """Derive the Python import path for the bundle's custom prompts.py.
 
-    Given config_dir like ``.../configs/CUSTOMIZED_SIMULATION/{bundle}/Default/{variant}/``,
-    the corresponding example module is
-    ``examples.CUSTOMIZED_SIMULATION.{bundle}.Default.{variant}.prompts``.
+    Returns the short module path ``"prompts"`` because bundle folder names
+    contain hyphens (e.g. ``MYTest-a4fc6d93-AnchoringEffect``) which are
+    illegal in Python import syntax.  At runtime,
+    :func:`SimulationRunner._customized_bundle_import_root` adds the
+    variant-level directory to ``sys.path``, so
+    ``importlib.import_module("prompts")`` resolves to the correct file
+    without needing a fully-qualified dotted path.
     """
-    from pathlib import Path
-    parts = Path(config_dir).parts
-    # Find 'CUSTOMIZED_SIMULATION' in parts and take everything after
-    try:
-        idx = parts.index("CUSTOMIZED_SIMULATION")
-    except ValueError:
-        return "prompts"
-    module_parts = ["examples", "CUSTOMIZED_SIMULATION"] + list(parts[idx + 1:])
-    return ".".join(module_parts) + ".prompts"
+    return "prompts"
 
 
 def _field_from_summary_table(markdown: str, field: str) -> str:
@@ -2751,7 +2747,9 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
                 help=_help,
             ):
                 st.session_state[engine_key] = _eng
-                st.rerun()
+                # Use fragment-scoped rerun so the dialog stays open.
+                # st.rerun() defaults to scope="app" which closes the dialog.
+                st.rerun(scope="fragment")
 
     if is_rulellm:
         st.info(RULELLM_SAMPLE_NOTICE, icon="📖")
@@ -2867,7 +2865,7 @@ def _render_entry_edit_panel(agent: dict[str, Any], entry_id: str) -> None:
                     del st.session_state[wkey]
             save_state_from_session(project_root=PROJECT_ROOT)
             st.toast("Parameters reset", icon="↺")
-            st.rerun()
+            st.rerun(scope="fragment")
     with btn_del:
         if st.button(
             "× Delete",
@@ -3232,7 +3230,11 @@ def _compose_help(spec: ParamSpec) -> str:
     return "\n\n".join(bits)
 
 
-def _render_agent_card(agent: dict[str, Any]) -> None:
+def _render_agent_card(
+    agent: dict[str, Any],
+    *,
+    scenario_provided_features: set[str] | None = None,
+) -> None:
     """Render one card in the agent grid.
 
     Roster-aware: multiple entries per archetype are surfaced as an
@@ -3248,6 +3250,10 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
       * **Configure…** — append a fresh entry *and* open the edit dialog
         so the user can pick engine / edit params / adjust instance count
         before the entry is committed to the roster.
+
+    When *scenario_provided_features* is given, the card checks the
+    agent's ``REQUIRES_FEATURES`` declaration and disables action buttons
+    if any required feature is missing from the current scenario.
     """
     agent_type = agent["agent_type"]
     roster = get_roster(st.session_state)
@@ -3255,6 +3261,14 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
     entry_count = len(entries_here)
     instance_count = sum(int(e.num_instances or 1) for e in entries_here)
     selected = entry_count > 0
+
+    # --- Compatibility check against scenario features ------------------
+    agent_required = set(required_features(agent_type))
+    if scenario_provided_features is not None and agent_required:
+        missing_features = agent_required - scenario_provided_features
+    else:
+        missing_features = set()
+    is_compatible = not missing_features
 
     # --- Image (browser-cached, full-column width) -------------------
     img_path = Path(agent["image_file"])
@@ -3298,6 +3312,17 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
         )
     st.markdown(badge, unsafe_allow_html=True)
 
+    # --- Incompatibility badge (shown only when features are missing) ---
+    if not is_compatible:
+        missing_list = ", ".join(sorted(missing_features))
+        incompat_badge = (
+            "<div style='text-align:center;margin:2px 0 4px;'>"
+            "<span style='display:inline-block;font-size:0.62rem;padding:2px 6px;"
+            "border-radius:8px;background:#fff3cd;color:#856404;'>"
+            f"Requires: {html.escape(missing_list)}</span></div>"
+        )
+        st.markdown(incompat_badge, unsafe_allow_html=True)
+
     # --- Agent name: clickable text button -> opens profile dialog ---
     if st.button(
         agent["display_name"],
@@ -3308,15 +3333,26 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
         _show_catalog_agent_profile_dialog(agent)
 
     # --- Primary action row: + Add (quick) and Configure… (opens dialog)
+    _incompat_help = (
+        f"This agent requires market features ({', '.join(sorted(missing_features))}) "
+        "that the current scenario does not provide. Choose a compatible "
+        "scenario or pick a different agent."
+    ) if not is_compatible else None
+
     if st.button(
         "+ Add",
         key=f"market_quick_add_{agent_type}",
         type="primary",
         width="stretch",
+        disabled=not is_compatible,
         help=(
-            "Append a new roster entry for this agent with default "
-            "settings (Rule engine, 1 instance). You can add the same "
-            "agent multiple times with different configurations."
+            _incompat_help
+            if not is_compatible
+            else (
+                "Append a new roster entry for this agent with default "
+                "settings (Rule engine, 1 instance). You can add the same "
+                "agent multiple times with different configurations."
+            )
         ),
     ):
         add_entry(roster, agent_type=agent_type, engine="Rule", num_instances=1)
@@ -3329,10 +3365,15 @@ def _render_agent_card(agent: dict[str, Any]) -> None:
         key=f"market_configure_{agent_type}",
         type="tertiary",
         width="stretch",
+        disabled=not is_compatible,
         help=(
-            "Create a new roster entry and immediately open its editor "
-            "to pick engine, adjust parameters, and (for LLM engines) "
-            "edit the prompt before committing."
+            _incompat_help
+            if not is_compatible
+            else (
+                "Create a new roster entry and immediately open its editor "
+                "to pick engine, adjust parameters, and (for LLM engines) "
+                "edit the prompt before committing."
+            )
         ),
     ):
         new_entry = add_entry(
@@ -3860,6 +3901,9 @@ def render_customize() -> None:
             by_category.setdefault(key, []).append(agent)
         active_categories = [c for c in _CATEGORY_ORDER if by_category.get(c)]
 
+        # Pre-compute the scenario's provided features for card-level gating.
+        _scenario_feats: set[str] = scenario_market_features(scenario_base)
+
         def _render_grid(agents: list[dict[str, Any]]) -> None:
             grid_columns_per_row = 6
             for start in range(0, len(agents), grid_columns_per_row):
@@ -3868,7 +3912,10 @@ def render_customize() -> None:
                     columns, agents[start : start + grid_columns_per_row]
                 ):
                     with column:
-                        _render_agent_card(agent)
+                        _render_agent_card(
+                            agent,
+                            scenario_provided_features=_scenario_feats,
+                        )
 
         if len(active_categories) <= 1:
             # Single-category result set (typical when the search box
@@ -3898,11 +3945,19 @@ def render_customize() -> None:
     # Inline compatibility warning: surface incompatible archetypes
     # before the user attempts to launch.
     compat_blocker = None
+    compat_bad_types: list[str] = []
     if selected_agents:
-        roster = [a["agent_type"] for a in selected_agents]
-        ok, reasons = is_scenario_compatible(scenario_base, roster)
+        roster_types = [a["agent_type"] for a in selected_agents]
+        ok, reasons = is_scenario_compatible(scenario_base, roster_types)
         if not ok:
             compat_blocker = reasons
+            # Identify which archetypes are actually incompatible so we
+            # can offer one-click removal.
+            provided = scenario_market_features(scenario_base)
+            for atype in roster_types:
+                needed = set(required_features(atype))
+                if needed and not needed.issubset(provided):
+                    compat_bad_types.append(atype)
 
     st.divider()
     if selected_agents:
@@ -3914,6 +3969,26 @@ def render_customize() -> None:
                 f"**{scenario_display_name(scenario_base)}**:\n\n"
                 + "\n".join(f"- {r}" for r in compat_blocker)
             )
+            # Offer one-click cleanup for the incompatible entries.
+            if compat_bad_types and st.button(
+                f"Remove {len(compat_bad_types)} incompatible agent(s)",
+                key="remove_incompatible_agents",
+                type="secondary",
+                help=(
+                    "Remove all roster entries whose required market "
+                    "features are not provided by the current scenario."
+                ),
+            ):
+                roster = get_roster(st.session_state)
+                for entry in list(roster):
+                    if entry.agent_type in compat_bad_types:
+                        remove_entry(roster, entry.id)
+                save_state_from_session(project_root=PROJECT_ROOT)
+                st.toast(
+                    f"Removed {len(compat_bad_types)} incompatible agent(s)",
+                    icon="🧹",
+                )
+                st.rerun()
 
     # ---- My Roster: full entry-level management ---------------------
     # Rendered even when empty so first-time users see the affordance
