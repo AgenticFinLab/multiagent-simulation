@@ -1320,7 +1320,33 @@ def render_default_config() -> None:
 
     st.divider()
 
-    # ── Rounds editor ─────────────────────────────────────────────────────
+    # ── Load player data ──────────────────────────────────────────────────
+    # Read from the *bundle*'s players.yml so the UI reflects on-disk edits
+    # persisted by the Save button in the edit dialog. The bundle is created
+    # by :func:`copy_default_scenario_bundle` above (idempotent).
+    players = extract_default_players(
+        scenario_name=base,
+        variant=variant,
+        project_root=PROJECT_ROOT,
+        players_yml_path=bundle.players_yaml,
+    )
+    if not players:
+        st.info("No configurable parameters for this scenario.")
+        _render_launch_button(scenario_key)
+        return
+
+    session_key = _default_extras_session_key(base)
+    edits: dict[str, dict[str, Any]] = st.session_state.setdefault(session_key, {})
+
+    # Separate market coordinator from investor agents
+    player_items = list(players.items())
+    market_key, market_info = player_items[0]
+    agent_items = player_items[1:]
+
+    # ── Market Environment (Rounds + market extras) ───────────────────────
+    st.subheader("Market Environment")
+
+    # Rounds — logically part of market/environment config
     info = get_scenario_info(scenario_key)
     try:
         shipped_rounds = int(info.get("total_rounds") or 0)
@@ -1347,35 +1373,9 @@ def render_default_config() -> None:
         )
         st.session_state[_rounds_key] = int(edited_rounds)
 
-    st.divider()
-
-    # ── Load player data ──────────────────────────────────────────────────
-    # Read from the *bundle*'s players.yml so the UI reflects on-disk edits
-    # persisted by the Save button in the edit dialog. The bundle is created
-    # by :func:`copy_default_scenario_bundle` above (idempotent).
-    players = extract_default_players(
-        scenario_name=base,
-        variant=variant,
-        project_root=PROJECT_ROOT,
-        players_yml_path=bundle.players_yaml,
-    )
-    if not players:
-        st.info("No configurable parameters for this scenario.")
-        _render_launch_button(scenario_key)
-        return
-
-    session_key = _default_extras_session_key(base)
-    edits: dict[str, dict[str, Any]] = st.session_state.setdefault(session_key, {})
-
-    # Separate market coordinator from investor agents
-    player_items = list(players.items())
-    market_key, market_info = player_items[0]
-    agent_items = player_items[1:]
-
-    # ── Market Parameters ─────────────────────────────────────────────────
+    # Market extras grid
     market_extras = market_info.get("extras") or {}
     if market_extras:
-        st.subheader("Market Environment")
         # Resolve market handbook for richer tooltips
         _market_arch = get_market_archetype(base)
         _market_specs: dict[str, ParamSpec] | None = None
@@ -1395,7 +1395,7 @@ def render_default_config() -> None:
         )
         if not market_override:
             edits.pop("__market__", None)
-        st.divider()
+    st.divider()
 
     # ── Agent Cards (icon + name + Edit dialog) ─────────────────────────
     is_llm_variant = variant in ("LLM", "RuleLLM", "Rag")
@@ -1832,6 +1832,12 @@ def _render_extras_grid(
                 spec = (param_specs or {}).get(extras_key)
                 if spec is not None:
                     _parts: list[str] = []
+                    # Advisory for initial-condition params
+                    if extras_key == "initial_cash":
+                        _parts.append(
+                            "⚠️ 初始资金为模拟起始条件，通常无需修改。"
+                            "仅在需要观察资金规模对行为的影响时调整。"
+                        )
                     if spec.description:
                         _parts.append(spec.description)
                     _facts: list[str] = []
@@ -1849,7 +1855,15 @@ def _render_extras_grid(
                         _parts.append("\n".join(f"- {f}" for f in _facts))
                     help_text = "\n\n".join(_parts) if _parts else f"Default: {default_val}"
                 else:
-                    help_text = f"Default: {default_val!r}" if isinstance(default_val, str) else f"Default: {default_val}"
+                    _fallback = f"Default: {default_val!r}" if isinstance(default_val, str) else f"Default: {default_val}"
+                    if extras_key == "initial_cash":
+                        help_text = (
+                            "⚠️ 初始资金为模拟起始条件，通常无需修改。"
+                            "仅在需要观察资金规模对行为的影响时调整。\n\n"
+                            + _fallback
+                        )
+                    else:
+                        help_text = _fallback
 
                 if isinstance(default_val, bool):
                     new_val = st.checkbox(
@@ -2608,12 +2622,56 @@ def _kebab_to_title(stem: str) -> str:
     return " ".join(part.capitalize() for part in stem.split("-"))
 
 
+# ─── Agent whitelist ──────────────────────────────────────────────────────
+# Only archetypes actually used by the 12 shipped scenarios are exposed in
+# the "Select & Setup Agents" grid.  Derived from configs/{Scenario}/
+# {Rule,LLM}/players.yml — the union of all agent block keys with
+# rule_/llm_ prefix stripped and underscores converted to hyphens.
+_SCENARIO_AGENT_STEMS: frozenset[str] = frozenset({
+    # HerdEffect
+    "momentum-investor", "contrarian-investor", "risk-averse-investor",
+    "aggressive-investor", "noise-trader",
+    # DispositionEffect
+    "disposition-investor", "rational-investor", "tax-aware-investor",
+    "index-holder", "institutional-investor", "loss-averse",
+    # OverconfidenceBias
+    "overconfident-trader", "self-attributor", "calibrated-trader",
+    # AnchoringEffect
+    "anchored-trader", "historical-anchor", "rational-updater",
+    "momentum-trader", "disposition-trader", "contrarian-trader",
+    "fundamental-analyst", "liquidity-provider",
+    # AssetBubble
+    "momentum-speculator", "rational-arbitrageur", "fundamental-investor",
+    "leveraged-buyer", "conservative-holder",
+    # MomentumEffect
+    "index-fund", "market-maker", "technical-trader", "fundamental-trader",
+    "trend-follower", "fundamental-anchor",
+    # FlashCrash2010
+    "hft-market-maker", "momentum-chaser", "stop-loss-trader",
+    # HerdingInformation
+    "cascade-follower", "reputation-herder", "independent-thinker",
+    "contrarian",
+    # DotComBubble
+    "new-economy-evangelist", "ipo-flipper", "momentum-follower",
+    "skeptical-value-investor", "short-seller",
+    # GFC2008
+    "mbs-originator", "leveraged-investor", "rating-agency",
+    "distressed-buyer", "regulator",
+    # GameStopShortSqueeze
+    "retail-coordinated", "short-seller-hf", "market-maker-gamma",
+    "institutional-value", "momentum-retail",
+    # SVBBankRun
+    "depositor", "social-media-influencer", "bank-manager", "bond-trader",
+})
+
+
 @st.cache_data(show_spinner=False)
 def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = None) -> list[dict[str, Any]]:
     """Load agent metadata and profiles from all domain directories + icons/.
 
     The canonical agent pool is the set of ``{domain}/*.md`` specs that
-    have a matching ``agent_images/icons/{domain}-<stem>.png`` icon.
+    have a matching ``agent_images/icons/{domain}-<stem>.png`` icon AND
+    are used by at least one of the 12 shipped scenarios.
     """
     raw_items: list[dict[str, Any]] = []
     # A handful of stems (e.g. ``distorting-relayer``) ship in BOTH the
@@ -2628,6 +2686,9 @@ def load_agent_catalog(_cache_signature: tuple[tuple[str, int], ...] | None = No
             continue
         for md_path in sorted(root.glob("*.md")):
             if md_path.stem in seen_types:
+                continue
+            # Only include archetypes used by the 12 shipped scenarios.
+            if md_path.stem not in _SCENARIO_AGENT_STEMS:
                 continue
             icon_name = f"{domain}-{md_path.stem}.png"
             if (ICON_ROOT / icon_name).exists():
@@ -3407,7 +3468,6 @@ def _render_entry_llm_extras(
     temp_key = f"entry_{entry_id}_llm_temp_{engine}"
     tok_key = f"entry_{entry_id}_llm_tokens_{engine}"
     sys_key = f"entry_{entry_id}_llm_sysprompt_{engine}"
-    usr_key = f"entry_{entry_id}_llm_userprompt_{engine}"
 
     lm_default = persisted.get("__llm_lm_name__", "ark/doubao-seed-2-0-mini-260428")
     temp_default = float(persisted.get("__llm_temperature__", 0.7))
@@ -3561,48 +3621,10 @@ def _render_entry_llm_extras(
             icon="\U0001f512",
         )
 
-    usr_placeholder = (
-        "No default per-round template is registered for this archetype "
-        "+ engine yet. Type a Python ``str.format`` template that will be "
-        "rendered every round with current market state injected. "
-        "Available placeholders (scenario-dependent) include: {round}, "
-        "{price}, {prev_price}, {fundamental}, {price_change}, "
-        "{deviation}, {cash}, {position}, {portfolio_value}."
-    )
-    usr_label = (
-        "User prompt template (default shown below — edit to customize)"
-        if has_shipped_user else
-        "User prompt template (no default registered — type your own)"
-    )
-    with st.expander(usr_label, expanded=True):
-        if has_shipped_user:
-            st.caption(
-                "This is the actual per-round template shipped with the "
-                "example codebase. The player class fills in placeholders "
-                "such as `{round}`, `{price}`, `{cash}` every tick. Edit "
-                "to override; the bundle writer will save your version."
-            )
-        else:
-            st.caption(
-                "No default per-round template has been registered for "
-                "this archetype + engine combination yet. Type your own "
-                "below using `str.format` placeholders."
-            )
-        edited["__llm_user_prompt__"] = st.text_area(
-            "User prompt template",
-            value=usr_default,
-            placeholder=usr_placeholder,
-            height=300,
-            key=usr_key,
-            label_visibility="collapsed",
-            help=(
-                "Python `str.format` template sent as the user message on "
-                "every round. Unknown placeholders raise KeyError at "
-                "runtime, so only use the ones the scenario provides. "
-                "**Config key:** `llm.user_message`."
-            ),
-            disabled=disabled,
-        )
+    # User prompt template — not exposed in the UI. It's a runtime format
+    # template that injects market state placeholders each round; editing it
+    # risks KeyError at runtime. Silently preserve the existing value.
+    edited["__llm_user_prompt__"] = usr_default
 
 
 def _compose_help(spec: ParamSpec) -> str:
@@ -3613,10 +3635,18 @@ def _compose_help(spec: ParamSpec) -> str:
     as Markdown, so we use Markdown bullets for legibility.
     """
     bits: list[str] = []
-    # Description first — the bulk of the explanation.  Skip when the
-    # display label already shows the description (schema-1 handbooks),
-    # to avoid duplication.
-    if spec.description and spec.description != spec.display_label:
+    # Special advisory for initial-condition params that are shown but
+    # should rarely be changed.
+    if spec.symbol == "initial_cash":
+        bits.append(
+            "⚠️ 初始资金为模拟起始条件，通常无需修改。"
+            "仅在需要观察资金规模对行为的影响时调整。"
+        )
+    # Always show description — it's the primary explanation of what the
+    # parameter does.  Even when display_label already equals description
+    # (schema-1 handbooks without a Name column), the tooltip is hidden
+    # behind the "?" icon so repeating it provides useful context.
+    if spec.description:
         bits.append(spec.description)
     facts: list[str] = []
     if spec.default:
@@ -4040,39 +4070,13 @@ def render_customize() -> None:
         feats = scenario_market_features(scenario_base)
         feats_text = ", ".join(sorted(feats)) if feats else "standard"
 
-        # Editable rounds — mirrors the widget on the variant_choice page
-        # so the user can also adjust the round count from inside the
-        # Customize flow.  Persisted under the same session key
-        # (``variant_rounds_<base>``) so ``_write_customized_bundle``
-        # picks it up unchanged.
-        _rounds_key = f"variant_rounds_{scenario_base}"
-        _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
-        _rounds_now = int(
-            st.session_state.get(_rounds_key, _rounds_default)
+        st.markdown(
+            f"<div class='scenario-confirm-chip' style='margin-top:14px'>"
+            f"🔒 {html.escape(scenario_display_name(scenario_base))} · "
+            f"{html.escape(feats_text)}"
+            f"</div>",
+            unsafe_allow_html=True,
         )
-        chip_col, num_col = st.columns([3, 1])
-        with chip_col:
-            st.markdown(
-                f"<div class='scenario-confirm-chip' style='margin-top:14px'>"
-                f"🔒 {html.escape(scenario_display_name(scenario_base))} · "
-                f"{html.escape(feats_text)}"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
-        with num_col:
-            edited_rounds = st.number_input(
-                "Rounds",
-                min_value=1,
-                max_value=100000,
-                value=_rounds_now,
-                step=1,
-                key=f"widget_customize_{_rounds_key}",
-                help=(
-                    f"Number of simulation rounds. Shipped default: "
-                    f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}."
-                ),
-            )
-            st.session_state[_rounds_key] = int(edited_rounds)
 
     # Page-level read/write contract summary (mirrors the per-dialog
     # provenance banner rendered inside _render_entry_edit_panel).
@@ -4413,23 +4417,40 @@ def render_customize() -> None:
     st.markdown("---")
     _render_my_roster(catalog)
 
-    # --- Market Parameters Editor ---
+    # --- Market Environment (Rounds + market extras) ---
     bundle_name = st.session_state.get("customized_bundle_name", "")
     if bundle_name:
-        with st.expander("Market Parameters", expanded=False):
-            st.caption(
-                "Edit the market coordinator's parameters. These control "
-                "price dynamics, impact coefficients, and noise in the "
-                "simulation."
+        with st.expander("Market Environment", expanded=True):
+            # Rounds editor
+            _rounds_key = f"variant_rounds_{scenario_base}"
+            _rounds_default = shipped_rounds if shipped_rounds > 0 else 1
+            _rounds_now = int(
+                st.session_state.get(_rounds_key, _rounds_default)
             )
-            # Load defaults from the bundle's Rule/players.yml.
+            rounds_col, _ = st.columns([2, 4])
+            with rounds_col:
+                edited_rounds = st.number_input(
+                    "Total Rounds",
+                    min_value=1,
+                    max_value=100000,
+                    value=_rounds_now,
+                    step=1,
+                    key=f"widget_customize_{_rounds_key}",
+                    help=(
+                        f"Number of simulation rounds. Shipped default: "
+                        f"{shipped_rounds if shipped_rounds > 0 else 'n/a'}."
+                    ),
+                )
+                st.session_state[_rounds_key] = int(edited_rounds)
+
+            # Market extras grid
             default_extras = extract_market_extras(
                 bundle_name=bundle_name,
                 scenario_name=scenario_base,
                 project_root=PROJECT_ROOT,
             )
             if default_extras:
-                # Initialize persisted overrides from session state or disk.
+                st.markdown("")
                 persisted_market = st.session_state.setdefault(
                     "customized_market_extras", {}
                 )
@@ -4445,7 +4466,6 @@ def render_customize() -> None:
                             current_val = persisted_market.get(
                                 param_key, default_val
                             )
-                            # Render as float input.
                             label = param_key.replace("_", " ").title()
                             widget_key = f"market_extra_{param_key}"
                             new_val = st.number_input(
@@ -4457,12 +4477,9 @@ def render_customize() -> None:
                             )
                             edited_market[param_key] = new_val
 
-                # Update session state if user changed anything.
                 if edited_market != persisted_market:
                     st.session_state["customized_market_extras"] = edited_market
                     save_state_from_session(project_root=PROJECT_ROOT)
-            else:
-                st.info("No editable market parameters found for this scenario.")
 
     # --- Config preview: dry-run the bundle write to show the exact YAML
     # the user is about to launch.  Uses the same code path as the actual

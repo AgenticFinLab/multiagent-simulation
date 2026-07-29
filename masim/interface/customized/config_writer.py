@@ -1366,17 +1366,17 @@ def extract_market_extras(
     market_block = data[market_key]
     extras = (market_block.get("config") or {}).get("extras") or {}
 
-    # Filter out non-editable infrastructure keys.
-    _INFRA_KEYS = {"record_path", "custom_state_hot_limit"}
+    # Filter out infrastructure / initial-condition keys.
+    _INFRA_KEYS = {"record_path", "custom_state_hot_limit", "initial_position"}
     return {k: v for k, v in extras.items() if k not in _INFRA_KEYS}
 
 
-# Infrastructure keys hidden from user-facing extras editors.  These are
-# owned by the runner (record path, custom-state hot limit) rather than by
-# the agent's behavioural parameterisation, so surfacing them would only
-# encourage users to shoot themselves in the foot.
+# Infrastructure and initial-condition keys hidden from user-facing extras
+# editors.  Infrastructure keys (record_path, custom_state_hot_limit) are
+# owned by the runner.  initial_position is a portfolio starting state with
+# no behavioural impact — always hidden.
 _INFRA_EXTRAS_KEYS = frozenset(
-    {"record_path", "custom_state_hot_limit"}
+    {"record_path", "custom_state_hot_limit", "initial_position"}
 )
 
 
