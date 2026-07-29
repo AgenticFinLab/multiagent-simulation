@@ -8,6 +8,9 @@ enableXsrfProtection = true
 maxUploadSize = 50
 # Reduce WebSocket reconnect churn under load
 enableWebsocketCompression = true
+# Auto-destroy session 5 min after browser disconnect (tab close / network drop).
+# This frees the Nginx connection slot so other users can connect.
+disconnectedSessionTTL = 300
 
 [browser]
 gatherUsageStats = false
