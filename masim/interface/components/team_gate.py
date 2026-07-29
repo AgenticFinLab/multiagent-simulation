@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import re
 import shutil
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -570,3 +571,117 @@ def _render_team_delete_panel(existing: list[str]) -> None:
                             "_team_delete_confirm_input", None
                         )
                         st.rerun()
+
+
+def _render_purge_all_panel() -> None:
+    """Admin panel to purge ALL team data at once.
+
+    Placed on the team gate page (visible without logging in) so the
+    admin can wipe everything without needing to select a team first.
+    Two-step confirmation: user must type ``DELETE ALL`` before the
+    button activates.
+    """
+    st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
+    with st.expander("⚠️ 清除所有团队数据 (Purge ALL data)", expanded=False):
+        st.caption(
+            "删除**所有团队**的配置 bundle、模拟结果和注册信息。"
+            "此操作不可逆——数据将被直接删除（不走隔离区）。"
+        )
+        confirm_input = st.text_input(
+            "输入 DELETE ALL 确认",
+            key="_admin_purge_confirm",
+            placeholder="DELETE ALL",
+        )
+        if st.button(
+            "🗑️ 确认清除全部数据",
+            key="_admin_purge_btn",
+            type="primary",
+            disabled=(confirm_input.strip() != "DELETE ALL"),
+        ):
+            with st.spinner("正在清除..."):
+                result = _purge_all_team_data()
+            st.success(
+                f"✅ 清除完成: "
+                f"{result.get('configs_bundles', 0)} 个配置 bundle, "
+                f"{result.get('examples_bundles', 0)} 个 example bundle, "
+                f"{result.get('experiment_size_mb', 0)} MB 实验数据, "
+                f"{result.get('teams_removed', 0)} 个 team 注册。"
+            )
+            # Clear confirmation input
+            st.session_state.pop("_admin_purge_confirm", None)
+
+
+def _purge_all_team_data() -> dict:
+    """Delete ALL team runtime data. Returns a summary dict.
+
+    Targets (all under _PROJECT_ROOT):
+    - configs/CUSTOMIZED_SIMULATION/*
+    - examples/CUSTOMIZED_SIMULATION/*
+    - EXPERIMENT/* (all simulation results)
+    - configs/.team_registry
+    - configs/.deleted_teams/
+    - /tmp/masim_sim_slots/
+    """
+    summary: dict = {}
+
+    # 1. configs/CUSTOMIZED_SIMULATION
+    if _CUSTOMIZED_DIR.exists():
+        entries = [e for e in _CUSTOMIZED_DIR.iterdir() if e.is_dir()]
+        summary["configs_bundles"] = len(entries)
+        for entry in entries:
+            shutil.rmtree(entry, ignore_errors=True)
+        # Remove any stray files at the top level
+        for f in _CUSTOMIZED_DIR.iterdir():
+            if f.is_file():
+                f.unlink(missing_ok=True)
+    else:
+        summary["configs_bundles"] = 0
+
+    # 2. examples/CUSTOMIZED_SIMULATION
+    if _EXAMPLES_CUSTOMIZED_DIR.exists():
+        entries = [e for e in _EXAMPLES_CUSTOMIZED_DIR.iterdir() if e.is_dir()]
+        summary["examples_bundles"] = len(entries)
+        shutil.rmtree(_EXAMPLES_CUSTOMIZED_DIR, ignore_errors=True)
+        _EXAMPLES_CUSTOMIZED_DIR.mkdir(parents=True, exist_ok=True)
+    else:
+        summary["examples_bundles"] = 0
+
+    # 3. EXPERIMENT/ (all simulation records)
+    experiment_dir = _PROJECT_ROOT / "EXPERIMENT"
+    if experiment_dir.exists():
+        total_size = sum(
+            f.stat().st_size
+            for f in experiment_dir.rglob("*")
+            if f.is_file()
+        )
+        summary["experiment_size_mb"] = round(total_size / (1024 * 1024), 1)
+        shutil.rmtree(experiment_dir, ignore_errors=True)
+        experiment_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        summary["experiment_size_mb"] = 0
+
+    # 4. configs/.team_registry
+    if _TEAM_REGISTRY.exists():
+        teams = [
+            line.strip()
+            for line in _TEAM_REGISTRY.read_text().splitlines()
+            if line.strip()
+        ]
+        summary["teams_removed"] = len(teams)
+        _TEAM_REGISTRY.unlink()
+    else:
+        summary["teams_removed"] = 0
+
+    # 5. configs/.deleted_teams/ (quarantine area from prior individual deletes)
+    if _DELETED_TEAMS_DIR.exists():
+        shutil.rmtree(_DELETED_TEAMS_DIR, ignore_errors=True)
+
+    # 6. /tmp/masim_sim_slots/ (simulation lock files)
+    sim_slots = Path(tempfile.gettempdir()) / "masim_sim_slots"
+    if sim_slots.exists():
+        shutil.rmtree(sim_slots, ignore_errors=True)
+
+    # 7. Clear Streamlit caches to avoid stale scenario/team discovery
+    st.cache_data.clear()
+
+    return summary
