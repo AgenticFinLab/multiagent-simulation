@@ -147,7 +147,8 @@ def is_visible_to_team(project_slug: str, viewer_team: str) -> bool:
     Visibility rules:
 
     * Bundle owned by ``viewer_team``  → visible.
-    * Legacy bundle (no team prefix)   → visible (shared demo).
+    * Legacy bundle (no team prefix)   → hidden when viewer has a team,
+      visible only in unauthenticated / CLI context.
     * Bundle owned by another team     → hidden.
 
     An empty ``viewer_team`` (should not happen in production because
@@ -156,10 +157,10 @@ def is_visible_to_team(project_slug: str, viewer_team: str) -> bool:
     when this helper is exercised outside a Streamlit session.
     """
     owner = owning_team_of(project_slug)
-    if owner is None:
-        return True  # legacy — visible to everyone
     if not viewer_team:
         return True  # unauthenticated / CLI context — no filtering
+    if owner is None:
+        return False  # legacy — hidden when viewer has a team
     return owner == viewer_team
 
 

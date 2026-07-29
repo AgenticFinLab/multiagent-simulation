@@ -704,15 +704,20 @@ def render_welcome() -> None:
                         for idx, proj in enumerate(row_slice):
                             with chip_cols[idx]:
                                 pid = proj.get("project_id") or ""
+                                team = proj.get("team") or ""
                                 # Markdown label: bold name + inline-code
                                 # id gives clear visual hierarchy between
                                 # the human-readable label and the machine
                                 # identifier. CSS above strips the code
                                 # tag's default background and monospaces
                                 # the id in a subtle gray.
+                                # When team is present, append @team to
+                                # disambiguate same-slug projects owned by
+                                # different teams (or legacy shared ones).
+                                team_suffix = f" @{team}" if team else ""
                                 chip_label = (
-                                    f"**{proj['display_name']}** \u2009`{pid}`"
-                                    if pid else f"**{proj['display_name']}**"
+                                    f"**{proj['display_name']}** \u2009`{pid}{team_suffix}`"
+                                    if pid else f"**{proj['display_name']}{team_suffix}**"
                                 )
                                 this_key = f"{proj['slug']}::{pid}::{proj.get('team') or ''}"
                                 is_selected = (selected_key == this_key)
@@ -722,8 +727,9 @@ def render_welcome() -> None:
                                     type="primary" if is_selected else "secondary",
                                     help=(
                                         f"Reuse '{proj['display_name']}' "
-                                        f"(examples/{proj['slug']}/). "
-                                        "Click again to deselect."
+                                        f"(examples/{proj['slug']}/)."
+                                        f"{' Owner: ' + team + '.' if team else ' Shared (legacy).'}"
+                                        " Click again to deselect."
                                     ),
                                     width="stretch",
                                 ):
