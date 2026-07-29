@@ -3774,6 +3774,17 @@ def render_customize() -> None:
             or query in agent["scenarios"].lower()
         ]
 
+        # Hide agents whose REQUIRES_FEATURES aren't satisfied by the
+        # current scenario.  These specialist agents (designed for specific
+        # coordinator types like DeFi/FX/credit) cannot function in the
+        # selected scenario and would only confuse users.
+        _provided = scenario_market_features(scenario_base)
+        filtered = [
+            agent
+            for agent in filtered
+            if set(required_features(agent["agent_type"])).issubset(_provided)
+        ]
+
         if not filtered:
             st.info("No agents match this search.")
             return
@@ -3942,53 +3953,30 @@ def render_customize() -> None:
     st.session_state.selected_market_agents = selected
     selected_agents = [a for a in catalog if a["agent_type"] in set(selected)]
 
-    # Inline compatibility warning: surface incompatible archetypes
-    # before the user attempts to launch.
-    compat_blocker = None
-    compat_bad_types: list[str] = []
+    # Auto-remove incompatible agents from the roster.  Since the grid
+    # already hides specialist agents, any incompatible entries are leftovers
+    # from a previous session or a scenario switch — silently clean them up.
     if selected_agents:
         roster_types = [a["agent_type"] for a in selected_agents]
-        ok, reasons = is_scenario_compatible(scenario_base, roster_types)
+        ok, _reasons = is_scenario_compatible(scenario_base, roster_types)
         if not ok:
-            compat_blocker = reasons
-            # Identify which archetypes are actually incompatible so we
-            # can offer one-click removal.
             provided = scenario_market_features(scenario_base)
-            for atype in roster_types:
-                needed = set(required_features(atype))
-                if needed and not needed.issubset(provided):
-                    compat_bad_types.append(atype)
+            bad_types = [
+                atype for atype in roster_types
+                if not set(required_features(atype)).issubset(provided)
+            ]
+            if bad_types:
+                roster = get_roster(st.session_state)
+                for entry in list(roster):
+                    if entry.agent_type in bad_types:
+                        remove_entry(roster, entry.id)
+                save_state_from_session(project_root=PROJECT_ROOT)
+                st.rerun()
 
     st.divider()
     if selected_agents:
         st.markdown("**Current market**")
         _render_market_chips(selected_agents)
-        if compat_blocker:
-            st.error(
-                "The current market is incompatible with "
-                f"**{scenario_display_name(scenario_base)}**:\n\n"
-                + "\n".join(f"- {r}" for r in compat_blocker)
-            )
-            # Offer one-click cleanup for the incompatible entries.
-            if compat_bad_types and st.button(
-                f"Remove {len(compat_bad_types)} incompatible agent(s)",
-                key="remove_incompatible_agents",
-                type="secondary",
-                help=(
-                    "Remove all roster entries whose required market "
-                    "features are not provided by the current scenario."
-                ),
-            ):
-                roster = get_roster(st.session_state)
-                for entry in list(roster):
-                    if entry.agent_type in compat_bad_types:
-                        remove_entry(roster, entry.id)
-                save_state_from_session(project_root=PROJECT_ROOT)
-                st.toast(
-                    f"Removed {len(compat_bad_types)} incompatible agent(s)",
-                    icon="🧹",
-                )
-                st.rerun()
 
     # ---- My Roster: full entry-level management ---------------------
     # Rendered even when empty so first-time users see the affordance
@@ -4080,7 +4068,7 @@ def render_customize() -> None:
             "Launch simulation →",
             type="primary",
             width="stretch",
-            disabled=not selected or compat_blocker is not None,
+            disabled=not selected,
             key="customize_launch",
         ):
             target = _write_customized_bundle(
