@@ -14,6 +14,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/masim/multiagent-simulation
+EnvironmentFile=-/opt/masim/masim.env
 Environment="PATH=/opt/masim/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 Environment="PYTHONPATH=/opt/masim/multiagent-simulation"
 Environment="STREAMLIT_SERVER_PORT=%i"

@@ -1309,7 +1309,7 @@ def _start_simulation(scenario_name: str, info: dict):
     import os
     import tempfile
 
-    MAX_CONCURRENT_SIMS = 4
+    MAX_CONCURRENT_SIMS = int(os.environ.get("MASIM_MAX_CONCURRENT_SIMS", 4))
     _SIM_SLOT_DIR = Path(tempfile.gettempdir()) / "masim_sim_slots"
     _SIM_SLOT_DIR.mkdir(exist_ok=True)
 
