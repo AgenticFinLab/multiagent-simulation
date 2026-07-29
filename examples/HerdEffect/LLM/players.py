@@ -49,7 +49,15 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 # Shared utility for parsing LLM responses with analysis/decision format
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+# plus the robust retry/backoff/fallback wrapper.  ``robust_llm_call`` is
+# the single source of truth for LLM invocation across MASIM — it does
+# error classification, exponential backoff, and returns a synthetic
+# fallback-hold decision (``_fallback=True``) when all retries are
+# exhausted, so a single agent's LLM outage can never crash the sim.
+from masim.utils.llm_utils import (
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+)
 
 logger = logging.getLogger("HerdEffectLLM")
 
@@ -345,26 +353,51 @@ Respond with ONLY valid JSON:
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        max_retries = 3
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input]).outputs[0]
-            try:
-                decision = self._parse_llm_response(infer_output.response)
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < max_retries - 1:
-                    logger.debug(
-                        f"[{self.identity}] LLM parse failed, retrying..."
-                    )  # pylint: disable=logging-fstring-interpolation
+        # Route through robust_llm_call: 5 retries with exponential
+        # backoff, transient-vs-permanent error discrimination, and
+        # a synthetic fallback-hold decision on retry exhaustion.
+        # This replaces the legacy hand-rolled 3-attempt loop that had
+        # ``llm_client.run(...)`` outside the try/except — any API-side
+        # transient (429/500/timeout) would previously bubble out of
+        # ``decide()`` and crash the entire simulation.
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=self._parse_llm_response,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
+        # When retries are exhausted, robust_llm_call returns a decision
+        # marked ``_fallback=True``.  Emit a noop bid for this round so
+        # metrics/analysis can distinguish it from a real hold decision,
+        # and let subsequent rounds try again once the LLM recovers.
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop (skip trade this round).",
+                self.identity,
+                round_num,
             )
+            noop_bid_price = float(market_data["price"])
+            noop_order = {
+                "bid_price": noop_bid_price,
+                "quantity": 0.0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "llm_fallback_noop",
+                "analysis": "",
+                "cash": self.state.custom_state["cash"],
+                "position": self.state.custom_state["position"],
+                "_skipped_reason": "llm_fallback_noop",
+            }
+            return {
+                **noop_order,
+                "outbound_messages": [
+                    {"payload": noop_order, "content_type": "investor_bid"}
+                ],
+            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])

@@ -44,7 +44,11 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import (
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+    validate_bid_qty_decision,
+)
 
 logger = logging.getLogger("DispositionEffectLLM")
 
@@ -310,30 +314,38 @@ class LLMInvestor(GeneralPlayer):
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        max_retries = llm_config["max_retries"]
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
-            try:
-                decision = self._parse_llm_response(infer_output.outputs[0].response)
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"invalid action: {decision['action']}")
-                if float(decision["bid_price"]) <= 0:
-                    raise ValueError(f"invalid bid_price: {decision['bid_price']}")
-                if not str(decision["reasoning"]).strip():
-                    raise ValueError("missing reasoning")
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < max_retries - 1:
-                    logger.debug("[%s] LLM parse failed, retrying...", self.identity)
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=validate_bid_qty_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                round_num,
             )
+            fallback_order = {
+                "action": "hold",
+                "bid_price": float(market_data["price"]),
+                "quantity": 0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "llm_fallback_noop",
+                "analysis": "",
+            }
+            return {
+                **fallback_order,
+                "outbound_messages": [
+                    {"payload": fallback_order, "content_type": "investor_bid"}
+                ],
+            }
 
         # The market broadcast is the execution price.  The LLM-proposed price
         # is validated above for schema compliance but cannot mint cash through

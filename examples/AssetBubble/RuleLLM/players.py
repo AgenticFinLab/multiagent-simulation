@@ -61,7 +61,7 @@ from lmbase.inference.base import InferInput
 # Add examples directory to path for shared utilities
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 
 logger = logging.getLogger("AssetBubbleRuleLLM")
 
@@ -430,43 +430,42 @@ Quantity must never be negative. Use action="sell" with a positive quantity for 
         llm_config = self.config.extras["llm"]
         system_prompt = load_prompt(llm_config["sys_message"])
 
-        max_retries = 3
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            try:
-                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                infer_output = llm_client.run([infer_input]).outputs[0]
-                decision = self._parse_llm_response(_infer_response_text(infer_output))
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM call/parse failed (attempt %d/%d), retrying: %s",
-                        self.identity,
-                        attempt + 1,
-                        max_retries,
-                        exc,
-                    )
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            if last_error is not None and is_retryable_llm_error(last_error):
-                counts = self.state.custom_state.setdefault("llm_fallback_counts", {})
-                counts["retryable_api_error"] = (
-                    int(counts.get("retryable_api_error", 0)) + 1
-                )
-                decision = {
-                    "action": "hold",
-                    "bid_price": market_data["price"],
-                    "quantity": 0.0,
-                    "reasoning": "LLM unavailable after retries; holding.",
-                    "analysis": f"Fallback after retryable LLM error: {last_error}",
-                }
-            else:
-                raise RuntimeError(
-                    f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
-                )
+        if decision.get("_fallback"):
+            counts = self.state.custom_state.setdefault("llm_fallback_counts", {})
+            counts["retryable_api_error"] = (
+                int(counts.get("retryable_api_error", 0)) + 1
+            )
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                round_num,
+            )
+            order = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "llm_fallback_noop",
+                "analysis": "",
+                "cash": self.state.custom_state["cash"],
+                "position": self.state.custom_state["position"],
+            }
+            validate_order(order)
+            return {
+                **order,
+                "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
+            }
 
         action, quantity_magnitude = normalize_action_quantity(
             decision["action"], decision["quantity"]

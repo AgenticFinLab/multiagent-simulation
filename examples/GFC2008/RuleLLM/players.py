@@ -14,7 +14,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.GFC2008.Rule.players import Market, _build_order
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 from examples.GFC2008.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("GFC2008.RuleLLM")
@@ -25,6 +25,16 @@ def load_prompt(prompt_path: str) -> str:
     module_path, var_name = prompt_path.rsplit(":", 1)
     module = importlib.import_module(module_path)
     return getattr(module, var_name)
+
+
+def _validate_gfc2008_decision(decision: Dict[str, Any]) -> None:
+    """Raise ValueError if the parsed decision fails GFC2008 contract checks."""
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
 
 
 class RuleLLMInvestor(GeneralPlayer):
@@ -100,33 +110,24 @@ class RuleLLMInvestor(GeneralPlayer):
             portfolio_value=portfolio_value,
         )
 
-        decision = None
-        last_error = None
-        for attempt in range(3):
-            try:
-                infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
-                response = self._llm_client.run([infer_input]).outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"Invalid action: {decision['action']}")
-                if float(decision["bid_price"]) <= 0:
-                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
-                if not str(decision["reasoning"]).strip():
-                    raise ValueError("Missing reasoning")
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < 2:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
+        decision = robust_llm_call(
+            self._llm_client,
+            system_msg,
+            user_msg,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=_validate_gfc2008_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                self.state.custom_state["round"],
             )
+            return _build_order(self, "hold", 0, float(price), "llm_fallback_noop")
 
         action = decision["action"]
         quantity = int(decision["quantity"])

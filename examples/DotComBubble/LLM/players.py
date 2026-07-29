@@ -22,7 +22,11 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import (
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+    validate_bid_qty_decision,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -123,39 +127,46 @@ class LLMInvestor(GeneralPlayer):
         )
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        decision = None
-        last_error = None
-        max_retries = int(llm_cfg["max_retries"])
-        for attempt in range(max_retries):
-            try:
-                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                result = llm_client.run([infer_input])
-                parsed = parse_llm_response_with_thinking(result.outputs[0].response)
-                if parsed["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"Invalid action: {parsed['action']}")
-                proposed_price = float(parsed["bid_price"])
-                proposed_quantity = float(parsed["quantity"])
-                if not math.isfinite(proposed_price) or proposed_price <= 0:
-                    raise ValueError(f"Invalid bid_price: {parsed['bid_price']}")
-                if not math.isfinite(proposed_quantity) or proposed_quantity < 0:
-                    raise ValueError(f"Invalid quantity: {parsed['quantity']}")
-                if not str(parsed["reasoning"]).strip():
-                    raise ValueError("Missing reasoning")
-                decision = parsed
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < max_retries - 1:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
+        def _validate_dotcombubble_llm(parsed):
+            validate_bid_qty_decision(parsed)
+            proposed_quantity = float(parsed["quantity"])
+            if not math.isfinite(proposed_quantity) or proposed_quantity < 0:
+                raise ValueError(f"Invalid quantity: {parsed['quantity']}")
+            proposed_price = float(parsed["bid_price"])
+            if not math.isfinite(proposed_price):
+                raise ValueError(f"Invalid bid_price: {parsed['bid_price']}")
+
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=_validate_dotcombubble_llm,
+            max_retries=int(llm_cfg["max_retries"]),
+            fallback="hold",
+            identity=self.identity,
+        )
+
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                round_num,
             )
+            fallback_order = _build_order(
+                self,
+                "hold",
+                0,
+                float(price),
+                "llm_fallback_noop",
+            )
+            return {
+                **fallback_order,
+                "outbound_messages": [
+                    {"payload": fallback_order, "content_type": "order"}
+                ],
+            }
 
         action_str = decision["action"]
         quantity = min(

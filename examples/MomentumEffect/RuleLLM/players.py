@@ -28,7 +28,7 @@ from .prompts import (
     RULELLM_TREND_FOLLOWER_SYS,
     RULELLM_USER_TEMPLATE,
 )
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 
 logger = logging.getLogger("MomentumEffectRuleLLM")
 
@@ -258,34 +258,21 @@ class RuleLLMInvestor(GeneralPlayer):
 
         user_prompt = self._build_prompt(market_data)
 
-        max_retries = 3
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(
-                system_msg=self._system_prompt, user_msg=user_prompt
-            )
-            infer_output = llm.run([infer_input])
-            try:
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
-                break
-            except ValueError as e:
-                last_error = e
-                if attempt < max_retries - 1:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
+        decision = robust_llm_call(
+            llm,
+            self._system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
+        if decision.get("_fallback"):
             logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding.",
+                "[%s] R%d LLM unavailable; emitting noop.",
                 self.identity,
-                max_retries,
-                last_error,
+                round_num,
             )
             order = {
                 "action": "hold",
@@ -296,7 +283,7 @@ class RuleLLMInvestor(GeneralPlayer):
                 "reasoning": "LLM parse failed: held position",
                 "provides_liquidity": False,
                 "_skipped": True,
-                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
+                "_skipped_reason": "llm_fallback_noop",
             }
             return {
                 **order,

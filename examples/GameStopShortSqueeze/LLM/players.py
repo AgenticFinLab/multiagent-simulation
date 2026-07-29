@@ -17,7 +17,11 @@ from masim.player.base import Action
 from masim.player.general import GeneralPlayer
 
 from examples.GameStopShortSqueeze.Rule.players import Market, _build_order  # noqa: F401
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import (
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+    validate_bid_qty_decision,
+)
 from examples.GameStopShortSqueeze.LLM.prompts import LLM_USER_TEMPLATE
 
 logger = logging.getLogger("GameStopShortSqueeze.LLM")
@@ -114,34 +118,25 @@ class LLMInvestor(GeneralPlayer):
                 self.state.custom_state["decision_params"]
             ),
         )
-        infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
 
-        decision = None
-        last_error = None
-        for attempt in range(3):
-            try:
-                response = self._llm_client.run([infer_input]).outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"Invalid action: {decision['action']}")
-                if float(decision["bid_price"]) <= 0:
-                    raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
-                if not str(decision["reasoning"]).strip():
-                    raise ValueError("Missing reasoning")
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < 2:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
+        decision = robust_llm_call(
+            self._llm_client,
+            system_msg,
+            user_msg,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=validate_bid_qty_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                round_num,
             )
+            return _build_order(self, "hold", 0, float(price), "llm_fallback_noop")
 
         action = decision["action"]
         quantity = int(decision["quantity"])

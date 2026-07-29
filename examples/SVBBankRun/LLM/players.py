@@ -19,6 +19,11 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+# ``robust_llm_call`` is the single source of truth for LLM invocation:
+# 5 retries with exponential backoff, error classification, and a
+# synthetic ``_fallback=True`` decision on retry exhaustion (so a
+# single agent's LLM outage never crashes the sim).
+from masim.utils.llm_utils import robust_llm_call
 from examples.SVBBankRun.decision import (
     fallback_hold_decision,
     parse_svbbankrun_decision,
@@ -110,31 +115,36 @@ class LLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Optional[Dict[str, Any]] = None
-        last_error = ""
-        max_retries = 3
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
-            try:
-                decision = parse_svbbankrun_decision(infer_output.outputs[0].response)
-                break
-            except (ValueError, KeyError) as exc:
-                last_error = str(exc)
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; explicit fallback hold: %s",
-                        self.identity,
-                        max_retries,
-                        last_error,
-                    )
-                    decision = fallback_hold_decision(last_error)
+        # Route through robust_llm_call: 5 retries with exponential
+        # backoff, transient-vs-permanent error discrimination, and a
+        # synthetic fallback marker on retry exhaustion.  This replaces
+        # the legacy 3-attempt hand-rolled loop that had ``llm_client.
+        # run(...)`` outside the try/except — any API-side transient
+        # (429/500/timeout) would previously bubble out of ``decide()``
+        # and crash the whole simulation.  We keep the scenario's
+        # ``llm_fallback`` / ``fallback_reason`` contract for downstream
+        # analytics by translating a ``_fallback=True`` response into
+        # the same ``fallback_hold_decision(...)`` payload the legacy
+        # parser produced on parse failure.
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_svbbankrun_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable after retries; using explicit fallback hold.",
+                self.identity,
+                round_num,
+            )
+            decision = fallback_hold_decision("llm_unavailable_after_retries")
 
-        if decision is None:
-            raise RuntimeError(f"[{self.identity}] LLM decision failed without fallback")
-
-        llm_fallback = bool(decision.pop("llm_fallback"))
-        fallback_reason = str(decision.pop("fallback_reason"))
+        llm_fallback = bool(decision.pop("llm_fallback", False))
+        fallback_reason = str(decision.pop("fallback_reason", ""))
         action = decision["action"]
         quantity = int(decision["quantity"])
 

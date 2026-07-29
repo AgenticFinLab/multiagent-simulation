@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -146,28 +146,44 @@ class LLMInvestor(GeneralPlayer):
             portfolio_value=cash + position * price,
         )
 
-        decision = None
-        last_error = None
-        for attempt in range(3):
-            try:
-                output = llm_client.run(
-                    [InferInput(system_msg=system_prompt, user_msg=user_prompt)]
-                )
-                decision = parse_llm_response_with_thinking(output.outputs[0].response)
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < 2:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+        strategy_name = self.__class__.__name__
+
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop.",
+                self.identity,
+                round_num,
             )
+            order = {
+                "action": "hold",
+                "bid_price": market_data["price"],
+                "quantity": 0.0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "llm_fallback_noop",
+                "analysis": "",
+                "agent_type": agent_type_for_strategy(strategy_name),
+                "provides_liquidity": False,
+                "liquidity_field_missing": False,
+                "_skipped": True,
+                "_skipped_reason": "llm_fallback_noop",
+            }
+            return {
+                **order,
+                "outbound_messages": [
+                    {"payload": order, "content_type": "investor_order"}
+                ],
+            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])

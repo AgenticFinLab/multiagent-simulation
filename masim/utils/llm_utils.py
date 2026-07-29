@@ -107,6 +107,27 @@ def parse_llm_quantity_response_with_thinking(response_text: str) -> Dict[str, A
 
 
 # ---------------------------------------------------------------------------
+# Shared decision validators (raise ValueError → robust_llm_call retries)
+# ---------------------------------------------------------------------------
+
+
+def validate_bid_qty_decision(decision: Dict[str, Any]) -> None:
+    """Validate the standard bid+quantity decision contract.
+
+    Contract: ``action`` ∈ {buy, sell, hold}, ``bid_price`` > 0, ``reasoning``
+    non-empty.  Called from :func:`robust_llm_call` via ``validate_fn=``.
+    Raises :class:`ValueError` on any contract violation so the caller triggers
+    a retry (parse errors are treated the same as ``ValueError``).
+    """
+    if decision["action"] not in ("buy", "sell", "hold"):
+        raise ValueError(f"Invalid action: {decision['action']}")
+    if float(decision["bid_price"]) <= 0:
+        raise ValueError(f"Invalid bid_price: {decision['bid_price']}")
+    if not str(decision["reasoning"]).strip():
+        raise ValueError("Missing reasoning")
+
+
+# ---------------------------------------------------------------------------
 # Permanent-error detection (errors that will NEVER succeed on retry)
 # ---------------------------------------------------------------------------
 

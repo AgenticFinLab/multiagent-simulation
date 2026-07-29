@@ -50,6 +50,7 @@ from lmbase.inference.base import InferInput
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,
     is_retryable_llm_error,
+    robust_llm_call,
 )
 
 
@@ -363,56 +364,47 @@ class BaseLLMInvestor(GeneralPlayer):
 
         messages = [InferInput(system_msg=sys_msg, user_msg=user_msg)]
 
-        # Call LLM
-        max_retries = 3
+        # Route through robust_llm_call: exponential backoff, permanent-vs-transient
+        # error discrimination, and a synthetic fallback-hold on retry exhaustion.
         llm_client = self.state.custom_state["llm_client"]
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            try:
-                infer_output = llm_client.run(messages)
-                response_text = (
-                    infer_output.outputs[0].response
-                    if hasattr(infer_output, "outputs")
-                    else infer_output.response
-                )
-                decision = parse_llm_response_with_thinking(response_text)
-                break
-            except Exception as exc:  # pylint: disable=broad-except
-                last_error = exc
-                parse_error = isinstance(
-                    exc, (json.JSONDecodeError, ValueError, KeyError)
-                )
-                retryable_api_error = is_retryable_llm_error(exc)
-                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
-                    logger.debug(
-                        "[%s] LLM call/parse failed (attempt %d/%d), retrying: %s",
-                        self.identity,
-                        attempt + 1,
-                        max_retries,
-                        exc,
-                    )
-                    continue
-                if not parse_error and not retryable_api_error:
-                    raise
+        decision = robust_llm_call(
+            llm_client,
+            sys_msg,
+            user_msg,
+            parse_fn=parse_llm_response_with_thinking,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            if last_error is not None and is_retryable_llm_error(last_error):
-                counts = self.state.custom_state.setdefault("llm_fallback_counts", {})
-                counts["retryable_api_error"] = (
-                    int(counts.get("retryable_api_error", 0)) + 1
-                )
-                decision = {
-                    "action": "hold",
-                    "bid_price": price,
-                    "quantity": 0.0,
-                    "reasoning": "LLM unavailable after retries; holding.",
-                    "analysis": f"Fallback after retryable LLM error: {last_error}",
-                }
-            else:
-                raise RuntimeError(
-                    f"[{self.identity}] LLM parse failed after {max_retries} retries: {last_error}"
-                )
+        if decision.get("_fallback"):
+            counts = self.state.custom_state.setdefault("llm_fallback_counts", {})
+            counts["retryable_api_error"] = (
+                int(counts.get("retryable_api_error", 0)) + 1
+            )
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop (skip trade this round).",
+                self.identity,
+                round_num,
+            )
+            noop_bid_price = float(market_data["price"])
+            noop_order = {
+                "bid_price": noop_bid_price,
+                "quantity": 0.0,
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "llm_fallback_noop",
+                "analysis": "",
+                "cash": self.state.custom_state["cash"],
+                "position": self.state.custom_state["position"],
+                "_skipped_reason": "llm_fallback_noop",
+            }
+            return {
+                **noop_order,
+                "outbound_messages": [
+                    {"payload": noop_order, "content_type": "investor_bid"}
+                ],
+            }
 
         # Extract decision
         action = decision["action"]

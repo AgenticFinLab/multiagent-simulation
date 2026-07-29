@@ -32,7 +32,12 @@ from .prompts import (
     LLM_NOISE_TRADER_PROMPT,
     LLM_USER_TEMPLATE,
 )
-from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import (
+    is_retryable_llm_error,
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+    validate_bid_qty_decision,
+)
 from examples.OverconfidenceBias.Rule.players import (  # noqa: F401
     Market,
     _build_order,
@@ -137,39 +142,32 @@ class LLMInvestor(GeneralPlayer):
 
         user_prompt = self._build_prompt()
 
-        max_retries = 3
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(
-                system_msg=self._system_prompt, user_msg=user_prompt
-            )
-            try:
-                infer_output = llm.run([infer_input])
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
-                decision = _validate_decision(decision, self.identity)
-                break
-            except Exception as exc:
-                last_error = exc
-                parse_error = isinstance(exc, (ValueError, KeyError))
-                retryable_api_error = is_retryable_llm_error(exc)
-                if attempt < max_retries - 1:
-                    logger.debug(
-                        "[%s] LLM call/parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
-                    continue
-                if not parse_error and not retryable_api_error:
-                    raise
+        decision = robust_llm_call(
+            llm,
+            self._system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=validate_bid_qty_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM decision contract failed after "
-                f"{max_retries} retries: {last_error}"
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                round_num,
             )
+            order = _build_order(
+                self, "hold", 0, float(price), "llm_fallback_noop"
+            )
+            order["analysis"] = ""
+            order["strategy"] = strategy_name
+            return {
+                **order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            }
 
         action = decision["action"]
         quantity = _to_nonnegative_int(decision["quantity"], f"[{self.identity}] quantity")

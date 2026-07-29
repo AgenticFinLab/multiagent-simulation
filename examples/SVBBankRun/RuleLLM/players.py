@@ -19,6 +19,7 @@ from lmbase.inference.base import InferInput
 
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
+from masim.utils.llm_utils import robust_llm_call
 from examples.SVBBankRun.decision import (
     fallback_hold_decision,
     parse_svbbankrun_decision,
@@ -110,31 +111,33 @@ class RuleLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        decision: Optional[Dict[str, Any]] = None
-        last_error = ""
-        max_retries = 3
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            infer_output = llm_client.run([infer_input])
-            try:
-                decision = parse_svbbankrun_decision(infer_output.outputs[0].response)
-                break
-            except (ValueError, KeyError) as exc:
-                last_error = str(exc)
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; explicit fallback hold: %s",
-                        self.identity,
-                        max_retries,
-                        last_error,
-                    )
-                    decision = fallback_hold_decision(last_error)
+        # Route through robust_llm_call for centralized retry/backoff/permanent-error
+        # detection.  On retry exhaustion we honor the SVBBankRun API decision
+        # contract by returning ``fallback_hold_decision(...)`` (matches the shape
+        # produced by ``parse_svbbankrun_decision``: action/quantity/reasoning/
+        # analysis/llm_fallback/fallback_reason).  This replaces the legacy
+        # 3-attempt loop that crashed the sim on non-parse errors (client.run
+        # was outside the try/except).
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_svbbankrun_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(f"[{self.identity}] RuleLLM decision failed without fallback")
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting fallback hold decision.",
+                self.identity,
+                round_num,
+            )
+            decision = fallback_hold_decision("llm_unavailable_after_retries")
 
-        llm_fallback = bool(decision.pop("llm_fallback"))
-        fallback_reason = str(decision.pop("fallback_reason"))
+        llm_fallback = bool(decision.pop("llm_fallback", False))
+        fallback_reason = str(decision.pop("fallback_reason", ""))
         action = decision["action"]
         quantity = int(decision["quantity"])
 

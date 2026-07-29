@@ -17,7 +17,10 @@ from masim.player.base import Action, Observation
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import (
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+)
 from examples.DotComBubble.Rule.players import Market, _build_order  # noqa: F401
 
 logger = logging.getLogger(__name__)
@@ -146,56 +149,47 @@ class RuleLLMInvestor(GeneralPlayer):
         )
 
         llm_client: LangChainAPIInference = self.state.custom_state["llm_client"]
-        decision = None
-        last_error = None
-        used_fallback = False
+
+        def _validate_and_normalize(parsed: Dict[str, Any]) -> None:
+            normalized = _validate_decision(parsed, self.identity)
+            parsed.update(normalized)
+
         max_attempts = int(llm_cfg.get("max_attempts", 3))
         if max_attempts <= 0:
             raise ValueError(f"{self.identity} llm.max_attempts must be positive")
-        for attempt in range(max_attempts):
-            try:
-                infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-                result = llm_client.run([infer_input])
-                response = result.outputs[0].response
-                decision = _validate_decision(
-                    parse_llm_response_with_thinking(response), self.identity
-                )
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < max_attempts - 1:
-                    logger.warning(
-                        "[%s] LLM call/parse failed (attempt %d/%d), retrying: %s",
-                        self.identity,
-                        attempt + 1,
-                        max_attempts,
-                        exc,
-                    )
 
-        if decision is None:
-            failure_policy = str(llm_cfg.get("failure_policy", "hold")).lower()
-            if failure_policy == "raise":
-                raise RuntimeError(
-                    f"[{self.identity}] LLM call/parse failed after "
-                    f"{max_attempts} attempts: {last_error}"
-                )
-            if failure_policy != "hold":
-                raise ValueError(
-                    f"{self.identity} llm.failure_policy must be 'hold' or 'raise'"
-                )
-            logger.error(
-                "[%s] LLM unavailable after %d attempts; using a hold order so the "
-                "simulation can continue: %s",
+        used_fallback = False
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=_validate_and_normalize,
+            max_retries=max_attempts,
+            fallback="hold",
+            identity=self.identity,
+        )
+
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
                 self.identity,
-                max_attempts,
-                last_error,
+                round_num,
             )
             used_fallback = True
-            decision = {
-                "action": "hold",
-                "bid_price": price,
-                "quantity": 0,
-                "reasoning": f"LLM fallback hold after retries: {last_error}",
+            fallback_order = _build_order(
+                self,
+                "hold",
+                0,
+                float(price),
+                "llm_fallback_noop",
+            )
+            fallback_order["llm_fallback"] = used_fallback
+            return {
+                **fallback_order,
+                "outbound_messages": [
+                    {"payload": fallback_order, "content_type": "order"}
+                ],
             }
 
         action_str = decision["action"]

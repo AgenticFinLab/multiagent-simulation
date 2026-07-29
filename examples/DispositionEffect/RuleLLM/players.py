@@ -62,6 +62,8 @@ _DECISION_PARAM_SKIP_KEYS = {
 from masim.utils.llm_utils import (
     is_retryable_llm_error,
     parse_llm_response_with_thinking,
+    robust_llm_call,
+    validate_bid_qty_decision,
 )
 
 
@@ -375,46 +377,46 @@ class BaseLLMInvestor(GeneralPlayer):
             decision_params=format_decision_params(extras),
         )
 
-        # Call LLM
-        max_retries = llm_config["max_retries"]
         llm_client = self.state.custom_state["llm_client"]
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            try:
-                infer_output = llm_client.run(
-                    [InferInput(system_msg=sys_msg, user_msg=user_msg)]
-                )
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
-                if decision["action"] not in ("buy", "sell", "hold"):
-                    raise ValueError(f"invalid action: {decision['action']}")
-                proposed_price = float(decision["bid_price"])
-                if not math.isfinite(proposed_price) or proposed_price <= 0:
-                    raise ValueError(f"invalid bid_price: {decision['bid_price']}")
-                if not str(decision["reasoning"]).strip():
-                    raise ValueError("missing reasoning")
-                if not str(decision["analysis"]).strip():
-                    raise ValueError("missing analysis")
-                break
-            except Exception as e:
-                decision = None
-                parse_error = isinstance(
-                    e, (json.JSONDecodeError, ValueError, KeyError, TypeError)
-                )
-                if not parse_error and not is_retryable_llm_error(e):
-                    raise
-                last_error = e
-                if attempt < max_retries - 1:
-                    logger.debug(
-                        "[%s] LLM parse failed, retrying...", self.config.identity
-                    )
+        decision = robust_llm_call(
+            llm_client,
+            sys_msg,
+            user_msg,
+            parse_fn=parse_llm_response_with_thinking,
+            validate_fn=validate_bid_qty_decision,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM failed after {max_retries} attempts: {last_error}"
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting noop hold.",
+                self.identity,
+                round_num,
             )
+            fallback_bid_price = float(price)
+            return {
+                "action": "hold",
+                "bid_price": fallback_bid_price,
+                "quantity": 0,
+                "strategy": strategy_name,
+                "reasoning": "llm_fallback_noop",
+                "analysis": "",
+                "outbound_messages": [
+                    {
+                        "payload": {
+                            "bid_price": fallback_bid_price,
+                            "quantity": 0,
+                            "action": "hold",
+                            "strategy": strategy_name,
+                            "reasoning": "llm_fallback_noop",
+                            "analysis": "",
+                        },
+                        "content_type": "investor_bid",
+                    }
+                ],
+            }
 
         # Extract decision
         action = decision["action"]

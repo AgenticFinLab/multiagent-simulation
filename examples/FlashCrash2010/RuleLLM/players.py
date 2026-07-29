@@ -22,7 +22,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
+from masim.utils.llm_utils import (
+    is_retryable_llm_error,
+    parse_llm_response_with_thinking,
+    robust_llm_call,
+)
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
@@ -150,48 +154,43 @@ class RuleLLMInvestor(GeneralPlayer):
             portfolio_value=cash + position * price,
         )
 
-        max_retries = 3
-        decision = None
-        last_error = None
-        for attempt in range(max_retries):
-            infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
-            try:
-                infer_output = llm_client.run([infer_input])
-                decision = parse_llm_response_with_thinking(
-                    infer_output.outputs[0].response
-                )
-                break
-            except Exception as exc:
-                last_error = exc
-                parse_error = isinstance(exc, (ValueError, KeyError))
-                retryable_api_error = is_retryable_llm_error(exc)
-                if attempt < max_retries - 1 and (parse_error or retryable_api_error):
-                    logger.debug(
-                        "[%s] LLM call/parse failed (attempt %d), retrying: %s",
-                        self.identity,
-                        attempt + 1,
-                        exc,
-                    )
-                    continue
-                if not parse_error and not retryable_api_error:
-                    raise
+        strategy_name = self.__class__.__name__
 
-        if decision is None:
+        decision = robust_llm_call(
+            llm_client,
+            system_prompt,
+            user_prompt,
+            parse_fn=parse_llm_response_with_thinking,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
+
+        if decision.get("_fallback"):
             logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding.",
+                "[%s] R%d LLM unavailable; emitting noop.",
                 self.identity,
-                max_retries,
-                last_error,
+                round_num,
             )
-            decision = {
+            order = {
                 "action": "hold",
-                "bid_price": price,
+                "bid_price": market_data["price"],
                 "quantity": 0.0,
-                "reasoning": f"LLM fallback hold after retries: {last_error}",
+                "strategy": strategy_name,
+                "investor": self.identity,
+                "reasoning": "llm_fallback_noop",
                 "analysis": "",
+                "agent_type": agent_type_for_strategy(strategy_name),
                 "provides_liquidity": False,
+                "liquidity_field_missing": False,
                 "_skipped": True,
-                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
+                "_skipped_reason": "llm_fallback_noop",
+            }
+            return {
+                **order,
+                "outbound_messages": [
+                    {"payload": order, "content_type": "investor_order"}
+                ],
             }
 
         action = decision["action"]

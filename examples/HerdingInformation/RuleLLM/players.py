@@ -17,7 +17,7 @@ from masim.player.base import Action
 from masim.player.general import GeneralPlayer
 
 from examples.HerdingInformation.Rule.players import Market  # noqa: F401
-from masim.utils.llm_utils import parse_llm_response_with_thinking
+from masim.utils.llm_utils import parse_llm_response_with_thinking, robust_llm_call
 from examples.HerdingInformation.RuleLLM.prompts import RULELLM_USER_TEMPLATE
 
 logger = logging.getLogger("HerdingInformation.RuleLLM")
@@ -96,26 +96,26 @@ class RuleLLMInvestor(GeneralPlayer):
         )
         infer_input = InferInput(system_msg=system_msg, user_msg=user_msg)
 
-        decision = None
-        last_error = None
-        for attempt in range(3):
-            try:
-                response = self._llm_client.run([infer_input]).outputs[0].response
-                decision = parse_llm_response_with_thinking(response)
-                break
-            except Exception as exc:
-                last_error = exc
-                if attempt < 2:
-                    logger.debug(
-                        "[%s] LLM parse failed (attempt %d), retrying...",
-                        self.identity,
-                        attempt + 1,
-                    )
+        # Route through robust_llm_call for centralized retry/backoff/fallback.
+        # On retry exhaustion we return a safe act+qty hold (Template C: no
+        # bid_price field — act() reads action/quantity only).
+        decision = robust_llm_call(
+            self._llm_client,
+            system_msg,
+            user_msg,
+            parse_fn=parse_llm_response_with_thinking,
+            max_retries=5,
+            fallback="hold",
+            identity=self.identity,
+        )
 
-        if decision is None:
-            raise RuntimeError(
-                f"[{self.identity}] LLM parse failed after 3 retries: {last_error}"
+        if decision.get("_fallback"):
+            logger.warning(
+                "[%s] R%d LLM unavailable; emitting hold (skip trade this round).",
+                self.identity,
+                round_num,
             )
+            return {"action": "hold", "quantity": 0}
 
         action = decision["action"]
         quantity = int(decision["quantity"])
