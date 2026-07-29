@@ -887,149 +887,160 @@ def render_variant_choice() -> None:
         roster_col, topo_col = st.columns([3, 2], gap="medium")
 
         with roster_col:
-            st.markdown("**Agents in this scenario**")
+            # Lazy: keep the (potentially expensive) avatar grid hidden
+            # behind an expander so it doesn't render on every scenario
+            # switch.  The label carries a live count so users know
+            # what's inside without opening it.
             if player_agents:
                 total_instances = sum(a["instances"] for a in player_agents)
-                st.caption(
-                    f"{len(player_agents)} agent types, "
-                    f"{total_instances} total instances — click any agent name "
-                    "to view its design profile"
+                _agents_label = (
+                    f"Agents in this scenario — "
+                    f"{len(player_agents)} types · {total_instances} instances"
                 )
-                # Scoped CSS:
-                # * .masim-avatar-img / .masim-avatar-fallback: pure visual
-                #   avatar (non-interactive).
-                # * .st-key-agent_label_<pid> button: the AGENT NAME beside
-                #   the avatar is the click target, styled as a compact
-                #   text-link (transparent background, no border, hover
-                #   underline + blue).
-                st.markdown(
-                    "<style>"
-                    '.masim-avatar-img{'
-                    'width:56px;height:56px;border-radius:50%;'
-                    'border:2px solid #dde4ea;'
-                    'box-shadow:0 1px 3px rgba(0,0,0,0.08);'
-                    'object-fit:cover;display:block;background:#e8f0fb;'
-                    '}'
-                    '.masim-avatar-fallback{'
-                    'width:56px;height:56px;border-radius:50%;'
-                    'border:2px solid #dde4ea;'
-                    'box-shadow:0 1px 3px rgba(0,0,0,0.08);'
-                    'display:flex;align-items:center;justify-content:center;'
-                    'background:#e8f0fb;color:#2a5fa6;font-weight:700;'
-                    'font-size:0.85rem;'
-                    '}'
-                    # Zero out every wrapper Streamlit adds around the
-                    # label button so the box shrinks to the text glyphs.
-                    '[class*="st-key-agent_label_"],'
-                    '[class*="st-key-agent_label_"] .stElementContainer,'
-                    '[class*="st-key-agent_label_"] div[data-testid="stElementContainer"],'
-                    '[class*="st-key-agent_label_"] div[data-testid="stButton"]{'
-                    'gap:0 !important;margin:0 !important;padding:0 !important;'
-                    '}'
-                    # The button itself: pill-shaped text label with a
-                    # subtle gray background frame.
-                    '[class*="st-key-agent_label_"] button{'
-                    'background:#eef1f4 !important;'
-                    'border:1px solid #dde4ea !important;'
-                    'box-shadow:none !important;'
-                    'border-radius:6px !important;'
-                    'padding:4px 8px !important;margin:0 !important;'
-                    'min-height:0 !important;height:auto !important;'
-                    'width:auto !important;max-width:100% !important;'
-                    'color:#374955 !important;font-weight:600 !important;'
-                    'text-align:left !important;'
-                    'justify-content:flex-start !important;'
-                    'white-space:normal !important;'
-                    'word-break:break-word !important;'
-                    '}'
-                    # Universal descendant: force compact font-size and
-                    # tight line-height on EVERY inner wrapper.
-                    '[class*="st-key-agent_label_"] button,'
-                    '[class*="st-key-agent_label_"] button *{'
-                    'font-size:0.7rem !important;'
-                    'line-height:1.15 !important;'
-                    '}'
-                    '[class*="st-key-agent_label_"] button p,'
-                    '[class*="st-key-agent_label_"] button div{'
-                    'margin:0 !important;padding:0 !important;'
-                    'font-weight:600 !important;color:inherit !important;'
-                    '}'
-                    '[class*="st-key-agent_label_"] button:hover,'
-                    '[class*="st-key-agent_label_"] button:hover *{'
-                    'color:#2a5fa6 !important;'
-                    'background:#e4ecf6 !important;'
-                    'border-color:#c9d6e6 !important;'
-                    'text-decoration:none !important;'
-                    '}'
-                    "</style>",
-                    unsafe_allow_html=True,
-                )
-                # Layout: 3 chips per row (pure-image avatar + clickable
-                # text label to the right). vertical_alignment="center"
-                # re-centres the compact label against the 56 px avatar.
-                per_row = 3
-                for row_start in range(0, len(player_agents), per_row):
-                    row_agents = player_agents[row_start : row_start + per_row]
-                    cols = st.columns(per_row, gap="small")
-                    for col, a in zip(cols, row_agents):
-                        with col:
-                            player_id = a["id"]
-                            archetype = _canonical_archetype(player_id)
-                            icon_path = (
-                                ICON_ROOT
-                                / f"finance-{archetype.replace('_', '-')}.png"
-                            )
-                            count = a["instances"]
-                            display_name = html.escape(a["name"])
-                            count_suffix = (
-                                f" \u00d7{count}" if count > 1 else ""
-                            )
-                            tip = (
-                                a.get("theory")
-                                or a.get("principle")
-                                or "Click to view design profile"
-                            )
-                            avatar_col, label_col = st.columns(
-                                [1, 2],
-                                gap="small",
-                                vertical_alignment="center",
-                            )
-                            with avatar_col:
-                                # Pure visual avatar (non-clickable).
-                                if icon_path.exists():
-                                    uri = _image_data_uri(icon_path)
-                                    st.markdown(
-                                        f'<img class="masim-avatar-img" '
-                                        f'src="{uri}" alt="{display_name}" />',
-                                        unsafe_allow_html=True,
-                                    )
-                                else:
-                                    initial = html.escape(
-                                        a["name"][:2].upper()
-                                        if a["name"]
-                                        else "?"
-                                    )
-                                    st.markdown(
-                                        f'<div class="masim-avatar-fallback">'
-                                        f'{initial}</div>',
-                                        unsafe_allow_html=True,
-                                    )
-                            with label_col:
-                                # Clickable text label -> opens .md profile.
-                                label_text = f"{a['name']}{count_suffix}"
-                                with st.container(
-                                    key=f"agent_label_{player_id}"
-                                ):
-                                    clicked = st.button(
-                                        label_text,
-                                        key=f"btn_agent_label_{player_id}",
-                                        help=tip,
-                                        type="tertiary",
-                                    )
-                                    if clicked:
-                                        _show_agent_profile_dialog(a)
             else:
-                st.caption("No agent information available.")
+                _agents_label = "Agents in this scenario"
+            with st.expander(_agents_label, expanded=False):
+                if player_agents:
+                    st.caption(
+                        f"{len(player_agents)} agent types, "
+                        f"{total_instances} total instances — click any agent name "
+                        "to view its design profile"
+                    )
+                    # Scoped CSS:
+                    # * .masim-avatar-img / .masim-avatar-fallback: pure visual
+                    #   avatar (non-interactive).
+                    # * .st-key-agent_label_<pid> button: the AGENT NAME beside
+                    #   the avatar is the click target, styled as a compact
+                    #   text-link (transparent background, no border, hover
+                    #   underline + blue).
+                    st.markdown(
+                        "<style>"
+                        '.masim-avatar-img{'
+                        'width:56px;height:56px;border-radius:50%;'
+                        'border:2px solid #dde4ea;'
+                        'box-shadow:0 1px 3px rgba(0,0,0,0.08);'
+                        'object-fit:cover;display:block;background:#e8f0fb;'
+                        '}'
+                        '.masim-avatar-fallback{'
+                        'width:56px;height:56px;border-radius:50%;'
+                        'border:2px solid #dde4ea;'
+                        'box-shadow:0 1px 3px rgba(0,0,0,0.08);'
+                        'display:flex;align-items:center;justify-content:center;'
+                        'background:#e8f0fb;color:#2a5fa6;font-weight:700;'
+                        'font-size:0.85rem;'
+                        '}'
+                        # Zero out every wrapper Streamlit adds around the
+                        # label button so the box shrinks to the text glyphs.
+                        '[class*="st-key-agent_label_"],'
+                        '[class*="st-key-agent_label_"] .stElementContainer,'
+                        '[class*="st-key-agent_label_"] div[data-testid="stElementContainer"],'
+                        '[class*="st-key-agent_label_"] div[data-testid="stButton"]{'
+                        'gap:0 !important;margin:0 !important;padding:0 !important;'
+                        '}'
+                        # The button itself: pill-shaped text label with a
+                        # subtle gray background frame.
+                        '[class*="st-key-agent_label_"] button{'
+                        'background:#eef1f4 !important;'
+                        'border:1px solid #dde4ea !important;'
+                        'box-shadow:none !important;'
+                        'border-radius:6px !important;'
+                        'padding:4px 8px !important;margin:0 !important;'
+                        'min-height:0 !important;height:auto !important;'
+                        'width:auto !important;max-width:100% !important;'
+                        'color:#374955 !important;font-weight:600 !important;'
+                        'text-align:left !important;'
+                        'justify-content:flex-start !important;'
+                        'white-space:normal !important;'
+                        'word-break:break-word !important;'
+                        '}'
+                        # Universal descendant: force compact font-size and
+                        # tight line-height on EVERY inner wrapper.
+                        '[class*="st-key-agent_label_"] button,'
+                        '[class*="st-key-agent_label_"] button *{'
+                        'font-size:0.7rem !important;'
+                        'line-height:1.15 !important;'
+                        '}'
+                        '[class*="st-key-agent_label_"] button p,'
+                        '[class*="st-key-agent_label_"] button div{'
+                        'margin:0 !important;padding:0 !important;'
+                        'font-weight:600 !important;color:inherit !important;'
+                        '}'
+                        '[class*="st-key-agent_label_"] button:hover,'
+                        '[class*="st-key-agent_label_"] button:hover *{'
+                        'color:#2a5fa6 !important;'
+                        'background:#e4ecf6 !important;'
+                        'border-color:#c9d6e6 !important;'
+                        'text-decoration:none !important;'
+                        '}'
+                        "</style>",
+                        unsafe_allow_html=True,
+                    )
+                    # Layout: 3 chips per row (pure-image avatar + clickable
+                    # text label to the right). vertical_alignment="center"
+                    # re-centres the compact label against the 56 px avatar.
+                    per_row = 3
+                    for row_start in range(0, len(player_agents), per_row):
+                        row_agents = player_agents[row_start : row_start + per_row]
+                        cols = st.columns(per_row, gap="small")
+                        for col, a in zip(cols, row_agents):
+                            with col:
+                                player_id = a["id"]
+                                archetype = _canonical_archetype(player_id)
+                                icon_path = (
+                                    ICON_ROOT
+                                    / f"finance-{archetype.replace('_', '-')}.png"
+                                )
+                                count = a["instances"]
+                                display_name = html.escape(a["name"])
+                                count_suffix = (
+                                    f" \u00d7{count}" if count > 1 else ""
+                                )
+                                tip = (
+                                    a.get("theory")
+                                    or a.get("principle")
+                                    or "Click to view design profile"
+                                )
+                                avatar_col, label_col = st.columns(
+                                    [1, 2],
+                                    gap="small",
+                                    vertical_alignment="center",
+                                )
+                                with avatar_col:
+                                    # Pure visual avatar (non-clickable).
+                                    if icon_path.exists():
+                                        uri = _image_data_uri(icon_path)
+                                        st.markdown(
+                                            f'<img class="masim-avatar-img" '
+                                            f'src="{uri}" alt="{display_name}" />',
+                                            unsafe_allow_html=True,
+                                        )
+                                    else:
+                                        initial = html.escape(
+                                            a["name"][:2].upper()
+                                            if a["name"]
+                                            else "?"
+                                        )
+                                        st.markdown(
+                                            f'<div class="masim-avatar-fallback">'
+                                            f'{initial}</div>',
+                                            unsafe_allow_html=True,
+                                        )
+                                with label_col:
+                                    # Clickable text label -> opens .md profile.
+                                    label_text = f"{a['name']}{count_suffix}"
+                                    with st.container(
+                                        key=f"agent_label_{player_id}"
+                                    ):
+                                        clicked = st.button(
+                                            label_text,
+                                            key=f"btn_agent_label_{player_id}",
+                                            help=tip,
+                                            type="tertiary",
+                                        )
+                                        if clicked:
+                                            _show_agent_profile_dialog(a)
+                else:
+                    st.caption("No agent information available.")
 
         with topo_col:
             from .topology_d3 import market_icon_uri, render_d3_topology_with_expand
@@ -3750,10 +3761,12 @@ def render_customize() -> None:
     # Full-page reruns (sidebar preview, Load default, Clear, Launch)
     # still happen through their own buttons outside this scope.
     #
-    # LAZY LOADING: agents are split by domain into ``st.tabs()`` — only
-    # the ACTIVE tab renders its cards on each rerun, so the landing view
-    # only pays the image-decode / roster-check cost for one domain at a
-    # time. Domains that have zero agents in the catalog are hidden.
+    # LAZY LOADING: agents are split by *thematic category* into
+    # ``st.tabs()`` (Crisis / Mechanics / Behavioral / Momentum /
+    # Fundamental / Opinion / Other) — only the ACTIVE tab renders its
+    # cards on each rerun, so the landing view only pays the image-decode
+    # / roster-check cost for one category at a time.  Categories that
+    # have zero agents in the catalog are hidden.
     @st.fragment
     def _agent_grid_fragment() -> None:
         controls, count = st.columns([4, 1])
@@ -3791,16 +3804,107 @@ def render_customize() -> None:
             st.info("No agents match this search.")
             return
 
-        # Group by domain for tab-based lazy loading.
-        _DOMAIN_LABELS = {
-            "finance": "🏦 Finance Agents",
-            "opinion": "💬 Opinion Agents",
-        }
-        _DOMAIN_ORDER = ["finance", "opinion"]
-        by_domain: dict[str, list[dict[str, Any]]] = {}
+        # Group by *thematic category* for tab-based lazy loading. Finer
+        # than the raw finance/opinion domain split so a 200-agent pool
+        # (~195 finance + ~5 opinion) surfaces as five browsable buckets
+        # instead of one giant Finance tab.  Order = display order;
+        # matching is first-wins so the ambiguous "leveraged-buyer" style
+        # stems land in the most specific bucket that mentions them.
+        #
+        # Rules are keyword-substring based against the agent_type stem
+        # (kebab-case).  A stem may hit many patterns — the first winning
+        # rule assigns it, so put highly specific / low-ambiguity rules
+        # first (crisis actors are named, mechanics uses precise terms
+        # like "hft" / "market-maker", biases are lexically distinctive).
+        # Anything that matches no rule falls into "Other" so nothing is
+        # dropped from the catalog.
+        _CATEGORY_RULES: list[tuple[str, str, tuple[str, ...]]] = [
+            (
+                "crisis",
+                "🔥 Crisis & Systemic",
+                (
+                    "depositor", "run-", "panic", "forced-seller", "forced-",
+                    "central-bank", "regulator", "contagion", "sovereign",
+                    "imf", "ecb", "minsky", "distressed", "creditor",
+                    "default-", "bank-manager", "rescuer", "intervenor",
+                    "flight-", "carry-trade-unwind",
+                ),
+            ),
+            (
+                "mechanics",
+                "⚡ Market Mechanics",
+                (
+                    "hft", "high-frequency", "algorithmic", "algo-",
+                    "market-maker", "arbitrag", "stop-loss", "block-trade",
+                    "flash-", "liquidity-provider", "liquidity-demander",
+                    "index-tracker", "index-arbitrag", "gamma",
+                    "convergence-",
+                ),
+            ),
+            (
+                "behavioral",
+                "🧠 Behavioral Biases",
+                (
+                    "anchor", "anchored", "overconfident", "hindsight",
+                    "disposition", "framing", "gain-frame", "loss-frame",
+                    "endow", "loss-averse", "myopic", "mental-account",
+                    "hot-hand", "house-money", "category-overgen",
+                    "break-even", "commitment", "regret", "availability",
+                    "confirmation", "recency", "narrative-believer",
+                    "gambler", "base-rate", "escalat", "sunk-cost",
+                    "prospect", "frame-invariant",
+                ),
+            ),
+            (
+                "momentum",
+                "🌊 Momentum & Herding",
+                (
+                    "momentum", "trend", "herd", "cascade", "follower",
+                    "chaser", "media-influenced", "greater-fool",
+                    "speculator", "retail-coord", "ipo-flip", "hot-money",
+                    "evangelist", "conformist", "default-follower",
+                    "gullible", "ideologue",
+                ),
+            ),
+            (
+                "fundamental",
+                "📊 Fundamental & Informed",
+                (
+                    "fundamental", "value-investor", "informed", "analyst",
+                    "bayesian", "calibrated", "critical-thinker",
+                    "fact-checker", "expert", "intrinsic-value",
+                    "mbs-originator", "bond-trader", "long-horizon",
+                    "long-term", "institutional", "insider", "contrarian",
+                    "independent-", "conservative-", "balanced-",
+                    "concentrated-fund", "core-bond", "index-fund",
+                    "index-holder", "hedge",
+                ),
+            ),
+        ]
+
+        def _classify(agent: dict[str, Any]) -> tuple[str, str]:
+            if agent.get("domain") == "opinion":
+                return ("opinion", "💬 Opinion Agents")
+            stem = agent.get("agent_type", "").lower()
+            for key, label, patterns in _CATEGORY_RULES:
+                for pat in patterns:
+                    if pat in stem:
+                        return (key, label)
+            return ("other", "📎 Other")
+
+        _CATEGORY_ORDER = [
+            "crisis", "mechanics", "behavioral", "momentum",
+            "fundamental", "opinion", "other",
+        ]
+        _CATEGORY_LABELS = {k: lbl for k, lbl, _ in _CATEGORY_RULES}
+        _CATEGORY_LABELS["opinion"] = "💬 Opinion Agents"
+        _CATEGORY_LABELS["other"] = "📎 Other"
+
+        by_category: dict[str, list[dict[str, Any]]] = {}
         for agent in filtered:
-            by_domain.setdefault(agent.get("domain", "finance"), []).append(agent)
-        active_domains = [d for d in _DOMAIN_ORDER if by_domain.get(d)]
+            key, _label = _classify(agent)
+            by_category.setdefault(key, []).append(agent)
+        active_categories = [c for c in _CATEGORY_ORDER if by_category.get(c)]
 
         def _render_grid(agents: list[dict[str, Any]]) -> None:
             grid_columns_per_row = 6
@@ -3812,18 +3916,24 @@ def render_customize() -> None:
                     with column:
                         _render_agent_card(agent)
 
-        if len(active_domains) <= 1:
-            # Single-domain result set — no need for tabs; render inline.
-            _render_grid(by_domain.get(active_domains[0], []) if active_domains else [])
+        if len(active_categories) <= 1:
+            # Single-category result set (typical when the search box
+            # narrows the pool) — no need for tabs; render inline.
+            _render_grid(
+                by_category.get(active_categories[0], [])
+                if active_categories
+                else []
+            )
             return
 
         tab_labels = [
-            f"{_DOMAIN_LABELS[d]} ({len(by_domain[d])})" for d in active_domains
+            f"{_CATEGORY_LABELS[c]} ({len(by_category[c])})"
+            for c in active_categories
         ]
         tabs = st.tabs(tab_labels)
-        for domain, tab in zip(active_domains, tabs):
+        for category, tab in zip(active_categories, tabs):
             with tab:
-                _render_grid(by_domain[domain])
+                _render_grid(by_category[category])
 
     _agent_grid_fragment()
 

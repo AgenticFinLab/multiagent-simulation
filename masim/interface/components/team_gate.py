@@ -39,6 +39,8 @@ Design constraints (per product decisions)
 from __future__ import annotations
 
 import re
+import shutil
+from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
@@ -49,7 +51,12 @@ import streamlit as st
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]  # components → interface → masim → root
 _CUSTOMIZED_DIR = _PROJECT_ROOT / "configs" / "CUSTOMIZED_SIMULATION"
+_EXPERIMENT_CUSTOMIZED_DIR = _PROJECT_ROOT / "EXPERIMENT" / "CUSTOMIZED_SIMULATION"
 _TEAM_REGISTRY = _PROJECT_ROOT / "configs" / ".team_registry"
+# Soft-delete quarantine: deleted team assets are MOVED here (never `rm`-ed)
+# so an accidental click can be recovered manually.  Timestamped subdirs
+# avoid collisions when the same team slug is deleted twice.
+_DELETED_TEAMS_DIR = _PROJECT_ROOT / "configs" / ".deleted_teams"
 _BUNDLE_NAME_RE = re.compile(r"^(.+)-([0-9a-fA-F]{8})-([^-]+)$")
 _TEAM_IN_SLUG_RE = re.compile(r"^team-([A-Za-z0-9_]+)-(.+)$")
 
@@ -91,6 +98,83 @@ def _register_team(slug: str) -> None:
         _TEAM_REGISTRY.parent.mkdir(parents=True, exist_ok=True)
         with _TEAM_REGISTRY.open("a") as f:
             f.write(slug + "\n")
+
+
+def _unregister_team(slug: str) -> None:
+    """Remove a team slug from the registry file (idempotent, order-preserving)."""
+    if not _TEAM_REGISTRY.exists():
+        return
+    kept: list[str] = []
+    for line in _TEAM_REGISTRY.read_text().splitlines():
+        s = line.strip()
+        if s and s != slug:
+            kept.append(s)
+    _TEAM_REGISTRY.write_text(("\n".join(kept) + "\n") if kept else "")
+
+
+def _collect_team_paths(slug: str) -> list[Path]:
+    """Return every on-disk directory that belongs to ``slug``.
+
+    Covers:
+    * ``configs/CUSTOMIZED_SIMULATION/team-{slug}-*`` — source bundles.
+    * ``EXPERIMENT/CUSTOMIZED_SIMULATION/team-{slug}-*`` — run outputs.
+
+    The scan uses the strict ``TEAM_NAME_IN_SLUG_RE`` decode so we never
+    delete a legacy or another-team directory whose name happens to start
+    with the same characters.  Returns an empty list when nothing matches.
+    """
+    hits: list[Path] = []
+    for root in (_CUSTOMIZED_DIR, _EXPERIMENT_CUSTOMIZED_DIR):
+        if not root.exists():
+            continue
+        for entry in root.iterdir():
+            if not entry.is_dir():
+                continue
+            m = _BUNDLE_NAME_RE.match(entry.name)
+            if not m:
+                continue
+            raw_slug = m.group(1)
+            tm = _TEAM_IN_SLUG_RE.match(raw_slug)
+            if tm and tm.group(1) == slug:
+                hits.append(entry)
+    return hits
+
+
+def _quarantine_team(slug: str) -> tuple[int, Path]:
+    """Move every asset owned by ``slug`` into the soft-delete quarantine.
+
+    Uses :func:`shutil.move` (never ``rm``) so an accidental click can
+    always be recovered by moving the timestamped folder back into place.
+    Also drops ``slug`` from ``.team_registry`` so the quick-select
+    dropdown stops offering it.
+
+    Returns ``(moved_count, quarantine_root)`` — the caller can surface
+    ``quarantine_root`` so the user knows where their data went.
+    """
+    paths = _collect_team_paths(slug)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    quarantine_root = _DELETED_TEAMS_DIR / f"{stamp}-{slug}"
+    if paths:
+        quarantine_root.mkdir(parents=True, exist_ok=True)
+        for src in paths:
+            # Preserve the FULL parent path (relative to the project
+            # root) so bundles coming from ``configs/CUSTOMIZED_SIMULATION``
+            # don't collide with bundles from
+            # ``EXPERIMENT/CUSTOMIZED_SIMULATION`` — both parents share
+            # the same leaf name and would otherwise nest inside each
+            # other after two consecutive ``shutil.move`` calls.
+            try:
+                rel_parent = src.parent.relative_to(_PROJECT_ROOT)
+            except ValueError:
+                rel_parent = Path(src.parent.name)
+            dest_parent = quarantine_root / rel_parent
+            dest_parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dest_parent / src.name))
+    # Registry cleanup happens even when nothing was on disk — the slug
+    # may still be lingering there from a first-touch login that never
+    # produced any bundles.
+    _unregister_team(slug)
+    return len(paths), quarantine_root
 
 __all__ = [
     "TEAM_NAME_KEY",
@@ -320,8 +404,133 @@ def render_team_gate() -> None:
                             st.session_state["_prefill_team"] = team
                             st.rerun()
 
+                # --- Manage / delete teams (destructive) ---
+                _render_team_delete_panel(existing)
+
         st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
         st.caption(
             "🔒 Team names are used only to namespace files on the server. "
             "There is no password — please stick to your assigned handle."
         )
+
+
+def _render_team_delete_panel(existing: list[str]) -> None:
+    """Collapsible danger-zone panel for removing a team and its data.
+
+    Kept inside an ``st.expander`` (collapsed by default) so first-time
+    visitors never brush against a destructive control by accident.
+    Every team gets its own **two-step** confirmation:
+
+    1. Click the 🗑️ trash button next to the team name.  This just marks
+       the team as "pending delete" in session state — nothing on disk
+       has been touched yet.
+    2. A confirmation row appears: the user must **type the exact team
+       slug** and click **Confirm delete**.  Only then does
+       :func:`_quarantine_team` move the assets to
+       ``configs/.deleted_teams/{timestamp}-{slug}/``.
+
+    Deleted assets are never ``rm``-ed; they are moved into a
+    timestamped quarantine folder, so an accidental click can be
+    reversed by moving the folder back manually.
+    """
+    st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
+    with st.expander("🗑️ 管理 / 删除团队 (Manage / delete teams)", expanded=False):
+        st.caption(
+            "危险操作。删除后该团队的项目配置与实验结果会被移动到 "
+            "`configs/.deleted_teams/` 子目录（时间戳归档），可人工恢复；"
+            "但当前 UI 不会再显示它。"
+        )
+        _pending_key = "_team_delete_pending"
+        pending = st.session_state.get(_pending_key, "")
+
+        for team in existing:
+            row_left, row_right = st.columns([4, 1], gap="small")
+            with row_left:
+                st.markdown(
+                    f"<div style='padding:0.35rem 0;'>"
+                    f"<code style='background:#f3f4f6;padding:2px 6px;"
+                    f"border-radius:4px;'>{team}</code></div>",
+                    unsafe_allow_html=True,
+                )
+            with row_right:
+                if st.button(
+                    "🗑️",
+                    key=f"_del_team_btn_{team}",
+                    help=f"Move team '{team}' and all its bundles to the quarantine folder.",
+                    use_container_width=True,
+                ):
+                    st.session_state[_pending_key] = team
+                    # Clear any previous confirmation input so the new
+                    # row starts empty.
+                    st.session_state.pop("_team_delete_confirm_input", None)
+                    st.rerun()
+
+            # Inline confirmation row for the currently-pending team.
+            if pending == team:
+                # Pre-flight scan so we can tell the user exactly how
+                # many folders will be moved.
+                affected = len(_collect_team_paths(team))
+                st.warning(
+                    f"⚠️ 即将删除团队 **`{team}`** — 会移动 **{affected}** 个"
+                    f"目录（configs/CUSTOMIZED_SIMULATION + EXPERIMENT/CUSTOMIZED_SIMULATION）。"
+                    "请在下方输入框输入团队名以确认。"
+                )
+                confirm_left, confirm_mid, confirm_right = st.columns(
+                    [3, 1, 1], gap="small"
+                )
+                with confirm_left:
+                    typed = st.text_input(
+                        "Type the team name to confirm",
+                        key="_team_delete_confirm_input",
+                        placeholder=team,
+                        label_visibility="collapsed",
+                    )
+                with confirm_mid:
+                    if st.button(
+                        "✅ Confirm",
+                        key=f"_del_team_confirm_{team}",
+                        type="primary",
+                        use_container_width=True,
+                        disabled=(typed.strip().lower() != team.lower()),
+                    ):
+                        moved, quarantine_root = _quarantine_team(team)
+                        # If the user is deleting their own signed-in
+                        # team (unlikely from the pre-gate screen, but
+                        # possible if this panel is embedded elsewhere
+                        # later), wipe the identity keys too.
+                        if current_team() == team:
+                            st.session_state.pop(TEAM_NAME_KEY, None)
+                            try:
+                                st.query_params.pop(_QUERY_KEY, None)
+                            except Exception:
+                                pass
+                        st.session_state.pop(_pending_key, None)
+                        st.session_state.pop(
+                            "_team_delete_confirm_input", None
+                        )
+                        # Also clear any stale "prefill" pointing at the
+                        # team we just removed, so the input field
+                        # doesn't repopulate it on next rerun.
+                        if st.session_state.get("_prefill_team") == team:
+                            st.session_state.pop("_prefill_team", None)
+                        try:
+                            rel = quarantine_root.relative_to(_PROJECT_ROOT)
+                            location = str(rel)
+                        except ValueError:
+                            location = str(quarantine_root)
+                        st.success(
+                            f"团队 `{team}` 已删除 — 移动了 {moved} 个目录到 "
+                            f"`{location}` （如需恢复请人工移回）。"
+                        )
+                        st.rerun()
+                with confirm_right:
+                    if st.button(
+                        "Cancel",
+                        key=f"_del_team_cancel_{team}",
+                        use_container_width=True,
+                    ):
+                        st.session_state.pop(_pending_key, None)
+                        st.session_state.pop(
+                            "_team_delete_confirm_input", None
+                        )
+                        st.rerun()
