@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-_SECTION_RE = re.compile(r"^##\s+Parameters\s*$", re.MULTILINE)
+_SECTION_RE = re.compile(r"^##\s+(?:Environmental\s+)?Parameters\s*$", re.MULTILINE)
 _NEXT_HEADER_RE = re.compile(r"^##\s+\S", re.MULTILINE)
 # A parameter symbol: letters, digits, underscores, plus a few greek
 # letters that show up in handbook tables (e.g. α, θ, ρ, σ, λ).  We only
@@ -129,6 +129,9 @@ def parse_parameters_table(markdown: str) -> list[ParamSpec]:
         symbol = (record.get("parameter") or record.get("symbol") or "").strip()
         symbol = _strip_backticks(symbol)
         if not symbol or symbol.lower().startswith("--"):
+            continue
+        # Skip repeated header rows from multi-table sections
+        if symbol.lower() in ("parameter", "symbol"):
             continue
         spec = _build_spec(symbol, record)
         if spec is not None:

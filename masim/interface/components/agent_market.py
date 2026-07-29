@@ -1376,12 +1376,22 @@ def render_default_config() -> None:
     market_extras = market_info.get("extras") or {}
     if market_extras:
         st.subheader("Market Environment")
+        # Resolve market handbook for richer tooltips
+        _market_arch = get_market_archetype(base)
+        _market_specs: dict[str, ParamSpec] | None = None
+        if _market_arch:
+            _market_md = AGENT_POOL_ROOT / "market" / f"{_market_arch}.md"
+            if _market_md.exists():
+                _m_list = parse_parameters_file(_market_md)
+                if _m_list:
+                    _market_specs = {s.symbol: s for s in _m_list}
         market_override = edits.setdefault("__market__", {})
         _render_extras_grid(
             extras=market_extras,
             override_slot=market_override,
             key_prefix=f"dc_{base}_market",
             disabled=is_rulellm,
+            param_specs=_market_specs,
         )
         if not market_override:
             edits.pop("__market__", None)
@@ -1609,11 +1619,23 @@ def _show_default_edit_dialog(
     override_slot: dict[str, Any] = dict(edits.get(block_key) or {})
     if extras:
         st.markdown("**Parameters**")
+        # Resolve handbook ParamSpec for richer tooltips
+        _archetype = _canonical_archetype(block_key)
+        _md_stem = _archetype.replace("_", "-")
+        _specs_dict: dict[str, ParamSpec] | None = None
+        for _domain, _root in _DOMAIN_ROOTS:
+            _handbook = _root / f"{_md_stem}.md"
+            if _handbook.exists():
+                _specs_list = parse_parameters_file(_handbook)
+                if _specs_list:
+                    _specs_dict = {s.symbol: s for s in _specs_list}
+                break
         _render_extras_grid(
             extras=extras,
             override_slot=override_slot,
             key_prefix=f"dc_{base}_{block_key}",
             disabled=is_rulellm,
+            param_specs=_specs_dict,
         )
         st.divider()
 
@@ -1781,12 +1803,18 @@ def _render_extras_grid(
     override_slot: dict[str, Any],
     key_prefix: str,
     disabled: bool = False,
+    param_specs: dict[str, "ParamSpec"] | None = None,
 ) -> None:
     """Render a responsive grid of parameter widgets for an extras dict.
 
     When ``disabled=True`` (e.g. RuleLLM sample view), each widget is
     greyed-out and no overrides are recorded — the current values are
     shown for reference only.
+
+    ``param_specs`` is an optional mapping from extras key → ParamSpec
+    (from the agent handbook's Parameters table). When present, the
+    tooltip shows a richer description including default, range, impact,
+    and source.
     """
     cols_per_row = 3
     keys = list(extras.keys())
@@ -1800,12 +1828,35 @@ def _render_extras_grid(
                 widget_key = f"{key_prefix}_{extras_key}"
                 pretty = extras_key.replace("_", " ").title()
 
+                # Build tooltip — rich if handbook spec available
+                spec = (param_specs or {}).get(extras_key)
+                if spec is not None:
+                    _parts: list[str] = []
+                    if spec.description:
+                        _parts.append(spec.description)
+                    _facts: list[str] = []
+                    if spec.default:
+                        _facts.append(f"**Default:** `{spec.default}`")
+                    if spec.valid_range:
+                        _facts.append(f"**Range:** `{spec.valid_range}`")
+                    if spec.sensitivity:
+                        _facts.append(f"**Sensitivity:** {spec.sensitivity}")
+                    if spec.impact:
+                        _facts.append(f"**Impact:** {spec.impact}")
+                    if spec.source:
+                        _facts.append(f"**Source:** {spec.source}")
+                    if _facts:
+                        _parts.append("\n".join(f"- {f}" for f in _facts))
+                    help_text = "\n\n".join(_parts) if _parts else f"Default: {default_val}"
+                else:
+                    help_text = f"Default: {default_val!r}" if isinstance(default_val, str) else f"Default: {default_val}"
+
                 if isinstance(default_val, bool):
                     new_val = st.checkbox(
                         pretty,
                         value=bool(current_val),
                         key=widget_key,
-                        help=f"Default: {default_val}",
+                        help=help_text,
                         disabled=disabled,
                     )
                 elif isinstance(default_val, (int, float)):
@@ -1822,7 +1873,7 @@ def _render_extras_grid(
                             else "%d"
                         ),
                         key=widget_key,
-                        help=f"Default: {default_val}",
+                        help=help_text,
                         disabled=disabled,
                     )
                 else:
@@ -1830,7 +1881,7 @@ def _render_extras_grid(
                         pretty,
                         value=str(current_val),
                         key=widget_key,
-                        help=f"Default: {default_val!r}",
+                        help=help_text,
                         disabled=disabled,
                     )
 
