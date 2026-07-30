@@ -65,6 +65,7 @@ class Market(GeneralPlayer):
             self._initialize_market_state()
         orders = self._extract_orders(observation)
         market_result = self._clear_market(orders)
+        self.state.custom_state["prev_price"] = self.state.custom_state["price"]
         self._update_state(market_result)
         self._log_market_state()
 
@@ -128,9 +129,11 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0
+        prev_price = self.state.custom_state.get("prev_price", price)
         market_update = {
             "type": "market_update",
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

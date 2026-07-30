@@ -68,6 +68,7 @@ class Market(GeneralPlayer):
             + random.gauss(0, self.state.custom_state["noise_std"])
         )
         new_price = max(new_price, 0.01)
+        self.state.custom_state["prev_price"] = price
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         logger.debug(
@@ -80,9 +81,11 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0.0
+        prev_price = self.state.custom_state.get("prev_price", price)
         market_update = {
             "type": "market_update",
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

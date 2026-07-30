@@ -82,6 +82,7 @@ class Market(GeneralPlayer):
         new_price = max(price + price_change + reversion + noise, 0.01)
         volume = min(total_buy, total_sell) + abs(net_demand) * 0.5
 
+        self.state.custom_state["prev_price"] = self.state.custom_state["price"]
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["volume_history"].append(volume)
@@ -95,9 +96,11 @@ class Market(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
+        prev_price = self.state.custom_state.get("prev_price", self.state.custom_state["price"])
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0.0
         market_data = {
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

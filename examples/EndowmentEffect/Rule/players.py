@@ -72,6 +72,7 @@ class Market(GeneralPlayer):
             + noise
         )
         new_price = max(new_price, 0.01)
+        self.state.custom_state["prev_price"] = price
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
 
@@ -79,8 +80,10 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = (price - fundamental) / fundamental if fundamental > 0 else 0.0
+        prev_price = self.state.custom_state["prev_price"]
         market_data = {
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

@@ -133,6 +133,7 @@ class Market(GeneralPlayer):
         return {"price": new_price, "volume": volume, "net_demand": net_demand}
 
     def _update_state(self, market_result: dict) -> None:
+        self.state.custom_state["prev_price"] = self.state.custom_state["price"]
         self.state.custom_state["price"] = market_result["price"]
         self.state.custom_state["price_history"].append(market_result["price"])
         self.state.custom_state["volume_history"].append(market_result["volume"])
@@ -147,12 +148,14 @@ class Market(GeneralPlayer):
     async def decide(self) -> Dict[str, Any]:
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
+        prev_price = self.state.custom_state.get("prev_price", self.state.custom_state["price"])
         if fundamental <= 0:
             raise ValueError("fundamental must be positive")
         deviation = (price - fundamental) / fundamental
         market_update = {
             "type": "market_update",
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

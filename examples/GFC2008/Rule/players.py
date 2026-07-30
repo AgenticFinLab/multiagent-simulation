@@ -133,6 +133,7 @@ class Market(GeneralPlayer):
         market_update = {
             "type": "market_update",
             "price": new_price,
+            "prev_price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

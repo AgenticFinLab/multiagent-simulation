@@ -163,6 +163,7 @@ class Market(GeneralPlayer):
         market_data = {
             "type": "market_update",
             "price": new_price,
+            "prev_price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "net_demand": net_demand,

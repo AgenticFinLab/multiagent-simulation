@@ -107,6 +107,7 @@ class Market(GeneralPlayer):
         )
         return {
             "price": new_price,
+            "prev_price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],
@@ -117,6 +118,7 @@ class Market(GeneralPlayer):
         market_update = {
             "type": "market_update",
             "price": decision_payload["price"],
+            "prev_price": decision_payload["prev_price"],
             "fundamental": decision_payload["fundamental"],
             "deviation": decision_payload["deviation"],
             "round": decision_payload["round"],

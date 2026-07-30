@@ -158,6 +158,7 @@ class Market(GeneralPlayer):
             price + price_change + reversion + noise + shock,
             self.state.custom_state["price_floor"],
         )
+        self.state.custom_state["prev_price"] = price
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         volume = min(buy_vol, sell_vol) + abs(net_demand) * 0.5
@@ -172,9 +173,11 @@ class Market(GeneralPlayer):
         fundamental = self.state.custom_state["fundamental"]
         _require_positive(fundamental, "fundamental")
         deviation = (price - fundamental) / fundamental
+        prev_price = self.state.custom_state.get("prev_price", price)
         market_update = {
             "type": "market_update",
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

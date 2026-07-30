@@ -107,6 +107,7 @@ class Market(GeneralPlayer):
         )
         return {
             "price": new_price,
+            "prev_price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

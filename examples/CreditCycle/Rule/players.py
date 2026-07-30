@@ -71,6 +71,7 @@ class Market(GeneralPlayer):
         reversion = self.state.custom_state["mean_reversion"] * (fundamental - price)
         noise = random.gauss(0, self.state.custom_state["noise_std"])
         new_price = max(price + price_change + reversion + noise, 0.01)
+        self.state.custom_state["prev_price"] = price
         self.state.custom_state["price"] = new_price
         self.state.custom_state["price_history"].append(new_price)
         self.state.custom_state["fundamental_history"].append(fundamental)
@@ -99,8 +100,10 @@ class Market(GeneralPlayer):
         price = self.state.custom_state["price"]
         fundamental = self.state.custom_state["fundamental"]
         deviation = self.state.custom_state["deviation"]
+        prev_price = self.state.custom_state["prev_price"]
         market_data = {
             "price": price,
+            "prev_price": prev_price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": self.state.custom_state["round"],

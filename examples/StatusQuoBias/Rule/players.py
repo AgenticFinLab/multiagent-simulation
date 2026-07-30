@@ -110,6 +110,7 @@ class Market(GeneralPlayer):
 
         market_data = {
             "price": new_price,
+            "prev_price": price,
             "fundamental": fundamental,
             "deviation": deviation,
             "round": round_num,
