@@ -127,12 +127,10 @@ def get_scenario_color(scenario_name: str) -> str:
         "AssetBubble": "#FF6B6B",
         "MarketCrash": "#4ECDC4",
         "HerdEffect": "#45B7D1",
-        "MomentumEffect": "#96CEB4",
         "ReversalEffect": "#FFEAA7",
         "FlashCrash": "#DDA0DD",
         "VolatilityClustering": "#98D8C8",
         "EquityPremium": "#F7DC6F",
-        "DispositionEffect": "#BB8FCE",
         "LiquidityDryup": "#85C1E9",
         "ShortSqueeze": "#F8C471",
     }

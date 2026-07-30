@@ -31,24 +31,20 @@ _EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION"}
 
 
 # ─── Curated scenario visibility (Plan A: whitelist) ──────────────────────
-# 12 精选场景，按教学模块分组。修改此 dict 即可增删可见场景；
+# 8 精选场景，按教学模块分组。修改此 dict 即可增删可见场景；
 # 隐藏的场景在磁盘保留，历史实验数据完好，可随时切换回来。
 _SCENARIO_CATEGORIES: Dict[str, str] = {
     # 🧠 行为偏差 Behavioral Biases
     "HerdEffect":           "behavioral",
-    "DispositionEffect":    "behavioral",
     "OverconfidenceBias":   "behavioral",
     "AnchoringEffect":      "behavioral",
     # 💥 市场机制 Market Mechanisms
     "AssetBubble":          "mechanism",
-    "MomentumEffect":       "mechanism",
     "FlashCrash2010":       "mechanism",
-    "HerdingInformation":   "mechanism",
     # 📉 历史危机 Historical Crises
     "DotComBubble":         "crisis",
     "GFC2008":              "crisis",
     "GameStopShortSqueeze": "crisis",
-    "SVBBankRun":           "crisis",
 }
 _VISIBLE_SCENARIOS: set[str] = set(_SCENARIO_CATEGORIES.keys())
 
@@ -396,12 +392,6 @@ _AGENT_THEORIES: Dict[str, str] = {
     "ContrarianInvestor": "Anti-Herding / Contrarianism",
     "RiskAverseInvestor": "Mean-Variance Optimisation",
     "AggressiveInvestor": "Overconfidence Bias",
-    # MomentumEffect
-    "MomentumTrader": "Momentum Premium (Jegadeesh & Titman)",
-    "ContrarianTrader": "Mean Reversion / DeBondt-Thaler",
-    "IndexFund": "Passive Benchmark",
-    "TechnicalTrader": "Technical Analysis",
-    "FundamentalTrader": "Fundamental Valuation",
     # ReversalEffect
     "OverconfidentTrader": "Overconfidence Bias",
     "ValueInvestor": "Fundamental Valuation",
@@ -428,23 +418,6 @@ _AGENT_THEORIES: Dict[str, str] = {
     "LLMTrendFollower": "Chartist / Trend Extrapolation",
     "LLMSlowAdapter": "Adaptive Expectations",
     "LLMVolatilityTrader": "GARCH Volatility Trading",
-    # DispositionEffect
-    "DispositionInvestor": "Prospect Theory (Kahneman-Tversky)",
-    "RationalInvestor": "Expected Utility Theory",
-    "TaxAwareInvestor": "Tax-Loss Harvesting",
-    "IndexHolder": "Passive Buy-and-Hold",
-    "InstitutionalInvestor": "Professional Discipline",
-    "LLMDispositionBiased": "Prospect Theory (Kahneman-Tversky)",
-    "LLMRationalInvestor": "Expected Utility Theory",
-    "LLMTaxAwareInvestor": "Tax-Loss Harvesting",
-    "LLMInstitutionalInvestor": "Professional Discipline",
-    "LLMLossAverse": "Loss Aversion (Kahneman-Tversky)",
-    # DispositionEffectRuleLLM
-    "RuleLLMDispositionBiased": "Prospect Theory (Kahneman-Tversky)",
-    "RuleLLMRationalInvestor": "Expected Utility Theory",
-    "RuleLLMTaxAwareInvestor": "Tax-Loss Harvesting",
-    "RuleLLMInstitutionalInvestor": "Professional Discipline",
-    "RuleLLMLossAverse": "Loss Aversion (Kahneman-Tversky)",
     # HerdEffectRuleLLM
     "RuleLLMMomentumInvestor": "Momentum Premium (Jegadeesh & Titman)",
     "RuleLLMContrarianInvestor": "Mean Reversion / DeBondt-Thaler",
@@ -743,12 +716,6 @@ _AGENT_PRINCIPLES: Dict[str, str] = {
     "ContrarianInvestor": "Bets against consensus; provides weak mean-reversion pressure",
     "RiskAverseInvestor": "Reduces exposure during volatility spikes; adds stability",
     "AggressiveInvestor": "Large position sizes with high conviction; amplifies moves",
-    # MomentumEffect / MomentumEffectLLM
-    "MomentumTrader": "Buys winners and sells losers based on recent returns",
-    "ContrarianTrader": "Fades momentum; profits from mean-reversion episodes",
-    "IndexFund": "Passive buy-and-hold benchmark; no active signal",
-    "TechnicalTrader": "Uses moving averages and chart patterns to time entries",
-    "FundamentalTrader": "Trades on earnings/valuation signals; long-horizon view",
     # ReversalEffect / ReversalEffectLLM
     "OverconfidentTrader": "Over-extrapolates recent returns; creates reversal opportunities",
     "ValueInvestor": "Patient buyer of undervalued assets; anchors long-run prices",
@@ -775,23 +742,6 @@ _AGENT_PRINCIPLES: Dict[str, str] = {
     "LLMTrendFollower": "LLM-driven trend follower interpreting price narratives",
     "LLMSlowAdapter": "LLM-driven slow adapter updating beliefs gradually",
     "LLMVolatilityTrader": "LLM-driven volatility trader calibrating exposure to vol regime",
-    # DispositionEffect / DispositionEffectLLM
-    "DispositionInvestor": "Sells winners too early and holds losers too long (prospect theory)",
-    "RationalInvestor": "Maximises expected utility; no disposition bias",
-    "TaxAwareInvestor": "Harvests tax losses; rational selling of losers",
-    "IndexHolder": "Passive index holder; no active trading bias",
-    "InstitutionalInvestor": "Large-scale disciplined trader with risk limits",
-    "LLMDispositionBiased": "LLM investor exhibiting prospect-theory disposition bias in reasoning",
-    "LLMRationalInvestor": "LLM investor applying expected-utility maximisation",
-    "LLMTaxAwareInvestor": "LLM investor optimising after-tax portfolio returns",
-    "LLMInstitutionalInvestor": "LLM-driven institutional investor with mandate constraints",
-    "LLMLossAverse": "LLM investor with strong loss aversion; holds losers, books gains",
-    # DispositionEffectRuleLLM
-    "RuleLLMDispositionBiased": "Hybrid rule+LLM investor following embedded disposition effect formulas",
-    "RuleLLMRationalInvestor": "Hybrid rule+LLM investor with systematic rebalancing rules",
-    "RuleLLMTaxAwareInvestor": "Hybrid rule+LLM investor applying tax-loss harvesting formulas",
-    "RuleLLMInstitutionalInvestor": "Hybrid rule+LLM institutional investor with symmetric thresholds",
-    "RuleLLMLossAverse": "Hybrid rule+LLM investor with extreme loss aversion embedded rules",
     # HerdEffectRuleLLM
     "RuleLLMMomentumInvestor": "Hybrid rule+LLM momentum investor following trend formulas",
     "RuleLLMContrarianInvestor": "Hybrid rule+LLM contrarian applying mean-reversion rules",
@@ -1066,16 +1016,6 @@ _SCENARIO_MARKET_DESCRIPTIONS: Dict[str, str] = {
         "whether language-model reasoning leads to emergent herding or independent "
         "judgment under social influence."
     ),
-    "MomentumEffect": (
-        "Investors trade based on past return signals. Momentum traders buy recent "
-        "winners and sell losers, contrarian traders fade them, and index funds provide "
-        "a passive benchmark — measuring return autocorrelation and momentum persistence."
-    ),
-    "MomentumEffectLLM": (
-        "LLM investors interpret price history narratives. The simulation tests whether "
-        "LLM-driven momentum chasers generate the same return persistence and eventual "
-        "reversal as rule-based counterparts."
-    ),
     "ReversalEffect": (
         "Investors trade on mean-reversion signals after extreme moves. Contrarians buy "
         "oversold stocks and sell overbought ones, while overconfident traders "
@@ -1115,22 +1055,6 @@ _SCENARIO_MARKET_DESCRIPTIONS: Dict[str, str] = {
         "LLM investors decide between stocks and bonds using loss-aversion reasoning. "
         "The simulation tests whether LLM myopic framing generates an equity premium "
         "as large as that observed in rule-based models and real markets."
-    ),
-    "DispositionEffect": (
-        "Investors manage a portfolio of stocks with varying purchase prices. "
-        "Disposition-biased traders sell winners too early and hold losers too long, "
-        "while rational and tax-aware agents trade to maximise after-tax returns."
-    ),
-    "DispositionEffectLLM": (
-        "LLM investors track personal cost bases and make sell decisions in natural "
-        "language. The simulation tests whether LLM reasoning reproduces the "
-        "prospect-theory disposition effect seen in real retail investors."
-    ),
-    "DispositionEffectRuleLLM": (
-        "Hybrid rule+LLM investors follow embedded quantitative disposition rules "
-        "while using LLM reasoning for qualitative adjustments. Each agent computes "
-        "gain/loss relative to reference point and applies prospect-theory formulas "
-        "with natural language context — combining rule precision with LLM flexibility."
     ),
     "HerdEffectRuleLLM": (
         "Hybrid rule+LLM investors follow embedded momentum, contrarian, and volatility "
@@ -1233,7 +1157,6 @@ _ARCHETYPE_FALLBACK: Dict[str, str] = {
     "EchoChamber": "opinion-echo-chamber-clustering",
     "RumorSpread": "information-sis-contagion",
     "LUNACollapse": "crypto-algostable-depeg",
-    "SVBBankRun": "deposit-bank-run-diamond-dybvig",
     "Volmageddon": "derivatives-vol-feedback",
     "CreditCycle": "credit-minsky-cycle",
     "GFC2008": "credit-minsky-cycle",

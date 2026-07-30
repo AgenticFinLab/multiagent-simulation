@@ -1019,7 +1019,6 @@ def _shorten_node_label(name: str) -> str:
         "institutional_investor": "Inst.\nInv.",
         "short_term_speculator": "ST Spec.",
         "loss_averse_investor": "Loss Averse",
-        "disposition_investor": "Disposition\nInv.",
         "myopic_investor": "Myopic\nInv.",
         "risk_parity_fund": "Risk\nParity",
         "leveraged_hedge_fund": "Lev.\nHedge",

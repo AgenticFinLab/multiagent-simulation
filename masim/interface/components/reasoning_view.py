@@ -232,7 +232,6 @@ def _escape_html(text: str) -> str:
     )
 
 
-@st.cache_data(ttl=60, show_spinner="Loading round data…")
 def _load_cached_rounds(scenario_name: str):
-    """Cache round data to avoid re-reading disk on every page interaction."""
+    """Load round data from disk (fast SSD read, no cache needed)."""
     return load_rounds(scenario_name)

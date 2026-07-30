@@ -505,7 +505,6 @@ def _chart_description(stem: str) -> str:
         "volatility_analysis": "Volatility clustering and GARCH-style regime detection",
         "herd_analysis": "Herding coefficient and synchronisation across agents",
         "crash_analysis": "Market crash depth, speed and contagion dynamics",
-        "disposition_analysis": "Disposition effect by strategy — PGR vs PLR",
     }
     for key, desc in descriptions.items():
         if key in stem.lower():
