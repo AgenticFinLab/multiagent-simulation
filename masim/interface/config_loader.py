@@ -31,12 +31,11 @@ _EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION"}
 
 
 # ─── Curated scenario visibility (Plan A: whitelist) ──────────────────────
-# 8 精选场景，按教学模块分组。修改此 dict 即可增删可见场景；
+# 6 精选场景，按教学模块分组。修改此 dict 即可增删可见场景；
 # 隐藏的场景在磁盘保留，历史实验数据完好，可随时切换回来。
 _SCENARIO_CATEGORIES: Dict[str, str] = {
     # 🧠 行为偏差 Behavioral Biases
     "HerdEffect":           "behavioral",
-    "OverconfidenceBias":   "behavioral",
     "AnchoringEffect":      "behavioral",
     # 💥 市场机制 Market Mechanisms
     "AssetBubble":          "mechanism",
@@ -44,7 +43,6 @@ _SCENARIO_CATEGORIES: Dict[str, str] = {
     # 📉 历史危机 Historical Crises
     "DotComBubble":         "crisis",
     "GFC2008":              "crisis",
-    "GameStopShortSqueeze": "crisis",
 }
 _VISIBLE_SCENARIOS: set[str] = set(_SCENARIO_CATEGORIES.keys())
 
