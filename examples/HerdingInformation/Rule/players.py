@@ -95,21 +95,9 @@ class Market(GeneralPlayer):
         }
 
     async def act(self, decision_payload):
-        market_update = {
-            "type": "market_update",
-            "price": decision_payload["price"],
-            "fundamental": decision_payload["fundamental"],
-            "deviation": decision_payload["deviation"],
-            "round": decision_payload["round"],
-        }
         return Action(
             action_type="market_broadcast",
-            payload={
-                "market_data": market_update,
-                "outbound_messages": [
-                    {"payload": market_update, "content_type": "market_update"}
-                ],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 
@@ -152,17 +140,25 @@ class CascadeFollower(GeneralPlayer):
             cascade_count += 1
         self.state.custom_state["cascade_count"] = cascade_count
 
+        action = "hold"
+        quantity = 0
         if cascade_count >= cascade_trigger:
             qty = min(800, int(abs(deviation) * social_weight * 5000))
             if deviation > 0 and price > 0:
                 buy_qty = min(qty, int(cash / price))
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    action, quantity = "buy", buy_qty
             elif deviation < 0:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    action, quantity = "sell", sell_qty
+
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -174,13 +170,9 @@ class CascadeFollower(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 
@@ -215,17 +207,25 @@ class ReputationHerder(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         reputation_concern = self.state.custom_state["reputation_concern"]
 
+        action = "hold"
+        quantity = 0
         if abs(deviation) > 0.02:
             qty = min(600, int(abs(deviation) * reputation_concern * 4000))
             if deviation > 0 and price > 0:
                 buy_qty = min(qty, int(cash / price))
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    action, quantity = "buy", buy_qty
             elif deviation < 0:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    action, quantity = "sell", sell_qty
+
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -237,13 +237,9 @@ class ReputationHerder(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 
@@ -278,17 +274,25 @@ class IndependentThinker(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         signal_precision = self.state.custom_state["signal_precision"]
 
+        action = "hold"
+        quantity = 0
         if abs(deviation) > 0.03:
             qty = min(500, int(abs(deviation) * signal_precision * 3000))
             if deviation < 0 and price > 0:
                 buy_qty = min(qty, int(cash / price))
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
+                    action, quantity = "buy", buy_qty
             elif deviation > 0:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
-        return {"action": "hold", "quantity": 0}
+                    action, quantity = "sell", sell_qty
+
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -300,13 +304,9 @@ class IndependentThinker(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 
@@ -343,17 +343,25 @@ class Contrarian(GeneralPlayer):
         deviation = self.state.custom_state["deviation"]
         contrarian_threshold = self.state.custom_state["contrarian_threshold"]
 
+        action = "hold"
+        quantity = 0
         if abs(deviation) > contrarian_threshold * 0.05:
             qty = min(400, int(abs(deviation) * 2000))
             if deviation > 0:
                 sell_qty = min(qty, max(position, 0))
                 if sell_qty > 0:
-                    return {"action": "sell", "quantity": sell_qty}
+                    action, quantity = "sell", sell_qty
             elif price > 0:
                 buy_qty = min(qty, int(cash / price))
                 if buy_qty > 0:
-                    return {"action": "buy", "quantity": buy_qty}
-        return {"action": "hold", "quantity": 0}
+                    action, quantity = "buy", buy_qty
+
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -365,13 +373,9 @@ class Contrarian(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 
@@ -405,16 +409,24 @@ class NoiseTrader(GeneralPlayer):
         position = self.state.custom_state["position"]
         prob = self.state.custom_state["trade_probability"]
 
+        action = "hold"
+        quantity = 0
         if random.random() < prob:
             qty = random.randint(100, 500)
-            action = "buy" if random.random() > 0.5 else "sell"
-            if action == "buy" and price > 0:
+            act = "buy" if random.random() > 0.5 else "sell"
+            if act == "buy" and price > 0:
                 qty = min(qty, int(cash / price))
             else:
                 qty = min(qty, max(position, 0))
             if qty > 0:
-                return {"action": action, "quantity": qty}
-        return {"action": "hold", "quantity": 0}
+                action, quantity = act, qty
+
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -426,13 +438,9 @@ class NoiseTrader(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 

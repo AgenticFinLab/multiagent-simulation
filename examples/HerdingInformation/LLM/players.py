@@ -116,7 +116,12 @@ class LLMInvestor(GeneralPlayer):
                 self.identity,
                 round_num,
             )
-            return {"action": "hold", "quantity": 0}
+            order = {"type": "order", "action": "hold", "quantity": 0}
+            return {
+                "action": "hold",
+                "quantity": 0,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            }
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -127,7 +132,12 @@ class LLMInvestor(GeneralPlayer):
         elif action == "sell":
             quantity = min(quantity, max(position, 0))
 
-        return {"action": action, "quantity": quantity}
+        order = {"type": "order", "action": action, "quantity": quantity}
+        return {
+            "action": action,
+            "quantity": quantity,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload):
         action = decision_payload["action"]
@@ -139,13 +149,9 @@ class LLMInvestor(GeneralPlayer):
         elif action == "sell" and quantity > 0:
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
-        order = {"type": "order", "action": action, "quantity": quantity}
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 

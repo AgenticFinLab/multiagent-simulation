@@ -120,7 +120,11 @@ class LLMInvestor(GeneralPlayer):
                 self.identity,
                 self.state.custom_state["round"],
             )
-            return _build_order(self, "hold", 0, float(price), "llm_fallback_noop")
+            order = _build_order(self, "hold", 0, float(price), "llm_fallback_noop")
+            return {
+                **order,
+                "outbound_messages": [{"payload": order, "content_type": "order"}],
+            }
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -135,13 +139,17 @@ class LLMInvestor(GeneralPlayer):
             quantity = 0
 
         quantity = max(0, quantity)
-        return _build_order(
+        order = _build_order(
             self,
             action,
             quantity,
             float(decision["bid_price"]),
             str(decision["reasoning"]),
         )
+        return {
+            **order,
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
+        }
 
     async def act(self, decision_payload: dict) -> Action:
         """Update portfolio and send order."""
@@ -156,19 +164,9 @@ class LLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = _build_order(
-            self,
-            action,
-            quantity,
-            float(decision_payload["bid_price"]),
-            str(decision_payload["reasoning"]),
-        )
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 

@@ -328,10 +328,12 @@ class RagLLMInvestor(GeneralPlayer):
         else:
             quantity = 0
 
+        order = {"type": "order", "action": action, "quantity": quantity}
         return {
             "action": action,
             "quantity": quantity,
             "rag_context": self.state.custom_state["last_rag_context"],
+            "outbound_messages": [{"payload": order, "content_type": "order"}],
         }
 
     async def act(self, decision_payload: dict) -> Action:
@@ -347,19 +349,9 @@ class RagLLMInvestor(GeneralPlayer):
             self.state.custom_state["cash"] += quantity * price
             self.state.custom_state["position"] -= quantity
 
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": action,
-            "quantity": quantity,
-            "agent_type": self.__class__.__name__,
-        }
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 

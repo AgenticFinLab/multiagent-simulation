@@ -366,14 +366,6 @@ class RagLLMInvestor(GeneralPlayer):
             quantity = 0
         quantity = max(0, quantity)
 
-        if action in ("buy", "sell") and quantity > 0:
-            if action == "buy":
-                self.state.custom_state["cash"] -= quantity * price
-                self.state.custom_state["position"] += quantity
-            else:
-                self.state.custom_state["cash"] += quantity * price
-                self.state.custom_state["position"] -= quantity
-
         order = _build_order(
             self,
             action,
@@ -388,23 +380,18 @@ class RagLLMInvestor(GeneralPlayer):
         }
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        order = {
-            "type": "order",
-            "from": self.identity,
-            "action": decision_payload["action"],
-            "bid_price": decision_payload["bid_price"],
-            "quantity": decision_payload["quantity"],
-            "reasoning": decision_payload["reasoning"],
-            "agent_type": self.__class__.__name__,
-            "strategy": self.__class__.__name__,
-        }
+        action = decision_payload["action"]
+        quantity = decision_payload["quantity"]
+        price = self.state.custom_state["price"]
+        if action == "buy" and quantity > 0 and price > 0:
+            self.state.custom_state["cash"] -= quantity * price
+            self.state.custom_state["position"] += quantity
+        elif action == "sell" and quantity > 0:
+            self.state.custom_state["cash"] += quantity * price
+            self.state.custom_state["position"] -= quantity
         return Action(
             action_type="order",
-            payload={
-                "order": order,
-                "rag_context": decision_payload["rag_context"],
-                "outbound_messages": [{"payload": order, "content_type": "order"}],
-            },
+            payload=decision_payload,
             source_id=self.identity,
         )
 
