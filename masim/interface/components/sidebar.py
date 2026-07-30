@@ -645,9 +645,13 @@ def _get_or_create_icon_topology_preview(scenario_name: str) -> Optional[Path]:
     Returns:
         Path to the icon preview PNG, or None if topology.yml is missing.
     """
-    scenario_name = _resolve_display_key(scenario_name)
+    # Try the direct path first (Customized bundles have their own topology).
     topology_path = _configs_path(scenario_name) / "topology.yml"
     players_path = _configs_path(scenario_name) / "players.yml"
+    if not topology_path.exists():
+        scenario_name = _resolve_display_key(scenario_name)
+        topology_path = _configs_path(scenario_name) / "topology.yml"
+        players_path = _configs_path(scenario_name) / "players.yml"
     if not topology_path.exists():
         return None
 

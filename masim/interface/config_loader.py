@@ -956,8 +956,12 @@ def get_diagram_path(scenario_name: str) -> Optional[Path]:
     Returns:
         Path to the latest topology PNG, or None if not found
     """
-    scenario_name = _resolve_display_key(scenario_name)
+    # Try the direct path first — Customized bundles write experiment output
+    # under their own EXPERIMENT/CUSTOMIZED_SIMULATION/{cid}/... tree.
     diagram_dir = _experiment_path(scenario_name) / "records" / "diagrams"
+    if not diagram_dir.exists():
+        resolved = _resolve_display_key(scenario_name)
+        diagram_dir = _experiment_path(resolved) / "records" / "diagrams"
     if not diagram_dir.exists():
         return None
     # Take the first available topology PNG (typically only one)
@@ -974,8 +978,13 @@ def get_topology_info(scenario_name: str) -> Dict[str, Any]:
     Returns:
         Dict with topology_type, sources, connections (node -> [targets])
     """
-    scenario_name = _resolve_display_key(scenario_name)
+    # Try the direct path first — Customized bundles generate their own
+    # topology.yml that reflects the user's agent selections.
     topology_path = _configs_path(scenario_name) / "topology.yml"
+    if not topology_path.exists():
+        # Fall back to the shipped scenario's topology for display-only keys.
+        resolved = _resolve_display_key(scenario_name)
+        topology_path = _configs_path(resolved) / "topology.yml"
 
     result: Dict[str, Any] = {
         "topology_type": "star",
