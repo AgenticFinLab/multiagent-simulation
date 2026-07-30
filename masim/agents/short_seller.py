@@ -30,6 +30,7 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -56,8 +57,11 @@ class RuleShortSeller(CanonicalRulePlayer):
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
         cs = self.state.custom_state
-        hold = InvestorOrder.hold(
-            price=state.price, investor=self.identity, strategy=self.STRATEGY
+        hold = replace(
+            InvestorOrder.hold(
+                price=state.price, investor=self.identity, strategy=self.STRATEGY
+            ),
+            extras={"is_short_cover": False},
         )
         # Already flat / long — permanently deactivated (never sells).
         if state.position >= 0:
@@ -75,11 +79,14 @@ class RuleShortSeller(CanonicalRulePlayer):
         qty = min(qty, int(abs_pos))
         if qty <= 0:
             return hold
-        return InvestorOrder.buy(
-            quantity=float(qty),
-            price=state.price,
-            investor=self.identity,
-            strategy=self.STRATEGY,
+        return replace(
+            InvestorOrder.buy(
+                quantity=float(qty),
+                price=state.price,
+                investor=self.identity,
+                strategy=self.STRATEGY,
+            ),
+            extras={"is_short_cover": True},
         )
 
 

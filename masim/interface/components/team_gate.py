@@ -603,15 +603,10 @@ def _render_purge_all_panel() -> None:
         ):
             with st.spinner("正在清除..."):
                 result = _purge_all_team_data()
-            st.success(
-                f"✅ 清除完成: "
-                f"{result.get('configs_bundles', 0)} 个配置 bundle, "
-                f"{result.get('examples_bundles', 0)} 个 example bundle, "
-                f"{result.get('experiment_size_mb', 0)} MB 实验数据, "
-                f"{result.get('teams_removed', 0)} 个 team 注册。"
-            )
-            # Clear confirmation input
+            # Clear confirmation input and rerun to reflect clean state.
             st.session_state.pop("_admin_purge_confirm", None)
+            st.rerun()
+            return
 
 
 def _purge_all_team_data() -> dict:

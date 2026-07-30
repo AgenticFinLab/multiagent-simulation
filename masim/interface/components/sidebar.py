@@ -90,6 +90,12 @@ def _bundle_check_dialog(scenario_key: str) -> None:
         if logical == "prompts.py" and prov["variant"] not in ("LLM", "RuleLLM", "Rag"):
             if not exists:
                 continue
+        # Customized-agents bundles keep players.py at Rule/players.py
+        # (full scenario copy); probe_bundle_provenance checks both paths.
+        # Skip if not yet initialized (defensive — initialization is lazy).
+        if logical == "players.py" and prov["kind"] == "Customized-agents":
+            if not exists:
+                continue
         mark = "✅" if exists else ("—" if logical == "prompts.py" else "❌")
         rows.append(f"- {mark} `{_try_relative_to_project(path)}`")
     st.markdown("\n".join(rows) if rows else "_(无路径信息)_")

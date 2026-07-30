@@ -254,8 +254,10 @@ def _emit(order: InvestorOrder) -> Dict[str, Any]:
     # that reaches the network is guaranteed to match the schema regardless
     # of which factory produced the order.
     validate_order(payload)
+    # Strip only internal chain-of-thought (analysis) — reasoning is kept
+    # for Markets that use it (e.g. social-influence scenarios).
     outbound_payload = {
-        k: v for k, v in payload.items() if k not in {"reasoning", "analysis"}
+        k: v for k, v in payload.items() if k not in {"analysis"}
     }
     return {
         **payload,
@@ -340,7 +342,20 @@ class CanonicalRulePlayer(GeneralPlayer):
             strategy=self.STRATEGY,
         )
         order = self._finalize_order(order, state)
-        return _emit(order)
+        result = _emit(order)
+
+        # Inject truthful agent state into outbound so Market coordinators
+        # receive real data for clearing/logging — never fabricate defaults.
+        _agent_state = {
+            "cash": state.cash,
+            "position": state.position,
+            "agent_type": self.STRATEGY,  # alias for backward compat
+        }
+        result.update(_agent_state)
+        for msg in result.get("outbound_messages", []):
+            msg["payload"].update(_agent_state)
+
+        return result
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         # decision_payload comes from _emit(order) where order is a fully
@@ -639,7 +654,19 @@ class CanonicalLLMPlayer(GeneralPlayer):
         # Rule agents — reuse of the code path guarantees Rule / LLM parity
         # for the clipping semantics.
         order = self._finalize_llm_order(order, state)
-        return _emit(order)
+        result = _emit(order)
+
+        # Inject truthful agent state into outbound (same as Rule variant).
+        _agent_state = {
+            "cash": state.cash,
+            "position": state.position,
+            "agent_type": self.STRATEGY,
+        }
+        result.update(_agent_state)
+        for msg in result.get("outbound_messages", []):
+            msg["payload"].update(_agent_state)
+
+        return result
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
         # Same contract as CanonicalRulePlayer.act — the payload is emitted

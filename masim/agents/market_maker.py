@@ -35,6 +35,7 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -65,9 +66,13 @@ class RuleMarketMaker(CanonicalRulePlayer):
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
         eta = self.state.custom_state["mean_reversion"]
         withdraw_th = self.state.custom_state["withdraw_threshold"]
+        _extras = {"provides_liquidity": True, "is_market_maker": True}
 
-        hold = InvestorOrder.hold(
-            price=state.price, investor=self.identity, strategy=self.STRATEGY
+        hold = replace(
+            InvestorOrder.hold(
+                price=state.price, investor=self.identity, strategy=self.STRATEGY
+            ),
+            extras=_extras,
         )
         # Compute deviation from fundamental (fund - price)/price per profile.
         if state.price <= 0:
@@ -87,20 +92,26 @@ class RuleMarketMaker(CanonicalRulePlayer):
         if inventory > 0:
             qty = int(eta * inventory)
             qty = max(1, min(qty, int(inventory)))
-            return InvestorOrder.sell(
-                quantity=float(qty),
-                price=state.price,
-                investor=self.identity,
-                strategy=self.STRATEGY,
+            return replace(
+                InvestorOrder.sell(
+                    quantity=float(qty),
+                    price=state.price,
+                    investor=self.identity,
+                    strategy=self.STRATEGY,
+                ),
+                extras=_extras,
             )
         if inventory < 0:
             qty = int(eta * abs(inventory))
             qty = max(1, min(qty, int(abs(inventory))))
-            return InvestorOrder.buy(
-                quantity=float(qty),
-                price=state.price,
-                investor=self.identity,
-                strategy=self.STRATEGY,
+            return replace(
+                InvestorOrder.buy(
+                    quantity=float(qty),
+                    price=state.price,
+                    investor=self.identity,
+                    strategy=self.STRATEGY,
+                ),
+                extras=_extras,
             )
         return hold
 

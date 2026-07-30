@@ -1080,6 +1080,12 @@ def render_variant_choice() -> None:
                 "optionally rewrite LLM prompts, then launch. The chosen "
                 "scenario stays locked while you build."
             )
+            st.warning(
+                "⚠️ **体验项目 (Experimental)**\n\n"
+                "此模式为进阶体验，不做硬性要求。"
+                "建议先完成左侧 Default 模式的任务后再来探索。",
+                icon="⚠️",
+            )
             if st.button(
                 "Select agents for simulation \u2192",
                 key="stage2_go_customize",
@@ -2661,19 +2667,29 @@ def _kebab_to_title(stem: str) -> str:
 #     trend-follower (systematic/technical trading)
 #
 _SCENARIO_AGENT_STEMS: frozenset[str] = frozenset({
-    # ── Core (user-specified) ──
+    # ── Core ──
     "momentum-investor",        # 动量型 — trend following
     "aggressive-investor",      # 激进型 — amplified momentum
     "noise-trader",             # 噪音型 — random / uninformed
     "contrarian-investor",      # 反向操作型 — mean reversion
     "risk-averse-investor",     # 风险感知型 — volatility-sensitive
-    # ── Supplementary ──
     "fundamental-investor",     # 基本面型 — value / intrinsic worth
+    "value-investor",           # 价值投资者 — Graham/Dodd margin of safety
+    "passive-investor",         # 被动型 — index tracking / buy-and-hold
+    # ── Behavioral ──
     "disposition-investor",     # 处置效应型 — holds losers, sells winners
     "overconfident-trader",     # 过度自信型 — overestimation bias
-    "stop-loss-trader",         # 止损型 — mechanical exit (flash crash)
+    "loss-averse-investor",     # 损失厌恶型 — Kahneman & Tversky prospect theory
+    "anchored-trader",          # 锚定效应型 — reference price dependency
+    "panic-seller",             # 恐慌抛售型 — crash cascade amplification
+    # ── Structural / Microstructure ──
     "market-maker",             # 做市商 — two-sided liquidity
     "short-seller",             # 做空型 — bets against overvaluation
+    "arbitrageur",              # 套利者 — price efficiency enforcement
+    "high-frequency-trader",    # 高频交易者 — speed-driven microstructure
+    "retail-trader",            # 散户 — behavioral biases, FOMO, social trading
+    # ── Technical / Mechanical ──
+    "stop-loss-trader",         # 止损型 — mechanical exit (flash crash)
     "trend-follower",           # 趋势跟踪型 — systematic / technical
 })
 

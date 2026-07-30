@@ -26,6 +26,7 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Dict, List
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
@@ -61,8 +62,12 @@ class RuleStopLossTrader(CanonicalRulePlayer):
             del buf[: len(buf) - window]
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
-        hold = InvestorOrder.hold(
-            price=state.price, investor=self.identity, strategy=self.STRATEGY
+        _extras = {"provides_liquidity": False}
+        hold = replace(
+            InvestorOrder.hold(
+                price=state.price, investor=self.identity, strategy=self.STRATEGY
+            ),
+            extras=_extras,
         )
         buf: List[float] = self.state.custom_state.get("price_history_stop") or []
         if not buf or state.position <= 0:
@@ -74,11 +79,14 @@ class RuleStopLossTrader(CanonicalRulePlayer):
         stop_loss = self.state.custom_state["stop_loss"]
 
         if state.price < recent_high * (1.0 - stop_loss):
-            return InvestorOrder.sell(
-                quantity=float(state.position),
-                price=state.price,
-                investor=self.identity,
-                strategy=self.STRATEGY,
+            return replace(
+                InvestorOrder.sell(
+                    quantity=float(state.position),
+                    price=state.price,
+                    investor=self.identity,
+                    strategy=self.STRATEGY,
+                ),
+                extras=_extras,
             )
         return hold
 

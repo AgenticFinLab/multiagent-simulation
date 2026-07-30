@@ -221,8 +221,17 @@ tmpl/
 *TEST*
 
 slides*
+!docs/slides/
+!docs/slides/**
+
+# Slide build artifacts (still ignored)
+docs/slides/**/.cache/
+docs/slides/**/*_files/
+docs/slides/**/*.log
 
 *CUSTOMIZED_SIMULATION*
 
 
 configs/.team_registry
+
+*/slides/*

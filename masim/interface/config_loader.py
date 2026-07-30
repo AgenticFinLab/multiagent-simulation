@@ -1671,6 +1671,12 @@ def probe_bundle_provenance(scenario_key: str) -> Dict[str, Any]:
         ("prompts.py", "prompts.py"),
     ):
         p = examples_dir / rel
+        # Customized-agents bundles store players.py inside the Rule/
+        # subdirectory (full scenario copy); check there as fallback.
+        if not p.exists() and kind == "Customized-agents":
+            alt = examples_dir / "Rule" / rel
+            if alt.exists():
+                p = alt
         files[logical_name] = {"path": p, "exists": p.exists()}
 
     # ── Parse players.yml for class / sys_message refs ────────────────────
