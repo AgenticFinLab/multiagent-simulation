@@ -3862,41 +3862,6 @@ def _class_to_agent_type(class_name: str) -> str:
     return kebab.lower()
 
 
-def _default_agent_types_for_scenario(
-    scenario_base: str,
-    catalog: list[dict[str, Any]],
-) -> tuple[list[str], list[str]]:
-    """Return (available, missing) agent_types for the scenario's Rule default.
-
-    ``available`` are catalog agent_types that map to a default player class
-    and can be checked in the market grid. ``missing`` are class names whose
-    kebab form has no matching entry in the AGENT_POOL catalog (usually
-    because the icon has not been authored yet).
-    """
-    probe_key = _scenario_probe_key(scenario_base, discover_scenario_groups())
-    agents = get_agents_info(probe_key)
-    catalog_types = {agent["agent_type"] for agent in catalog}
-
-    available: list[str] = []
-    missing: list[str] = []
-    seen: set[str] = set()
-    for info in agents:
-        if info.get("role") == "coordinator":
-            continue
-        class_str = info.get("class", "") or ""
-        if not class_str:
-            continue
-        kebab = _class_to_agent_type(class_str)
-        if not kebab or kebab in seen:
-            continue
-        seen.add(kebab)
-        if kebab in catalog_types:
-            available.append(kebab)
-        else:
-            missing.append(class_str.split(":")[-1] or kebab)
-    return available, missing
-
-
 @st.dialog("Live market preview", width="large")
 def _show_market_preview_dialog(selected_agents: list[dict[str, Any]]) -> None:
     """Deprecated stand-alone dialog kept only for backwards compatibility.
@@ -3932,8 +3897,8 @@ def _render_live_market_preview(
     if not selected_agents:
         st.markdown("**Live market preview**")
         st.caption(
-            "No agents selected yet. Click **Load default agents** or pick "
-            "agents from the grid to preview the market topology here."
+            "No agents selected yet. Pick agents from the grid to "
+            "preview the market topology here."
         )
         return
 
@@ -4111,56 +4076,6 @@ def render_customize() -> None:
             f"- Confirm & Launch → `{_ca2_cfg}/` + `{_ca2_ex}/`"
         )
 
-    # Pre-compute the Default preset targets. The selection snapshot
-    # (selected_agents_now / selected_types_now) was already computed above,
-    # before the sidebar preview was rendered.
-    default_available, default_missing = _default_agent_types_for_scenario(
-        scenario_base, catalog
-    )
-
-    # Compact row directly beneath the chip: just the Default preset button.
-    # The live topology preview lives in the left sidebar and updates every
-    # time an agent is toggled in the grid below.
-    default_btn_col, _spacer = st.columns([1, 3])
-    with default_btn_col:
-        default_help = (
-            "Auto-select the agents shipped with this scenario's Default "
-            "configuration (" + str(len(default_available)) + " available)."
-        )
-        if default_missing:
-            default_help += (
-                " Not in pool yet: " + ", ".join(default_missing) + "."
-            )
-        if st.button(
-            "Load default agents",
-            width="stretch",
-            disabled=not default_available,
-            key="customize_load_default_top",
-            help=default_help,
-        ):
-            # Roster semantics: the default preset REPLACES the current
-            # roster with one entry per default archetype so the user
-            # gets a clean starting point.  Any bespoke entries the user
-            # added get overwritten — matching the pre-refactor behaviour
-            # of the flat checkbox reset.
-            clear_roster(st.session_state)
-            # Also drop every entry-scoped widget key so stale values
-            # from the previous roster cannot leak into the fresh entries.
-            for wkey in list(st.session_state.keys()):
-                if wkey.startswith("entry_"):
-                    del st.session_state[wkey]
-            roster_now = get_roster(st.session_state)
-            for agent_type in default_available:
-                add_entry(
-                    roster_now,
-                    agent_type=agent_type,
-                    engine="Rule",
-                    num_instances=1,
-                )
-            st.session_state.selected_market_agents = list(default_available)
-            save_state_from_session(project_root=PROJECT_ROOT)
-            st.rerun()
-
     st.write(
         "Click **+ Add** on any agent card to append a new roster entry. "
         "The same agent can appear multiple times with different engines "
@@ -4178,7 +4093,7 @@ def render_customize() -> None:
 
     # ---- Agent grid: wrapped in @st.fragment for scoped reruns ------
     # Only search / grid widgets trigger fragment-local reruns.
-    # Full-page reruns (sidebar preview, Load default, Clear, Launch)
+    # Full-page reruns (sidebar preview, Clear, Launch)
     # still happen through their own buttons outside this scope.
     #
     # LAZY LOADING: agents are split by *thematic category* into
@@ -4601,16 +4516,14 @@ def _render_my_roster(catalog: list[dict[str, Any]]) -> None:
       (label suffixed with "(copy)" when present).
     * **×** — deletes just this row without touching the rest.
 
-    Empty roster renders a friendly hint pointing users at the grid /
-    Load default agents button above.
+    Empty roster renders a friendly hint pointing users at the grid.
     """
     roster = get_roster(st.session_state)
     st.markdown("**My Roster**")
     if not roster:
         st.caption(
             "No entries yet — click **+ Add** on any agent card above to "
-            "append a fresh roster row, or **Load default agents** to seed "
-            "the scenario's shipped lineup."
+            "append a fresh roster row."
         )
         return
 
