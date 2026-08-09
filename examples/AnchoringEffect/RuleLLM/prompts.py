@@ -326,18 +326,16 @@ RULELLM_LIQUIDITY_PROVIDER_SYS = _LIQUIDITY_PROVIDER_PERSONA + "\n\n" + FORMAT_T
 
 # -----------------------------------------------------------------------------
 # User Prompt Template
+# Byte-identical to :data:`examples.AnchoringEffect.LLM.prompts.LLM_USER_TEMPLATE`
+# — the RuleLLM variant differs from the plain LLM variant only in the
+# system-prompt content (rule numbers embedded in personas); the user
+# message merely reports the market snapshot the coordinator broadcast,
+# which is variant-agnostic. Aliasing here keeps the yaml classpath
+# ``examples.AnchoringEffect.RuleLLM.prompts:RULELLM_USER_TEMPLATE``
+# resolvable while making the template a single source of truth.
 # Placeholders: {round}, {price}, {prev_price}, {fundamental}, {price_change},
 #               {deviation}, {cash}, {position}, {portfolio_value}
 # -----------------------------------------------------------------------------
-RULELLM_USER_TEMPLATE = (
-    "Current Market State (Round {round}):\n"
-    "- Current Price: ${price:.2f}\n"
-    "- Previous Price: ${prev_price:.2f}\n"
-    "- Fundamental Value: ${fundamental:.2f}\n"
-    "- Price Change: {price_change:+.2%}\n"
-    "- Price Deviation from Fundamental: {deviation:+.2%}\n"
-    "- Your Cash: ${cash:.2f}\n"
-    "- Your Position: {position:.2f} shares\n"
-    "- Portfolio Value: ${portfolio_value:.2f}\n\n"
-    "Make your trading decision as instructed in your system prompt.\n"
-)
+from examples.AnchoringEffect.LLM.prompts import LLM_USER_TEMPLATE
+
+RULELLM_USER_TEMPLATE = LLM_USER_TEMPLATE

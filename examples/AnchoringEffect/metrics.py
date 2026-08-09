@@ -62,6 +62,34 @@ from masim.evaluation.finance.timeseries import _returns
 
 
 # ---------------------------------------------------------------------------
+# Archetype ids used to filter payloads by `strategy`.
+#
+# The wire-format contract stamps every InvestorOrder with
+# ``strategy=self.STRATEGY`` — and every canonical AnchoringEffect class
+# (Rule / LLM / RuleLLM / Rag) declares ``STRATEGY`` as the kebab-case
+# archetype id (e.g. ``anchored-trader``).  Grouping metrics below must
+# match on that same identifier — the previous PascalCase spellings
+# (``AnchoredTrader`` etc.) silently failed to match any payload and
+# turned all four grouping metrics into permanent ``MetricUnavailable``.
+# ---------------------------------------------------------------------------
+
+ANCHORED_TRADER = "anchored-trader"
+HISTORICAL_ANCHOR = "historical-anchor"
+RATIONAL_UPDATER = "rational-updater"
+MOMENTUM_TRADER = "momentum-trader"
+DISPOSITION_TRADER = "disposition-trader"
+CONTRARIAN_TRADER = "contrarian-trader"
+FUNDAMENTAL_ANALYST = "fundamental-analyst"
+
+BIASED_STRATEGIES = frozenset({
+    ANCHORED_TRADER, HISTORICAL_ANCHOR, DISPOSITION_TRADER,
+})
+CORRECTIVE_STRATEGIES = frozenset({
+    RATIONAL_UPDATER, FUNDAMENTAL_ANALYST, CONTRARIAN_TRADER,
+})
+
+
+# ---------------------------------------------------------------------------
 # Scenario-specific helpers (AnchoringEffect only)
 # ---------------------------------------------------------------------------
 
@@ -178,7 +206,7 @@ def m_anchor_dispersion(data, config):
     targets_per_round: Dict[int, List[float]] = {}
     for pid, round_payloads in payloads.items():
         for round_num, payload in round_payloads.items():
-            if payload.get("strategy") != "AnchoredTrader":
+            if payload.get("strategy") != ANCHORED_TRADER:
                 continue
             if "perceived_target" not in payload:
                 continue
@@ -187,7 +215,7 @@ def m_anchor_dispersion(data, config):
             )
     if not targets_per_round:
         raise MetricUnavailable(
-            "no AnchoredTrader payload contained `perceived_target`"
+            f"no {ANCHORED_TRADER!r} payload contained `perceived_target`"
         )
     rounds_sorted = sorted(targets_per_round)
     dispersions = [float(np.std(targets_per_round[r])) for r in rounds_sorted]
@@ -219,14 +247,15 @@ def m_corrective_to_biased_volume_ratio(data, config):
         raise MetricUnavailable("no investor payloads recorded")
     biased_total = 0.0
     corrective_total = 0.0
+    biased_ids = {ANCHORED_TRADER, HISTORICAL_ANCHOR}
     for round_payloads in payloads.values():
         for payload in round_payloads.values():
             strategy = payload.get("strategy")
             buy, sell = _payload_buy_sell(payload)
             volume = buy + sell
-            if strategy in ("AnchoredTrader", "HistoricalAnchor"):
+            if strategy in biased_ids:
                 biased_total += volume
-            elif strategy == "RationalUpdater":
+            elif strategy == RATIONAL_UPDATER:
                 corrective_total += volume
     if biased_total <= 0:
         raise MetricUnavailable("no biased agent volume recorded")
@@ -242,8 +271,8 @@ def m_momentum_anchoring_coupling(data, config):
     payloads = data["investor_payloads"]
     if not payloads:
         raise MetricUnavailable("no investor payloads recorded")
-    at_demand = _strategy_demand(payloads, {"AnchoredTrader"})
-    mt_demand = _strategy_demand(payloads, {"MomentumTrader"})
+    at_demand = _strategy_demand(payloads, {ANCHORED_TRADER})
+    mt_demand = _strategy_demand(payloads, {MOMENTUM_TRADER})
     if not at_demand or not mt_demand:
         raise MetricUnavailable("need both AT and MT trades for coupling")
     common = sorted(set(at_demand) & set(mt_demand))
@@ -315,8 +344,8 @@ def m_wealth_transfer_direction(data, config):
     """Net wealth flow from biased to corrective agents.
 
     Scenario-specific: hardcodes AnchoringEffect strategy group classification
-    (biased = AnchoredTrader/HistoricalAnchor/DispositionTrader,
-     corrective = RationalUpdater/FundamentalAnalyst/ContrarianTrader).
+    (biased = anchored-trader / historical-anchor / disposition-trader,
+     corrective = rational-updater / fundamental-analyst / contrarian-trader).
     """
     payloads = data.get("investor_payloads")
     if not payloads:
@@ -327,8 +356,6 @@ def m_wealth_transfer_direction(data, config):
     from masim.evaluation.data_loader import per_agent_initial_cash, per_agent_initial_position
     initial_cash = per_agent_initial_cash(config)
     initial_positions = per_agent_initial_position(config)
-    biased_strategies = {"AnchoredTrader", "HistoricalAnchor", "DispositionTrader"}
-    corrective_strategies = {"RationalUpdater", "FundamentalAnalyst", "ContrarianTrader"}
     biased_wealth_change = 0.0
     corrective_wealth_change = 0.0
     for pid, round_payloads in payloads.items():
@@ -348,18 +375,39 @@ def m_wealth_transfer_direction(data, config):
         initial_wealth = cash + position * final_price
         strategy = None
         for payload in round_payloads.values():
+            if strategy is None:
+                strategy = payload.get("strategy")
             buy, sell = _payload_buy_sell(payload)
-            bid = float(payload.get("bid_price", final_price))
+            # HOLD / skipped / clipped-to-zero records contribute nothing to
+            # wealth arithmetic; skip them explicitly rather than dereferencing
+            # a potentially absent bid_price with a silent final_price fallback.
+            if buy == 0 and sell == 0:
+                continue
+            # Wire-format contract (masim.format.order.validate_order) requires
+            # every non-hold order to carry bid_price > 0. A missing or
+            # non-positive value here is a broken record; surface it as
+            # MetricUnavailable rather than laundering it into wealth deltas.
+            if "bid_price" not in payload:
+                raise MetricUnavailable(
+                    f"agent {pid!r} record has action-implied trade "
+                    f"(buy={buy}, sell={sell}) but no bid_price — "
+                    "wire-format contract violated"
+                )
+            bid = float(payload["bid_price"])
+            if bid <= 0:
+                raise MetricUnavailable(
+                    f"agent {pid!r} record has action-implied trade "
+                    f"(buy={buy}, sell={sell}) but bid_price={bid!r} "
+                    "(must be strictly positive) — wire-format contract violated"
+                )
             cash -= buy * bid
             cash += sell * bid
             position = position + buy - sell
-            if strategy is None:
-                strategy = payload.get("strategy")
         terminal_wealth = cash + position * final_price
         change = terminal_wealth - initial_wealth
-        if strategy in biased_strategies:
+        if strategy in BIASED_STRATEGIES:
             biased_wealth_change += change
-        elif strategy in corrective_strategies:
+        elif strategy in CORRECTIVE_STRATEGIES:
             corrective_wealth_change += change
     return {
         "biased_net_change": biased_wealth_change,

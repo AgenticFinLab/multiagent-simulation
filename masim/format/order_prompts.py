@@ -39,7 +39,7 @@ DECISION_FORMAT_INSTRUCTION_TPL = DECISION_FORMAT_INSTRUCTION.replace(
 
 # ---------------------------------------------------------------------------
 # Standard market-state placeholders (the ONLY variables that
-# masim.agents._state.StandardMarketState.template_vars guarantees).
+# masim.format.state.StandardMarketState.template_vars guarantees).
 # ---------------------------------------------------------------------------
 
 

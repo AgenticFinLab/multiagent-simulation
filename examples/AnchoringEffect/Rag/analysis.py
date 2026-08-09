@@ -111,14 +111,28 @@ def main() -> None:
 
     summary = analyze_anchoring(data, config, output_dir, variant=VARIANT)
 
-    # Rag-specific augmentation.
+    # Rag-specific augmentation. ``analyze_anchoring`` has already invoked
+    # ``write_universal_summary`` which persists the Hook-11 canonical
+    # ``summary.json`` (universal_metrics, references, config_hash, etc.);
+    # here we augment that persisted file with the Rag knowledge-effect
+    # block via read-modify-write instead of clobbering it with the small
+    # scenario-only ``summary`` dict.
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
-    summary["rag_knowledge_effect"] = rag_stats
 
     with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as fh:
         json.dump(rag_stats, fh, indent=2)
-    with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as fh:
-        json.dump(summary, fh, indent=2, default=str)
+
+    summary_path = os.path.join(output_dir, "summary.json")
+    try:
+        with open(summary_path, "r", encoding="utf-8") as fh:
+            persisted = json.load(fh)
+    except (OSError, ValueError):
+        persisted = summary if isinstance(summary, dict) else {}
+    persisted["rag_knowledge_effect"] = rag_stats
+    with open(summary_path, "w", encoding="utf-8") as fh:
+        json.dump(persisted, fh, indent=2, default=str)
+    if isinstance(summary, dict):
+        summary["rag_knowledge_effect"] = rag_stats
 
     agg = rag_stats.get("aggregate")
     if agg:

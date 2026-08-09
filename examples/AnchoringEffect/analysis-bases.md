@@ -1195,7 +1195,7 @@ From AnchoringEffect-Analysis-Overhaul (2026-Q1) the analysis pipeline is
 *registry-driven*: every scalar quantity reported by
 `examples/AnchoringEffect/Rule/analysis.py` is produced by a metric function in
 `examples/AnchoringEffect/metrics.py` and registered with the shared
-`MetricsRegistry` (`examples/AnchoringEffect/standard_rule_analysis.py`). Adding a new metric
+`MetricsRegistry` (`masim.evaluation.registry.MetricsRegistry`). Adding a new metric
 requires only two steps:
 
 1. Implement `def m_my_metric(data, config) -> dict[str, Any]:` raising

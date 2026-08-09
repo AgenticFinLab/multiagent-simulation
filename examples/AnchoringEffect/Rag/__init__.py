@@ -1,21 +1,10 @@
-"""AnchoringEffect Rag Variant"""
+"""AnchoringEffect Rag variant package.
 
-from examples.AnchoringEffect.Rag.players import (
-    Market,
-    RagLLMInvestor,
-    RagLLMAnchoredTrader,
-    RagLLMHistoricalAnchor,
-    RagLLMRationalUpdater,
-    RagLLMMomentumTrader,
-    RagLLMNoiseTrader,
-)
-
-__all__ = [
-    "Market",
-    "RagLLMInvestor",
-    "RagLLMAnchoredTrader",
-    "RagLLMHistoricalAnchor",
-    "RagLLMRationalUpdater",
-    "RagLLMMomentumTrader",
-    "RagLLMNoiseTrader",
-]
+All archetypes live in :mod:`examples.AnchoringEffect.Rag.players` and
+are referenced by their explicit classpath from
+``configs/AnchoringEffect/Rag/players.yml`` (e.g.
+``"examples.AnchoringEffect.Rag.players:RagLLMAnchoredTrader"``). This
+``__init__`` deliberately re-exports nothing — the module-level surface
+is authoritative, so a stale hand-maintained ``__all__`` here cannot
+drift out of sync with :mod:`.players`.
+"""

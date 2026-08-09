@@ -1,60 +1,21 @@
 #!/usr/bin/env python
-"""AnchoringEffect Rag Simulation Runner
+"""AnchoringEffect Rag Simulation Runner (thin variant shim).
 
-Anchoring causes traders to insufficiently adjust from reference prices, creating slow price discovery
+Phenomenon: Anchoring causes traders to insufficiently adjust from
+reference prices, creating slow price discovery.
 
-Usage:
+Usage::
+
     python examples/AnchoringEffect/Rag/run_anchoringeffect_rag.py \
         -c configs/AnchoringEffect/Rag/simulation.yml
+
+Shared skeleton lives in :mod:`examples.AnchoringEffect._run`.
 """
 
-import argparse
-import asyncio
-
-import os
-
-from dotenv import load_dotenv
-
-from masim.simulator.base import SimulationConfig
-from masim.simulator.general import GeneralSimulator
-from masim.utils.config import load_config, setup_logging
-
-
-async def main():
-    load_dotenv()
-    setup_logging()
-    
-    parser = argparse.ArgumentParser(
-        description="Run AnchoringEffect Rag Simulation"
-    )
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="configs/AnchoringEffect/Rag/simulation.yml",
-    )
-    args = parser.parse_args()
-    
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-    
-    print("\n" + "=" * 70)
-    print("AnchoringEffect Simulation - Rag Agents")
-    print("=" * 70)
-    print("Rounds:     %s" % config.setting["total_rounds"])
-    print("=" * 70 + "\n")
-    
-    simulator = GeneralSimulator(config)
-    
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 70)
-        print("Simulation Complete!")
-        print("=" * 70)
-    finally:
-        await simulator.shutdown()
-
+from examples.AnchoringEffect._run import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        variant="Rag",
+        default_config="configs/AnchoringEffect/Rag/simulation.yml",
+    )

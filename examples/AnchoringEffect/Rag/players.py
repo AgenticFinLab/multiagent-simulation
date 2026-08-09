@@ -41,12 +41,15 @@ class _AnchoringRagBase(CanonicalRagPlayer):
     ``anchoring bias`` and the same market signals the LLM prompt
     consumes.  All infrastructure (index bootstrap, prompt injection,
     schema-validated retry, order finalisation) is inherited unchanged.
-    """
 
-    # Archetype STRATEGY is set on each concrete subclass below so
-    # analytics can group across Rule / LLM / RuleLLM / Rag runs by
-    # the AGENT_POOL kebab stem.
-    STRATEGY: str = "CanonicalRagPlayer"
+    STRATEGY is intentionally not re-declared on this base. The framework
+    parent :class:`CanonicalRagPlayer` already carries a placeholder
+    ``STRATEGY = "CanonicalRagPlayer"`` default; redeclaring the same
+    placeholder here would be pure duplication (and would blur which
+    class owns which archetype). Every concrete subclass below MUST
+    override STRATEGY with its AGENT_POOL kebab stem so cross-variant
+    analytics group Rule / LLM / RuleLLM / Rag runs by archetype.
+    """
 
     def _build_rag_query(self, state: StandardMarketState) -> str:
         parts = [
@@ -115,14 +118,8 @@ class RagLLMLiquidityProvider(_AnchoringRagBase):
     STRATEGY = "liquidity-provider"
 
 
-# Historical alias kept so downstream imports of ``LLMInvestor`` from
-# the RAG module (rare, but present in legacy notebooks) still resolve.
-RagLLMInvestor = _AnchoringRagBase
-
-
 __all__ = [
     "Market",
-    "RagLLMInvestor",
     "RagLLMAnchoredTrader",
     "RagLLMHistoricalAnchor",
     "RagLLMRationalUpdater",
