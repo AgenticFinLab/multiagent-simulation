@@ -23,7 +23,7 @@ MASim 是一个面向金融市场与群体行为研究的多智能体模拟框�
 YAML 配置
   -> GeneralSimulator 创建 Ray Actor
   -> PlayerPersona 托管 Player 与基础设施代理
-  -> Player 执行 perceive -> decide -> act
+  -> Player 执行 perceive -> decide -> act (-> on_fill)
   -> Communication/Proxy 路由 Agent 消息
   -> Storage 保存逐轮状态和通信记录
   -> analysis.py 计算指标并生成分析产物
@@ -35,6 +35,8 @@ YAML 配置
 2. `collect`：收集行动与待发送信息；
 3. `dispatch`：按拓扑发送信息；
 4. `record`：持久化轮次、消息和市场状态。
+
+**Player 生命周期细化**：金融场景 Player 由 `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator`（`masim/agents/_base.py`）派生。每一轮 `perceive → decide → act` 的最后一步由框架实现的 `_apply_fill_and_emit_action` 统一执行：从 `decide()` 返回的 `decision_payload` 中读取 `action / quantity / bid_price`，走 `require_positive_bid_price` 断言、`clip_order_to_liquidity`、更新 `cash / position`，然后调用可选的 `on_fill(action, quantity, bid_price)` 钩子进行 archetype 级 VWAP/cost-basis 更新。所有 archetype 类（含四个变体的 `players.py`）**禁止** override `act()` / `decide()`；如需 per-fill 状态维护，只能覆盖 `on_fill`。完整契约见 `docs/framework-contract.md`。
 
 ## 3. 顶层目录
 
@@ -64,19 +66,20 @@ multiagent-simulation/
 
 ## 4. 框架模块
 
-| 模块                  | 职责                                 | 主要入口                           |
-|-----------------------|--------------------------------------|------------------------------------|
-| `masim/simulator`     | 加载配置、管理轮次、拓扑和 Ray Actor | `GeneralSimulator`                 |
-| `masim/player`        | Agent 的感知、决策和行动逻辑         | `GeneralPlayer`                    |
-| `masim/persona`       | 将 Player 包装为 Ray Actor           | `PlayerPersona`                    |
-| `masim/communication` | 消息编码、解码和传输                 | `GeneralCommunicationChannel`      |
-| `masim/proxy`         | 通信、存储、监控和资源代理           | `SendReceiveProxy`、`StorageProxy` |
-| `masim/knowledge`     | 文档加载、向量索引和 RAG 检索        | `KnowledgeManager`                 |
-| `masim/evaluation`    | 金融指标、有效性验证和可视化         | `finance/*`                        |
-| `masim/format`        | 通用 prompt、订单 schema 等格式约束  | `order.py`、`base_prompts.py`      |
-| `masim/interface`     | Streamlit 场景选择、回放和分析       | `app.py`                           |
-| `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`      |
-| `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                             |
+| 模块                  | 职责                                 | 主要入口                                                                                                                                     |
+|-----------------------|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `masim/simulator`     | 加载配置、管理轮次、拓扑和 Ray Actor | `GeneralSimulator`                                                                                                                           |
+| `masim/player`        | Agent 感知/决策/行动的通用基类       | `GeneralPlayer`                                                                                                                              |
+| `masim/agents`        | 金融场景 canonical 基类 + 29 个 archetype | `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator` / `_apply_fill_and_emit_action` / `on_fill` |
+| `masim/persona`       | 将 Player 包装为 Ray Actor           | `PlayerPersona`                                                                                                                              |
+| `masim/communication` | 消息编码、解码和传输                 | `GeneralCommunicationChannel`                                                                                                                |
+| `masim/proxy`         | 通信、存储、监控和资源代理           | `SendReceiveProxy`、`StorageProxy`                                                                                                           |
+| `masim/knowledge`     | 文档加载、向量索引和 RAG 检索        | `KnowledgeManager`                                                                                                                           |
+| `masim/evaluation`    | 金融指标、有效性验证和可视化         | `finance/*`                                                                                                                                  |
+| `masim/format`        | 通用 prompt / 订单 schema / 订单最终化 | `order.py`、`base_prompts.py`、`finalize.py` (`require_positive_bid_price` / `clip_order_to_liquidity`)                                       |
+| `masim/interface`     | Streamlit 场景选择、回放和分析       | `app.py`                                                                                                                                     |
+| `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`                                                                                                                |
+| `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
 
 职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则；`masim/skills/` 不参与运行时，只供设计阶段调用。
 
@@ -293,6 +296,8 @@ polish-simulation-pipeline.md          (pipeline #2 入口)
 | 修改记录行为       | `persona.yml`                                                     |
 | 分析实验结果       | `analysis.py`、`masim/evaluation/`                                |
 | 排查实验失败       | `docs/example-revision-guide/08-runtime-failure-patterns.md`      |
+| 理解框架契约（act/decide/on_fill 边界） | `docs/framework-contract.md`（唯一权威）                    |
+| 审计场景是否违反契约 | `scripts/audit_scenario_contract.py --scenario {Scenario}`     |
 | 撰写新场景目标文件     | `masim/skills/define-simulation-scenario-skill.md`（{domain}-{scenario}.md 规范）    |
 | 从零创建新场景         | `masim/skills/create-simulation-pipeline.md`（pipeline #1；需先有目标文件）           |
 | 升级已有场景到最新规范 | `masim/skills/polish-simulation-pipeline.md`（pipeline #2；对 examples/ 下已有场景做审计-补丁） |

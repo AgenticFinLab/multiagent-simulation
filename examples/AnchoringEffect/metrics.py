@@ -65,26 +65,39 @@ from masim.evaluation.finance.timeseries import _returns
 # Archetype ids used to filter payloads by `strategy`.
 #
 # The wire-format contract stamps every InvestorOrder with
-# ``strategy=self.STRATEGY`` — and every canonical AnchoringEffect class
-# (Rule / LLM / RuleLLM / Rag) declares ``STRATEGY`` as the kebab-case
-# archetype id (e.g. ``anchored-trader``).  Grouping metrics below must
-# match on that same identifier — the previous PascalCase spellings
-# (``AnchoredTrader`` etc.) silently failed to match any payload and
-# turned all four grouping metrics into permanent ``MetricUnavailable``.
+# ``strategy=self.STRATEGY``. Every canonical archetype (Rule / LLM /
+# RuleLLM / Rag sibling) shares the SAME kebab-case ``STRATEGY``
+# class-attribute value — that IS the archetype id.
+#
+# To eliminate string-literal drift we import the constants directly
+# from the canonical Rule* class attributes in ``masim.agents``. If any
+# archetype STRATEGY is ever renamed at the class definition, every
+# filter below follows automatically — no string literal is duplicated
+# in this module.
 # ---------------------------------------------------------------------------
 
-ANCHORED_TRADER = "anchored-trader"
-HISTORICAL_ANCHOR = "historical-anchor"
-RATIONAL_UPDATER = "rational-updater"
-MOMENTUM_TRADER = "momentum-trader"
-DISPOSITION_TRADER = "disposition-trader"
-CONTRARIAN_TRADER = "contrarian-trader"
-FUNDAMENTAL_ANALYST = "fundamental-analyst"
+from masim.agents import (
+    RuleAnchoredTrader as _RuleAnchoredTrader,
+    RuleContrarianTrader as _RuleContrarianTrader,
+    RuleDispositionTrader as _RuleDispositionTrader,
+    RuleFundamentalAnalyst as _RuleFundamentalAnalyst,
+    RuleHistoricalAnchor as _RuleHistoricalAnchor,
+    RuleMomentumTrader as _RuleMomentumTrader,
+    RuleRationalUpdater as _RuleRationalUpdater,
+)
 
-BIASED_STRATEGIES = frozenset({
+ANCHORED_TRADER: str = _RuleAnchoredTrader.STRATEGY
+HISTORICAL_ANCHOR: str = _RuleHistoricalAnchor.STRATEGY
+RATIONAL_UPDATER: str = _RuleRationalUpdater.STRATEGY
+MOMENTUM_TRADER: str = _RuleMomentumTrader.STRATEGY
+DISPOSITION_TRADER: str = _RuleDispositionTrader.STRATEGY
+CONTRARIAN_TRADER: str = _RuleContrarianTrader.STRATEGY
+FUNDAMENTAL_ANALYST: str = _RuleFundamentalAnalyst.STRATEGY
+
+BIASED_STRATEGIES: frozenset = frozenset({
     ANCHORED_TRADER, HISTORICAL_ANCHOR, DISPOSITION_TRADER,
 })
-CORRECTIVE_STRATEGIES = frozenset({
+CORRECTIVE_STRATEGIES: frozenset = frozenset({
     RATIONAL_UPDATER, FUNDAMENTAL_ANALYST, CONTRARIAN_TRADER,
 })
 

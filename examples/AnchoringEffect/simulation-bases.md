@@ -12,7 +12,7 @@
 | §4  | Investor Taxonomy (9 types)       | §4.1 AnchoredTrader; §4.2 HistoricalAnchor; §4.3 RationalUpdater; §4.4 MomentumTrader; §4.5 NoiseTrader; §4.6 DispositionTrader; §4.7 ContrarianTrader; §4.8 FundamentalAnalyst; §4.9 LiquidityProvider |
 | §5  | Agent Diversity Verification      | Time-horizon matrix, information-set coverage, strategy taxonomy                                                                                                                                        |
 | §6  | Parameter Table                   | All configurable parameters with default values and academic calibration sources                                                                                                                        |
-| §7  | Communication and Round Structure | Star topology, message format, round lifecycle                                                                                                                                                          |
+| §7  | Communication and Round Structure | Star topology, message format, round lifecycle; §7.1 Reference Pattern — Framework Contract for Variants                                                                                                |
 | §8  | Historical Case Studies           | Analyst Earnings Anchoring; Real Estate Appraisal Anchoring; IPO Aftermarket Anchoring                                                                                                                  |
 | §9  | Variant Comparison Preview        | Rule vs LLM vs RuleLLM vs Rag — expected behavioural differences                                                                                                                                        |
 | §10 | Equilibrium Analysis              | Steady-state derivation, biased equilibrium P* > F, convergence eigenvalue, two-phase dynamics                                                                                                          |
@@ -1564,6 +1564,41 @@ Round N:
 Topology: Star — Market at centre broadcasts to all 14 investors; investors send orders back to Market.
 
 Initialization: Market starts at `initial_price = 105.0` (5% above fundamental 100.0). AnchoredTrader records this as its permanent anchor on round 1; DispositionTrader records its cost basis; FundamentalAnalyst initialises belief to 105.0; LiquidityProvider initialises EMA to 105.0. These initialise the mispricing that the simulation then studies.
+
+### §7.1 Reference Pattern — Framework Contract for Variants
+
+AnchoringEffect is the canonical reference scenario for the framework's `decide → act → on_fill` contract. All four variants (`Rule`, `LLM`, `RuleLLM`, `Rag`) share a strict invariant: **no variant overrides `act()` and no variant overrides `decide()` on the canonical bases**. This is not a stylistic preference — it is a design boundary that keeps wire-format validation, atomic state, and fail-loud guarantees in a single chokepoint.
+
+Rationale (see `masim/agents/_base.py :: _apply_fill_and_emit_action` and `masim/format/finalize.py :: require_positive_bid_price`):
+
+1. **Single validation site.** All `decide()` outputs flow through `_apply_fill_and_emit_action`, which enforces `bid_price > 0` for BUY/SELL via `require_positive_bid_price`, forbids missing wire-format keys (`action`, `quantity`, `bid_price`), and mutates `cash` / `position` atomically. A scenario-level `act()` override reintroduces the exact silent-fill anti-pattern this validator was written to eliminate: `bid_price = market_data["price"]` on missing/zero bids launders a contract violation into a corrupted anchor state.
+
+2. **Single mutation site.** Cash and position mutation happens exclusively inside the framework's `act`. A scenario-level `act()` override that also mutates `cash` / `position` double-counts fills or, worse, silently disagrees with the framework's arithmetic. This is the origin of the class of bugs documented in the pre-refactor RuleLLM `players.py` (see `examples/MarketCrash/RuleLLM/players.py` for the historical shape of the anti-pattern before the framework refactor).
+
+3. **Anchor extensions use `on_fill`, not `act`.** Archetypes that track a per-agent anchor (`cost_basis`, `purchase_price`, `avg_entry_price`) declare the `on_fill(action, quantity, bid_price)` hook on the canonical base. `on_fill` runs after wire-format validation and after cash/position mutation, so `bid_price` is guaranteed strictly positive and finite; a rejected record raises before the hook runs, leaving the anchor untouched (atomic state). This makes silent-fill unwriteable by construction: the raw decision payload never reaches subclass code.
+
+Concretely, for every AnchoringEffect variant player (`Rule/players.py`, `LLM/players.py`, `RuleLLM/players.py`, `Rag/players.py`):
+
+```
+# ALLOWED
+class RuleAnchoredTrader(CanonicalRulePlayer):
+    STRATEGY = "anchored-trader"
+    def init_extras(self, extras): ...
+    def on_market_data(self, market_data): ...      # anchor initialisation
+    def decide_order(self, state) -> InvestorOrder: ...  # returns pure order object
+    def on_fill(self, action, quantity, bid_price): ...  # optional: update anchor after fill
+
+# FORBIDDEN (drops framework contract)
+class RuleAnchoredTrader(CanonicalRulePlayer):
+    async def act(self, decision_payload):          # bypasses require_positive_bid_price
+        ...
+    async def decide(self):                          # bypasses _apply_fill_and_emit_action wiring
+        return {"action": "buy", "quantity": q, "bid_price": md["price"]}  # silent fill
+```
+
+The five canonical archetypes that track anchors (`disposition-trader`, `disposition-investor`, `endowed-holder`, `institutional-investor`, `long-term-investor`) are the reference implementations of `on_fill`. Non-anchor archetypes (`anchored-trader`, `historical-anchor`, `rational-updater`, `fundamental-analyst`, `momentum-trader`, `contrarian-trader`, `market-maker`, `liquidity-provider`) declare only `init_extras`, `on_market_data`, and `decide_order` — the base class's `act()` and default no-op `on_fill()` handle the rest.
+
+Consequence for new scenario authors: if a variant needs behaviour that seems to require overriding `act()` or `decide()`, the correct move is (i) push the extension point into `on_fill` if it is a post-fill anchor update, (ii) push it into `decide_order` (Rule) or `_build_prompt` / `parse_llm_response` (LLM/Rag) if it is a pre-decision computation, or (iii) file a framework change against `_apply_fill_and_emit_action` rather than shadowing the contract locally. The scenario audit script under `scripts/audit_scenario_contract.py` scans for exactly this class of override.
 
 
 ## §8 Historical Case Studies

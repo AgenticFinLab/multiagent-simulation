@@ -199,6 +199,18 @@ configs/{ScenarioName}/
 - [ ] English-only comments and documentation
 - [ ] `py_compile` passes on all .py files
 
+**Framework-contract layer** (`docs/framework-contract.md`, `docs/llm-coding-rules.md` §11):
+
+- [ ] Every financial player inherits from a canonical base (`CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator`), NOT `GeneralPlayer`
+- [ ] No `players.py` file overrides `act()` on a canonical subclass (framework act is authoritative)
+- [ ] No `players.py` file overrides `decide()` to bypass the payload contract — `decide()` returns `{action, quantity, bid_price, ...}`
+- [ ] Per-fill state (VWAP anchor, cost basis, purchase price, avg entry price, acquired units) is updated only inside `on_fill(action, quantity, bid_price)`, never inside `act()` / `decide()`
+- [ ] Zero silent-fill fallbacks: no `bid_price = market_data["price"]`, no `payload.get("bid_price", state.price)` anywhere in scenario code
+- [ ] Zero direct `state.custom_state["cash" | "position"] ±= ...` mutations outside the base — the base is the single point of truth
+- [ ] STRATEGY-id filters use canonical class attributes (`SomeArchetype.STRATEGY`), not hard-coded PascalCase class names or kebab literals
+- [ ] `scripts/audit_scenario_contract.py --scenario {ThisScenario}` reports zero CRITICAL/HIGH findings (`STRUCT-ACT`, `STRUCT-DECIDE`, `SEM-SILENT-FILL`, `SEM-CASH-MUT`)
+- [ ] For any archetype touched, `PYTHONPATH=. python3 verify_archetype_fixes.py` still reports 24/24 PASS
+
 ---
 
 ## NEW DOMAIN EXPANSION

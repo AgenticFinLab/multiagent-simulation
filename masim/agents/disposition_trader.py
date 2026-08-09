@@ -104,27 +104,28 @@ class RuleDispositionTrader(CanonicalRulePlayer):
             )
         return hold
 
-    async def act(self, decision_payload):  # type: ignore[override]
-        """Extend the base ``act`` to VWAP-update the cost basis on buys."""
-        action = decision_payload.get("action", "hold")
-        quantity = float(decision_payload.get("quantity", 0.0) or 0.0)
-        bid_price = float(decision_payload.get("bid_price") or 0.0)
-        market_data = self.state.custom_state.get("market_data") or {}
-        fill_price = (
-            bid_price if bid_price > 0 else float(market_data.get("price", 0.0))
+    def on_fill(
+        self, action: str, quantity: float, bid_price: float
+    ) -> None:
+        """VWAP-update the cost basis on buys.
+
+        The framework's :func:`_apply_fill_and_emit_action` has already
+        validated the wire-format contract and mutated ``position`` /
+        ``cash`` before this hook fires — so ``bid_price`` is guaranteed
+        positive for BUY, and the pre-fill position is recovered from
+        the post-fill state as ``new_pos - quantity``.
+        """
+        if action != "buy" or quantity <= 0:
+            return
+        new_pos = float(self.state.custom_state["position"])
+        old_pos = new_pos - quantity
+        old_cost = float(
+            self.state.custom_state.get("cost_basis") or bid_price
         )
-
-        if action == "buy" and quantity > 0:
-            old_pos = float(self.state.custom_state["position"])
-            old_cost = float(self.state.custom_state.get("cost_basis") or fill_price)
-            new_pos = old_pos + quantity
-            if new_pos > 0:
-                self.state.custom_state["cost_basis"] = (
-                    old_cost * old_pos + fill_price * quantity
-                ) / new_pos
-
-        # Delegate the normal cash / position bookkeeping.
-        return await super().act(decision_payload)
+        if new_pos > 0:
+            self.state.custom_state["cost_basis"] = (
+                old_cost * old_pos + bid_price * quantity
+            ) / new_pos
 
 
 class LLMDispositionTrader(CanonicalLLMPlayer):

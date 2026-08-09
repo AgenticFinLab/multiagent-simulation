@@ -124,25 +124,35 @@ class RuleLongTermInvestor(CanonicalRulePlayer):
                 )
         return hold
 
-    async def act(self, decision_payload):  # type: ignore[override]
-        """Update running VWAP entry price on finalised buys."""
-        action = decision_payload.get("action", "hold")
-        quantity = float(decision_payload.get("quantity", 0.0) or 0.0)
-        bid_price = float(decision_payload.get("bid_price") or 0.0)
-        market_data = self.state.custom_state.get("market_data") or {}
-        fill_price = (
-            bid_price if bid_price > 0 else float(market_data.get("price", 0.0))
-        )
-        if action == "buy" and quantity > 0 and fill_price > 0:
-            acquired = float(self.state.custom_state.get("acquired_units", 0.0))
-            avg_entry = float(self.state.custom_state.get("avg_entry_price", 0.0))
-            new_total = acquired + quantity
-            if new_total > 0:
-                self.state.custom_state["avg_entry_price"] = (
-                    avg_entry * acquired + fill_price * quantity
-                ) / new_total
-                self.state.custom_state["acquired_units"] = new_total
-        return await super().act(decision_payload)
+    def on_fill(self, action: str, quantity: float, bid_price: float) -> None:
+        """Update running VWAP entry price on finalised buys.
+
+        Invoked by :meth:`CanonicalRulePlayer._apply_fill_and_emit_action`
+        AFTER wire-format validation (``require_positive_bid_price``)
+        and cash/position mutation. Contract guarantees:
+
+        * ``bid_price`` is finite and strictly positive for BUY/SELL;
+          silent substitution of ``market_data.price`` is impossible.
+        * A rejected record raises before this hook runs, so
+          ``avg_entry_price`` / ``acquired_units`` remain untouched
+          on failure (atomic state).
+
+        DCA maintains its own acquisition denominator
+        (``acquired_units``, independent of current ``position``), so
+        we do not need to recover the pre-fill position from
+        ``new_pos - quantity`` — the base's position mutation is
+        orthogonal to the VWAP entry-price computation.
+        """
+        if action != "buy" or quantity <= 0:
+            return
+        acquired = float(self.state.custom_state.get("acquired_units", 0.0))
+        avg_entry = float(self.state.custom_state.get("avg_entry_price", 0.0))
+        new_total = acquired + quantity
+        if new_total > 0:
+            self.state.custom_state["avg_entry_price"] = (
+                avg_entry * acquired + bid_price * quantity
+            ) / new_total
+            self.state.custom_state["acquired_units"] = new_total
 
 
 class LLMLongTermInvestor(CanonicalLLMPlayer):

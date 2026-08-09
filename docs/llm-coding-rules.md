@@ -510,3 +510,76 @@ Before writing any code, ask:
 | Factory pattern   | Only for runtime selection               | Static type selection          |
 | Config class      | Only if complex validation               | Simple dict access             |
 | Manager class     | Only if orchestrates multiple components | Single component management    |
+
+## 11. MASim Framework Contract — Player Lifecycle
+
+The full contract lives in `docs/framework-contract.md`. This section codifies the coding rules that follow from that contract. Any scenario `players.py`, agent archetype under `masim/agents/`, or scenario base that touches the perceive/decide/act pipeline MUST obey them.
+
+### 11.1 Never override `act()` on canonical bases
+
+**WRONG — silent-fill anti-pattern:**
+```python
+class MomentumTrader(CanonicalRulePlayer):
+    async def act(self):
+        payload = self.state.custom_state["decision_payload"]
+        fill_price = payload.get("bid_price") or self.state.custom_state["market_data"]["price"]  # silent fallback
+        # ... reinvents cash/position mutation, VWAP updates, wire-format emission ...
+```
+
+Overriding `act()` re-derives the wire semantics that `_apply_fill_and_emit_action` (in `masim/agents/_base.py`) already enforces, and typically reintroduces the classic silent-fill bug (`bid_price = market_data["price"]`) that the framework contract exists to forbid.
+
+**CORRECT — use the base act, keep decide() authoritative:**
+```python
+class MomentumTrader(CanonicalRulePlayer):
+    STRATEGY = "momentum-trader"
+
+    def decide(self):
+        # Read state, compute action/quantity/bid_price, return payload.
+        # The base act() will validate, clip, mutate cash/position, and emit.
+        return {"action": "buy", "quantity": qty, "bid_price": price, ...}
+```
+
+### 11.2 Never override `decide()` to bypass the payload contract
+
+`_apply_fill_and_emit_action` reads `action`, `quantity`, `bid_price` from the dict `decide()` returns. `decide()` MUST return that dict — do not stash results in `self.state.custom_state["decision_payload"]` manually, do not raise-and-swallow inside a wrapper, do not return `None` and rely on side-effects.
+
+### 11.3 Use `on_fill` — and only `on_fill` — for per-fill bookkeeping
+
+Any archetype that must update running VWAP anchors, cost basis, purchase price, average entry price, acquired-units counters, or similar per-fill state MUST override:
+
+```python
+def on_fill(self, action: str, quantity: float, bid_price: float) -> None:
+    ...
+```
+
+The tuple `(action, quantity, bid_price)` is already validated (`bid_price > 0` guaranteed for `buy`/`sell`), and the base has already mutated `self.state.custom_state["cash" | "position"]` by the time `on_fill` runs. Do not re-compute fills, do not re-mutate cash/position inside `on_fill`. Reference implementations: `masim/agents/{disposition_trader,disposition_investor,endowed_holder,institutional_investor,long_term_investor}.py`.
+
+### 11.4 Never write a silent-fill fallback anywhere
+
+The regex `bid_price\s*=.*market_data\[["']price["']\]` (or any equivalent that substitutes the market price when the payload lacks a `bid_price`) is banned in every scenario `players.py` and every archetype module. The single sanctioned substitution — `state.price` for `participation_order` payloads where `bid_price` is not part of the schema — is applied by `finalize_llm_order` in `masim/format/finalize.py` and MUST NOT be duplicated in agent code.
+
+### 11.5 Never mutate `state.custom_state['cash' | 'position']` outside the base
+
+`_apply_fill_and_emit_action` is the single point of truth for cash/position mutation. Doing this inside `decide()`, `act()`, or scenario helpers double-counts fills and desynchronises the wire payload from the ledger. If you find yourself writing `self.state.custom_state["cash"] -= ...` in a subclass, stop — the mutation belongs in the base and only there.
+
+### 11.6 Use canonical bases, not `GeneralPlayer`, for financial archetypes
+
+New financial archetypes MUST inherit from `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` (or `CanonicalMarketCoordinator` for market coordinators). Inheriting directly from `GeneralPlayer` is a `LEGACY-BASE` finding of `scripts/audit_scenario_contract.py` — the 176 remaining `LEGACY-BASE` entries in the audit baseline are exactly the migration backlog.
+
+### 11.7 Zero-drift STRATEGY id imports
+
+Filter frozensets and metric groupings MUST NOT hard-code kebab strategy strings. Import the canonical class-attribute:
+
+```python
+from masim.agents.momentum_trader import MomentumTrader
+BIASED_STRATEGIES = frozenset({MomentumTrader.STRATEGY, ...})
+```
+
+Hard-coding `"MomentumTrader"` (PascalCase class name) is the exact bug that silently disabled the four AnchoringEffect grouping metrics for months post STRATEGY-id refactor.
+
+### 11.8 Verification checklist (before commit)
+
+- [ ] `scripts/audit_scenario_contract.py --scenario {Scenario}` reports zero `STRUCT-ACT` / `STRUCT-DECIDE` / `SEM-SILENT-FILL` / `SEM-CASH-MUT` findings.
+- [ ] `PYTHONPATH=. python3 verify_archetype_fixes.py` still reports `24/24 PASS` if the touched archetype has a verification row.
+- [ ] The archetype ships with a `docstring` that references `docs/framework-contract.md §4` (the on_fill contract) where relevant.
+- [ ] No `.get("bid_price", ...)` fallbacks, no `market_data["price"]` fills, no `state.custom_state["cash"] -= ...` in `decide()` or a subclass `act()`.
