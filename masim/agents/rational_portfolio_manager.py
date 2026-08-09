@@ -1,7 +1,7 @@
 """rational-portfolio-manager — Contrarian portfolio manager on short-term reversals.
 
 Canonical implementation of the ``rational-portfolio-manager`` archetype
-documented in ``examples/AGENT_POOL/finance/rational-portfolio-manager.md``.
+documented in ``masim/agents/defines/finance/rational-portfolio-manager.md``.
 Trades contrarian to the single-tick return (not to fundamental), with
 size scaled by |single-tick return| and risk aversion.
 

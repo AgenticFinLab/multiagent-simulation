@@ -1,7 +1,7 @@
 """risk-averse-saver — Precautionary saver with volatility panic exits.
 
 Canonical implementation of the ``risk-averse-saver`` archetype documented
-in ``examples/AGENT_POOL/finance/risk-averse-saver.md``. Panics out of the
+in ``masim/agents/defines/finance/risk-averse-saver.md``. Panics out of the
 market when volatility spikes, restores a cash buffer when the ratio drops,
 and only buys when the market is heavily discounted below fair value.
 

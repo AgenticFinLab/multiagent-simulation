@@ -1,7 +1,7 @@
 """retail-coordinator — Social-media coordinator amplifying short squeezes.
 
 Canonical implementation of the ``retail-coordinator`` archetype documented
-in ``examples/AGENT_POOL/finance/retail-coordinator.md``. Reads the
+in ``masim/agents/defines/finance/retail-coordinator.md``. Reads the
 scenario's coordination and short-interest signals and either accumulates
 (when coordination is high) or exits (when coordination fades).
 

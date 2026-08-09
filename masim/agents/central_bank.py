@@ -1,7 +1,7 @@
 """central-bank — Stochastic lender-of-last-resort central bank.
 
 Canonical implementation of the ``central-bank`` archetype documented in
-``examples/AGENT_POOL/finance/central-bank.md``. Intervenes stochastically
+``masim/agents/defines/finance/central-bank.md``. Intervenes stochastically
 on the buy side when the market trades sufficiently far below fundamental
 — a probabilistic Bagehot-style rescue.
 

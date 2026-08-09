@@ -7,7 +7,6 @@ Environment Variables:
 import importlib
 import logging
 import os
-import sys
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
@@ -20,7 +19,6 @@ from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
 from masim.format.order import validate_order
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from masim.utils.llm_utils import is_retryable_llm_error, parse_llm_response_with_thinking
 from examples.AvailabilityBias.Rule.players import Market

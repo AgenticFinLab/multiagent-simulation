@@ -1,7 +1,7 @@
 """fundamental-investor — Value-driven long-horizon investor.
 
 Canonical implementation of the ``fundamental-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/fundamental-investor.md``.
+documented in ``masim/agents/defines/finance/fundamental-investor.md``.
 Buys when price is discounted relative to fundamental and sells when
 overvalued; sizes by discount magnitude subject to a base-position cap.
 

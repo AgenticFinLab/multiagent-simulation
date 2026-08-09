@@ -1,7 +1,7 @@
 """frame-invariant-trader — Rational contrarian on mispricing.
 
 Canonical implementation of the ``frame-invariant-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/frame-invariant-trader.md``.
+documented in ``masim/agents/defines/finance/frame-invariant-trader.md``.
 Frames deviation objectively — buys undervaluation and sells overvaluation
 above a mispricing threshold; ignores gain/loss framing effects.
 

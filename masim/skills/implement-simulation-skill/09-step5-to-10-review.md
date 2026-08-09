@@ -47,8 +47,8 @@ options before Status transition. Executed manually by walking each
 invariant in the coverage list below across every scenario in
 `examples/`. Coverage:
 
-- **Orphan pool assets.** Any `examples/AGENT_POOL/{Domain}/*.md` or
-  `examples/AGENT_POOL/agent_images/icons/{Domain}-*.png` not
+- **Orphan pool assets.** Any `masim/agents/defines/{Domain}/*.md` or
+  `masim/agents/defines/agent_images/icons/{Domain}-*.png` not
   referenced by any active scenario's `players.yml` → flag for
   deletion or reuse. Do NOT auto-delete; propose deletion via
   `AskUserQuestion`.

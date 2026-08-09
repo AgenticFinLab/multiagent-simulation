@@ -1,7 +1,7 @@
 """category-overgeneralizer — Representativeness-heuristic regime classifier.
 
 Canonical implementation of the ``category-overgeneralizer`` archetype
-documented in ``examples/AGENT_POOL/finance/category-overgeneralizer.md``.
+documented in ``masim/agents/defines/finance/category-overgeneralizer.md``.
 Assigns a regime category to the market from a single deviation
 observation and commits full conviction — the representativeness
 heuristic with insensitivity to sample size.

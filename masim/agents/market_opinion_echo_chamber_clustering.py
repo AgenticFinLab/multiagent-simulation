@@ -1,6 +1,6 @@
 """Opinion echo-chamber clustering — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/opinion-echo-chamber-clustering.md
+Profile: masim/agents/defines/market/opinion-echo-chamber-clustering.md
 Mechanism: Linear polarization dynamics with centripetal moderation, cluster
            geometry derived from submitted opinions, and Gaussian noise
            (DeGroot 1974 + Sunstein 2001 + Del Vicario et al. 2016).

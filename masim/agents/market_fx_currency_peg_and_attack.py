@@ -1,6 +1,6 @@
 """FX Currency Peg and Attack — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/fx-currency-peg-and-attack.md
+Profile: masim/agents/defines/market/fx-currency-peg-and-attack.md
 Mechanism: Linear price-impact + intervention-boosted mean-reversion around
            an official peg with finite reserve-financed defense and regime
            switch on reserve depletion.  Based on Krugman (1979) first-generation

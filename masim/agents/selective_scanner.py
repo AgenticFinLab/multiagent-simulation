@@ -1,7 +1,7 @@
 """selective-scanner — Confirmation-biased selective information scanner.
 
 Canonical implementation of the ``selective-scanner`` archetype documented
-in ``examples/AGENT_POOL/finance/selective-scanner.md``. Weights confirming
+in ``masim/agents/defines/finance/selective-scanner.md``. Weights confirming
 signals heavily while systematically discounting disconfirming ones, unless
 the disconfirming evidence is overwhelming.
 

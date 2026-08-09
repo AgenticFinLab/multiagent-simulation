@@ -1,7 +1,7 @@
 """prime-broker-first-mover — Fast prime-broker liquidator (creditor run).
 
 Canonical implementation of the ``prime-broker-first-mover`` archetype
-documented in ``examples/AGENT_POOL/finance/prime-broker-first-mover.md``.
+documented in ``masim/agents/defines/finance/prime-broker-first-mover.md``.
 The first-mover creditor pulls collateral / liquidates positions the
 moment a stress threshold is breached, exploiting the first-mover
 advantage during a creditor run.

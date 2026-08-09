@@ -1,7 +1,7 @@
 """insider-advantaged — Privately-informed early mover.
 
 Canonical implementation of the ``insider-advantaged`` archetype documented
-in ``examples/AGENT_POOL/finance/insider-advantaged.md``. Trades pro-
+in ``masim/agents/defines/finance/insider-advantaged.md``. Trades pro-
 cyclically on the deviation signal, riding bubbles up and exiting before
 crashes; the ``information_advantage`` parameter scales the effective
 response size.

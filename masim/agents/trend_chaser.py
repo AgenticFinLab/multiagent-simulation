@@ -1,7 +1,7 @@
 """trend-chaser — Positive-feedback speculator chasing deviation direction.
 
 Canonical implementation of the ``trend-chaser`` archetype documented in
-``examples/AGENT_POOL/finance/trend-chaser.md``. Buys when price is above
+``masim/agents/defines/finance/trend-chaser.md``. Buys when price is above
 fundamental (rides the up-trend) and sells when price is below fundamental
 (rides the down-trend) — the classic "greater fool" speculator that
 amplifies mispricings.

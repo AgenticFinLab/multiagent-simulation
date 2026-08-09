@@ -1,7 +1,7 @@
 """core-bond-buyer — Flight-to-quality core government bond buyer.
 
 Canonical implementation of the ``core-bond-buyer`` archetype documented
-in ``examples/AGENT_POOL/finance/core-bond-buyer.md``. Accumulates safe
+in ``masim/agents/defines/finance/core-bond-buyer.md``. Accumulates safe
 government bonds when yield (relative to par/fundamental) exceeds a floor,
 amplifying purchases under stress; sells only when bonds become materially
 overpriced.

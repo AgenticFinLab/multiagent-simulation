@@ -1,7 +1,7 @@
 """sunk-cost-holder — Sunk-cost / house-money holder.
 
 Canonical implementation of the ``sunk-cost-holder`` archetype documented
-in ``examples/AGENT_POOL/finance/sunk-cost-holder.md``. Refuses to
+in ``masim/agents/defines/finance/sunk-cost-holder.md``. Refuses to
 realise losses (sunk-cost fallacy) and only partially trims once the
 position is comfortably in the black.
 

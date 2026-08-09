@@ -1,7 +1,7 @@
 """momentum-speculator — Leveraged short-window momentum speculator.
 
 Canonical implementation of the ``momentum-speculator`` archetype documented
-in ``examples/AGENT_POOL/finance/momentum-speculator.md``. Chases a very
+in ``masim/agents/defines/finance/momentum-speculator.md``. Chases a very
 short moving-average momentum signal and amplifies buy-side positions via a
 leverage multiplier; sells the entire held position when momentum turns
 sharply negative.

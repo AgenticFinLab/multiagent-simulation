@@ -3,7 +3,7 @@
 Public surface used by the Streamlit interface to:
 
 1. Parse the standardised ``## Parameters`` table out of an agent handbook
-   under ``examples/AGENT_POOL/ExtractedExampleInvestors/unique/``.
+   under ``masim/agents/defines/ExtractedExampleInvestors/unique/``.
 2. Look up the marketplace catalog (discovered from :mod:`masim.agents` —
    each canonical class declares its own metadata and default prompts):
    supported engines, canonical class paths under ``masim.agents.*``, and

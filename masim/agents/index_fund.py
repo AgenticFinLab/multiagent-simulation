@@ -1,7 +1,7 @@
 """index-fund — Periodic constant-weight index fund / ETF.
 
 Canonical implementation of the ``index-fund`` archetype documented in
-``examples/AGENT_POOL/finance/index-fund.md``. Rebalances toward a target
+``masim/agents/defines/finance/index-fund.md``. Rebalances toward a target
 equity weight on a fixed schedule; between rebalancing rounds, holds.
 Provides mechanical mean-reverting demand.
 

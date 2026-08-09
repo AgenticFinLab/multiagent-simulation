@@ -1,7 +1,7 @@
 """portfolio-insurer — Portfolio-insurance / delta-hedge selling.
 
 Canonical implementation of the ``portfolio-insurer`` archetype
-documented in ``examples/AGENT_POOL/finance/portfolio-insurer.md``.
+documented in ``masim/agents/defines/finance/portfolio-insurer.md``.
 Sells into declines (feedback selling) and buys into rallies to
 restore a target delta. This is the mechanism famously implicated in
 the October 1987 crash by the Brady Commission (1988).

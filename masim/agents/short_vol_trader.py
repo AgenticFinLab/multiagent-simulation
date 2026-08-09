@@ -1,7 +1,7 @@
 """short-vol-trader — Short-volatility carry trader with stop-loss cover.
 
 Canonical implementation of the ``short-vol-trader`` archetype documented in
-``examples/AGENT_POOL/finance/short-vol-trader.md``. Sells short-vol
+``masim/agents/defines/finance/short-vol-trader.md``. Sells short-vol
 inventory during calm regimes (small negative deviation) and covers
 aggressively when stress arrives (deviation above stop-loss).
 

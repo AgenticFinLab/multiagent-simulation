@@ -1,7 +1,7 @@
 """program-trader — Program-trading feedback seller (Brady-style).
 
 Canonical implementation of the ``program-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/program-trader.md``.
+documented in ``masim/agents/defines/finance/program-trader.md``.
 Amplifies price moves via mechanical, deviation-triggered sell (and
 optional buy) programs — the mechanism the Brady Commission (1988)
 implicated in Black Monday.

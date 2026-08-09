@@ -1,7 +1,7 @@
 """self-attributor — Self-attribution biased overconfident trader.
 
 Canonical implementation of the ``self-attributor`` archetype documented in
-``examples/AGENT_POOL/finance/self-attributor.md``. Escalates its position
+``masim/agents/defines/finance/self-attributor.md``. Escalates its position
 after favourable confirmations and only partially liquidates on extreme
 losses — the psychology of illusory-skill attribution.
 

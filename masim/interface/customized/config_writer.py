@@ -353,7 +353,7 @@ _ALIAS_PATCH_MARKER = "# ⇢ MASIM handbook-symbol alias patch"
 # with fallback to the shipped-code name and finally the canonical default.
 #
 # Why: the customized flow uses canonical ``masim.agents.*`` classes which
-# consume handbook symbols documented in ``examples/AGENT_POOL/finance/*.md``
+# consume handbook symbols documented in ``masim/agents/defines/finance/*.md``
 # (e.g. ``alpha``). The shipped scenario's ``metrics.py`` and
 # ``{Variant}/analysis.py`` were written against the scenario-specific
 # parameter name (e.g. ``adjustment_factor``). Without this bridge, analysis
@@ -1556,7 +1556,7 @@ def _normalise_stem(archetype: str) -> str:
     """Normalise an archetype id to a Python-safe snake_case stem.
 
     Handles both the canonical kebab-case form documented in
-    ``examples/AGENT_POOL/finance/<stem>.md`` (e.g. ``"anchored-trader"``)
+    ``masim/agents/defines/finance/<stem>.md`` (e.g. ``"anchored-trader"``)
     and the legacy PascalCase form used by earlier canonical classes
     (e.g. ``"AnchoringBiasInvestor"``).  Downstream identifiers (YAML block
     keys, Python module stems, ``SCREAMING_SNAKE`` prompt constants) MUST

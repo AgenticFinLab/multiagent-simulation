@@ -1,7 +1,7 @@
 """block-trade-buyer — Opportunistic block-trade buyer at fire-sale discounts.
 
 Canonical implementation of the ``block-trade-buyer`` archetype documented in
-``examples/AGENT_POOL/finance/block-trade-buyer.md``.
+``masim/agents/defines/finance/block-trade-buyer.md``.
 
 Theoretical basis:
     Grossman & Miller (1988) — block liquidity provision with inventory-risk

@@ -1,7 +1,7 @@
 """uninformed-bystander — Passive stochastic background trader.
 
 Canonical implementation of the ``uninformed-bystander`` archetype
-documented in ``examples/AGENT_POOL/finance/uninformed-bystander.md``.
+documented in ``masim/agents/defines/finance/uninformed-bystander.md``.
 The bystander is a rumor-audience archetype ported into the trading
 setting: it mostly holds, occasionally participates through a two-gate
 stochastic engagement rule, and when it does act, it trades weakly in

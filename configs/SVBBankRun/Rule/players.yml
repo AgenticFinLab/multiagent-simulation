@@ -1,5 +1,5 @@
 market:
-  archetype: deposit-bank-run-diamond-dybvig  # -> AGENT_POOL/market/deposit-bank-run-diamond-dybvig.md
+  archetype: deposit-bank-run-diamond-dybvig  # -> masim/agents/defines/market/deposit-bank-run-diamond-dybvig.md
   name: "Market"
   class: "examples.SVBBankRun.Rule.players:Market"
   num_instances: 1

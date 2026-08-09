@@ -38,7 +38,7 @@ This block is the **stable I/O declaration** for Step 0. Both
 |---------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
 | `examples/{ScenarioName}/simulation-build-log.md` | fresh file with the §0.3 skeleton; §0 Meta populated with pointers to the target file (create pipeline only) |
 | Target file `Status: draft → locked`              | the pipeline's single permitted edit to the target file                                                      |
-| `examples/AGENT_POOL/{Domain}/`                   | folder created if missing (empty)                                                                            |
+| `masim/agents/defines/{Domain}/`                   | folder created if missing (empty)                                                                            |
 
 **Polish Hooks (what a polish audit does at Step 0).**
 For `polish-simulation-pipeline.md`, Step 0 has two variants:
@@ -106,13 +106,13 @@ to *verify* and *consume* — not to extract more material.
    passes three consecutive times.
 
 4. **Resolve domain palette.** Check whether
-   `examples/AGENT_POOL/{Domain}/` already exists.
-   - If yes (e.g., `examples/AGENT_POOL/finance/`): use it.
+   `masim/agents/defines/{Domain}/` already exists.
+   - If yes (e.g., `masim/agents/defines/finance/`): use it.
    - If no: confirm the target file includes
      `§A Domain Palette Appendix` with the three required palettes
      (Theory Family list, Real-world counterpart enumeration,
      Stylized fact catalogue). Create the empty folder
-     `examples/AGENT_POOL/{Domain}/`.
+     `masim/agents/defines/{Domain}/`.
    - If neither: block and instruct the author to add the appendix.
 
 5. **Seed `simulation-build-log.md`.** Create
@@ -249,7 +249,7 @@ Step 0 is complete when:
       `examples/{ScenarioName}/{domain}-{scenario}.md`.
 - [ ] Target file §11 has three consecutive PASS runs.
 - [ ] Target file `Status: locked`.
-- [ ] Domain folder `examples/AGENT_POOL/{Domain}/` exists.
+- [ ] Domain folder `masim/agents/defines/{Domain}/` exists.
 - [ ] `examples/{ScenarioName}/simulation-build-log.md` exists with the
       §0.3 skeleton; §0 Meta references the target file by path.
 - [ ] §D Build Log has one row recording Phase 0 outcome.

@@ -149,7 +149,7 @@ Expected behavior: fundamentalist orders correlate negatively with price-fundame
 
 #### 4.1.11 Design Provenance and Versioning
 
-Created for the VolatilityClustering scenario under `masim/skills/polish-simulation-pipeline.md`. Profile stored at `examples/AGENT_POOL/finance/fundamentalist.md`.
+Created for the VolatilityClustering scenario under `masim/skills/polish-simulation-pipeline.md`. Profile stored at `masim/agents/defines/finance/fundamentalist.md`.
 
 ---
 
@@ -238,7 +238,7 @@ Expected behavior: trend-follower order volume positively correlates with market
 
 #### 4.2.11 Design Provenance and Versioning
 
-Created for the VolatilityClustering scenario. Profile stored at `examples/AGENT_POOL/finance/trend-follower.md`.
+Created for the VolatilityClustering scenario. Profile stored at `masim/agents/defines/finance/trend-follower.md`.
 
 ---
 
@@ -322,7 +322,7 @@ Expected behavior: noise-trader orders are uncorrelated with price signals. Aggr
 
 #### 4.3.11 Design Provenance and Versioning
 
-Existing profile at `examples/AGENT_POOL/finance/noise-trader.md`. Reused without modification for this scenario.
+Existing profile at `masim/agents/defines/finance/noise-trader.md`. Reused without modification for this scenario.
 
 ---
 
@@ -407,7 +407,7 @@ Expected behavior: slow-adapter orders lag price shocks by several rounds and pe
 
 #### 4.4.11 Design Provenance and Versioning
 
-Created for the VolatilityClustering scenario. Profile stored at `examples/AGENT_POOL/finance/slow-adapter.md`.
+Created for the VolatilityClustering scenario. Profile stored at `masim/agents/defines/finance/slow-adapter.md`.
 
 ---
 
@@ -494,7 +494,7 @@ Expected behavior: volatility-trader sell volume is positive during at least 30%
 
 #### 4.5.11 Design Provenance and Versioning
 
-Created for the VolatilityClustering scenario. Profile stored at `examples/AGENT_POOL/finance/volatility-trader.md`.
+Created for the VolatilityClustering scenario. Profile stored at `masim/agents/defines/finance/volatility-trader.md`.
 
 ## §5 Agent Diversity Verification
 

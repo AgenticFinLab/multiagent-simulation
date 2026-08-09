@@ -1,7 +1,7 @@
 """value-investor — Graham-style margin-of-safety value investor.
 
 Canonical implementation of the ``value-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/value-investor.md``. Buys fixed lots
+in ``masim/agents/defines/finance/value-investor.md``. Buys fixed lots
 when price is below fundamental by more than the margin of safety, and
 sells fixed lots at symmetric premiums. Never short-sells, never uses
 leverage — a patient institutional value buyer providing the price floor.

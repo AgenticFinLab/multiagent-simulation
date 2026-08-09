@@ -1,7 +1,7 @@
 """equity-trader — Risk-controlled equity desk with two-band gate.
 
 Canonical implementation of the ``equity-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/equity-trader.md``. A risk-controlled
+in ``masim/agents/defines/finance/equity-trader.md``. A risk-controlled
 equity desk that de-risks (sells) when the deviation breaks above a
 two-band gate and rebuilds (buys) when it breaks below; the gate is
 ``gate = 2 * risk_limit``.

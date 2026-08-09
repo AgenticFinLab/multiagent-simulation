@@ -16,8 +16,9 @@ matplotlib.use("Agg")
 # Agent icon library (kebab-case PNGs keyed by player base id).
 ICON_ROOT = (
     Path(__file__).resolve().parents[3]
-    / "examples"
-    / "AGENT_POOL"
+    / "masim"
+    / "agents"
+    / "defines"
     / "agent_images"
     / "icons"
 )
@@ -349,7 +350,7 @@ def render_sidebar(on_scenario_change: Optional[Callable[[str], None]] = None) -
                         plt.close(fig)
 
         # Market coordinator profile — click to open the archetype .md
-        # (examples/AGENT_POOL/market/{stem}.md) in a modal, mirroring the
+        # (masim/agents/defines/market/{stem}.md) in a modal, mirroring the
         # drill-through available on the "Choose how to run it" page.
         if st.button(
             "📄 View market profile",

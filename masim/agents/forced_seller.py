@@ -1,7 +1,7 @@
 """forced-seller — Distressed leveraged trader unwinding into a falling market.
 
 Canonical implementation of the ``forced-seller`` archetype documented in
-``examples/AGENT_POOL/finance/forced-seller.md``. Liquidates a fraction of
+``masim/agents/defines/finance/forced-seller.md``. Liquidates a fraction of
 the position when the current margin falls below the maintenance margin,
 amplifying declines through fire-sale dynamics.
 

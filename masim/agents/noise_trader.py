@@ -1,7 +1,7 @@
 """noise-trader — Random uninformed retail trader.
 
 Canonical implementation of the ``noise-trader`` archetype documented in
-``examples/AGENT_POOL/finance/noise-trader.md``. Supplies zero-mean random
+``masim/agents/defines/finance/noise-trader.md``. Supplies zero-mean random
 order flow; neither converges nor diverges from fundamental on average.
 
 The archetype identifier (``STRATEGY = "noise-trader"``) matches the

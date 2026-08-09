@@ -1,6 +1,6 @@
 ---
 name: agent-icon-generation-skill
-description: Generate and register AGENT_POOL agent icons when a new or forked reusable agent profile is added under examples/AGENT_POOL/{domain}/ during create or polish pipelines, or when polish discovers that any reused pool profile lacks a valid icon. Use this skill whenever an agent is not already covered by the pool and a new pool markdown file is written, or when auditing that every pool agent has a matching icon PNG, Design Provenance Icon row, and agent_images/design.md mapping.
+description: Generate and register AGENT_POOL agent icons when a new or forked reusable agent profile is added under masim/agents/defines/{domain}/ during create or polish pipelines, or when polish discovers that any reused pool profile lacks a valid icon. Use this skill whenever an agent is not already covered by the pool and a new pool markdown file is written, or when auditing that every pool agent has a matching icon PNG, Design Provenance Icon row, and agent_images/design.md mapping.
 ---
 
 # Agent Icon Generation Skill
@@ -21,20 +21,20 @@ visual identity.
 
 | Input                    | Source                                                                            |
 |--------------------------|-----------------------------------------------------------------------------------|
-| Domain                   | `examples/AGENT_POOL/{domain}/<agent>.md` parent folder                           |
+| Domain                   | `masim/agents/defines/{domain}/<agent>.md` parent folder                           |
 | Agent stem               | pool markdown filename without `.md`                                              |
 | Agent summary            | pool file `§3.2 Summary` / Summary table                                          |
 | Theory family            | pool file Summary + Theoretical Foundation                                        |
 | Behavioral role          | pool file Summary + Design Purpose                                                |
-| Existing style reference | `examples/AGENT_POOL/agent_images/design.md` and `icon_focused_contact_sheet.jpg` |
+| Existing style reference | `masim/agents/defines/agent_images/design.md` and `icon_focused_contact_sheet.jpg` |
 
 ## Outputs
 
 | Artefact          | Required path / change                                             |
 |-------------------|--------------------------------------------------------------------|
-| Icon PNG          | `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` |
+| Icon PNG          | `masim/agents/defines/agent_images/icons/{domain}-{agent-stem}.png` |
 | Pool profile link | `                                                                  |
-| Mapping row       | Add one row to `examples/AGENT_POOL/agent_images/design.md`        |
+| Mapping row       | Add one row to `masim/agents/defines/agent_images/design.md`        |
 
 ## Invocation Rules
 
@@ -50,13 +50,13 @@ Invoke this skill for a pool profile in any of these cases:
   table has no `Icon` row.
 - A polish audit finds an `Icon` row whose linked PNG is missing, empty, or
   not named `{domain}-{agent-stem}.png`.
-- A polish audit finds that `examples/AGENT_POOL/agent_images/design.md` has
+- A polish audit finds that `masim/agents/defines/agent_images/design.md` has
   no row mapping `{domain}/{agent-stem}.md` to
   `{domain}-{agent-stem}.png`.
 
 Do not invent alternate filenames. The agent-to-icon relationship is always:
-`examples/AGENT_POOL/{domain}/{agent-stem}.md` maps to
-`examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png`, and
+`masim/agents/defines/{domain}/{agent-stem}.md` maps to
+`masim/agents/defines/agent_images/icons/{domain}-{agent-stem}.png`, and
 `agent_images/design.md` records that same pair.
 
 For audit mode, derive `{agent-stem}` from the concrete agent identity with
@@ -88,8 +88,8 @@ NOT include a robot head, face, or any humanoid element. Do not
 blur this boundary.
 
 Match the existing icon set in
-`examples/AGENT_POOL/agent_images/icon_focused_contact_sheet.jpg` and
-`examples/AGENT_POOL/agent_images/icons/`.
+`masim/agents/defines/agent_images/icon_focused_contact_sheet.jpg` and
+`masim/agents/defines/agent_images/icons/`.
 
 **Composition (participant icons).**
 
@@ -123,7 +123,7 @@ Match the existing icon set in
 - **Never omit the robot head.** A headless icon in a participant
   domain is automatically invalid and must be regenerated. If you
   need a headless mechanism-diagram icon, that agent belongs under
-  `examples/AGENT_POOL/market/` — use the market-icon skill instead.
+  `masim/agents/defines/market/` — use the market-icon skill instead.
 - No photorealistic people, office scenes, trading floors, screenshots, or
   detailed UI panels.
 - No full-body character replacing the standard robot head.
@@ -147,8 +147,8 @@ Match the existing icon set in
 
 1. **Derive the file name and mapping.** Use lowercase kebab-case:
    `{domain}-{agent-stem}.png`. For example,
-   `examples/AGENT_POOL/finance/program-trader.md` maps to
-   `examples/AGENT_POOL/agent_images/icons/finance-program-trader.png`.
+   `masim/agents/defines/finance/program-trader.md` maps to
+   `masim/agents/defines/agent_images/icons/finance-program-trader.png`.
    The mapping row must pair `finance/program-trader.md` with
    `finance-program-trader.png`. If a stale row points to a different
    filename for the same agent, replace it with the canonical mapping.
@@ -224,7 +224,7 @@ Match the existing icon set in
    ```
 
 7. **Patch the image mapping.** Add or update one row in
-   `examples/AGENT_POOL/agent_images/design.md` under the relevant domain
+   `masim/agents/defines/agent_images/design.md` under the relevant domain
    mapping table with:
    - Agent path, for example `finance/program-trader.md`
    - Icon filename, for example `finance-program-trader.png`
@@ -238,7 +238,7 @@ Match the existing icon set in
 Run these checks three consecutive times during Step 2 closeout:
 
 - [ ] Every referenced pool profile has one `| Icon |` row.
-- [ ] The linked PNG exists under `examples/AGENT_POOL/agent_images/icons/`.
+- [ ] The linked PNG exists under `masim/agents/defines/agent_images/icons/`.
 - [ ] The PNG filename is `{domain}-{agent-stem}.png`.
 - [ ] The icon **visually contains a robot head** in the upper third
       — headless icons in participant domains are invalid.

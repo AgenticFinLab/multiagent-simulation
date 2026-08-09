@@ -1,7 +1,7 @@
 """information-environment — Rumor / belief coordinator.
 
 Canonical implementation of the ``information-environment`` archetype
-documented in ``examples/AGENT_POOL/finance/information-environment.md``.
+documented in ``masim/agents/defines/finance/information-environment.md``.
 This archetype represents the shared social space through which rumors
 propagate. It is not a market participant in the usual sense: it holds
 every round and instead maintains and broadcasts aggregate belief and

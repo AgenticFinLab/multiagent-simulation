@@ -1,7 +1,7 @@
 """contagion-trader — Cross-signal contagion seller (sell-only).
 
 Canonical implementation of the ``contagion-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/contagion-trader.md``.
+documented in ``masim/agents/defines/finance/contagion-trader.md``.
 Combines a deviation signal and a return signal into a scalar
 contagion index; sells a fixed fraction of position when the signal
 plunges below threshold — regional risk-off herding.

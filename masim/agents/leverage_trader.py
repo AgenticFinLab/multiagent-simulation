@@ -1,7 +1,7 @@
 """leverage-trader — Leveraged convergence trader with margin discipline.
 
 Canonical implementation of the ``leverage-trader`` archetype documented in
-``examples/AGENT_POOL/finance/leverage-trader.md``. Uses balance-sheet
+``masim/agents/defines/finance/leverage-trader.md``. Uses balance-sheet
 leverage to buy into meaningful discounts vs fundamental, but is forced to
 delever when equity falls below the margin threshold.
 

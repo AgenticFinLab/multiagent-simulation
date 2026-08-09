@@ -1,7 +1,7 @@
 """calibrated-trader — Calibrated-signal-precision contrarian trader.
 
 Canonical implementation of the ``calibrated-trader`` archetype documented in
-``examples/AGENT_POOL/finance/calibrated-trader.md``.
+``masim/agents/defines/finance/calibrated-trader.md``.
 
 Theoretical basis:
     Grossman & Stiglitz (1980) — informed traders correcting mispricings

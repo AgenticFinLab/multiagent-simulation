@@ -1,7 +1,7 @@
 """arbitrage-framer — Rational-framing arbitrageur.
 
 Canonical implementation of the ``arbitrage-framer`` archetype documented in
-``examples/AGENT_POOL/finance/arbitrage-framer.md``.
+``masim/agents/defines/finance/arbitrage-framer.md``.
 
 Theoretical basis:
     Tversky & Kahneman (1981) — framing effects; the "rational framing"

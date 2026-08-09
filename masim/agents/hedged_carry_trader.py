@@ -1,7 +1,7 @@
 """hedged-carry-trader — Volatility-gated hedged carry trader.
 
 Canonical implementation of the ``hedged-carry-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/hedged-carry-trader.md``. Enters partially
+in ``masim/agents/defines/finance/hedged-carry-trader.md``. Enters partially
 hedged carry positions during low-volatility regimes and unwinds when
 volatility rises.
 

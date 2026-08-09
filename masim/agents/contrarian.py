@@ -1,7 +1,7 @@
 """contrarian — Simple deviation-contrarian trader.
 
 Canonical implementation of the ``contrarian`` archetype documented in
-``examples/AGENT_POOL/finance/contrarian.md``. Trades opposite the
+``masim/agents/defines/finance/contrarian.md``. Trades opposite the
 deviation once it exceeds a scaled threshold — a small, deterministic
 mean-reverter.
 

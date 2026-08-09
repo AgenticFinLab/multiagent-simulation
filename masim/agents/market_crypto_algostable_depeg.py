@@ -1,6 +1,6 @@
 """Crypto Algorithmic Stablecoin Depeg — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/crypto-algostable-depeg.md
+Profile: masim/agents/defines/market/crypto-algostable-depeg.md
 Mechanism: Two-asset coupled linear price-impact + mean-reversion of stablecoin
            to peg + arbitrage-triggered mint/burn dilution + Gaussian idiosyncratic
            noise.  Models an algorithmic stablecoin (UST) redeemable for a fixed

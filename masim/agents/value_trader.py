@@ -1,7 +1,7 @@
 """value-trader — Fundamental-anchored value trader ignoring salience.
 
 Canonical implementation of the ``value-trader`` archetype documented in
-``examples/AGENT_POOL/finance/value-trader.md``. Trades strictly on the
+``masim/agents/defines/finance/value-trader.md``. Trades strictly on the
 price-vs-fundamental gap using the ``(F - P) / P`` signal — the
 availability-heuristic antithesis: ignores recency and salience,
 converges on fundamental value.

@@ -1,60 +1,19 @@
 #!/usr/bin/env python
-"""HerdingInformation Rag Simulation Runner
+"""HerdingInformation Rag Simulation Runner.
 
-Information cascade occurs when individuals ignore private signals and follow the crowd
+Usage::
 
-Usage:
     python examples/HerdingInformation/Rag/run_herdinginformation_rag.py \
         -c configs/HerdingInformation/Rag/simulation.yml
 """
 
-import argparse
-import asyncio
-
-import os
-
-from dotenv import load_dotenv
-
-from masim.simulator.base import SimulationConfig
-from masim.simulator.general import GeneralSimulator
-from masim.utils.config import load_config, setup_logging
-
-
-async def main():
-    load_dotenv()
-    setup_logging()
-    
-    parser = argparse.ArgumentParser(
-        description="Run HerdingInformation Rag Simulation"
-    )
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="configs/HerdingInformation/Rag/simulation.yml",
-    )
-    args = parser.parse_args()
-    
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-    
-    print("\n" + "=" * 70)
-    print("HerdingInformation Simulation - Rag Agents")
-    print("=" * 70)
-    print("Rounds:     %s" % config.setting["total_rounds"])
-    print("=" * 70 + "\n")
-    
-    simulator = GeneralSimulator(config)
-    
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 70)
-        print("Simulation Complete!")
-        print("=" * 70)
-    finally:
-        await simulator.shutdown()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        scenario="HerdingInformation",
+        variant="Rag",
+        default_config="configs/HerdingInformation/Rag/simulation.yml",
+        phenomenon="Information cascade - individuals ignore private signals and follow the crowd",
+        load_env=True,
+    )

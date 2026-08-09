@@ -185,32 +185,25 @@ class {ClassName}(GeneralPlayer):
 ### 4.1.3 `run_{name}.py` Pattern
 
 ```python
+#!/usr/bin/env python
+"""{SimulationName} Rule-Based Simulation Runner.
+
+Usage::
+
+    python examples/{SimulationName}/Rule/run_{name}.py \
+        -c configs/{SimulationName}/Rule/simulation.yml
 """
-{SimulationName} Rule Variant — Simulation Runner
 
-Phenomenon: [brief]
-Theory: [list]
-Usage: python examples/{SimulationName}/Rule/run_{name}.py -c configs/{SimulationName}/Rule/simulation.yml
-"""
-import sys, os, argparse, logging
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
-
-from masim.runner import SimulationRunner
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-
-def main():
-    parser = argparse.ArgumentParser(description="{SimulationName} Rule simulation")
-    parser.add_argument("-c", "--config", required=True, help="Path to simulation.yml")
-    args = parser.parse_args()
-
-    runner = SimulationRunner(config_path=args.config)
-    runner.run()
-    print(f"Simulation complete. Results in EXPERIMENT/{SimulationName}/Rule/")
+from masim.cli import run
 
 if __name__ == "__main__":
-    main()
+    run(
+        scenario="{SimulationName}",
+        variant="Rule-Based",
+        default_config="configs/{SimulationName}/Rule/simulation.yml",
+        phenomenon="{One-line phenomenon description}",
+        load_env=False,
+    )
 ```
 
 ### 4.1.4 `analysis.py` Structure (Rule Variant — Authoritative)

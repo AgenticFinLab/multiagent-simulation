@@ -1,7 +1,7 @@
 """hedged-fund — Convergence-arbitrage hedge fund with drawdown deleveraging.
 
 Canonical implementation of the ``hedged-fund`` archetype documented in
-``examples/AGENT_POOL/finance/hedged-fund.md``. Enters when a valuation
+``masim/agents/defines/finance/hedged-fund.md``. Enters when a valuation
 spread widens beyond the entry threshold, exits on spread collapse, and
 force-deleverages when drawdown exceeds the limit.
 

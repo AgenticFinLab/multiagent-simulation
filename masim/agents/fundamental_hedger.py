@@ -1,7 +1,7 @@
 """fundamental-hedger — Real-economy hedger rebalancing to a target ratio.
 
 Canonical implementation of the ``fundamental-hedger`` archetype documented
-in ``examples/AGENT_POOL/finance/fundamental-hedger.md``. Maintains a target
+in ``masim/agents/defines/finance/fundamental-hedger.md``. Maintains a target
 hedge position sized by exposure value, hedge ratio, and hedge
 effectiveness; rebalances only when the position gap exceeds a tolerance.
 

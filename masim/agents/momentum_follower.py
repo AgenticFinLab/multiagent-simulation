@@ -1,7 +1,7 @@
 """momentum-follower — Systematic CTA-style trend follower.
 
 Canonical implementation of the ``momentum-follower`` archetype documented
-in ``examples/AGENT_POOL/finance/momentum-follower.md``. Buys winners and
+in ``masim/agents/defines/finance/momentum-follower.md``. Buys winners and
 sells losers based on a lookback-window return signal, sizing
 proportionally to the signal-over-threshold ratio.
 

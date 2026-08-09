@@ -1,7 +1,7 @@
 """anchored-trader — Anchoring-bias retail trader.
 
 Canonical implementation of the ``anchored-trader`` archetype documented in
-``examples/AGENT_POOL/finance/anchored-trader.md``. The archetype identifier
+``masim/agents/defines/finance/anchored-trader.md``. The archetype identifier
 (``STRATEGY = "anchored-trader"``) matches the AGENT_POOL profile filename
 stem verbatim and is the single source of truth used by
 :mod:`masim.interface.customized.agent_catalog`, generated ``players.yml``

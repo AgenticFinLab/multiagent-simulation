@@ -1,7 +1,7 @@
 # FramingEffect Rule Agent Configuration
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.FramingEffect.Rule.players:Market"
   num_instances: 1

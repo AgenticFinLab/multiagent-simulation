@@ -1,7 +1,7 @@
 """social-proof-follower — Herding trader who follows the crowd's direction.
 
 Canonical implementation of the ``social-proof-follower`` archetype
-documented in ``examples/AGENT_POOL/finance/social-proof-follower.md``.
+documented in ``masim/agents/defines/finance/social-proof-follower.md``.
 Uses the sign of price-fundamental deviation as a proxy for the crowd's
 direction and trades with it, amplifying whichever side is winning.
 

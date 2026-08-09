@@ -1,7 +1,7 @@
 """early-exit-trader — Strategic "smart-money" early exit trader.
 
 Canonical implementation of the ``early-exit-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/early-exit-trader.md``. When the price
+in ``masim/agents/defines/finance/early-exit-trader.md``. When the price
 diverges from fundamental beyond an activation threshold, the agent
 trades contrarian to the divergence — selling into overvaluation
 (strategic exit) or buying into undervaluation (strategic entry).

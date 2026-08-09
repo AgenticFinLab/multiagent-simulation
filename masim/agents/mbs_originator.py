@@ -1,7 +1,7 @@
 """mbs-originator — MBS originator distributing to investors.
 
 Canonical implementation of the ``mbs-originator`` archetype documented in
-``examples/AGENT_POOL/finance/mbs-originator.md``. Models the
+``masim/agents/defines/finance/mbs-originator.md``. Models the
 originate-to-distribute lender who steadily unloads freshly securitised
 inventory into the market.
 

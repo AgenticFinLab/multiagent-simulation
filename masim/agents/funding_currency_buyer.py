@@ -1,7 +1,7 @@
 """funding-currency-buyer — Supportive buyer of a currency under stress.
 
 Canonical implementation of the ``funding-currency-buyer`` archetype
-documented in ``examples/AGENT_POOL/finance/funding-currency-buyer.md``.
+documented in ``masim/agents/defines/finance/funding-currency-buyer.md``.
 Steps in with size ``position_size`` when the currency's deviation drops
 below the negative risk threshold; otherwise sits out.
 

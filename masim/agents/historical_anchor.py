@@ -1,7 +1,7 @@
 """historical-anchor — Historical-price anchoring trader.
 
 Canonical implementation of the ``historical-anchor`` archetype documented in
-``examples/AGENT_POOL/finance/historical-anchor.md``. Distinct from
+``masim/agents/defines/finance/historical-anchor.md``. Distinct from
 ``anchored-trader`` in that the reference point is a rolling window of past
 prices rather than the single first-observed price.
 

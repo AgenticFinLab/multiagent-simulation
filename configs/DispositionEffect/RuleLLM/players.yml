@@ -9,7 +9,7 @@
 
 # Market (rule-based, identical to DispositionEffect)
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.DispositionEffect.RuleLLM.players:Market"
   num_instances: 1

@@ -1,7 +1,7 @@
 """momentum-retail — Late-arriving FOMO retail buyer.
 
 Canonical implementation of the ``momentum-retail`` archetype documented
-in ``examples/AGENT_POOL/finance/momentum-retail.md``. Sits out until the
+in ``masim/agents/defines/finance/momentum-retail.md``. Sits out until the
 deviation from fundamental exceeds a FOMO threshold, then buys a small
 capped quantity per round — never sells.
 

@@ -1,7 +1,7 @@
 """conformist — Momentum-conformist herding trader.
 
 Canonical implementation of the ``conformist`` archetype documented in
-``examples/AGENT_POOL/finance/conformist.md``. Follows the last-tick
+``masim/agents/defines/finance/conformist.md``. Follows the last-tick
 return: buys after up-moves, sells after down-moves — pure return
 conformity.
 

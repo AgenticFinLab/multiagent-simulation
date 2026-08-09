@@ -1,7 +1,7 @@
 """fundamental-anchor — Slow value-anchored arbitrageur.
 
 Canonical implementation of the ``fundamental-anchor`` archetype documented
-in ``examples/AGENT_POOL/finance/fundamental-anchor.md``. Builds positions
+in ``masim/agents/defines/finance/fundamental-anchor.md``. Builds positions
 gradually against mispricing, subject to a hard position cap.
 
 Theoretical basis:

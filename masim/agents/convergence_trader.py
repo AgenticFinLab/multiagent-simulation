@@ -1,7 +1,7 @@
 """convergence-trader — Uninformed noise trader on policy-convergence beliefs.
 
 Canonical implementation of the ``convergence-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/convergence-trader.md``. Places random
+in ``masim/agents/defines/finance/convergence-trader.md``. Places random
 directional trades with a fixed per-tick probability — provides noise-trader
 liquidity and can be wrong-footed by fundamental shifts.
 

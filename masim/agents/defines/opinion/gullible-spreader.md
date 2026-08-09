@@ -54,5 +54,5 @@ Vosoughi, S., Roy, D., & Aral, S. (2018). https://doi.org/10.1126/science.aap955
 
 - Origin: new (2026-07-11, RumorSpread polish)
 - Polish audit: 2026-07-11 against agent-design-skill.md
-- Pool reference: `examples/AGENT_POOL/opinion/gullible-spreader.md`
+- Pool reference: `masim/agents/defines/opinion/gullible-spreader.md`
 | Icon | ![](../agent_images/icons/opinion-gullible-spreader.png) |

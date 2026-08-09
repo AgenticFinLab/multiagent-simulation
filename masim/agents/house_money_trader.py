@@ -1,7 +1,7 @@
 """house-money-trader — Outcome-dependent risk-taker.
 
 Canonical implementation of the ``house-money-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/house-money-trader.md``. Position sizing
+in ``masim/agents/defines/finance/house-money-trader.md``. Position sizing
 depends on whether the agent is up or down against its entry price:
 "playing with house money" after gains -> doubles size; "snake-bit" after
 losses -> halves size. Direction itself is contrarian on the single-tick

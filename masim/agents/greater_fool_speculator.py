@@ -1,7 +1,7 @@
 """greater-fool-speculator — Bubble rider exiting on momentum reversal.
 
 Canonical implementation of the ``greater-fool-speculator`` archetype
-documented in ``examples/AGENT_POOL/finance/greater-fool-speculator.md``.
+documented in ``masim/agents/defines/finance/greater-fool-speculator.md``.
 Rides positive momentum while overvaluation is below a crash threshold,
 then exits aggressively when momentum turns or the ratio nears crash.
 

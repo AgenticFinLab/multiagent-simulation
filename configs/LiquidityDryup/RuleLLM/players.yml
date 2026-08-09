@@ -3,7 +3,7 @@
 # =============================================================================
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
   class: "examples.LiquidityDryup.RuleLLM.players:Market"
   num_instances: 1
@@ -27,7 +27,7 @@ market:
   persona: !include persona.yml
 
 rulellm_market_maker:
-  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
+  archetype: market-maker  # -> masim/agents/defines/finance/market-maker.md
   name: "RuleLLM Market Maker"
   class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMMarketMaker"
   # Expander → rulellm_market_maker_1, rulellm_market_maker_2, rulellm_market_maker_3
@@ -54,7 +54,7 @@ rulellm_market_maker:
   persona: !include persona.yml
 
 rulellm_liquidity_seeker:
-  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
+  archetype: liquidity-seeker  # -> masim/agents/defines/finance/liquidity-seeker.md
   name: "RuleLLM Liquidity Seeker"
   class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMLiquiditySeeker"
   # Expander → rulellm_liquidity_seeker_1, rulellm_liquidity_seeker_2, rulellm_liquidity_seeker_3
@@ -81,7 +81,7 @@ rulellm_liquidity_seeker:
   persona: !include persona.yml
 
 rulellm_value_trader:
-  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
+  archetype: value-trader  # -> masim/agents/defines/finance/value-trader.md
   name: "RuleLLM Value Trader"
   class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMValueTrader"
   # Expander → rulellm_value_trader_1, rulellm_value_trader_2
@@ -108,7 +108,7 @@ rulellm_value_trader:
   persona: !include persona.yml
 
 rulellm_momentum_trader:
-  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
+  archetype: momentum-trader  # -> masim/agents/defines/finance/momentum-trader.md
   name: "RuleLLM Momentum Trader"
   class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMMomentumTrader"
   # Expander → rulellm_momentum_trader_1, rulellm_momentum_trader_2
@@ -135,7 +135,7 @@ rulellm_momentum_trader:
   persona: !include persona.yml
 
 rulellm_noise_trader:
-  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
+  archetype: noise-trader  # -> masim/agents/defines/finance/noise-trader.md
   name: "RuleLLM Noise Trader"
   class: "examples.LiquidityDryup.RuleLLM.players:RuleLLMNoiseTrader"
   # Expander → rulellm_noise_trader_1, rulellm_noise_trader_2

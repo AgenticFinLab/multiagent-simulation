@@ -40,7 +40,7 @@ Inside a market simulation this agent amplifies the first leg of overreaction an
 - Mathematical Formulation: `return_pct = (P_t - P_{t-1}) / P_{t-1}`.
 - Empirical Evidence: Winner-minus-loser strategies show positive intermediate-horizon returns in U.S. equities.
 - Relevance to This Agent: Recent return is the salience input, but not the only input.
-- Calibration Source: Parent pool file `examples/AGENT_POOL/finance/momentum-trader.md`.
+- Calibration Source: Parent pool file `masim/agents/defines/finance/momentum-trader.md`.
 - Falsification Conditions: If the agent trades solely on `deviation` and ignores `return_pct`, it collapses into a rational updater.
 - Alternative Theories: reversal trading; value investing.
 

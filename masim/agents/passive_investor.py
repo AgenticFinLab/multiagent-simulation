@@ -1,7 +1,7 @@
 """passive-investor — Periodic fixed-target rebalancer.
 
 Canonical implementation of the ``passive-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/passive-investor.md``. A patient
+in ``masim/agents/defines/finance/passive-investor.md``. A patient
 buy-and-hold investor with a fixed target allocation. Only trades on
 rebalancing rounds and only moves a fraction of the position gap toward
 target, clipped by a per-event maximum.

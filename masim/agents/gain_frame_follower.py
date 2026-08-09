@@ -1,7 +1,7 @@
 """gain-frame-follower — Kahneman-Tversky framing-driven trend follower.
 
 Canonical implementation of the ``gain-frame-follower`` archetype documented
-in ``examples/AGENT_POOL/finance/gain-frame-follower.md``. Reacts to how
+in ``masim/agents/defines/finance/gain-frame-follower.md``. Reacts to how
 the current mispricing is framed: buys in the gain frame, sells in the
 loss frame, and stays out when deviation is sub-threshold.
 

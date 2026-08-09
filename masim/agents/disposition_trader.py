@@ -1,7 +1,7 @@
 """disposition-trader — Disposition-effect retail trader.
 
 Canonical implementation of the ``disposition-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/disposition-trader.md``. Sells winners too
+in ``masim/agents/defines/finance/disposition-trader.md``. Sells winners too
 early and holds losers too long — the classic Prospect-Theory asymmetry.
 
 Theoretical basis:

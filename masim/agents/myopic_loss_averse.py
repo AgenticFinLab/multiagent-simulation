@@ -1,7 +1,7 @@
 """myopic-loss-averse — Myopic-loss-averse trader (fast evaluation).
 
 Canonical implementation of the ``myopic-loss-averse`` archetype documented
-in ``examples/AGENT_POOL/finance/myopic-loss-averse.md``. Evaluates
+in ``masim/agents/defines/finance/myopic-loss-averse.md``. Evaluates
 portfolio performance every few ticks against an anchor price, applies
 prospect-theory utility with heightened loss aversion, and sells a large
 fraction of its position whenever the utility turns negative. Re-enters

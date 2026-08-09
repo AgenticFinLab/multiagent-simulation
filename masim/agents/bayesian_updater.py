@@ -1,7 +1,7 @@
 """bayesian-updater — Bayesian rational trader with base-rate weighting.
 
 Canonical implementation of the ``bayesian-updater`` archetype documented in
-``examples/AGENT_POOL/finance/bayesian-updater.md``.
+``masim/agents/defines/finance/bayesian-updater.md``.
 
 Theoretical basis:
     Grether (1980) — Bayesian benchmark for belief revision;

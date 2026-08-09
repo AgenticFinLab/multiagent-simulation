@@ -1,7 +1,7 @@
 """hot-money-funder — Short-horizon foreign creditor / crisis initiator.
 
 Canonical implementation of the ``hot-money-funder`` archetype documented in
-``examples/AGENT_POOL/finance/hot-money-funder.md``. Fast balance-sheet
+``masim/agents/defines/finance/hot-money-funder.md``. Fast balance-sheet
 protection: pulls a large fraction of the position at the first sign of
 FX/asset stress, then dips a toe back in when conditions normalise.
 

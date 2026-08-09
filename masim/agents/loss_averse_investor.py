@@ -1,7 +1,7 @@
 """loss-averse-investor — Prospect-theory loss-averse investor.
 
 Canonical implementation of the ``loss-averse-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/loss-averse-investor.md``.
+documented in ``masim/agents/defines/finance/loss-averse-investor.md``.
 Uses the Kahneman-Tversky lambda parameter to set an asymmetric loss
 tolerance around an entry price.
 

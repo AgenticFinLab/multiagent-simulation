@@ -39,7 +39,7 @@ these seven checks — no new configs are added:
 3. No default value in any config disagrees with target §9 (the target file is authoritative — configs are echoes).
 4. Every variant folder marked `Yes` in target §10.1 has all required YAML files present; variants marked `No` MUST NOT have a config folder.
 5. **Identity form.** Every top-level identity key in `players.yml` (and every `config.identity` string) MUST be `snake_case`, MUST NOT end with a numeric suffix `_\d+$` (the runtime `expand_player_instances` in `masim/interface/config_loader.py` appends instance indices automatically when `num_instances > 1`; a template-level numeric suffix produces double-suffixed IDs at runtime that break UI icon/`.md` lookups), and MUST contain underscores between semantic tokens (concatenated forms such as `insideradvantaged` are FORBIDDEN — kebab-case file lookups require preserved word boundaries). See §3.4 "Identity naming rule (MUST follow)" for the full rationale and worked examples.
-6. **Variant prefix.** Every identity MUST start with the variant's canonical prefix as declared in target §10.1 (finance-default: `rule_`, `llm_`, `rulellm_`, `ragllm_`). Stripping the prefix (via `masim/interface/components/agent_market.py::_canonical_archetype()`) MUST yield an archetype stem that resolves to an existing `examples/AGENT_POOL/{Domain}/{stem-kebab}.md` profile — this ties Step 3's identity form back to Step 2's AGENT_POOL match (Hook 4 there). Fix: rename the identity to include the prefix and rerun the pool three-stage match; do NOT rename the pool file.
+6. **Variant prefix.** Every identity MUST start with the variant's canonical prefix as declared in target §10.1 (finance-default: `rule_`, `llm_`, `rulellm_`, `ragllm_`). Stripping the prefix (via `masim/interface/components/agent_market.py::_canonical_archetype()`) MUST yield an archetype stem that resolves to an existing `masim/agents/defines/{Domain}/{stem-kebab}.md` profile — this ties Step 3's identity form back to Step 2's AGENT_POOL match (Hook 4 there). Fix: rename the identity to include the prefix and rerun the pool three-stage match; do NOT rename the pool file.
 7. **Topology–players identity consistency.** Every identity referenced in `topology.yml` (any variant folder) MUST be defined as a top-level key in the same variant's `players.yml`. Stray topology identities are a defect; fix by removing the orphan reference or by adding the missing player block (whichever the design intent supports — halt via `AskUserQuestion` if unclear).
 
 **Manual audit procedure.** For Hooks 5–7, for the scenario under polish (or every scenario during a repo-wide sweep): (i) list every top-level identity in each variant's `configs/{Scenario}/{Variant}/players.yml`, (ii) list every identity referenced in the same variant's `topology.yml`, and (iii) diff both sets across variants. Any orphan, missing, or unequal identity is a defect and MUST halt via `AskUserQuestion`.
@@ -202,8 +202,8 @@ template must NEVER carry a numeric suffix of its own.
 - For variant configs, the identity MUST also carry the variant prefix:
   `rule_short_vol_trader`, `llm_short_vol_trader`, `rulellm_short_vol_trader`,
   `ragllm_short_vol_trader`. The archetype-level assets (`.md` profile in
-  `examples/AGENT_POOL/finance/` and icon in
-  `examples/AGENT_POOL/agent_images/icons/`) are shared across variants; the
+  `masim/agents/defines/finance/` and icon in
+  `masim/agents/defines/agent_images/icons/`) are shared across variants; the
   UI resolver strips the variant prefix via `_canonical_archetype()` in
   `masim/interface/components/agent_market.py`.
 - Concatenated identities without underscores are FORBIDDEN (`insideradvantaged`

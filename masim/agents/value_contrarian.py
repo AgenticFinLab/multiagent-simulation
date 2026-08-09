@@ -1,7 +1,7 @@
 """value-contrarian — Long-horizon crisis-arb value contrarian.
 
 Canonical implementation of the ``value-contrarian`` archetype documented
-in ``examples/AGENT_POOL/finance/value-contrarian.md``. Buys deeply
+in ``masim/agents/defines/finance/value-contrarian.md``. Buys deeply
 oversold assets during panic and sells into over-bullish rallies —
 converges on fundamental with capital-constrained sizing.
 

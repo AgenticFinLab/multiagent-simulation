@@ -1,7 +1,7 @@
 # Volmageddon RuleLLM Agent Configuration
 
 market:
-  archetype: derivatives-vol-feedback  # -> AGENT_POOL/market/derivatives-vol-feedback.md
+  archetype: derivatives-vol-feedback  # -> masim/agents/defines/market/derivatives-vol-feedback.md
   name: "Market"
   class: "examples.Volmageddon.RuleLLM.players:Market"
   num_instances: 1

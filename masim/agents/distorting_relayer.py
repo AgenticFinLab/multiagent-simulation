@@ -1,7 +1,7 @@
 """distorting-relayer — Serial-distortion rumor relayer.
 
 Canonical implementation of the ``distorting-relayer`` archetype
-documented in ``examples/AGENT_POOL/finance/distorting-relayer.md``. The
+documented in ``masim/agents/defines/finance/distorting-relayer.md``. The
 agent updates a personal belief in a rumor via credulity + sharpening
 (distortion) + leveling (regression to neutral), then relays with
 intensity proportional to belief strength.

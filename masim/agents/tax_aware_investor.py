@@ -1,7 +1,7 @@
 """tax-aware-investor — Tax-loss harvester / gain deferrer.
 
 Canonical implementation of the ``tax-aware-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/tax-aware-investor.md``. Anchors to a
+in ``masim/agents/defines/finance/tax-aware-investor.md``. Anchors to a
 running cost basis: harvests losses aggressively (opposite of the
 disposition effect) and defers gains until they become very large.
 

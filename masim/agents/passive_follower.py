@@ -1,7 +1,7 @@
 """passive-follower — Herding-driven consensus follower.
 
 Canonical implementation of the ``passive-follower`` archetype documented
-in ``examples/AGENT_POOL/finance/passive-follower.md``. An uninformed
+in ``masim/agents/defines/finance/passive-follower.md``. An uninformed
 conformist that observes the majority action and majority-fraction of
 peers in a lookback window and mirrors the herd when consensus is strong
 enough, sizing its trade proportional to consensus intensity.

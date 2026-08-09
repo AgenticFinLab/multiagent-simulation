@@ -1,7 +1,7 @@
 """market-maker — Inventory-reverting market maker.
 
 Canonical implementation of the ``market-maker`` archetype documented in
-``examples/AGENT_POOL/finance/market-maker.md``. Trades to mean-revert its
+``masim/agents/defines/finance/market-maker.md``. Trades to mean-revert its
 inventory back toward zero, but withdraws entirely when the market is
 severely mispriced vs fundamental.
 

@@ -1,7 +1,7 @@
 """bridge-builder — Inventory-aware two-sided market maker.
 
 Canonical implementation of the ``bridge-builder`` archetype documented in
-``examples/AGENT_POOL/finance/bridge-builder.md``.
+``masim/agents/defines/finance/bridge-builder.md``.
 
 Theoretical basis:
     Kyle (1985) — market microstructure with a risk-averse market maker;

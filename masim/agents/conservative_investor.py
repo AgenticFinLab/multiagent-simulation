@@ -1,7 +1,7 @@
 """conservative-investor — CRRA risk-averse utility maximiser.
 
 Canonical implementation of the ``conservative-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/conservative-investor.md``.
+documented in ``masim/agents/defines/finance/conservative-investor.md``.
 Buys when the certainty equivalent (expected return net of variance
 penalty) exceeds a hurdle and the market trades below fundamental;
 takes profit when the market trades meaningfully above fundamental.

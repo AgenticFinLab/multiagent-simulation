@@ -1,7 +1,7 @@
 """hindsight-overconfident — "Knew it all along" momentum amplifier.
 
 Canonical implementation of the ``hindsight-overconfident`` archetype
-documented in ``examples/AGENT_POOL/finance/hindsight-overconfident.md``.
+documented in ``masim/agents/defines/finance/hindsight-overconfident.md``.
 Chases the current price-fundamental deviation with a bias-inflated
 position size — post-hoc "obviousness" plus forward overconfidence make
 its orders systematically larger than an unbiased momentum trader's.

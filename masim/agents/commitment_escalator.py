@@ -1,7 +1,7 @@
 """commitment-escalator — Sunk-cost escalation of commitment (buy-only).
 
 Canonical implementation of the ``commitment-escalator`` archetype
-documented in ``examples/AGENT_POOL/finance/commitment-escalator.md``.
+documented in ``masim/agents/defines/finance/commitment-escalator.md``.
 Doubles down in losses (larger orders when deviation is more negative)
 and adds modestly in gains — the classic escalation-of-commitment /
 sunk-cost fallacy.

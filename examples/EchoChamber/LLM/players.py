@@ -36,7 +36,6 @@ import json
 import math
 import random
 import re
-import sys
 import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
@@ -47,13 +46,6 @@ from masim.utils.history import HistoryBuffer
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
-
-# Support direct module loading when the repository is not installed editable.
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
 
 from masim.utils.llm_utils import is_retryable_llm_error
 

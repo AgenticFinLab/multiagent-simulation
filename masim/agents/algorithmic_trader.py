@@ -1,7 +1,7 @@
 """algorithmic-trader — Systematic trend follower over a fixed lookback.
 
 Canonical implementation of the ``algorithmic-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/algorithmic-trader.md``.
+in ``masim/agents/defines/finance/algorithmic-trader.md``.
 
 Theoretical basis:
     Jegadeesh & Titman (1993) — momentum profits in equities; Moskowitz,

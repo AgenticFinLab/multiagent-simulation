@@ -1,7 +1,7 @@
 """counter-cyclical-lender — Basel-III style counter-cyclical credit provider.
 
 Canonical implementation of the ``counter-cyclical-lender`` archetype
-documented in ``examples/AGENT_POOL/finance/counter-cyclical-lender.md``.
+documented in ``masim/agents/defines/finance/counter-cyclical-lender.md``.
 Uses an EMA trend of price as a credit-cycle proxy: extends credit (buys)
 in busts (price below trend) and tightens (sells) in booms (price above
 trend).

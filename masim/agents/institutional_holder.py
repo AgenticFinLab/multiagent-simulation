@@ -1,7 +1,7 @@
 """institutional-holder — Passive institutional holder withholding float.
 
 Canonical implementation of the ``institutional-holder`` archetype documented
-in ``examples/AGENT_POOL/finance/institutional-holder.md``. Emits an
+in ``masim/agents/defines/finance/institutional-holder.md``. Emits an
 unconditional hold every round — models a large index fund / insider whose
 locked-up position removes shares from the tradeable float.
 

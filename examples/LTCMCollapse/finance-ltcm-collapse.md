@@ -133,11 +133,11 @@ The episode ends when finite positions and cash limit additional forced trading,
 
 | Agent name (kebab) | Real-world counterpart | Theory family (§4 anchor) | Domain role | Primary signals | Intent line | Expected pool match |
 |---|---|---|---|---|---|---|
-| convergence-arbitrageur | leveraged relative-value hedge fund | Limits to Arbitrage (§4.1) | Context-dependent | price, fundamental, deviation | Exists to trade expected convergence while exposing funding fragility. | examples/AGENT_POOL/finance/convergence-arbitrageur.md |
-| leverage-trader | balance-sheet-constrained leveraged fund | Leverage Cycle (§4.2) | Destabilising | price, deviation, equity | Exists to convert margin pressure into forced deleveraging. | examples/AGENT_POOL/finance/leverage-trader.md |
-| risk-manager | institutional risk-control desk | Procyclical Risk Management (§4.3) | Context-dependent | price, deviation, position | Exists to reduce individual exposure at the risk of synchronized selling. | examples/AGENT_POOL/finance/risk-manager.md |
-| liquidity-provider | inventory-constrained dealer | Funding and Market Liquidity (§4.4) | Stabilising | price, deviation, position | Exists to supply ordinary liquidity and withdraw when funding stress binds. | examples/AGENT_POOL/finance/liquidity-provider.md |
-| central-bank | official-sector crisis coordinator | Crisis Coordination (§4.5) | Stabilising | price, deviation, round | Exists to provide contingent support during systemic stress. | examples/AGENT_POOL/finance/central-bank.md |
+| convergence-arbitrageur | leveraged relative-value hedge fund | Limits to Arbitrage (§4.1) | Context-dependent | price, fundamental, deviation | Exists to trade expected convergence while exposing funding fragility. | masim/agents/defines/finance/convergence-arbitrageur.md |
+| leverage-trader | balance-sheet-constrained leveraged fund | Leverage Cycle (§4.2) | Destabilising | price, deviation, equity | Exists to convert margin pressure into forced deleveraging. | masim/agents/defines/finance/leverage-trader.md |
+| risk-manager | institutional risk-control desk | Procyclical Risk Management (§4.3) | Context-dependent | price, deviation, position | Exists to reduce individual exposure at the risk of synchronized selling. | masim/agents/defines/finance/risk-manager.md |
+| liquidity-provider | inventory-constrained dealer | Funding and Market Liquidity (§4.4) | Stabilising | price, deviation, position | Exists to supply ordinary liquidity and withdraw when funding stress binds. | masim/agents/defines/finance/liquidity-provider.md |
+| central-bank | official-sector crisis coordinator | Crisis Coordination (§4.5) | Stabilising | price, deviation, round | Exists to provide contingent support during systemic stress. | masim/agents/defines/finance/central-bank.md |
 
 ## §8 Environment Specification
 

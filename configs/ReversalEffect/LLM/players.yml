@@ -3,7 +3,7 @@
 # =============================================================================
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market with Mean Reversion"
   class: "examples.ReversalEffect.LLM.players:Market"
   num_instances: 1
@@ -14,13 +14,13 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/market.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      price_impact: 0.08  # Source: AGENT_POOL/finance/market.md §6
-      mean_reversion: 0.01  # Source: AGENT_POOL/finance/market.md §6
-      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: masim/agents/defines/finance/market.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      initial_price: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      price_impact: 0.08  # Source: masim/agents/defines/finance/market.md §6
+      mean_reversion: 0.01  # Source: masim/agents/defines/finance/market.md §6
+      noise_std: 0.5  # Source: masim/agents/defines/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/market.md §6
   persona: !include persona.yml
 
 llm_contrarian_investor:
@@ -35,18 +35,18 @@ llm_contrarian_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-      initial_cash: 10000.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-      initial_position: 50.0  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+      initial_cash: 10000.0  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+      initial_position: 50.0  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/contrarian-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_CONTRARIAN_SYS"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-        lm_type: "api"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_CONTRARIAN_SYS"  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+        lm_type: "api"  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/finance/contrarian-investor.md §6
         generation_config:
-          temperature: 0.3  # Source: AGENT_POOL/finance/contrarian-investor.md §6
-          max_new_tokens: 500  # Source: AGENT_POOL/finance/contrarian-investor.md §6
+          temperature: 0.3  # Source: masim/agents/defines/finance/contrarian-investor.md §6
+          max_new_tokens: 500  # Source: masim/agents/defines/finance/contrarian-investor.md §6
   persona: !include persona.yml
 
 llm_overconfident_trader:
@@ -61,18 +61,18 @@ llm_overconfident_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-      initial_cash: 10000.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-      initial_position: 50.0  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+      initial_cash: 10000.0  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+      initial_position: 50.0  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/overconfident-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_OVERCONFIDENT_SYS"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-        lm_type: "api"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_OVERCONFIDENT_SYS"  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+        lm_type: "api"  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/finance/overconfident-trader.md §6
         generation_config:
-          temperature: 0.5  # Source: AGENT_POOL/finance/overconfident-trader.md §6
-          max_new_tokens: 500  # Source: AGENT_POOL/finance/overconfident-trader.md §6
+          temperature: 0.5  # Source: masim/agents/defines/finance/overconfident-trader.md §6
+          max_new_tokens: 500  # Source: masim/agents/defines/finance/overconfident-trader.md §6
   persona: !include persona.yml
 
 llm_value_investor:
@@ -87,18 +87,18 @@ llm_value_investor:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/value-investor.md §6
-      initial_cash: 10000.0  # Source: AGENT_POOL/finance/value-investor.md §6
-      initial_position: 50.0  # Source: AGENT_POOL/finance/value-investor.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/value-investor.md §6
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: masim/agents/defines/finance/value-investor.md §6
+      initial_cash: 10000.0  # Source: masim/agents/defines/finance/value-investor.md §6
+      initial_position: 50.0  # Source: masim/agents/defines/finance/value-investor.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/value-investor.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_VALUE_SYS"  # Source: AGENT_POOL/finance/value-investor.md §6
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/value-investor.md §6
-        lm_type: "api"  # Source: AGENT_POOL/finance/value-investor.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/value-investor.md §6
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_VALUE_SYS"  # Source: masim/agents/defines/finance/value-investor.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: masim/agents/defines/finance/value-investor.md §6
+        lm_type: "api"  # Source: masim/agents/defines/finance/value-investor.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/finance/value-investor.md §6
         generation_config:
-          temperature: 0.3  # Source: AGENT_POOL/finance/value-investor.md §6
-          max_new_tokens: 500  # Source: AGENT_POOL/finance/value-investor.md §6
+          temperature: 0.3  # Source: masim/agents/defines/finance/value-investor.md §6
+          max_new_tokens: 500  # Source: masim/agents/defines/finance/value-investor.md §6
   persona: !include persona.yml
 
 llm_momentum_chaser:
@@ -113,18 +113,18 @@ llm_momentum_chaser:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-      initial_cash: 10000.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-      initial_position: 50.0  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+      initial_cash: 10000.0  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+      initial_position: 50.0  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/momentum-chaser.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-        lm_type: "api"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_MOMENTUM_CHASER_SYS"  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+        lm_type: "api"  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/finance/momentum-chaser.md §6
         generation_config:
-          temperature: 0.4  # Source: AGENT_POOL/finance/momentum-chaser.md §6
-          max_new_tokens: 500  # Source: AGENT_POOL/finance/momentum-chaser.md §6
+          temperature: 0.4  # Source: masim/agents/defines/finance/momentum-chaser.md §6
+          max_new_tokens: 500  # Source: masim/agents/defines/finance/momentum-chaser.md §6
   persona: !include persona.yml
 
 llm_noise_trader:
@@ -139,16 +139,16 @@ llm_noise_trader:
     group_tags:
       - llm_investors
     extras:
-      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: AGENT_POOL/finance/noise-trader.md §6
-      initial_cash: 10000.0  # Source: AGENT_POOL/finance/noise-trader.md §6
-      initial_position: 50.0  # Source: AGENT_POOL/finance/noise-trader.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/noise-trader.md §6
+      record_path: "EXPERIMENT/ReversalEffectLLM/records"  # Source: masim/agents/defines/finance/noise-trader.md §6
+      initial_cash: 10000.0  # Source: masim/agents/defines/finance/noise-trader.md §6
+      initial_position: 50.0  # Source: masim/agents/defines/finance/noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/noise-trader.md §6
       llm:
-        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_NOISE_SYS"  # Source: AGENT_POOL/finance/noise-trader.md §6
-        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: AGENT_POOL/finance/noise-trader.md §6
-        lm_type: "api"  # Source: AGENT_POOL/finance/noise-trader.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/finance/noise-trader.md §6
+        sys_message: "examples.ReversalEffect.LLM.prompts:LLM_NOISE_SYS"  # Source: masim/agents/defines/finance/noise-trader.md §6
+        user_message: "examples.ReversalEffect.LLM.prompts:LLM_USER_TEMPLATE"  # Source: masim/agents/defines/finance/noise-trader.md §6
+        lm_type: "api"  # Source: masim/agents/defines/finance/noise-trader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/finance/noise-trader.md §6
         generation_config:
-          temperature: 0.7  # Source: AGENT_POOL/finance/noise-trader.md §6
-          max_new_tokens: 500  # Source: AGENT_POOL/finance/noise-trader.md §6
+          temperature: 0.7  # Source: masim/agents/defines/finance/noise-trader.md §6
+          max_new_tokens: 500  # Source: masim/agents/defines/finance/noise-trader.md §6
   persona: !include persona.yml

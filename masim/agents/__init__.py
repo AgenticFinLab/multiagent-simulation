@@ -1,7 +1,7 @@
 """Canonical, scenario-agnostic agent classes.
 
 This package auto-registers every archetype whose profile lives at
-``examples/AGENT_POOL/{finance,market,opinion}/<stem>.md``.  See the
+``masim/agents/defines/{finance,market,opinion}/<stem>.md``.  See the
 module docstring in earlier revisions for the naming contract and
 the replication playbook.  209 archetypes are shipped as of the
 latest full-pool rollout:

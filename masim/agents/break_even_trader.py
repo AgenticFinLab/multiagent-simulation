@@ -1,7 +1,7 @@
 """break-even-trader — Break-even loss-averse buy-the-dip trader.
 
 Canonical implementation of the ``break-even-trader`` archetype documented in
-``examples/AGENT_POOL/finance/break-even-trader.md``.
+``masim/agents/defines/finance/break-even-trader.md``.
 
 Theoretical basis:
     Barberis & Xiong (2009) — break-even effect and realization utility;

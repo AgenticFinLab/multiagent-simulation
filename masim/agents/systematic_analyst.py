@@ -1,7 +1,7 @@
 """systematic-analyst — Rational Bayesian benchmark trader.
 
 Canonical implementation of the ``systematic-analyst`` archetype
-documented in ``examples/AGENT_POOL/finance/systematic-analyst.md``.
+documented in ``masim/agents/defines/finance/systematic-analyst.md``.
 Treats fundamental as the precision-weighted Bayesian posterior and
 trades the resulting price-vs-posterior deviation using symmetric
 threshold rules.

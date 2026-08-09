@@ -1,7 +1,7 @@
 """new-buyer — Late-cycle retail entrant.
 
 Canonical implementation of the ``new-buyer`` archetype documented in
-``examples/AGENT_POOL/finance/new-buyer.md``. A late-cycle retail entrant
+``masim/agents/defines/finance/new-buyer.md``. A late-cycle retail entrant
 who never sells: enters with a fixed fraction of cash whenever the trailing
 return exceeds an entry threshold, then intends to hold indefinitely.
 

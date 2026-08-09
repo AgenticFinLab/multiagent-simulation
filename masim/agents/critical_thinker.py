@@ -1,7 +1,7 @@
 """critical-thinker — Contrarian critical thinker resisting the crowd.
 
 Canonical implementation of the ``critical-thinker`` archetype documented
-in ``examples/AGENT_POOL/finance/critical-thinker.md``. Trades against the
+in ``masim/agents/defines/finance/critical-thinker.md``. Trades against the
 market consensus when the consensus diverges materially from the agent's
 private fundamental estimate.
 

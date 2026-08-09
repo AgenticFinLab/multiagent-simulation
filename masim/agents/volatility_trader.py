@@ -1,7 +1,7 @@
 """volatility-trader — Volatility-targeting regime trader.
 
 Canonical implementation of the ``volatility-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/volatility-trader.md``.
+documented in ``masim/agents/defines/finance/volatility-trader.md``.
 Mechanically reduces exposure when realized volatility is high relative
 to its own moving average, and rebuilds exposure when volatility is low
 — a discrete-threshold approximation of the Moreira & Muir (2017)

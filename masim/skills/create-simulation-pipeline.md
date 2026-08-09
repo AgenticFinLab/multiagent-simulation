@@ -395,7 +395,7 @@ plus write-back.
 ### 6.1 Entry Conditions
 
 - Phase 2 exit conditions hold.
-- The domain folder `examples/AGENT_POOL/<domain>/` exists (the
+- The domain folder `masim/agents/defines/<domain>/` exists (the
   pipeline creates it in lowercase kebab-case if it does not).
 
 ### 6.2 Three-Stage Match Protocol
@@ -406,9 +406,9 @@ result of each candidate's run is appended to §A as a single row:
 ```markdown
 | Candidate archetype | Stage reached | Outcome            | Pool file                                                   |
 |---------------------|---------------|--------------------|-------------------------------------------------------------|
-| trend-follower      | 3             | reuse              | examples/AGENT_POOL/finance/momentum-trader.md              |
+| trend-follower      | 3             | reuse              | masim/agents/defines/finance/momentum-trader.md              |
 | panic-leveraged-LP  | 2             | new                | (to be created)                                             |
-| fundamentalist      | 3             | fork (calibration) | examples/AGENT_POOL/finance/fundamental-analyst.md (parent) |
+| fundamentalist      | 3             | fork (calibration) | masim/agents/defines/finance/fundamental-analyst.md (parent) |
 ```
 
 **Stage 1 — Filename scan.** List every `*.md` in the domain folder.
@@ -468,7 +468,7 @@ For every candidate with outcome `new` or `fork`:
 3. **Write standalone form to the pool.** The pool file uses standalone
    header levels (H1 title, H2 sections, H4 behavioral-framework
    sub-blocks). Filename: `<kebab-case-role>.md`. Path:
-   `examples/AGENT_POOL/<domain>/<kebab-case-role>.md`.
+   `masim/agents/defines/<domain>/<kebab-case-role>.md`.
 4. **Embed re-levelled form in `simulation-bases.md §4`.** Shift the
    pool file's header levels down by two so investor title sits at
    `###`, handbook §3.x sections at `####`, handbook §3.6.y
@@ -502,7 +502,7 @@ written into `simulation-bases.md §4`.
 - Every candidate from §B.4 has a row in §A with an `approved`
   outcome.
 - Every `new` / `fork` outcome has a corresponding standalone file in
-  `examples/AGENT_POOL/<domain>/`.
+  `masim/agents/defines/<domain>/`.
 - `simulation-bases.md §4` contains a re-levelled embedded block (or
   reuse pointer) for every candidate.
 - The handbook §6 checklist has been run three times consecutively
@@ -630,7 +630,7 @@ produced by any later phase MUST trace back, through
 | `simulation-bases.md §3` (market mechanism choices)    | §B.2 stylized facts                 | target §5 + §8                 |
 | `simulation-bases.md §4.{N}` block                     | §A row + §B.4 taxonomy entry        | target §7                      |
 | `simulation-bases.md §6` parameter rows                | §B.5 estimates                      | target §9                      |
-| `examples/AGENT_POOL/<domain>/<file>.md` (new entries) | §A row with outcome ∈ {new, fork}   | target §7 row marked as new    |
+| `masim/agents/defines/<domain>/<file>.md` (new entries) | §A row with outcome ∈ {new, fork}   | target §7 row marked as new    |
 | `players.yml` extras with `# Source:` comment          | §B.5 (or override in §4.{N}.6)      | target §9                      |
 | Any prompt persona trait in `LLM/prompts.py`           | A handbook §3.4 or §3.6.5 line      | target §4 + §7                 |
 | Any analysis metric in `analysis-bases.md §2`          | §B.2 stylized fact / §B.3 event     | target §5 + §6 + §10.2         |
@@ -674,7 +674,7 @@ Run this checklist once before invoking Phase 0:
       before the file was written to disk.
 - [ ] The proposed `{ScenarioName}` is unique under `examples/`.
 - [ ] The chosen `{domain}` has (or will be created as) a folder
-      under `examples/AGENT_POOL/`. For new domains, the target file
+      under `masim/agents/defines/`. For new domains, the target file
       must include `§A Domain Palette Appendix`.
 - [ ] You have access to academic sources sufficient to *verify*
       every citation in target §4, §5, §6, §9.
@@ -702,5 +702,5 @@ If any item is unchecked, fix it before starting Phase 0.
 | Step 4 (Implement)                    | `masim/skills/implement-simulation-skill/08-step4-implement.md`        |
 | Steps 5 — 10 (Validate, review, run)  | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`     |
 | AssetBubble reference                 | `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`  |
-| AGENT_POOL directory                  | `examples/AGENT_POOL/`                                                 |
+| AGENT_POOL directory                  | `masim/agents/defines/`                                                 |
 | Project structure overview            | `docs/structure.md`                                                    |

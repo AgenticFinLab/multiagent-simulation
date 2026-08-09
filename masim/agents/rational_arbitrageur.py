@@ -1,7 +1,7 @@
 """rational-arbitrageur — Rational arbitrageur with short-selling capacity.
 
 Canonical implementation of the ``rational-arbitrageur`` archetype
-documented in ``examples/AGENT_POOL/finance/rational-arbitrageur.md``.
+documented in ``masim/agents/defines/finance/rational-arbitrageur.md``.
 Unlike a naive mean-reverter, this agent can go net short when the
 asset is meaningfully overvalued and cover shorts when the deviation
 compresses back.

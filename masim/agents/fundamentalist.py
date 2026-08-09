@@ -1,7 +1,7 @@
 """fundamentalist — Brock-Hommes fundamentalist with noise and frequency gating.
 
 Canonical implementation of the ``fundamentalist`` archetype documented in
-``examples/AGENT_POOL/finance/fundamentalist.md``. Trades on noisy value
+``masim/agents/defines/finance/fundamentalist.md``. Trades on noisy value
 estimates every ``trade_frequency`` rounds; provides slow stabilising
 demand around the true fundamental.
 

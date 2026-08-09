@@ -1,7 +1,7 @@
 """fundamental-analyst — Conservative fundamental analyst.
 
 Canonical implementation of the ``fundamental-analyst`` archetype documented
-in ``examples/AGENT_POOL/finance/fundamental-analyst.md``. Gradually learns
+in ``masim/agents/defines/finance/fundamental-analyst.md``. Gradually learns
 the fundamental via exponential smoothing — captures the *conservatism* bias
 in belief updating, in contrast to ``rational-updater`` which trusts the
 fundamental broadcast immediately.

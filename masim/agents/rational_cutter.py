@@ -1,7 +1,7 @@
 """rational-cutter — Rational contrarian cutter.
 
 Canonical implementation of the ``rational-cutter`` archetype
-documented in ``examples/AGENT_POOL/finance/rational-cutter.md``. The
+documented in ``masim/agents/defines/finance/rational-cutter.md``. The
 agent trades contrarian to observed deviations with quantity scaling
 linearly with |dev| / cut_threshold once the threshold is breached.
 

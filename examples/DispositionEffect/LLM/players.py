@@ -27,7 +27,6 @@ Environment Variables:
 
 import os
 import random
-import sys
 import logging
 import math
 from typing import Any, Dict, Optional
@@ -41,7 +40,6 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 # Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from masim.utils.llm_utils import (
     parse_llm_response_with_thinking,

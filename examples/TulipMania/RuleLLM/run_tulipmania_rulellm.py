@@ -1,56 +1,19 @@
 #!/usr/bin/env python
-"""TulipMania RuleLLM Simulation Runner
+"""TulipMania RuleLLM Simulation Runner.
 
-TulipMania simulation
+Usage::
 
-Usage:
     python examples/TulipMania/RuleLLM/run_tulipmania_rulellm.py \
         -c configs/TulipMania/RuleLLM/simulation.yml
 """
 
-import argparse
-import asyncio
-
-from dotenv import load_dotenv
-
-from masim.simulator.base import SimulationConfig
-from masim.simulator.general import GeneralSimulator
-from masim.utils.config import load_config, setup_logging
-
-
-async def main():
-    load_dotenv()
-    setup_logging()
-
-    parser = argparse.ArgumentParser(description="Run TulipMania RuleLLM Simulation")
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="configs/TulipMania/RuleLLM/simulation.yml",
-    )
-    args = parser.parse_args()
-
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-
-    print("\n" + "=" * 70)
-    print("TulipMania Simulation - RuleLLM Agents")
-    print("=" * 70)
-    print("Rounds:     %s" % config.setting["total_rounds"])
-    print("=" * 70 + "\n")
-
-    simulator = GeneralSimulator(config)
-
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 70)
-        print("Simulation Complete!")
-        print("=" * 70)
-    finally:
-        await simulator.shutdown()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        scenario="TulipMania",
+        variant="RuleLLM",
+        default_config="configs/TulipMania/RuleLLM/simulation.yml",
+        phenomenon="Trend-chasing and social-proof amplification ratchet prices above fundamentals until crash",
+        load_env=True,
+    )

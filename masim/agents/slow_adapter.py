@@ -1,7 +1,7 @@
 """slow-adapter — Slow-updating perceived-value trader.
 
 Canonical implementation of the ``slow-adapter`` archetype documented in
-``examples/AGENT_POOL/finance/slow-adapter.md``. Anchors perceived value
+``masim/agents/defines/finance/slow-adapter.md``. Anchors perceived value
 to a slow moving average of recent prices with a small fundamental
 weight, and takes small trades against the perceived deviation.
 

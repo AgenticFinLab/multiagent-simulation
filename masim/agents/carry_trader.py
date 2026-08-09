@@ -1,7 +1,7 @@
 """carry-trader — Leveraged carry trader with crash-risk unwind.
 
 Canonical implementation of the ``carry-trader`` archetype documented in
-``examples/AGENT_POOL/finance/carry-trader.md``. Accumulates a levered
+``masim/agents/defines/finance/carry-trader.md``. Accumulates a levered
 long position while the funding-currency proxy trades below fundamental
 and abruptly unwinds when it appreciates past threshold — the classic
 carry-crash asymmetry.

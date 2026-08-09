@@ -1,7 +1,7 @@
 """de-fi-lender — Protocol-liquidated DeFi collateral holder.
 
 Canonical implementation of the ``de-fi-lender`` archetype documented in
-``examples/AGENT_POOL/finance/de-fi-lender.md``. When the price deviates
+``masim/agents/defines/finance/de-fi-lender.md``. When the price deviates
 below a liquidation threshold from parity, the protocol force-sells a
 fixed fraction of the agent's collateral position. Otherwise the agent
 holds. Never buys.

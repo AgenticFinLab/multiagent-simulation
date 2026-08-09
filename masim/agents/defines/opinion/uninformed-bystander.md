@@ -53,5 +53,5 @@ Watts, D. J. (2002). A simple model of global cascades on random networks. *PNAS
 
 - Origin: new (2026-07-11, RumorSpread polish)
 - Polish audit: 2026-07-11 against agent-design-skill.md
-- Pool reference: `examples/AGENT_POOL/opinion/uninformed-bystander.md`
+- Pool reference: `masim/agents/defines/opinion/uninformed-bystander.md`
 | Icon | ![](../agent_images/icons/opinion-uninformed-bystander.png) |

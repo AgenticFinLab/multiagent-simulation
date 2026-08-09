@@ -10,7 +10,7 @@
 # Market (Coordinator) — rule-based price mechanism
 # -----------------------------------------------------------------------------
 market:
-  archetype: credit-minsky-cycle  # -> AGENT_POOL/market/credit-minsky-cycle.md
+  archetype: credit-minsky-cycle  # -> masim/agents/defines/market/credit-minsky-cycle.md
   name: "Market"
   class: "examples.CreditCycle.Rule.players:Market"
   num_instances: 1

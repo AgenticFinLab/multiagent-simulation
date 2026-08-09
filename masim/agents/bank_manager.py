@@ -1,7 +1,7 @@
 """bank-manager — Bank ALM manager buying undervalued own securities.
 
 Canonical implementation of the ``bank-manager`` archetype documented in
-``examples/AGENT_POOL/finance/bank-manager.md``.
+``masim/agents/defines/finance/bank-manager.md``.
 
 Theoretical basis:
     Flannery (1994) — bank asset-liability management under interest-rate

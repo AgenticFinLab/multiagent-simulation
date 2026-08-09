@@ -1,7 +1,7 @@
 """institutional-investor — Weakened-disposition professional trader.
 
 Canonical implementation of the ``institutional-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/institutional-investor.md``.
+documented in ``masim/agents/defines/finance/institutional-investor.md``.
 Models a professional portfolio manager exhibiting the disposition effect at
 attenuated strength: wider gain threshold (holds winners longer) and tighter
 loss threshold (cuts losers faster) than the retail disposition trader.

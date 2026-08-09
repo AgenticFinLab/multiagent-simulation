@@ -1,7 +1,7 @@
 """streak-reversal-trader — Pro-cyclical gambler's-fallacy trader.
 
 Canonical implementation of the ``streak-reversal-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/streak-reversal-trader.md``.
+documented in ``masim/agents/defines/finance/streak-reversal-trader.md``.
 The profile's §Core Behavioral Mechanism is pro-cyclical: the agent
 misperceives a persistent price-vs-fundamental deviation as a streak and
 trades **with** that direction (see Tversky & Kahneman 1971; Rabin 2002).

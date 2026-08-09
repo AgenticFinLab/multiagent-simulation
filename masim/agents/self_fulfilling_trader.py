@@ -1,7 +1,7 @@
 """self-fulfilling-trader — Soros-style reflexive self-fulfilling attacker.
 
 Canonical implementation of the ``self-fulfilling-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/self-fulfilling-trader.md``.
+documented in ``masim/agents/defines/finance/self-fulfilling-trader.md``.
 Attacks a vulnerable target when the environment's vulnerability signal
 exceeds a conviction threshold, and reinforces its conviction when price
 moves align with its side; retreats otherwise.

@@ -1,7 +1,7 @@
 """flash-market-maker — High-frequency market maker with flash-crash withdrawal.
 
 Canonical implementation of the ``flash-market-maker`` archetype documented in
-``examples/AGENT_POOL/finance/flash-market-maker.md``. Provides two-sided
+``masim/agents/defines/finance/flash-market-maker.md``. Provides two-sided
 liquidity in calm markets and withdraws when realized volatility exceeds a
 threshold, amplifying flash-crash dynamics.
 

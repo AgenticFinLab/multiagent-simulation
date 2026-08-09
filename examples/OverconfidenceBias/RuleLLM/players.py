@@ -8,7 +8,6 @@ All parameters configured via players.yml.
 """
 
 import logging
-import os
 from typing import Any, Dict, Optional
 
 from lmbase.inference.api_call import LangChainAPIInference

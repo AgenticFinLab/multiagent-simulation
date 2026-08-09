@@ -112,8 +112,8 @@ from masim.utils.config import load_config, setup_logging
 
 _CONFIGS_DIR = project_root / "configs"
 _EXAMPLES_DIR = project_root / "examples"
-_AGENT_POOL_DIR = _EXAMPLES_DIR / "AGENT_POOL"
-_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION", "AGENT_POOL"}
+_AGENT_POOL_DIR = project_root / "masim" / "agents" / "defines"
+_EXCLUDED_DIRS = {"TEMPLATES", "__pycache__", "Demo", "CUSTOMIZED_SIMULATION"}
 
 
 # ---------------------------------------------------------------------------
@@ -165,7 +165,7 @@ def discover_variants(scenario_name: str) -> List[str]:
 
 
 def list_agent_pool() -> List[Dict[str, Any]]:
-    """List available agent archetypes from AGENT_POOL/finance/.
+    """List available agent archetypes from masim/agents/defines/finance/.
 
     Each entry contains:
         - name: filename stem (e.g. 'noise-trader')

@@ -1,7 +1,7 @@
 """rational-investor — Target-allocation rational rebalancer.
 
 Canonical implementation of the ``rational-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/rational-investor.md``.
+documented in ``masim/agents/defines/finance/rational-investor.md``.
 The agent holds a target risky-asset allocation and rebalances when
 the actual allocation drifts outside the rebalance band, moving a
 fraction of the gap per tick.

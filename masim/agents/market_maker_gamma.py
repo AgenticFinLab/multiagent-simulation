@@ -1,7 +1,7 @@
 """market-maker-gamma — Short-gamma dealer forced-buying.
 
 Canonical implementation of the ``market-maker-gamma`` archetype
-documented in ``examples/AGENT_POOL/finance/market-maker-gamma.md``.
+documented in ``masim/agents/defines/finance/market-maker-gamma.md``.
 Models a dealer who is short gamma (short calls hedged with delta) and
 must mechanically buy the underlying as it rises above the option's
 reference strike, amplifying the up-move — the "gamma squeeze" mechanism.

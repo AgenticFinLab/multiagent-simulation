@@ -20,7 +20,7 @@ knowledge:
     top_k: 5  # Source: retrieval coverage contract; Rag/analysis.md §2
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.EndowmentEffect.Rag.players:Market"
   num_instances: 1

@@ -1,7 +1,7 @@
 """long-vol-hedger — Long-volatility crash hedger.
 
 Canonical implementation of the ``long-vol-hedger`` archetype documented in
-``examples/AGENT_POOL/finance/long-vol-hedger.md``. Buys cheap convexity
+``masim/agents/defines/finance/long-vol-hedger.md``. Buys cheap convexity
 when the market has crashed below fundamental and rolls it off after a
 sharp recovery.
 

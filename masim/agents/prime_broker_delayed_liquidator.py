@@ -2,7 +2,7 @@
 
 Canonical implementation of the ``prime-broker-delayed-liquidator``
 archetype documented in
-``examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md``.
+``masim/agents/defines/finance/prime-broker-delayed-liquidator.md``.
 Contrast with ``prime-broker-first-mover``: this creditor waits for a
 deeper stress trigger and pays a price penalty when it finally liquidates.
 

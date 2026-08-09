@@ -1,7 +1,7 @@
 """myopic-loss-averse-investor — Standard myopic loss-averse investor.
 
 Canonical implementation of the ``myopic-loss-averse-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/myopic-loss-averse-investor.md``.
+documented in ``masim/agents/defines/finance/myopic-loss-averse-investor.md``.
 Same prospect-theory mechanism as the ``myopic-loss-averse`` archetype but
 with a longer evaluation period, milder loss aversion, more moderate
 sell/buy fractions, and a lower re-entry threshold — matching the standard

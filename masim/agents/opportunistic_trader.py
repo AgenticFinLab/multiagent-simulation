@@ -1,7 +1,7 @@
 """opportunistic-trader — Follower speculator amplifying visible attacks.
 
 Canonical implementation of the ``opportunistic-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/opportunistic-trader.md``. A
+documented in ``masim/agents/defines/finance/opportunistic-trader.md``. A
 fringe speculator that waits for the price to visibly deviate from
 fundamental before trading, then piles in *with* the deviation direction,
 amplifying rather than correcting the mispricing.

@@ -1,7 +1,7 @@
 """institutional-value — Sell-only fundamental value investor.
 
 Canonical implementation of the ``institutional-value`` archetype documented
-in ``examples/AGENT_POOL/finance/institutional-value.md``. Sells shares into
+in ``masim/agents/defines/finance/institutional-value.md``. Sells shares into
 overvaluation once ``deviation`` exceeds a valuation threshold and holds
 otherwise — never buys.
 

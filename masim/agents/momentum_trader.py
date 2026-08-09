@@ -1,7 +1,7 @@
 """momentum-trader — Short-term momentum trader.
 
 Canonical implementation of the ``momentum-trader`` archetype documented in
-``examples/AGENT_POOL/finance/momentum-trader.md``. Chases recent price
+``masim/agents/defines/finance/momentum-trader.md``. Chases recent price
 trends and amplifies short-run moves — diverges from fundamental during
 trending episodes.
 

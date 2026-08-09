@@ -1,56 +1,19 @@
 #!/usr/bin/env python
-"""FramingEffect RAG-LLM Simulation Runner
+"""FramingEffect Rag Simulation Runner.
 
-Framing Effect: RAG-augmented LLM agents with research-backed framing susceptibility
+Usage::
 
-Usage:
     python examples/FramingEffect/Rag/run_framingeffect_rag.py \
         -c configs/FramingEffect/Rag/simulation.yml
 """
 
-import argparse
-import asyncio
-
-from dotenv import load_dotenv
-
-from masim.simulator.base import SimulationConfig
-from masim.simulator.general import GeneralSimulator
-from masim.utils.config import load_config, setup_logging
-
-
-async def main():
-    load_dotenv()
-    setup_logging()
-
-    parser = argparse.ArgumentParser(description="Run FramingEffect RAG-LLM Simulation")
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="configs/FramingEffect/Rag/simulation.yml",
-    )
-    args = parser.parse_args()
-
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-
-    print("\n" + "=" * 70)
-    print("FramingEffect Simulation - RAG-LLM Agents")
-    print("=" * 70)
-    print("Rounds:     %s" % config.setting["total_rounds"])
-    print("=" * 70 + "\n")
-
-    simulator = GeneralSimulator(config)
-
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 70)
-        print("Simulation Complete!")
-        print("=" * 70)
-    finally:
-        await simulator.shutdown()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        scenario="FramingEffect",
+        variant="Rag",
+        default_config="configs/FramingEffect/Rag/simulation.yml",
+        phenomenon="Gain/loss frames elicit asymmetric risk attitudes, generating bias-driven order flow",
+        load_env=True,
+    )

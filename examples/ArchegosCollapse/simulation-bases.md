@@ -153,7 +153,7 @@ This section follows `masim/skills/agent-design-skill.md` and the finance instan
 
 ### §4.1 ConcentratedFund
 
-> Agent pool source: examples/AGENT_POOL/finance/concentrated-fund.md
+> Agent pool source: masim/agents/defines/finance/concentrated-fund.md
 
 
 #### 4.1.1 Summary
@@ -442,7 +442,7 @@ State update: no state becomes negative.
 
 ### §4.2 PrimeBrokerFirstMover
 
-> Agent pool source: examples/AGENT_POOL/finance/prime-broker-first-mover.md
+> Agent pool source: masim/agents/defines/finance/prime-broker-first-mover.md
 
 
 #### 4.2.1 Summary
@@ -717,7 +717,7 @@ State update: no state becomes negative.
 
 ### §4.3 PrimeBrokerDelayedLiquidator
 
-> Agent pool source: examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md
+> Agent pool source: masim/agents/defines/finance/prime-broker-delayed-liquidator.md
 
 
 #### 4.3.1 Summary
@@ -994,7 +994,7 @@ State update: no state becomes negative.
 
 ### §4.4 BlockTradeBuyer
 
-> Agent pool source: examples/AGENT_POOL/finance/block-trade-buyer.md
+> Agent pool source: masim/agents/defines/finance/block-trade-buyer.md
 
 
 #### 4.4.1 Summary
@@ -1280,7 +1280,7 @@ State update: no state becomes negative.
 
 ### §4.5 InformationTrader
 
-> Agent pool source: examples/AGENT_POOL/finance/information-trader.md
+> Agent pool source: masim/agents/defines/finance/information-trader.md
 
 
 #### 4.5.1 Summary

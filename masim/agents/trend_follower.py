@@ -1,7 +1,7 @@
 """trend-follower — CTA/managed-futures time-series-momentum trader.
 
 Canonical implementation of the ``trend-follower`` archetype documented
-in ``examples/AGENT_POOL/finance/trend-follower.md``. Detects a trend
+in ``masim/agents/defines/finance/trend-follower.md``. Detects a trend
 signal from the deviation of price relative to a short moving average
 and trades in the direction of that deviation, with position size scaled
 by signal strength and a procyclical volatility multiplier.

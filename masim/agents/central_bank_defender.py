@@ -1,7 +1,7 @@
 """central-bank-defender — Currency peg defender with reserve-floor exit.
 
 Canonical implementation of the ``central-bank-defender`` archetype
-documented in ``examples/AGENT_POOL/finance/central-bank-defender.md``.
+documented in ``masim/agents/defines/finance/central-bank-defender.md``.
 Defends a fixed peg by contrarian intervention scaled by deviation
 magnitude, and capitulates when reserves fall below the credibility
 floor (twin-crisis capitulation).

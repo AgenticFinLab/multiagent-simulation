@@ -1,7 +1,7 @@
 """vol-arbitrageur — Model-based volatility mean-reversion arbitrageur.
 
 Canonical implementation of the ``vol-arbitrageur`` archetype documented
-in ``examples/AGENT_POOL/finance/vol-arbitrageur.md``. Trades large
+in ``masim/agents/defines/finance/vol-arbitrageur.md``. Trades large
 dislocations back toward fundamental under a per-round capital cap that
 encodes the limits-to-arbitrage discipline.
 

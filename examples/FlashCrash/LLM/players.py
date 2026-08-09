@@ -31,7 +31,6 @@ import os
 import json
 import random
 import re
-import sys
 import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
@@ -45,7 +44,6 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 # Shared utility for parsing LLM responses with analysis/decision format
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from masim.utils.llm_utils import parse_llm_response_with_thinking
 
 logger = logging.getLogger("FlashCrashLLM")

@@ -1,7 +1,7 @@
 """conservative-holder — Value-discount patient buyer (buy-only).
 
 Canonical implementation of the ``conservative-holder`` archetype
-documented in ``examples/AGENT_POOL/finance/conservative-holder.md``.
+documented in ``masim/agents/defines/finance/conservative-holder.md``.
 Buys a small base position when the discount to fundamental exceeds a
 generous threshold and never sells — a patient value-holder.
 

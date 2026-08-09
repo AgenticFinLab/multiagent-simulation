@@ -1,7 +1,7 @@
 """gullible-spreader — Credulous rumor spreader (non-market agent).
 
 Canonical implementation of the ``gullible-spreader`` archetype documented
-in ``examples/AGENT_POOL/finance/gullible-spreader.md``. Belongs to an
+in ``masim/agents/defines/finance/gullible-spreader.md``. Belongs to an
 opinion-dynamics / rumor-spreading domain rather than an investor market;
 its native action space is ``{spread, ignore}`` with a spread intensity.
 

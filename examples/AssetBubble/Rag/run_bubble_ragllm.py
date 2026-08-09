@@ -1,41 +1,21 @@
 #!/usr/bin/env python
-"""AssetBubbleRag Simulation Runner
+"""AssetBubble RAG Simulation Runner.
 
-Run RAG-augmented Rule+LLM bubble investor simulation.
+RAG-augmented bubble simulation with knowledge pre-processing.
+Documents are pre-processed during setup; agents load from shared cache.
 
-Knowledge Management Architecture:
-  1. ResourceManager pre-processes ALL documents during simulation setup
-     (before agents start). This ensures PDFs are processed only once,
-     preventing duplicate MinerU API calls and resource contention.
-     Already processed PDFs are automatically skipped.
-  2. Agents load pre-processed documents from shared cache during initialization.
-  3. Each agent builds its own RAG index from pre-processed documents.
+Usage::
 
-Configuration:
-  Top-level `knowledge:` in simulation.yml defines shared resources.
-  Each agent has `private_knowledge:` for agent-specific resources
-  and `rag:` for RAG embedding/indexing configuration.
-
-Usage:
-    python examples/AssetBubble/Rag/run_bubble_ragllm.py -c configs/AssetBubble/Rag/simulation.yml
-
-Environment Variables:
-    ARK_API_KEY: ByteDance Doubao API key — used for LLM inference
-    HUNYUAN_API_KEY: Tencent Hunyuan API key — used for RAG embedding
-    MINERU_API_KEY: MinerU API key — used for PDF parsing
+    python examples/AssetBubble/Rag/run_bubble_ragllm.py \
+        -c configs/AssetBubble/Rag/simulation.yml
 """
 
 import argparse
 import asyncio
 import os
 import traceback
-import sys
-from pathlib import Path
 
 from dotenv import load_dotenv
-
-project_root = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(project_root))
 
 from masim.simulator.base import SimulationConfig
 from masim.simulator.general import GeneralSimulator
@@ -65,14 +45,9 @@ async def main():
     config = SimulationConfig(**yaml_config)
 
     print("\n" + "=" * 60)
-    print("AssetBubbleRag Simulation")
+    print("AssetBubble RAG Simulation")
     print("=" * 60)
     print("Phenomenon: Asset Bubble with RAG-Augmented LLM Decision-Making")
-    print("Theory:     Greater Fool Theory + Explicit Quantitative Rules + RAG")
-    print("Agents:     Momentum Speculator, Rational Arbitrageur, Noise Trader,")
-    print("            Value Investor, Leveraged Buyer  (all Rule+LLM+RAG)")
-    print("Note:       Documents are pre-processed during simulation setup.")
-    print("            Each agent loads from shared cache (no duplicates).")
     print("Rounds:     %s" % config.setting["total_rounds"])
     print("=" * 60 + "\n")
 
@@ -124,9 +99,9 @@ async def main():
     total = len(results)
     print(f"[SETUP] Document status: {success}/{total} ready")
     if success == total and total > 0:
-        print(f"[SETUP] All documents ready!")
+        print("[SETUP] All documents ready!")
     elif total == 0:
-        print(f"[SETUP] No PDFs found in shared resources.")
+        print("[SETUP] No PDFs found in shared resources.")
 
     # Build shared RAG index (config-driven, reads rag defaults from knowledge.rag)
     print("[SETUP] Building shared RAG index...")
@@ -137,8 +112,6 @@ async def main():
         print("[SETUP] No shared RAG index built (no processed documents available).")
 
     # Inject knowledge config into each RAG agent's extras so agents can access it
-    # The top-level `knowledge:` section is in simulation.yml, stored in config.knowledge,
-    # and injected into agent extras for per-agent initialization.
     for player_key, player_cfg in config.players.items():
         extras = player_cfg.get("config", {}).get("extras", {})
         if isinstance(extras, dict) and "private_knowledge" in extras:

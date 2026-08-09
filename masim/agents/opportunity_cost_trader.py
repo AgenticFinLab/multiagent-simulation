@@ -1,7 +1,7 @@
 """opportunity-cost-trader — Institutional contrarian reallocator.
 
 Canonical implementation of the ``opportunity-cost-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/opportunity-cost-trader.md``.
+documented in ``masim/agents/defines/finance/opportunity-cost-trader.md``.
 A contrarian reallocator that waits for a relatively large mispricing
 before reallocating capital: sells when the asset is meaningfully
 overvalued (high opportunity cost of holding), buys when meaningfully

@@ -168,7 +168,7 @@ Per-agent profiles that are intended to be **reusable across scenarios** are
 additionally stored at:
 
 ```text
-examples/AGENT_POOL/<domain>/<kebab-name>.md   # one file per agent archetype
+masim/agents/defines/<domain>/<kebab-name>.md   # one file per agent archetype
 ```
 
 (see `masim/skills/create-simulation-pipeline.md` for the reuse-or-create

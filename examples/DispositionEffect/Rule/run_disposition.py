@@ -1,80 +1,19 @@
-#!/usr/bin/env python3
-"""
-Run DispositionEffect Simulation
+#!/usr/bin/env python
+"""DispositionEffect Rule-Based Simulation Runner.
 
-Demonstrates the disposition effect (Shefrin & Statman 1985):
-- Investors sell winners too early (realize gains)
-- Investors hold losers too long (reluctant to realize losses)
+Usage::
 
-Usage:
-    python examples/DispositionEffect/Rule/run_disposition.py -c configs/DispositionEffect/Rule/simulation.yml
+    python examples/DispositionEffect/Rule/run_disposition.py \
+        -c configs/DispositionEffect/Rule/simulation.yml
 """
 
-import argparse
-import asyncio
-import logging
-import os
-import shutil
-
-from masim.simulator.general import GeneralSimulator
-from masim.simulator.base import SimulationConfig
-from masim.utils.config import load_config, setup_logging
-
-
-setup_logging()
-logger = logging.getLogger("DispositionEffect")
-
-
-async def run_simulation(config_path: str, steps: int | None = None):
-    """Run the disposition effect simulation."""
-
-    yaml_config = load_config(config_path)
-    if steps is not None:
-        if steps < 1:
-            raise ValueError("steps must be at least 1")
-        yaml_config["setting"]["total_rounds"] = steps
-    config = SimulationConfig(**yaml_config)
-
-    # Clear stale records from any previous run
-    record_path = yaml_config["setting"]["record_path"]
-    if os.path.exists(record_path):
-        shutil.rmtree(record_path)
-        logger.info("Cleared old records: %s", record_path)
-    logger.info("=" * 70)
-    logger.info("DISPOSITION EFFECT SIMULATION")
-    logger.info("=" * 70)
-    logger.info("Phenomenon: Disposition Effect (Shefrin & Statman 1985)")
-    logger.info("Theory: Prospect Theory (Kahneman & Tversky 1979)")
-    logger.info("")
-    logger.info("Investor Types:")
-    logger.info("  - DispositionInvestor: Sells winners, holds losers")
-    logger.info("  - RationalInvestor:    Baseline expected utility")
-    logger.info("  - TaxAwareInvestor:    Tax loss harvesting")
-    logger.info("  - IndexHolder:         Passive buy-and-hold")
-    logger.info("  - InstitutionalInvestor: Professional (less biased)")
-    logger.info("=" * 70)
-
-    simulator = GeneralSimulator(config)
-
-    await simulator.setup()
-    results = await simulator.run()
-    await simulator.shutdown()
-
-    logger.info("Simulation Complete!")
-    return results
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Disposition Effect Simulation")
-    parser.add_argument("-c", "--config", type=str, required=True)
-    parser.add_argument(
-        "--steps",
-        type=int,
-        help="Override total_rounds for a smoke or calibration run",
-    )
-    return parser.parse_args()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    args = parse_args()
-    asyncio.run(run_simulation(args.config, args.steps))
+    run(
+        scenario="DispositionEffect",
+        variant="Rule-Based",
+        default_config="configs/DispositionEffect/Rule/simulation.yml",
+        phenomenon="Loss aversion causes investors to sell winners too early and hold losers too long",
+        load_env=False,
+    )

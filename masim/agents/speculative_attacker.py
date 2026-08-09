@@ -1,7 +1,7 @@
 """speculative-attacker — Currency-peg / reserve-run attacker.
 
 Canonical implementation of the ``speculative-attacker`` archetype
-documented in ``examples/AGENT_POOL/finance/speculative-attacker.md``.
+documented in ``masim/agents/defines/finance/speculative-attacker.md``.
 Waits for two co-conditions on the defender's reserves and the peg's
 fundamental misalignment, then attacks in size scaled by how far the
 misalignment breaches its threshold.

@@ -1,7 +1,7 @@
 """process-evaluator — Process-oriented contrarian evaluator.
 
 Canonical implementation of the ``process-evaluator`` archetype
-documented in ``examples/AGENT_POOL/finance/process-evaluator.md``.
+documented in ``masim/agents/defines/finance/process-evaluator.md``.
 The agent trades contrarian to observed deviations, scaled by the
 process-vs-outcome weighting that Roese & Vohs (2012) invoke as a
 hindsight-debiasing device.

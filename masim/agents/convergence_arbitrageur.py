@@ -1,7 +1,7 @@
 """convergence-arbitrageur — LTCM-style leveraged relative-value trader.
 
 Canonical implementation of the ``convergence-arbitrageur`` archetype
-documented in ``examples/AGENT_POOL/finance/convergence-arbitrageur.md``.
+documented in ``masim/agents/defines/finance/convergence-arbitrageur.md``.
 Deploys extreme leverage against spreads that exceed a minimum entry
 band — buys discounts, sells premiums — sizing the order to leveraged
 capacity capped at max_position.

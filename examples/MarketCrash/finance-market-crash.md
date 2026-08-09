@@ -113,12 +113,12 @@ The decline ends when forced selling is exhausted and net demand ceases to be pe
 
 | Agent name (kebab) | Real-world counterpart | Theory family (§4 anchor) | Domain role | Primary signals | Intent line | Expected pool match |
 |---|---|---|---|---|---|---|
-| risk-parity-fund | volatility-targeting multi-asset fund | Volatility-managed exposure (§4.1) | Destabilising | price, volatility, round | Exists to translate elevated volatility into systematic exposure reduction. | examples/AGENT_POOL/finance/risk-parity-fund.md |
-| leveraged-hedge-fund | leveraged relative-value hedge fund | Funding-liquidity spiral (§4.2) | Destabilising | price, leverage, liquidity | Exists to transmit losses and funding pressure into forced liquidation. | examples/AGENT_POOL/finance/leveraged-hedge-fund.md |
-| market-maker | securities dealer | Funding-liquidity spiral (§4.2) | Context-dependent | price, liquidity, net demand | Exists to absorb order imbalance until inventory and liquidity constraints bind. | examples/AGENT_POOL/finance/market-maker.md |
-| passive-investor | benchmarked long-only fund | Slow-moving capital (§4.3) | Stabilising | price, fundamental, round | Exists to rebalance slowly toward a strategic allocation. | examples/AGENT_POOL/finance/passive-investor.md |
-| panic-seller | loss-sensitive retail or discretionary investor | Prospect-theory selling (§4.4) | Destabilising | price, drawdown, volatility | Exists to amplify salient losses through threshold-driven selling. | examples/AGENT_POOL/finance/panic-seller.md |
-| bottom-fisher | contrarian value investor | Contrarian value demand (§4.5) | Stabilising | price, fundamental, drawdown | Exists to supply delayed demand after a sufficiently deep discount. | examples/AGENT_POOL/finance/bottom-fisher.md |
+| risk-parity-fund | volatility-targeting multi-asset fund | Volatility-managed exposure (§4.1) | Destabilising | price, volatility, round | Exists to translate elevated volatility into systematic exposure reduction. | masim/agents/defines/finance/risk-parity-fund.md |
+| leveraged-hedge-fund | leveraged relative-value hedge fund | Funding-liquidity spiral (§4.2) | Destabilising | price, leverage, liquidity | Exists to transmit losses and funding pressure into forced liquidation. | masim/agents/defines/finance/leveraged-hedge-fund.md |
+| market-maker | securities dealer | Funding-liquidity spiral (§4.2) | Context-dependent | price, liquidity, net demand | Exists to absorb order imbalance until inventory and liquidity constraints bind. | masim/agents/defines/finance/market-maker.md |
+| passive-investor | benchmarked long-only fund | Slow-moving capital (§4.3) | Stabilising | price, fundamental, round | Exists to rebalance slowly toward a strategic allocation. | masim/agents/defines/finance/passive-investor.md |
+| panic-seller | loss-sensitive retail or discretionary investor | Prospect-theory selling (§4.4) | Destabilising | price, drawdown, volatility | Exists to amplify salient losses through threshold-driven selling. | masim/agents/defines/finance/panic-seller.md |
+| bottom-fisher | contrarian value investor | Contrarian value demand (§4.5) | Stabilising | price, fundamental, drawdown | Exists to supply delayed demand after a sufficiently deep discount. | masim/agents/defines/finance/bottom-fisher.md |
 
 ## §8 Environment Specification
 

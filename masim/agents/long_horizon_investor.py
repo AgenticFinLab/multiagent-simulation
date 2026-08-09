@@ -1,7 +1,7 @@
 """long-horizon-investor — Portfolio-weight rebalancing investor.
 
 Canonical implementation of the ``long-horizon-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/long-horizon-investor.md``. The
+documented in ``masim/agents/defines/finance/long-horizon-investor.md``. The
 archetype maintains a target equity weight in a long-horizon portfolio and
 rebalances only when the realised weight drifts outside a band. When price
 is deep-discounted relative to fundamental, buys are scaled up

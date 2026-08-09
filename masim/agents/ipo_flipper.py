@@ -1,7 +1,7 @@
 """ipo-flipper — Short-horizon IPO allocation flipper.
 
 Canonical implementation of the ``ipo-flipper`` archetype documented in
-``examples/AGENT_POOL/finance/ipo-flipper.md``. Receives an IPO allocation
+``masim/agents/defines/finance/ipo-flipper.md``. Receives an IPO allocation
 at ``offer_price`` on the first tick of the IPO window and flips it out when
 either a target return or a maximum-hold horizon is reached.
 

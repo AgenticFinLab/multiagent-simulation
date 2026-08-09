@@ -1,7 +1,7 @@
 """stop-loss-trader — Trailing stop-loss liquidator.
 
 Canonical implementation of the ``stop-loss-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/stop-loss-trader.md``. Tracks a rolling
+in ``masim/agents/defines/finance/stop-loss-trader.md``. Tracks a rolling
 recent high and dumps the entire position once price drops by more than
 the stop-loss fraction below that high.
 

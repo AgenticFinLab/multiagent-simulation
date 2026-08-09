@@ -118,11 +118,11 @@ The cascade slows when finite inventories limit additional sales and value deman
 
 | Agent name (kebab) | Real-world counterpart | Theory family (§4 anchor) | Domain role | Primary signals | Intent line | Expected pool match |
 |---|---|---|---|---|---|---|
-| stablecoin-holder | UST holder | Threshold Stablecoin Run (§4.1) | Destabilising | price, fundamental, deviation | Exists to convert confidence loss into redemption selling. | examples/AGENT_POOL/finance/stablecoin-holder.md |
-| arbitrageur | algorithmic conversion trader | Algorithmic Stablecoin Arbitrage (§4.2) | Context-dependent | price, fundamental, deviation | Exists to execute the conversion channel that can amplify stress. | examples/AGENT_POOL/finance/arbitrageur.md |
-| de-fi-lender | collateralized lending protocol | DeFi Liquidation Contagion (§4.3) | Destabilising | price, fundamental, deviation | Exists to translate collateral impairment into forced selling. | examples/AGENT_POOL/finance/de-fi-lender.md |
-| anchor-depositor | high-yield protocol depositor | Run-prone Yield Deposits (§4.4) | Destabilising | price, deviation, round | Exists to model ecosystem withdrawal after confidence deteriorates. | examples/AGENT_POOL/finance/anchor-depositor.md |
-| value-buyer | constrained contrarian investor | Limits to Arbitrage (§4.5) | Stabilising | price, fundamental, deviation | Exists to supply bounded demand at deep discounts. | examples/AGENT_POOL/finance/value-buyer.md |
+| stablecoin-holder | UST holder | Threshold Stablecoin Run (§4.1) | Destabilising | price, fundamental, deviation | Exists to convert confidence loss into redemption selling. | masim/agents/defines/finance/stablecoin-holder.md |
+| arbitrageur | algorithmic conversion trader | Algorithmic Stablecoin Arbitrage (§4.2) | Context-dependent | price, fundamental, deviation | Exists to execute the conversion channel that can amplify stress. | masim/agents/defines/finance/arbitrageur.md |
+| de-fi-lender | collateralized lending protocol | DeFi Liquidation Contagion (§4.3) | Destabilising | price, fundamental, deviation | Exists to translate collateral impairment into forced selling. | masim/agents/defines/finance/de-fi-lender.md |
+| anchor-depositor | high-yield protocol depositor | Run-prone Yield Deposits (§4.4) | Destabilising | price, deviation, round | Exists to model ecosystem withdrawal after confidence deteriorates. | masim/agents/defines/finance/anchor-depositor.md |
+| value-buyer | constrained contrarian investor | Limits to Arbitrage (§4.5) | Stabilising | price, fundamental, deviation | Exists to supply bounded demand at deep discounts. | masim/agents/defines/finance/value-buyer.md |
 
 ## §8 Environment Specification
 

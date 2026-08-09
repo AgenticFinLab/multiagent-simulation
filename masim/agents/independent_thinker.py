@@ -1,7 +1,7 @@
 """independent-thinker — Bayesian contrarian who breaks cascades.
 
 Canonical implementation of the ``independent-thinker`` archetype
-documented in ``examples/AGENT_POOL/finance/independent-thinker.md``. Acts
+documented in ``masim/agents/defines/finance/independent-thinker.md``. Acts
 as the rational agent in Bikhchandani et al. (1992) who breaks
 information cascades by trading against the deviation direction based on
 a private signal of quality ``signal_precision``.

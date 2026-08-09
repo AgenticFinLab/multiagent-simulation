@@ -1,7 +1,7 @@
 """leveraged-carry-fund — Stop-loss triggered leveraged carry fund.
 
 Canonical implementation of the ``leveraged-carry-fund`` archetype documented
-in ``examples/AGENT_POOL/finance/leveraged-carry-fund.md``. Sits on a
+in ``masim/agents/defines/finance/leveraged-carry-fund.md``. Sits on a
 leveraged carry position under normal conditions and executes forced
 liquidations once the price deviation breaches the stop-loss threshold.
 

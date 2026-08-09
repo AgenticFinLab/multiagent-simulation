@@ -1,7 +1,7 @@
 """outcome-learner — Attribution-biased outcome learner.
 
 Canonical implementation of the ``outcome-learner`` archetype documented in
-``examples/AGENT_POOL/finance/outcome-learner.md``. Trades pro-cyclically on
+``masim/agents/defines/finance/outcome-learner.md``. Trades pro-cyclically on
 observed price deviation, but with asymmetric attribution: gains are
 attributed to skill (scaling up size), losses are attributed to bad luck
 (sizing at baseline).

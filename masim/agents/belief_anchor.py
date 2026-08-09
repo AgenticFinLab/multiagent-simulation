@@ -1,7 +1,7 @@
 """belief-anchor — Conservatism-biased belief-anchored updater.
 
 Canonical implementation of the ``belief-anchor`` archetype documented in
-``examples/AGENT_POOL/finance/belief-anchor.md``.
+``masim/agents/defines/finance/belief-anchor.md``.
 
 Theoretical basis:
     Edwards (1968) — conservatism bias in belief revision;

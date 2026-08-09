@@ -1,7 +1,7 @@
 """pattern-matcher — Representativeness-heuristic pattern trader.
 
 Canonical implementation of the ``pattern-matcher`` archetype documented
-in ``examples/AGENT_POOL/finance/pattern-matcher.md``. Interprets each
+in ``masim/agents/defines/finance/pattern-matcher.md``. Interprets each
 price deviation as representative of a persistent regime and trades in
 its direction with size proportional to |deviation|.
 

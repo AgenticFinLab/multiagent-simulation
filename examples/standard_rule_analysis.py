@@ -1,12 +1,23 @@
 """Shared standard analysis utilities for lightweight financial scenarios.
 
-The helper provides the project-wide analysis output contract used by
-standardized examples:
+Architecture
+~~~~~~~~~~~~
+This module is the **scenario-level** analysis framework that orchestrates:
 
-- structured validation console report;
-- `summary.json`;
-- fixed PNG files: `00_investor_bids.png`, `01_*_dynamics.png`,
-  `02_*_analysis.png`, and `03_summary.png`.
+- CLI entry point with argparse (``run_standard_analysis``);
+- structured validation console report (``validate_standard_metrics``);
+- four fixed PNG visualizations (``create_standard_visualizations``);
+- ``summary.json`` + universal summary hook (``analyze_standard_scenario``);
+- extensible metric registry (``MetricsRegistry``).
+
+The lower-level **framework toolkit** lives in :mod:`masim.evaluation`, which
+provides reusable primitives (data loading, metric computation, timeseries
+analysis, finance-specific validation). This module delegates to
+:func:`masim.evaluation.write_universal_summary` for Hook 9/11 compliance.
+
+When adding new analysis capabilities:
+- Framework-general utilities → :mod:`masim.evaluation`
+- Scenario-specific orchestration → this module or per-scenario ``analysis.py``
 """
 
 from __future__ import annotations

@@ -1,7 +1,7 @@
 """fact-checker — Truth-anchored fact-checking correction agent.
 
 Canonical implementation of the ``fact-checker`` archetype documented
-in ``examples/AGENT_POOL/finance/fact-checker.md``. The agent has
+in ``masim/agents/defines/finance/fact-checker.md``. The agent has
 privileged access to a ``truth_value`` signal; its belief rapidly
 converges to it. When the environmental rumor belief exceeds a
 threshold, it emits a correction with intensity proportional to how

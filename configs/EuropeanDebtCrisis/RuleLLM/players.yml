@@ -1,7 +1,7 @@
 # EuropeanDebtCrisis RuleLLM Agent Configuration
 
 market:
-  archetype: bond-yield-spread-inverse  # -> AGENT_POOL/market/bond-yield-spread-inverse.md
+  archetype: bond-yield-spread-inverse  # -> masim/agents/defines/market/bond-yield-spread-inverse.md
   name: "Market"
   class: "examples.EuropeanDebtCrisis.Rule.players:Market"
   num_instances: 1
@@ -12,14 +12,14 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/market.md §6
-      initial_price: 95.0  # Source: AGENT_POOL/finance/market.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      core_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      price_impact: 0.05  # Source: AGENT_POOL/finance/market.md §6
-      mean_reversion: 0.02  # Source: AGENT_POOL/finance/market.md §6
-      noise_std: 0.01  # Source: AGENT_POOL/finance/market.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/market.md §6
+      initial_price: 95.0  # Source: masim/agents/defines/finance/market.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      core_price: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      price_impact: 0.05  # Source: masim/agents/defines/finance/market.md §6
+      mean_reversion: 0.02  # Source: masim/agents/defines/finance/market.md §6
+      noise_std: 0.01  # Source: masim/agents/defines/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/market.md §6
   persona: !include persona.yml
 
 rulellm_periphery_bond_seller:
@@ -33,15 +33,15 @@ rulellm_periphery_bond_seller:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      initial_position: 500  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      initial_price: 95.0  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      core_price: 100.0  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      panic_threshold: 5.0  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      base_size: 300  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-periphery-bond-seller.md §6
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      initial_cash: 1000000.0  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      initial_position: 500  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      initial_price: 95.0  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      core_price: 100.0  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      panic_threshold: 5.0  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      base_size: 300  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-periphery-bond-seller.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_PERIPHERY_BOND_SELLER_SYS"
         user_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -63,15 +63,15 @@ rulellm_creditor_panicker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      initial_position: 400  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      initial_price: 95.0  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      core_price: 100.0  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      stress_threshold: 3.0  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      base_size: 350  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-creditor-panicker.md §6
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      initial_cash: 1000000.0  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      initial_position: 400  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      initial_price: 95.0  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      core_price: 100.0  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      stress_threshold: 3.0  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      base_size: 350  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-creditor-panicker.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_CREDITOR_PANICKER_SYS"
         user_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -93,15 +93,15 @@ rulellm_core_bond_buyer:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      initial_position: 0  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      initial_price: 95.0  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      core_price: 100.0  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      value_threshold: 0.05  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      base_size: 300  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-core-bond-buyer.md §6
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      initial_cash: 1000000.0  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      initial_position: 0  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      initial_price: 95.0  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      core_price: 100.0  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      value_threshold: 0.05  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      base_size: 300  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-core-bond-buyer.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_CORE_BOND_BUYER_SYS"
         user_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -123,15 +123,15 @@ rulellm_ecb_intervenor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      initial_cash: 5000000.0  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      initial_position: 0  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      initial_price: 95.0  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      core_price: 100.0  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      ecb_threshold: 8.0  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      intervention_size: 600  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-ecb-intervenor.md §6
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      initial_cash: 5000000.0  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      initial_position: 0  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      initial_price: 95.0  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      core_price: 100.0  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      ecb_threshold: 8.0  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      intervention_size: 600  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-ecb-intervenor.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_ECB_INTERVENOR_SYS"
         user_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -153,16 +153,16 @@ rulellm_hedged_fund:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      initial_position: 0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      initial_price: 95.0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      core_price: 100.0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      spread_buy_threshold: 7.0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      spread_exit_threshold: 3.0  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      base_size: 400  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-hedged-fund.md §6
+      record_path: "EXPERIMENT/EuropeanDebtCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      initial_cash: 1000000.0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      initial_position: 0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      initial_price: 95.0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      core_price: 100.0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      spread_buy_threshold: 7.0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      spread_exit_threshold: 3.0  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      base_size: 400  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-hedged-fund.md §6
       llm:
         sys_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_HEDGED_FUND_SYS"
         user_message: "examples.EuropeanDebtCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

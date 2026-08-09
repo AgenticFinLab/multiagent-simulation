@@ -22,15 +22,9 @@ Environment Variables:
 import argparse
 import asyncio
 import os
-import sys
 import traceback
 
 from dotenv import load_dotenv
-
-project_root = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-sys.path.insert(0, project_root)
 
 from masim.simulator.base import SimulationConfig
 from masim.simulator.general import GeneralSimulator

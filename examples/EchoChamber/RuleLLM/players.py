@@ -42,7 +42,6 @@ import json as _json
 import math
 import random
 import re as _re
-import sys
 import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
@@ -55,7 +54,6 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 # Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from masim.utils.llm_utils import is_retryable_llm_error
 

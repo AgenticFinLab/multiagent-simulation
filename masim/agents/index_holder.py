@@ -1,7 +1,7 @@
 """index-holder — Buy-and-hold passive index holder.
 
 Canonical implementation of the ``index-holder`` archetype documented in
-``examples/AGENT_POOL/finance/index-holder.md``. Establishes a target long
+``masim/agents/defines/finance/index-holder.md``. Establishes a target long
 inventory at initialization and adds via scheduled contributions; never
 sells and never reacts to price.
 

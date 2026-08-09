@@ -1,7 +1,7 @@
 """momentum-chaser — Two-sided velocity chaser.
 
 Canonical implementation of the ``momentum-chaser`` archetype documented
-in ``examples/AGENT_POOL/finance/momentum-chaser.md``. Trades both sides
+in ``masim/agents/defines/finance/momentum-chaser.md``. Trades both sides
 of the market proportional to a lookback-window velocity signal.
 
 Theoretical basis:

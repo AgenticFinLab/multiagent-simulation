@@ -1,7 +1,7 @@
 """bottom-fisher — Crash-reactive bottom-fishing buyer.
 
 Canonical implementation of the ``bottom-fisher`` archetype documented in
-``examples/AGENT_POOL/finance/bottom-fisher.md``.
+``masim/agents/defines/finance/bottom-fisher.md``.
 
 Theoretical basis:
     Lakonishok, Shleifer & Vishny (1994) — contrarian value from bought

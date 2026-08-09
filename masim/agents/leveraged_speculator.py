@@ -1,7 +1,7 @@
 """leveraged-speculator — Aggressive leveraged directional speculator.
 
 Canonical implementation of the ``leveraged-speculator`` archetype documented
-in ``examples/AGENT_POOL/finance/leveraged-speculator.md``. Trades a
+in ``masim/agents/defines/finance/leveraged-speculator.md``. Trades a
 directional signal at extreme leverage and is force-liquidated once the
 margin utilisation crosses the margin-call level.
 

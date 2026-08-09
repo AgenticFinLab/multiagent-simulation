@@ -1,65 +1,19 @@
 #!/usr/bin/env python
-"""EquityPremiumLLM Simulation Runner
+"""EquityPremium LLM Simulation Runner.
 
-Usage:
-    python examples/EquityPremium/LLM/run_equity_premium_llm.py -c configs/EquityPremium/LLM/simulation.yml
+Usage::
+
+    python examples/EquityPremium/LLM/run_equity_premium_llm.py \
+        -c configs/EquityPremium/LLM/simulation.yml
 """
 
-import argparse
-import asyncio
-import os
-import sys
-
-project_root = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-sys.path.insert(0, project_root)
-
-from masim.simulator.general import GeneralSimulator
-from masim.simulator.base import SimulationConfig
-from masim.utils.config import load_config, setup_logging
-
-
-async def main():
-    setup_logging()
-
-    parser = argparse.ArgumentParser(description="Run EquityPremiumLLM Simulation")
-    parser.add_argument(
-        "-c", "--config", type=str, default="configs/EquityPremium/LLM/simulation.yml"
-    )
-    parser.add_argument("-r", "--rounds", type=int, default=None)
-    args = parser.parse_args()
-
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    if not os.getenv("ARK_API_KEY"):
-        print("WARNING: ARK_API_KEY not set!")
-
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-    if args.rounds:
-        config.setting["total_rounds"] = args.rounds
-
-    print("\n" + "=" * 60)
-    print("EquityPremiumLLM Simulation")
-    print("=" * 60)
-    print("Phenomenon: Equity Premium Puzzle")
-    print("Theory: Mehra & Prescott (1985), Benartzi & Thaler (1995)")
-    print("Rounds: %s" % config.setting["total_rounds"])
-    print("=" * 60 + "\n")
-
-    simulator = GeneralSimulator(config)
-
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 60)
-        print("Simulation Complete! Rounds: %d" % config.setting["total_rounds"])
-        print("=" * 60)
-    finally:
-        await simulator.shutdown()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        scenario="EquityPremium",
+        variant="LLM",
+        default_config="configs/EquityPremium/LLM/simulation.yml",
+        phenomenon="Stocks return ~6% more than bonds historically (Equity Premium Puzzle)",
+        load_env=True,
+    )

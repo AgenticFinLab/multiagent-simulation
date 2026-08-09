@@ -1,7 +1,7 @@
 """disposition-investor — Prospect-theory disposition investor.
 
 Canonical implementation of the ``disposition-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/disposition-investor.md``.
+documented in ``masim/agents/defines/finance/disposition-investor.md``.
 Realises gains too early (sells winners) and averages down on losers
 (buys losers) — the disposition effect.
 

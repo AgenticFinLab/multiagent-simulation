@@ -20,7 +20,7 @@ Public surface
   — the format schema constants; these are what
   :meth:`InvestorOrder.to_dict` guarantees.
 
-Contract summary (mirrors ``examples/AGENT_POOL`` §I/O Contract)
+Contract summary (mirrors ``masim/agents/defines`` §I/O Contract)
 ----------------------------------------------------------------
 
 Required fields on the wire (dict form):

@@ -1,7 +1,7 @@
 """reputation-herder — Career-concern reputation herder.
 
 Canonical implementation of the ``reputation-herder`` archetype documented
-in ``examples/AGENT_POOL/finance/reputation-herder.md``. Trades in the
+in ``masim/agents/defines/finance/reputation-herder.md``. Trades in the
 direction of the crowd (proxied here by the sign of the broadcast
 price-to-fundamental deviation) to protect reputation.
 

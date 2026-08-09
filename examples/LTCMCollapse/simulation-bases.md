@@ -159,7 +159,7 @@ The simulation uses this investor to model the central LTCM hypothesis: sophisti
 
 #### §4.1.2 Definition and Goals
 
-This embedded design reuses `examples/AGENT_POOL/finance/convergence-arbitrageur.md`. It models a leveraged relative-value hedge fund, chooses a bounded order, and seeks convergence without predicting future prices. It MUST respect cash and position limits and hold on missing signals.
+This embedded design reuses `masim/agents/defines/finance/convergence-arbitrageur.md`. It models a leveraged relative-value hedge fund, chooses a bounded order, and seeks convergence without predicting future prices. It MUST respect cash and position limits and hold on missing signals.
 
 #### §4.1.3 Theoretical Foundation
 
@@ -242,7 +242,7 @@ Shleifer & Vishny (1997); Jorion (2000); Lowenstein (2000), *When Genius Failed*
 
 - Origin: reuse.
 - Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
-- Pool reference: `examples/AGENT_POOL/finance/convergence-arbitrageur.md` (three-stage match outcome: reuse).
+- Pool reference: `masim/agents/defines/finance/convergence-arbitrageur.md` (three-stage match outcome: reuse).
 
 ### §4.2 LeverageTrader
 
@@ -254,7 +254,7 @@ This investor produces forced selling pressure after losses accumulate, capturin
 
 #### §4.2.2 Definition and Goals
 
-This embedded design reuses `examples/AGENT_POOL/finance/leverage-trader.md`. It models a marked-to-market leveraged fund, selects a feasible order, and prioritizes contraction after a margin breach. It MUST NOT increase absolute exposure during a breach or act without required balance-sheet signals.
+This embedded design reuses `masim/agents/defines/finance/leverage-trader.md`. It models a marked-to-market leveraged fund, selects a feasible order, and prioritizes contraction after a margin breach. It MUST NOT increase absolute exposure during a breach or act without required balance-sheet signals.
 
 #### §4.2.3 Theoretical Foundation
 
@@ -343,7 +343,7 @@ Geanakoplos (2010); Brunnermeier & Pedersen (2009); Jorion (2000).
 
 - Origin: reuse.
 - Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
-- Pool reference: `examples/AGENT_POOL/finance/leverage-trader.md` (three-stage match outcome: reuse).
+- Pool reference: `masim/agents/defines/finance/leverage-trader.md` (three-stage match outcome: reuse).
 
 ### §4.3 RiskManager
 
@@ -353,7 +353,7 @@ The `RiskManager` represents institutional risk-control desks that cut exposure 
 
 #### §4.3.2 Definition and Goals
 
-This embedded design reuses `examples/AGENT_POOL/finance/risk-manager.md`. It models an institutional risk desk, selects a position-reducing order, and applies a public stress proxy. It MUST NOT open new exposure, increase absolute inventory, or act without deviation and position.
+This embedded design reuses `masim/agents/defines/finance/risk-manager.md`. It models an institutional risk desk, selects a position-reducing order, and applies a public stress proxy. It MUST NOT open new exposure, increase absolute inventory, or act without deviation and position.
 
 #### §4.3.3 Theoretical Foundation
 
@@ -441,7 +441,7 @@ Jorion (2000); Danielsson et al. (2001), "An academic response to Basel II."
 
 - Origin: reuse.
 - Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
-- Pool reference: `examples/AGENT_POOL/finance/risk-manager.md` (three-stage match outcome: reuse).
+- Pool reference: `masim/agents/defines/finance/risk-manager.md` (three-stage match outcome: reuse).
 
 ### §4.4 LiquidityProvider
 
@@ -451,7 +451,7 @@ The `LiquidityProvider` represents market makers that supply liquidity when devi
 
 #### §4.4.2 Definition and Goals
 
-This embedded design reuses `examples/AGENT_POOL/finance/liquidity-provider.md`. It models an inventory-constrained dealer, selects a countercyclical order in ordinary states, and withdraws under stress. It MUST NOT exceed its inventory or cash constraints or provide unlimited crisis liquidity.
+This embedded design reuses `masim/agents/defines/finance/liquidity-provider.md`. It models an inventory-constrained dealer, selects a countercyclical order in ordinary states, and withdraws under stress. It MUST NOT exceed its inventory or cash constraints or provide unlimited crisis liquidity.
 
 #### §4.4.3 Theoretical Foundation
 
@@ -523,7 +523,7 @@ Morris & Shin (2004); Brunnermeier & Pedersen (2009).
 
 - Origin: reuse.
 - Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical embedded sections added.
-- Pool reference: `examples/AGENT_POOL/finance/liquidity-provider.md` (three-stage match outcome: reuse).
+- Pool reference: `masim/agents/defines/finance/liquidity-provider.md` (three-stage match outcome: reuse).
 
 ### §4.5 CentralBank
 
@@ -533,7 +533,7 @@ The `CentralBank` represents official-sector or coordinated private-sector lende
 
 #### §4.5.2 Definition and Goals
 
-This embedded design reuses `examples/AGENT_POOL/finance/central-bank.md`. It models a systemic-crisis coordinator, selects a bounded contingent support order, and represents a Fed-facilitated private response rather than a literal automatic public purchase. It MUST NOT intervene at ordinary stress or emit unbounded demand.
+This embedded design reuses `masim/agents/defines/finance/central-bank.md`. It models a systemic-crisis coordinator, selects a bounded contingent support order, and represents a Fed-facilitated private response rather than a literal automatic public purchase. It MUST NOT intervene at ordinary stress or emit unbounded demand.
 
 #### §4.5.3 Theoretical Foundation
 
@@ -611,7 +611,7 @@ Bagehot (1873); Lowenstein (2000); Jorion (2000).
 
 - Origin: reuse.
 - Polish audit: 2026-07-20 against `agent-design-skill.md`; canonical sections and I/O contract added.
-- Pool reference: `examples/AGENT_POOL/finance/central-bank.md` (three-stage match outcome: reuse).
+- Pool reference: `masim/agents/defines/finance/central-bank.md` (three-stage match outcome: reuse).
 
 ## §5 Agent Diversity Verification
 

@@ -25,7 +25,7 @@ This block is the **stable I/O declaration** for Step 2. Both
 | Target §4 Theoretical Anchors                 | each agent's `Theoretical Foundation` sub-block                                                                                                                                                                                                                                                                                                                 |
 | Target §9 Parameter Seeds                     | each agent's `Parameters` table + `simulation-bases.md §6`                                                                                                                                                                                                                                                                                                      |
 | `simulation-bases.md §2` (from Step 1)        | Theory citations per agent                                                                                                                                                                                                                                                                                                                                      |
-| `examples/AGENT_POOL/{domain}/*.md`           | AGENT_POOL three-stage match (§2.2.0)                                                                                                                                                                                                                                                                                                                           |
+| `masim/agents/defines/{domain}/*.md`           | AGENT_POOL three-stage match (§2.2.0)                                                                                                                                                                                                                                                                                                                           |
 | `masim/skills/agent-design-skill.md` §3, §6   | Universal Agent Design Handbook — canonical section order and Validation Checklist                                                                                                                                                                                                                                                                              |
 | `masim/skills/agent-icon-generation-skill.md` | Icon generation and registration for any pool agent whose icon is missing or broken, including new/forked and reused profiles                                                                                                                                                                                                                                   |
 
@@ -38,9 +38,9 @@ This block is the **stable I/O declaration** for Step 2. Both
 | `examples/{ScenarioName}/simulation-bases.md §5`                   | Agent Diversity Verification                                                                                                                                                                                                                 |
 | `examples/{ScenarioName}/simulation-bases.md §7`                   | Communication and Round Structure                                                                                                                                                                                                            |
 | `examples/{ScenarioName}/simulation-build-log.md §A`               | AGENT_POOL Reuse-or-Create Gate log — one row per candidate archetype with Stage reached, Outcome, Pool file                                                                                                                                 |
-| `examples/AGENT_POOL/{domain}/{new-file}.md`                       | On `new` or `fork` outcome only — the resulting agent spec is written back to the pool as a reusable archetype                                                                                                                               |
-| `examples/AGENT_POOL/agent_images/icons/{domain}-{agent-stem}.png` | Matching icon generated via `agent-icon-generation-skill.md` whenever a new/forked pool profile is created or an existing reused profile has no resolving icon                                                                               |
-| `examples/AGENT_POOL/agent_images/design.md`                       | Icon mapping row added or updated for every pool profile whose icon is generated or repaired                                                                                                                                                 |
+| `masim/agents/defines/{domain}/{new-file}.md`                       | On `new` or `fork` outcome only — the resulting agent spec is written back to the pool as a reusable archetype                                                                                                                               |
+| `masim/agents/defines/agent_images/icons/{domain}-{agent-stem}.png` | Matching icon generated via `agent-icon-generation-skill.md` whenever a new/forked pool profile is created or an existing reused profile has no resolving icon                                                                               |
+| `masim/agents/defines/agent_images/design.md`                       | Icon mapping row added or updated for every pool profile whose icon is generated or repaired                                                                                                                                                 |
 
 **Polish Hooks (what a polish audit re-verifies against this step).**
 When `polish-simulation-pipeline.md` audits Step 2, it MUST re-run
@@ -197,7 +197,7 @@ Design 4-6 agent types. Fewer than 4 produces insufficient behavioral diversity;
 
 Before writing any new per-agent specification, every candidate archetype
 MUST pass through the **reuse-or-create gate** rooted at
-`examples/AGENT_POOL/<domain>/`. The gate exists because the project has
+`masim/agents/defines/<domain>/`. The gate exists because the project has
 already accumulated dozens of agent archetypes across scenarios; duplicating
 an existing archetype under a new name fragments the calibration evidence
 and pollutes downstream comparison.
@@ -211,7 +211,7 @@ push through the gate below.
 
 The gate runs as a **three-stage match** against the domain folder that
 fits the new scenario (for finance-domain scenarios this is
-`examples/AGENT_POOL/finance/`; for opinion-dynamics or other domains, create
+`masim/agents/defines/finance/`; for opinion-dynamics or other domains, create
 a new sibling folder named after the domain in lowercase kebab-case if it
 does not already exist).
 
@@ -239,7 +239,7 @@ Information Set, Core Behavioral Mechanism, Parameters). Decide one of:
 
 - **Reuse as-is.** The existing archetype already covers the candidate.
   Reference the existing file by relative path from `simulation-bases.md §4`
-  (e.g. `> Reuses agent profile: examples/AGENT_POOL/finance/momentum-trader.md`)
+  (e.g. `> Reuses agent profile: masim/agents/defines/finance/momentum-trader.md`)
   and embed only the variant-specific population/instance count and
   parameter calibration. The full handbook block is NOT duplicated in
   `simulation-bases.md §4` — only the reuse pointer and the calibration
@@ -268,7 +268,7 @@ Information Set, Core Behavioral Mechanism, Parameters). Decide one of:
 
 **Where to store new designs.** Every newly designed agent that survives
 §2.2.2 + the validation gate in §2.2.3 MUST be written back to
-`examples/AGENT_POOL/<domain>/<kebab-name>.md` so that future scenarios can
+`masim/agents/defines/<domain>/<kebab-name>.md` so that future scenarios can
 reuse it. The file uses the **standalone** handbook header levels (H1 for
 title, H2 for sections, H4 for behavioral framework sub-blocks) — NOT the
 embedded form used inside `simulation-bases.md §4`. The same content is
@@ -276,7 +276,7 @@ then re-levelled and copied into `simulation-bases.md §4.{N}` for the
 scenario being built.
 
 **Icon requirement for every pool-backed agent.** Immediately after writing
-`examples/AGENT_POOL/<domain>/<kebab-name>.md` for a `new` or `fork`
+`masim/agents/defines/<domain>/<kebab-name>.md` for a `new` or `fork`
 outcome, invoke `masim/skills/agent-icon-generation-skill.md`. For
 `reuse` and `reuse with parameter adjustment` outcomes, inspect the reused
 pool profile before closing the gate. If the profile has no `Icon` row, the
@@ -285,11 +285,11 @@ linked PNG does not exist, the filename does not match
 for the profile, invoke the same icon skill as a repair step. The gate is
 not complete until:
 
-- `examples/AGENT_POOL/agent_images/icons/<domain>-<kebab-name>.png` exists.
+- `masim/agents/defines/agent_images/icons/<domain>-<kebab-name>.png` exists.
 - The pool profile's Design Provenance table has exactly one `Icon` row
   linking to `../agent_images/icons/<domain>-<kebab-name>.png`.
-- `examples/AGENT_POOL/agent_images/design.md` has a mapping row for the
-  profile, pairing `examples/AGENT_POOL/<domain>/<kebab-name>.md` with
+- `masim/agents/defines/agent_images/design.md` has a mapping row for the
+  profile, pairing `masim/agents/defines/<domain>/<kebab-name>.md` with
   `<domain>-<kebab-name>.png`.
 
 If image generation is unavailable, halt and report the missing icon as a
@@ -512,7 +512,7 @@ Before moving to Step 3, verify:
       (`agent-design-skill.md §6`) end-to-end — **three consecutive PASS
       runs** required per §2.2.2 step 5 — no unchecked items
 - [ ] Every newly designed agent has been written back to
-      `examples/AGENT_POOL/<domain>/<kebab-name>.md` in standalone header form
+      `masim/agents/defines/<domain>/<kebab-name>.md` in standalone header form
 - [ ] Every referenced pool agent has passed
       `agent-icon-generation-skill.md` validation: PNG exists, pool `Icon`
       row exists, and `agent_images/design.md` contains the

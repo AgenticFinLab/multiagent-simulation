@@ -1,7 +1,7 @@
 """arbitrageur — Classic convergence arbitrageur.
 
 Canonical implementation of the ``arbitrageur`` archetype documented in
-``examples/AGENT_POOL/finance/arbitrageur.md``.
+``masim/agents/defines/finance/arbitrageur.md``.
 
 Theoretical basis:
     Shleifer & Vishny (1997) — limits of arbitrage; classical

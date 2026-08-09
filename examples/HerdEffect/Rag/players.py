@@ -48,7 +48,6 @@ import os
 import random
 import re
 import shutil
-import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -56,7 +55,6 @@ from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
 # Add examples directory to path for shared utilities
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput

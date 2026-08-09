@@ -54,5 +54,5 @@ Lewandowsky et al. (2012). https://doi.org/10.1177/1529100612451018; Ecker et al
 
 - Origin: new (2026-07-11, RumorSpread polish)
 - Polish audit: 2026-07-11 against agent-design-skill.md
-- Pool reference: `examples/AGENT_POOL/opinion/fact-checker.md`
+- Pool reference: `masim/agents/defines/opinion/fact-checker.md`
 | Icon | ![](../agent_images/icons/opinion-fact-checker.png) |

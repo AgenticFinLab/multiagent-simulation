@@ -1,7 +1,7 @@
 # LTCMCollapse LLM Agent Configuration
 
 market:
-  archetype: bond-yield-spread-inverse  # -> AGENT_POOL/market/bond-yield-spread-inverse.md
+  archetype: bond-yield-spread-inverse  # -> masim/agents/defines/market/bond-yield-spread-inverse.md
   name: "Market"
   class: "examples.LTCMCollapse.LLM.players:Market"
   num_instances: 1

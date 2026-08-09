@@ -1,7 +1,7 @@
 """skeptical-value-investor — Margin-of-safety deep-value buyer.
 
 Canonical implementation of the ``skeptical-value-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/skeptical-value-investor.md``.
+documented in ``masim/agents/defines/finance/skeptical-value-investor.md``.
 Buys only when price trades at a large discount to intrinsic value and
 sells only on a meaningful premium.
 

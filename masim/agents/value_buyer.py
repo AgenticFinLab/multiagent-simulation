@@ -1,7 +1,7 @@
 """value-buyer — Contrarian value buyer entering after large discounts.
 
 Canonical implementation of the ``value-buyer`` archetype documented in
-``examples/AGENT_POOL/finance/value-buyer.md``. Buys only, and only when
+``masim/agents/defines/finance/value-buyer.md``. Buys only, and only when
 price is materially below the fundamental parity by more than
 ``discount_threshold``. Uses cash-fraction deployment capped at
 ``max_buy`` per tick — the "limits of arbitrage" contrarian who provides

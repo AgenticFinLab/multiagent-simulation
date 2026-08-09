@@ -1,7 +1,7 @@
 """liquidity-provider — Two-sided liquidity provider.
 
 Canonical implementation of the ``liquidity-provider`` archetype documented
-in ``examples/AGENT_POOL/finance/liquidity-provider.md``. Quotes a two-sided
+in ``masim/agents/defines/finance/liquidity-provider.md``. Quotes a two-sided
 band around a short-term EMA of price; buys when price is below the bid
 edge, sells when above the ask edge — earns the spread.
 

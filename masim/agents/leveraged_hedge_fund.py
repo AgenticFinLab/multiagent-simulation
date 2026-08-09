@@ -1,7 +1,7 @@
 """leveraged-hedge-fund — Margin-constrained leveraged hedge fund.
 
 Canonical implementation of the ``leveraged-hedge-fund`` archetype documented
-in ``examples/AGENT_POOL/finance/leveraged-hedge-fund.md``. Sizes trades on
+in ``masim/agents/defines/finance/leveraged-hedge-fund.md``. Sizes trades on
 short-run momentum when the margin ratio is healthy and liquidates
 partially/fully once the margin ratio breaches a floor.
 

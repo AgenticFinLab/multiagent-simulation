@@ -1185,7 +1185,7 @@ def get_market_archetype(scenario_name: str) -> Optional[str]:
 
     Returns:
         A kebab-case archetype stem (matching a file under
-        ``examples/AGENT_POOL/market/{stem}.md``) or ``None`` if the
+        ``masim/agents/defines/market/{stem}.md``) or ``None`` if the
         scenario name is unknown and no players.yml can be parsed.
     """
     resolved = _resolve_display_key(scenario_name)
@@ -1212,7 +1212,7 @@ def get_market_archetype(scenario_name: str) -> Optional[str]:
 def get_market_icon_path(scenario_name: str) -> Optional[Path]:
     """Return the coordinator icon PNG for this scenario, if present on disk.
 
-    The path is ``examples/AGENT_POOL/agent_images/icons/market/{stem}.png``
+    The path is ``masim/agents/defines/agent_images/icons/market/{stem}.png``
     where ``{stem}`` is the archetype returned by :func:`get_market_archetype`.
 
     Returns ``None`` if either the archetype cannot be resolved or the PNG
@@ -1221,7 +1221,7 @@ def get_market_icon_path(scenario_name: str) -> Optional[Path]:
     stem = get_market_archetype(scenario_name)
     if not stem:
         return None
-    p = EXAMPLES_DIR / "AGENT_POOL" / "agent_images" / "icons" / "market" / f"{stem}.png"
+    p = _PROJECT_ROOT / "masim" / "agents" / "defines" / "agent_images" / "icons" / "market" / f"{stem}.png"
     return p if p.exists() else None
 
 

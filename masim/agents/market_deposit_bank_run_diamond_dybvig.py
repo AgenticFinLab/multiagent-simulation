@@ -1,6 +1,6 @@
 """Deposit Bank-Run Diamond-Dybvig — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/deposit-bank-run-diamond-dybvig.md
+Profile: masim/agents/defines/market/deposit-bank-run-diamond-dybvig.md
 Mechanism: Withdrawal-fraction cumulative state with first-mover advantage,
     mark-to-market bond losses, panic-threshold trigger, and post-failure
     haircut on remaining claims.  One-way regime latch: solvent -> stressed

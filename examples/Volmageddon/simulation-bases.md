@@ -306,7 +306,7 @@ Investor orders sent back to the Market carry the following fields:
 
 ### §4.1 ShortVolTrader
 
-> Agent pool source: examples/AGENT_POOL/finance/short-vol-trader.md
+> Agent pool source: masim/agents/defines/finance/short-vol-trader.md
 
 
 #### 4.1.1 Summary
@@ -599,7 +599,7 @@ State update: no state becomes negative.
 
 ### §4.2 VolETNManager
 
-> Agent pool source: examples/AGENT_POOL/finance/vol-etn-manager.md
+> Agent pool source: masim/agents/defines/finance/vol-etn-manager.md
 
 
 #### 4.2.1 Summary
@@ -887,7 +887,7 @@ State update: no state becomes negative.
 
 ### §4.3 LongVolHedger
 
-> Agent pool source: examples/AGENT_POOL/finance/long-vol-hedger.md
+> Agent pool source: masim/agents/defines/finance/long-vol-hedger.md
 
 
 #### 4.3.1 Summary
@@ -1180,7 +1180,7 @@ State update: no state becomes negative.
 
 ### §4.4 VolArbitrageur
 
-> Agent pool source: examples/AGENT_POOL/finance/vol-arbitrageur.md
+> Agent pool source: masim/agents/defines/finance/vol-arbitrageur.md
 
 
 #### 4.4.1 Summary
@@ -1476,7 +1476,7 @@ State update: cash increases by `5000 * price`; position falls to zero.
 
 ### §4.5 EquityTrader
 
-> Agent pool source: examples/AGENT_POOL/finance/equity-trader.md
+> Agent pool source: masim/agents/defines/finance/equity-trader.md
 
 
 #### 4.5.1 Summary

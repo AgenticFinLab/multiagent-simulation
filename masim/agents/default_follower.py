@@ -1,7 +1,7 @@
 """default-follower — Default-effect dampened contrarian.
 
 Canonical implementation of the ``default-follower`` archetype documented
-in ``examples/AGENT_POOL/finance/default-follower.md``. The agent adheres
+in ``masim/agents/defines/finance/default-follower.md``. The agent adheres
 to its default allocation until the deviation |price - fundamental| /
 fundamental exceeds an activation cutoff. When it does trade, its
 response is dampened by a ``default_weight`` factor that reflects

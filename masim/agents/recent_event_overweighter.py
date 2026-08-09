@@ -1,7 +1,7 @@
 """recent-event-overweighter — Availability-biased salient-return chaser.
 
 Canonical implementation of the ``recent-event-overweighter`` archetype
-documented in ``examples/AGENT_POOL/finance/recent-event-overweighter.md``.
+documented in ``masim/agents/defines/finance/recent-event-overweighter.md``.
 Blends the salient recent return with the objective deviation via a
 recency weight; trades in the direction of the perceived signal when it
 crosses a salience threshold.

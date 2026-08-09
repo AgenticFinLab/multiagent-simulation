@@ -1,6 +1,6 @@
 """Credit Minsky-Cycle — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/credit-minsky-cycle.md
+Profile: masim/agents/defines/market/credit-minsky-cycle.md
 Mechanism: Standard linear price-impact + regime-gated mean-reversion + Gaussian
     noise, extended with a categorical Minsky financing regime state
     {hedge, speculative, ponzi} whose transitions are a deterministic function

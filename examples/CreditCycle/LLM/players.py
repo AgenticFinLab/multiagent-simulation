@@ -4,13 +4,10 @@ from __future__ import annotations
 
 import importlib
 import logging
-import os
-import sys
 from typing import Dict
 
 from dotenv import load_dotenv
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lmbase.inference.api_call import LangChainAPIInference
 from masim.player.base import Action, Observation

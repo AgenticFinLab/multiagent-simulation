@@ -62,7 +62,7 @@ All other target-file changes go through the define skill's revise mode.
 | AGENT_POOL icon generation protocol    | `masim/skills/agent-icon-generation-skill.md`                                                                                                                                                                                                                                                                          |
 | Market Coordinator Design Handbook     | `masim/skills/market-design-skill.md` (§2 Market Type taxonomy, §3 canonical section order, §6 Validation Checklist)                                                                                                                                                                                                   |
 | Market coordinator icon generation     | `masim/skills/market-icon-generation-skill.md`                                                                                                                                                                                                                                                                         |
-| Market coordinator pool match protocol | `examples/AGENT_POOL/market/` — three-stage match analogous to participant-agent gate, driven by `simulation-bases.md §3` coordinator identity                                                                                                                                                                         |
+| Market coordinator pool match protocol | `masim/agents/defines/market/` — three-stage match analogous to participant-agent gate, driven by `simulation-bases.md §3` coordinator identity                                                                                                                                                                         |
 | Agent handbook structural audit        | Manual review against `06-step2-agent-design.md` Hook 5a — walk every AGENT_POOL profile and confirm no `TODO / TBD / FIXME / XXX / PLACEHOLDER / Status: stub / auto-generated placeholder / fill this section / insert here` marker exists outside fenced code blocks; any such marker is a hard FAIL |
 | Agent naming / parity / coverage audit | Manual review against Hooks 4, 6, 7 — cross-check every scenario's `players.py` roster, `simulation-bases.md §3` anchor, and per-config roster in `configs/{Scenario}/{Variant}/simulation.yml` for parity |
 | Three-PASS validation discipline       | This file §3 and `agent-design-skill.md §6`                                                                                                                                                                                                                                                                            |
@@ -232,7 +232,7 @@ log to tmpl/".
     │   fork/new AND outcome-shrink new→reuse).                  │
     │   Also audits root doc §3 Environment Design, §5 Diversity │
     │   Verification, §7 Communication and Round Structure.      │
-    │   Market coordinator audit: AGENT_POOL/market/ three-stage │
+    │   Market coordinator audit: masim/agents/defines/market/ three-stage │
     │   match, market-design-skill.md §6 three-PASS, icon gate.  │
     └────────────────────────────────────────────────────────────┘
                                 │
@@ -243,7 +243,7 @@ log to tmpl/".
     │   Every YAML parses; # Source: comments trace to target §9 │
     │   / bases §4.{N}.7 / §6; variant folders match target      │
     │   §10.1 exactly (extras and missing both flagged);          │
-    │   coordinator archetype: field resolves to AGENT_POOL/      │
+    │   coordinator archetype: field resolves to masim/agents/defines/      │
     │   market/ profile.                                         │
     └────────────────────────────────────────────────────────────┘
                                 │
@@ -628,7 +628,7 @@ directly dispatches to:
 - `masim/skills/market-design-skill.md §6` (Validation Checklist for
   market coordinator profiles)
 - `masim/skills/market-icon-generation-skill.md` (icon generation and
-  registration for any `AGENT_POOL/market/` coordinator profile whose
+  registration for any `masim/agents/defines/market/` coordinator profile whose
   icon is missing or broken)
 
 The polish pipeline's role at Step 2 is orchestration and three-PASS
@@ -643,7 +643,7 @@ enforcement; the actual per-agent audit logic lives in the handbook
   blocks in `simulation-bases.md` (the embedded form is the only
   in-scenario agent surface). Any reused pool profile is referenced
   from the `§4.{N}` block via a relative path to
-  `examples/AGENT_POOL/{Domain}/<kebab-name>.md`; the pool file is
+  `masim/agents/defines/{Domain}/<kebab-name>.md`; the pool file is
   audited alongside the embedded block whenever it is referenced.
 - For variant-scoped polish requests, build the expected agent identity
   set before Step 2 closes. Sources, in priority order, are the target
@@ -666,12 +666,12 @@ doc §3, §5, §7), and (C) market coordinator audit (dispatched to
 For **each** agent, in target §7 roster order, do the following:
 
 0. **Icon-completeness preflight.** Cross-check the expected agent
-   identity set against `examples/AGENT_POOL/{Domain}/`. For each
+   identity set against `masim/agents/defines/{Domain}/`. For each
    identity, the canonical profile is
-   `examples/AGENT_POOL/{Domain}/{identity.replace("_", "-")}.md`
+   `masim/agents/defines/{Domain}/{identity.replace("_", "-")}.md`
    unless the three-stage match resolves to a different existing pool
    profile. The expected icon is always
-   `examples/AGENT_POOL/agent_images/icons/{Domain}-{agent-stem}.png`.
+   `masim/agents/defines/agent_images/icons/{Domain}-{agent-stem}.png`.
    Missing `.md` profiles, missing `Icon` rows, missing PNGs, stale
    filenames, or missing `agent_images/design.md` rows are Step 2
    failures. Create or repair them through the AGENT_POOL match and
@@ -695,7 +695,7 @@ For **each** agent, in target §7 roster order, do the following:
    since, or a new archetype may now cover this agent. Run
    `06-step2-agent-design.md §2.2.0` in full:
    - Stage 1 — filename scan against
-     `examples/AGENT_POOL/{Domain}/*.md`.
+     `masim/agents/defines/{Domain}/*.md`.
    - Stage 2 — 7-row Summary fingerprint (≥5/7 match, or ≥3/7 with
      Theory Family match, → escalate to Stage 3).
    - Stage 3 — full-text inspection.
@@ -722,13 +722,13 @@ For **each** agent, in target §7 roster order, do the following:
      `agent-icon-generation-skill.md` to generate and register the
      matching icon. The `new` / `fork` branch is incomplete until the
      icon PNG exists, the pool profile has an `Icon` row, and
-     `examples/AGENT_POOL/agent_images/design.md` has the mapping row.
+     `masim/agents/defines/agent_images/design.md` has the mapping row.
      If image generation is unavailable, halt and return the missing
      icon as a blocking asset task instead of inserting a placeholder.
    - On `reuse` or `reuse+override`, verify the referenced pool profile
      already has a valid `Icon` row, that the linked PNG exists, that
      the PNG filename is `{domain}-{agent-stem}.png`, and that
-     `examples/AGENT_POOL/agent_images/design.md` maps the profile to
+     `masim/agents/defines/agent_images/design.md` maps the profile to
      that filename. If any of these checks fails, immediately invoke
      `agent-icon-generation-skill.md` as an icon-repair step. The
      reused branch is incomplete until the icon PNG exists, the profile
@@ -742,11 +742,11 @@ For **each** agent, in target §7 roster order, do the following:
    ```markdown
    ## §3.11 Design Provenance (or ###### §3.11, per embedded-form level)
    - Origin: <fork-from-pool / new / reuse / outcome-shrink new→reuse>
-   - Parent (if fork or shrink): `examples/AGENT_POOL/{Domain}/<parent>.md`
+   - Parent (if fork or shrink): `masim/agents/defines/{Domain}/<parent>.md`
    - Polish audit: YYYY-MM-DD against `agent-design-skill.md`.
      Structural changes in this pass:
      - <bullet per structural change; "no structural change" if none>
-   - Pool reference: `examples/AGENT_POOL/{Domain}/<file>.md`
+   - Pool reference: `masim/agents/defines/{Domain}/<file>.md`
      (three-stage match outcome: <reuse / reuse+override / fork / new /
      shrink>)
    ```
@@ -795,7 +795,7 @@ FAIL resets the count.
 Every scenario has at least one coordinator agent (called "Market" in
 finance, "OpinionEnvironment" / "InformationEnvironment" in opinion
 dynamics, etc.). The coordinator's canonical pool profile lives under
-`examples/AGENT_POOL/market/{market-type}-{coordinator-stem}.md`, and
+`masim/agents/defines/market/{market-type}-{coordinator-stem}.md`, and
 its design specification follows `market-design-skill.md` (the
 sibling of `agent-design-skill.md`). A polish run MUST audit the
 coordinator with the same rigour applied to participant agents in
@@ -813,13 +813,13 @@ Part A. Coordinator audit runs AFTER Part B — it depends on a valid
      to a pool profile.
    - Derive the expected pool stem: `{market-type}-{coordinator-stem}`
      (all lowercase, kebab-case). The expected pool profile is
-     `examples/AGENT_POOL/market/{stem}.md`.
+     `masim/agents/defines/market/{stem}.md`.
 
-1. **Three-stage AGENT_POOL/market match.** Run a match protocol
+1. **Three-stage masim/agents/defines/market match.** Run a match protocol
    analogous to the participant-agent gate in Part A Hook 2, but
-   scoped to `examples/AGENT_POOL/market/`:
+   scoped to `masim/agents/defines/market/`:
    - Stage 1 — filename scan against
-     `examples/AGENT_POOL/market/*.md`.
+     `masim/agents/defines/market/*.md`.
    - Stage 2 — Summary fingerprint comparison (Market Type, Mechanism
      Family, Feedback Direction, State Variables, Broadcast Payload,
      ≥4/6 match → escalate to Stage 3).
@@ -828,7 +828,7 @@ Part A. Coordinator audit runs AFTER Part B — it depends on a valid
      new→reuse}. Same halt-and-ask protocol as Part A Hook 2 applies
      when an outcome-shrink is detected.
    - On `new` or `fork`, the resulting coordinator spec is written
-     into `examples/AGENT_POOL/market/` AFTER three consecutive PASS
+     into `masim/agents/defines/market/` AFTER three consecutive PASS
      runs of `market-design-skill.md §6`. Immediately invoke
      `market-icon-generation-skill.md` to generate and register the
      icon at `agent_images/icons/market/{stem}.png`.
@@ -871,7 +871,7 @@ Part A. Coordinator audit runs AFTER Part B — it depends on a valid
    ## §3.11 Design Provenance
    - Origin: <fork-from-pool / new / reuse / outcome-shrink new→reuse>
    - Market Type: <market-type from §2 taxonomy>
-   - Parent (if fork or shrink): `examples/AGENT_POOL/market/<parent>.md`
+   - Parent (if fork or shrink): `masim/agents/defines/market/<parent>.md`
    - Polish audit: YYYY-MM-DD against `market-design-skill.md`.
      Structural changes in this pass:
      - <bullet per structural change; "no structural change" if none>
@@ -906,14 +906,14 @@ group. Any FAIL resets the count.
 - `simulation-bases.md §5` Diversity Verification (missing rows added).
 - `simulation-bases.md §7` Communication and Round Structure
   (structural fills).
-- Every affected pool file under `examples/AGENT_POOL/{Domain}/` that
+- Every affected pool file under `masim/agents/defines/{Domain}/` that
   a `§4.{N}` block references (reuse / reuse-with-override / fork /
   outcome-shrink).
 - Every icon file, profile `Icon` row, and mapping row created or repaired
   by `agent-icon-generation-skill.md` for new/forked pool files and for
   reused pool files whose icon was missing or broken.
 - Every affected coordinator pool file under
-  `examples/AGENT_POOL/market/` (reuse / reuse+override / fork /
+  `masim/agents/defines/market/` (reuse / reuse+override / fork /
   outcome-shrink) — produced or patched by Part C.
 - Every coordinator icon file, profile `Icon` row, and
   `agent_images/design.md` mapping row created or repaired by
@@ -939,7 +939,7 @@ group. Any FAIL resets the count.
   `agent-icon-generation-skill.md`; unresolved icon gaps are blocking
   asset tasks, never tolerated warnings.
 - The scenario's coordinator has a conformant pool profile under
-  `examples/AGENT_POOL/market/` with three consecutive PASS runs of
+  `masim/agents/defines/market/` with three consecutive PASS runs of
   `market-design-skill.md §6`.
 - The coordinator pool profile has an up-to-date §3.11 Provenance
   recording this polish run.
@@ -1014,7 +1014,7 @@ the Step 3 Contract:
    `{variant}_information_environment:`, or any other coordinator
    identity declared by the scenario) MUST contain an `archetype:`
    field whose value resolves to an existing pool profile at
-   `examples/AGENT_POOL/market/{archetype-value}.md`. Verify:
+   `masim/agents/defines/market/{archetype-value}.md`. Verify:
    - The `archetype:` field is present (missing field is a defect —
      add it using the stem determined at Step 2 Part C Hook 0).
    - The referenced profile exists on disk and has passed
@@ -1045,7 +1045,7 @@ Append step summary to `tmpl/polish-log.md`.
 - Every YAML parses.
 - Every `# Source:` comment resolves to an upstream anchor.
 - Every coordinator block has a valid `archetype:` field pointing to
-  an existing `AGENT_POOL/market/` profile, and its `extras` contain
+  an existing `masim/agents/defines/market/` profile, and its `extras` contain
   all Environmental Parameters declared by that profile.
 
 ---
@@ -1519,9 +1519,9 @@ run MUST NOT close if any row cannot be resolved.
 | `configs/{ScenarioName}/{V}/players.yml` extras              | target §9 (via `# Source:` comments)               |
 | Variant `{V}`'s agent-implementation module classes          | `simulation-bases.md §4.{N}` (via `explain.md §2`) |
 | Variant `{V}`'s analysis module functions                    | `analysis-bases.md §2` (via `analysis.md §2`)      |
-| `examples/AGENT_POOL/{Domain}/<file>.md` (touched)           | target §7 row + agent §3.11 Provenance             |
-| `examples/AGENT_POOL/market/<file>.md` (touched)             | target §8 + coordinator §3.11 Provenance           |
-| `configs/{ScenarioName}/{V}/players.yml` coordinator block   | `AGENT_POOL/market/` profile (via `archetype:`)    |
+| `masim/agents/defines/{Domain}/<file>.md` (touched)           | target §7 row + agent §3.11 Provenance             |
+| `masim/agents/defines/market/<file>.md` (touched)             | target §8 + coordinator §3.11 Provenance           |
+| `configs/{ScenarioName}/{V}/players.yml` coordinator block   | `masim/agents/defines/market/` profile (via `archetype:`)    |
 | Variant subdirectories present                               | target §10.1                                       |
 | `analysis_output/summary.json.universal_metrics`             | §8.6 Layer A tables (36 rows across 6 categories)  |
 | `analysis_output/summary.json.scenario_metrics`              | `analysis-bases.md §2` Layer B rows                |
@@ -1605,7 +1605,7 @@ any of the following occurs:
 - A coordinator's `market-design-skill.md §6` Validation Checklist
   has three consecutive FAILs (no green PASS achievable within the
   polish scope) — same halt protocol as participant agents.
-- An AGENT_POOL/market/ outcome-shrink new→reuse is detected (Step 2
+- An masim/agents/defines/market/ outcome-shrink new→reuse is detected (Step 2
   Part C Hook 1) and the user has not yet chosen adopt / keep-fork /
   revise-mode.
 - The coordinator pool profile's §3.6 Coordination Framework
@@ -1708,7 +1708,7 @@ Run this checklist once before invoking Preflight:
       listed in §14 (this is the audit-facing surface — read it
       first).
 - [ ] The AGENT_POOL folder for the scenario's domain
-      (`examples/AGENT_POOL/{Domain}/`) exists and is up to date.
+      (`masim/agents/defines/{Domain}/`) exists and is up to date.
 - [ ] The reader has read this file (`polish-simulation-pipeline.md`)
       end-to-end at least once.
 - [ ] The reader is aware that this pipeline **does not** produce a
@@ -1743,8 +1743,8 @@ If any item is unchecked, fix it before starting Preflight.
 | Step 4 (Implement)    — Contract                            | `masim/skills/implement-simulation-skill/08-step4-implement.md`        |
 | Steps 5 — 10 (Validate, review, run) — Contract             | `masim/skills/implement-simulation-skill/09-step5-to-10-review.md`     |
 | AssetBubble reference implementation (finance domain)       | `masim/skills/implement-simulation-skill/15-reference-assetbubble.md`  |
-| AGENT_POOL directory                                        | `examples/AGENT_POOL/`                                                 |
-| AGENT_POOL market coordinator pool                          | `examples/AGENT_POOL/market/`                                          |
+| AGENT_POOL directory                                        | `masim/agents/defines/`                                                 |
+| AGENT_POOL market coordinator pool                          | `masim/agents/defines/market/`                                          |
 | Project structure overview                                  | `docs/structure.md`                                                    |
 
 ---

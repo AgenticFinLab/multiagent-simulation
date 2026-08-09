@@ -1,7 +1,7 @@
 """inertial-holder — Status-quo-biased sticky holder.
 
 Canonical implementation of the ``inertial-holder`` archetype documented
-in ``examples/AGENT_POOL/finance/inertial-holder.md``. Holds through
+in ``masim/agents/defines/finance/inertial-holder.md``. Holds through
 normal market conditions; only extreme mispricings overcome its inertia,
 and even then the trade is heavily dampened.
 

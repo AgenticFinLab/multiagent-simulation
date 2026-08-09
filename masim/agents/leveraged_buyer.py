@@ -1,7 +1,7 @@
 """leveraged-buyer — Momentum chaser with procyclical leverage.
 
 Canonical implementation of the ``leveraged-buyer`` archetype documented in
-``examples/AGENT_POOL/finance/leveraged-buyer.md``. Amplifies short-run
+``masim/agents/defines/finance/leveraged-buyer.md``. Amplifies short-run
 momentum with balance-sheet leverage and is force-deleveraged when equity
 falls below a margin call level.
 

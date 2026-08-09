@@ -1,7 +1,7 @@
 """opinion-gullible-spreader — Gullible rumor spreader (opinion domain).
 
 Canonical implementation of the ``gullible-spreader`` archetype documented in
-``examples/AGENT_POOL/opinion/gullible-spreader.md``. Models a social media
+``masim/agents/defines/opinion/gullible-spreader.md``. Models a social media
 user who accepts and relays unverified claims without scrutiny whenever the
 emotional salience of a message exceeds a low gullibility threshold — the
 classical Vosoughi/Roy/Aral (2018) mechanism by which false news diffuses

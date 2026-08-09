@@ -1,7 +1,7 @@
 """opinion-skeptical-evaluator — Skeptical rumor evaluator (opinion domain).
 
 Canonical implementation of the ``skeptical-evaluator`` archetype documented
-in ``examples/AGENT_POOL/opinion/skeptical-evaluator.md``. Models a critical-
+in ``masim/agents/defines/opinion/skeptical-evaluator.md``. Models a critical-
 thinking user who interrogates claims by demanding evidence: shares only when
 evidence quality clears a *high* skepticism threshold, and even then only
 probabilistically with qualification (Lewandowsky et al. 2012).

@@ -1,7 +1,7 @@
 """rational-optimizer — Merton-style mean-variance optimizer.
 
 Canonical implementation of the ``rational-optimizer`` archetype
-documented in ``examples/AGENT_POOL/finance/rational-optimizer.md``.
+documented in ``masim/agents/defines/finance/rational-optimizer.md``.
 Every round the agent computes the closed-form Merton weight
 ``w* = (mu - rf) / (gamma * sigma^2)`` and rebalances partially toward
 it whenever the deviation from current weight exceeds the rebalance band.

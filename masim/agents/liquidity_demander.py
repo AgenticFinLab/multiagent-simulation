@@ -1,7 +1,7 @@
 """liquidity-demander — Urgency-driven immediate transactor.
 
 Canonical implementation of the ``liquidity-demander`` archetype documented
-in ``examples/AGENT_POOL/finance/liquidity-demander.md``. When a liquidity
+in ``masim/agents/defines/finance/liquidity-demander.md``. When a liquidity
 need is signalled with sufficient urgency it fires an immediate market
 order in the required direction.
 

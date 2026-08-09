@@ -1,7 +1,7 @@
 """opinion-environment — Non-trading opinion signal generator.
 
 Canonical implementation of the ``opinion-environment`` archetype documented
-in ``examples/AGENT_POOL/finance/opinion-environment.md``. This is a
+in ``masim/agents/defines/finance/opinion-environment.md``. This is a
 non-trading environment agent: it maintains an autoregressive opinion
 state driven by price momentum and Gaussian shocks, and broadcasts it
 without ever placing a trade.

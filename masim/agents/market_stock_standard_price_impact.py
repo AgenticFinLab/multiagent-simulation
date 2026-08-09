@@ -1,6 +1,6 @@
 """Standard price-impact stock market — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/stock-standard-price-impact.md
+Profile: masim/agents/defines/market/stock-standard-price-impact.md
 Mechanism: Linear price-impact with mean-reversion and Gaussian noise
            (Kyle 1985 + Brock & Hommes 1998 + Roll 1984).
 Broadcast: 7 fields — price, prev_price, fundamental, deviation, volume,

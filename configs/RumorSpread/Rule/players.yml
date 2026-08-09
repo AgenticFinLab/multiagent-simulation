@@ -16,7 +16,7 @@
 # InformationEnvironment (Coordinator)
 # -----------------------------------------------------------------------------
 rule_information_environment:
-  archetype: information-sis-contagion  # -> AGENT_POOL/market/information-sis-contagion.md
+  archetype: information-sis-contagion  # -> masim/agents/defines/market/information-sis-contagion.md
   name: "InformationEnvironment"
   class: "examples.RumorSpread.Rule.players:InformationEnvironment"
   num_instances: 1
@@ -27,16 +27,16 @@ rule_information_environment:
     group_tags:
       - environment
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: AGENT_POOL/finance/information-environment.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: masim/agents/defines/finance/information-environment.md §6
       # Belief dynamics parameters
-      rumor_truth_value: 0.1     # 0.0 = completely false, 1.0 = fully true  # Source: AGENT_POOL/finance/information-environment.md §6
-      initial_belief: 0.3        # Starting belief level (rumor seed)  # Source: AGENT_POOL/finance/information-environment.md §6
-      spread_impact: 0.15        # How strongly agent actions shift belief  # Source: AGENT_POOL/finance/information-environment.md §6
-      truth_correction: 0.02     # Rate of truth-based correction  # Source: AGENT_POOL/finance/information-environment.md §6
-      leveling_rate: 0.01        # Allport & Postman: detail loss rate  # Source: AGENT_POOL/finance/information-environment.md §6
-      sharpening_rate: 0.02      # Allport & Postman: exaggeration rate  # Source: AGENT_POOL/finance/information-environment.md §6
-      noise_std: 0.02            # Transmission noise  # Source: AGENT_POOL/finance/information-environment.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/information-environment.md §6
+      rumor_truth_value: 0.1     # 0.0 = completely false, 1.0 = fully true  # Source: masim/agents/defines/finance/information-environment.md §6
+      initial_belief: 0.3        # Starting belief level (rumor seed)  # Source: masim/agents/defines/finance/information-environment.md §6
+      spread_impact: 0.15        # How strongly agent actions shift belief  # Source: masim/agents/defines/finance/information-environment.md §6
+      truth_correction: 0.02     # Rate of truth-based correction  # Source: masim/agents/defines/finance/information-environment.md §6
+      leveling_rate: 0.01        # Allport & Postman: detail loss rate  # Source: masim/agents/defines/finance/information-environment.md §6
+      sharpening_rate: 0.02      # Allport & Postman: exaggeration rate  # Source: masim/agents/defines/finance/information-environment.md §6
+      noise_std: 0.02            # Transmission noise  # Source: masim/agents/defines/finance/information-environment.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/information-environment.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -53,15 +53,15 @@ rule_gullible_spreader:
     group_tags:
       - agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
       # Agent base parameters
-      initial_belief: 0.3        # Starts believing rumor somewhat  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      initial_credibility: 0.5  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      initial_belief: 0.3        # Starts believing rumor somewhat  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      initial_credibility: 0.5  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
       # GullibleSpreader specific parameters
-      credulity: 0.8             # High: believes easily  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      spread_eagerness: 0.9      # High: spreads actively  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      distortion_amplification: 0.3  # Amplifies distortion  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      credulity: 0.8             # High: believes easily  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      spread_eagerness: 0.9      # High: spreads actively  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      distortion_amplification: 0.3  # Amplifies distortion  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -78,16 +78,16 @@ rule_distorting_relayer:
     group_tags:
       - agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
       # Agent base parameters
-      initial_belief: 0.2  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      initial_credibility: 0.4  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      initial_belief: 0.2  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      initial_credibility: 0.4  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
       # DistortingRelayer specific parameters
-      credulity: 0.5             # Moderate: somewhat believing  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      relay_eagerness: 0.7       # Moderate-high: relays often  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      sharpening_factor: 0.4     # Exaggerates dramatic elements  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      leveling_factor: 0.2       # Drops nuance  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      credulity: 0.5             # Moderate: somewhat believing  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      relay_eagerness: 0.7       # Moderate-high: relays often  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      sharpening_factor: 0.4     # Exaggerates dramatic elements  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      leveling_factor: 0.2       # Drops nuance  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -104,15 +104,15 @@ rule_skeptical_evaluator:
     group_tags:
       - agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
       # Agent base parameters
-      initial_belief: 0.1        # Low: skeptical from start  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      initial_credibility: 0.7  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      initial_belief: 0.1        # Low: skeptical from start  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      initial_credibility: 0.7  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
       # SkepticalEvaluator specific parameters
-      skepticism: 0.7            # High: demands evidence  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      correction_eagerness: 0.6  # Moderate: corrects when confident  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      belief_threshold: 0.4      # Corrects when own belief below this  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      skepticism: 0.7            # High: demands evidence  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      correction_eagerness: 0.6  # Moderate: corrects when confident  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      belief_threshold: 0.4      # Corrects when own belief below this  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -129,15 +129,15 @@ rule_fact_checker:
     group_tags:
       - agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: masim/agents/defines/opinion/fact-checker.md §6
       # Agent base parameters
-      initial_belief: 0.05       # Very low: professional skeptic  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      initial_credibility: 0.9  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      initial_belief: 0.05       # Very low: professional skeptic  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      initial_credibility: 0.9  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/fact-checker.md §6
       # FactChecker specific parameters
-      fact_check_strength: 0.8       # Strong: active investigator  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      credibility_discount: 0.6      # Corrections travel slower  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      distortion_sensitivity: 0.5    # Better at debunking obvious falsehoods  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      fact_check_strength: 0.8       # Strong: active investigator  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      credibility_discount: 0.6      # Corrections travel slower  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      distortion_sensitivity: 0.5    # Better at debunking obvious falsehoods  # Source: masim/agents/defines/opinion/fact-checker.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -154,12 +154,12 @@ rule_uninformed_bystander:
     group_tags:
       - agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rule/records"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
       # Agent base parameters
-      initial_belief: 0.2  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-      initial_credibility: 0.3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      initial_belief: 0.2  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+      initial_credibility: 0.3  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
       # UninformedBystander specific parameters
-      engagement_probability: 0.3    # Low: rarely engages  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-      spread_probability: 0.4       # When engaged, slightly more likely to spread  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      engagement_probability: 0.3    # Low: rarely engages  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+      spread_probability: 0.4       # When engaged, slightly more likely to spread  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
   persona: !include persona.yml

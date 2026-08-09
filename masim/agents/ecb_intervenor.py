@@ -1,7 +1,7 @@
 """ecb-intervenor — Sovereign-spread central-bank backstop buyer.
 
 Canonical implementation of the ``ecb-intervenor`` archetype documented
-in ``examples/AGENT_POOL/finance/ecb-intervenor.md``. When the sovereign
+in ``masim/agents/defines/finance/ecb-intervenor.md``. When the sovereign
 spread exceeds a threshold (in bps), the central bank buys bonds at a
 spread-proportional size, subject to a remaining-capacity budget. Never
 sells.

@@ -1,7 +1,7 @@
 """distressed-buyer — Deep-discount distressed-debt buyer.
 
 Canonical implementation of the ``distressed-buyer`` archetype documented
-in ``examples/AGENT_POOL/finance/distressed-buyer.md``. When the price
+in ``masim/agents/defines/finance/distressed-buyer.md``. When the price
 discount from fundamental exceeds a threshold, the agent gradually
 deploys cash at a fixed fraction per round up to a per-round share cap.
 Never sells.

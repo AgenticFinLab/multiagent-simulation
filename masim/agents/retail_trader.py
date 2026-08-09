@@ -1,7 +1,7 @@
 """retail-trader — Small retail noise-plus-mean-reversion trader.
 
 Canonical implementation of the ``retail-trader`` archetype documented in
-``examples/AGENT_POOL/finance/retail-trader.md``. Emits a small mean-reverting
+``masim/agents/defines/finance/retail-trader.md``. Emits a small mean-reverting
 noise order on a fixed cadence.
 
 Theoretical basis:

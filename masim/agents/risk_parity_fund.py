@@ -1,7 +1,7 @@
 """risk-parity-fund — Volatility-targeting risk-parity fund.
 
 Canonical implementation of the ``risk-parity-fund`` archetype documented in
-``examples/AGENT_POOL/finance/risk-parity-fund.md``. Scales its position
+``masim/agents/defines/finance/risk-parity-fund.md``. Scales its position
 inversely with realised volatility (target-vol targeting) and force-cuts on
 volatility spikes — creating procyclical selling in stress episodes.
 

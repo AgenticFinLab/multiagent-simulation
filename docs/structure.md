@@ -12,7 +12,7 @@ MASim 是一个面向金融市场与群体行为研究的多智能体模拟框�
 - 45 个正式场景（见 `examples/{Scenario}/`），每个场景四种变体；
 - 四种决策机制：`Rule`、`LLM`、`RuleLLM`、`Rag`；
 - 标准化实验产物（`EXPERIMENT/` 单次运行 + `simulation-results/` 发布包）；
-- 由 261 个场景级角色合并而来的 29 类通用 Agent 原型，外加 `examples/AGENT_POOL/` 下的可复用 Agent 档案库；
+- 由 261 个场景级角色合并而来的 29 类通用 Agent 原型，外加 `masim/agents/defines/` 下的可复用 Agent 档案库；
 - Streamlit 实验回放与分析界面；
 - 每个新场景都以一份**用户/上游 LLM 撰写的目标说明文件** `{domain}-{scenario}.md` 作为唯一上游输入（格式由 `define-simulation-scenario-skill.md` 约束）；
 - 位于 `masim/skills/` 的**设计 / 创建 / 升级** Skill 体系（`define-simulation-scenario-skill.md`、`agent-design-skill.md`、`implement-simulation-skill/`；两条顶层 pipeline：`create-simulation-pipeline.md` 从零新建、`polish-simulation-pipeline.md` 对已存在场景标准化升级）。
@@ -43,13 +43,20 @@ YAML 配置
 ```text
 multiagent-simulation/
 |-- masim/                    # 通用模拟框架 + 设计 Skill
-|   |-- agents/  communication/  evaluation/  format/
+|   |-- agents/              # 209 个 archetype .py + defines/ 行为规格
+|   |   |-- _base.py  _coordinator_base.py  _rag_base.py  _state.py
+|   |   |-- momentum_trader.py  contrarian_investor.py  ...  (209)
+|   |   `-- defines/         # 可复用 Agent 行为规格档案库
+|   |       |-- finance/     # 195 个金融 agent 档案 (kebab-case .md)
+|   |       |-- market/      # 9 个 market coordinator 档案
+|   |       |-- opinion/     # 5 个 opinion-propagation 档案
+|   |       `-- agent_images/ # 图标 PNGs + Streamlit Agent Market 资产
+|   |-- communication/  evaluation/  format/
 |   |-- interface/  knowledge/  persona/  player/
 |   |-- proxy/  simulator/  utils/
 |   `-- skills/               # define-simulation-scenario-skill.md, agent-design-skill.md, implement-simulation-skill/, create-simulation-pipeline.md (从零新建), polish-simulation-pipeline.md (升级已有)
 |-- examples/                 # 场景实现与运行入口
 |   |-- {Scenario}/           # 45 个正式场景（Rule/LLM/RuleLLM/Rag 四变体）
-|   |-- AGENT_POOL/           # 可复用 Agent 档案库（含 finance/ 等领域子目录、agent_images/）
 |   |-- CUSTOMIZED_SIMULATION/  # 自定义/未发布场景的工作空间
 |   |-- document-sources/     # RAG 文档原料
 |   `-- __init__.py
@@ -62,7 +69,7 @@ multiagent-simulation/
 `-- requirements.txt          # 项目依赖
 ```
 
-> `investment-agents/` 是历史遗留目录，新档案统一写入 `examples/AGENT_POOL/<domain>/`。
+> `investment-agents/` 是历史遗留目录，新档案统一写入 `masim/agents/defines/<domain>/`。
 
 ## 4. 框架模块
 
@@ -79,6 +86,7 @@ multiagent-simulation/
 | `masim/format`        | 通用 prompt / 订单 schema / 订单最终化 | `order.py`、`base_prompts.py`、`finalize.py` (`require_positive_bid_price` / `clip_order_to_liquidity`)                                       |
 | `masim/interface`     | Streamlit 场景选择、回放和分析       | `app.py`                                                                                                                                     |
 | `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`                                                                                                                |
+| `masim/cli`           | 通用场景 runner（消除 run_*.py 样板） | `run(scenario, variant, default_config, ...)`                                                                                                |
 | `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
 
 职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则；`masim/skills/` 不参与运行时，只供设计阶段调用。
@@ -106,7 +114,7 @@ examples/{Scenario}/
 `-- {Mechanism}/            # 是否包含取决于目标文件 §10.1 的 build matrix
     |-- players.py        # 市场与投资者实现
     |-- prompts.py        # LLM 提示词，Rule 模式可能没有
-    |-- run_*.py          # 单实验入口
+    |-- run_*.py          # 单实验入口（thin shim → masim.cli.run）
     |-- analysis.py       # 结果分析（Rule 为权威实现，其余继承）
     |-- explain.md        # 机制与实现说明（引用 simulation-bases.md §N.M）
     `-- analysis.md       # 指标说明（引用 analysis-bases.md §N.M）
@@ -190,21 +198,21 @@ LLM 模式通常需要 `ARK_API_KEY`；RAG 还可能需要 `HUNYUAN_API_KEY`、`
 
 ## 10. Agent 档案与 Pool 复用
 
-`examples/AGENT_POOL/` 是 **可复用 Agent 档案库**，所有新场景都必须先经此目录做"复用 vs. 新建"判定，避免重复设计相同行为的 Agent。
+`masim/agents/defines/` 是 **可复用 Agent 档案库**，所有新场景都必须先经此目录做"复用 vs. 新建"判定，避免重复设计相同行为的 Agent。
 
 ```text
-examples/AGENT_POOL/
-|-- finance/                            # 金融领域 Agent（momentum / fundamental / liquidity / ...）
-|-- ExtractedExampleInvestors/          # 从历史场景抽取的原始档案
-|   |-- unique/                         # 去重后的市场级原型
-|   `-- non-unique/                     # 场景级原始档案
+masim/agents/defines/
+|-- finance/                            # 195 个金融领域 Agent 档案（momentum / fundamental / liquidity / ...）
+|-- market/                             # 9 个 market coordinator 档案（price-impact / depeg / ...）
+|-- opinion/                            # 5 个 opinion-propagation 档案（distorting / fact-check / ...）
 |-- agent_images/                       # 头像图标 (icons/) 与设计说明 (design.md)
 `-- README.md
 ```
 
 - 单个 Agent 档案严格遵循 `masim/skills/agent-design-skill.md` 的 11 节格式；
 - 文件名采用 kebab-case（如 `momentum-trader.md`、`fundamental-analyst.md`），与 H1 一致；
-- 领域子目录（`finance/`、未来可能的 `opinion/`、`epidemics/` 等）由档案的真实领域决定；
+- 领域子目录（`finance/`、`market/`、`opinion/`，未来可能的 `epidemics/` 等）由档案的真实领域决定；
+- 每个 `.md` 档案与 `masim/agents/` 下的同名（snake_case）`.py` 实现构成 **1:1 映射**；新增 Agent 必须同时添加 `.md` 规格和 `.py` 实现；
 - 添加新 Agent 之前，必须先按 `masim/skills/create-simulation-pipeline.md`（新建场景时）或 `masim/skills/polish-simulation-pipeline.md`（升级已有场景时）的三段式匹配流程检索是否已有满足要求的档案。
 
 未发布或试验性的自定义场景写入 `examples/CUSTOMIZED_SIMULATION/`，构成熟稳定后再迁入 `examples/<Scenario>/`。
@@ -254,9 +262,9 @@ create-simulation-pipeline.md          (pipeline #1 入口)
         |-- Phase 1: 文献研究（验证/扩展目标 §4-§6-§9）
         |-- Phase 2: Agent 角色规划（基于目标 §7）
         |-- Phase 3: AGENT_POOL 复用门
-        |        |-- 复用现有 agent (examples/AGENT_POOL/<domain>/*.md)
+        |        |-- 复用现有 agent (masim/agents/defines/<domain>/*.md)
         |        `-- 新建：调用 agent-design-skill.md + 三遍 §6 checklist
-        |              ----> 写入 examples/AGENT_POOL/<domain>/<kebab>.md
+        |              ----> 写入 masim/agents/defines/<domain>/<kebab>.md
         |-- Phase 4: 切换到 implement-simulation-skill/ 的 02 -> 08，完成 simulation-bases / configs / players.py
         `-- Phase 5/6: 三遍场景级审查 + 实验执行
               (闭包时将目标文件与 simulation-build-log.md 一并 released)
@@ -301,5 +309,5 @@ polish-simulation-pipeline.md          (pipeline #2 入口)
 | 撰写新场景目标文件     | `masim/skills/define-simulation-scenario-skill.md`（{domain}-{scenario}.md 规范）    |
 | 从零创建新场景         | `masim/skills/create-simulation-pipeline.md`（pipeline #1；需先有目标文件）           |
 | 升级已有场景到最新规范 | `masim/skills/polish-simulation-pipeline.md`（pipeline #2；对 examples/ 下已有场景做审计-补丁） |
-| 设计新 Agent       | `masim/skills/agent-design-skill.md` + `examples/AGENT_POOL/`     |
-| 查找可复用 Agent   | `examples/AGENT_POOL/<domain>/`，按文件名/Summary/全文三段式检索  |
+| 设计新 Agent       | `masim/skills/agent-design-skill.md` + `masim/agents/defines/`     |
+| 查找可复用 Agent   | `masim/agents/defines/<domain>/`，按文件名/Summary/全文三段式检索  |

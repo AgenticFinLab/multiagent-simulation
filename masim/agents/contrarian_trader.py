@@ -1,7 +1,7 @@
 """contrarian-trader — Mean-reversion contrarian trader.
 
 Canonical implementation of the ``contrarian-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/contrarian-trader.md``. Fades extreme
+in ``masim/agents/defines/finance/contrarian-trader.md``. Fades extreme
 cumulative moves and trades against the prevailing trend on a lookback
 horizon — converges on fundamental after overshoots.
 

@@ -1,7 +1,7 @@
 """risk-manager — VaR-triggered forced deleveraging.
 
 Canonical implementation of the ``risk-manager`` archetype documented in
-``examples/AGENT_POOL/finance/risk-manager.md``. Sells a fraction of the
+``masim/agents/defines/finance/risk-manager.md``. Sells a fraction of the
 existing long position whenever the price-to-fundamental deviation breaches
 three times the configured VaR limit. Never buys.
 

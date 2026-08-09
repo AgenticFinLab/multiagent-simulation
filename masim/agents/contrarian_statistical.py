@@ -1,7 +1,7 @@
 """contrarian-statistical — Statistical (position-capped) contrarian.
 
 Canonical implementation of the ``contrarian-statistical`` archetype
-documented in ``examples/AGENT_POOL/finance/contrarian-statistical.md``.
+documented in ``masim/agents/defines/finance/contrarian-statistical.md``.
 Trades opposite deviation with quantity proportional to |deviation|,
 capped by a position limit and per-round order cap.
 

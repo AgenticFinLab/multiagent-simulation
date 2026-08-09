@@ -1,7 +1,7 @@
 """opinion-fact-checker — Authoritative fact-checker (opinion domain).
 
 Canonical implementation of the ``fact-checker`` archetype documented in
-``examples/AGENT_POOL/opinion/fact-checker.md``. Models a professional
+``masim/agents/defines/opinion/fact-checker.md``. Models a professional
 fact-checking organisation that monitors ambient population belief in a
 rumor and broadcasts a verified correction whenever belief deviates from the
 truth beyond a threshold (Lewandowsky et al. 2012; Ecker et al. 2022).

@@ -9,7 +9,7 @@
 # Market (Coordinator) — rule-based, identical to Rule variant
 # -----------------------------------------------------------------------------
 market:
-  archetype: credit-minsky-cycle  # -> AGENT_POOL/market/credit-minsky-cycle.md
+  archetype: credit-minsky-cycle  # -> masim/agents/defines/market/credit-minsky-cycle.md
   name: "Market"
   class: "examples.CreditCycle.LLM.players:Market"
   num_instances: 1

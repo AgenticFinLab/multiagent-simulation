@@ -1,7 +1,7 @@
 """periphery-bond-seller — Peripheral-sovereign bond seller under contagion.
 
 Canonical implementation of the ``periphery-bond-seller`` archetype
-documented in ``examples/AGENT_POOL/finance/periphery-bond-seller.md``.
+documented in ``masim/agents/defines/finance/periphery-bond-seller.md``.
 The agent sells peripheral-sovereign bonds when its effective spread
 (observed spread plus a contagion loading) crosses a stress threshold,
 and re-accumulates opportunistically when stress fades.

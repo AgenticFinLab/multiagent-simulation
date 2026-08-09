@@ -1,7 +1,7 @@
 """peg-defender — Central-bank / peg-defending intervention agent.
 
 Canonical implementation of the ``peg-defender`` archetype documented in
-``examples/AGENT_POOL/finance/peg-defender.md``. The agent defends a
+``masim/agents/defines/finance/peg-defender.md``. The agent defends a
 declared peg (proxied by ``fundamental``) by intervening against
 deviations while it still has ammunition (cash).
 

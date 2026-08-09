@@ -17,7 +17,7 @@
 # =============================================================================
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market"
   class: "examples.LiquidityDryup.Rule.players:Market"
   num_instances: 1
@@ -40,7 +40,7 @@ market:
   persona: !include persona.yml
 
 rule_market_maker:
-  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
+  archetype: market-maker  # -> masim/agents/defines/finance/market-maker.md
   name: "Market Maker"
   class: "examples.LiquidityDryup.Rule.players:MarketMaker"
   # Expander → market_maker_1, market_maker_2, market_maker_3
@@ -64,7 +64,7 @@ rule_market_maker:
   persona: !include persona.yml
 
 rule_liquidity_seeker:
-  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
+  archetype: liquidity-seeker  # -> masim/agents/defines/finance/liquidity-seeker.md
   name: "Liquidity Seeker"
   class: "examples.LiquidityDryup.Rule.players:LiquiditySeeker"
   # Expander → liquidity_seeker_1, liquidity_seeker_2, liquidity_seeker_3
@@ -86,7 +86,7 @@ rule_liquidity_seeker:
   persona: !include persona.yml
 
 rule_value_trader:
-  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
+  archetype: value-trader  # -> masim/agents/defines/finance/value-trader.md
   name: "Value Trader"
   class: "examples.LiquidityDryup.Rule.players:ValueTrader"
   # Expander → value_trader_1, value_trader_2
@@ -110,7 +110,7 @@ rule_value_trader:
   persona: !include persona.yml
 
 rule_momentum_trader:
-  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
+  archetype: momentum-trader  # -> masim/agents/defines/finance/momentum-trader.md
   name: "Momentum Trader"
   class: "examples.LiquidityDryup.Rule.players:MomentumTrader"
   # Expander → momentum_trader_1, momentum_trader_2
@@ -132,7 +132,7 @@ rule_momentum_trader:
   persona: !include persona.yml
 
 rule_noise_trader:
-  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
+  archetype: noise-trader  # -> masim/agents/defines/finance/noise-trader.md
   name: "Noise Trader"
   class: "examples.LiquidityDryup.Rule.players:NoiseTrader"
   # Expander → noise_trader_1, noise_trader_2

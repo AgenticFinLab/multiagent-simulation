@@ -1,7 +1,7 @@
 """contrarian-investor — Bid-formation contrarian with Gaussian noise.
 
 Canonical implementation of the ``contrarian-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/contrarian-investor.md``.
+documented in ``masim/agents/defines/finance/contrarian-investor.md``.
 Posts a bid drawn around fundamental with additive noise and sizes an
 order proportional to the mispricing, clipped to a per-tick range.
 

@@ -1,6 +1,6 @@
 """Information SIS contagion — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/information-sis-contagion.md
+Profile: masim/agents/defines/market/information-sis-contagion.md
 Mechanism: Linear SIS-style rumor contagion with truth-anchored correction,
            Allport-Postman leveling/sharpening distortion dynamics, and
            Gaussian noise (Daley-Kendall 1965 + Vosoughi-Roy-Aral 2018 +

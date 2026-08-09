@@ -1,7 +1,7 @@
 """ideologue — Belief-persistent directional trader.
 
 Canonical implementation of the ``ideologue`` archetype documented in
-``examples/AGENT_POOL/finance/ideologue.md``. Trades in a fixed direction
+``masim/agents/defines/finance/ideologue.md``. Trades in a fixed direction
 determined by an ideological belief (bull or bear); intensity is scaled by
 conviction and (optionally) decays each tick.
 

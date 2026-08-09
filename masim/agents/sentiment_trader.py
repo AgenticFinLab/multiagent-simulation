@@ -1,7 +1,7 @@
 """sentiment-trader — Sentiment-driven noise trader.
 
 Canonical implementation of the ``sentiment-trader`` archetype documented in
-``examples/AGENT_POOL/finance/sentiment-trader.md``. Trades in the direction
+``masim/agents/defines/finance/sentiment-trader.md``. Trades in the direction
 of an exogenous sentiment signal whenever its magnitude exceeds a neutral
 band.
 

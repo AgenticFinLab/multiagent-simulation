@@ -26,7 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
   class: "examples.LiquidityDryup.Rag.players:Market"
   num_instances: 1
@@ -50,7 +50,7 @@ market:
   persona: !include persona.yml
 
 ragllm_market_maker:
-  archetype: market-maker  # -> AGENT_POOL/finance/market-maker.md
+  archetype: market-maker  # -> masim/agents/defines/finance/market-maker.md
   name: "RAG Market Maker"
   class: "examples.LiquidityDryup.Rag.players:RagLLMMarketMaker"
   # Expander → ragllm_market_maker_1, ragllm_market_maker_2, ragllm_market_maker_3
@@ -94,7 +94,7 @@ ragllm_market_maker:
   persona: !include persona.yml
 
 ragllm_liquidity_seeker:
-  archetype: liquidity-seeker  # -> AGENT_POOL/finance/liquidity-seeker.md
+  archetype: liquidity-seeker  # -> masim/agents/defines/finance/liquidity-seeker.md
   name: "RAG Liquidity Seeker"
   class: "examples.LiquidityDryup.Rag.players:RagLLMLiquiditySeeker"
   # Expander → ragllm_liquidity_seeker_1, ragllm_liquidity_seeker_2, ragllm_liquidity_seeker_3
@@ -138,7 +138,7 @@ ragllm_liquidity_seeker:
   persona: !include persona.yml
 
 ragllm_value_trader:
-  archetype: value-trader  # -> AGENT_POOL/finance/value-trader.md
+  archetype: value-trader  # -> masim/agents/defines/finance/value-trader.md
   name: "RAG Value Trader"
   class: "examples.LiquidityDryup.Rag.players:RagLLMValueTrader"
   # Expander → ragllm_value_trader_1, ragllm_value_trader_2
@@ -182,7 +182,7 @@ ragllm_value_trader:
   persona: !include persona.yml
 
 ragllm_momentum_trader:
-  archetype: momentum-trader  # -> AGENT_POOL/finance/momentum-trader.md
+  archetype: momentum-trader  # -> masim/agents/defines/finance/momentum-trader.md
   name: "RAG Momentum Trader"
   class: "examples.LiquidityDryup.Rag.players:RagLLMMomentumTrader"
   # Expander → ragllm_value_1, ragllm_value_2
@@ -226,7 +226,7 @@ ragllm_momentum_trader:
   persona: !include persona.yml
 
 ragllm_noise_trader:
-  archetype: noise-trader  # -> AGENT_POOL/finance/noise-trader.md
+  archetype: noise-trader  # -> masim/agents/defines/finance/noise-trader.md
   name: "RAG Noise Trader"
   class: "examples.LiquidityDryup.Rag.players:RagLLMNoiseTrader"
   # Expander → ragllm_noise_trader_1, ragllm_noise_trader_2

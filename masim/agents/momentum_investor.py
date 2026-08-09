@@ -1,7 +1,7 @@
 """momentum-investor — Positive-feedback momentum trader.
 
 Canonical implementation of the ``momentum-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/momentum-investor.md``. Trades on the
+in ``masim/agents/defines/finance/momentum-investor.md``. Trades on the
 single-round return with a Shiller-style positive-feedback bid-price
 shift; order size scales with return magnitude and cash.
 

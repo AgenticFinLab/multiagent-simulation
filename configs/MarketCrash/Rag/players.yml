@@ -26,7 +26,7 @@ knowledge:
     chunk_overlap: 64
 
 market:
-  archetype: stock-standard-price-impact  # -> AGENT_POOL/market/stock-standard-price-impact.md
+  archetype: stock-standard-price-impact  # -> masim/agents/defines/market/stock-standard-price-impact.md
   name: "Market with Liquidity Dynamics"
   class: "examples.MarketCrash.Rule.players:Market"
   num_instances: 1

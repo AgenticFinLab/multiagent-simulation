@@ -10,7 +10,7 @@ page bytes-on-wire by roughly 10× without touching the visible design.
 
 WHAT IT DOES
 ------------
-For each ``*.png`` under ``examples/AGENT_POOL/agent_images/icons/``:
+For each ``*.png`` under ``masim/agents/defines/agent_images/icons/``:
 
   1. Skip files already ≤ ``--min-target-kb`` (default 60KB) — no need to re-touch.
   2. Downscale from source dimensions to ``--max-side`` (default 512) using
@@ -68,7 +68,7 @@ except ImportError:  # pragma: no cover
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ICONS_DIR = REPO_ROOT / "examples/AGENT_POOL/agent_images/icons"
+ICONS_DIR = REPO_ROOT / "masim/agents/defines/agent_images/icons"
 BACKUP_DIR = ICONS_DIR / "_originals"
 
 

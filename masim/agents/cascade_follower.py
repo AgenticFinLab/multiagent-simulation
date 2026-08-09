@@ -1,7 +1,7 @@
 """cascade-follower — Informational cascade follower.
 
 Canonical implementation of the ``cascade-follower`` archetype documented
-in ``examples/AGENT_POOL/finance/cascade-follower.md``. Accumulates a
+in ``masim/agents/defines/finance/cascade-follower.md``. Accumulates a
 count of rounds with abnormal deviation and, once the count exceeds a
 trigger, commits to the sign of the current deviation — the sequential
 informational-cascade mechanism.

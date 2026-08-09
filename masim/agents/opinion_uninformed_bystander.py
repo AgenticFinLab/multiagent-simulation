@@ -1,7 +1,7 @@
 """opinion-uninformed-bystander — Uninformed passive bystander (opinion domain).
 
 Canonical implementation of the ``uninformed-bystander`` archetype documented
-in ``examples/AGENT_POOL/opinion/uninformed-bystander.md``. Models a passive
+in ``masim/agents/defines/opinion/uninformed-bystander.md``. Models a passive
 social-media reader who receives information without retransmitting it. In
 Watts (2002)'s cascade model these are the silent majority whose belief may
 drift with the ambient signal, but who never actively propagate.

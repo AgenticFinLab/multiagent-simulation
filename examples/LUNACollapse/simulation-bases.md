@@ -38,7 +38,7 @@ work motivate the lender/liquidator and yield-depositor agents.
 ## §3 Market Mechanism
 
 The shipped market is the openly disclosed single-risky-asset approximation of
-`examples/AGENT_POOL/market/crypto-algostable-depeg.md`. It isolates the LUNA
+`masim/agents/defines/market/crypto-algostable-depeg.md`. It isolates the LUNA
 leg of the death spiral while preserving the depeg-to-selling causal chain:
 
 ```text

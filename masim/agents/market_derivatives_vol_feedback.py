@@ -1,6 +1,6 @@
 """Derivatives Vol-Feedback — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/derivatives-vol-feedback.md
+Profile: masim/agents/defines/market/derivatives-vol-feedback.md
 Mechanism: Two-asset coupled VIX (implied-vol index) and XIV (inverse-vol ETN)
     coordinator with short-gamma hedging-flow feedback.  When |delta_V/V| exceeds
     a rebalance threshold, ETN issuers must buy volatility, amplifying the move

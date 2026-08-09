@@ -1,7 +1,7 @@
 """short-seller — Individual short seller with staged forced covering.
 
 Canonical implementation of the ``short-seller`` archetype documented in
-``examples/AGENT_POOL/finance/short-seller.md``. Holds an initial negative
+``masim/agents/defines/finance/short-seller.md``. Holds an initial negative
 position and covers half of the remaining short whenever price runs
 sufficiently far above the entry price.
 

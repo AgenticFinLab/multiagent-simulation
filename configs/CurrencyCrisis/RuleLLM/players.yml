@@ -1,7 +1,7 @@
 # CurrencyCrisis RuleLLM Agent Configuration
 
 market:
-  archetype: fx-currency-peg-and-attack  # -> AGENT_POOL/market/fx-currency-peg-and-attack.md
+  archetype: fx-currency-peg-and-attack  # -> masim/agents/defines/market/fx-currency-peg-and-attack.md
   name: "Market"
   class: "examples.CurrencyCrisis.RuleLLM.players:Market"
   num_instances: 1
@@ -12,15 +12,15 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/market.md §6
-      initial_price: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      peg_rate: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      fundamental_value: 100.0  # Source: AGENT_POOL/finance/market.md §6
-      reserve_level: 500000.0  # Source: AGENT_POOL/finance/market.md §6
-      price_impact: 0.01  # Source: AGENT_POOL/finance/market.md §6
-      mean_reversion: 0.02  # Source: AGENT_POOL/finance/market.md §6
-      noise_std: 0.5  # Source: AGENT_POOL/finance/market.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/market.md §6
+      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/market.md §6
+      initial_price: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      peg_rate: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      fundamental_value: 100.0  # Source: masim/agents/defines/finance/market.md §6
+      reserve_level: 500000.0  # Source: masim/agents/defines/finance/market.md §6
+      price_impact: 0.01  # Source: masim/agents/defines/finance/market.md §6
+      mean_reversion: 0.02  # Source: masim/agents/defines/finance/market.md §6
+      noise_std: 0.5  # Source: masim/agents/defines/finance/market.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/market.md §6
   persona: !include persona.yml
 
 rulellm_speculative_attacker:
@@ -34,12 +34,12 @@ rulellm_speculative_attacker:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-speculative-attacker.md §6
-      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/rulellm-speculative-attacker.md §6
-      initial_position: 5000  # Source: AGENT_POOL/finance/rulellm-speculative-attacker.md §6
-      attack_threshold: 0.03  # Source: AGENT_POOL/finance/rulellm-speculative-attacker.md §6
-      position_size: 800  # Source: AGENT_POOL/finance/rulellm-speculative-attacker.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-speculative-attacker.md §6
+      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-speculative-attacker.md §6
+      initial_cash: 1000000.0  # Source: masim/agents/defines/finance/rulellm-speculative-attacker.md §6
+      initial_position: 5000  # Source: masim/agents/defines/finance/rulellm-speculative-attacker.md §6
+      attack_threshold: 0.03  # Source: masim/agents/defines/finance/rulellm-speculative-attacker.md §6
+      position_size: 800  # Source: masim/agents/defines/finance/rulellm-speculative-attacker.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-speculative-attacker.md §6
       llm:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SPECULATIVE_ATTACKER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -61,13 +61,13 @@ rulellm_self_fulfilling_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
-      initial_cash: 800000.0  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
-      initial_position: 5000  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
-      contagion_sensitivity: 0.01  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
-      exit_threshold: 0.03  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
-      position_size: 500  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-self-fulfilling-trader.md §6
+      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
+      initial_cash: 800000.0  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
+      initial_position: 5000  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
+      contagion_sensitivity: 0.01  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
+      exit_threshold: 0.03  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
+      position_size: 500  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-self-fulfilling-trader.md §6
       llm:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_SELF_FULFILLING_TRADER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -89,12 +89,12 @@ rulellm_central_bank_defender:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-central-bank-defender.md §6
-      initial_cash: 5000000.0  # Source: AGENT_POOL/finance/rulellm-central-bank-defender.md §6
-      initial_position: 3000  # Source: AGENT_POOL/finance/rulellm-central-bank-defender.md §6
-      defense_size: 600  # Source: AGENT_POOL/finance/rulellm-central-bank-defender.md §6
-      defense_threshold: 0.05  # Source: AGENT_POOL/finance/rulellm-central-bank-defender.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-central-bank-defender.md §6
+      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-central-bank-defender.md §6
+      initial_cash: 5000000.0  # Source: masim/agents/defines/finance/rulellm-central-bank-defender.md §6
+      initial_position: 3000  # Source: masim/agents/defines/finance/rulellm-central-bank-defender.md §6
+      defense_size: 600  # Source: masim/agents/defines/finance/rulellm-central-bank-defender.md §6
+      defense_threshold: 0.05  # Source: masim/agents/defines/finance/rulellm-central-bank-defender.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-central-bank-defender.md §6
       llm:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_CENTRAL_BANK_DEFENDER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -116,12 +116,12 @@ rulellm_fundamental_hedger:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-fundamental-hedger.md §6
-      initial_cash: 1000000.0  # Source: AGENT_POOL/finance/rulellm-fundamental-hedger.md §6
-      initial_position: 2000  # Source: AGENT_POOL/finance/rulellm-fundamental-hedger.md §6
-      hedge_ratio: 0.05  # Source: AGENT_POOL/finance/rulellm-fundamental-hedger.md §6
-      position_size: 400  # Source: AGENT_POOL/finance/rulellm-fundamental-hedger.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-fundamental-hedger.md §6
+      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-fundamental-hedger.md §6
+      initial_cash: 1000000.0  # Source: masim/agents/defines/finance/rulellm-fundamental-hedger.md §6
+      initial_position: 2000  # Source: masim/agents/defines/finance/rulellm-fundamental-hedger.md §6
+      hedge_ratio: 0.05  # Source: masim/agents/defines/finance/rulellm-fundamental-hedger.md §6
+      position_size: 400  # Source: masim/agents/defines/finance/rulellm-fundamental-hedger.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-fundamental-hedger.md §6
       llm:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_FUNDAMENTAL_HEDGER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"
@@ -143,12 +143,12 @@ rulellm_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: AGENT_POOL/finance/rulellm-noise-trader.md §6
-      initial_cash: 500000.0  # Source: AGENT_POOL/finance/rulellm-noise-trader.md §6
-      initial_position: 500  # Source: AGENT_POOL/finance/rulellm-noise-trader.md §6
-      trade_probability: 0.3  # Source: AGENT_POOL/finance/rulellm-noise-trader.md §6
-      noise_size: 100  # Source: AGENT_POOL/finance/rulellm-noise-trader.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/rulellm-noise-trader.md §6
+      record_path: "EXPERIMENT/CurrencyCrisis/RuleLLM/records"  # Source: masim/agents/defines/finance/rulellm-noise-trader.md §6
+      initial_cash: 500000.0  # Source: masim/agents/defines/finance/rulellm-noise-trader.md §6
+      initial_position: 500  # Source: masim/agents/defines/finance/rulellm-noise-trader.md §6
+      trade_probability: 0.3  # Source: masim/agents/defines/finance/rulellm-noise-trader.md §6
+      noise_size: 100  # Source: masim/agents/defines/finance/rulellm-noise-trader.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/rulellm-noise-trader.md §6
       llm:
         sys_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_NOISE_TRADER_SYS"
         user_message: "examples.CurrencyCrisis.RuleLLM.prompts:RULELLM_USER_TEMPLATE"

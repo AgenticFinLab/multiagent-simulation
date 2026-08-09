@@ -47,7 +47,6 @@ Environment Variables:
 
 import logging
 import os
-import sys
 import importlib
 from typing import Any, Dict, Optional
 from dotenv import load_dotenv
@@ -60,7 +59,6 @@ from examples.EquityPremium.market import calculate_stock_transition
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from examples.EquityPremium.decision import (  # noqa: E402
     fallback_hold_decision,

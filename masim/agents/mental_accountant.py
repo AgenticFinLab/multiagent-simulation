@@ -1,7 +1,7 @@
 """mental-accountant — Mental-accounting per-bucket trader.
 
 Canonical implementation of the ``mental-accountant`` archetype documented
-in ``examples/AGENT_POOL/finance/mental-accountant.md``. Splits its
+in ``masim/agents/defines/finance/mental-accountant.md``. Splits its
 position into multiple mental accounts and evaluates each with prospect-
 theoretic asymmetric gain/loss thresholds, sizing sell orders per bucket
 rather than the whole book.

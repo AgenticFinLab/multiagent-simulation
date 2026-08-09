@@ -1,7 +1,7 @@
 """active-rebalancer — Contrarian portfolio rebalancer driven by deviation.
 
 Canonical implementation of the ``active-rebalancer`` archetype documented in
-``examples/AGENT_POOL/finance/active-rebalancer.md``.
+``masim/agents/defines/finance/active-rebalancer.md``.
 
 Theoretical basis:
     Markowitz (1952) — mean-variance rebalancing; systematic contrarian

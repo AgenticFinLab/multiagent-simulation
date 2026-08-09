@@ -1,7 +1,7 @@
 """leveraged-fund — Target-leverage rebalancing fund.
 
 Canonical implementation of the ``leveraged-fund`` archetype documented in
-``examples/AGENT_POOL/finance/leveraged-fund.md``. Continuously rebalances
+``masim/agents/defines/finance/leveraged-fund.md``. Continuously rebalances
 its exposure toward a target-leverage ratio subject to a hard leverage
 ceiling — a mechanical balance-sheet optimiser that inadvertently amplifies
 market cycles.

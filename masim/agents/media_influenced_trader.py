@@ -1,7 +1,7 @@
 """media-influenced-trader — Social-amplified sentiment trader.
 
 Canonical implementation of the ``media-influenced-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/media-influenced-trader.md``.
+documented in ``masim/agents/defines/finance/media-influenced-trader.md``.
 Weights the observed mispricing by a media sensitivity and social
 amplification factor, then trades against a dead-band-corrected
 "sentiment gap".

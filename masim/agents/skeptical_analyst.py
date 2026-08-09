@@ -1,7 +1,7 @@
 """skeptical-analyst — Contrarian value-scepticism trader.
 
 Canonical implementation of the ``skeptical-analyst`` archetype documented
-in ``examples/AGENT_POOL/finance/skeptical-analyst.md``. Fades price-vs-
+in ``masim/agents/defines/finance/skeptical-analyst.md``. Fades price-vs-
 fundamental deviations by buying undervaluation and selling overvaluation
 once the gap exceeds a scepticism threshold.
 

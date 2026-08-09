@@ -2,7 +2,7 @@
 
 Canonical implementation of the ``technical-trader`` (aka moving-average
 crossover trader) archetype documented in
-``examples/AGENT_POOL/finance/technical-trader.md``. Maintains a rolling
+``masim/agents/defines/finance/technical-trader.md``. Maintains a rolling
 price buffer, computes short vs long moving averages, and takes a
 signal-proportional position in the direction of the crossover.
 

@@ -1,7 +1,7 @@
 """rating-agency — Overconfident rating agency (perceived-fundamental bias).
 
 Canonical implementation of the ``rating-agency`` archetype documented
-in ``examples/AGENT_POOL/finance/rating-agency.md``. The agent behaves
+in ``masim/agents/defines/finance/rating-agency.md``. The agent behaves
 as if the true fundamental is inflated above the published fundamental
 (overrating bias) and buys whenever the market price is meaningfully
 below its inflated fair value. Buy-only.

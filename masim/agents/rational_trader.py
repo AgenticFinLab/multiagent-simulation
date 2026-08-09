@@ -1,7 +1,7 @@
 """rational-trader — Glosten-Milgrom / Shleifer rational informed trader.
 
 Canonical implementation of the ``rational-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/rational-trader.md``. Trades contrarian
+in ``masim/agents/defines/finance/rational-trader.md``. Trades contrarian
 to observable deviation with quantity proportional to |deviation| and
 risk aversion — the neoclassical benchmark agent.
 

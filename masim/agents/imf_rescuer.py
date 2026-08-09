@@ -1,7 +1,7 @@
 """imf-rescuer — Delayed official-sector floor.
 
 Canonical implementation of the ``imf-rescuer`` archetype documented in
-``examples/AGENT_POOL/finance/imf-rescuer.md``. Deploys a fraction of
+``masim/agents/defines/finance/imf-rescuer.md``. Deploys a fraction of
 remaining support capacity only once stress crosses a severe negative
 threshold; otherwise stands aside.
 

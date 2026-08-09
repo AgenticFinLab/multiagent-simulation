@@ -147,7 +147,7 @@ A single table identifying the file:
 
 - **MUST** match `{ScenarioName}` exactly in `Name`.
 - **MUST** declare a `Domain` value that has (or will have) a
-  corresponding `examples/AGENT_POOL/{domain}/` folder.
+  corresponding `masim/agents/defines/{domain}/` folder.
 - **MUST** provide a `Phenomenon` field: one sentence (15–30 words)
   that captures the scenario’s core dynamic at a glance. This sentence
   should distill what §2 Phenomenon Statement describes in detail.
@@ -319,8 +319,8 @@ A single table with **4 — 7 rows**, one per agent archetype:
 
 | Agent name (kebab) | Real-world counterpart | Theory family (§4 anchor)  | Domain role   | Primary signals               | Intent line                                         | Expected pool match                                |
 |--------------------|------------------------|----------------------------|---------------|-------------------------------|-----------------------------------------------------|----------------------------------------------------|
-| trend-follower     | active retail trader   | Quant / Statistical (§4.2) | Destabilising | price, return, deviation      | "Exists to amplify ongoing directional moves."      | examples/AGENT_POOL/finance/momentum-trader.md     |
-| fundamental-anchor | mutual fund            | Fundamental / Value (§4.1) | Stabilising   | price, fundamental, deviation | "Exists to pull price back toward intrinsic value." | examples/AGENT_POOL/finance/fundamental-analyst.md |
+| trend-follower     | active retail trader   | Quant / Statistical (§4.2) | Destabilising | price, return, deviation      | "Exists to amplify ongoing directional moves."      | masim/agents/defines/finance/momentum-trader.md     |
+| fundamental-anchor | mutual fund            | Fundamental / Value (§4.1) | Stabilising   | price, fundamental, deviation | "Exists to pull price back toward intrinsic value." | masim/agents/defines/finance/fundamental-analyst.md |
 | ...                | ...                    | ...                        | ...           | ...                           | ...                                                 | ...                                                |
 ```
 
@@ -328,16 +328,16 @@ A single table with **4 — 7 rows**, one per agent archetype:
 Non-finance instantiations of the §7 Agent Roster (illustrative — the invoking agent adapts columns to the chosen §1 Domain):
 
   Opinion domain:
-    | echo-amplifier    | partisan influencer      | Bounded Confidence (§4.1) | Destabilising | opinion, network-neighbour opinions | "Exists to reinforce like-minded views."           | examples/AGENT_POOL/opinion/echo-amplifier.md    |
-    | bridge-moderator  | cross-community journalist | Deliberative Democracy (§4.2) | Stabilising | opinion, out-group signals         | "Exists to bring dissonant views into contact."    | examples/AGENT_POOL/opinion/bridge-moderator.md  |
+    | echo-amplifier    | partisan influencer      | Bounded Confidence (§4.1) | Destabilising | opinion, network-neighbour opinions | "Exists to reinforce like-minded views."           | masim/agents/defines/opinion/echo-amplifier.md    |
+    | bridge-moderator  | cross-community journalist | Deliberative Democracy (§4.2) | Stabilising | opinion, out-group signals         | "Exists to bring dissonant views into contact."    | masim/agents/defines/opinion/bridge-moderator.md  |
 
   Epidemics domain:
-    | high-mixer        | frontline service worker | Contact Heterogeneity (§4.1) | Destabilising | contact_rate, symptom, testing     | "Exists to sustain many daily contacts."           | examples/AGENT_POOL/epidemics/high-mixer.md      |
-    | cautious-isolator | vulnerable resident      | Behavioural Response (§4.2)  | Stabilising   | prevalence, symptom, testing        | "Exists to reduce exposure when risk is high."     | examples/AGENT_POOL/epidemics/cautious-isolator.md |
+    | high-mixer        | frontline service worker | Contact Heterogeneity (§4.1) | Destabilising | contact_rate, symptom, testing     | "Exists to sustain many daily contacts."           | masim/agents/defines/epidemics/high-mixer.md      |
+    | cautious-isolator | vulnerable resident      | Behavioural Response (§4.2)  | Stabilising   | prevalence, symptom, testing        | "Exists to reduce exposure when risk is high."     | masim/agents/defines/epidemics/cautious-isolator.md |
 
   Sociology domain:
-    | early-adopter     | urban innovator          | Threshold Model (§4.1)      | Destabilising | neighbour-adoption, media          | "Exists to trigger cascades at low thresholds."     | examples/AGENT_POOL/sociology/early-adopter.md   |
-    | conformist        | community elder          | Social Proof (§4.2)         | Stabilising   | neighbour-adoption                 | "Exists to hold out until majority adoption."       | examples/AGENT_POOL/sociology/conformist.md      |
+    | early-adopter     | urban innovator          | Threshold Model (§4.1)      | Destabilising | neighbour-adoption, media          | "Exists to trigger cascades at low thresholds."     | masim/agents/defines/sociology/early-adopter.md   |
+    | conformist        | community elder          | Social Proof (§4.2)         | Stabilising   | neighbour-adoption                 | "Exists to hold out until majority adoption."       | masim/agents/defines/sociology/conformist.md      |
 -->
 
 
@@ -958,7 +958,7 @@ are required, in the style of `agent-design-skill.md §6` and
 
 **Domain compatibility**
 
-- [ ] `examples/AGENT_POOL/{Domain}/` exists, OR the file includes
+- [ ] `masim/agents/defines/{Domain}/` exists, OR the file includes
       `§A Domain Palette Appendix` with the three required palettes.
 - [ ] §7 real-world counterparts all come from the chosen domain's
       enumeration.
@@ -998,7 +998,7 @@ status thereafter.
 | Universal Agent Design Handbook         | `masim/skills/agent-design-skill.md`                                     |
 | Domain-instantiation rules (finance)    | `masim/skills/implement-simulation-skill/02-root-documents-spec.md §4.1` |
 | Step 0 contract template                | `masim/skills/implement-simulation-skill/04-step0-load-target.md`        |
-| AGENT_POOL directory                    | `examples/AGENT_POOL/`                                                   |
+| AGENT_POOL directory                    | `masim/agents/defines/`                                                   |
 | Project structure overview              | `docs/structure.md`                                                      |
 
 ---

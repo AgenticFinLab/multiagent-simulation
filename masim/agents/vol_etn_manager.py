@@ -1,7 +1,7 @@
 """vol-etn-manager — Inverse-volatility ETP procyclical rebalance manager.
 
 Canonical implementation of the ``vol-etn-manager`` archetype documented
-in ``examples/AGENT_POOL/finance/vol-etn-manager.md``. One-sided
+in ``masim/agents/defines/finance/vol-etn-manager.md``. One-sided
 mechanical buy-only rebalance: whenever positive deviation exceeds a
 public threshold, the product manager submits a buy order sized as a
 linear function of the deviation, subject to a cash constraint. Never

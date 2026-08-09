@@ -1,7 +1,7 @@
 """intrinsic-value-trader — Contrarian fundamental value arbitrageur.
 
 Canonical implementation of the ``intrinsic-value-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/intrinsic-value-trader.md``.
+documented in ``masim/agents/defines/finance/intrinsic-value-trader.md``.
 Trades against price deviations from fundamental value, but with a higher
 activation threshold and a smaller position cap than the destabilising
 crowd — operationalising limits to arbitrage.

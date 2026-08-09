@@ -54,5 +54,5 @@ Allport, G. W., & Postman, L. (1947). *The Psychology of Rumor*. Henry Holt and 
 
 - Origin: new (2026-07-11, RumorSpread polish)
 - Polish audit: 2026-07-11 against agent-design-skill.md
-- Pool reference: `examples/AGENT_POOL/opinion/distorting-relayer.md`
+- Pool reference: `masim/agents/defines/opinion/distorting-relayer.md`
 | Icon | ![](../agent_images/icons/opinion-distorting-relayer.png) |

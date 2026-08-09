@@ -1,7 +1,7 @@
 """index-arbitrageur — Futures/cash program-trading desk.
 
 Canonical implementation of the ``index-arbitrageur`` archetype documented
-in ``examples/AGENT_POOL/finance/index-arbitrageur.md``. When the observed
+in ``masim/agents/defines/finance/index-arbitrageur.md``. When the observed
 spot/fair-value deviation exceeds the no-arbitrage band, submits a fixed-
 size cash-side order that closes the mispricing.
 

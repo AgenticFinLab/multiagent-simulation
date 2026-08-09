@@ -1,7 +1,7 @@
 """new-economy-evangelist — Paradigm-shift narrative believer.
 
 Canonical implementation of the ``new-economy-evangelist`` archetype
-documented in ``examples/AGENT_POOL/finance/new-economy-evangelist.md``.
+documented in ``masim/agents/defines/finance/new-economy-evangelist.md``.
 Reads a scenario-provided ``narrative_strength`` signal (0-1). Buys
 aggressively while the paradigm story is strong; capitulates and dumps a
 large fraction of position when the story collapses.

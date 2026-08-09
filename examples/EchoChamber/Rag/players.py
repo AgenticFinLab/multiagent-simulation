@@ -9,17 +9,10 @@ import math
 import os
 import re
 import shutil
-import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-
-PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
 
 from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput

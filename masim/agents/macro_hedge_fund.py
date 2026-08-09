@@ -1,7 +1,7 @@
 """macro-hedge-fund — Macro speculator / peg-attacker.
 
 Canonical implementation of the ``macro-hedge-fund`` archetype documented
-in ``examples/AGENT_POOL/finance/macro-hedge-fund.md``. Attacks mispricings
+in ``masim/agents/defines/finance/macro-hedge-fund.md``. Attacks mispricings
 once they exceed a size threshold — famously the model of Soros-style
 speculation against a defended peg (Krugman 1979, Obstfeld 1996).
 

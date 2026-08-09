@@ -1,7 +1,7 @@
 """opinion-distorting-relayer — Serial-distortion rumor relayer (opinion domain).
 
 Canonical implementation of the ``distorting-relayer`` archetype documented in
-``examples/AGENT_POOL/opinion/distorting-relayer.md``. Models a social media
+``masim/agents/defines/opinion/distorting-relayer.md``. Models a social media
 user who modifies information during retransmission through the classical
 levelling / sharpening / assimilation triad of Allport & Postman (1947).
 

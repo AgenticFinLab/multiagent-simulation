@@ -15,11 +15,11 @@
 
 | Candidate archetype             | Stage reached | Outcome        | Pool file                                                      |
 |---------------------------------|---------------|----------------|----------------------------------------------------------------|
-| concentrated-fund               | 3             | reuse approved | examples/AGENT_POOL/finance/concentrated-fund.md               |
-| prime-broker-first-mover        | 3             | reuse approved | examples/AGENT_POOL/finance/prime-broker-first-mover.md        |
-| prime-broker-delayed-liquidator | 3             | reuse approved | examples/AGENT_POOL/finance/prime-broker-delayed-liquidator.md |
-| block-trade-buyer               | 3             | reuse approved | examples/AGENT_POOL/finance/block-trade-buyer.md               |
-| information-trader              | 3             | reuse approved | examples/AGENT_POOL/finance/information-trader.md              |
+| concentrated-fund               | 3             | reuse approved | masim/agents/defines/finance/concentrated-fund.md               |
+| prime-broker-first-mover        | 3             | reuse approved | masim/agents/defines/finance/prime-broker-first-mover.md        |
+| prime-broker-delayed-liquidator | 3             | reuse approved | masim/agents/defines/finance/prime-broker-delayed-liquidator.md |
+| block-trade-buyer               | 3             | reuse approved | masim/agents/defines/finance/block-trade-buyer.md               |
+| information-trader              | 3             | reuse approved | masim/agents/defines/finance/information-trader.md              |
 
 Gate rationale: the current finance pool contains Archegos-specific standalone profiles for all five target §7 archetypes. Stage 1 matched filenames exactly, Stage 2 matched the seven-row Summary fingerprints, and Stage 3 confirmed compatible mechanisms, signal sets, parameters, and I/O contracts. No new pool file was required in this create-pipeline replay.
 
@@ -64,7 +64,7 @@ Target §9 parameter seeds are echoed in `simulation-bases.md §6` and `configs/
 | Phase                       | Date       | Outcome      | Reviewer  | Notes                                                                                                                                                                                                                                                                                               |
 |-----------------------------|------------|--------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Structure check             | 2026-06-30 | partial pass | Codex     | Added `simulation-build-log.md`; upstream target file remains absent as legacy gap.                                                                                                                                                                                                                 |
-| AGENT_POOL gate             | 2026-06-30 | pass         | Codex     | All five agents classified as `new`; pool files created in `examples/AGENT_POOL/finance/`.                                                                                                                                                                                                          |
+| AGENT_POOL gate             | 2026-06-30 | pass         | Codex     | All five agents classified as `new`; pool files created in `masim/agents/defines/finance/`.                                                                                                                                                                                                          |
 | Root §4 normalization       | 2026-06-30 | pass         | Codex     | Replaced legacy §4 with handbook-aligned embedded form and pool source links.                                                                                                                                                                                                                       |
 | Polish supersession         | 2026-07-01 | superseded   | QoderWork | Superseded by polish audit; polish trail lives in target §1 Meta CHANGELOG (`finance-archegos-collapse.md`) + git history. This build-log is retained for historical reference only and is not maintained by the polish pipeline.                                                                   |
 | Round-2 polish supersession | 2026-07-06 | superseded   | QoderWork | Superseded by Round-2 polish audit under the evaluation-first baseline (`masim/evaluation/README.md`, Pass 2 Analysis Migration Rule); Round-2 trail lives in target §1 Meta CHANGELOG + git history (`polish(archegos): step {0..closeout}` commits). Build-log remains historical reference only. |

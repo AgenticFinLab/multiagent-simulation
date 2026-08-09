@@ -1,6 +1,6 @@
 """Parse the standardised ``## Parameters`` table from agent handbooks.
 
-Every file under ``examples/AGENT_POOL/ExtractedExampleInvestors/unique/``
+Every file under ``masim/agents/defines/ExtractedExampleInvestors/unique/``
 follows the agent-design rubric and exposes a ``## Parameters`` GitHub
 markdown table with the canonical columns:
 

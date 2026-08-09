@@ -1,7 +1,7 @@
 """skeptical-evaluator — Truth-anchored corrective node for rumour scenarios.
 
 Canonical implementation of the ``skeptical-evaluator`` archetype
-documented in ``examples/AGENT_POOL/finance/skeptical-evaluator.md``.
+documented in ``masim/agents/defines/finance/skeptical-evaluator.md``.
 Reads the environmental rumour-belief signal and emits corrective
 selling pressure proportional to the agent's confidence that the rumour
 is false; otherwise ignores the environment.

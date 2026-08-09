@@ -1,7 +1,7 @@
 """panic-seller — Panic-selling loss-averse investor.
 
 Canonical implementation of the ``panic-seller`` archetype documented in
-``examples/AGENT_POOL/finance/panic-seller.md``. Never buys. Fully
+``masim/agents/defines/finance/panic-seller.md``. Never buys. Fully
 liquidates when cumulative P&L (versus entry price) breaches a loss
 threshold; otherwise sells a fraction of position when a single-tick
 return breaches a crash trigger.

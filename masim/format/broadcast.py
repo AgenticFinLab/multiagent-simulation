@@ -33,7 +33,7 @@ one monolithic dataclass.  The validation is equally strict:
 - No NaN or Inf in any numeric field.
 - No undeclared keys (strict mode; disables with ``strict=False``).
 
-Contract summary (mirrors ``examples/AGENT_POOL/market/*.md`` §Shared State)
+Contract summary (mirrors ``masim/agents/defines/market/*.md`` §Shared State)
 -----------------------------------------------------------------------------
 
 Each coordinator archetype defines its broadcast as a flat dict; the field
@@ -437,7 +437,7 @@ CREDIT_MINSKY_CYCLE_SCHEMA = BroadcastSchema(
 # Format contract (2026-07-24): coordinators call
 # ``get_coordinator_action_types(STRATEGY)`` in their aggregation loop and
 # raise a ValueError on unknown action_type — the .md profile in
-# examples/AGENT_POOL/market/ is authoritative and this map mirrors it.
+# masim/agents/defines/market/ is authoritative and this map mirrors it.
 
 COORDINATOR_ACTION_TYPES: Dict[str, FrozenSet[str]] = {
     # Investor-order-based coordinators (stock, fx, bond, crypto, derivatives,

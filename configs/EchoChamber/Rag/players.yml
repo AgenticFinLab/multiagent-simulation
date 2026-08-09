@@ -26,7 +26,7 @@ knowledge: &shared_knowledge
     top_k: 5  # Source: retrieval coverage design; analysis-bases.md §2.7
 
 ragllm_opinion_environment:
-  archetype: opinion-echo-chamber-clustering  # -> AGENT_POOL/market/opinion-echo-chamber-clustering.md
+  archetype: opinion-echo-chamber-clustering  # -> masim/agents/defines/market/opinion-echo-chamber-clustering.md
   name: "OpinionEnvironment"
   class: "examples.EchoChamber.Rag.players:OpinionEnvironment"
   num_instances: 1

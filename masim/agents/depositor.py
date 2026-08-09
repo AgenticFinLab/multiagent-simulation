@@ -1,7 +1,7 @@
 """depositor — Bank-run depositor with social influence.
 
 Canonical implementation of the ``depositor`` archetype documented in
-``examples/AGENT_POOL/finance/depositor.md``. The depositor's effective
+``masim/agents/defines/finance/depositor.md``. The depositor's effective
 withdrawal threshold falls under stress (peer influence), triggering an
 aggressive one-shot withdrawal (``sell``) up to a size cap.
 

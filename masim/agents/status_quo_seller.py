@@ -1,7 +1,7 @@
 """status-quo-seller — Reference-dependent status-quo bias trader.
 
 Canonical implementation of the ``status-quo-seller`` archetype documented
-in ``examples/AGENT_POOL/finance/status-quo-seller.md``. Prefers to hold
+in ``masim/agents/defines/finance/status-quo-seller.md``. Prefers to hold
 inventory (status-quo bias) but capitulates once the drawdown from the
 observed peak — combined with any external social pressure — exceeds
 the pressure threshold.

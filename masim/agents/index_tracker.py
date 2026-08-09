@@ -1,7 +1,7 @@
 """index-tracker — Passive proportional rebalancer.
 
 Canonical implementation of the ``index-tracker`` archetype documented in
-``examples/AGENT_POOL/finance/index-tracker.md``. Continuously trades a
+``masim/agents/defines/finance/index-tracker.md``. Continuously trades a
 fraction of the gap between current and target position every round,
 providing slow non-directional flow toward the target.
 

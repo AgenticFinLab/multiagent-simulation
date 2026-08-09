@@ -1,7 +1,7 @@
 """passive-bystander — Rationally inattentive stabiliser.
 
 Canonical implementation of the ``passive-bystander`` archetype documented
-in ``examples/AGENT_POOL/finance/passive-bystander.md``. A rationally
+in ``masim/agents/defines/finance/passive-bystander.md``. A rationally
 inattentive investor who only acts on gross deviations from fundamental —
 buying extreme underpricings and selling extreme overpricings at a fixed
 rebalance size.

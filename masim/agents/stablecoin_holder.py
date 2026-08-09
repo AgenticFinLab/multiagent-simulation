@@ -1,7 +1,7 @@
 """stablecoin-holder — Redemption-panic stablecoin holder.
 
 Canonical implementation of the ``stablecoin-holder`` archetype documented
-in ``examples/AGENT_POOL/finance/stablecoin-holder.md``. Holds the coin
+in ``masim/agents/defines/finance/stablecoin-holder.md``. Holds the coin
 peacefully until price falls below parity by more than the redemption
 threshold, then dumps a fixed fraction of the position in a run-like
 manner.

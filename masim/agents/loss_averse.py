@@ -1,7 +1,7 @@
 """loss-averse — Loss-averse disposition trader.
 
 Canonical implementation of the ``loss-averse`` archetype documented in
-``examples/AGENT_POOL/finance/loss-averse.md``. Reacts asymmetrically to
+``masim/agents/defines/finance/loss-averse.md``. Reacts asymmetrically to
 paper gains vs paper losses around a self-tracked cost basis: cuts big
 on losses, takes small profits on modest gains.
 

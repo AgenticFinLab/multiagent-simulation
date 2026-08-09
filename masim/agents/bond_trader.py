@@ -1,7 +1,7 @@
 """bond-trader — Fixed-income deadband contrarian trader.
 
 Canonical implementation of the ``bond-trader`` archetype documented in
-``examples/AGENT_POOL/finance/bond-trader.md``.
+``masim/agents/defines/finance/bond-trader.md``.
 
 Theoretical basis:
     Ellul, Jotikasthira & Lundblad (2011) — fire-sale mispricings in

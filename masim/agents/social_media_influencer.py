@@ -1,7 +1,7 @@
 """social-media-influencer — Amplifies drawdowns by selling into weakness.
 
 Canonical implementation of the ``social-media-influencer`` archetype
-documented in ``examples/AGENT_POOL/finance/social-media-influencer.md``.
+documented in ``masim/agents/defines/finance/social-media-influencer.md``.
 Broadcasts and acts on negative sentiment: when price falls meaningfully
 below fundamental, dumps position in size proportional to the drawdown
 amplified by a broadcast multiplier.

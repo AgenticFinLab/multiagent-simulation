@@ -1,7 +1,7 @@
 """high-frequency-trader — HFT momentum amplifier with ultra-short lookback.
 
 Canonical implementation of the ``high-frequency-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/high-frequency-trader.md``.
+documented in ``masim/agents/defines/finance/high-frequency-trader.md``.
 Computes short-window momentum and amplifies it with a speed-advantage
 multiplier; clamped to a hard ±60-unit ceiling.
 

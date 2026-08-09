@@ -127,11 +127,11 @@ An episode resolves when price returns near the public fundamental or reference 
 
 | Agent name (kebab) | Real-world counterpart | Theory family | Domain role | Primary signals | Intent line | Expected pool match |
 |---|---|---|---|---|---|---|
-| loss-averse-investor | retail investor with disposition effect | §4.1, §4.3 | behavioral asymmetry | price, entry_price, cash, position | Realize gains more readily than losses. | examples/AGENT_POOL/finance/loss-averse-investor.md |
-| break-even-trader | loss-domain risk seeker | §4.2 | behavioral escalation | price, entry_price, cash, position | Increase exposure after a material loss. | examples/AGENT_POOL/finance/break-even-trader.md |
-| rational-trader | fundamental-value investor | §4.4 | stabilizing benchmark | price, fundamental, cash, position | Trade against material public mispricing. | examples/AGENT_POOL/finance/rational-trader.md |
-| momentum-trader | short-horizon trend follower | §4.4 | destabilizing amplifier | price, fundamental, cash, position | Trade with the signed deviation. | examples/AGENT_POOL/finance/momentum-trader.md |
-| market-maker | inventory-constrained dealer | §4.5 | stabilizing liquidity | price, fundamental, cash, position | Trade against imbalance within inventory limits. | examples/AGENT_POOL/finance/market-maker.md |
+| loss-averse-investor | retail investor with disposition effect | §4.1, §4.3 | behavioral asymmetry | price, entry_price, cash, position | Realize gains more readily than losses. | masim/agents/defines/finance/loss-averse-investor.md |
+| break-even-trader | loss-domain risk seeker | §4.2 | behavioral escalation | price, entry_price, cash, position | Increase exposure after a material loss. | masim/agents/defines/finance/break-even-trader.md |
+| rational-trader | fundamental-value investor | §4.4 | stabilizing benchmark | price, fundamental, cash, position | Trade against material public mispricing. | masim/agents/defines/finance/rational-trader.md |
+| momentum-trader | short-horizon trend follower | §4.4 | destabilizing amplifier | price, fundamental, cash, position | Trade with the signed deviation. | masim/agents/defines/finance/momentum-trader.md |
+| market-maker | inventory-constrained dealer | §4.5 | stabilizing liquidity | price, fundamental, cash, position | Trade against imbalance within inventory limits. | masim/agents/defines/finance/market-maker.md |
 
 ## §8 Environment Specification
 

@@ -1,7 +1,7 @@
 """short-seller-hf — Short-selling hedge fund with forced covering.
 
 Canonical implementation of the ``short-seller-hf`` archetype documented in
-``examples/AGENT_POOL/finance/short-seller-hf.md``. Institutional short
+``masim/agents/defines/finance/short-seller-hf.md``. Institutional short
 seller that mechanically covers a fraction of its remaining short whenever
 the price-to-fundamental deviation exceeds a loss threshold — amplifying
 the squeeze through forced buying.

@@ -1,7 +1,7 @@
 """anchor-depositor — Currency-peg anchored depositor that runs on the peg.
 
 Canonical implementation of the ``anchor-depositor`` archetype documented in
-``examples/AGENT_POOL/finance/anchor-depositor.md``.
+``masim/agents/defines/finance/anchor-depositor.md``.
 
 Theoretical basis:
     Goldstein & Pauzner (2005) — depositor runs on stressed pegs;

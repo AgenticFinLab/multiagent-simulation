@@ -1,7 +1,7 @@
 """independent-assessor — Statistically-literate contrarian.
 
 Canonical implementation of the ``independent-assessor`` archetype
-documented in ``examples/AGENT_POOL/finance/independent-assessor.md``.
+documented in ``masim/agents/defines/finance/independent-assessor.md``.
 Treats successive price changes as independent draws — buys undervalued
 assets and sells overvalued ones. Higher threshold and lower cap than the
 biased-momentum siblings, reflecting real-world limits to arbitrage.

@@ -1,7 +1,7 @@
 """liquidity-seeker — Depth-scaled uninformed liquidity seeker.
 
 Canonical implementation of the ``liquidity-seeker`` archetype documented in
-``examples/AGENT_POOL/finance/liquidity-seeker.md``. Draws a mean-zero
+``masim/agents/defines/finance/liquidity-seeker.md``. Draws a mean-zero
 Gaussian target every tick, scales it by observed market depth (proxied by
 the scenario-specific ``liquidity`` field), clips to a hard per-tick cap and
 executes at the market.

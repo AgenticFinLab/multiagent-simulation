@@ -1,7 +1,7 @@
 """regulator — Central-bank / policy last-resort intervener.
 
 Canonical implementation of the ``regulator`` archetype documented in
-``examples/AGENT_POOL/finance/regulator.md``. Buys distressed assets in a
+``masim/agents/defines/finance/regulator.md``. Buys distressed assets in a
 fixed rescue block when price falls far below fundamental and a probabilistic
 "political willingness" draw fires.
 

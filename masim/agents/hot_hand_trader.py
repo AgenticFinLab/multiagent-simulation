@@ -1,7 +1,7 @@
 """hot-hand-trader — Hot-hand fallacy momentum chaser.
 
 Canonical implementation of the ``hot-hand-trader`` archetype documented in
-``examples/AGENT_POOL/finance/hot-hand-trader.md``. Interprets any sustained
+``masim/agents/defines/finance/hot-hand-trader.md``. Interprets any sustained
 price-vs-fundamental deviation as a "hot streak" that must continue and
 trades in the direction of the deviation, amplifying trends.
 

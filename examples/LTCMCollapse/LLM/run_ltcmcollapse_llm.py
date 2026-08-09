@@ -1,60 +1,19 @@
 #!/usr/bin/env python
-"""LTCMCollapse LLM Simulation Runner
+"""LTCMCollapse LLM Simulation Runner.
 
-August-September 1998 LTCM crisis - Russian default triggered liquidity crisis
+Usage::
 
-Usage:
     python examples/LTCMCollapse/LLM/run_ltcmcollapse_llm.py \
         -c configs/LTCMCollapse/LLM/simulation.yml
 """
 
-import argparse
-import asyncio
-
-import os
-
-from dotenv import load_dotenv
-
-from masim.simulator.base import SimulationConfig
-from masim.simulator.general import GeneralSimulator
-from masim.utils.config import load_config, setup_logging
-
-
-async def main():
-    load_dotenv()
-    setup_logging()
-    
-    parser = argparse.ArgumentParser(
-        description="Run LTCMCollapse LLM Simulation"
-    )
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="configs/LTCMCollapse/LLM/simulation.yml",
-    )
-    args = parser.parse_args()
-    
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-    
-    print("\n" + "=" * 70)
-    print("LTCMCollapse Simulation - LLM Agents")
-    print("=" * 70)
-    print("Rounds:     %s" % config.setting["total_rounds"])
-    print("=" * 70 + "\n")
-    
-    simulator = GeneralSimulator(config)
-    
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 70)
-        print("Simulation Complete!")
-        print("=" * 70)
-    finally:
-        await simulator.shutdown()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        scenario="LTCMCollapse",
+        variant="LLM",
+        default_config="configs/LTCMCollapse/LLM/simulation.yml",
+        phenomenon="August-September 1998 LTCM crisis - Russian default triggered liquidity crisis",
+        load_env=True,
+    )

@@ -1,7 +1,7 @@
 """aggressive-investor — Momentum-plus-acceleration aggressive investor.
 
 Canonical implementation of the ``aggressive-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/aggressive-investor.md``.
+in ``masim/agents/defines/finance/aggressive-investor.md``.
 
 Theoretical basis:
     Nofsinger & Sias (1999) — institutional herding on positive-feedback

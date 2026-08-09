@@ -1,6 +1,6 @@
 ---
 name: market-icon-generation-skill
-description: Generate and register AGENT_POOL market-coordinator icons when a new or forked market profile is added under examples/AGENT_POOL/market/{market-type}-{stem}.md during create or polish pipelines, or when polish discovers that a reused market profile lacks a valid icon. Market Type (stock/fx/opinion/etc.) is a first-class classifier and MUST be reflected in the icon filename, the visual motif, and the Chinese label tag.
+description: Generate and register AGENT_POOL market-coordinator icons when a new or forked market profile is added under masim/agents/defines/market/{market-type}-{stem}.md during create or polish pipelines, or when polish discovers that a reused market profile lacks a valid icon. Market Type (stock/fx/opinion/etc.) is a first-class classifier and MUST be reflected in the icon filename, the visual motif, and the Chinese label tag.
 ---
 
 # Market Icon Generation Skill
@@ -10,8 +10,8 @@ description: Generate and register AGENT_POOL market-coordinator icons when a ne
 Create or repair the visual icon that belongs to a reusable
 AGENT_POOL **market coordinator** profile. This skill is a sibling of
 `agent-icon-generation-skill.md`; that skill covers participant agents
-under `examples/AGENT_POOL/{finance,opinion}/`. This skill covers
-market coordinators under `examples/AGENT_POOL/market/`.
+under `masim/agents/defines/{finance,opinion}/`. This skill covers
+market coordinators under `masim/agents/defines/market/`.
 
 Market coordinators differ from participant agents in one crucial
 way: they are defined primarily by *what kind of market they are*
@@ -27,14 +27,14 @@ elevates **Market Type** to a required naming and visual dimension.
 | Coordinator summary      | Profile `## Summary` table                                                        |
 | Mechanism family         | Profile Summary row `Mechanism Family` + `## Theoretical / Mechanistic Foundation` |
 | Feedback direction       | Profile Summary row `Feedback Direction`                                          |
-| Existing style reference | `examples/AGENT_POOL/agent_images/design.md` and `icon_focused_contact_sheet.jpg` |
-| Participant icon set     | `examples/AGENT_POOL/agent_images/icons/finance-*.png` (for style consistency)    |
+| Existing style reference | `masim/agents/defines/agent_images/design.md` and `icon_focused_contact_sheet.jpg` |
+| Participant icon set     | `masim/agents/defines/agent_images/icons/finance-*.png` (for style consistency)    |
 
 ## Outputs
 
 | Artefact              | Required path / change                                                                              |
 |-----------------------|-----------------------------------------------------------------------------------------------------|
-| Icon PNG              | `examples/AGENT_POOL/agent_images/icons/market/{market-type}-{coordinator-stem}.png`                |
+| Icon PNG              | `masim/agents/defines/agent_images/icons/market/{market-type}-{coordinator-stem}.png`                |
 | Profile icon row      | `| Icon | ![](../agent_images/icons/market/{market-type}-{coordinator-stem}.png) |` in §4.11        |
 | Design.md mapping row | Add one row under a `## Mapping: market/ coordinators → icons/market/` section in `agent_images/design.md` |
 
@@ -58,8 +58,8 @@ Do not invent alternate filenames. The market-to-icon relationship
 is always:
 
 ```
-examples/AGENT_POOL/market/{market-type}-{stem}.md
-    ↔ examples/AGENT_POOL/agent_images/icons/market/{market-type}-{stem}.png
+masim/agents/defines/market/{market-type}-{stem}.md
+    ↔ masim/agents/defines/agent_images/icons/market/{market-type}-{stem}.png
 ```
 
 `{market-type}` MUST be one of the canonical slugs from
@@ -236,9 +236,9 @@ character**. The subject is the mechanism itself.
    with the Market-Type slug as prefix:
 
    ```
-   examples/AGENT_POOL/market/{market-type}-{stem}.md
+   masim/agents/defines/market/{market-type}-{stem}.md
        →
-   examples/AGENT_POOL/agent_images/icons/market/{market-type}-{stem}.png
+   masim/agents/defines/agent_images/icons/market/{market-type}-{stem}.png
    ```
 
    Example: profile `market/stock-standard-price-impact.md` maps to
@@ -355,7 +355,7 @@ character**. The subject is the mechanism itself.
    a validation gate.
 
 7. **Patch the image mapping.** In
-   `examples/AGENT_POOL/agent_images/design.md`, ensure there is a
+   `masim/agents/defines/agent_images/design.md`, ensure there is a
    dedicated section `## Mapping: market/ coordinators → icons/market/`
    (create it once, below the existing `finance/ & opinion/` mapping
    section). Add or update one row per market profile with columns:
@@ -375,10 +375,10 @@ Run these checks three consecutive times during coordinator-audit
 closeout:
 
 - [ ] Profile `.md` exists at
-      `examples/AGENT_POOL/market/{market-type}-{stem}.md` with a
+      `masim/agents/defines/market/{market-type}-{stem}.md` with a
       canonical Market Type slug
 - [ ] Icon PNG exists at
-      `examples/AGENT_POOL/agent_images/icons/market/{market-type}-{stem}.png`
+      `masim/agents/defines/agent_images/icons/market/{market-type}-{stem}.png`
 - [ ] PNG passed the full **visual read** (not just size check)
 - [ ] Icon visually shows: circular badge on pure white background,
       a LARGE centered Market-Type primary symbol occupying the upper
@@ -421,7 +421,7 @@ configs/{scenario}/{variant}/players.yml
                 ▼
 masim/interface/config_loader.py
     └── get_market_archetype(scenario_name)    → {stem}
-    └── get_market_icon_path(scenario_name)    → examples/AGENT_POOL/agent_images/icons/market/{stem}.png
+    └── get_market_icon_path(scenario_name)    → masim/agents/defines/agent_images/icons/market/{stem}.png
                 │
                 ▼
 UI consumers
@@ -440,7 +440,7 @@ UI consumers
   `get_market_icon_path()` to return `None` and the UI to fall
   back to the gold placeholder.
 - **Adding a new archetype** requires three coordinated writes:
-  (1) the profile at `AGENT_POOL/market/{stem}.md`, (2) the icon
+  (1) the profile at `masim/agents/defines/market/{stem}.md`, (2) the icon
   at `agent_images/icons/market/{stem}.png`, (3) at least one
   scenario's `players.yml → archetype: {stem}` (otherwise the
   archetype is unreferenced and stale).

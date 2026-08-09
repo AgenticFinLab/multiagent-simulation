@@ -1,7 +1,7 @@
 """pro-cyclical-lender — Procyclical lending / credit-cycle amplifier.
 
 Canonical implementation of the ``pro-cyclical-lender`` archetype
-documented in ``examples/AGENT_POOL/finance/pro-cyclical-lender.md``.
+documented in ``masim/agents/defines/finance/pro-cyclical-lender.md``.
 The agent expands lending (buys) in expansions and contracts lending
 (sells) in downturns, amplifying the underlying cycle.
 

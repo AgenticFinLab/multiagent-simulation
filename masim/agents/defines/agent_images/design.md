@@ -351,7 +351,7 @@ corresponding icon in `icons/`. Rows marked **MISSING** have no icon PNG on disk
 
 ## Mapping: market/ coordinators → icons/market/
 
-Market coordinators live under `examples/AGENT_POOL/market/{market-type}-{stem}.md`
+Market coordinators live under `masim/agents/defines/market/{market-type}-{stem}.md`
 and their icons under `agent_images/icons/market/{market-type}-{stem}.png`.
 Per `masim/skills/market-icon-generation-skill.md` v1.1.x, coordinator icons are
 **headless mechanism diagrams** — deliberately different from participant icons.

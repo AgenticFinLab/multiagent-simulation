@@ -1,7 +1,7 @@
 """concentrated-fund — Margin-call forced-seller fund (sell-only).
 
 Canonical implementation of the ``concentrated-fund`` archetype
-documented in ``examples/AGENT_POOL/finance/concentrated-fund.md``.
+documented in ``masim/agents/defines/finance/concentrated-fund.md``.
 Sells a fixed fraction of its position when the deviation from
 fundamental is deeply negative — models a concentrated, levered fund
 that faces margin calls in stress.

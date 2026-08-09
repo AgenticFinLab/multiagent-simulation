@@ -1,7 +1,7 @@
 """leveraged-investor — Margin-call fire-sale investor.
 
 Canonical implementation of the ``leveraged-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/leveraged-investor.md``. Fires a fixed
+in ``masim/agents/defines/finance/leveraged-investor.md``. Fires a fixed
 fraction of the position onto the market when the price deviation from
 fundamental crosses a negative margin-call trigger.
 

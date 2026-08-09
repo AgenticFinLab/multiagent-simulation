@@ -1,7 +1,7 @@
 """endowed-holder — Endowment-effect long-term holder.
 
 Canonical implementation of the ``endowed-holder`` archetype documented
-in ``examples/AGENT_POOL/finance/endowed-holder.md``. The agent refuses
+in ``masim/agents/defines/finance/endowed-holder.md``. The agent refuses
 to sell unless the price exceeds a large multiple of its purchase price
 (WTA >> WTP); it buys only at a deep discount below purchase price.
 

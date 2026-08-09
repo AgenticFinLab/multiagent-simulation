@@ -15,11 +15,11 @@
 
 | Candidate archetype | Stage reached | Outcome | Pool file |
 |---|---|---|---|
-| convergence-arbitrageur | exact-name audit | reused and upgraded | examples/AGENT_POOL/finance/convergence-arbitrageur.md |
-| leverage-trader | exact-name audit | reused and upgraded | examples/AGENT_POOL/finance/leverage-trader.md |
-| risk-manager | exact-name audit | reused and upgraded | examples/AGENT_POOL/finance/risk-manager.md |
-| liquidity-provider | exact-name audit | reused | examples/AGENT_POOL/finance/liquidity-provider.md |
-| central-bank | exact-name audit | reused and upgraded | examples/AGENT_POOL/finance/central-bank.md |
+| convergence-arbitrageur | exact-name audit | reused and upgraded | masim/agents/defines/finance/convergence-arbitrageur.md |
+| leverage-trader | exact-name audit | reused and upgraded | masim/agents/defines/finance/leverage-trader.md |
+| risk-manager | exact-name audit | reused and upgraded | masim/agents/defines/finance/risk-manager.md |
+| liquidity-provider | exact-name audit | reused | masim/agents/defines/finance/liquidity-provider.md |
+| central-bank | exact-name audit | reused and upgraded | masim/agents/defines/finance/central-bank.md |
 
 ## §B Research Notes (extends target §4 - §6)
 

@@ -1,7 +1,7 @@
 """contrarian-skeptic — Skepticism-scaled contrarian.
 
 Canonical implementation of the ``contrarian-skeptic`` archetype
-documented in ``examples/AGENT_POOL/finance/contrarian-skeptic.md``.
+documented in ``masim/agents/defines/finance/contrarian-skeptic.md``.
 Trades opposite deviation with quantity scaled by a skepticism factor —
 sells premium, buys discount.
 

@@ -1,7 +1,7 @@
 """creditor-panicker — Diamond-Dybvig style panicking creditor.
 
 Canonical implementation of the ``creditor-panicker`` archetype documented
-in ``examples/AGENT_POOL/finance/creditor-panicker.md``. When the
+in ``masim/agents/defines/finance/creditor-panicker.md``. When the
 price-vs-fundamental stress signal breaches a panic threshold, the agent
 liquidates a fraction of its position aggressively; once stress subsides
 below a recovery threshold, it cautiously rebuilds toward a fraction of

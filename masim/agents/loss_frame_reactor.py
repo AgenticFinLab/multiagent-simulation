@@ -1,7 +1,7 @@
 """loss-frame-reactor — Framing-effect deviation reactor.
 
 Canonical implementation of the ``loss-frame-reactor`` archetype documented
-in ``examples/AGENT_POOL/finance/loss-frame-reactor.md``. Trades against
+in ``masim/agents/defines/finance/loss-frame-reactor.md``. Trades against
 mispricing framed as loss/gain relative to fundamental, with a dead band
 inside which the deviation is treated as noise.
 

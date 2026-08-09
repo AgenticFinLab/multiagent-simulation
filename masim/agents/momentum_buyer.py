@@ -1,7 +1,7 @@
 """momentum-buyer — Buy-only lookback-momentum trader.
 
 Canonical implementation of the ``momentum-buyer`` archetype documented in
-``examples/AGENT_POOL/finance/momentum-buyer.md``. Measures momentum over
+``masim/agents/defines/finance/momentum-buyer.md``. Measures momentum over
 a self-maintained price-history lookback and only buys when the signal
 exceeds a threshold — never sells.
 

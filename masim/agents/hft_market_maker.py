@@ -1,7 +1,7 @@
 """hft-market-maker — Binary-regime HFT market maker with velocity gate.
 
 Canonical implementation of the ``hft-market-maker`` archetype documented
-in ``examples/AGENT_POOL/finance/hft-market-maker.md``. Provides a fixed
+in ``masim/agents/defines/finance/hft-market-maker.md``. Provides a fixed
 ``quote_size`` of liquidity per round while a 5-round mean absolute
 return stays below the withdrawal threshold; withdraws (hold) otherwise.
 

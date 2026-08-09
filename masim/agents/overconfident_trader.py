@@ -1,7 +1,7 @@
 """overconfident-trader — Precision-overestimating trader (DHS 1998).
 
 Canonical implementation of the ``overconfident-trader`` archetype
-documented in ``examples/AGENT_POOL/finance/overconfident-trader.md``. The
+documented in ``masim/agents/defines/finance/overconfident-trader.md``. The
 agent takes the raw mispricing signal ``(fundamental - price) / price`` and
 inflates it by a precision-overestimate multiplier, then trades in the
 direction of the (inflated) signal with oversized quantities.

@@ -1,7 +1,7 @@
 """risk-averse-investor — Variance-conditioned Markowitz rebalancer.
 
 Canonical implementation of the ``risk-averse-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/risk-averse-investor.md``. Sets a target
+in ``masim/agents/defines/finance/risk-averse-investor.md``. Sets a target
 position inversely proportional to price variance, and rebalances toward it
 each round.
 

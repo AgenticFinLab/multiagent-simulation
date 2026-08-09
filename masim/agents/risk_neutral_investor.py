@@ -1,7 +1,7 @@
 """risk-neutral-investor — Kelly-fraction expected-return investor.
 
 Canonical implementation of the ``risk-neutral-investor`` archetype
-documented in ``examples/AGENT_POOL/finance/risk-neutral-investor.md``.
+documented in ``masim/agents/defines/finance/risk-neutral-investor.md``.
 Trades in proportion to the expected return relative to a perceived fair
 value, sized as a fraction of the growth-optimal Kelly bet.
 

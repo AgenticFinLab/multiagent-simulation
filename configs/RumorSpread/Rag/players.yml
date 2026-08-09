@@ -42,7 +42,7 @@ knowledge:
 # InformationEnvironment (Coordinator) — identical to Rule variant
 # -----------------------------------------------------------------------------
 ragllm_information_environment:
-  archetype: information-sis-contagion  # -> AGENT_POOL/market/information-sis-contagion.md
+  archetype: information-sis-contagion  # -> masim/agents/defines/market/information-sis-contagion.md
   name: "InformationEnvironment"
   class: "examples.RumorSpread.Rag.players:InformationEnvironment"
   num_instances: 1
@@ -53,15 +53,15 @@ ragllm_information_environment:
     group_tags:
       - environment
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: AGENT_POOL/finance/information-environment.md §6
-      rumor_truth_value: 0.1  # Source: AGENT_POOL/finance/information-environment.md §6
-      initial_belief: 0.3  # Source: AGENT_POOL/finance/information-environment.md §6
-      spread_impact: 0.15  # Source: AGENT_POOL/finance/information-environment.md §6
-      truth_correction: 0.02  # Source: AGENT_POOL/finance/information-environment.md §6
-      leveling_rate: 0.01  # Source: AGENT_POOL/finance/information-environment.md §6
-      sharpening_rate: 0.02  # Source: AGENT_POOL/finance/information-environment.md §6
-      noise_std: 0.02  # Source: AGENT_POOL/finance/information-environment.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/finance/information-environment.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: masim/agents/defines/finance/information-environment.md §6
+      rumor_truth_value: 0.1  # Source: masim/agents/defines/finance/information-environment.md §6
+      initial_belief: 0.3  # Source: masim/agents/defines/finance/information-environment.md §6
+      spread_impact: 0.15  # Source: masim/agents/defines/finance/information-environment.md §6
+      truth_correction: 0.02  # Source: masim/agents/defines/finance/information-environment.md §6
+      leveling_rate: 0.01  # Source: masim/agents/defines/finance/information-environment.md §6
+      sharpening_rate: 0.02  # Source: masim/agents/defines/finance/information-environment.md §6
+      noise_std: 0.02  # Source: masim/agents/defines/finance/information-environment.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/finance/information-environment.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -78,35 +78,35 @@ ragllm_gullible_spreader:
     group_tags:
       - ragllm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      initial_belief: 0.3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      initial_credibility: 0.5  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      initial_belief: 0.3  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      initial_credibility: 0.5  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+          - "MinerU_processed"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
         local_resources:
-          local_uri: ""  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          local_resources: []  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+          local_uri: ""  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          local_resources: []  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          local_index_dir: ""  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          embed_type: "litellm"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          chunk_size: 512  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          chunk_overlap: 64  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          top_k: 5  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+            - "rag_index"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          local_index_dir: ""  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          embed_type: "litellm"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          chunk_size: 512  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          chunk_overlap: 64  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          top_k: 5  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
       llm:
-        sys_message: "examples.RumorSpread.Rag.prompts:RAG_GULLIBLE_SYS"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-        lm_type: "api"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_GULLIBLE_SYS"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+        lm_type: "api"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
         generation_config:
-          temperature: 0.3  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
-          max_new_tokens: 600  # Source: AGENT_POOL/opinion/gullible-spreader.md §6
+          temperature: 0.3  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
+          max_new_tokens: 600  # Source: masim/agents/defines/opinion/gullible-spreader.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -123,35 +123,35 @@ ragllm_distorting_relayer:
     group_tags:
       - ragllm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      initial_belief: 0.2  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      initial_credibility: 0.4  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      initial_belief: 0.2  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      initial_credibility: 0.4  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+          - "MinerU_processed"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
         local_resources:
-          local_uri: ""  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          local_resources: []  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+          local_uri: ""  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          local_resources: []  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          local_index_dir: ""  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          embed_type: "litellm"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          chunk_size: 512  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          chunk_overlap: 64  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          top_k: 5  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+            - "rag_index"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          local_index_dir: ""  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          embed_type: "litellm"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          chunk_size: 512  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          chunk_overlap: 64  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          top_k: 5  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
       llm:
-        sys_message: "examples.RumorSpread.Rag.prompts:RAG_DISTORTING_SYS"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-        lm_type: "api"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_DISTORTING_SYS"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+        lm_type: "api"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
         generation_config:
-          temperature: 0.3  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
-          max_new_tokens: 600  # Source: AGENT_POOL/opinion/distorting-relayer.md §6
+          temperature: 0.3  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
+          max_new_tokens: 600  # Source: masim/agents/defines/opinion/distorting-relayer.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -168,35 +168,35 @@ ragllm_skeptical_evaluator:
     group_tags:
       - ragllm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      initial_belief: 0.1  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      initial_credibility: 0.7  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      initial_belief: 0.1  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      initial_credibility: 0.7  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+          - "MinerU_processed"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
         local_resources:
-          local_uri: ""  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          local_resources: []  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+          local_uri: ""  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          local_resources: []  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          local_index_dir: ""  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          embed_type: "litellm"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          chunk_size: 512  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          chunk_overlap: 64  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          top_k: 5  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+            - "rag_index"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          local_index_dir: ""  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          embed_type: "litellm"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          chunk_size: 512  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          chunk_overlap: 64  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          top_k: 5  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
       llm:
-        sys_message: "examples.RumorSpread.Rag.prompts:RAG_SKEPTICAL_SYS"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-        lm_type: "api"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_SKEPTICAL_SYS"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+        lm_type: "api"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
         generation_config:
-          temperature: 0.3  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
-          max_new_tokens: 600  # Source: AGENT_POOL/opinion/skeptical-evaluator.md §6
+          temperature: 0.3  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
+          max_new_tokens: 600  # Source: masim/agents/defines/opinion/skeptical-evaluator.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -213,35 +213,35 @@ ragllm_fact_checker:
     group_tags:
       - ragllm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      initial_belief: 0.05  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      initial_credibility: 0.9  # Source: AGENT_POOL/opinion/fact-checker.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/fact-checker.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      initial_belief: 0.05  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      initial_credibility: 0.9  # Source: masim/agents/defines/opinion/fact-checker.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/fact-checker.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+          - "MinerU_processed"  # Source: masim/agents/defines/opinion/fact-checker.md §6
         local_resources:
-          local_uri: ""  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          local_resources: []  # Source: AGENT_POOL/opinion/fact-checker.md §6
+          local_uri: ""  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          local_resources: []  # Source: masim/agents/defines/opinion/fact-checker.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          local_index_dir: ""  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          embed_type: "litellm"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          chunk_size: 512  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          chunk_overlap: 64  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          top_k: 5  # Source: AGENT_POOL/opinion/fact-checker.md §6
+            - "rag_index"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          local_index_dir: ""  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          embed_type: "litellm"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          chunk_size: 512  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          chunk_overlap: 64  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          top_k: 5  # Source: masim/agents/defines/opinion/fact-checker.md §6
       llm:
-        sys_message: "examples.RumorSpread.Rag.prompts:RAG_FACTCHECKER_SYS"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-        lm_type: "api"  # Source: AGENT_POOL/opinion/fact-checker.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/fact-checker.md §6
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_FACTCHECKER_SYS"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+        lm_type: "api"  # Source: masim/agents/defines/opinion/fact-checker.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/opinion/fact-checker.md §6
         generation_config:
-          temperature: 0.3  # Source: AGENT_POOL/opinion/fact-checker.md §6
-          max_new_tokens: 600  # Source: AGENT_POOL/opinion/fact-checker.md §6
+          temperature: 0.3  # Source: masim/agents/defines/opinion/fact-checker.md §6
+          max_new_tokens: 600  # Source: masim/agents/defines/opinion/fact-checker.md §6
   persona: !include persona.yml
 
 # -----------------------------------------------------------------------------
@@ -258,33 +258,33 @@ ragllm_uninformed_bystander:
     group_tags:
       - ragllm_agents
     extras:
-      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-      initial_belief: 0.2  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-      initial_credibility: 0.3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-      custom_state_hot_limit: 3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+      record_path: "EXPERIMENT/RumorSpread/Rag/records"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+      initial_belief: 0.2  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+      initial_credibility: 0.3  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+      custom_state_hot_limit: 3  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
       private_knowledge:
         from_global_resources:
-          - "MinerU_processed"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+          - "MinerU_processed"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
         local_resources:
-          local_uri: ""  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          local_resources: []  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+          local_uri: ""  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          local_resources: []  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
         rag:
           from_global_index_dir:
-            - "rag_index"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          local_index_dir: ""  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          embed_type: "litellm"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          embed_model: "openai/hunyuan-embedding"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          chunk_size: 512  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          chunk_overlap: 64  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          top_k: 3  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+            - "rag_index"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          local_index_dir: ""  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          embed_type: "litellm"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          embed_model: "openai/hunyuan-embedding"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          embed_api_key: "{{ HUNYUAN_API_KEY }}"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          embed_api_base: "https://api.hunyuan.cloud.tencent.com/v1"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          chunk_size: 512  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          chunk_overlap: 64  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          top_k: 3  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
       llm:
-        sys_message: "examples.RumorSpread.Rag.prompts:RAG_BYSTANDER_SYS"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-        lm_type: "api"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+        sys_message: "examples.RumorSpread.Rag.prompts:RAG_BYSTANDER_SYS"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+        user_message: "examples.RumorSpread.Rag.prompts:RAG_USER_TEMPLATE"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+        lm_type: "api"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+        lm_name: "ark/doubao-seed-2-0-mini-260428"  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
         generation_config:
-          temperature: 0.4  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
-          max_new_tokens: 600  # Source: AGENT_POOL/opinion/uninformed-bystander.md §6
+          temperature: 0.4  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
+          max_new_tokens: 600  # Source: masim/agents/defines/opinion/uninformed-bystander.md §6
   persona: !include persona.yml

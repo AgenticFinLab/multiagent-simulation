@@ -1,7 +1,7 @@
 """minsky-borrower — Minsky financial-instability borrower.
 
 Canonical implementation of the ``minsky-borrower`` archetype documented
-in ``examples/AGENT_POOL/finance/minsky-borrower.md``. Escalates leverage
+in ``masim/agents/defines/finance/minsky-borrower.md``. Escalates leverage
 through hedge / speculative / Ponzi stages during a boom, then is forced
 to fire-sell when refinancing costs exceed cash-flow (a Minsky-moment).
 

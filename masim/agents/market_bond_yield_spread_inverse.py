@@ -1,6 +1,6 @@
 """Bond Yield Spread Inverse — canonical market coordinator.
 
-Profile: examples/AGENT_POOL/market/bond-yield-spread-inverse.md
+Profile: masim/agents/defines/market/bond-yield-spread-inverse.md
 Mechanism: Linear price-impact with fundamental-anchored mean-reversion pull
            plus a central-bank (ECB/Fed) intervention channel that discretely
            shifts the mean-reversion anchor upward when severe stress is

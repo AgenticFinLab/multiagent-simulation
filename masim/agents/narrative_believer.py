@@ -1,7 +1,7 @@
 """narrative-believer — Narrative-driven trend confirmer.
 
 Canonical implementation of the ``narrative-believer`` archetype documented
-in ``examples/AGENT_POOL/finance/narrative-believer.md``. Interprets each
+in ``masim/agents/defines/finance/narrative-believer.md``. Interprets each
 price deviation from fundamental as evidence about a story: rising prices
 confirm the narrative and trigger buying; falling prices disconfirm it and
 trigger selling. Sizes conviction linearly with deviation magnitude.

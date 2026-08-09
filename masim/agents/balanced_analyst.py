@@ -1,7 +1,7 @@
 """balanced-analyst — Hybrid fundamental-plus-trend balanced analyst.
 
 Canonical implementation of the ``balanced-analyst`` archetype documented in
-``examples/AGENT_POOL/finance/balanced-analyst.md``.
+``masim/agents/defines/finance/balanced-analyst.md``.
 
 Theoretical basis:
     Grossman & Stiglitz (1980) — informed traders combining fundamental

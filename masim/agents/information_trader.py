@@ -1,7 +1,7 @@
 """information-trader — Predatory informed front-runner.
 
 Canonical implementation of the ``information-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/information-trader.md``. Detects an
+in ``masim/agents/defines/finance/information-trader.md``. Detects an
 impending forced-liquidation signal with Bernoulli probability and front-
 runs it; covers the resulting short after the recovery threshold is
 crossed.

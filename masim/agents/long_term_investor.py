@@ -1,7 +1,7 @@
 """long-term-investor — Dollar-cost-averaging long-term investor.
 
 Canonical implementation of the ``long-term-investor`` archetype documented
-in ``examples/AGENT_POOL/finance/long-term-investor.md``. Dollar-cost-
+in ``masim/agents/defines/finance/long-term-investor.md``. Dollar-cost-
 averages a fixed cash amount at a fixed cadence, tracks a running
 average entry price, and trims only when the position has multiplied by
 a "sell ceiling" multiple.

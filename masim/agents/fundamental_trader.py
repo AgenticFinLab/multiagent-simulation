@@ -1,7 +1,7 @@
 """fundamental-trader — Threshold-based fundamental trader with signed clamp.
 
 Canonical implementation of the ``fundamental-trader`` archetype documented
-in ``examples/AGENT_POOL/finance/fundamental-trader.md``. Trades when
+in ``masim/agents/defines/finance/fundamental-trader.md``. Trades when
 deviation from fundamental crosses a threshold; buys are clamped to
 [0, 50] and sells to [-30, 0] to reflect asymmetric conviction.
 

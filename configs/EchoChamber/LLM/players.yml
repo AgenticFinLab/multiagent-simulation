@@ -16,7 +16,7 @@
 # OpinionEnvironment (Coordinator) — identical to Rule variant
 # -----------------------------------------------------------------------------
 llm_opinion_environment:
-  archetype: opinion-echo-chamber-clustering  # -> AGENT_POOL/market/opinion-echo-chamber-clustering.md
+  archetype: opinion-echo-chamber-clustering  # -> masim/agents/defines/market/opinion-echo-chamber-clustering.md
   name: "OpinionEnvironment"
   class: "examples.EchoChamber.LLM.players:OpinionEnvironment"
   num_instances: 1

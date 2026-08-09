@@ -13,7 +13,6 @@ Environment Variables:
 import importlib
 import logging
 import os
-import sys
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
@@ -26,7 +25,6 @@ from masim.utils.history import HistoryBuffer
 from masim.format.order import normalize_action_quantity, validate_order
 from masim.utils.llm_utils import robust_llm_call_async
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from examples.ArchegosCollapse.Rule.players import Market  # noqa: E402
 

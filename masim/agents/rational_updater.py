@@ -1,7 +1,7 @@
 """rational-updater — Fundamental-value rational updater.
 
 Canonical implementation of the ``rational-updater`` archetype documented in
-``examples/AGENT_POOL/finance/rational-updater.md``. This is the rational
+``masim/agents/defines/finance/rational-updater.md``. This is the rational
 benchmark: no bias, no anchoring, no herding — just directional trades
 whenever the broadcast ``deviation`` exceeds a threshold.
 

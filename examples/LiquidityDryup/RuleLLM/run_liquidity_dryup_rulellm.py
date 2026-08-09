@@ -1,78 +1,19 @@
 #!/usr/bin/env python
-"""LiquidityDryupRuleLLM Simulation Runner
+"""LiquidityDryup RuleLLM Simulation Runner.
 
-Run hybrid Rule+LLM liquidity dryup investor simulation.
-Each LLM agent follows explicit quantitative rules (embedded in system prompt)
-alongside a rich persona description.
+Usage::
 
-Usage:
-    python examples/LiquidityDryup/RuleLLM/run_liquidity_dryup_rulellm.py -c configs/LiquidityDryup/RuleLLM/simulation.yml
-
-Environment Variables:
-    ARK_API_KEY: ByteDance Doubao API key (required)
+    python examples/LiquidityDryup/RuleLLM/run_liquidity_dryup_rulellm.py \
+        -c configs/LiquidityDryup/RuleLLM/simulation.yml
 """
 
-import argparse
-import asyncio
-import os
-import sys
-
-from dotenv import load_dotenv
-
-from masim.simulator.base import SimulationConfig
-from masim.simulator.general import GeneralSimulator
-from masim.utils.config import load_config, setup_logging
-
-
-project_root = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-sys.path.insert(0, project_root)
-
-
-async def main():
-    setup_logging()
-
-    parser = argparse.ArgumentParser(description="Run LiquidityDryupRuleLLM Simulation")
-    parser.add_argument(
-        "-c",
-        "--config",
-        type=str,
-        default="configs/LiquidityDryup/RuleLLM/simulation.yml",
-    )
-    parser.add_argument("-r", "--rounds", type=int, default=None)
-    args = parser.parse_args()
-
-    load_dotenv()
-    if not os.getenv("ARK_API_KEY"):
-        print("WARNING: ARK_API_KEY not set! LLM investors will not function.")
-
-    yaml_config = load_config(args.config)
-    config = SimulationConfig(**yaml_config)
-    if args.rounds:
-        config.setting["total_rounds"] = args.rounds
-
-    print("\n" + "=" * 60)
-    print("LiquidityDryupRuleLLM Simulation")
-    print("=" * 60)
-    print("Phenomenon: LiquidityDryup with Rule-Guided LLM Decision-Making")
-    print("Theory: Market Microstructure, Kirilenko et al. (2017)")
-    print("Agents: HFT, Market Maker, Algorithmic Trader,")
-    print("        Stop-Loss Trader, Fundamental Trader  (all Rule+LLM hybrid)")
-    print("Rounds: %s" % config.setting["total_rounds"])
-    print("=" * 60 + "\n")
-
-    simulator = GeneralSimulator(config)
-
-    try:
-        await simulator.setup()
-        results = await simulator.run()
-        print("\n" + "=" * 60)
-        print("Simulation Complete! Rounds: %d" % config.setting["total_rounds"])
-        print("=" * 60)
-    finally:
-        await simulator.shutdown()
-
+from masim.cli import run
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    run(
+        scenario="LiquidityDryup",
+        variant="RuleLLM",
+        default_config="configs/LiquidityDryup/RuleLLM/simulation.yml",
+        phenomenon="Market maker withdrawal creates illiquidity spirals",
+        load_env=True,
+    )

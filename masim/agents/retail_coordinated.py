@@ -1,7 +1,7 @@
 """retail-coordinated — Coordinated retail cohort buyer.
 
 Canonical implementation of the ``retail-coordinated`` archetype documented
-in ``examples/AGENT_POOL/finance/retail-coordinated.md``. Deploys a fixed
+in ``masim/agents/defines/finance/retail-coordinated.md``. Deploys a fixed
 fraction of available cash into buys as long as a cash-abundance threshold
 is met. Never sells.
 
