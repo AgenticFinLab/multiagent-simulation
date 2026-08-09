@@ -1,9 +1,8 @@
 """Utility functions for MASIM Web Interface."""
 
 import os
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 
 def get_project_root() -> Path:

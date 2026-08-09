@@ -43,8 +43,8 @@ Optional fields:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Mapping, Optional, Set
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Mapping, Set
 
 INVESTOR_ORDER_REQUIRED_FIELDS: List[str] = [
     "action",

@@ -12,7 +12,6 @@ Usage:
 
 from __future__ import annotations
 
-import argparse
 import json
 import os
 from typing import Any, Dict, Optional
@@ -134,7 +133,6 @@ def calculate_standard_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
         calculate_max_drawdown,
         calculate_sharpe_ratio,
         calculate_price_deviation,
-        calculate_autocorrelation,
     )
     from masim.evaluation.finance.behavioral import (
         calculate_bid_convergence_cv,

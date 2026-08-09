@@ -49,7 +49,7 @@ substitution site.
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Dict, Mapping, Optional, Union
+from typing import Any, Dict, Mapping, Optional
 
 from masim.format.order import (
     BUY,

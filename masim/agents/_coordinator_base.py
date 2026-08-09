@@ -42,7 +42,6 @@ from __future__ import annotations
 import logging
 import math
 import os
-import random
 from typing import Any, Dict, List, Optional
 
 from masim.format.broadcast import validate_broadcast, MarketBroadcast

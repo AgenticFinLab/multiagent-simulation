@@ -20,9 +20,7 @@ Usage:
 from typing import Any, Dict, List, Optional
 import os
 
-import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import networkx as nx
 
 

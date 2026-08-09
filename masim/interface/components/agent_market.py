@@ -5,11 +5,9 @@ from __future__ import annotations
 import base64
 import functools
 import html
-import json
 import re
 from pathlib import Path
 from typing import Any, Dict
-from urllib.parse import quote  # noqa: F401 – kept for potential external use
 
 import streamlit as st
 

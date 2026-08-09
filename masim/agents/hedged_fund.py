@@ -36,7 +36,6 @@ broadcast; ``drawdown`` falls back to 0.0.
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer

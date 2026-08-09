@@ -115,7 +115,6 @@ from masim.utils.history import HistoryBuffer
 if TYPE_CHECKING:
     import ray
     from ray.actor import ActorHandle
-    from masim.persona.base import PlayerPersona
     from masim.utils.topology import TopologyGraph
     from masim.communication.general import CommunicationChannel
 

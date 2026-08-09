@@ -59,7 +59,7 @@ Parameters (read from ``extras``; defaults from AGENT_POOL §Parameters):
 from __future__ import annotations
 
 import random
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable
 
 from masim.agents._base import CanonicalLLMPlayer, CanonicalRulePlayer
 from masim.format.state import StandardMarketState

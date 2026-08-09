@@ -10,7 +10,7 @@ References:
     - Shiller (2000): Bubble dynamics
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
 from collections import defaultdict
 import numpy as np
 
@@ -354,7 +354,6 @@ def calculate_liquidity_metrics(
 # into MetricsRegistry via MICROSTRUCTURE_METRICS.
 # ===========================================================================
 
-from typing import Tuple
 from masim.evaluation.registry import Metric, MetricUnavailable
 from masim.evaluation.data_loader import payload_buy_sell
 

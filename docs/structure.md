@@ -44,7 +44,7 @@ YAML 配置
 multiagent-simulation/
 |-- masim/                    # 通用模拟框架 + 设计 Skill
 |   |-- agents/              # 209 个 archetype .py + defines/ 行为规格
-|   |   |-- _base.py  _coordinator_base.py  _rag_base.py  _state.py
+|   |   |-- _base.py  _coordinator_base.py  _rag_base.py
 |   |   |-- momentum_trader.py  contrarian_investor.py  ...  (209)
 |   |   `-- defines/         # 可复用 Agent 行为规格档案库
 |   |       |-- finance/     # 195 个金融 agent 档案 (kebab-case .md)

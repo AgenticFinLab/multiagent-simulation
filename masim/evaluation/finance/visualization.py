@@ -19,7 +19,7 @@ Chart Categories:
     - Comprehensive: Multi-panel summaries
 """
 
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from collections import defaultdict
 import numpy as np
 

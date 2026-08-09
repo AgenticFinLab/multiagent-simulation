@@ -45,7 +45,7 @@ from __future__ import annotations
 import logging
 import os
 import shutil
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from masim.agents._base import CanonicalLLMPlayer
 from masim.format.state import StandardMarketState
