@@ -34,6 +34,13 @@ from .order import (
     InvestorOrder,
     validate_order,
 )
+from .finalize import (
+    require_positive_bid_price,
+    clip_order_to_liquidity,
+    finalize_rule_order,
+    finalize_llm_order,
+    emit_order_envelope,
+)
 from .state import (
     REQUIRED_BROADCAST_FIELDS,
     StandardMarketState,
@@ -160,6 +167,13 @@ __all__ = [
     # Structured order + validators
     "InvestorOrder",
     "validate_order",
+    # Centralised order-finalisation helpers (single site for the
+    # clip → validate → emit pipeline; enforces the fail-loud rules)
+    "require_positive_bid_price",
+    "clip_order_to_liquidity",
+    "finalize_rule_order",
+    "finalize_llm_order",
+    "emit_order_envelope",
     # Standard broadcast-read model consumed by canonical agents
     "StandardMarketState",
     "REQUIRED_BROADCAST_FIELDS",

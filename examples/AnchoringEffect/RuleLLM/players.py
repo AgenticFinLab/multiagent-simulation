@@ -1,283 +1,47 @@
-"""AnchoringEffect RuleLLM Simulation
+"""AnchoringEffect RuleLLM Simulation — pure canonical re-export.
 
-Anchoring bias simulation with LLM-driven investors using rule-embedded prompts.
-System prompts contain explicit quantitative trading rules.
+The RuleLLM variant differs from the plain LLM variant only in the
+system-prompt content (rule-embedded personas live in
+``examples.AnchoringEffect.RuleLLM.prompts``); the LLM plumbing itself
+is identical, so every class here is a thin alias to the shipped
+``LLM<Camel>`` implementation in :mod:`masim.agents`.
 
-Environment Variables:
-    ARK_API_KEY: ByteDance Doubao API key (required for LLM calls)
+Runtime behaviour
+-----------------
+
+At scenario-run time, ``configs/AnchoringEffect/RuleLLM/players.yml``
+passes each investor's ``sys_message`` reference through
+``extras["llm"]["sys_message"]``.  :class:`masim.agents.CanonicalLLMPlayer`
+resolves the reference via :func:`masim.agents._base.load_prompt`, so
+the RuleLLM personas are picked up transparently — no additional plumbing
+is needed here.
+
+Historical yaml references
+--------------------------
+
+``configs/AnchoringEffect/RuleLLM/players.yml`` still pins each class by
+``"examples.AnchoringEffect.RuleLLM.players:RuleLLM<Camel>"``.  The
+aliases below preserve those exact names.
 """
 
-import importlib
-import logging
-import os
-import sys
-from typing import Any, Dict, Optional
+from __future__ import annotations
 
-from dotenv import load_dotenv
-
-from lmbase.inference.api_call import LangChainAPIInference
-from lmbase.inference.base import InferInput
-
-from masim.player.base import Action, Observation, StepResult
-from masim.player.general import GeneralPlayer
-from masim.utils.history import HistoryBuffer
-from masim.format.order import validate_order
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from masim.utils.llm_utils import (
-    parse_llm_response_with_thinking,
-    robust_llm_call,
+from masim.agents import CanonicalLLMPlayer as RuleLLMInvestor
+from masim.agents import (
+    LLMAnchoredTrader as RuleLLMAnchoredTrader,
+    LLMContrarianTrader as RuleLLMContrarianTrader,
+    LLMDispositionTrader as RuleLLMDispositionTrader,
+    LLMFundamentalAnalyst as RuleLLMFundamentalAnalyst,
+    LLMHistoricalAnchor as RuleLLMHistoricalAnchor,
+    LLMLiquidityProvider as RuleLLMLiquidityProvider,
+    LLMMomentumTrader as RuleLLMMomentumTrader,
+    LLMNoiseTrader as RuleLLMNoiseTrader,
+    LLMRationalUpdater as RuleLLMRationalUpdater,
 )
-from masim.format import get_order_format
+
+# Coordinator (rule-executed) — inherited from the Rule module which
+# re-exports :class:`masim.agents.MarketStockStandardPriceImpact`.
 from examples.AnchoringEffect.Rule.players import Market
-
-logger = logging.getLogger("AnchoringEffect.RuleLLM")
-
-
-def load_prompt(prompt_path: str) -> str:
-    """Load a prompt string from a module path (module:VARIABLE)."""
-    module_path, var_name = prompt_path.rsplit(":", 1)
-    module = importlib.import_module(module_path)
-    return getattr(module, var_name)
-
-
-class RuleLLMInvestor(GeneralPlayer):
-    """
-    Base class for RuleLLM-powered investors in the AnchoringEffect scenario.
-
-    Parameters from config extras:
-        - initial_cash, initial_position, custom_state_hot_limit, record_path
-        - llm: sys_message, user_message, lm_name, generation_config
-    """
-
-    async def perceive(
-        self,
-        observation: Observation,
-        prev_result: Optional[StepResult] = None,
-    ) -> None:
-        round_num = observation.round
-        self.state.custom_state["round"] = round_num
-
-        if "cash" not in self.state.custom_state:
-            extras = self.config.extras
-            record_path = extras["record_path"]
-            hot_limit = extras["custom_state_hot_limit"]
-
-            self.state.custom_state["cash"] = extras["initial_cash"]
-            self.state.custom_state["position"] = extras["initial_position"]
-
-            load_dotenv()
-            llm_cfg = extras["llm"]
-            lm_name = llm_cfg["lm_name"]
-            generation_config = llm_cfg["generation_config"]
-
-            self.state.custom_state["lm_name"] = lm_name
-            self.state.custom_state["generation_config"] = generation_config
-            self.state.custom_state["llm_client"] = LangChainAPIInference(
-                lm_name=lm_name,
-                generation_config=generation_config,
-            )
-            self.state.custom_state["price_history"] = HistoryBuffer(
-                folder=os.path.join(record_path, self.config.identity, "price"),
-                entry_limit=hot_limit,
-            )
-
-        if observation.inbounds:
-            for inb in observation.inbounds:
-                market_data = inb.payload
-                self.state.custom_state["market_data"] = market_data
-                self.state.custom_state["price_history"].append(market_data["price"])
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if "state" in state and hasattr(state["state"], "custom_state"):
-            custom = dict(state["state"].custom_state)
-            custom.pop("llm_client", None)
-            state["state"].custom_state = custom
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        if hasattr(self, "state") and hasattr(self.state, "custom_state"):
-            custom = self.state.custom_state
-            if "lm_name" in custom and "llm_client" not in custom:
-                custom["llm_client"] = LangChainAPIInference(
-                    lm_name=custom["lm_name"],
-                    generation_config=custom["generation_config"],
-                )
-
-    async def decide(self) -> Dict[str, Any]:
-        round_num = self.state.custom_state["round"]
-        market_data = self.state.custom_state["market_data"]
-        llm_client = self.state.custom_state["llm_client"]
-        cash = self.state.custom_state["cash"]
-        position = self.state.custom_state["position"]
-        strategy_name = self.__class__.__name__
-
-        llm_cfg = self.config.extras["llm"]
-        system_prompt = load_prompt(llm_cfg["sys_message"])
-        user_template = load_prompt(llm_cfg["user_message"])
-
-        # Compute price_change for template (not broadcast by Market)
-        price_change = (
-            (market_data["price"] - market_data["prev_price"])
-            / market_data["prev_price"]
-            if market_data["prev_price"] > 0
-            else 0.0
-        )
-
-        user_prompt = user_template.format(
-            round=round_num,
-            price=market_data["price"],
-            prev_price=market_data["prev_price"],
-            fundamental=market_data["fundamental"],
-            price_change=price_change,
-            deviation=market_data["deviation"],
-            cash=cash,
-            position=position,
-            portfolio_value=cash + position * market_data["price"],
-        )
-
-        decision = robust_llm_call(
-            llm_client,
-            system_prompt,
-            user_prompt,
-            parse_fn=parse_llm_response_with_thinking,
-            validate_fn=get_order_format("AnchoringEffect").validate_decision,
-            max_retries=5,
-            fallback="hold",
-            identity=self.identity,
-        )
-
-        if decision.get("_fallback"):
-            logger.warning(
-                "[%s] R%d LLM unavailable; emitting noop hold.",
-                self.identity,
-                round_num,
-            )
-            fallback_order = {
-                "action": "hold",
-                "quantity": 0,
-                "bid_price": float(market_data["price"]),
-                "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": "llm_fallback_noop",
-                "analysis": "",
-            }
-            return {
-                **fallback_order,
-                "outbound_messages": [
-                    {"payload": fallback_order, "content_type": "investor_bid"}
-                ],
-            }
-
-        action = decision["action"]
-        bid_price = float(decision["bid_price"])
-        quantity = float(decision["quantity"])
-
-        # Guard: LLMs sometimes output bid_price=0 for hold actions.
-        # Use the current market price so recorded bids stay meaningful.
-        if bid_price <= 0:
-            bid_price = market_data["price"]
-
-        if action == "buy":
-            max_affordable = cash / bid_price if bid_price > 0 else 0
-            quantity = min(quantity, max_affordable)
-            self.state.custom_state["cash"] -= quantity * bid_price
-            self.state.custom_state["position"] += quantity
-        elif action == "sell":
-            quantity = min(quantity, position)
-            self.state.custom_state["cash"] += quantity * bid_price
-            self.state.custom_state["position"] -= quantity
-
-        logger.info(
-            "[%s] R%d (%s %s): Q=%.2f",
-            self.identity,
-            round_num,
-            strategy_name,
-            action,
-            quantity,
-        )
-
-        order = {
-            "action": action,
-            "quantity": quantity,
-            "bid_price": bid_price,
-            "strategy": strategy_name,
-            "investor": self.identity,
-            "reasoning": decision["reasoning"][:100],
-            "analysis": decision["analysis"],
-        }
-
-        validate_order(order)
-
-        return {
-            **order,
-            "outbound_messages": [{"payload": order, "content_type": "investor_bid"}],
-        }
-
-    async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        return Action(
-            action_type="investor_bid",
-            payload=decision_payload,
-            source_id=self.identity,
-        )
-
-
-class RuleLLMAnchoredTrader(RuleLLMInvestor):
-    """RuleLLM anchored trader — anchors to initial price, adjusts insufficiently. Theory: simulation-bases.md §4.1 — AnchoredTrader."""
-
-    pass
-
-
-class RuleLLMHistoricalAnchor(RuleLLMInvestor):
-    """RuleLLM historical anchor — anchors to historical average price. Theory: simulation-bases.md §4.2 — HistoricalAnchor."""
-
-    pass
-
-
-class RuleLLMRationalUpdater(RuleLLMInvestor):
-    """RuleLLM rational updater — Bayesian, no anchoring bias (benchmark). Theory: simulation-bases.md §4.3 — RationalUpdater."""
-
-    pass
-
-
-class RuleLLMMomentumTrader(RuleLLMInvestor):
-    """RuleLLM momentum trader — follows price trends. Theory: simulation-bases.md §4.4 — MomentumTrader."""
-
-    pass
-
-
-class RuleLLMNoiseTrader(RuleLLMInvestor):
-    """RuleLLM noise trader — uninformed random participant. Theory: simulation-bases.md §4.5 — NoiseTrader."""
-
-    pass
-
-
-class RuleLLMDispositionTrader(RuleLLMInvestor):
-    """RuleLLM disposition trader — Prospect-Theory asymmetric cost-basis reference. Theory: simulation-bases.md §4.6 — DispositionTrader."""
-
-    pass
-
-
-class RuleLLMContrarianTrader(RuleLLMInvestor):
-    """RuleLLM contrarian trader — fades short-horizon cumulative overextension. Theory: simulation-bases.md §4.7 — ContrarianTrader."""
-
-    pass
-
-
-class RuleLLMFundamentalAnalyst(RuleLLMInvestor):
-    """RuleLLM fundamental analyst — slow belief updating toward fundamental (conservatism bias). Theory: simulation-bases.md §4.8 — FundamentalAnalyst."""
-
-    pass
-
-
-class RuleLLMLiquidityProvider(RuleLLMInvestor):
-    """RuleLLM liquidity provider — passive two-sided quoting around a short-term EMA. Theory: simulation-bases.md §4.9 — LiquidityProvider."""
-
-    pass
-
 
 __all__ = [
     "Market",

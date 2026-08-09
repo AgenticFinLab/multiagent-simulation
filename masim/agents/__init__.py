@@ -18,6 +18,7 @@ rule-executed even when participants are LLM-driven.
 
 from masim.format.state import StandardMarketState
 from masim.agents._base import CanonicalRulePlayer, CanonicalLLMPlayer
+from masim.agents._rag_base import CanonicalRagPlayer, RAG_FALLBACK_MESSAGE
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
 
 from masim.agents.active_rebalancer import RuleActiveRebalancer, LLMActiveRebalancer
@@ -481,6 +482,8 @@ __all__ = [
     "StandardMarketState",
     "CanonicalRulePlayer",
     "CanonicalLLMPlayer",
+    "CanonicalRagPlayer",
+    "RAG_FALLBACK_MESSAGE",
     "CanonicalMarketCoordinator",
     "REGISTRY",
     "COORDINATOR_REGISTRY",

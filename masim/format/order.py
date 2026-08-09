@@ -166,11 +166,19 @@ class InvestorOrder:
         strategy: str = "",
         reasoning: str = "",
     ) -> "InvestorOrder":
-        """Build a BUY order (quantity > 0)."""
+        """Build a BUY order (quantity > 0, price > 0).
+
+        Fail-loud on ``price <= 0``: a BUY order without a positive
+        execution reference price is meaningless and produces silent
+        ``fill_price = 0`` cash bookkeeping downstream. Callers with a
+        genuinely unknown reference should emit a HOLD (or a ``noop``
+        for the bootstrap round) instead.
+        """
+        normalised_price = cls._require_positive_price(price, action=BUY)
         return cls(
             action=BUY,
             quantity=cls._normalise_quantity(quantity),
-            bid_price=cls._normalise_price(price),
+            bid_price=normalised_price,
             investor=investor,
             strategy=strategy,
             reasoning=reasoning,
@@ -186,11 +194,16 @@ class InvestorOrder:
         strategy: str = "",
         reasoning: str = "",
     ) -> "InvestorOrder":
-        """Build a SELL order (quantity > 0)."""
+        """Build a SELL order (quantity > 0, price > 0).
+
+        See :meth:`InvestorOrder.buy` for the fail-loud rationale on
+        ``price <= 0``.
+        """
+        normalised_price = cls._require_positive_price(price, action=SELL)
         return cls(
             action=SELL,
             quantity=cls._normalise_quantity(quantity),
-            bid_price=cls._normalise_price(price),
+            bid_price=normalised_price,
             investor=investor,
             strategy=strategy,
             reasoning=reasoning,
@@ -295,14 +308,26 @@ class InvestorOrder:
             quantity = float(order.get("quantity", 0.0) or 0.0)
         except (TypeError, ValueError):
             quantity = 0.0
+        raw_bid = order.get("bid_price")
         try:
-            bid_price = float(order.get("bid_price") or 0.0)
+            bid_price = float(raw_bid) if raw_bid is not None else 0.0
         except (TypeError, ValueError):
             bid_price = 0.0
+        # Fail-loud contract: BUY/SELL orders reaching from_dict MUST already
+        # carry a strictly positive bid_price. The historical silent clamp to
+        # zero has been removed so scenario code that produces an invalid
+        # BUY/SELL dict is surfaced immediately instead of laundered through
+        # a hold-shaped record. HOLD orders may still carry a non-positive
+        # bid_price for legacy disk-restore paths (normalised to >= 0).
+        if action in (BUY, SELL):
+            bid_price = cls._require_positive_price(bid_price, action=action)
+            normalised_bid = bid_price
+        else:
+            normalised_bid = cls._normalise_price(bid_price) if bid_price > 0 else 0.0
         return cls(
             action=action,
             quantity=cls._normalise_quantity(quantity) if quantity > 0 else 0.0,
-            bid_price=cls._normalise_price(bid_price) if bid_price > 0 else 0.0,
+            bid_price=normalised_bid,
             investor=str(order.get("investor", "")),
             strategy=str(order.get("strategy", "")),
             reasoning=str(order.get("reasoning", ""))[:200],
@@ -373,6 +398,46 @@ class InvestorOrder:
         except (TypeError, ValueError):
             return 0.0
         return max(value, 0.0)
+
+    @staticmethod
+    def _require_positive_price(p: Any, *, action: str) -> float:
+        """Return ``float(p)`` iff strictly positive; fail-loud otherwise.
+
+        Used by :meth:`InvestorOrder.buy` and :meth:`InvestorOrder.sell`
+        to reject nonsense reference prices at construction time. The
+        historical :meth:`_normalise_price` — which silently clamped
+        negatives to zero — is preserved for legacy dict-restoration
+        paths (:meth:`from_dict`) where zeroing a bogus value keeps the
+        downstream ``validate_order`` diagnostics readable.
+        """
+        try:
+            value = float(p)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"InvestorOrder.{action}: price must be numeric, got "
+                f"{p!r} ({type(p).__name__})."
+            ) from exc
+        if value <= 0:
+            raise ValueError(
+                f"InvestorOrder.{action}: price must be strictly positive, "
+                f"got {value!r}. A {action.upper()} order without a "
+                f"positive reference price would produce silent "
+                f"fill_price=0 cash bookkeeping downstream — emit a HOLD "
+                f"(or InvestorOrder.noop for the bootstrap round) instead."
+            )
+        return value
+
+    # -- assertions -------------------------------------------------------
+
+    def assert_valid(self) -> None:
+        """Run the wire-format validator on ``self.to_dict()``.
+
+        Convenience so callers that hold an ``InvestorOrder`` — rather
+        than a raw dict — can trigger the same strict schema check that
+        the pipeline runs at emission time. Raises :class:`ValueError`
+        on any violation.
+        """
+        validate_order(self.to_dict())
 
 
 # ---------------------------------------------------------------------------

@@ -53,7 +53,11 @@ from masim.format.order import (
     HOLD,
     SELL,
     InvestorOrder,
-    validate_order,
+)
+from masim.format.finalize import (
+    emit_order_envelope,
+    finalize_llm_order,
+    finalize_rule_order,
 )
 from masim.format.state import StandardMarketState
 
@@ -242,29 +246,83 @@ def _coerce_to_order(
     return dataclasses.replace(order, **updates) if updates else order
 
 
-def _emit(order: InvestorOrder) -> Dict[str, Any]:
+def _emit(
+    order: InvestorOrder,
+    *,
+    agent_state: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Serialise an :class:`InvestorOrder` for the pipeline.
 
-    Attaches the ``outbound_messages`` envelope required by the market
-    coordinator; the inner payload is a *fresh* ``to_dict()`` snapshot so
-    the wire format is decoupled from any local mutation.
+    Thin delegate around :func:`masim.format.finalize.emit_order_envelope`
+    — the wire-format logic (schema validation, ``outbound_messages``
+    envelope, ``analysis`` stripping, ``agent_state`` injection) lives in
+    a single place so scenario code that reimplements the perceive/decide
+    skeleton can obtain the same behaviour with a single import.
+
+    ``agent_state`` — when supplied, keys (typically ``cash`` / ``position``
+    / ``agent_type``) are merged into both the top-level result dict AND
+    every outbound message payload so market coordinators see truthful
+    portfolio state, never fabricated defaults.
     """
-    payload = order.to_dict()
-    # `validate_order` is idempotent; running it here means every code path
-    # that reaches the network is guaranteed to match the schema regardless
-    # of which factory produced the order.
-    validate_order(payload)
-    # Strip only internal chain-of-thought (analysis) — reasoning is kept
-    # for Markets that use it (e.g. social-influence scenarios).
-    outbound_payload = {
-        k: v for k, v in payload.items() if k not in {"analysis"}
-    }
-    return {
-        **payload,
-        "outbound_messages": [
-            {"payload": outbound_payload, "content_type": "investor_bid"}
-        ],
-    }
+    return emit_order_envelope(
+        order,
+        strip_analysis=True,
+        agent_state=agent_state,
+    )
+
+
+def _apply_fill_and_emit_action(
+    agent: GeneralPlayer,
+    decision_payload: Dict[str, Any],
+    *,
+    class_name: str,
+) -> Action:
+    """Shared ``act()`` implementation for canonical Rule / LLM / RAG bases.
+
+    Historically each canonical base carried its own ~30 line copy of
+    this logic (key-presence guard → positive-``bid_price`` guard →
+    cash/inventory bookkeeping → :class:`Action` construction).  The
+    only inter-class delta was the error-message prefix, which we now
+    thread through ``class_name`` so every bases produces exactly one
+    taxonomy of failures — routed through
+    :func:`~masim.format.finalize.require_positive_bid_price` — and
+    the two bases can never drift on cash-update semantics.
+    """
+    from masim.format.finalize import require_positive_bid_price
+
+    for required in ("action", "quantity", "bid_price"):
+        if required not in decision_payload:
+            raise KeyError(
+                f"{class_name}.act: decision_payload missing required "
+                f"field {required!r}. Payload keys: {sorted(decision_payload)}"
+            )
+    action = decision_payload["action"]
+    quantity = float(decision_payload["quantity"])
+    bid_price = float(decision_payload["bid_price"])
+
+    if action in (BUY, SELL) and quantity > 0:
+        # Defence-in-depth: emit_order_envelope + finalize_* already
+        # invoked require_positive_bid_price on this record. If a
+        # subclass short-circuited the finalizer this second call still
+        # fires with a stable error format so operators can trace the
+        # invariant break to a single site.
+        require_positive_bid_price(
+            bid_price, action, context=f"{class_name}.act"
+        )
+        fill_price = bid_price
+
+        if action == BUY:
+            agent.state.custom_state["cash"] -= quantity * fill_price
+            agent.state.custom_state["position"] += quantity
+        else:  # SELL
+            agent.state.custom_state["cash"] += quantity * fill_price
+            agent.state.custom_state["position"] -= quantity
+
+    return Action(
+        action_type="investor_bid",
+        payload=decision_payload,
+        source_id=agent.identity,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -342,62 +400,24 @@ class CanonicalRulePlayer(GeneralPlayer):
             strategy=self.STRATEGY,
         )
         order = self._finalize_order(order, state)
-        result = _emit(order)
-
         # Inject truthful agent state into outbound so Market coordinators
         # receive real data for clearing/logging — never fabricate defaults.
-        _agent_state = {
-            "cash": state.cash,
-            "position": state.position,
-            "agent_type": self.STRATEGY,  # alias for backward compat
-        }
-        result.update(_agent_state)
-        for msg in result.get("outbound_messages", []):
-            msg["payload"].update(_agent_state)
-
-        return result
+        return _emit(
+            order,
+            agent_state={
+                "cash": state.cash,
+                "position": state.position,
+                "agent_type": self.STRATEGY,  # alias for backward compat
+            },
+        )
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        # decision_payload comes from _emit(order) where order is a fully
-        # validated InvestorOrder — action/quantity/bid_price are guaranteed
-        # to be present.  Missing keys here indicate an invariant violation
-        # in the emission pipeline, not a routine "empty round".
-        for required in ("action", "quantity", "bid_price"):
-            if required not in decision_payload:
-                raise KeyError(
-                    f"CanonicalRulePlayer.act: decision_payload missing "
-                    f"required field {required!r}. Payload keys: "
-                    f"{sorted(decision_payload)}"
-                )
-        action = decision_payload["action"]
-        quantity = float(decision_payload["quantity"])
-        bid_price = float(decision_payload["bid_price"])
-
-        if action in (BUY, SELL) and quantity > 0:
-            # Buy/sell requires a fill price; bid_price is guaranteed positive
-            # after _finalize_order (falls back to state.price when the raw
-            # subclass output was <= 0).  If it is still non-positive here we
-            # have a wire-format violation — refuse to fabricate a nonsense
-            # cash update at fill_price=0.
-            if bid_price <= 0:
-                raise ValueError(
-                    f"CanonicalRulePlayer.act: {action} order has "
-                    f"bid_price={bid_price!r}; every non-hold order MUST "
-                    f"carry a positive bid_price after _finalize_order."
-                )
-            fill_price = bid_price
-
-            if action == BUY:
-                self.state.custom_state["cash"] -= quantity * fill_price
-                self.state.custom_state["position"] += quantity
-            else:  # SELL
-                self.state.custom_state["cash"] += quantity * fill_price
-                self.state.custom_state["position"] -= quantity
-
-        return Action(
-            action_type="investor_bid",
-            payload=decision_payload,
-            source_id=self.identity,
+        # The whole body (key-presence guard, positive-bid_price guard via
+        # require_positive_bid_price, cash/inventory bookkeeping, and the
+        # Action envelope) lives in the shared helper so this base and
+        # CanonicalLLMPlayer cannot drift on wire semantics.
+        return _apply_fill_and_emit_action(
+            self, decision_payload, class_name="CanonicalRulePlayer"
         )
 
     # -- override hooks ----------------------------------------------------
@@ -455,89 +475,27 @@ class CanonicalRulePlayer(GeneralPlayer):
     ) -> InvestorOrder:
         """Clip buy/sell orders to available cash/inventory and validate.
 
-        Returns a new :class:`InvestorOrder` (frozen; uses
-        :func:`dataclasses.replace` to apply clipping) with the
-        ``_clipped*`` bookkeeping flags populated whenever we had to shrink
-        the intended size. An order clipped down to zero is converted to a
-        ``hold`` but is still marked ``clipped_from`` so downstream metrics
-        can distinguish it from an explicit hold decision.
+        Thin delegate around :func:`masim.format.finalize.finalize_rule_order`
+        — the semantics are documented at the helper site.  Rule agents
+        historically fill ``bid_price`` from ``state.price`` when the
+        subclass returned an order with ``bid_price <= 0`` (a common
+        pattern for HOLD orders in hand-rolled Rule code); this is
+        preserved.  Non-hold orders that would emerge with a non-positive
+        ``bid_price`` after that fallback trigger a ``ValueError`` so a
+        broadcast bug is surfaced rather than papered over with a
+        ``fill_price = 0`` cash update.
+
+        An order clipped down to zero from a genuine BUY/SELL intent is
+        converted to a ``hold`` but marked ``clipped_from`` so downstream
+        behavioural metrics (action_frequency, decision_entropy) can
+        distinguish it from an explicit hold decision.
         """
-        original_action = order.action
-        original_quantity = float(order.quantity or 0.0)
-
-        # Fall back to reference price when the subclass omitted it (or
-        # supplied a non-positive value; e.g. a legacy dict with
-        # bid_price=0.0 for a hold).
-        bid_price = float(order.bid_price) if order.bid_price > 0 else float(state.price)
-
-        action = original_action
-        quantity = original_quantity
-        clipped = False
-        clipped_reason = ""
-
-        if action == BUY and quantity > 0:
-            affordable = state.cash / bid_price if bid_price > 0 else 0.0
-            new_qty = min(quantity, max(affordable, 0.0))
-            if new_qty < quantity:
-                clipped = True
-                clipped_reason = "insufficient_cash"
-            quantity = new_qty
-        elif action == SELL and quantity > 0:
-            new_qty = min(quantity, max(state.position, 0.0))
-            if new_qty < quantity:
-                clipped = True
-                clipped_reason = "insufficient_position"
-            quantity = new_qty
-
-        # Preserve intent: an order clipped down to 0 from a genuine buy/sell
-        # intent is NOT the same as an explicit hold decision. Downstream
-        # behavioral metrics (action_frequency, decision_entropy) must be
-        # able to distinguish them; silent masking previously inflated the
-        # hold bucket and understated agent decisiveness.
-        clipped_to_hold = False
-        if quantity <= 0 and original_action in (BUY, SELL):
-            clipped_to_hold = True
-            if not clipped_reason:
-                clipped_reason = "zero_quantity_after_clip"
-            action = HOLD
-            quantity = 0.0
-        elif quantity <= 0 and action != HOLD:
-            action = HOLD
-            quantity = 0.0
-
-        finalized = dataclasses.replace(
+        return finalize_rule_order(
             order,
-            action=action,
-            quantity=float(quantity),
-            bid_price=float(bid_price if bid_price > 0 else state.price),
+            state=state,
             investor=self.identity,
             strategy=order.strategy or self.STRATEGY,
         )
-        if clipped or clipped_to_hold:
-            finalized = dataclasses.replace(
-                finalized,
-                clipped=True,
-                clipped_from=original_action,
-                clipped_intended_quantity=float(original_quantity),
-                clipped_reason=clipped_reason or "unspecified",
-            )
-        # Every non-hold order MUST carry a strictly positive bid_price so
-        # downstream cash bookkeeping cannot silently fabricate a fill at
-        # price zero. If we get here with bid_price <= 0 on a buy/sell, the
-        # broadcast lacked a usable price (state.price non-positive) — that
-        # is a scenario configuration bug, not a runtime "no data" case.
-        if finalized.action in (BUY, SELL) and float(finalized.bid_price) <= 0:
-            raise ValueError(
-                f"CanonicalRulePlayer._finalize_order: {finalized.action} "
-                f"order emerges with bid_price={finalized.bid_price!r}. "
-                f"state.price={state.price!r}, original bid_price="
-                f"{order.bid_price!r}. Every non-hold order requires a "
-                f"positive bid_price."
-            )
-        # Sanity-check via the legacy validator; keeps the format-drift
-        # tests exercising the same code path as the wire format.
-        validate_order(finalized.to_dict())
-        return finalized
 
     def _noop_order(self, reason: str = "no_market_data") -> InvestorOrder:
         """Bootstrap-round placeholder.
@@ -654,56 +612,21 @@ class CanonicalLLMPlayer(GeneralPlayer):
         # Rule agents — reuse of the code path guarantees Rule / LLM parity
         # for the clipping semantics.
         order = self._finalize_llm_order(order, state)
-        result = _emit(order)
-
         # Inject truthful agent state into outbound (same as Rule variant).
-        _agent_state = {
-            "cash": state.cash,
-            "position": state.position,
-            "agent_type": self.STRATEGY,
-        }
-        result.update(_agent_state)
-        for msg in result.get("outbound_messages", []):
-            msg["payload"].update(_agent_state)
-
-        return result
+        return _emit(
+            order,
+            agent_state={
+                "cash": state.cash,
+                "position": state.position,
+                "agent_type": self.STRATEGY,
+            },
+        )
 
     async def act(self, decision_payload: Dict[str, Any]) -> Action:
-        # Same contract as CanonicalRulePlayer.act — the payload is emitted
-        # by _emit() from a validated InvestorOrder.  Missing keys or a
-        # non-positive bid_price on a non-hold order indicate an invariant
-        # violation upstream, not a benign empty round.
-        for required in ("action", "quantity", "bid_price"):
-            if required not in decision_payload:
-                raise KeyError(
-                    f"CanonicalLLMPlayer.act: decision_payload missing "
-                    f"required field {required!r}. Payload keys: "
-                    f"{sorted(decision_payload)}"
-                )
-        action = decision_payload["action"]
-        quantity = float(decision_payload["quantity"])
-        bid_price = float(decision_payload["bid_price"])
-
-        if action in (BUY, SELL) and quantity > 0:
-            if bid_price <= 0:
-                raise ValueError(
-                    f"CanonicalLLMPlayer.act: {action} order has "
-                    f"bid_price={bid_price!r}; every non-hold order MUST "
-                    f"carry a positive bid_price after _finalize_llm_order."
-                )
-            fill_price = bid_price
-
-            if action == BUY:
-                self.state.custom_state["cash"] -= quantity * fill_price
-                self.state.custom_state["position"] += quantity
-            else:  # SELL
-                self.state.custom_state["cash"] += quantity * fill_price
-                self.state.custom_state["position"] -= quantity
-
-        return Action(
-            action_type="investor_bid",
-            payload=decision_payload,
-            source_id=self.identity,
+        # Shared implementation with CanonicalRulePlayer.act — see
+        # _apply_fill_and_emit_action for the full contract.
+        return _apply_fill_and_emit_action(
+            self, decision_payload, class_name="CanonicalLLMPlayer"
         )
 
     # -- pickling: drop the live LLM client --------------------------------
@@ -818,7 +741,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
         sys_prompt = _load_dotted(sys_ref)
         user_template = _load_dotted(user_ref)
-        user_prompt = user_template.format(**state.template_vars())
+        user_prompt = self._format_user_prompt(user_template, state)
 
         # Scenario-aware strict schema validation: the LLM must return a
         # decision-dict that matches the category advertised in the prompt's
@@ -848,6 +771,24 @@ class CanonicalLLMPlayer(GeneralPlayer):
             identity=self.identity,
         )
 
+    def _format_user_prompt(
+        self,
+        user_template: str,
+        state: StandardMarketState,
+    ) -> str:
+        """Render the LLM user template against the current market state.
+
+        Default implementation formats ``user_template`` with
+        :meth:`StandardMarketState.template_vars`.  Subclasses that need
+        to inject additional template variables (for example
+        :class:`CanonicalRagPlayer` supplying ``rag_context``) override
+        this hook rather than duplicating the whole :meth:`_run_llm`
+        skeleton.  Any string returned here is passed straight to
+        :func:`robust_llm_call` as the user message; there is no further
+        transformation.
+        """
+        return user_template.format(**state.template_vars())
+
     def _finalize_llm_order(
         self,
         order: InvestorOrder,
@@ -855,109 +796,30 @@ class CanonicalLLMPlayer(GeneralPlayer):
     ) -> InvestorOrder:
         """Apply cash/inventory clipping to an LLM-produced order.
 
-        Mirrors :meth:`CanonicalRulePlayer._finalize_order` but skips the
-        dict-normalisation step (the LLM path already lands in
+        Thin delegate around :func:`masim.format.finalize.finalize_llm_order`
+        — mirrors :meth:`CanonicalRulePlayer._finalize_order` but skips
+        the dict-normalisation step (the LLM path already lands in
         :class:`InvestorOrder` via
         :meth:`InvestorOrder.from_llm_decision`).
 
-        Bid-price semantics are **category-aware** (no silent fallback):
+        Bid-price semantics are **category-aware** (see helper docstring
+        for the full contract):
 
         * ``limit_order`` / ``maker_taker_order`` — every non-hold order MUST
           carry ``bid_price > 0``.  The category ``validate_decision`` already
-          enforces this at LLM output, so any ``BUY``/``SELL`` reaching this
-          method with ``bid_price <= 0`` indicates a bug (the validator failed
-          or the parser dropped the field silently).  We raise
-          :class:`ValueError` immediately rather than paper over it with
-          ``state.price``.
+          enforces this at LLM output; any ``BUY``/``SELL`` reaching this
+          method with ``bid_price <= 0`` triggers :class:`ValueError`.
         * ``participation_order`` — this category intentionally omits
-          ``bid_price`` at the LLM/schema layer (see
-          :mod:`masim.format.participation_order`); the order aggregates
-          participation counts, not prices.  We record ``state.price`` on the
-          finalised order **explicitly** so downstream cash bookkeeping still
-          has a numeric reference, and document the substitution here.
+          ``bid_price`` at the LLM/schema layer; the helper records
+          ``state.price`` on the finalised order **explicitly** so
+          downstream cash bookkeeping still has a numeric reference.
         """
-        original_action = order.action
-        original_quantity = float(order.quantity or 0.0)
-        category = self._order_format_category()
-
-        if category == "participation_order":
-            # bid_price is intentionally not part of participation-order
-            # schemas; use state.price as an accounting reference so cash /
-            # inventory clipping below still has a numeric price to work with.
-            # This substitution is explicit (not a silent default) — the
-            # category itself declares bid_price meaningless.
-            bid_price = float(state.price)
-        else:
-            # limit_order / maker_taker_order: bid_price must arrive positive
-            # for every non-hold action. A zero/negative bid_price here means
-            # the LLM validator or InvestorOrder.from_llm_decision let a bogus
-            # value through — fail loudly.
-            if original_action in (BUY, SELL) and float(order.bid_price) <= 0:
-                raise ValueError(
-                    f"CanonicalLLMPlayer._finalize_llm_order[{category}]: "
-                    f"{original_action} order arrived with "
-                    f"bid_price={order.bid_price!r}. Non-hold orders in the "
-                    f"{category} category MUST carry bid_price > 0 — the LLM "
-                    f"schema validator ({category}.validate_decision) is "
-                    f"supposed to enforce this. No silent state.price "
-                    f"fallback here."
-                )
-            bid_price = float(order.bid_price)
-
-        action = original_action
-        quantity = original_quantity
-        clipped = False
-        clipped_reason = ""
-
-        if action == BUY and quantity > 0:
-            affordable = state.cash / bid_price if bid_price > 0 else 0.0
-            new_qty = min(quantity, max(affordable, 0.0))
-            if new_qty < quantity:
-                clipped = True
-                clipped_reason = "insufficient_cash"
-            quantity = new_qty
-        elif action == SELL and quantity > 0:
-            new_qty = min(quantity, max(state.position, 0.0))
-            if new_qty < quantity:
-                clipped = True
-                clipped_reason = "insufficient_position"
-            quantity = new_qty
-
-        clipped_to_hold = False
-        if quantity <= 0 and original_action in (BUY, SELL):
-            clipped_to_hold = True
-            if not clipped_reason:
-                clipped_reason = "zero_quantity_after_clip"
-            action = HOLD
-            quantity = 0.0
-
-        finalized = dataclasses.replace(
+        return finalize_llm_order(
             order,
-            action=action,
-            quantity=float(quantity),
-            bid_price=float(bid_price),
+            state=state,
+            category=self._order_format_category(),
+            strategy=order.strategy or self.STRATEGY,
         )
-        if clipped or clipped_to_hold:
-            finalized = dataclasses.replace(
-                finalized,
-                clipped=True,
-                clipped_from=original_action,
-                clipped_intended_quantity=float(original_quantity),
-                clipped_reason=clipped_reason or "unspecified",
-            )
-        # Defence-in-depth: even after category-aware handling above, refuse
-        # to emit a non-hold order without a positive bid_price. Reaching
-        # this branch would indicate an upstream logic bug (e.g. state.price
-        # was non-positive on a participation_order finalisation).
-        if finalized.action in (BUY, SELL) and float(finalized.bid_price) <= 0:
-            raise ValueError(
-                f"CanonicalLLMPlayer._finalize_llm_order: {finalized.action} "
-                f"order emerges with bid_price={finalized.bid_price!r} "
-                f"(category={category}). state.price={state.price!r}, "
-                f"original bid_price={order.bid_price!r}."
-            )
-        validate_order(finalized.to_dict())
-        return finalized
 
     def _noop_order(self, reason: str = "no_market_data") -> InvestorOrder:
         """Bootstrap-round placeholder for the LLM path.
