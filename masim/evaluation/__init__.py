@@ -18,7 +18,8 @@ Structure:
         ├── microstructure.py - Market microstructure (volume, liquidity, impact)
         ├── visualization.py  - Professional financial charting functions
         ├── validation.py     - Rule-based scenario validation
-        └── validation_llm.py - LLM-based validation
+        ├── validation_llm.py - LLM-based validation
+        └── llm_action_distribution.py - LLM action-distribution audit
 
 Usage:
     # Domain-agnostic infrastructure
@@ -44,7 +45,8 @@ from .data_loader import (
     market_players,
     series,
 )
-from .llm_action_distribution import analyze_action_distribution
+from .finance.llm_action_distribution import analyze_action_distribution
+from .llm_harness import finalize_llm_analysis, run_llm_analysis
 from .universal import (
     CATEGORY_ORDER,
     compute_universal_metrics,
@@ -66,6 +68,9 @@ __all__ = [
     "series",
     # LLM-specific analysis (implement-simulation-skill §7.2)
     "analyze_action_distribution",
+    # LLM analysis harness (shared boilerplate elimination)
+    "finalize_llm_analysis",
+    "run_llm_analysis",
     # Universal metric aggregator (polish-simulation-pipeline §8.6 Hook 9)
     "CATEGORY_ORDER",
     "compute_universal_metrics",

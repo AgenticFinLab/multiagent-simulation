@@ -51,6 +51,7 @@ import ray
 
 from masim.simulator.base import (
     BaseSimulator,
+    BaseSimulationRunner,
     SimulationConfig,
     SimulatorStatus,
     RoundPhase,
@@ -850,3 +851,154 @@ class GeneralSimulator(BaseSimulator):
         if player_id not in self.player_persona_handles:
             return None
         return self.player_persona_handles[player_id]
+
+
+# =============================================================================
+# General Simulation Runner + CLI Entry
+# =============================================================================
+
+
+class GeneralSimulationRunner(BaseSimulationRunner):
+    """Scenario runner paired with :class:`GeneralSimulator`.
+
+    Handles the full lifecycle of a Ray-backed simulation run driven from
+    a YAML config: knowledge preflight (when needed), simulator setup, round
+    execution, and shutdown. Used both by CLI shims (via the module-level
+    :func:`run` convenience function) and by programmatic callers.
+
+    Programmatic usage::
+
+        from masim.simulator.general import GeneralSimulationRunner
+
+        runner = GeneralSimulationRunner.from_config(
+            "configs/FlashCrash/Rag/simulation.yml"
+        )
+        await runner.execute()
+    """
+
+    def _build_simulator(self, config: SimulationConfig) -> "GeneralSimulator":
+        return GeneralSimulator(config)
+
+
+# ---------------------------------------------------------------------------
+# CLI shell — imported by every examples/*/run_*.py shim
+# ---------------------------------------------------------------------------
+
+_BANNER_WIDTH = 70
+
+
+def _print_banner(
+    scenario: str,
+    variant: str,
+    total_rounds: int,
+    phenomenon: Optional[str] = None,
+    *,
+    has_knowledge: bool = False,
+) -> None:
+    """Print the standard simulation startup banner."""
+    sep = "=" * _BANNER_WIDTH
+    print(f"\n{sep}")
+    if has_knowledge:
+        print(f"{scenario} Simulation - {variant} Agents (RAG-Augmented)")
+    else:
+        print(f"{scenario} Simulation - {variant} Agents")
+    print(sep)
+    if phenomenon:
+        print(f"Phenomenon: {phenomenon}")
+    if has_knowledge:
+        print("Mode:       RAG-Augmented LLM Decision-Making")
+        print("Note:       Documents pre-processed during setup (shared cache).")
+    print(f"Rounds:     {total_rounds}")
+    print(f"{sep}\n")
+
+
+def run(
+    *,
+    scenario: str,
+    default_config: str,
+    variant: Optional[str] = None,
+    phenomenon: Optional[str] = None,
+    load_env: bool = True,
+) -> None:
+    """Universal CLI entry point for :class:`GeneralSimulator` scenarios.
+
+    Every ``examples/{Scenario}/{Variant}/run_*.py`` shim calls this
+    function. Knowledge preprocessing is auto-detected from the YAML
+    config content — callers never need to choose between different
+    runners for Rule / LLM / RuleLLM / Rag variants.
+
+    Parameters
+    ----------
+    scenario : str
+        Human-readable scenario name printed in the banner
+        (e.g. ``"FlashCrash"``).
+    default_config : str
+        Config path used when caller omits ``-c``. Always relative to the
+        project root (e.g. ``"configs/FlashCrash/Rag/simulation.yml"``).
+    variant : str, optional
+        Variant label for the banner. Auto-detected from the config path
+        when omitted (e.g. ``.../LLM/simulation.yml`` → ``"LLM"``).
+    phenomenon : str, optional
+        One-line phenomenon description shown in the banner.
+    load_env : bool
+        When ``True`` (default), call :func:`dotenv.load_dotenv` before
+        any preprocessing. Pass ``False`` only for pure-Rule scenarios
+        that require no API keys.
+    """
+    # Delayed imports: keep base module import free of dotenv / argparse
+    # side effects so ``from masim.simulator.general import GeneralSimulator``
+    # stays cheap for tests and notebooks.
+    import argparse
+    import asyncio
+    import traceback
+
+    from masim.simulator.base import detect_variant, extract_knowledge_config
+    from masim.utils.config import load_config, setup_logging
+
+    if load_env:
+        from dotenv import load_dotenv
+        load_dotenv()
+
+    setup_logging()
+
+    # ── CLI parsing ──────────────────────────────────────────────────────
+    parser = argparse.ArgumentParser(description=f"Run {scenario} Simulation")
+    parser.add_argument(
+        "-c", "--config", type=str, default=default_config,
+        help="Path to the simulation YAML config",
+    )
+    parser.add_argument(
+        "-r", "--rounds", type=int, default=None,
+        help="Override total_rounds in the config",
+    )
+    args = parser.parse_args()
+
+    # ── Config load + optional round override ────────────────────────────
+    yaml_config = load_config(args.config)
+    config = SimulationConfig(**yaml_config)
+    if args.rounds:
+        config.setting["total_rounds"] = args.rounds
+
+    resolved_variant = variant or detect_variant(args.config)
+    has_knowledge = extract_knowledge_config(config) is not None
+
+    _print_banner(
+        scenario, resolved_variant, config.setting["total_rounds"],
+        phenomenon, has_knowledge=has_knowledge,
+    )
+
+    # ── Runner lifecycle ─────────────────────────────────────────────────
+    runner = GeneralSimulationRunner(config)
+    try:
+        asyncio.run(runner.execute())
+        sep = "=" * _BANNER_WIDTH
+        print(f"\n{sep}")
+        print(f"Simulation Complete! Rounds: {config.setting['total_rounds']}")
+        print(sep)
+    except Exception:
+        sep = "=" * _BANNER_WIDTH
+        print(f"\n{sep}")
+        print("SIMULATION FAILED WITH ERROR:")
+        print(sep)
+        traceback.print_exc()
+        raise

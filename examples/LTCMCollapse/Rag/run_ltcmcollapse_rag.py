@@ -7,7 +7,7 @@ Usage::
         -c configs/LTCMCollapse/Rag/simulation.yml
 """
 
-from masim.cli import run
+from masim.simulator.general import run
 
 if __name__ == "__main__":
     run(

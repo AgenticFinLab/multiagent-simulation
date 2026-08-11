@@ -89,15 +89,29 @@ class AgentEntry:
 
 
 def _iter_agent_modules() -> Iterable:
-    """Yield each importable sub-module under :mod:`masim.agents`."""
+    """Yield each importable sub-module under :mod:`masim.agents`.
+
+    Walks recursively into sub-packages (``finance/``, ``market/``,
+    ``opinion/``) so that modules like ``masim.agents.finance.noise_trader``
+    are discovered correctly.
+    """
     pkg = importlib.import_module(_AGENTS_PACKAGE)
-    for info in pkgutil.iter_modules(pkg.__path__):
-        # Skip private helpers (``_base``, ``_state``) to keep discovery cheap;
-        # those modules expose the base classes and standard market state, not
-        # canonical archetypes.
-        if info.name.startswith("_"):
+    for info in pkgutil.walk_packages(pkg.__path__, prefix=f"{_AGENTS_PACKAGE}."):
+        # Skip private helpers (``_base``, ``_state``) and the ``defines``
+        # sub-package which holds markdown specs, not agent classes.
+        basename = info.name.rsplit(".", 1)[-1]
+        if basename.startswith("_"):
             continue
-        yield importlib.import_module(f"{_AGENTS_PACKAGE}.{info.name}")
+        if ".defines" in info.name:
+            continue
+        # Only yield leaf modules (not sub-packages themselves whose
+        # __init__.py may be empty).
+        if info.ispkg:
+            continue
+        try:
+            yield importlib.import_module(info.name)
+        except Exception:
+            continue
 
 
 def _is_concrete_subclass(obj, base) -> bool:

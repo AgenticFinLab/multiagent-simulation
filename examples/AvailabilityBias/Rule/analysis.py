@@ -35,10 +35,6 @@ from masim.evaluation import write_universal_summary
 # ---------------------------------------------------------------------------
 
 
-def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Legacy adapter -> masim.evaluation.data_loader.batch_to_rounds."""
-    return batch_to_rounds(values)
-
 
 def _load_data(results) -> Dict[str, Any]:
     """Legacy adapter -> masim.evaluation.data_loader.load_data.
@@ -805,7 +801,6 @@ def main() -> None:
 
 
 __all__ = [
-    "_batch_to_rounds",
     "_load_data",
     "_validate_availability_bias",
     "_build_interpretation",

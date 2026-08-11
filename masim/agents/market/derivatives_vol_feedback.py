@@ -21,7 +21,7 @@ from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
 
-logger = logging.getLogger("masim.agents.market_derivatives_vol_feedback")
+logger = logging.getLogger("masim.agents.market.derivatives_vol_feedback")
 
 
 class MarketDerivativesVolFeedback(CanonicalMarketCoordinator):

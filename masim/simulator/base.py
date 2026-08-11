@@ -399,3 +399,218 @@ class BaseSimulator(ABC):
     def get_player_handle(self, player_id: str) -> Optional["ActorHandle"]:
         """Get Ray actor handle for a specific player."""
         ...
+
+
+# =============================================================================
+# Base Simulation Runner (Abstract)
+# =============================================================================
+
+
+def extract_knowledge_config(config: SimulationConfig) -> Optional[Dict[str, Any]]:
+    """Detect whether a scenario needs knowledge preflight.
+
+    Returns a resolved knowledge config dict when either
+    ``config.knowledge`` is populated OR at least one player carries
+    ``extras.private_knowledge.rag``. Returns ``None`` when no knowledge
+    preprocessing is required (pure Rule / LLM / RuleLLM scenarios).
+
+    Kept at module level (not as a method) so it can be reused by any
+    :class:`BaseSimulationRunner` subclass and by external inspection
+    tools without instantiating a runner.
+    """
+    if config.knowledge:
+        return config.knowledge
+
+    for player_cfg in config.players.values():
+        extras = player_cfg.get("config", {}).get("extras", {})
+        if not isinstance(extras, dict):
+            continue
+        pk = extras.get("private_knowledge")
+        if not pk:
+            continue
+        rag_cfg = pk.get("rag")
+        if rag_cfg:
+            return {
+                "backend": "local",
+                "global_uri": rag_cfg.get("docs_dir", "examples/document-sources"),
+                "preprocessing": {
+                    "parser": "mineru",
+                    "output_position": rag_cfg.get(
+                        "mineru_output_dir", "MinerU_processed"
+                    ),
+                },
+                "rag": {
+                    "output_position": rag_cfg.get(
+                        "shared_rag_index_dir", "rag_index"
+                    ),
+                },
+            }
+    return None
+
+
+def detect_variant(config_path: str) -> str:
+    """Derive the simulation variant label (Rule/LLM/RuleLLM/Rag) from a config path."""
+    for variant in ("RuleLLM", "Rule", "LLM", "Rag"):
+        if f"/{variant}/" in config_path or config_path.endswith(f"/{variant}"):
+            return variant
+    return "LLM"
+
+
+class BaseSimulationRunner(ABC):
+    """
+    Abstract scenario runner — pairs 1:1 with a :class:`BaseSimulator` subclass.
+
+    A Runner is the outer orchestration layer that turns a YAML config into a
+    fully-executed simulation. It handles:
+
+    * config loading (``from_config``)
+    * config-driven preflight (knowledge / RAG index construction, future modes)
+    * simulator lifecycle (setup → run → shutdown, with exception safety)
+
+    Every concrete ``{Variant}Simulator`` lives in the same module as its
+    matching ``{Variant}SimulationRunner`` (see e.g.
+    ``masim/simulator/general.py`` for the ``General`` pair).
+
+    Subclass contract
+    -----------------
+    Concrete subclasses MUST implement :meth:`_build_simulator` to bind the
+    runner to a specific ``BaseSimulator`` implementation. Subclasses MAY
+    override :meth:`_preflight` to append mode-specific preflight phases
+    (call ``super()._preflight()`` first to keep knowledge auto-detection).
+
+    Usage
+    -----
+    Programmatic embedding (notebook / pytest / Streamlit)::
+
+        runner = GeneralSimulationRunner.from_config(
+            "configs/FlashCrash/Rag/simulation.yml"
+        )
+        await runner.execute()
+
+    CLI shims (``examples/*/run_*.py``) call the module-level ``run()``
+    convenience function co-located with each Runner subclass.
+    """
+
+    def __init__(self, config: SimulationConfig):
+        self.config: SimulationConfig = config
+        self.simulator: BaseSimulator = self._build_simulator(config)
+        # Populated by _preflight() when knowledge preprocessing is required.
+        self.resource_manager: Optional[Any] = None
+
+    # ------------------------------------------------------------------
+    # Construction
+    # ------------------------------------------------------------------
+
+    @abstractmethod
+    def _build_simulator(self, config: SimulationConfig) -> BaseSimulator:
+        """Instantiate the concrete simulator this runner drives.
+
+        Subclasses bind here — e.g. ``GeneralSimulationRunner`` returns a
+        ``GeneralSimulator(config)``.
+        """
+        ...
+
+    @classmethod
+    def from_config(cls, path: str) -> "BaseSimulationRunner":
+        """Load YAML from ``path`` and construct the runner (with its simulator)."""
+        # Imported lazily to keep base.py free of utils dependency at import time.
+        from masim.utils.config import load_config
+
+        yaml_config = load_config(path)
+        return cls(SimulationConfig(**yaml_config))
+
+    # ------------------------------------------------------------------
+    # Lifecycle
+    # ------------------------------------------------------------------
+
+    async def execute(self) -> List[Dict[str, Any]]:
+        """Run the full scenario lifecycle: preflight → setup → run → shutdown.
+
+        Returns the round-result list produced by the underlying simulator's
+        ``run()``. Any exception during setup/run is re-raised after
+        ``shutdown()`` completes, so Ray actors are always released.
+        """
+        await self._preflight()
+        await self.simulator.setup()
+        try:
+            results = await self.simulator.run()
+            return results
+        finally:
+            await self.simulator.shutdown()
+
+    async def _preflight(self) -> None:
+        """Config-driven preflight — override to append mode-specific phases.
+
+        Default behavior: if the config declares knowledge sources (top-level
+        ``knowledge:`` or per-player ``extras.private_knowledge.rag``), build
+        the shared RAG index and inject the resolved knowledge config into
+        each RAG player's ``extras`` before ``setup()``.
+
+        Subclasses adding a new mode (streaming, distributed, etc.) SHOULD
+        call ``await super()._preflight()`` first, then append their own
+        phase, so knowledge preprocessing continues to work across modes.
+        """
+        knowledge_config = extract_knowledge_config(self.config)
+        if knowledge_config is None:
+            return
+        self.resource_manager = await self._preflight_knowledge(knowledge_config)
+        # After index is ready, propagate resolved knowledge config into each
+        # RAG agent's extras and hand the ResourceManager to the simulator so
+        # PlayerPersonas can access shared resources.
+        for player_cfg in self.config.players.values():
+            extras = player_cfg.get("config", {}).get("extras", {})
+            if isinstance(extras, dict) and "private_knowledge" in extras:
+                extras["knowledge"] = knowledge_config
+        if hasattr(self.simulator, "resource_manager"):
+            self.simulator.resource_manager = self.resource_manager
+
+    async def _preflight_knowledge(
+        self, knowledge_config: Dict[str, Any]
+    ) -> Any:
+        """Build the shared RAG index and return a ready ``ResourceManager``.
+
+        Delegated helper so subclasses can override just the knowledge phase
+        (e.g. to swap in an alternative retrieval backend) without touching
+        the outer preflight orchestration.
+        """
+        # Imported lazily — only scenarios that actually use RAG pay the
+        # cost of loading knowledge / dotenv-consuming modules.
+        from masim.knowledge import ResourceManager
+        from masim.knowledge.manager import KnowledgeManager
+
+        self._warn_missing_env_keys()
+
+        print("[SETUP] Initializing ResourceManager...")
+        resource_manager = ResourceManager(knowledge_config)
+        knowledge_manager = KnowledgeManager.from_config(knowledge_config)
+
+        print("[SETUP] Checking and pre-processing documents...")
+        results = resource_manager.prepare_shared_resources(fail_fast=False)
+        success = sum(1 for v in results.values() if v)
+        total = len(results)
+        print(f"[SETUP] Document status: {success}/{total} ready")
+        if total == 0:
+            print("[SETUP] No PDFs found in shared resources.")
+        elif success == total:
+            print("[SETUP] All documents ready!")
+
+        print("[SETUP] Building shared RAG index...")
+        shared_store = knowledge_manager.build_shared_rag_index()
+        if shared_store:
+            print("[SETUP] Shared RAG index ready!")
+        else:
+            print("[SETUP] No shared RAG index built (no processed documents available).")
+
+        return resource_manager
+
+    @staticmethod
+    def _warn_missing_env_keys() -> None:
+        """Emit a warning for API keys typically needed by RAG scenarios."""
+        keys = {
+            "ARK_API_KEY": "LLM inference",
+            "HUNYUAN_API_KEY": "RAG embedding",
+            "MINERU_API_KEY": "PDF parsing",
+        }
+        for key, purpose in keys.items():
+            if not os.getenv(key):
+                print(f"WARNING: {key} not set! {purpose} will not function.")

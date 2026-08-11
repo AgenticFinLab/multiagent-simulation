@@ -32,6 +32,7 @@ from masim.evaluation.finance import (
     validate_asset_bubble,
 )
 from masim.utils import load_config, load_results
+from masim.evaluation.data_loader import batch_to_rounds
 
 
 def _market_players(results) -> Dict[str, Any]:
@@ -65,11 +66,6 @@ def _market_data_from_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     return {}
 
 
-def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Convert a batch store list to {round_num: value} (round_num starts at 1)."""
-    return {i + 1: v for i, v in enumerate(values)}
-
-
 def _load_data(results) -> Dict[str, Any]:
     """Extract analysis-ready data dicts from a SimulationResults object.
 
@@ -93,11 +89,11 @@ def _load_data(results) -> Dict[str, Any]:
     volumes: Dict[int, float] = {}
     for player in _market_players(results).values():
         if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
+            market_prices.update(batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+            fundamentals.update(batch_to_rounds(player.batch("fundamental").all()))
         if "volume" in player.batch_store_names:
-            volumes.update(_batch_to_rounds(player.batch("volume").all()))
+            volumes.update(batch_to_rounds(player.batch("volume").all()))
         for round_num, payload in player.turns.payloads().items():
             market_data = _market_data_from_payload(payload)
             if round_num not in market_prices and "price" in market_data:

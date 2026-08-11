@@ -22,7 +22,7 @@ from typing import Any, Dict, List
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
 from masim.format.broadcast import get_coordinator_action_types
 
-logger = logging.getLogger("masim.agents.market_deposit_bank_run_diamond_dybvig")
+logger = logging.getLogger("masim.agents.market.deposit_bank_run_diamond_dybvig")
 
 _VALID_ACTION_TYPES = get_coordinator_action_types("deposit-bank-run-diamond-dybvig")
 

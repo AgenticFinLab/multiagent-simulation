@@ -571,7 +571,7 @@ New financial archetypes MUST inherit from `CanonicalRulePlayer` / `CanonicalLLM
 Filter frozensets and metric groupings MUST NOT hard-code kebab strategy strings. Import the canonical class-attribute:
 
 ```python
-from masim.agents.momentum_trader import MomentumTrader
+from masim.agents.finance.momentum_trader import MomentumTrader
 BIASED_STRATEGIES = frozenset({MomentumTrader.STRATEGY, ...})
 ```
 

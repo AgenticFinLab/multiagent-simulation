@@ -33,6 +33,7 @@ import numpy as np
 
 from masim.utils import load_config, load_results
 from masim.evaluation import write_universal_summary
+from masim.evaluation.data_loader import batch_to_rounds
 
 
 # ---------------------------------------------------------------------------
@@ -200,11 +201,6 @@ class StandardValidationResult:
         }
 
 
-def _batch_to_rounds(values: list[Any]) -> Dict[int, float]:
-    """Convert a batch store list to `{round_num: value}`."""
-    return {index + 1: float(value) for index, value in enumerate(values)}
-
-
 def _market_data_from_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Return market data from a turn payload, supporting nested and flat shapes."""
     market_data = payload.get("market_data")
@@ -233,11 +229,11 @@ def _load_data(results: Any) -> Dict[str, Any]:
 
     for player in _market_players(results).values():
         if "price" in player.batch_store_names:
-            market_prices.update(_batch_to_rounds(player.batch("price").all()))
+            market_prices.update(batch_to_rounds(player.batch("price").all()))
         if "fundamental" in player.batch_store_names:
-            fundamentals.update(_batch_to_rounds(player.batch("fundamental").all()))
+            fundamentals.update(batch_to_rounds(player.batch("fundamental").all()))
         if "volume" in player.batch_store_names:
-            volumes.update(_batch_to_rounds(player.batch("volume").all()))
+            volumes.update(batch_to_rounds(player.batch("volume").all()))
         for round_num, payload in player.turns.payloads().items():
             market_data = _market_data_from_payload(payload)
             if round_num not in market_prices and "price" in market_data:

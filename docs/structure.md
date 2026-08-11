@@ -45,8 +45,10 @@ multiagent-simulation/
 |-- masim/                    # 通用模拟框架 + 设计 Skill
 |   |-- agents/              # 209 个 archetype .py + defines/ 行为规格
 |   |   |-- _base.py  _coordinator_base.py  _rag_base.py
-|   |   |-- momentum_trader.py  contrarian_investor.py  ...  (209)
-|   |   `-- defines/         # 可复用 Agent 行为规格档案库
+|   |   |-- finance/         # 195 个金融 investor agent (snake_case .py)
+|   |   |-- market/          # 9 个 market coordinator (snake_case .py)
+|   |   |-- opinion/         # 5 个 opinion agent (snake_case .py)
+|   |   `-- defines/         # 可复用 Agent 行为规格档案库（与上面 1:1 镜像）
 |   |       |-- finance/     # 195 个金融 agent 档案 (kebab-case .md)
 |   |       |-- market/      # 9 个 market coordinator 档案
 |   |       |-- opinion/     # 5 个 opinion-propagation 档案
@@ -75,7 +77,7 @@ multiagent-simulation/
 
 | 模块                  | 职责                                 | 主要入口                                                                                                                                     |
 |-----------------------|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `masim/simulator`     | 加载配置、管理轮次、拓扑和 Ray Actor | `GeneralSimulator`                                                                                                                           |
+| `masim/simulator`     | 加载配置、管理轮次、拓扑和 Ray Actor；每个 `{V}Simulator` 与其配对的 `{V}SimulationRunner` + 模块级 `run()` CLI 便捷函数**同文件共存**（新模式按同一模板扩展） | `GeneralSimulator` / `GeneralSimulationRunner` / `run(scenario, default_config, ...)` / `BaseSimulationRunner`                                |
 | `masim/player`        | Agent 感知/决策/行动的通用基类       | `GeneralPlayer`                                                                                                                              |
 | `masim/agents`        | 金融场景 canonical 基类 + 29 个 archetype | `CanonicalRulePlayer` / `CanonicalLLMPlayer` / `CanonicalRagPlayer` / `CanonicalMarketCoordinator` / `_apply_fill_and_emit_action` / `on_fill` |
 | `masim/persona`       | 将 Player 包装为 Ray Actor           | `PlayerPersona`                                                                                                                              |
@@ -86,7 +88,6 @@ multiagent-simulation/
 | `masim/format`        | 通用 prompt / 订单 schema / 订单最终化 | `order.py`、`base_prompts.py`、`finalize.py` (`require_positive_bid_price` / `clip_order_to_liquidity`)                                       |
 | `masim/interface`     | Streamlit 场景选择、回放和分析       | `app.py`                                                                                                                                     |
 | `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`                                                                                                                |
-| `masim/cli`           | 通用场景 runner（消除 run_*.py 样板） | `run(scenario, variant, default_config, ...)`                                                                                                |
 | `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
 
 职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则；`masim/skills/` 不参与运行时，只供设计阶段调用。
@@ -114,7 +115,7 @@ examples/{Scenario}/
 `-- {Mechanism}/            # 是否包含取决于目标文件 §10.1 的 build matrix
     |-- players.py        # 市场与投资者实现
     |-- prompts.py        # LLM 提示词，Rule 模式可能没有
-    |-- run_*.py          # 单实验入口（thin shim → masim.cli.run）
+    |-- run_*.py          # 单实验入口（thin shim → masim.simulator.general.run）
     |-- analysis.py       # 结果分析（Rule 为权威实现，其余继承）
     |-- explain.md        # 机制与实现说明（引用 simulation-bases.md §N.M）
     `-- analysis.md       # 指标说明（引用 analysis-bases.md §N.M）
@@ -212,7 +213,7 @@ masim/agents/defines/
 - 单个 Agent 档案严格遵循 `masim/skills/agent-design-skill.md` 的 11 节格式；
 - 文件名采用 kebab-case（如 `momentum-trader.md`、`fundamental-analyst.md`），与 H1 一致；
 - 领域子目录（`finance/`、`market/`、`opinion/`，未来可能的 `epidemics/` 等）由档案的真实领域决定；
-- 每个 `.md` 档案与 `masim/agents/` 下的同名（snake_case）`.py` 实现构成 **1:1 映射**；新增 Agent 必须同时添加 `.md` 规格和 `.py` 实现；
+- 每个 `.md` 档案与 `masim/agents/<domain>/` 下的同名（snake_case）`.py` 实现构成 **1:1 镜像映射**（如 `defines/finance/momentum-trader.md` ↔ `agents/finance/momentum_trader.py`）；新增 Agent 必须同时添加 `.md` 规格和 `.py` 实现；
 - 添加新 Agent 之前，必须先按 `masim/skills/create-simulation-pipeline.md`（新建场景时）或 `masim/skills/polish-simulation-pipeline.md`（升级已有场景时）的三段式匹配流程检索是否已有满足要求的档案。
 
 未发布或试验性的自定义场景写入 `examples/CUSTOMIZED_SIMULATION/`，构成熟稳定后再迁入 `examples/<Scenario>/`。

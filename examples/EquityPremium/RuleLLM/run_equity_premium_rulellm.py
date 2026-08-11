@@ -7,7 +7,7 @@ Usage::
         -c configs/EquityPremium/RuleLLM/simulation.yml
 """
 
-from masim.cli import run
+from masim.simulator.general import run
 
 if __name__ == "__main__":
     run(

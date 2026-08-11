@@ -29,7 +29,7 @@ from typing import Any, Dict, List
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from masim.utils import load_config, load_results
-from masim.evaluation import write_universal_summary
+from masim.evaluation.llm_harness import finalize_llm_analysis
 
 from examples.FlashCrash2010.Rule.analysis import (
     STANDARD_OUTPUT_FILES,
@@ -163,13 +163,9 @@ def analyze_llm(config_path: str) -> Dict[str, Any]:
     }
     with open(os.path.join(output_dir, "summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, default=str)
-    write_universal_summary(
-        data,
-        config,
-        output_dir,
-        scenario="FlashCrash2010",
-        variant="LLM",
-        extra_summary={"scenario_metrics": summary},
+    finalize_llm_analysis(
+        data, config, output_dir, "FlashCrash2010", summary,
+        config_path=config_path,
     )
     return summary
 

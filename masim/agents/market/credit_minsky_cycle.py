@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
 
-logger = logging.getLogger("masim.agents.market_credit_minsky_cycle")
+logger = logging.getLogger("masim.agents.market.credit_minsky_cycle")
 
 
 class MarketCreditMinskyCycle(CanonicalMarketCoordinator):

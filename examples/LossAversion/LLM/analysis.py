@@ -14,7 +14,7 @@ from examples.LossAversion.Rule.analysis import (
     load_simulation_data,
 )
 from masim.utils import load_config
-from masim.evaluation import write_universal_summary
+from masim.evaluation.llm_harness import finalize_llm_analysis
 
 DEFAULT_CONFIG = "configs/LossAversion/LLM/simulation.yml"
 
@@ -27,25 +27,9 @@ def main() -> Dict[str, Any]:
     data = load_simulation_data(config)
     output_dir = Path(config["setting"]["record_path"]).parent / "analysis"
     summary = analyze_lossaversion(data, config, str(output_dir))
-    # Compute the 36-metric Layer A baseline and write summary.json
-    # + four universal PNG dashboards. The variant is derived from
-    # the config path so shared-main re-exports still report right.
-    _variant = 'LLM'
-    _cfg_path = locals().get('args', None)
-    _cfg_path = getattr(_cfg_path, 'config', None) if _cfg_path else None
-    if isinstance(_cfg_path, str):
-        for _v in ('RuleLLM', 'Rule', 'LLM', 'Rag'):
-            if f'/{_v}/' in _cfg_path or _cfg_path.endswith(f'/{_v}'):
-                _variant = _v
-                break
-    _universal = write_universal_summary(
-        data,
-        config,
-        output_dir,
-        scenario='LossAversion',
-        variant=_variant,
-        extra_summary={'scenario_metrics': summary}
-            if isinstance(summary, dict) else None,
+    finalize_llm_analysis(
+        data, config, str(output_dir), "LossAversion", summary,
+        config_path=args.config,
     )
     return summary
 

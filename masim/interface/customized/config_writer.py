@@ -27,7 +27,7 @@ The generator never writes into ``examples/<Scenario>/`` — it only
 *reads* the chosen scenario once to copy ``simulation.yml`` /
 ``persona.yml`` and to source a single market block.  The customized
 ``players.yml`` references canonical agent classes via dotted import
-path (``masim.agents.noise_trader:RuleNoiseTrader``); LLM prompts
+path (``masim.agents.finance.noise_trader:RuleNoiseTrader``); LLM prompts
 reference the bundle-local ``prompts.py`` module so each bundle is
 self-contained and reproducible.
 """

@@ -29,7 +29,6 @@ from masim.evaluation.finance import (
 from masim.evaluation import write_universal_summary
 
 __all__ = [
-    "_batch_to_rounds",
     "_load_data",
     "_validate_black_monday",
     "_build_interpretation",
@@ -41,10 +40,6 @@ __all__ = [
 # Data loading
 # ---------------------------------------------------------------------------
 
-
-def _batch_to_rounds(values: list) -> Dict[int, float]:
-    """Legacy alias. See ``masim.evaluation.data_loader.batch_to_rounds``."""
-    return batch_to_rounds(values)
 
 
 def _load_data(results) -> Dict[str, Any]:
