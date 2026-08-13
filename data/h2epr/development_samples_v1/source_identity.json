@@ -1,0 +1,15 @@
+{
+  "draft_release": {
+    "identity": "h2epr_unified3000_finmycelium_draft_supplement_v1",
+    "tree_sha256": "d2d47a080cacb147b837a9d3f9b826a9e40c611a62a2b07e203030e9bfe453c1"
+  },
+  "event_and_evidence_release": {
+    "identity": "unified3000_directllm_final",
+    "tree_sha256": "5485a178cde7ee6d014ce88300074815cbcc66506a8ddaabe63e06dd09bc8105"
+  },
+  "reference_release": {
+    "identity": "unified3000_formal_gold_v2",
+    "tree_sha256": "b0f608addc7eeeec9673efd2de58c609827f8d8b092c60b77c29426091513d00"
+  },
+  "sample_contract": "h2epr_cross_domain_development_samples_v1"
+}

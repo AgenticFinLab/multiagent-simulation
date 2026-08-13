@@ -1,0 +1,9 @@
+sequence,public_event_id,title,domain,category,simulation_pattern,draft_source_kind,stage_count,episode_count,participant_count,action_count,participant_relation_count,transaction_count,source_count,evidence_character_count
+1,H2EPR-0288,Panic of 1907,Finance,Institutional Crises & Liquidity Runs,systemic liquidity shock and coordinated intervention,finmycelium_final_event_cascade_core,3,10,33,34,18,5,12,34458
+2,H2EPR-1031,Baoneng-Vanke Takeover Battle,Finance,"Corporate Governance, IPOs & M&A",strategic takeover contest and stakeholder response,finmycelium_final_event_cascade_expansion,4,10,33,31,24,6,10,28571
+3,H2EPR-0616,SingHealth Data Breach,Cybersecurity & Tech Governance,Data Breaches & Identity Risk,cyber incident detection response and accountability,finmycelium_final_event_cascade_core,4,8,26,26,17,2,12,33043
+4,H2EPR-0196,East Palestine Train Derailment,Energy & Environment,Industrial & Environmental Disasters,industrial emergency response and environmental governance,finmycelium_final_event_cascade_core,4,8,26,31,13,6,12,28398
+5,H2EPR-0892,Lebanese Civil War,Military & Geopolitics,War Outbreaks & Escalation,long-horizon multi-party conflict and intervention,finmycelium_final_event_cascade_core,4,9,40,43,18,7,12,30429
+6,H2EPR-0551,Angola Yellow Fever Outbreak of 2016,Public Health & Biosecurity,Regional Epidemics & Biosecurity,outbreak response vaccination and cross-border coordination,finmycelium_final_event_cascade_core,4,9,31,36,17,0,12,22327
+7,H2EPR-0481,Samsung Galaxy Note 7 Battery Recall Crisis,Science & Engineering,Engineering & Product Safety,product safety escalation recall and remediation,finmycelium_final_event_cascade_core,4,9,24,35,13,7,11,36000
+8,H2EPR-0170,TikTok Divestiture and National Security Dispute,Cybersecurity & Tech Governance,"Platform Governance, Surveillance & Influence",platform governance negotiation and policy conflict,finmycelium_final_event_cascade_core,4,10,26,30,13,1,12,29614
