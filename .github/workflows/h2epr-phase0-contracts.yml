@@ -5,14 +5,34 @@ name: H2EPR Phase-0 contracts
     paths:
       - "projects/h2epr/**"
       - ".github/workflows/h2epr-phase0-contracts.yml"
+      - "README.md"
+      - "data/h2epr/README.md"
       - "docs/development-environment.md"
+      - "docs/structure.md"
       - "environments/lmsim.yml"
+      - "masim/agents/finance/**"
+      - "masim/agents/market/**"
+      - "masim/agents/opinion/**"
+      - "masim/simulator/base.py"
+      - "masim/simulator/general.py"
+      - "requirements.txt"
+      - "setup.py"
   push:
     paths:
       - "projects/h2epr/**"
       - ".github/workflows/h2epr-phase0-contracts.yml"
+      - "README.md"
+      - "data/h2epr/README.md"
       - "docs/development-environment.md"
+      - "docs/structure.md"
       - "environments/lmsim.yml"
+      - "masim/agents/finance/**"
+      - "masim/agents/market/**"
+      - "masim/agents/opinion/**"
+      - "masim/simulator/base.py"
+      - "masim/simulator/general.py"
+      - "requirements.txt"
+      - "setup.py"
 
 permissions:
   contents: read
