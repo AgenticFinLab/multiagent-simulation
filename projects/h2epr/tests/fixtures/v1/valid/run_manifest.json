@@ -1,0 +1,98 @@
+{
+  "artifact_identity": {
+    "artifact_id": "manifest.synthetic.001",
+    "artifact_kind": "run_manifest",
+    "schema_version": "h2epr.phase0.r1",
+    "producer_version": "phase0_fixture.r1",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "parent_artifacts": [
+      {
+        "artifact_id": "runtime.synthetic.strict.001",
+        "artifact_kind": "runtime_scenario_bundle",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "artifact_sha256": "10c01f29f013759c2aa2373d294d3e7cff296dd68e6dce1353d906658a445dc9"
+      }
+    ],
+    "review_state": "reviewed"
+  },
+  "manifest_id": "manifest.synthetic.001",
+  "run_id": "run.synthetic.001",
+  "scenario_id": "scenario.synthetic.strict.001",
+  "event_id": "event.synthetic.001",
+  "protocol_context": {
+    "protocol_label": "strict_continuation",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "root_construction_artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1"
+  },
+  "source_kind": "synthetic",
+  "runtime_bundle_sha256": "10c01f29f013759c2aa2373d294d3e7cff296dd68e6dce1353d906658a445dc9",
+  "config_sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+  "code_artifact_hashes": [
+    "9999999999999999999999999999999999999999999999999999999999999999"
+  ],
+  "contract_versions": [
+    "h2epr.phase0.r1",
+    "trace.contract.r1",
+    "hash.contract.r1"
+  ],
+  "time_policy": {
+    "t0": "2000-01-01T23:59:59Z",
+    "start": "2000-01-02T00:00:00Z",
+    "horizon": "2000-01-02T23:59:59Z",
+    "timezone": "UTC",
+    "clock_mode": "event_driven",
+    "daily_barrier": true,
+    "tail_policy": "close_due_at_horizon_no_adaptive_tail",
+    "boundary_policy_version": "time.boundary.r1"
+  },
+  "participant_artifact_hashes": [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  ],
+  "component_versions": [
+    "world.reducer.r1",
+    "rule.policy.r1",
+    "trace.writer.r1"
+  ],
+  "rng_streams": [
+    {
+      "stream_id": "policy.synthetic.actor.a",
+      "seed": 17
+    }
+  ],
+  "resume_allowed": false,
+  "fresh_output_attestation": true,
+  "leakage_preflight": {
+    "policy_version": "leakage.policy.r1",
+    "status": "pass",
+    "checks": [
+      "closed_schema",
+      "strict_identity",
+      "source_allowlist",
+      "reference_denied"
+    ],
+    "scanner_version": "synthetic.scanner.r1"
+  },
+  "reference_access": "denied",
+  "canonicalization_version": "h2epr_cjson.v1",
+  "manifest_hash_preimage": "omit_manifest_sha256_and_operational_metadata",
+  "manifest_sha256": "3ac3f153597b5c0d661ec6e32c59139b904b43ab714ce1b253bde915d393e106",
+  "operational_metadata": {
+    "captured_wall_clock": "excluded-from-scientific-manifest-hash",
+    "host_process_id": "excluded-from-scientific-manifest-hash"
+  }
+}

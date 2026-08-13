@@ -1,0 +1,59 @@
+{
+  "allowlist_schema_version": "h2epr.external.construction.anchor.allowlist.v1",
+  "allowlist_id": "h2epr.synthetic.anchor.allowlist.v1",
+  "anchor_class": "synthetic_test_only",
+  "freeze_scope": "synthetic_expected_construction_lineage_only",
+  "entries": [
+    {
+      "entry_id": "anchor.h2epr.0288.full-draft-target-demo.r1",
+      "event_id": "H2EPR-0288",
+      "lineage_ref": {
+        "artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1",
+        "artifact_kind": "full_draft_target_demo_construction_bundle",
+        "construction_state": "full_draft_target_demo",
+        "artifact_scope": "target_specific",
+        "source_scope": "full_draft_target_specific",
+        "builder_access": "full_target_draft",
+        "contamination_status": "full_draft_exposed",
+        "protocol_eligibility": "architecture_demo_only",
+        "artifact_sha256": "060958af637f48fcb1ef805686e126b8e87b62f01665bcbffbd93400255bbb36"
+      },
+      "content_hash_preimage": "omit_construction_seal_and_operational_metadata",
+      "review_state": "synthetic_contract_fixture"
+    },
+    {
+      "entry_id": "anchor.h2epr.0288.prefix-contaminated-demo.r1",
+      "event_id": "H2EPR-0288",
+      "lineage_ref": {
+        "artifact_id": "h2epr.0288.prefix.contaminated.demo.bundle.r1",
+        "artifact_kind": "prefix_contaminated_demo_construction_bundle",
+        "construction_state": "prefix_contaminated_demo",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_inputs_after_full_draft_exposure",
+        "contamination_status": "full_draft_exposed",
+        "protocol_eligibility": "architecture_demo_only",
+        "artifact_sha256": "d830d3c07296900a31f8470b275dd1a63d8327698d1843b3911822118e25ad03"
+      },
+      "content_hash_preimage": "omit_construction_seal_and_operational_metadata",
+      "review_state": "synthetic_contract_fixture"
+    },
+    {
+      "entry_id": "anchor.h2epr.0288.prefix-clean-strict.r1",
+      "event_id": "H2EPR-0288",
+      "lineage_ref": {
+        "artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1",
+        "artifact_kind": "prefix_clean_strict_construction_bundle",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "artifact_sha256": "46dae8356e16315e5c6c291316bd44cbe543c4f861ed02a5e37d9232cd2c6d7e"
+      },
+      "content_hash_preimage": "omit_construction_seal_and_operational_metadata",
+      "review_state": "synthetic_contract_fixture"
+    }
+  ]
+}

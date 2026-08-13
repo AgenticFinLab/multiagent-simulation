@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/participant_artifact.schema.json",
+  "title": "Participant Artifact V1",
+  "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ParticipantArtifact"
+}

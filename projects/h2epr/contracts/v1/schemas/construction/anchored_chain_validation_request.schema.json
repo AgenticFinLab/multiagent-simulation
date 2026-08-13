@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/anchored_chain_validation_request.schema.json",
+  "title": "Anchored Artifact Chain Validation Request V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_schema_version",
+    "chain_fixture",
+    "external_anchor_context",
+    "internal_chain_anchor_role",
+    "validation_policy"
+  ],
+  "properties": {
+    "request_schema_version": {
+      "const": "h2epr.anchored.chain.validation.request.v1"
+    },
+    "chain_fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "builder",
+        "builder_version",
+        "dependency_receipt_sha256"
+      ],
+      "properties": {
+        "builder": {
+          "const": "typed_artifact_chain.synthetic_builder"
+        },
+        "builder_version": {
+          "const": "h2epr.contract.validator.v1"
+        },
+        "dependency_receipt_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "external_anchor_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowlist_id",
+        "allowlist_sha256",
+        "context_id",
+        "context_sha256"
+      ],
+      "properties": {
+        "allowlist_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowlist_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "context_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "internal_chain_anchor_role": {
+      "const": "untrusted_echo_must_equal_external_expected_lineage"
+    },
+    "validation_policy": {
+      "const": "external_anchor_precedes_chain_validation.v1"
+    }
+  }
+}

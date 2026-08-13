@@ -1,0 +1,203 @@
+{
+  "artifact_identity": {
+    "artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1",
+    "artifact_kind": "full_draft_target_demo_construction_bundle",
+    "schema_version": "h2epr.phase0.r1",
+    "producer_version": "phase0_fixture.r1",
+    "construction_state": "full_draft_target_demo",
+    "artifact_scope": "target_specific",
+    "source_scope": "full_draft_target_specific",
+    "builder_access": "full_target_draft",
+    "contamination_status": "full_draft_exposed",
+    "protocol_eligibility": "architecture_demo_only",
+    "parent_artifacts": [],
+    "review_state": "reviewed"
+  },
+  "t0": {
+    "lower": null,
+    "upper": null,
+    "precision": "unknown",
+    "timezone": null,
+    "uncertainty": "P-001 remains pending; this contract fixture does not freeze the H2EPR-0288 cut."
+  },
+  "input_assets": [
+    {
+      "asset_id": "h2epr.0288.event.spec",
+      "asset_role": "target_event_identity_and_scope",
+      "source_kind": "event_spec",
+      "content_sha256": "a9f262b9d48a1b594b8a65f5ebdd39184996b34423be3d432390a3917bad1a52",
+      "byte_count": 619,
+      "read_only": true,
+      "allowed_json_pointers": [
+        ""
+      ]
+    },
+    {
+      "asset_id": "h2epr.0288.finmycelium.draft",
+      "asset_role": "target_specific_architecture_demo_construction",
+      "source_kind": "draft_epg",
+      "content_sha256": "4f98abfe0432fa1f41b6494e5966622f92ecf163584f5a8023fa5c2af8c9d8a3",
+      "byte_count": 316834,
+      "read_only": true,
+      "allowed_json_pointers": [
+        ""
+      ]
+    },
+    {
+      "asset_id": "h2epr.0288.frozen.evidence",
+      "asset_role": "bounded_evidence_references_only",
+      "source_kind": "frozen_evidence",
+      "content_sha256": "c27f6f36dcb008c3314e458e9d4c4fa714a3b1a7ba4150b13e0e33d94a7f6bb3",
+      "byte_count": 100292,
+      "read_only": true,
+      "allowed_json_pointers": []
+    }
+  ],
+  "source_field_policy": {
+    "policy_id": "h2epr.0288.full.demo.source.policy",
+    "policy_version": "h2epr.0288.full.demo.source.policy.r1",
+    "access_class": "full_draft_target_demo",
+    "allowed_source_kinds": [
+      "event_spec",
+      "draft_epg",
+      "frozen_evidence",
+      "generic_contract",
+      "synthetic"
+    ],
+    "gold_fallback_label_requirement": "architecture_debug_gold_fallback",
+    "review_state": "reviewed"
+  },
+  "availability_adjudications": [],
+  "entity_registry": [
+    {
+      "entity_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "aliases": [
+        "Synthetic Actor A"
+      ],
+      "semantic_fields": [],
+      "mention_refs": [
+        "draft.participant.synthetic.a"
+      ],
+      "runtime_disposition": "autonomous_participant_agent",
+      "aggregate_member_ids": [],
+      "information_loss": [],
+      "selection_review": {
+        "rubric_version": "participant.selection.r1",
+        "future_salience_used": true,
+        "verdict": "include",
+        "reviewer_role": "phase0_contract_reviewer"
+      }
+    }
+  ],
+  "participant_artifacts": [
+    {
+      "artifact_identity": {
+        "artifact_id": "synthetic.participant.a.full.demo",
+        "artifact_kind": "participant_artifact",
+        "schema_version": "h2epr.phase0.r1",
+        "producer_version": "phase0_fixture.r1",
+        "construction_state": "full_draft_target_demo",
+        "artifact_scope": "target_specific",
+        "source_scope": "full_draft_target_specific",
+        "builder_access": "full_target_draft",
+        "contamination_status": "full_draft_exposed",
+        "protocol_eligibility": "architecture_demo_only",
+        "parent_artifacts": [],
+        "review_state": "reviewed"
+      },
+      "runtime_actor_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "representation_class": "autonomous_participant_agent",
+      "participant_profile": [],
+      "behavior_profile": [],
+      "skill_set": [],
+      "goal_set": [],
+      "constraint_set": [],
+      "information_boundary": {
+        "allowed_observation_types": [
+          "public_signal"
+        ],
+        "accessible_entity_ids": [
+          "synthetic.actor.a"
+        ],
+        "denied_semantic_fields": [
+          "suffix_outcome"
+        ],
+        "policy_ref": "synthetic.info.boundary.r1"
+      },
+      "action_space_refs": [
+        "synthetic.observe_and_wait"
+      ],
+      "communication_policy_ref": "synthetic.communication.policy.r1",
+      "initial_resource_state": [],
+      "rule_policy_ref": "synthetic.rule.policy.r1",
+      "review_state": "reviewed"
+    }
+  ],
+  "initial_world_state": {
+    "state_version": 0,
+    "entities": [
+      "synthetic.actor.a"
+    ],
+    "resources": [],
+    "relations": [],
+    "commitments": [],
+    "risks": [],
+    "access_grants": [],
+    "public_signals": [],
+    "process_states": []
+  },
+  "action_registry": [
+    {
+      "action_type": "synthetic.observe_and_wait",
+      "version": "synthetic.observe_and_wait.r1",
+      "allowed_representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "parameter_names": [],
+      "state_changing": false,
+      "review_state": "reviewed"
+    }
+  ],
+  "communication_routes": [],
+  "observation_access_rules": [
+    {
+      "actor_id": "synthetic.actor.a",
+      "field_name": "public_signal",
+      "access": "public",
+      "latency_ticks": 0
+    }
+  ],
+  "exogenous_manifest": [],
+  "rule_policy_refs": [
+    "synthetic.rule.policy.r1"
+  ],
+  "scheduler_review_state": "reviewed",
+  "clean_builder_attestation": false,
+  "contamination_disclosures": [
+    "The builder inspected the complete target draft.",
+    "This artifact and all descendants remain architecture_demo_only."
+  ],
+  "owner_decision_gate": {
+    "decision_id": "SD-001",
+    "supersedes_baseline_decision": "F-004",
+    "proposal_owner": "contract_specification_window",
+    "approval_owner": "project_owner",
+    "status": "pending",
+    "execution_authorized": false
+  },
+  "construction_seal": {
+    "seal_type": "construction_bundle",
+    "artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1",
+    "artifact_kind": "full_draft_target_demo_construction_bundle",
+    "construction_state": "full_draft_target_demo",
+    "canonicalization_version": "h2epr_cjson.v1",
+    "hash_preimage": "omit_construction_seal_and_operational_metadata",
+    "content_sha256": "060958af637f48fcb1ef805686e126b8e87b62f01665bcbffbd93400255bbb36"
+  }
+}

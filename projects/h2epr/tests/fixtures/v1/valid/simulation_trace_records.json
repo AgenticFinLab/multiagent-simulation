@@ -1,0 +1,261 @@
+{
+  "artifact_identity": {
+    "artifact_id": "trace.synthetic.001",
+    "artifact_kind": "simulation_trace",
+    "schema_version": "h2epr.phase0.r1",
+    "producer_version": "phase0_fixture.r1",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "parent_artifacts": [
+      {
+        "artifact_id": "manifest.synthetic.001",
+        "artifact_kind": "run_manifest",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "artifact_sha256": "3ac3f153597b5c0d661ec6e32c59139b904b43ab714ce1b253bde915d393e106"
+      }
+    ],
+    "review_state": "reviewed"
+  },
+  "protocol_context": {
+    "protocol_label": "strict_continuation",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "root_construction_artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1"
+  },
+  "trace_artifact_id": "trace.synthetic.001",
+  "run_id": "run.synthetic.001",
+  "source_manifest_sha256": "3ac3f153597b5c0d661ec6e32c59139b904b43ab714ce1b253bde915d393e106",
+  "trace_usage_class": "compiler_evaluator_eligible",
+  "records": [
+    {
+      "trace_id": "trace.record.000",
+      "trace_artifact_id": "trace.synthetic.001",
+      "run_id": "run.synthetic.001",
+      "schema_version": "h2epr.trace.record.r1",
+      "protocol_context": {
+        "protocol_label": "strict_continuation",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "root_construction_artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1"
+      },
+      "record_type": "tick_opened",
+      "logical_tick": 0,
+      "tick_phase": "open",
+      "sequence_in_tick": 0,
+      "simulation_time": {
+        "lower": "2000-01-02T00:00:00Z",
+        "upper": "2000-01-02T00:00:00Z",
+        "precision": "exact_datetime",
+        "timezone": "UTC",
+        "uncertainty": ""
+      },
+      "masim_round": 0,
+      "execution_level": 0,
+      "first_consumable_round": null,
+      "actor_id": null,
+      "target_ids": [],
+      "visibility": "system",
+      "channel": null,
+      "payload": {
+        "event_id": "tick.0.open",
+        "event_type": "tick_opened",
+        "fields": [],
+        "reason_codes": [
+          "scheduled_tick"
+        ]
+      },
+      "observation_refs": [],
+      "decision_refs": [],
+      "intent_refs": [],
+      "message_refs": [],
+      "parent_trace_ids": [],
+      "causal_parent_ids": [],
+      "state_before_version": 0,
+      "state_after_version": 0,
+      "source_kind": "simulation",
+      "component_id": "event.stage.controller",
+      "component_version": "event.stage.controller.r1",
+      "rule_id": "tick.open.rule",
+      "rule_version": "tick.open.rule.r1",
+      "rng_draw_id": null,
+      "canonicalization_version": "h2epr_cjson.v1",
+      "record_hash_preimage": "omit_record_hash_and_operational_metadata_include_previous_record_hash",
+      "previous_record_hash": "3ac3f153597b5c0d661ec6e32c59139b904b43ab714ce1b253bde915d393e106",
+      "record_hash": "b5b9b427fbb6bac9d2924e4a9000014373220065a3769bbe3d2f48e50b9a8497",
+      "operational_metadata": {
+        "captured_wall_clock": "excluded",
+        "host_process_id": "excluded"
+      }
+    },
+    {
+      "trace_id": "trace.record.001",
+      "trace_artifact_id": "trace.synthetic.001",
+      "run_id": "run.synthetic.001",
+      "schema_version": "h2epr.trace.record.r1",
+      "protocol_context": {
+        "protocol_label": "strict_continuation",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "root_construction_artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1"
+      },
+      "record_type": "tick_sealed",
+      "logical_tick": 0,
+      "tick_phase": "seal",
+      "sequence_in_tick": 1,
+      "simulation_time": {
+        "lower": "2000-01-02T23:59:59Z",
+        "upper": "2000-01-02T23:59:59Z",
+        "precision": "exact_datetime",
+        "timezone": "UTC",
+        "uncertainty": ""
+      },
+      "masim_round": 0,
+      "execution_level": 0,
+      "first_consumable_round": null,
+      "actor_id": null,
+      "target_ids": [],
+      "visibility": "system",
+      "channel": null,
+      "payload": {
+        "seal_type": "tick",
+        "logical_tick": 0,
+        "manifest_sha256": "3ac3f153597b5c0d661ec6e32c59139b904b43ab714ce1b253bde915d393e106",
+        "first_record_hash": "b5b9b427fbb6bac9d2924e4a9000014373220065a3769bbe3d2f48e50b9a8497",
+        "last_record_hash_before_seal": "b5b9b427fbb6bac9d2924e4a9000014373220065a3769bbe3d2f48e50b9a8497",
+        "record_count_before_seal": 1,
+        "state_before_version": 0,
+        "state_after_version": 0,
+        "state_before_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "state_after_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "closure_check_version": "tick.closure.r1",
+        "closure_result": "pass",
+        "tick_validity": "valid",
+        "canonicalization_version": "h2epr_cjson.v1"
+      },
+      "observation_refs": [],
+      "decision_refs": [],
+      "intent_refs": [],
+      "message_refs": [],
+      "parent_trace_ids": [
+        "trace.record.000"
+      ],
+      "causal_parent_ids": [
+        "trace.record.000"
+      ],
+      "state_before_version": 0,
+      "state_after_version": 0,
+      "source_kind": "simulation",
+      "component_id": "trace.sealer",
+      "component_version": "trace.sealer.r1",
+      "rule_id": "tick.seal.rule",
+      "rule_version": "tick.seal.rule.r1",
+      "rng_draw_id": null,
+      "canonicalization_version": "h2epr_cjson.v1",
+      "record_hash_preimage": "omit_record_hash_and_operational_metadata_include_previous_record_hash",
+      "previous_record_hash": "b5b9b427fbb6bac9d2924e4a9000014373220065a3769bbe3d2f48e50b9a8497",
+      "record_hash": "0fbdcc2d310cacb1a4bbfd02e777bb77b82f95840e3040b4614bb98d6633b776"
+    },
+    {
+      "trace_id": "trace.record.002",
+      "trace_artifact_id": "trace.synthetic.001",
+      "run_id": "run.synthetic.001",
+      "schema_version": "h2epr.trace.record.r1",
+      "protocol_context": {
+        "protocol_label": "strict_continuation",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "root_construction_artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1"
+      },
+      "record_type": "run_sealed",
+      "logical_tick": 0,
+      "tick_phase": "seal",
+      "sequence_in_tick": 2,
+      "simulation_time": {
+        "lower": "2000-01-02T23:59:59Z",
+        "upper": "2000-01-02T23:59:59Z",
+        "precision": "exact_datetime",
+        "timezone": "UTC",
+        "uncertainty": ""
+      },
+      "masim_round": 0,
+      "execution_level": 0,
+      "first_consumable_round": null,
+      "actor_id": null,
+      "target_ids": [],
+      "visibility": "system",
+      "channel": null,
+      "payload": {
+        "seal_type": "run",
+        "run_id": "run.synthetic.001",
+        "manifest_sha256": "3ac3f153597b5c0d661ec6e32c59139b904b43ab714ce1b253bde915d393e106",
+        "trace_prefix_sha256": "b9175e73249c211fb548c3789126ae66c5dfd288b29354f6e8485afe6d92420b",
+        "record_count_before_run_seal": 2,
+        "first_record_hash": "b5b9b427fbb6bac9d2924e4a9000014373220065a3769bbe3d2f48e50b9a8497",
+        "last_record_hash_before_run_seal": "0fbdcc2d310cacb1a4bbfd02e777bb77b82f95840e3040b4614bb98d6633b776",
+        "tick_seal_record_hashes": [
+          "0fbdcc2d310cacb1a4bbfd02e777bb77b82f95840e3040b4614bb98d6633b776"
+        ],
+        "terminal_state_version": 0,
+        "terminal_state_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "closure_check_version": "run.closure.r1",
+        "closure_result": "pass",
+        "run_validity": "valid",
+        "canonicalization_version": "h2epr_cjson.v1"
+      },
+      "observation_refs": [],
+      "decision_refs": [],
+      "intent_refs": [],
+      "message_refs": [],
+      "parent_trace_ids": [
+        "trace.record.001"
+      ],
+      "causal_parent_ids": [
+        "trace.record.001"
+      ],
+      "state_before_version": 0,
+      "state_after_version": 0,
+      "source_kind": "simulation",
+      "component_id": "trace.sealer",
+      "component_version": "trace.sealer.r1",
+      "rule_id": "run.seal.rule",
+      "rule_version": "run.seal.rule.r1",
+      "rng_draw_id": null,
+      "canonicalization_version": "h2epr_cjson.v1",
+      "record_hash_preimage": "omit_record_hash_and_operational_metadata_include_previous_record_hash",
+      "previous_record_hash": "0fbdcc2d310cacb1a4bbfd02e777bb77b82f95840e3040b4614bb98d6633b776",
+      "record_hash": "44344b6aa40c1ca6c2dd5853222e2eda2b71b29de4bea3f97f64c0b27f8cbaff"
+    }
+  ],
+  "trace_hash_preimage": "canonical_record_array_including_run_seal_omit_each_record_operational_metadata",
+  "canonicalization_version": "h2epr_cjson.v1",
+  "trace_sha256": "78e5f574aa94d6f94c8f30bd704f95c5bff94cfb78a8ac9d458214da043bc1ba",
+  "operational_metadata": {
+    "captured_wall_clock": "excluded-from-scientific-trace-hash",
+    "host_process_id": "excluded-from-scientific-trace-hash"
+  }
+}

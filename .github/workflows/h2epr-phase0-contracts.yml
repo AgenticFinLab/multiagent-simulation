@@ -1,0 +1,39 @@
+name: H2EPR Phase-0 contracts
+
+"on":
+  pull_request:
+    paths:
+      - "projects/h2epr/**"
+      - ".github/workflows/h2epr-phase0-contracts.yml"
+      - "docs/development-environment.md"
+      - "environments/lmsim.yml"
+  push:
+    paths:
+      - "projects/h2epr/**"
+      - ".github/workflows/h2epr-phase0-contracts.yml"
+      - "docs/development-environment.md"
+      - "environments/lmsim.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install contract-validation tools
+        run: >-
+          python -m pip install
+          pytest==9.0.3
+          iniconfig==2.3.0
+          pluggy==1.6.0
+          jsonschema==4.26.0
+      - name: Validate the offline Phase-0 contract surface
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python -m pytest -p no:cacheprovider projects/h2epr/tests

@@ -1,0 +1,317 @@
+{
+  "artifact_identity": {
+    "artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1",
+    "artifact_kind": "prefix_clean_strict_construction_bundle",
+    "schema_version": "h2epr.phase0.r1",
+    "producer_version": "phase0_fixture.r1",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "parent_artifacts": [],
+    "review_state": "reviewed"
+  },
+  "t0": {
+    "lower": "2000-01-01T23:59:59Z",
+    "upper": "2000-01-01T23:59:59Z",
+    "precision": "exact_datetime",
+    "timezone": "UTC",
+    "uncertainty": "synthetic contract sentinel; this fixture does not authorize construction or freeze H2EPR-0288 P-001"
+  },
+  "input_assets": [
+    {
+      "asset_id": "h2epr.0288.event.spec.strict.projection",
+      "asset_role": "strict_event_spec_projection",
+      "source_kind": "event_spec",
+      "content_sha256": "a9f262b9d48a1b594b8a65f5ebdd39184996b34423be3d432390a3917bad1a52",
+      "byte_count": 619,
+      "read_only": true,
+      "allowed_json_pointers": [
+        "/domain",
+        "/language_mode",
+        "/public_event_id",
+        "/schema_version",
+        "/title"
+      ]
+    },
+    {
+      "asset_id": "synthetic.draft.prefix.projection.001",
+      "asset_role": "strict_prefix_projection_placeholder",
+      "source_kind": "draft_epg_prefix_projection",
+      "content_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "byte_count": 1,
+      "read_only": true,
+      "allowed_json_pointers": [
+        "/stages/0"
+      ],
+      "projection_source_draft_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "projection_attestation_sha256": "a5234eb0e162b5a3f79ab8d736a96d1e9591be62cd62203e96e0f88426927aff",
+      "projection_attestation": {
+        "projection_id": "synthetic.draft.prefix.projection.001",
+        "schema_version": "h2epr.prefix.projection.attestation.v1",
+        "projection_content_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "source_draft_asset_id": "synthetic.source.draft.001",
+        "source_draft_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "t0": {
+          "lower": "2000-01-01T23:59:59Z",
+          "upper": "2000-01-01T23:59:59Z",
+          "precision": "exact_datetime",
+          "timezone": "UTC",
+          "uncertainty": "synthetic contract sentinel; does not freeze H2EPR-0288 P-001"
+        },
+        "cutoff": {
+          "lower": "2000-01-01T23:59:59Z",
+          "upper": "2000-01-01T23:59:59Z",
+          "precision": "exact_datetime",
+          "timezone": "UTC",
+          "uncertainty": "inclusive synthetic cutoff"
+        },
+        "cutoff_semantics": "include_only_claims_whose_upper_time_is_at_or_before_cutoff",
+        "projection_policy_id": "synthetic.prefix.projector.policy",
+        "projection_policy_version": "synthetic.prefix.projector.policy.r2",
+        "included_claim_pointers": [
+          "/stages/0"
+        ],
+        "included_source_pointers": [
+          "/stages/0/episodes/0"
+        ],
+        "suffix_absence_check": {
+          "scanner_version": "synthetic.suffix.absence.scanner.r2",
+          "checked_claim_pointer_count": 1,
+          "forbidden_suffix_claim_count": 0,
+          "result": "pass",
+          "receipt_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "producer_identity": {
+          "producer_id": "synthetic.noninteractive.prefix.projector",
+          "producer_version": "synthetic.noninteractive.prefix.projector.r2",
+          "build_id": "synthetic.clean.projection.build.001",
+          "execution_mode": "noninteractive_deterministic_cutoff_projector",
+          "prior_target_full_draft_exposure": false,
+          "interactive_target_analysis": false,
+          "reference_access": false
+        },
+        "consumer_boundary": {
+          "clean_builder_received_projection_only": true,
+          "full_draft_handle_available": false,
+          "suffix_handle_available": false
+        },
+        "review_receipt": {
+          "receipt_id": "synthetic.prefix.projection.review.001",
+          "receipt_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "reviewer_id": "synthetic.prefix.projection.reviewer",
+          "reviewer_role": "prefix_projection_reviewer",
+          "review_status": "reviewed_pass",
+          "reviewed_projection_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "reference_absence_attestation": {
+          "reference_opened": false,
+          "reference_parsed": false,
+          "reference_hashed": false,
+          "reference_copied": false,
+          "reference_handle_available_to_producer": false,
+          "reference_handle_available_to_clean_builder": false,
+          "static_scan_receipt_sha256": "abababababababababababababababababababababababababababababababab"
+        },
+        "canonicalization_version": "h2epr_cjson.v1",
+        "attestation_hash_preimage": "omit_attestation_sha256",
+        "attestation_sha256": "a5234eb0e162b5a3f79ab8d736a96d1e9591be62cd62203e96e0f88426927aff"
+      }
+    }
+  ],
+  "source_field_policy": {
+    "policy_id": "h2epr_0288_strict_source_policy",
+    "policy_version": "h2epr_0288_strict_source_policy.v1",
+    "event_spec_observed_json_pointers": [
+      "/category",
+      "/domain",
+      "/event_descriptor",
+      "/keywords",
+      "/language_mode",
+      "/public_event_id",
+      "/region_hint",
+      "/schema_version",
+      "/time_hint",
+      "/title"
+    ],
+    "event_spec_allowed_json_pointers": [
+      "/domain",
+      "/language_mode",
+      "/public_event_id",
+      "/schema_version",
+      "/title"
+    ],
+    "non_allowlist_field_adjudications": [
+      {
+        "json_pointer": "/category",
+        "verdict": "construction_only",
+        "reason_code": "possible_suffix_process_classification",
+        "approval_owner": "project_owner",
+        "decision_id": null
+      },
+      {
+        "json_pointer": "/event_descriptor",
+        "verdict": "reject",
+        "reason_code": "may_summarize_suffix_process",
+        "approval_owner": "project_owner",
+        "decision_id": null
+      },
+      {
+        "json_pointer": "/keywords",
+        "verdict": "reject",
+        "reason_code": "may_encode_suffix_outcomes",
+        "approval_owner": "project_owner",
+        "decision_id": null
+      },
+      {
+        "json_pointer": "/region_hint",
+        "verdict": "construction_only",
+        "reason_code": "not_yet_runtime_justified",
+        "approval_owner": "project_owner",
+        "decision_id": null
+      },
+      {
+        "json_pointer": "/time_hint",
+        "verdict": "reject",
+        "reason_code": "may_reveal_suffix_horizon",
+        "approval_owner": "project_owner",
+        "decision_id": null
+      }
+    ],
+    "source_kind_allowlist": [
+      "draft_epg_prefix_projection",
+      "event_spec",
+      "generic_contract",
+      "non_target_contemporaneous_source",
+      "synthetic"
+    ],
+    "gold_fallback_policy": "prohibited",
+    "raw_full_draft_handle_policy": "prohibited",
+    "review_state": "reviewed"
+  },
+  "availability_adjudications": [],
+  "entity_registry": [
+    {
+      "entity_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "aliases": [
+        "Synthetic Actor A"
+      ],
+      "semantic_fields": [],
+      "mention_refs": [
+        "draft.participant.synthetic.a"
+      ],
+      "runtime_disposition": "autonomous_participant_agent",
+      "aggregate_member_ids": [],
+      "information_loss": [],
+      "selection_review": {
+        "rubric_version": "participant.selection.r1",
+        "future_salience_used": false,
+        "verdict": "include",
+        "reviewer_role": "phase0_contract_reviewer"
+      }
+    }
+  ],
+  "participant_artifacts": [
+    {
+      "artifact_identity": {
+        "artifact_id": "synthetic.participant.a.strict",
+        "artifact_kind": "participant_artifact",
+        "schema_version": "h2epr.phase0.r1",
+        "producer_version": "phase0_fixture.r1",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "parent_artifacts": [],
+        "review_state": "reviewed"
+      },
+      "runtime_actor_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "representation_class": "autonomous_participant_agent",
+      "participant_profile": [],
+      "behavior_profile": [],
+      "skill_set": [],
+      "goal_set": [],
+      "constraint_set": [],
+      "information_boundary": {
+        "allowed_observation_types": [
+          "public_signal"
+        ],
+        "accessible_entity_ids": [
+          "synthetic.actor.a"
+        ],
+        "denied_semantic_fields": [
+          "suffix_outcome"
+        ],
+        "policy_ref": "synthetic.info.boundary.r1"
+      },
+      "action_space_refs": [
+        "synthetic.observe_and_wait"
+      ],
+      "communication_policy_ref": "synthetic.communication.policy.r1",
+      "initial_resource_state": [],
+      "rule_policy_ref": "synthetic.rule.policy.r1",
+      "review_state": "reviewed"
+    }
+  ],
+  "initial_world_state": {
+    "state_version": 0,
+    "entities": [
+      "synthetic.actor.a"
+    ],
+    "resources": [],
+    "relations": [],
+    "commitments": [],
+    "risks": [],
+    "access_grants": [],
+    "public_signals": [],
+    "process_states": []
+  },
+  "action_registry": [
+    {
+      "action_type": "synthetic.observe_and_wait",
+      "version": "synthetic.observe_and_wait.r1",
+      "allowed_representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "parameter_names": [],
+      "state_changing": false,
+      "review_state": "reviewed"
+    }
+  ],
+  "communication_routes": [],
+  "observation_access_rules": [
+    {
+      "actor_id": "synthetic.actor.a",
+      "field_name": "public_signal",
+      "access": "public",
+      "latency_ticks": 0
+    }
+  ],
+  "exogenous_manifest": [],
+  "rule_policy_refs": [
+    "synthetic.rule.policy.r1"
+  ],
+  "scheduler_review_state": "reviewed",
+  "clean_builder_attestation": true,
+  "contamination_disclosures": [],
+  "owner_decision_gate": null,
+  "construction_seal": {
+    "seal_type": "construction_bundle",
+    "artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1",
+    "artifact_kind": "prefix_clean_strict_construction_bundle",
+    "construction_state": "prefix_clean_strict",
+    "canonicalization_version": "h2epr_cjson.v1",
+    "hash_preimage": "omit_construction_seal_and_operational_metadata",
+    "content_sha256": "46dae8356e16315e5c6c291316bd44cbe543c4f861ed02a5e37d9232cd2c6d7e"
+  }
+}

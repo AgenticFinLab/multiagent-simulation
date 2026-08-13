@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/construction_anchor_allowlist.schema.json",
+  "title": "Synthetic Construction Anchor Allowlist V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "allowlist_schema_version",
+    "allowlist_id",
+    "anchor_class",
+    "freeze_scope",
+    "entries"
+  ],
+  "properties": {
+    "allowlist_schema_version": {
+      "const": "h2epr.external.construction.anchor.allowlist.v1"
+    },
+    "allowlist_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "anchor_class": {
+      "const": "synthetic_test_only"
+    },
+    "freeze_scope": {
+      "const": "synthetic_expected_construction_lineage_only"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entry_id",
+          "event_id",
+          "lineage_ref",
+          "content_hash_preimage",
+          "review_state"
+        ],
+        "properties": {
+          "entry_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lineage_ref": {
+            "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
+          },
+          "content_hash_preimage": {
+            "const": "omit_construction_seal_and_operational_metadata"
+          },
+          "review_state": {
+            "const": "synthetic_contract_fixture"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1302 @@
+{
+  "catalog_version": "h2epr.contract.negative_cases.v1",
+  "execution_contract": "Every legacy semantic case is reconstructed deterministically from synthetic V1 fixtures; no event evaluation reference is used.",
+  "cases": [
+    {
+      "behavior_case_id": "identity-architecture-generic-construction-state-full-draft-target-demo",
+      "legacy_case_id": "IDENTITY-N001",
+      "validator": "json_schema",
+      "base": "identity.architecture_generic",
+      "mutation": "construction_state=full_draft_target_demo",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-architecture-generic-construction-state-prefix-contaminated-demo",
+      "legacy_case_id": "IDENTITY-N002",
+      "validator": "json_schema",
+      "base": "identity.architecture_generic",
+      "mutation": "construction_state=prefix_contaminated_demo",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-architecture-generic-construction-state-prefix-clean-strict",
+      "legacy_case_id": "IDENTITY-N003",
+      "validator": "json_schema",
+      "base": "identity.architecture_generic",
+      "mutation": "construction_state=prefix_clean_strict",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-full-draft-target-demo-construction-state-architecture-generic",
+      "legacy_case_id": "IDENTITY-N004",
+      "validator": "json_schema",
+      "base": "identity.full_draft_target_demo",
+      "mutation": "construction_state=architecture_generic",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-full-draft-target-demo-construction-state-prefix-contaminated-demo",
+      "legacy_case_id": "IDENTITY-N005",
+      "validator": "json_schema",
+      "base": "identity.full_draft_target_demo",
+      "mutation": "construction_state=prefix_contaminated_demo",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-full-draft-target-demo-construction-state-prefix-clean-strict",
+      "legacy_case_id": "IDENTITY-N006",
+      "validator": "json_schema",
+      "base": "identity.full_draft_target_demo",
+      "mutation": "construction_state=prefix_clean_strict",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-contaminated-demo-construction-state-architecture-generic",
+      "legacy_case_id": "IDENTITY-N007",
+      "validator": "json_schema",
+      "base": "identity.prefix_contaminated_demo",
+      "mutation": "construction_state=architecture_generic",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-contaminated-demo-construction-state-full-draft-target-demo",
+      "legacy_case_id": "IDENTITY-N008",
+      "validator": "json_schema",
+      "base": "identity.prefix_contaminated_demo",
+      "mutation": "construction_state=full_draft_target_demo",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-contaminated-demo-construction-state-prefix-clean-strict",
+      "legacy_case_id": "IDENTITY-N009",
+      "validator": "json_schema",
+      "base": "identity.prefix_contaminated_demo",
+      "mutation": "construction_state=prefix_clean_strict",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-clean-strict-construction-state-architecture-generic",
+      "legacy_case_id": "IDENTITY-N010",
+      "validator": "json_schema",
+      "base": "identity.prefix_clean_strict",
+      "mutation": "construction_state=architecture_generic",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-clean-strict-construction-state-full-draft-target-demo",
+      "legacy_case_id": "IDENTITY-N011",
+      "validator": "json_schema",
+      "base": "identity.prefix_clean_strict",
+      "mutation": "construction_state=full_draft_target_demo",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-clean-strict-construction-state-prefix-contaminated-demo",
+      "legacy_case_id": "IDENTITY-N012",
+      "validator": "json_schema",
+      "base": "identity.prefix_clean_strict",
+      "mutation": "construction_state=prefix_contaminated_demo",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "identity-prefix-clean-strict-append-full-draft-exposed-target-ancestor",
+      "legacy_case_id": "LINEAGE-N001",
+      "validator": "semantic",
+      "base": "identity.prefix_clean_strict",
+      "mutation": "append full_draft_exposed target ancestor",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-full-draft-target-demo-protocol-context-valid-prefix-contaminated-demo-context",
+      "legacy_case_id": "LINEAGE-N002",
+      "validator": "semantic",
+      "base": "runtime.full_draft_target_demo",
+      "mutation": "protocol_context=valid prefix_contaminated_demo context",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-full-draft-target-demo-source-construction-bundle-artifact-id-differs-from-root-construction-artifact-id",
+      "legacy_case_id": "LINEAGE-N003",
+      "validator": "semantic",
+      "base": "runtime.full_draft_target_demo",
+      "mutation": "source_construction_bundle.artifact_id differs from root_construction_artifact_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-synthetic-evaluation-report-evaluation-protocol-and-claim-become-prefix-contaminated-demo-while-artifact-identity",
+      "legacy_case_id": "LINEAGE-N004",
+      "validator": "semantic",
+      "base": "strict synthetic evaluation report",
+      "mutation": "evaluation protocol and claim become prefix-contaminated demo while artifact identity remains strict",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-synthetic-evaluation-report-trace-parent-lineage-becomes-valid-full-draft-target-demo-tuple-while-child-remains-s",
+      "legacy_case_id": "LINEAGE-N005",
+      "validator": "semantic",
+      "base": "strict synthetic evaluation report",
+      "mutation": "trace parent lineage becomes valid full-draft-target demo tuple while child remains strict",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "full-draft-target-demo-construction-pending-gate-sets-execution-authorized-true",
+      "legacy_case_id": "OWNER-GATE-N001",
+      "validator": "json_schema",
+      "base": "full_draft_target_demo construction",
+      "mutation": "pending gate sets execution_authorized=true",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-bundle-artifact-kind-participant-artifact",
+      "legacy_case_id": "KIND-N001",
+      "validator": "json_schema",
+      "base": "runtime bundle",
+      "mutation": "artifact_kind=participant_artifact",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "participant-artifact-artifact-kind-runtime-scenario-bundle",
+      "legacy_case_id": "KIND-N002",
+      "validator": "json_schema",
+      "base": "participant artifact",
+      "mutation": "artifact_kind=runtime_scenario_bundle",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-construction-bundle-artifact-kind-runtime-scenario-bundle",
+      "legacy_case_id": "KIND-N003",
+      "validator": "json_schema",
+      "base": "strict construction bundle",
+      "mutation": "artifact_kind=runtime_scenario_bundle",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-event-identity-top-consumers-differ-from-provenance-consumers",
+      "legacy_case_id": "PROVENANCE-N001",
+      "validator": "semantic",
+      "base": "runtime event_identity",
+      "mutation": "top consumers differ from provenance consumers",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-event-identity-provenance-unknown-construction-only-under-top-available-runtime-public",
+      "legacy_case_id": "PROVENANCE-N002",
+      "validator": "semantic",
+      "base": "runtime event_identity",
+      "mutation": "provenance unknown/construction_only under top available/runtime_public",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-event-identity-event-spec-provenance-mislabeled-full-draft-informed",
+      "legacy_case_id": "PROVENANCE-N003",
+      "validator": "semantic",
+      "base": "runtime event_identity",
+      "mutation": "event_spec provenance mislabeled full_draft_informed",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "delivered-communication-chain-delivered-at-precedes-sent-at",
+      "legacy_case_id": "TIME-N001",
+      "validator": "semantic",
+      "base": "delivered communication chain",
+      "mutation": "delivered_at precedes sent_at",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "tick-opened-trace-record-record-type-decision-recorded-without-changing-payload",
+      "legacy_case_id": "TRACE-TYPE-N001",
+      "validator": "json_schema",
+      "base": "tick_opened trace record",
+      "mutation": "record_type=decision_recorded without changing payload",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-run-manifest-source-kind-gold-fallback",
+      "legacy_case_id": "SOURCE-N001",
+      "validator": "json_schema",
+      "base": "strict run manifest",
+      "mutation": "source_kind=gold_fallback",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "0288-strict-source-policy-event-spec-allowed-json-pointers-includes-event-descriptor",
+      "legacy_case_id": "SOURCE-N002",
+      "validator": "json_schema",
+      "base": "0288 strict source policy",
+      "mutation": "event_spec_allowed_json_pointers includes /event_descriptor",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-construction-bundle-input-source-kind-gold-fallback",
+      "legacy_case_id": "SOURCE-N003",
+      "validator": "json_schema",
+      "base": "strict construction bundle",
+      "mutation": "input source_kind=gold_fallback",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "prohibited-route-disposition-message-id-is-non-null",
+      "legacy_case_id": "COMM-N001",
+      "validator": "json_schema",
+      "base": "prohibited route disposition",
+      "mutation": "message_id is non-null",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "expired-communication-chain-terminal-message-id-differs-from-sent-message-id",
+      "legacy_case_id": "COMM-N002",
+      "validator": "semantic",
+      "base": "expired communication chain",
+      "mutation": "terminal message_id differs from sent message_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-chain-remove-messagesent",
+      "legacy_case_id": "COMM-N003",
+      "validator": "semantic",
+      "base": "accepted delivered chain",
+      "mutation": "remove MessageSent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "action-transport-envelope-add-undeclared-extras-answer-hint",
+      "legacy_case_id": "ACTION-N001",
+      "validator": "json_schema",
+      "base": "action transport envelope",
+      "mutation": "add undeclared extras.answer_hint",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "run-manifest-scenario-id-changes-without-manifest-rehash",
+      "legacy_case_id": "HASH-N001",
+      "validator": "semantic",
+      "base": "run manifest",
+      "mutation": "scenario_id changes without manifest rehash",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "trace-first-record-payload-changes-without-record-rehash",
+      "legacy_case_id": "HASH-N002",
+      "validator": "semantic",
+      "base": "trace",
+      "mutation": "first record payload changes without record rehash",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "trace-second-previous-record-hash-changes",
+      "legacy_case_id": "HASH-N003",
+      "validator": "semantic",
+      "base": "trace",
+      "mutation": "second previous_record_hash changes",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "trace-tick-seal-record-count-changes",
+      "legacy_case_id": "HASH-N004",
+      "validator": "semantic",
+      "base": "trace",
+      "mutation": "tick seal record_count changes",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "trace-run-seal-trace-prefix-sha256-changes",
+      "legacy_case_id": "HASH-N005",
+      "validator": "semantic",
+      "base": "trace",
+      "mutation": "run seal trace_prefix_sha256 changes",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "generated-epg-event-type-changes-without-graph-reseal",
+      "legacy_case_id": "HASH-N006",
+      "validator": "semantic",
+      "base": "Generated EPG",
+      "mutation": "event_type changes without graph reseal",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-runtime-bundle-remove-sole-construction-parent",
+      "legacy_case_id": "CHAIN-RUNTIME-N001",
+      "validator": "json_schema",
+      "base": "strict runtime bundle",
+      "mutation": "remove sole construction parent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-runtime-bundle-construction-parent-kind-becomes-run-manifest",
+      "legacy_case_id": "CHAIN-RUNTIME-N002",
+      "validator": "json_schema",
+      "base": "strict runtime bundle",
+      "mutation": "construction parent kind becomes run_manifest",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-strict-runtime-bundle-identity-parent-id-differs-from-source-construction-ref",
+      "legacy_case_id": "CHAIN-RUNTIME-N003",
+      "validator": "semantic",
+      "base": "resealed strict runtime bundle",
+      "mutation": "identity parent ID differs from source construction ref",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-strict-runtime-bundle-identity-parent-hash-differs-from-source-construction-ref",
+      "legacy_case_id": "CHAIN-RUNTIME-N004",
+      "validator": "semantic",
+      "base": "resealed strict runtime bundle",
+      "mutation": "identity parent hash differs from source construction ref",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-strict-runtime-bundle-protocol-root-construction-id-resets",
+      "legacy_case_id": "CHAIN-RUNTIME-N005",
+      "validator": "semantic",
+      "base": "resealed strict runtime bundle",
+      "mutation": "protocol root construction ID resets",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "run-manifest-remove-sole-runtime-parent",
+      "legacy_case_id": "CHAIN-MANIFEST-N001",
+      "validator": "json_schema",
+      "base": "run manifest",
+      "mutation": "remove sole runtime parent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "run-manifest-runtime-parent-kind-becomes-generated-epg",
+      "legacy_case_id": "CHAIN-MANIFEST-N002",
+      "validator": "json_schema",
+      "base": "run manifest",
+      "mutation": "runtime parent kind becomes generated_epg",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-manifest-runtime-parent-id-differs-from-actual-runtime-id",
+      "legacy_case_id": "CHAIN-MANIFEST-N003",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "manifest runtime parent ID differs from actual runtime ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-manifest-parent-runtime-bundle-hashes-agree-with-each-other-but-not-actual-runtime",
+      "legacy_case_id": "CHAIN-MANIFEST-N004",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "manifest parent/runtime_bundle hashes agree with each other but not actual runtime",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-manifest-root-construction-id-resets",
+      "legacy_case_id": "CHAIN-MANIFEST-N005",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "manifest root construction ID resets",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-manifest-and-its-parent-ref-reset-to-a-different-complete-identity-tuple",
+      "legacy_case_id": "CHAIN-MANIFEST-N006",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "manifest and its parent ref reset to a different complete identity tuple",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "simulation-trace-remove-sole-manifest-parent",
+      "legacy_case_id": "CHAIN-TRACE-N001",
+      "validator": "json_schema",
+      "base": "simulation trace",
+      "mutation": "remove sole manifest parent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "simulation-trace-manifest-parent-kind-becomes-runtime-scenario-bundle",
+      "legacy_case_id": "CHAIN-TRACE-N002",
+      "validator": "json_schema",
+      "base": "simulation trace",
+      "mutation": "manifest parent kind becomes runtime_scenario_bundle",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "typed-artifact-chain-trace-manifest-parent-id-differs-from-actual-manifest-id",
+      "legacy_case_id": "CHAIN-TRACE-N003",
+      "validator": "semantic",
+      "base": "typed artifact chain",
+      "mutation": "trace manifest parent ID differs from actual manifest ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-typed-artifact-chain-trace-parent-source-seals-use-a-hash-that-differs-from-actual-manifest",
+      "legacy_case_id": "CHAIN-TRACE-N004",
+      "validator": "semantic",
+      "base": "consistently rehashed typed artifact chain",
+      "mutation": "trace parent/source/seals use a hash that differs from actual manifest",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-typed-artifact-chain-trace-outer-and-record-protocol-roots-reset",
+      "legacy_case_id": "CHAIN-TRACE-N005",
+      "validator": "semantic",
+      "base": "consistently rehashed typed artifact chain",
+      "mutation": "trace outer and record protocol roots reset",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-typed-artifact-chain-trace-parent-ref-and-record-protocol-reset-to-another-complete-identity-tuple",
+      "legacy_case_id": "CHAIN-TRACE-N006",
+      "validator": "semantic",
+      "base": "consistently rehashed typed artifact chain",
+      "mutation": "trace, parent ref, and record protocol reset to another complete identity tuple",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "generated-epg-remove-trace-parent",
+      "legacy_case_id": "CHAIN-GRAPH-N001",
+      "validator": "json_schema",
+      "base": "Generated EPG",
+      "mutation": "remove trace parent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "generated-epg-trace-parent-kind-becomes-generated-epg",
+      "legacy_case_id": "CHAIN-GRAPH-N002",
+      "validator": "json_schema",
+      "base": "Generated EPG",
+      "mutation": "trace parent kind becomes generated_epg",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-manifest-parent-id-differs-from-actual-manifest",
+      "legacy_case_id": "CHAIN-GRAPH-N003",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph manifest parent ID differs from actual manifest",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-trace-parent-id-differs-from-actual-trace",
+      "legacy_case_id": "CHAIN-GRAPH-N004",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph trace parent ID differs from actual trace",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-trace-parent-source-hashes-agree-but-differ-from-actual-trace",
+      "legacy_case_id": "CHAIN-GRAPH-N005",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph trace parent/source hashes agree but differ from actual trace",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-manifest-parent-source-hashes-agree-but-differ-from-actual-manifest",
+      "legacy_case_id": "CHAIN-GRAPH-N006",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph manifest parent/source hashes agree but differ from actual manifest",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-root-construction-id-resets",
+      "legacy_case_id": "CHAIN-GRAPH-N007",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph root construction ID resets",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-and-both-parent-refs-reset-to-another-complete-identity-tuple",
+      "legacy_case_id": "CHAIN-GRAPH-N008",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph and both parent refs reset to another complete identity tuple",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "evaluation-report-remove-generated-epg-parent",
+      "legacy_case_id": "CHAIN-EVALUATION-N001",
+      "validator": "json_schema",
+      "base": "evaluation report",
+      "mutation": "remove Generated EPG parent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "evaluation-report-both-parents-become-simulation-trace",
+      "legacy_case_id": "CHAIN-EVALUATION-N002",
+      "validator": "json_schema",
+      "base": "evaluation report",
+      "mutation": "both parents become simulation_trace",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "typed-artifact-chain-evaluation-trace-parent-id-differs-from-actual-trace-source-id",
+      "legacy_case_id": "CHAIN-EVALUATION-N003",
+      "validator": "semantic",
+      "base": "typed artifact chain",
+      "mutation": "evaluation trace parent ID differs from actual trace/source ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "typed-artifact-chain-evaluation-graph-parent-id-differs-from-actual-graph-source-id",
+      "legacy_case_id": "CHAIN-EVALUATION-N004",
+      "validator": "semantic",
+      "base": "typed artifact chain",
+      "mutation": "evaluation graph parent ID differs from actual graph/source ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "typed-artifact-chain-evaluation-trace-parent-report-hashes-agree-but-differ-from-actual-trace",
+      "legacy_case_id": "CHAIN-EVALUATION-N005",
+      "validator": "semantic",
+      "base": "typed artifact chain",
+      "mutation": "evaluation trace parent/report hashes agree but differ from actual trace",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "typed-artifact-chain-evaluation-root-construction-id-resets",
+      "legacy_case_id": "CHAIN-EVALUATION-N006",
+      "validator": "semantic",
+      "base": "typed artifact chain",
+      "mutation": "evaluation root construction ID resets",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "typed-artifact-chain-evaluation-and-both-parent-refs-reset-to-another-complete-identity-tuple",
+      "legacy_case_id": "CHAIN-EVALUATION-N007",
+      "validator": "semantic",
+      "base": "typed artifact chain",
+      "mutation": "evaluation and both parent refs reset to another complete identity tuple",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "evaluation-report-report-content-changes-without-report-rehash",
+      "legacy_case_id": "HASH-R2-EVALUATION-N001",
+      "validator": "semantic",
+      "base": "evaluation report",
+      "mutation": "report content changes without report rehash",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-messagesent-sender-differs-from-messageintent-sender",
+      "legacy_case_id": "COMM-R2-N001",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "MessageSent sender differs from MessageIntent sender",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-messagesent-recipients-differ-from-messageintent-recipients",
+      "legacy_case_id": "COMM-R2-N002",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "MessageSent recipients differ from MessageIntent recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-messagesent-route-differs-from-accepted-disposition-route",
+      "legacy_case_id": "COMM-R2-N003",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "MessageSent route differs from accepted disposition route",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-messagesent-disposition-id-differs-from-accepted-disposition",
+      "legacy_case_id": "COMM-R2-N004",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "MessageSent disposition ID differs from accepted disposition",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-delivered-recipient-was-not-in-messagesent-recipients",
+      "legacy_case_id": "COMM-R2-N005",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "delivered recipient was not in MessageSent recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "communication-attempt-disposition-sender-differs-from-intent-sender",
+      "legacy_case_id": "COMM-R2-N006",
+      "validator": "semantic",
+      "base": "communication attempt",
+      "mutation": "disposition sender differs from intent sender",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "communication-attempt-disposition-recipients-differ-from-intent-recipients",
+      "legacy_case_id": "COMM-R2-N007",
+      "validator": "semantic",
+      "base": "communication attempt",
+      "mutation": "disposition recipients differ from intent recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-terminal-route-differs-from-sent-route",
+      "legacy_case_id": "COMM-R2-N008",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "terminal route differs from sent route",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-terminal-intent-id-differs-from-original-intent",
+      "legacy_case_id": "COMM-R2-N009",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "terminal intent ID differs from original intent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "communication-attempt-adjudicated-at-precedes-created-at",
+      "legacy_case_id": "TIME-R2-N001",
+      "validator": "semantic",
+      "base": "communication attempt",
+      "mutation": "adjudicated_at precedes created_at",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-delivery-due-at-precedes-sent-at",
+      "legacy_case_id": "TIME-R2-N002",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "delivery_due_at precedes sent_at",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-delivered-at-precedes-delivery-due-at",
+      "legacy_case_id": "TIME-R2-N003",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "delivered_at precedes delivery_due_at",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-first-consumable-logical-tick-is-not-later-than-delivery-tick",
+      "legacy_case_id": "TIME-R2-N004",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "first consumable logical tick is not later than delivery tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-expired-communication-expired-at-precedes-declared-expiry",
+      "legacy_case_id": "TIME-R2-N005",
+      "validator": "semantic",
+      "base": "accepted expired communication",
+      "mutation": "expired_at precedes declared expiry",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-sent-at-precedes-adjudicated-at",
+      "legacy_case_id": "TIME-R2-N006",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "sent_at precedes adjudicated_at",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-delivered-communication-first-consumable-logical-tick-equals-a-later-delivery-tick",
+      "legacy_case_id": "TIME-R2-N007",
+      "validator": "semantic",
+      "base": "accepted delivered communication",
+      "mutation": "first consumable logical tick equals a later delivery tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-trace-tickseal-manifest-hash-differs-from-enclosing-trace-source-manifest",
+      "legacy_case_id": "SEAL-R2-N001",
+      "validator": "semantic",
+      "base": "consistently rehashed trace",
+      "mutation": "TickSeal manifest hash differs from enclosing trace source manifest",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-trace-tickseal-logical-tick-differs-from-enclosing-record-tick",
+      "legacy_case_id": "SEAL-R2-N002",
+      "validator": "semantic",
+      "base": "consistently rehashed trace",
+      "mutation": "TickSeal logical tick differs from enclosing record tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-trace-runseal-manifest-hash-differs-from-enclosing-trace-source-manifest",
+      "legacy_case_id": "SEAL-R2-N003",
+      "validator": "semantic",
+      "base": "consistently rehashed trace",
+      "mutation": "RunSeal manifest hash differs from enclosing trace source manifest",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "consistently-rehashed-trace-runseal-run-id-differs-from-enclosing-trace-and-record",
+      "legacy_case_id": "SEAL-R2-N004",
+      "validator": "semantic",
+      "base": "consistently rehashed trace",
+      "mutation": "RunSeal run ID differs from enclosing trace and record",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "integrity-valid-audit-only-invalid-trace-request-compiler-evaluator-eligibility",
+      "legacy_case_id": "TRACE-ELIGIBILITY-N001",
+      "validator": "semantic",
+      "base": "integrity-valid audit-only invalid trace",
+      "mutation": "request compiler/evaluator eligibility",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "valid-sealed-trace-declare-audit-only-usage-despite-valid-seals",
+      "legacy_case_id": "TRACE-ELIGIBILITY-N002",
+      "validator": "semantic",
+      "base": "valid sealed trace",
+      "mutation": "declare audit-only usage despite valid seals",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "hash-consistent-chain-carrying-audit-only-invalid-trace-attempt-compiler-evaluator-chain-preflight",
+      "legacy_case_id": "TRACE-ELIGIBILITY-N003",
+      "validator": "semantic",
+      "base": "hash-consistent chain carrying audit-only invalid trace",
+      "mutation": "attempt compiler/evaluator chain preflight",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-duplicate-node-id",
+      "legacy_case_id": "GRAPH-R2-N001",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "duplicate node ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-duplicate-edge-id",
+      "legacy_case_id": "GRAPH-R2-N002",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "duplicate edge ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-node-and-edge-share-an-id",
+      "legacy_case_id": "GRAPH-R2-N003",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "node and edge share an ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-edge-source-endpoint-is-missing",
+      "legacy_case_id": "GRAPH-R2-N004",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "edge source endpoint is missing",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-edge-target-endpoint-is-missing",
+      "legacy_case_id": "GRAPH-R2-N005",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "edge target endpoint is missing",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-participant-ref-does-not-identify-a-participant-node",
+      "legacy_case_id": "GRAPH-R2-N006",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "participant ref does not identify a participant node",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-remove-one-required-provenance-index-row",
+      "legacy_case_id": "GRAPH-R2-N007",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "remove one required provenance-index row",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-add-provenance-index-row-for-no-graph-item",
+      "legacy_case_id": "GRAPH-R2-N008",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "add provenance-index row for no graph item",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-misdirect-provenance-index-graph-item-id",
+      "legacy_case_id": "GRAPH-R2-N009",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "misdirect provenance-index graph_item_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-index-trace-ref-set-differs-from-graph-item",
+      "legacy_case_id": "GRAPH-R2-N010",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "index trace-ref set differs from graph item",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-generated-epg-outer-generated-epg-id-differs-from-artifact-identity",
+      "legacy_case_id": "GRAPH-R2-N011",
+      "validator": "semantic",
+      "base": "resealed Generated EPG",
+      "mutation": "outer generated_epg_id differs from artifact identity",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-graph-index-cite-a-trace-id-absent-from-source-trace",
+      "legacy_case_id": "GRAPH-R2-N012",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "graph/index cite a trace ID absent from source trace",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "prefix-projection-attestation-suffix-absence-reports-forbidden-suffix-content",
+      "legacy_case_id": "PROJECTION-R2-N001",
+      "validator": "json_schema",
+      "base": "prefix projection attestation",
+      "mutation": "suffix absence reports forbidden suffix content",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-strict-prefix-projection-projection-cutoff-differs-from-t0-bundle-cutoff",
+      "legacy_case_id": "PROJECTION-R2-N002",
+      "validator": "semantic",
+      "base": "resealed strict prefix projection",
+      "mutation": "projection cutoff differs from t0/bundle cutoff",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-projection-input-input-source-draft-hash-differs-from-attestation",
+      "legacy_case_id": "PROJECTION-R2-N003",
+      "validator": "semantic",
+      "base": "strict projection input",
+      "mutation": "input source draft hash differs from attestation",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "prefix-projection-attestation-producer-declares-prior-target-full-draft-exposure",
+      "legacy_case_id": "PROJECTION-R2-N004",
+      "validator": "json_schema",
+      "base": "prefix projection attestation",
+      "mutation": "producer declares prior target full-draft exposure",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "prefix-projection-attestation-remove-audit-review-receipt",
+      "legacy_case_id": "PROJECTION-R2-N005",
+      "validator": "json_schema",
+      "base": "prefix projection attestation",
+      "mutation": "remove audit review receipt",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-construction-bundle-projection-asset-lacks-typed-attestation",
+      "legacy_case_id": "PROJECTION-R2-N006",
+      "validator": "json_schema",
+      "base": "strict construction bundle",
+      "mutation": "projection asset lacks typed attestation",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "prefix-projection-attestation-no-reference-proof-says-reference-was-hashed",
+      "legacy_case_id": "PROJECTION-R2-N007",
+      "validator": "json_schema",
+      "base": "prefix projection attestation",
+      "mutation": "no-Reference proof says Reference was hashed",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-projection-input-bound-attestation-hash-differs-from-embedded-attestation-seal",
+      "legacy_case_id": "PROJECTION-R2-N008",
+      "validator": "semantic",
+      "base": "strict projection input",
+      "mutation": "bound attestation hash differs from embedded attestation seal",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "strict-projection-input-allowed-claim-pointers-differ-from-attested-included-claims",
+      "legacy_case_id": "PROJECTION-R2-N009",
+      "validator": "semantic",
+      "base": "strict projection input",
+      "mutation": "allowed claim pointers differ from attested included claims",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-bundle-add-reference-epg-locator",
+      "legacy_case_id": "BACKFLOW-N001",
+      "validator": "json_schema",
+      "base": "runtime bundle",
+      "mutation": "add reference_epg_locator",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "generated-epg-add-evaluation-reference-sha256",
+      "legacy_case_id": "BACKFLOW-N002",
+      "validator": "json_schema",
+      "base": "Generated EPG",
+      "mutation": "add evaluation_reference_sha256",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "runtime-and-construction-schema-property-sets-inject-reference-evaluator-locator-property-synthetic-probe",
+      "legacy_case_id": "BACKFLOW-N003",
+      "validator": "static",
+      "base": "runtime and construction schema property sets",
+      "mutation": "inject Reference/evaluator locator property (synthetic probe)",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "sealed-strict-construction-bundle-change-construction-content-while-retaining-old-content-seal",
+      "legacy_case_id": "CONSTRUCTION-R3-N001",
+      "validator": "semantic",
+      "base": "sealed strict construction bundle",
+      "mutation": "change construction content while retaining old content seal",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "sealed-strict-construction-bundle-construction-seal-artifact-id-differs-from-object-identity",
+      "legacy_case_id": "CONSTRUCTION-R3-N002",
+      "validator": "semantic",
+      "base": "sealed strict construction bundle",
+      "mutation": "construction seal artifact ID differs from object identity",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "sealed-strict-construction-bundle-construction-seal-content-sha-differs-from-canonical-preimage",
+      "legacy_case_id": "CONSTRUCTION-R3-N003",
+      "validator": "semantic",
+      "base": "sealed strict construction bundle",
+      "mutation": "construction seal content SHA differs from canonical preimage",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "sealed-strict-construction-bundle-construction-seal-artifact-kind-differs-from-object-identity",
+      "legacy_case_id": "CONSTRUCTION-R3-N004",
+      "validator": "semantic",
+      "base": "sealed strict construction bundle",
+      "mutation": "construction seal artifact kind differs from object identity",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "sealed-strict-construction-bundle-construction-seal-state-differs-from-object-identity-tuple",
+      "legacy_case_id": "CONSTRUCTION-R3-N005",
+      "validator": "semantic",
+      "base": "sealed strict construction bundle",
+      "mutation": "construction seal state differs from object identity tuple",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "fully-resealed-typed-artifact-chain-change-both-local-runtime-construction-ids-without-changing-actual-construction-obje",
+      "legacy_case_id": "CHAIN-CONSTRUCTION-R3-N001",
+      "validator": "semantic",
+      "base": "fully resealed typed artifact chain",
+      "mutation": "change both local runtime construction IDs without changing actual construction object",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "fully-resealed-typed-artifact-chain-change-both-local-runtime-construction-hashes-without-changing-actual-construction-o",
+      "legacy_case_id": "CHAIN-CONSTRUCTION-R3-N002",
+      "validator": "semantic",
+      "base": "fully resealed typed artifact chain",
+      "mutation": "change both local runtime construction hashes without changing actual construction object",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "fully-resealed-typed-artifact-chain-change-both-local-runtime-construction-kinds-without-changing-actual-construction-ob",
+      "legacy_case_id": "CHAIN-CONSTRUCTION-R3-N003",
+      "validator": "semantic",
+      "base": "fully resealed typed artifact chain",
+      "mutation": "change both local runtime construction kinds without changing actual construction object",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "fully-resealed-typed-artifact-chain-change-both-local-runtime-construction-identity-tuples-without-changing-actual-const",
+      "legacy_case_id": "CHAIN-CONSTRUCTION-R3-N004",
+      "validator": "semantic",
+      "base": "fully resealed typed artifact chain",
+      "mutation": "change both local runtime construction identity tuples without changing actual construction object",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "fully-resealed-typed-artifact-chain-substitute-construction-content-and-root-and-reseal-every-descendant-while-retaining",
+      "legacy_case_id": "CHAIN-CONSTRUCTION-R3-N005",
+      "validator": "semantic",
+      "base": "fully resealed typed artifact chain",
+      "mutation": "substitute construction content and root and reseal every descendant while retaining trusted anchor",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "messageintent-declare-multiple-recipients",
+      "legacy_case_id": "COMM-SCHEMA-R3-N001",
+      "validator": "json_schema",
+      "base": "MessageIntent",
+      "mutation": "declare multiple recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "communicationdisposition-declare-multiple-recipients",
+      "legacy_case_id": "COMM-SCHEMA-R3-N002",
+      "validator": "json_schema",
+      "base": "CommunicationDisposition",
+      "mutation": "declare multiple recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "messagesent-declare-multiple-recipients",
+      "legacy_case_id": "COMM-SCHEMA-R3-N003",
+      "validator": "json_schema",
+      "base": "MessageSent",
+      "mutation": "declare multiple recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "messageexpired-declare-multiple-recipients",
+      "legacy_case_id": "COMM-SCHEMA-R3-N004",
+      "validator": "json_schema",
+      "base": "MessageExpired",
+      "mutation": "declare multiple recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "communication-chain-two-recipient-intent-disposition-and-sent-object-terminate-only-one-recipient",
+      "legacy_case_id": "COMM-R3-N001",
+      "validator": "semantic",
+      "base": "communication chain",
+      "mutation": "two-recipient intent, disposition and sent object terminate only one recipient",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "single-recipient-communication-chain-terminal-recipient-differs-from-intent-recipient",
+      "legacy_case_id": "COMM-R3-N002",
+      "validator": "semantic",
+      "base": "single-recipient communication chain",
+      "mutation": "terminal recipient differs from intent recipient",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "communication-runseal-closure-recipient-remains-unresolved-at-runseal",
+      "legacy_case_id": "COMM-R3-N003",
+      "validator": "semantic",
+      "base": "communication RunSeal closure",
+      "mutation": "recipient remains unresolved at RunSeal",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "accepted-messagesent-chain-remove-terminal-outcome-before-runseal",
+      "legacy_case_id": "COMM-R3-N004",
+      "validator": "semantic",
+      "base": "accepted MessageSent chain",
+      "mutation": "remove terminal outcome before RunSeal",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "deterministic-fan-out-plan-duplicate-source-recipient",
+      "legacy_case_id": "FANOUT-R3-N001",
+      "validator": "semantic",
+      "base": "deterministic fan-out plan",
+      "mutation": "duplicate source recipient",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "deterministic-fan-out-plan-replace-stable-intent-id",
+      "legacy_case_id": "FANOUT-R3-N002",
+      "validator": "semantic",
+      "base": "deterministic fan-out plan",
+      "mutation": "replace stable intent ID",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "deterministic-fan-out-plan-reuse-terminal-id-across-recipients",
+      "legacy_case_id": "FANOUT-R3-N003",
+      "validator": "semantic",
+      "base": "deterministic fan-out plan",
+      "mutation": "reuse terminal ID across recipients",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-two-tickseals-for-one-logical-tick",
+      "legacy_case_id": "TICK-R3-N001",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "two TickSeals for one logical tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-tickseal-appears-in-the-middle-of-its-tick",
+      "legacy_case_id": "TICK-R3-N002",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "TickSeal appears in the middle of its tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-new-logical-tick-has-scientific-record-but-no-tickseal",
+      "legacy_case_id": "TICK-R3-N003",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "new logical tick has scientific record but no TickSeal",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-two-tick-trace-append-a-record-to-an-already-sealed-earlier-tick",
+      "legacy_case_id": "TICK-R3-N004",
+      "validator": "semantic",
+      "base": "resealed two-tick trace",
+      "mutation": "append a record to an already sealed earlier tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-duplicate-sequence-in-tick-coordinate",
+      "legacy_case_id": "TICK-R3-N005",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "duplicate sequence_in_tick coordinate",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-two-tick-trace-sequence-in-tick-descends-within-a-tick",
+      "legacy_case_id": "TICK-R3-N006",
+      "validator": "semantic",
+      "base": "resealed two-tick trace",
+      "mutation": "sequence_in_tick descends within a tick",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-two-tick-trace-logical-tick-groups-appear-out-of-order",
+      "legacy_case_id": "TICK-R3-N007",
+      "validator": "semantic",
+      "base": "resealed two-tick trace",
+      "mutation": "logical tick groups appear out of order",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "hash-consistent-two-tick-trace-runseal-omits-one-tickseal-from-exact-bound-set",
+      "legacy_case_id": "TICK-R3-N008",
+      "validator": "semantic",
+      "base": "hash-consistent two-tick trace",
+      "mutation": "RunSeal omits one TickSeal from exact bound set",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-duplicate-global-trace-id",
+      "legacy_case_id": "TRACE-ID-R3-N001",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "duplicate global trace_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-dangling-parent-trace-id",
+      "legacy_case_id": "TRACE-PARENT-R3-N001",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "dangling parent_trace_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-self-parent-trace-id",
+      "legacy_case_id": "TRACE-PARENT-R3-N002",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "self parent_trace_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-forward-parent-trace-id",
+      "legacy_case_id": "TRACE-PARENT-R3-N003",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "forward parent_trace_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-dangling-causal-parent-id",
+      "legacy_case_id": "TRACE-CAUSAL-R3-N001",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "dangling causal_parent_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-self-causal-parent-id",
+      "legacy_case_id": "TRACE-CAUSAL-R3-N002",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "self causal_parent_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-trace-forward-causal-parent-id",
+      "legacy_case_id": "TRACE-CAUSAL-R3-N003",
+      "validator": "semantic",
+      "base": "resealed trace",
+      "mutation": "forward causal_parent_id",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-message-trace-dangling-message-sent-trace-ref",
+      "legacy_case_id": "TRACE-MESSAGE-REF-R3-N001",
+      "validator": "semantic",
+      "base": "resealed message trace",
+      "mutation": "dangling message_sent_trace_ref",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-message-trace-self-message-sent-trace-ref",
+      "legacy_case_id": "TRACE-MESSAGE-REF-R3-N002",
+      "validator": "semantic",
+      "base": "resealed message trace",
+      "mutation": "self message_sent_trace_ref",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-message-trace-forward-message-sent-trace-ref",
+      "legacy_case_id": "TRACE-MESSAGE-REF-R3-N003",
+      "validator": "semantic",
+      "base": "resealed message trace",
+      "mutation": "forward message_sent_trace_ref",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-message-trace-message-sent-trace-ref-resolves-to-wrong-record-type",
+      "legacy_case_id": "TRACE-MESSAGE-REF-R3-N004",
+      "validator": "semantic",
+      "base": "resealed message trace",
+      "mutation": "message_sent_trace_ref resolves to wrong record type",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-message-trace-message-terminal-lineage-differs-from-referenced-messagesent",
+      "legacy_case_id": "TRACE-MESSAGE-REF-R3-N005",
+      "validator": "semantic",
+      "base": "resealed message trace",
+      "mutation": "message terminal lineage differs from referenced MessageSent",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-generated-epg-trace-ref-resolves-to-zero-source-records",
+      "legacy_case_id": "GRAPH-TRACE-R3-N001",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "Generated EPG trace_ref resolves to zero source records",
+      "expected": "reject"
+    },
+    {
+      "behavior_case_id": "resealed-typed-artifact-chain-generated-epg-trace-ref-resolves-to-multiple-source-records",
+      "legacy_case_id": "GRAPH-TRACE-R3-N002",
+      "validator": "semantic",
+      "base": "resealed typed artifact chain",
+      "mutation": "Generated EPG trace_ref resolves to multiple source records",
+      "expected": "reject"
+    }
+  ]
+}

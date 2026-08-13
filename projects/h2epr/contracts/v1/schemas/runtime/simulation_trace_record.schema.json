@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/simulation_trace_record.schema.json",
+  "title": "Simulation Trace Record V1",
+  "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/TraceRecord"
+}

@@ -1,0 +1,70 @@
+{
+  "policy_id": "h2epr_0288_strict_source_policy",
+  "policy_version": "h2epr_0288_strict_source_policy.v1",
+  "event_spec_observed_json_pointers": [
+    "/category",
+    "/domain",
+    "/event_descriptor",
+    "/keywords",
+    "/language_mode",
+    "/public_event_id",
+    "/region_hint",
+    "/schema_version",
+    "/time_hint",
+    "/title"
+  ],
+  "event_spec_allowed_json_pointers": [
+    "/domain",
+    "/language_mode",
+    "/public_event_id",
+    "/schema_version",
+    "/title"
+  ],
+  "non_allowlist_field_adjudications": [
+    {
+      "json_pointer": "/category",
+      "verdict": "construction_only",
+      "reason_code": "possible_suffix_process_classification",
+      "approval_owner": "project_owner",
+      "decision_id": null
+    },
+    {
+      "json_pointer": "/event_descriptor",
+      "verdict": "reject",
+      "reason_code": "may_summarize_suffix_process",
+      "approval_owner": "project_owner",
+      "decision_id": null
+    },
+    {
+      "json_pointer": "/keywords",
+      "verdict": "reject",
+      "reason_code": "may_encode_suffix_outcomes",
+      "approval_owner": "project_owner",
+      "decision_id": null
+    },
+    {
+      "json_pointer": "/region_hint",
+      "verdict": "construction_only",
+      "reason_code": "not_yet_runtime_justified",
+      "approval_owner": "project_owner",
+      "decision_id": null
+    },
+    {
+      "json_pointer": "/time_hint",
+      "verdict": "reject",
+      "reason_code": "may_reveal_suffix_horizon",
+      "approval_owner": "project_owner",
+      "decision_id": null
+    }
+  ],
+  "source_kind_allowlist": [
+    "draft_epg_prefix_projection",
+    "event_spec",
+    "generic_contract",
+    "non_target_contemporaneous_source",
+    "synthetic"
+  ],
+  "gold_fallback_policy": "prohibited",
+  "raw_full_draft_handle_policy": "prohibited",
+  "review_state": "reviewed"
+}

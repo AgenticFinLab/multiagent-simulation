@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/runtime_scenario_bundle.schema.json",
+  "title": "Runtime Scenario Bundle V1",
+  "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/RuntimeScenarioBundle"
+}

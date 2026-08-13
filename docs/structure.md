@@ -57,12 +57,19 @@ multiagent-simulation/
 |   |-- interface/  knowledge/  persona/  player/
 |   |-- proxy/  simulator/  utils/
 |   `-- skills/               # define-simulation-scenario-skill.md, agent-design-skill.md, implement-simulation-skill/, create-simulation-pipeline.md (从零新建), polish-simulation-pipeline.md (升级已有)
-|-- examples/                 # 场景实现与运行入口
+|-- examples/                 # 标准/既有 MASim 场景实现与运行入口
 |   |-- {Scenario}/           # 45 个正式场景（Rule/LLM/RuleLLM/Rag 四变体）
 |   |-- CUSTOMIZED_SIMULATION/  # 自定义/未发布场景的工作空间
 |   |-- document-sources/     # RAG 文档原料
 |   `-- __init__.py
-|-- configs/                  # 场景运行配置（与 examples/ 同名目录、四变体并列）
+|-- configs/                  # 标准/既有 MASim 场景配置（与 examples/ 同名目录）
+|-- projects/                 # 跨场景研究项目；可组合合同、评估器与多事件协议
+|   `-- h2epr/                # H2EPR 事件过程模拟的项目根
+|       |-- contracts/v1/     # 稳定的 Phase-0 合同接口
+|       |-- tests/            # 当前离线合同测试
+|       |-- README.md         # 项目入口和当前能力边界
+|       |-- ARCHITECTURE.md   # 科学边界和候选扩展点
+|       `-- EVOLUTION.md      # 合同版本与实现演进策略
 |-- docs/                     # 架构、场景、实验规范与历史报告
 |-- EXPERIMENT/               # 本地实验产物（运行时生成）
 |-- simulation-results/       # 标准化发布数据包（外部交付）
@@ -72,6 +79,14 @@ multiagent-simulation/
 ```
 
 > `investment-agents/` 是历史遗留目录，新档案统一写入 `masim/agents/defines/<domain>/`。
+
+`examples/` / 顶层 `configs/` 是当前标准 MASim 单场景约定；`projects/` 面向需要
+跨场景合同、编译器、评估器和研究协议的长期研究项目。H2EPR 当前只在
+`projects/h2epr/` 公开稳定 V1 合同和离线合同测试。未来场景、配置、运行时模块和新测试
+可以在实现证据和 Phase-1 ADR 的指导下演进；当前文档不锁定其最终目录或类名。
+H2EPR 的冻结输入保留在
+`data/h2epr/`，未来运行产物进入 `EXPERIMENT/H2EPR/`，经过整理的发布包进入
+`simulation-results/H2EPR/`；输入、项目装配、运行工作区和发布边界不得混用。
 
 ## 4. 框架模块
 
@@ -90,7 +105,10 @@ multiagent-simulation/
 | `masim/utils`         | 配置、拓扑、Ray 和结果读取工具       | `load_config`、`load_results`                                                                                                                |
 | `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
 
-职责边界：场景开发主要修改 `examples/` 和 `configs/`；`masim/` 应保持领域无关，不应写入某个金融场景的专用规则；`masim/skills/` 不参与运行时，只供设计阶段调用。
+职责边界：标准 MASim 场景开发主要修改 `examples/` 和顶层 `configs/`。H2EPR 当前保持
+独立的研究合同根；其后续场景、配置和运行时归属要由 Phase-1 ADR 根据真实实现证据确定。
+`masim/` 应保持领域无关，不应写入某个金融场景或某个 H2EPR 事件的专用规则；
+`masim/skills/` 不参与运行时，只供设计阶段调用。
 
 ## 5. 场景与机制
 

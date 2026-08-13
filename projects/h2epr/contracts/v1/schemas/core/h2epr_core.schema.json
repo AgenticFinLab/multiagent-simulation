@@ -1,0 +1,5902 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json",
+  "title": "H2EPR Core Contracts V1",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "StableId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "JsonPointer": {
+      "type": "string",
+      "pattern": "^(/([^~/]|~[01])*)*$",
+      "maxLength": 512
+    },
+    "TypedValue": {
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 4096
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 1024
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "TimeInterval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lower",
+        "upper",
+        "precision",
+        "timezone",
+        "uncertainty"
+      ],
+      "properties": {
+        "lower": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "upper": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "precision": {
+          "enum": [
+            "exact_datetime",
+            "date",
+            "month",
+            "year",
+            "range",
+            "unknown"
+          ]
+        },
+        "timezone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "uncertainty": {
+          "type": "string",
+          "maxLength": 512
+        }
+      }
+    },
+    "ArtifactLineageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "construction_state",
+        "artifact_scope",
+        "source_scope",
+        "builder_access",
+        "contamination_status",
+        "protocol_eligibility",
+        "artifact_sha256"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "artifact_kind": {
+          "$ref": "#/$defs/ArtifactKind"
+        },
+        "construction_state": {
+          "$ref": "#/$defs/ConstructionState"
+        },
+        "artifact_scope": {
+          "enum": [
+            "generic_only",
+            "target_specific"
+          ]
+        },
+        "source_scope": {
+          "enum": [
+            "full_draft_generic_only",
+            "full_draft_target_specific",
+            "prefix_target_specific"
+          ]
+        },
+        "builder_access": {
+          "enum": [
+            "full_target_draft",
+            "prefix_inputs_after_full_draft_exposure",
+            "prefix_allowlist_only"
+          ]
+        },
+        "contamination_status": {
+          "enum": [
+            "full_draft_exposed",
+            "clean_prefix_only"
+          ]
+        },
+        "protocol_eligibility": {
+          "enum": [
+            "architecture_demo_only",
+            "strict_eligible"
+          ]
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "genericity_review": {
+          "enum": [
+            "not_applicable",
+            "approved_generic_only"
+          ]
+        }
+      }
+    },
+    "ArtifactKind": {
+      "enum": [
+        "generic_contract",
+        "architecture_generic_construction_bundle",
+        "full_draft_target_demo_construction_bundle",
+        "prefix_contaminated_demo_construction_bundle",
+        "prefix_clean_strict_construction_bundle",
+        "participant_artifact",
+        "runtime_scenario_bundle",
+        "run_manifest",
+        "simulation_trace",
+        "generated_epg"
+      ]
+    },
+    "ConstructionState": {
+      "enum": [
+        "architecture_generic",
+        "full_draft_target_demo",
+        "prefix_contaminated_demo",
+        "prefix_clean_strict"
+      ]
+    },
+    "ArtifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "schema_version",
+        "producer_version",
+        "construction_state",
+        "artifact_scope",
+        "source_scope",
+        "builder_access",
+        "contamination_status",
+        "protocol_eligibility",
+        "parent_artifacts",
+        "review_state"
+      ],
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "artifact_kind": {
+          "$ref": "#/$defs/ArtifactKind"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "producer_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "construction_state": {
+          "$ref": "#/$defs/ConstructionState"
+        },
+        "artifact_scope": {
+          "enum": [
+            "generic_only",
+            "target_specific"
+          ]
+        },
+        "source_scope": {
+          "enum": [
+            "full_draft_generic_only",
+            "full_draft_target_specific",
+            "prefix_target_specific"
+          ]
+        },
+        "builder_access": {
+          "enum": [
+            "full_target_draft",
+            "prefix_inputs_after_full_draft_exposure",
+            "prefix_allowlist_only"
+          ]
+        },
+        "contamination_status": {
+          "enum": [
+            "full_draft_exposed",
+            "clean_prefix_only"
+          ]
+        },
+        "protocol_eligibility": {
+          "enum": [
+            "architecture_demo_only",
+            "strict_eligible"
+          ]
+        },
+        "parent_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactLineageRef"
+          }
+        },
+        "review_state": {
+          "enum": [
+            "draft",
+            "reviewed",
+            "approved",
+            "rejected"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "construction_state": {
+              "const": "architecture_generic"
+            },
+            "artifact_scope": {
+              "const": "generic_only"
+            },
+            "source_scope": {
+              "const": "full_draft_generic_only"
+            },
+            "builder_access": {
+              "const": "full_target_draft"
+            },
+            "contamination_status": {
+              "const": "full_draft_exposed"
+            },
+            "protocol_eligibility": {
+              "const": "architecture_demo_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "construction_state": {
+              "const": "full_draft_target_demo"
+            },
+            "artifact_scope": {
+              "const": "target_specific"
+            },
+            "source_scope": {
+              "const": "full_draft_target_specific"
+            },
+            "builder_access": {
+              "const": "full_target_draft"
+            },
+            "contamination_status": {
+              "const": "full_draft_exposed"
+            },
+            "protocol_eligibility": {
+              "const": "architecture_demo_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "construction_state": {
+              "const": "prefix_contaminated_demo"
+            },
+            "artifact_scope": {
+              "const": "target_specific"
+            },
+            "source_scope": {
+              "const": "prefix_target_specific"
+            },
+            "builder_access": {
+              "const": "prefix_inputs_after_full_draft_exposure"
+            },
+            "contamination_status": {
+              "const": "full_draft_exposed"
+            },
+            "protocol_eligibility": {
+              "const": "architecture_demo_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "construction_state": {
+              "const": "prefix_clean_strict"
+            },
+            "artifact_scope": {
+              "const": "target_specific"
+            },
+            "source_scope": {
+              "const": "prefix_target_specific"
+            },
+            "builder_access": {
+              "const": "prefix_allowlist_only"
+            },
+            "contamination_status": {
+              "const": "clean_prefix_only"
+            },
+            "protocol_eligibility": {
+              "const": "strict_eligible"
+            }
+          }
+        }
+      ]
+    },
+    "ProtocolContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_label",
+        "construction_state",
+        "artifact_scope",
+        "source_scope",
+        "builder_access",
+        "contamination_status",
+        "protocol_eligibility",
+        "root_construction_artifact_id"
+      ],
+      "properties": {
+        "protocol_label": {
+          "enum": [
+            "architecture_development_demo",
+            "architecture_debug_gold_fallback",
+            "strict_continuation"
+          ]
+        },
+        "construction_state": {
+          "$ref": "#/$defs/ConstructionState"
+        },
+        "artifact_scope": {
+          "const": "target_specific"
+        },
+        "source_scope": {
+          "enum": [
+            "full_draft_target_specific",
+            "prefix_target_specific"
+          ]
+        },
+        "builder_access": {
+          "enum": [
+            "full_target_draft",
+            "prefix_inputs_after_full_draft_exposure",
+            "prefix_allowlist_only"
+          ]
+        },
+        "contamination_status": {
+          "enum": [
+            "full_draft_exposed",
+            "clean_prefix_only"
+          ]
+        },
+        "protocol_eligibility": {
+          "enum": [
+            "architecture_demo_only",
+            "strict_eligible"
+          ]
+        },
+        "root_construction_artifact_id": {
+          "$ref": "#/$defs/StableId"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "protocol_label": {
+              "enum": [
+                "architecture_development_demo",
+                "architecture_debug_gold_fallback"
+              ]
+            },
+            "construction_state": {
+              "const": "full_draft_target_demo"
+            },
+            "source_scope": {
+              "const": "full_draft_target_specific"
+            },
+            "builder_access": {
+              "const": "full_target_draft"
+            },
+            "contamination_status": {
+              "const": "full_draft_exposed"
+            },
+            "protocol_eligibility": {
+              "const": "architecture_demo_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "protocol_label": {
+              "const": "architecture_development_demo"
+            },
+            "construction_state": {
+              "const": "prefix_contaminated_demo"
+            },
+            "source_scope": {
+              "const": "prefix_target_specific"
+            },
+            "builder_access": {
+              "const": "prefix_inputs_after_full_draft_exposure"
+            },
+            "contamination_status": {
+              "const": "full_draft_exposed"
+            },
+            "protocol_eligibility": {
+              "const": "architecture_demo_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "protocol_label": {
+              "const": "strict_continuation"
+            },
+            "construction_state": {
+              "const": "prefix_clean_strict"
+            },
+            "source_scope": {
+              "const": "prefix_target_specific"
+            },
+            "builder_access": {
+              "const": "prefix_allowlist_only"
+            },
+            "contamination_status": {
+              "const": "clean_prefix_only"
+            },
+            "protocol_eligibility": {
+              "const": "strict_eligible"
+            }
+          }
+        }
+      ]
+    },
+    "OwnerDecisionGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "supersedes_baseline_decision",
+        "proposal_owner",
+        "approval_owner",
+        "status",
+        "execution_authorized"
+      ],
+      "properties": {
+        "decision_id": {
+          "const": "SD-001"
+        },
+        "supersedes_baseline_decision": {
+          "const": "F-004"
+        },
+        "proposal_owner": {
+          "$ref": "#/$defs/StableId"
+        },
+        "approval_owner": {
+          "const": "project_owner"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "execution_authorized": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "approved"
+              }
+            }
+          },
+          "then": {},
+          "else": {
+            "properties": {
+              "execution_authorized": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ConstructionBundleSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seal_type",
+        "artifact_id",
+        "artifact_kind",
+        "construction_state",
+        "canonicalization_version",
+        "hash_preimage",
+        "content_sha256"
+      ],
+      "properties": {
+        "seal_type": {
+          "const": "construction_bundle"
+        },
+        "artifact_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "artifact_kind": {
+          "enum": [
+            "full_draft_target_demo_construction_bundle",
+            "prefix_contaminated_demo_construction_bundle",
+            "prefix_clean_strict_construction_bundle"
+          ]
+        },
+        "construction_state": {
+          "enum": [
+            "full_draft_target_demo",
+            "prefix_contaminated_demo",
+            "prefix_clean_strict"
+          ]
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "hash_preimage": {
+          "const": "omit_construction_seal_and_operational_metadata"
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "artifact_kind": {
+              "const": "full_draft_target_demo_construction_bundle"
+            },
+            "construction_state": {
+              "const": "full_draft_target_demo"
+            }
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {
+              "const": "prefix_contaminated_demo_construction_bundle"
+            },
+            "construction_state": {
+              "const": "prefix_contaminated_demo"
+            }
+          }
+        },
+        {
+          "properties": {
+            "artifact_kind": {
+              "const": "prefix_clean_strict_construction_bundle"
+            },
+            "construction_state": {
+              "const": "prefix_clean_strict"
+            }
+          }
+        }
+      ]
+    },
+    "PrefixProjectionProducerIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producer_id",
+        "producer_version",
+        "build_id",
+        "execution_mode",
+        "prior_target_full_draft_exposure",
+        "interactive_target_analysis",
+        "reference_access"
+      ],
+      "properties": {
+        "producer_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "producer_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "build_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "execution_mode": {
+          "const": "noninteractive_deterministic_cutoff_projector"
+        },
+        "prior_target_full_draft_exposure": {
+          "const": false
+        },
+        "interactive_target_analysis": {
+          "const": false
+        },
+        "reference_access": {
+          "const": false
+        }
+      }
+    },
+    "PrefixProjectionReviewReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_id",
+        "receipt_sha256",
+        "reviewer_id",
+        "reviewer_role",
+        "review_status",
+        "reviewed_projection_sha256"
+      ],
+      "properties": {
+        "receipt_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "receipt_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "reviewer_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "reviewer_role": {
+          "const": "prefix_projection_reviewer"
+        },
+        "review_status": {
+          "const": "reviewed_pass"
+        },
+        "reviewed_projection_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "PrefixProjectionReferenceAbsenceAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_opened",
+        "reference_parsed",
+        "reference_hashed",
+        "reference_copied",
+        "reference_handle_available_to_producer",
+        "reference_handle_available_to_clean_builder",
+        "static_scan_receipt_sha256"
+      ],
+      "properties": {
+        "reference_opened": {
+          "const": false
+        },
+        "reference_parsed": {
+          "const": false
+        },
+        "reference_hashed": {
+          "const": false
+        },
+        "reference_copied": {
+          "const": false
+        },
+        "reference_handle_available_to_producer": {
+          "const": false
+        },
+        "reference_handle_available_to_clean_builder": {
+          "const": false
+        },
+        "static_scan_receipt_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "PrefixProjectionAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projection_id",
+        "schema_version",
+        "projection_content_sha256",
+        "source_draft_asset_id",
+        "source_draft_sha256",
+        "t0",
+        "cutoff",
+        "cutoff_semantics",
+        "projection_policy_id",
+        "projection_policy_version",
+        "included_claim_pointers",
+        "included_source_pointers",
+        "suffix_absence_check",
+        "producer_identity",
+        "consumer_boundary",
+        "review_receipt",
+        "reference_absence_attestation",
+        "canonicalization_version",
+        "attestation_hash_preimage",
+        "attestation_sha256"
+      ],
+      "properties": {
+        "projection_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "schema_version": {
+          "const": "h2epr.prefix.projection.attestation.v1"
+        },
+        "projection_content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "source_draft_asset_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_draft_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "t0": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "properties": {
+                "lower": {
+                  "type": "string"
+                },
+                "upper": {
+                  "type": "string"
+                },
+                "precision": {
+                  "const": "exact_datetime"
+                }
+              }
+            }
+          ]
+        },
+        "cutoff": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "properties": {
+                "lower": {
+                  "type": "string"
+                },
+                "upper": {
+                  "type": "string"
+                },
+                "precision": {
+                  "const": "exact_datetime"
+                }
+              }
+            }
+          ]
+        },
+        "cutoff_semantics": {
+          "const": "include_only_claims_whose_upper_time_is_at_or_before_cutoff"
+        },
+        "projection_policy_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "projection_policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "included_claim_pointers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/JsonPointer"
+          },
+          "uniqueItems": true
+        },
+        "included_source_pointers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/JsonPointer"
+          },
+          "uniqueItems": true
+        },
+        "suffix_absence_check": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scanner_version",
+            "checked_claim_pointer_count",
+            "forbidden_suffix_claim_count",
+            "result",
+            "receipt_sha256"
+          ],
+          "properties": {
+            "scanner_version": {
+              "$ref": "#/$defs/StableId"
+            },
+            "checked_claim_pointer_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "forbidden_suffix_claim_count": {
+              "const": 0
+            },
+            "result": {
+              "const": "pass"
+            },
+            "receipt_sha256": {
+              "$ref": "#/$defs/Sha256"
+            }
+          }
+        },
+        "producer_identity": {
+          "$ref": "#/$defs/PrefixProjectionProducerIdentity"
+        },
+        "consumer_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "clean_builder_received_projection_only",
+            "full_draft_handle_available",
+            "suffix_handle_available"
+          ],
+          "properties": {
+            "clean_builder_received_projection_only": {
+              "const": true
+            },
+            "full_draft_handle_available": {
+              "const": false
+            },
+            "suffix_handle_available": {
+              "const": false
+            }
+          }
+        },
+        "review_receipt": {
+          "$ref": "#/$defs/PrefixProjectionReviewReceipt"
+        },
+        "reference_absence_attestation": {
+          "$ref": "#/$defs/PrefixProjectionReferenceAbsenceAttestation"
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "attestation_hash_preimage": {
+          "const": "omit_attestation_sha256"
+        },
+        "attestation_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "InputAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "asset_role",
+        "source_kind",
+        "content_sha256",
+        "byte_count",
+        "read_only",
+        "allowed_json_pointers"
+      ],
+      "properties": {
+        "asset_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "asset_role": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_kind": {
+          "enum": [
+            "event_spec",
+            "draft_epg",
+            "draft_epg_prefix_projection",
+            "frozen_evidence",
+            "non_target_contemporaneous_source",
+            "generic_contract",
+            "gold_fallback",
+            "synthetic"
+          ]
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "read_only": {
+          "const": true
+        },
+        "allowed_json_pointers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JsonPointer"
+          },
+          "uniqueItems": true
+        },
+        "projection_source_draft_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "projection_attestation_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "projection_attestation": {
+          "$ref": "#/$defs/PrefixProjectionAttestation"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source_kind": {
+                "const": "draft_epg_prefix_projection"
+              }
+            },
+            "required": [
+              "source_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "projection_source_draft_sha256",
+              "projection_attestation_sha256",
+              "projection_attestation"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "projection_source_draft_sha256"
+                  ]
+                },
+                {
+                  "required": [
+                    "projection_attestation_sha256"
+                  ]
+                },
+                {
+                  "required": [
+                    "projection_attestation"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ProvenanceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_kind",
+        "source_ref_id",
+        "claim_ref_ids",
+        "derivation_class",
+        "availability_at_t0",
+        "visibility",
+        "consumers",
+        "review_state",
+        "availability_adjudication_id"
+      ],
+      "properties": {
+        "source_kind": {
+          "enum": [
+            "event_spec",
+            "draft_epg_prefix_projection",
+            "draft_epg_full",
+            "frozen_evidence",
+            "non_target_contemporaneous_source",
+            "human_assumption",
+            "generic_contract",
+            "simulation_trace",
+            "scheduled_exogenous",
+            "gold_fallback",
+            "synthetic"
+          ]
+        },
+        "source_ref_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "claim_ref_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "derivation_class": {
+          "enum": [
+            "prefix_derived",
+            "full_draft_informed",
+            "assumed",
+            "calibrated",
+            "generic_contract",
+            "simulation_generated",
+            "scheduled_exogenous",
+            "construction_evidence_only"
+          ]
+        },
+        "content_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_time": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "availability_at_t0": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown",
+            "not_applicable",
+            "construction_only_contaminated"
+          ]
+        },
+        "availability_adjudication_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "visibility": {
+          "enum": [
+            "construction_only",
+            "runtime_public",
+            "runtime_private",
+            "runtime_system_only",
+            "evaluation_only"
+          ]
+        },
+        "consumers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "review_state": {
+          "enum": [
+            "unreviewed",
+            "reviewed",
+            "approved",
+            "rejected"
+          ]
+        }
+      }
+    },
+    "RuntimeValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "provenance",
+        "availability_at_t0",
+        "visibility",
+        "visibility_scope_ids",
+        "consumers",
+        "review_state"
+      ],
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/TypedValue"
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ProvenanceEntry"
+          }
+        },
+        "availability_at_t0": {
+          "enum": [
+            "available",
+            "not_applicable",
+            "construction_only_contaminated"
+          ]
+        },
+        "visibility": {
+          "enum": [
+            "runtime_public",
+            "runtime_private",
+            "runtime_system_only"
+          ]
+        },
+        "visibility_scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "consumers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "availability_at_t0": {
+                "const": "construction_only_contaminated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "visibility": {
+                "enum": [
+                  "runtime_private",
+                  "runtime_system_only"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "RuntimeField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field_name",
+        "runtime_value"
+      ],
+      "properties": {
+        "field_name": {
+          "$ref": "#/$defs/StableId"
+        },
+        "runtime_value": {
+          "$ref": "#/$defs/RuntimeValue"
+        }
+      }
+    },
+    "EvidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref_id",
+        "claim_ref_ids",
+        "content_sha256",
+        "availability_at_t0",
+        "availability_adjudication_id",
+        "review_state"
+      ],
+      "properties": {
+        "source_ref_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "claim_ref_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "availability_at_t0": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown",
+            "not_applicable"
+          ]
+        },
+        "availability_adjudication_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "approved_excerpt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "text",
+            "byte_count",
+            "purpose",
+            "approval_id"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 280
+            },
+            "byte_count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 280
+            },
+            "purpose": {
+              "type": "string",
+              "maxLength": 160
+            },
+            "approval_id": {
+              "$ref": "#/$defs/StableId"
+            }
+          }
+        },
+        "review_state": {
+          "enum": [
+            "unreviewed",
+            "reviewed",
+            "approved",
+            "rejected"
+          ]
+        }
+      }
+    },
+    "ConstructionDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostic_id",
+        "code",
+        "severity",
+        "source_pointer",
+        "bounded_summary",
+        "review_state"
+      ],
+      "properties": {
+        "diagnostic_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "code": {
+          "$ref": "#/$defs/StableId"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error",
+            "fatal"
+          ]
+        },
+        "source_pointer": {
+          "$ref": "#/$defs/JsonPointer"
+        },
+        "raw_claim_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bounded_summary": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "review_state": {
+          "enum": [
+            "unreviewed",
+            "reviewed",
+            "resolved",
+            "accepted_raw"
+          ]
+        }
+      }
+    },
+    "AvailabilityAdjudication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adjudication_id",
+        "claim_ref_id",
+        "occurrence_class",
+        "availability_class",
+        "audience_ids",
+        "reviewer_role",
+        "verdict"
+      ],
+      "properties": {
+        "adjudication_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "claim_ref_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "occurrence_class": {
+          "enum": [
+            "prefix",
+            "suffix",
+            "spanning",
+            "unknown"
+          ]
+        },
+        "availability_class": {
+          "enum": [
+            "available",
+            "unavailable",
+            "unknown"
+          ]
+        },
+        "audience_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "reviewer_role": {
+          "$ref": "#/$defs/StableId"
+        },
+        "verdict": {
+          "enum": [
+            "allow_runtime",
+            "construction_only",
+            "reject"
+          ]
+        }
+      }
+    },
+    "NonAllowlistFieldAdjudication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "json_pointer",
+        "verdict",
+        "reason_code",
+        "approval_owner",
+        "decision_id"
+      ],
+      "properties": {
+        "json_pointer": {
+          "$ref": "#/$defs/JsonPointer"
+        },
+        "verdict": {
+          "enum": [
+            "reject",
+            "construction_only",
+            "allow_with_owner_approval"
+          ]
+        },
+        "reason_code": {
+          "$ref": "#/$defs/StableId"
+        },
+        "approval_owner": {
+          "const": "project_owner"
+        },
+        "decision_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "StrictSourceFieldPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "policy_version",
+        "event_spec_observed_json_pointers",
+        "event_spec_allowed_json_pointers",
+        "non_allowlist_field_adjudications",
+        "source_kind_allowlist",
+        "gold_fallback_policy",
+        "raw_full_draft_handle_policy",
+        "review_state"
+      ],
+      "properties": {
+        "policy_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "event_spec_observed_json_pointers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/JsonPointer"
+          },
+          "uniqueItems": true
+        },
+        "event_spec_allowed_json_pointers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JsonPointer"
+          },
+          "uniqueItems": true
+        },
+        "non_allowlist_field_adjudications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NonAllowlistFieldAdjudication"
+          }
+        },
+        "source_kind_allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "event_spec",
+              "draft_epg_prefix_projection",
+              "non_target_contemporaneous_source",
+              "generic_contract",
+              "synthetic"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "gold_fallback_policy": {
+          "const": "prohibited"
+        },
+        "raw_full_draft_handle_policy": {
+          "const": "prohibited"
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "ContaminatedSourceFieldPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "policy_version",
+        "access_class",
+        "allowed_source_kinds",
+        "gold_fallback_label_requirement",
+        "review_state"
+      ],
+      "properties": {
+        "policy_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "access_class": {
+          "const": "full_draft_target_demo"
+        },
+        "allowed_source_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "event_spec",
+              "draft_epg",
+              "frozen_evidence",
+              "generic_contract",
+              "gold_fallback",
+              "synthetic"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "gold_fallback_label_requirement": {
+          "const": "architecture_debug_gold_fallback"
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "SelectionReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rubric_version",
+        "future_salience_used",
+        "verdict",
+        "reviewer_role"
+      ],
+      "properties": {
+        "rubric_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "future_salience_used": {
+          "type": "boolean"
+        },
+        "verdict": {
+          "enum": [
+            "include",
+            "aggregate",
+            "world",
+            "exclude"
+          ]
+        },
+        "reviewer_role": {
+          "$ref": "#/$defs/StableId"
+        }
+      }
+    },
+    "EntityRegistryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "source_participant_ids",
+        "aliases",
+        "semantic_fields",
+        "mention_refs",
+        "runtime_disposition",
+        "aggregate_member_ids",
+        "information_loss",
+        "selection_review"
+      ],
+      "properties": {
+        "entity_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_participant_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "uniqueItems": true
+        },
+        "semantic_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "mention_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "runtime_disposition": {
+          "enum": [
+            "autonomous_participant_agent",
+            "institutional_environment_agent",
+            "aggregate_population_agent",
+            "exogenous_environmental_process",
+            "world_state_entity",
+            "excluded_out_of_scope"
+          ]
+        },
+        "aggregate_member_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "information_loss": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "selection_review": {
+          "$ref": "#/$defs/SelectionReview"
+        }
+      }
+    },
+    "InformationBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_observation_types",
+        "accessible_entity_ids",
+        "denied_semantic_fields",
+        "policy_ref"
+      ],
+      "properties": {
+        "allowed_observation_types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "accessible_entity_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "denied_semantic_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/StableId"
+        }
+      }
+    },
+    "ResourceState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_id",
+        "resource_type",
+        "owner_entity_id",
+        "unit",
+        "lower_bound",
+        "upper_bound",
+        "quantity",
+        "visibility",
+        "conservation_rule",
+        "state_version"
+      ],
+      "properties": {
+        "resource_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "resource_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "owner_entity_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "unit": {
+          "$ref": "#/$defs/StableId"
+        },
+        "lower_bound": {
+          "type": "number"
+        },
+        "upper_bound": {
+          "type": "number"
+        },
+        "quantity": {
+          "$ref": "#/$defs/RuntimeValue"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "owner_private",
+            "restricted"
+          ]
+        },
+        "conservation_rule": {
+          "enum": [
+            "conserved",
+            "bounded_creation",
+            "bounded_destruction",
+            "nonconserved_index"
+          ]
+        },
+        "state_version": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "BehavioralSkill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "skill_id",
+        "version",
+        "capability_type",
+        "trigger_fields",
+        "required_observation_types",
+        "authority_preconditions",
+        "resource_preconditions",
+        "action_type_ref",
+        "proposed_effects",
+        "prohibited_contexts",
+        "fallback_action_type",
+        "backend",
+        "provenance",
+        "review_state"
+      ],
+      "properties": {
+        "skill_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "capability_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "trigger_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "required_observation_types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "authority_preconditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "resource_preconditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "action_type_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "proposed_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "latency_ticks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reliability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "prohibited_contexts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "fallback_action_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "backend": {
+          "const": "rule"
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ProvenanceEntry"
+          }
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "ParticipantArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "runtime_actor_id",
+        "source_participant_ids",
+        "representation_class",
+        "participant_profile",
+        "behavior_profile",
+        "skill_set",
+        "goal_set",
+        "constraint_set",
+        "information_boundary",
+        "action_space_refs",
+        "communication_policy_ref",
+        "initial_resource_state",
+        "rule_policy_ref",
+        "review_state"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactIdentity"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "const": "participant_artifact"
+                }
+              }
+            },
+            {
+              "not": {
+                "properties": {
+                  "construction_state": {
+                    "const": "architecture_generic"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            }
+          ]
+        },
+        "runtime_actor_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_participant_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "representation_class": {
+          "enum": [
+            "autonomous_participant_agent",
+            "institutional_environment_agent",
+            "aggregate_population_agent"
+          ]
+        },
+        "participant_profile": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "behavior_profile": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "skill_set": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BehavioralSkill"
+          }
+        },
+        "goal_set": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeValue"
+          }
+        },
+        "constraint_set": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeValue"
+          }
+        },
+        "information_boundary": {
+          "$ref": "#/$defs/InformationBoundary"
+        },
+        "action_space_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "communication_policy_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "initial_resource_state": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResourceState"
+          }
+        },
+        "rule_policy_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "TimePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "t0",
+        "start",
+        "horizon",
+        "timezone",
+        "clock_mode",
+        "daily_barrier",
+        "tail_policy",
+        "boundary_policy_version"
+      ],
+      "properties": {
+        "t0": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "start": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "horizon": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "timezone": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "clock_mode": {
+          "const": "event_driven"
+        },
+        "daily_barrier": {
+          "const": true
+        },
+        "tail_policy": {
+          "const": "close_due_at_horizon_no_adaptive_tail"
+        },
+        "boundary_policy_version": {
+          "$ref": "#/$defs/StableId"
+        }
+      }
+    },
+    "WorldState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state_version",
+        "entities",
+        "resources",
+        "relations",
+        "commitments",
+        "risks",
+        "access_grants",
+        "public_signals",
+        "process_states"
+      ],
+      "properties": {
+        "state_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResourceState"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "commitments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "access_grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "public_signals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "process_states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        }
+      }
+    },
+    "ActionDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_type",
+        "version",
+        "allowed_representation_classes",
+        "parameter_names",
+        "state_changing",
+        "review_state"
+      ],
+      "properties": {
+        "action_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "allowed_representation_classes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "parameter_names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "state_changing": {
+          "type": "boolean"
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "CommunicationRoute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "route_id",
+        "source_id",
+        "target_id",
+        "performative",
+        "channel",
+        "confidentiality",
+        "latency_ticks",
+        "expiry_policy",
+        "review_state"
+      ],
+      "properties": {
+        "route_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "target_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "performative": {
+          "$ref": "#/$defs/StableId"
+        },
+        "channel": {
+          "$ref": "#/$defs/StableId"
+        },
+        "confidentiality": {
+          "enum": [
+            "public",
+            "private",
+            "restricted"
+          ]
+        },
+        "latency_ticks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiry_policy": {
+          "enum": [
+            "drop_and_record_expired",
+            "deliver_if_due_before_expiry"
+          ]
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "ObservationAccessRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "field_name",
+        "access",
+        "latency_ticks"
+      ],
+      "properties": {
+        "actor_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "field_name": {
+          "$ref": "#/$defs/StableId"
+        },
+        "access": {
+          "enum": [
+            "public",
+            "private",
+            "denied"
+          ]
+        },
+        "latency_ticks": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ExogenousItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schedule_id",
+        "event_type",
+        "release_time",
+        "audience_ids",
+        "historical_replay",
+        "provenance",
+        "review_state"
+      ],
+      "properties": {
+        "schedule_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "event_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "release_time": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "audience_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "historical_replay": {
+          "const": false
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ProvenanceEntry"
+          }
+        },
+        "review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        }
+      }
+    },
+    "LeakagePreflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_version",
+        "status",
+        "checks",
+        "scanner_version"
+      ],
+      "properties": {
+        "policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "status": {
+          "const": "pass"
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "scanner_version": {
+          "$ref": "#/$defs/StableId"
+        }
+      }
+    },
+    "ArchitectureGenericConstructionBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "input_assets",
+        "observed_shapes",
+        "diagnostics",
+        "generic_only_attestation"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactIdentity"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "const": "architecture_generic_construction_bundle"
+                },
+                "construction_state": {
+                  "const": "architecture_generic"
+                }
+              }
+            }
+          ]
+        },
+        "input_assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/InputAsset"
+          }
+        },
+        "observed_shapes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConstructionDiagnostic"
+          }
+        },
+        "generic_only_attestation": {
+          "const": true
+        }
+      }
+    },
+    "TargetConstructionBundleBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "t0",
+        "input_assets",
+        "source_field_policy",
+        "availability_adjudications",
+        "entity_registry",
+        "participant_artifacts",
+        "initial_world_state",
+        "action_registry",
+        "communication_routes",
+        "observation_access_rules",
+        "exogenous_manifest",
+        "rule_policy_refs",
+        "scheduler_review_state",
+        "clean_builder_attestation",
+        "contamination_disclosures",
+        "owner_decision_gate",
+        "construction_seal"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "$ref": "#/$defs/ArtifactIdentity"
+        },
+        "t0": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "input_assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/InputAsset"
+          }
+        },
+        "source_field_policy": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StrictSourceFieldPolicy"
+            },
+            {
+              "$ref": "#/$defs/ContaminatedSourceFieldPolicy"
+            }
+          ]
+        },
+        "availability_adjudications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AvailabilityAdjudication"
+          }
+        },
+        "entity_registry": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EntityRegistryEntry"
+          }
+        },
+        "participant_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ParticipantArtifact"
+          }
+        },
+        "initial_world_state": {
+          "$ref": "#/$defs/WorldState"
+        },
+        "action_registry": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ActionDefinition"
+          }
+        },
+        "communication_routes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommunicationRoute"
+          }
+        },
+        "observation_access_rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ObservationAccessRule"
+          }
+        },
+        "exogenous_manifest": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExogenousItem"
+          }
+        },
+        "rule_policy_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "scheduler_review_state": {
+          "enum": [
+            "reviewed",
+            "approved"
+          ]
+        },
+        "clean_builder_attestation": {
+          "type": "boolean"
+        },
+        "contamination_disclosures": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "owner_decision_gate": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/OwnerDecisionGate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "construction_seal": {
+          "$ref": "#/$defs/ConstructionBundleSeal"
+        },
+        "operational_metadata": {
+          "$ref": "#/$defs/OperationalMetadata"
+        }
+      }
+    },
+    "FullDraftTargetDemoConstructionBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/TargetConstructionBundleBase"
+        },
+        {
+          "properties": {
+            "artifact_identity": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ArtifactIdentity"
+                },
+                {
+                  "properties": {
+                    "artifact_kind": {
+                      "const": "full_draft_target_demo_construction_bundle"
+                    },
+                    "construction_state": {
+                      "const": "full_draft_target_demo"
+                    }
+                  }
+                }
+              ]
+            },
+            "input_assets": {
+              "contains": {
+                "properties": {
+                  "source_kind": {
+                    "enum": [
+                      "draft_epg",
+                      "gold_fallback"
+                    ]
+                  }
+                },
+                "required": [
+                  "source_kind"
+                ]
+              },
+              "minContains": 1
+            },
+            "source_field_policy": {
+              "$ref": "#/$defs/ContaminatedSourceFieldPolicy"
+            },
+            "clean_builder_attestation": {
+              "const": false
+            },
+            "owner_decision_gate": {
+              "$ref": "#/$defs/OwnerDecisionGate"
+            }
+          }
+        }
+      ]
+    },
+    "PrefixContaminatedDemoConstructionBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/TargetConstructionBundleBase"
+        },
+        {
+          "properties": {
+            "artifact_identity": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ArtifactIdentity"
+                },
+                {
+                  "properties": {
+                    "artifact_kind": {
+                      "const": "prefix_contaminated_demo_construction_bundle"
+                    },
+                    "construction_state": {
+                      "const": "prefix_contaminated_demo"
+                    }
+                  }
+                }
+              ]
+            },
+            "input_assets": {
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/InputAsset"
+                  },
+                  {
+                    "properties": {
+                      "source_kind": {
+                        "enum": [
+                          "event_spec",
+                          "draft_epg_prefix_projection",
+                          "non_target_contemporaneous_source",
+                          "generic_contract",
+                          "synthetic"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "source_field_policy": {
+              "$ref": "#/$defs/StrictSourceFieldPolicy"
+            },
+            "clean_builder_attestation": {
+              "const": false
+            },
+            "owner_decision_gate": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "PrefixCleanStrictConstructionBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/TargetConstructionBundleBase"
+        },
+        {
+          "properties": {
+            "artifact_identity": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ArtifactIdentity"
+                },
+                {
+                  "properties": {
+                    "artifact_kind": {
+                      "const": "prefix_clean_strict_construction_bundle"
+                    },
+                    "construction_state": {
+                      "const": "prefix_clean_strict"
+                    }
+                  }
+                }
+              ]
+            },
+            "input_assets": {
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/InputAsset"
+                  },
+                  {
+                    "properties": {
+                      "source_kind": {
+                        "enum": [
+                          "event_spec",
+                          "draft_epg_prefix_projection",
+                          "non_target_contemporaneous_source",
+                          "generic_contract",
+                          "synthetic"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "source_field_policy": {
+              "$ref": "#/$defs/StrictSourceFieldPolicy"
+            },
+            "entity_registry": {
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/EntityRegistryEntry"
+                  },
+                  {
+                    "properties": {
+                      "selection_review": {
+                        "properties": {
+                          "future_salience_used": {
+                            "const": false
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "participant_artifacts": {
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/ParticipantArtifact"
+                  },
+                  {
+                    "properties": {
+                      "artifact_identity": {
+                        "properties": {
+                          "construction_state": {
+                            "const": "prefix_clean_strict"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "clean_builder_attestation": {
+              "const": true
+            },
+            "owner_decision_gate": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "RuntimeScenarioBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "protocol_context",
+        "runtime_bundle_id",
+        "source_kind",
+        "source_construction_bundle",
+        "owner_decision_gate",
+        "backend",
+        "resume_allowed",
+        "event_identity",
+        "time_policy",
+        "entity_registry",
+        "participant_artifacts",
+        "initial_world_state",
+        "action_registry",
+        "communication_routes",
+        "observation_access_rules",
+        "exogenous_manifest",
+        "compiler_contract_refs",
+        "leakage_preflight",
+        "canonicalization_version",
+        "artifact_hash_preimage",
+        "artifact_sha256"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactIdentity"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "const": "runtime_scenario_bundle"
+                }
+              }
+            },
+            {
+              "not": {
+                "properties": {
+                  "construction_state": {
+                    "const": "architecture_generic"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            },
+            {
+              "properties": {
+                "parent_artifacts": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/$defs/ArtifactLineageRef"
+                      },
+                      {
+                        "properties": {
+                          "artifact_kind": {
+                            "enum": [
+                              "full_draft_target_demo_construction_bundle",
+                              "prefix_contaminated_demo_construction_bundle",
+                              "prefix_clean_strict_construction_bundle"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "protocol_context": {
+          "$ref": "#/$defs/ProtocolContext"
+        },
+        "runtime_bundle_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_kind": {
+          "enum": [
+            "authentic_finmycelium_draft",
+            "gold_fallback",
+            "synthetic"
+          ]
+        },
+        "source_construction_bundle": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactLineageRef"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "enum": [
+                    "full_draft_target_demo_construction_bundle",
+                    "prefix_contaminated_demo_construction_bundle",
+                    "prefix_clean_strict_construction_bundle"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "owner_decision_gate": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/OwnerDecisionGate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backend": {
+          "const": "rule"
+        },
+        "resume_allowed": {
+          "const": false
+        },
+        "event_identity": {
+          "$ref": "#/$defs/RuntimeValue"
+        },
+        "time_policy": {
+          "$ref": "#/$defs/TimePolicy"
+        },
+        "entity_registry": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/EntityRegistryEntry"
+          }
+        },
+        "participant_artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ParticipantArtifact"
+          }
+        },
+        "initial_world_state": {
+          "$ref": "#/$defs/WorldState"
+        },
+        "action_registry": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ActionDefinition"
+          }
+        },
+        "communication_routes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommunicationRoute"
+          }
+        },
+        "observation_access_rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ObservationAccessRule"
+          }
+        },
+        "exogenous_manifest": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExogenousItem"
+          }
+        },
+        "compiler_contract_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "leakage_preflight": {
+          "$ref": "#/$defs/LeakagePreflight"
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "artifact_hash_preimage": {
+          "const": "omit_artifact_sha256_and_operational_metadata"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "operational_metadata": {
+          "$ref": "#/$defs/OperationalMetadata"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source_kind": {
+                "const": "gold_fallback"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "protocol_context": {
+                "properties": {
+                  "protocol_label": {
+                    "const": "architecture_debug_gold_fallback"
+                  },
+                  "construction_state": {
+                    "const": "full_draft_target_demo"
+                  }
+                }
+              },
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "full_draft_target_demo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol_context": {
+                "properties": {
+                  "protocol_label": {
+                    "const": "strict_continuation"
+                  }
+                },
+                "required": [
+                  "protocol_label"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_kind": {
+                "enum": [
+                  "authentic_finmycelium_draft",
+                  "synthetic"
+                ]
+              },
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "prefix_clean_strict"
+                  }
+                }
+              },
+              "owner_decision_gate": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "full_draft_target_demo"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "owner_decision_gate": {
+                "$ref": "#/$defs/OwnerDecisionGate"
+              },
+              "artifact_identity": {
+                "properties": {
+                  "parent_artifacts": {
+                    "items": {
+                      "properties": {
+                        "artifact_kind": {
+                          "const": "full_draft_target_demo_construction_bundle"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "source_construction_bundle": {
+                "properties": {
+                  "artifact_kind": {
+                    "const": "full_draft_target_demo_construction_bundle"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "prefix_contaminated_demo"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "artifact_identity": {
+                "properties": {
+                  "parent_artifacts": {
+                    "items": {
+                      "properties": {
+                        "artifact_kind": {
+                          "const": "prefix_contaminated_demo_construction_bundle"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "source_construction_bundle": {
+                "properties": {
+                  "artifact_kind": {
+                    "const": "prefix_contaminated_demo_construction_bundle"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "prefix_clean_strict"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "artifact_identity": {
+                "properties": {
+                  "parent_artifacts": {
+                    "items": {
+                      "properties": {
+                        "artifact_kind": {
+                          "const": "prefix_clean_strict_construction_bundle"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "source_construction_bundle": {
+                "properties": {
+                  "artifact_kind": {
+                    "const": "prefix_clean_strict_construction_bundle"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "DecisionRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "run_id",
+        "logical_tick",
+        "actor_id",
+        "observation_refs",
+        "rule_ids",
+        "action_intent_ids",
+        "message_intent_ids",
+        "structured_reason_codes",
+        "decision_schema_version"
+      ],
+      "properties": {
+        "decision_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "actor_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "observation_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "rule_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "action_intent_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "message_intent_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "structured_reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          }
+        },
+        "decision_schema_version": {
+          "$ref": "#/$defs/StableId"
+        }
+      }
+    },
+    "ActionIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent_id",
+        "run_id",
+        "logical_tick",
+        "actor_id",
+        "action_type",
+        "action_schema_version",
+        "target_entity_ids",
+        "parameters",
+        "claimed_authority_refs",
+        "resource_offer_or_request",
+        "earliest_effect_time",
+        "expiry_time",
+        "observation_refs",
+        "decision_ref",
+        "idempotency_key",
+        "visibility"
+      ],
+      "properties": {
+        "intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "actor_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "action_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "action_schema_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "target_entity_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "claimed_authority_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "resource_offer_or_request": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "earliest_effect_time": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expiry_time": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "decision_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "idempotency_key": {
+          "$ref": "#/$defs/StableId"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "actor_private",
+            "restricted"
+          ]
+        }
+      }
+    },
+    "ActionTransportEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_type",
+        "payload",
+        "source_id",
+        "logical_timestamp",
+        "timestamp_policy",
+        "extras"
+      ],
+      "properties": {
+        "action_type": {
+          "const": "event_process_intent"
+        },
+        "payload": {
+          "$ref": "#/$defs/ActionIntent"
+        },
+        "source_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_timestamp": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "timestamp_policy": {
+          "const": "explicit_logical_time_override_operational_timestamp_excluded"
+        },
+        "extras": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "intent_schema_version",
+            "participant_artifact_id"
+          ],
+          "properties": {
+            "intent_schema_version": {
+              "$ref": "#/$defs/StableId"
+            },
+            "participant_artifact_id": {
+              "$ref": "#/$defs/StableId"
+            }
+          }
+        }
+      }
+    },
+    "ActionDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "disposition_id",
+        "intent_id",
+        "reducer_id",
+        "reducer_version",
+        "status",
+        "reason_codes",
+        "accepted_parameters",
+        "rejected_parameters",
+        "conflict_set_ids",
+        "state_before_version",
+        "state_after_version",
+        "delta_ids",
+        "explicit_no_effect",
+        "retry_policy"
+      ],
+      "properties": {
+        "disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "reducer_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "reducer_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "partial",
+            "delayed",
+            "superseded",
+            "failed"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          }
+        },
+        "accepted_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "rejected_parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "conflict_set_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "state_before_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state_after_version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "delta_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "explicit_no_effect": {
+          "type": "boolean"
+        },
+        "retry_policy": {
+          "enum": [
+            "none",
+            "next_tick",
+            "on_condition"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "rejected",
+                  "superseded",
+                  "failed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "delta_ids": {
+                "maxItems": 0
+              },
+              "explicit_no_effect": {
+                "const": true
+              },
+              "state_after_version": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "delayed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "delta_ids": {
+                "maxItems": 0
+              },
+              "explicit_no_effect": {
+                "const": false
+              },
+              "state_after_version": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "accepted",
+                  "partial"
+                ]
+              }
+            }
+          },
+          "then": {
+            "anyOf": [
+              {
+                "properties": {
+                  "delta_ids": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "explicit_no_effect": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "StateDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delta_id",
+        "disposition_id",
+        "entity_id",
+        "state_path",
+        "operation",
+        "before",
+        "after",
+        "unit",
+        "state_before_version",
+        "state_after_version",
+        "invariant_checks",
+        "causal_parent_ids"
+      ],
+      "properties": {
+        "delta_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "entity_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "state_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.:-]+$",
+          "maxLength": 256
+        },
+        "operation": {
+          "enum": [
+            "set",
+            "increment",
+            "decrement",
+            "add_member",
+            "remove_member",
+            "transition"
+          ]
+        },
+        "before": {
+          "$ref": "#/$defs/TypedValue"
+        },
+        "after": {
+          "$ref": "#/$defs/TypedValue"
+        },
+        "unit": {
+          "$ref": "#/$defs/StableId"
+        },
+        "state_before_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state_after_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "invariant_checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          }
+        },
+        "causal_parent_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "MessageIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message_intent_id",
+        "run_id",
+        "logical_tick",
+        "sender_id",
+        "recipient_ids",
+        "performative",
+        "content_schema_version",
+        "structured_content",
+        "channel",
+        "confidentiality",
+        "created_at",
+        "earliest_delivery_time",
+        "expiry_time",
+        "decision_ref",
+        "idempotency_key",
+        "correlation_ids"
+      ],
+      "properties": {
+        "message_intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sender_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "recipient_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "performative": {
+          "$ref": "#/$defs/StableId"
+        },
+        "content_schema_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "structured_content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "channel": {
+          "$ref": "#/$defs/StableId"
+        },
+        "confidentiality": {
+          "enum": [
+            "public",
+            "private",
+            "restricted"
+          ]
+        },
+        "created_at": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "earliest_delivery_time": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "expiry_time": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "decision_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "idempotency_key": {
+          "$ref": "#/$defs/StableId"
+        },
+        "correlation_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "CommunicationDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "communication_disposition_id",
+        "message_intent_id",
+        "run_id",
+        "logical_tick",
+        "sender_id",
+        "recipient_ids",
+        "requested_channel",
+        "adjudicated_at",
+        "policy_id",
+        "policy_version",
+        "status",
+        "reason_codes",
+        "route_id",
+        "message_id",
+        "terminal",
+        "duplicate_of_message_intent_id"
+      ],
+      "properties": {
+        "communication_disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sender_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "recipient_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "requested_channel": {
+          "$ref": "#/$defs/StableId"
+        },
+        "adjudicated_at": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "policy_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "prohibited_route",
+            "expired",
+            "duplicate",
+            "failed",
+            "delayed"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          }
+        },
+        "route_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "terminal": {
+          "type": "boolean"
+        },
+        "duplicate_of_message_intent_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "accepted"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "route_id": {
+                "$ref": "#/$defs/StableId"
+              },
+              "message_id": {
+                "$ref": "#/$defs/StableId"
+              },
+              "terminal": {
+                "const": true
+              },
+              "duplicate_of_message_intent_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "prohibited_route",
+                  "expired",
+                  "failed"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "message_id": {
+                "type": "null"
+              },
+              "terminal": {
+                "const": true
+              },
+              "duplicate_of_message_intent_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "duplicate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "message_id": {
+                "type": "null"
+              },
+              "terminal": {
+                "const": true
+              },
+              "duplicate_of_message_intent_id": {
+                "$ref": "#/$defs/StableId"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "delayed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "message_id": {
+                "type": "null"
+              },
+              "terminal": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "MessageSent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message_id",
+        "message_intent_id",
+        "communication_disposition_id",
+        "run_id",
+        "logical_tick",
+        "sender_id",
+        "recipient_ids",
+        "route_id",
+        "sent_at",
+        "delivery_due_at",
+        "expiry_time",
+        "canonical_content_sha256"
+      ],
+      "properties": {
+        "message_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "communication_disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sender_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "recipient_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "route_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "sent_at": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "delivery_due_at": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "expiry_time": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/TimeInterval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "canonical_content_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      }
+    },
+    "MessageDelivered": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delivery_id",
+        "message_id",
+        "message_intent_id",
+        "communication_disposition_id",
+        "run_id",
+        "sender_id",
+        "recipient_id",
+        "route_id",
+        "message_sent_trace_ref",
+        "delivered_logical_tick",
+        "delivered_at",
+        "first_consumable_logical_tick",
+        "delivery_masim_round",
+        "first_consumable_masim_round"
+      ],
+      "properties": {
+        "delivery_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "communication_disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "sender_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_sent_trace_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "recipient_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "route_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "delivered_logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "delivered_at": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "first_consumable_logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "delivery_masim_round": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "first_consumable_masim_round": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "MessageExpired": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expiration_id",
+        "message_id",
+        "message_intent_id",
+        "communication_disposition_id",
+        "run_id",
+        "sender_id",
+        "recipient_ids",
+        "route_id",
+        "message_sent_trace_ref",
+        "expired_logical_tick",
+        "expired_at",
+        "reason_code"
+      ],
+      "properties": {
+        "expiration_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "communication_disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "sender_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "recipient_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "route_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_sent_trace_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "expired_logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expired_at": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "reason_code": {
+          "enum": [
+            "delivery_due_after_expiry",
+            "recipient_unavailable_until_expiry",
+            "horizon_reached"
+          ]
+        }
+      }
+    },
+    "MessageFanoutItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recipient_id",
+        "message_intent_id",
+        "communication_disposition_id",
+        "message_id",
+        "terminal_id"
+      ],
+      "properties": {
+        "recipient_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_intent_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "communication_disposition_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "message_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "terminal_id": {
+          "$ref": "#/$defs/StableId"
+        }
+      }
+    },
+    "MessageFanoutPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "broadcast_request_id",
+        "source_decision_id",
+        "run_id",
+        "logical_tick",
+        "sender_id",
+        "recipient_ids",
+        "expansion_policy_version",
+        "stable_id_algorithm",
+        "expanded_items"
+      ],
+      "properties": {
+        "broadcast_request_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_decision_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sender_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "recipient_ids": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "expansion_policy_version": {
+          "const": "h2epr.message.fanout.v1"
+        },
+        "stable_id_algorithm": {
+          "const": "sha256_cjson_request_recipient_kind_policy_prefix16"
+        },
+        "expanded_items": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/MessageFanoutItem"
+          }
+        }
+      }
+    },
+    "ObservationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_id",
+        "fields"
+      ],
+      "properties": {
+        "observation_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        }
+      }
+    },
+    "SystemEventPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "fields",
+        "reason_codes"
+      ],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "event_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          }
+        }
+      }
+    },
+    "TickSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seal_type",
+        "logical_tick",
+        "manifest_sha256",
+        "first_record_hash",
+        "last_record_hash_before_seal",
+        "record_count_before_seal",
+        "state_before_version",
+        "state_after_version",
+        "state_before_sha256",
+        "state_after_sha256",
+        "closure_check_version",
+        "closure_result",
+        "tick_validity",
+        "canonicalization_version"
+      ],
+      "properties": {
+        "seal_type": {
+          "const": "tick"
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "first_record_hash": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "last_record_hash_before_seal": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "record_count_before_seal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state_before_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state_after_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state_before_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "state_after_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "closure_check_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "closure_result": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "tick_validity": {
+          "enum": [
+            "valid",
+            "invalid"
+          ]
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        }
+      }
+    },
+    "RunSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seal_type",
+        "run_id",
+        "manifest_sha256",
+        "trace_prefix_sha256",
+        "record_count_before_run_seal",
+        "first_record_hash",
+        "last_record_hash_before_run_seal",
+        "tick_seal_record_hashes",
+        "terminal_state_version",
+        "terminal_state_sha256",
+        "closure_check_version",
+        "closure_result",
+        "run_validity",
+        "canonicalization_version"
+      ],
+      "properties": {
+        "seal_type": {
+          "const": "run"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "trace_prefix_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "record_count_before_run_seal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "first_record_hash": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "last_record_hash_before_run_seal": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "tick_seal_record_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Sha256"
+          },
+          "uniqueItems": true
+        },
+        "terminal_state_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "terminal_state_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "closure_check_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "closure_result": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "run_validity": {
+          "enum": [
+            "valid",
+            "invalid"
+          ]
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        }
+      }
+    },
+    "OperationalMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "captured_wall_clock",
+        "host_process_id"
+      ],
+      "properties": {
+        "captured_wall_clock": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "host_process_id": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "RunManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "manifest_id",
+        "run_id",
+        "scenario_id",
+        "event_id",
+        "protocol_context",
+        "source_kind",
+        "runtime_bundle_sha256",
+        "config_sha256",
+        "code_artifact_hashes",
+        "contract_versions",
+        "time_policy",
+        "participant_artifact_hashes",
+        "component_versions",
+        "rng_streams",
+        "resume_allowed",
+        "fresh_output_attestation",
+        "leakage_preflight",
+        "reference_access",
+        "canonicalization_version",
+        "manifest_hash_preimage",
+        "manifest_sha256"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactIdentity"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "const": "run_manifest"
+                }
+              }
+            },
+            {
+              "not": {
+                "properties": {
+                  "construction_state": {
+                    "const": "architecture_generic"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            },
+            {
+              "properties": {
+                "parent_artifacts": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/$defs/ArtifactLineageRef"
+                      },
+                      {
+                        "properties": {
+                          "artifact_kind": {
+                            "const": "runtime_scenario_bundle"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "manifest_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "scenario_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "event_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "protocol_context": {
+          "$ref": "#/$defs/ProtocolContext"
+        },
+        "source_kind": {
+          "enum": [
+            "authentic_finmycelium_draft",
+            "gold_fallback",
+            "synthetic"
+          ]
+        },
+        "runtime_bundle_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "config_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "code_artifact_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Sha256"
+          },
+          "uniqueItems": true
+        },
+        "contract_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "time_policy": {
+          "$ref": "#/$defs/TimePolicy"
+        },
+        "participant_artifact_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Sha256"
+          }
+        },
+        "component_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          }
+        },
+        "rng_streams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "stream_id",
+              "seed"
+            ],
+            "properties": {
+              "stream_id": {
+                "$ref": "#/$defs/StableId"
+              },
+              "seed": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "resume_allowed": {
+          "const": false
+        },
+        "fresh_output_attestation": {
+          "const": true
+        },
+        "leakage_preflight": {
+          "$ref": "#/$defs/LeakagePreflight"
+        },
+        "reference_access": {
+          "const": "denied"
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "manifest_hash_preimage": {
+          "const": "omit_manifest_sha256_and_operational_metadata"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "operational_metadata": {
+          "$ref": "#/$defs/OperationalMetadata"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source_kind": {
+                "const": "gold_fallback"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "protocol_context": {
+                "properties": {
+                  "protocol_label": {
+                    "const": "architecture_debug_gold_fallback"
+                  },
+                  "construction_state": {
+                    "const": "full_draft_target_demo"
+                  }
+                }
+              },
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "full_draft_target_demo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol_context": {
+                "properties": {
+                  "protocol_label": {
+                    "const": "strict_continuation"
+                  }
+                },
+                "required": [
+                  "protocol_label"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source_kind": {
+                "enum": [
+                  "authentic_finmycelium_draft",
+                  "synthetic"
+                ]
+              },
+              "artifact_identity": {
+                "properties": {
+                  "construction_state": {
+                    "const": "prefix_clean_strict"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TraceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trace_id",
+        "trace_artifact_id",
+        "run_id",
+        "schema_version",
+        "protocol_context",
+        "record_type",
+        "logical_tick",
+        "tick_phase",
+        "sequence_in_tick",
+        "simulation_time",
+        "masim_round",
+        "execution_level",
+        "first_consumable_round",
+        "actor_id",
+        "target_ids",
+        "visibility",
+        "channel",
+        "payload",
+        "observation_refs",
+        "decision_refs",
+        "intent_refs",
+        "message_refs",
+        "parent_trace_ids",
+        "causal_parent_ids",
+        "state_before_version",
+        "state_after_version",
+        "source_kind",
+        "component_id",
+        "component_version",
+        "rule_id",
+        "rule_version",
+        "rng_draw_id",
+        "canonicalization_version",
+        "record_hash_preimage",
+        "previous_record_hash",
+        "record_hash"
+      ],
+      "properties": {
+        "trace_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "trace_artifact_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "protocol_context": {
+          "$ref": "#/$defs/ProtocolContext"
+        },
+        "record_type": {
+          "enum": [
+            "tick_opened",
+            "exogenous_event_released",
+            "observation_delivered",
+            "decision_recorded",
+            "action_intent_created",
+            "action_disposition_recorded",
+            "state_transition_applied",
+            "message_intent_created",
+            "communication_disposition_recorded",
+            "message_sent",
+            "message_delivered",
+            "message_expired",
+            "local_outcome_detected",
+            "phase_transition_detected",
+            "agent_activated",
+            "agent_deactivated",
+            "invariant_violation",
+            "runtime_error",
+            "tick_sealed",
+            "run_sealed"
+          ]
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tick_phase": {
+          "enum": [
+            "open",
+            "release",
+            "observe",
+            "decide",
+            "reduce",
+            "commit",
+            "communicate",
+            "detect",
+            "seal"
+          ]
+        },
+        "sequence_in_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "simulation_time": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "masim_round": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "execution_level": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "first_consumable_round": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "actor_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "actor_private",
+            "restricted",
+            "system"
+          ]
+        },
+        "channel": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/SystemEventPayload"
+            },
+            {
+              "$ref": "#/$defs/ObservationPayload"
+            },
+            {
+              "$ref": "#/$defs/DecisionRecord"
+            },
+            {
+              "$ref": "#/$defs/ActionIntent"
+            },
+            {
+              "$ref": "#/$defs/ActionDisposition"
+            },
+            {
+              "$ref": "#/$defs/StateDelta"
+            },
+            {
+              "$ref": "#/$defs/MessageIntent"
+            },
+            {
+              "$ref": "#/$defs/CommunicationDisposition"
+            },
+            {
+              "$ref": "#/$defs/MessageSent"
+            },
+            {
+              "$ref": "#/$defs/MessageDelivered"
+            },
+            {
+              "$ref": "#/$defs/MessageExpired"
+            },
+            {
+              "$ref": "#/$defs/TickSeal"
+            },
+            {
+              "$ref": "#/$defs/RunSeal"
+            }
+          ]
+        },
+        "observation_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "decision_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "intent_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "message_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "parent_trace_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "causal_parent_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "state_before_version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "state_after_version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "source_kind": {
+          "enum": [
+            "simulation",
+            "scheduled_exogenous"
+          ]
+        },
+        "component_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "component_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "rule_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rule_version": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rng_draw_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/StableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "record_hash_preimage": {
+          "const": "omit_record_hash_and_operational_metadata_include_previous_record_hash"
+        },
+        "previous_record_hash": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "record_hash": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "operational_metadata": {
+          "$ref": "#/$defs/OperationalMetadata"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "observation_delivered"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/ObservationPayload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "decision_recorded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/DecisionRecord"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "action_intent_created"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/ActionIntent"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "action_disposition_recorded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/ActionDisposition"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "state_transition_applied"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/StateDelta"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "message_intent_created"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/MessageIntent"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "communication_disposition_recorded"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/CommunicationDisposition"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "message_sent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/MessageSent"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "message_delivered"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/MessageDelivered"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "message_expired"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/MessageExpired"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "tick_sealed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/TickSeal"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "const": "run_sealed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/RunSeal"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_type": {
+                "enum": [
+                  "tick_opened",
+                  "exogenous_event_released",
+                  "local_outcome_detected",
+                  "phase_transition_detected",
+                  "agent_activated",
+                  "agent_deactivated",
+                  "invariant_violation",
+                  "runtime_error"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/SystemEventPayload"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SimulationTrace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "protocol_context",
+        "trace_artifact_id",
+        "run_id",
+        "source_manifest_sha256",
+        "trace_usage_class",
+        "records",
+        "trace_hash_preimage",
+        "canonicalization_version",
+        "trace_sha256"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactIdentity"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "const": "simulation_trace"
+                }
+              }
+            },
+            {
+              "not": {
+                "properties": {
+                  "construction_state": {
+                    "const": "architecture_generic"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            },
+            {
+              "properties": {
+                "parent_artifacts": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/$defs/ArtifactLineageRef"
+                      },
+                      {
+                        "properties": {
+                          "artifact_kind": {
+                            "const": "run_manifest"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "protocol_context": {
+          "$ref": "#/$defs/ProtocolContext"
+        },
+        "trace_artifact_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "trace_usage_class": {
+          "enum": [
+            "compiler_evaluator_eligible",
+            "audit_only_invalid_run"
+          ]
+        },
+        "records": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/TraceRecord"
+          }
+        },
+        "trace_hash_preimage": {
+          "const": "canonical_record_array_including_run_seal_omit_each_record_operational_metadata"
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "trace_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "operational_metadata": {
+          "$ref": "#/$defs/OperationalMetadata"
+        }
+      }
+    },
+    "GeneratedGraphNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "node_kind",
+        "event_type",
+        "time",
+        "participant_refs",
+        "trace_refs",
+        "compiler_rule_ref",
+        "attributes"
+      ],
+      "properties": {
+        "node_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "node_kind": {
+          "enum": [
+            "stage",
+            "episode",
+            "participant",
+            "action",
+            "outcome",
+            "transaction"
+          ]
+        },
+        "event_type": {
+          "$ref": "#/$defs/StableId"
+        },
+        "time": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "participant_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "trace_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "compiler_rule_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeField"
+          }
+        }
+      }
+    },
+    "GeneratedGraphEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_id",
+        "edge_kind",
+        "source_node_id",
+        "target_node_id",
+        "trace_refs",
+        "compiler_rule_ref",
+        "uncertainty"
+      ],
+      "properties": {
+        "edge_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "edge_kind": {
+          "enum": [
+            "contains",
+            "performed_by",
+            "targets",
+            "recipient",
+            "before",
+            "meets",
+            "overlaps",
+            "during",
+            "simultaneous",
+            "uncertain_order",
+            "causes",
+            "mechanism_path",
+            "world_interaction",
+            "transfer"
+          ]
+        },
+        "source_node_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "target_node_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "trace_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/StableId"
+          },
+          "uniqueItems": true
+        },
+        "compiler_rule_ref": {
+          "$ref": "#/$defs/StableId"
+        },
+        "uncertainty": {
+          "type": "string",
+          "maxLength": 512
+        }
+      }
+    },
+    "GeneratedEPGSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_sha256",
+        "hash_preimage",
+        "canonicalization_version",
+        "node_count",
+        "edge_count",
+        "closure_check_version",
+        "closure_result",
+        "validity"
+      ],
+      "properties": {
+        "artifact_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "hash_preimage": {
+          "const": "omit_seal_and_operational_metadata"
+        },
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "node_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edge_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closure_check_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "closure_result": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "validity": {
+          "enum": [
+            "valid",
+            "invalid"
+          ]
+        }
+      }
+    },
+    "GeneratedEPG": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_identity",
+        "protocol_context",
+        "generated_epg_id",
+        "run_id",
+        "schema_version",
+        "compiler_version",
+        "detector_registry_version",
+        "grouping_policy_version",
+        "stage_policy_version",
+        "source_manifest_sha256",
+        "source_trace_sha256",
+        "event_time_scope",
+        "nodes",
+        "edges",
+        "trace_provenance_index",
+        "validation_status",
+        "seal"
+      ],
+      "properties": {
+        "artifact_identity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/ArtifactIdentity"
+            },
+            {
+              "properties": {
+                "artifact_kind": {
+                  "const": "generated_epg"
+                }
+              }
+            },
+            {
+              "not": {
+                "properties": {
+                  "construction_state": {
+                    "const": "architecture_generic"
+                  }
+                },
+                "required": [
+                  "construction_state"
+                ]
+              }
+            },
+            {
+              "properties": {
+                "parent_artifacts": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/$defs/ArtifactLineageRef"
+                  },
+                  "allOf": [
+                    {
+                      "contains": {
+                        "properties": {
+                          "artifact_kind": {
+                            "const": "run_manifest"
+                          }
+                        },
+                        "required": [
+                          "artifact_kind"
+                        ]
+                      },
+                      "minContains": 1,
+                      "maxContains": 1
+                    },
+                    {
+                      "contains": {
+                        "properties": {
+                          "artifact_kind": {
+                            "const": "simulation_trace"
+                          }
+                        },
+                        "required": [
+                          "artifact_kind"
+                        ]
+                      },
+                      "minContains": 1,
+                      "maxContains": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "protocol_context": {
+          "$ref": "#/$defs/ProtocolContext"
+        },
+        "generated_epg_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "run_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "compiler_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "detector_registry_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "grouping_policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "stage_policy_version": {
+          "$ref": "#/$defs/StableId"
+        },
+        "source_manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "source_trace_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "event_time_scope": {
+          "$ref": "#/$defs/TimeInterval"
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/GeneratedGraphNode"
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GeneratedGraphEdge"
+          }
+        },
+        "trace_provenance_index": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "graph_item_id",
+              "trace_refs"
+            ],
+            "properties": {
+              "graph_item_id": {
+                "$ref": "#/$defs/StableId"
+              },
+              "trace_refs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/StableId"
+                },
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "validation_status": {
+          "const": "pass"
+        },
+        "seal": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/GeneratedEPGSeal"
+            },
+            {
+              "properties": {
+                "closure_result": {
+                  "const": "pass"
+                },
+                "validity": {
+                  "const": "valid"
+                }
+              }
+            }
+          ]
+        },
+        "operational_metadata": {
+          "$ref": "#/$defs/OperationalMetadata"
+        }
+      }
+    },
+    "ProductionChainStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage_index",
+        "artifact_id",
+        "artifact_kind",
+        "construction_state",
+        "source_scope",
+        "builder_access",
+        "contamination_status",
+        "protocol_eligibility",
+        "protocol_label",
+        "parent_stage_indices",
+        "status"
+      ],
+      "properties": {
+        "stage_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "artifact_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "artifact_kind": {
+          "enum": [
+            "full_draft_target_demo_construction_bundle",
+            "runtime_scenario_bundle",
+            "run_manifest",
+            "simulation_trace",
+            "generated_epg",
+            "evaluation_report"
+          ]
+        },
+        "construction_state": {
+          "const": "full_draft_target_demo"
+        },
+        "source_scope": {
+          "const": "full_draft_target_specific"
+        },
+        "builder_access": {
+          "const": "full_target_draft"
+        },
+        "contamination_status": {
+          "const": "full_draft_exposed"
+        },
+        "protocol_eligibility": {
+          "const": "architecture_demo_only"
+        },
+        "protocol_label": {
+          "const": "architecture_development_demo"
+        },
+        "parent_stage_indices": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "const": "planned_not_executed"
+        }
+      }
+    },
+    "FullDraftTargetDemoProductionChainPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plan_id",
+        "plan_status",
+        "input_source_kind",
+        "owner_decision_gate",
+        "contained_reviewed_components",
+        "stages",
+        "no_strict_relabel_attestation"
+      ],
+      "properties": {
+        "plan_id": {
+          "$ref": "#/$defs/StableId"
+        },
+        "plan_status": {
+          "const": "contract_specification_only"
+        },
+        "input_source_kind": {
+          "const": "authentic_finmycelium_draft"
+        },
+        "owner_decision_gate": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/OwnerDecisionGate"
+            },
+            {
+              "properties": {
+                "status": {
+                  "const": "pending"
+                },
+                "execution_authorized": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "contained_reviewed_components": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "entity_registry"
+            },
+            {
+              "const": "participant_roster"
+            },
+            {
+              "const": "participant_artifacts"
+            },
+            {
+              "const": "initial_world_state"
+            },
+            {
+              "const": "rule_policies"
+            },
+            {
+              "const": "communication_and_observation_policies"
+            },
+            {
+              "const": "scheduler"
+            }
+          ],
+          "items": false,
+          "minItems": 7,
+          "maxItems": 7
+        },
+        "stages": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ProductionChainStage"
+                },
+                {
+                  "properties": {
+                    "stage_index": {
+                      "const": 0
+                    },
+                    "artifact_kind": {
+                      "const": "full_draft_target_demo_construction_bundle"
+                    },
+                    "parent_stage_indices": {
+                      "maxItems": 0
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ProductionChainStage"
+                },
+                {
+                  "properties": {
+                    "stage_index": {
+                      "const": 1
+                    },
+                    "artifact_kind": {
+                      "const": "runtime_scenario_bundle"
+                    },
+                    "parent_stage_indices": {
+                      "const": [
+                        0
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ProductionChainStage"
+                },
+                {
+                  "properties": {
+                    "stage_index": {
+                      "const": 2
+                    },
+                    "artifact_kind": {
+                      "const": "run_manifest"
+                    },
+                    "parent_stage_indices": {
+                      "const": [
+                        1
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ProductionChainStage"
+                },
+                {
+                  "properties": {
+                    "stage_index": {
+                      "const": 3
+                    },
+                    "artifact_kind": {
+                      "const": "simulation_trace"
+                    },
+                    "parent_stage_indices": {
+                      "const": [
+                        2
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ProductionChainStage"
+                },
+                {
+                  "properties": {
+                    "stage_index": {
+                      "const": 4
+                    },
+                    "artifact_kind": {
+                      "const": "generated_epg"
+                    },
+                    "parent_stage_indices": {
+                      "const": [
+                        2,
+                        3
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/ProductionChainStage"
+                },
+                {
+                  "properties": {
+                    "stage_index": {
+                      "const": 5
+                    },
+                    "artifact_kind": {
+                      "const": "evaluation_report"
+                    },
+                    "parent_stage_indices": {
+                      "const": [
+                        3,
+                        4
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "no_strict_relabel_attestation": {
+          "const": true
+        }
+      }
+    }
+  }
+}

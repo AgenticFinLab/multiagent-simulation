@@ -1,0 +1,148 @@
+{
+  "catalog_version": "h2epr.contracts.v1",
+  "base_uri": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/",
+  "network_resolution": "prohibited",
+  "schema_count": 28,
+  "schemas": [
+    {
+      "path": "compiler/generated_epg.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/compiler/generated_epg.schema.json",
+      "sha256": "f5d06b551365e0f6647d463ef825259c90d70793a364ad9a052a956144911a11"
+    },
+    {
+      "path": "construction/anchored_chain_validation_request.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/anchored_chain_validation_request.schema.json",
+      "sha256": "0dc22a3519ea62af86b594ab36bf7ea34f2efd45bd1cfd62da26ad14eb8dd492"
+    },
+    {
+      "path": "construction/architecture_generic_construction_bundle.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/architecture_generic_construction_bundle.schema.json",
+      "sha256": "8339c1e26ca8fbdfbc95ba5affb1012baa33e46565ca58cc5496e2ed0205f19e"
+    },
+    {
+      "path": "construction/construction_anchor_allowlist.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/construction_anchor_allowlist.schema.json",
+      "sha256": "d8e0e0149b7f807abc46032024a4a90a1ee1f98b8af6982b143e6dccd08d7d03"
+    },
+    {
+      "path": "construction/construction_bundle_seal.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/construction_bundle_seal.schema.json",
+      "sha256": "41c99c5d6bf8d6508babacb97086c9f13288a77eb4bbf6e388cf20dbe0f8577c"
+    },
+    {
+      "path": "construction/external_construction_anchor_context.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/external_construction_anchor_context.schema.json",
+      "sha256": "8e143f99fe93562a0103655b8f0de2104fe359900ba3f993376d8279a3df93d0"
+    },
+    {
+      "path": "construction/full_draft_target_demo_construction_bundle.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/full_draft_target_demo_construction_bundle.schema.json",
+      "sha256": "76777faab618bb755422c06bfa1fafc3985e33d60aa108da401640e63876b36f"
+    },
+    {
+      "path": "construction/full_draft_target_demo_production_chain.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/full_draft_target_demo_production_chain.schema.json",
+      "sha256": "b027dc0b8c3d02cc10141d3e2523833390f08f2d45967d0c2d8e7b7d6edb424b"
+    },
+    {
+      "path": "construction/prefix_clean_strict_construction_bundle.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/prefix_clean_strict_construction_bundle.schema.json",
+      "sha256": "f4eeab74613d465c911b169ba36580855180631f7985598ab326fe8a0eff8085"
+    },
+    {
+      "path": "construction/prefix_contaminated_demo_construction_bundle.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/prefix_contaminated_demo_construction_bundle.schema.json",
+      "sha256": "d159e1a6fb0a7ad5d0da58f84a4d430c437af7218d07fbcf836878fd7eafa714"
+    },
+    {
+      "path": "construction/prefix_projection_attestation.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/prefix_projection_attestation.schema.json",
+      "sha256": "8a443b4d79c4088ff267a9c52235528d717f59444fa7f61cbc8521ce1a5cf28a"
+    },
+    {
+      "path": "construction/typed_artifact_chain.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/typed_artifact_chain.schema.json",
+      "sha256": "21be0cf01542d3381a1f260e741378fa91fd91782f3db0b3f8191da91cc34eff"
+    },
+    {
+      "path": "core/artifact_identity.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/artifact_identity.schema.json",
+      "sha256": "dcf80618433a4fa1640fe17465dda2aa66ef0c5b0e00aab45edbfa26202214f2"
+    },
+    {
+      "path": "core/h2epr_core.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json",
+      "sha256": "d6bea7e1094071c5187e16c2c52e989d8353e426da4d385206a11a189c5c5cf5"
+    },
+    {
+      "path": "core/participant_artifact.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/participant_artifact.schema.json",
+      "sha256": "9945e44c39803b0097af58881081763325b8c664e66f7356537ae1a4d2ceb290"
+    },
+    {
+      "path": "evaluation/evaluation_report.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/evaluation/evaluation_report.schema.json",
+      "sha256": "f20692f2891a56cc6e0e2d2b8b395b03d7bb46f0e9a4c0bab84e50c7aba4f1c2"
+    },
+    {
+      "path": "runtime/action_transport_envelope.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/action_transport_envelope.schema.json",
+      "sha256": "ed18993ca707d8f80b1d147e5879ae0380d4d54c5c9cae3df448af1cf48e8ce2"
+    },
+    {
+      "path": "runtime/communication_history.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json",
+      "sha256": "f0ba7a38caa2cb725caf1c81f850091bce25eaf3059b09b7e34315f67524bf2d"
+    },
+    {
+      "path": "runtime/communication_record.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/communication_record.schema.json",
+      "sha256": "52e459ac40988c2d7e6a907dd9fb7fc47cb60fa2b5e90f0cf9194603d1b1ebbd"
+    },
+    {
+      "path": "runtime/linked_communication_run.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/linked_communication_run.schema.json",
+      "sha256": "bb1f3feda781c36b39a6feb2a65ddd3d6addfc9a66803605a3819addf255535f"
+    },
+    {
+      "path": "runtime/message_fanout_plan.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/message_fanout_plan.schema.json",
+      "sha256": "7a6b522231951d9e20f0b1f250bc20464b43988306330cee44eb686b780eabd2"
+    },
+    {
+      "path": "runtime/run_manifest.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/run_manifest.schema.json",
+      "sha256": "e303ddf2530c23e172ab5342552a0fa6f8459eaaa4e41a21e659e7a0a0a1804e"
+    },
+    {
+      "path": "runtime/run_seal.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/run_seal.schema.json",
+      "sha256": "d4e724f1bc9d1642cb2678187a4c432734f6a105c417759011e3a9a1a23cf43b"
+    },
+    {
+      "path": "runtime/runtime_scenario_bundle.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/runtime_scenario_bundle.schema.json",
+      "sha256": "a9c3bfb8b87c2f0938dea5254a6e33a237ce90bc0c6b08761b0b5346ea23f6d2"
+    },
+    {
+      "path": "runtime/simulation_trace.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/simulation_trace.schema.json",
+      "sha256": "6fe8c7aea8f6a1b926aed91f6272d17db7ce36c0e262bf224d28b4b3c3fb5984"
+    },
+    {
+      "path": "runtime/simulation_trace_record.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/simulation_trace_record.schema.json",
+      "sha256": "f6da2aab6e0286caa772264a65461b2f7501a174c92381cd7e642cfcd50c1a80"
+    },
+    {
+      "path": "runtime/tick_seal.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/tick_seal.schema.json",
+      "sha256": "88e13bee0fc586f3da7e2d1e84f927e2473062ce33166993fe3bcb65b50f42e7"
+    },
+    {
+      "path": "scenarios/panic_1907/h2epr_0288_strict_source_policy.schema.json",
+      "schema_id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/scenarios/panic_1907/h2epr_0288_strict_source_policy.schema.json",
+      "sha256": "74fbfc1de9f6379f366557abaf17c0fd42cf915aaa9d26e4c2d02e548be5451a"
+    }
+  ]
+}

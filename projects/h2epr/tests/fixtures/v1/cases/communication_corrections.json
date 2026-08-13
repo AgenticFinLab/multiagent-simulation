@@ -1,0 +1,39 @@
+{
+  "fixture_catalog_version": "h2epr.communication.corrections.v1",
+  "semantic_scope": "run-seal binding, delivery ordering, consumability, and unresolved-recipient set semantics",
+  "base_fixture_ids": [
+    "valid/communication_history_closed.json",
+    "valid/communication_history_unresolved.json",
+    "valid/simulation_trace_records.json"
+  ],
+  "cases": [
+    {
+      "behavior_case_id": "valid-linked-closed-run-replace-run-seal-trace-id-with-nonexistent-id",
+      "legacy_case_id": "ESCAPE-R4-B2-UNBOUND-RUN-SEAL-TRACE-ID",
+      "base": "valid_linked_closed_run",
+      "mutation": "replace_run_seal_trace_id_with_nonexistent_id",
+      "expected_result": "reject"
+    },
+    {
+      "behavior_case_id": "closed-communication-delivered-before-sent",
+      "legacy_case_id": "ESCAPE-R4-B2-DELIVERED-BEFORE-SENT",
+      "base": "r4_closed_communication",
+      "mutation": "set_delivery_lower_and_upper_to_1907-10-14T08:59:00Z",
+      "expected_result": "reject"
+    },
+    {
+      "behavior_case_id": "closed-communication-consumable-without-later-tick-or-round",
+      "legacy_case_id": "ESCAPE-R4-B2-CONSUMABLE-WITHOUT-LATER-TICK-OR-ROUND",
+      "base": "r4_closed_communication",
+      "mutation": "set_first_consumable_tick_and_round_equal_to_delivery",
+      "expected_result": "reject"
+    },
+    {
+      "behavior_case_id": "unresolved-communication-distinct-intents-share-recipient",
+      "legacy_case_id": "FALSE-REJECT-R4-B2-TWO-UNRESOLVED-SAME-RECIPIENT-SET",
+      "base": "r4_unresolved_communication",
+      "mutation": "append_distinct_unresolved_intent_for_same_recipient",
+      "expected_result": "accept"
+    }
+  ]
+}

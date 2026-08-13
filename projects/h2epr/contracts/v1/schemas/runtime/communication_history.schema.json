@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json",
+  "title": "Append-only Communication History and RunSeal Closure",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_version",
+    "decision_record",
+    "attempts",
+    "run_seal_closure"
+  ],
+  "properties": {
+    "fixture_version": {
+      "const": "communication.history.v1"
+    },
+    "decision_record": {
+      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/DecisionRecord"
+    },
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/CommunicationAttemptHistory"
+      }
+    },
+    "run_seal_closure": {
+      "$ref": "#/$defs/CommunicationRunSealClosure"
+    }
+  },
+  "$defs": {
+    "IntentContentSeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalization_version",
+        "preimage_version",
+        "hash_preimage",
+        "content_sha256"
+      ],
+      "properties": {
+        "canonicalization_version": {
+          "const": "h2epr_cjson.v1"
+        },
+        "preimage_version": {
+          "const": "h2epr.message_intent_content.v1"
+        },
+        "hash_preimage": {
+          "const": "sender_id,recipient_ids,performative,content_schema_version,structured_content,channel,confidentiality,idempotency_key,correlation_ids"
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "CommunicationAttemptHistory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "intent",
+        "intent_content_seal",
+        "disposition_history",
+        "sent",
+        "terminal"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent": {
+          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageIntent"
+        },
+        "intent_content_seal": {
+          "$ref": "#/$defs/IntentContentSeal"
+        },
+        "disposition_history": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/CommunicationDisposition"
+          }
+        },
+        "sent": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageSent"
+            }
+          ]
+        },
+        "terminal": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageDelivered"
+            },
+            {
+              "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageExpired"
+            }
+          ]
+        }
+      }
+    },
+    "CommunicationRunSealClosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "run_seal_trace_id",
+        "logical_tick",
+        "closure_policy_version",
+        "closure_status",
+        "compiler_evaluator_eligible",
+        "latest_disposition_ids",
+        "terminal_transport_ids",
+        "unresolved_message_intent_ids",
+        "unresolved_recipient_ids"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_seal_trace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "logical_tick": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closure_policy_version": {
+          "const": "communication.latest_disposition.exact_unresolved.v1"
+        },
+        "closure_status": {
+          "enum": [
+            "closed",
+            "unresolved"
+          ]
+        },
+        "compiler_evaluator_eligible": {
+          "type": "boolean"
+        },
+        "latest_disposition_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "terminal_transport_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "unresolved_message_intent_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "unresolved_recipient_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

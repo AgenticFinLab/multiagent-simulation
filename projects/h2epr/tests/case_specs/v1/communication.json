@@ -1,0 +1,1733 @@
+{
+  "case_spec_schema_version": "h2epr.contract.case-spec.v1",
+  "responsibility": "communication",
+  "cases": [
+    {
+      "semantic_condition_id": "terminal-message-id-must-match-sent-message",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-N002",
+        "legacy_position": 82
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            1,
+            "terminal",
+            "message_id"
+          ],
+          "value": "wrong.message"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "accepted-disposition-requires-message-sent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-N003",
+        "legacy_position": 83
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent"
+          ],
+          "value": null
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-message-sender-must-match-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N001",
+        "legacy_position": 124
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent",
+            "sender_id"
+          ],
+          "value": "synthetic.actor.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-message-recipient-must-match-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N002",
+        "legacy_position": 125
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent",
+            "recipient_ids",
+            0
+          ],
+          "value": "synthetic.actor.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-message-route-must-match-disposition",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N003",
+        "legacy_position": 126
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent",
+            "route_id"
+          ],
+          "value": "route.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-message-disposition-id-must-match-latest-disposition",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N004",
+        "legacy_position": 127
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent",
+            "communication_disposition_id"
+          ],
+          "value": "comm.disposition.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "delivered-recipient-must-match-single-intent-recipient",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N005",
+        "legacy_position": 128
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "terminal",
+            "recipient_id"
+          ],
+          "value": "synthetic.actor.not.sent"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "disposition-sender-must-match-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N006",
+        "legacy_position": 129
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition",
+            "sender_id"
+          ],
+          "value": "synthetic.actor.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "disposition-recipient-must-match-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N007",
+        "legacy_position": 130
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition",
+            "recipient_ids",
+            0
+          ],
+          "value": "synthetic.actor.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "terminal-route-must-match-sent-message",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N008",
+        "legacy_position": 131
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "terminal",
+            "route_id"
+          ],
+          "value": "route.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "terminal-intent-id-must-match-source-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R2-N009",
+        "legacy_position": 132
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "terminal",
+            "message_intent_id"
+          ],
+          "value": "msg.intent.redirected"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "message-intent-rejects-multiple-recipients",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R3-N001",
+        "legacy_position": 182
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "insert",
+          "path": [
+            "attempts",
+            0,
+            "disposition",
+            "recipient_ids",
+            1
+          ],
+          "value": "synthetic.actor.second_recipient"
+        },
+        {
+          "op": "insert",
+          "path": [
+            "attempts",
+            0,
+            "intent",
+            "recipient_ids",
+            1
+          ],
+          "value": "synthetic.actor.second_recipient"
+        },
+        {
+          "op": "insert",
+          "path": [
+            "attempts",
+            0,
+            "sent",
+            "recipient_ids",
+            1
+          ],
+          "value": "synthetic.actor.second_recipient"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "delivery-recipient-must-match-expanded-intent-recipient",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R3-N002",
+        "legacy_position": 183
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "terminal",
+            "recipient_id"
+          ],
+          "value": "synthetic.actor.not.intent.recipient"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "run-seal-rejects-unresolved-recipient",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R3-N003",
+        "legacy_position": 184
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "insert",
+          "path": [
+            "run_seal_closure",
+            "unresolved_recipient_ids",
+            0
+          ],
+          "value": "synthetic.actor.b"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-message-requires-delivery-or-expiration",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R3-N004",
+        "legacy_position": 185
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_errors",
+      "base": "communications",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "terminal"
+          ],
+          "value": null
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-trace-reference-must-resolve",
+      "legacy_provenance": {
+        "legacy_case_id": "TRACE-MESSAGE-REF-R3-N001",
+        "legacy_position": 204
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "trace_integrity_errors",
+      "base": "message-trace",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "payload",
+            "message_sent_trace_ref"
+          ],
+          "value": "trace.message.sent.missing"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "record_hash"
+          ],
+          "value": "1580e08013bf92d3f783326690b447baf957c45b8288978737f70ef4d93d3202"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "payload",
+            "last_record_hash_before_seal"
+          ],
+          "value": "1580e08013bf92d3f783326690b447baf957c45b8288978737f70ef4d93d3202"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "previous_record_hash"
+          ],
+          "value": "1580e08013bf92d3f783326690b447baf957c45b8288978737f70ef4d93d3202"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "record_hash"
+          ],
+          "value": "6b816d6cb93872be99264649459b1b54fe8f4d963a8aaec182a5706be1693bfb"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "last_record_hash_before_run_seal"
+          ],
+          "value": "6b816d6cb93872be99264649459b1b54fe8f4d963a8aaec182a5706be1693bfb"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "tick_seal_record_hashes",
+            0
+          ],
+          "value": "6b816d6cb93872be99264649459b1b54fe8f4d963a8aaec182a5706be1693bfb"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "trace_prefix_sha256"
+          ],
+          "value": "6c31685dbfeece45d1e990d4ebc6976317b7c655a4faa4f91c04842045a889ca"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "previous_record_hash"
+          ],
+          "value": "6b816d6cb93872be99264649459b1b54fe8f4d963a8aaec182a5706be1693bfb"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "record_hash"
+          ],
+          "value": "b4a5f3c29c21173289da1cc856dc4b6c9c82af5de482bd9e6b39c567b76c85dc"
+        },
+        {
+          "op": "set",
+          "path": [
+            "trace_sha256"
+          ],
+          "value": "c663db89faafb08857ddad71cd09ed69363011bc8050e1d15ff350e7955010a7"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "terminal-cannot-reference-its-own-trace-record",
+      "legacy_provenance": {
+        "legacy_case_id": "TRACE-MESSAGE-REF-R3-N002",
+        "legacy_position": 205
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "trace_integrity_errors",
+      "base": "message-trace",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "payload",
+            "message_sent_trace_ref"
+          ],
+          "value": "trace.message.delivered.001"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "record_hash"
+          ],
+          "value": "e64b2623db75a5314ca76930680f5f753da64b893a6a435e100552c1e41f7fd5"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "payload",
+            "last_record_hash_before_seal"
+          ],
+          "value": "e64b2623db75a5314ca76930680f5f753da64b893a6a435e100552c1e41f7fd5"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "previous_record_hash"
+          ],
+          "value": "e64b2623db75a5314ca76930680f5f753da64b893a6a435e100552c1e41f7fd5"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "record_hash"
+          ],
+          "value": "ef285103e70012461bb44444489d2a513dfdbb53529ce950b41b001b7e258c75"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "last_record_hash_before_run_seal"
+          ],
+          "value": "ef285103e70012461bb44444489d2a513dfdbb53529ce950b41b001b7e258c75"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "tick_seal_record_hashes",
+            0
+          ],
+          "value": "ef285103e70012461bb44444489d2a513dfdbb53529ce950b41b001b7e258c75"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "trace_prefix_sha256"
+          ],
+          "value": "5831769e818e3de7c0452bb8408608504032199cdb7dc8f24df16f9322644ca8"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "previous_record_hash"
+          ],
+          "value": "ef285103e70012461bb44444489d2a513dfdbb53529ce950b41b001b7e258c75"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "record_hash"
+          ],
+          "value": "af0b664639d0cdf41ac85dc40d20ffae8cfb601ca95d8dd9f7b83d2a850fc335"
+        },
+        {
+          "op": "set",
+          "path": [
+            "trace_sha256"
+          ],
+          "value": "f89297018b33bfba542642b045e0e4a1f987f23bc2f46c52ad493a40316dae84"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "terminal-cannot-reference-later-trace-record",
+      "legacy_provenance": {
+        "legacy_case_id": "TRACE-MESSAGE-REF-R3-N003",
+        "legacy_position": 206
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "trace_integrity_errors",
+      "base": "message-trace",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "payload",
+            "message_sent_trace_ref"
+          ],
+          "value": "trace.record.001"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "record_hash"
+          ],
+          "value": "4d531b57a2ec859a9d02e0f8f2d612309e1419c5fbcbc927de8a191bc908b5a3"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "payload",
+            "last_record_hash_before_seal"
+          ],
+          "value": "4d531b57a2ec859a9d02e0f8f2d612309e1419c5fbcbc927de8a191bc908b5a3"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "previous_record_hash"
+          ],
+          "value": "4d531b57a2ec859a9d02e0f8f2d612309e1419c5fbcbc927de8a191bc908b5a3"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "record_hash"
+          ],
+          "value": "eac91aac999ed94063e2f21f7550fdcfc9d1bfc9ea02c2c2a0c7fed599cd4119"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "last_record_hash_before_run_seal"
+          ],
+          "value": "eac91aac999ed94063e2f21f7550fdcfc9d1bfc9ea02c2c2a0c7fed599cd4119"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "tick_seal_record_hashes",
+            0
+          ],
+          "value": "eac91aac999ed94063e2f21f7550fdcfc9d1bfc9ea02c2c2a0c7fed599cd4119"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "trace_prefix_sha256"
+          ],
+          "value": "d5d79609604d0ff93b278fe94d19f5bdd6711abf743bc15ed67a1733b840c1da"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "previous_record_hash"
+          ],
+          "value": "eac91aac999ed94063e2f21f7550fdcfc9d1bfc9ea02c2c2a0c7fed599cd4119"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "record_hash"
+          ],
+          "value": "3ea1cb9edd414e49eeaca074f792342ef1dd8dabf9d8c0efdee5b8341eb442eb"
+        },
+        {
+          "op": "set",
+          "path": [
+            "trace_sha256"
+          ],
+          "value": "4fe10c09bdcd257e785f6626ca175c18d3fb433f169c500182f9dc65238f5ed3"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-trace-reference-must-target-message-sent-record",
+      "legacy_provenance": {
+        "legacy_case_id": "TRACE-MESSAGE-REF-R3-N004",
+        "legacy_position": 207
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "trace_integrity_errors",
+      "base": "message-trace",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "payload",
+            "message_sent_trace_ref"
+          ],
+          "value": "trace.message.intent.001"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "record_hash"
+          ],
+          "value": "ecc40ecdeea6e25075294ba1b5cd105892b683da1040cfb13bfa6165bdce5360"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "payload",
+            "last_record_hash_before_seal"
+          ],
+          "value": "ecc40ecdeea6e25075294ba1b5cd105892b683da1040cfb13bfa6165bdce5360"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "previous_record_hash"
+          ],
+          "value": "ecc40ecdeea6e25075294ba1b5cd105892b683da1040cfb13bfa6165bdce5360"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "record_hash"
+          ],
+          "value": "89b39070e86befe036597d6b47d59f485e4f64a9e51cae9940599c9f4e27ccf7"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "last_record_hash_before_run_seal"
+          ],
+          "value": "89b39070e86befe036597d6b47d59f485e4f64a9e51cae9940599c9f4e27ccf7"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "tick_seal_record_hashes",
+            0
+          ],
+          "value": "89b39070e86befe036597d6b47d59f485e4f64a9e51cae9940599c9f4e27ccf7"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "trace_prefix_sha256"
+          ],
+          "value": "31b193cb701767e65124f07154c2e254c618d0218bf8c5a23e7cdf8af15d206b"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "previous_record_hash"
+          ],
+          "value": "89b39070e86befe036597d6b47d59f485e4f64a9e51cae9940599c9f4e27ccf7"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "record_hash"
+          ],
+          "value": "5d2bb8fdf28a5e8343672ae3cc34414e5e672926a876382d884ca8b1040d4f64"
+        },
+        {
+          "op": "set",
+          "path": [
+            "trace_sha256"
+          ],
+          "value": "e6ba6f0edd4c0b7252cef5c6d8ad84cc0247640ce0164d69ad57430bb5405ea3"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-trace-reference-must-match-message-lineage",
+      "legacy_provenance": {
+        "legacy_case_id": "TRACE-MESSAGE-REF-R3-N005",
+        "legacy_position": 208
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "trace_integrity_errors",
+      "base": "message-trace",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "payload",
+            "message_id"
+          ],
+          "value": "message.lineage.redirected"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            4,
+            "record_hash"
+          ],
+          "value": "3da2f7cbb7d3351d7eb9d5f7cbde2f6a0c1fd511a675771571d9e462dc59ee5a"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "payload",
+            "last_record_hash_before_seal"
+          ],
+          "value": "3da2f7cbb7d3351d7eb9d5f7cbde2f6a0c1fd511a675771571d9e462dc59ee5a"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "previous_record_hash"
+          ],
+          "value": "3da2f7cbb7d3351d7eb9d5f7cbde2f6a0c1fd511a675771571d9e462dc59ee5a"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            5,
+            "record_hash"
+          ],
+          "value": "434f454c6c9a02d67a9f31345319647331cf98da0aa489df47f2a872cb212bfd"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "last_record_hash_before_run_seal"
+          ],
+          "value": "434f454c6c9a02d67a9f31345319647331cf98da0aa489df47f2a872cb212bfd"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "tick_seal_record_hashes",
+            0
+          ],
+          "value": "434f454c6c9a02d67a9f31345319647331cf98da0aa489df47f2a872cb212bfd"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "payload",
+            "trace_prefix_sha256"
+          ],
+          "value": "433fb4f065016a09680d554aba4762204e6e8fffdd8a3159fad3cc51733b7077"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "previous_record_hash"
+          ],
+          "value": "434f454c6c9a02d67a9f31345319647331cf98da0aa489df47f2a872cb212bfd"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            6,
+            "record_hash"
+          ],
+          "value": "72a0200862d0f75f440568a6e078fd2a16f6cd2d48a0f66bd527cd82167f278a"
+        },
+        {
+          "op": "set",
+          "path": [
+            "trace_sha256"
+          ],
+          "value": "4c513556569489d75b7f179f5ce12fd26014e4f4612ce2e3463d11be064e3331"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "closed-communication-history-semantics-accepted",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-P001",
+        "legacy_position": 233
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "accept",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": []
+    },
+    {
+      "semantic_condition_id": "unresolved-communication-history-semantics-accepted",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-P002",
+        "legacy_position": 234
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "accept",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-unresolved",
+      "operations": []
+    },
+    {
+      "semantic_condition_id": "unresolved-history-cannot-claim-closed-run-seal",
+      "legacy_provenance": {
+        "legacy_case_id": "ESCAPE-R3-B2-DELAYED-UNRESOLVED-AT-RUN-SEAL",
+        "legacy_position": 248
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-unresolved",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "closure_status"
+          ],
+          "value": "closed"
+        },
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "compiler_evaluator_eligible"
+          ],
+          "value": true
+        },
+        {
+          "op": "delete",
+          "path": [
+            "run_seal_closure",
+            "unresolved_message_intent_ids",
+            0
+          ],
+          "value": null
+        },
+        {
+          "op": "delete",
+          "path": [
+            "run_seal_closure",
+            "unresolved_recipient_ids",
+            0
+          ],
+          "value": null
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "duplicate-intent-cannot-self-reference",
+      "legacy_provenance": {
+        "legacy_case_id": "ESCAPE-R3-B2-DUPLICATE-SELF-REFERENCE",
+        "legacy_position": 249
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            1,
+            "disposition_history",
+            0,
+            "duplicate_of_message_intent_id"
+          ],
+          "value": "msg.intent.r4.duplicate"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-content-hash-must-derive-from-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "ESCAPE-R3-B2-UNBOUND-CONTENT-HASH",
+        "legacy_position": 250
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent",
+            "canonical_content_sha256"
+          ],
+          "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "disposition-history-cannot-continue-after-terminal",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N004-TERMINAL-THEN-DELAYED",
+        "legacy_position": 251
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "adjudicated_at",
+            "lower"
+          ],
+          "value": "1907-10-14T09:01:00Z"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "adjudicated_at",
+            "upper"
+          ],
+          "value": "1907-10-14T09:01:00Z"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "communication_disposition_id"
+          ],
+          "value": "comm.disposition.r4.deliver.accepted"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "message_id"
+          ],
+          "value": "message.r4.deliver"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "reason_codes",
+            0
+          ],
+          "value": "route_allowed"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "route_id"
+          ],
+          "value": "route.a.b.direct"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "status"
+          ],
+          "value": "accepted"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            0,
+            "terminal"
+          ],
+          "value": true
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "adjudicated_at",
+            "lower"
+          ],
+          "value": "1907-10-14T09:00:30Z"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "adjudicated_at",
+            "upper"
+          ],
+          "value": "1907-10-14T09:00:30Z"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "communication_disposition_id"
+          ],
+          "value": "comm.disposition.r4.deliver.delayed"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "message_id"
+          ],
+          "value": null
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "reason_codes",
+            0
+          ],
+          "value": "queued_for_route_capacity"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "route_id"
+          ],
+          "value": null
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "status"
+          ],
+          "value": "delayed"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "terminal"
+          ],
+          "value": false
+        },
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "latest_disposition_ids",
+            0
+          ],
+          "value": "comm.disposition.r4.deliver.delayed"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "disposition-history-time-must-not-decrease",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N005-DISPOSITION-TIME-DECREASES",
+        "legacy_position": 252
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "adjudicated_at",
+            "lower"
+          ],
+          "value": "1907-10-14T09:00:10Z"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "adjudicated_at",
+            "upper"
+          ],
+          "value": "1907-10-14T09:00:10Z"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "duplicate-intent-reference-must-point-backward",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N006-DUPLICATE-FORWARD-REFERENCE",
+        "legacy_position": 253
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "duplicate_of_message_intent_id"
+          ],
+          "value": "msg.intent.r4.duplicate"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            1,
+            "status"
+          ],
+          "value": "duplicate"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "sent"
+          ],
+          "value": null
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "terminal"
+          ],
+          "value": null
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "duplicate-intent-reference-must-resolve",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N007-DUPLICATE-DANGLING-REFERENCE",
+        "legacy_position": 254
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            1,
+            "disposition_history",
+            0,
+            "duplicate_of_message_intent_id"
+          ],
+          "value": "msg.intent.missing"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "duplicate-intent-lineage-must-match-idempotency",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N008-DUPLICATE-IDEMPOTENCY-MISMATCH",
+        "legacy_position": 255
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            1,
+            "intent",
+            "idempotency_key"
+          ],
+          "value": "different.idempotency.key"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            1,
+            "intent_content_seal",
+            "content_sha256"
+          ],
+          "value": "0c4d1677ccff09e81225a5c3e786bdc43fd7a17985dabe958c3309ba23cf9f8e"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "run-seal-latest-dispositions-must-match-histories",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N009-LATEST-DISPOSITION-SET-MISMATCH",
+        "legacy_position": 256
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "latest_disposition_ids",
+            0
+          ],
+          "value": "comm.disposition.r4.prohibited"
+        },
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "latest_disposition_ids",
+            2
+          ],
+          "value": "comm.disposition.r4.deliver.accepted"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "run-seal-unresolved-intent-list-must-be-complete",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N010-UNRESOLVED-INTENT-OMITTED",
+        "legacy_position": 257
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-unresolved",
+      "operations": [
+        {
+          "op": "delete",
+          "path": [
+            "run_seal_closure",
+            "unresolved_message_intent_ids",
+            0
+          ],
+          "value": null
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "run-seal-unresolved-recipient-list-must-be-exact",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N011-UNRESOLVED-RECIPIENT-MISMATCH",
+        "legacy_position": 258
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-unresolved",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "unresolved_recipient_ids",
+            0
+          ],
+          "value": "synthetic.actor.c"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "unresolved-run-cannot-be-compiler-eligible",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N012-UNRESOLVED-MARKED-ELIGIBLE",
+        "legacy_position": 259
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-unresolved",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "compiler_evaluator_eligible"
+          ],
+          "value": true
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "intent-content-mutation-invalidates-content-seal",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N013-INTENT-CONTENT-MUTATION-OLD-SEAL",
+        "legacy_position": 260
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "intent",
+            "performative"
+          ],
+          "value": "request"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "intent-content-seal-must-match-canonical-content",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N014-INTENT-SEAL-MUTATION",
+        "legacy_position": 261
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "intent_content_seal",
+            "content_sha256"
+          ],
+          "value": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "sent-content-hash-must-match-mutated-intent",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N015-INTENT-RESEALED-SENT-STALE",
+        "legacy_position": 262
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "intent",
+            "performative"
+          ],
+          "value": "request"
+        },
+        {
+          "op": "set",
+          "path": [
+            "attempts",
+            0,
+            "intent_content_seal",
+            "content_sha256"
+          ],
+          "value": "f80fabe7e859653bd1ec1deafc7e10651426a29316286e17bd21544cc7ae8edb"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "terminal-disposition-cannot-be-followed-by-new-disposition",
+      "legacy_provenance": {
+        "legacy_case_id": "COMM-R4-N016-DISPOSITION-APPENDED-AFTER-TERMINAL",
+        "legacy_position": 263
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "communication_history_errors",
+      "base": "communication-closed",
+      "operations": [
+        {
+          "op": "insert",
+          "path": [
+            "attempts",
+            0,
+            "disposition_history",
+            2
+          ],
+          "value": {
+            "communication_disposition_id": "comm.disposition.r4.after-terminal",
+            "message_intent_id": "msg.intent.r4.deliver",
+            "run_id": "run.synthetic.r4.closed",
+            "logical_tick": 0,
+            "sender_id": "synthetic.actor.a",
+            "recipient_ids": [
+              "synthetic.actor.b"
+            ],
+            "requested_channel": "direct",
+            "adjudicated_at": {
+              "lower": "1907-10-14T09:01:00Z",
+              "upper": "1907-10-14T09:01:00Z",
+              "precision": "exact_datetime",
+              "timezone": "UTC",
+              "uncertainty": ""
+            },
+            "policy_id": "synthetic.communication.policy.r4",
+            "policy_version": "synthetic.communication.policy.r4",
+            "status": "accepted",
+            "reason_codes": [
+              "route_allowed"
+            ],
+            "route_id": "route.a.b.direct",
+            "message_id": "message.r4.deliver",
+            "terminal": true,
+            "duplicate_of_message_intent_id": null
+          }
+        },
+        {
+          "op": "set",
+          "path": [
+            "run_seal_closure",
+            "latest_disposition_ids",
+            0
+          ],
+          "value": "comm.disposition.r4.after-terminal"
+        }
+      ]
+    },
+    {
+      "semantic_condition_id": "run-seal-sequence-must-be-unique-and-next",
+      "legacy_provenance": {
+        "legacy_case_id": "TRACE-R4-N002-RUN-SEAL-SEQUENCE-DUPLICATE",
+        "legacy_position": 265
+      },
+      "category": "cross_object_semantic_validation",
+      "expected_result": "reject",
+      "validation_kind": "semantic",
+      "validator_subject": "run_seal_coordinate_errors",
+      "base": "trace",
+      "operations": [
+        {
+          "op": "set",
+          "path": [
+            "records",
+            2,
+            "record_hash"
+          ],
+          "value": "0c61bff5bea584efbb95367fc1cbb76d2ceaa1e6288fec7282c2df069b80f492"
+        },
+        {
+          "op": "set",
+          "path": [
+            "records",
+            2,
+            "sequence_in_tick"
+          ],
+          "value": 1
+        },
+        {
+          "op": "set",
+          "path": [
+            "trace_sha256"
+          ],
+          "value": "271869a270d760f843c7c6423164b6761973c139c273799248425bef5298bc7d"
+        }
+      ]
+    }
+  ]
+}

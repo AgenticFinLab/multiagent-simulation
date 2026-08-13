@@ -1,0 +1,233 @@
+{
+  "artifact_identity": {
+    "artifact_id": "runtime.synthetic.strict.001",
+    "artifact_kind": "runtime_scenario_bundle",
+    "schema_version": "h2epr.phase0.r1",
+    "producer_version": "phase0_fixture.r1",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "parent_artifacts": [
+      {
+        "artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1",
+        "artifact_kind": "prefix_clean_strict_construction_bundle",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "artifact_sha256": "46dae8356e16315e5c6c291316bd44cbe543c4f861ed02a5e37d9232cd2c6d7e"
+      }
+    ],
+    "review_state": "reviewed"
+  },
+  "protocol_context": {
+    "protocol_label": "strict_continuation",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "root_construction_artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1"
+  },
+  "runtime_bundle_id": "runtime.synthetic.strict.001",
+  "source_kind": "synthetic",
+  "source_construction_bundle": {
+    "artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1",
+    "artifact_kind": "prefix_clean_strict_construction_bundle",
+    "construction_state": "prefix_clean_strict",
+    "artifact_scope": "target_specific",
+    "source_scope": "prefix_target_specific",
+    "builder_access": "prefix_allowlist_only",
+    "contamination_status": "clean_prefix_only",
+    "protocol_eligibility": "strict_eligible",
+    "artifact_sha256": "46dae8356e16315e5c6c291316bd44cbe543c4f861ed02a5e37d9232cd2c6d7e"
+  },
+  "owner_decision_gate": null,
+  "backend": "rule",
+  "resume_allowed": false,
+  "event_identity": {
+    "value": "event.synthetic.001",
+    "provenance": [
+      {
+        "source_kind": "synthetic",
+        "source_ref_id": "synthetic.event.identity.001",
+        "claim_ref_ids": [
+          "synthetic.event.identity.claim"
+        ],
+        "derivation_class": "prefix_derived",
+        "content_sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+        "source_time": null,
+        "availability_at_t0": "available",
+        "availability_adjudication_id": "adj.event.identity.001",
+        "visibility": "runtime_public",
+        "consumers": [
+          "runtime",
+          "trace"
+        ],
+        "review_state": "reviewed"
+      }
+    ],
+    "availability_at_t0": "available",
+    "visibility": "runtime_public",
+    "visibility_scope_ids": [],
+    "consumers": [
+      "runtime",
+      "trace"
+    ],
+    "review_state": "reviewed"
+  },
+  "time_policy": {
+    "t0": "P-001-pending",
+    "start": "P-001-pending-plus-one-tick",
+    "horizon": "P-001-pending-horizon",
+    "timezone": "event-local-pending",
+    "clock_mode": "event_driven",
+    "daily_barrier": true,
+    "tail_policy": "close_due_at_horizon_no_adaptive_tail",
+    "boundary_policy_version": "time.boundary.r1"
+  },
+  "entity_registry": [
+    {
+      "entity_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "aliases": [
+        "Synthetic Actor A"
+      ],
+      "semantic_fields": [],
+      "mention_refs": [
+        "draft.participant.synthetic.a"
+      ],
+      "runtime_disposition": "autonomous_participant_agent",
+      "aggregate_member_ids": [],
+      "information_loss": [],
+      "selection_review": {
+        "rubric_version": "participant.selection.r1",
+        "future_salience_used": false,
+        "verdict": "include",
+        "reviewer_role": "phase0_contract_reviewer"
+      }
+    }
+  ],
+  "participant_artifacts": [
+    {
+      "artifact_identity": {
+        "artifact_id": "synthetic.participant.a.strict",
+        "artifact_kind": "participant_artifact",
+        "schema_version": "h2epr.phase0.r1",
+        "producer_version": "phase0_fixture.r1",
+        "construction_state": "prefix_clean_strict",
+        "artifact_scope": "target_specific",
+        "source_scope": "prefix_target_specific",
+        "builder_access": "prefix_allowlist_only",
+        "contamination_status": "clean_prefix_only",
+        "protocol_eligibility": "strict_eligible",
+        "parent_artifacts": [
+          {
+            "artifact_id": "h2epr.0288.prefix.clean.strict.bundle.r1",
+            "artifact_kind": "prefix_clean_strict_construction_bundle",
+            "construction_state": "prefix_clean_strict",
+            "artifact_scope": "target_specific",
+            "source_scope": "prefix_target_specific",
+            "builder_access": "prefix_allowlist_only",
+            "contamination_status": "clean_prefix_only",
+            "protocol_eligibility": "strict_eligible",
+            "artifact_sha256": "46dae8356e16315e5c6c291316bd44cbe543c4f861ed02a5e37d9232cd2c6d7e"
+          }
+        ],
+        "review_state": "reviewed"
+      },
+      "runtime_actor_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "representation_class": "autonomous_participant_agent",
+      "participant_profile": [],
+      "behavior_profile": [],
+      "skill_set": [],
+      "goal_set": [],
+      "constraint_set": [],
+      "information_boundary": {
+        "allowed_observation_types": [
+          "public_signal"
+        ],
+        "accessible_entity_ids": [
+          "synthetic.actor.a"
+        ],
+        "denied_semantic_fields": [
+          "suffix_outcome"
+        ],
+        "policy_ref": "synthetic.info.boundary.r1"
+      },
+      "action_space_refs": [
+        "synthetic.observe_and_wait"
+      ],
+      "communication_policy_ref": "synthetic.communication.policy.r1",
+      "initial_resource_state": [],
+      "rule_policy_ref": "synthetic.rule.policy.r1",
+      "review_state": "reviewed"
+    }
+  ],
+  "initial_world_state": {
+    "state_version": 0,
+    "entities": [
+      "synthetic.actor.a"
+    ],
+    "resources": [],
+    "relations": [],
+    "commitments": [],
+    "risks": [],
+    "access_grants": [],
+    "public_signals": [],
+    "process_states": []
+  },
+  "action_registry": [
+    {
+      "action_type": "synthetic.observe_and_wait",
+      "version": "synthetic.observe_and_wait.r1",
+      "allowed_representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "parameter_names": [],
+      "state_changing": false,
+      "review_state": "reviewed"
+    }
+  ],
+  "communication_routes": [],
+  "observation_access_rules": [
+    {
+      "actor_id": "synthetic.actor.a",
+      "field_name": "public_signal",
+      "access": "public",
+      "latency_ticks": 0
+    }
+  ],
+  "exogenous_manifest": [],
+  "compiler_contract_refs": [
+    "detector.envelope.r1",
+    "grouping.envelope.r1",
+    "stage.envelope.r1"
+  ],
+  "leakage_preflight": {
+    "policy_version": "leakage.policy.r2",
+    "status": "pass",
+    "checks": [
+      "closed_schema",
+      "strict_identity",
+      "source_allowlist",
+      "reference_denied",
+      "projection_attestation"
+    ],
+    "scanner_version": "synthetic.scanner.r2"
+  },
+  "canonicalization_version": "h2epr_cjson.v1",
+  "artifact_hash_preimage": "omit_artifact_sha256_and_operational_metadata",
+  "artifact_sha256": "10c01f29f013759c2aa2373d294d3e7cff296dd68e6dce1353d906658a445dc9"
+}

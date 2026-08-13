@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/prefix_contaminated_demo_construction_bundle.schema.json",
+  "title": "Prefix-Contaminated Demo Construction Bundle",
+  "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixContaminatedDemoConstructionBundle"
+}

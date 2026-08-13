@@ -1,0 +1,238 @@
+{
+  "artifact_identity": {
+    "artifact_id": "h2epr.0288.runtime.bundle.full.demo.r1",
+    "artifact_kind": "runtime_scenario_bundle",
+    "schema_version": "h2epr.phase0.r1",
+    "producer_version": "phase0_fixture.r1",
+    "construction_state": "full_draft_target_demo",
+    "artifact_scope": "target_specific",
+    "source_scope": "full_draft_target_specific",
+    "builder_access": "full_target_draft",
+    "contamination_status": "full_draft_exposed",
+    "protocol_eligibility": "architecture_demo_only",
+    "parent_artifacts": [
+      {
+        "artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1",
+        "artifact_kind": "full_draft_target_demo_construction_bundle",
+        "construction_state": "full_draft_target_demo",
+        "artifact_scope": "target_specific",
+        "source_scope": "full_draft_target_specific",
+        "builder_access": "full_target_draft",
+        "contamination_status": "full_draft_exposed",
+        "protocol_eligibility": "architecture_demo_only",
+        "artifact_sha256": "060958af637f48fcb1ef805686e126b8e87b62f01665bcbffbd93400255bbb36"
+      }
+    ],
+    "review_state": "reviewed"
+  },
+  "protocol_context": {
+    "protocol_label": "architecture_development_demo",
+    "construction_state": "full_draft_target_demo",
+    "artifact_scope": "target_specific",
+    "source_scope": "full_draft_target_specific",
+    "builder_access": "full_target_draft",
+    "contamination_status": "full_draft_exposed",
+    "protocol_eligibility": "architecture_demo_only",
+    "root_construction_artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1"
+  },
+  "runtime_bundle_id": "h2epr.0288.runtime.bundle.full.demo.r1",
+  "source_kind": "authentic_finmycelium_draft",
+  "source_construction_bundle": {
+    "artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1",
+    "artifact_kind": "full_draft_target_demo_construction_bundle",
+    "construction_state": "full_draft_target_demo",
+    "artifact_scope": "target_specific",
+    "source_scope": "full_draft_target_specific",
+    "builder_access": "full_target_draft",
+    "contamination_status": "full_draft_exposed",
+    "protocol_eligibility": "architecture_demo_only",
+    "artifact_sha256": "060958af637f48fcb1ef805686e126b8e87b62f01665bcbffbd93400255bbb36"
+  },
+  "owner_decision_gate": {
+    "decision_id": "SD-001",
+    "supersedes_baseline_decision": "F-004",
+    "proposal_owner": "contract_specification_window",
+    "approval_owner": "project_owner",
+    "status": "pending",
+    "execution_authorized": false
+  },
+  "backend": "rule",
+  "resume_allowed": false,
+  "event_identity": {
+    "value": "H2EPR-0288",
+    "provenance": [
+      {
+        "source_kind": "event_spec",
+        "source_ref_id": "h2epr.0288.event.spec",
+        "claim_ref_ids": [
+          "event.spec.public_event_id"
+        ],
+        "derivation_class": "prefix_derived",
+        "content_sha256": "a9f262b9d48a1b594b8a65f5ebdd39184996b34423be3d432390a3917bad1a52",
+        "source_time": null,
+        "availability_at_t0": "available",
+        "availability_adjudication_id": "adj.event.identity.001",
+        "visibility": "runtime_public",
+        "consumers": [
+          "runtime",
+          "trace"
+        ],
+        "review_state": "reviewed"
+      }
+    ],
+    "availability_at_t0": "available",
+    "visibility": "runtime_public",
+    "visibility_scope_ids": [],
+    "consumers": [
+      "runtime",
+      "trace"
+    ],
+    "review_state": "reviewed"
+  },
+  "time_policy": {
+    "t0": "P-001-pending",
+    "start": "P-001-pending-plus-one-tick",
+    "horizon": "P-001-pending-horizon",
+    "timezone": "event-local-pending",
+    "clock_mode": "event_driven",
+    "daily_barrier": true,
+    "tail_policy": "close_due_at_horizon_no_adaptive_tail",
+    "boundary_policy_version": "time.boundary.r1"
+  },
+  "entity_registry": [
+    {
+      "entity_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "aliases": [
+        "Synthetic Actor A"
+      ],
+      "semantic_fields": [],
+      "mention_refs": [
+        "draft.participant.synthetic.a"
+      ],
+      "runtime_disposition": "autonomous_participant_agent",
+      "aggregate_member_ids": [],
+      "information_loss": [],
+      "selection_review": {
+        "rubric_version": "participant.selection.r1",
+        "future_salience_used": true,
+        "verdict": "include",
+        "reviewer_role": "phase0_contract_reviewer"
+      }
+    }
+  ],
+  "participant_artifacts": [
+    {
+      "artifact_identity": {
+        "artifact_id": "synthetic.participant.a.full.demo",
+        "artifact_kind": "participant_artifact",
+        "schema_version": "h2epr.phase0.r1",
+        "producer_version": "phase0_fixture.r1",
+        "construction_state": "full_draft_target_demo",
+        "artifact_scope": "target_specific",
+        "source_scope": "full_draft_target_specific",
+        "builder_access": "full_target_draft",
+        "contamination_status": "full_draft_exposed",
+        "protocol_eligibility": "architecture_demo_only",
+        "parent_artifacts": [
+          {
+            "artifact_id": "h2epr.0288.full.draft.target.demo.bundle.r1",
+            "artifact_kind": "full_draft_target_demo_construction_bundle",
+            "construction_state": "full_draft_target_demo",
+            "artifact_scope": "target_specific",
+            "source_scope": "full_draft_target_specific",
+            "builder_access": "full_target_draft",
+            "contamination_status": "full_draft_exposed",
+            "protocol_eligibility": "architecture_demo_only",
+            "artifact_sha256": "060958af637f48fcb1ef805686e126b8e87b62f01665bcbffbd93400255bbb36"
+          }
+        ],
+        "review_state": "reviewed"
+      },
+      "runtime_actor_id": "synthetic.actor.a",
+      "source_participant_ids": [
+        "draft.participant.synthetic.a"
+      ],
+      "representation_class": "autonomous_participant_agent",
+      "participant_profile": [],
+      "behavior_profile": [],
+      "skill_set": [],
+      "goal_set": [],
+      "constraint_set": [],
+      "information_boundary": {
+        "allowed_observation_types": [
+          "public_signal"
+        ],
+        "accessible_entity_ids": [
+          "synthetic.actor.a"
+        ],
+        "denied_semantic_fields": [
+          "suffix_outcome"
+        ],
+        "policy_ref": "synthetic.info.boundary.r1"
+      },
+      "action_space_refs": [
+        "synthetic.observe_and_wait"
+      ],
+      "communication_policy_ref": "synthetic.communication.policy.r1",
+      "initial_resource_state": [],
+      "rule_policy_ref": "synthetic.rule.policy.r1",
+      "review_state": "reviewed"
+    }
+  ],
+  "initial_world_state": {
+    "state_version": 0,
+    "entities": [
+      "synthetic.actor.a"
+    ],
+    "resources": [],
+    "relations": [],
+    "commitments": [],
+    "risks": [],
+    "access_grants": [],
+    "public_signals": [],
+    "process_states": []
+  },
+  "action_registry": [
+    {
+      "action_type": "synthetic.observe_and_wait",
+      "version": "synthetic.observe_and_wait.r1",
+      "allowed_representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "parameter_names": [],
+      "state_changing": false,
+      "review_state": "reviewed"
+    }
+  ],
+  "communication_routes": [],
+  "observation_access_rules": [
+    {
+      "actor_id": "synthetic.actor.a",
+      "field_name": "public_signal",
+      "access": "public",
+      "latency_ticks": 0
+    }
+  ],
+  "exogenous_manifest": [],
+  "compiler_contract_refs": [
+    "detector.envelope.r1",
+    "grouping.envelope.r1",
+    "stage.envelope.r1"
+  ],
+  "leakage_preflight": {
+    "policy_version": "leakage.policy.r1",
+    "status": "pass",
+    "checks": [
+      "closed_schema",
+      "construction_identity",
+      "suffix_claim_scan"
+    ],
+    "scanner_version": "synthetic.scanner.r1"
+  },
+  "canonicalization_version": "h2epr_cjson.v1",
+  "artifact_hash_preimage": "omit_artifact_sha256_and_operational_metadata",
+  "artifact_sha256": "b8de85b9c5d36bfb3b326d13fca27028ed66589a44032cebe332d489b97a3bb5"
+}
