@@ -1,0 +1,29 @@
+{
+  "fixture_class": "synthetic",
+  "profile_id": "balanced",
+  "world_entity_ids": [
+    "synthetic_actor_a",
+    "synthetic_actor_b",
+    "synthetic_population"
+  ],
+  "resource_owner_ids": [
+    "synthetic_actor_a",
+    "synthetic_actor_b"
+  ],
+  "operational_entity_ids": [
+    "synthetic_actor_a",
+    "synthetic_actor_b"
+  ],
+  "depositor_entity_id": "synthetic_population",
+  "expected": {
+    "entity_count": 3,
+    "resource_count": 11,
+    "relation_count": 2,
+    "liquid_total_bp": 10000,
+    "derived_stress_total_bp": 10000,
+    "operational_statuses": [
+      "open",
+      "open"
+    ]
+  }
+}

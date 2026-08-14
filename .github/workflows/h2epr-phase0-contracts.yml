@@ -56,4 +56,4 @@ jobs:
       - name: Validate the offline Phase-0 contract surface
         env:
           PYTHONDONTWRITEBYTECODE: "1"
-        run: python -m pytest -p no:cacheprovider projects/h2epr/tests
+        run: python -m pytest -p no:cacheprovider projects/h2epr/tests/contracts

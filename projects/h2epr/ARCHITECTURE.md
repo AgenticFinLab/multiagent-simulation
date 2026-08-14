@@ -15,6 +15,66 @@ H2EPR simulation separates three views:
    real process only after a run. Its data cannot flow back into construction,
    runtime, memory, prompts, retrieval, or world state.
 
+## G1 construction seam
+
+The active G1 candidate is deliberately project-owned and Reference-blind:
+
+```text
+explicit SourceDescriptor manifest
+  -> normalized path and hash guard
+  -> tolerant JSON/CSV decoder
+  -> immutable typed Construction IR
+  -> minimized evidence/provenance
+  -> versioned canonical snapshot export
+```
+
+Callers provide both approved roots and explicit descriptors. The adapter does
+not walk directories, infer siblings, accept a Reference locator, or discover
+schemas from the working directory. Accepted `contracts/v1/` schemas remain the
+single contract source and are not duplicated under `src/`.
+
+Architecture-generic parsing is implemented for the authorized non-Reference
+development inputs. It preserves raw JSON-compatible values and exact pointers
+while adding normalization proposals and bounded diagnostics. It does not
+select participants, aggregate entities, define a world, or produce runtime
+policy. Synthetic strict-prefix tests validate the closed policy boundary; an
+actual clean strict artifact is not produced in G1.
+
+This seam is independent of MASim imports. Runtime integration remains a later
+Gate decision.
+
+## G2 artifact and EventBundle seam
+
+The current project-owned G2 candidate remains upstream of runtime execution:
+
+```text
+typed Construction IR
+  -> entity registry + reversible roster/loss report
+  -> one data-driven ParticipantArtifact envelope
+  -> declarative Rule skills and policy catalog
+  -> normalized profile-specific world
+  -> sealed target-demo construction bundle
+  -> canonical RuntimeScenarioBundle (EventBundle)
+```
+
+Its `artifacts/`, `policies/`, `world/`, and `bundles/` modules are separated by
+responsibility. The world helpers are pure calculations; they do not mutate
+live state. The EventBundle compiler creates exactly one bundle per sensitivity
+profile. Run seeds remain separate future execution inputs, so the nine-row
+profile/seed matrix refers to three bundle hashes rather than creating nine
+duplicate bundle identities.
+
+The Panic-of-1907 instance is an architecture demo built from an explicit
+26-file non-evaluation source profile. Only the two common authorization inputs
+and three approved target files enter its source ancestry; the other seven
+events are genericity-regression inputs only. Full-draft contamination is
+irreversible, the historical post-cutoff scheduler is empty, and all normalized
+world values are assumptions rather than historical measurements.
+
+G2 exports declarative shell inputs only. It neither imports nor instantiates a
+Player, Persona, Ray actor, runner, simulator, reducer, compiler, or evaluator.
+Placement and packaging must be reconsidered before runtime implementation.
+
 ## Framework integration target
 
 MASim currently starts standard scenarios through:
@@ -47,6 +107,9 @@ Scenario assemblies, run configurations, reusable modules, and later tests may
 be added under locations selected by reviewed Phase-1 decisions. Existing
 `examples/` and top-level `configs/` remain the standard MASim boundary today;
 this document does not pre-allocate or reserve a permanent H2EPR alternative.
+The project-local G1/G2 package is likewise an incubator, not a permanent
+package or runtime placement. Its ownership and packaging must be reconsidered
+before G3 using implementation evidence, as specified by ADR-0001 and ADR-0002.
 
 ## Authority flow
 

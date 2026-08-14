@@ -1,0 +1,62 @@
+{
+  "event_id": "SYNTHETIC-EVENT",
+  "stages": [
+    {
+      "stage_id": "stage-1",
+      "index_in_event": 0,
+      "name": {"value": "Synthetic stage", "confidence": 1.0},
+      "start_time": {"value": "2026-01", "confidence": 0.5},
+      "end_time": {"value": null, "confidence": 0.0},
+      "episodes": [
+        {
+          "episode_id": "episode-1",
+          "index_in_stage": 0,
+          "name": {"value": "Synthetic episode", "confidence": 1.0},
+          "participants": [
+            {
+              "participant_id": "participant-a",
+              "name": {"value": "Participant A", "confidence": 1.0},
+              "participant_type": {"value": "institution", "confidence": 0.9},
+              "base_role": {"value": "coordinator", "confidence": 0.8},
+              "attributes": {
+                "unknown_capability": {"value": ["alpha", 2, null], "confidence": 0.7}
+              },
+              "actions": [
+                {
+                  "name": {"value": "publish notice", "confidence": 0.9},
+                  "details": [{"value": "bounded synthetic detail", "confidence": 0.8}],
+                  "timestamp": {"value": "2026-01-02", "confidence": 0.9}
+                }
+              ]
+            }
+          ],
+          "participant_relations": [
+            {
+              "from_participant_id": "participant-a",
+              "to_participant_id": "external:observer",
+              "relation_type": {"value": "notifies", "confidence": 0.8},
+              "relation_name": {"value": "public notice", "confidence": 0.8},
+              "is_bidirectional": false
+            }
+          ],
+          "transactions": [
+            {
+              "name": {"value": "synthetic transfer", "confidence": 0.7},
+              "transaction_type": {"value": "resource", "confidence": 0.7},
+              "from_participant_id": {"value": "participant-a", "confidence": 1.0},
+              "to_participant_id": {"value": "unknown", "confidence": 0.2},
+              "timestamp": {"value": "2026", "confidence": 0.4},
+              "details": [],
+              "instruments": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "synthetic_unknown": {"nested": true},
+  "synthetic_empty_object": {},
+  "synthetic_empty_array": [],
+  "evidence_source_contents": ["SYNTHETIC EVIDENCE MUST BE MINIMIZED"],
+  "reasons": ["SYNTHETIC REASON MUST BE MINIMIZED"]
+}

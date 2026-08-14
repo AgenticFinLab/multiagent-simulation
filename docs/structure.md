@@ -66,7 +66,14 @@ multiagent-simulation/
 |-- projects/                 # 跨场景研究项目；可组合合同、评估器与多事件协议
 |   `-- h2epr/                # H2EPR 事件过程模拟的项目根
 |       |-- contracts/v1/     # 稳定的 Phase-0 合同接口
-|       |-- tests/            # 当前离线合同测试
+|       |-- decisions/        # 项目级、可演进的架构决策
+|       |-- src/h2epr/        # G1 repository-local 实现孵化层（不由根包分发）
+|       |   |-- construction/ # 显式输入适配和 typed Construction IR
+|       |   |-- artifacts/    # EntityRegistry、roster 与 ParticipantArtifact 装配
+|       |   |-- policies/     # 声明式 Rule policy/skill 输入（不执行）
+|       |   |-- world/        # 归一化 canary 状态与纯计算 helper
+|       |   `-- bundles/      # sealed construction / EventBundle 编译（不运行）
+|       |-- tests/            # contract、construction 与 G2 离线测试
 |       |-- README.md         # 项目入口和当前能力边界
 |       |-- ARCHITECTURE.md   # 科学边界和候选扩展点
 |       `-- EVOLUTION.md      # 合同版本与实现演进策略
@@ -82,7 +89,9 @@ multiagent-simulation/
 
 `examples/` / 顶层 `configs/` 是当前标准 MASim 单场景约定；`projects/` 面向需要
 跨场景合同、编译器、评估器和研究协议的长期研究项目。H2EPR 当前只在
-`projects/h2epr/` 公开稳定 V1 合同和离线合同测试。未来场景、配置、运行时模块和新测试
+`projects/h2epr/` 公开稳定 V1 合同、离线合同测试，以及 G1/G2 的 repository-local
+Source Adapter / Construction IR 与 declarative EventBundle 孵化实现。该实现不由根 `setup.py` 分发，不启动 MASim，
+也不代表 runtime 或 scientific readiness。未来场景、配置、运行时模块和新测试
 可以在实现证据和 Phase-1 ADR 的指导下演进；当前文档不锁定其最终目录或类名。
 H2EPR 的冻结输入保留在
 `data/h2epr/`，未来运行产物进入 `EXPERIMENT/H2EPR/`，经过整理的发布包进入
@@ -106,7 +115,8 @@ H2EPR 的冻结输入保留在
 | `masim/skills`        | 设计/创建 Skill 体系                 | 见 §11                                                                                                                                       |
 
 职责边界：标准 MASim 场景开发主要修改 `examples/` 和顶层 `configs/`。H2EPR 当前保持
-独立的研究合同根；其后续场景、配置和运行时归属要由 Phase-1 ADR 根据真实实现证据确定。
+独立的研究项目根；当前 G1/G2 construction 与 EventBundle 层仅为项目内孵化边界，其后续场景、配置、
+打包和运行时归属要在 G3 前根据 G1/G2 真实实现证据重新裁定。
 `masim/` 应保持领域无关，不应写入某个金融场景或某个 H2EPR 事件的专用规则；
 `masim/skills/` 不参与运行时，只供设计阶段调用。
 
