@@ -47,13 +47,20 @@ remain separate responsibilities even if their eventual module layout changes.
 
 ## Repository boundaries
 
-The H2EPR project package remains repository-only and is not installed by
-`setup.py`; the domain-neutral G3 integration modules under `masim/` are
-discovered normally. Standard MASim scenarios and configurations remain in
-`examples/` and top-level `configs/`, while the bounded H2EPR canary
-configuration stays under `projects/h2epr/configs/`. A later reviewed decision
-may revise these locations without weakening the stable V1 contract or
-allowing evaluation data to flow into construction or runtime.
+The H2EPR project implementation remains repository-only and is not installed
+by `setup.py`; the domain-neutral G3 integration modules under `masim/` are
+discovered normally. Its repository-local namespace is organized by
+responsibility, not as a permanently fixed G1–G3 package range. Construction,
+artifact assembly and runtime keep their current reviewed ownership, while
+compiler or evaluator namespaces are added only with implemented later-phase
+work. Runtime and later compiler/evaluator surfaces remain explicit opt-in
+imports rather than eager top-level package effects.
+
+Standard MASim scenarios and configurations remain in `examples/` and top-level
+`configs/`, while the bounded H2EPR canary configuration stays under
+`projects/h2epr/configs/`. A later reviewed decision may revise these locations
+without weakening the stable V1 contract or allowing evaluation data to flow
+into construction or runtime.
 
 Phase-0 validation proves only the accepted contract surface. The bounded G1
 construction and G2 EventBundle layers remain non-runtime. G3 now runs a

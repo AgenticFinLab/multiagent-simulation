@@ -69,14 +69,14 @@ multiagent-simulation/
 |       |-- contracts/v1/     # 稳定的 Phase-0 合同接口
 |       |-- decisions/        # 项目级、可演进的架构决策
 |       |-- configs/          # H2EPR canary 配置；不与标准 configs/ 混用
-|       |-- src/h2epr/        # G1-G3 repository-local 实现孵化层（不由根包分发）
+|       |-- src/h2epr/        # 按职责扩展的 repository-local 研究实现（不由根包分发）
 |       |   |-- construction/ # 显式输入适配和 typed Construction IR
 |       |   |-- artifacts/    # EntityRegistry、roster 与 ParticipantArtifact 装配
 |       |   |-- policies/     # 声明式 Rule policy/skill 输入（不执行）
 |       |   |-- world/        # 归一化 canary 状态与纯计算 helper
 |       |   |-- bundles/      # sealed construction / EventBundle 编译（不运行）
 |       |   `-- runtime/      # G3 adapter、Rule policy、detector、reducer/runner
-|       |-- tests/            # contract、G1/G2 与 G3 owning tests；fixtures 均为 synthetic
+|       |-- tests/            # 分阶段 owning tests；tracked fixtures 仅保留 synthetic 输入
 |       |-- README.md         # 项目入口和当前能力边界
 |       |-- ARCHITECTURE.md   # 科学边界和候选扩展点
 |       `-- EVOLUTION.md      # 合同版本与实现演进策略
@@ -91,15 +91,17 @@ multiagent-simulation/
 > `investment-agents/` 是历史遗留目录，新档案统一写入 `masim/agents/defines/<domain>/`。
 
 `examples/` / 顶层 `configs/` 是当前标准 MASim 单场景约定；`projects/` 面向需要
-跨场景合同、编译器、评估器和研究协议的长期研究项目。H2EPR 当前只在
-`projects/h2epr/` 公开稳定 V1 合同，以及 G1/G2 construction、declarative
-EventBundle 和 G3 Rule-runtime canary 的 repository-local 实现。项目专用 `h2epr`
-包不由根 `setup.py` 分发；G3 仅把领域无关的 phased/event-process 机制放入
+跨场景合同、编译器、评估器和研究协议的长期研究项目。H2EPR 在
+`projects/h2epr/` 公开稳定 V1 合同，并按职责容纳 construction、artifact、bundle
+和 runtime 等项目专用实现；当前工程基线已覆盖 G1/G2 与 G3 Rule-runtime canary。
+项目专用 `h2epr` 包不由根 `setup.py` 分发；G3 仅把领域无关的 phased/event-process 机制放入
 `masim/`，事件身份、规则和配置仍留在项目根。该 canary 已跑通确定性执行链，
 但不代表历史校准或 scientific readiness。后续编译器、场景和测试仍可在 Gate
-证据与 ADR 指导下演进；当前边界不锁死最终目录或类名。
+证据与 ADR 指导下演进；对应目录只随实际实现创建，不使用空占位目录，当前边界
+也不锁死最终目录或类名。
 H2EPR 的冻结输入保留在
-`data/h2epr/`，未来运行产物进入 `EXPERIMENT/H2EPR/`，经过整理的发布包进入
+`data/h2epr/`，开发生成物进入被忽略的 `EXPERIMENT/H2EPR/` 或本地证据根；
+tracked test tree 只接收最小 synthetic fixtures。经过单独筛选的发布包才进入
 `simulation-results/H2EPR/`；输入、项目装配、运行工作区和发布边界不得混用。
 
 ## 4. 框架模块

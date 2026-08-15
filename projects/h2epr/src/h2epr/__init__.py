@@ -1,7 +1,9 @@
-"""Repository-local H2EPR research implementation incubator.
+"""Repository-local H2EPR research implementation.
 
-The exported G2 modules build declarative artifacts and EventBundles only.
-They deliberately expose no simulation entry point.
+The top-level package exposes only lightweight construction and artifact
+namespaces. Runtime and future compiler or evaluator surfaces remain explicit,
+opt-in imports so importing :mod:`h2epr` does not activate simulation or
+evaluation code.
 """
 
 from . import artifacts, bundles, construction, policies, world

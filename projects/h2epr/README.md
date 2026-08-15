@@ -89,13 +89,32 @@ construction or runtime inputs.
 
 ## Repository and packaging status
 
-`projects/h2epr/` is a repository research surface. Its project-specific G1–G3
-source is explicitly repository-local and is not discovered or distributed as
-an installed Python package by `setup.py`. The reviewed G3 placement keeps
+`projects/h2epr/` is a repository research surface. Its project-specific
+implementation is explicitly repository-local and is not discovered or
+distributed as an installed Python package by `setup.py`. The reviewed G3 placement keeps
 domain-neutral event-process integration in the distributable `masim` package
 and H2EPR-specific runtime/configuration under the project root. This split is
 an evolvable canary boundary, not a permanent package guarantee. Standard MASim
 scenarios in `examples/` and top-level `configs/` remain separate.
+
+The project is organized by responsibility rather than by audit round:
+
+| Surface | Responsibility | Current status |
+|---|---|---|
+| `contracts/v1/` | stable construction, runtime, compiler and evaluation interfaces | accepted Phase-0 baseline |
+| `src/h2epr/construction/` | explicit source loading and typed Construction IR | G1 baseline |
+| `src/h2epr/artifacts/`, `bundles/`, `policies/`, `world/` | participant, policy, world and EventBundle construction | G2 baseline |
+| `src/h2epr/runtime/` | project-owned Rule runtime, detectors and orchestration | G3 baseline |
+| future `src/h2epr/compiler/` and `tests/g4/` | deterministic trace-package validation and Generated EPG compilation | created only with an implemented G4 task |
+| future evaluation surface | isolated post-seal Reference alignment | placement decided with G5 implementation |
+
+Future compiler, G4 test and G4 synthetic-fixture directories are created only
+with their first real implementation; the repository does not reserve them
+with empty placeholders. Development-generated G3 or G4 outputs belong below
+the ignored `EXPERIMENT/H2EPR/` workspace or an explicitly local evidence root.
+Only minimized synthetic fixtures belong in the tracked test tree.
+`simulation-results/H2EPR/` remains reserved for artifacts admitted by a
+separate curation and publication decision.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for present boundaries,
 [EVOLUTION.md](EVOLUTION.md) for the evolution policy, and
