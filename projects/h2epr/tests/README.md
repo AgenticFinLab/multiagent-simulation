@@ -28,6 +28,21 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
   projects/h2epr/tests/contracts
 ```
 
+The G3 suite validates the opt-in phased runtime, fixed Rule policy,
+authoritative reducer, delayed-message transport, trace/seal/replay chain and
+generated-only P007 annotations. Ordinary CI runs the offline owning suite; it
+does not launch the formal Ray matrix:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
+  RAY_USAGE_STATS_ENABLED=0 \
+  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/g3
+```
+
+Fixtures below `fixtures/g3/` are synthetic closed-value examples, not run
+outputs or historical targets. Formal canary outputs remain ignored local
+evidence rather than tracked test fixtures.
+
 Fixtures below `fixtures/g2/` are minimized and explicitly synthetic. Real
 target-derived bundles are generated only into the ignored local evidence
 area; they are not tracked fixtures or expected scientific outcomes.
@@ -61,11 +76,11 @@ Every case also exposes a canonical behavior-only mutation descriptor and its
 SHA-256. Receipt grouping uses only responsibility, validation category, and
 expected/observed outcome rather than historical cumulative suite slices.
 
-None of these suites creates a runnable scenario. The G1/G2 suites establish
-only construction and declarative EventBundle candidates, not Gate acceptance,
-runtime readiness, or scientific readiness. `examples/` and top-level
-`configs/` remain the current standard MASim convention. Future H2EPR scenario,
-configuration, runtime, and test locations remain adjustable through reviewed
-Phase-1 architecture decisions. Passing this suite does not claim runtime or
-scientific readiness, and the required-surface check deliberately allows
-unrelated future files under `projects/h2epr/`.
+The contract, G1 and G2 suites do not create a runnable scenario. G3 exercises
+the bounded H2EPR Rule runtime and its deterministic interfaces; the separately
+controlled canary matrix supplies execution evidence. Neither the tests nor the
+canary establish historical calibration, Reference alignment or scientific
+readiness. `examples/` and top-level `configs/` remain the standard MASim
+scenario convention, while the reviewed H2EPR project/runtime split remains
+evolvable. Required-surface checks deliberately allow unrelated future files
+under `projects/h2epr/`.

@@ -48,10 +48,26 @@ local evidence area; tracked G2 fixtures are synthetic. The G2 API has no
 runtime entry point and does not import MASim, Ray, model, retrieval, or
 evaluation code.
 
-Neither construction layer implements or runs MASim integration, a participant
-turn, reducer, tick barrier, message transport, trace, compiler, evaluator,
-scenario, or experiment. Technical completion does not itself establish a
-Gate decision.
+The G3 engineering baseline consumes one sealed G2 matrix row through an
+opt-in paired phased runtime:
+
+```text
+RuntimeScenarioBundle + profile/seed row
+  -> H2EPR Rule participants
+  -> ten ordered per-tick barriers
+  -> authoritative world reduction and delayed-message transport
+  -> hash-chained trace, TickSeals and RunSeal
+  -> deterministic replay and generated-only P007 annotations
+```
+
+Domain-neutral runtime values, transport, reduction, trace and seal mechanics
+live under `masim.integrations.event_process`; the H2EPR adapter, fixed Rule
+policy, world effects, P007 detectors and runner remain under
+`src/h2epr/runtime/`. The standard `GeneralSimulator` path is unchanged. The
+accepted canary runs 41 logical ticks across the nine profile/seed rows and is
+Rule-only, Reference-blind, `full_draft_exposed`, `architecture_demo_only`, and
+not historically calibrated. It proves an executable deterministic engineering
+chain, not historical fidelity or scientific readiness.
 
 V1 is a stable consumer interface, not a frozen blueprint for the complete
 H2EPR system. Passing the Phase-0 tests establishes contract consistency only;
@@ -61,10 +77,11 @@ and tests may evolve without renaming or weakening the accepted V1 contract.
 Contract-breaking changes require an explicit successor contract version;
 compatible implementation changes do not create audit-round public versions.
 
-The first future implementation target is an H2EPR-0288 Panic of 1907 Rule
-canary. A later H2EPR-0616 SingHealth canary is a required anti-finance gate.
-Passing these contracts is necessary, but it does not authorize a later
-implementation phase or a scientific fidelity claim.
+The current implementation target is the H2EPR-0288 Panic of 1907 Rule canary.
+Its next compiler stage must normalize and validate the immutable G3 output
+package before producing a deterministic Generated EPG. A later H2EPR-0616
+SingHealth canary remains a required anti-finance gate. Passing an engineering
+Gate does not authorize a later phase or a scientific fidelity claim.
 
 Frozen event assets remain under `data/h2epr/`. They are inputs with a strict
 read-only boundary, not project source files. Evaluation references are never
@@ -72,14 +89,13 @@ construction or runtime inputs.
 
 ## Repository and packaging status
 
-`projects/h2epr/` is currently a repository research surface. Its G1 source is
-an explicitly exposed repository-local incubator; it is not
-discovered or distributed as an installed Python package by `setup.py`.
-Reusable runtime/package ownership, final scenario and configuration locations,
-and concrete runner/simulator classes require a later reviewed decision
-informed by implementation evidence. Standard MASim scenarios in `examples/` and
-top-level `configs/` remain separate unless a later reviewed architecture
-decision changes that boundary.
+`projects/h2epr/` is a repository research surface. Its project-specific G1–G3
+source is explicitly repository-local and is not discovered or distributed as
+an installed Python package by `setup.py`. The reviewed G3 placement keeps
+domain-neutral event-process integration in the distributable `masim` package
+and H2EPR-specific runtime/configuration under the project root. This split is
+an evolvable canary boundary, not a permanent package guarantee. Standard MASim
+scenarios in `examples/` and top-level `configs/` remain separate.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for present boundaries,
 [EVOLUTION.md](EVOLUTION.md) for the evolution policy, and
@@ -87,4 +103,6 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for present boundaries,
 The G1 incubation rationale and pre-G3 reconsideration point are recorded in
 [ADR-0001](decisions/ADR-0001-g1-project-local-incubator.md). The G2 artifact
 and EventBundle seam is recorded in
-[ADR-0002](decisions/ADR-0002-g2-artifacts-event-bundle-canary.md).
+[ADR-0002](decisions/ADR-0002-g2-artifacts-event-bundle-canary.md). The adopted
+G3 phased-runtime split is recorded in
+[ADR-0003](decisions/ADR-0003-g3-phased-runtime-placement.md).

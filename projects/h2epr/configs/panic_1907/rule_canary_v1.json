@@ -1,0 +1,38 @@
+{
+  "backend": "rule",
+  "case_ids": [
+    "low_stress.seed.0",
+    "low_stress.seed.1",
+    "low_stress.seed.2",
+    "balanced.seed.0",
+    "balanced.seed.1",
+    "balanced.seed.2",
+    "high_stress.seed.0",
+    "high_stress.seed.1",
+    "high_stress.seed.2"
+  ],
+  "clock": {
+    "end_date": "1907-11-30",
+    "inclusive_ticks": 41,
+    "start_date": "1907-10-21"
+  },
+  "historical_exogenous_manifest": [],
+  "knowledge": {},
+  "load_env": false,
+  "model": null,
+  "not_historically_calibrated": true,
+  "protocol_eligibility": "architecture_demo_only",
+  "rag": null,
+  "ray": {
+    "address": null,
+    "include_dashboard": false,
+    "log_to_driver": false,
+    "num_cpus": 1,
+    "num_gpus": 0,
+    "runtime_env": {
+      "env_vars": {},
+      "pip": []
+    }
+  },
+  "resume_allowed": false
+}

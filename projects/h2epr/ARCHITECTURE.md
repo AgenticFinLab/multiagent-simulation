@@ -40,8 +40,9 @@ select participants, aggregate entities, define a world, or produce runtime
 policy. Synthetic strict-prefix tests validate the closed policy boundary; an
 actual clean strict artifact is not produced in G1.
 
-This seam is independent of MASim imports. Runtime integration remains a later
-Gate decision.
+This seam remains independent of MASim imports. G3 consumes its downstream G2
+artifacts through a separate project-owned adapter; G1 itself remains
+runtime-free.
 
 ## G2 artifact and EventBundle seam
 
@@ -73,9 +74,10 @@ world values are assumptions rather than historical measurements.
 
 G2 exports declarative shell inputs only. It neither imports nor instantiates a
 Player, Persona, Ray actor, runner, simulator, reducer, compiler, or evaluator.
-Placement and packaging must be reconsidered before runtime implementation.
+ADR-0003 completed the pre-runtime placement review without changing that G2
+boundary.
 
-## Framework integration target
+## G3 framework integration
 
 MASim currently starts standard scenarios through:
 
@@ -87,18 +89,36 @@ scenario entry
   -> GeneralSimulator
 ```
 
-One provisional extension shape is an opt-in `H2EPRSimulationRunner` paired
-with an `H2EPRSimulator`, following the current MASim runner pattern. In that
-option the runner would own MASim lifecycle and tick orchestration while
-domain-neutral scheduler, reducer, trace, and compiler responsibilities remain
-separate. These names and source locations are candidates, not Phase-0
-requirements; a Phase-1 ADR must test them against implementation evidence.
-Any accepted design must preserve `GeneralSimulator` defaults and keep generic
-participant runtime code out of the finance package.
+G3 adopts an opt-in `H2EPRSimulationRunner` paired with an `H2EPRSimulator`.
+The pair preserves the MASim outer lifecycle while using ten explicit phased
+barriers for same-prestate participant decisions, authoritative reduction,
+delayed-message transport, generated-only detection, trace sealing and replay.
+Domain-neutral values and mechanics live in
+`masim.integrations.event_process` and `masim.simulator.phased`; fixed H2EPR
+policy, world effects, adapters, detectors and orchestration remain under
+`projects/h2epr/src/h2epr/runtime`. `GeneralSimulator` and its legacy dispatch
+path remain unchanged.
 
-`BaseSimulationRunner` does not itself supply an H2EPR tick barrier,
-authoritative world reducer, stage controller, trace seal, trace-to-EPG
-compiler, or offline evaluator. Those remain explicit future capabilities.
+The current runtime is a local CPU/private-loopback Ray Rule canary. It emits a
+41-tick hash-chained trace, TickSeals, a RunSeal, deterministic replay and P007
+annotations. It does not implement a trace-to-EPG compiler or offline
+evaluator, and it does not establish historical calibration or scientific
+validity.
+
+## Pre-G4 compiler seam
+
+The seven G3 scientific files are immutable source evidence, not yet the outer
+Phase-0 `RunManifest` and `SimulationTrace` contract objects. G4 must receive an
+explicit path/hash inventory, verify the record chain, seals and replay, and
+materialize contract-conformant wrappers before assigning
+`compiler_evaluator_eligible`. It must preserve the original G3 bytes and the
+`architecture_demo_only` / `full_draft_exposed` scope.
+
+The deterministic compiler belongs under a project-owned `h2epr.compiler`
+boundary unless later cross-domain evidence justifies extracting a generic
+abstraction. It may consume the validated trace and generated-only P007
+evidence, but it must not import Reference/evaluation material or ask an agent
+to emit a complete event graph.
 
 ## Evolvability boundary
 
@@ -107,9 +127,10 @@ Scenario assemblies, run configurations, reusable modules, and later tests may
 be added under locations selected by reviewed Phase-1 decisions. Existing
 `examples/` and top-level `configs/` remain the standard MASim boundary today;
 this document does not pre-allocate or reserve a permanent H2EPR alternative.
-The project-local G1/G2 package is likewise an incubator, not a permanent
-package or runtime placement. Its ownership and packaging must be reconsidered
-before G3 using implementation evidence, as specified by ADR-0001 and ADR-0002.
+The project-local G1–G3 package remains an incubator rather than a permanent
+distribution promise. ADR-0003 records the current generic/project split using
+G1/G2 implementation evidence; later compatible refactoring remains allowed
+with focused migration tests.
 
 ## Authority flow
 

@@ -1,0 +1,15 @@
+{
+  "actors": {
+    "actor_a": {
+      "confidence_index_bp": 5000,
+      "coordination_readiness_bp": 5000,
+      "liquid_resource_bp": 5000,
+      "operational_status": "open",
+      "resource_stress_bp": 5000,
+      "withdrawal_pressure_bp": 5000
+    }
+  },
+  "exposures": [],
+  "state_version": 0,
+  "withdrawal_demand_bp": 5000
+}

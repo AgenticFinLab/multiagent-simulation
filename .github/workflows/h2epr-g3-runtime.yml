@@ -1,0 +1,26 @@
+name: h2epr-g3-contracts
+
+on:
+  pull_request:
+    paths:
+      - "masim/integrations/event_process/**"
+      - "masim/simulator/phased.py"
+      - "projects/h2epr/**"
+      - ".github/workflows/h2epr-g3-runtime.yml"
+
+jobs:
+  offline-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Run offline G3 contract pack
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          RAY_USAGE_STATS_ENABLED: "0"
+        run: >-
+          python -B -m pytest -p no:cacheprovider
+          projects/h2epr/tests/g3
