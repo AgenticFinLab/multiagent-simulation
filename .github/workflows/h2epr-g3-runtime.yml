@@ -1,25 +1,124 @@
-name: h2epr-g3-contracts
+name: H2EPR G3 runtime contracts
 
-on:
+"on":
   pull_request:
     paths:
-      - "masim/integrations/event_process/**"
-      - "masim/simulator/phased.py"
-      - "projects/h2epr/**"
       - ".github/workflows/h2epr-g3-runtime.yml"
+      - "data/h2epr/development_samples_v1/**"
+      - "masim/__init__.py"
+      - "masim/communication/**"
+      - "masim/integrations/__init__.py"
+      - "masim/integrations/event_process/**"
+      - "masim/persona/**"
+      - "masim/player/**"
+      - "masim/proxy/**"
+      - "masim/simulator/__init__.py"
+      - "masim/simulator/base.py"
+      - "masim/simulator/general.py"
+      - "masim/simulator/phased.py"
+      - "masim/utils/__init__.py"
+      - "masim/utils/config.py"
+      - "masim/utils/history.py"
+      - "masim/utils/llm_utils.py"
+      - "masim/utils/ray_utils.py"
+      - "masim/utils/result_loader.py"
+      - "masim/utils/topology.py"
+      - "projects/h2epr/configs/**"
+      - "projects/h2epr/contracts/v1/**"
+      - "projects/h2epr/src/**"
+      - "projects/h2epr/tests/fixtures/g3/**"
+      - "projects/h2epr/tests/g3/**"
+      - "requirements.txt"
+      - "setup.py"
+  push:
+    paths:
+      - ".github/workflows/h2epr-g3-runtime.yml"
+      - "data/h2epr/development_samples_v1/**"
+      - "masim/__init__.py"
+      - "masim/communication/**"
+      - "masim/integrations/__init__.py"
+      - "masim/integrations/event_process/**"
+      - "masim/persona/**"
+      - "masim/player/**"
+      - "masim/proxy/**"
+      - "masim/simulator/__init__.py"
+      - "masim/simulator/base.py"
+      - "masim/simulator/general.py"
+      - "masim/simulator/phased.py"
+      - "masim/utils/__init__.py"
+      - "masim/utils/config.py"
+      - "masim/utils/history.py"
+      - "masim/utils/llm_utils.py"
+      - "masim/utils/ray_utils.py"
+      - "masim/utils/result_loader.py"
+      - "masim/utils/topology.py"
+      - "projects/h2epr/configs/**"
+      - "projects/h2epr/contracts/v1/**"
+      - "projects/h2epr/src/**"
+      - "projects/h2epr/tests/fixtures/g3/**"
+      - "projects/h2epr/tests/g3/**"
+      - "requirements.txt"
+      - "setup.py"
+
+permissions:
+  contents: read
 
 jobs:
-  offline-contracts:
+  runtime-contracts:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Check out MASim
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Check out pinned lmbase source
+        uses: actions/checkout@v6
+        with:
+          repository: AgenticFinLab/lmbase
+          ref: 5137b8c84b70b1c46b025247233777d1764783ad
+          path: .ci/lmbase
+          persist-credentials: false
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - name: Run offline G3 contract pack
+      - name: Install bounded G3 validation dependencies
+        run: >-
+          python -m pip install
+          pytest==9.0.3
+          iniconfig==2.3.0
+          pluggy==1.6.0
+          jsonschema==4.26.0
+          numpy==2.4.4
+          matplotlib==3.10.9
+          networkx==3.6.1
+          PyYAML==6.0.3
+          psutil==7.2.2
+          ray==2.55.1
+      - name: Install the CPU tensor dependency required by lmbase storage
+        run: >-
+          python -m pip install
+          --extra-index-url https://download.pytorch.org/whl/cpu
+          torch==2.12.0+cpu
+      - name: Verify pinned lmbase source and import boundary
         env:
+          EXPECTED_LMBASE_COMMIT: 5137b8c84b70b1c46b025247233777d1764783ad
           PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: .ci/lmbase
+        run: >-
+          test "$(git -C .ci/lmbase rev-parse HEAD)" = "$EXPECTED_LMBASE_COMMIT" &&
+          python -c
+          'from pathlib import Path; import lmbase;
+          from lmbase.utils.tools import BlockBasedStoreManager;
+          root=(Path.cwd()/".ci/lmbase/lmbase").resolve();
+          source=Path(lmbase.__file__).resolve();
+          assert source == root/"__init__.py", (source, root);
+          assert BlockBasedStoreManager.__module__ == "lmbase.utils.tools"'
+      - name: Run G3 owning tests
+        env:
+          MPLBACKEND: Agg
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: projects/h2epr/src:.ci/lmbase
           RAY_USAGE_STATS_ENABLED: "0"
         run: >-
           python -B -m pytest -p no:cacheprovider
