@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "case_id": "threshold_equal_merges",
+      "max_tick_gap": 1,
+      "ticks": [1, 2],
+      "expected_group_count": 1
+    },
+    {
+      "case_id": "threshold_exceeded_splits",
+      "max_tick_gap": 1,
+      "ticks": [1, 3],
+      "expected_group_count": 2
+    },
+    {
+      "case_id": "zero_threshold_splits_adjacent_ticks",
+      "max_tick_gap": 0,
+      "ticks": [1, 2],
+      "expected_group_count": 2
+    }
+  ]
+}
