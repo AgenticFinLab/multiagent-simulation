@@ -42,7 +42,7 @@ must preserve this three-view boundary and requires implementation evidence.
 
 `H2EPRSimulationRunner` and `H2EPRSimulator` are the adopted G3 paired-runner
 canary classes, not permanent compatibility commitments. The phased lifecycle,
-H2EPR world reducer, trace recorder, future compiler and offline evaluator
+H2EPR world reducer, trace recorder, G4 compiler and future offline evaluator
 remain separate responsibilities even if their eventual module layout changes.
 
 ## Repository boundaries
@@ -50,10 +50,10 @@ remain separate responsibilities even if their eventual module layout changes.
 The H2EPR project implementation remains repository-only and is not installed
 by `setup.py`; the domain-neutral G3 integration modules under `masim/` are
 discovered normally. Its repository-local namespace is organized by
-responsibility, not as a permanently fixed G1–G3 package range. Construction,
-artifact assembly and runtime keep their current reviewed ownership, while
-compiler or evaluator namespaces are added only with implemented later-phase
-work. Runtime and later compiler/evaluator surfaces remain explicit opt-in
+responsibility, not as a permanently fixed G1–G4 package range. Construction,
+artifact assembly, runtime and compiler keep their current reviewed ownership,
+while an evaluator namespace is added only with separately authorized G5 work.
+Runtime, compiler and later evaluator surfaces remain explicit opt-in
 imports rather than eager top-level package effects.
 
 Standard MASim scenarios and configurations remain in `examples/` and top-level
@@ -65,7 +65,9 @@ into construction or runtime.
 Phase-0 validation proves only the accepted contract surface. The bounded G1
 construction and G2 EventBundle layers remain non-runtime. G3 now runs a
 deterministic Rule-only architecture canary, but it does not establish strict
-continuation eligibility, historical calibration or scientific readiness.
-Before G4 compilation, its immutable scientific files require an explicit
-contract-wrapper and eligibility check; later Gates remain separately
-authorized.
+continuation eligibility, historical calibration or scientific readiness. G4
+now performs an explicit inventory, contract-wrapper and eligibility check on
+the immutable G3 scientific files, then deterministically produces a sealed V1
+Generated EPG. This remains Reference-blind architecture/demo evidence rather
+than a fidelity result. G5 post-seal evaluation and later Gates remain
+separately authorized.

@@ -69,6 +69,16 @@ Rule-only, Reference-blind, `full_draft_exposed`, `architecture_demo_only`, and
 not historically calibrated. It proves an executable deterministic engineering
 chain, not historical fidelity or scientific readiness.
 
+The G4 compiler consumes an explicitly inventoried, sealed G3 trace package,
+validates its chain/seal/replay boundary, materializes V1 `RunManifest` and
+`SimulationTrace` wrappers, and deterministically produces a V1 Generated EPG
+and GraphSeal. Event detection, episode grouping, stage induction and
+temporal/causal relations are derived only from simulation-generated records
+and generated-only P007 annotations. This is Reference-blind architecture/demo
+evidence; it is not Reference alignment, historical calibration, or a
+scientific-fidelity result. G5 remains a future, separately authorized and
+isolated post-seal evaluation stage.
+
 V1 is a stable consumer interface, not a frozen blueprint for the complete
 H2EPR system. Passing the Phase-0 tests establishes contract consistency only;
 it does not establish simulator readiness, scientific fidelity, or permission
@@ -78,7 +88,7 @@ Contract-breaking changes require an explicit successor contract version;
 compatible implementation changes do not create audit-round public versions.
 
 The current implementation target is the H2EPR-0288 Panic of 1907 Rule canary.
-Its next compiler stage must normalize and validate the immutable G3 output
+Its G4 compiler now normalizes and validates the immutable G3 output
 package before producing a deterministic Generated EPG. A later H2EPR-0616
 SingHealth canary remains a required anti-finance gate. Passing an engineering
 Gate does not authorize a later phase or a scientific fidelity claim.
@@ -105,12 +115,12 @@ The project is organized by responsibility rather than by audit round:
 | `src/h2epr/construction/` | explicit source loading and typed Construction IR | G1 baseline |
 | `src/h2epr/artifacts/`, `bundles/`, `policies/`, `world/` | participant, policy, world and EventBundle construction | G2 baseline |
 | `src/h2epr/runtime/` | project-owned Rule runtime, detectors and orchestration | G3 baseline |
-| future `src/h2epr/compiler/` and `tests/g4/` | deterministic trace-package validation and Generated EPG compilation | created only with an implemented G4 task |
+| `src/h2epr/compiler/` and `tests/g4/` | deterministic trace-package validation and Generated EPG/GraphSeal compilation | G4 baseline |
 | future evaluation surface | isolated post-seal Reference alignment | placement decided with G5 implementation |
 
-Future compiler, G4 test and G4 synthetic-fixture directories are created only
-with their first real implementation; the repository does not reserve them
-with empty placeholders. Development-generated G3 or G4 outputs belong below
+The current compiler responsibility map is intentionally evolvable: its public
+behavior is governed by V1 contracts and tests, not by a permanently frozen
+private module layout. Development-generated G3 or G4 outputs belong below
 the ignored `EXPERIMENT/H2EPR/` workspace or an explicitly local evidence root.
 Only minimized synthetic fixtures belong in the tracked test tree.
 `simulation-results/H2EPR/` remains reserved for artifacts admitted by a

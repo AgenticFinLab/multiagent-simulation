@@ -43,6 +43,20 @@ Fixtures below `fixtures/g3/` are synthetic closed-value examples, not run
 outputs or historical targets. Formal canary outputs remain ignored local
 evidence rather than tracked test fixtures.
 
+The G4 owning suite validates Reference-blind sealed-trace inventory and
+wrapper checks, deterministic event/episode/stage compilation, graph
+relations, GraphSeal closure, and fail-closed dependency boundaries:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
+  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/g4
+```
+
+G4 tests use only minimized synthetic fixtures below `fixtures/g4/` and
+offline V1 contract assets. They do not read real A0 outputs or Reference
+material, start Ray or a simulation, or establish historical fidelity. The
+isolated post-seal evaluation surface remains future G5 work.
+
 Fixtures below `fixtures/g2/` are minimized and explicitly synthetic. Real
 target-derived bundles are generated only into the ignored local evidence
 area; they are not tracked fixtures or expected scientific outcomes.
@@ -78,9 +92,10 @@ expected/observed outcome rather than historical cumulative suite slices.
 
 The contract, G1 and G2 suites do not create a runnable scenario. G3 exercises
 the bounded H2EPR Rule runtime and its deterministic interfaces; the separately
-controlled canary matrix supplies execution evidence. Neither the tests nor the
-canary establish historical calibration, Reference alignment or scientific
-readiness. `examples/` and top-level `configs/` remain the standard MASim
-scenario convention, while the reviewed H2EPR project/runtime split remains
-evolvable. Required-surface checks deliberately allow unrelated future files
-under `projects/h2epr/`.
+controlled canary matrix supplies execution evidence. G4 compiles eligible
+sealed trace records into a deterministic V1 Generated EPG, but neither these
+tests nor the canary establish historical calibration, Reference alignment or
+scientific readiness. `examples/` and top-level `configs/` remain the standard
+MASim scenario convention, while the reviewed H2EPR project/runtime/compiler
+split remains evolvable. Required-surface checks deliberately allow unrelated
+future files under `projects/h2epr/`.

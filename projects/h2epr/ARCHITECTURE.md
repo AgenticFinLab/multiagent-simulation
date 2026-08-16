@@ -101,24 +101,29 @@ path remain unchanged.
 
 The current runtime is a local CPU/private-loopback Ray Rule canary. It emits a
 41-tick hash-chained trace, TickSeals, a RunSeal, deterministic replay and P007
-annotations. It does not implement a trace-to-EPG compiler or offline
-evaluator, and it does not establish historical calibration or scientific
-validity.
+annotations. Runtime remains separate from the downstream G4 compiler and the
+future offline evaluator, and it does not establish historical calibration or
+scientific validity.
 
-## Pre-G4 compiler seam
+## G4 deterministic compiler seam
 
-The seven G3 scientific files are immutable source evidence, not yet the outer
-Phase-0 `RunManifest` and `SimulationTrace` contract objects. G4 must receive an
-explicit path/hash inventory, verify the record chain, seals and replay, and
-materialize contract-conformant wrappers before assigning
-`compiler_evaluator_eligible`. It must preserve the original G3 bytes and the
-`architecture_demo_only` / `full_draft_exposed` scope.
+The accepted G4 compiler consumes the seven immutable G3 scientific files
+through an explicit path/hash inventory. It verifies the record chain, seals
+and replay, materializes V1 `RunManifest` and `SimulationTrace` wrappers, and
+only then assigns `compiler_evaluator_eligible`. It deterministically detects
+and groups generated events into participant, action, outcome, transaction,
+episode and stage nodes, closes temporal/causal edges, and seals the resulting
+V1 Generated EPG with a GraphSeal. The original G3 bytes and the
+`architecture_demo_only` / `full_draft_exposed` scope remain unchanged.
 
-The deterministic compiler belongs under a project-owned `h2epr.compiler`
-boundary unless later cross-domain evidence justifies extracting a generic
-abstraction. It may consume the validated trace and generated-only P007
-evidence, but it must not import Reference/evaluation material or ask an agent
-to emit a complete event graph.
+The implementation currently belongs under the project-owned
+`h2epr.compiler` responsibility boundary; that private module layout may
+evolve if later cross-domain evidence justifies a generic abstraction. The
+compiler consumes only the validated trace and generated-only P007 evidence.
+It neither imports Reference/evaluation material nor asks an agent to emit a
+complete event graph. Its evidence is an architecture/demo canary, not
+Reference-based fidelity evaluation or a historical-validity claim. G5 remains
+a separately authorized, isolated post-seal evaluation stage.
 
 ## Evolvability boundary
 
@@ -127,7 +132,7 @@ Scenario assemblies, run configurations, reusable modules, and later tests may
 be added under locations selected by reviewed Phase-1 decisions. Existing
 `examples/` and top-level `configs/` remain the standard MASim boundary today;
 this document does not pre-allocate or reserve a permanent H2EPR alternative.
-The project-local G1–G3 package remains an incubator rather than a permanent
+The project-local G1–G4 package remains an incubator rather than a permanent
 distribution promise. ADR-0003 records the current generic/project split using
 G1/G2 implementation evidence; later compatible refactoring remains allowed
 with focused migration tests.
