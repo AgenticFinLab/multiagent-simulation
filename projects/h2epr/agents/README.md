@@ -5,16 +5,17 @@ Definitions and their derived executable mappings. It borrows MASim's useful
 separation between Markdown definitions and Python implementations, while
 keeping the H2EPR profiles event-bound until reuse is demonstrated.
 
-The pilot tests whether role, legal information, persistent state, authority,
-procedure, and intent/result separation can drive auditable behavior. It does
-not claim historical calibration, cross-event reuse, LLM readiness, or a
-complete reconstruction of the Panic of 1907.
+The current two-role study examines whether institutional role,
+participant-available information, persistent state, authority, procedure, and
+intent/result separation can support auditable behavior. Its scope is the
+exploratory reconstruction of a bounded Panic of 1907 situation; calibration,
+cross-event reuse, and additional execution approaches require separate work.
 
 ## Authority map
 
 | Asset | Owns | Does not own |
 |---|---|---|
-| Agent Definition Markdown | representation, legal information semantics, decision commitments, intent meaning, assumptions, falsifiers | source status, actual world values, wire schemas, adjudicated results |
+| Agent Definition Markdown | representation, participant-available information semantics, decision commitments, intent meaning, assumptions, falsifiers | source status, actual world values, wire schemas, adjudicated results |
 | `evidence-ledger.md` | adopted source locator/hash, claim status, exposure and allowed use | behavior rules or runtime values |
 | `micro-situation.md` | pilot boundary, institutional facts, observation delivery, business-process and adjudication assumptions | participant decision policy |
 | `defines/<event>/binding-catalog.json` | derived, executable mapping of Definition identity, observation domains, commitment-specific inputs, intent parameters, and intent envelopes | independent behavior semantics |
@@ -47,13 +48,14 @@ agents/
 - Only the role Markdown files are Agent Definitions. The evidence ledger,
   micro-situation, and binding catalog are adjacent event support assets with
   separate authority.
-- H2EPR framework Skills are flat Markdown files under `skills/` unless a
-  genuinely multi-file workflow later justifies a directory.
+- H2EPR framework Skills use one directory per workflow. `SKILL.md` is the
+  entry point; detailed research and review guidance lives in `references/`.
+  The current catalog is documented in [`../skills/README.md`](../skills/README.md).
 
 ## Current assets
 
-- [`agent-definition-template.md`](agent-definition-template.md): provisional
-  method, not a stable schema.
+- [`agent-definition-template.md`](agent-definition-template.md): ten-module
+  working template for event-bound scholarly and behavioral Definitions.
 - [`defines/panic_1907/evidence-ledger.md`](defines/panic_1907/evidence-ledger.md): adopted evidence and
   bounded unresolved gaps.
 - [`defines/panic_1907/micro-situation.md`](defines/panic_1907/micro-situation.md): shared

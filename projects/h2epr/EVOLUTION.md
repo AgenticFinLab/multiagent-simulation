@@ -70,13 +70,17 @@ justify a successor contract on its own.
 
 ## Agent Definition changes
 
-Agent Definitions, the template and `agent-definition-skill.md` are active
-research assets. The tracked paths contain the current candidate:
+Agent Definitions, the template and the research/authoring/review Skills are
+active research assets. The tracked paths contain the current methods and
+candidate:
 
 ```text
 agents/agent-definition-template.md
 agents/defines/<event>/<participant>.md
-skills/agent-definition-skill.md
+skills/historical-evidence-research/
+skills/participant-behavior-research/
+skills/agent-definition/
+skills/agent-definition-review/
 ```
 
 Update these files in place as the pilot produces feedback. When a Definition

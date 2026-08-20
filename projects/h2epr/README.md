@@ -50,7 +50,10 @@ projects/h2epr/
 │   ├── agent-definition-template.md
 │   └── defines/panic_1907/
 ├── skills/
-│   └── agent-definition-skill.md
+│   ├── historical-evidence-research/
+│   ├── participant-behavior-research/
+│   ├── agent-definition/
+│   └── agent-definition-review/
 ├── src/h2epr/
 │   ├── construction/
 │   ├── artifacts/

@@ -76,7 +76,10 @@ projects/h2epr/
 │   ├── agent-definition-template.md
 │   └── defines/panic_1907/
 ├── skills/
-│   └── agent-definition-skill.md
+│   ├── historical-evidence-research/
+│   ├── participant-behavior-research/
+│   ├── agent-definition/
+│   └── agent-definition-review/
 ├── src/h2epr/
 │   ├── construction/
 │   ├── artifacts/
@@ -103,6 +106,9 @@ projects/h2epr/
 | `runtime/` | H2EPR 的 MASim 适配、Rule runtime、detector 和 runner |
 | `compiler/` | 校验 sealed trace，并生成 EPG 和 GraphSeal |
 | `tests/` | 合同、construction、runtime、compiler 和 Agent 测试 |
+
+`skills/` 按证据研究、角色行为研究、Definition 编写和独立审核分层。每个
+Skill 以 `SKILL.md` 作为入口，并把详细研究规范放在相邻 `references/` 中。
 
 这些目录按职责组织。内部类名和文件拆分可以随着实现演进；`contracts/v1` 的公开语义保持稳定。
 
