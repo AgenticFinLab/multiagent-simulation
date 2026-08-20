@@ -36,11 +36,14 @@ smaller validation environment.
 ## H2EPR research project
 
 [`projects/h2epr/`](projects/h2epr/) is a repository-local research surface for
-draft-EPG-driven participant simulation. Its current engineering chain includes
-the Phase-0 contracts, G1 construction adapter and IR, G2 participant/world
-artifacts and EventBundles, and an opt-in G3 deterministic Rule runtime canary.
-The canary is Reference-blind and architecture-demo-only: it proves a runnable,
-auditable engineering path, not historical fidelity, scientific readiness, or
-a complete real-event experiment. The [project README](projects/h2epr/README.md)
-documents the current scope, evolution policy, and strict
-Reference-information boundary.
+draft-EPG-driven participant simulation and the current single authority root
+for H2EPR-owned contracts, Agent/Scenario semantics, runtime adapters and
+compiler responsibilities. Its G1–G4 engineering chain reaches deterministic
+Rule execution, sealed trace/replay and Generated EPG compilation, but remains
+Reference-blind and architecture-demo-only. The post-advisor research mainline
+is now a smaller two-role Agent Definition pilot; neither line establishes
+historical fidelity or scientific readiness.
+
+Start with the repository-level
+[H2EPR project guide](projects/H2EPR.md), then use the
+[project README](projects/h2epr/README.md) for current implementation details.

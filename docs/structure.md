@@ -65,16 +65,21 @@ multiagent-simulation/
 |   `-- __init__.py
 |-- configs/                  # 标准/既有 MASim 场景配置（与 examples/ 同名目录）
 |-- projects/                 # 跨场景研究项目；可组合合同、评估器与多事件协议
-|   `-- h2epr/                # H2EPR 事件过程模拟的项目根
+|   |-- README.md              # 研究项目索引
+|   |-- H2EPR.md               # H2EPR 仓库级项目指南
+|   `-- h2epr/                # 唯一 H2EPR framework/research authority
 |       |-- contracts/v1/     # 稳定的 Phase-0 合同接口
 |       |-- decisions/        # 项目级、可演进的架构决策
 |       |-- configs/          # H2EPR canary 配置；不与标准 configs/ 混用
+|       |-- agents/           # event-bound Agent Definitions、ledger、微局面与 binding
+|       |-- skills/           # H2EPR 自有设计期 Skill；不参与运行时
 |       |-- src/h2epr/        # 按职责扩展的 repository-local 研究实现（不由根包分发）
 |       |   |-- construction/ # 显式输入适配和 typed Construction IR
 |       |   |-- artifacts/    # EntityRegistry、roster 与 ParticipantArtifact 装配
 |       |   |-- policies/     # 声明式 Rule policy/skill 输入（不执行）
 |       |   |-- world/        # 归一化 canary 状态与纯计算 helper
 |       |   |-- bundles/      # sealed construction / EventBundle 编译（不运行）
+|       |   |-- agents/       # Definition binding 与当前两角色最小反馈实现
 |       |   |-- runtime/      # G3 adapter、Rule policy、detector、reducer/runner
 |       |   `-- compiler/     # G4 sealed-trace 校验与确定性 Generated EPG 编译
 |       |-- tests/            # 分阶段 owning tests；tracked fixtures 仅保留 synthetic 输入
@@ -93,15 +98,18 @@ multiagent-simulation/
 
 `examples/` / 顶层 `configs/` 是当前标准 MASim 单场景约定；`projects/` 面向需要
 跨场景合同、编译器、评估器和研究协议的长期研究项目。H2EPR 在
-`projects/h2epr/` 公开稳定 V1 合同，并按职责容纳 construction、artifact、bundle
-和 runtime 等项目专用实现；当前工程基线已覆盖 G1/G2、G3 Rule-runtime canary，
-以及从 sealed trace 到 V1 Generated EPG/GraphSeal 的 Reference-blind G4 编译。
+`projects/h2epr/` 公开稳定 V1 合同，并按职责容纳 construction、artifact、bundle、
+Agent、runtime 和 compiler 等项目专用实现；当前工程基线已覆盖 G1/G2、G3 Rule-runtime
+canary，以及从 sealed trace 到 V1 Generated EPG/GraphSeal 的 Reference-blind G4 编译。
+导师会议后的当前研究主线则是 Knickerbocker Trust + NYCH 两角色 Agent Definition
+标准化和最小反馈迭代；它借鉴 MASim 的 Markdown/Python 分离与 Skill 纪律，但不提前建立
+跨事件 Agent pool，也不把四变体矩阵作为前置要求。
 项目专用 `h2epr` 包不由根 `setup.py` 分发；G3 仅把领域无关的 phased/event-process 机制放入
 `masim/`，事件身份、规则和配置仍留在项目根。该 canary 已跑通确定性执行链，
 G4 则在项目根中消费经验证的 sealed trace，不改变 MASim 的默认运行路径；二者
-都不代表 Reference 对齐、历史校准或 scientific readiness。后续场景、评估器和测试仍可在 Gate
-证据与 ADR 指导下演进；对应目录只随实际实现创建，不使用空占位目录，当前边界
-也不锁死最终目录或类名。
+都不代表 Reference 对齐、历史校准或 scientific readiness。后续职责以短迭代和证据触发演进，
+不把 G5/G6 视为自动顺序；对应目录只随实际消费者创建，不使用空占位目录，当前边界也不锁死
+最终目录或类名。仓库级当前解释见 `projects/H2EPR.md`。
 H2EPR 的冻结输入保留在
 `data/h2epr/`，开发生成物进入被忽略的 `EXPERIMENT/H2EPR/` 或本地证据根；
 tracked test tree 只接收最小 synthetic fixtures。经过单独筛选的发布包才进入

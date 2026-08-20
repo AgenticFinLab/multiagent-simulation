@@ -1,137 +1,189 @@
-# H2EPR event-process simulation
+# H2EPR
 
-This project studies whether autonomous participant agents can reproduce the
-evolution of a real social event as an auditable process, rather than produce
-one plausible retrospective narrative.
+H2EPR is a repository-local research project for auditable simulation of real
+event processes. It builds participant Agents from bounded evidence, records
+their interaction as a sealed trace and compiles the generated process into an
+EPG.
 
-The near-term research chain is:
+For the repository-level overview and the relationship with MASim, see the
+[H2EPR project guide](../H2EPR.md).
 
-```text
-Draft EPG and frozen evidence
-  -> behavior/skill distillation
-  -> participant artifacts and controlled world inputs
-  -> participant-agent interaction
-  -> sealed simulation trace
-  -> deterministic Generated EPG
-  -> offline alignment with a held-out real process
-```
+## Current focus
 
-`contracts/v1/` is the Phase-0 contract baseline. It defines construction
-identity, runtime information boundaries, communication, logical time, trace
-and seal rules, Generated EPG structure, and evaluation separation. The
-contract tests use synthetic fixtures only.
+The current research loop is an Agent Definition pilot for the Panic of 1907.
+It compares two institutionally different participants:
 
-The repository-local `src/h2epr/construction/` incubator is the bounded G1
-implementation candidate for explicit-manifest source loading and typed,
-lossless Construction IR. It enforces Reference-blind path handling, four
-closed construction identities, evidence minimization and deterministic V1
-synthetic snapshots. Its architecture-generic adapter may inspect only an
-explicitly authorized non-Reference development manifest; full-draft-derived
-outputs remain permanently demo-only. Synthetic strict-policy tests exercise
-fail-closed rules, but no actual clean strict build is claimed.
+- Knickerbocker Trust;
+- New York Clearing House (NYCH).
 
-The project-local G2 candidate adds declarative construction after the IR:
+Each participant has an event-specific Markdown Definition. A small non-Ray
+pilot checks whether those Definitions constrain legal observations,
+request lifecycle, procedural authority, intents and response to results.
 
-```text
-Construction IR
-  -> reviewed EntityRegistry and reversible roster/loss report
-  -> generic ParticipantArtifacts and declarative Rule policies
-  -> normalized, dimensionless sensitivity world
-  -> three sealed construction/EventBundle profile pairs
-  -> nine profile/seed execution-matrix rows
-```
+The earlier G1–G4 work remains the engineering foundation: construction,
+participant artifacts, deterministic Rule execution, trace/seal/replay and
+Generated EPG compilation.
 
-The three profiles are explicit assumptions, permanently
-`full_draft_exposed`, `architecture_demo_only`, and not historically
-calibrated. The target-derived bundles are generated only into the ignored
-local evidence area; tracked G2 fixtures are synthetic. The G2 API has no
-runtime entry point and does not import MASim, Ray, model, retrieval, or
-evaluation code.
+## Implemented components
 
-The G3 engineering baseline consumes one sealed G2 matrix row through an
-opt-in paired phased runtime:
-
-```text
-RuntimeScenarioBundle + profile/seed row
-  -> H2EPR Rule participants
-  -> ten ordered per-tick barriers
-  -> authoritative world reduction and delayed-message transport
-  -> hash-chained trace, TickSeals and RunSeal
-  -> deterministic replay and generated-only P007 annotations
-```
-
-Domain-neutral runtime values, transport, reduction, trace and seal mechanics
-live under `masim.integrations.event_process`; the H2EPR adapter, fixed Rule
-policy, world effects, P007 detectors and runner remain under
-`src/h2epr/runtime/`. The standard `GeneralSimulator` path is unchanged. The
-accepted canary runs 41 logical ticks across the nine profile/seed rows and is
-Rule-only, Reference-blind, `full_draft_exposed`, `architecture_demo_only`, and
-not historically calibrated. It proves an executable deterministic engineering
-chain, not historical fidelity or scientific readiness.
-
-The G4 compiler consumes an explicitly inventoried, sealed G3 trace package,
-validates its chain/seal/replay boundary, materializes V1 `RunManifest` and
-`SimulationTrace` wrappers, and deterministically produces a V1 Generated EPG
-and GraphSeal. Event detection, episode grouping, stage induction and
-temporal/causal relations are derived only from simulation-generated records
-and generated-only P007 annotations. This is Reference-blind architecture/demo
-evidence; it is not Reference alignment, historical calibration, or a
-scientific-fidelity result. G5 remains a future, separately authorized and
-isolated post-seal evaluation stage.
-
-V1 is a stable consumer interface, not a frozen blueprint for the complete
-H2EPR system. Passing the Phase-0 tests establishes contract consistency only;
-it does not establish simulator readiness, scientific fidelity, or permission
-to begin a later phase. Future scenarios, configurations, internal modules,
-and tests may evolve without renaming or weakening the accepted V1 contract.
-Contract-breaking changes require an explicit successor contract version;
-compatible implementation changes do not create audit-round public versions.
-
-The current implementation target is the H2EPR-0288 Panic of 1907 Rule canary.
-Its G4 compiler now normalizes and validates the immutable G3 output
-package before producing a deterministic Generated EPG. A later H2EPR-0616
-SingHealth canary remains a required anti-finance gate. Passing an engineering
-Gate does not authorize a later phase or a scientific fidelity claim.
-
-Frozen event assets remain under `data/h2epr/`. They are inputs with a strict
-read-only boundary, not project source files. Evaluation references are never
-construction or runtime inputs.
-
-## Repository and packaging status
-
-`projects/h2epr/` is a repository research surface. Its project-specific
-implementation is explicitly repository-local and is not discovered or
-distributed as an installed Python package by `setup.py`. The reviewed G3 placement keeps
-domain-neutral event-process integration in the distributable `masim` package
-and H2EPR-specific runtime/configuration under the project root. This split is
-an evolvable canary boundary, not a permanent package guarantee. Standard MASim
-scenarios in `examples/` and top-level `configs/` remain separate.
-
-The project is organized by responsibility rather than by audit round:
-
-| Surface | Responsibility | Current status |
+| Component | Location | Current role |
 |---|---|---|
-| `contracts/v1/` | stable construction, runtime, compiler and evaluation interfaces | accepted Phase-0 baseline |
-| `src/h2epr/construction/` | explicit source loading and typed Construction IR | G1 baseline |
-| `src/h2epr/artifacts/`, `bundles/`, `policies/`, `world/` | participant, policy, world and EventBundle construction | G2 baseline |
-| `src/h2epr/runtime/` | project-owned Rule runtime, detectors and orchestration | G3 baseline |
-| `src/h2epr/compiler/` and `tests/g4/` | deterministic trace-package validation and Generated EPG/GraphSeal compilation | G4 baseline |
-| future evaluation surface | isolated post-seal Reference alignment | placement decided with G5 implementation |
+| Contracts V1 | `contracts/v1/` | Stable construction, runtime, trace, seal and Generated EPG interfaces |
+| Construction IR | `src/h2epr/construction/` | Explicit source loading and typed, lossless construction data |
+| Participant artifacts | `src/h2epr/artifacts/` | Entity registry, provenance and ParticipantArtifact assembly |
+| Event bundles | `src/h2epr/bundles/` | Construction seals, RuntimeScenarioBundle generation and validation |
+| Canary policy and world | `src/h2epr/policies/`, `src/h2epr/world/` | Rule policy inputs and normalized sensitivity state |
+| Runtime | `src/h2epr/runtime/` | H2EPR adapter, phased Rule runtime, detectors and orchestration |
+| Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
+| Agent Definitions | `agents/` | Event-specific behavior definitions, evidence ledger and bindings |
+| Agent pilot | `src/h2epr/agents/` | Definition enforcement and the current two-role feedback loop |
 
-The current compiler responsibility map is intentionally evolvable: its public
-behavior is governed by V1 contracts and tests, not by a permanently frozen
-private module layout. Development-generated G3 or G4 outputs belong below
-the ignored `EXPERIMENT/H2EPR/` workspace or an explicitly local evidence root.
-Only minimized synthetic fixtures belong in the tracked test tree.
-`simulation-results/H2EPR/` remains reserved for artifacts admitted by a
-separate curation and publication decision.
+## Repository layout
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for present boundaries,
-[EVOLUTION.md](EVOLUTION.md) for the evolution policy, and
-[tests/README.md](tests/README.md) for lightweight offline validation.
-The G1 incubation rationale and pre-G3 reconsideration point are recorded in
-[ADR-0001](decisions/ADR-0001-g1-project-local-incubator.md). The G2 artifact
-and EventBundle seam is recorded in
-[ADR-0002](decisions/ADR-0002-g2-artifacts-event-bundle-canary.md). The adopted
-G3 phased-runtime split is recorded in
-[ADR-0003](decisions/ADR-0003-g3-phased-runtime-placement.md).
+```text
+projects/h2epr/
+├── contracts/v1/
+├── decisions/
+├── configs/panic_1907/
+├── agents/
+│   ├── README.md
+│   ├── agent-definition-template.md
+│   └── defines/panic_1907/
+├── skills/
+│   └── agent-definition-skill.md
+├── src/h2epr/
+│   ├── construction/
+│   ├── artifacts/
+│   ├── policies/
+│   ├── world/
+│   ├── bundles/
+│   ├── agents/
+│   ├── runtime/
+│   └── compiler/
+└── tests/
+```
+
+The project is organized by responsibility rather than by audit round. New
+directories are added when a real implementation needs them; the tree is not
+a permanent package API.
+
+## Agent Definition pilot
+
+The current event assets are under `agents/defines/panic_1907/`:
+
+| File | Purpose |
+|---|---|
+| `knickerbocker-trust.md` | Knickerbocker role, information, authority and decision commitments |
+| `new-york-clearing-house.md` | NYCH governance, eligibility and procedural commitments |
+| `evidence-ledger.md` | Adopted claims, source identity, exposure and unresolved questions |
+| `micro-situation.md` | Shared October 21 support-request situation |
+| `binding-catalog.json` | Derived mapping from Definition hashes to executable commitments |
+
+The three-tick pilot follows one narrow path:
+
+1. Knickerbocker submits a support request.
+2. NYCH issues a typed member-facility decline.
+3. Knickerbocker receives the result and prepares an operational restriction.
+
+This path exercises Definition hashes, observation allowlists, explicit
+unknown values, request state, authority checks, intent/result separation,
+deterministic trace and replay.
+
+Two historical questions remain open: NYCH authority over other possible
+support routes, and the exact Knickerbocker representatives and corporate
+authorization behind the request. The pilot keeps both as bounded unknowns.
+
+## Architecture
+
+```text
+evidence
+  -> Agent Definition + scenario/environment
+  -> ParticipantArtifact / EventBundle
+  -> filtered observation
+  -> Agent intent or message
+  -> environment adjudication
+  -> authoritative state update
+  -> sealed trace and replay
+  -> Generated EPG
+```
+
+Agents propose actions; the environment determines admissibility and effects.
+Only the reducer commits world state. The runtime records accepted, rejected,
+delayed, duplicate, failed and expired attempts.
+
+The full architecture and integration boundaries are described in
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Evidence and generated data
+
+- `data/h2epr/` contains frozen input assets.
+- `.local-runtime/h2epr-simulation/` contains local working material,
+  research history and archived evidence.
+- `EXPERIMENT/H2EPR/` is used for generated local run data.
+- `simulation-results/H2EPR/` is reserved for separately curated releases.
+
+Construction, runtime and post-seal evaluation use separate information
+boundaries. The current Panic of 1907 canary was built after exposure to the
+full draft and is classified as an architecture demo. Its outputs support
+engineering review rather than historical calibration.
+
+## Packaging
+
+The `h2epr` package is not installed by the root `setup.py`. Run project tests
+from the repository root with `projects/h2epr/src` on `PYTHONPATH`:
+
+```bash
+PYTHONPATH=projects/h2epr/src python -c "import h2epr"
+```
+
+Domain-neutral phased execution and event-process primitives currently live in
+`masim/`. Event identity, Agent behavior, scenario policy and compiler logic
+remain in H2EPR.
+
+## Tests
+
+Contracts and the Agent pilot run offline and do not start Ray:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 \
+PYTHONPATH=projects/h2epr/src \
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/contracts \
+  projects/h2epr/tests/agents
+```
+
+Additional suites cover construction, bundles, runtime and compilation:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 \
+PYTHONPATH=projects/h2epr/src \
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/construction \
+  projects/h2epr/tests/g2 \
+  projects/h2epr/tests/g3 \
+  projects/h2epr/tests/g4
+```
+
+The G3 suite requires the project runtime environment. See
+[tests/README.md](tests/README.md) for details.
+
+## Project status
+
+G1–G4 provide a deterministic engineering chain with recorded limitations.
+The current Agent work is the first event-specific semantic iteration and has
+not yet been integrated into the G3/G4 path. Scientific evaluation remains a
+later post-seal activity.
+
+H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
+required before a future shared-core claim. It is not scheduled as the next
+development task.
+
+## Further reading
+
+- [Research projects index](../README.md)
+- [Project guide](../H2EPR.md)
+- [Architecture](ARCHITECTURE.md)
+- [Evolution policy](EVOLUTION.md)
+- [Agent guide](agents/README.md)
+- [Contracts V1](contracts/v1/README.md)
+- [Architecture decisions](decisions/)

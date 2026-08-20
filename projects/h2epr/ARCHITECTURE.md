@@ -1,147 +1,288 @@
-# Architecture
+# H2EPR architecture
 
-## Scientific boundary
+H2EPR turns bounded event evidence into participant artifacts, executes
+participant interaction and compiles the resulting trace into a Generated EPG.
+This document describes the responsibilities between those stages.
 
-H2EPR simulation separates three views:
+## Design principles
 
-1. **Construction view** produces typed participant, policy, world, scheduler,
-   and source-policy artifacts. A full-draft target demo is permanently
-   contaminated. A strict build accepts only an approved prefix projection and
-   must be performed by a clean builder.
-2. **Runtime view** exposes only identity, capabilities, state, delivered
-   information, public event progress, and prior trace-derived history. It does
-   not expose future real actions or outcomes.
-3. **Evaluation view** reads the sealed generated artifacts and the held-out
-   real process only after a run. Its data cannot flow back into construction,
-   runtime, memory, prompts, retrieval, or world state.
+### Separate construction, runtime and evaluation
 
-## G1 construction seam
+H2EPR uses three information views:
 
-The active G1 candidate is deliberately project-owned and Reference-blind:
+1. **Construction** prepares participants, policies, world inputs and event
+   bundles from the evidence available to the builder.
+2. **Runtime** gives each participant only its legal observation and records
+   the generated interaction.
+3. **Evaluation** compares sealed generated artifacts with held-out event
+   material after a run.
+
+Evaluation data does not enter construction, runtime state, prompts, memory or
+retrieval. A builder who has seen the target continuation cannot restore a
+clean held-out status by rebuilding the same event.
+
+### Keep Agent decisions separate from environment results
+
+Agents emit intents and messages. The environment checks institutional rules,
+authority, resources and concurrent state. The authoritative reducer is the
+only component that commits state changes.
+
+This keeps the following events distinct:
+
+- an Agent requests an action;
+- the request is accepted for processing;
+- the action is executed;
+- the action has a partial, delayed, failed or zero effect.
+
+### Make every run auditable
+
+Runtime records use logical coordinates and deterministic ordering. Trace
+records are hash chained, sealed by tick and sealed again for the full run.
+Replay reconstructs state from the same trace before the compiler accepts it.
+
+### Keep event semantics in H2EPR
+
+MASim supplies reusable execution infrastructure. H2EPR owns event evidence,
+participant behavior, institutional rules, observation policy, business
+results and Generated EPG semantics.
+
+## System flow
 
 ```text
-explicit SourceDescriptor manifest
-  -> normalized path and hash guard
-  -> tolerant JSON/CSV decoder
-  -> immutable typed Construction IR
-  -> minimized evidence/provenance
-  -> versioned canonical snapshot export
+explicit source manifest
+  -> typed Construction IR
+  -> EntityRegistry and ParticipantArtifacts
+  -> world inputs and RuntimeScenarioBundle
+  -> participant-specific observations
+  -> Agent decisions, intents and messages
+  -> environment adjudication
+  -> authoritative state reduction
+  -> trace, tick seals, run seal and replay
+  -> Generated EPG and GraphSeal
+  -> post-seal evaluation
 ```
 
-Callers provide both approved roots and explicit descriptors. The adapter does
-not walk directories, infer siblings, accept a Reference locator, or discover
-schemas from the working directory. Accepted `contracts/v1/` schemas remain the
-single contract source and are not duplicated under `src/`.
+## Construction
 
-Architecture-generic parsing is implemented for the authorized non-Reference
-development inputs. It preserves raw JSON-compatible values and exact pointers
-while adding normalization proposals and bounded diagnostics. It does not
-select participants, aggregate entities, define a world, or produce runtime
-policy. Synthetic strict-prefix tests validate the closed policy boundary; an
-actual clean strict artifact is not produced in G1.
+### Source loading
 
-This seam remains independent of MASim imports. G3 consumes its downstream G2
-artifacts through a separate project-owned adapter; G1 itself remains
-runtime-free.
+`src/h2epr/construction/` receives an explicit list of
+`SourceDescriptor` objects and approved roots. The source adapter:
 
-## G2 artifact and EventBundle seam
+- normalizes and checks paths;
+- verifies source hashes;
+- reads supported JSON and CSV inputs;
+- preserves raw JSON-compatible values and exact source pointers;
+- records bounded diagnostics and provenance;
+- exports a deterministic Construction IR snapshot.
 
-The current project-owned G2 candidate remains upstream of runtime execution:
+It does not discover sibling files or walk input directories. Reference and
+evaluation locations are rejected by the construction policy.
+
+The current internal snapshot identity is
+`h2epr.construction_ir.v1`. Its meaning and serialized shape are versioned
+independently from the private Python module layout.
+
+### Artifact and bundle assembly
 
 ```text
-typed Construction IR
-  -> entity registry + reversible roster/loss report
-  -> one data-driven ParticipantArtifact envelope
-  -> declarative Rule skills and policy catalog
-  -> normalized profile-specific world
-  -> sealed target-demo construction bundle
-  -> canonical RuntimeScenarioBundle (EventBundle)
+Construction IR
+  -> EntityRegistry
+  -> roster and reversible loss report
+  -> ParticipantArtifacts
+  -> policy and world inputs
+  -> construction seal
+  -> RuntimeScenarioBundle
 ```
 
-Its `artifacts/`, `policies/`, `world/`, and `bundles/` modules are separated by
-responsibility. The world helpers are pure calculations; they do not mutate
-live state. The EventBundle compiler creates exactly one bundle per sensitivity
-profile. Run seeds remain separate future execution inputs, so the nine-row
-profile/seed matrix refers to three bundle hashes rather than creating nine
-duplicate bundle identities.
+The artifact layer separates:
 
-The Panic-of-1907 instance is an architecture demo built from an explicit
-26-file non-evaluation source profile. Only the two common authorization inputs
-and three approved target files enter its source ancestry; the other seven
-events are genericity-regression inputs only. Full-draft contamination is
-irreversible, the historical post-cutoff scheduler is empty, and all normalized
-world values are assumptions rather than historical measurements.
+- `artifacts/` for entity resolution, participant envelopes and provenance;
+- `policies/` for declarative Rule policy inputs;
+- `world/` for normalized world values and pure calculations;
+- `bundles/` for source profiles, canonical hashes, seals and bundle
+  validation.
 
-G2 exports declarative shell inputs only. It neither imports nor instantiates a
-Player, Persona, Ray actor, runner, simulator, reducer, compiler, or evaluator.
-ADR-0003 completed the pre-runtime placement review without changing that G2
-boundary.
+The Panic of 1907 architecture canary has three sensitivity profiles. Seeds
+remain execution inputs rather than part of EventBundle identity, producing a
+three-profile by three-seed runtime matrix over three bundle hashes.
 
-## G3 framework integration
+Target-specific descendants are marked `full_draft_exposed` and
+`architecture_demo_only` because the builder had access to the complete draft.
+The normalized world values are sensitivity assumptions rather than historical
+measurements.
 
-MASim currently starts standard scenarios through:
+## Agent and scenario semantics
+
+The current Agent Definition pilot adds a behavior layer above the existing
+ParticipantArtifact shell.
+
+| Responsibility | Owner |
+|---|---|
+| Role, legal information, decision commitments, intent meaning and limits | Agent Definition Markdown |
+| Claim source, event time, availability and use | Evidence ledger |
+| Institutions, relationships, observation delivery, authority and results | Scenario/environment |
+| Field types, serialization and versioning | Contracts V1 |
+| Executable mapping from Definition to code | Binding and backend adapter |
+| State transition and action result | Authoritative reducer |
+
+The binding catalog stores Definition hashes and declared commitment IDs. It
+is regenerated when a Definition changes and is validated before the pilot
+runs.
+
+### Observation boundary
+
+The environment produces an actor-specific observation from authoritative
+world state. Each observation declares the fields available to that actor and
+uses explicit markers for missing or unresolved values.
+
+Persistent state that affects future behavior must be visible to replay. For
+the current pilot, this includes request status, authorization state, review
+stage and operational posture.
+
+### Current two-role pilot
+
+`src/h2epr/agents/` implements a small non-Ray feedback path for Knickerbocker
+Trust and NYCH. It validates:
+
+- Definition identity and content hashes;
+- observation allowlists;
+- missing-value handling;
+- request and response lifecycle;
+- procedural authority;
+- commitment-to-intent mapping;
+- environment-owned results;
+- deterministic trace and replay.
+
+This pilot is separate from the older G3 Rule policy. Integration begins only
+after the event-specific semantics have survived direct review and negative
+tests.
+
+## Runtime and MASim integration
+
+Standard MASim scenarios use:
 
 ```text
-scenario entry
-  -> masim.simulator.general.run
-  -> GeneralSimulationRunner
-  -> BaseSimulationRunner lifecycle/preflight
+GeneralSimulationRunner
   -> GeneralSimulator
+  -> PlayerPersona
+  -> GeneralPlayer
 ```
 
-G3 adopts an opt-in `H2EPRSimulationRunner` paired with an `H2EPRSimulator`.
-The pair preserves the MASim outer lifecycle while using ten explicit phased
-barriers for same-prestate participant decisions, authoritative reduction,
-delayed-message transport, generated-only detection, trace sealing and replay.
-Domain-neutral values and mechanics live in
-`masim.integrations.event_process` and `masim.simulator.phased`; fixed H2EPR
-policy, world effects, adapters, detectors and orchestration remain under
-`projects/h2epr/src/h2epr/runtime`. `GeneralSimulator` and its legacy dispatch
-path remain unchanged.
+The H2EPR G3 canary uses an opt-in pair:
 
-The current runtime is a local CPU/private-loopback Ray Rule canary. It emits a
-41-tick hash-chained trace, TickSeals, a RunSeal, deterministic replay and P007
-annotations. Runtime remains separate from the downstream G4 compiler and the
-future offline evaluator, and it does not establish historical calibration or
-scientific validity.
+```text
+H2EPRSimulationRunner
+  -> H2EPRSimulator
+  -> ten phased barriers
+  -> H2EPR policy and world effects
+  -> event-process reducer, transport and trace
+```
 
-## G4 deterministic compiler seam
+The paired runtime keeps the MASim setup/run/shutdown lifecycle while replacing
+level dispatch with explicit barriers. All participant decisions for a tick use
+the same prestate. Participant completion order is canonicalized before
+reduction.
 
-The accepted G4 compiler consumes the seven immutable G3 scientific files
-through an explicit path/hash inventory. It verifies the record chain, seals
-and replay, materializes V1 `RunManifest` and `SimulationTrace` wrappers, and
-only then assigns `compiler_evaluator_eligible`. It deterministically detects
-and groups generated events into participant, action, outcome, transaction,
-episode and stage nodes, closes temporal/causal edges, and seals the resulting
-V1 Generated EPG with a GraphSeal. The original G3 bytes and the
-`architecture_demo_only` / `full_draft_exposed` scope remain unchanged.
+Domain-neutral event-process values, transport, reducer mechanics, trace and
+seals live under `masim.integrations.event_process`. H2EPR event identity,
+policy, world effects, detectors and orchestration remain under this project.
+The default `GeneralSimulator` path is unchanged.
 
-The implementation currently belongs under the project-owned
-`h2epr.compiler` responsibility boundary; that private module layout may
-evolve if later cross-domain evidence justifies a generic abstraction. The
-compiler consumes only the validated trace and generated-only P007 evidence.
-It neither imports Reference/evaluation material nor asks an agent to emit a
-complete event graph. Its evidence is an architecture/demo canary, not
-Reference-based fidelity evaluation or a historical-validity claim. G5 remains
-a separately authorized, isolated post-seal evaluation stage.
+The current code predates a fully consolidated adapter boundary. Direct MASim
+imports appear in the G3 runtime modules, the G4 compiler adapter and the
+two-role pilot. Before the new Agent semantics join the formal runtime, these
+imports should be reviewed capability by capability and routed through a clear
+H2EPR integration surface.
 
-## Evolvability boundary
+## Runtime authority and trace
 
-Phase 0 freezes the behavior of `contracts/v1`, not the full project tree.
-Scenario assemblies, run configurations, reusable modules, and later tests may
-be added under locations selected by reviewed Phase-1 decisions. Existing
-`examples/` and top-level `configs/` remain the standard MASim boundary today;
-this document does not pre-allocate or reserve a permanent H2EPR alternative.
-The project-local G1–G4 package remains an incubator rather than a permanent
-distribution promise. ADR-0003 records the current generic/project split using
-G1/G2 implementation evidence; later compatible refactoring remains allowed
-with focused migration tests.
+Each logical tick follows the same responsibility order:
 
-## Authority flow
+1. construct participant observations from one prestate;
+2. collect decisions and intents;
+3. validate intent identity and prestate binding;
+4. adjudicate actions and messages;
+5. apply state deltas through the reducer;
+6. advance delayed-message transport;
+7. write generated detector annotations;
+8. seal the tick.
 
-Agents emit intentions. The environment validates and adjudicates them. Only
-the authoritative world reducer may commit state changes. Communication is a
-transport process with append-only attempts and dispositions. The trace records
-both accepted effects and rejected, delayed, duplicate, failed, prohibited, or
-expired attempts. A deterministic compiler consumes only eligible sealed trace
-records.
+The transport records queued, delayed, sent, delivered, expired, rejected,
+duplicate and failed dispositions. A delivered message proves transport
+delivery, not completion of the business request it carries.
+
+The accepted architecture canary covers nine profile/seed rows and 41 logical
+ticks. It is deterministic and Rule-only.
+
+## Generated EPG compiler
+
+`src/h2epr/compiler/` consumes an explicitly inventoried G3 trace package.
+The compiler:
+
+1. verifies each input path and SHA-256;
+2. validates the record chain, TickSeals and RunSeal;
+3. replays the trace;
+4. materializes V1 RunManifest and SimulationTrace wrappers;
+5. derives events, episodes, stages and temporal/causal relations;
+6. writes a deterministic Generated EPG and GraphSeal.
+
+The compiler uses only simulation records and generated detector annotations.
+The seven original G3 scientific files remain unchanged.
+
+Private compiler modules may be reorganized as the project grows. V1 output
+shape, identity and deterministic behavior remain the compatibility boundary.
+
+## Evaluation
+
+Historical evaluation is a post-seal responsibility. It receives:
+
+- a sealed SimulationTrace;
+- a Generated EPG and GraphSeal;
+- an approved held-out evidence set.
+
+Evaluation findings belong to a successor Agent/scenario version. The same
+run is not modified after its historical outcome has been inspected.
+
+No evaluation package is currently part of the active implementation. Its
+placement will be chosen together with the first approved evaluation method.
+
+## Repository and package boundaries
+
+`projects/h2epr/src/h2epr` is repository-local and is not installed by the
+root `setup.py`. This keeps H2EPR-specific code separate from the distributed
+MASim package while the framework boundary is still evolving.
+
+The current placement rules are:
+
+- H2EPR event assets and configs stay under `projects/h2epr/`;
+- standard MASim scenarios stay under root `examples/` and `configs/`;
+- reusable MASim code contains no H2EPR event identity or policy;
+- frozen inputs stay under `data/h2epr/`;
+- generated runs stay under `EXPERIMENT/H2EPR/`.
+
+A future package move must preserve contract identity, trace hashes and path
+semantics. The project will audit those identities before changing the
+repository location.
+
+## Current limitations
+
+- The current G1–G4 canary is based on full-draft-exposed construction.
+- Rule v1 reads broader state and uses more actor-specific code than the new
+  Agent Definition design permits.
+- The two-role Agent pilot has not yet been mapped into the G3/G4 path.
+- NYCH authority outside the member facility remains unresolved.
+- Exact Knickerbocker requester identity and corporate authorization remain
+  unresolved.
+- H2EPR-0616 is still required before a future cross-domain shared-core claim.
+
+These constraints define the next review work; they do not prevent continued
+iteration on the two Agent Definitions.
+
+## Related documents
+
+- [Project guide](../H2EPR.md)
+- [Project README](README.md)
+- [Evolution policy](EVOLUTION.md)
+- [Contracts V1](contracts/v1/README.md)
+- [Agent guide](agents/README.md)

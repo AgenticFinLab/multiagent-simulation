@@ -1,73 +1,179 @@
-# H2EPR evolution policy
+# H2EPR evolution and compatibility
 
-## Stable now
+H2EPR is still developing its Agent and scenario model, while Contracts V1
+already provides a stable interface for existing artifacts and tools. This
+document explains which parts can change in place and which changes require a
+new version.
 
-`contracts/v1/` is the stable Phase-0 consumer contract. Compatible
-implementations must preserve its construction identities, information
-boundaries, communication and trace semantics, seal rules, Generated EPG
-shape, and evaluation isolation. Breaking those interfaces requires an
-explicit successor contract version and reviewed migration plan.
+## Stable interfaces
 
-## Deliberately adjustable
+`contracts/v1/` defines the current compatibility boundary for:
 
-Phase 0 does not freeze the complete `projects/h2epr/` tree. Scenario
-assemblies, configurations, internal modules, runtime adapters, test
-organization, and operational tooling may change as implementation evidence
-arrives. Compatible adjustments do not receive audit-round public version
-names. The permanent ownership of reusable runtime code and its packaging
-boundary must be decided by reviewed integration evidence rather than inferred
-from provisional documentation.
+- construction identities and source-policy classes;
+- ParticipantArtifact and RuntimeScenarioBundle;
+- information access, actions, messages and logical time;
+- trace records, TickSeal and RunSeal;
+- RunManifest and SimulationTrace;
+- Generated EPG and GraphSeal;
+- separation of construction, runtime and evaluation.
 
-ADR-0001 approves `src/h2epr/construction/` only as a repository-local G1
-incubator. Its public responsibility boundary is explicit-manifest construction
-and deterministic IR export; private module names and internal class layout are
-not compatibility commitments. The required pre-G3 placement review was
-completed by ADR-0003 using G1/G2 evidence. A compatible relocation or refactor
-through a reviewed successor decision does not create a new V1 contract
-version. A change to snapshot meaning or shape does require a new explicit
-snapshot version and migration tests.
+An object may satisfy JSON Schema and still fail a cross-object invariant.
+Schema validation and semantic validation are both part of V1 compatibility.
 
-ADR-0002 applies the same incubation rule to the G2 `artifacts/`, `policies/`,
-`world/`, and `bundles/` modules. Their present responsibility split is useful
-evidence, not a permanent namespace guarantee. The accepted V1 construction,
-participant, and runtime-bundle schemas remain authoritative; canary-specific
-assembly, profile values, policy thresholds, file layout, and future packaging
-may be replaced through reviewed compatible successors.
+The internal Construction IR snapshot currently uses
+`h2epr.construction_ir.v1`. A change to its meaning or serialized shape needs
+a new snapshot version even when Contracts V1 remains unchanged.
 
-The focused placement/readiness review retained event identity, roster,
-calibration assumptions and target-specific policy under the H2EPR project,
-while extracting only domain-neutral phased runtime, event-process values,
-transport, reduction, trace and seal mechanics into MASim. Future movement
-must preserve this three-view boundary and requires implementation evidence.
+## What can change in place
 
-`H2EPRSimulationRunner` and `H2EPRSimulator` are the adopted G3 paired-runner
-canary classes, not permanent compatibility commitments. The phased lifecycle,
-H2EPR world reducer, trace recorder, G4 compiler and future offline evaluator
-remain separate responsibilities even if their eventual module layout changes.
+The following are implementation details and can evolve with tests and review:
 
-## Repository boundaries
+- private Python modules and class names;
+- scenario and config layout inside `projects/h2epr/`;
+- runtime adapters and orchestration;
+- compiler internals;
+- Agent Definition sections and wording;
+- derived binding formats that have no external consumer;
+- test organization and developer tooling;
+- repository-local packaging.
 
-The H2EPR project implementation remains repository-only and is not installed
-by `setup.py`; the domain-neutral G3 integration modules under `masim/` are
-discovered normally. Its repository-local namespace is organized by
-responsibility, not as a permanently fixed G1–G4 package range. Construction,
-artifact assembly, runtime and compiler keep their current reviewed ownership,
-while an evaluator namespace is added only with separately authorized G5 work.
-Runtime, compiler and later evaluator surfaces remain explicit opt-in
-imports rather than eager top-level package effects.
+Compatible changes update the current files. They do not create public
+versions named after audit rounds or development attempts.
 
-Standard MASim scenarios and configurations remain in `examples/` and top-level
-`configs/`, while the bounded H2EPR canary configuration stays under
-`projects/h2epr/configs/`. A later reviewed decision may revise these locations
-without weakening the stable V1 contract or allowing evaluation data to flow
-into construction or runtime.
+## When a new contract version is required
 
-Phase-0 validation proves only the accepted contract surface. The bounded G1
-construction and G2 EventBundle layers remain non-runtime. G3 now runs a
-deterministic Rule-only architecture canary, but it does not establish strict
-continuation eligibility, historical calibration or scientific readiness. G4
-now performs an explicit inventory, contract-wrapper and eligibility check on
-the immutable G3 scientific files, then deterministically produces a sealed V1
-Generated EPG. This remains Reference-blind architecture/demo evidence rather
-than a fidelity result. G5 post-seal evaluation and later Gates remain
-separately authorized.
+A successor contract is needed when a supported consumer would observe a
+change in meaning, required fields, identity, validation behavior or
+serialization.
+
+Examples include:
+
+- changing a V1 schema in a way that rejects valid existing data;
+- changing a hash preimage or canonical JSON rule;
+- changing the meaning of an action, disposition or trace record;
+- changing seal or replay semantics;
+- weakening the construction/runtime/evaluation boundary;
+- adding a required first-class carrier that cannot be represented compatibly
+  in V1.
+
+A successor should include:
+
+1. the new contract and schema;
+2. a migration description;
+3. old and new deterministic fixtures;
+4. compatibility tests for supported consumers;
+5. a clear cutover point.
+
+The current Agent carrier study found that the two-role pilot fits V1 through
+explicit internal mapping and cross-object validation. That result does not
+justify a successor contract on its own.
+
+## Agent Definition changes
+
+Agent Definitions, the template and `agent-definition-skill.md` are active
+research assets. The tracked paths contain the current candidate:
+
+```text
+agents/agent-definition-template.md
+agents/defines/<event>/<participant>.md
+skills/agent-definition-skill.md
+```
+
+Update these files in place as the pilot produces feedback. When a Definition
+changes, update its content hash, binding catalog, implementation mapping,
+tests and concise documentation together.
+
+Git history keeps accepted versions. Working drafts, comparisons and rejected
+alternatives belong under:
+
+```text
+.local-runtime/h2epr-simulation/working/
+```
+
+Date-suffixed and `-old` copies are not kept beside the current Definition.
+Contract versions and intentionally supported release lines are the exception.
+
+## Evidence and run history
+
+Research working files are editable until they are accepted or archived as
+evidence. The following assets keep their original bytes once recorded:
+
+- adopted source archives;
+- accepted project decisions;
+- evidence manifests and checksums;
+- formal run manifests;
+- sealed traces and replay data;
+- release receipts.
+
+Corrections to those records use a small erratum or successor record rather
+than overwriting the original.
+
+## Repository placement
+
+The current Python package lives under `projects/h2epr/src/h2epr` and is not
+distributed by the root `setup.py`. This placement supports fast project-local
+iteration without turning event-specific behavior into MASim defaults.
+
+A move to a root-level package becomes useful when one of the following is
+true:
+
+- another repository needs H2EPR as an installable dependency;
+- H2EPR needs its own release and dependency cycle;
+- repository-local imports repeatedly block reproducible use;
+- the framework/event boundary has been demonstrated by more than one
+  consumer.
+
+If the package moves, the project keeps one `h2epr` namespace and one contract
+source. The old and new locations are not maintained as parallel
+implementations.
+
+Before a move, review path-sensitive identities in ConstructionIdentity,
+RunManifest, input inventories, seals and published locators. A path that
+participates in identity turns relocation into a migration rather than a
+simple file move.
+
+## Moving reusable code into MASim
+
+Code belongs in `masim/` when it has:
+
+- a domain-neutral interface;
+- no H2EPR event identity or policy;
+- clear failure and replay behavior;
+- at least one credible consumer beyond a single event-specific use;
+- tests that preserve the H2EPR information and authority boundaries.
+
+The phased simulator and event-process primitives are the current examples.
+Agent Definitions, evidence ledgers, institutional actions and historical
+evaluation remain H2EPR responsibilities.
+
+## Current implementation names
+
+`H2EPRSimulationRunner` and `H2EPRSimulator` identify the accepted G3 canary.
+They are useful integration points, not permanent public class names.
+
+The same applies to the current split between `artifacts/`, `policies/`,
+`world/`, `bundles/`, `agents/`, `runtime/` and `compiler/`. Responsibilities
+should stay clear even if the module layout changes.
+
+Architecture decisions record why the current boundaries were chosen:
+
+- [ADR-0001](decisions/ADR-0001-g1-project-local-incubator.md)
+- [ADR-0002](decisions/ADR-0002-g2-artifacts-event-bundle-canary.md)
+- [ADR-0003](decisions/ADR-0003-g3-phased-runtime-placement.md)
+
+## Development direction
+
+G1–G4 remain the engineering baseline. Current development proceeds through
+small Agent Definition and scenario feedback loops. Rule v2, scientific
+simulation, evaluation, LLM/RAG and multi-event work each begin when their
+inputs and research purpose are ready.
+
+H2EPR-0616 remains the V1 cross-domain check required before a future
+shared-core claim. It does not set the order of the current Agent work.
+
+## Related documents
+
+- [Project guide](../H2EPR.md)
+- [Project README](README.md)
+- [Architecture](ARCHITECTURE.md)
+- [Contracts V1](contracts/v1/README.md)
