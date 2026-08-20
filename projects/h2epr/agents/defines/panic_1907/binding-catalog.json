@@ -1,0 +1,106 @@
+{
+  "authority": "derived_mapping_only",
+  "binding_schema_version": "h2epr.agent-definition-binding.v0_1",
+  "catalog_version": "0.1.0-dev",
+  "evidence_path": "agents/defines/panic_1907/evidence-ledger.md",
+  "evidence_sha256": "3f8489aff5f46a48ede934a291cdb6bd4c886cbf3abdfd2481756bad42d76af7",
+  "micro_situation_path": "agents/defines/panic_1907/micro-situation.md",
+  "micro_situation_sha256": "69e357ec3c63acec112d8ee8d80347f8dad7cf814363d58a600a66ec8138b9fc",
+  "definitions": [
+    {
+      "allowed_intents": [
+        "prepare_operational_restriction",
+        "provide_information",
+        "request_channel_confirmation",
+        "request_internal_authorization",
+        "request_result_clarification",
+        "request_status_confirmation",
+        "submit_support_request"
+      ],
+      "allowed_observations": [
+        "delivered_result_class",
+        "last_verified_information_tick",
+        "own_authorization_state",
+        "own_pressure_class",
+        "public_pressure_class",
+        "request_channel_status",
+        "support_request_status"
+      ],
+      "content_sha256": "b6b11f7cf80abf40a032a7a17edbc79bcb60f363478b68c501b3dc4ee4603047",
+      "decision_commitment_ids": [
+        "DC-KT-01",
+        "DC-KT-02",
+        "DC-KT-03"
+      ],
+      "commitment_intents": {
+        "DC-KT-01": [
+          "request_channel_confirmation",
+          "request_internal_authorization",
+          "submit_support_request"
+        ],
+        "DC-KT-02": [
+          "provide_information",
+          "request_status_confirmation"
+        ],
+        "DC-KT-03": [
+          "prepare_operational_restriction",
+          "request_result_clarification"
+        ]
+      },
+      "definition_id": "h2epr.agent-definition.0288.knickerbocker-trust",
+      "definition_path": "agents/defines/panic_1907/knickerbocker-trust.md",
+      "participant_id": "knickerbocker_trust",
+      "version": "0.1.0-dev"
+    },
+    {
+      "allowed_intents": [
+        "communicate_status",
+        "continue_review",
+        "decline_member_facility",
+        "refer_request",
+        "request_authority_clarification",
+        "request_information"
+      ],
+      "allowed_observations": [
+        "authorization_state",
+        "delivered_request_id",
+        "knickerbocker_membership",
+        "member_facility_eligibility",
+        "other_route_authority_status",
+        "public_pressure_class",
+        "review_stage",
+        "submitted_information_status",
+        "support_request_status",
+        "support_route_class"
+      ],
+      "content_sha256": "a4fb5abec4215244780171366b7b24bc798e67e0487346af6dccbc22def7ceee",
+      "decision_commitment_ids": [
+        "DC-NYCH-01",
+        "DC-NYCH-02",
+        "DC-NYCH-03"
+      ],
+      "commitment_intents": {
+        "DC-NYCH-01": [
+          "refer_request",
+          "request_authority_clarification",
+          "request_information"
+        ],
+        "DC-NYCH-02": [
+          "communicate_status",
+          "continue_review",
+          "request_authority_clarification",
+          "request_information"
+        ],
+        "DC-NYCH-03": [
+          "decline_member_facility",
+          "refer_request",
+          "request_authority_clarification"
+        ]
+      },
+      "definition_id": "h2epr.agent-definition.0288.new-york-clearing-house",
+      "definition_path": "agents/defines/panic_1907/new-york-clearing-house.md",
+      "participant_id": "nych",
+      "version": "0.1.0-dev"
+    }
+  ]
+}

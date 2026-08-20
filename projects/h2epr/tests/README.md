@@ -8,6 +8,17 @@ LMSim development environment, then run it from the repository root:
 PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider projects/h2epr/tests/contracts
 ```
 
+The Agent Definition pilot suite validates the two canonical Markdown hashes,
+commitment inventories, legal observation envelopes, explicit unknown/missing
+handling, authority and request lifecycle, intent/result separation, and a
+deterministic three-tick trace/replay. It does not start Ray or run the G3
+simulation:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
+  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/agents
+```
+
 The separate G1 construction suite validates the repository-local Source
 Adapter and typed Construction IR:
 
@@ -90,9 +101,10 @@ Every case also exposes a canonical behavior-only mutation descriptor and its
 SHA-256. Receipt grouping uses only responsibility, validation category, and
 expected/observed outcome rather than historical cumulative suite slices.
 
-The contract, G1 and G2 suites do not create a runnable scenario. G3 exercises
-the bounded H2EPR Rule runtime and its deterministic interfaces; the separately
-controlled canary matrix supplies execution evidence. G4 compiles eligible
+The contract, G1, G2, and Agent pilot suites do not run a full scenario. The
+Agent pilot executes only its bounded three-tick semantic micro-situation. G3
+exercises the bounded H2EPR Rule runtime and its deterministic interfaces; the
+separately controlled canary matrix supplies execution evidence. G4 compiles eligible
 sealed trace records into a deterministic V1 Generated EPG, but neither these
 tests nor the canary establish historical calibration, Reference alignment or
 scientific readiness. `examples/` and top-level `configs/` remain the standard
