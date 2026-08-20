@@ -28,10 +28,8 @@ BINDING_PATH = PROJECT_ROOT / "agents/defines/panic_1907/binding-catalog.json"
 def _kt_values(**overrides):
     values = {
         "delivered_result_class": "not_delivered",
-        "last_verified_information_tick": 0,
         "own_authorization_state": "authorized",
         "own_pressure_class": "high",
-        "public_pressure_class": "elevated",
         "request_channel_status": "available",
         "support_request_status": "none",
     }
@@ -46,7 +44,6 @@ def _nych_values(**overrides):
         "knickerbocker_membership": "nonmember",
         "member_facility_eligibility": "ineligible",
         "other_route_authority_status": "unknown",
-        "public_pressure_class": "elevated",
         "review_stage": "not_open",
         "submitted_information_status": "incomplete",
         "support_request_status": "delivered",
@@ -78,6 +75,14 @@ def test_binding_catalog_matches_markdown_hashes_and_commitments() -> None:
         "DC-NYCH-02",
         "DC-NYCH-03",
     )
+    assert set(catalog["knickerbocker_trust"].observation_contracts) == set(
+        catalog["knickerbocker_trust"].allowed_observations
+    )
+    assert set(catalog["nych"].intent_contracts) == set(
+        catalog["nych"].allowed_intents
+    )
+    assert "public_pressure_class" not in catalog["knickerbocker_trust"].allowed_observations
+    assert "public_pressure_class" not in catalog["nych"].allowed_observations
 
 
 def test_binding_fails_closed_after_definition_drift(tmp_path: Path) -> None:
@@ -105,6 +110,47 @@ def test_missing_observation_requires_an_explicit_unknown_marker() -> None:
         knickerbocker.decide(_observation("knickerbocker_trust", values))
 
 
+def test_out_of_domain_observation_is_rejected_before_policy() -> None:
+    knickerbocker, _ = build_pilot_agents(BINDING_PATH)
+    with pytest.raises(
+        AgentConformanceError,
+        match="observation_value:own_pressure_class_outside_enum",
+    ):
+        knickerbocker.decide(
+            _observation(
+                "knickerbocker_trust",
+                _kt_values(own_pressure_class="severe"),
+            )
+        )
+
+
+def test_mistyped_observation_is_rejected_before_policy() -> None:
+    knickerbocker, _ = build_pilot_agents(BINDING_PATH)
+    with pytest.raises(
+        AgentConformanceError,
+        match="observation_value:support_request_status_type_invalid",
+    ):
+        knickerbocker.decide(
+            _observation(
+                "knickerbocker_trust",
+                _kt_values(support_request_status=1),
+            )
+        )
+
+
+def test_explicit_stale_pressure_uses_declared_fallback() -> None:
+    knickerbocker, _ = build_pilot_agents(BINDING_PATH)
+    outcome = knickerbocker.decide(
+        _observation(
+            "knickerbocker_trust",
+            _kt_values(own_pressure_class="stale"),
+        )
+    )
+    assert outcome.intent is None
+    assert outcome.decision.commitment_ids == ("DC-KT-01",)
+    assert "pressure_information_missing_or_stale" in outcome.decision.reason_codes
+
+
 def test_pending_request_produces_auditable_zero_intent_not_duplicate() -> None:
     knickerbocker, _ = build_pilot_agents(BINDING_PATH)
     outcome = knickerbocker.decide(
@@ -116,6 +162,10 @@ def test_pending_request_produces_auditable_zero_intent_not_duplicate() -> None:
     assert outcome.intent is None
     assert outcome.decision.commitment_ids == ("DC-KT-02",)
     assert "duplicate_request_forbidden" in outcome.decision.reason_codes
+    assert outcome.decision.used_observation_fields == (
+        "delivered_result_class",
+        "support_request_status",
+    )
 
 
 def test_missing_authorization_cannot_submit_support_request() -> None:
@@ -138,6 +188,20 @@ def test_member_facility_nonmember_yields_typed_decline() -> None:
     assert outcome.intent.intent_type == "decline_member_facility"
     assert outcome.decision.commitment_ids == ("DC-NYCH-01", "DC-NYCH-03")
     assert "member_facility_ineligible" in outcome.decision.reason_codes
+
+
+def test_explicit_null_request_id_is_not_treated_as_a_delivered_request() -> None:
+    _, nych = build_pilot_agents(BINDING_PATH)
+    outcome = nych.decide(
+        _observation(
+            "nych",
+            _nych_values(delivered_request_id=None, support_request_status="none"),
+            tick=1,
+        )
+    )
+    assert outcome.intent is None
+    assert outcome.decision.commitment_ids == ("DC-NYCH-01",)
+    assert "no_delivered_request" in outcome.decision.reason_codes
 
 
 def test_member_facility_decline_still_requires_procedural_authority() -> None:
@@ -197,6 +261,86 @@ def test_binding_blocks_an_allowed_intent_under_the_wrong_commitment() -> None:
         bad_agent.decide(_observation("knickerbocker_trust", _kt_values()))
 
 
+def test_binding_blocks_observation_use_under_the_wrong_commitment() -> None:
+    catalog = load_binding_catalog(BINDING_PATH)
+
+    def bad_policy(observation):
+        _ = observation["own_authorization_state"]
+        return DecisionDraft(
+            commitment_ids=("DC-KT-02",),
+            reason_codes=("wrong_commitment_observation_mapping",),
+        )
+
+    bad_agent = DefinitionDrivenAgent(
+        catalog["knickerbocker_trust"],
+        bad_policy,
+    )
+    with pytest.raises(
+        AgentConformanceError,
+        match="observation_not_permitted_by_commitments:own_authorization_state",
+    ):
+        bad_agent.decide(_observation("knickerbocker_trust", _kt_values()))
+
+
+def test_binding_blocks_missing_intent_parameters() -> None:
+    catalog = load_binding_catalog(BINDING_PATH)
+    bad_agent = DefinitionDrivenAgent(
+        catalog["knickerbocker_trust"],
+        lambda _: DecisionDraft(
+            commitment_ids=("DC-KT-01",),
+            reason_codes=("incomplete_intent_parameters",),
+            intent_type="submit_support_request",
+            parameters={"request_id": REQUEST_ID},
+        ),
+    )
+    with pytest.raises(
+        AgentConformanceError,
+        match="intent_parameters_missing:channel_id,recipient_id,route_class",
+    ):
+        bad_agent.decide(_observation("knickerbocker_trust", _kt_values()))
+
+
+def test_binding_blocks_out_of_domain_intent_parameter() -> None:
+    catalog = load_binding_catalog(BINDING_PATH)
+    bad_agent = DefinitionDrivenAgent(
+        catalog["knickerbocker_trust"],
+        lambda _: DecisionDraft(
+            commitment_ids=("DC-KT-01",),
+            reason_codes=("out_of_domain_route",),
+            intent_type="submit_support_request",
+            parameters={
+                "channel_id": "national_bank_of_commerce",
+                "recipient_id": "nych",
+                "request_id": REQUEST_ID,
+                "route_class": "unproven_exception",
+            },
+        ),
+    )
+    with pytest.raises(
+        AgentConformanceError,
+        match="intent_parameter:submit_support_request:route_class_outside_enum",
+    ):
+        bad_agent.decide(_observation("knickerbocker_trust", _kt_values()))
+
+
+def test_binding_blocks_empty_required_identifier() -> None:
+    catalog = load_binding_catalog(BINDING_PATH)
+    bad_agent = DefinitionDrivenAgent(
+        catalog["knickerbocker_trust"],
+        lambda _: DecisionDraft(
+            commitment_ids=("DC-KT-01",),
+            reason_codes=("empty_request_identity",),
+            intent_type="request_internal_authorization",
+            parameters={"request_id": ""},
+        ),
+    )
+    with pytest.raises(
+        AgentConformanceError,
+        match="intent_parameter:request_internal_authorization:request_id_below_min_length",
+    ):
+        bad_agent.decide(_observation("knickerbocker_trust", _kt_values()))
+
+
 def test_three_tick_pilot_closes_intent_result_and_replay_boundaries() -> None:
     run = run_member_facility_pilot(BINDING_PATH)
     assert run.trace_errors() == []
@@ -221,6 +365,7 @@ def test_three_tick_pilot_closes_intent_result_and_replay_boundaries() -> None:
         "decline_member_facility",
         "prepare_operational_restriction",
     ]
+    assert all(row["payload"]["used_observation_fields"] for row in decisions)
 
     denial_delivery_sequence = next(
         row["sequence_in_run"]

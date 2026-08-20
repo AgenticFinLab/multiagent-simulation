@@ -33,14 +33,18 @@ the scenario/environment.
 ## 3. Epistemic and persistent-state boundary
 
 For each material observation, specify its meaning, visibility, delivery or
-availability time, freshness, missing/stale behavior, and claim or scenario
-reference. List forbidden information, especially future outcomes, hidden
-world state, another institution's private procedure, and undelivered messages.
+availability time, semantic type and shape, unit or enumeration, permitted
+range/domain, freshness, missing/stale behavior, and claim or scenario
+reference. Use an explicit semantic signature that can be projected into the
+machine contract; do not copy the wire schema into the Definition. List
+forbidden information, especially future outcomes, hidden world state, another
+institution's private procedure, and undelivered messages.
 
 At an executable pilot boundary, every bound observation field must appear
 with either a value or an explicit missing/stale/unknown/not-delivered marker.
 An absent key must not be silently interpreted as a known value or backend
-default.
+default. A derived binding must reject values outside the declared type/domain
+before policy use.
 
 List only persistent state that changes a later decision. Distinguish:
 
@@ -79,12 +83,16 @@ code.
 Separate hard obligations from behavioral hypotheses. A hard-obligation
 failure means a backend or adapter is non-conformant; a hypothesis failure
 means the candidate scientific model needs revision. Permit multiple compliant
-intents unless evidence genuinely fixes one.
+intents unless evidence genuinely fixes one. Each commitment must enumerate
+the observations it may consume; an Agent-wide input envelope alone is not a
+sufficient mapping.
 
 ## 5. Intent and environment boundary
 
 Define only the minimum semantic intents needed by the commitments, including
-their target, lifecycle, prerequisites, and prohibited self-realized outcome.
+their target, lifecycle, prerequisites, parameter names, semantic types,
+units/ranges or enumerations, and prohibited self-realized outcome. A derived
+binding must reject missing, undeclared, mistyped, or out-of-domain parameters.
 The environment/reducer decides whether an intent is admissible, scheduled,
 executed, partial, delayed, ineffective, failed, or prohibited, and is the only
 authority that commits world or business-process state.
@@ -110,7 +118,8 @@ Before promoting a candidate, perform at least:
 5. persistent-state replay;
 6. invalid-intent visibility;
 7. commitment-to-runtime mapping;
-8. deletion of every mandatory capability.
+8. observation and intent value-domain violations;
+9. deletion of every mandatory capability.
 
 Success means an independent reviewer can identify legal information,
 authority, permitted intent, fallback, uncertainty, and violations without
@@ -119,4 +128,5 @@ cross-event reuse.
 
 Any derived executable binding must fail closed when the canonical Markdown
 hash, Definition identity/version, Decision Commitment inventory, observation
-envelope, or commitment-specific intent mapping drifts.
+envelope/domain, commitment-specific observation mapping, intent parameter
+contract, or commitment-specific intent mapping drifts.

@@ -17,13 +17,14 @@ complete reconstruction of the Panic of 1907.
 | Agent Definition Markdown | representation, legal information semantics, decision commitments, intent meaning, assumptions, falsifiers | source status, actual world values, wire schemas, adjudicated results |
 | `evidence-ledger.md` | adopted source locator/hash, claim status, exposure and allowed use | behavior rules or runtime values |
 | `micro-situation.md` | pilot boundary, institutional facts, observation delivery, business-process and adjudication assumptions | participant decision policy |
-| `defines/<event>/binding-catalog.json` | derived, executable mapping to the Markdown Definitions | independent behavior semantics |
+| `defines/<event>/binding-catalog.json` | derived, executable mapping of Definition identity, observation domains, commitment-specific inputs, intent parameters, and intent envelopes | independent behavior semantics |
 | machine contracts | encoding, type, shape, serialization and versioning | historical or behavioral claims |
 | environment/reducer | authoritative business state, admissibility, effects and results | participant intent |
 
-The Markdown Definitions are canonical for this pilot. `binding-catalog.json` must
-match their content SHA-256 values and declared commitment IDs. A binding is
-invalid after the Markdown changes until it is regenerated and reviewed.
+The Markdown Definitions are canonical for this pilot. `binding-catalog.json`
+must match their content SHA-256 values, declared commitment IDs, semantic
+observation/intent contracts, and commitment mappings. A binding is invalid
+after the Markdown changes until it is regenerated and reviewed.
 
 ## Layout and naming
 

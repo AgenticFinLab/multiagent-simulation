@@ -41,23 +41,25 @@ the later loan-certificate procedure wholesale.
 
 ## Epistemic and state boundary
 
-| Semantic observation | Legal view and missing behavior |
-|---|---|
-| delivered request | only a request actually delivered by the legal channel; absence is not a request |
-| route class | member facility / other identified route / unknown; unknown requires clarification or abstention |
-| membership and member-facility eligibility | institutional projection; nonmember + member facility activates the known gate |
-| other-route authority | authorized/prohibited/unknown scenario projection; unknown grants neither permission nor prohibition |
-| submitted information | delivered complete/incomplete/stale/unknown material only |
-| review stage | not-open/open/waiting-information/decision-ready/closed institutional state |
-| authorization state | not-requested/pending/authorized/denied/unknown institutional state |
-| public pressure | timestamped lawful aggregate only; it cannot override authority or eligibility |
+| Semantic observation | Type/domain | Legal view and missing/stale behavior |
+|---|---|---|
+| delivered request ID | non-empty identifier or explicit `null` | only a request actually delivered by the legal channel; `null` is not a request |
+| support-request status | enum: `none`, `sent`, `delivered`, `under_review`, `denied`, `expired`, `failed`, `partial`, `realized`, `unknown` | environment-owned business projection; only active delivered/review state permits handling |
+| route class | enum: `member_facility`, `other_identified_route`, `unknown` | `unknown` requires clarification or abstention |
+| membership | enum: `member`, `nonmember`, `unknown` | institutional projection; missing knowledge is not inferred from actor identity |
+| member-facility eligibility | enum: `eligible`, `ineligible`, `not_applicable`, `unknown` | nonmember + member facility + ineligible activates the known gate |
+| other-route authority | enum: `authorized`, `prohibited`, `unknown` | scenario projection; `unknown` grants neither permission nor prohibition |
+| submitted information | enum: `complete`, `incomplete`, `stale`, `unknown` | delivered material only; missing/stale data cannot be filled from hidden solvency |
+| review stage | enum: `not_open`, `open`, `waiting_information`, `decision_ready`, `closed` | authoritative institutional process state, not a random delay |
+| authorization state | enum: `not_requested`, `pending`, `authorized`, `denied`, `unknown` | authoritative institutional process state, not a willingness score |
 
 Forbidden information includes Knickerbocker hidden solvency, NBC reasoning,
 exact private state of every member bank, undelivered messages, the October 22
 suspension, and later Morgan/loan-certificate outcomes. Request status is
 environment-owned; review and authorization are authoritative institutional
 process state. A random delay or `willingness_to_help` score cannot replace
-that state.
+that state. Public pressure is not bound as a v0.1 decision input because no
+current commitment consumes it.
 
 ## Decision Commitments
 
@@ -67,7 +69,7 @@ that state.
 |---|---|
 | activation | a support-related request is delivered through the legal channel |
 | claim basis | `H-001`, `H-003`, `H-007..009` establish the institutional and member-facility boundary; `U-001` bounds all other routes |
-| legal observations/state | delivered request, route, membership/eligibility, submitted information, review/authority state |
+| legal observations/state | delivered request and active request status, route, membership, member-facility eligibility |
 | hard obligations | delivery is not executable support; identify route and eligibility before a terminal intent; never use future outcome or hidden solvency |
 | behavioral hypothesis | response category changes with institutional position, information, and procedure rather than global stress or a rescue-preference score |
 | precedence | authority, eligibility, and information constraints precede system-pressure goals |
@@ -81,7 +83,7 @@ that state.
 |---|---|
 | activation | a potentially admissible route is under review but required information or authorization is incomplete |
 | claim basis | `H-007`, `T-001`, `T-002`, `U-001`, `GAP-04` |
-| legal observations/state | review stage, authorization, delivered information/freshness, request status |
+| legal observations/state | delivered request and active request status, route/eligibility/other-route authority, review stage, authorization, delivered information/freshness |
 | hard obligations | no fully authorized proposal without authority; no hidden default or random gate may fill missing information |
 | behavioral hypothesis | request information, continue procedure, seek authority, or abstain rather than issue an unsupported terminal choice |
 | precedence | authority and required information precede irreversible/terminal intent |
@@ -95,7 +97,7 @@ that state.
 |---|---|
 | activation | request identity/membership is known and the applicable facility or other route must be determined |
 | claim basis | `H-001`, `H-007..009` establish the member-facility gate; `U-001` preserves other-route uncertainty |
-| legal observations/state | route class, membership, eligibility, other-route authority, authorization, review, request status |
+| legal observations/state | delivered request and active request status, route class, membership, eligibility, other-route authority, authorization |
 | hard obligations | enforce the known member-facility mismatch, but issue a typed institutional decline only through an affirmatively authorized procedural interface; never infer other-route authority from stress, preference, refusal outcome, or absent evidence; never implement resource effect directly |
 | behavioral hypothesis | route/authority classification changes the legal intent envelope structurally, rather than changing a rescue probability |
 | precedence | route, authority, and eligibility precede resources or policy objectives |
@@ -105,14 +107,14 @@ that state.
 
 ## Intent and environment boundary
 
-The binding may expose only these pilot intent meanings:
-
-- `decline_member_facility`
-- `request_information`
-- `continue_review`
-- `request_authority_clarification`
-- `refer_request`
-- `communicate_status`
+| Intent | Required semantic parameters | Prohibited self-realized result |
+|---|---|---|
+| `decline_member_facility` | non-empty `request_id`; `reason_code=member_facility_ineligible` | request/result delivery or wider-route prohibition |
+| `request_information` | non-empty `request_id` | information received, complete, or verified |
+| `continue_review` | non-empty `request_id` | review completed or support authorized |
+| `request_authority_clarification` | non-empty `request_id`; `route_class` in `member_facility`, `other_identified_route`, `unknown` | authority granted or prohibited |
+| `refer_request` | non-empty `request_id`; `route_class` in `member_facility`, `other_identified_route`, `unknown` | referral accepted or support realized |
+| `communicate_status` | non-empty `request_id` | message delivered or business state changed |
 
 Auditable abstention is a zero-intent decision. The environment alone decides
 admissibility, review/result lifecycle, resource feasibility, delay, partial or

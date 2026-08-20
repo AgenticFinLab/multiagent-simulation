@@ -37,17 +37,49 @@ PENDING_REQUEST_STATES = frozenset({"sent", "delivered", "under_review"})
 DELIVERED_ADVERSE_RESULTS = frozenset(
     {"denied_member_facility", "denied", "failed", "partial", "delayed"}
 )
+DELIVERED_RESULTS = DELIVERED_ADVERSE_RESULTS | {"executed"}
 
 
 def _knickerbocker_policy(observation: Mapping[str, Any]) -> DecisionDraft:
-    delivered_result = observation.get("delivered_result_class", "not_delivered")
-    if delivered_result in DELIVERED_ADVERSE_RESULTS:
+    delivered_result = observation["delivered_result_class"]
+    if delivered_result in DELIVERED_RESULTS:
         if delivered_result in {"partial", "delayed"}:
             return DecisionDraft(
                 commitment_ids=("DC-KT-03",),
                 reason_codes=("delivered_result_incomplete",),
                 intent_type="request_result_clarification",
                 parameters={"request_id": REQUEST_ID, "result_class": delivered_result},
+            )
+        if delivered_result == "executed":
+            return DecisionDraft(
+                commitment_ids=("DC-KT-03",),
+                reason_codes=("delivered_support_result_requires_no_adverse_response",),
+            )
+        authorization = observation["own_authorization_state"]
+        if authorization != "authorized":
+            return DecisionDraft(
+                commitment_ids=("DC-KT-03",),
+                reason_codes=(
+                    "operational_response_authorization_not_affirmative",
+                    "auditable_abstention",
+                ),
+            )
+        pressure = observation["own_pressure_class"]
+        if pressure in {"stale", "unknown"}:
+            return DecisionDraft(
+                commitment_ids=("DC-KT-03",),
+                reason_codes=(
+                    "operational_assessment_missing_or_stale",
+                    "auditable_abstention",
+                ),
+            )
+        if pressure != "high":
+            return DecisionDraft(
+                commitment_ids=("DC-KT-03",),
+                reason_codes=(
+                    "operational_assessment_does_not_support_restriction",
+                    "auditable_abstention",
+                ),
             )
         return DecisionDraft(
             commitment_ids=("DC-KT-03",),
@@ -56,14 +88,14 @@ def _knickerbocker_policy(observation: Mapping[str, Any]) -> DecisionDraft:
             parameters={"request_id": REQUEST_ID, "target_posture": "restricted_preparation"},
         )
 
-    request_status = observation.get("support_request_status", "unknown")
+    request_status = observation["support_request_status"]
     if request_status in PENDING_REQUEST_STATES:
         return DecisionDraft(
             commitment_ids=("DC-KT-02",),
             reason_codes=("equivalent_request_unresolved", "duplicate_request_forbidden"),
         )
 
-    authorization = observation.get("own_authorization_state", "unknown")
+    authorization = observation["own_authorization_state"]
     if authorization != "authorized":
         if authorization in {"unknown", "not_requested"}:
             return DecisionDraft(
@@ -77,7 +109,7 @@ def _knickerbocker_policy(observation: Mapping[str, Any]) -> DecisionDraft:
             reason_codes=("authorization_not_affirmative", "auditable_abstention"),
         )
 
-    channel = observation.get("request_channel_status", "unknown")
+    channel = observation["request_channel_status"]
     if channel != "available":
         return DecisionDraft(
             commitment_ids=("DC-KT-01",),
@@ -86,12 +118,16 @@ def _knickerbocker_policy(observation: Mapping[str, Any]) -> DecisionDraft:
             parameters={"channel_id": "national_bank_of_commerce"},
         )
 
-    pressure = observation.get("own_pressure_class", "unknown")
+    pressure = observation["own_pressure_class"]
     if pressure != "high":
         return DecisionDraft(
             commitment_ids=("DC-KT-01",),
             reason_codes=(
-                "qualitative_pressure_not_high" if pressure != "unknown" else "pressure_unknown",
+                (
+                    "pressure_information_missing_or_stale"
+                    if pressure in {"stale", "unknown"}
+                    else "qualitative_pressure_not_high"
+                ),
                 "auditable_abstention",
             ),
         )
@@ -120,19 +156,25 @@ def _knickerbocker_policy(observation: Mapping[str, Any]) -> DecisionDraft:
 
 
 def _nych_policy(observation: Mapping[str, Any]) -> DecisionDraft:
-    request_id = observation.get("delivered_request_id")
+    request_id = observation["delivered_request_id"]
     if not request_id:
         return DecisionDraft(
             commitment_ids=("DC-NYCH-01",),
             reason_codes=("no_delivered_request", "auditable_abstention"),
         )
+    request_status = observation["support_request_status"]
+    if request_status not in {"delivered", "under_review"}:
+        return DecisionDraft(
+            commitment_ids=("DC-NYCH-01",),
+            reason_codes=("delivered_request_not_active", "auditable_abstention"),
+        )
 
-    route = observation.get("support_route_class", "unknown")
-    membership = observation.get("knickerbocker_membership", "unknown")
-    eligibility = observation.get("member_facility_eligibility", "unknown")
+    route = observation["support_route_class"]
+    membership = observation["knickerbocker_membership"]
+    eligibility = observation["member_facility_eligibility"]
     if route == "member_facility":
         if membership == "nonmember" and eligibility == "ineligible":
-            if observation.get("authorization_state", "unknown") != "authorized":
+            if observation["authorization_state"] != "authorized":
                 return DecisionDraft(
                     commitment_ids=("DC-NYCH-02", "DC-NYCH-03"),
                     reason_codes=("member_facility_decline_authority_not_affirmative",),
@@ -161,7 +203,7 @@ def _nych_policy(observation: Mapping[str, Any]) -> DecisionDraft:
             )
 
     if route in {"other_identified_route", "unknown"}:
-        authority = observation.get("other_route_authority_status", "unknown")
+        authority = observation["other_route_authority_status"]
         if authority == "unknown" or route == "unknown":
             return DecisionDraft(
                 commitment_ids=("DC-NYCH-01", "DC-NYCH-03"),
@@ -175,7 +217,7 @@ def _nych_policy(observation: Mapping[str, Any]) -> DecisionDraft:
                 reason_codes=("explicit_other_route_prohibition", "auditable_abstention"),
             )
 
-    information = observation.get("submitted_information_status", "unknown")
+    information = observation["submitted_information_status"]
     if information != "complete":
         return DecisionDraft(
             commitment_ids=("DC-NYCH-02",),
@@ -183,7 +225,7 @@ def _nych_policy(observation: Mapping[str, Any]) -> DecisionDraft:
             intent_type="request_information",
             parameters={"request_id": request_id},
         )
-    review_stage = observation.get("review_stage", "not_open")
+    review_stage = observation["review_stage"]
     if review_stage != "decision_ready":
         return DecisionDraft(
             commitment_ids=("DC-NYCH-02",),
@@ -191,7 +233,7 @@ def _nych_policy(observation: Mapping[str, Any]) -> DecisionDraft:
             intent_type="continue_review",
             parameters={"request_id": request_id},
         )
-    authorization = observation.get("authorization_state", "unknown")
+    authorization = observation["authorization_state"]
     if authorization != "authorized":
         return DecisionDraft(
             commitment_ids=("DC-NYCH-02", "DC-NYCH-03"),
@@ -429,10 +471,8 @@ def run_member_facility_pilot(
         logical_tick=tick,
         values={
             "delivered_result_class": "not_delivered",
-            "last_verified_information_tick": 0,
             "own_authorization_state": state["knickerbocker_trust"]["authorization_state"],
             "own_pressure_class": state["knickerbocker_trust"]["pressure_class"],
-            "public_pressure_class": "elevated",
             "request_channel_status": "available",
             "support_request_status": state["request"]["status"],
         },
@@ -511,7 +551,6 @@ def run_member_facility_pilot(
             "knickerbocker_membership": "nonmember",
             "member_facility_eligibility": state["request"]["member_facility_eligibility"],
             "other_route_authority_status": state["request"]["other_route_authority_status"],
-            "public_pressure_class": "elevated",
             "review_stage": state["nych"]["review_stage"],
             "submitted_information_status": "incomplete",
             "support_request_status": state["request"]["status"],
@@ -587,10 +626,8 @@ def run_member_facility_pilot(
         logical_tick=tick,
         values={
             "delivered_result_class": state["request"]["result_class"],
-            "last_verified_information_tick": 2,
             "own_authorization_state": state["knickerbocker_trust"]["authorization_state"],
             "own_pressure_class": state["knickerbocker_trust"]["pressure_class"],
-            "public_pressure_class": "elevated",
             "request_channel_status": "available",
             "support_request_status": state["request"]["status"],
         },

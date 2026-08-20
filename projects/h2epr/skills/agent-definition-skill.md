@@ -34,11 +34,13 @@ actors, and a trigger for finer granularity.
 
 For each decision situation make reviewable:
 
-- legal and forbidden observations, freshness, and missing/stale behavior;
+- legal and forbidden observations, semantic type/shape/unit/domain,
+  freshness, and missing/stale behavior;
 - behaviorally material state and its authoritative replay path;
 - authority, procedure, resource-control relation, and hard constraints;
 - hard conformance obligations, separately from behavioral hypotheses;
-- precedence, permitted intent envelope, fallback, and abstention;
+- precedence, permitted intent envelope and typed parameters, fallback, and
+  abstention;
 - trace implication, falsifier, downstream consumer, and deletion consequence.
 
 Do not translate every code branch into a commitment. Allow multiple compliant
@@ -71,13 +73,21 @@ state, and outcome semantics.
 
 If a pilot uses a derived machine binding, verify the canonical Markdown hash,
 identity/version, commitment inventory, explicit missing-value observations,
-and commitment-specific intent envelope. Treat any drift as a fail-closed
-conformance error; never let the binding become an independent behavior source.
+observation value domains, commitment-specific observation use, intent
+parameter contracts, and commitment-specific intent envelope. Treat any drift
+as a fail-closed conformance error; never let the binding become an independent
+behavior source.
+
+Apply a consumer/deletion test to every bound input. Remove an observation that
+no commitment or review actually consumes instead of retaining it for apparent
+completeness. Never make a currently decorative signal behaviorally active
+merely to justify its presence.
 
 Review actor-name erasure, role/authority swap, future-fact injection,
-missing/stale input, state replay, invalid-intent visibility, runtime mapping,
-and deletion of mandatory content. Stop before unauthorized evidence access,
-contract changes, additional events, or unsupported validity claims.
+missing/stale or out-of-domain input, state replay, invalid-intent and invalid-
+parameter visibility, runtime mapping, and deletion of mandatory content. Stop
+before unauthorized evidence access, contract changes, additional events, or
+unsupported validity claims.
 
 For the tracked H2EPR pilot, read:
 

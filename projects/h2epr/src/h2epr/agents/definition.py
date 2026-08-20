@@ -1,9 +1,9 @@
 """Executable binding for event-bound Markdown Agent Definitions.
 
 The Markdown remains the pilot's behavioral authority.  The JSON binding is a
-derived mapping that is rejected if its content hash or Decision Commitment
-inventory drifts.  This module deliberately contains no historical policy and
-no environment state mutation.
+derived mapping that is rejected if its content hash, Decision Commitment,
+semantic value contract, or commitment mapping drifts. This module deliberately
+contains no historical policy and no environment state mutation.
 """
 
 from __future__ import annotations
@@ -14,11 +14,12 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 import re
 from types import MappingProxyType
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Iterator, Mapping
 
 
-BINDING_SCHEMA_VERSION = "h2epr.agent-definition-binding.v0_1"
+BINDING_SCHEMA_VERSION = "h2epr.agent-definition-binding.v0_2"
 _COMMITMENT_HEADING = re.compile(r"^### `(?P<commitment>DC-[A-Z]+-[0-9]+)`", re.MULTILINE)
+_VALUE_TYPES = frozenset({"null", "string"})
 
 
 class BindingValidationError(ValueError):
@@ -73,6 +74,112 @@ def _project_file(project_root: Path, relative_path: Any, name: str) -> Path:
 
 
 @dataclass(frozen=True)
+class ValueContract:
+    """Small internal value contract used by the derived binding."""
+
+    types: tuple[str, ...]
+    enum: tuple[Any, ...] | None = None
+    min_length: int | None = None
+
+
+def _matches_value_type(value: Any, value_type: str) -> bool:
+    if value_type == "null":
+        return value is None
+    if value_type == "string":
+        return isinstance(value, str)
+    raise AssertionError(f"unsupported_value_type:{value_type}")
+
+
+def _parse_value_contract(value: Any, name: str) -> ValueContract:
+    if not isinstance(value, dict):
+        raise BindingValidationError(f"invalid_{name}")
+    allowed_keys = {"enum", "min_length", "type"}
+    extra_keys = set(value) - allowed_keys
+    if extra_keys:
+        raise BindingValidationError(
+            f"unknown_{name}_fields:" + ",".join(sorted(extra_keys))
+        )
+
+    raw_types = value.get("type")
+    if isinstance(raw_types, str):
+        types = (raw_types,)
+    elif isinstance(raw_types, list) and raw_types:
+        types = tuple(raw_types)
+    else:
+        raise BindingValidationError(f"invalid_{name}_type")
+    if (
+        any(not isinstance(item, str) or item not in _VALUE_TYPES for item in types)
+        or len(types) != len(set(types))
+        or types != tuple(sorted(types))
+    ):
+        raise BindingValidationError(f"invalid_{name}_type")
+
+    enum: tuple[Any, ...] | None = None
+    if "enum" in value:
+        raw_enum = value["enum"]
+        if not isinstance(raw_enum, list) or not raw_enum:
+            raise BindingValidationError(f"invalid_{name}_enum")
+        if any(not isinstance(item, (str, type(None))) for item in raw_enum):
+            raise BindingValidationError(f"invalid_{name}_enum")
+        if len(raw_enum) != len(set(raw_enum)):
+            raise BindingValidationError(f"duplicate_{name}_enum")
+        if any(
+            not any(_matches_value_type(item, value_type) for value_type in types)
+            for item in raw_enum
+        ):
+            raise BindingValidationError(f"invalid_{name}_enum_type")
+        enum = tuple(raw_enum)
+
+    min_length = value.get("min_length")
+    if min_length is not None:
+        if (
+            isinstance(min_length, bool)
+            or not isinstance(min_length, int)
+            or min_length < 0
+            or "string" not in types
+        ):
+            raise BindingValidationError(f"invalid_{name}_min_length")
+
+    return ValueContract(
+        types=types,
+        enum=enum,
+        min_length=min_length,
+    )
+
+
+def _validate_runtime_value(value: Any, contract: ValueContract, context: str) -> None:
+    if not any(_matches_value_type(value, value_type) for value_type in contract.types):
+        raise AgentConformanceError(f"{context}_type_invalid")
+    if contract.enum is not None and value not in contract.enum:
+        raise AgentConformanceError(f"{context}_outside_enum")
+    if isinstance(value, str) and contract.min_length is not None:
+        if len(value) < contract.min_length:
+            raise AgentConformanceError(f"{context}_below_min_length")
+
+
+class _ObservedMapping(Mapping[str, Any]):
+    """Read-only mapping that records fields actually consumed by a policy."""
+
+    def __init__(self, values: Mapping[str, Any]) -> None:
+        self._values = dict(values)
+        self._accessed: set[str] = set()
+
+    def __getitem__(self, key: str) -> Any:
+        self._accessed.add(key)
+        return self._values[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._values)
+
+    def __len__(self) -> int:
+        return len(self._values)
+
+    @property
+    def accessed(self) -> frozenset[str]:
+        return frozenset(self._accessed)
+
+
+@dataclass(frozen=True)
 class DefinitionBinding:
     definition_id: str
     version: str
@@ -81,8 +188,11 @@ class DefinitionBinding:
     content_sha256: str
     decision_commitment_ids: tuple[str, ...]
     allowed_observations: frozenset[str]
+    observation_contracts: Mapping[str, ValueContract]
+    commitment_observations: Mapping[str, frozenset[str]]
     allowed_intents: frozenset[str]
     commitment_intents: Mapping[str, frozenset[str]]
+    intent_contracts: Mapping[str, Mapping[str, ValueContract]]
 
 
 def load_binding_catalog(
@@ -157,6 +267,44 @@ def load_binding_catalog(
         allowed_observations = frozenset(
             _ordered_unique_strings(row.get("allowed_observations"), "allowed_observations")
         )
+        raw_observation_contracts = row.get("observation_contracts")
+        if not isinstance(raw_observation_contracts, dict):
+            raise BindingValidationError("observation_contracts_must_be_object")
+        if set(raw_observation_contracts) != allowed_observations:
+            raise BindingValidationError(
+                f"observation_contract_inventory_mismatch:{participant_id}"
+            )
+        observation_contracts = {
+            field_name: _parse_value_contract(
+                raw_observation_contracts[field_name],
+                f"observation_contract:{participant_id}:{field_name}",
+            )
+            for field_name in sorted(raw_observation_contracts)
+        }
+
+        raw_commitment_observations = row.get("commitment_observations")
+        if not isinstance(raw_commitment_observations, dict):
+            raise BindingValidationError("commitment_observations_must_be_object")
+        if set(raw_commitment_observations) != set(commitments):
+            raise BindingValidationError(
+                f"commitment_observation_inventory_mismatch:{participant_id}"
+            )
+        commitment_observations: dict[str, frozenset[str]] = {}
+        for commitment_id in commitments:
+            mapped = frozenset(
+                _ordered_unique_strings(
+                    raw_commitment_observations[commitment_id],
+                    "commitment_observations",
+                )
+            )
+            if not mapped <= allowed_observations:
+                raise BindingValidationError(
+                    f"commitment_observation_outside_envelope:{participant_id}:{commitment_id}"
+                )
+            commitment_observations[commitment_id] = mapped
+        if frozenset().union(*commitment_observations.values()) != allowed_observations:
+            raise BindingValidationError(f"unmapped_allowed_observation:{participant_id}")
+
         allowed_intents = frozenset(
             _ordered_unique_strings(row.get("allowed_intents"), "allowed_intents")
         )
@@ -182,6 +330,29 @@ def load_binding_catalog(
             commitment_intents[commitment_id] = mapped
         if frozenset().union(*commitment_intents.values()) != allowed_intents:
             raise BindingValidationError(f"unmapped_allowed_intent:{participant_id}")
+
+        raw_intent_contracts = row.get("intent_contracts")
+        if not isinstance(raw_intent_contracts, dict):
+            raise BindingValidationError("intent_contracts_must_be_object")
+        if set(raw_intent_contracts) != allowed_intents:
+            raise BindingValidationError(
+                f"intent_contract_inventory_mismatch:{participant_id}"
+            )
+        intent_contracts: dict[str, Mapping[str, ValueContract]] = {}
+        for intent_type in sorted(raw_intent_contracts):
+            raw_parameters = raw_intent_contracts[intent_type]
+            if not isinstance(raw_parameters, dict):
+                raise BindingValidationError(
+                    f"intent_contract_must_be_object:{participant_id}:{intent_type}"
+                )
+            parameter_contracts: dict[str, ValueContract] = {}
+            for parameter_name in sorted(raw_parameters):
+                _string(parameter_name, "intent_parameter_name")
+                parameter_contracts[parameter_name] = _parse_value_contract(
+                    raw_parameters[parameter_name],
+                    f"intent_contract:{participant_id}:{intent_type}:{parameter_name}",
+                )
+            intent_contracts[intent_type] = MappingProxyType(parameter_contracts)
         result[participant_id] = DefinitionBinding(
             definition_id=definition_id,
             version=version,
@@ -190,8 +361,11 @@ def load_binding_catalog(
             content_sha256=content_sha256,
             decision_commitment_ids=commitments,
             allowed_observations=allowed_observations,
+            observation_contracts=MappingProxyType(observation_contracts),
+            commitment_observations=MappingProxyType(commitment_observations),
             allowed_intents=allowed_intents,
             commitment_intents=MappingProxyType(commitment_intents),
+            intent_contracts=MappingProxyType(intent_contracts),
         )
     return result
 
@@ -249,6 +423,7 @@ class DecisionRecord:
     definition_version: str
     definition_sha256: str
     commitment_ids: tuple[str, ...]
+    used_observation_fields: tuple[str, ...]
     reason_codes: tuple[str, ...]
     intent_ids: tuple[str, ...]
 
@@ -285,10 +460,19 @@ class DefinitionDrivenAgent:
             raise AgentConformanceError(
                 "missing_observation_fields:" + ",".join(sorted(missing))
             )
-        draft = self._policy(MappingProxyType(dict(observation.values)))
+        for field_name, value in observation.values.items():
+            _validate_runtime_value(
+                value,
+                self.binding.observation_contracts[field_name],
+                f"observation_value:{field_name}",
+            )
+        observed = _ObservedMapping(observation.values)
+        draft = self._policy(observed)
         if not isinstance(draft, DecisionDraft):
             raise AgentConformanceError("policy_return_type_invalid")
-        if not draft.commitment_ids or len(draft.commitment_ids) != len(set(draft.commitment_ids)):
+        if not draft.commitment_ids or len(draft.commitment_ids) != len(
+            set(draft.commitment_ids)
+        ):
             raise AgentConformanceError("decision_commitment_ids_invalid")
         unknown_commitments = set(draft.commitment_ids) - set(
             self.binding.decision_commitment_ids
@@ -297,8 +481,19 @@ class DefinitionDrivenAgent:
             raise AgentConformanceError(
                 "unbound_decision_commitments:" + ",".join(sorted(unknown_commitments))
             )
+        permitted_observations = frozenset().union(
+            *(self.binding.commitment_observations[item] for item in draft.commitment_ids)
+        )
+        unexpected_access = observed.accessed - permitted_observations
+        if unexpected_access:
+            raise AgentConformanceError(
+                "observation_not_permitted_by_commitments:"
+                + ",".join(sorted(unexpected_access))
+            )
         if not draft.reason_codes or len(draft.reason_codes) != len(set(draft.reason_codes)):
             raise AgentConformanceError("decision_reason_codes_invalid")
+        if not isinstance(draft.parameters, Mapping):
+            raise AgentConformanceError("decision_parameters_must_be_mapping")
         parameters = dict(draft.parameters)
         if draft.intent_type is None:
             if parameters:
@@ -311,6 +506,24 @@ class DefinitionDrivenAgent:
             raise AgentConformanceError(
                 f"intent_not_permitted_by_commitments:{draft.intent_type}"
             )
+        else:
+            parameter_contracts = self.binding.intent_contracts[draft.intent_type]
+            missing_parameters = set(parameter_contracts) - set(parameters)
+            if missing_parameters:
+                raise AgentConformanceError(
+                    "intent_parameters_missing:" + ",".join(sorted(missing_parameters))
+                )
+            extra_parameters = set(parameters) - set(parameter_contracts)
+            if extra_parameters:
+                raise AgentConformanceError(
+                    "intent_parameters_undeclared:" + ",".join(sorted(extra_parameters))
+                )
+            for parameter_name, value in parameters.items():
+                _validate_runtime_value(
+                    value,
+                    parameter_contracts[parameter_name],
+                    f"intent_parameter:{draft.intent_type}:{parameter_name}",
+                )
 
         decision_preimage = {
             "actor_id": observation.actor_id,
@@ -350,6 +563,7 @@ class DefinitionDrivenAgent:
             definition_version=self.binding.version,
             definition_sha256=self.binding.content_sha256,
             commitment_ids=draft.commitment_ids,
+            used_observation_fields=tuple(sorted(observed.accessed)),
             reason_codes=draft.reason_codes,
             intent_ids=(() if intent is None else (intent.intent_id,)),
         )

@@ -9,10 +9,11 @@ PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider projects/h2epr/te
 ```
 
 The Agent Definition pilot suite validates the two canonical Markdown hashes,
-commitment inventories, legal observation envelopes, explicit unknown/missing
-handling, authority and request lifecycle, intent/result separation, and a
-deterministic three-tick trace/replay. It does not start Ray or run the G3
-simulation:
+commitment inventories, legal observation envelopes and value domains,
+commitment-specific observation use, explicit unknown/missing handling,
+typed intent parameters, authority and request lifecycle, intent/result
+separation, and a deterministic three-tick trace/replay. It does not start Ray
+or run the G3 simulation:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \

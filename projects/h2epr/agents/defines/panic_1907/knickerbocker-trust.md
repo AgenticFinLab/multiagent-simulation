@@ -38,21 +38,20 @@ withdrawal or depositor behavior.
 
 ## Epistemic and state boundary
 
-| Semantic observation | Legal view and missing behavior |
-|---|---|
-| own authorization | affirmative/pending/denied/unknown institutional projection; anything but affirmative blocks an external request |
-| own pressure | qualitative high/not-high/unknown; unknown cannot be replaced by hidden exact values |
-| request channel | delivered available/unavailable/unknown projection; unknown prompts clarification or abstention |
-| support-request status | environment-owned none/sent/delivered/under-review/denied/expired/partial/realized projection |
-| delivered result | only a result actually delivered through the channel; absence means unresolved, not success |
-| last verified information | replayable tick/time marker used to detect stale input |
-| public pressure | only a timestamped public projection; it cannot override authority or information bounds |
+| Semantic observation | Type/domain | Legal view and missing/stale behavior |
+|---|---|---|
+| own authorization | enum: `authorized`, `pending`, `denied`, `not_requested`, `unknown` | own institutional projection; anything but `authorized` blocks an external request |
+| own pressure | enum: `high`, `not_high`, `stale`, `unknown` | qualitative own assessment; `stale`/`unknown` cannot be replaced by hidden exact values |
+| request channel | enum: `available`, `unavailable`, `stale`, `unknown` | delivered channel projection; anything but `available` prompts confirmation or abstention |
+| support-request status | enum: `none`, `sent`, `delivered`, `under_review`, `denied`, `expired`, `failed`, `partial`, `realized`, `unknown` | environment-owned business projection; transport delivery alone is not realization |
+| delivered result | enum: `not_delivered`, `denied_member_facility`, `denied`, `failed`, `partial`, `delayed`, `executed` | only a result actually delivered through the channel; `not_delivered` means unresolved, not success |
 
 Forbidden information includes NYCH private deliberation or exact resources,
 other institutions' hidden state, NBC internal reasoning, undelivered messages,
 and the October 22 suspension (`H-006`). Request status and result are
-environment-owned business truth. Operational posture and last-verified time
-are replayable private decision state; neither may be hidden only in a backend.
+environment-owned business truth. Operational posture is replayable private
+decision state and may not be hidden only in a backend. Public pressure is not
+bound as a v0.1 decision input because no current commitment consumes it.
 
 ## Decision Commitments
 
@@ -62,7 +61,7 @@ are replayable private decision state; neither may be hidden only in a backend.
 |---|---|
 | activation | qualitative pressure is high, explicit authorization is affirmative, the channel is available, and no equivalent request is unresolved |
 | claim basis | `H-002`, `H-003` support the institution/title-level request channel; `U-002`, `GAP-04` bound authority and information |
-| legal observations/state | own authorization and pressure, channel status, request status, last-verified information |
+| legal observations/state | delivered result marker, own authorization and pressure, channel status, request status |
 | hard obligations | never infer authorization from a name/title; never use hidden NYCH state; never announce support as obtained; missing authority/channel/pressure must use fallback |
 | behavioral hypothesis | under these conditions, submitting a support request is a legal active option, not a compulsory historical prediction |
 | precedence | information, authority, channel, and unresolved-request constraints override the support goal |
@@ -76,7 +75,7 @@ are replayable private decision state; neither may be hidden only in a backend.
 |---|---|
 | activation | request status is sent, delivered, under review, or materially stale/unknown |
 | claim basis | `H-003`, `T-002`, `T-003` motivate a separate business lifecycle and delivered-result boundary |
-| legal observations/state | request status, delivered acknowledgement/result, channel status, last-verified information |
+| legal observations/state | request status and delivered result marker |
 | hard obligations | delivery is not acceptance; no business-equivalent duplicate; no hidden backend request memory |
 | behavioral hypothesis | while unresolved, wait, confirm status, or supply authorized information rather than resubmit each tick |
 | precedence | environment business truth overrides the Agent's desire to make progress |
@@ -90,7 +89,7 @@ are replayable private decision state; neither may be hidden only in a backend.
 |---|---|
 | activation | a denial, delay, partial, executed, failed, or channel-change result has been delivered |
 | claim basis | `H-004` is exposed calibration only; `T-003` supplies the authority flow |
-| legal observations/state | delivered result, request status, own operational assessment and authorization |
+| legal observations/state | delivered result, own operational assessment and authorization |
 | hard obligations | result delivery precedes response; partial is not fully realized; suspension or avoided panic is never self-declared |
 | behavioral hypothesis | an adverse or incomplete delivered result changes request strategy or operational preparation |
 | precedence | the delivered result updates the older request belief; new actions still obey authority/information constraints |
@@ -100,15 +99,15 @@ are replayable private decision state; neither may be hidden only in a backend.
 
 ## Intent and environment boundary
 
-The binding may expose only these pilot intent meanings:
-
-- `submit_support_request`
-- `request_internal_authorization`
-- `request_channel_confirmation`
-- `request_status_confirmation`
-- `provide_information`
-- `prepare_operational_restriction`
-- `request_result_clarification`
+| Intent | Required semantic parameters | Prohibited self-realized result |
+|---|---|---|
+| `submit_support_request` | non-empty `request_id`; `channel_id=national_bank_of_commerce`; `recipient_id=nych`; `route_class=member_facility` | support accepted, delivered, or realized |
+| `request_internal_authorization` | non-empty `request_id` | authorization granted |
+| `request_channel_confirmation` | `channel_id=national_bank_of_commerce` | channel available or message delivered |
+| `request_status_confirmation` | non-empty `request_id` | request reviewed or completed |
+| `provide_information` | non-empty `request_id` | information accepted as complete or correct |
+| `prepare_operational_restriction` | non-empty `request_id`; `target_posture=restricted_preparation` | restriction executed or institution closed |
+| `request_result_clarification` | non-empty `request_id`; `result_class` in `partial`, `delayed` | clarification received or result changed |
 
 Auditable abstention is a zero-intent decision with reason codes, not an action
 that changes state. The environment alone creates and delivers a request,

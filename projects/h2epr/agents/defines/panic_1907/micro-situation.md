@@ -47,13 +47,18 @@ future cutoff = before the 1907-10-22 suspension
 | submitted information | knows what it sent | sees only delivered material |
 | membership/route/eligibility | own relation can be known | institutional view after delivery |
 | NYCH review/authorization | delivered updates only | private procedural projection |
-| public pressure | only timestamped public signal | only timestamped public signal |
+| public pressure | scenario context only; not bound to the v0.1 policy | scenario context only; not bound to the v0.1 policy |
 | global exact resources/hidden solvency | forbidden | forbidden |
 | NBC internal reasoning | forbidden | forbidden |
 | October 22 suspension/later outcome | forbidden | forbidden |
 
 Missing or stale required information leads to clarification, procedure,
 waiting, or auditable abstention—not a hidden default.
+
+The v0.1 executable binding carries only observations consumed by at least one
+Decision Commitment. Public pressure remains lawful scenario context, but its
+deletion from both Agent input envelopes is intentional: neither current
+commitment has an evidence-backed behavioral use for it.
 
 ## Authoritative state used by the pilot
 
@@ -84,10 +89,16 @@ route are synthetic pilot inputs, not newly discovered historical facts.
 ## Required counterexamples
 
 - An undeclared or future observation must be rejected before policy use.
+- A declared observation with the wrong type or an out-of-domain value must be
+  rejected before policy use.
 - An unresolved request must not be duplicated.
 - Unknown other-route authority must produce clarification or abstention, not
   automatic permission or universal prohibition.
 - Swapping role/authority must change the permitted intent envelope.
+- A commitment must not read an Agent-wide observation outside its declared
+  commitment-specific input mapping.
+- An intent with missing, undeclared, mistyped, or out-of-domain parameters
+  must be rejected before environment adjudication.
 - An Agent intent must never update authoritative state directly.
 
 Passing these checks proves only that the two Definitions can constrain a
