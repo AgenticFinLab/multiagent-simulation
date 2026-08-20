@@ -212,8 +212,8 @@ Not produced:
 
 ## 9. Implementation entry conditions
 
-This accepted mapping remains non-executable. A separately authorized first implementation slice must satisfy all
-of the following:
+This accepted mapping is non-executable by itself. Any separately authorized implementation slice must satisfy
+all of the following:
 
 1. use only `NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE`; the bounded-discretion proposal branch remains a
    separate structural-sensitivity slice;

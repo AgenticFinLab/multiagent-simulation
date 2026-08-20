@@ -1,0 +1,513 @@
+{
+  "schema_version": "h2epr.intent-registry-machine.v0_2",
+  "registry_id": "h2epr.intent-registry.0288.two-role",
+  "version": "0.2.1",
+  "authority": "derived_mapping_only",
+  "source_path": "agents/bindings/panic_1907/intent-registry.md",
+  "source_sha256": "63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87",
+  "action_schema_version": "h2epr.intent.v0_2_1",
+  "message_content_schema_version": "h2epr.message-content.v0_2_1",
+  "actor_intent_counts": {
+    "knickerbocker_trust": 11,
+    "new_york_clearing_house": 10
+  },
+  "intents": [
+    {
+      "semantic_id": "verify_internal_condition",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-01"],
+      "observations": ["internal_liquidity_assessment", "withdrawal_pressure"],
+      "participant_state_inputs": ["last_verified_condition_time"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "information_category_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "required_as_of": {"type": "time_value", "carrier": "parameters"},
+          "responsible_interface_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "verification_request_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "verification.none_or_terminal_to_pending",
+      "message_performative": null,
+      "forbidden_self_results": ["information_obtained", "information_accurate"]
+    },
+    {
+      "semantic_id": "seek_institutional_authorization",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-01", "DC-KT-02"],
+      "observations": ["corporate_authorization", "internal_liquidity_assessment", "withdrawal_pressure"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "authorization_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "scope_id": {"type": "stable_id", "carrier": "parameters"},
+          "supporting_information_status": {"type": "enum", "values": ["missing", "incomplete", "adequate_for_scope", "disputed", "unknown"], "carrier": "parameters"}
+        },
+        "optional": {
+          "proposal_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "conditional": []
+      },
+      "lifecycle_rule_id": "corporate_authorization.not_requested_or_unknown_to_pending",
+      "message_performative": null,
+      "forbidden_self_results": ["authorization_granted"]
+    },
+    {
+      "semantic_id": "prepare_information_package",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-01", "DC-KT-02"],
+      "observations": ["asset_liquidity_assessment", "collateral_package_status", "corporate_authorization", "internal_liquidity_assessment"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "as_of": {"type": "time_value", "carrier": "parameters"},
+          "disclosure_scope_id": {"type": "stable_id", "carrier": "parameters"},
+          "information_category_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "package_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {
+          "request_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "conditional": []
+      },
+      "lifecycle_rule_id": "information_package.not_prepared_or_unknown_to_preparing",
+      "message_performative": null,
+      "forbidden_self_results": ["package_complete", "package_submitted", "package_accepted", "collateral_accepted"]
+    },
+    {
+      "semantic_id": "submit_support_request",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-02"],
+      "observations": ["asset_liquidity_assessment", "clearing_channel_status", "collateral_package_status", "corporate_authorization", "internal_liquidity_assessment", "support_request_status", "withdrawal_pressure"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "channel_id": {"type": "stable_id", "carrier": "parameters"},
+          "expiry_time": {"type": "nullable_time_value", "carrier": "expiry_time"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "request_id": {"type": "stable_id", "carrier": "parameters"},
+          "resource_category_id": {"type": "stable_id", "carrier": "resource_offer_or_request"},
+          "route_id": {"type": "stable_id", "carrier": "parameters"},
+          "withdrawal_condition_ids": {"type": "stable_id_array", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": [
+          {
+            "rule": "exactly_one_group",
+            "groups": [
+              {
+                "requested_amount_unit": {"type": "stable_id", "carrier": "resource_offer_or_request"},
+                "requested_amount_value": {"type": "number", "carrier": "resource_offer_or_request"}
+              },
+              {
+                "qualitative_bound": {"type": "enum", "values": ["amount_unknown", "bounded_minimum", "bounded_maximum", "bounded_range", "nonquantified_category_request"], "carrier": "resource_offer_or_request"}
+              }
+            ]
+          },
+          {
+            "rule": "required_when_context_true",
+            "context_key": "package_material_exists",
+            "parameter": "package_ref_ids",
+            "contract": {"type": "stable_id_array", "carrier": "parameters"}
+          }
+        ]
+      },
+      "lifecycle_rule_id": "support_request.none_to_prepared",
+      "message_performative": "request",
+      "forbidden_self_results": ["delivery", "recipient_admissibility", "approval", "funding", "rescue"]
+    },
+    {
+      "semantic_id": "request_channel_confirmation",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-02", "DC-KT-04"],
+      "observations": ["clearing_channel_status", "delivered_disposition"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "channel_id": {"type": "stable_id", "carrier": "parameters"},
+          "confirmation_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "relationship_ref": {"type": "stable_id", "carrier": "parameters"},
+          "relevant_time": {"type": "time_value", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "channel_confirmation.none_or_terminal_to_pending",
+      "message_performative": "query",
+      "forbidden_self_results": ["channel_active", "channel_unchanged", "message_delivered"]
+    },
+    {
+      "semantic_id": "provide_requested_information",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-03"],
+      "observations": ["collateral_package_status", "corporate_authorization", "received_information_request", "support_request_status"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "as_of": {"type": "time_value", "carrier": "parameters"},
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "disclosure_scope_id": {"type": "stable_id", "carrier": "parameters"},
+          "information_item_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "provenance_ref_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "request_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "information_response.create_for_existing_case",
+      "message_performative": "inform",
+      "forbidden_self_results": ["material_complete", "material_favorable", "review_complete", "support_approved"]
+    },
+    {
+      "semantic_id": "request_status_clarification",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-03"],
+      "observations": ["delivered_disposition", "support_request_status"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "as_of": {"type": "time_value", "carrier": "parameters"},
+          "clarification_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "request_id": {"type": "stable_id", "carrier": "parameters"},
+          "status_question_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "status_clarification.none_or_terminal_to_pending",
+      "message_performative": "query",
+      "forbidden_self_results": ["review_complete", "result_changed"]
+    },
+    {
+      "semantic_id": "revise_or_withdraw_request",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-03"],
+      "observations": ["corporate_authorization", "delivered_disposition", "support_request_status"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "operation": {"type": "enum", "values": ["revise", "withdraw"], "carrier": "parameters"},
+          "reason_code": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "request_id": {"type": "stable_id", "carrier": "parameters"},
+          "scope_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "support_request.authorized_revision_or_withdrawal",
+      "message_performative": "notify",
+      "forbidden_self_results": ["downstream_cancellation", "acknowledgement", "request_already_changed"]
+    },
+    {
+      "semantic_id": "issue_institutional_communication",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-04"],
+      "observations": ["clearing_channel_status", "corporate_authorization", "delivered_disposition"],
+      "participant_state_inputs": ["operational_posture"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "audience_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "basis_ref_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "bounded_claim_id": {"type": "stable_id", "carrier": "parameters"},
+          "communication_act_id": {"type": "stable_id", "carrier": "parameters"},
+          "effective_time": {"type": "time_value", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "communication.not_issued_to_issued",
+      "message_performative": "inform",
+      "forbidden_self_results": ["delivery", "confidence_restored", "withdrawals_stopped", "operational_result"]
+    },
+    {
+      "semantic_id": "prepare_operational_contingency",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-01", "DC-KT-03", "DC-KT-04"],
+      "observations": ["clearing_channel_status", "corporate_authorization", "delivered_disposition", "internal_liquidity_assessment", "withdrawal_pressure"],
+      "participant_state_inputs": ["operational_posture"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "contingency_id": {"type": "stable_id", "carrier": "parameters"},
+          "preparation_class_id": {"type": "stable_id", "carrier": "parameters"},
+          "revisit_trigger_id": {"type": "stable_id", "carrier": "parameters"},
+          "scope_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "operational_posture.ordinary_or_prior_to_contingency_prepared",
+      "message_performative": null,
+      "forbidden_self_results": ["restriction", "suspension", "closure", "contingency_execution"]
+    },
+    {
+      "semantic_id": "request_result_clarification",
+      "actor_id": "knickerbocker_trust",
+      "commitment_ids": ["DC-KT-04"],
+      "observations": ["clearing_channel_status", "delivered_disposition", "support_request_status"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "ambiguity_code": {"type": "stable_id", "carrier": "parameters"},
+          "clarification_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "question_id": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "request_id": {"type": "stable_id", "carrier": "parameters"},
+          "result_ref": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "result_clarification.none_or_terminal_to_pending",
+      "message_performative": "query",
+      "forbidden_self_results": ["prior_result_reversed", "new_result_delivered"]
+    },
+    {
+      "semantic_id": "record_and_classify_request",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-01"],
+      "observations": ["delivered_request", "facility_eligibility", "relationship_status", "request_authorization_evidence", "route_classification"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "channel_id": {"type": "stable_id", "carrier": "parameters"},
+          "relationship_ref": {"type": "stable_id", "carrier": "parameters"},
+          "represented_institution_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "route_class": {"type": "enum", "values": ["member_facility", "nonmember_clearing_matter", "other_identified_route", "unresolved"], "carrier": "parameters"},
+          "sender_id": {"type": "stable_id", "carrier": "parameters"},
+          "source_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "unresolved_field_ids": {"type": "stable_id_array", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": [
+          {
+            "rule": "required_when_parameter_in",
+            "parameter": "facility_id",
+            "contract": {"type": "stable_id", "carrier": "parameters"},
+            "source_parameter": "route_class",
+            "values": ["member_facility"]
+          }
+        ]
+      },
+      "lifecycle_rule_id": "nych_case.received_to_classified",
+      "message_performative": null,
+      "forbidden_self_results": ["request_accepted", "support_available", "resource_effect"]
+    },
+    {
+      "semantic_id": "request_case_information",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-01", "DC-NYCH-02", "DC-NYCH-04", "DC-NYCH-05"],
+      "observations": ["case_disposition_status", "delivered_request", "financial_information_status", "request_authorization_evidence", "review_state"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "information_category_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "information_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "required_as_of": {"type": "time_value", "carrier": "parameters"},
+          "scope_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "nych_case.classified_or_reviewing_to_awaiting_information",
+      "message_performative": "request",
+      "forbidden_self_results": ["information_delivered", "information_complete", "information_favorable", "review_complete"]
+    },
+    {
+      "semantic_id": "open_or_continue_review",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-02"],
+      "observations": ["authority_state", "financial_information_status", "review_state"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "current_information_status": {"type": "enum", "values": ["not_received", "incomplete", "stale", "adequate_for_scope", "disputed", "unknown"], "carrier": "parameters"},
+          "desired_transition": {"type": "enum", "values": ["collecting_information", "examining", "awaiting_forum", "decision_ready", "complete"], "carrier": "parameters"},
+          "review_act_id": {"type": "stable_id", "carrier": "parameters"},
+          "reviewing_interface_id": {"type": "stable_id", "carrier": "parameters"},
+          "scope_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "review.legal_transition",
+      "message_performative": null,
+      "forbidden_self_results": ["review_complete", "decision_made"]
+    },
+    {
+      "semantic_id": "seek_procedural_authority",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-01", "DC-NYCH-02", "DC-NYCH-03"],
+      "observations": ["authority_state", "facility_eligibility", "review_state", "route_classification"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "authority_question_id": {"type": "stable_id", "carrier": "parameters"},
+          "authority_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "case_or_proposal_id": {"type": "stable_id", "carrier": "parameters"},
+          "proposed_forum_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "route_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "institutional_authority.unresolved_or_disputed_to_pending",
+      "message_performative": null,
+      "forbidden_self_results": ["authority_granted", "universal_prohibition"]
+    },
+    {
+      "semantic_id": "seek_member_or_association_authorization",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-04"],
+      "observations": ["authority_state", "financial_information_status", "resource_proposal_status", "review_state"],
+      "authority_refs_required": 1,
+      "enabled_variants": ["BOUNDED_ALTERNATIVE_ROUTE_DISCRETION"],
+      "parameters": {
+        "required": {
+          "authorization_request_id": {"type": "stable_id", "carrier": "parameters"},
+          "commitment_class_id": {"type": "stable_id", "carrier": "parameters"},
+          "condition_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "forum_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "proposal_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "institutional_authorization.to_pending",
+      "message_performative": null,
+      "forbidden_self_results": ["member_agreement", "resource_commitment", "proposal_execution"]
+    },
+    {
+      "semantic_id": "refer_request",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-01", "DC-NYCH-02", "DC-NYCH-03", "DC-NYCH-05"],
+      "observations": ["authority_state", "case_communication_status", "case_disposition_status", "route_classification"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "receiving_route_id": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "referral_basis_id": {"type": "stable_id", "carrier": "parameters"},
+          "referral_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "nych_case.scoped_referral",
+      "message_performative": "refer",
+      "forbidden_self_results": ["recipient_acceptance", "assistance"]
+    },
+    {
+      "semantic_id": "issue_typed_decline",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-03", "DC-NYCH-05"],
+      "observations": ["authority_state", "case_disposition_status", "facility_eligibility", "route_classification"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "decline_act_id": {"type": "stable_id", "carrier": "parameters"},
+          "facility_or_route_scope_id": {"type": "stable_id", "carrier": "parameters"},
+          "issuing_authority_ref": {"type": "stable_id", "carrier": "claimed_authority_refs"},
+          "reason_code": {"type": "enum", "values": ["facility_ineligible", "no_competent_authority", "insufficient_information", "not_approved", "other_supported_reason"], "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "nych_case.disposition_ready_to_disposition_issued",
+      "message_performative": "decline",
+      "forbidden_self_results": ["all_routes_prohibited", "requester_failure", "message_delivery", "automatic_case_closure"]
+    },
+    {
+      "semantic_id": "propose_conditioned_measure",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-04"],
+      "observations": ["authority_state", "financial_information_status", "resource_proposal_status", "review_state", "route_classification"],
+      "authority_refs_required": 1,
+      "enabled_variants": ["BOUNDED_ALTERNATIVE_ROUTE_DISCRETION"],
+      "parameters": {
+        "required": {
+          "authorized_route_id": {"type": "stable_id", "carrier": "parameters"},
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "collateral_or_information_requirement_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "condition_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "expiry_time": {"type": "time_value", "carrier": "expiry_time"},
+          "proposal_id": {"type": "stable_id", "carrier": "parameters"},
+          "recipient_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "requested_commitment_ids": {"type": "stable_id_array", "carrier": "parameters"},
+          "scope_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "proposal.create_or_advance",
+      "message_performative": "propose",
+      "forbidden_self_results": ["member_commitment", "collateral_accepted", "execution_scheduled", "resources_transferred", "system_stabilized"]
+    },
+    {
+      "semantic_id": "communicate_case_status",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-01", "DC-NYCH-02", "DC-NYCH-03", "DC-NYCH-04", "DC-NYCH-05"],
+      "observations": ["authority_state", "case_communication_status", "case_disposition_status", "delivered_case_result", "review_state"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "audience_id": {"type": "stable_id", "carrier": "target_entity_ids"},
+          "case_disposition_ref": {"type": "stable_id", "carrier": "parameters"},
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "communication_act_id": {"type": "stable_id", "carrier": "parameters"},
+          "effective_time": {"type": "time_value", "carrier": "parameters"},
+          "issuing_authority_ref": {"type": "stable_id", "carrier": "claimed_authority_refs"},
+          "procedural_state": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": []
+      },
+      "lifecycle_rule_id": "communication.not_issued_or_terminal_failure_to_issued",
+      "message_performative": "inform",
+      "forbidden_self_results": ["delivery", "counterparty_acceptance", "case_result_changed", "resource_effect"]
+    },
+    {
+      "semantic_id": "close_or_reopen_review",
+      "actor_id": "new_york_clearing_house",
+      "commitment_ids": ["DC-NYCH-05"],
+      "observations": ["authority_state", "case_communication_status", "case_disposition_status", "delivered_case_result", "review_state"],
+      "authority_refs_required": 1,
+      "parameters": {
+        "required": {
+          "authority_ref": {"type": "stable_id", "carrier": "claimed_authority_refs"},
+          "case_id": {"type": "stable_id", "carrier": "parameters"},
+          "operation": {"type": "enum", "values": ["close", "reopen"], "carrier": "parameters"},
+          "reason_code": {"type": "stable_id", "carrier": "parameters"},
+          "review_act_id": {"type": "stable_id", "carrier": "parameters"}
+        },
+        "optional": {},
+        "conditional": [
+          {
+            "rule": "required_when_parameter_in",
+            "parameter": "new_event_ref",
+            "contract": {"type": "stable_id", "carrier": "parameters"},
+            "source_parameter": "operation",
+            "values": ["reopen"]
+          }
+        ]
+      },
+      "lifecycle_rule_id": "review.close_or_successor_reopen",
+      "message_performative": null,
+      "forbidden_self_results": ["external_process_cancelled", "history_erased", "outcome_changed"]
+    }
+  ]
+}

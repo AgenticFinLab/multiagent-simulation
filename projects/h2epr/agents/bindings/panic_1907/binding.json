@@ -1,0 +1,115 @@
+{
+  "binding_schema_version": "h2epr.agent-definition-mapping.v0_2_1",
+  "mapping_profile_id": "h2epr.agent-definition.mapping.0288.two-role.v0_2_1",
+  "status": "implementation_candidate",
+  "authority": "derived_mapping_only",
+  "source_assets": [
+    {
+      "asset_id": "cross_object_conformance",
+      "path": "agents/bindings/panic_1907/cross-object-conformance.md",
+      "sha256": "9a9a9aae6908409450aa6831da5c5f011846474423bf5571171344fc40a1746f"
+    },
+    {
+      "asset_id": "decision_situations",
+      "path": "agents/defines/panic_1907/decision-situations.md",
+      "sha256": "b9cd28a6b95481e75135ad91a3651ea9f286b757142e22189ce266423d8c0883"
+    },
+    {
+      "asset_id": "evidence_ledger",
+      "path": "agents/defines/panic_1907/evidence-ledger.md",
+      "sha256": "e9f22d792a3a78f4bd23684edd09969ff433bcaae799df1db8316fb21ae60cd7"
+    },
+    {
+      "asset_id": "intent_registry_specification",
+      "path": "agents/bindings/panic_1907/intent-registry.md",
+      "sha256": "63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87"
+    },
+    {
+      "asset_id": "scenario_identity_and_lifecycles",
+      "path": "agents/bindings/panic_1907/scenario-identity-and-business-lifecycles.md",
+      "sha256": "8a60c1607cf1226bb8249d087f35b01c6d1a0b1ac5b16f68c1b383f6779837b7"
+    },
+    {
+      "asset_id": "source_register",
+      "path": "agents/defines/panic_1907/source-register.md",
+      "sha256": "9b4c44d3e7c5f48143e55c8235faa985712f74da01512eae47969c130740b2e9"
+    },
+    {
+      "asset_id": "two_role_binding_specification",
+      "path": "agents/bindings/panic_1907/two-role-binding.md",
+      "sha256": "42d9b50060458fcf63a33345f72f3a63c8b0cc4e5c1b2badf10687c936d019c2"
+    }
+  ],
+  "machine_registries": {
+    "intent": {
+      "path": "agents/bindings/panic_1907/intent-registry.json",
+      "sha256": "8bc6db5e17b7e4af6180d4df59caf68b103b75d4ac1880c256b81501e0070b27"
+    },
+    "lifecycle": {
+      "path": "agents/bindings/panic_1907/lifecycle-registry.json",
+      "sha256": "6ef4ac68931c6cc9509ded17f474eb46604e9c9ad76d05ab7993ffac8c9c45c3"
+    }
+  },
+  "contract_carrier": {
+    "path": "contracts/v1/schemas/core/h2epr_core.schema.json",
+    "sha256": "d6bea7e1094071c5187e16c2c52e989d8353e426da4d385206a11a189c5c5cf5",
+    "verdict": "V1_COMPATIBLE_VIA_EXPLICIT_INTERNAL_MAPPING_AND_CROSS_OBJECT_VALIDATION",
+    "successor_required": false
+  },
+  "scenario_identity": {
+    "variant": "NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE",
+    "alternative_route_ref": null,
+    "alternative_forum_ref": null,
+    "basis_ref": "model_choice.0288.nych_route_gap.conservative.v0_2_1",
+    "visibility": "runtime_system_only",
+    "immutable": true
+  },
+  "causal_scope": {
+    "scope_id": "focal_two_role_request_response_only",
+    "external_channel_actor": "national_bank_of_commerce",
+    "external_channel_policy_endogenous": false,
+    "historical_validity_claim": false
+  },
+  "participants": [
+    {
+      "participant_id": "knickerbocker_trust",
+      "definition_id": "h2epr.agent-definition.0288.knickerbocker-trust",
+      "version": "0.2.1",
+      "definition_path": "agents/defines/panic_1907/knickerbocker-trust.md",
+      "content_sha256": "df800bea6820eb5087c02fbcdb446b0f4ca558be143ed0d89d81074d75562758",
+      "representation_class": "aggregate_authorized_company_decision_interface",
+      "decision_commitments": {
+        "DC-KT-01": ["prepare_information_package", "prepare_operational_contingency", "seek_institutional_authorization", "verify_internal_condition"],
+        "DC-KT-02": ["prepare_information_package", "request_channel_confirmation", "seek_institutional_authorization", "submit_support_request"],
+        "DC-KT-03": ["prepare_operational_contingency", "provide_requested_information", "request_status_clarification", "revise_or_withdraw_request"],
+        "DC-KT-04": ["issue_institutional_communication", "prepare_operational_contingency", "request_channel_confirmation", "request_result_clarification"]
+      },
+      "hard_obligation_ids": ["CO-05", "CO-06", "CO-07", "CO-08", "CO-09", "CO-10", "CO-11", "CO-12", "CO-13", "CO-14", "CO-15", "CO-16", "CO-17", "CO-18", "CO-19", "CO-20", "CO-21"],
+      "behavioral_hypothesis_ids": ["DC-KT-01", "DC-KT-02", "DC-KT-03", "DC-KT-04"],
+      "observations": ["asset_liquidity_assessment", "clearing_channel_status", "collateral_package_status", "corporate_authorization", "delivered_disposition", "internal_liquidity_assessment", "received_information_request", "support_request_status", "withdrawal_pressure"],
+      "participant_state": ["last_verified_condition_time", "operational_posture", "request_strategy_posture"],
+      "intents": ["issue_institutional_communication", "prepare_information_package", "prepare_operational_contingency", "provide_requested_information", "request_channel_confirmation", "request_result_clarification", "request_status_clarification", "revise_or_withdraw_request", "seek_institutional_authorization", "submit_support_request", "verify_internal_condition"]
+    },
+    {
+      "participant_id": "new_york_clearing_house",
+      "definition_id": "h2epr.agent-definition.0288.new-york-clearing-house",
+      "version": "0.2.1",
+      "definition_path": "agents/defines/panic_1907/new-york-clearing-house.md",
+      "content_sha256": "8b4e66fc18c4c032cca2d3028d598a5ad4256303599e3d1a055cc9d83dd1a4df",
+      "representation_class": "aggregate_procedural_institutional_interface",
+      "decision_commitments": {
+        "DC-NYCH-01": ["communicate_case_status", "record_and_classify_request", "refer_request", "request_case_information", "seek_procedural_authority"],
+        "DC-NYCH-02": ["communicate_case_status", "open_or_continue_review", "refer_request", "request_case_information", "seek_procedural_authority"],
+        "DC-NYCH-03": ["communicate_case_status", "issue_typed_decline", "refer_request", "seek_procedural_authority"],
+        "DC-NYCH-04": ["communicate_case_status", "propose_conditioned_measure", "request_case_information", "seek_member_or_association_authorization"],
+        "DC-NYCH-05": ["close_or_reopen_review", "communicate_case_status", "issue_typed_decline", "refer_request", "request_case_information"]
+      },
+      "hard_obligation_ids": ["CO-05", "CO-06", "CO-07", "CO-08", "CO-09", "CO-10", "CO-11", "CO-12", "CO-13", "CO-14", "CO-15", "CO-16", "CO-17", "CO-18", "CO-19", "CO-20", "CO-21"],
+      "behavioral_hypothesis_ids": ["DC-NYCH-01", "DC-NYCH-02", "DC-NYCH-03", "DC-NYCH-05"],
+      "scenario_conditional_commitment_ids": ["DC-NYCH-04"],
+      "observations": ["authority_state", "case_communication_status", "case_disposition_status", "delivered_case_result", "delivered_request", "facility_eligibility", "financial_information_status", "relationship_status", "request_authorization_evidence", "resource_proposal_status", "review_state", "route_classification"],
+      "participant_state": ["last_consumed_record_versions", "procedural_assessment_posture"],
+      "intents": ["close_or_reopen_review", "communicate_case_status", "issue_typed_decline", "open_or_continue_review", "propose_conditioned_measure", "record_and_classify_request", "refer_request", "request_case_information", "seek_member_or_association_authorization", "seek_procedural_authority"]
+    }
+  ]
+}

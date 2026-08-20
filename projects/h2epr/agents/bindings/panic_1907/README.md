@@ -5,10 +5,10 @@ H2EPR-0288 Agent Definitions, version `0.2.1`. It maps their observations,
 decision commitments, state, intents, institutional processes, and trace
 requirements onto Contracts V1.
 
-The specification is currently non-executable. Code and traces can claim
-conformance only after the mapping, registry, and fail-closed checks have been
-implemented and reviewed against the exact Definition identities recorded in
-[two-role-binding.md](two-role-binding.md).
+The Markdown files remain the reviewed specification. The JSON files are
+strict derived projections used by the current implementation candidate. They
+load only when the recorded Definition, evidence, specification and Contracts
+V1 hashes still match.
 
 ## Files
 
@@ -18,6 +18,9 @@ implemented and reviewed against the exact Definition identities recorded in
 | [scenario-identity-and-business-lifecycles.md](scenario-identity-and-business-lifecycles.md) | NYCH structural scenario identity and the seven authoritative business lifecycles |
 | [intent-registry.md](intent-registry.md) | versioned semantic contracts and V1 projections for the 21 two-role intents |
 | [cross-object-conformance.md](cross-object-conformance.md) | fail-closed rules linking Definitions, scenario state, artifacts, observations, decisions, intents, messages, results, trace, and seals |
+| [binding.json](binding.json) | exact source identities, participant inventories, conservative scenario identity and V1 carrier verdict |
+| [intent-registry.json](intent-registry.json) | executable parameter, observation, authority and carrier rules for all 21 intents |
+| [lifecycle-registry.json](lifecycle-registry.json) | executable transition rules for the seven business lifecycle families |
 
 The Agent Definitions remain the authority for participant behavior. Scenario
 state and lifecycle truth remain environment-owned, machine shape remains in
@@ -29,6 +32,13 @@ The baseline binding uses
 `BOUNDED_ALTERNATIVE_ROUTE_DISCRETION` branch is retained as a separate
 structural-sensitivity specification and is not part of the first
 implementation slice.
+
+The first slice is implemented under
+[`scenarios/panic_1907/`](../../../scenarios/panic_1907/). It exercises eight
+decisions on the conservative path and closes observation, decision, action,
+message, disposition, state-delta, delivery and replay references. It is a
+synthetic conformance path, not a historical simulation or a complete policy
+implementation for all 21 intents.
 
 The earlier `0.1.0-dev` path remains a frozen engineering fixture under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../../../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/).
