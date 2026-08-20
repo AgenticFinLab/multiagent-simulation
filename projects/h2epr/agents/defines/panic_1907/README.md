@@ -26,10 +26,11 @@ delivery, institutional process, adjudication, and results.
 
 ## Implementation status
 
-There is no active executable binding for the `0.2.1` Definitions. Their observation, state, commitment, intent,
-and trace mapping has been accepted as a non-executable specification under
-[`agents/bindings/panic_1907/`](../../bindings/panic_1907/). Code and traces must not claim conformance until that
-mapping and its fail-closed checks are implemented and reviewed.
+The `0.2.1` Definitions now have an exact-hash machine mapping and a conservative first conformance slice under
+[`scenarios/panic_1907/`](../../../scenarios/panic_1907/). The machine registry covers all 21 intents; the first
+slice exercises eight decisions from support request through delivered facility-scoped decline and subsequent
+contingency preparation. It remains a bounded implementation candidate, not a full role policy, G3/G4 runtime
+integration, historical calibration, or validation result.
 
 The earlier `0.1.0-dev` three-tick path is preserved only as a frozen engineering fixture under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../../../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/).

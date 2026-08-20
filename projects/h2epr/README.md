@@ -16,10 +16,11 @@ It compares two institutionally different participants:
 - Knickerbocker Trust;
 - New York Clearing House (NYCH).
 
-Each participant has an event-specific Markdown Definition. A small non-Ray
-engineering fixture preserves the earlier binding and trace checks, while the
-current `0.2.1` Definitions now have an accepted, non-executable V1 mapping
-specification.
+Each participant has an event-specific Markdown Definition. The current
+`0.2.1` Definitions have an accepted V1 mapping, machine-readable intent and
+lifecycle registries, fail-closed carrier checks, and a deterministic non-Ray
+request-to-feedback conformance slice. The earlier `0.1.0-dev` fixture remains
+frozen as an engineering baseline.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -37,7 +38,8 @@ Generated EPG compilation.
 | Runtime | `src/h2epr/runtime/` | H2EPR adapter, phased Rule runtime, detectors and orchestration |
 | Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
 | Agent Definitions | `agents/` | Event-specific behavior definitions, source register, evidence ledger and decision situations |
-| Agent binding support | `src/h2epr/agents/` | Generic Definition enforcement plus the isolated `0.1.0-dev` engineering baseline |
+| Agent binding support | `src/h2epr/agents/` | Strict Definition mapping, semantic-intent validation and Contracts V1 carrier checks |
+| Event conformance slices | `scenarios/` | Event-owned policies, authoritative process state and bounded non-Ray integration paths |
 
 ## Repository layout
 
@@ -56,6 +58,7 @@ projects/h2epr/
 │   ├── participant-behavior-research/
 │   ├── agent-definition/
 │   └── agent-definition-review/
+├── scenarios/panic_1907/
 ├── src/h2epr/
 │   ├── construction/
 │   ├── artifacts/
@@ -94,10 +97,18 @@ discretion is retained only for structural sensitivity.
 
 The accepted mapping under `agents/bindings/panic_1907/` pins the two
 Definition hashes, seven business lifecycles, 21 semantic intents, and 21
-cross-object conformance rules to Contracts V1. It remains non-executable.
+cross-object conformance rules to Contracts V1. Its machine projections reject
+stale hashes, undeclared parameters, carrier drift, illegal lifecycle changes,
+and action/message mismatches.
 
-No executable binding currently claims conformance with version `0.2.1`. The
-earlier three-tick path is frozen under
+The conservative first slice under `scenarios/panic_1907/` exercises eight
+decisions across request formation, case classification, information exchange,
+review, a facility-scoped decline, delivery, and Knickerbocker's subsequent
+contingency preparation. All 21 intents are registered and validated, but the
+remaining intent policies are not implemented by this slice. It does not start
+Ray or the G3/G4 simulation path and makes no historical-validity claim.
+
+The earlier three-tick path is frozen under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
 Definition hashes, observation allowlists, request state, intent/result
 separation, deterministic trace and replay only for the old `0.1.0-dev`
@@ -185,9 +196,10 @@ The G3 suite requires the project runtime environment. See
 ## Project status
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
-The current Agent work has reached an accepted two-role semantic and V1 mapping
-specification. It has not yet been implemented or integrated into the G3/G4
-path. Scientific evaluation remains a later post-seal activity.
+The current Agent work has reached an accepted two-role semantic design and a
+tested first Definition-to-implementation slice. The slice is not yet
+integrated into the G3/G4 runtime, and it does not establish historical or
+scientific validity. Scientific evaluation remains a later post-seal activity.
 
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next

@@ -19,15 +19,17 @@ cross-event reuse, and additional execution approaches require separate work.
 | `source-register.md` | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
 | `evidence-ledger.md` | claim status, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
 | `decision-situations.md` | shared research situations and perturbations | participant policy or executable scenario state |
-| accepted binding specification | derived mapping of Definition identity, observations, commitments and intents | independent behavior semantics or executable conformance |
+| accepted binding specification | reviewed mapping of Definition identity, observations, commitments and intents | independent behavior semantics |
+| executable mapping and carrier checks | exact-hash loading, parameter/lifecycle validation and Contracts V1 projection | new historical claims or result adjudication |
 | machine contracts | encoding, type, shape, serialization and versioning | historical or behavioral claims |
 | environment/reducer | authoritative business state, admissibility, effects and results | participant intent |
 
 The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
 and intent semantics it was reviewed against. The current `0.2.1` Definitions
-have an accepted, non-executable V1 mapping specification; an executable
-binding remains future work.
+have both the accepted V1 specification and a machine-readable implementation
+candidate. The conservative first slice exercises only the bounded
+request-to-feedback path; it is not a complete role implementation.
 
 ## Layout and naming
 
@@ -71,9 +73,12 @@ agents/
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
   the current `0.2.1` reference Definitions.
-- [`bindings/panic_1907/`](bindings/panic_1907/): the accepted, non-executable
-  Definition-to-V1 mapping, scenario/lifecycle specification, 21-intent
-  registry, and cross-object conformance rules.
+- [`bindings/panic_1907/`](bindings/panic_1907/): the accepted
+  Definition-to-V1 specification plus strict machine projections for the
+  21-intent registry and seven lifecycle families.
+- [`../scenarios/panic_1907/`](../scenarios/panic_1907/): the conservative
+  non-Ray request-to-feedback implementation slice and its authoritative,
+  replayable process state.
 
 All historical outcomes used here are already exposed. This iteration is
 construction and semantic falsification work, not held-out validation.

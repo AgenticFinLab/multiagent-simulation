@@ -141,15 +141,19 @@ world state. Each observation declares the fields available to that actor and
 uses explicit markers for missing or unresolved values.
 
 Persistent state that affects future behavior must be visible to replay. The
-current Definitions identify request/case status, authorization, information,
-review, channel, proposal and posture states that the next mapping must place
-under an authoritative, replayable path.
+current first slice places request/case status, authorization, information,
+review, communication and participant posture under one authoritative,
+replayable state path. Its actor observations are flat V1 field families with
+source record, as-of time, freshness, availability and scope metadata.
 
 ### Current Definitions and frozen engineering baseline
 
-The current Knickerbocker Trust and NYCH Definitions have an accepted,
-non-executable mapping specification. `tests/support/agents/panic_1907_baseline.py` preserves a
-small non-Ray path for the old `0.1.0-dev` fixture. It validates:
+The current Knickerbocker Trust and NYCH Definitions have an accepted mapping
+specification, strict machine registries, generic carrier validators, and a
+bounded event-owned conformance slice under `scenarios/panic_1907/`.
+`tests/support/agents/panic_1907_baseline.py` preserves a small non-Ray path for
+the old `0.1.0-dev` fixture. Together the current slice and frozen baseline
+exercise:
 
 - Definition identity and content hashes;
 - observation allowlists;
@@ -160,9 +164,9 @@ small non-Ray path for the old `0.1.0-dev` fixture. It validates:
 - environment-owned results;
 - deterministic trace and replay.
 
-This fixture is separate from both the current Definitions and the older G3
-Rule policy. It proves engineering seams only. Current integration begins with
-a new Definition-to-implementation mapping rather than relabeling this path.
+The current slice and frozen fixture are separate from the older G3 Rule
+policy. They prove engineering and conformance seams only; neither is a
+historical simulation or a scientific-validity result.
 
 ## Runtime and MASim integration
 
