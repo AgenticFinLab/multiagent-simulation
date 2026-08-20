@@ -2,17 +2,78 @@
 
 This module provides a simple, intuitive implementation of CommunicationChannel:
 - GeneralCommunicationChannel: JSON-based SimPacket encoding, recording, and dispatch
+- build_message_from_info():   Info (player layer) → Message (communication layer)
 
-For abstract base class and SimPacket type, see `base.py`.
-For Message and proxy-layer types, see `masim.proxy.base`.
+For abstract base class + Message/enum definitions, see `masim/communication/base.py`.
+The communication layer OWNS Message and its enums; proxy consumes them.
 """
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, TYPE_CHECKING
 
-from masim.communication.base import CommunicationChannel, SimPacket
-from masim.proxy.base import Message
+from masim.communication.base import (
+    CommunicationChannel,
+    Message,
+    MessageType,
+    SimPacket,
+)
+
+if TYPE_CHECKING:
+    # Info is defined in the player layer. TYPE_CHECKING avoids a runtime
+    # circular import while still giving IDEs / mypy the correct hint.
+    from masim.player.base import Info
+
+
+# =============================================================================
+#                     BUILD MESSAGE HELPER
+# =============================================================================
+
+
+def build_message_from_info(
+    info: "Info",
+    sender_id: str,
+    target_id: str,
+    round_num: int = 0,
+) -> Message:
+    """
+    Convert a player-layer Info unit into a routed communication-layer Message.
+
+    This is the ONLY place where Info → Message conversion happens.
+    Called by Simulator in phase_dispatch after collecting outbound Info units.
+
+    The Info payload is wrapped in a content envelope so the routed Message
+    carries structured metadata alongside the raw content::
+
+        payload = {"content": info.payload,
+                   "content_type": info.content_type,
+                   "extras": info.extras}
+
+    On the receive side, SendReceiveProxy.handle_incoming() unpacks this envelope
+    back into an Info unit for the target player.
+
+    Args:
+        info:       The Info unit produced by the sending Player
+        sender_id:  Identity of the sending Persona
+        target_id:  Identity of the receiving Persona
+        round_num:  Current simulation round (stored in extras)
+
+    Returns:
+        Message ready for CommunicationChannel.encode_and_deliver()
+    """
+    payload = {
+        "content": info.payload,
+        "content_type": info.content_type,
+        "extras": info.extras,
+    }
+    return Message(
+        message_type=MessageType.PEER,
+        sender_id=sender_id,
+        recipient_id=target_id,
+        payload=payload,
+        timestamp=datetime.now().isoformat(),
+        extras={"round_num": round_num},
+    )
 
 
 class GeneralCommunicationChannel(CommunicationChannel):
@@ -136,4 +197,28 @@ class GeneralCommunicationChannel(CommunicationChannel):
         return refs
 
     def shutdown(self) -> None:
-        """Shutdown the channel and release resources."""
+        """Shutdown the channel: flush message store so trailing blocks are persisted.
+
+        Fixes H7: previously this was a no-op, so if the driver terminated
+        without flushing message_store, the last unflushed block(s) would be
+        lost. BlockBasedStoreManager writes append-only blocks and flushes when
+        a block fills; on shutdown we force one final flush.
+        """
+        store = getattr(self, "message_store", None)
+        if store is None:
+            return
+        for method_name in ("flush", "close", "finalize"):
+            fn = getattr(store, method_name, None)
+            if callable(fn):
+                try:
+                    fn()
+                except Exception:
+                    # Store shutdown failures should not mask upstream shutdown
+                    # signals; log and continue. The rest of the finally block
+                    # in Simulator.shutdown still needs to run.
+                    import logging
+                    logging.getLogger(__name__).exception(
+                        "GeneralCommunicationChannel.shutdown: %s() raised",
+                        method_name,
+                    )
+                break

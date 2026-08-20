@@ -22,10 +22,9 @@ if TYPE_CHECKING:
     from masim.proxy.general import (
         SendReceiveProxy,
         StorageProxy,
-        ResourceProxy,
         MonitoringProxy,
     )
-    from masim.proxy.base import Message
+    from masim.communication.base import Message
     from masim.player.base import BasePlayer, PlayerConfig, TurnResult
 
 
@@ -72,7 +71,6 @@ class BasePersona(ABC):
         # Proxy references
         self.message_proxy: Optional["SendReceiveProxy"] = None
         self.storage: Optional["StorageProxy"] = None
-        self.resource: Optional["ResourceProxy"] = None
         self.monitoring: Optional["MonitoringProxy"] = None
 
         # Lifecycle flag
@@ -132,8 +130,8 @@ class BasePersona(ABC):
         Returns:
             Tuple of (TurnResult, pending_infos) where pending_infos is a list
             of dicts with keys: info, sender_id, target_ids, round_num.
-            Both values are returned together to avoid a separate IPC round-trip
-            for collect_pending_infos().
+            Bundling both values in a single return keeps message dispatch to a
+            single IPC round-trip per persona per turn.
         """
         ...
 
@@ -173,23 +171,6 @@ class BasePersona(ABC):
     @abstractmethod
     def receive_message(self, message: "Message") -> None:
         """Receive a message from another player (called remotely)."""
-        ...
-
-    # =========================================================================
-    #                    MESSAGE DISPATCH (Called by Simulator)
-    # =========================================================================
-
-    @abstractmethod
-    def collect_pending_infos(self) -> List[Dict[str, Any]]:
-        """
-        Collect all queued Info units declared by Player.
-
-        Called by Simulator to gather Info units for dispatch
-        via CommunicationChannel.
-
-        Returns:
-            List of dicts with keys: info, sender_id, target_ids, round_num
-        """
         ...
 
     # =========================================================================

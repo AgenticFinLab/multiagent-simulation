@@ -294,23 +294,13 @@ class LLMInvestor(GeneralPlayer):
                     )
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM parse contract failed after %d attempts: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            # Strict fail-fast: retry exhaustion propagates as RuntimeError.
+            # Do NOT fabricate a hold decision — that would silently mask
+            # persistent LLM failures.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after "
+                f"{max_retries} retries. Last error: {last_error}"
             )
-            decision = {
-                "action": "hold",
-                "bid_price": market_data["price"],
-                "quantity": 0,
-                "is_short_cover": False,
-                "reasoning": f"LLM parse failed after {max_retries} attempts: {last_error}",
-                "analysis": "",
-            }
-            parser_fallback = True
-        else:
-            parser_fallback = False
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])
@@ -347,7 +337,6 @@ class LLMInvestor(GeneralPlayer):
             "is_short_cover": is_short_cover,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
-            "parser_fallback": parser_fallback,
         }
         return {
             **order,

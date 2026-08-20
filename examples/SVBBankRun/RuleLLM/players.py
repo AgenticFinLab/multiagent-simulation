@@ -20,10 +20,7 @@ from lmbase.inference.base import InferInput
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.llm_utils import robust_llm_call
-from examples.SVBBankRun.decision import (
-    fallback_hold_decision,
-    parse_svbbankrun_decision,
-)
+from examples.SVBBankRun.decision import parse_svbbankrun_decision
 from masim.format import get_order_format
 from .prompts import (
     RULELLM_DEPOSITOR_SYS,
@@ -112,13 +109,10 @@ class RuleLLMInvestor(GeneralPlayer):
         user_prompt = self._build_prompt()
         system_prompt = self._system_prompt
 
-        # Route through robust_llm_call for centralized retry/backoff/permanent-error
-        # detection.  On retry exhaustion we honor the SVBBankRun API decision
-        # contract by returning ``fallback_hold_decision(...)`` (matches the shape
-        # produced by ``parse_svbbankrun_decision``: action/quantity/reasoning/
-        # analysis/llm_fallback/fallback_reason).  This replaces the legacy
-        # 3-attempt loop that crashed the sim on non-parse errors (client.run
-        # was outside the try/except).
+        # Strict fail-fast: robust_llm_call raises RuntimeError on retry
+        # exhaustion or permanent errors. Do NOT translate to a fabricated
+        # hold — the simulator surfaces the failure to the runner which
+        # halts the whole round loudly.
         decision = robust_llm_call(
             llm_client,
             system_prompt,
@@ -126,20 +120,10 @@ class RuleLLMInvestor(GeneralPlayer):
             parse_fn=parse_svbbankrun_decision,
             validate_fn=get_order_format("SVBBankRun").validate_decision,
             max_retries=5,
-            fallback="hold",
+            fallback="raise",
             identity=self.identity,
         )
 
-        if decision.get("_fallback"):
-            logger.warning(
-                "[%s] R%d LLM unavailable; emitting fallback hold decision.",
-                self.identity,
-                round_num,
-            )
-            decision = fallback_hold_decision("llm_unavailable_after_retries")
-
-        llm_fallback = bool(decision.pop("llm_fallback", False))
-        fallback_reason = str(decision.pop("fallback_reason", ""))
         action = decision["action"]
         quantity = int(decision["quantity"])
 
@@ -181,8 +165,6 @@ class RuleLLMInvestor(GeneralPlayer):
             "agent_type": strategy_name,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "llm_fallback": llm_fallback,
-            "fallback_reason": fallback_reason,
         }
         return {
             **order,

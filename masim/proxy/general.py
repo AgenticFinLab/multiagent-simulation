@@ -3,7 +3,6 @@
 This module provides concrete proxy implementations:
     - SendReceiveProxy: Info send/receive queue management for Persona
     - StorageProxy: State checkpoint/restore using BlockBasedStoreManager
-    - ResourceProxy: MCP resource access
     - MonitoringProxy: Metrics and logging
 
 Base classes and configs are in base.py; implementations are here.
@@ -34,19 +33,15 @@ import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+from masim.communication.base import Message
 from masim.proxy.base import (
     # Types
-    ProxyType,
     OwnerType,
     BaseProxy,
     ProxyResult,
-    # Message types
-    Message,
-    MessageType,
     # Configs
     SendReceiveConfig,
     StorageConfig,
-    ResourceConfig,
     MonitoringConfig,
 )
 from masim.player.base import Info
@@ -55,56 +50,6 @@ from lmbase.utils.tools import BlockBasedStoreManager
 
 if TYPE_CHECKING:
     pass
-
-
-# =============================================================================
-#                     BUILD MESSAGE HELPER
-# =============================================================================
-
-
-def build_message_from_info(
-    info: "Info",
-    sender_id: str,
-    target_id: str,
-    round_num: int = 0,
-) -> Message:
-    """
-    Convert a player-layer Info unit to a proxy-layer Message.
-
-    This is the ONLY place where Info → Message conversion happens.
-    Called by Simulator in phase_dispatch after collecting outbounds.
-
-    The Info payload is wrapped in a content envelope so the proxy-layer
-    Message carries structured metadata alongside the raw content:
-        payload = {"content": info.payload,
-                   "content_type": info.content_type,
-                   "extras": info.extras}
-
-    On the receive side, SendReceiveProxy.handle_incoming() unpacks this
-    envelope back into an Info unit for the target player.
-
-    Args:
-        info:       The Info unit produced by the sending Player
-        sender_id:  Identity of the sending Persona
-        target_id:  Identity of the receiving Persona
-        round_num:  Current simulation round (stored in extras)
-
-    Returns:
-        Message ready for CommunicationChannel.encode_and_deliver()
-    """
-    payload = {
-        "content": info.payload,
-        "content_type": info.content_type,
-        "extras": info.extras,
-    }
-    return Message(
-        message_type=MessageType.PEER,
-        sender_id=sender_id,
-        recipient_id=target_id,
-        payload=payload,
-        timestamp=datetime.now().isoformat(),
-        extras={"round_num": round_num},
-    )
 
 
 # =============================================================================
@@ -342,124 +287,19 @@ class StorageProxy(BaseProxy):
 
 
 # =============================================================================
-#                          RESOURCE PROXY
+#                          RESOURCE PROXY  (removed)
 # =============================================================================
-
-
-class ResourceProxy(BaseProxy):
-    """Proxy for MCP connection management and resource access."""
-
-    def __init__(
-        self,
-        config: Optional[ResourceConfig] = None,
-        owner: Optional[OwnerType] = None,
-    ):
-        super().__init__(config or ResourceConfig(), owner)
-        self.config: ResourceConfig = config or ResourceConfig()
-        self._connections: Dict[str, Any] = {}
-        self._resource_cache: Dict[str, tuple] = {}
-
-    async def initialize(self) -> None:
-        for server_config in self.config.mcp_servers:
-            server_name = server_config["name"]
-            self._connections[server_name] = {
-                "config": server_config,
-                "connected": True,
-            }
-        self.is_initialized = True
-
-    async def shutdown(self) -> None:
-        self._connections.clear()
-        self._resource_cache.clear()
-        self.is_initialized = False
-
-    async def fetch_resource(self, resource_uri: str) -> ProxyResult:
-        """Fetch a resource via MCP protocol."""
-        if self.config.enable_caching:
-            cached = self._check_cache(resource_uri)
-            if cached is not None:
-                return ProxyResult.ok(cached)
-
-        server_name, _ = self._parse_uri(resource_uri)
-
-        if server_name not in self._connections:
-            return ProxyResult.fail(
-                "NOT_CONNECTED", f"Not connected to MCP server: {server_name}"
-            )
-
-        result = {
-            "uri": resource_uri,
-            "data": {},
-            "timestamp": datetime.now().isoformat(),
-        }
-
-        if self.config.enable_caching:
-            self._cache_result(resource_uri, result)
-
-        return ProxyResult.ok(result)
-
-    async def invoke_tool(
-        self, tool_name: str, args: Dict[str, Any], server: Optional[str] = None
-    ) -> ProxyResult:
-        """Invoke an external tool via MCP."""
-        target_server = server or (
-            list(self._connections.keys())[0] if self._connections else None
-        )
-        if not target_server or target_server not in self._connections:
-            return ProxyResult.fail("NO_SERVER", "No connected MCP server")
-
-        result = {
-            "tool": tool_name,
-            "args": args,
-            "result": {},
-            "timestamp": datetime.now().isoformat(),
-        }
-        return ProxyResult.ok(result)
-
-    async def list_available_resources(
-        self, server: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """List available resources from connected servers."""
-        servers = [server] if server else list(self._connections.keys())
-        return [
-            {"server": srv, "resources": []}
-            for srv in servers
-            if srv in self._connections
-        ]
-
-    async def connect(self, server_config: Dict[str, Any]) -> bool:
-        """Connect to an MCP server."""
-        server_name = server_config["name"]
-        self._connections[server_name] = {"config": server_config, "connected": True}
-        return True
-
-    async def disconnect(self, server_name: str) -> bool:
-        """Disconnect from an MCP server."""
-        if server_name not in self._connections:
-            return False
-        del self._connections[server_name]
-        return True
-
-    def _parse_uri(self, uri: str) -> tuple:
-        """Parse MCP URI into (server_name, resource_path)."""
-        if not uri.startswith("mcp://"):
-            raise ValueError(f"Invalid MCP URI format: {uri}")
-        path = uri[6:]
-        parts = path.split("/", 1)
-        return parts[0], parts[1] if len(parts) > 1 else ""
-
-    def _check_cache(self, uri: str) -> Optional[Any]:
-        """Check cache for a resource."""
-        if uri in self._resource_cache:
-            data, ts = self._resource_cache[uri]
-            if time.time() - ts < self.config.cache_ttl_seconds:
-                return data
-            del self._resource_cache[uri]
-        return None
-
-    def _cache_result(self, uri: str, data: Any) -> None:
-        """Cache a resource result."""
-        self._resource_cache[uri] = (data, time.time())
+#
+# The former ``ResourceProxy`` class (MCP connection stub) lived here but was
+# never wired: it was instantiated on every PlayerPersona but nothing ever
+# read ``persona.resource``.  The class body only returned placeholder dicts,
+# so removing it eliminates dead code without changing any observable
+# behaviour.  The matching ``ResourceConfig`` dataclass was likewise removed
+# from ``proxy/base.py`` (and the ``ProxyType.RESOURCE`` enum entry retained
+# as a reserved slot for future MCP integration).
+#
+# Config-side impact: existing ``persona.yml`` files may still contain a
+# ``resource:`` block; it is now ignored by ``PlayerPersona._setup_proxies``.
 
 
 # =============================================================================
@@ -587,101 +427,11 @@ class MonitoringProxy(BaseProxy):
 
 
 # =============================================================================
-#                       CONVENIENCE FUNCTIONS
+#                       PUBLIC API
 # =============================================================================
 
-
-def create_default_proxies(
-    owner: Optional[OwnerType] = None,
-) -> Dict[ProxyType, BaseProxy]:
-    """Create a complete set of proxies with default configurations."""
-    return {
-        ProxyType.COMMUNICATION: SendReceiveProxy(SendReceiveConfig(), owner),
-        ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
-        ProxyType.RESOURCE: ResourceProxy(ResourceConfig(), owner),
-        ProxyType.OBSERVABILITY: MonitoringProxy(MonitoringConfig(), owner),
-    }
-
-
-def create_minimal_proxies(
-    owner: Optional[OwnerType] = None,
-) -> Dict[ProxyType, BaseProxy]:
-    """Create a minimal proxy set with just storage and observability."""
-    return {
-        ProxyType.STORAGE: StorageProxy(StorageConfig(), owner),
-        ProxyType.OBSERVABILITY: MonitoringProxy(MonitoringConfig(), owner),
-    }
-
-
-def create_proxies_for_owner(
-    owner: OwnerType,
-    include_communication: bool = True,
-    include_storage: bool = True,
-    include_resource: bool = True,
-    include_monitoring: bool = True,
-) -> Dict[ProxyType, BaseProxy]:
-    """Create a customized proxy set for a specific owner."""
-    proxies = {}
-
-    if include_communication:
-        proxies[ProxyType.COMMUNICATION] = SendReceiveProxy(SendReceiveConfig(), owner)
-
-    if include_storage:
-        proxies[ProxyType.STORAGE] = StorageProxy(StorageConfig(), owner)
-
-    if include_resource:
-        proxies[ProxyType.RESOURCE] = ResourceProxy(ResourceConfig(), owner)
-
-    if include_monitoring:
-        proxies[ProxyType.OBSERVABILITY] = MonitoringProxy(MonitoringConfig(), owner)
-
-    return proxies
-
-
-# =============================================================================
-#                      SIMPLIFIED PROXY WRAPPERS
-# =============================================================================
-
-
-class SimpleStorageProxy(StorageProxy):
-    """Simplified StorageProxy with sensible defaults."""
-
-    def __init__(self, owner: Optional[OwnerType] = None):
-        config = StorageConfig(
-            checkpoint_dir="checkpoints",
-            record_path="records",
-            record_rounds=True,
-        )
-        super().__init__(config, owner)
-
-
-class SimpleMonitoringProxy(MonitoringProxy):
-    """Simplified MonitoringProxy with sensible defaults."""
-
-    def __init__(
-        self,
-        record_path: str = "EXPERIMENT/default/monitoring",
-        owner: Optional[OwnerType] = None,
-    ):
-        config = MonitoringConfig(
-            record_path=record_path,
-            monitor_hot_limit=3,
-        )
-        super().__init__(config, owner)
-
-
-# Re-export
 __all__ = [
-    # Proxy implementations
     "SendReceiveProxy",
     "StorageProxy",
-    "ResourceProxy",
     "MonitoringProxy",
-    # Convenience functions
-    "create_default_proxies",
-    "create_minimal_proxies",
-    "create_proxies_for_owner",
-    # Simplified wrappers
-    "SimpleStorageProxy",
-    "SimpleMonitoringProxy",
 ]

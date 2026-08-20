@@ -11,15 +11,17 @@ sources:
 
 connections:
   market:
-    # Market broadcasts to all investors
-    - rulellm_momentum_1
-    - rulellm_momentum_2
-    - rulellm_momentum_3
-    - rulellm_contrarian_1
-    - rulellm_contrarian_2
-    - rulellm_risk_averse_1
-    - rulellm_risk_averse_2
-    - rulellm_aggressive_1
-    - rulellm_aggressive_2
-    - rulellm_noise_1
-    - rulellm_noise_2
+    # Market broadcasts to all investors.
+    # Instance keys must match the fully-expanded player keys
+    # produced by expand_player_instances() — base key + '_' + index.
+    - rulellm_momentum_investor_1
+    - rulellm_momentum_investor_2
+    - rulellm_momentum_investor_3
+    - rulellm_contrarian_investor_1
+    - rulellm_contrarian_investor_2
+    - rulellm_risk_averse_investor_1
+    - rulellm_risk_averse_investor_2
+    - rulellm_aggressive_investor_1
+    - rulellm_aggressive_investor_2
+    - rulellm_noise_trader_1
+    - rulellm_noise_trader_2

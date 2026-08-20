@@ -364,8 +364,6 @@ class RagLLMInvestor(GeneralPlayer):
         decision: Optional[Dict[str, Any]] = None
         max_retries = 3
         last_error: BaseException | None = None
-        parser_fallback = False
-        fallback_reason = ""
         for attempt in range(max_retries):
             infer_input = InferInput(system_msg=system_prompt, user_msg=user_prompt)
             try:
@@ -376,26 +374,19 @@ class RagLLMInvestor(GeneralPlayer):
                 last_error = exc
                 parse_error = isinstance(exc, (ValueError, KeyError))
                 retryable_api_error = is_retryable_llm_error(exc)
+                # Strict fail-fast: permanent errors abort immediately.
                 if not parse_error and not retryable_api_error:
                     raise
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM failed after %d attempts: %s. Holding.",
-                        self.identity,
-                        max_retries,
-                        exc,
-                    )
-                    decision = {
-                        "action": "hold",
-                        "quantity": 0,
-                        "reasoning": f"LLM fallback hold after retries: {last_error}",
-                        "analysis": "",
-                    }
-                    parser_fallback = parse_error
-                    fallback_reason = "parse" if parse_error else "retryable_api"
 
         if decision is None:
-            raise RuntimeError(f"[{self.identity}] LLM decision unavailable")
+            # Strict fail-fast: retry exhaustion propagates as RuntimeError.
+            # Do NOT fabricate a hold decision — that would silently mask
+            # persistent LLM failures. Simulator will surface this to the
+            # runner which halts the whole round.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after "
+                f"{max_retries} retries. Last error: {last_error}"
+            )
         action = decision["action"]
         quantity = int(decision["quantity"])
         reasoning = str(decision.pop("reasoning"))[:120]
@@ -445,8 +436,6 @@ class RagLLMInvestor(GeneralPlayer):
             "agent_type": strategy_name,
             "reasoning": reasoning,
             "analysis": analysis,
-            "parser_fallback": parser_fallback,
-            "fallback_reason": fallback_reason,
             "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {

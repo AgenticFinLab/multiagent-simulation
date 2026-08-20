@@ -77,15 +77,3 @@ def parse_svbbankrun_decision(response_text: str) -> Dict[str, Any]:
         "llm_fallback": False,
         "fallback_reason": "",
     }
-
-
-def fallback_hold_decision(reason: str) -> Dict[str, Any]:
-    """Return an explicit conservative fallback decision for stochastic API output."""
-    return {
-        "action": "hold",
-        "quantity": 0,
-        "reasoning": f"fallback hold: {reason}",
-        "analysis": "",
-        "llm_fallback": True,
-        "fallback_reason": reason,
-    }

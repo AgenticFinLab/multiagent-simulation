@@ -164,21 +164,13 @@ class LLMInvestor(GeneralPlayer):
                     )
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM parse contract failed after %d attempts: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            # Strict fail-fast: retry exhaustion propagates as RuntimeError.
+            # Do NOT fabricate a hold decision — that would silently mask
+            # persistent LLM failures.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after "
+                f"{max_retries} retries. Last error: {last_error}"
             )
-            decision = {
-                "action": "hold",
-                "quantity": 0,
-                "reasoning": f"fallback hold after LLM parse failure: {last_error}",
-                "analysis": "",
-            }
-            parser_fallback = True
-        else:
-            parser_fallback = False
 
         action = decision["action"]
         quantity = int(decision["quantity"])
@@ -224,7 +216,6 @@ class LLMInvestor(GeneralPlayer):
             "agent_type": strategy_name,
             "reasoning": reasoning,
             "analysis": analysis,
-            "parser_fallback": parser_fallback,
         }
         return {
             **order,

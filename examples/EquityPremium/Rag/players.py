@@ -22,10 +22,7 @@ from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 
 from examples.EquityPremium.LLM.players import Market
-from examples.EquityPremium.decision import (
-    fallback_hold_decision,
-    parse_equity_premium_decision,
-)
+from examples.EquityPremium.decision import parse_equity_premium_decision
 
 logger = logging.getLogger("EquityPremium.Rag")
 
@@ -256,19 +253,16 @@ class RagLLMInvestor(GeneralPlayer):
                 break
             except ValueError as exc:
                 last_error = str(exc)
-                if attempt == 2:
-                    logger.warning(
-                        "[%s] parse failed after retries; explicit fallback: %s",
-                        self.identity,
-                        last_error,
-                    )
-                    decision = fallback_hold_decision(last_error)
 
         if decision is None:
-            raise RuntimeError(f"[{self.identity}] Rag decision failed")
+            # Strict fail-fast: do NOT fabricate a hold decision. Raise so
+            # the simulator surfaces the failure to the runner which halts
+            # the whole round loudly.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after 3 retries. "
+                f"Last error: {last_error}"
+            )
 
-        llm_fallback = bool(decision.pop("llm_fallback"))
-        fallback_reason = str(decision.pop("fallback_reason"))
         stock_qty = float(decision["stock_qty"])
         price = market_data["stock_price"]
         cash = self.state.custom_state["cash"]
@@ -293,8 +287,6 @@ class RagLLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "llm_fallback": llm_fallback,
-            "fallback_reason": fallback_reason,
             "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {

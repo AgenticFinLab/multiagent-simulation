@@ -41,10 +41,7 @@ Usage:
 
 import copy
 import logging
-import json
 import os
-import re
-import tempfile
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -56,10 +53,16 @@ from masim.simulator.base import (
     SimulatorStatus,
     RoundPhase,
 )
+from masim.simulator.resume_scanner import (
+    detect_resume_round,
+    write_resume_checkpoint,
+)
 from masim.player.base import PlayerConfig
 from masim.persona.general import PlayerPersona
-from masim.communication.general import GeneralCommunicationChannel
-from masim.proxy.general import build_message_from_info
+from masim.communication.general import (
+    GeneralCommunicationChannel,
+    build_message_from_info,
+)
 from masim.utils.topology import TopologyGraph
 from masim.utils.ray_utils import ensure_ray, get_actor_name
 from masim.utils.config import load_class
@@ -548,7 +551,7 @@ class GeneralSimulator(BaseSimulator):
         # This marker is written only after every execution level and message
         # dispatch completed.  It is intentionally simulator-owned instead of
         # inferred from scenario-specific folders such as ``records/market``.
-        self._write_resume_checkpoint(
+        write_resume_checkpoint(
             self.config.setting["record_path"], round_num
         )
 
@@ -580,7 +583,7 @@ class GeneralSimulator(BaseSimulator):
         record_path = self.config.setting["record_path"]
 
         # Detect already-completed rounds from on-disk data
-        start_round = self._detect_resume_round(record_path) + 1
+        start_round = detect_resume_round(record_path) + 1
         if start_round > 1:
             logger.info(
                 "    Resume detected: %d round(s) already on disk, starting from round %d",
@@ -613,136 +616,12 @@ class GeneralSimulator(BaseSimulator):
         # Return recent history (from hot storage)
         return self.history.recent
 
-    @staticmethod
-    def _detect_resume_round(record_path: str) -> int:
-        """
-        Scan record_path for the highest completed round number.
-
-        Uses the market coordinator's turns/ directory (turn_block_N.json),
-        where each entry contains a round_num field — one entry per round.
-        Falls back to scanning HistoryBuffer cold files (batch_XXXXXXXX_XXXXXXXX.json)
-        under record_path/market/ if turns data is absent.
-        Returns 0 if no data is found.
-        """
-        checkpoint_path = os.path.join(record_path, ".masim-progress.json")
-        try:
-            with open(checkpoint_path, encoding="utf-8") as checkpoint_file:
-                checkpoint = json.load(checkpoint_file)
-            completed_round = int(checkpoint["completed_round"])
-            if completed_round >= 0:
-                return completed_round
-        except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError):
-            pass
-
-        # Compatibility recovery for EchoChamber runs created before the
-        # progress marker existed.  The environment receives the final-level
-        # actions; the largest persisted round is therefore the last round
-        # that made it through the simulation pipeline.
-        environment_messages = os.path.join(record_path, "environment", "messages")
-        recovered_round = GeneralSimulator._max_persisted_message_round(
-            environment_messages
-        )
-        if recovered_round:
-            logger.info(
-                "    Recovered completed round %d from environment messages",
-                recovered_round,
-            )
-            return recovered_round
-
-        market_path = os.path.join(record_path, "market")
-        if not os.path.isdir(market_path):
-            return 0
-
-        # Primary: read turn_block_*.json files in market/turns/
-        turns_path = os.path.join(market_path, "turns")
-        if os.path.isdir(turns_path):
-            max_round = 0
-            for fname in os.listdir(turns_path):
-                if not (fname.startswith("turn_block_") and fname.endswith(".json")):
-                    continue
-                try:
-                    with open(os.path.join(turns_path, fname)) as f:
-                        block = json.load(f)
-                    for record in block.values():
-                        rn = (
-                            record.get("round_num")
-                            if isinstance(record, dict)
-                            else None
-                        )
-                        if rn is not None:
-                            max_round = max(max_round, int(rn))
-                except Exception:
-                    pass
-            if max_round > 0:
-                return max_round
-
-        # Fallback: count entries in HistoryBuffer cold files under market/*/
-        # File naming: batch_{start:08d}_{end:08d}.json  (HistoryBuffer cold storage)
-        # File naming: batch_block_N.json                (BlockBasedStoreManager)
-        max_round = 0
-        for store_name in os.listdir(market_path):
-            store_path = os.path.join(market_path, store_name)
-            if not os.path.isdir(store_path) or store_name in ("turns", "messages"):
-                continue
-            total = 0
-            for fname in os.listdir(store_path):
-                # HistoryBuffer: batch_00000000_00000049.json
-                m = re.match(r"batch_(\d{8})_(\d{8})\.json", fname)
-                if m:
-                    batch_end = int(m.group(2))  # 0-based end index
-                    total = max(total, batch_end + 1)
-                # BlockBasedStoreManager: batch_block_N.json
-                m2 = re.match(r"batch_block_(\d+)\.json", fname)
-                if m2:
-                    try:
-                        with open(os.path.join(store_path, fname)) as f:
-                            entries = json.load(f)
-                        block_idx = int(m2.group(1))
-                        block_size = 50
-                        total = max(total, block_idx * block_size + len(entries))
-                    except Exception:
-                        pass
-            max_round = max(max_round, total)
-        return max_round
-
-    @staticmethod
-    def _max_persisted_message_round(messages_path: str) -> int:
-        """Return the largest round in persisted message blocks."""
-        if not os.path.isdir(messages_path):
-            return 0
-        max_round = 0
-        for fname in os.listdir(messages_path):
-            if not (fname.startswith("msg_block_") and fname.endswith(".json")):
-                continue
-            try:
-                with open(
-                    os.path.join(messages_path, fname), encoding="utf-8"
-                ) as message_file:
-                    block = json.load(message_file)
-                for record in block.values():
-                    if isinstance(record, dict) and record.get("round_num") is not None:
-                        max_round = max(max_round, int(record["round_num"]))
-            except (OSError, ValueError, TypeError, json.JSONDecodeError):
-                continue
-        return max_round
-
-    @staticmethod
-    def _write_resume_checkpoint(record_path: str, round_num: int) -> None:
-        """Atomically persist the latest fully completed round."""
-        os.makedirs(record_path, exist_ok=True)
-        checkpoint_path = os.path.join(record_path, ".masim-progress.json")
-        fd, temporary_path = tempfile.mkstemp(
-            prefix=".masim-progress-", suffix=".tmp", dir=record_path
-        )
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as checkpoint_file:
-                json.dump({"completed_round": int(round_num)}, checkpoint_file)
-                checkpoint_file.flush()
-                os.fsync(checkpoint_file.fileno())
-            os.replace(temporary_path, checkpoint_path)
-        finally:
-            if os.path.exists(temporary_path):
-                os.unlink(temporary_path)
+    # NOTE: resume-scanning helpers (_detect_resume_round,
+    # _max_persisted_message_round, _write_resume_checkpoint) moved to
+    # ``masim.simulator.resume_scanner`` — they are pure stdlib disk
+    # helpers with no simulator state, and lived here only for historical
+    # reasons.  Call sites now use ``resume_scanner.detect_resume_round``
+    # and ``resume_scanner.write_resume_checkpoint`` directly.
 
     async def shutdown(self) -> None:
         """Shutdown simulation and release resources."""
@@ -953,6 +832,7 @@ def run(
     import traceback
 
     from masim.simulator.base import detect_variant, extract_knowledge_config
+    from masim.simulator.config_schema import validate_simulation_config
     from masim.utils.config import load_config, setup_logging
 
     if load_env:
@@ -975,6 +855,10 @@ def run(
 
     # ── Config load + optional round override ────────────────────────────
     yaml_config = load_config(args.config)
+    # Boundary-validate against pydantic v2 schema so shape/type errors
+    # surface here (with a full field-path trace) rather than as opaque
+    # KeyErrors mid-way through Ray actor construction.
+    validate_simulation_config(yaml_config)
     config = SimulationConfig(**yaml_config)
     if args.rounds:
         config.setting["total_rounds"] = args.rounds

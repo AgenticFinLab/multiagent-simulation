@@ -22,7 +22,6 @@ Core Design Principles:
 4. Infrastructure Decoupling via Micro-Proxy Pattern:
    - SendReceiveProxy: Message routing and transmission
    - StorageProxy: State checkpoint and rollback
-   - ResourceProxy: MCP protocol integration
    - ObservabilityProxy: Metrics and logging
 
 Architecture:
@@ -72,19 +71,19 @@ from masim.player import (
     GeneralPlayer,
 )
 
-# Communication module (channel wire layer only)
+# Communication module (message + channel wire layer)
 from masim.communication import (
+    Message,
+    MessageType,
+    MessagePriority,
     SimPacket,
     CommunicationChannel,
     GeneralCommunicationChannel,
+    build_message_from_info,
 )
 
-# Proxy module (message routing + proxy layer)
+# Proxy module (infrastructure proxy layer)
 from masim.proxy import (
-    MessageType,
-    MessagePriority,
-    Message,
-    build_message_from_info,
     ProxyType,
     ProxyConfig,
     BaseProxy,
@@ -92,8 +91,6 @@ from masim.proxy import (
     SendReceiveProxy,
     StorageConfig,
     StorageProxy,
-    ResourceConfig,
-    ResourceProxy,
     MonitoringConfig,
     MonitoringProxy,
 )
@@ -135,15 +132,15 @@ __all__ = [
     "PlayerState",
     "BasePlayer",
     "GeneralPlayer",
-    # Communication types (channel wire layer)
+    # Communication types (message + channel wire layer)
+    "Message",
+    "MessageType",
+    "MessagePriority",
     "SimPacket",
     "CommunicationChannel",
     "GeneralCommunicationChannel",
-    # Proxy types (message routing + proxy layer)
-    "MessageType",
-    "MessagePriority",
-    "Message",
     "build_message_from_info",
+    # Proxy types (infrastructure proxy layer)
     "ProxyType",
     "ProxyConfig",
     "BaseProxy",
@@ -151,8 +148,6 @@ __all__ = [
     "SendReceiveProxy",
     "StorageConfig",
     "StorageProxy",
-    "ResourceConfig",
-    "ResourceProxy",
     "MonitoringConfig",
     "MonitoringProxy",
     # Simulator types
