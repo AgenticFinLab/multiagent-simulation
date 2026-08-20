@@ -148,7 +148,7 @@ under an authoritative, replayable path.
 ### Current Definitions and frozen engineering baseline
 
 The current Knickerbocker Trust and NYCH Definitions have an accepted,
-non-executable mapping specification. `src/h2epr/agents/panic_1907_baseline.py` preserves a
+non-executable mapping specification. `tests/support/agents/panic_1907_baseline.py` preserves a
 small non-Ray path for the old `0.1.0-dev` fixture. It validates:
 
 - Definition identity and content hashes;

@@ -14,7 +14,7 @@ from h2epr.agents.definition import (
     DefinitionDrivenAgent,
     load_binding_catalog,
 )
-from h2epr.agents.panic_1907_baseline import (
+from support.agents.panic_1907_baseline import (
     REQUEST_ID,
     build_pilot_agents,
     run_member_facility_pilot,

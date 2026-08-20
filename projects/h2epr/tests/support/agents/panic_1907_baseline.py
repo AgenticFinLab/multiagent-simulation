@@ -23,7 +23,7 @@ from masim.integrations.event_process import (
     validate_trace,
 )
 
-from .definition import (
+from h2epr.agents.definition import (
     AgentObservation,
     DecisionDraft,
     DecisionOutcome,

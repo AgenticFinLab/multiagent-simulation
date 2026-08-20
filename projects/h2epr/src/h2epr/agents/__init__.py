@@ -1,8 +1,4 @@
-"""Definition binding and conformance surfaces.
-
-The historical engineering baseline remains an explicit opt-in module.
-Importing :mod:`h2epr` does not load it or activate a simulation runtime.
-"""
+"""Definition binding and conformance surfaces."""
 
 from .definition import (
     AgentConformanceError,

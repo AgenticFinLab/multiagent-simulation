@@ -18,6 +18,6 @@ The binding catalog originally had SHA-256
 `1c6d12f21b88ecae8de1dd3b2de90de4f4821a41b47442692fc3140fc52458fa`; relocation changed only its four
 repository-relative asset locators. The four referenced Markdown hashes remain unchanged.
 
-The corresponding implementation is `h2epr.agents.panic_1907_baseline`, and its dedicated tests are in
-`tests/agents/test_panic_1907_agent_baseline.py`. Changes are limited to correcting a defect in the fixture or
-its verification. Current Agent research and behavior changes belong only at `agents/defines/panic_1907/`.
+The corresponding implementation is `tests/support/agents/panic_1907_baseline.py`, and its dedicated tests are
+in `tests/agents/test_panic_1907_agent_baseline.py`. Changes are limited to correcting a defect in the fixture
+or its verification. Current Agent research and behavior changes belong only at `agents/defines/panic_1907/`.

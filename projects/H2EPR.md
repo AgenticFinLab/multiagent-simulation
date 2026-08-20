@@ -291,7 +291,7 @@ Rule v2、正式 simulation、post-seal evaluation、LLM/RAG 和多事件扩展�
 | evaluation package | post-seal 评价方法和数据边界已经确定 |
 | 根级 H2EPR package | 出现仓库外使用者、独立发布或复现需求 |
 
-旧三步实现保存在 `src/h2epr/agents/panic_1907_baseline.py`，只供冻结工程夹具使用。当前 Definition
+旧三步实现保存在 `tests/support/agents/panic_1907_baseline.py`，只供冻结工程夹具使用。当前 Definition
 不会复用该模块名称或映射；后续实现按 Agent、scenario/environment 和 reducer 的真实职责建立。
 
 ## 开发与版本管理
