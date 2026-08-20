@@ -191,9 +191,9 @@ projects/h2epr/agents/
 
 当前 Knickerbocker Definition 包含四个 Decision Commitment，NYCH 包含五个。两份定义使用同一
 十模块结构，但分别表达公司级流动性与求援决策、成员制清算机构的程序与资源边界。它们是已经接受的
-`0.2.0` 参考候选，仍属于结果已暴露的探索性建模，不声称历史校准或独立验证。
+`0.2.1` 参考 Definition，仍属于结果已暴露的探索性建模，不声称历史校准或独立验证。
 
-当前 `0.2.0` Definition 尚无可执行 binding。旧的三 tick 路径已经作为 `0.1.0-dev` 冻结工程夹具
+当前 `0.2.1` Definition 已有接受的 V1 mapping 规范，但尚无可执行 binding。旧的三 tick 路径已经作为 `0.1.0-dev` 冻结工程夹具
 移入 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`，只覆盖：
 
 1. Knickerbocker 发出 support request；
@@ -201,7 +201,7 @@ projects/h2epr/agents/
 3. Knickerbocker 在收到结果后更新 operational posture。
 
 该夹具用于验证旧 Definition binding、缺失信息处理、请求生命周期、权限、结果反馈和 replay，不能
-作为当前 `0.2.0` Definition 的实现或 conformance 证据。
+作为当前 `0.2.1` Definition 的实现或 conformance 证据。
 
 ## 与 MASim 的关系
 
@@ -245,8 +245,8 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | ParticipantArtifact / EventBundle | G2 工程基线完成 |
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
-| Agent Definition 0.2.0 | 两角色参考 Definition、来源表、claim ledger 和决策局面已接受 |
-| Definition implementation mapping | 尚未开始；旧三步路径仅作为冻结工程基线 |
+| Agent Definition 0.2.1 | 两角色参考 Definition、来源表、claim ledger 和决策局面已接受 |
+| Definition implementation mapping | V1 mapping 规范已接受但尚未实现；旧三步路径仅作为冻结工程基线 |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
 
@@ -258,7 +258,7 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 当前迭代
 
-下一轮使用 Knickerbocker 和 NYCH 完成 Definition-to-implementation mapping：
+两角色 Definition-to-implementation mapping 已完成设计并接受为非可执行规范，覆盖：
 
 - 映射 Definition identity、Decision Commitment、observation 和状态；
 - 映射 intent、权限、business result 与 trace 记录；
@@ -267,8 +267,9 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 映射完成后
 
-根据两角色映射和反馈结果，再决定是否需要修订 Definition、Template 或 Skills，并判断是否已经具备
-进入实现迭代的条件。
+下一轮在单独授权下实现保守的 request–classification–information–scoped-decline–feedback
+切片，先建立 binding、intent registry 和 fail-closed checks，再加入角色 policy。根据映射和实现反馈，
+再决定是否修订 Definition、Template 或 Skills。
 
 如果实际映射出现 V1 无法表达的案例，再评估窄范围的 successor contract。目录或字段风格本身不构成
 修改合同的理由。

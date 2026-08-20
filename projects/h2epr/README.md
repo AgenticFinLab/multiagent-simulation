@@ -18,7 +18,8 @@ It compares two institutionally different participants:
 
 Each participant has an event-specific Markdown Definition. A small non-Ray
 engineering fixture preserves the earlier binding and trace checks, while the
-current `0.2.0` Definitions await a separately reviewed implementation mapping.
+current `0.2.1` Definitions now have an accepted, non-executable V1 mapping
+specification.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -48,7 +49,8 @@ projects/h2epr/
 ├── agents/
 │   ├── README.md
 │   ├── agent-definition-template.md
-│   └── defines/panic_1907/
+│   ├── defines/panic_1907/
+│   └── bindings/panic_1907/
 ├── skills/
 │   ├── historical-evidence-research/
 │   ├── participant-behavior-research/
@@ -90,7 +92,11 @@ restriction is common to both NYCH structures; the conservative baseline uses
 no evidenced competent alternative route, while bounded alternative-route
 discretion is retained only for structural sensitivity.
 
-No executable binding currently claims conformance with version `0.2.0`. The
+The accepted mapping under `agents/bindings/panic_1907/` pins the two
+Definition hashes, seven business lifecycles, 21 semantic intents, and 21
+cross-object conformance rules to Contracts V1. It remains non-executable.
+
+No executable binding currently claims conformance with version `0.2.1`. The
 earlier three-tick path is frozen under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
 Definition hashes, observation allowlists, request state, intent/result
@@ -179,9 +185,9 @@ The G3 suite requires the project runtime environment. See
 ## Project status
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
-The current Agent work is the first event-specific semantic iteration and has
-not yet been mapped into an executable two-role implementation or integrated
-into the G3/G4 path. Scientific evaluation remains a later post-seal activity.
+The current Agent work has reached an accepted two-role semantic and V1 mapping
+specification. It has not yet been implemented or integrated into the G3/G4
+path. Scientific evaluation remains a later post-seal activity.
 
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next

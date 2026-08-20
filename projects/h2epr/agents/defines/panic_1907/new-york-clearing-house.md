@@ -7,12 +7,12 @@
 | Historical participant | New York Clearing House Association (NYCH) |
 | Modeled role | member-governed procedural interface for request receipt, route and eligibility classification, information review, authority formation, and institutional disposition |
 | Event and interval | H2EPR-0288, Panic of 1907; the October 21 request receipt, classification, review, authority, and response boundary |
-| Primary situations | request classification; incomplete information or authority; member-facility boundary; conditioned proposal; delivered disposition or result |
+| Primary situations | request classification; incomplete information or authority; member-facility boundary; conditioned proposal; case disposition, communication delivery, and later result |
 | Decision cadence | event-driven when a request, relationship fact, information item, forum/authority state, proposal state, or result changes; an activated case must produce a procedural response record |
 | Decision form | constrained set-valued procedural policy: all implementations share classification, minimum response, authority, and result boundaries while some institutionally permitted choices remain open |
 | State authority | case, review, authority, commitment, and result truth is environment-owned institutional process state; the Agent may propose transitions and retain delivered references |
 | Evidence status | exploratory construction using fully exposed draft material; the alternative-route baseline and sensitivity variant are modeling choices, not historically validated procedures |
-| Definition identity | `h2epr.agent-definition.0288.new-york-clearing-house`, version `0.2.0` |
+| Definition identity | `h2epr.agent-definition.0288.new-york-clearing-house`, version `0.2.1` |
 
 This Agent represents the New York Clearing House Association as a member-based procedural institution, not as
 a single banker or a modern central bank. It explains how a support-related request may be received, classified
@@ -176,7 +176,9 @@ the eventual result.
 | `review_state` | `{not_open, collecting_information, examining, awaiting_forum, decision_ready, complete, closed}` plus competent interface and authoritative record identity | environment-owned institutional process event delivered to the Agent | not modeled as a random delay and not privately editable | `DC-NYCH-02`–`DC-NYCH-04` |
 | `authority_state` | `{no_competent_authority_identified, committee_scope, membership_scope_required, authorized, denied, disputed, unknown}` with route/proposal scope and authoritative record identity | institutional rules and environment-owned dated decisions | unknown creates no authority; the Agent cannot create authority by changing its own memory | `DC-NYCH-02`–`DC-NYCH-04` |
 | `resource_proposal_status` | `{none, information_needed, collateral_review, member_consultation, conditionally_authorized, scheduled, partial, failed, executed, withdrawn}` | environment-owned institutional/member process and result events | proposal is not member commitment or effect | `DC-NYCH-04`, `DC-NYCH-05` |
-| `delivered_case_result` | typed disposition and reason, or none | delivered authoritative result | silence is not refusal or approval | `DC-NYCH-05` |
+| `case_disposition_status` | `{none, pending, information_needed, referred, facility_declined, other_scoped_decline, conditioned_proposal, closed}` plus case, scope, reason, and issuing-authority references | environment-owned case/institutional decision record delivered to the Agent | a disposition is not message issue, delivery, counterparty acceptance, or resource effect | `DC-NYCH-05` |
+| `case_communication_status` | `{not_issued, issued, transport_pending, delivered, expired, failed, unknown}` plus message, recipient, route, and event-time references | environment-owned issue and communication-transport records delivered to the Agent | issued is not delivered; delivered is not business acceptance or effect | `DC-NYCH-05` |
+| `delivered_case_result` | `{none, delayed, partial, failed, executed, withdrawn}` plus typed reason and result reference | delivered authoritative execution/resource/process result | silence is no result; the result cannot rewrite the prior disposition or communication record | `DC-NYCH-05` |
 
 #### Explicitly forbidden information
 
@@ -194,8 +196,8 @@ delivered member or market report whose role in a specific commitment is declare
 
 ### Authoritative process state and participant decision state
 
-The case, classification, review, authority, member/collateral commitment, message delivery, and realized result
-are authoritative institutional or environment-owned records. The Agent may propose a transition and retain the
+The case, classification, review, authority, member/collateral commitment, case disposition, communication
+issue/delivery, and realized result are authoritative institutional or environment-owned records. The Agent may propose a transition and retain the
 last delivered record identity; it cannot privately mutate a second copy. Optional qualitative assessments and
 the last-consumed record versions are Agent decision state and must remain declared and replayable.
 
@@ -207,7 +209,8 @@ the last-consumed record versions are Agent decision state and must remain decla
 | review/forum state | environment-owned institutional process | not open | authorized procedural event | distinguishes receipt, examination, consultation, and decision readiness |
 | authority record | environment-owned governance process | no competent authority identified or unknown | dated committee/association decision | opens or closes only the scoped intent |
 | resource-commitment record | environment/member-owned process | none | proposal, member/collateral process, authoritative result | prevents double commitment and separates authorization from realization |
-| communicated disposition | environment-owned issue/delivery record | none | actual message issue and delivery events | determines later follow-up, not counterparty behavior automatically |
+| case disposition | environment-owned institutional/case decision record | none | authorized pending, information-needed, referral, scoped-decline, proposal, or closure event | determines what may be communicated and the visible business posture; does not prove delivery or effect |
+| case communication status | environment-owned issue/transport record | not issued | authorized message issue plus transport adjudication, delivery, expiry, or failure | determines what the counterparty could observe and whether follow-up is due; does not change the disposition or result |
 | procedural assessment posture | Agent decision state derived from delivered records | no assessment beyond current records | new information, classification, authority, or result observation | supports bounded choice without competing with institutional truth |
 
 The Agent may form qualitative institutional assessments—such as information adequate for a limited route or
@@ -236,7 +239,7 @@ Abstention is permitted only when no request or authorized matter exists, jurisd
 cannot be established, necessary information cannot presently be requested or obtained, an identified process
 is awaiting a named event, or no institutionally permitted response remains. The record must state the blocker
 and the event that would reopen the case. Repeated abstention after a delivered request is classifiable,
-information is adequate, authority is available, and no process is pending is inconsistent with this candidate
+information is adequate, authority is available, and no process is pending is inconsistent with this Definition
 unless declared as a competing institutional hypothesis.
 
 ### Model invariants
@@ -482,39 +485,50 @@ constraint and a revisit event. It cannot replace a decision after all declared 
 pattern:** NYCH directly spends member resources. **Falsifier:** resource/procedure conditions never change
 proposal behavior, or focal evidence shows no competent route.
 
-#### `DC-NYCH-05` — communicate a typed disposition and follow the case result
+#### `DC-NYCH-05` — issue a typed disposition, communicate it, and follow later results
 
-**Situation.** A competent process has produced a pending status, information need, referral, decline, or
-authorized proposal, or a later execution result has been delivered.
+**Situation.** A competent process has produced a new case disposition; the associated communication has been
+issued, delivered, delayed, expired, or failed; or a later authoritative execution/resource result has been
+delivered.
 
-**Basis.** `M-NYCH-02`–`M-NYCH-04`; explicit case and result lifecycles are modeling requirements needed to keep
-institutional communication, member commitment, execution, and effect analytically distinct.
+**Basis.** `M-NYCH-02`–`M-NYCH-04`; explicit case, disposition, communication, and result lifecycles are
+modeling requirements needed to keep institutional decision, counterparty information, member commitment,
+execution, and effect analytically distinct.
 
-**Authorized information and state.** `communicated_disposition`, `resource_proposal_status`, and `delivered_case_result`.
+**Authorized information and state.** `case_disposition_status`, `case_communication_status`,
+`resource_proposal_status`, and `delivered_case_result`.
 
-**Alternatives.** Issue the typed message; request follow-up information; maintain or close review; reconsider
-only through an authorized new event; abstain.
+**Alternatives.** Issue or communicate the typed disposition; request follow-up information; address a failed or
+expired communication through a permitted route; maintain or close review; reconsider only through an authorized
+new event; abstain when no communication or follow-up is due.
 
-**Hypothesis.** The counterparty can adapt only after message delivery, and NYCH’s later behavior differs among
-pending, partial, failed, and executed results.
+**Hypothesis.** A case disposition changes NYCH's authoritative case posture; the counterparty can adapt only
+after the corresponding message is delivered; and NYCH's later behavior differs among communication failure,
+pending status, and delayed, partial, failed, executed, or withdrawn results.
 
 **Permitted intents.** `communicate_case_status`, `issue_typed_decline`, `refer_request`,
 `request_case_information`, `close_or_reopen_review`, or abstention.
 
-**Precedence.** The newest delivered authoritative disposition or result supersedes the prior visible case
-posture. Communication and follow-up remain bounded by the issuing forum and may not rewrite the underlying
-result.
+**Precedence.** The authoritative case disposition determines what may be truthfully communicated. Communication
+status determines whether delivery-dependent follow-up is due but cannot rewrite the disposition. A newer
+authoritative execution/resource result supersedes the prior resource-process posture without erasing either the
+disposition or communication history. Every action remains bounded by the issuing forum.
 
-**Minimum response.** A newly available disposition or execution result must update the case and produce the
-corresponding communication, follow-up request, closure, or authorized reopening. A prior proposal may not remain
-the visible terminal state after a partial, failed, executed, or withdrawn result is delivered.
+**Minimum response.** A new case disposition must produce the corresponding authorized communication act or a
+recorded absence of a competent route/interface. A failed or expired communication must remain visible and
+produce a permitted retry, route clarification, maintained failure state, or a scoped no-further-action record.
+A newly delivered execution/resource result must update the case and produce the applicable follow-up,
+communication, closure, or authorized reopening. A prior proposal may not remain the visible terminal state after
+a delayed, partial, failed, executed, or withdrawn result.
 
-**Abstention boundary.** Abstention is conforming only when the delivered state requires no new communication or
-follow-up and the reason for maintaining the current case state is recorded.
+**Abstention boundary.** Abstention is conforming only when no new communication or follow-up is due, or no
+competent issuing/delivery path exists. The current disposition, communication status, blocking condition, and
+revisit event must remain recorded.
 
-**Expected pattern.** Message issue, delivery, and resource result remain distinct. **Forbidden pattern:** a
-proposal immediately rescues the requester. **Falsifier:** disposition/result categories have no behavioral or
-trace consequence.
+**Expected pattern.** Case disposition, message issue, transport adjudication, message delivery, execution/result,
+and later observation occur as distinct linked records. **Forbidden pattern:** a disposition is treated as
+delivered, or a proposal immediately rescues the requester. **Falsifier:** communication status or result class
+has no behavioral or trace consequence.
 
 ## Intent and result boundary
 
@@ -548,6 +562,8 @@ alternative. It is subject to the commitment-specific boundaries above and is no
 | information sufficiency | qualitative category plus provenance and `as-of` | exact focal dossier unavailable |
 | review/forum/authority | categorical procedural state | general interfaces supported; October 21 sequence unavailable |
 | resource commitment | proposal/commitment/result lifecycle with typed conditions | no single NYCH-owned resource scalar |
+| case disposition | scoped business state with reason and issuing authority | distinct from communication transport and resource result |
+| case communication | issue/delivery lifecycle with message, route, recipient, and time references | delivery does not create acceptance or effect |
 | collateral/amount | quantity, unit, valuation date, and route only when source/scenario provides them | focal values unidentified |
 | member/system pressure | delivered aggregate or qualitative report when a commitment consumes it | no participant-visible global exact state |
 | empirical membership effect | scholarly result only | about 20 percentage points in one cross-sectional specification; not a policy parameter |
@@ -702,10 +718,12 @@ Withdraw or materially revise:
 
 ### Design provenance
 
-Version `0.2.0` retains the reviewed procedural institution model and records the owner-approved structural
-treatment. The member-facility restriction is now common to both variants; the conservative baseline is
-`NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE`, and `BOUNDED_ALTERNATIVE_ROUTE_DISCRETION` is retained only for
-structural sensitivity. Neither is presented as historically validated.
+Version `0.2.1` retains the reviewed procedural institution model and owner-approved structural
+treatment. It replaces the ambiguous `communicated_disposition` input with two explicit observations:
+`case_disposition_status` for the environment-owned business disposition and
+`case_communication_status` for issue/transport/delivery state; `delivered_case_result` remains the separate
+later execution/resource/process result. The member-facility restriction remains common to both route variants,
+and neither variant is presented as historically validated.
 
 ### References
 

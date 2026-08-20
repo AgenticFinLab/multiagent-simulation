@@ -77,6 +77,7 @@ candidate:
 ```text
 agents/agent-definition-template.md
 agents/defines/<event>/<participant>.md
+agents/bindings/<event>/
 skills/historical-evidence-research/
 skills/participant-behavior-research/
 skills/agent-definition/
@@ -99,8 +100,9 @@ alternatives belong under:
 Date-suffixed and `-old` copies are not kept beside the current Definition.
 Contract versions and intentionally supported release lines are the exception.
 
-The current Panic of 1907 Definitions are version `0.2.0` and have no active
-executable binding. The earlier `0.1.0-dev` three-tick unit is retained under
+The current Panic of 1907 Definitions are version `0.2.1`. Their accepted V1
+mapping under `agents/bindings/panic_1907/` is non-executable. The earlier
+`0.1.0-dev` three-tick unit is retained under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/` as a frozen regression
 fixture. It is not an editable Definition line and does not claim conformance
 with the current files.

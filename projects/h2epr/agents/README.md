@@ -19,14 +19,15 @@ cross-event reuse, and additional execution approaches require separate work.
 | `source-register.md` | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
 | `evidence-ledger.md` | claim status, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
 | `decision-situations.md` | shared research situations and perturbations | participant policy or executable scenario state |
-| accepted binding, when present | derived mapping of Definition identity, observations, commitments and intents | independent behavior semantics |
+| accepted binding specification | derived mapping of Definition identity, observations, commitments and intents | independent behavior semantics or executable conformance |
 | machine contracts | encoding, type, shape, serialization and versioning | historical or behavioral claims |
 | environment/reducer | authoritative business state, admissibility, effects and results | participant intent |
 
 The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
-and intent semantics it was reviewed against. The current `0.2.0` Definitions
-do not yet have an executable binding.
+and intent semantics it was reviewed against. The current `0.2.1` Definitions
+have an accepted, non-executable V1 mapping specification; an executable
+binding remains future work.
 
 ## Layout and naming
 
@@ -34,6 +35,8 @@ do not yet have an executable binding.
 agents/
 ├── README.md
 ├── agent-definition-template.md
+├── bindings/
+│   └── panic_1907/
 └── defines/
     └── panic_1907/
         ├── README.md
@@ -67,7 +70,10 @@ agents/
   situations and falsification perturbations.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
-  the current `0.2.0` reference Definitions.
+  the current `0.2.1` reference Definitions.
+- [`bindings/panic_1907/`](bindings/panic_1907/): the accepted, non-executable
+  Definition-to-V1 mapping, scenario/lifecycle specification, 21-intent
+  registry, and cross-object conformance rules.
 
 All historical outcomes used here are already exposed. This iteration is
 construction and semantic falsification work, not held-out validation.
@@ -95,4 +101,4 @@ exception merely to retain history.
 The `0.1.0-dev` three-tick path is retained under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/)
 as a frozen engineering fixture. It is not a current Definition line and cannot
-be cited as conformance evidence for version `0.2.0`.
+be cited as conformance evidence for version `0.2.1`.

@@ -114,9 +114,10 @@ measurements.
 
 ## Agent and scenario semantics
 
-The current `0.2.0` Agent Definitions specify the behavior layer that will sit
-above the existing ParticipantArtifact shell. Their executable mapping has not
-yet been accepted.
+The current `0.2.1` Agent Definitions specify the behavior layer that will sit
+above the existing ParticipantArtifact shell. Their V1 mapping specification
+has been accepted under `agents/bindings/panic_1907/`, but it is not yet
+executable.
 
 | Responsibility | Owner |
 |---|---|
@@ -146,8 +147,8 @@ under an authoritative, replayable path.
 
 ### Current Definitions and frozen engineering baseline
 
-The current Knickerbocker Trust and NYCH Definitions are research assets with
-no executable binding. `src/h2epr/agents/panic_1907_baseline.py` preserves a
+The current Knickerbocker Trust and NYCH Definitions have an accepted,
+non-executable mapping specification. `src/h2epr/agents/panic_1907_baseline.py` preserves a
 small non-Ray path for the old `0.1.0-dev` fixture. It validates:
 
 - Definition identity and content hashes;
@@ -275,9 +276,9 @@ repository location.
 - The current G1–G4 canary is based on full-draft-exposed construction.
 - Rule v1 reads broader state and uses more actor-specific code than the new
   Agent Definition design permits.
-- The current `0.2.0` two-role Definitions have no executable mapping and have
-  not been integrated into the G3/G4 path; the old three-tick unit is only a
-  frozen engineering fixture.
+- The current `0.2.1` two-role Definitions and mapping specification have not
+  been implemented or integrated into the G3/G4 path; the old three-tick unit
+  is only a frozen engineering fixture.
 - NYCH authority outside the member facility remains unresolved.
 - Exact Knickerbocker requester identity and corporate authorization remain
   unresolved.

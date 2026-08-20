@@ -12,7 +12,7 @@
 | Decision form | constrained set-valued policy: all implementations share the permitted response classes and minimum response obligations, while more than one intent may remain admissible |
 | State authority | business-process and relationship truth is environment-owned; the Agent retains only declared decision posture and references to authoritative records |
 | Evidence status | exploratory construction using fully exposed draft material; request formation in `DC-KT-02` is an exposed event-specific calibration hypothesis, not independent validation |
-| Definition identity | `h2epr.agent-definition.0288.knickerbocker-trust`, version `0.2.0` |
+| Definition identity | `h2epr.agent-definition.0288.knickerbocker-trust`, version `0.2.1` |
 
 This Agent represents Knickerbocker Trust Company as an authorized institutional decision interface under
 withdrawal pressure and changing clearing access. It explains how an institution may assess immediate
@@ -169,7 +169,7 @@ world truth.
 | `asset_liquidity_assessment` | `{readily_available, conditionally_liquid, illiquid, disputed, unknown}` | authorized internal assessment | distinguishes expected conversion from book or ultimate value | `DC-KT-02`, `DC-KT-04` |
 | `collateral_package_status` | `{not_prepared, preparing, available, submitted, disputed, unknown}` | internal preparation and delivered process events | does not assert recipient acceptance or valuation | `DC-KT-02`, `DC-KT-03` |
 | `corporate_authorization` | `{not_requested, pending, authorized, denied, unknown}` with scope and authoritative record identity | environment-owned internal governance result delivered to the Agent | only `authorized` for the named scope permits the material intent; the Agent cannot privately rewrite the result | all material commitments |
-| `clearing_channel_status` | `{active, termination_notice_delivered, ending_at_time, inactive, disputed, unknown}` | delivered NBC/scenario relationship event | researcher knowledge of NBC’s choice is not delivery | `DC-KT-02`, `DC-KT-04` |
+| `clearing_channel_status` | `{active, termination_notice_delivered, ending_at_time, inactive, disputed, unknown}` plus recipient, channel, route, effective time, and declared content-requirement refs | delivered NBC/scenario relationship event | researcher knowledge of NBC’s choice is not delivery; missing route requirements remain explicit | `DC-KT-02`, `DC-KT-04` |
 | `support_request_status` | `{none, prepared, sent, delivered, awaiting_information, under_review, refused, expired, withdrawn, partial, failed, executed, unknown}` plus request identity | environment-owned process projection | sent is not delivered; delivered is not accepted; executed is not inferred | `DC-KT-02`–`DC-KT-04` |
 | `received_information_request` | requested material and request identity, or none | delivered message from recipient/process | only delivered requests may trigger disclosure work | `DC-KT-03` |
 | `delivered_disposition` | `{none, pending, need_information, referred, refused, prohibited, delayed, partial, failed, executed}` plus typed reason | delivered environment/institution result | no result is inferred from silence | `DC-KT-03`, `DC-KT-04` |
@@ -232,7 +232,7 @@ Abstention is permitted only when the record identifies a missing authority, mat
 available institutional channel, an unresolved process awaiting a named event, or no remaining permitted
 response. It must include the condition that would reopen the decision. Repeated abstention with satisfied
 authority, adequate information, an available route, no active equivalent process, and material unresolved
-pressure is inconsistent with this candidate model unless introduced as an explicit competing hypothesis.
+pressure is inconsistent with this model unless introduced as an explicit competing hypothesis.
 
 ### Model invariants
 
@@ -333,42 +333,71 @@ or a hidden exact balance activates the decision. **Falsifier:** masking the ass
 **Model-use classification.** `EXPOSED_EVENT_SPECIFIC_CALIBRATION_HYPOTHESIS`. The known request makes this a
 construction anchor for the focal event, not an independently predicted action or a general trust-company rule.
 
-**Situation.** Material pressure is established, a scope-appropriate authorization exists, a channel is active,
-and no equivalent request is unresolved.
+**Situation.** Five explicitly declared gates are closed: material pressure, scoped corporate authorization, an
+active identified channel/route, sufficient bounded request content, and absence of a business-equivalent
+unresolved request.
 
 **Basis.** `M-KT-01`–`M-KT-03`; the request and NBC relationship are reconstructed from exposed, partly disputed
-accounts, while the exact requester, mandate, amount, and package remain unresolved.
+accounts, while the exact requester, mandate, amount, and package remain unresolved. The categorical gate rule
+below is an exposed modeling decision, not a recovered historical algorithm.
 
-**Authorized information and state.** `corporate_authorization`, `clearing_channel_status`,
-`active_request_reference`, and relevant resource assessments.
+**Authorized information and state.** `internal_liquidity_assessment`, `withdrawal_pressure`,
+`asset_liquidity_assessment`, `collateral_package_status`, `corporate_authorization`,
+`clearing_channel_status` including its declared route-content requirements, and `active_request_reference`.
 
-**Alternatives.** Before all gates close: seek clarification of channel or authority, assemble information or
-collateral, prepare contingency, or abstain for a declared blocker. After all gates close: submit the bounded
-request.
+**Gate semantics.**
 
-**Hypothesis.** In this event-specific candidate, material pressure plus scoped authorization, an active route,
-sufficient request content, and no equivalent pending request produce submission. The hypothesis does not claim
-that the adopted evidence identifies this as the unique historical decision rule.
+1. `material_pressure` is established only when a current `withdrawal_pressure` is `elevated` or `severe`
+   and a current `internal_liquidity_assessment` is `strained` or `critical`. Each value is current only when its
+   `as_of` has not been superseded by a later delivered observation of the same construct, or by a later event
+   that the frozen scenario explicitly declares invalidates that assessment. A channel event does not silently
+   stale a liquidity assessment, and an asset event does so only when the assessment records that dependency.
+2. `scoped_authorization` is established only by `corporate_authorization=authorized` for this request scope
+   and an authoritative record identity.
+3. `active_route` is established only by a delivered `clearing_channel_status=active` for the named recipient,
+   channel, and relevant time.
+4. `sufficient_request_content` means the request has a stable identity; represented institution and
+   authorization scope; recipient, channel, and proposed route; requested resource category; a typed quantity
+   with unit or an explicit qualitative/unknown bound; dated liquidity/withdrawal information; the
+   `asset_liquidity_assessment` and `collateral_package_status` exactly as known, including disputed or unknown;
+   route-required material when the delivered channel/route record establishes such requirements; and
+   expiry/withdrawal conditions. Sufficiency
+   means bounded and explicit, not complete knowledge or recipient acceptance.
+5. `no_equivalent_unresolved_request` is established only when the authoritative request process contains no
+   business-equivalent request in `prepared`, `sent`, `delivered`, `awaiting_information`, or
+   `under_review`.
+
+No hidden numeric threshold, exact world balance, later run, or backend default may satisfy a gate. Unknown,
+missing, stale, disputed, or route-incomplete inputs remain visible and select the named incomplete-gate branch.
+
+**Alternatives.** Before all five gates close: return to `DC-KT-01` for incomplete pressure information; seek the
+missing authorization or channel confirmation; assemble the missing bounded content; preserve an existing request
+under `DC-KT-03`; or abstain for a declared blocker. After all five gates close: submit the bounded request.
+
+**Hypothesis.** In this event-specific model, the five gate conditions produce submission. The hypothesis
+does not claim that the adopted evidence identifies this as the unique historical decision rule.
 
 **Permitted intents.** `submit_support_request`, `request_channel_confirmation`,
-`prepare_information_package`, `seek_institutional_authorization`, or abstention.
+`prepare_information_package`, `seek_institutional_authorization`, or abstention. An open material-pressure or
+request-lifecycle gate dispatches to `DC-KT-01` or `DC-KT-03` rather than expanding this commitment's intent set.
 
-**Precedence.** Scoped authorization, one-request lifecycle, channel validity, and adequate request content
-take precedence over urgency. Once all four gates and material pressure are satisfied, submission takes
-precedence over generic preparation or waiting in this candidate policy.
+**Precedence.** Information legality, scoped authorization, the one-request lifecycle, channel validity, and
+bounded request content take precedence over urgency. Once all five gates close, submission takes precedence over
+generic preparation or waiting in the current policy.
 
-**Minimum response.** When material pressure, scoped authorization, an active identified channel, sufficient
-request content, and absence of an equivalent unresolved request are all established, the candidate policy
-submits the bounded support request. If request content or route status is incomplete, it must instead seek the
-specific clarification or prepare the missing material. Generic waiting is not a substitute for either branch.
+**Minimum response.** If the material-pressure inputs are missing, stale, disputed, or outside the declared
+categories, the Agent returns to verification or a blocker-specific response under `DC-KT-01`. If authority,
+route, or content is the sole open gate, it addresses that gate without inventing a substitute. If an equivalent
+request is unresolved, it preserves that request under `DC-KT-03`.
+When all five gates close, the current policy submits exactly one bounded support request.
 
-**Abstention boundary.** Abstention requires an explicit authority, information, channel, or jurisdictional
-blocker. Evidence that the institution did not treat an otherwise complete request as an active option would
-falsify or narrow this behavioral commitment.
+**Abstention boundary.** Abstention requires an explicit information, authority, channel, content, lifecycle, or
+jurisdictional blocker and a named revisit event. Evidence that the institution did not treat an otherwise
+gate-closed request as an active option would falsify or narrow this behavioral commitment.
 
 **Expected pattern.** Request identity and scope remain stable from preparation through delivery. **Forbidden
-pattern:** name-based authority or self-declared support. **Falsifier:** removing authorization or the channel does
-not narrow the intent set.
+pattern:** name-based authority, hidden threshold, duplicate request, or self-declared support. **Falsifier:**
+removing or reopening any gate does not narrow the response, or all five gates close without submission.
 
 #### `DC-KT-03` — maintain an unresolved request and answer information needs
 
@@ -478,6 +507,19 @@ This revision uses categorical and dated states. It introduces no fitted behavio
 | reported deposits | contextual scale only | $62 million and $48.8 million reports are not silently reconciled |
 | reserve | dated historical bound only | $4.745 million on August 22 as reported by Sprague; not current cash |
 
+### `DC-KT-02` qualitative gate decision table
+
+| Gate | Closed when | Open/unknown response | Prohibited shortcut |
+|---|---|---|---|
+| material pressure | current `withdrawal_pressure ∈ {elevated, severe}` and current `internal_liquidity_assessment ∈ {strained, critical}` | verify, narrow, prepare, or record a blocker under `DC-KT-01` | hidden balance, future run, or numeric threshold |
+| scoped authorization | authoritative `authorized` record matches the request scope | seek authorization or use an ordinary-authority response | infer authority from name, title, or urgency |
+| active route | delivered active relationship identifies recipient/channel/route at the relevant time | seek confirmation, prepare another evidenced response, or record unavailable route | treat researcher's NBC knowledge as delivery |
+| sufficient bounded content | the minimum content inventory is present and all uncertainty is explicitly typed | prepare/clarify the missing item | require false precision or call missing values complete |
+| no unresolved equivalent | no authoritative request in a nonterminal equivalent state | maintain/supplement the existing request | create a new request ID to bypass duplication |
+
+This table fixes categorical branch semantics but not historical parameter values. A future binding may encode
+the categories and references; it may not replace them with an undocumented scalar score.
+
 Generic risk tolerance, fear, confidence, rescue probability, and precise subjective solvency probability are
 omitted because they lack a defensible construct and update path.
 
@@ -507,7 +549,7 @@ while authorization and channel facts remain unchanged.
 **Decision-time situation.** The institution has a material pressure assessment, an authorized request scope,
 an active NBC channel, sufficient request content, and no unresolved equivalent request.
 
-**Required response.** Under `DC-KT-02`, the candidate policy submits one bounded request with a stable identity.
+**Required response.** Under `DC-KT-02`, the current policy submits one bounded request with a stable identity.
 
 **Environment boundary.** Delivery, route admissibility, review, support, and effects remain outside its control.
 
@@ -592,9 +634,11 @@ Withdraw or materially revise:
 
 ### Design provenance
 
-Version `0.2.0` retains the reviewed institutional and behavioral model and records the owner-approved use of
-`DC-KT-02` as an exposed, event-specific calibration hypothesis. Its strong response rule is limited to the
-declared gate-closed focal construction and is not historical validation or a cross-event policy claim.
+Version `0.2.1` retains the reviewed institutional and behavioral model while making the
+owner-approved `DC-KT-02` calibration hypothesis operationally explicit. It replaces the ambiguous phrases
+“material pressure,” “relevant resource assessments,” and “sufficient request content” with five categorical,
+dated, auditable gates. The change introduces no fitted numeric threshold and remains an exposed focal-event
+construction, not historical validation or a cross-event policy claim.
 
 ### References
 

@@ -13,7 +13,7 @@ commitment inventories, legal observation envelopes and value domains,
 commitment-specific observation use, explicit unknown/missing handling,
 typed intent parameters, authority and request lifecycle, intent/result
 separation, and a deterministic three-tick trace/replay. It does not bind the
-current `0.2.0` Definitions, start Ray, or run the G3 simulation:
+current `0.2.1` Definitions, start Ray, or run the G3 simulation:
 
 The fixture is documented under
 [`fixtures/agents/panic_1907/minimal_binding_v0_1/`](fixtures/agents/panic_1907/minimal_binding_v0_1/).
