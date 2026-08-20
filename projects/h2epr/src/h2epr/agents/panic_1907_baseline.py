@@ -1,15 +1,17 @@
-"""Two-role H2EPR-0288 Agent Definition pilot.
+"""Frozen two-role H2EPR-0288 engineering baseline.
 
-This is a three-tick, deterministic micro-situation used to obtain feedback on
-the Definition carrier.  It is not Rule v2, a full Panic of 1907 scenario, or a
-historical-validity experiment.  Agents only emit semantic intents; the thin
-pilot environment owns request lifecycle, result delivery, and state changes.
+This module preserves the deterministic three-tick path built against the
+``0.1.0-dev`` Definition fixture. It tests the binding, intent/result, trace,
+and replay seams; it is not an implementation of the current reference
+Definitions. Agents only emit semantic intents, while the thin baseline
+environment owns request lifecycle, result delivery, and state changes.
 """
 
 from __future__ import annotations
 
 import copy
 import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -38,6 +40,9 @@ DELIVERED_ADVERSE_RESULTS = frozenset(
     {"denied_member_facility", "denied", "failed", "partial", "delayed"}
 )
 DELIVERED_RESULTS = DELIVERED_ADVERSE_RESULTS | {"executed"}
+BASELINE_RELATIVE_ROOT = Path(
+    "tests/fixtures/agents/panic_1907/minimal_binding_v0_1"
+)
 
 
 def _knickerbocker_policy(observation: Mapping[str, Any]) -> DecisionDraft:
@@ -265,7 +270,7 @@ class PilotRun:
 
 def default_binding_path() -> Path:
     project_root = Path(__file__).resolve().parents[3]
-    return project_root / "agents/defines/panic_1907/binding-catalog.json"
+    return project_root / BASELINE_RELATIVE_ROOT / "binding-catalog.json"
 
 
 def build_pilot_agents(
@@ -406,18 +411,19 @@ def run_member_facility_pilot(
     """Execute the minimal request → typed decline → response path."""
 
     path = Path(binding_path or default_binding_path()).resolve()
-    catalog = load_binding_catalog(path)
+    project_root = Path(__file__).resolve().parents[3]
+    catalog = load_binding_catalog(path, project_root=project_root)
     knickerbocker = DefinitionDrivenAgent(
         catalog["knickerbocker_trust"], _knickerbocker_policy
     )
     nych = DefinitionDrivenAgent(catalog["nych"], _nych_policy)
     catalog_document = path.read_bytes()
-    project_root = path.parents[3]
+    catalog_payload = json.loads(catalog_document)
     evidence_sha = hashlib.sha256(
-        (project_root / "agents/defines/panic_1907/evidence-ledger.md").read_bytes()
+        (project_root / catalog_payload["evidence_path"]).read_bytes()
     ).hexdigest()
     situation_sha = hashlib.sha256(
-        (project_root / "agents/defines/panic_1907/micro-situation.md").read_bytes()
+        (project_root / catalog_payload["micro_situation_path"]).read_bytes()
     ).hexdigest()
     manifest_preimage = {
         "binding_catalog_sha256": hashlib.sha256(catalog_document).hexdigest(),

@@ -14,7 +14,7 @@ from h2epr.agents.definition import (
     DefinitionDrivenAgent,
     load_binding_catalog,
 )
-from h2epr.agents.panic_1907 import (
+from h2epr.agents.panic_1907_baseline import (
     REQUEST_ID,
     build_pilot_agents,
     run_member_facility_pilot,
@@ -22,7 +22,10 @@ from h2epr.agents.panic_1907 import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-BINDING_PATH = PROJECT_ROOT / "agents/defines/panic_1907/binding-catalog.json"
+BASELINE_RELATIVE_ROOT = Path(
+    "tests/fixtures/agents/panic_1907/minimal_binding_v0_1"
+)
+BINDING_PATH = PROJECT_ROOT / BASELINE_RELATIVE_ROOT / "binding-catalog.json"
 
 
 def _kt_values(**overrides):
@@ -87,9 +90,10 @@ def test_binding_catalog_matches_markdown_hashes_and_commitments() -> None:
 
 def test_binding_fails_closed_after_definition_drift(tmp_path: Path) -> None:
     copied_root = tmp_path / "h2epr"
-    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
-    copied_binding = copied_root / "agents/defines/panic_1907/binding-catalog.json"
-    definition = copied_root / "agents/defines/panic_1907/knickerbocker-trust.md"
+    copied_baseline = copied_root / BASELINE_RELATIVE_ROOT
+    shutil.copytree(PROJECT_ROOT / BASELINE_RELATIVE_ROOT, copied_baseline)
+    copied_binding = copied_baseline / "binding-catalog.json"
+    definition = copied_baseline / "knickerbocker-trust.md"
     definition.write_text(definition.read_text(encoding="utf-8") + "\n<!-- drift -->\n", encoding="utf-8")
     with pytest.raises(BindingValidationError, match="definition_sha256_mismatch"):
         load_binding_catalog(copied_binding, project_root=copied_root)

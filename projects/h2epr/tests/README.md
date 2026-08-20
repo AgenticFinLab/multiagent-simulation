@@ -8,12 +8,15 @@ LMSim development environment, then run it from the repository root:
 PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider projects/h2epr/tests/contracts
 ```
 
-The Agent Definition pilot suite validates the two canonical Markdown hashes,
+The frozen Agent engineering-baseline suite validates its two `0.1.0-dev` Markdown hashes,
 commitment inventories, legal observation envelopes and value domains,
 commitment-specific observation use, explicit unknown/missing handling,
 typed intent parameters, authority and request lifecycle, intent/result
-separation, and a deterministic three-tick trace/replay. It does not start Ray
-or run the G3 simulation:
+separation, and a deterministic three-tick trace/replay. It does not bind the
+current `0.2.0` Definitions, start Ray, or run the G3 simulation:
+
+The fixture is documented under
+[`fixtures/agents/panic_1907/minimal_binding_v0_1/`](fixtures/agents/panic_1907/minimal_binding_v0_1/).
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
@@ -102,8 +105,8 @@ Every case also exposes a canonical behavior-only mutation descriptor and its
 SHA-256. Receipt grouping uses only responsibility, validation category, and
 expected/observed outcome rather than historical cumulative suite slices.
 
-The contract, G1, G2, and Agent pilot suites do not run a full scenario. The
-Agent pilot executes only its bounded three-tick semantic micro-situation. G3
+The contract, G1, G2, and Agent baseline suites do not run a full scenario. The
+Agent baseline executes only its frozen three-tick semantic micro-situation. G3
 exercises the bounded H2EPR Rule runtime and its deterministic interfaces; the
 separately controlled canary matrix supplies execution evidence. G4 compiles eligible
 sealed trace records into a deterministic V1 Generated EPG, but neither these

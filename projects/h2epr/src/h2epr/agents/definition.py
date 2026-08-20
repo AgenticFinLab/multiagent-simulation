@@ -1,9 +1,9 @@
-"""Executable binding for event-bound Markdown Agent Definitions.
+"""Executable binding support for event-bound Markdown Agent Definitions.
 
-The Markdown remains the pilot's behavioral authority.  The JSON binding is a
-derived mapping that is rejected if its content hash, Decision Commitment,
-semantic value contract, or commitment mapping drifts. This module deliberately
-contains no historical policy and no environment state mutation.
+A bound Markdown file remains the behavioral authority for that mapping. The
+JSON binding is rejected if its content hash, Decision Commitment, semantic
+value contract, or commitment mapping drifts. This module deliberately contains
+no historical policy and no environment state mutation.
 """
 
 from __future__ import annotations

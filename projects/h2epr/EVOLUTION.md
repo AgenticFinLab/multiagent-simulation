@@ -83,9 +83,11 @@ skills/agent-definition/
 skills/agent-definition-review/
 ```
 
-Update these files in place as the pilot produces feedback. When a Definition
-changes, update its content hash, binding catalog, implementation mapping,
-tests and concise documentation together.
+Update these files in place as the study produces feedback. Before promoting a
+Definition change, inspect every binding, implementation, state, trace, test,
+and documentation consumer. A mapping may be updated only when it actually
+conforms to the new Definition; otherwise retire it or isolate it as an
+explicit engineering fixture instead of updating only its hash.
 
 Git history keeps accepted versions. Working drafts, comparisons and rejected
 alternatives belong under:
@@ -96,6 +98,12 @@ alternatives belong under:
 
 Date-suffixed and `-old` copies are not kept beside the current Definition.
 Contract versions and intentionally supported release lines are the exception.
+
+The current Panic of 1907 Definitions are version `0.2.0` and have no active
+executable binding. The earlier `0.1.0-dev` three-tick unit is retained under
+`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/` as a frozen regression
+fixture. It is not an editable Definition line and does not claim conformance
+with the current files.
 
 ## Evidence and run history
 

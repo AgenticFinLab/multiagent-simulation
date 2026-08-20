@@ -17,8 +17,8 @@ It compares two institutionally different participants:
 - New York Clearing House (NYCH).
 
 Each participant has an event-specific Markdown Definition. A small non-Ray
-pilot checks whether those Definitions constrain legal observations,
-request lifecycle, procedural authority, intents and response to results.
+engineering fixture preserves the earlier binding and trace checks, while the
+current `0.2.0` Definitions await a separately reviewed implementation mapping.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -35,8 +35,8 @@ Generated EPG compilation.
 | Canary policy and world | `src/h2epr/policies/`, `src/h2epr/world/` | Rule policy inputs and normalized sensitivity state |
 | Runtime | `src/h2epr/runtime/` | H2EPR adapter, phased Rule runtime, detectors and orchestration |
 | Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
-| Agent Definitions | `agents/` | Event-specific behavior definitions, evidence ledger and bindings |
-| Agent pilot | `src/h2epr/agents/` | Definition enforcement and the current two-role feedback loop |
+| Agent Definitions | `agents/` | Event-specific behavior definitions, source register, evidence ledger and decision situations |
+| Agent binding support | `src/h2epr/agents/` | Generic Definition enforcement plus the isolated `0.1.0-dev` engineering baseline |
 
 ## Repository layout
 
@@ -78,19 +78,24 @@ The current event assets are under `agents/defines/panic_1907/`:
 |---|---|
 | `knickerbocker-trust.md` | Knickerbocker role, information, authority and decision commitments |
 | `new-york-clearing-house.md` | NYCH governance, eligibility and procedural commitments |
-| `evidence-ledger.md` | Adopted claims, source identity, exposure and unresolved questions |
-| `micro-situation.md` | Shared October 21 support-request situation |
-| `binding-catalog.json` | Derived mapping from Definition hashes to executable commitments |
+| `source-register.md` | Adopted source identities, public locators, hashes, cited passages and limitations |
+| `evidence-ledger.md` | Claim status, participant availability, exposure and unresolved questions |
+| `decision-situations.md` | Shared role-comparison situations and falsification perturbations |
 
-The three-tick pilot follows one narrow path:
+The two Definitions now provide four Knickerbocker and five NYCH Decision
+Commitments. They cover information and authorization work, request/case
+lifecycle, route and facility classification, conditional proposals,
+communication, results, uncertainty and falsification. The member-facility
+restriction is common to both NYCH structures; the conservative baseline uses
+no evidenced competent alternative route, while bounded alternative-route
+discretion is retained only for structural sensitivity.
 
-1. Knickerbocker submits a support request.
-2. NYCH issues a typed member-facility decline.
-3. Knickerbocker receives the result and prepares an operational restriction.
-
-This path exercises Definition hashes, observation allowlists, explicit
-unknown values, request state, authority checks, intent/result separation,
-deterministic trace and replay.
+No executable binding currently claims conformance with version `0.2.0`. The
+earlier three-tick path is frozen under
+`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
+Definition hashes, observation allowlists, request state, intent/result
+separation, deterministic trace and replay only for the old `0.1.0-dev`
+fixture.
 
 Two historical questions remain open: NYCH authority over other possible
 support routes, and the exact Knickerbocker representatives and corporate
@@ -145,7 +150,8 @@ remain in H2EPR.
 
 ## Tests
 
-Contracts and the Agent pilot run offline and do not start Ray:
+Contracts and the frozen Agent engineering baseline run offline and do not
+start Ray:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 \
@@ -174,8 +180,8 @@ The G3 suite requires the project runtime environment. See
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
 The current Agent work is the first event-specific semantic iteration and has
-not yet been integrated into the G3/G4 path. Scientific evaluation remains a
-later post-seal activity.
+not yet been mapped into an executable two-role implementation or integrated
+into the G3/G4 path. Scientific evaluation remains a later post-seal activity.
 
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next

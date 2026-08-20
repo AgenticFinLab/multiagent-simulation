@@ -114,21 +114,24 @@ measurements.
 
 ## Agent and scenario semantics
 
-The current Agent Definition pilot adds a behavior layer above the existing
-ParticipantArtifact shell.
+The current `0.2.0` Agent Definitions specify the behavior layer that will sit
+above the existing ParticipantArtifact shell. Their executable mapping has not
+yet been accepted.
 
 | Responsibility | Owner |
 |---|---|
 | Role, legal information, decision commitments, intent meaning and limits | Agent Definition Markdown |
-| Claim source, event time, availability and use | Evidence ledger |
+| Source identity, locator, adopted scope and file hash | Source register |
+| Claim status, event time, availability and use | Evidence ledger |
 | Institutions, relationships, observation delivery, authority and results | Scenario/environment |
 | Field types, serialization and versioning | Contracts V1 |
 | Executable mapping from Definition to code | Binding and backend adapter |
 | State transition and action result | Authoritative reducer |
 
-The binding catalog stores Definition hashes and declared commitment IDs. It
-is regenerated when a Definition changes and is validated before the pilot
-runs.
+An accepted binding must store exact Definition hashes and a complete mapping
+of the commitments, observations, state and intents it implements. A changed
+Definition invalidates the old mapping; updating a hash without semantic
+remapping is not conformance.
 
 ### Observation boundary
 
@@ -136,14 +139,16 @@ The environment produces an actor-specific observation from authoritative
 world state. Each observation declares the fields available to that actor and
 uses explicit markers for missing or unresolved values.
 
-Persistent state that affects future behavior must be visible to replay. For
-the current pilot, this includes request status, authorization state, review
-stage and operational posture.
+Persistent state that affects future behavior must be visible to replay. The
+current Definitions identify request/case status, authorization, information,
+review, channel, proposal and posture states that the next mapping must place
+under an authoritative, replayable path.
 
-### Current two-role pilot
+### Current Definitions and frozen engineering baseline
 
-`src/h2epr/agents/` implements a small non-Ray feedback path for Knickerbocker
-Trust and NYCH. It validates:
+The current Knickerbocker Trust and NYCH Definitions are research assets with
+no executable binding. `src/h2epr/agents/panic_1907_baseline.py` preserves a
+small non-Ray path for the old `0.1.0-dev` fixture. It validates:
 
 - Definition identity and content hashes;
 - observation allowlists;
@@ -154,9 +159,9 @@ Trust and NYCH. It validates:
 - environment-owned results;
 - deterministic trace and replay.
 
-This pilot is separate from the older G3 Rule policy. Integration begins only
-after the event-specific semantics have survived direct review and negative
-tests.
+This fixture is separate from both the current Definitions and the older G3
+Rule policy. It proves engineering seams only. Current integration begins with
+a new Definition-to-implementation mapping rather than relabeling this path.
 
 ## Runtime and MASim integration
 
@@ -191,9 +196,9 @@ The default `GeneralSimulator` path is unchanged.
 
 The current code predates a fully consolidated adapter boundary. Direct MASim
 imports appear in the G3 runtime modules, the G4 compiler adapter and the
-two-role pilot. Before the new Agent semantics join the formal runtime, these
-imports should be reviewed capability by capability and routed through a clear
-H2EPR integration surface.
+frozen Agent baseline. Before the new Agent semantics join the formal runtime,
+these imports should be reviewed capability by capability and routed through a
+clear H2EPR integration surface.
 
 ## Runtime authority and trace
 
@@ -270,7 +275,9 @@ repository location.
 - The current G1–G4 canary is based on full-draft-exposed construction.
 - Rule v1 reads broader state and uses more actor-specific code than the new
   Agent Definition design permits.
-- The two-role Agent pilot has not yet been mapped into the G3/G4 path.
+- The current `0.2.0` two-role Definitions have no executable mapping and have
+  not been integrated into the G3/G4 path; the old three-tick unit is only a
+  frozen engineering fixture.
 - NYCH authority outside the member facility remains unresolved.
 - Exact Knickerbocker requester identity and corporate authorization remain
   unresolved.

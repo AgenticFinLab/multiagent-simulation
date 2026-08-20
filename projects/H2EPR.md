@@ -102,7 +102,7 @@ projects/h2epr/
 | `policies/` | 现有 Rule canary 使用的声明式策略 |
 | `world/` | canary 世界状态和纯计算函数 |
 | `bundles/` | Construction bundle、EventBundle 及其校验 |
-| `agents/` | Agent Definition binding 和两角色反馈实现 |
+| `agents/` | 当前 Agent Definition 研究资产、通用 binding 约束和冻结工程基线 |
 | `runtime/` | H2EPR 的 MASim 适配、Rule runtime、detector 和 runner |
 | `compiler/` | 校验 sealed trace，并生成 EPG 和 GraphSeal |
 | `tests/` | 合同、construction、runtime、compiler 和 Agent 测试 |
@@ -175,31 +175,33 @@ projects/h2epr/agents/
 
 - `knickerbocker-trust.md`
 - `new-york-clearing-house.md`
+- `source-register.md`
 - `evidence-ledger.md`
-- `micro-situation.md`
-- `binding-catalog.json`
+- `decision-situations.md`
 
 各文件分工如下：
 
 | 文件 | 负责的内容 |
 |---|---|
 | Agent Definition | 角色、可用信息、权限、决策机制、intent、假设和限制 |
-| evidence ledger | 来源、claim、时间边界和材料用途 |
-| micro-situation | 共同事件局面、信息投递、制度规则和结果处理 |
-| binding catalog | Markdown Definition 到 Python 实现的派生映射 |
+| source register | 采用来源、公开地址、文件哈希、采用范围和限制 |
+| evidence ledger | claim、时间边界、参与者可得性、材料用途和撤回后果 |
+| decision situations | 两角色共享的研究局面和可证伪扰动 |
 | runtime/reducer | 实际状态、裁决和结果 |
 
-目前每个角色只保留三个高信息量的 decision commitment。这样可以先检验角色差异是否真的来自制度、
-权限和信息边界，再决定模板还需要哪些内容。
+当前 Knickerbocker Definition 包含四个 Decision Commitment，NYCH 包含五个。两份定义使用同一
+十模块结构，但分别表达公司级流动性与求援决策、成员制清算机构的程序与资源边界。它们是已经接受的
+`0.2.0` 参考候选，仍属于结果已暴露的探索性建模，不声称历史校准或独立验证。
 
-现有三 tick pilot 覆盖：
+当前 `0.2.0` Definition 尚无可执行 binding。旧的三 tick 路径已经作为 `0.1.0-dev` 冻结工程夹具
+移入 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`，只覆盖：
 
 1. Knickerbocker 发出 support request；
 2. NYCH 根据 member-facility 资格和程序权限作出 typed decline；
 3. Knickerbocker 在收到结果后更新 operational posture。
 
-该 pilot 用于验证 Definition binding、缺失信息处理、请求生命周期、权限、结果反馈和 replay。
-1907 年事件材料已经被完整暴露，因此当前结果属于探索性建模和工程验证，尚未形成独立的历史校准。
+该夹具用于验证旧 Definition binding、缺失信息处理、请求生命周期、权限、结果反馈和 replay，不能
+作为当前 `0.2.0` Definition 的实现或 conformance 证据。
 
 ## 与 MASim 的关系
 
@@ -231,7 +233,7 @@ MASim 是 H2EPR 的基础参考，也是部分通用运行能力的来源。
 - UI 和插件化场景系统。
 
 MASim 保持独立，不引用 H2EPR。H2EPR 通过项目侧适配层使用所需能力。目前旧 G3、G4 compiler
-adapter 和新的 Agent pilot 仍分别存在直接 MASim imports；在正式接入新的 Agent runtime 前，
+adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正式接入新的 Agent runtime 前，
 需要将这些依赖整理为清楚的适配边界。
 
 ## 当前状态
@@ -243,7 +245,8 @@ adapter 和新的 Agent pilot 仍分别存在直接 MASim imports；在正式接
 | ParticipantArtifact / EventBundle | G2 工程基线完成 |
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
-| Agent Definition v0.1 | 两角色首轮定义和最小反馈实现已完成 |
+| Agent Definition 0.2.0 | 两角色参考 Definition、来源表、claim ledger 和决策局面已接受 |
+| Definition implementation mapping | 尚未开始；旧三步路径仅作为冻结工程基线 |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
 
@@ -255,18 +258,17 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 当前迭代
 
-继续使用 Knickerbocker 和 NYCH 做小规模反馈：
+下一轮使用 Knickerbocker 和 NYCH 完成 Definition-to-implementation mapping：
 
-- 检查角色互换后行为边界是否变化；
-- 删除或延迟 observation，检查 fallback 和 abstention；
-- 检查 pending、denied、expired 等请求状态；
-- 确认 adapter 没有添加 Definition 之外的行为；
-- 删除没有实际消费者的模板字段。
+- 映射 Definition identity、Decision Commitment、observation 和状态；
+- 映射 intent、权限、business result 与 trace 记录；
+- 明确保留哪些 backend 自由度，哪些属于硬 conformance 边界；
+- 通过角色互换、信息遮蔽、请求生命周期和无效 intent 检查映射。
 
-### Agent 定义稳定后
+### 映射完成后
 
-下一步是把 Definition identity、commitment、observation、private/business state、authority 和
-result 映射到正式 V1 carrier，并增加相应的跨对象校验。
+根据两角色映射和反馈结果，再决定是否需要修订 Definition、Template 或 Skills，并判断是否已经具备
+进入实现迭代的条件。
 
 如果实际映射出现 V1 无法表达的案例，再评估窄范围的 successor contract。目录或字段风格本身不构成
 修改合同的理由。
@@ -288,8 +290,8 @@ Rule v2、正式 simulation、post-seal evaluation、LLM/RAG 和多事件扩展�
 | evaluation package | post-seal 评价方法和数据边界已经确定 |
 | 根级 H2EPR package | 出现仓库外使用者、独立发布或复现需求 |
 
-`src/h2epr/agents/panic_1907.py` 当前同时包含 binding 和小型 pilot orchestration。首轮保留这一紧凑
-结构；出现第二个消费者或正式 runtime 接入时，再按 Agent、scenario 和 reducer 的职责拆分。
+旧三步实现保存在 `src/h2epr/agents/panic_1907_baseline.py`，只供冻结工程夹具使用。当前 Definition
+不会复用该模块名称或映射；后续实现按 Agent、scenario/environment 和 reducer 的真实职责建立。
 
 ## 开发与版本管理
 
@@ -311,7 +313,7 @@ Rule v2、正式 simulation、post-seal evaluation、LLM/RAG 和多事件扩展�
 
 ## 测试
 
-Agent pilot 和 V1 合同测试不启动 Ray：
+冻结 Agent 工程基线和 V1 合同测试不启动 Ray：
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 \

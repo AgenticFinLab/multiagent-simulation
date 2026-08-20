@@ -2,9 +2,9 @@
   "authority": "derived_mapping_only",
   "binding_schema_version": "h2epr.agent-definition-binding.v0_2",
   "catalog_version": "0.2.0-dev",
-  "evidence_path": "agents/defines/panic_1907/evidence-ledger.md",
+  "evidence_path": "tests/fixtures/agents/panic_1907/minimal_binding_v0_1/evidence-ledger.md",
   "evidence_sha256": "3f8489aff5f46a48ede934a291cdb6bd4c886cbf3abdfd2481756bad42d76af7",
-  "micro_situation_path": "agents/defines/panic_1907/micro-situation.md",
+  "micro_situation_path": "tests/fixtures/agents/panic_1907/minimal_binding_v0_1/micro-situation.md",
   "micro_situation_sha256": "604d6085fd51aa3c6e5b1f59dbce830e5ecbec7eee2fb538bbd9c4e71ff76974",
   "definitions": [
     {
@@ -64,7 +64,7 @@
         ]
       },
       "definition_id": "h2epr.agent-definition.0288.knickerbocker-trust",
-      "definition_path": "agents/defines/panic_1907/knickerbocker-trust.md",
+      "definition_path": "tests/fixtures/agents/panic_1907/minimal_binding_v0_1/knickerbocker-trust.md",
       "intent_contracts": {
         "prepare_operational_restriction": {
           "request_id": {
@@ -276,7 +276,7 @@
         ]
       },
       "definition_id": "h2epr.agent-definition.0288.new-york-clearing-house",
-      "definition_path": "agents/defines/panic_1907/new-york-clearing-house.md",
+      "definition_path": "tests/fixtures/agents/panic_1907/minimal_binding_v0_1/new-york-clearing-house.md",
       "intent_contracts": {
         "communicate_status": {
           "request_id": {
