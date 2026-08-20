@@ -1,13 +1,19 @@
 """Base Communication module for the Multi-Agent Simulation (MASim) framework.
 
-This module provides the channel wire type and the CommunicationChannel base class.
-For concrete implementations, see `general.py`.
+This module owns the wire-layer types (SimPacket, Message + enums) and the
+CommunicationChannel abstract base class. For concrete implementations, see
+`general.py`.
 
 ================================================================================
                           MODULE CONTENTS
 ================================================================================
 
+Enums:
+    MessageType          - OBSERVATION, ACTION, COORDINATION, PEER, SYSTEM, BROADCAST
+    MessagePriority      - LOW, NORMAL, HIGH, CRITICAL
+
 Dataclasses:
+    Message              - Routed message: sender_id, recipient_id, payload
     SimPacket            - Channel wire envelope: encoded Message + transmission metadata
 
 Abstract Classes:
@@ -17,18 +23,22 @@ Abstract Classes:
                          DESIGN PHILOSOPHY
 ================================================================================
 
-Three-layer message model (types defined close to their layer):
-    Info      (player/base.py)  - Player-layer content: pure payload, no routing
-    Message   (proxy/base.py)   - Proxy-layer: adds sender_id, recipient_id, routing
-    SimPacket (here)            - Channel wire envelope: encoded Message for transmission
+Three-layer message model (definitions live with the wire layer that carries them):
+    Info      (player/base.py)         - Player-layer content: pure payload, no routing
+    Message   (this file)              - Routed message: adds sender_id / recipient_id
+    SimPacket (this file)              - Channel wire envelope: encoded Message on wire
 
 CommunicationChannel responsibility: SimPacket ONLY.
-    encode_message(Message) → SimPacket   [bridges proxy → wire]
-    decode_message(SimPacket) → Message   [bridges wire → proxy]
+    encode_message(Message) → SimPacket   [routed → wire]
+    decode_message(SimPacket) → Message   [wire → routed]
 
-Building a Message from an Info unit is NOT a Channel concern —
-it is handled by build_message_from_info() in proxy/general.py,
-called by the Simulator in phase_dispatch.
+Building a Message from an Info unit is handled by build_message_from_info()
+in `masim/communication/general.py`, called by the Simulator in phase_dispatch.
+
+Dependency direction (correct after layer-inversion fix):
+    communication/base.py  → defines Message + enums (this file, no upward imports)
+    proxy/*                → CONSUMES Message from communication.base
+    simulator/*            → CONSUMES Message from communication.base
 
 ================================================================================
                     COMMUNICATION CHANNEL FLOW
@@ -37,7 +47,7 @@ called by the Simulator in phase_dispatch.
     Simulator
         │
         │  1. collect_outbound_messages() from all Personas
-        │  2. build_message_from_info(Info) → Message  [proxy helper]
+        │  2. build_message_from_info(Info) → Message   [communication helper]
         │
         ▼
     CommunicationChannel.encode_and_deliver(messages, handles)
@@ -56,12 +66,123 @@ import os
 from abc import ABC, abstractmethod
 from datetime import datetime
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
 
 from lmbase.utils.tools import BlockBasedStoreManager
 
-if TYPE_CHECKING:
-    from masim.proxy.base import Message
+
+# =============================================================================
+# Message-layer types (owned by communication layer)
+# =============================================================================
+
+
+PayloadType = Union[Dict[str, Any], np.ndarray, bytes, List[Any]]
+
+
+class MessageType(Enum):
+    """Types of messages in the framework."""
+
+    # Environment -> Players
+    OBSERVATION = auto()
+    # Player -> Environment
+    ACTION = auto()
+    # Player -> Players (coordination)
+    COORDINATION = auto()
+    # Player <-> Player
+    PEER = auto()
+    # Framework internal
+    SYSTEM = auto()
+    # One-to-many
+    BROADCAST = auto()
+
+
+class MessagePriority(Enum):
+    """Priority levels for message delivery."""
+
+    LOW = 0
+    NORMAL = 1
+    HIGH = 2
+    CRITICAL = 3
+
+
+@dataclass
+class Message:
+    """
+    Routed message on the communication layer.
+
+    Built by the Simulator (via build_message_from_info) from an Info unit;
+    adds routing metadata (sender_id, recipient_id, timestamp, priority) so
+    the Channel can encode it to a SimPacket for wire transmission.
+
+    Flow:
+        Info (player layer)
+          → Message (routed, built by build_message_from_info)
+          → SimPacket (channel wire, encoded by CommunicationChannel)
+          → decode → Message (restored)
+          → handle_incoming() → Info (player layer, routing stripped)
+
+    Attributes:
+        message_type: Category of message
+        sender_id:    ID of the sending component
+        payload:      Message content (must be serializable)
+        recipient_id: Target recipient (None for broadcast)
+        timestamp:    ISO format timestamp
+        priority:     Message delivery priority
+        extras:       Additional context
+    """
+
+    message_type: MessageType
+    sender_id: str
+    payload: PayloadType
+    recipient_id: Optional[str] = None
+    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    priority: MessagePriority = MessagePriority.NORMAL
+    extras: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self._validate_payload()
+
+    def _validate_payload(self) -> None:
+        """Ensure payload is serialization-friendly."""
+        if self.payload is None:
+            return
+        if isinstance(self.payload, (dict, list, np.ndarray, bytes)):
+            return
+        raise TypeError(
+            f"Message payload must be dict, list, numpy.ndarray, or bytes. "
+            f"Got: {type(self.payload).__name__}"
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        payload_data = self.payload
+        if isinstance(self.payload, np.ndarray):
+            payload_data = self.payload.tolist()
+        return {
+            "message_type": self.message_type.name,
+            "sender_id": self.sender_id,
+            "recipient_id": self.recipient_id,
+            "payload": payload_data,
+            "timestamp": self.timestamp,
+            "priority": self.priority.value,
+            "extras": self.extras,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Message":
+        """Create Message from dictionary."""
+        return cls(
+            message_type=MessageType[data["message_type"]],
+            sender_id=data["sender_id"],
+            recipient_id=data["recipient_id"],
+            payload=data["payload"],
+            timestamp=data["timestamp"],
+            priority=MessagePriority(data["priority"]),
+            extras=data["extras"],
+        )
 
 
 # =============================================================================

@@ -696,31 +696,13 @@ class RagLLMInvestor(GeneralPlayer):
                     )
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding this round.",
-                self.identity,
-                max_retries,
-                last_error,
+            # Strict fail-fast: do NOT fabricate a hold decision. Raise so
+            # the simulator surfaces the failure to the runner which halts
+            # the whole round loudly.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after {max_retries} retries. "
+                f"Last error: {last_error}"
             )
-            order = {
-                "action": "hold",
-                "bid_price": market_data["price"],
-                "quantity": 0.0,
-                "strategy": strategy_name,
-                "investor": self.identity,
-                "reasoning": "LLM parse failed: held position",
-                "provides_liquidity": False,
-                "is_market_maker": self.__class__.__name__.endswith("MarketMaker"),
-                "rag_context": self.state.custom_state.get("last_rag_context"),
-                "_skipped": True,
-                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
-            }
-            return {
-                **order,
-                "outbound_messages": [
-                    {"payload": order, "content_type": "investor_bid"}
-                ],
-            }
 
         bid_price = float(decision["bid_price"])
         if bid_price <= 0:

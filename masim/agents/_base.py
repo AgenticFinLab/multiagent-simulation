@@ -652,25 +652,17 @@ class CanonicalLLMPlayer(GeneralPlayer):
             position=self.state.custom_state["position"],
         )
 
-        try:
-            decision = self._run_llm(state)
-        except Exception as exc:  # noqa: BLE001
-            # Even with fallback="raise", we catch here to prevent a single
-            # agent from crashing the entire simulation.  Log loudly and skip.
-            logger.error(
-                "[%s] LLM call failed (%s); emitting noop for this round.",
-                self.identity,
-                exc,
-            )
-            return _emit(self._noop_order())
-
-        # Fallback hold from robust_llm_call — emit as noop so metrics exclude it
-        if decision.get("_fallback"):
-            logger.warning(
-                "[%s] Using fallback hold (LLM unavailable this round).",
-                self.identity,
-            )
-            return _emit(self._noop_order())
+        # Strict fail-fast: any LLM failure — permanent auth error, schema
+        # violation after max_retries, prompt-loading failure, network outage
+        # after retries — propagates out of decide() and halts the round.
+        # We do NOT catch here: silently substituting a synthetic noop order
+        # on LLM failure would let auth misconfigurations and prompt-schema
+        # bugs corrupt an entire simulation without ever surfacing to the
+        # operator. Transient errors are still absorbed inside
+        # `robust_llm_call` via `is_retryable_llm_error` + exponential
+        # backoff; only permanent failures (or retries fully exhausted with
+        # `fallback="raise"`) reach this frame.
+        decision = self._run_llm(state)
 
         order = InvestorOrder.from_llm_decision(
             decision,
@@ -845,7 +837,14 @@ class CanonicalLLMPlayer(GeneralPlayer):
         max_retries = int(
             self.state.custom_state.get("max_llm_retries", 5)
         )
-        fallback = self.state.custom_state.get("llm_failure_policy", "hold")
+        # Strict fail-fast by default (H2): exhausted retries or permanent
+        # errors raise a RuntimeError out of robust_llm_call, which then
+        # propagates up through decide() and halts the simulation round.
+        # Scenarios that explicitly want the legacy synthetic-hold fallback
+        # can override via `custom_state["llm_failure_policy"] = "hold"`
+        # (e.g. from extras) at their own risk — the default no longer
+        # silently corrupts downstream behavioural metrics.
+        fallback = self.state.custom_state.get("llm_failure_policy", "raise")
 
         return robust_llm_call(
             client,

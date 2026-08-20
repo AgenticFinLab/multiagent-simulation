@@ -60,10 +60,7 @@ from lmbase.inference.api_call import LangChainAPIInference
 from lmbase.inference.base import InferInput
 
 
-from examples.EquityPremium.decision import (  # noqa: E402
-    fallback_hold_decision,
-    parse_equity_premium_decision,
-)
+from examples.EquityPremium.decision import parse_equity_premium_decision  # noqa: E402
 
 logger = logging.getLogger("EquityPremiumLLM")
 
@@ -271,15 +268,14 @@ class LLMInvestor(GeneralPlayer):
                     )
 
         if decision is None:
-            logger.warning(
-                "[%s] parse failed after retries; explicit fallback: %s",
-                self.identity,
-                last_error,
+            # Strict fail-fast: do NOT fabricate a hold decision. Raise so
+            # the simulator surfaces the failure to the runner which halts
+            # the whole round loudly.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after 3 retries. "
+                f"Last error: {last_error}"
             )
-            decision = fallback_hold_decision(str(last_error))
 
-        llm_fallback = bool(decision.pop("llm_fallback"))
-        fallback_reason = str(decision.pop("fallback_reason"))
         stock_qty = float(decision["stock_qty"])
         cash, stocks = (
             self.state.custom_state["cash"],
@@ -306,8 +302,6 @@ class LLMInvestor(GeneralPlayer):
             "investor": self.identity,
             "reasoning": decision["reasoning"][:100],
             "analysis": decision["analysis"],
-            "llm_fallback": llm_fallback,
-            "fallback_reason": fallback_reason,
         }
         return {
             **order,

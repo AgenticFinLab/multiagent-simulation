@@ -66,14 +66,3 @@ def parse_equity_premium_decision(response_text: str) -> Dict[str, Any]:
         "llm_fallback": False,
         "fallback_reason": "",
     }
-
-
-def fallback_hold_decision(reason: str) -> Dict[str, Any]:
-    """Return an explicit conservative no-rebalance decision."""
-    return {
-        "stock_qty": 0.0,
-        "reasoning": f"fallback no rebalance: {reason}",
-        "analysis": "",
-        "llm_fallback": True,
-        "fallback_reason": reason,
-    }

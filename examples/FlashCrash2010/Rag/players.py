@@ -385,22 +385,14 @@ class RagLLMInvestor(GeneralPlayer):
                     raise
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding.",
-                self.identity,
-                max_retries,
-                last_error,
+            # Strict fail-fast: retry exhaustion propagates as RuntimeError.
+            # Do NOT fabricate a hold decision — that would silently mask
+            # persistent LLM failures. Simulator will surface this to the
+            # runner which halts the whole round.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after "
+                f"{max_retries} retries. Last error: {last_error}"
             )
-            decision = {
-                "action": "hold",
-                "bid_price": price,
-                "quantity": 0.0,
-                "reasoning": f"LLM fallback hold after retries: {last_error}",
-                "analysis": "",
-                "provides_liquidity": False,
-                "_skipped": True,
-                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
-            }
 
         action = decision["action"]
         bid_price = float(decision["bid_price"])

@@ -285,21 +285,13 @@ Respond with ONLY valid JSON:
                     )
 
         if decision is None:
-            logger.warning(
-                "[%s] LLM failed after %d attempts: %s. Holding this round.",
-                self.identity,
-                max_retries,
-                last_error,
+            # Strict fail-fast: retry exhaustion propagates as RuntimeError.
+            # Do NOT fabricate a hold decision — that would silently mask
+            # persistent LLM failures.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after "
+                f"{max_retries} retries. Last error: {last_error}"
             )
-            decision = {
-                "action": "hold",
-                "bid_price": market_data["price"],
-                "quantity": 0,
-                "reasoning": "LLM parse failed: held position",
-                "analysis": "",
-                "_skipped": True,
-                "_skipped_reason": f"llm_failed_after_{max_retries}_attempts: {last_error}",
-            }
 
         bid_price = float(decision["bid_price"])
         quantity = float(decision["quantity"])

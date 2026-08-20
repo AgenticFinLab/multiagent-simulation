@@ -9,7 +9,8 @@ Architecture:
     ┌─────────────────────────────────────────────────────────────────────────┐
     │  SIMULATOR (owns CommunicationChannel)                                  │
     │   • channel.encode_and_deliver() → persona.receive_message()           │
-    │   • persona.collect_pending_infos() → build_message_from_info(Info)   │
+    │   • persona.operate() → (TurnResult, pending_infos) tuple             │
+    │   • Simulator → build_message_from_info(Info) → Message                │
     └─────────────────────────────────────────────────────────────────────────┘
                                     │
                      [via Ray remote calls only]
@@ -63,17 +64,15 @@ from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 logger = logging.getLogger("masim.persona")
 
 from masim.persona.base import BasePersona
-from masim.proxy.base import Message
+from masim.communication.base import Message
 from masim.proxy.base import (
     StorageConfig,
     SendReceiveConfig,
-    ResourceConfig,
     MonitoringConfig,
 )
 from masim.proxy.general import (
     StorageProxy,
     SendReceiveProxy,
-    ResourceProxy,
     MonitoringProxy,
 )
 
@@ -151,7 +150,10 @@ class PlayerPersona(BasePersona):
         self.message_proxy = SendReceiveProxy(
             SendReceiveConfig(**proxy_config["communication"])
         )
-        self.resource = ResourceProxy(ResourceConfig(**proxy_config["resource"]))
+        # NOTE: any ``resource:`` block still present in legacy persona.yml
+        # configs is intentionally ignored — the ResourceProxy stub was
+        # removed as dead code.  Keeping the YAML key valid avoids editing
+        # every scenario config; the schema layer accepts it via extra="allow".
 
     async def shutdown(self) -> None:
         """
@@ -347,44 +349,6 @@ class PlayerPersona(BasePersona):
         """Restore state to internal Player."""
         if self.player:
             self.player.load_state(state)
-
-    # =========================================================================
-    #                    INFO COLLECTION (Simulator calls this)
-    # =========================================================================
-
-    def collect_pending_infos(self) -> List[Dict[str, Any]]:
-        """
-        Collect all queued Info units from proxy for external dispatch.
-
-        Note: The GeneralSimulator does NOT call this method — it uses the
-        pending_infos bundled into the operate() return tuple instead
-        (via _collect_pending_infos_local), avoiding a separate IPC round-trip.
-
-        This method remains available as a public API for:
-        - Custom simulator subclasses that prefer explicit collection
-        - Testing and introspection outside of normal round execution
-
-        Returns:
-            List of dicts with keys: info, sender_id, target_ids, round_num
-        """
-        if not self._topology_initialized:
-            return []
-
-        # Dequeue Info units from proxy (owned by Persona)
-        infos = self.message_proxy.dequeue_infos()
-
-        result = []
-        for info in infos:
-            result.append(
-                {
-                    "info": info,
-                    "sender_id": self.identity,
-                    "target_ids": self._topology_targets,
-                    "round_num": self.current_round,
-                }
-            )
-
-        return result
 
     # =========================================================================
     #                    TOPOLOGY & MESSAGE PASSING

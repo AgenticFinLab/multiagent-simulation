@@ -30,10 +30,7 @@ from masim.knowledge import (
 from masim.knowledge.manager import KnowledgeManager
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
-from examples.SVBBankRun.decision import (
-    fallback_hold_decision,
-    parse_svbbankrun_decision,
-)
+from examples.SVBBankRun.decision import parse_svbbankrun_decision
 from .prompts import (
     RAGLLM_DEPOSITOR_SYS,
     RAGLLM_SOCIAL_MEDIA_INFLUENCER_SYS,
@@ -349,20 +346,16 @@ class RagLLMInvestor(GeneralPlayer):
                 break
             except (ValueError, KeyError) as exc:
                 last_error = str(exc)
-                if attempt == max_retries - 1:
-                    logger.warning(
-                        "[%s] LLM parse failed after %d attempts; explicit fallback hold: %s",
-                        self.identity,
-                        max_retries,
-                        last_error,
-                    )
-                    decision = fallback_hold_decision(last_error)
 
         if decision is None:
-            raise RuntimeError(f"[{self.identity}] Rag decision failed without fallback")
+            # Strict fail-fast: do NOT fabricate a hold decision. Raise so
+            # the simulator surfaces the failure to the runner which halts
+            # the whole round loudly.
+            raise RuntimeError(
+                f"[{self.identity}] LLM decision unavailable after {max_retries} retries. "
+                f"Last error: {last_error}"
+            )
 
-        llm_fallback = bool(decision.pop("llm_fallback"))
-        fallback_reason = str(decision.pop("fallback_reason"))
         action = decision["action"]
         quantity = int(decision["quantity"])
 
@@ -404,8 +397,6 @@ class RagLLMInvestor(GeneralPlayer):
             "agent_type": strategy_name,
             "reasoning": decision["reasoning"][:120],
             "analysis": decision["analysis"],
-            "llm_fallback": llm_fallback,
-            "fallback_reason": fallback_reason,
             "rag_context": self.state.custom_state["last_rag_context"],
         }
         return {

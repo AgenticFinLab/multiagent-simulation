@@ -101,6 +101,8 @@ sys.path.insert(0, str(project_root))
 
 from masim.simulator.general import GeneralSimulator
 from masim.simulator.base import SimulationConfig, SimulatorStatus
+from masim.simulator.config_schema import validate_simulation_config
+from masim.simulator.resume_scanner import detect_resume_round
 from masim.utils.config import load_config, setup_logging
 
 
@@ -324,6 +326,10 @@ class SimulationRunner:
             )
 
             yaml_config = load_config(self.config_path)
+            # Boundary-validate against pydantic v2 schema so shape/type
+            # errors surface here (with a full field-path trace) instead
+            # of as opaque KeyErrors mid-way through actor construction.
+            validate_simulation_config(yaml_config)
             self.config = SimulationConfig(**yaml_config)
 
             self.status.total_rounds = self.config.setting.get("total_rounds", 0)
@@ -398,7 +404,7 @@ class SimulationRunner:
         try:
             # Mirror GeneralSimulator.run() resume detection, but execute the
             # rounds here so progress updates represent completed real work.
-            completed_on_disk = self.simulator._detect_resume_round(record_path)
+            completed_on_disk = detect_resume_round(record_path)
             start_round = completed_on_disk + 1
             run_started = time.monotonic()
             completed_this_run = 0

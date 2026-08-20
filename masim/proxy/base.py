@@ -10,12 +10,7 @@ For concrete implementations, see `general.py`.
 Protocols:
     ObservableEntity     - Minimal interface for proxy owners (identity, save_state, etc.)
 
-Enums:
-    MessageType          - OBSERVATION, ACTION, COORDINATION, PEER, SYSTEM, BROADCAST
-    MessagePriority      - LOW, NORMAL, HIGH, CRITICAL
-
 Dataclasses:
-    Message              - Proxy-layer routed message: sender_id, recipient_id, payload
     ProxyResult          - Result wrapper for graceful degradation (success, data, error)
     SendReceiveConfig    - Config for SendReceiveProxy
     StorageConfig        - Config for StorageProxy
@@ -275,9 +270,13 @@ from typing import (
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# No longer importing Message from communication.base — Message is defined
-# HERE in proxy/base.py since it is a proxy-layer concept.
+# Message-layer types are OWNED by the communication layer. We only import
+# `Message` here because BaseProxy.on_message() uses it as a type annotation;
+# external consumers must import Message / MessageType / MessagePriority /
+# PayloadType directly from masim.communication.base (this module no longer
+# re-exports them).
 # ---------------------------------------------------------------------------
+from masim.communication.base import Message
 
 # ---------------------------------------------------------------------------
 # TYPE_CHECKING Block
@@ -293,127 +292,6 @@ import numpy as np
 # ---------------------------------------------------------------------------
 if TYPE_CHECKING:
     from masim.player.base import BasePlayer
-
-
-# =============================================================================
-#                    PROXY-LAYER MESSAGE TYPES
-# =============================================================================
-#
-# Message and its supporting enums live here (proximity principle):
-# - MessageType / MessagePriority: enums used by Message
-# - Message: proxy-layer routed object, built from Info (player layer)
-#            and consumed by CommunicationChannel (which encodes it to SimPacket)
-#
-# Dependency direction:
-#   proxy/base.py  defines Message
-#   communication/base.py  imports Message from proxy.base (for encode/decode)
-# =============================================================================
-
-
-PayloadType = Union[Dict[str, Any], np.ndarray, bytes, List[Any]]
-
-
-class MessageType(Enum):
-    """Types of messages in the framework."""
-
-    # Environment -> Players
-    OBSERVATION = auto()
-    # Player -> Environment
-    ACTION = auto()
-    # Player -> Players (coordination)
-    COORDINATION = auto()
-    # Player <-> Player
-    PEER = auto()
-    # Framework internal
-    SYSTEM = auto()
-    # One-to-many
-    BROADCAST = auto()
-
-
-class MessagePriority(Enum):
-    """Priority levels for message delivery."""
-
-    LOW = 0
-    NORMAL = 1
-    HIGH = 2
-    CRITICAL = 3
-
-
-@dataclass
-class Message:
-    """
-    Proxy-layer routed message.
-
-    Built by the Simulator from an Info unit; adds routing metadata
-    (sender_id, recipient_id, timestamp, priority) so the Channel can
-    encode it to a SimPacket for wire transmission.
-
-    Flow:
-        Info (player layer)
-          → Message (proxy layer, routing added by Simulator)
-          → SimPacket (channel wire layer, encoded by CommunicationChannel)
-          → decode → Message (proxy layer restored)
-          → handle_incoming() → Info (player layer, routing stripped)
-
-    Attributes:
-        message_type: Category of message
-        sender_id:    ID of the sending component
-        payload:      Message content (must be serializable)
-        recipient_id: Target recipient (None for broadcast)
-        timestamp:    ISO format timestamp
-        priority:     Message delivery priority
-        extras:       Additional context
-    """
-
-    message_type: MessageType
-    sender_id: str
-    payload: PayloadType
-    recipient_id: Optional[str] = None
-    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    priority: MessagePriority = MessagePriority.NORMAL
-    extras: Dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self):
-        self._validate_payload()
-
-    def _validate_payload(self) -> None:
-        """Ensure payload is serialization-friendly."""
-        if self.payload is None:
-            return
-        if isinstance(self.payload, (dict, list, np.ndarray, bytes)):
-            return
-        raise TypeError(
-            f"Message payload must be dict, list, numpy.ndarray, or bytes. "
-            f"Got: {type(self.payload).__name__}"
-        )
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
-        payload_data = self.payload
-        if isinstance(self.payload, np.ndarray):
-            payload_data = self.payload.tolist()
-        return {
-            "message_type": self.message_type.name,
-            "sender_id": self.sender_id,
-            "recipient_id": self.recipient_id,
-            "payload": payload_data,
-            "timestamp": self.timestamp,
-            "priority": self.priority.value,
-            "extras": self.extras,
-        }
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Message":
-        """Create Message from dictionary."""
-        return cls(
-            message_type=MessageType[data["message_type"]],
-            sender_id=data["sender_id"],
-            recipient_id=data["recipient_id"],
-            payload=data["payload"],
-            timestamp=data["timestamp"],
-            priority=MessagePriority(data["priority"]),
-            extras=data["extras"],
-        )
 
 
 # =============================================================================
@@ -985,61 +863,14 @@ class StorageConfig(ProxyConfig):
 
 
 # =============================================================================
-#                           RESOURCE PROXY
+#                           RESOURCE PROXY  (removed)
 # =============================================================================
 #
-# ResourceProxy handles MCP (Model Context Protocol) connection management
-# and resource access. It provides a unified interface for:
-# - Fetching external resources (data, files, API responses)
-# - Invoking external tools (LLM, computation services)
-# - Managing MCP server connections
-#
-# Key Design:
-# - URI-based resource addressing (mcp://server/resource)
-# - Response caching for performance
-# - Access control via owner.capabilities
-# =============================================================================
+# ``ResourceConfig`` and the accompanying ``ResourceProxy`` (previously in
+# ``proxy/general.py``) were dead stubs — instantiated on every PlayerPersona
+# but never consumed.  Both were removed.  The ``ProxyType.RESOURCE`` enum
+# entry is kept as a reserved slot for future MCP integration.
 
-
-@dataclass
-class ResourceConfig(ProxyConfig):
-    """
-    Configuration for ResourceProxy.
-
-    Attributes:
-        proxy_type: Fixed to RESOURCE
-        mcp_servers: List of MCP server configurations to connect to
-        connection_timeout_ms: Timeout for server connections
-        enable_caching: Whether to cache resource responses
-        cache_ttl_seconds: Cache time-to-live in seconds
-
-    MCP Server Config Format:
-        {
-            "name": "market_data",
-            "endpoint": "ws://localhost:8080",
-            "capabilities": ["prices", "orderbook"]
-        }
-
-    Example:
-        config = ResourceConfig(
-            mcp_servers=[
-                {"name": "market", "endpoint": "ws://market:8080"},
-                {"name": "llm", "endpoint": "ws://llm:8080"}
-            ],
-            enable_caching=True,
-            cache_ttl_seconds=60  # 1 minute cache
-        )
-    """
-
-    proxy_type: ProxyType = field(default=ProxyType.RESOURCE, init=False)
-    mcp_servers: List[Dict[str, Any]] = field(default_factory=list)
-    connection_timeout_ms: int = 5000  # 5 second connection timeout
-    enable_caching: bool = True  # Cache resource responses
-    cache_ttl_seconds: int = 300  # 5 minute cache TTL
-
-
-# ResourceProxy implementation is in general.py
-# This section contains only the ResourceConfig dataclass above
 
 
 # =============================================================================
