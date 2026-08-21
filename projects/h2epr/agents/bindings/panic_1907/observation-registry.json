@@ -1,0 +1,137 @@
+{
+  "schema_version": "h2epr.observation-registry-machine.v0_1",
+  "registry_id": "h2epr.observation-registry.0288.two-role",
+  "version": "0.2.1",
+  "authority": "derived_mapping_only",
+  "source_path": "agents/bindings/panic_1907/observation-registry.md",
+  "source_sha256": "8bc43bd866a0b4a194168688b9d15e3e3e209eb7ffd8dbb0246541ef58cd69a2",
+  "actor_observation_counts": {
+    "knickerbocker_trust": 9,
+    "new_york_clearing_house": 12
+  },
+  "observations": [
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "asset_liquidity_assessment",
+      "value_type": "enum",
+      "values": ["readily_available", "conditionally_liquid", "illiquid", "disputed", "unknown"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "clearing_channel_status",
+      "value_type": "enum",
+      "values": ["active", "termination_notice_delivered", "ending_at_time", "inactive", "disputed", "unknown"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "collateral_package_status",
+      "value_type": "enum",
+      "values": ["not_prepared", "preparing", "available", "submitted", "disputed", "unknown"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "corporate_authorization",
+      "value_type": "enum",
+      "values": ["not_requested", "pending", "authorized", "denied", "unknown"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "delivered_disposition",
+      "value_type": "status_reason_pair",
+      "values": ["none", "pending", "need_information", "referred", "refused", "prohibited", "delayed", "partial", "failed", "executed"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "internal_liquidity_assessment",
+      "value_type": "enum",
+      "values": ["adequate", "strained", "critical", "unknown"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "received_information_request",
+      "value_type": "nullable_stable_id"
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "support_request_status",
+      "value_type": "enum",
+      "values": ["none", "prepared", "sent", "delivered", "awaiting_information", "under_review", "refused", "expired", "withdrawn", "partial", "failed", "executed", "unknown"]
+    },
+    {
+      "actor_id": "knickerbocker_trust",
+      "semantic_id": "withdrawal_pressure",
+      "value_type": "enum",
+      "values": ["ordinary", "elevated", "severe", "unknown"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "authority_state",
+      "value_type": "enum",
+      "values": ["no_competent_authority_identified", "committee_scope", "membership_scope_required", "authorized", "denied", "disputed", "unknown"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "case_communication_status",
+      "value_type": "enum",
+      "values": ["not_issued", "issued", "transport_pending", "delivered", "expired", "failed", "unknown"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "case_disposition_status",
+      "value_type": "status_reason_pair",
+      "values": ["none", "pending", "information_needed", "referred", "facility_declined", "other_scoped_decline", "conditioned_proposal", "closed"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "delivered_case_result",
+      "value_type": "status_reason_pair",
+      "values": ["none", "delayed", "partial", "failed", "executed", "withdrawn"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "delivered_request",
+      "value_type": "nullable_stable_id"
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "facility_eligibility",
+      "value_type": "enum",
+      "values": ["eligible", "ineligible", "not_applicable", "disputed", "unknown"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "financial_information_status",
+      "value_type": "enum",
+      "values": ["not_received", "incomplete", "stale", "adequate_for_scope", "disputed", "unknown"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "relationship_status",
+      "value_type": "stable_id"
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "request_authorization_evidence",
+      "value_type": "enum",
+      "values": ["sufficient", "incomplete", "disputed", "absent", "unknown"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "resource_proposal_status",
+      "value_type": "enum",
+      "values": ["none", "information_needed", "collateral_review", "member_consultation", "conditionally_authorized", "scheduled", "partial", "failed", "executed", "withdrawn"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "review_state",
+      "value_type": "enum",
+      "values": ["not_open", "collecting_information", "examining", "awaiting_forum", "decision_ready", "complete", "closed"]
+    },
+    {
+      "actor_id": "new_york_clearing_house",
+      "semantic_id": "route_classification",
+      "value_type": "enum",
+      "values": ["member_facility", "nonmember_clearing_matter", "other_identified_route", "unresolved"]
+    }
+  ]
+}

@@ -197,6 +197,13 @@ def validate_observation_payload(
         raise CarrierConformanceError(
             f"observation_family_mismatch:missing={missing}:extra={extra}"
         )
+    mapping.validate_observation_values(
+        actor_id=actor_id,
+        values=semantic_values,
+        availability={
+            name: values[f"{name}_availability"] for name in semantic_names
+        },
+    )
     for name, expected in semantic_values.items():
         if values[name] != expected:
             raise CarrierConformanceError(f"observation_value_mismatch:{name}")

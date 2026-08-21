@@ -15,7 +15,12 @@ from h2epr.agents import (
 from masim.integrations.event_process import validate_trace
 
 from scenarios.panic_1907 import run_first_slice
-from scenarios.panic_1907.policies import decide_knickerbocker, decide_nych
+from scenarios.panic_1907.policies import (
+    KT_ID,
+    NYCH_ID,
+    decide_knickerbocker,
+    decide_nych,
+)
 from support.schema_registry import definition_errors
 
 
@@ -97,8 +102,12 @@ def test_first_slice_closes_request_to_feedback_without_simulation() -> None:
     assert state["facts"]["financial_information"]["value"] == (
         "adequate_for_scope"
     )
-    assert state["facts"]["case_disposition"]["value"] == (
-        "facility_scoped_decline"
+    assert state["facts"]["request_authorization_evidence"]["value"] == (
+        "sufficient"
+    )
+    assert state["facts"]["case_disposition"]["value"] == "facility_declined"
+    assert state["facts"]["case_disposition"]["reason_code"] == (
+        "facility_ineligible"
     )
     assert state["facts"]["case_communication"]["value"] == "delivered"
     assert state["participant_state"]["knickerbocker_trust"][
@@ -138,6 +147,15 @@ def test_observations_are_complete_actor_scoped_families() -> None:
         actor_id = rows[0]["runtime_value"]["visibility_scope_ids"][0]
         semantic_names = mapping.participants[actor_id].observations
         values = runtime_field_values(rows, "observation")
+        scoped_observations = {
+            (KT_ID, "corporate_authorization"): "scope.kt.support_request",
+            (NYCH_ID, "authority_state"): (
+                "scope.nych.facility_classification"
+            ),
+            (NYCH_ID, "request_authorization_evidence"): (
+                "scope.kt.support_request"
+            ),
+        }
         for name in semantic_names:
             assert name in values
             assert values[f"{name}_authoritative_record_ref"] in known_record_refs
@@ -147,7 +165,9 @@ def test_observations_are_complete_actor_scoped_families() -> None:
                 "delivered",
                 "unavailable",
             }
-            assert values[f"{name}_scope_id"] == f"scope.observation.{actor_id}"
+            assert values[f"{name}_scope_id"] == scoped_observations.get(
+                (actor_id, name), f"scope.observation.{actor_id}"
+            )
         assert len(values) == len(semantic_names) * 6
 
 
@@ -292,7 +312,7 @@ def test_decline_is_delivered_before_knickerbocker_adapts() -> None:
     observation = result.records[observation_index]["payload"]
     assert runtime_field_values(observation["fields"], "observation")[
         "delivered_disposition"
-    ] == "facility_scoped_decline"
+    ] == ["refused", "facility_ineligible"]
     assert decline_delivery_index < observation_index < contingency_index
 
 
@@ -306,13 +326,13 @@ def test_first_slice_is_deterministic_and_replayable() -> None:
 
 def test_knickerbocker_policy_uses_qualitative_gates_and_suppresses_duplicates() -> None:
     observations = {
-        "asset_liquidity_assessment": "illiquid_value_uncertain",
+        "asset_liquidity_assessment": "unknown",
         "clearing_channel_status": "active",
-        "collateral_package_status": "bounded_unknown",
+        "collateral_package_status": "available",
         "corporate_authorization": "authorized",
-        "delivered_disposition": "none",
+        "delivered_disposition": ["none", None],
         "internal_liquidity_assessment": "critical",
-        "received_information_request": "none",
+        "received_information_request": None,
         "support_request_status": "none",
         "withdrawal_pressure": "severe",
     }
@@ -346,20 +366,23 @@ def test_knickerbocker_policy_uses_qualitative_gates_and_suppresses_duplicates()
         observations, _current_metadata(observations), participant_state
     )
     assert duplicate_plan.semantic_id is None
-    assert duplicate_plan.reason_codes == ("reason.equivalent_request_unresolved",)
+    assert duplicate_plan.reason_codes == (
+        "reason.equivalent_request_unresolved",
+        "reason.request_strategy_posture.no_active_request",
+    )
 
 
 def test_nych_conservative_policy_has_no_invented_alternative_route() -> None:
     observations = {
         "authority_state": "authorized",
         "case_communication_status": "not_issued",
-        "case_disposition_status": "case_disposition_ready",
-        "delivered_case_result": None,
+        "case_disposition_status": ["none", None],
+        "delivered_case_result": ["none", None],
         "delivered_request": "request.kt.support.001",
         "facility_eligibility": "ineligible",
         "financial_information_status": "adequate_for_scope",
         "relationship_status": "nonmember_clearing_relationship",
-        "request_authorization_evidence": "authorized",
+        "request_authorization_evidence": "sufficient",
         "resource_proposal_status": "none",
         "review_state": "decision_ready",
         "route_classification": "member_facility",
@@ -374,3 +397,38 @@ def test_nych_conservative_policy_has_no_invented_alternative_route() -> None:
     assert plan.semantic_id == "issue_typed_decline"
     assert "proposal_id" not in plan.parameters
     assert plan.authority_refs == ()
+
+
+def test_nych_procedural_forum_must_come_from_authority_observation() -> None:
+    observations = {
+        "authority_state": "committee_scope",
+        "case_communication_status": "not_issued",
+        "case_disposition_status": ["none", None],
+        "delivered_case_result": ["none", None],
+        "delivered_request": "request.kt.support.001",
+        "facility_eligibility": "ineligible",
+        "financial_information_status": "adequate_for_scope",
+        "relationship_status": "nonmember_clearing_relationship",
+        "request_authorization_evidence": "sufficient",
+        "resource_proposal_status": "none",
+        "review_state": "not_open",
+        "route_classification": "member_facility",
+    }
+    participant_state = {
+        "last_consumed_record_versions": "none",
+        "procedural_assessment_posture": "case_classified",
+    }
+    generic = _current_metadata(observations)
+    blocked = decide_nych(observations, generic, participant_state)
+    assert blocked.semantic_id is None
+    assert "reason.no_competent_forum_identified" in blocked.reason_codes
+
+    delivered = _current_metadata(observations)
+    delivered["authority_state"]["scope_id"] = (
+        "forum.nych.executive_committee"
+    )
+    selected = decide_nych(observations, delivered, participant_state)
+    assert selected.semantic_id == "seek_procedural_authority"
+    assert selected.parameters["proposed_forum_id"] == (
+        "forum.nych.executive_committee"
+    )

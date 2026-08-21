@@ -46,6 +46,18 @@ class ObservedValues(Mapping[str, Any]):
         self._accessed.add(key)
         return self._metadata[key]["availability"]
 
+    def record_ref(self, key: str) -> str:
+        self._accessed.add(key)
+        return self._metadata[key]["authoritative_record_ref"]
+
+    def scope_id(self, key: str) -> str:
+        self._accessed.add(key)
+        return self._metadata[key]["scope_id"]
+
+    def as_of(self, key: str) -> str:
+        self._accessed.add(key)
+        return self._metadata[key]["as_of"]
+
 
 @dataclass(frozen=True)
 class DecisionPlan:
@@ -57,6 +69,17 @@ class DecisionPlan:
     context: Mapping[str, Any] = field(default_factory=dict)
     used_observations: tuple[str, ...] = ()
     used_participant_state: tuple[str, ...] = ()
+
+
+def _status_reason(value: Any, name: str) -> tuple[str, str | None]:
+    if not isinstance(value, list) or len(value) != 2:
+        raise ValueError(f"status_reason_pair_invalid:{name}")
+    status, reason = value
+    if not isinstance(status, str) or (
+        reason is not None and not isinstance(reason, str)
+    ):
+        raise ValueError(f"status_reason_pair_invalid:{name}")
+    return status, reason
 
 
 def _plan(
@@ -98,9 +121,11 @@ def decide_knickerbocker(
         },
     )
 
-    delivered_disposition = observation["delivered_disposition"]
+    delivered_disposition, disposition_reason = _status_reason(
+        observation["delivered_disposition"], "delivered_disposition"
+    )
     if (
-        delivered_disposition == "facility_scoped_decline"
+        delivered_disposition == "refused"
         and observation.availability("delivered_disposition") == "delivered"
     ):
         posture = state["operational_posture"]
@@ -113,7 +138,10 @@ def decide_knickerbocker(
                 observation,
                 state,
                 commitment_ids=("DC-KT-04",),
-                reason_codes=("reason.delivered_scoped_decline_requires_adaptation",),
+                reason_codes=(
+                    "reason.delivered_scoped_decline_requires_adaptation",
+                    f"reason.disposition.{disposition_reason}",
+                ),
                 semantic_id="prepare_operational_contingency",
                 parameters={
                     "contingency_id": "contingency.kt.after_decline.001",
@@ -138,16 +166,17 @@ def decide_knickerbocker(
 
     information_request = observation["received_information_request"]
     if (
-        information_request != "none"
+        information_request is not None
         and observation.availability("received_information_request") == "delivered"
     ):
         package_status = observation["collateral_package_status"]
         authorization = observation["corporate_authorization"]
         request_status = observation["support_request_status"]
-        if authorization == "authorized" and package_status in {
-            "bounded_unknown",
-            "prepared_bounded",
-        } and request_status == "awaiting_information":
+        if (
+            authorization == "authorized"
+            and package_status in {"available", "submitted", "disputed", "unknown"}
+            and request_status == "awaiting_information"
+        ):
             return _plan(
                 observation,
                 state,
@@ -161,9 +190,11 @@ def decide_knickerbocker(
                     "information_item_ids": [
                         "information.asset_liquidity_assessment",
                         "information.collateral_package_status",
+                        "information.request_authorization_evidence",
                     ],
                     "provenance_ref_ids": [
-                        "claim.fixture.bounded_information_only"
+                        "claim.fixture.bounded_information_only",
+                        observation.record_ref("corporate_authorization"),
                     ],
                     "recipient_id": NYCH_ID,
                     "request_id": "request.kt.support.001",
@@ -185,11 +216,15 @@ def decide_knickerbocker(
         "awaiting_information",
         "under_review",
     }:
+        request_posture = state["request_strategy_posture"]
         return _plan(
             observation,
             state,
             commitment_ids=("DC-KT-03",),
-            reason_codes=("reason.equivalent_request_unresolved",),
+            reason_codes=(
+                "reason.equivalent_request_unresolved",
+                f"reason.request_strategy_posture.{request_posture}",
+            ),
         )
 
     liquidity = observation["internal_liquidity_assessment"]
@@ -263,10 +298,11 @@ def decide_knickerbocker(
     asset_status = observation["asset_liquidity_assessment"]
     package_status = observation["collateral_package_status"]
     if (
-        asset_status == "missing"
-        or package_status == "missing"
+        observation.availability("asset_liquidity_assessment") != "delivered"
+        or observation.availability("collateral_package_status") != "delivered"
         or observation.freshness("asset_liquidity_assessment") != "current"
         or observation.freshness("collateral_package_status") != "current"
+        or package_status in {"not_prepared", "preparing"}
     ):
         return _plan(
             observation,
@@ -303,7 +339,7 @@ def decide_knickerbocker(
             "route_id": "route.nbc_mediated.nych",
             "withdrawal_condition_ids": ["condition.channel_withdrawal"],
         },
-        authority_refs=("authority.kt.support_request.001",),
+        authority_refs=(observation.record_ref("corporate_authorization"),),
         context={"package_material_exists": True},
     )
 
@@ -323,87 +359,257 @@ def decide_nych(
             for name in participant_state
         },
     )
-    case_status = observation["case_disposition_status"]
-    review_state = observation["review_state"]
     delivered_request = observation["delivered_request"]
+    route = observation["route_classification"]
 
     if (
-        case_status == "case_received"
-        and observation.availability("delivered_request") == "delivered"
+        delivered_request is None
+        or observation.availability("delivered_request") != "delivered"
     ):
-        relationship = observation["relationship_status"]
-        route = observation["route_classification"]
-        eligibility = observation["facility_eligibility"]
-        mandate = observation["request_authorization_evidence"]
-        unresolved = []
-        if mandate != "authorized":
-            unresolved.append("field.request_authorization")
-        unresolved.append("field.financial_information")
         return _plan(
             observation,
             state,
             commitment_ids=("DC-NYCH-01",),
-            reason_codes=("reason.delivered_request_requires_classification",),
+            reason_codes=("reason.no_delivered_request_no_case_action",),
+        )
+
+    if route == "unresolved":
+        relationship = observation["relationship_status"]
+        eligibility = observation["facility_eligibility"]
+        mandate = observation["request_authorization_evidence"]
+        classified_route = (
+            "member_facility"
+            if eligibility in {"eligible", "ineligible"}
+            else "unresolved"
+        )
+        unresolved = []
+        if mandate != "sufficient":
+            unresolved.append("field.request_authorization")
+        if classified_route == "unresolved":
+            unresolved.append("field.route_classification")
+        unresolved.append("field.financial_information")
+        parameters = {
+            "case_id": "case.kt_nych.001",
+            "channel_id": "channel.nbc_mediated",
+            "relationship_ref": observation.record_ref("relationship_status"),
+            "represented_institution_id": KT_ID,
+            "route_class": classified_route,
+            "sender_id": KT_ID,
+            "source_request_id": delivered_request,
+            "unresolved_field_ids": unresolved,
+        }
+        if classified_route == "member_facility":
+            parameters["facility_id"] = "facility.nych.member_support"
+        return _plan(
+            observation,
+            state,
+            commitment_ids=("DC-NYCH-01",),
+            reason_codes=(
+                "reason.delivered_request_requires_classification",
+                f"reason.relationship_class.{relationship}",
+            ),
             semantic_id="record_and_classify_request",
-            parameters={
-                "case_id": "case.kt_nych.001",
-                "channel_id": "channel.nbc_mediated",
-                "facility_id": "facility.nych.member_support",
-                "relationship_ref": "relationship.kt_nbc_nych.001",
-                "represented_institution_id": KT_ID,
-                "route_class": route,
-                "sender_id": KT_ID,
-                "source_request_id": delivered_request,
-                "unresolved_field_ids": unresolved,
-            },
+            parameters=parameters,
             authority_refs=("authority.nych.intake.001",),
         )
 
-    if case_status == "case_classified":
-        information = observation["financial_information_status"]
-        mandate = observation["request_authorization_evidence"]
-        disposition = observation["case_communication_status"]
-        if information != "adequate_for_scope":
+    case_disposition, disposition_reason = _status_reason(
+        observation["case_disposition_status"], "case_disposition_status"
+    )
+    communication_state = observation["case_communication_status"]
+    result_status, result_reason = _status_reason(
+        observation["delivered_case_result"], "delivered_case_result"
+    )
+    review_state = observation["review_state"]
+
+    if (
+        result_status != "none"
+        and observation.availability("delivered_case_result") == "delivered"
+    ):
+        authority = observation["authority_state"]
+        if (
+            authority == "authorized"
+            and result_status == "executed"
+            and review_state == "complete"
+        ):
             return _plan(
                 observation,
                 state,
-                commitment_ids=("DC-NYCH-01", "DC-NYCH-02"),
-                reason_codes=("reason.named_case_information_missing",),
-                semantic_id="request_case_information",
+                commitment_ids=("DC-NYCH-05",),
+                reason_codes=(
+                    "reason.delivered_execution_result_requires_case_closure",
+                    f"reason.delivered_result.{result_reason}",
+                ),
+                semantic_id="close_or_reopen_review",
                 parameters={
+                    "authority_ref": observation.record_ref("authority_state"),
                     "case_id": "case.kt_nych.001",
-                    "information_category_ids": [
-                        "information.asset_liquidity_assessment",
-                        "information.collateral_package_status",
-                    ],
-                    "information_request_id": "information_request.nych.kt.001",
-                    "recipient_id": KT_ID,
-                    "required_as_of": "time.focal_information_package",
-                    "scope_id": "scope.nych.facility_classification",
+                    "operation": "close",
+                    "reason_code": "reason.executed_result_delivered",
+                    "review_act_id": "review_act.nych.close_after_execution.001",
                 },
-                authority_refs=("authority.nych.case_information.001",),
+            )
+        if (
+            authority == "authorized"
+            and result_status in {"delayed", "partial", "failed", "withdrawn"}
+            and review_state == "closed"
+        ):
+            return _plan(
+                observation,
+                state,
+                commitment_ids=("DC-NYCH-05",),
+                reason_codes=(
+                    "reason.delivered_adverse_result_requires_successor_review",
+                    f"reason.delivered_result.{result_status}",
+                    f"reason.delivered_result_detail.{result_reason}",
+                ),
+                semantic_id="close_or_reopen_review",
+                parameters={
+                    "authority_ref": observation.record_ref("authority_state"),
+                    "case_id": "case.kt_nych.001",
+                    "new_event_ref": observation.record_ref(
+                        "delivered_case_result"
+                    ),
+                    "operation": "reopen",
+                    "reason_code": f"reason.result_requires_review.{result_status}",
+                    "review_act_id": "review_act.nych.reopen_after_result.001",
+                },
             )
         return _plan(
             observation,
             state,
-            commitment_ids=("DC-NYCH-02",),
+            commitment_ids=("DC-NYCH-05",),
             reason_codes=(
-                f"reason.classified_case_no_procedural_step.{mandate}.{disposition}",
+                "reason.delivered_result_follow_up_blocked",
+                f"reason.current_review_state.{review_state}",
+                f"reason.current_authority_state.{authority}",
             ),
         )
 
-    if case_status == "case_under_review" and review_state in {
+    if case_disposition != "none" and communication_state in {
+        "not_issued",
+        "expired",
+        "failed",
+    }:
+        authority = observation["authority_state"]
+        if authority == "authorized":
+            effective_at = observation.as_of("case_disposition_status")
+            return _plan(
+                observation,
+                state,
+                commitment_ids=("DC-NYCH-05",),
+                reason_codes=(
+                    "reason.case_disposition_requires_authorized_communication",
+                    f"reason.communication_state.{communication_state}",
+                ),
+                semantic_id="communicate_case_status",
+                parameters={
+                    "audience_id": KT_ID,
+                    "case_disposition_ref": observation.record_ref(
+                        "case_disposition_status"
+                    ),
+                    "case_id": "case.kt_nych.001",
+                    "communication_act_id": (
+                        "communication_act.nych.case_status."
+                        f"{case_disposition}.{communication_state}.001"
+                    ),
+                    "effective_time": {
+                        "lower": effective_at,
+                        "upper": effective_at,
+                        "precision": "exact_datetime",
+                        "timezone": "America/New_York",
+                        "uncertainty": "synthetic conformance fixture coordinate",
+                    },
+                    "issuing_authority_ref": observation.record_ref(
+                        "authority_state"
+                    ),
+                    "procedural_state": (
+                        f"status.case_disposition.{case_disposition}"
+                    ),
+                },
+            )
+        return _plan(
+            observation,
+            state,
+            commitment_ids=("DC-NYCH-05",),
+            reason_codes=(
+                "reason.case_communication_authority_not_available",
+                f"reason.current_authority_state.{authority}",
+            ),
+        )
+
+    information = observation["financial_information_status"]
+    if route != "unresolved" and review_state == "not_open" and (
+        information != "adequate_for_scope"
+    ):
+        mandate = observation["request_authorization_evidence"]
+        return _plan(
+            observation,
+            state,
+            commitment_ids=("DC-NYCH-01", "DC-NYCH-02"),
+            reason_codes=(
+                "reason.named_case_information_missing",
+                f"reason.request_authorization_evidence.{mandate}",
+            ),
+            semantic_id="request_case_information",
+            parameters={
+                "case_id": "case.kt_nych.001",
+                "information_category_ids": [
+                    "information.asset_liquidity_assessment",
+                    "information.collateral_package_status",
+                    "information.request_authorization_evidence",
+                ],
+                "information_request_id": "information_request.nych.kt.001",
+                "recipient_id": KT_ID,
+                "required_as_of": "time.focal_information_package",
+                "scope_id": "scope.nych.facility_classification",
+            },
+            authority_refs=("authority.nych.case_information.001",),
+        )
+
+    if information == "adequate_for_scope" and review_state in {
         "not_open",
         "collecting_information",
     }:
-        information = observation["financial_information_status"]
         authority = observation["authority_state"]
         if authority != "authorized":
+            observation["facility_eligibility"]
+            proposed_forum = observation.scope_id("authority_state")
+            if authority not in {
+                "committee_scope",
+                "membership_scope_required",
+            } or not proposed_forum.startswith("forum.nych."):
+                return _plan(
+                    observation,
+                    state,
+                    commitment_ids=("DC-NYCH-02",),
+                    reason_codes=(
+                        "reason.review_authority_not_available",
+                        "reason.no_competent_forum_identified",
+                        f"reason.current_authority_state.{authority}",
+                    ),
+                )
             return _plan(
                 observation,
                 state,
                 commitment_ids=("DC-NYCH-02",),
-                reason_codes=("reason.review_authority_not_available",),
+                reason_codes=(
+                    "reason.review_authority_not_available",
+                    f"reason.current_authority_state.{authority}",
+                ),
+                semantic_id="seek_procedural_authority",
+                parameters={
+                    "authority_question_id": (
+                        "authority_question.nych.facility_review.001"
+                    ),
+                    "authority_request_id": (
+                        "authority_request.nych.facility_review.001"
+                    ),
+                    "case_or_proposal_id": "case.kt_nych.001",
+                    "proposed_forum_id": proposed_forum,
+                    "route_id": f"route.nych.{route}",
+                },
+                authority_refs=("authority.nych.procedural_inquiry.001",),
             )
         desired = (
             "collecting_information"
@@ -424,12 +630,11 @@ def decide_nych(
                 "reviewing_interface_id": "interface.nych.scoped_review",
                 "scope_id": "scope.nych.facility_classification",
             },
-            authority_refs=("authority.nych.facility_disposition.001",),
+            authority_refs=(observation.record_ref("authority_state"),),
         )
 
-    if case_status == "case_disposition_ready":
+    if review_state == "decision_ready" and case_disposition == "none":
         eligibility = observation["facility_eligibility"]
-        route = observation["route_classification"]
         authority = observation["authority_state"]
         if (
             eligibility == "ineligible"
@@ -446,7 +651,9 @@ def decide_nych(
                     "case_id": "case.kt_nych.001",
                     "decline_act_id": "decline.nych.facility_scope.001",
                     "facility_or_route_scope_id": "facility.nych.member_support",
-                    "issuing_authority_ref": "authority.nych.facility_disposition.001",
+                    "issuing_authority_ref": observation.record_ref(
+                        "authority_state"
+                    ),
                     "reason_code": "facility_ineligible",
                     "recipient_id": KT_ID,
                 },
@@ -461,8 +668,12 @@ def decide_nych(
     return _plan(
         observation,
         state,
-        commitment_ids=("DC-NYCH-01",),
-        reason_codes=("reason.no_due_procedural_response",),
+        commitment_ids=("DC-NYCH-05",),
+        reason_codes=(
+            "reason.no_due_procedural_response",
+            f"reason.case_disposition.{case_disposition}",
+            f"reason.case_disposition_detail.{disposition_reason or 'none'}",
+        ),
     )
 
 

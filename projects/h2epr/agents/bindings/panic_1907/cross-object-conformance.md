@@ -1,12 +1,18 @@
 # Fail-closed cross-object conformance rules
 
-> Rule-set ID: `h2epr.agent-binding.conformance.v0_2_1`
+> Rule-set ID: `h2epr.agent-binding.conformance.v0_2_2`
 >
-> Status: `ACCEPTED_SPECIFICATION / NO_VALIDATOR_IMPLEMENTATION`
+> Status: `ACCEPTED_SPECIFICATION / PARTIAL_EXECUTABLE_CONFORMANCE`
 
 V1 JSON Schema validates individual record shape. These rules validate meaning across Definition, evidence,
 scenario, participant artifact, observation, decision, intent, communication, reducer state, trace, and seals.
 A missing or ambiguous reference fails closed; validators do not repair the object or choose a scientific value.
+
+The current machine mapping implements exact source identity, actor-specific observation domains, intent
+projection, selected lifecycles, owner/capability/scope/time authority resolution, carrier correlation, trace
+closure, and replay checks for the conservative first slice. The Cycle 4 behavior matrix exercises selected
+policy-and-binding cases without starting a simulator. Rules outside that bounded coverage remain specifications;
+partial execution is not historical or scientific validation.
 
 ## 1. Identity and inventory
 
@@ -58,6 +64,10 @@ Definition permits concept
 
 Fail if any link is absent or if policy reads `WorldState` directly.
 
+The machine observation domain for a concept must also match the exact observation row in that actor's bound
+Definition. A value appearing elsewhere in a shared source or in the other participant's Definition does not
+establish parity.
+
 ### `CO-06` — time and freshness
 
 - Every dated observation includes source/effective time and delivery/logical time.
@@ -81,6 +91,10 @@ Fail if any link is absent or if policy reads `WorldState` directly.
   uncommunicated deliberation, later certificate program, Reference EPG, evaluation material, or any field denied
   by the Definition.
 - Record the failed field identity and safe payload hash as an invariant violation; do not deliver it.
+- A receiving Agent may classify requester authorization only from delivered request/dossier material. It may not
+  read the requester's internal authorization state merely because both states exist in the same world model.
+- Before a request is delivered, requester-authorization evidence is `absent` or `unknown`; request and dossier
+  delivery may advance that evidence through explicit, traceable states but cannot pre-populate it.
 
 ## 3. State, lifecycle, and ownership
 
@@ -131,11 +145,15 @@ Fail if any link is absent or if policy reads `WorldState` directly.
 
 ### `CO-15` — authority, route, and resource
 
-- Every claimed authority ref resolves to an effective, scoped authority record.
+- Every claimed authority ref resolves to an effective record whose owner actor, semantic capability, parameter
+  scope, target scope, and effective interval all cover the attempted act.
+- The attempted target set must equal the grant's target set. An empty grant means that the act has no external
+  target; it is not a wildcard.
 - Communication route, institutional eligibility, issuing authority, and resource ownership are checked separately.
 - The member-facility gate applies only to its named facility.
 - A conditioned NYCH proposal requires the sensitivity variant, explicit route/forum, and scoped authority.
-- Fail on missing/expired/mismatched authority, invented alternative route, or Agent-owned member resource.
+- Fail on missing, expired, wrong-actor, wrong-capability, wrong-scope, or wrong-target authority; invented
+  alternative route; or Agent-owned member resource.
 
 ### `CO-16` — action/message correlation
 
@@ -155,6 +173,9 @@ Fail if any link is absent or if policy reads `WorldState` directly.
   explicit no-effect.
 - CommunicationDisposition and sent/delivered/expired records describe transport only.
 - `case_disposition_status`, `case_communication_status`, and `delivered_case_result` have distinct records.
+- Under the conservative structural variant, a conditioned proposal, non-neutral resource-proposal state, or
+  proposal execution result is unreachable and fails before policy selection. Result-follow-up cases belong to a
+  separately bound sensitivity variant.
 - Fail if accepted means success, issued means delivered, delivered means counterparty agreement, or proposal means
   execution/effect.
 
@@ -233,5 +254,5 @@ cycles, wrong actor, nonmonotone state version, or missing result delivery.
 
 This rule set is complete as an accepted design specification when all `CO-01..21` have named inputs, a
 deterministic pass/fail condition, and a diagnostic failure class; all 21 intents and seven lifecycles are
-consumed; and no rule requires a new V1 field. It becomes executable only after a separately authorized validator
-implementation and tests.
+consumed; and no rule requires a new V1 field. Executable coverage is reported per validator, policy case, and
+reducer path. Unexercised rules remain explicit gaps rather than inheriting a pass from the first slice.

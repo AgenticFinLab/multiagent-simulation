@@ -11,6 +11,7 @@ from h2epr.agents import (
     IntentConformanceError,
     LifecycleConformanceError,
     MappingValidationError,
+    ObservationConformanceError,
     load_executable_mapping,
 )
 
@@ -63,11 +64,12 @@ def _validate_support_request(parameters=None, **overrides):
 def test_current_mapping_closes_reviewed_inventory() -> None:
     mapping = _mapping()
     assert mapping.mapping_profile_id == (
-        "h2epr.agent-definition.mapping.0288.two-role.v0_2_1"
+        "h2epr.agent-definition.mapping.0288.two-role.v0_2_2"
     )
     assert mapping.scenario_variant == "NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE"
     assert len(mapping.intents) == 21
     assert len(mapping.lifecycles.families) == 7
+    assert sum(len(rows) for rows in mapping.observation_contracts.values()) == 21
     assert set(mapping.participants) == {
         "knickerbocker_trust",
         "new_york_clearing_house",
@@ -112,6 +114,173 @@ def test_machine_registry_hash_is_bound_by_mapping(tmp_path: Path) -> None:
         load_executable_mapping(
             copied_root / "agents/bindings/panic_1907/binding.json",
             project_root=copied_root,
+        )
+
+
+def test_observation_registry_rejects_an_implementation_only_synonym(
+    tmp_path: Path,
+) -> None:
+    copied_root = tmp_path / "h2epr"
+    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
+    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
+    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
+    copied_contract.parent.mkdir(parents=True)
+    shutil.copy2(contract, copied_contract)
+
+    registry = copied_root / "agents/bindings/panic_1907/observation-registry.json"
+    registry_value = json.loads(registry.read_text(encoding="utf-8"))
+    asset = next(
+        row
+        for row in registry_value["observations"]
+        if row["semantic_id"] == "asset_liquidity_assessment"
+    )
+    asset["values"].append("illiquid_value_uncertain")
+    registry.write_text(
+        json.dumps(registry_value, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    binding = copied_root / "agents/bindings/panic_1907/binding.json"
+    binding_value = json.loads(binding.read_text(encoding="utf-8"))
+    binding_value["machine_registries"]["observation"]["sha256"] = hashlib.sha256(
+        registry.read_bytes()
+    ).hexdigest()
+    binding.write_text(
+        json.dumps(binding_value, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        MappingValidationError,
+        match="observation_value_missing_from_source",
+    ):
+        load_executable_mapping(binding, project_root=copied_root)
+
+
+def test_observation_registry_value_must_match_the_same_actor_definition_row(
+    tmp_path: Path,
+) -> None:
+    copied_root = tmp_path / "h2epr"
+    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
+    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
+    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
+    copied_contract.parent.mkdir(parents=True)
+    shutil.copy2(contract, copied_contract)
+
+    registry = copied_root / "agents/bindings/panic_1907/observation-registry.json"
+    registry_value = json.loads(registry.read_text(encoding="utf-8"))
+    asset = next(
+        row
+        for row in registry_value["observations"]
+        if row["actor_id"] == "knickerbocker_trust"
+        and row["semantic_id"] == "asset_liquidity_assessment"
+    )
+    # `active` exists in the shared registry source and elsewhere in the KT
+    # Definition, but not in this observation's Definition row.
+    asset["values"].append("active")
+    registry.write_text(
+        json.dumps(registry_value, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    binding = copied_root / "agents/bindings/panic_1907/binding.json"
+    binding_value = json.loads(binding.read_text(encoding="utf-8"))
+    binding_value["machine_registries"]["observation"]["sha256"] = hashlib.sha256(
+        registry.read_bytes()
+    ).hexdigest()
+    binding.write_text(
+        json.dumps(binding_value, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        MappingValidationError,
+        match="definition_observation_value_domain_mismatch:"
+        "knickerbocker_trust:asset_liquidity_assessment:active",
+    ):
+        load_executable_mapping(binding, project_root=copied_root)
+
+
+def test_observation_contracts_reject_out_of_domain_runtime_values() -> None:
+    mapping = _mapping()
+    participant = mapping.participants["knickerbocker_trust"]
+    values = {
+        semantic_id: {
+            "asset_liquidity_assessment": "unknown",
+            "clearing_channel_status": "active",
+            "collateral_package_status": "available",
+            "corporate_authorization": "authorized",
+            "delivered_disposition": ["none", None],
+            "internal_liquidity_assessment": "critical",
+            "received_information_request": None,
+            "support_request_status": "none",
+            "withdrawal_pressure": "severe",
+        }[semantic_id]
+        for semantic_id in participant.observations
+    }
+    availability = {semantic_id: "delivered" for semantic_id in values}
+    availability["delivered_disposition"] = "unavailable"
+    availability["received_information_request"] = "unavailable"
+    mapping.validate_observation_values(
+        actor_id="knickerbocker_trust",
+        values=values,
+        availability=availability,
+    )
+
+    availability["asset_liquidity_assessment"] = "unavailable"
+    mapping.validate_observation_values(
+        actor_id="knickerbocker_trust",
+        values=values,
+        availability=availability,
+    )
+    values["asset_liquidity_assessment"] = "illiquid"
+    with pytest.raises(
+        ObservationConformanceError,
+        match="unavailable_observation_requires_unknown",
+    ):
+        mapping.validate_observation_values(
+            actor_id="knickerbocker_trust",
+            values=values,
+            availability=availability,
+        )
+
+    values["asset_liquidity_assessment"] = "illiquid_value_uncertain"
+    with pytest.raises(
+        ObservationConformanceError,
+        match="observation_value_outside_enum",
+    ):
+        mapping.validate_observation_values(
+            actor_id="knickerbocker_trust",
+            values=values,
+            availability=availability,
+        )
+
+
+def test_nych_cannot_observe_sufficient_request_authority_without_a_request() -> None:
+    values = {
+        "authority_state": "authorized",
+        "case_communication_status": "not_issued",
+        "case_disposition_status": ["none", None],
+        "delivered_case_result": ["none", None],
+        "delivered_request": None,
+        "facility_eligibility": "ineligible",
+        "financial_information_status": "not_received",
+        "relationship_status": "nonmember_clearing_relationship",
+        "request_authorization_evidence": "sufficient",
+        "resource_proposal_status": "none",
+        "review_state": "not_open",
+        "route_classification": "unresolved",
+    }
+    availability = {semantic_id: "delivered" for semantic_id in values}
+    availability["delivered_request"] = "unavailable"
+    availability["delivered_case_result"] = "unavailable"
+
+    with pytest.raises(
+        ObservationConformanceError,
+        match="request_authorization_evidence_without_delivered_request",
+    ):
+        _mapping().validate_observation_values(
+            actor_id="new_york_clearing_house",
+            values=values,
+            availability=availability,
         )
 
 

@@ -1,13 +1,13 @@
 {
-  "binding_schema_version": "h2epr.agent-definition-mapping.v0_2_1",
-  "mapping_profile_id": "h2epr.agent-definition.mapping.0288.two-role.v0_2_1",
+  "binding_schema_version": "h2epr.agent-definition-mapping.v0_2_2",
+  "mapping_profile_id": "h2epr.agent-definition.mapping.0288.two-role.v0_2_2",
   "status": "implementation_candidate",
   "authority": "derived_mapping_only",
   "source_assets": [
     {
       "asset_id": "cross_object_conformance",
       "path": "agents/bindings/panic_1907/cross-object-conformance.md",
-      "sha256": "9a9a9aae6908409450aa6831da5c5f011846474423bf5571171344fc40a1746f"
+      "sha256": "cf70034f13d907f4754ae76686f58746a826709539e4e19595de41a3a15df7ef"
     },
     {
       "asset_id": "decision_situations",
@@ -25,6 +25,11 @@
       "sha256": "63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87"
     },
     {
+      "asset_id": "observation_registry_specification",
+      "path": "agents/bindings/panic_1907/observation-registry.md",
+      "sha256": "8bc43bd866a0b4a194168688b9d15e3e3e209eb7ffd8dbb0246541ef58cd69a2"
+    },
+    {
       "asset_id": "scenario_identity_and_lifecycles",
       "path": "agents/bindings/panic_1907/scenario-identity-and-business-lifecycles.md",
       "sha256": "8a60c1607cf1226bb8249d087f35b01c6d1a0b1ac5b16f68c1b383f6779837b7"
@@ -37,7 +42,7 @@
     {
       "asset_id": "two_role_binding_specification",
       "path": "agents/bindings/panic_1907/two-role-binding.md",
-      "sha256": "42d9b50060458fcf63a33345f72f3a63c8b0cc4e5c1b2badf10687c936d019c2"
+      "sha256": "57e4292a4d9b43d88b0ae1a7da8d18821f9bf0f8870ead28795da002593f5063"
     }
   ],
   "machine_registries": {
@@ -48,6 +53,10 @@
     "lifecycle": {
       "path": "agents/bindings/panic_1907/lifecycle-registry.json",
       "sha256": "6ef4ac68931c6cc9509ded17f474eb46604e9c9ad76d05ab7993ffac8c9c45c3"
+    },
+    "observation": {
+      "path": "agents/bindings/panic_1907/observation-registry.json",
+      "sha256": "7a8c60de2fea5f088ca9c6422ef368f47b3d9f0c960c45e3965eee35868bec66"
     }
   },
   "contract_carrier": {

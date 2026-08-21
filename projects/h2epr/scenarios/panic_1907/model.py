@@ -22,7 +22,7 @@ from masim.integrations.event_process import canonical_sha256
 from .policies import DecisionPlan, KT_ID, NYCH_ID
 
 
-RUN_ID = "run.agent_definition.first_slice.0288.v0_2_1"
+RUN_ID = "run.agent_definition.first_slice.0288.v0_2_2"
 REQUEST_ID = "request.kt.support.001"
 CASE_ID = "case.kt_nych.001"
 FACILITY_ID = "facility.nych.member_support"
@@ -212,6 +212,7 @@ def initial_state(mapping: ExecutableDefinitionMapping) -> dict[str, Any]:
             "result": {
                 "entity_id": "result.kt_nych.placeholder",
                 "status": "none",
+                "reason_code": None,
                 "version": 0,
             },
         },
@@ -219,38 +220,116 @@ def initial_state(mapping: ExecutableDefinitionMapping) -> dict[str, Any]:
             "kt_corporate": {
                 "entity_id": "authority.kt.support_request.001",
                 "status": "authorized",
+                "owner_actor_id": KT_ID,
+                "grants": {
+                    "submit_support_request": {
+                        "parameter_constraints": {
+                            "channel_id": ["channel.nbc_mediated"],
+                            "resource_category_id": ["resource.liquidity_support"],
+                            "route_id": ["route.nbc_mediated.nych"],
+                        },
+                        "target_entity_ids": [NYCH_ID],
+                    }
+                },
+                "effective_from_tick": 0,
+                "effective_until_tick": 7,
+                "observation_scope_id": "scope.kt.support_request",
                 "version": 0,
             },
-            "nych_facility_disposition": {
-                "entity_id": "authority.nych.facility_disposition.001",
+            "nych_case_process": {
+                "entity_id": "authority.nych.case_process.001",
                 "status": "authorized",
+                "owner_actor_id": NYCH_ID,
+                "grants": {
+                    "communicate_case_status": {
+                        "parameter_constraints": {},
+                        "target_entity_ids": [KT_ID],
+                    },
+                    "issue_typed_decline": {
+                        "parameter_constraints": {
+                            "facility_or_route_scope_id": [FACILITY_ID]
+                        },
+                        "target_entity_ids": [KT_ID],
+                    },
+                    "open_or_continue_review": {
+                        "parameter_constraints": {
+                            "scope_id": ["scope.nych.facility_classification"]
+                        },
+                        "target_entity_ids": [],
+                    },
+                },
+                "effective_from_tick": 0,
+                "effective_until_tick": 7,
+                "observation_scope_id": "scope.nych.facility_classification",
                 "version": 0,
             },
             "kt_case_disclosure": {
                 "entity_id": "authority.kt.case_disclosure.001",
                 "status": "authorized",
+                "owner_actor_id": KT_ID,
+                "grants": {
+                    "provide_requested_information": {
+                        "parameter_constraints": {
+                            "disclosure_scope_id": ["scope.kt.case_information"]
+                        },
+                        "target_entity_ids": [NYCH_ID],
+                    }
+                },
+                "effective_from_tick": 0,
+                "effective_until_tick": 7,
                 "version": 0,
             },
             "kt_operational_preparation": {
                 "entity_id": "authority.kt.operational_preparation.001",
                 "status": "authorized",
+                "owner_actor_id": KT_ID,
+                "grants": {
+                    "prepare_operational_contingency": {
+                        "parameter_constraints": {},
+                        "target_entity_ids": [],
+                    }
+                },
+                "effective_from_tick": 0,
+                "effective_until_tick": 7,
                 "version": 0,
             },
             "nych_case_information": {
                 "entity_id": "authority.nych.case_information.001",
                 "status": "authorized",
+                "owner_actor_id": NYCH_ID,
+                "grants": {
+                    "request_case_information": {
+                        "parameter_constraints": {
+                            "scope_id": ["scope.nych.facility_classification"]
+                        },
+                        "target_entity_ids": [KT_ID],
+                    }
+                },
+                "effective_from_tick": 0,
+                "effective_until_tick": 7,
                 "version": 0,
             },
             "nych_intake": {
                 "entity_id": "authority.nych.intake.001",
                 "status": "authorized",
+                "owner_actor_id": NYCH_ID,
+                "grants": {
+                    "record_and_classify_request": {
+                        "parameter_constraints": {
+                            "facility_id": [FACILITY_ID]
+                        },
+                        "target_entity_ids": [KT_ID],
+                    }
+                },
+                "effective_from_tick": 0,
+                "effective_until_tick": 7,
                 "version": 0,
             },
         },
         "facts": {
             "kt_asset_liquidity_assessment": {
                 "entity_id": "fact.kt.asset_liquidity_assessment.001",
-                "value": "illiquid_value_uncertain",
+                "value": "unknown",
                 "version": 0,
             },
             "kt_clearing_channel_status": {
@@ -260,7 +339,7 @@ def initial_state(mapping: ExecutableDefinitionMapping) -> dict[str, Any]:
             },
             "kt_collateral_package_status": {
                 "entity_id": "fact.kt.collateral_package_status.001",
-                "value": "bounded_unknown",
+                "value": "available",
                 "version": 0,
             },
             "kt_internal_liquidity_assessment": {
@@ -285,17 +364,24 @@ def initial_state(mapping: ExecutableDefinitionMapping) -> dict[str, Any]:
             },
             "nych_route_classification": {
                 "entity_id": FACILITY_ID,
-                "value": "member_facility",
+                "value": "unresolved",
                 "version": 0,
             },
             "financial_information": {
                 "entity_id": CASE_ID,
-                "value": "incomplete",
+                "value": "not_received",
+                "version": 0,
+            },
+            "request_authorization_evidence": {
+                "entity_id": "evidence.request.kt.support.001",
+                "value": "absent",
+                "scope_id": "scope.kt.support_request",
                 "version": 0,
             },
             "case_disposition": {
                 "entity_id": CASE_ID,
                 "value": "none",
+                "reason_code": None,
                 "version": 0,
             },
             "case_communication": {
@@ -474,7 +560,7 @@ def build_action_disposition(
         ),
         "intent_id": action["intent_id"],
         "reducer_id": "h2epr.first_slice.business_reducer",
-        "reducer_version": "0.2.1",
+        "reducer_version": "0.2.2",
         "status": "accepted",
         "reason_codes": [reason_code],
         "accepted_parameters": copy.deepcopy(
@@ -487,6 +573,36 @@ def build_action_disposition(
         "delta_ids": [delta["delta_id"] for delta in deltas],
         "explicit_no_effect": not deltas,
         "retry_policy": "none",
+    }
+
+
+def build_rejected_action_disposition(
+    action: Mapping[str, Any],
+    *,
+    state_version: int,
+    reason_code: str,
+) -> dict[str, Any]:
+    """Record a schema-valid action that the reducer refuses without repair."""
+
+    return {
+        "disposition_id": stable_identifier(
+            "action_disposition", action["intent_id"], reason_code
+        ),
+        "intent_id": action["intent_id"],
+        "reducer_id": "h2epr.first_slice.business_reducer",
+        "reducer_version": "0.2.2",
+        "status": "rejected",
+        "reason_codes": [reason_code],
+        "accepted_parameters": [],
+        "rejected_parameters": copy.deepcopy(
+            [*action["parameters"], *action["resource_offer_or_request"]]
+        ),
+        "conflict_set_ids": [],
+        "state_before_version": state_version,
+        "state_after_version": state_version,
+        "delta_ids": [],
+        "explicit_no_effect": True,
+        "retry_policy": "on_condition",
     }
 
 
@@ -694,6 +810,7 @@ __all__ = [
     "build_message_delivered",
     "build_message_intent",
     "build_message_sent",
+    "build_rejected_action_disposition",
     "initial_state",
     "observation_payload",
     "replay_state",

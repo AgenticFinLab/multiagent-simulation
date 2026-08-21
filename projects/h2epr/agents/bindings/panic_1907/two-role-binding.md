@@ -1,8 +1,8 @@
 # H2EPR-0288 two-role Definition binding
 
-> Mapping profile ID: `h2epr.agent-definition.mapping.0288.two-role.v0_2_1`
+> Mapping profile ID: `h2epr.agent-definition.mapping.0288.two-role.v0_2_2`
 >
-> Status: `ACCEPTED_MAPPING_SPECIFICATION / NON_EXECUTABLE`
+> Status: `ACCEPTED_MAPPING_SPECIFICATION / PARTIAL_EXECUTABLE_FIRST_SLICE`
 >
 > Carrier target: H2EPR contracts V1
 
@@ -17,7 +17,8 @@
 | Decision situations | `b9cd28a6b95481e75135ad91a3651ea9f286b757142e22189ce266423d8c0883` |
 | Scenario identity/lifecycles | `8a60c1607cf1226bb8249d087f35b01c6d1a0b1ac5b16f68c1b383f6779837b7` |
 | Intent registry | `63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87` |
-| Cross-object conformance rules | `9a9a9aae6908409450aa6831da5c5f011846474423bf5571171344fc40a1746f` |
+| Observation registry | `8bc43bd866a0b4a194168688b9d15e3e3e209eb7ffd8dbb0246541ef58cd69a2`; derived from the two Definition observation tables |
+| Cross-object conformance rules | `cf70034f13d907f4754ae76686f58746a826709539e4e19595de41a3a15df7ef` |
 | V1 core schema | `d6bea7e1094071c5187e16c2c52e989d8353e426da4d385206a11a189c5c5cf5` |
 
 Any bound content change invalidates this mapping until the affected hash and dependent mapping are reviewed and updated.
@@ -192,39 +193,45 @@ v1_successor_required=NO
 
 ## 8. Specification completeness and deliberate gaps
 
-Specified here:
+Specified and machine-checked for the bounded conservative slice:
 
 - 4+5 Commitment identity and semantics;
 - 9+12 observation inventory;
+- actor-specific observation value domains;
 - seven authoritative lifecycles;
 - two immutable NYCH structural interpretations;
 - 21 unique intent contracts;
 - 21 cross-object rule designs and 20 minimum conformance cases;
-- first-slice carrier and causal boundary.
+- first-slice carrier and causal boundary;
+- exact source/hash binding, semantic-intent projection, selected lifecycle
+  transitions, and owner/capability/parameter/target/time authority resolution;
+  target grants use exact set equality, including an empty no-external-target
+  set; and
+- one deterministic eight-action reducer/transport/replay path plus the
+  Cycle 4 policy-and-binding feedback matrix.
 
-Not produced:
+Still outside the implemented boundary:
 
 - actual ParticipantArtifact or RuntimeScenarioBundle JSON;
 - action/communication registry JSON;
-- executable loader, mapper, validator, Rule policy, reducer extension, or tests;
+- reducer paths for all 21 intents and either complete NYCH structural branch;
 - a historical route latency, request amount, exact mandate, or NYCH focal procedure;
 - an active binding, simulation run, historical calibration, or validity claim.
 
-## 9. Implementation entry conditions
+## 9. Current execution boundary
 
-This accepted mapping is non-executable by itself. Any separately authorized implementation slice must satisfy
-all of the following:
+The executable portion satisfies these constraints:
 
 1. use only `NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE`; the bounded-discretion proposal branch remains a
    separate structural-sensitivity slice;
-2. materialize Definition identity, the executable intent registry, and fail-closed validators before adding role
-   policy branches;
+2. bind Definition identity and the executable intent/observation registries before running a role policy branch;
 3. close DecisionRecord, ActionIntent, ActionDisposition, MessageIntent, and communication-disposition staging
    without orphan references or pre-admission delivery;
 4. label synthetic inputs as conformance fixtures rather than historical measurements;
 5. leave the frozen `0.1.0-dev` engineering fixture unchanged and never cite it as current Definition evidence;
-6. begin with static, unit, binding, and conformance tests; simulation remains separately authorized; and
+6. use static, unit, binding, and conformance tests; the current path starts no simulator; and
 7. stop for a narrow successor review if implementation reveals a concrete V1 carrier counterexample rather than
    hiding it in adapter defaults.
 
-This specification does not itself authorize implementation, Rule policy changes, contract changes, or simulation.
+The bounded execution does not establish full-role coverage, historical calibration, scientific validity, or
+permission to treat the separate sensitivity branch as active.

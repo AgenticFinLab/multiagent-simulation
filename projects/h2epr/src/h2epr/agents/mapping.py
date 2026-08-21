@@ -18,9 +18,10 @@ from types import MappingProxyType
 from typing import Any, Iterable, Mapping, Sequence
 
 
-MAPPING_SCHEMA_VERSION = "h2epr.agent-definition-mapping.v0_2_1"
+MAPPING_SCHEMA_VERSION = "h2epr.agent-definition-mapping.v0_2_2"
 INTENT_REGISTRY_SCHEMA_VERSION = "h2epr.intent-registry-machine.v0_2"
 LIFECYCLE_REGISTRY_SCHEMA_VERSION = "h2epr.lifecycle-registry-machine.v0_2"
+OBSERVATION_REGISTRY_SCHEMA_VERSION = "h2epr.observation-registry-machine.v0_1"
 
 _STABLE_ID = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$")
 _COMMITMENT_HEADING = re.compile(
@@ -58,6 +59,9 @@ _CONDITIONAL_RULES = frozenset(
         "required_when_parameter_in",
     }
 )
+_OBSERVATION_VALUE_TYPES = frozenset(
+    {"enum", "nullable_stable_id", "stable_id", "status_reason_pair"}
+)
 
 
 class MappingValidationError(ValueError):
@@ -66,6 +70,10 @@ class MappingValidationError(ValueError):
 
 class IntentConformanceError(ValueError):
     """A semantic intent escapes its reviewed mapping envelope."""
+
+
+class ObservationConformanceError(ValueError):
+    """A runtime observation escapes its Definition-derived semantic domain."""
 
 
 class LifecycleConformanceError(ValueError):
@@ -170,6 +178,82 @@ class ParameterContract:
     value_type: str
     carrier: str
     values: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class ObservationContract:
+    """One Definition observation's accepted runtime value representation."""
+
+    value_type: str
+    values: tuple[str, ...] = ()
+
+    def validate(self, value: Any, *, availability: str, context: str) -> None:
+        if availability not in {"delivered", "unavailable", "unknown"}:
+            raise ObservationConformanceError(
+                f"observation_availability_invalid:{context}"
+            )
+        if self.value_type == "enum":
+            if not isinstance(value, str) or value not in self.values:
+                raise ObservationConformanceError(
+                    f"observation_value_outside_enum:{context}"
+                )
+            if availability == "unavailable":
+                if "unknown" not in self.values or value != "unknown":
+                    raise ObservationConformanceError(
+                        f"unavailable_observation_requires_unknown:{context}"
+                    )
+            return
+        if self.value_type == "stable_id":
+            if not isinstance(value, str) or _STABLE_ID.fullmatch(value) is None:
+                raise ObservationConformanceError(
+                    f"observation_value_invalid_stable_id:{context}"
+                )
+            if availability == "unavailable":
+                raise ObservationConformanceError(
+                    f"unavailable_observation_has_value:{context}"
+                )
+            return
+        if self.value_type == "nullable_stable_id":
+            if value is not None and (
+                not isinstance(value, str) or _STABLE_ID.fullmatch(value) is None
+            ):
+                raise ObservationConformanceError(
+                    f"observation_value_invalid_nullable_stable_id:{context}"
+                )
+            if availability == "unavailable" and value is not None:
+                raise ObservationConformanceError(
+                    f"unavailable_observation_has_value:{context}"
+                )
+            if availability == "delivered" and value is None:
+                raise ObservationConformanceError(
+                    f"delivered_observation_missing_value:{context}"
+                )
+            return
+        if self.value_type == "status_reason_pair":
+            if not isinstance(value, list) or len(value) != 2:
+                raise ObservationConformanceError(
+                    f"observation_status_reason_pair_invalid:{context}"
+                )
+            status, reason = value
+            if not isinstance(status, str) or status not in self.values:
+                raise ObservationConformanceError(
+                    f"observation_status_outside_enum:{context}"
+                )
+            if status == "none":
+                if reason is not None:
+                    raise ObservationConformanceError(
+                        f"neutral_observation_has_reason:{context}"
+                    )
+            elif not isinstance(reason, str) or _STABLE_ID.fullmatch(reason) is None:
+                raise ObservationConformanceError(
+                    f"nonneutral_observation_missing_reason:{context}"
+                )
+            if availability == "unavailable" and value != ["none", None]:
+                raise ObservationConformanceError(
+                    f"unavailable_observation_has_value:{context}"
+                )
+            return
+        raise AssertionError(self.value_type)
 
 
 @dataclass(frozen=True)
@@ -302,6 +386,8 @@ class SemanticIntentProjection:
 class ExecutableDefinitionMapping:
     mapping_profile_id: str
     status: str
+    observation_registry_id: str
+    observation_registry_version: str
     intent_registry_id: str
     intent_registry_version: str
     action_schema_version: str
@@ -310,8 +396,102 @@ class ExecutableDefinitionMapping:
     scenario_basis_ref: str
     causal_scope: Mapping[str, Any]
     participants: Mapping[str, ParticipantMapping]
+    observation_contracts: Mapping[str, Mapping[str, ObservationContract]]
     intents: Mapping[str, IntentDefinition]
     lifecycles: LifecycleRegistry
+
+    def validate_observation_values(
+        self,
+        *,
+        actor_id: str,
+        values: Mapping[str, Any],
+        availability: Mapping[str, str],
+    ) -> None:
+        participant = self.participants.get(actor_id)
+        contracts = self.observation_contracts.get(actor_id)
+        if participant is None or contracts is None:
+            raise ObservationConformanceError(f"observation_actor_unknown:{actor_id}")
+        if set(values) != participant.observations or set(availability) != set(values):
+            raise ObservationConformanceError(
+                f"observation_contract_inventory_mismatch:{actor_id}"
+            )
+        for semantic_id, value in values.items():
+            contract = contracts.get(semantic_id)
+            if contract is None:
+                raise ObservationConformanceError(
+                    f"observation_contract_missing:{actor_id}:{semantic_id}"
+                )
+            contract.validate(
+                value,
+                availability=availability[semantic_id],
+                context=f"{actor_id}:{semantic_id}",
+            )
+        self.validate_scenario_observation_coherence(
+            actor_id=actor_id,
+            values=values,
+        )
+
+    def validate_scenario_observation_coherence(
+        self,
+        *,
+        actor_id: str,
+        values: Mapping[str, Any],
+    ) -> None:
+        """Reject actor-local values that cannot coexist in the bound scenario.
+
+        The per-field registry checks vocabulary.  This check preserves the
+        separately bound structural interpretation and cross-object order.
+        """
+
+        if actor_id != "new_york_clearing_house":
+            return
+        disposition = values.get("case_disposition_status")
+        result = values.get("delivered_case_result")
+        proposal = values.get("resource_proposal_status")
+        if not (
+            isinstance(disposition, list)
+            and len(disposition) == 2
+            and isinstance(result, list)
+            and len(result) == 2
+            and isinstance(proposal, str)
+        ):
+            return  # individual contracts report malformed values first
+
+        disposition_status = disposition[0]
+        result_status = result[0]
+        if values.get("delivered_request") is None and values.get(
+            "request_authorization_evidence"
+        ) not in {"absent", "unknown"}:
+            raise ObservationConformanceError(
+                "request_authorization_evidence_without_delivered_request:"
+                "request_authorization_evidence"
+            )
+        if self.scenario_variant == "NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE":
+            if disposition_status == "conditioned_proposal":
+                raise ObservationConformanceError(
+                    "conditioned_proposal_unreachable_in_conservative_variant:"
+                    "case_disposition_status"
+                )
+            if proposal != "none":
+                raise ObservationConformanceError(
+                    "resource_proposal_unreachable_in_conservative_variant:"
+                    "resource_proposal_status"
+                )
+            if result_status != "none":
+                raise ObservationConformanceError(
+                    "proposal_result_unreachable_in_conservative_variant:"
+                    "delivered_case_result"
+                )
+            return
+
+        if disposition_status == "conditioned_proposal" and proposal == "none":
+            raise ObservationConformanceError(
+                "conditioned_disposition_without_resource_proposal"
+            )
+        if result_status != "none" and proposal == "none":
+            raise ObservationConformanceError(
+                "delivered_result_without_prior_resource_proposal"
+            )
 
     def validate_semantic_intent(
         self,
@@ -794,6 +974,130 @@ def _parse_intent_registry(
     )
 
 
+def _parse_observation_registry(
+    document: Mapping[str, Any],
+    root: Path,
+    registry_path: Path,
+) -> tuple[str, str, Mapping[str, Mapping[str, ObservationContract]]]:
+    _exact_keys(
+        document,
+        {
+            "actor_observation_counts",
+            "authority",
+            "observations",
+            "registry_id",
+            "schema_version",
+            "source_path",
+            "source_sha256",
+            "version",
+        },
+        "observation_registry",
+    )
+    if document["schema_version"] != OBSERVATION_REGISTRY_SCHEMA_VERSION:
+        raise MappingValidationError("observation_registry_schema_version_mismatch")
+    if document["authority"] != "derived_mapping_only":
+        raise MappingValidationError("observation_registry_authority_mismatch")
+    source = _project_file(
+        root, document["source_path"], "observation_registry_source_path"
+    )
+    source_sha256 = _sha256(
+        document["source_sha256"], "observation_registry_source_sha256"
+    )
+    if _sha256_file(source) != source_sha256:
+        raise MappingValidationError("observation_registry_source_sha256_mismatch")
+    if _sha256_file(registry_path) == source_sha256:
+        raise MappingValidationError("observation_registry_cannot_be_its_own_source")
+    source_text = source.read_text(encoding="utf-8")
+
+    counts = document["actor_observation_counts"]
+    if not isinstance(counts, dict) or not counts:
+        raise MappingValidationError("actor_observation_counts_invalid")
+    for actor_id, count in counts.items():
+        _stable_id(actor_id, "observation_actor_id")
+        if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+            raise MappingValidationError("actor_observation_count_invalid")
+
+    rows = document["observations"]
+    if not isinstance(rows, list) or not rows:
+        raise MappingValidationError("observation_registry_empty")
+    actual_counts = {actor_id: 0 for actor_id in counts}
+    result: dict[str, dict[str, ObservationContract]] = {
+        actor_id: {} for actor_id in counts
+    }
+    previous_identity: tuple[str, str] | None = None
+    for row in rows:
+        if not isinstance(row, dict):
+            raise MappingValidationError("observation_registry_row_invalid")
+        required = {"actor_id", "semantic_id", "value_type"}
+        if not required <= set(row) or set(row) - (required | {"values"}):
+            raise MappingValidationError("observation_registry_row_keys_mismatch")
+        actor_id = _stable_id(row["actor_id"], "observation_actor_id")
+        if actor_id not in counts:
+            raise MappingValidationError(
+                f"observation_actor_not_counted:{actor_id}"
+            )
+        semantic_id = _string(row["semantic_id"], "observation_semantic_id")
+        if _SEMANTIC_ID.fullmatch(semantic_id) is None:
+            raise MappingValidationError(
+                f"observation_semantic_id_invalid:{semantic_id}"
+            )
+        identity = (actor_id, semantic_id)
+        if previous_identity is not None and identity <= previous_identity:
+            raise MappingValidationError("observation_registry_not_strictly_sorted")
+        previous_identity = identity
+        if semantic_id in result[actor_id]:
+            raise MappingValidationError(
+                f"duplicate_observation_contract:{actor_id}:{semantic_id}"
+            )
+        value_type = _string(row["value_type"], "observation_value_type")
+        if value_type not in _OBSERVATION_VALUE_TYPES:
+            raise MappingValidationError(
+                f"unsupported_observation_value_type:{semantic_id}:{value_type}"
+            )
+        raw_values = row.get("values", [])
+        values = _ordered_unique_strings(
+            raw_values,
+            f"observation_values:{actor_id}:{semantic_id}",
+            allow_empty=True,
+            sorted_required=False,
+        )
+        if (value_type in {"enum", "status_reason_pair"}) != bool(values):
+            raise MappingValidationError(
+                f"observation_values_mismatch:{actor_id}:{semantic_id}"
+            )
+        if value_type == "status_reason_pair" and "none" not in values:
+            raise MappingValidationError(
+                f"observation_neutral_status_missing:{actor_id}:{semantic_id}"
+            )
+        if f"`{semantic_id}`" not in source_text:
+            raise MappingValidationError(
+                f"observation_missing_from_source:{actor_id}:{semantic_id}"
+            )
+        for item in values:
+            if f"`{item}`" not in source_text:
+                raise MappingValidationError(
+                    f"observation_value_missing_from_source:{actor_id}:{semantic_id}:{item}"
+                )
+        result[actor_id][semantic_id] = ObservationContract(
+            value_type=value_type,
+            values=values,
+        )
+        actual_counts[actor_id] += 1
+
+    if actual_counts != counts:
+        raise MappingValidationError("actor_observation_counts_mismatch")
+    return (
+        _stable_id(document["registry_id"], "observation_registry_id"),
+        _stable_id(document["version"], "observation_registry_version"),
+        MappingProxyType(
+            {
+                actor_id: MappingProxyType(contracts)
+                for actor_id, contracts in result.items()
+            }
+        ),
+    )
+
+
 def _parse_track(value: Mapping[str, Any], name: str, *, track_id: str) -> LifecycleTrack:
     _exact_keys(value, {"states", "terminal_states", "transitions"}, name)
     states = frozenset(
@@ -1088,6 +1392,39 @@ def _parse_participant(
     )
 
 
+def _validate_definition_observation_domain_parity(
+    *,
+    root: Path,
+    participants: Mapping[str, ParticipantMapping],
+    contracts: Mapping[str, Mapping[str, ObservationContract]],
+) -> None:
+    """Bind each machine value domain to the matching actor Definition row."""
+
+    for actor_id, participant in participants.items():
+        markdown = (root / participant.definition_path).read_text(encoding="utf-8")
+        lines = markdown.splitlines()
+        for semantic_id, contract in contracts[actor_id].items():
+            row_pattern = re.compile(
+                rf"^\|\s*`{re.escape(semantic_id)}`\s*\|"
+            )
+            rows = [line for line in lines if row_pattern.search(line)]
+            if len(rows) != 1:
+                raise MappingValidationError(
+                    "definition_observation_row_identity_mismatch:"
+                    f"{actor_id}:{semantic_id}"
+                )
+            row = rows[0]
+            for value in contract.values:
+                value_pattern = re.compile(
+                    rf"(?<![A-Za-z0-9_]){re.escape(value)}(?![A-Za-z0-9_])"
+                )
+                if value_pattern.search(row) is None:
+                    raise MappingValidationError(
+                        "definition_observation_value_domain_mismatch:"
+                        f"{actor_id}:{semantic_id}:{value}"
+                    )
+
+
 def load_executable_mapping(
     binding_path: str | Path,
     *,
@@ -1145,9 +1482,11 @@ def load_executable_mapping(
     machine = document["machine_registries"]
     if not isinstance(machine, dict):
         raise MappingValidationError("machine_registries_invalid")
-    _exact_keys(machine, {"intent", "lifecycle"}, "machine_registries")
+    _exact_keys(
+        machine, {"intent", "lifecycle", "observation"}, "machine_registries"
+    )
     registry_documents: dict[str, tuple[Path, dict[str, Any]]] = {}
-    for registry_name in ("intent", "lifecycle"):
+    for registry_name in ("intent", "lifecycle", "observation"):
         descriptor = machine[registry_name]
         if not isinstance(descriptor, dict):
             raise MappingValidationError(f"machine_registry_invalid:{registry_name}")
@@ -1172,6 +1511,15 @@ def load_executable_mapping(
         registry_documents["intent"][1], root, registry_documents["intent"][0]
     )
     lifecycles = _parse_lifecycle_registry(registry_documents["lifecycle"][1], root)
+    (
+        observation_registry_id,
+        observation_registry_version,
+        observation_contracts,
+    ) = _parse_observation_registry(
+        registry_documents["observation"][1],
+        root,
+        registry_documents["observation"][0],
+    )
 
     contract = document["contract_carrier"]
     if not isinstance(contract, dict):
@@ -1243,6 +1591,18 @@ def load_executable_mapping(
         definition_ids.add(participant.definition_id)
     if set(participants) != {definition.actor_id for definition in intents.values()}:
         raise MappingValidationError("participant_actor_inventory_mismatch")
+    if set(observation_contracts) != set(participants):
+        raise MappingValidationError("observation_contract_actor_inventory_mismatch")
+    for actor_id, participant in participants.items():
+        if set(observation_contracts[actor_id]) != participant.observations:
+            raise MappingValidationError(
+                f"observation_contract_inventory_mismatch:{actor_id}"
+            )
+    _validate_definition_observation_domain_parity(
+        root=root,
+        participants=participants,
+        contracts=observation_contracts,
+    )
 
     causal_scope = document["causal_scope"]
     if not isinstance(causal_scope, dict):
@@ -1267,6 +1627,8 @@ def load_executable_mapping(
     return ExecutableDefinitionMapping(
         mapping_profile_id=_stable_id(document["mapping_profile_id"], "mapping_profile_id"),
         status=_stable_id(document["status"], "binding_status"),
+        observation_registry_id=observation_registry_id,
+        observation_registry_version=observation_registry_version,
         intent_registry_id=registry_id,
         intent_registry_version=registry_version,
         action_schema_version=action_version,
@@ -1275,6 +1637,7 @@ def load_executable_mapping(
         scenario_basis_ref=basis_ref,
         causal_scope=MappingProxyType(dict(causal_scope)),
         participants=MappingProxyType(participants),
+        observation_contracts=observation_contracts,
         intents=intents,
         lifecycles=lifecycles,
     )
@@ -1290,6 +1653,8 @@ __all__ = [
     "LifecycleRegistry",
     "LifecycleTrack",
     "MappingValidationError",
+    "ObservationConformanceError",
+    "ObservationContract",
     "ParameterContract",
     "ParticipantMapping",
     "SemanticIntentProjection",

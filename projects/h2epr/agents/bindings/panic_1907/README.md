@@ -6,7 +6,7 @@ decision commitments, state, intents, institutional processes, and trace
 requirements onto Contracts V1.
 
 The Markdown files remain the reviewed specification. The JSON files are
-strict derived projections used by the current implementation candidate. They
+strict derived projections used by the current implementation. They
 load only when the recorded Definition, evidence, specification and Contracts
 V1 hashes still match.
 
@@ -17,9 +17,11 @@ V1 hashes still match.
 | [two-role-binding.md](two-role-binding.md) | pinned Definition and evidence identities, V1 placement, causal chain, carrier judgment, and implementation entry conditions |
 | [scenario-identity-and-business-lifecycles.md](scenario-identity-and-business-lifecycles.md) | NYCH structural scenario identity and the seven authoritative business lifecycles |
 | [intent-registry.md](intent-registry.md) | versioned semantic contracts and V1 projections for the 21 two-role intents |
+| [observation-registry.md](observation-registry.md) | Definition-derived value domains and unavailable-value rules for the 21 declared observations |
 | [cross-object-conformance.md](cross-object-conformance.md) | fail-closed rules linking Definitions, scenario state, artifacts, observations, decisions, intents, messages, results, trace, and seals |
 | [binding.json](binding.json) | exact source identities, participant inventories, conservative scenario identity and V1 carrier verdict |
 | [intent-registry.json](intent-registry.json) | executable parameter, observation, authority and carrier rules for all 21 intents |
+| [observation-registry.json](observation-registry.json) | executable actor-scoped observation domains derived from the Definitions |
 | [lifecycle-registry.json](lifecycle-registry.json) | executable transition rules for the seven business lifecycle families |
 
 The Agent Definitions remain the authority for participant behavior. Scenario
@@ -39,6 +41,16 @@ decisions on the conservative path and closes observation, decision, action,
 message, disposition, state-delta, delivery and replay references. It is a
 synthetic conformance path, not a historical simulation or a complete policy
 implementation for all 21 intents.
+
+Cycle 4 adds a 22-case, non-simulation behavior matrix under
+[`scenarios/panic_1907/`](../../../scenarios/panic_1907/). It checks that
+changes in information, authority, route, request lifecycle, review,
+and communication alter the selected response while the resulting intent
+still conforms to this binding. Twenty reachable cases exercise response
+selection; two proposal/result combinations that cannot occur in the
+conservative variant must be rejected before policy selection. The checks also
+record rejected authority attempts and out-of-domain observations without
+silently repairing them.
 
 The earlier `0.1.0-dev` path remains a frozen engineering fixture under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../../../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/).

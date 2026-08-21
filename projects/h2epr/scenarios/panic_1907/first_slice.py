@@ -32,6 +32,7 @@ from .model import (
     build_message_delivered,
     build_message_intent,
     build_message_sent,
+    build_rejected_action_disposition,
     initial_state,
     observation_payload,
     replay_state,
@@ -177,14 +178,14 @@ class FirstSliceRunner:
         values = self._observation_values(actor_id)
         metadata = self._observation_metadata(actor_id, logical_tick)
         participant_state = self._participant_state(actor_id)
-        observation = observation_payload(
-            self.mapping,
-            actor_id=actor_id,
-            logical_tick=logical_tick,
-            values=values,
-            metadata=metadata,
+        observation = self._record_observation_attempt(
+            actor_id,
+            logical_tick,
+            values,
+            metadata,
         )
-        self.trace.append("observation_delivered", logical_tick, observation)
+        if observation is None:
+            return
         plan = (
             decide_knickerbocker(values, metadata, participant_state)
             if actor_id == KT_ID
@@ -193,6 +194,109 @@ class FirstSliceRunner:
         self._check_plan_envelope(actor_id, plan)
         self._execute_plan(actor_id, logical_tick, observation, plan)
         self.mailbox[actor_id].clear()
+
+    def _record_observation_attempt(
+        self,
+        actor_id: str,
+        logical_tick: int,
+        values: Mapping[str, Any],
+        metadata: Mapping[str, Mapping[str, str]],
+    ) -> Mapping[str, Any] | None:
+        try:
+            observation = observation_payload(
+                self.mapping,
+                actor_id=actor_id,
+                logical_tick=logical_tick,
+                values=values,
+                metadata=metadata,
+            )
+        except ValueError as error:
+            error_text = str(error)
+            failed_fields = sorted(
+                name for name in values if f":{name}" in error_text
+            )
+            self._append_invariant_violation(
+                actor_id=actor_id,
+                logical_tick=logical_tick,
+                failure_layer="layer.observation_semantic_conformance",
+                attempted_payload={"metadata": metadata, "values": values},
+                failed_field_ids=failed_fields,
+                reason_code="reason.observation_payload_rejected",
+            )
+            return None
+        self.trace.append("observation_delivered", logical_tick, observation)
+        return observation
+
+    def _append_invariant_violation(
+        self,
+        *,
+        actor_id: str,
+        logical_tick: int,
+        failure_layer: str,
+        attempted_payload: Mapping[str, Any],
+        failed_field_ids: Sequence[str],
+        reason_code: str,
+    ) -> None:
+        event_id = stable_identifier(
+            "event.invariant_violation",
+            RUN_ID,
+            logical_tick,
+            actor_id,
+            failure_layer,
+            canonical_sha256(attempted_payload),
+        )
+        payload = {
+            "event_id": event_id,
+            "event_type": "invariant_violation",
+            "fields": [
+                runtime_field(
+                    "actor_id",
+                    actor_id,
+                    source_kind="synthetic",
+                    source_ref_id=event_id,
+                    claim_ref_ids=("fixture.synthetic.conformance_only",),
+                    derivation_class="assumed",
+                    availability_at_t0="not_applicable",
+                    visibility="runtime_system_only",
+                    consumers=("trace.review",),
+                ),
+                runtime_field(
+                    "attempted_payload_sha256",
+                    canonical_sha256(attempted_payload),
+                    source_kind="synthetic",
+                    source_ref_id=event_id,
+                    claim_ref_ids=("fixture.synthetic.conformance_only",),
+                    derivation_class="assumed",
+                    availability_at_t0="not_applicable",
+                    visibility="runtime_system_only",
+                    consumers=("trace.review",),
+                ),
+                runtime_field(
+                    "failed_field_ids",
+                    list(failed_field_ids),
+                    source_kind="synthetic",
+                    source_ref_id=event_id,
+                    claim_ref_ids=("fixture.synthetic.conformance_only",),
+                    derivation_class="assumed",
+                    availability_at_t0="not_applicable",
+                    visibility="runtime_system_only",
+                    consumers=("trace.review",),
+                ),
+                runtime_field(
+                    "failure_layer",
+                    failure_layer,
+                    source_kind="synthetic",
+                    source_ref_id=event_id,
+                    claim_ref_ids=("fixture.synthetic.conformance_only",),
+                    derivation_class="assumed",
+                    availability_at_t0="not_applicable",
+                    visibility="runtime_system_only",
+                    consumers=("trace.review",),
+                ),
+            ],
+            "reason_codes": [reason_code],
+        }
+        self.trace.append("invariant_violation", logical_tick, payload)
 
     def _check_plan_envelope(self, actor_id: str, plan: DecisionPlan) -> None:
         participant = self.mapping.participants[actor_id]
@@ -259,7 +363,41 @@ class FirstSliceRunner:
             observation_id=observation["observation_id"],
             authoritative_object_version=self.state.version,
         )
-        self._assert_authority(action)
+        authority_rejection = self._authority_rejection_reason(
+            action,
+            logical_tick=logical_tick,
+        )
+        if authority_rejection is not None:
+            action_disposition = build_rejected_action_disposition(
+                action,
+                state_version=self.state.version,
+                reason_code=authority_rejection,
+            )
+            validate_action_message_staging(
+                projection,
+                action_disposition,
+                (),
+            )
+            decision = build_decision_record(
+                self.mapping,
+                plan,
+                actor_id=actor_id,
+                logical_tick=logical_tick,
+                observation_id=observation["observation_id"],
+                decision_id=decision_id,
+                action_intent_ids=(action["intent_id"],),
+                message_intent_ids=(),
+            )
+            self._append_decision_basis(
+                logical_tick, actor_id, decision_id, plan
+            )
+            self.trace.append("decision_recorded", logical_tick, decision)
+            self.trace.append("action_intent_created", logical_tick, action)
+            self.trace.append(
+                "action_disposition_recorded", logical_tick, action_disposition
+            )
+            self.action_semantic_ids.append(plan.semantic_id)
+            return
         staged_message = None
         if projection.definition.message_performative is not None:
             staged_message = build_message_intent(
@@ -584,6 +722,14 @@ class FirstSliceRunner:
                         CASE_ID,
                         "nych_case",
                     ),
+                    StateChange(
+                        "facts",
+                        "request_authorization_evidence",
+                        "value",
+                        "absent",
+                        "incomplete",
+                        "evidence.request.kt.support.001",
+                    ),
                 ]
             )
         elif item.semantic_id == "request_case_information":
@@ -599,6 +745,19 @@ class FirstSliceRunner:
                 )
             )
         elif item.semantic_id == "provide_requested_information":
+            delivered_values = runtime_field_values(
+                item.message["structured_content"],
+                "delivered_case_information",
+            )
+            if (
+                "information.request_authorization_evidence"
+                not in delivered_values["information_item_ids"]
+                or "authority.kt.support_request.001"
+                not in delivered_values["provenance_ref_ids"]
+            ):
+                raise ValueError(
+                    "delivered_request_authorization_evidence_not_explicit"
+                )
             changes.extend(
                 [
                     StateChange(
@@ -623,9 +782,17 @@ class FirstSliceRunner:
                         "facts",
                         "financial_information",
                         "value",
-                        "incomplete",
+                        "not_received",
                         "adequate_for_scope",
                         CASE_ID,
+                    ),
+                    StateChange(
+                        "facts",
+                        "request_authorization_evidence",
+                        "value",
+                        "incomplete",
+                        "sufficient",
+                        "evidence.request.kt.support.001",
                     ),
                 ]
             )
@@ -717,18 +884,46 @@ class FirstSliceRunner:
         for delta in deltas:
             self.trace.append("state_transition_applied", logical_tick, delta)
 
-    def _assert_authority(self, action: Mapping[str, Any]) -> None:
-        authorized = {
-            row["entity_id"]
+    def _authority_rejection_reason(
+        self,
+        action: Mapping[str, Any],
+        *,
+        logical_tick: int,
+    ) -> str | None:
+        """Resolve exact owner/capability/scope/time authority or fail closed."""
+
+        records = {
+            row["entity_id"]: row
             for row in self.state.state["authorizations"].values()
-            if row["status"] == "authorized"
         }
-        missing = set(action["claimed_authority_refs"]) - authorized
-        if missing:
-            raise ValueError(
-                "unresolved_or_unauthorized_authority_ref:"
-                + ",".join(sorted(missing))
-            )
+        semantic_id = action["action_type"].removeprefix("h2epr.action.")
+        parameter_values = runtime_field_values(
+            [*action["parameters"], *action["resource_offer_or_request"]],
+            "authority_scope",
+        )
+        target_entity_ids = set(action["target_entity_ids"])
+        for authority_ref in action["claimed_authority_refs"]:
+            record = records.get(authority_ref)
+            if record is None or record["status"] != "authorized":
+                return "reason.claimed_authority_not_effective"
+            if record["owner_actor_id"] != action["actor_id"]:
+                return "reason.claimed_authority_actor_mismatch"
+            if not (
+                record["effective_from_tick"]
+                <= logical_tick
+                <= record["effective_until_tick"]
+            ):
+                return "reason.claimed_authority_outside_effective_interval"
+            grant = record["grants"].get(semantic_id)
+            if grant is None:
+                return "reason.claimed_authority_capability_mismatch"
+            allowed_targets = set(grant["target_entity_ids"])
+            if target_entity_ids != allowed_targets:
+                return "reason.claimed_authority_target_scope_mismatch"
+            for name, accepted_values in grant["parameter_constraints"].items():
+                if parameter_values.get(name) not in accepted_values:
+                    return "reason.claimed_authority_parameter_scope_mismatch"
+        return None
 
     def _action_changes(
         self, semantic_id: str, parameters: Mapping[str, Any]
@@ -763,6 +958,14 @@ class FirstSliceRunner:
                     "classified",
                     CASE_ID,
                     "nych_case",
+                ),
+                StateChange(
+                    "facts",
+                    "nych_route_classification",
+                    "value",
+                    "unresolved",
+                    parameters["route_class"],
+                    FACILITY_ID,
                 ),
                 StateChange(
                     "participant_state",
@@ -840,7 +1043,15 @@ class FirstSliceRunner:
                     "case_disposition",
                     "value",
                     "none",
-                    "facility_scoped_decline",
+                    "facility_declined",
+                    CASE_ID,
+                ),
+                StateChange(
+                    "facts",
+                    "case_disposition",
+                    "reason_code",
+                    None,
+                    parameters["reason_code"],
                     CASE_ID,
                 ),
                 StateChange(
@@ -893,16 +1104,23 @@ class FirstSliceRunner:
                     for item in delivered
                     if item.semantic_id == "request_case_information"
                 ),
-                "none",
+                None,
             )
-            disposition = (
-                "facility_scoped_decline"
-                if any(
-                    item.semantic_id == "issue_typed_decline"
+            delivered_decline = next(
+                (
+                    item
                     for item in delivered
-                )
-                else "none"
+                    if item.semantic_id == "issue_typed_decline"
+                ),
+                None,
             )
+            disposition = ["none", None]
+            if delivered_decline is not None:
+                decline_values = runtime_field_values(
+                    delivered_decline.message["structured_content"],
+                    "delivered_decline",
+                )
+                disposition = ["refused", decline_values["reason_code"]]
             return {
                 "asset_liquidity_assessment": state["facts"][
                     "kt_asset_liquidity_assessment"
@@ -928,30 +1146,20 @@ class FirstSliceRunner:
             }
 
         case_status = state["objects"]["nych_case"]["status"]
-        case_labels = {
-            "none": "no_case",
-            "received": "case_received",
-            "classified": "case_classified",
-            "awaiting_information": "case_awaiting_information",
-            "under_review": "case_under_review",
-            "awaiting_authority": "case_awaiting_authority",
-            "disposition_ready": "case_disposition_ready",
-            "disposition_issued": "case_disposition_issued",
-            "closed": "case_closed",
-        }
+        disposition = state["facts"]["case_disposition"]
+        result = state["objects"]["result"]
         return {
             "authority_state": state["authorizations"][
-                "nych_facility_disposition"
+                "nych_case_process"
             ]["status"],
             "case_communication_status": state["facts"]["case_communication"][
                 "value"
             ],
-            "case_disposition_status": case_labels[case_status],
-            "delivered_case_result": (
-                None
-                if state["objects"]["result"]["status"] == "none"
-                else state["objects"]["result"]["status"]
-            ),
+            "case_disposition_status": [
+                disposition["value"],
+                disposition["reason_code"],
+            ],
+            "delivered_case_result": [result["status"], result["reason_code"]],
             "delivered_request": REQUEST_ID if case_status != "none" else None,
             "facility_eligibility": state["facts"][
                 "nych_facility_eligibility"
@@ -962,9 +1170,9 @@ class FirstSliceRunner:
             "relationship_status": state["facts"]["nych_relationship_status"][
                 "value"
             ],
-            "request_authorization_evidence": state["authorizations"][
-                "kt_corporate"
-            ]["status"],
+            "request_authorization_evidence": state["facts"][
+                "request_authorization_evidence"
+            ]["value"],
             "resource_proposal_status": state["objects"]["proposal"]["status"],
             "review_state": state["objects"]["review"]["status"],
             "route_classification": state["facts"]["nych_route_classification"][
@@ -1009,12 +1217,14 @@ class FirstSliceRunner:
         else:
             record_refs = {
                 "authority_state": state["authorizations"][
-                    "nych_facility_disposition"
+                    "nych_case_process"
                 ]["entity_id"],
                 "case_communication_status": state["facts"]["case_communication"][
                     "entity_id"
                 ],
-                "case_disposition_status": state["objects"]["nych_case"]["entity_id"],
+                "case_disposition_status": state["facts"]["case_disposition"][
+                    "entity_id"
+                ],
                 "delivered_case_result": state["objects"]["result"]["entity_id"],
                 "delivered_request": state["objects"]["support_request"]["entity_id"],
                 "facility_eligibility": state["facts"]["nych_facility_eligibility"][
@@ -1026,8 +1236,8 @@ class FirstSliceRunner:
                 "relationship_status": state["facts"]["nych_relationship_status"][
                     "entity_id"
                 ],
-                "request_authorization_evidence": state["authorizations"][
-                    "kt_corporate"
+                "request_authorization_evidence": state["facts"][
+                    "request_authorization_evidence"
                 ]["entity_id"],
                 "resource_proposal_status": state["objects"]["proposal"]["entity_id"],
                 "review_state": state["objects"]["review"]["entity_id"],
@@ -1048,6 +1258,9 @@ class FirstSliceRunner:
             for name, record_ref in record_refs.items()
         }
         if actor_id == KT_ID:
+            metadata["corporate_authorization"]["scope_id"] = state[
+                "authorizations"
+            ]["kt_corporate"]["observation_scope_id"]
             delivered = self.mailbox[actor_id]
             metadata["delivered_disposition"]["availability"] = (
                 "delivered"
@@ -1063,6 +1276,12 @@ class FirstSliceRunner:
                 else "unavailable"
             )
         else:
+            metadata["authority_state"]["scope_id"] = state["authorizations"][
+                "nych_case_process"
+            ]["observation_scope_id"]
+            metadata["request_authorization_evidence"]["scope_id"] = state[
+                "facts"
+            ]["request_authorization_evidence"]["scope_id"]
             metadata["delivered_request"]["availability"] = (
                 "delivered"
                 if state["objects"]["nych_case"]["status"] != "none"

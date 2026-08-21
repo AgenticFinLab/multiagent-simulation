@@ -17,6 +17,8 @@ from .mapping import (
     IntentConformanceError,
     LifecycleConformanceError,
     MappingValidationError,
+    ObservationConformanceError,
+    ObservationContract,
     SemanticIntentProjection,
     load_executable_mapping,
 )
@@ -48,6 +50,8 @@ __all__ = [
     "IntentConformanceError",
     "LifecycleConformanceError",
     "MappingValidationError",
+    "ObservationConformanceError",
+    "ObservationContract",
     "SemanticIntent",
     "SemanticIntentProjection",
     "load_binding_catalog",
