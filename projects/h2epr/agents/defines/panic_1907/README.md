@@ -12,6 +12,11 @@ different representation, information, authority, resource, decision, and intent
 fully exposed research material and remain exploratory; none is historically calibrated or independently
 validated.
 
+The first non-Agent Roster product is the adjacent
+[Knickerbocker depositor population model](../../../populations/defines/panic_1907/knickerbocker-depositors.md).
+It reuses this event's source register and evidence ledger while keeping its
+distributed behavior semantics under `populations/`.
+
 The accepted event scope and remaining participant dispositions are in the
 [H2EPR-0288 research roster](../../rosters/panic_1907.md). New production
 batches use the event [semantic skeleton](../../../scenarios/panic_1907/semantic-skeleton.md)
@@ -23,7 +28,7 @@ only after the Roster Definition release.
 | File | Purpose |
 |---|---|
 | [source-register.md](source-register.md) | adopted public sources, stable source identities, public locators, byte hashes, adopted passages, and limitations |
-| [evidence-ledger.md](evidence-ledger.md) | claim-level status, participant availability, allowed use, model consequence, and withdrawal consequence |
+| [evidence-ledger.md](evidence-ledger.md) | claim-level status, participant or population availability, allowed use, model consequence, and withdrawal consequence |
 | [decision-situations.md](decision-situations.md) | shared situations and perturbations used to compare Knickerbocker and NYCH |
 | [binding specification](../../bindings/panic_1907/) | accepted mapping of the Knickerbocker and NYCH Definitions into Contracts V1, business lifecycles, intent registry, and cross-object checks |
 

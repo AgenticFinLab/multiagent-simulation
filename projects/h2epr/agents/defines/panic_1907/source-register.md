@@ -1,9 +1,10 @@
-# Panic of 1907 Agent Definition source register
+# Panic of 1907 participant-model source register
 
 The five `P4` records below were adopted during the focused two-role behavior study. Three `NBC-EXT` records
-were subsequently adopted for the National Bank of Commerce Definition. Eight earlier records are cited as
-`BASE-S01` through `BASE-S08`; their original source IDs and uses are listed at the end of this file. The sealed
-local evidence archives retain the adopted bytes and checksums.
+were subsequently adopted for the National Bank of Commerce Definition. The Knickerbocker depositor
+population model reuses the same adopted source set and adds no new source bytes. Eight earlier records are
+cited as `BASE-S01` through `BASE-S08`; their original source IDs and uses are listed at the end of this file.
+The sealed local evidence archives retain the adopted bytes and checksums.
 
 Archive identities:
 
@@ -30,6 +31,8 @@ none of these sources is labeled held-out evidence.
   - Knickerbocker scale, clearing-balance pressure, clearing-agent withdrawal, late examination, board
     reassurance, three-hour withdrawal episode, suspension, asset illiquidity, reserve context, and later
     reorganization;
+  - the depositor population's aggregate payment episode and the boundary between requested withdrawal,
+    realized payment, and suspension;
   - the distinction between immediate liquidity and ultimate asset value;
   - the October 26 member loan-certificate procedure as later institutional context only.
 - Important contradiction: Sprague states that apparently no proposal to assist Knickerbocker was considered,
@@ -100,7 +103,9 @@ none of these sources is labeled held-out evidence.
   - the result that the membership coefficient corresponds to about 20 percentage points less mean demand-
     deposit contraction in the authors’ specification;
   - the need to treat clearinghouse access as a bundle that may include liquidity, monitoring, collective
-    guarantee, and depositor signaling rather than a single “rescue” variable.
+    guarantee, and depositor signaling rather than a single “rescue” variable;
+  - the depositor population model's separation of access, signal, liquidity context, and uncalibrated
+    individual response.
 - Limitations: observational cross-section; membership is represented by a crude institutional-type dummy;
   city and institution effects cannot be completely separated; the capital proxy does not measure anticipated
   portfolio losses; the paper cannot establish an individual participant’s decision rule.
@@ -119,7 +124,9 @@ none of these sources is labeled held-out evidence.
   - a bounded-information, bounded-computation alternative to global optimization;
   - the proposition that useful simplifications depend jointly on the decision interface and its environment;
   - limited-horizon, aspiration, priority, persistence, and clue-guided mechanisms as possible modeling
-    families that do not require a single global utility function.
+    families that do not require a single global utility function;
+  - a bounded-information design lens for depositor choice units without transferring a historical threshold
+    or cognition claim.
 - Limitations: the paper’s illustrative organism is not evidence about 1907 institutions. No numerical value,
   aspiration level, or specific priority is transferred into either participant model.
 - Archive: `raw/simon_rational_choice_environment_1956.pdf`
@@ -212,6 +219,8 @@ none of these sources is labeled held-out evidence.
 - Adopted file SHA-256: `149221455b5eafc2a28ba6e7f73228cbd730a18b18dd77fc301269422ebff474`
 - Adopted locations: pp. 999–1001.
 - Continued use: contemporaneous chronology separating NBC, the Knickerbocker board, and later meetings.
+- Depositor-population use: aggregate reported payment and suspension chronology; not individual demand,
+  queue order, or motive.
 - Limit: it does not identify or establish the authority of the focal requesters.
 
 ### `BASE-S04` / `SRC-GAP-04` — *Commercial and Financial Chronicle*, February 10, 1906
@@ -240,6 +249,8 @@ none of these sources is labeled held-out evidence.
   page 2 metadata `189165152b484db79462a27e6d0211772d6397019f877157b80ee935851178e2`;
   page 2 OCR `7f0846ad725d61675cae6820867e26ab8ef8a9024f02cd48d75a5ff36ad1d88e`.
 - Continued use: contemporaneous public reports and the notice-delivery chronology.
+- Depositor-population use: the dated coexistence of adverse leadership or clearing information and
+  reassuring public claims, treated as fallible signals rather than verified world state.
 - Limit: newspaper reporting and provider OCR do not establish actual knowledge, authority, or formal procedure.
 
 ### `BASE-S07` / `SRC-GAP-07` — Cleveland Fed Working Paper 2012-28

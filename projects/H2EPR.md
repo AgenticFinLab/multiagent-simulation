@@ -30,8 +30,9 @@ projects/h2epr/
 
 当前工作重点是完成 1907 年金融恐慌事件的研究 Roster。Knickerbocker Trust 和 New York
 Clearing House（NYCH）已经完成参考试验；National Bank of Commerce 是第三份接受的学术
-Definition。其余角色先按统一方法完成研究、Definition 与轻量接口检查，再在 Roster Definition
-release 后统一 mapping。
+Definition。Knickerbocker depositors 已在第一个批量生产周期中确定为群体模型，而不是单一
+Agent。其余角色先按统一方法完成研究、Definition 或群体模型与轻量接口检查，再在 Roster
+Definition release 后统一 mapping。
 
 ## 文档导航
 
@@ -76,6 +77,9 @@ projects/h2epr/
 ├── agents/
 │   ├── agent-definition-template.md
 │   └── defines/panic_1907/
+├── populations/
+│   ├── defines/panic_1907/
+│   └── interfaces/panic_1907/
 ├── skills/
 │   ├── historical-evidence-research/
 │   ├── participant-behavior-research/
@@ -104,6 +108,7 @@ projects/h2epr/
 | `world/` | canary 世界状态和纯计算函数 |
 | `bundles/` | Construction bundle、EventBundle 及其校验 |
 | `agents/` | 当前 Agent Definition 研究资产、通用 binding 约束和冻结工程基线 |
+| `populations/` | 无法或无需逐人重建的异质参与者群体模型及轻量接口检查 |
 | `runtime/` | H2EPR 的 MASim 适配、Rule runtime、detector 和 runner |
 | `compiler/` | 校验 sealed trace，并生成 EPG 和 GraphSeal |
 | `tests/` | 合同、construction、runtime、compiler 和 Agent 测试 |
@@ -250,6 +255,7 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
 | Agent Definitions | 三份机构 Definition 已接受；两角色构成参考试验，Roster 生产继续 |
+| Population models | Knickerbocker depositors `0.1.0` 已接受；组成和响应参数保留为敏感性设定 |
 | Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster mapping 延后到 Definition release |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
@@ -262,7 +268,7 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 当前迭代
 
-H2EPR-0288 的 [Roster v0.1](h2epr/agents/rosters/panic_1907.md) 和
+H2EPR-0288 的 [Roster v0.2](h2epr/agents/rosters/panic_1907.md) 和
 [event semantic skeleton](h2epr/scenarios/panic_1907/semantic-skeleton.md) 已建立。后续角色按小批次完成：
 
 - 证据和行为研究；

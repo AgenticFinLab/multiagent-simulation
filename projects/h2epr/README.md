@@ -18,9 +18,12 @@ conformance slice. The earlier `0.1.0-dev` fixture remains frozen as an
 engineering baseline.
 
 National Bank of Commerce is the third accepted scholarly Definition. The
-project is now completing the accepted H2EPR-0288 research roster in small
-production batches. Each batch stops at a lightweight event-interface
-preflight; consolidated mapping waits for the Roster Definition release.
+first Roster-production batch has also resolved Knickerbocker depositors as an
+event-bound population model rather than a collective Agent or an entirely
+external demand path. The project is completing the remaining H2EPR-0288
+roster in small production batches. Each batch stops at a lightweight
+event-interface preflight; consolidated mapping waits for the Roster
+Definition release.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -37,7 +40,8 @@ Generated EPG compilation.
 | Canary policy and world | `src/h2epr/policies/`, `src/h2epr/world/` | Rule policy inputs and normalized sensitivity state |
 | Runtime | `src/h2epr/runtime/` | H2EPR adapter, phased Rule runtime, detectors and orchestration |
 | Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
-| Agent research | `agents/` | Event roster, behavior Definitions, source register, evidence ledger, decision situations, and derived bindings |
+| Agent research | `agents/` | Event roster, institutional behavior Definitions, source register, evidence ledger, decision situations, and derived bindings |
+| Population research | `populations/` | Reviewed heterogeneous-participant models and lightweight interface preflights |
 | Agent binding support | `src/h2epr/agents/` | Strict Definition mapping, semantic-intent validation and Contracts V1 carrier checks |
 | Event conformance slices | `scenarios/` | Event-owned policies, authoritative process state and bounded non-Ray integration paths |
 
@@ -54,6 +58,9 @@ projects/h2epr/
 │   ├── defines/panic_1907/
 │   ├── rosters/panic_1907.md
 │   └── bindings/panic_1907/
+├── populations/
+│   ├── defines/panic_1907/
+│   └── interfaces/panic_1907/
 ├── skills/
 │   ├── event-agent-batch/
 │   ├── historical-evidence-research/
@@ -114,6 +121,15 @@ Ray or the G3/G4 simulation path and makes no historical-validity claim.
 The NBC `0.1.0` Definition is the third accepted scholarly role model. It is
 not part of the two-role binding, intent registry, or implementation slice. Its
 mapping is deferred to the consolidated Roster Definition release.
+
+The accepted [Knickerbocker depositor population model](populations/defines/panic_1907/knickerbocker-depositors.md)
+is the first Roster-production product with a non-Agent representation. It
+preserves heterogeneous withdrawal and retention choices, pending-request
+discipline, and delivered-result response. Population composition and response
+profiles remain uncalibrated sensitivity inputs. Its
+[interface preflight](populations/interfaces/panic_1907/knickerbocker-depositors.md)
+found no concrete Contracts V1 counterexample and deliberately created no
+mapping or implementation.
 
 The accepted [research roster](agents/rosters/panic_1907.md) fixes the v0.1
 question, horizon, causal ownership, and role dispositions. The non-executable
@@ -210,7 +226,7 @@ The G3 suite requires the project runtime environment. See
 G1–G4 provide a deterministic engineering chain with recorded limitations.
 The current Agent work has reached an accepted three-role Definition set; two
 roles have an accepted semantic binding and a tested first implementation
-slice. Roster v0.1 and the event semantic skeleton now govern the remaining
+slice. Roster v0.2 and the event semantic skeleton now govern the remaining
 Definition batches. The slice is not yet integrated into the G3/G4 runtime,
 and it does not establish historical or scientific validity. Scientific
 evaluation remains a later post-seal activity.

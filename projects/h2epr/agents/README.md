@@ -12,7 +12,9 @@ consolidated mapping after the Roster Definition release.
 The current Panic of 1907 collection contains three institutional role models.
 Knickerbocker Trust and the New York Clearing House form the current executable
 conformance subset; National Bank of Commerce is a reviewed scholarly Definition
-that has not yet been mapped into that subset. The work examines whether
+that has not yet been mapped into that subset. The adjacent
+[population collection](../populations/README.md) contains the accepted
+Knickerbocker depositor model. The work examines whether
 participant-available information, persistent state, authority, procedure, and
 intent/result separation can support auditable behavior. Calibration, cross-event
 reuse, and additional execution approaches require separate work.
@@ -24,6 +26,7 @@ reuse, and additional execution approaches require separate work.
 | event roster | selected question and horizon, role dispositions, causal ownership, and release membership | participant policy, scenario state, or executable membership |
 | event semantic skeleton | shared event concepts, interaction routes, ownership boundaries, and structural variants | numerical state, wire fields, policy, or realized outcomes |
 | Agent Definition Markdown | representation, participant-available information semantics, decision commitments, intent meaning, assumptions, falsifiers | source status, actual world values, wire schemas, adjudicated results |
+| population model Markdown | distributed choice semantics, retained heterogeneity, aggregation meaning, assumptions, and falsifiers | one collective personality, population composition, service process, or realized effects |
 | `source-register.md` | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
 | `evidence-ledger.md` | claim status, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
 | `decision-situations.md` | shared research situations and perturbations | participant policy or executable scenario state |
@@ -93,6 +96,9 @@ agents/
   the current `0.2.1` Definitions in the executable two-role subset.
 - [`defines/panic_1907/national-bank-of-commerce.md`](defines/panic_1907/national-bank-of-commerce.md):
   the current `0.1.0` scholarly Definition, not yet included in the executable mapping.
+- [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
+  the accepted `0.1.0` event-bound population model produced by the first
+  Roster batch.
 - [`bindings/panic_1907/`](bindings/panic_1907/): the accepted
   Definition-to-V1 specification plus strict machine projections for the
   21-intent registry and seven lifecycle families.

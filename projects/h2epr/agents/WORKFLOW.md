@@ -240,7 +240,7 @@ only after the released system is mapped and the agreed test ladder passes.
 Knickerbocker Trust and NYCH form the completed reference pilot. National Bank
 of Commerce is the third accepted Definition, but it will not trigger a
 standalone three-role mapping cycle. The accepted
-[Roster v0.1](rosters/panic_1907.md) and event
+[Roster v0.2](rosters/panic_1907.md) and event
 [semantic skeleton](../scenarios/panic_1907/semantic-skeleton.md) now govern
 Roster production. Consolidated mapping waits for Roster Definition release
 v0.1.

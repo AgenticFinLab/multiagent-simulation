@@ -1,6 +1,6 @@
 # H2EPR-0288 research roster
 
-- Version: `0.1`
+- Version: `0.2`
 - Status: accepted research scope
 - Accepted: 21 August 2026
 - Event: Panic of 1907, acute New York phase
@@ -36,7 +36,7 @@ later institutional reform are outside v0.1.
 | Knickerbocker Trust Company | Agent | institutional assessment, authorization, support-seeking, communication, and adaptation | Definition `0.2.1` accepted; reference binding available |
 | New York Clearing House Association | Agent | case classification, review, authority, scoped disposition, and communication | Definition `0.2.1` accepted; reference binding available |
 | National Bank of Commerce in New York | Agent | credit, request intermediation, clearing relationship, notice, and communication choices | Definition `0.1.0` accepted; consolidated mapping deferred |
-| Knickerbocker depositors | representation gate | withdrawal, waiting, access, and response to information; decide between cohort Agent, population model, or scenario demand process | first production batch |
+| Knickerbocker depositors | population model | heterogeneous withdrawal, retention, access, pending-request, and delivered-result response without a collective depositor personality | population model `0.1.0` accepted; consolidated mapping deferred |
 | J. P. Morgan and private-financier coordination | Agent | examination commissioning, private-aid decisions, coordination, and money-pool formation | focused research must settle the individual-versus-coordination representation before Definition |
 | Trust Company of America | Agent | institution-specific response, support-seeking, collateral, communication, and operational choices | focused research and Definition required |
 | Lincoln Trust Company | Agent | institution-specific response and support path; retain separately unless evidence supports aggregation | focused research and Definition required |
@@ -63,7 +63,8 @@ the consolidated mapping stage.
 
 Roster production proceeds in causal batches:
 
-1. resolve the Knickerbocker depositor representation;
+1. Knickerbocker depositor representation completed as an event-bound
+   population model;
 2. research Morgan/private coordination, Trust Company of America, and Lincoln
    Trust Company, splitting the batch if evidence review requires it;
 3. resolve the trust-company committee, later depositor, member-bank, and
@@ -93,8 +94,12 @@ carrier review.
 
 ## Change policy
 
-Roster v0.1 is frozen in the practical sense: batches may refine evidence and
+Roster v0.2 is frozen in the practical sense: batches may refine evidence and
 Definitions, but they may not silently change the event question, horizon,
 causal owner, or disposition of another row. Such a change requires an owner
 decision and a new roster version. Git retains accepted history; working
 alternatives remain under the ignored local research area.
+
+Roster v0.2 records the owner-authorized R1 disposition of Knickerbocker
+depositors as a population model. It does not change the event question,
+horizon, or any other row.
