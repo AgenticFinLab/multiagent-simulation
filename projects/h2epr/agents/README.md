@@ -6,15 +6,16 @@ separation between Markdown definitions and Python implementations, while
 keeping H2EPR profiles event-bound until reuse is demonstrated.
 
 Use the [Agent development workflow](WORKFLOW.md) to admit roles, organize
-small research batches, promote reviewed Definitions, and prepare one
-consolidated mapping after the Roster Definition release.
+small research batches, promote reviewed Definitions, and prepare and review
+one consolidated mapping after the Roster Definition release.
 
 The current Panic of 1907 collection contains seven institutional or named-person
 role models. Knickerbocker Trust and the New York Clearing House form the
 current executable conformance subset; National Bank of Commerce, J. Pierpont
 Morgan, Trust Company of America, Lincoln Trust Company, and the trust-company
-presidents' committee are reviewed scholarly Definitions reserved for the
-consolidated event mapping. The adjacent [population collection](../populations/README.md)
+presidents' committee are reviewed scholarly Definitions covered by the
+accepted consolidated event mapping but not yet by an executable
+implementation. The adjacent [population collection](../populations/README.md)
 contains five accepted models: Knickerbocker and later-trust depositors,
 member/correspondent-bank resource decisions, call-money lenders and broker-
 borrowers. The work examines whether
@@ -113,12 +114,14 @@ agents/
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
   the current `0.2.1` Definitions in the executable two-role subset.
 - [`defines/panic_1907/national-bank-of-commerce.md`](defines/panic_1907/national-bank-of-commerce.md):
-  the current `0.1.0` scholarly Definition, not yet included in the executable mapping.
+  the current `0.1.0` scholarly Definition, covered by the consolidated
+  design but not yet included in an executable mapping.
 - [`defines/panic_1907/j-pierpont-morgan.md`](defines/panic_1907/j-pierpont-morgan.md),
   [`defines/panic_1907/trust-company-of-america.md`](defines/panic_1907/trust-company-of-america.md), and
   [`defines/panic_1907/lincoln-trust-company.md`](defines/panic_1907/lincoln-trust-company.md): the accepted R2
   `0.1.0` Definitions for bounded private coordination, an aggregate named-trust response, and a thin
-  board-authorized institutional communication interface. Consolidated mapping remains deferred.
+  board-authorized institutional communication interface. They are covered by
+  the accepted consolidated design.
 - [`defines/panic_1907/trust-company-presidents-committee.md`](defines/panic_1907/trust-company-presidents-committee.md):
   the accepted R3 `0.1.0` aggregate procedural committee Definition, with advice, contributor commitment and
   resource ownership kept separate.
@@ -134,8 +137,11 @@ agents/
 - [`../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md`](../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md):
   accepted R4 semantic preflight, including the scenario-owned NYSE boundary.
 - [`../releases/panic_1907/roster-definition-v0.1/`](../releases/panic_1907/roster-definition-v0.1/):
-  hash-pinned semantic release and consolidated-mapping input inventory.
-- [`bindings/panic_1907/`](bindings/panic_1907/): the accepted
+  hash-pinned semantic release and sole consolidated-mapping input inventory.
+- [`bindings/panic_1907/consolidated/`](bindings/panic_1907/consolidated/):
+  accepted non-executable full-Roster mapping, carrier decision, hashes and
+  owner-resolution record.
+- [`bindings/panic_1907/`](bindings/panic_1907/): the retained two-role
   Definition-to-V1 specification plus strict machine projections for the
   21-intent registry and seven lifecycle families.
 - [`../scenarios/panic_1907/`](../scenarios/panic_1907/): the conservative
@@ -161,11 +167,11 @@ The tracked paths above contain only the current accepted candidate. Do not add
    accepted repository versions; `.local-runtime` preserves richer research and
    review history that should not burden the public tree.
 
-Roster Definition release v0.1 now closes every roster disposition and pins
-the accepted semantic products. Consolidated mapping, carrier review,
-implementation and conformance remain distinct stages requiring their stated
-authorization. The current two-role implementation is the retained reference
-pilot, not the per-role production pattern.
+Roster Definition release v0.1 closes every roster disposition and pins the
+accepted semantic products. The consolidated mapping and carrier review are
+now accepted design inputs. Implementation and conformance remain distinct
+stages requiring separate authorization. The current two-role implementation
+is the retained reference pilot, not the per-role production pattern.
 
 Contract successors or intentionally supported public release lines may coexist
 when compatibility requires it. Mutable Agent drafts do not receive that

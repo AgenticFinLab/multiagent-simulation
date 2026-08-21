@@ -1,13 +1,14 @@
 # Panic of 1907 Agent binding
 
-This directory contains the accepted mapping specification for the two
-H2EPR-0288 Agent Definitions, version `0.2.1`. It maps their observations,
+This directory retains the accepted mapping specification for the two
+H2EPR-0288 Agent Definitions, version `0.2.1`, as the event's frozen
+engineering reference. It maps their observations,
 decision commitments, state, intents, institutional processes, and trace
 requirements onto Contracts V1.
 
-The event collection also includes a National Bank of Commerce Definition,
-version `0.1.0`. It is not a participant in this binding or its executable
-registries.
+The accepted [consolidated mapping](consolidated/) covers the complete Roster
+Definition release as a non-executable design specification. It does not alter
+this binding or its executable registries.
 
 The Markdown files remain the reviewed specification. The JSON files are
 strict derived projections used by the current implementation. They
@@ -28,6 +29,7 @@ V1 hashes still match.
 | [observation-registry.json](observation-registry.json) | executable actor-scoped observation domains derived from the Definitions |
 | [lifecycle-registry.json](lifecycle-registry.json) | executable transition rules for the seven business lifecycle families |
 | [reference-pilot-snapshot/](reference-pilot-snapshot/) | immutable shared ledger and source-register bytes reviewed by this binding |
+| [consolidated/](consolidated/) | accepted, non-executable full-Roster mapping specification and V1 carrier decision |
 
 The snapshot prevents later Roster-production claims from changing the identity
 of this frozen two-role reference pilot. The current event ledger and source

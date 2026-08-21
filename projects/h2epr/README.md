@@ -23,9 +23,9 @@ accepted scholarly Definitions outside the current two-role executable subset.
 Roster production has also accepted five event-bound population models:
 Knickerbocker depositors, later trust-company depositors, member/correspondent-
 bank resource decisions, call-money lenders and broker-borrowers. NYSE venue
-and market operation remain scenario-owned. Every H2EPR-0288 roster row now
-has a reviewed disposition, and Roster Definition release v0.1 is the fixed
-semantic input for the next consolidated mapping and carrier review.
+and market operation remain scenario-owned. Every H2EPR-0288 roster row has a
+reviewed disposition. Roster Definition release v0.1 is the fixed semantic
+input to the accepted consolidated mapping and V1 carrier review.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -129,8 +129,9 @@ Ray or the G3/G4 simulation path and makes no historical-validity claim.
 
 The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions
 are accepted scholarly role models. They are not part of the two-role binding,
-intent registry, or implementation slice. Their mapping belongs to the
-consolidated mapping cycle after Roster Definition release v0.1. The accepted
+intent registry, or implementation slice. They are covered by the accepted
+[consolidated mapping design](agents/bindings/panic_1907/consolidated/). The
+accepted
 [R2 interface preflight](agents/interfaces/panic_1907/r2-private-and-named-trusts.md)
 finds no concrete carrier counterexample while recording expected later
 mapping extensions.
@@ -167,6 +168,9 @@ question, horizon, causal ownership, and role dispositions. The non-executable
 shared concepts and interaction routes while new role products are developed.
 The hash-pinned [Roster Definition release v0.1](releases/panic_1907/roster-definition-v0.1/)
 closes semantic production and is the sole input set for consolidated mapping.
+The accepted [consolidated mapping](agents/bindings/panic_1907/consolidated/)
+defines the full-Roster identity, information, authority, resource, lifecycle
+and result model while retaining Contracts V1.
 
 The earlier three-tick path is frozen under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
@@ -256,13 +260,13 @@ The G3 suite requires the project runtime environment. See
 ## Project status
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
-The current Agent work has reached seven accepted Definitions and five
-accepted population models; two roles have an accepted semantic binding and a
-tested first implementation slice. Roster v0.4 and Roster Definition release
-v0.1 close semantic production and prepare one consolidated mapping cycle. The
-slice is not yet integrated into the G3/G4 runtime, and it does not establish
-historical or scientific validity. Scientific evaluation remains a later
-post-seal activity.
+The current Agent work has reached seven accepted Definitions, five accepted
+population models and one accepted full-Roster mapping design. Two roles have
+an executable conformance subset and a tested first implementation slice.
+The next eligible engineering work is a separately authorized mapping-loader
+and conformance slice. The existing slice is not integrated into the G3/G4
+runtime, and none of this establishes historical or scientific validity.
+Scientific evaluation remains a later post-seal activity.
 
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next
@@ -278,5 +282,6 @@ development task.
 - [Agent development workflow](agents/WORKFLOW.md)
 - [Panic of 1907 research roster](agents/rosters/panic_1907.md)
 - [Panic of 1907 semantic skeleton](scenarios/panic_1907/semantic-skeleton.md)
+- [Panic of 1907 consolidated mapping](agents/bindings/panic_1907/consolidated/)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

@@ -118,8 +118,10 @@ The Knickerbocker and NYCH `0.2.1` Agent Definitions specify the behavior layer
 above the existing ParticipantArtifact shell. Their accepted V1 mapping and
 bounded non-Ray reference slice live under `agents/bindings/panic_1907/` and
 `scenarios/panic_1907/`. Roster Definition release v0.1 adds five further
-Agent Definitions and five population models as scholarly semantic inputs;
-they remain outside that executable subset until consolidated mapping.
+Agent Definitions and five population models as scholarly semantic inputs.
+The accepted consolidated mapping covers all twelve products, but the added
+roles and populations remain outside the executable subset until a separately
+authorized implementation and conformance cycle.
 
 | Responsibility | Owner |
 |---|---|
@@ -135,11 +137,12 @@ they remain outside that executable subset until consolidated mapping.
 
 The current two-role binding is a reference pilot. Roster-production batches
 received only lightweight interface preflights. The hash-pinned Roster
-Definition release v0.1 is now the input to a consolidated binding design,
-which must store exact Definition/population hashes plus a complete mapping of
-the commitments, observations, state and intents it implements. A changed
-semantic product invalidates that mapping; updating a hash without semantic
-remapping is not conformance.
+Definition release v0.1 is the sole semantic input to the accepted
+consolidated mapping under `agents/bindings/panic_1907/consolidated/`. The
+mapping stores exact Definition/population identities and covers their
+commitments, observations, state and intents. A changed semantic product
+invalidates that mapping; updating a hash without semantic remapping is not
+conformance.
 
 ### Observation boundary
 
@@ -287,9 +290,9 @@ repository location.
 - The current G1–G4 canary is based on full-draft-exposed construction.
 - Rule v1 reads broader state and uses more actor-specific code than the new
   Agent Definition design permits.
-- The current `0.2.1` two-role Definitions and mapping specification have not
-  been implemented or integrated into the G3/G4 path; the old three-tick unit
-  is only a frozen engineering fixture.
+- The current `0.2.1` two-role Definitions have a bounded non-Ray conformance
+  slice, but it is not integrated into the G3/G4 path. The accepted full-Roster
+  consolidated mapping is design-only and has not been implemented.
 - NYCH authority outside the member facility remains unresolved.
 - Exact Knickerbocker requester identity and corporate authorization remain
   unresolved.
