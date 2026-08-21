@@ -28,9 +28,10 @@ projects/h2epr/
   -> Generated EPG
 ```
 
-当前工作重点已经转向 Agent Definition。第一轮使用 1907 年金融恐慌中的 Knickerbocker Trust
-和 New York Clearing House（NYCH），检查两个制度角色能否通过同一套方法得到清晰、可执行的
-行为定义。
+当前工作重点是完成 1907 年金融恐慌事件的研究 Roster。Knickerbocker Trust 和 New York
+Clearing House（NYCH）已经完成参考试验；National Bank of Commerce 是第三份接受的学术
+Definition。其余角色先按统一方法完成研究、Definition 与轻量接口检查，再在 Roster Definition
+release 后统一 mapping。
 
 ## 文档导航
 
@@ -175,6 +176,7 @@ projects/h2epr/agents/
 
 - `knickerbocker-trust.md`
 - `new-york-clearing-house.md`
+- `national-bank-of-commerce.md`
 - `source-register.md`
 - `evidence-ledger.md`
 - `decision-situations.md`
@@ -193,8 +195,10 @@ projects/h2epr/agents/
 十模块结构，但分别表达公司级流动性与求援决策、成员制清算机构的程序与资源边界。它们是已经接受的
 `0.2.1` 参考 Definition，仍属于结果已暴露的探索性建模，不声称历史校准或独立验证。
 
-当前 `0.2.1` Definition 已有接受的 V1 mapping 规范，但尚无可执行 binding。旧的三 tick 路径已经作为 `0.1.0-dev` 冻结工程夹具
-移入 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`，只覆盖：
+Knickerbocker 与 NYCH 的 `0.2.1` Definition 已有接受的 V1 mapping 和可执行的非 Ray
+conformance 切片。National Bank of Commerce `0.1.0` 尚未进入该 binding；其 mapping 推迟到
+Roster Definition release 后统一进行。旧的三 tick 路径已经作为 `0.1.0-dev` 冻结工程夹具移入
+`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`，只覆盖：
 
 1. Knickerbocker 发出 support request；
 2. NYCH 根据 member-facility 资格和程序权限作出 typed decline；
@@ -245,8 +249,8 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | ParticipantArtifact / EventBundle | G2 工程基线完成 |
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
-| Agent Definition 0.2.1 | 两角色参考 Definition、来源表、claim ledger 和决策局面已接受 |
-| Definition implementation mapping | V1 mapping 规范已接受但尚未实现；旧三步路径仅作为冻结工程基线 |
+| Agent Definitions | 三份机构 Definition 已接受；两角色构成参考试验，Roster 生产继续 |
+| Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster mapping 延后到 Definition release |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
 
@@ -258,21 +262,17 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 当前迭代
 
-两角色 Definition-to-implementation mapping 已完成设计并接受为非可执行规范，覆盖：
+H2EPR-0288 的 [Roster v0.1](h2epr/agents/rosters/panic_1907.md) 和
+[event semantic skeleton](h2epr/scenarios/panic_1907/semantic-skeleton.md) 已建立。后续角色按小批次完成：
 
-- 映射 Definition identity、Decision Commitment、observation 和状态；
-- 映射 intent、权限、business result 与 trace 记录；
-- 明确保留哪些 backend 自由度，哪些属于硬 conformance 边界；
-- 通过角色互换、信息遮蔽、请求生命周期和无效 intent 检查映射。
+- 证据和行为研究；
+- 论文级 Agent Definition 或经审核的 population/cohort 表示；
+- 独立实质审核与正式提升；
+- 一份轻量 interface preflight。
 
-### 映射完成后
-
-下一轮在单独授权下实现保守的 request–classification–information–scoped-decline–feedback
-切片，先建立 binding、intent registry 和 fail-closed checks，再加入角色 policy。根据映射和实现反馈，
-再决定是否修订 Definition、Template 或 Skills。
-
-如果实际映射出现 V1 无法表达的案例，再评估窄范围的 successor contract。目录或字段风格本身不构成
-修改合同的理由。
+生产批次不逐个做 binding 和实现。等所有 Roster 行都有明确处置、所有 Agent Definition 已接受后，
+形成 Roster Definition release，再统一完成 mapping、carrier review、交互与 replay 测试。如果届时出现
+V1 无法表达的具体案例，再评估窄范围 successor contract。
 
 ### 后续方向
 

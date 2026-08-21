@@ -24,20 +24,24 @@ Agent Definition authoring
         ↓
 Scholarly and modeling review
         ↓
-Scenario binding and implementation conformance
+Lightweight event-interface preflight
         ↓
-Batch feedback and next-roster decision
+Roster Definition release
+        ↓
+Consolidated mapping and implementation conformance
 ```
 
-The first four stages produce publication-facing research artifacts. Runtime
-mapping follows only after the behavioral model is stable enough to review on
-its own terms.
+The first four stages produce publication-facing research artifacts. Normal
+Roster batches then record a lightweight interface preflight. Runtime mapping
+follows once the Roster Definition release is stable enough to review as one
+semantic system. A small reference pilot may reach mapping earlier only when
+that engineering feedback is the purpose of the pilot.
 
 ## Available skills
 
 | Skill | Use |
 |---|---|
-| [`event-agent-batch`](event-agent-batch/SKILL.md) | Coordinate an approved role batch, route work through the specialized Skills, and close promotion, mapping, testing, and feedback without expanding the roster or permissions. |
+| [`event-agent-batch`](event-agent-batch/SKILL.md) | Coordinate an approved role batch in reference-pilot or Roster-production mode, route work through the specialist Skills, and stop at the correct integration boundary. |
 | [`historical-evidence-research`](historical-evidence-research/SKILL.md) | Find, read, classify, and adjudicate evidence for a participant, institution, or decision situation. |
 | [`participant-behavior-research`](participant-behavior-research/SKILL.md) | Build a publication-facing participant behavior model from adjudicated evidence, theory, institutional analysis, and high-information decision situations. |
 | [`agent-definition`](agent-definition/SKILL.md) | Turn reviewed participant research into a canonical, publication-facing, backend-neutral Agent Definition. |

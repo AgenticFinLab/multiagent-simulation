@@ -1,71 +1,94 @@
 # Agent development workflow
 
-This guide defines how H2EPR develops event-bound Agent Definitions in small,
-repeatable batches. It connects historical research to reviewed Definitions,
-derived mappings, conformance tests, and later scenario work without turning
-every named historical entity into an Agent.
+H2EPR develops event-bound participant models in two modes. Reference pilots
+take a few roles through the whole semantic and engineering path to test the
+method. Roster production then builds the remaining scholarly Definitions
+against a shared event skeleton before the event is mapped as one system.
 
-## From event question to tested batch
+## Two operating modes
+
+| Mode | Use | Normal endpoint |
+|---|---|---|
+| reference pilot | test a new representation, Definition method, carrier boundary, or interaction pattern with a small number of roles | accepted Definitions plus an explicitly authorized mapping and conformance slice |
+| Roster batch production | complete the accepted event roster efficiently and consistently | accepted role or population products plus a lightweight interface preflight |
+
+Choose the mode in the batch brief. Do not run the reference-pilot engineering
+tail for every production role.
 
 ```text
-research question and event horizon
-  -> causal role map and approved roster
-  -> batch scope and permissions
-  -> evidence research
-  -> participant behavior research
-  -> Agent Definition
-  -> independent review and owner acceptance
-  -> atomic promotion
-  -> batch mapping and carrier review
+event question and horizon
+  -> causal role map
+  -> accepted research roster
+  -> event semantic skeleton
+  -> reference pilot, when the method needs testing
+  -> Roster production batches
+       evidence -> behavior -> Definition -> review -> promotion
+       -> lightweight interface preflight
+  -> Roster Definition release
+  -> consolidated mapping and carrier review
   -> conformance, interaction, and replay tests
-  -> feedback and next-batch decision
+  -> separately approved simulation
 ```
 
-Simulation follows a separate decision. A batch first has to show that its
-Definitions, information boundaries, authority, intents, results, and
-interactions can be implemented without adding hidden semantics.
-
-## Build the roster around causal responsibility
+## Build and maintain the roster
 
 The roster starts from the research question, modeled interval, and causal
-transitions that the project intends to explain. Each relevant entity or
-process receives one disposition:
+transitions the project intends to explain. Each relevant entity or process
+receives one disposition:
 
 | Disposition | Use |
 |---|---|
 | Agent | an autonomous choice must be explained and has a defensible decision interface |
 | population or cohort | heterogeneous actors matter collectively and individual reconstruction is neither necessary nor supported |
+| representation gate | a required short study must choose Agent, population/cohort, or scenario ownership before production continues |
 | scenario or institutional process | rules, timing, routing, delivery, adjudication, market mechanics, or resource effects |
-| initial or exogenous context | establishes the selected starting boundary without claiming endogenous explanation |
+| initial or exogenous context | establishes the selected boundary without claiming endogenous explanation |
 | excluded | outside the approved question or evidence boundary |
 
-For every proposed Agent, record its focal choices, representation boundary,
+For a proposed Agent, record its focal choices, representation boundary,
 evidence maturity, cost of externalization, and promotion trigger. Historical
 prominence alone is not an admission criterion.
 
-Approve the roster before opening a production batch. A later role is added
-only when the research question changes, new evidence reveals an autonomous
-choice, or an existing externalization prevents a stated causal claim.
+Approve the roster before production. Freezing a roster prevents silent scope
+drift; it does not make the model immutable. A change to the event question,
+horizon, causal owner, or disposition requires an owner decision and a new
+roster version. Evidence refinement within an accepted row does not.
+
+## Establish the event semantic skeleton
+
+Before Roster production, define a short event-level skeleton that names:
+
+- the research boundary and working phases;
+- shared institutional, information, relationship, resource, request, result,
+  and time concepts;
+- the main interaction routes and causal lineage requirements;
+- what Agents, populations, scenario, contracts, mapping, and reducer each own;
+- known structural variants and exogenous inputs; and
+- the interface-preflight questions every batch must answer.
+
+The skeleton aligns vocabulary and ownership. It is not a scenario
+implementation, wire schema, parameter registry, or event script. A role batch
+may propose a revision when evidence exposes a genuine conflict, but may not
+silently redefine the shared event language.
 
 ## Open a small batch
 
-A normal batch contains two or three roles from one causal segment. A single
-role is appropriate when it introduces a materially different representation,
-such as an institution versus a population, or when its evidence boundary is
-unusually difficult.
+A normal batch contains two or three roles from one causal segment. A
+single-role batch is appropriate for a materially different representation,
+such as the first population/cohort model, or an unusually difficult evidence
+boundary.
 
 Use one concise batch brief to record:
 
-- event identity, modeled interval, and research question;
-- admitted roles and the decisions assigned to each;
+- mode, event identity, modeled interval, and research question;
+- roster rows and causal choices assigned to the batch;
 - interactions and scenario-owned processes in scope;
-- local evidence inputs and exposed outcomes;
-- authorized network, archive, private, and held-out boundaries;
-- whether the batch includes Definition work only, mapping, implementation,
-  or a separately approved run;
-- stopping conditions and owner decision points.
+- local evidence, exposed outcomes, and source permissions;
+- whether promotion is per role or per batch;
+- the authorized endpoint; and
+- stopping conditions and owner decisions.
 
-Use the existing mutable working root and keep one directory per batch:
+Use the mutable working root and one directory per batch:
 
 ```text
 batches/<batch-id>/
@@ -75,21 +98,22 @@ batches/<batch-id>/
 │   ├── BEHAVIOR.md
 │   ├── DEFINITION.md
 │   └── REVIEW.md
+├── INTERFACE.md
 └── CLOSE.md
 ```
 
-Small roles may combine research notes when ownership remains clear. Raw
-source bytes belong in the evidence area rather than the batch directory.
+Small roles may share research notes when ownership remains clear. Raw source
+bytes belong in the evidence area rather than the batch directory.
 
 Permissions are batch-specific. Research permission for one role does not
-authorize a different participant or source boundary, and mapping permission
-does not authorize implementation or simulation.
+authorize another participant or source boundary. Definition promotion does
+not authorize mapping, implementation, simulation, or contract changes.
 
 ## Develop each role
 
-Each role follows the same four research stages. The stages may share sources
-and decision situations, but they keep separate participant boundaries and
-review verdicts.
+Each role follows four research stages. They may share adopted sources and
+decision situations, but retain separate participant boundaries and review
+verdicts.
 
 | Stage | Project Skill | Required result |
 |---|---|---|
@@ -98,17 +122,16 @@ review verdicts.
 | Definition | [agent-definition](../skills/agent-definition/SKILL.md) | one canonical, publication-facing, event-bound Definition candidate |
 | Review | [agent-definition-review](../skills/agent-definition-review/SKILL.md) | independent findings, revision routing, and an acceptance or return verdict |
 
-Local sources and existing event claims are reviewed before new research.
-External research uses the approved scope and archives only sources that enter
-claim adjudication. Search results and unused downloads remain working notes.
+Review local sources and event claims before opening new research. External
+research uses the approved scope and archives only sources that enter claim
+adjudication. Search results and unused downloads remain working notes.
 
-The ten-module Definition template provides a common reading order. It does
-not force different institutions, individuals, or populations to use the same
-mechanism, variables, or number of commitments. Every behaviorally material
-observation, state, parameter, and intent needs an actual explanatory or review
-consumer.
+The ten-module template provides a common reading order. It does not force
+institutions, individuals, and populations to share mechanisms, variables, or
+commitment counts. Every material observation, state, parameter, and intent
+needs an explanatory or review consumer.
 
-## Review and promote a role
+## Review and promote
 
 Review a stable candidate independently of backend code and simulation output.
 Resolve blocking and major findings in the layer that owns the problem:
@@ -116,96 +139,108 @@ evidence, representation, behavior, Definition, or scenario boundary.
 
 Before promotion:
 
-1. confirm the Definition identity, version, claim references, and source
-   records;
-2. check cross-section and cross-role consistency;
-3. review the impact on current bindings and shared source/evidence snapshots;
-4. obtain owner acceptance;
-5. promote the Definition, adopted claims, sources, and concise public guide
-   updates as one coherent commit.
+1. confirm Definition identity, version, claim references, and source records;
+2. check cross-section, cross-role, roster, and skeleton consistency;
+3. complete the batch interface preflight;
+4. obtain owner acceptance; and
+5. promote the Definition, adopted claims, sources, interface note, and concise
+   guide updates as one coherent change.
 
-Choose the promotion unit in the batch brief: one role or the complete small
-batch. Never split one role's Definition, adopted claims, source records, and
-required binding-hash update across inconsistent commits.
-
-The tracked tree contains the latest accepted research artifacts. Drafts,
-search notes, rejected alternatives, source bytes, and detailed review history
+The tracked tree contains the current accepted research artifacts. Drafts,
+search notes, rejected alternatives, raw sources, and detailed review history
 remain in the ignored working and evidence areas. Git records accepted public
 history.
 
-Promotion does not silently add the role to an executable roster. A binding
-names its participant set explicitly.
+Promotion adds an accepted research product. It does not silently add an
+executable participant, update a binding hash, or authorize implementation.
 
-## Integrate and test a batch
+## Lightweight preflight for production batches
 
-Mapping begins after every Definition in the batch is independently readable
-and accepted. The mapping is derived: it may connect semantic concepts to
-machine carriers, but it cannot introduce a new behavioral rule, observation,
-authority, state, intent, or result meaning.
+Roster batches stop after a semantic interface check. `INTERFACE.md` records:
+
+- representation and causal choices;
+- observations, private state, intents, counterparties, and routes;
+- authority, resource, lifecycle, result, and scenario dependencies;
+- compatibility with the event skeleton and other accepted products; and
+- whether each material interface is a known fit, expects an internal mapping
+  extension, or presents a concrete carrier counterexample.
+
+The preflight does not choose machine fields, build registries, bind hashes,
+implement policy, or run replay tests. A suspected carrier issue is recorded
+for consolidated review; only a concrete, irreducible counterexample pauses
+production for an owner decision.
+
+## Create the Roster Definition release
+
+The release closes the semantic production phase. It requires:
+
+- a reviewed disposition for every roster row;
+- an accepted Definition for every admitted Agent;
+- an accepted interface for every retained population/cohort;
+- explicit scenario ownership for externalized processes;
+- resolved blocking conflicts across Definitions and the skeleton; and
+- a manifest pinning roster, skeleton, Definition, evidence, and preflight
+  identities.
+
+The release is a coherent semantic input, not an executable bundle and not a
+scientific-validity claim.
+
+## Map and test the released roster
+
+Consolidated mapping starts only after the release and under separate
+authorization. It derives implementation carriers for the released semantic
+system; it cannot introduce a behavior, observation, authority, state, intent,
+route, or result meaning.
 
 Use the following test ladder:
 
 | Level | Question |
 |---|---|
-| Definition integrity | Do claims, sources, sections, IDs, links, and semantic inventories close? |
-| Mapping and carrier | Can every material observation, state, commitment, intent, and lifecycle be carried without loss or hidden defaults? |
-| Role conformance | Do missing information, authority, lifecycle, alternative mechanisms, and adverse results change behavior as declared? |
-| Cross-role interaction | Do sender, receiver, route, message, authorization, disposition, and result references close across participants? |
-| Replay | Are state transitions, invalid attempts, results, and trace identity deterministic and inspectable? |
-| Bounded run | Does a separately approved scenario answer a stated scientific question without using its known outcome as policy input? |
+| release integrity | Do roster, evidence, Definitions, population interfaces, skeleton, IDs, links, and inventories close? |
+| mapping and carrier | Can every material semantic element be carried without loss or hidden defaults? |
+| role conformance | Do information, authority, lifecycle, mechanism, and adverse-result changes affect behavior as declared? |
+| cross-role interaction | Do sender, receiver, route, authorization, disposition, result, and causal lineage close? |
+| replay | Are state transitions, invalid attempts, results, and trace identity deterministic and inspectable? |
+| bounded run | Does a separately approved scenario answer a stated scientific question without using its known outcome as policy input? |
 
-Start with high-information cases rather than broad scenario coverage. Include
-future-information injection, missing or stale observations, invalid authority,
-duplicate requests, delayed or partial results, role/authority perturbations,
-and an always-wait or always-abstain challenge where applicable.
+Start with high-information cases rather than broad scenario coverage.
+Simulation remains a separate decision.
 
-A batch close record contains only the information needed to reproduce and
-review it:
-
-- batch scope and participant versions;
-- adopted source-archive identities and Definition hashes;
-- binding, scenario variant, contract, and code identity;
-- test commands and results;
-- unresolved evidence, unimplemented paths, and permitted claims.
-
-## Route feedback to the owning layer
+## Route feedback
 
 | Finding | Return to |
 |---|---|
 | source, event time, participant availability, or exposure error | evidence research |
 | weak representation, mechanism, selection rule, or falsifier | behavior research or Definition |
-| world fact, institution, routing, delivery, resource, or adjudication gap | scenario/environment |
-| semantic loss between Definition and carrier | mapping |
+| world fact, institution, routing, delivery, resource, or adjudication gap | semantic skeleton or scenario/environment |
+| semantic loss between release and carrier | consolidated mapping |
 | hidden branch, default, memory, or silent repair | implementation |
-| demonstrated inability of the accepted semantics to fit the current carrier | narrow contract-successor review |
+| demonstrated inability of released semantics to fit the carrier | narrow contract-successor review |
 
-A role-specific correction stays with that role. Update the shared template or
-Skills only when a completed use case reveals a reusable method gap. Review the
-change against existing accepted Definitions before using it in the next batch.
+A role-specific correction stays with that role. Revise the shared template or
+Skills only when a completed use case reveals a reusable method gap. Review a
+shared change against accepted Definitions before using it in the next batch.
 
 ## Completion criteria
 
 A role is complete for Definition work when its evidence question is closed
-for the stated use, its behavior dossier is review-ready, its Definition has
-passed independent substantive review, and the owner has accepted its atomic
-promotion.
+for the stated use, its behavior model is review-ready, its Definition has
+passed independent substantive review, its interface preflight closes, and the
+owner accepts its promotion.
 
-A batch is complete for conformance work when all admitted Definitions are
-hash-pinned, every required semantic element is mapped, cross-role lifecycles
-close, the agreed test ladder passes, and residual limitations are explicit.
+A production batch is complete when every admitted role reaches that state and
+the close record names any roster, skeleton, evidence, or later-mapping issue.
 
-The event roster is complete for the selected research question when every
-target causal transition has an explicit Agent, population, scenario, context,
-or exclusion owner; every admitted Agent has an accepted Definition; and every
-interaction needed by the intended run has passed mapping and conformance
-review.
+The Roster Definition release is complete when all roster dispositions and
+semantic products meet the release gate. Consolidated conformance is complete
+only after the released system is mapped and the agreed test ladder passes.
 
 ## Current H2EPR-0288 application
 
-National Bank of Commerce is the third accepted Panic of 1907 Definition. Its
-next cycle is a read-only mapping and carrier-impact review followed by a
-separate decision on three-role conformance work. After that review, the event
-role map will be refreshed and the remaining roster divided into small batches.
-The existing map suggests run formation, private and trust-company rescue, and
-collective bank/market response as distinct causal segments; their exact role
-membership remains an owner decision tied to the event horizon.
+Knickerbocker Trust and NYCH form the completed reference pilot. National Bank
+of Commerce is the third accepted Definition, but it will not trigger a
+standalone three-role mapping cycle. The accepted
+[Roster v0.1](rosters/panic_1907.md) and event
+[semantic skeleton](../scenarios/panic_1907/semantic-skeleton.md) now govern
+Roster production. Consolidated mapping waits for Roster Definition release
+v0.1.

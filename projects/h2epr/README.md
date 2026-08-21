@@ -10,17 +10,17 @@ For the repository-level overview and the relationship with MASim, see the
 
 ## Current focus
 
-The current research loop is an Agent Definition pilot for the Panic of 1907.
-It compares two institutionally different participants:
+The Knickerbocker Trust–New York Clearing House work is the completed reference
+pilot for Panic of 1907 Agent Definitions. Its `0.2.1` Definitions have an
+accepted V1 mapping, machine-readable intent and lifecycle registries,
+fail-closed carrier checks, and a deterministic non-Ray request-to-feedback
+conformance slice. The earlier `0.1.0-dev` fixture remains frozen as an
+engineering baseline.
 
-- Knickerbocker Trust;
-- New York Clearing House (NYCH).
-
-Each participant has an event-specific Markdown Definition. The current
-`0.2.1` Definitions have an accepted V1 mapping, machine-readable intent and
-lifecycle registries, fail-closed carrier checks, and a deterministic non-Ray
-request-to-feedback conformance slice. The earlier `0.1.0-dev` fixture remains
-frozen as an engineering baseline.
+National Bank of Commerce is the third accepted scholarly Definition. The
+project is now completing the accepted H2EPR-0288 research roster in small
+production batches. Each batch stops at a lightweight event-interface
+preflight; consolidated mapping waits for the Roster Definition release.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -37,7 +37,7 @@ Generated EPG compilation.
 | Canary policy and world | `src/h2epr/policies/`, `src/h2epr/world/` | Rule policy inputs and normalized sensitivity state |
 | Runtime | `src/h2epr/runtime/` | H2EPR adapter, phased Rule runtime, detectors and orchestration |
 | Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
-| Agent Definitions | `agents/` | Event-specific behavior definitions, source register, evidence ledger and decision situations |
+| Agent research | `agents/` | Event roster, behavior Definitions, source register, evidence ledger, decision situations, and derived bindings |
 | Agent binding support | `src/h2epr/agents/` | Strict Definition mapping, semantic-intent validation and Contracts V1 carrier checks |
 | Event conformance slices | `scenarios/` | Event-owned policies, authoritative process state and bounded non-Ray integration paths |
 
@@ -52,8 +52,10 @@ projects/h2epr/
 │   ├── README.md
 │   ├── agent-definition-template.md
 │   ├── defines/panic_1907/
+│   ├── rosters/panic_1907.md
 │   └── bindings/panic_1907/
 ├── skills/
+│   ├── event-agent-batch/
 │   ├── historical-evidence-research/
 │   ├── participant-behavior-research/
 │   ├── agent-definition/
@@ -75,7 +77,7 @@ The project is organized by responsibility rather than by audit round. New
 directories are added when a real implementation needs them; the tree is not
 a permanent package API.
 
-## Agent Definition pilot
+## Agent Definitions and roster production
 
 The current event assets are under `agents/defines/panic_1907/`:
 
@@ -88,7 +90,7 @@ The current event assets are under `agents/defines/panic_1907/`:
 | `evidence-ledger.md` | Claim status, participant availability, exposure and unresolved questions |
 | `decision-situations.md` | Shared role-comparison situations and falsification perturbations |
 
-The two Definitions now provide four Knickerbocker and five NYCH Decision
+The reference Definitions provide four Knickerbocker and five NYCH Decision
 Commitments. They cover information and authorization work, request/case
 lifecycle, route and facility classification, conditional proposals,
 communication, results, uncertainty and falsification. The member-facility
@@ -110,7 +112,13 @@ remaining intent policies are not implemented by this slice. It does not start
 Ray or the G3/G4 simulation path and makes no historical-validity claim.
 
 The NBC `0.1.0` Definition is the third accepted scholarly role model. It is
-not yet part of the two-role binding, intent registry, or implementation slice.
+not part of the two-role binding, intent registry, or implementation slice. Its
+mapping is deferred to the consolidated Roster Definition release.
+
+The accepted [research roster](agents/rosters/panic_1907.md) fixes the v0.1
+question, horizon, causal ownership, and role dispositions. The non-executable
+[event semantic skeleton](scenarios/panic_1907/semantic-skeleton.md) aligns
+shared concepts and interaction routes while new role products are developed.
 
 The earlier three-tick path is frozen under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
@@ -202,9 +210,10 @@ The G3 suite requires the project runtime environment. See
 G1–G4 provide a deterministic engineering chain with recorded limitations.
 The current Agent work has reached an accepted three-role Definition set; two
 roles have an accepted semantic binding and a tested first implementation
-slice. The slice is not yet integrated into the G3/G4 runtime, and it does not
-establish historical or scientific validity. Scientific evaluation remains a
-later post-seal activity.
+slice. Roster v0.1 and the event semantic skeleton now govern the remaining
+Definition batches. The slice is not yet integrated into the G3/G4 runtime,
+and it does not establish historical or scientific validity. Scientific
+evaluation remains a later post-seal activity.
 
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next
@@ -218,5 +227,7 @@ development task.
 - [Evolution policy](EVOLUTION.md)
 - [Agent guide](agents/README.md)
 - [Agent development workflow](agents/WORKFLOW.md)
+- [Panic of 1907 research roster](agents/rosters/panic_1907.md)
+- [Panic of 1907 semantic skeleton](scenarios/panic_1907/semantic-skeleton.md)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

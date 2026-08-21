@@ -1,4 +1,11 @@
-# Panic of 1907 two-role conformance slice
+# Panic of 1907 scenario
+
+The event-level [semantic skeleton](semantic-skeleton.md) defines the shared
+v0.1 vocabulary, interaction routes, ownership boundaries, structural
+variants, and interface-preflight questions used during Roster production. It
+is non-executable and does not prescribe numerical state or policy.
+
+## Current reference slice
 
 This package connects the accepted Knickerbocker Trust and New York Clearing
 House Definitions to the machine mapping in `agents/bindings/panic_1907/`.

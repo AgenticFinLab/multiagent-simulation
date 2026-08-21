@@ -114,13 +114,16 @@ measurements.
 
 ## Agent and scenario semantics
 
-The current `0.2.1` Agent Definitions specify the behavior layer that will sit
-above the existing ParticipantArtifact shell. Their V1 mapping specification
-has been accepted under `agents/bindings/panic_1907/`, but it is not yet
-executable.
+The Knickerbocker and NYCH `0.2.1` Agent Definitions specify the behavior layer
+above the existing ParticipantArtifact shell. Their accepted V1 mapping and
+bounded non-Ray reference slice live under `agents/bindings/panic_1907/` and
+`scenarios/panic_1907/`. National Bank of Commerce `0.1.0` is accepted as a
+scholarly Definition but remains outside that executable subset.
 
 | Responsibility | Owner |
 |---|---|
+| Event question, horizon, role disposition and release membership | Research roster |
+| Shared event concepts, interaction routes and structural variants | Event semantic skeleton |
 | Role, legal information, decision commitments, intent meaning and limits | Agent Definition Markdown |
 | Source identity, locator, adopted scope and file hash | Source register |
 | Claim status, event time, availability and use | Evidence ledger |
@@ -129,10 +132,12 @@ executable.
 | Executable mapping from Definition to code | Binding and backend adapter |
 | State transition and action result | Authoritative reducer |
 
-An accepted binding must store exact Definition hashes and a complete mapping
-of the commitments, observations, state and intents it implements. A changed
-Definition invalidates the old mapping; updating a hash without semantic
-remapping is not conformance.
+The current two-role binding is a reference pilot. Normal Roster-production
+batches receive only a lightweight interface preflight. A consolidated binding
+is designed after the Roster Definition release and must store exact Definition
+hashes plus a complete mapping of the commitments, observations, state and
+intents it implements. A changed Definition invalidates that mapping; updating
+a hash without semantic remapping is not conformance.
 
 ### Observation boundary
 

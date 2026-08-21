@@ -12,6 +12,12 @@ different representation, information, authority, resource, decision, and intent
 fully exposed research material and remain exploratory; none is historically calibrated or independently
 validated.
 
+The accepted event scope and remaining participant dispositions are in the
+[H2EPR-0288 research roster](../../rosters/panic_1907.md). New production
+batches use the event [semantic skeleton](../../../scenarios/panic_1907/semantic-skeleton.md)
+and stop at a lightweight interface preflight. A consolidated mapping is made
+only after the Roster Definition release.
+
 ## Supporting research assets
 
 | File | Purpose |
@@ -33,8 +39,8 @@ their 21 intents; the first slice exercises eight decisions from support request
 facility-scoped decline and subsequent contingency preparation.
 
 The NBC `0.1.0` Definition is the accepted scholarly model for the third role. It is not included in the
-two-role binding, executable mapping, intent registry, or scenario implementation. Adding that mapping is a
-separate review cycle rather than part of this Definition promotion.
+two-role binding, executable mapping, intent registry, or scenario implementation. Its mapping is deferred to
+the consolidated Roster Definition release rather than performed as a standalone three-role cycle.
 
 The earlier `0.1.0-dev` three-tick path is preserved only as a frozen engineering fixture under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../../../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/).
