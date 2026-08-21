@@ -17,13 +17,13 @@ fail-closed carrier checks, and a deterministic non-Ray request-to-feedback
 conformance slice. The earlier `0.1.0-dev` fixture remains frozen as an
 engineering baseline.
 
-National Bank of Commerce is the third accepted scholarly Definition. The
-first Roster-production batch has also resolved Knickerbocker depositors as an
-event-bound population model rather than a collective Agent or an entirely
-external demand path. The project is completing the remaining H2EPR-0288
-roster in small production batches. Each batch stops at a lightweight
-event-interface preflight; consolidated mapping waits for the Roster
-Definition release.
+National Bank of Commerce, J. Pierpont Morgan, Trust Company of America, and
+Lincoln Trust Company are accepted scholarly Definitions outside the current
+two-role executable subset. Roster production has also resolved Knickerbocker
+depositors as an event-bound population model. The project is completing the
+remaining H2EPR-0288 representation gates in small batches. Each batch stops
+at a lightweight event-interface preflight; consolidated mapping waits for the
+Roster Definition release.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -56,6 +56,7 @@ projects/h2epr/
 │   ├── README.md
 │   ├── agent-definition-template.md
 │   ├── defines/panic_1907/
+│   ├── interfaces/panic_1907/
 │   ├── rosters/panic_1907.md
 │   └── bindings/panic_1907/
 ├── populations/
@@ -93,6 +94,9 @@ The current event assets are under `agents/defines/panic_1907/`:
 | `knickerbocker-trust.md` | Knickerbocker role, information, authority and decision commitments |
 | `new-york-clearing-house.md` | NYCH governance, eligibility and procedural commitments |
 | `national-bank-of-commerce.md` | NBC credit, request-intermediation and clearing-relationship decisions |
+| `j-pierpont-morgan.md` | bounded information, examination, proposal, solicitation and coordination choices |
+| `trust-company-of-america.md` | TCA information, examination, support-route, collateral, operating and communication choices |
+| `lincoln-trust-company.md` | thin board-authorized condition-communication interface |
 | `source-register.md` | Adopted source identities, public locators, hashes, cited passages and limitations |
 | `evidence-ledger.md` | Claim status, participant availability, exposure and unresolved questions |
 | `decision-situations.md` | Shared role-comparison situations and falsification perturbations |
@@ -118,9 +122,13 @@ contingency preparation. All 21 intents are registered and validated, but the
 remaining intent policies are not implemented by this slice. It does not start
 Ray or the G3/G4 simulation path and makes no historical-validity claim.
 
-The NBC `0.1.0` Definition is the third accepted scholarly role model. It is
-not part of the two-role binding, intent registry, or implementation slice. Its
-mapping is deferred to the consolidated Roster Definition release.
+The NBC, Morgan, TCA, and Lincoln `0.1.0` Definitions are accepted scholarly
+role models. They are not part of the two-role binding, intent registry, or
+implementation slice. Their mapping is deferred to the consolidated Roster
+Definition release. The accepted
+[R2 interface preflight](agents/interfaces/panic_1907/r2-private-and-named-trusts.md)
+finds no concrete carrier counterexample while recording expected later
+mapping extensions.
 
 The accepted [Knickerbocker depositor population model](populations/defines/panic_1907/knickerbocker-depositors.md)
 is the first Roster-production product with a non-Agent representation. It

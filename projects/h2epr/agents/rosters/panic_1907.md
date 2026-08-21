@@ -37,9 +37,9 @@ later institutional reform are outside v0.1.
 | New York Clearing House Association | Agent | case classification, review, authority, scoped disposition, and communication | Definition `0.2.1` accepted; reference binding available |
 | National Bank of Commerce in New York | Agent | credit, request intermediation, clearing relationship, notice, and communication choices | Definition `0.1.0` accepted; consolidated mapping deferred |
 | Knickerbocker depositors | population model | heterogeneous withdrawal, retention, access, pending-request, and delivered-result response without a collective depositor personality | population model `0.1.0` accepted; consolidated mapping deferred |
-| J. P. Morgan and private-financier coordination | Agent | examination commissioning, private-aid decisions, coordination, and money-pool formation | focused research must settle the individual-versus-coordination representation before Definition |
-| Trust Company of America | Agent | institution-specific response, support-seeking, collateral, communication, and operational choices | focused research and Definition required |
-| Lincoln Trust Company | Agent | institution-specific response and support path; retain separately unless evidence supports aggregation | focused research and Definition required |
+| J. P. Morgan and private-financier coordination | Agent | information and examination routing, convening, proposal formation, independent commitment solicitation, coordination, and money-pool assembly without owning contributors | bounded named-coordinator Definition `0.1.0` accepted; consolidated mapping deferred |
+| Trust Company of America | Agent | condition verification, examination cooperation, route-specific support seeking, collateral proposals, communication, and operational-posture choices | aggregate institutional Definition `0.1.0` accepted; consolidated mapping deferred |
+| Lincoln Trust Company | Agent | board-authorized institutional condition communication; broader support, collateral, resource, and operating policy remains external absent direct evidence | thin communication Definition `0.1.0` accepted; consolidated mapping deferred |
 | trust-company presidents' committee | representation gate | formation, review, contribution, and allocation choices | use an Agent only if these choices are not fixed by an institutional protocol |
 | depositors at later trust companies | representation gate | heterogeneous contagion and withdrawal pressure | decide institution-specific cohorts versus a bounded aggregate model |
 | NYCH member banks and large correspondent banks | representation gate | member-owned resources, commitments, certificate demand, and possible disagreement | begin as a reviewed cohort; promote named Agents only when needed by the question |
@@ -65,8 +65,8 @@ Roster production proceeds in causal batches:
 
 1. Knickerbocker depositor representation completed as an event-bound
    population model;
-2. research Morgan/private coordination, Trust Company of America, and Lincoln
-   Trust Company, splitting the batch if evidence review requires it;
+2. Morgan/private coordination, Trust Company of America, and Lincoln Trust
+   Company completed as three deliberately non-symmetrical Definitions;
 3. resolve the trust-company committee, later depositor, member-bank, and
    call-money representation gates, then write Definitions only for the roles
    admitted as Agents.

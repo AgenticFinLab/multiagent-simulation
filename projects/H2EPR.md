@@ -29,10 +29,10 @@ projects/h2epr/
 ```
 
 当前工作重点是完成 1907 年金融恐慌事件的研究 Roster。Knickerbocker Trust 和 New York
-Clearing House（NYCH）已经完成参考试验；National Bank of Commerce 是第三份接受的学术
-Definition。Knickerbocker depositors 已在第一个批量生产周期中确定为群体模型，而不是单一
-Agent。其余角色先按统一方法完成研究、Definition 或群体模型与轻量接口检查，再在 Roster
-Definition release 后统一 mapping。
+Clearing House（NYCH）已经完成参考试验；National Bank of Commerce、J. Pierpont Morgan、
+Trust Company of America 和 Lincoln Trust Company 已完成学术 Definition。Knickerbocker
+depositors 已确定为群体模型，而不是单一 Agent。其余角色先按统一方法完成研究、Definition
+或群体模型与轻量接口检查，再在 Roster Definition release 后统一 mapping。
 
 ## 文档导航
 

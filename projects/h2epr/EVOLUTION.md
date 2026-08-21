@@ -100,9 +100,12 @@ alternatives belong under:
 Date-suffixed and `-old` copies are not kept beside the current Definition.
 Contract versions and intentionally supported release lines are the exception.
 
-The current Panic of 1907 Definitions are version `0.2.1`. Their accepted V1
-mapping under `agents/bindings/panic_1907/` now has strict machine projections
-and a conservative first conformance slice under `scenarios/panic_1907/`.
+The two current Panic of 1907 reference-pilot Definitions are version `0.2.1`.
+Their accepted V1 mapping under `agents/bindings/panic_1907/` now has strict
+machine projections and a conservative first conformance slice under
+`scenarios/panic_1907/`. NBC, Morgan, TCA, and Lincoln are accepted `0.1.0`
+Roster-production Definitions whose mapping is deferred to the consolidated
+Roster Definition release.
 That slice does not replace the G3 runtime or establish historical validity.
 The earlier `0.1.0-dev` three-tick unit is retained under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/` as a frozen regression
