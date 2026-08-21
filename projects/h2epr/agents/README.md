@@ -9,13 +9,14 @@ Use the [Agent development workflow](WORKFLOW.md) to admit roles, organize
 small research batches, promote reviewed Definitions, and prepare one
 consolidated mapping after the Roster Definition release.
 
-The current Panic of 1907 collection contains six institutional or named-person
+The current Panic of 1907 collection contains seven institutional or named-person
 role models. Knickerbocker Trust and the New York Clearing House form the
 current executable conformance subset; National Bank of Commerce, J. Pierpont
-Morgan, Trust Company of America, and Lincoln Trust Company are reviewed
-scholarly Definitions reserved for the consolidated event mapping. The adjacent
-[population collection](../populations/README.md) contains the accepted
-Knickerbocker depositor model. The work examines whether
+Morgan, Trust Company of America, Lincoln Trust Company, and the trust-company
+presidents' committee are reviewed scholarly Definitions reserved for the
+consolidated event mapping. The adjacent [population collection](../populations/README.md)
+contains the accepted Knickerbocker depositor and member/correspondent-bank
+resource-decision models. The work examines whether
 participant-available information, persistent state, authority, procedure, and
 intent/result separation can support auditable behavior. Calibration, cross-event
 reuse, and additional execution approaches require separate work.
@@ -64,10 +65,12 @@ agents/
 │       ├── national-bank-of-commerce.md
 │       ├── new-york-clearing-house.md
 │       ├── source-register.md
+│       ├── trust-company-presidents-committee.md
 │       └── trust-company-of-america.md
 ├── interfaces/
 │   └── panic_1907/
-│       └── r2-private-and-named-trusts.md
+│       ├── r2-private-and-named-trusts.md
+│       └── r3-collective-trust-support.md
 └── rosters/
     └── panic_1907.md
 ```
@@ -100,6 +103,8 @@ agents/
   situations and falsification perturbations.
 - [`interfaces/panic_1907/r2-private-and-named-trusts.md`](interfaces/panic_1907/r2-private-and-named-trusts.md):
   accepted semantic preflight for the Morgan, TCA, and Lincoln R2 batch; no executable mapping is implied.
+- [`interfaces/panic_1907/r3-collective-trust-support.md`](interfaces/panic_1907/r3-collective-trust-support.md):
+  accepted semantic preflight for the committee and member/correspondent-bank resource-decision population.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
   the current `0.2.1` Definitions in the executable two-role subset.
@@ -110,9 +115,14 @@ agents/
   [`defines/panic_1907/lincoln-trust-company.md`](defines/panic_1907/lincoln-trust-company.md): the accepted R2
   `0.1.0` Definitions for bounded private coordination, an aggregate named-trust response, and a thin
   board-authorized institutional communication interface. Consolidated mapping remains deferred.
+- [`defines/panic_1907/trust-company-presidents-committee.md`](defines/panic_1907/trust-company-presidents-committee.md):
+  the accepted R3 `0.1.0` aggregate procedural committee Definition, with advice, contributor commitment and
+  resource ownership kept separate.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the accepted `0.1.0` event-bound population model produced by the first
   Roster batch.
+- [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):
+  the accepted R3 `0.1.0` institution-preserving resource-decision population.
 - [`bindings/panic_1907/`](bindings/panic_1907/): the accepted
   Definition-to-V1 specification plus strict machine projections for the
   21-intent registry and seven lifecycle families.

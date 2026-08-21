@@ -1,6 +1,6 @@
 # H2EPR-0288 research roster
 
-- Version: `0.2`
+- Version: `0.3`
 - Status: accepted research scope
 - Accepted: 21 August 2026
 - Event: Panic of 1907, acute New York phase
@@ -40,9 +40,9 @@ later institutional reform are outside v0.1.
 | J. P. Morgan and private-financier coordination | Agent | information and examination routing, convening, proposal formation, independent commitment solicitation, coordination, and money-pool assembly without owning contributors | bounded named-coordinator Definition `0.1.0` accepted; consolidated mapping deferred |
 | Trust Company of America | Agent | condition verification, examination cooperation, route-specific support seeking, collateral proposals, communication, and operational-posture choices | aggregate institutional Definition `0.1.0` accepted; consolidated mapping deferred |
 | Lincoln Trust Company | Agent | board-authorized institutional condition communication; broader support, collateral, resource, and operating policy remains external absent direct evidence | thin communication Definition `0.1.0` accepted; consolidated mapping deferred |
-| trust-company presidents' committee | representation gate | formation, review, contribution, and allocation choices | use an Agent only if these choices are not fixed by an institutional protocol |
+| trust-company presidents' committee | Agent | application intake, information calls, investigation, qualified advice, reporting, and bounded coordination without contributor resource ownership | aggregate procedural Definition `0.1.0` accepted; consolidated mapping deferred |
 | depositors at later trust companies | representation gate | heterogeneous contagion and withdrawal pressure | decide institution-specific cohorts versus a bounded aggregate model |
-| NYCH member banks and large correspondent banks | representation gate | member-owned resources, commitments, certificate demand, and possible disagreement | begin as a reviewed cohort; promote named Agents only when needed by the question |
+| NYCH member banks and large correspondent banks | population model | institution-owned resources, independent commitments, certificate demand, conditions and disagreement without a collective bank personality | institution-preserving resource-decision population `0.1.0` accepted; consolidated mapping deferred |
 | brokers, call-money lenders, and borrowers | representation gate | collective market liquidity, collateralized lending, and liquidation behavior | population/cohort model unless autonomous named choices are required |
 | NYSE venue and market operation | scenario or institutional process | matching, loan-post, collateral, price, and venue mechanics | a governance interface requires a separate roster revision |
 | clearing, settlement, message transport, notice delivery, and resource adjudication | scenario process | timing, routing, legal and physical effects, and result production | owned by the scenario/environment |
@@ -67,9 +67,11 @@ Roster production proceeds in causal batches:
    population model;
 2. Morgan/private coordination, Trust Company of America, and Lincoln Trust
    Company completed as three deliberately non-symmetrical Definitions;
-3. resolve the trust-company committee, later depositor, member-bank, and
-   call-money representation gates, then write Definitions only for the roles
-   admitted as Agents.
+3. trust-company committee and member/correspondent-bank resource decisions
+   completed as one aggregate procedural Agent and one institution-preserving
+   population model;
+4. resolve the later-depositor and call-money representation gates, then write
+   Definitions only for roles admitted as Agents.
 
 The order may be shortened or split for reviewability. It must not be expanded
 with a new role merely because that participant is historically prominent.
@@ -94,12 +96,13 @@ carrier review.
 
 ## Change policy
 
-Roster v0.2 is frozen in the practical sense: batches may refine evidence and
+Roster v0.3 is frozen in the practical sense: batches may refine evidence and
 Definitions, but they may not silently change the event question, horizon,
 causal owner, or disposition of another row. Such a change requires an owner
 decision and a new roster version. Git retains accepted history; working
 alternatives remain under the ignored local research area.
 
-Roster v0.2 records the owner-authorized R1 disposition of Knickerbocker
-depositors as a population model. It does not change the event question,
-horizon, or any other row.
+Roster v0.3 records the owner-authorized R3 dispositions of the trust-company
+presidents' committee as an aggregate procedural Agent and member/correspondent
+bank resource decisions as an institution-preserving population model. It does
+not change the event question, horizon, or prior accepted rows.

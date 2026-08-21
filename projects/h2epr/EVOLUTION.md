@@ -72,7 +72,7 @@ justify a successor contract on its own.
 
 Agent Definitions, the template and the research/authoring/review Skills are
 active research assets. The tracked paths contain the current methods and
-candidate:
+accepted versions:
 
 ```text
 agents/agent-definition-template.md
@@ -103,9 +103,11 @@ Contract versions and intentionally supported release lines are the exception.
 The two current Panic of 1907 reference-pilot Definitions are version `0.2.1`.
 Their accepted V1 mapping under `agents/bindings/panic_1907/` now has strict
 machine projections and a conservative first conformance slice under
-`scenarios/panic_1907/`. NBC, Morgan, TCA, and Lincoln are accepted `0.1.0`
-Roster-production Definitions whose mapping is deferred to the consolidated
-Roster Definition release.
+`scenarios/panic_1907/`. NBC, Morgan, TCA, Lincoln, and the trust-company
+presidents' committee are accepted `0.1.0` Roster-production Definitions whose
+mapping is deferred to the consolidated Roster Definition release. The
+Knickerbocker depositor and member/correspondent-bank resource-decision models
+are accepted `0.1.0` population products under the same deferred-mapping rule.
 That slice does not replace the G3 runtime or establish historical validity.
 The earlier `0.1.0-dev` three-tick unit is retained under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/` as a frozen regression

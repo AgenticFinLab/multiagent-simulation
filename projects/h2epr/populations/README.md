@@ -17,7 +17,8 @@ populations/
 ├── README.md
 ├── defines/
 │   └── panic_1907/
-│       └── knickerbocker-depositors.md
+│       ├── knickerbocker-depositors.md
+│       └── member-and-correspondent-bank-resource-decisions.md
 └── interfaces/
     └── panic_1907/
         └── knickerbocker-depositors.md
@@ -37,6 +38,13 @@ explicitly uncalibrated heterogeneity. Its
 [interface preflight](interfaces/panic_1907/knickerbocker-depositors.md)
 records the later integration surface without selecting carriers or changing
 Contracts V1.
+
+[NYCH member and large correspondent bank resource decisions](defines/panic_1907/member-and-correspondent-bank-resource-decisions.md)
+are modeled as weight-one institution-preserving choice units. The population
+keeps authority, resource ownership, commitments and certificate demand with
+each institution instead of inventing a collective bank personality or named
+bank policies. Its accepted [combined R3 interface preflight](../agents/interfaces/panic_1907/r3-collective-trust-support.md)
+also covers the trust-company committee interaction boundary.
 
 Drafts and detailed review records stay in the ignored local research area.
 Git history records accepted population-model revisions.

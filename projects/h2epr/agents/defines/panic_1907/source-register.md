@@ -2,10 +2,10 @@
 
 The five `P4` records below were adopted during the focused two-role behavior study. Three `NBC-EXT` records
 were subsequently adopted for the National Bank of Commerce Definition, and three `R2` records for Morgan,
-Trust Company of America, and Lincoln Trust Company. The Knickerbocker depositor population model reuses the
-same adopted source set and adds no new source bytes. Eight earlier records are cited as `BASE-S01` through
-`BASE-S08`; their original source IDs and uses are listed at the end of this file. The sealed local evidence
-archives retain the adopted bytes and checksums.
+Trust Company of America, and Lincoln Trust Company. The Knickerbocker depositor population model and the R3
+committee and bank-resource models reuse this adopted source set and add no new source bytes. Eight earlier
+records are cited as `BASE-S01` through `BASE-S08`; their original source IDs and uses are listed at the end of
+this file. The sealed local evidence archives retain the adopted bytes and checksums.
 
 Archive identities:
 
@@ -28,13 +28,15 @@ none of these sources is labeled held-out evidence.
 - Class: official commissioned retrospective economic history with reproduced institutional documents.
 - Public file: https://fraser.stlouisfed.org/files/docs/historical/nmc/nmc_538_1910.pdf
 - Custody: FRASER scan of the National Monetary Commission volume.
-- Adopted locations: printed pp. 251–253; Appendix Note J, printed pp. 420–431.
+- Adopted locations: printed pp. 251–254; Appendix Note J, printed pp. 420–431.
 - Adopted for:
   - Knickerbocker scale, clearing-balance pressure, clearing-agent withdrawal, late examination, board
     reassurance, three-hour withdrawal episode, suspension, asset illiquidity, reserve context, and later
     reorganization;
   - the depositor population's aggregate payment episode and the boundary between requested withdrawal,
     realized payment, and suspension;
+  - the trust-company committee's application, examination, reporting and bounded assistance-routing role;
+  - institution-preserving contribution and NYCH member-certificate demand boundaries;
   - the distinction between immediate liquidity and ultimate asset value;
   - the October 26 member loan-certificate procedure as later institutional context only.
 - Important contradiction: Sprague states that apparently no proposal to assist Knickerbocker was considered,
@@ -204,12 +206,14 @@ none of these sources is labeled held-out evidence.
   Corporation*. House No. 23, August 11, 1911. Washington: Government Printing Office, 1911.
 - Class: official retrospective hearing testimony, including participant testimony by Oakleigh Thorne.
 - Public file: https://upload.wikimedia.org/wikipedia/commons/5/51/United_States_Steel_Corporation._Hearings_before_the_Committee_on_Investigation_of_United_States_Steel_Corporation._House_of_Representatives_%28IA_cu31924092550379%29.pdf
-- Adopted locations: printed hearing pp. 1661–1669, 1674, and 1686–1688.
+- Adopted locations: printed hearing pp. 1661–1669, 1674, 1677, and 1686–1688.
 - Adopted for:
   - TCA's daily statement, conditional examination consent, information and record provision;
   - TCA's reported payment-service expansion, separate assistance applications, company notes and collateral;
   - meetings and information routes involving Morgan, associates, examiners, applicants and institutions; and
-  - separating coordination and solicitation from committee findings, contributor commitments and resources.
+  - separating coordination and solicitation from committee findings, contributor commitments and resources;
+  - Edward King's reported conduit role and the distinction between committee coordination and participant
+    payment.
 - Limitations: 1911 testimony in an adversarial investigation is retrospective and self-interested. It does
   not independently prove objective solvency, private motive, exact board authority, participant-time
   knowledge or a unique policy. Later agreements are not projected backward into 23–26 October.
@@ -271,8 +275,10 @@ none of these sources is labeled held-out evidence.
 
 - Public file: https://fraser.stlouisfed.org/files/docs/publications/cfc/cfc_19071026.pdf
 - Adopted file SHA-256: `149221455b5eafc2a28ba6e7f73228cbd730a18b18dd77fc301269422ebff474`
-- Adopted locations: pp. 999–1001.
-- Continued use: contemporaneous chronology separating NBC, the Knickerbocker board, and later meetings.
+- Adopted locations: printed pp. 999–1001 and 1061.
+- Continued use: contemporaneous chronology separating NBC, the Knickerbocker board, and later meetings; the
+  October 23 five-person committee's appointment, membership and announced mandate; and institution-level
+  reports used to bound collective-support participation.
 - Depositor-population use: aggregate reported payment and suspension chronology; not individual demand,
   queue order, or motive.
 - Limit: it does not identify or establish the authority of the focal requesters.

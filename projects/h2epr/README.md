@@ -17,13 +17,14 @@ fail-closed carrier checks, and a deterministic non-Ray request-to-feedback
 conformance slice. The earlier `0.1.0-dev` fixture remains frozen as an
 engineering baseline.
 
-National Bank of Commerce, J. Pierpont Morgan, Trust Company of America, and
-Lincoln Trust Company are accepted scholarly Definitions outside the current
-two-role executable subset. Roster production has also resolved Knickerbocker
-depositors as an event-bound population model. The project is completing the
-remaining H2EPR-0288 representation gates in small batches. Each batch stops
-at a lightweight event-interface preflight; consolidated mapping waits for the
-Roster Definition release.
+National Bank of Commerce, J. Pierpont Morgan, Trust Company of America,
+Lincoln Trust Company, and the trust-company presidents' committee are
+accepted scholarly Definitions outside the current two-role executable subset.
+Roster production has also resolved Knickerbocker depositors and member/
+correspondent-bank resource decisions as event-bound population models. The
+project is completing the remaining H2EPR-0288 representation gates in small
+batches. Each batch stops at a lightweight event-interface preflight;
+consolidated mapping waits for the Roster Definition release.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -97,6 +98,7 @@ The current event assets are under `agents/defines/panic_1907/`:
 | `j-pierpont-morgan.md` | bounded information, examination, proposal, solicitation and coordination choices |
 | `trust-company-of-america.md` | TCA information, examination, support-route, collateral, operating and communication choices |
 | `lincoln-trust-company.md` | thin board-authorized condition-communication interface |
+| `trust-company-presidents-committee.md` | aggregate procedural application, investigation, advice, reporting, and bounded coordination interface |
 | `source-register.md` | Adopted source identities, public locators, hashes, cited passages and limitations |
 | `evidence-ledger.md` | Claim status, participant availability, exposure and unresolved questions |
 | `decision-situations.md` | Shared role-comparison situations and falsification perturbations |
@@ -122,10 +124,10 @@ contingency preparation. All 21 intents are registered and validated, but the
 remaining intent policies are not implemented by this slice. It does not start
 Ray or the G3/G4 simulation path and makes no historical-validity claim.
 
-The NBC, Morgan, TCA, and Lincoln `0.1.0` Definitions are accepted scholarly
-role models. They are not part of the two-role binding, intent registry, or
-implementation slice. Their mapping is deferred to the consolidated Roster
-Definition release. The accepted
+The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions
+are accepted scholarly role models. They are not part of the two-role binding,
+intent registry, or implementation slice. Their mapping is deferred to the
+consolidated Roster Definition release. The accepted
 [R2 interface preflight](agents/interfaces/panic_1907/r2-private-and-named-trusts.md)
 finds no concrete carrier counterexample while recording expected later
 mapping extensions.
@@ -138,6 +140,14 @@ profiles remain uncalibrated sensitivity inputs. Its
 [interface preflight](populations/interfaces/panic_1907/knickerbocker-depositors.md)
 found no concrete Contracts V1 counterexample and deliberately created no
 mapping or implementation.
+
+The accepted [member and correspondent bank resource-decision population](populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md)
+preserves weight-one institution identity, independent commitment authority,
+owned resources and certificate demand without inventing named-bank policies.
+The combined [R3 interface preflight](agents/interfaces/panic_1907/r3-collective-trust-support.md)
+keeps committee advice, institution commitment, resource transfer and NYCH
+certificate supply as separate causal owners and finds no concrete V1 carrier
+counterexample.
 
 The accepted [research roster](agents/rosters/panic_1907.md) fixes the v0.1
 question, horizon, causal ownership, and role dispositions. The non-executable
@@ -232,9 +242,9 @@ The G3 suite requires the project runtime environment. See
 ## Project status
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
-The current Agent work has reached an accepted three-role Definition set; two
-roles have an accepted semantic binding and a tested first implementation
-slice. Roster v0.2 and the event semantic skeleton now govern the remaining
+The current Agent work has reached seven accepted Definitions and two accepted
+population models; two roles have an accepted semantic binding and a tested
+first implementation slice. Roster v0.3 and the event semantic skeleton now govern the remaining
 Definition batches. The slice is not yet integrated into the G3/G4 runtime,
 and it does not establish historical or scientific validity. Scientific
 evaluation remains a later post-seal activity.

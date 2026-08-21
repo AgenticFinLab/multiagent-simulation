@@ -30,9 +30,10 @@ projects/h2epr/
 
 当前工作重点是完成 1907 年金融恐慌事件的研究 Roster。Knickerbocker Trust 和 New York
 Clearing House（NYCH）已经完成参考试验；National Bank of Commerce、J. Pierpont Morgan、
-Trust Company of America 和 Lincoln Trust Company 已完成学术 Definition。Knickerbocker
-depositors 已确定为群体模型，而不是单一 Agent。其余角色先按统一方法完成研究、Definition
-或群体模型与轻量接口检查，再在 Roster Definition release 后统一 mapping。
+Trust Company of America、Lincoln Trust Company 和 trust-company presidents' committee
+已完成学术 Definition。Knickerbocker depositors 与 member/correspondent-bank resource
+decisions 已确定为群体模型。其余角色先按统一方法完成研究、Definition 或群体模型与轻量接口
+检查，再在 Roster Definition release 后统一 mapping。
 
 ## 文档导航
 
@@ -177,11 +178,15 @@ compiler 只读取通过校验的 sealed trace，再生成 Generated EPG。Agent
 projects/h2epr/agents/
 ```
 
-第一轮包含：
+当前已接受的 Agent Definition 包含：
 
 - `knickerbocker-trust.md`
 - `new-york-clearing-house.md`
 - `national-bank-of-commerce.md`
+- `j-pierpont-morgan.md`
+- `trust-company-of-america.md`
+- `lincoln-trust-company.md`
+- `trust-company-presidents-committee.md`
 - `source-register.md`
 - `evidence-ledger.md`
 - `decision-situations.md`
@@ -254,8 +259,8 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | ParticipantArtifact / EventBundle | G2 工程基线完成 |
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
-| Agent Definitions | 三份机构 Definition 已接受；两角色构成参考试验，Roster 生产继续 |
-| Population models | Knickerbocker depositors `0.1.0` 已接受；组成和响应参数保留为敏感性设定 |
+| Agent Definitions | 七份 Definition 已接受；两角色构成可执行参考试验，其余等待全 Roster 统一 mapping |
+| Population models | Knickerbocker depositors 与 member/correspondent-bank resource decisions `0.1.0` 已接受；组成和响应参数保留为敏感性设定 |
 | Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster mapping 延后到 Definition release |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
@@ -268,7 +273,7 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 当前迭代
 
-H2EPR-0288 的 [Roster v0.2](h2epr/agents/rosters/panic_1907.md) 和
+H2EPR-0288 的 [Roster v0.3](h2epr/agents/rosters/panic_1907.md) 和
 [event semantic skeleton](h2epr/scenarios/panic_1907/semantic-skeleton.md) 已建立。后续角色按小批次完成：
 
 - 证据和行为研究；
