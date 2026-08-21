@@ -14,6 +14,8 @@ environment's result.
 ## Workflow
 
 ```text
+Event question, role map, and batch scope
+        ↓
 Historical evidence research
         ↓
 Participant behavior research
@@ -23,6 +25,8 @@ Agent Definition authoring
 Scholarly and modeling review
         ↓
 Scenario binding and implementation conformance
+        ↓
+Batch feedback and next-roster decision
 ```
 
 The first four stages produce publication-facing research artifacts. Runtime
@@ -33,14 +37,18 @@ its own terms.
 
 | Skill | Use |
 |---|---|
+| [`event-agent-batch`](event-agent-batch/SKILL.md) | Coordinate an approved role batch, route work through the specialized Skills, and close promotion, mapping, testing, and feedback without expanding the roster or permissions. |
 | [`historical-evidence-research`](historical-evidence-research/SKILL.md) | Find, read, classify, and adjudicate evidence for a participant, institution, or decision situation. |
 | [`participant-behavior-research`](participant-behavior-research/SKILL.md) | Build a publication-facing participant behavior model from adjudicated evidence, theory, institutional analysis, and high-information decision situations. |
 | [`agent-definition`](agent-definition/SKILL.md) | Turn reviewed participant research into a canonical, publication-facing, backend-neutral Agent Definition. |
 | [`agent-definition-review`](agent-definition-review/SKILL.md) | Independently review a Definition's historical grounding, institutional model, behavior, falsifiability, consistency, and publication quality. |
 
-Scenario design and runtime conformance will be added from completed use cases.
-Each addition must have a real consumer and reviewed content before it becomes
-part of this catalog.
+Dedicated scenario-design and runtime-conformance Skills will be added from
+completed use cases. Each addition must have a real consumer and reviewed
+content before it becomes part of this catalog.
+
+The detailed roster, batching, promotion, and test process is documented in
+the [Agent development workflow](../agents/WORKFLOW.md).
 
 ## Method principles
 

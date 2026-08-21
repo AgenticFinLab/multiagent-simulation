@@ -217,5 +217,6 @@ development task.
 - [Architecture](ARCHITECTURE.md)
 - [Evolution policy](EVOLUTION.md)
 - [Agent guide](agents/README.md)
+- [Agent development workflow](agents/WORKFLOW.md)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

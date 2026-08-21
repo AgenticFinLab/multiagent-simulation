@@ -5,6 +5,10 @@ Definitions and their supporting evidence. It borrows MASim's useful
 separation between Markdown definitions and Python implementations, while
 keeping H2EPR profiles event-bound until reuse is demonstrated.
 
+Use the [Agent development workflow](WORKFLOW.md) to admit roles, organize
+small research batches, promote reviewed Definitions, and run derived mapping
+and conformance work.
+
 The current Panic of 1907 collection contains three institutional role models.
 Knickerbocker Trust and the New York Clearing House form the current executable
 conformance subset; National Bank of Commerce is a reviewed scholarly Definition
@@ -38,6 +42,7 @@ request-to-feedback path; it is not a complete role implementation.
 ```text
 agents/
 ├── README.md
+├── WORKFLOW.md
 ├── agent-definition-template.md
 ├── bindings/
 │   └── panic_1907/
@@ -66,6 +71,8 @@ agents/
 
 - [`agent-definition-template.md`](agent-definition-template.md): ten-module
   working template for event-bound scholarly and behavioral Definitions.
+- [`WORKFLOW.md`](WORKFLOW.md): roster, batch, promotion, mapping, testing, and
+  feedback process for repeated Agent development.
 - [`defines/panic_1907/README.md`](defines/panic_1907/README.md): current event assets,
   authority boundaries, and implementation status.
 - [`defines/panic_1907/source-register.md`](defines/panic_1907/source-register.md) and
