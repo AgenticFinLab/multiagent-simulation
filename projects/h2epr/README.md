@@ -83,6 +83,7 @@ The current event assets are under `agents/defines/panic_1907/`:
 |---|---|
 | `knickerbocker-trust.md` | Knickerbocker role, information, authority and decision commitments |
 | `new-york-clearing-house.md` | NYCH governance, eligibility and procedural commitments |
+| `national-bank-of-commerce.md` | NBC credit, request-intermediation and clearing-relationship decisions |
 | `source-register.md` | Adopted source identities, public locators, hashes, cited passages and limitations |
 | `evidence-ledger.md` | Claim status, participant availability, exposure and unresolved questions |
 | `decision-situations.md` | Shared role-comparison situations and falsification perturbations |
@@ -107,6 +108,9 @@ review, a facility-scoped decline, delivery, and Knickerbocker's subsequent
 contingency preparation. All 21 intents are registered and validated, but the
 remaining intent policies are not implemented by this slice. It does not start
 Ray or the G3/G4 simulation path and makes no historical-validity claim.
+
+The NBC `0.1.0` Definition is the third accepted scholarly role model. It is
+not yet part of the two-role binding, intent registry, or implementation slice.
 
 The earlier three-tick path is frozen under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
@@ -196,10 +200,11 @@ The G3 suite requires the project runtime environment. See
 ## Project status
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
-The current Agent work has reached an accepted two-role semantic design and a
-tested first Definition-to-implementation slice. The slice is not yet
-integrated into the G3/G4 runtime, and it does not establish historical or
-scientific validity. Scientific evaluation remains a later post-seal activity.
+The current Agent work has reached an accepted three-role Definition set; two
+roles have an accepted semantic binding and a tested first implementation
+slice. The slice is not yet integrated into the G3/G4 runtime, and it does not
+establish historical or scientific validity. Scientific evaluation remains a
+later post-seal activity.
 
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next

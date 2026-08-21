@@ -12,8 +12,8 @@
 |---|---|
 | Knickerbocker Definition | `0.2.1`; `df800bea6820eb5087c02fbcdb446b0f4ca558be143ed0d89d81074d75562758` |
 | NYCH Definition | `0.2.1`; `8b4e66fc18c4c032cca2d3028d598a5ad4256303599e3d1a055cc9d83dd1a4df` |
-| Source register | `9b4c44d3e7c5f48143e55c8235faa985712f74da01512eae47969c130740b2e9` |
-| Evidence ledger | `e9f22d792a3a78f4bd23684edd09969ff433bcaae799df1db8316fb21ae60cd7` |
+| Source register | `4ad53e0f81afb25b769f376783e5a9ecdee594fc068e9bb1768cb85c4d7b4775` |
+| Evidence ledger | `94268266893cdea11d2e274a645de4512d580ca051e9391622cd1245d17e0c2a` |
 | Decision situations | `b9cd28a6b95481e75135ad91a3651ea9f286b757142e22189ce266423d8c0883` |
 | Scenario identity/lifecycles | `8a60c1607cf1226bb8249d087f35b01c6d1a0b1ac5b16f68c1b383f6779837b7` |
 | Intent registry | `63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87` |
@@ -22,6 +22,8 @@
 | V1 core schema | `d6bea7e1094071c5187e16c2c52e989d8353e426da4d385206a11a189c5c5cf5` |
 
 Any bound content change invalidates this mapping until the affected hash and dependent mapping are reviewed and updated.
+The current source-register and evidence-ledger snapshots also contain NBC research records. This binding
+consumes only the Knickerbocker, NYCH, and shared-theory claims; NBC `0.1.0` is not a bound participant.
 
 ## 2. Participant binding projection
 

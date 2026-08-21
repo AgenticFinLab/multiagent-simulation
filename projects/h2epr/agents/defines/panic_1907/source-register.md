@@ -1,13 +1,17 @@
 # Panic of 1907 Agent Definition source register
 
-The five `P4` records below were adopted during the focused role-behavior study. Eight earlier records are
-cited as `BASE-S01` through `BASE-S08`; their original source IDs and uses are listed at the end of this file.
-The sealed local evidence archives retain the adopted bytes and checksums.
+The five `P4` records below were adopted during the focused two-role behavior study. Three `NBC-EXT` records
+were subsequently adopted for the National Bank of Commerce Definition. Eight earlier records are cited as
+`BASE-S01` through `BASE-S08`; their original source IDs and uses are listed at the end of this file. The sealed
+local evidence archives retain the adopted bytes and checksums.
 
 Archive identities:
 
 - `h2epr-0288-reference-agent-research-20260820` for `P4-S01`–`P4-S05`;
-- `h2epr-0288-agent-definition-gap01-gap02-20260819` for `BASE-S01`–`BASE-S08`.
+- `h2epr-0288-agent-definition-gap01-gap02-20260819` for `BASE-S01`–`BASE-S08`;
+- `h2epr-0288-nbc-agent-research-20260821` for `NBC-EXT-S01`–`NBC-EXT-S03`;
+- `h2epr-0288-nbc-agent-research-20260821-supplement-01` for the original page scan supporting
+  `NBC-EXT-S02`.
 
 All event material is used for exploratory construction, mechanism selection, parameter bounding,
 worked examples, or falsification design. The historical outcome is already known to the research team, so
@@ -120,6 +124,69 @@ none of these sources is labeled held-out evidence.
   aspiration level, or specific priority is transferred into either participant model.
 - Archive: `raw/simon_rational_choice_environment_1956.pdf`
 - SHA-256: `6d0c480315ad76e66e4afa4f1b5cf4186e13a4b5f09d3655759a7552133107d8`
+
+## `NBC-EXT-S01` — *The Banking Law Journal*, August 1907
+
+- Citation: “The New Legislation Affecting Clearing for Non-Members in the New York Clearing House.”
+  *The Banking Law Journal* 24, no. 8 (August 1907): 595–602; Chapter 522, Laws of New York, 1907,
+  reproduced at 635–636.
+- Class: contemporary legal periodical reproducing the enacted statutory text.
+- Public item: https://archive.org/details/sim_banking-law-journal_1907-08_24_8
+- Custody: Internet Archive scan and provider metadata/OCR.
+- Adopted locations: PDF pp. 15–22 and 55–56, corresponding to printed pp. 595–602 and 635–636.
+- Adopted for:
+  - Chapter 522's enactment and effective date of June 17, 1907;
+  - the narrow post-possession rule governing later payments, advances, clearances, and liabilities;
+  - the contemporary claim that no trust company was then among the nonmembers cleared for by NYCH members,
+    retained as a conflict with focal accounts of the NBC–Knickerbocker relation.
+- Limitations: it does not establish NBC's focal reliance, the status of pre-possession claims or collateral,
+  a decision threshold, or direct Section 25 governance of the focal arrangement.
+- Archive files and SHA-256:
+  - `raw/banking_law_journal_1907-08_vol24_issue8.pdf` —
+    `21c9b732da89b081a12f43c97afb22ebb9f483b352f3ae4b7cb73913e048a9fd`;
+  - `raw/banking_law_journal_1907-08_vol24_issue8_ocr.txt` —
+    `37e1ba84c9c963a626296c4b7896a2f859fe7e6c7457a910c51599b745f6cb62`;
+  - `raw/banking_law_journal_1907-08_vol24_issue8_metadata.json` —
+    `7b9001c54b2ff3f20831bfbd9de1f16329914da6cd9b2dbd4af3a94ac6d25b40`.
+
+## `NBC-EXT-S02` — *New-York Tribune*, October 23, 1907
+
+- Citation: *New-York Tribune*, October 23, 1907, p. 1.
+- Class: contemporary press report preserved with the provider page scan, metadata, and OCR.
+- Public page: https://www.loc.gov/resource/sn83030214/1907-10-23/ed-1/?sp=1
+- Custody: Library of Congress, Chronicling America.
+- Adopted for:
+  - the reported $7 million NBC clearing-house debit on October 22;
+  - an unnamed NBC officer's statement that a large part related to Knickerbocker and that NBC was covered;
+  - the report that NBC terminated the clearing relation.
+- Limitations: post-action reporting does not establish the exact Knickerbocker amount, quality of coverage,
+  NBC's earlier information, an internal threshold, or the reason for the notice. It cannot be backfilled into
+  the October 21 participant observation set.
+- Archive files and SHA-256:
+  - original page scan `raw/new_york_tribune_1907-10-23_p1.pdf` —
+    `cad0d893f7d90f2f60884d1aa588091f3ed143728064457c5052426c5c1061af`;
+  - metadata `raw/new_york_tribune_1907-10-23_p1_metadata.json` —
+    `dcda5aa2dfe1b1be0707a8ced517e82a1c5910ac8b21c800a69b86928a6e33a1`;
+  - provider OCR `raw/new_york_tribune_1907-10-23_p1_ocr.json` —
+    `65344b32e1e800c4e9390b6b9dcb38386f8f10b1b3d7dfd8348d66549fd0bdcf`.
+
+## `NBC-EXT-S03` — Money Trust Investigation, Part 8
+
+- Citation: U.S. House of Representatives, Subcommittee of the Committee on Banking and Currency.
+  *Money Trust Investigation*, Part 8, 1912–1913, testimony of Mr. Frew, printed hearing pp. 630–633.
+- Class: official hearing testimony.
+- Public file: https://fraser.stlouisfed.org/files/docs/historical/house/money_trust/montru_pt08.pdf
+- Custody: FRASER scan of the congressional hearing volume.
+- Adopted locations: PDF pp. 58–61, printed hearing pp. 630–633.
+- Adopted for:
+  - the structural ability of a member clearing for a nonmember to stop clearing;
+  - Frew's recollection that NBC declined to continue clearing for Knickerbocker;
+  - the contrast with the privileges of a full member.
+- Limitations: Frew stated that he was not present when the focal matter was considered and did not know the
+  causal facts. The testimony does not identify NBC's deciding officer or body, prove an NYCH direction,
+  establish information reviewed, or identify NBC's motive.
+- Archive: `raw/money_trust_investigation_part8_1912-1913.pdf`
+- SHA-256: `18df2561ffcb0152ff7c8320196a775b44c8c7045dce8229550551fc87b430eb`
 
 ## Reused earlier source identities
 

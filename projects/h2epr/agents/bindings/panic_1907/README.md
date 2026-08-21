@@ -5,6 +5,10 @@ H2EPR-0288 Agent Definitions, version `0.2.1`. It maps their observations,
 decision commitments, state, intents, institutional processes, and trace
 requirements onto Contracts V1.
 
+The event collection also includes a National Bank of Commerce Definition,
+version `0.1.0`. It is not a participant in this binding or its executable
+registries.
+
 The Markdown files remain the reviewed specification. The JSON files are
 strict derived projections used by the current implementation. They
 load only when the recorded Definition, evidence, specification and Contracts

@@ -17,7 +17,7 @@
     {
       "asset_id": "evidence_ledger",
       "path": "agents/defines/panic_1907/evidence-ledger.md",
-      "sha256": "e9f22d792a3a78f4bd23684edd09969ff433bcaae799df1db8316fb21ae60cd7"
+      "sha256": "94268266893cdea11d2e274a645de4512d580ca051e9391622cd1245d17e0c2a"
     },
     {
       "asset_id": "intent_registry_specification",
@@ -37,12 +37,12 @@
     {
       "asset_id": "source_register",
       "path": "agents/defines/panic_1907/source-register.md",
-      "sha256": "9b4c44d3e7c5f48143e55c8235faa985712f74da01512eae47969c130740b2e9"
+      "sha256": "4ad53e0f81afb25b769f376783e5a9ecdee594fc068e9bb1768cb85c4d7b4775"
     },
     {
       "asset_id": "two_role_binding_specification",
       "path": "agents/bindings/panic_1907/two-role-binding.md",
-      "sha256": "57e4292a4d9b43d88b0ae1a7da8d18821f9bf0f8870ead28795da002593f5063"
+      "sha256": "efadac4f21022699933edeb5ecbeaa7fdec5fb783d5e3c3febc9e72bad2517d6"
     }
   ],
   "machine_registries": {

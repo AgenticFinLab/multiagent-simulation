@@ -5,11 +5,13 @@ Definitions and their supporting evidence. It borrows MASim's useful
 separation between Markdown definitions and Python implementations, while
 keeping H2EPR profiles event-bound until reuse is demonstrated.
 
-The current two-role study examines whether institutional role,
+The current Panic of 1907 collection contains three institutional role models.
+Knickerbocker Trust and the New York Clearing House form the current executable
+conformance subset; National Bank of Commerce is a reviewed scholarly Definition
+that has not yet been mapped into that subset. The work examines whether
 participant-available information, persistent state, authority, procedure, and
-intent/result separation can support auditable behavior. Its scope is the
-exploratory reconstruction of a bounded Panic of 1907 situation; calibration,
-cross-event reuse, and additional execution approaches require separate work.
+intent/result separation can support auditable behavior. Calibration, cross-event
+reuse, and additional execution approaches require separate work.
 
 ## Authority map
 
@@ -45,6 +47,7 @@ agents/
         ├── decision-situations.md
         ├── evidence-ledger.md
         ├── knickerbocker-trust.md
+        ├── national-bank-of-commerce.md
         ├── new-york-clearing-house.md
         └── source-register.md
 ```
@@ -72,7 +75,9 @@ agents/
   situations and falsification perturbations.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
-  the current `0.2.1` reference Definitions.
+  the current `0.2.1` Definitions in the executable two-role subset.
+- [`defines/panic_1907/national-bank-of-commerce.md`](defines/panic_1907/national-bank-of-commerce.md):
+  the current `0.1.0` scholarly Definition, not yet included in the executable mapping.
 - [`bindings/panic_1907/`](bindings/panic_1907/): the accepted
   Definition-to-V1 specification plus strict machine projections for the
   21-intent registry and seven lifecycle families.
@@ -106,4 +111,4 @@ exception merely to retain history.
 The `0.1.0-dev` three-tick path is retained under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/)
 as a frozen engineering fixture. It is not a current Definition line and cannot
-be cited as conformance evidence for version `0.2.1`.
+be cited as conformance evidence for any current Definition.
