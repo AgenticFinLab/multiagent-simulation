@@ -15,8 +15,9 @@ current executable conformance subset; National Bank of Commerce, J. Pierpont
 Morgan, Trust Company of America, Lincoln Trust Company, and the trust-company
 presidents' committee are reviewed scholarly Definitions reserved for the
 consolidated event mapping. The adjacent [population collection](../populations/README.md)
-contains the accepted Knickerbocker depositor and member/correspondent-bank
-resource-decision models. The work examines whether
+contains five accepted models: Knickerbocker and later-trust depositors,
+member/correspondent-bank resource decisions, call-money lenders and broker-
+borrowers. The work examines whether
 participant-available information, persistent state, authority, procedure, and
 intent/result separation can support auditable behavior. Calibration, cross-event
 reuse, and additional execution approaches require separate work.
@@ -69,6 +70,7 @@ agents/
 │       └── trust-company-of-america.md
 ├── interfaces/
 │   └── panic_1907/
+│       ├── national-bank-of-commerce.md
 │       ├── r2-private-and-named-trusts.md
 │       └── r3-collective-trust-support.md
 └── rosters/
@@ -103,6 +105,8 @@ agents/
   situations and falsification perturbations.
 - [`interfaces/panic_1907/r2-private-and-named-trusts.md`](interfaces/panic_1907/r2-private-and-named-trusts.md):
   accepted semantic preflight for the Morgan, TCA, and Lincoln R2 batch; no executable mapping is implied.
+- [`interfaces/panic_1907/national-bank-of-commerce.md`](interfaces/panic_1907/national-bank-of-commerce.md):
+  accepted NBC compound-observation, route-hop and lifecycle preflight for consolidated mapping.
 - [`interfaces/panic_1907/r3-collective-trust-support.md`](interfaces/panic_1907/r3-collective-trust-support.md):
   accepted semantic preflight for the committee and member/correspondent-bank resource-decision population.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
@@ -123,6 +127,14 @@ agents/
   Roster batch.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):
   the accepted R3 `0.1.0` institution-preserving resource-decision population.
+- [`../populations/defines/panic_1907/later-trust-company-depositors.md`](../populations/defines/panic_1907/later-trust-company-depositors.md),
+  [`../populations/defines/panic_1907/call-money-lenders.md`](../populations/defines/panic_1907/call-money-lenders.md), and
+  [`../populations/defines/panic_1907/call-money-broker-borrowers.md`](../populations/defines/panic_1907/call-money-broker-borrowers.md):
+  the accepted R4 `0.1.0` host-contagion and call-money population models.
+- [`../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md`](../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md):
+  accepted R4 semantic preflight, including the scenario-owned NYSE boundary.
+- [`../releases/panic_1907/roster-definition-v0.1/`](../releases/panic_1907/roster-definition-v0.1/):
+  hash-pinned semantic release and consolidated-mapping input inventory.
 - [`bindings/panic_1907/`](bindings/panic_1907/): the accepted
   Definition-to-V1 specification plus strict machine projections for the
   21-intent registry and seven lifecycle families.
@@ -149,11 +161,11 @@ The tracked paths above contain only the current accepted candidate. Do not add
    accepted repository versions; `.local-runtime` preserves richer research and
    review history that should not burden the public tree.
 
-After every roster row has a reviewed disposition and every admitted Agent has
-an accepted Definition, form one Roster Definition release. Consolidated
-mapping, carrier review, implementation, and conformance work begin from that
-release under separate authorization. The current two-role implementation is
-the retained reference pilot, not the per-role production pattern.
+Roster Definition release v0.1 now closes every roster disposition and pins
+the accepted semantic products. Consolidated mapping, carrier review,
+implementation and conformance remain distinct stages requiring their stated
+authorization. The current two-role implementation is the retained reference
+pilot, not the per-role production pattern.
 
 Contract successors or intentionally supported public release lines may coexist
 when compatibility requires it. Mutable Agent drafts do not receive that

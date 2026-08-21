@@ -31,9 +31,10 @@ projects/h2epr/
 当前工作重点是完成 1907 年金融恐慌事件的研究 Roster。Knickerbocker Trust 和 New York
 Clearing House（NYCH）已经完成参考试验；National Bank of Commerce、J. Pierpont Morgan、
 Trust Company of America、Lincoln Trust Company 和 trust-company presidents' committee
-已完成学术 Definition。Knickerbocker depositors 与 member/correspondent-bank resource
-decisions 已确定为群体模型。其余角色先按统一方法完成研究、Definition 或群体模型与轻量接口
-检查，再在 Roster Definition release 后统一 mapping。
+已完成学术 Definition。Knickerbocker depositors、later trust-company depositors、
+member/correspondent-bank resource decisions、call-money lenders 与 broker-borrowers 已确定为
+群体模型，NYSE 保持为场景过程。Roster v0.4 的每一行均已关闭，并由 Roster Definition release
+v0.1 固定为下一轮统一 mapping 的输入。
 
 ## 文档导航
 
@@ -81,6 +82,7 @@ projects/h2epr/
 ├── populations/
 │   ├── defines/panic_1907/
 │   └── interfaces/panic_1907/
+├── releases/panic_1907/      # 语义 release 清单与哈希
 ├── skills/
 │   ├── historical-evidence-research/
 │   ├── participant-behavior-research/
@@ -110,6 +112,7 @@ projects/h2epr/
 | `bundles/` | Construction bundle、EventBundle 及其校验 |
 | `agents/` | 当前 Agent Definition 研究资产、通用 binding 约束和冻结工程基线 |
 | `populations/` | 无法或无需逐人重建的异质参与者群体模型及轻量接口检查 |
+| `releases/` | 固定 Roster、Definitions、群体模型、证据、场景骨架和接口身份 |
 | `runtime/` | H2EPR 的 MASim 适配、Rule runtime、detector 和 runner |
 | `compiler/` | 校验 sealed trace，并生成 EPG 和 GraphSeal |
 | `tests/` | 合同、construction、runtime、compiler 和 Agent 测试 |
@@ -206,8 +209,9 @@ projects/h2epr/agents/
 `0.2.1` 参考 Definition，仍属于结果已暴露的探索性建模，不声称历史校准或独立验证。
 
 Knickerbocker 与 NYCH 的 `0.2.1` Definition 已有接受的 V1 mapping 和可执行的非 Ray
-conformance 切片。National Bank of Commerce `0.1.0` 尚未进入该 binding；其 mapping 推迟到
-Roster Definition release 后统一进行。旧的三 tick 路径已经作为 `0.1.0-dev` 冻结工程夹具移入
+conformance 切片。其他五份 Agent Definition 与五份 population model 已进入 Roster Definition
+release v0.1，尚未进入 executable binding；其 mapping 将在下一轮统一进行。旧的三 tick 路径已经作为
+`0.1.0-dev` 冻结工程夹具移入
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`，只覆盖：
 
 1. Knickerbocker 发出 support request；
@@ -260,8 +264,9 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
 | Agent Definitions | 七份 Definition 已接受；两角色构成可执行参考试验，其余等待全 Roster 统一 mapping |
-| Population models | Knickerbocker depositors 与 member/correspondent-bank resource decisions `0.1.0` 已接受；组成和响应参数保留为敏感性设定 |
-| Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster mapping 延后到 Definition release |
+| Population models | 五份 `0.1.0` 群体模型已接受；组成、profile/posture 和响应参数保留为暴露的敏感性设定 |
+| Roster Definition release | v0.1 已完成，固定 Roster v0.4、七份 Agent Definition、五份 population model、证据和接口哈希 |
+| Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster consolidated mapping 已具备入口但尚未开始 |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
 
@@ -273,17 +278,12 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 ### 当前迭代
 
-H2EPR-0288 的 [Roster v0.3](h2epr/agents/rosters/panic_1907.md) 和
-[event semantic skeleton](h2epr/scenarios/panic_1907/semantic-skeleton.md) 已建立。后续角色按小批次完成：
-
-- 证据和行为研究；
-- 论文级 Agent Definition 或经审核的 population/cohort 表示；
-- 独立实质审核与正式提升；
-- 一份轻量 interface preflight。
-
-生产批次不逐个做 binding 和实现。等所有 Roster 行都有明确处置、所有 Agent Definition 已接受后，
-形成 Roster Definition release，再统一完成 mapping、carrier review、交互与 replay 测试。如果届时出现
-V1 无法表达的具体案例，再评估窄范围 successor contract。
+H2EPR-0288 的 [Roster v0.4](h2epr/agents/rosters/panic_1907.md)、
+[event semantic skeleton](h2epr/scenarios/panic_1907/semantic-skeleton.md) 和
+[Roster Definition release v0.1](h2epr/releases/panic_1907/roster-definition-v0.1/) 已建立。下一轮从
+release manifest 统一盘点 observation、state、authority、intent、lifecycle、resource 与 result，
+完成多 capability 单一机构身份合成、V1 carrier review、cross-object validation 和高信息量 conformance
+case 设计。如果出现 V1 无法表达且内部 mapping 不能消解的具体案例，再评估窄范围 successor contract。
 
 ### 后续方向
 

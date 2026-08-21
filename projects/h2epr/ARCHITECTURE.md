@@ -117,8 +117,9 @@ measurements.
 The Knickerbocker and NYCH `0.2.1` Agent Definitions specify the behavior layer
 above the existing ParticipantArtifact shell. Their accepted V1 mapping and
 bounded non-Ray reference slice live under `agents/bindings/panic_1907/` and
-`scenarios/panic_1907/`. National Bank of Commerce `0.1.0` is accepted as a
-scholarly Definition but remains outside that executable subset.
+`scenarios/panic_1907/`. Roster Definition release v0.1 adds five further
+Agent Definitions and five population models as scholarly semantic inputs;
+they remain outside that executable subset until consolidated mapping.
 
 | Responsibility | Owner |
 |---|---|
@@ -132,12 +133,13 @@ scholarly Definition but remains outside that executable subset.
 | Executable mapping from Definition to code | Binding and backend adapter |
 | State transition and action result | Authoritative reducer |
 
-The current two-role binding is a reference pilot. Normal Roster-production
-batches receive only a lightweight interface preflight. A consolidated binding
-is designed after the Roster Definition release and must store exact Definition
-hashes plus a complete mapping of the commitments, observations, state and
-intents it implements. A changed Definition invalidates that mapping; updating
-a hash without semantic remapping is not conformance.
+The current two-role binding is a reference pilot. Roster-production batches
+received only lightweight interface preflights. The hash-pinned Roster
+Definition release v0.1 is now the input to a consolidated binding design,
+which must store exact Definition/population hashes plus a complete mapping of
+the commitments, observations, state and intents it implements. A changed
+semantic product invalidates that mapping; updating a hash without semantic
+remapping is not conformance.
 
 ### Observation boundary
 

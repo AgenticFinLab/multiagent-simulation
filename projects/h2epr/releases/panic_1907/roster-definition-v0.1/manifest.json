@@ -1,0 +1,170 @@
+{
+  "schema": "h2epr.roster-definition-release.v0_1",
+  "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
+  "event_id": "H2EPR-0288",
+  "released_on": "2026-08-21",
+  "status": "accepted_semantic_release",
+  "integrity_algorithm": "sha256",
+  "roster": {
+    "version": "0.4",
+    "path": "agents/rosters/panic_1907.md",
+    "sha256": "0e42ef6ade9cc881b6162414121cd90ad7eeb62a9cd40212ff382219edd8e770"
+  },
+  "semantic_skeleton": {
+    "version": "0.1",
+    "path": "scenarios/panic_1907/semantic-skeleton.md",
+    "sha256": "cfa0cb366745ddf1d04e1f812d3fc0a2d2b7e8890dbdb1a85165fb4bd37f8741"
+  },
+  "evidence_authorities": [
+    {
+      "kind": "source_register",
+      "path": "agents/defines/panic_1907/source-register.md",
+      "sha256": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
+    },
+    {
+      "kind": "evidence_ledger",
+      "path": "agents/defines/panic_1907/evidence-ledger.md",
+      "sha256": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933"
+    },
+    {
+      "kind": "decision_situations",
+      "path": "agents/defines/panic_1907/decision-situations.md",
+      "sha256": "b9cd28a6b95481e75135ad91a3651ea9f286b757142e22189ce266423d8c0883"
+    }
+  ],
+  "agent_definitions": [
+    {
+      "id": "h2epr.agent-definition.0288.knickerbocker-trust",
+      "version": "0.2.1",
+      "path": "agents/defines/panic_1907/knickerbocker-trust.md",
+      "sha256": "df800bea6820eb5087c02fbcdb446b0f4ca558be143ed0d89d81074d75562758"
+    },
+    {
+      "id": "h2epr.agent-definition.0288.new-york-clearing-house",
+      "version": "0.2.1",
+      "path": "agents/defines/panic_1907/new-york-clearing-house.md",
+      "sha256": "8b4e66fc18c4c032cca2d3028d598a5ad4256303599e3d1a055cc9d83dd1a4df"
+    },
+    {
+      "id": "h2epr.agent-definition.0288.national-bank-of-commerce",
+      "version": "0.1.0",
+      "path": "agents/defines/panic_1907/national-bank-of-commerce.md",
+      "sha256": "90f311c203bf61d97c3aabda2c9440e4c6357f7b52c35ea765340213ad33ba7c"
+    },
+    {
+      "id": "h2epr.agent-definition.0288.j-pierpont-morgan",
+      "version": "0.1.0",
+      "path": "agents/defines/panic_1907/j-pierpont-morgan.md",
+      "sha256": "26e868018aa981224b796831c573281d7eaf34470ecdfbb0b5d41201db6bd16f"
+    },
+    {
+      "id": "h2epr.agent-definition.0288.trust-company-of-america",
+      "version": "0.1.0",
+      "path": "agents/defines/panic_1907/trust-company-of-america.md",
+      "sha256": "c727ff51d3ae484edea1b82bacf31e2df86f001b2cb501fb5f95ba97b16a545f"
+    },
+    {
+      "id": "h2epr.agent-definition.0288.lincoln-trust-company",
+      "version": "0.1.0",
+      "path": "agents/defines/panic_1907/lincoln-trust-company.md",
+      "sha256": "24b8e3684be78d476dce3f3971bceef6163fc1f0611490016759a024be2896ce"
+    },
+    {
+      "id": "H2EPR-0288-TRUST-PRESIDENTS-COMMITTEE",
+      "version": "0.1.0",
+      "path": "agents/defines/panic_1907/trust-company-presidents-committee.md",
+      "sha256": "5112b42a350bbe11fe2043162b8fe028847698a2e09029e9e320bd77c8707a9b"
+    }
+  ],
+  "population_models": [
+    {
+      "id": "H2EPR-0288-KNICKERBOCKER-DEPOSITOR-POPULATION",
+      "version": "0.1.0",
+      "path": "populations/defines/panic_1907/knickerbocker-depositors.md",
+      "sha256": "104aa8e4c1e05542aa54c92542844d3d992db2dd4a0556335bce1a6ab767f364"
+    },
+    {
+      "id": "H2EPR-0288-BANK-RESOURCE-DECISION-POPULATION",
+      "version": "0.1.0",
+      "path": "populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md",
+      "sha256": "0871701338565f913ca679d2eae16c0ea2bd30e28eaa1525ac3026707144e9ee"
+    },
+    {
+      "id": "H2EPR-0288-LATER-TRUST-DEPOSITOR-POPULATIONS",
+      "version": "0.1.0",
+      "path": "populations/defines/panic_1907/later-trust-company-depositors.md",
+      "sha256": "75a079211fe43d387b9cb81eb4a81a3b0373062ff8e50187023dffb718c8add1"
+    },
+    {
+      "id": "H2EPR-0288-CALL-MONEY-LENDER-POPULATION",
+      "version": "0.1.0",
+      "path": "populations/defines/panic_1907/call-money-lenders.md",
+      "sha256": "5a9848413c52edbef35f3e42117b677f0a53136e1559cc29a6579352ff6d0bc5"
+    },
+    {
+      "id": "H2EPR-0288-CALL-MONEY-BROKER-BORROWER-POPULATION",
+      "version": "0.1.0",
+      "path": "populations/defines/panic_1907/call-money-broker-borrowers.md",
+      "sha256": "81bde63a266ee9f67d94d32f60d51dcc95c3ef8b9fd15f54240a83a4032476be"
+    }
+  ],
+  "interface_preflights": [
+    {
+      "scope": "knickerbocker_depositors",
+      "path": "populations/interfaces/panic_1907/knickerbocker-depositors.md",
+      "sha256": "b5cd30540cbaddb17f685200a72a48239a7ae56b45395caf1ffb4474a0f92302"
+    },
+    {
+      "scope": "national_bank_of_commerce",
+      "path": "agents/interfaces/panic_1907/national-bank-of-commerce.md",
+      "sha256": "d446f0c82da7970bebc2b12bb68a8887d99047cdfdd864f91808f5aad47189b7"
+    },
+    {
+      "scope": "r2_private_and_named_trusts",
+      "path": "agents/interfaces/panic_1907/r2-private-and-named-trusts.md",
+      "sha256": "c2666a460085f4cbe9599ecd467cd747fcd3315d377849162e06be73f9e66007"
+    },
+    {
+      "scope": "r3_collective_trust_support",
+      "path": "agents/interfaces/panic_1907/r3-collective-trust-support.md",
+      "sha256": "2e731d762b235d22b7d85260c719b9acfa2e75e9d4e9b282c703e39292d4a913"
+    },
+    {
+      "scope": "r4_trust_contagion_and_call_money",
+      "path": "populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md",
+      "sha256": "042b95f02ea746e84d974914dcd7a4de53fb433d11756c028dd459730a9adc0e"
+    }
+  ],
+  "scenario_dispositions": [
+    {
+      "id": "new_york_stock_exchange_venue_and_market_operation",
+      "disposition": "scenario_owned_v0_1"
+    },
+    {
+      "id": "clearing_settlement_transport_notice_and_resource_adjudication",
+      "disposition": "scenario_owned"
+    },
+    {
+      "id": "us_treasury_public_deposits",
+      "disposition": "explicit_exogenous_resource_input"
+    }
+  ],
+  "retained_reference_pilot": {
+    "participant_scope": [
+      "knickerbocker_trust",
+      "new_york_clearing_house"
+    ],
+    "binding_path": "agents/bindings/panic_1907/binding.json",
+    "binding_sha256": "e1368522bca22bdfc9905ef24ce167fe1080e279a9607bc254be6327070d73c2",
+    "specification_path": "agents/bindings/panic_1907/two-role-binding.md",
+    "specification_sha256": "efadac4f21022699933edeb5ecbeaa7fdec5fb783d5e3c3febc9e72bad2517d6",
+    "relation_to_release": "retained engineering reference; not the consolidated roster binding"
+  },
+  "next_stage": {
+    "name": "consolidated_mapping_and_carrier_review",
+    "authorization": "separate",
+    "implementation_authorized": false,
+    "simulation_authorized": false,
+    "contracts_change_authorized": false
+  }
+}

@@ -17,11 +17,15 @@ populations/
 ├── README.md
 ├── defines/
 │   └── panic_1907/
+│       ├── call-money-broker-borrowers.md
+│       ├── call-money-lenders.md
 │       ├── knickerbocker-depositors.md
+│       ├── later-trust-company-depositors.md
 │       └── member-and-correspondent-bank-resource-decisions.md
 └── interfaces/
     └── panic_1907/
-        └── knickerbocker-depositors.md
+        ├── knickerbocker-depositors.md
+        └── r4-trust-contagion-and-call-money.md
 ```
 
 `defines/` contains the accepted scholarly behavior model. `interfaces/`
@@ -29,7 +33,7 @@ contains the lightweight preflight used by Roster production. Exact machine
 mapping and implementation wait for the event's consolidated Roster Definition
 release.
 
-## Current model
+## Current models
 
 [Knickerbocker depositors](defines/panic_1907/knickerbocker-depositors.md)
 is an event-bound population of weighted choice units. It models withdrawal,
@@ -45,6 +49,24 @@ keeps authority, resource ownership, commitments and certificate demand with
 each institution instead of inventing a collective bank personality or named
 bank policies. Its accepted [combined R3 interface preflight](../agents/interfaces/panic_1907/r3-collective-trust-support.md)
 also covers the trust-company committee interaction boundary.
+
+[Later trust-company depositors](defines/panic_1907/later-trust-company-depositors.md)
+are modeled as host-indexed weighted choice units. A TCA, Lincoln or other
+trust depositor retains its own claim, delivered information, access and
+request lifecycle; private account or result state never crosses hosts.
+
+[Call-money lenders](defines/panic_1907/call-money-lenders.md) preserve the
+lending institution, contract, controlled exposure and resource envelope.
+[Broker-borrowers](defines/panic_1907/call-money-broker-borrowers.md) preserve
+an authorized firm funding interface without importing customer trading or
+venue policy. Their accepted
+[R4 interface preflight](interfaces/panic_1907/r4-trust-contagion-and-call-money.md)
+keeps call, offer, matching, booking, repayment, liquidation and market effect
+under distinct owners. NYSE remains scenario-owned in this release.
+
+All five population models belong to the Panic of 1907
+[Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
+Their executable composition is deferred to consolidated mapping.
 
 Drafts and detailed review records stay in the ignored local research area.
 Git history records accepted population-model revisions.

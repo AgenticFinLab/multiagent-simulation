@@ -7,7 +7,7 @@ participants:
 - [New York Clearing House Association](new-york-clearing-house.md), version `0.2.1`;
 - [National Bank of Commerce in New York](national-bank-of-commerce.md), version `0.1.0`;
 - [J. Pierpont Morgan](j-pierpont-morgan.md), version `0.1.0`;
-- [Trust Company of America](trust-company-of-america.md), version `0.1.0`; and
+- [Trust Company of America](trust-company-of-america.md), version `0.1.0`;
 - [Lincoln Trust Company](lincoln-trust-company.md), version `0.1.0`; and
 - [trust-company presidents' five-person committee](trust-company-presidents-committee.md), version `0.1.0`.
 
@@ -16,17 +16,20 @@ different representation, information, authority, resource, decision, and intent
 fully exposed research material and remain exploratory; none is historically calibrated or independently
 validated.
 
-Two non-Agent Roster products sit in the adjacent population collection: the
-[Knickerbocker depositor model](../../../populations/defines/panic_1907/knickerbocker-depositors.md)
-and the [member/correspondent-bank resource-decision model](../../../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md).
+Five non-Agent Roster products sit in the adjacent population collection: the
+[Knickerbocker depositor model](../../../populations/defines/panic_1907/knickerbocker-depositors.md),
+[member/correspondent-bank resource-decision model](../../../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md),
+[later trust-company depositor model](../../../populations/defines/panic_1907/later-trust-company-depositors.md),
+[call-money lender model](../../../populations/defines/panic_1907/call-money-lenders.md),
+and [broker-borrower model](../../../populations/defines/panic_1907/call-money-broker-borrowers.md).
 They reuse this event's source register and evidence ledger while keeping their
 distributed behavior semantics under `populations/`.
 
-The accepted event scope and remaining participant dispositions are in the
-[H2EPR-0288 research roster](../../rosters/panic_1907.md). New production
-batches use the event [semantic skeleton](../../../scenarios/panic_1907/semantic-skeleton.md)
-and stop at a lightweight interface preflight. A consolidated mapping is made
-only after the Roster Definition release.
+The accepted event scope and every participant disposition are in the
+[H2EPR-0288 research roster](../../rosters/panic_1907.md). The event
+[semantic skeleton](../../../scenarios/panic_1907/semantic-skeleton.md) and the
+[Roster Definition release v0.1](../../../releases/panic_1907/roster-definition-v0.1/)
+now provide the fixed semantic input for a separate consolidated mapping cycle.
 
 ## Supporting research assets
 
@@ -35,8 +38,11 @@ only after the Roster Definition release.
 | [source-register.md](source-register.md) | adopted public sources, stable source identities, public locators, byte hashes, adopted passages, and limitations |
 | [evidence-ledger.md](evidence-ledger.md) | claim-level status, participant or population availability, allowed use, model consequence, and withdrawal consequence |
 | [decision-situations.md](decision-situations.md) | shared situations and perturbations used to compare Knickerbocker and NYCH |
+| [NBC interface preflight](../../interfaces/panic_1907/national-bank-of-commerce.md) | accepted compound-observation, route-hop and lifecycle impact for NBC |
 | [R2 interface preflight](../../interfaces/panic_1907/r2-private-and-named-trusts.md) | accepted semantic fit and deferred-mapping note for Morgan, TCA, and Lincoln |
 | [R3 interface preflight](../../interfaces/panic_1907/r3-collective-trust-support.md) | accepted semantic fit and deferred-mapping note for the committee and bank resource-decision population |
+| [R4 interface preflight](../../../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md) | accepted host-contagion, call-lender, broker-borrower and NYSE scenario boundary |
+| [Roster Definition release v0.1](../../../releases/panic_1907/roster-definition-v0.1/) | exact semantic input inventory for consolidated mapping |
 | [binding specification](../../bindings/panic_1907/) | accepted mapping of the Knickerbocker and NYCH Definitions into Contracts V1, business lifecycles, intent registry, and cross-object checks |
 
 The evidence ledger owns claim status. The source register owns source identity and custody metadata. The
@@ -50,10 +56,10 @@ conformance slice under [`scenarios/panic_1907/`](../../../scenarios/panic_1907/
 their 21 intents; the first slice exercises eight decisions from support request through delivered
 facility-scoped decline and subsequent contingency preparation.
 
-The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions are accepted scholarly models
-produced during Roster production. None is included in the two-role binding, executable mapping, intent
-registry, or scenario implementation. Their mapping is deferred to the consolidated Roster Definition release
-rather than performed as a separate engineering cycle per role.
+The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions and all five population models
+are accepted scholarly products in Roster Definition release v0.1. None is included in the two-role binding,
+executable mapping, intent registry, or scenario implementation. Their mapping is performed as one
+consolidated cycle rather than as separate engineering work per role.
 
 The R2 Definitions are intentionally non-symmetrical. Morgan is a bounded named coordinator; TCA is an
 aggregate institutional response interface; Lincoln is a thin board-authorized communication interface because

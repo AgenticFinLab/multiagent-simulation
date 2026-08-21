@@ -1,9 +1,10 @@
 # H2EPR-0288 research roster
 
-- Version: `0.3`
+- Version: `0.4`
 - Status: accepted research scope
 - Accepted: 21 August 2026
 - Event: Panic of 1907, acute New York phase
+- Definition release: `v0.1` semantic release; manifest under `releases/panic_1907/`
 
 This roster defines the participants and processes that must be accounted for
 before the first consolidated event mapping. It is a research roster, not an
@@ -41,10 +42,11 @@ later institutional reform are outside v0.1.
 | Trust Company of America | Agent | condition verification, examination cooperation, route-specific support seeking, collateral proposals, communication, and operational-posture choices | aggregate institutional Definition `0.1.0` accepted; consolidated mapping deferred |
 | Lincoln Trust Company | Agent | board-authorized institutional condition communication; broader support, collateral, resource, and operating policy remains external absent direct evidence | thin communication Definition `0.1.0` accepted; consolidated mapping deferred |
 | trust-company presidents' committee | Agent | application intake, information calls, investigation, qualified advice, reporting, and bounded coordination without contributor resource ownership | aggregate procedural Definition `0.1.0` accepted; consolidated mapping deferred |
-| depositors at later trust companies | representation gate | heterogeneous contagion and withdrawal pressure | decide institution-specific cohorts versus a bounded aggregate model |
+| depositors at later trust companies | population model | host-specific heterogeneous withdrawal, retention, access, pending-request and delivered-result response | institution-indexed later-trust depositor population `0.1.0` accepted; consolidated mapping deferred |
 | NYCH member banks and large correspondent banks | population model | institution-owned resources, independent commitments, certificate demand, conditions and disagreement without a collective bank personality | institution-preserving resource-decision population `0.1.0` accepted; consolidated mapping deferred |
-| brokers, call-money lenders, and borrowers | representation gate | collective market liquidity, collateralized lending, and liquidation behavior | population/cohort model unless autonomous named choices are required |
-| NYSE venue and market operation | scenario or institutional process | matching, loan-post, collateral, price, and venue mechanics | a governance interface requires a separate roster revision |
+| call-money lenders | population model | institution-owned exposure review, continuation, call, term and new-offer choices | institution-preserving call-lender population `0.1.0` accepted; consolidated mapping deferred |
+| broker-borrowers | population model | authorized replacement funding, controlled collateral, repayment and bounded position-response choices | broker-funding-interface population `0.1.0` accepted; consolidated mapping deferred |
+| NYSE venue and market operation | scenario or institutional process | loan routes, matching, allocation, collateral/position bookkeeping, rates, trades and settlement | scenario-owned in v0.1; a governance Agent requires a new question and roster revision |
 | clearing, settlement, message transport, notice delivery, and resource adjudication | scenario process | timing, routing, legal and physical effects, and result production | owned by the scenario/environment |
 | U.S. Treasury public deposits | explicit exogenous resource input | changes available resources without claiming to explain the public decision | not an Agent in v0.1 |
 | Charles T. Barney, Knickerbocker directors, and officers | aggregated within the Knickerbocker representation | internal authorization and leadership are represented through the institutional interface | split only if distinct information or interacting choices become causally necessary |
@@ -70,15 +72,15 @@ Roster production proceeds in causal batches:
 3. trust-company committee and member/correspondent-bank resource decisions
    completed as one aggregate procedural Agent and one institution-preserving
    population model;
-4. resolve the later-depositor and call-money representation gates, then write
-   Definitions only for roles admitted as Agents.
+4. later-trust depositors, call-money lenders and broker-borrowers completed as
+   three population products; NYSE remains a scenario-owned venue/process.
 
 The order may be shortened or split for reviewability. It must not be expanded
 with a new role merely because that participant is historically prominent.
 
 ## Definition release gate
 
-`Roster Definition release v0.1` is ready when:
+`Roster Definition release v0.1` is complete because:
 
 - every roster row has a reviewed disposition;
 - every admitted Agent has an accepted, event-bound Definition;
@@ -90,19 +92,20 @@ with a new role merely because that participant is historically prominent.
 - a release manifest pins the roster, Definition, evidence, and skeleton
   identities.
 
+The release manifest pins these inputs under
+[`releases/panic_1907/roster-definition-v0.1/`](../../releases/panic_1907/roster-definition-v0.1/).
 The release does not itself authorize implementation or simulation. It is the
 entry point for one consolidated Definition-to-implementation mapping and
 carrier review.
 
 ## Change policy
 
-Roster v0.3 is frozen in the practical sense: batches may refine evidence and
+Roster v0.4 is frozen in the practical sense: batches may refine evidence and
 Definitions, but they may not silently change the event question, horizon,
 causal owner, or disposition of another row. Such a change requires an owner
 decision and a new roster version. Git retains accepted history; working
 alternatives remain under the ignored local research area.
 
-Roster v0.3 records the owner-authorized R3 dispositions of the trust-company
-presidents' committee as an aggregate procedural Agent and member/correspondent
-bank resource decisions as an institution-preserving population model. It does
-not change the event question, horizon, or prior accepted rows.
+Roster v0.4 closes the R4 representation gates with three population products
+and keeps NYSE venue/market operation scenario-owned. It does not change the
+event question, horizon, or prior accepted rows.

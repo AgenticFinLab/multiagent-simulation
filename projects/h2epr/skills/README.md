@@ -32,10 +32,10 @@ Consolidated mapping and implementation conformance
 ```
 
 The first four stages produce publication-facing research artifacts. Normal
-Roster batches then record a lightweight interface preflight. Runtime mapping
-follows once the Roster Definition release is stable enough to review as one
-semantic system. A small reference pilot may reach mapping earlier only when
-that engineering feedback is the purpose of the pilot.
+Roster batches then record a lightweight interface preflight. Roster
+Definition release v0.1 now provides the stable semantic input for the next
+consolidated mapping review. A small reference pilot may reach mapping earlier
+only when that engineering feedback is the purpose of the pilot.
 
 ## Available skills
 

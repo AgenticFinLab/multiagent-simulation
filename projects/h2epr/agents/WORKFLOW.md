@@ -237,10 +237,11 @@ only after the released system is mapped and the agreed test ladder passes.
 
 ## Current H2EPR-0288 application
 
-Knickerbocker Trust and NYCH form the completed reference pilot. National Bank
-of Commerce is the third accepted Definition, but it will not trigger a
-standalone three-role mapping cycle. The accepted
-[Roster v0.2](rosters/panic_1907.md) and event
-[semantic skeleton](../scenarios/panic_1907/semantic-skeleton.md) now govern
-Roster production. Consolidated mapping waits for Roster Definition release
-v0.1.
+Knickerbocker Trust and NYCH form the completed reference pilot. The accepted
+[Roster v0.4](rosters/panic_1907.md), event
+[semantic skeleton](../scenarios/panic_1907/semantic-skeleton.md), seven Agent
+Definitions and five population models now form
+[Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
+The next semantic-engineering stage is one separately authorized consolidated
+mapping and carrier review; no individual production role triggers a standalone
+mapping cycle.

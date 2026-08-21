@@ -2,10 +2,11 @@
 
 The five `P4` records below were adopted during the focused two-role behavior study. Three `NBC-EXT` records
 were subsequently adopted for the National Bank of Commerce Definition, and three `R2` records for Morgan,
-Trust Company of America, and Lincoln Trust Company. The Knickerbocker depositor population model and the R3
-committee and bank-resource models reuse this adopted source set and add no new source bytes. Eight earlier
-records are cited as `BASE-S01` through `BASE-S08`; their original source IDs and uses are listed at the end of
-this file. The sealed local evidence archives retain the adopted bytes and checksums.
+Trust Company of America, and Lincoln Trust Company. The Knickerbocker depositor population, R3 committee and
+bank-resource models, and R4 later-depositor/call-money populations reuse this adopted source set and add no
+new source bytes. Eight earlier records are cited as `BASE-S01` through `BASE-S08`; their original source IDs
+and uses are listed at the end of this file. The sealed local evidence archives retain the adopted bytes and
+checksums.
 
 Archive identities:
 
@@ -28,7 +29,7 @@ none of these sources is labeled held-out evidence.
 - Class: official commissioned retrospective economic history with reproduced institutional documents.
 - Public file: https://fraser.stlouisfed.org/files/docs/historical/nmc/nmc_538_1910.pdf
 - Custody: FRASER scan of the National Monetary Commission volume.
-- Adopted locations: printed pp. 251–254; Appendix Note J, printed pp. 420–431.
+- Adopted locations: printed pp. 251–258, 268–270 and 301–302; Appendix Note J, printed pp. 420–431.
 - Adopted for:
   - Knickerbocker scale, clearing-balance pressure, clearing-agent withdrawal, late examination, board
     reassurance, three-hour withdrawal episode, suspension, asset illiquidity, reserve context, and later
@@ -37,6 +38,10 @@ none of these sources is labeled held-out evidence.
     realized payment, and suspension;
   - the trust-company committee's application, examination, reporting and bounded assistance-routing role;
   - institution-preserving contribution and NYCH member-certificate demand boundaries;
+  - later runs at multiple trust companies, certified-check payment and the separation of host-specific
+    request pressure from service and payment results;
+  - outside-bank and trust-company call-loan reductions, broker recourse to regular banks, replacement
+    lending and the October 24–25 money-pool context;
   - the distinction between immediate liquidity and ultimate asset value;
   - the October 26 member loan-certificate procedure as later institutional context only.
 - Important contradiction: Sprague states that apparently no proposal to assist Knickerbocker was considered,
@@ -109,7 +114,9 @@ none of these sources is labeled held-out evidence.
   - the need to treat clearinghouse access as a bundle that may include liquidity, monitoring, collective
     guarantee, and depositor signaling rather than a single “rescue” variable;
   - the depositor population model's separation of access, signal, liquidity context, and uncalibrated
-    individual response.
+    individual response;
+  - later trust-company deposit contraction as an institution-level context for host-indexed, uncalibrated
+    depositor populations.
 - Limitations: observational cross-section; membership is represented by a crude institutional-type dummy;
   city and institution effects cannot be completely separated; the capital proxy does not measure anticipated
   portfolio losses; the paper cannot establish an individual participant’s decision rule.
@@ -213,7 +220,9 @@ none of these sources is labeled held-out evidence.
   - meetings and information routes involving Morgan, associates, examiners, applicants and institutions; and
   - separating coordination and solicitation from committee findings, contributor commitments and resources;
   - Edward King's reported conduit role and the distinction between committee coordination and participant
-    payment.
+    payment; and
+  - TCA's reported withdrawal timing, visible line and expanded paying-window response as host-specific
+    depositor information/service context.
 - Limitations: 1911 testimony in an adversarial investigation is retrospective and self-interested. It does
   not independently prove objective solvency, private motive, exact board authority, participant-time
   knowledge or a unique policy. Later agreements are not projected backward into 23–26 October.
@@ -243,11 +252,14 @@ none of these sources is labeled held-out evidence.
   Economic & Business History* 40 (2022): 156–187.
 - Class: retrospective open scholarship using archival and published reconstructions.
 - Public file: https://www.ebhsoc.org/journal/index.php/ebhs/article/download/491/410
-- Adopted locations: pp. 160–170 and 183–184, especially Table 5 and the direct-capital comparison.
+- Adopted locations: pp. 158–170 and 183–184, especially the call-money-pool discussion, Table 5 and the
+  direct-capital comparison.
 - Adopted for:
   - treating prior syndicate experience as a candidate structural mechanism rather than a hard rule;
   - differentiating Morgan, his firm, committees, applicants and capital providers; and
-  - showing that coordinated facility scale exceeded the direct Morgan-firm capital identified by the study.
+  - showing that coordinated facility scale exceeded the direct Morgan-firm capital identified by the study;
+  - the October 24 pool's floor-broker and trade-settlement context, without turning the known pool result into
+    lender or borrower policy.
 - Limitations: the relationship hypothesis is retrospective and outcome-exposed. It cannot become a hidden
   score, participant-time observation, historically validated decision rule or exact focal attribution.
 - Archive: `raw/moen_rodgers_2022_morgan_winners_losers.pdf`
@@ -267,8 +279,9 @@ none of these sources is labeled held-out evidence.
 
 - Public text: https://fraser.stlouisfed.org/title/report-committee-appointed-pursuant-house-resolutions-429-504-investigate-concentration-control-money-credit-1329/fulltext
 - Adopted file SHA-256: `4a043a724458bdf55eb595907a35fe3840ad23e45b7e91b7e3243eb03f486f40`
-- Adopted locations: report pp. 21–23.
-- Continued use: nonmember dependence on member clearing agents and the clearing-agent termination boundary.
+- Adopted locations: report pp. 21–23 and 33–34.
+- Continued use: nonmember dependence on member clearing agents and the clearing-agent termination boundary;
+  general NYSE loan-stand/direct bank–broker routes, demand-loan character and listed-collateral context.
 - Limit: this retrospective report is not an October 21 meeting record and does not establish the request mandate.
 
 ### `BASE-S03` / `SRC-GAP-03` — *Commercial and Financial Chronicle*, October 26, 1907
@@ -278,7 +291,8 @@ none of these sources is labeled held-out evidence.
 - Adopted locations: printed pp. 999–1001 and 1061.
 - Continued use: contemporaneous chronology separating NBC, the Knickerbocker board, and later meetings; the
   October 23 five-person committee's appointment, membership and announced mandate; and institution-level
-  reports used to bound collective-support participation.
+  reports used to bound collective-support participation; later trust-company withdrawals, TCA payment/service
+  context, public call-rate stress and the reported October 24 money pool.
 - Depositor-population use: aggregate reported payment and suspension chronology; not individual demand,
   queue order, or motive.
 - Limit: it does not identify or establish the authority of the focal requesters.
@@ -317,8 +331,9 @@ none of these sources is labeled held-out evidence.
 
 - Public file: https://fraser.stlouisfed.org/files/docs/historical/frbclev/wp/frbclv_2012-28.pdf
 - Adopted file SHA-256: `c214b9860782ba251b09be0189070856e9009da6c21ed8f822fd04324bf2636d`
-- Adopted locations: pp. 11–13.
-- Continued use: Wicker-derived request/rejection account and member-resource rationale.
+- Adopted locations: pp. 6, 11–14 and 17–19, including the chronology.
+- Continued use: Wicker-derived request/rejection account and member-resource rationale; trust-company deposit
+  contraction/payment context and the structure and transmission of the call-money disruption.
 - Limit: the paper is a later synthesis and does not prove named requesters, corporate authorization, or a
   universal legal rule.
 
