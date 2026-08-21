@@ -27,6 +27,12 @@ V1 hashes still match.
 | [intent-registry.json](intent-registry.json) | executable parameter, observation, authority and carrier rules for all 21 intents |
 | [observation-registry.json](observation-registry.json) | executable actor-scoped observation domains derived from the Definitions |
 | [lifecycle-registry.json](lifecycle-registry.json) | executable transition rules for the seven business lifecycle families |
+| [reference-pilot-snapshot/](reference-pilot-snapshot/) | immutable shared ledger and source-register bytes reviewed by this binding |
+
+The snapshot prevents later Roster-production claims from changing the identity
+of this frozen two-role reference pilot. The current event ledger and source
+register under `agents/defines/panic_1907/` remain the only editable research
+authorities; the snapshot is a binding input, not an alternative current record.
 
 The Agent Definitions remain the authority for participant behavior. Scenario
 state and lifecycle truth remain environment-owned, machine shape remains in
