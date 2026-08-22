@@ -56,6 +56,8 @@ agents/
 ├── agent-definition-template.md
 ├── bindings/
 │   └── panic_1907/
+│       ├── consolidated/
+│       └── roster-v0.1/
 ├── defines/
 │   └── panic_1907/
 │       ├── README.md
@@ -141,6 +143,11 @@ agents/
 - [`bindings/panic_1907/consolidated/`](bindings/panic_1907/consolidated/):
   accepted non-executable full-Roster mapping, carrier decision, hashes and
   owner-resolution record.
+- [`bindings/panic_1907/roster-v0.1/`](bindings/panic_1907/roster-v0.1/):
+  conformance-only machine profile for the accepted release. Its loader
+  hash-checks all twelve products, derives the release-wide observation and
+  intent identities, and exercises bounded identity, scope, authority,
+  resource, lifecycle and replay cases without selecting a policy.
 - [`bindings/panic_1907/`](bindings/panic_1907/): the retained two-role
   Definition-to-V1 specification plus strict machine projections for the
   21-intent registry and seven lifecycle families.
@@ -169,9 +176,10 @@ The tracked paths above contain only the current accepted candidate. Do not add
 
 Roster Definition release v0.1 closes every roster disposition and pins the
 accepted semantic products. The consolidated mapping and carrier review are
-now accepted design inputs. Implementation and conformance remain distinct
-stages requiring separate authorization. The current two-role implementation
-is the retained reference pilot, not the per-role production pattern.
+accepted design inputs, and the bounded release-wide loader/conformance slice
+is implemented separately from policy and simulation. The current two-role
+implementation remains the reference pilot, not the per-role production
+pattern.
 
 Contract successors or intentionally supported public release lines may coexist
 when compatibility requires it. Mutable Agent drafts do not receive that

@@ -261,10 +261,12 @@ The G3 suite requires the project runtime environment. See
 
 G1–G4 provide a deterministic engineering chain with recorded limitations.
 The current Agent work has reached seven accepted Definitions, five accepted
-population models and one accepted full-Roster mapping design. Two roles have
-an executable conformance subset and a tested first implementation slice.
-The next eligible engineering work is a separately authorized mapping-loader
-and conformance slice. The existing slice is not integrated into the G3/G4
+population models, one accepted full-Roster mapping design and a bounded
+release-wide mapping-loader/conformance implementation. The loader verifies
+all twelve product hashes and derives the 115 observation and 107 intent
+placements; its synthetic fixture covers capability composition, population
+scope, authority/resource ownership, one funding lifecycle and replay. It does
+not supply full-Roster policy behavior or integrate the Roster into the G3/G4
 runtime, and none of this establishes historical or scientific validity.
 Scientific evaluation remains a later post-seal activity.
 

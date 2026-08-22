@@ -8,12 +8,14 @@ LMSim development environment, then run it from the repository root:
 PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider projects/h2epr/tests/contracts
 ```
 
-The frozen Agent engineering-baseline suite validates its two `0.1.0-dev` Markdown hashes,
-commitment inventories, legal observation envelopes and value domains,
-commitment-specific observation use, explicit unknown/missing handling,
-typed intent parameters, authority and request lifecycle, intent/result
-separation, and a deterministic three-tick trace/replay. It does not bind the
-current `0.2.1` Definitions, start Ray, or run the G3 simulation:
+The Agent suite retains the frozen two-role `0.1.0-dev` engineering baseline
+and the current two-role conformance slice. It also validates the accepted
+Roster release through a separate mapping profile: all twelve product hashes,
+62 commitments, 115 observation placements, 107 intent placements,
+capability-qualified identities, multi-capability actor composition,
+host-scoped population state, authority/resource scope, a broker funding
+lifecycle and deterministic replay. It does not select a full-Roster policy,
+start Ray, or run the G3 simulation.
 
 The fixture is documented under
 [`fixtures/agents/panic_1907/minimal_binding_v0_1/`](fixtures/agents/panic_1907/minimal_binding_v0_1/).

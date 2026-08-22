@@ -1,0 +1,601 @@
+{
+  "schema": "h2epr.roster-mapping-profile.v0_1",
+  "profile_id": "h2epr.roster-consolidated-mapping.v0_1",
+  "version": "0.1",
+  "status": "conformance_only",
+  "event_id": "H2EPR-0288",
+  "event_namespace": "0288",
+  "source_release": {
+    "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
+    "manifest_path": "releases/panic_1907/roster-definition-v0.1/manifest.json",
+    "manifest_sha256": "0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6"
+  },
+  "accepted_mapping": {
+    "release_id": "H2EPR-0288-CONSOLIDATED-MAPPING-v0.1",
+    "manifest_path": "agents/bindings/panic_1907/consolidated/manifest.json",
+    "manifest_sha256": "987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a"
+  },
+  "coverage": {
+    "semantic_products": 12,
+    "commitments": 62,
+    "observation_placements": 115,
+    "distinct_reader_observations": 103,
+    "intent_placements": 107,
+    "distinct_reader_intents": 98
+  },
+  "capabilities": [
+    {
+      "capability_id": "bank_resource_decision",
+      "source_product_id": "H2EPR-0288-BANK-RESOURCE-DECISION-POPULATION",
+      "product_kind": "population_model",
+      "expected_observations": 9,
+      "expected_commitments": 6,
+      "expected_intents": 8,
+      "runtime_disposition": "institution_preserving_weight_one_units",
+      "representation_classes": [
+        "aggregate_population_agent",
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "institution_preserving_population"
+    },
+    {
+      "capability_id": "call_money_broker_borrower",
+      "source_product_id": "H2EPR-0288-CALL-MONEY-BROKER-BORROWER-POPULATION",
+      "product_kind": "population_model",
+      "expected_observations": 10,
+      "expected_commitments": 6,
+      "expected_intents": 10,
+      "runtime_disposition": "institution_preserving_borrowing_units",
+      "representation_classes": [
+        "aggregate_population_agent",
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "institution_preserving_population"
+    },
+    {
+      "capability_id": "call_money_lender",
+      "source_product_id": "H2EPR-0288-CALL-MONEY-LENDER-POPULATION",
+      "product_kind": "population_model",
+      "expected_observations": 13,
+      "expected_commitments": 5,
+      "expected_intents": 8,
+      "runtime_disposition": "institution_preserving_lender_units",
+      "representation_classes": [
+        "aggregate_population_agent",
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "institution_preserving_population"
+    },
+    {
+      "capability_id": "j_pierpont_morgan",
+      "source_product_id": "h2epr.agent-definition.0288.j-pierpont-morgan",
+      "product_kind": "agent_definition",
+      "expected_observations": 9,
+      "expected_commitments": 6,
+      "expected_intents": 10,
+      "runtime_disposition": "named_natural_person_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    },
+    {
+      "capability_id": "knickerbocker_depositor",
+      "source_product_id": "H2EPR-0288-KNICKERBOCKER-DEPOSITOR-POPULATION",
+      "product_kind": "population_model",
+      "expected_observations": 7,
+      "expected_commitments": 5,
+      "expected_intents": 3,
+      "runtime_disposition": "knickerbocker_host_scoped_weighted_units",
+      "representation_classes": [
+        "aggregate_population_agent"
+      ],
+      "unit_scope": "host_scoped_population"
+    },
+    {
+      "capability_id": "knickerbocker_trust",
+      "source_product_id": "h2epr.agent-definition.0288.knickerbocker-trust",
+      "product_kind": "agent_definition",
+      "expected_observations": 9,
+      "expected_commitments": 4,
+      "expected_intents": 11,
+      "runtime_disposition": "named_endogenous_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    },
+    {
+      "capability_id": "later_trust_depositor",
+      "source_product_id": "H2EPR-0288-LATER-TRUST-DEPOSITOR-POPULATIONS",
+      "product_kind": "population_model",
+      "expected_observations": 9,
+      "expected_commitments": 5,
+      "expected_intents": 3,
+      "runtime_disposition": "host_scoped_weighted_units",
+      "representation_classes": [
+        "aggregate_population_agent"
+      ],
+      "unit_scope": "host_scoped_population"
+    },
+    {
+      "capability_id": "lincoln_trust_company",
+      "source_product_id": "h2epr.agent-definition.0288.lincoln-trust-company",
+      "product_kind": "agent_definition",
+      "expected_observations": 6,
+      "expected_commitments": 4,
+      "expected_intents": 7,
+      "runtime_disposition": "named_bounded_communication_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    },
+    {
+      "capability_id": "national_bank_of_commerce",
+      "source_product_id": "h2epr.agent-definition.0288.national-bank-of-commerce",
+      "product_kind": "agent_definition",
+      "expected_observations": 12,
+      "expected_commitments": 4,
+      "expected_intents": 15,
+      "runtime_disposition": "named_multi_capability_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    },
+    {
+      "capability_id": "new_york_clearing_house",
+      "source_product_id": "h2epr.agent-definition.0288.new-york-clearing-house",
+      "product_kind": "agent_definition",
+      "expected_observations": 12,
+      "expected_commitments": 5,
+      "expected_intents": 10,
+      "runtime_disposition": "named_procedural_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    },
+    {
+      "capability_id": "trust_company_of_america",
+      "source_product_id": "h2epr.agent-definition.0288.trust-company-of-america",
+      "product_kind": "agent_definition",
+      "expected_observations": 9,
+      "expected_commitments": 6,
+      "expected_intents": 14,
+      "runtime_disposition": "named_endogenous_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    },
+    {
+      "capability_id": "trust_presidents_committee",
+      "source_product_id": "H2EPR-0288-TRUST-PRESIDENTS-COMMITTEE",
+      "product_kind": "agent_definition",
+      "expected_observations": 10,
+      "expected_commitments": 6,
+      "expected_intents": 8,
+      "runtime_disposition": "named_aggregate_procedural_actor",
+      "representation_classes": [
+        "autonomous_participant_agent"
+      ],
+      "unit_scope": "named_actor"
+    }
+  ],
+  "conformance_fixture": {
+    "schema": "h2epr.roster-conformance-fixture.v0_1",
+    "fixture_id": "fixture.h2epr.0288.roster_mapping.001",
+    "historical_validity_claim": false,
+    "structural_variants": {
+      "committee_resource_pool_policy": "independent_resource_owners",
+      "nbc_termination_provenance": "not_exercised_in_fixture",
+      "nych_route_interpretation": "no_evidenced_competent_alternative_route",
+      "venue_policy": "synthetic_conformance_only"
+    },
+    "actors": [
+      {
+        "actor_id": "actor.broker_alpha",
+        "entity_id": "entity.broker_alpha",
+        "participant_artifact_id": "participant_artifact.broker_alpha",
+        "representation_class": "aggregate_population_agent",
+        "authority_graph_id": "authority_graph.broker_alpha",
+        "resource_owner_id": "entity.broker_alpha",
+        "relationship_state_id": "relationship_state.broker_alpha",
+        "capability_ids": [
+          "call_money_broker_borrower"
+        ]
+      },
+      {
+        "actor_id": "actor.depositor.knickerbocker.cohort_a",
+        "entity_id": "entity.depositor.knickerbocker.cohort_a",
+        "participant_artifact_id": "participant_artifact.depositor.knickerbocker.cohort_a",
+        "representation_class": "aggregate_population_agent",
+        "authority_graph_id": "authority_graph.depositor.knickerbocker.cohort_a",
+        "resource_owner_id": "entity.depositor.knickerbocker.cohort_a",
+        "relationship_state_id": "relationship_state.depositor.knickerbocker.cohort_a",
+        "capability_ids": [
+          "knickerbocker_depositor"
+        ]
+      },
+      {
+        "actor_id": "actor.knickerbocker_trust",
+        "entity_id": "entity.knickerbocker_trust",
+        "participant_artifact_id": "participant_artifact.knickerbocker_trust",
+        "representation_class": "autonomous_participant_agent",
+        "authority_graph_id": "authority_graph.knickerbocker_trust",
+        "resource_owner_id": "entity.knickerbocker_trust",
+        "relationship_state_id": "relationship_state.knickerbocker_trust",
+        "capability_ids": [
+          "knickerbocker_trust"
+        ]
+      },
+      {
+        "actor_id": "actor.member_bank_alpha",
+        "entity_id": "entity.member_bank_alpha",
+        "participant_artifact_id": "participant_artifact.member_bank_alpha",
+        "representation_class": "aggregate_population_agent",
+        "authority_graph_id": "authority_graph.member_bank_alpha",
+        "resource_owner_id": "entity.member_bank_alpha",
+        "relationship_state_id": "relationship_state.member_bank_alpha",
+        "capability_ids": [
+          "bank_resource_decision",
+          "call_money_lender"
+        ]
+      }
+    ],
+    "authority_records": [
+      {
+        "authority_ref": "authority.broker_alpha.funding_request.001",
+        "actor_id": "actor.broker_alpha",
+        "capability_id": "call_money_broker_borrower",
+        "reader_intent_id": "request_call_loan_renewal_or_replacement",
+        "target_actor_ids": [
+          "actor.member_bank_alpha"
+        ],
+        "resource_owner_id": null,
+        "record_version": 1,
+        "state": "authorized"
+      },
+      {
+        "authority_ref": "authority.broker_alpha.offer_acceptance.001",
+        "actor_id": "actor.broker_alpha",
+        "capability_id": "call_money_broker_borrower",
+        "reader_intent_id": "accept_call_loan_offer",
+        "target_actor_ids": [
+          "actor.member_bank_alpha"
+        ],
+        "resource_owner_id": null,
+        "record_version": 1,
+        "state": "authorized"
+      },
+      {
+        "authority_ref": "authority.broker_alpha.repayment.001",
+        "actor_id": "actor.broker_alpha",
+        "capability_id": "call_money_broker_borrower",
+        "reader_intent_id": "authorize_controlled_repayment",
+        "target_actor_ids": [
+          "actor.member_bank_alpha"
+        ],
+        "resource_owner_id": "entity.broker_alpha",
+        "record_version": 1,
+        "state": "authorized"
+      },
+      {
+        "authority_ref": "authority.member_bank_alpha.lending.001",
+        "actor_id": "actor.member_bank_alpha",
+        "capability_id": "call_money_lender",
+        "reader_intent_id": "make_conditional_call_loan_offer",
+        "target_actor_ids": [
+          "actor.broker_alpha"
+        ],
+        "resource_owner_id": "entity.member_bank_alpha",
+        "record_version": 1,
+        "state": "authorized"
+      }
+    ],
+    "population_units": [
+      {
+        "unit_id": "unit.call_money_broker.borrower_alpha",
+        "actor_id": "actor.broker_alpha",
+        "capability_id": "call_money_broker_borrower",
+        "institution_entity_id": "entity.broker_alpha",
+        "host_entity_id": null,
+        "weight": 1,
+        "private_state_owner_id": "private_state.call_money_broker.borrower_alpha",
+        "resource_owner_id": "entity.broker_alpha"
+      },
+      {
+        "unit_id": "unit.call_money_lender.member_bank_alpha",
+        "actor_id": "actor.member_bank_alpha",
+        "capability_id": "call_money_lender",
+        "institution_entity_id": "entity.member_bank_alpha",
+        "host_entity_id": null,
+        "weight": 1,
+        "private_state_owner_id": "private_state.call_money_lender.member_bank_alpha",
+        "resource_owner_id": "entity.member_bank_alpha"
+      },
+      {
+        "unit_id": "unit.depositor.knickerbocker.cohort_a",
+        "actor_id": "actor.depositor.knickerbocker.cohort_a",
+        "capability_id": "knickerbocker_depositor",
+        "institution_entity_id": "entity.depositor.knickerbocker.cohort_a",
+        "host_entity_id": "entity.knickerbocker_trust",
+        "weight": 25,
+        "private_state_owner_id": "private_state.depositor.knickerbocker.cohort_a",
+        "resource_owner_id": "entity.depositor.knickerbocker.cohort_a"
+      },
+      {
+        "unit_id": "unit.resource_decision.member_bank_alpha",
+        "actor_id": "actor.member_bank_alpha",
+        "capability_id": "bank_resource_decision",
+        "institution_entity_id": "entity.member_bank_alpha",
+        "host_entity_id": null,
+        "weight": 1,
+        "private_state_owner_id": "private_state.resource_decision.member_bank_alpha",
+        "resource_owner_id": "entity.member_bank_alpha"
+      }
+    ],
+    "observation_cases": [
+      {
+        "case_id": "observation_case.knickerbocker_depositor.access.001",
+        "actor_id": "actor.depositor.knickerbocker.cohort_a",
+        "capability_id": "knickerbocker_depositor",
+        "reader_observation_id": "service_access_observation",
+        "host_entity_id": "entity.knickerbocker_trust",
+        "availability": "delivered",
+        "visibility": "runtime_private",
+        "visibility_scope_ids": [
+          "actor.depositor.knickerbocker.cohort_a"
+        ],
+        "authoritative_record_ref": "service_access.knickerbocker.cohort_a.001",
+        "record_version": 2,
+        "as_of": "1907-10-22T09:30:00-05:00",
+        "decision_time": "1907-10-22T09:35:00-05:00",
+        "freshness": "current_for_decision"
+      }
+    ],
+    "funding_lifecycle": {
+      "family_id": "replacement_funding",
+      "object_id": "funding_case.broker_alpha.001",
+      "owner_actor_id": "actor.broker_alpha",
+      "initial_state": "draft",
+      "initial_version": 0,
+      "expected_terminal_state": "closed",
+      "events": [
+        {
+          "event_id": "funding_request_registered.001",
+          "trigger": "action",
+          "actor_id": "actor.broker_alpha",
+          "capability_id": "call_money_broker_borrower",
+          "reader_intent_id": "request_call_loan_renewal_or_replacement",
+          "target_actor_ids": [
+            "actor.member_bank_alpha"
+          ],
+          "authority_refs": [
+            "authority.broker_alpha.funding_request.001"
+          ],
+          "resource_owner_id": null,
+          "before_state": "draft",
+          "after_state": "request_registered",
+          "before_version": 0,
+          "after_version": 1,
+          "business_result_id": "business_result.funding_request.registered.001",
+          "delivered_observation_id": null,
+          "material_parameters": {
+            "request_id": "funding_request.broker_alpha.001",
+            "route_id": "route.call_money.synthetic.001"
+          }
+        },
+        {
+          "event_id": "funding_request_delivered.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "request_registered",
+          "after_state": "request_received",
+          "before_version": 1,
+          "after_version": 2,
+          "business_result_id": "business_result.funding_request.delivered.001",
+          "delivered_observation_id": "observation.member_bank_alpha.borrower_request.001",
+          "material_parameters": {}
+        },
+        {
+          "event_id": "funding_offer_registered.001",
+          "trigger": "action",
+          "actor_id": "actor.member_bank_alpha",
+          "capability_id": "call_money_lender",
+          "reader_intent_id": "make_conditional_call_loan_offer",
+          "target_actor_ids": [
+            "actor.broker_alpha"
+          ],
+          "authority_refs": [
+            "authority.member_bank_alpha.lending.001"
+          ],
+          "resource_owner_id": "entity.member_bank_alpha",
+          "before_state": "request_received",
+          "after_state": "offer_registered",
+          "before_version": 2,
+          "after_version": 3,
+          "business_result_id": "business_result.funding_offer.registered.001",
+          "delivered_observation_id": null,
+          "material_parameters": {
+            "offer_id": "funding_offer.member_bank_alpha.001",
+            "resource_id": "resource.member_bank_alpha.call_money.001"
+          }
+        },
+        {
+          "event_id": "funding_offer_delivered.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "offer_registered",
+          "after_state": "offer_received",
+          "before_version": 3,
+          "after_version": 4,
+          "business_result_id": "business_result.funding_offer.delivered.001",
+          "delivered_observation_id": "observation.broker_alpha.funding_offer.001",
+          "material_parameters": {}
+        },
+        {
+          "event_id": "funding_offer_accepted.001",
+          "trigger": "action",
+          "actor_id": "actor.broker_alpha",
+          "capability_id": "call_money_broker_borrower",
+          "reader_intent_id": "accept_call_loan_offer",
+          "target_actor_ids": [
+            "actor.member_bank_alpha"
+          ],
+          "authority_refs": [
+            "authority.broker_alpha.offer_acceptance.001"
+          ],
+          "resource_owner_id": null,
+          "before_state": "offer_received",
+          "after_state": "acceptance_registered",
+          "before_version": 4,
+          "after_version": 5,
+          "business_result_id": "business_result.funding_offer.acceptance_registered.001",
+          "delivered_observation_id": null,
+          "material_parameters": {
+            "offer_id": "funding_offer.member_bank_alpha.001"
+          }
+        },
+        {
+          "event_id": "funding_match_completed.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "acceptance_registered",
+          "after_state": "matched",
+          "before_version": 5,
+          "after_version": 6,
+          "business_result_id": "business_result.funding_match.completed.001",
+          "delivered_observation_id": null,
+          "material_parameters": {}
+        },
+        {
+          "event_id": "funding_booking_completed.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "matched",
+          "after_state": "booked",
+          "before_version": 6,
+          "after_version": 7,
+          "business_result_id": "business_result.funding_booking.completed.001",
+          "delivered_observation_id": "observation.broker_alpha.funding_booking.001",
+          "material_parameters": {}
+        },
+        {
+          "event_id": "funding_transfer_completed.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "booked",
+          "after_state": "funded",
+          "before_version": 7,
+          "after_version": 8,
+          "business_result_id": "business_result.funding_transfer.completed.001",
+          "delivered_observation_id": "observation.broker_alpha.funding_result.001",
+          "material_parameters": {}
+        },
+        {
+          "event_id": "repayment_became_due.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "funded",
+          "after_state": "repayment_due",
+          "before_version": 8,
+          "after_version": 9,
+          "business_result_id": "business_result.repayment.due.001",
+          "delivered_observation_id": "observation.broker_alpha.repayment_due.001",
+          "material_parameters": {}
+        },
+        {
+          "event_id": "repayment_registered.001",
+          "trigger": "action",
+          "actor_id": "actor.broker_alpha",
+          "capability_id": "call_money_broker_borrower",
+          "reader_intent_id": "authorize_controlled_repayment",
+          "target_actor_ids": [
+            "actor.member_bank_alpha"
+          ],
+          "authority_refs": [
+            "authority.broker_alpha.repayment.001"
+          ],
+          "resource_owner_id": "entity.broker_alpha",
+          "before_state": "repayment_due",
+          "after_state": "repayment_registered",
+          "before_version": 9,
+          "after_version": 10,
+          "business_result_id": "business_result.repayment.registered.001",
+          "delivered_observation_id": null,
+          "material_parameters": {
+            "loan_id": "loan.broker_alpha.001",
+            "resource_id": "resource.broker_alpha.repayment.001"
+          }
+        },
+        {
+          "event_id": "repayment_settled.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "repayment_registered",
+          "after_state": "repaid",
+          "before_version": 10,
+          "after_version": 11,
+          "business_result_id": "business_result.repayment.settled.001",
+          "delivered_observation_id": "observation.member_bank_alpha.repayment_result.001",
+          "material_parameters": {}
+        },
+        {
+          "event_id": "funding_case_closed.001",
+          "trigger": "scenario",
+          "actor_id": null,
+          "capability_id": null,
+          "reader_intent_id": null,
+          "target_actor_ids": [],
+          "authority_refs": [],
+          "resource_owner_id": null,
+          "before_state": "repaid",
+          "after_state": "closed",
+          "before_version": 11,
+          "after_version": 12,
+          "business_result_id": "business_result.funding_case.closed.001",
+          "delivered_observation_id": null,
+          "material_parameters": {}
+        }
+      ]
+    }
+  }
+}

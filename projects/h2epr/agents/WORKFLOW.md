@@ -245,6 +245,8 @@ Definitions and five population models now form
 The accepted
 [consolidated mapping](bindings/panic_1907/consolidated/) now provides the
 full-Roster identity, observation, state, intent, lifecycle, authority,
-resource and V1 carrier design. The next eligible stage is a separately
-authorized mapping-loader/conformance implementation slice; no individual
-production role triggers a standalone mapping or implementation cycle.
+resource and V1 carrier design. Its bounded
+[mapping-loader/conformance profile](bindings/panic_1907/roster-v0.1/) now
+checks the release-wide carrier and assembly risks without selecting policy or
+running a scenario; no individual production role triggers a standalone
+mapping or implementation cycle.
