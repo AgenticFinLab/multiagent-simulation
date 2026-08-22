@@ -25,7 +25,10 @@ Knickerbocker depositors, later trust-company depositors, member/correspondent-
 bank resource decisions, call-money lenders and broker-borrowers. NYSE venue
 and market operation remain scenario-owned. Every H2EPR-0288 roster row has a
 reviewed disposition. Roster Definition release v0.1 is the fixed semantic
-input to the accepted consolidated mapping and V1 carrier review.
+input to the accepted consolidated mapping and V1 carrier review. The accepted
+[Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/) now
+provides the full event-world semantic boundary. A minimal versioned scenario
+configuration is the next design input.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -170,7 +173,10 @@ finds no concrete V1 carrier counterexample.
 The accepted [research roster](agents/rosters/panic_1907.md) fixes the v0.1
 question, horizon, causal ownership, and role dispositions. The non-executable
 [event semantic skeleton](scenarios/panic_1907/semantic-skeleton.md) aligns
-shared concepts and interaction routes while new role products are developed.
+shared concepts and interaction routes used during Roster production. The
+accepted [Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
+supersedes it as the full event-world semantic authority while preserving the
+skeleton as release provenance.
 The hash-pinned [Roster Definition release v0.1](releases/panic_1907/roster-definition-v0.1/)
 closes semantic production and is the sole input set for consolidated mapping.
 The accepted [consolidated mapping](agents/bindings/panic_1907/consolidated/)
@@ -289,6 +295,7 @@ development task.
 - [Agent development workflow](agents/WORKFLOW.md)
 - [Panic of 1907 research roster](agents/rosters/panic_1907.md)
 - [Panic of 1907 semantic skeleton](scenarios/panic_1907/semantic-skeleton.md)
+- [Panic of 1907 Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
 - [Panic of 1907 consolidated mapping](agents/bindings/panic_1907/consolidated/)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

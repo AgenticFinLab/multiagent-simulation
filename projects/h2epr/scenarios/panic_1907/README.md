@@ -1,11 +1,28 @@
 # Panic of 1907 scenario
 
+## Accepted Event Scenario Definition
+
+The [Event Scenario Definition v0.1](definition-v0.1/) is the accepted semantic
+authority for the full H2EPR-0288 Roster. It defines the modeled interval,
+causal ownership, institutions, relationships, resources, information
+delivery, shared lifecycles, adjudication, structural variants, termination,
+and reproducibility boundary. Its interface companion closes all 12 released
+products, 115 observation placements, 107 intent placements, 13 lifecycle
+families, and 34 cross-object rules.
+
+The Definition is not an executable configuration. Exact actor and population
+assembly, opening values, route and venue policies, and timing choices remain
+the next versioned design input.
+
+## Semantic precursor
+
 The event-level [semantic skeleton](semantic-skeleton.md) defines the shared
 v0.1 vocabulary, interaction routes, ownership boundaries, structural
 variants, and interface-preflight questions used during Roster production. It
-is non-executable and does not prescribe numerical state or policy.
+is retained as release provenance and does not compete with the accepted
+Definition.
 
-## Current reference slice
+## Current two-role reference slice
 
 This package connects the accepted Knickerbocker Trust and New York Clearing
 House Definitions to the machine mapping in `agents/bindings/panic_1907/`.

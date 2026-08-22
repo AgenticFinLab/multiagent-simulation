@@ -28,13 +28,10 @@ projects/h2epr/
   -> Generated EPG
 ```
 
-当前工作重点是完成 1907 年金融恐慌事件的研究 Roster。Knickerbocker Trust 和 New York
-Clearing House（NYCH）已经完成参考试验；National Bank of Commerce、J. Pierpont Morgan、
-Trust Company of America、Lincoln Trust Company 和 trust-company presidents' committee
-已完成学术 Definition。Knickerbocker depositors、later trust-company depositors、
-member/correspondent-bank resource decisions、call-money lenders 与 broker-borrowers 已确定为
-群体模型，NYSE 保持为场景过程。Roster v0.4 的每一行均已关闭，并由 Roster Definition release
-v0.1 固定为下一轮统一 mapping 的输入。
+1907 年金融恐慌事件已经完成七份 Agent Definitions、五份 population models、Roster Definition
+release v0.1、全 Roster consolidated mapping，以及 Event Scenario Definition v0.1。该场景定义
+统一了事件时间、制度与关系、资源、信息传递、业务生命周期、裁决、结构版本和终止边界。现阶段不再
+继续扩充角色，而是从已接受的语义输入形成最小版本化场景配置，再选择有界实现切片。
 
 ## 文档导航
 
@@ -272,11 +269,12 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | ParticipantArtifact / EventBundle | G2 工程基线完成 |
 | Rule runtime / trace | G3 deterministic canary 完成 |
 | Generated EPG compiler | G4 deterministic compiler 完成 |
-| Agent Definitions | 七份 Definition 已接受；两角色构成可执行参考试验，其余等待全 Roster 统一 mapping |
+| Agent Definitions | 七份 Definition 已接受；两角色构成可执行参考试验，全部产品由全 Roster consolidated mapping 覆盖 |
 | Population models | 五份 `0.1.0` 群体模型已接受；组成、profile/posture 和响应参数保留为暴露的敏感性设定 |
 | Roster Definition release | v0.1 已完成，固定 Roster v0.4、七份 Agent Definition、五份 population model、证据和接口哈希 |
-| Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster consolidated mapping 已具备入口但尚未开始 |
+| Definition implementation mapping | 两角色 V1 mapping 与非 Ray conformance 切片已完成；全 Roster consolidated mapping、carrier review 与 mapping-loader/conformance 已完成 |
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
+| Event Scenario Definition | v0.1 已接受，闭合 12 个产品、115 个 observation placements、107 个 intent placements、13 类生命周期和 34 项跨对象规则 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
 
 G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent 和 scenario 的科学合理性。GAP-01
@@ -289,10 +287,11 @@ G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent
 
 H2EPR-0288 的 [Roster v0.4](h2epr/agents/rosters/panic_1907.md)、
 [event semantic skeleton](h2epr/scenarios/panic_1907/semantic-skeleton.md) 和
-[Roster Definition release v0.1](h2epr/releases/panic_1907/roster-definition-v0.1/) 已建立。下一轮从
-release manifest 统一盘点 observation、state、authority、intent、lifecycle、resource 与 result，
-完成多 capability 单一机构身份合成、V1 carrier review、cross-object validation 和高信息量 conformance
-case 设计。如果出现 V1 无法表达且内部 mapping 不能消解的具体案例，再评估窄范围 successor contract。
+[Roster Definition release v0.1](h2epr/releases/panic_1907/roster-definition-v0.1/) 已建立；
+[consolidated mapping](h2epr/agents/bindings/panic_1907/consolidated/) 与
+[Event Scenario Definition v0.1](h2epr/scenarios/panic_1907/definition-v0.1/) 也已接受。下一轮只形成
+最小版本化场景配置，固定精确时间边界、actor/population assembly、初始投影、结构版本、路线和策略
+引用。之后再根据高信息量 worked cases 选择有界 policy/environment 实现切片，不直接启动全事件模拟。
 
 ### 后续方向
 

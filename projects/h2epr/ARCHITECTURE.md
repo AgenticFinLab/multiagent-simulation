@@ -119,14 +119,15 @@ above the existing ParticipantArtifact shell. Their accepted V1 mapping and
 bounded non-Ray reference slice live under `agents/bindings/panic_1907/` and
 `scenarios/panic_1907/`. Roster Definition release v0.1 adds five further
 Agent Definitions and five population models as scholarly semantic inputs.
-The accepted consolidated mapping covers all twelve products, but the added
-roles and populations remain outside the executable subset until a separately
-authorized implementation and conformance cycle.
+The accepted consolidated mapping covers all twelve products, and Event
+Scenario Definition v0.1 supplies their shared event-world semantics. The
+added roles and populations remain outside the executable subset until a
+separately authorized configuration, implementation, and conformance cycle.
 
 | Responsibility | Owner |
 |---|---|
 | Event question, horizon, role disposition and release membership | Research roster |
-| Shared event concepts, interaction routes and structural variants | Event semantic skeleton |
+| Event time, institutions, relationships, resources, information delivery, lifecycles, adjudication, variants and termination | Event Scenario Definition |
 | Role, legal information, decision commitments, intent meaning and limits | Agent Definition Markdown |
 | Source identity, locator, adopted scope and file hash | Source register |
 | Claim status, event time, availability and use | Evidence ledger |
