@@ -30,8 +30,9 @@ populations/
 
 `defines/` contains the accepted scholarly behavior model. `interfaces/`
 contains the lightweight preflight used by Roster production. Exact machine
-mapping and implementation wait for the event's consolidated Roster Definition
-release.
+mapping is now specified by the accepted event-level consolidated mapping;
+executable composition still requires a separately authorized implementation
+and conformance slice.
 
 ## Current models
 
@@ -66,7 +67,9 @@ under distinct owners. NYSE remains scenario-owned in this release.
 
 All five population models belong to the Panic of 1907
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
-Their executable composition is deferred to consolidated mapping.
+They are covered by the accepted
+[consolidated mapping](../agents/bindings/panic_1907/consolidated/), while
+their executable composition remains pending.
 
 Drafts and detailed review records stay in the ignored local research area.
 Git history records accepted population-model revisions.

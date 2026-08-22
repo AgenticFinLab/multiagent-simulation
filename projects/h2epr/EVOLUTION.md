@@ -64,9 +64,10 @@ A successor should include:
 4. compatibility tests for supported consumers;
 5. a clear cutover point.
 
-The current Agent carrier study found that the two-role pilot fits V1 through
-explicit internal mapping and cross-object validation. That result does not
-justify a successor contract on its own.
+The current full-Roster carrier review finds that all twelve released semantic
+products fit V1 through a consolidated internal mapping profile and Panic of
+1907 scenario semantic extension. No concrete carrier loss currently
+justifies a successor contract.
 
 ## Agent Definition changes
 
@@ -108,8 +109,10 @@ presidents' committee are accepted `0.1.0` Roster-production Definitions.
 Knickerbocker depositors, later-trust depositors, member/correspondent-bank
 resource decisions, call-money lenders and broker-borrowers are accepted
 `0.1.0` population products. Their hashes are pinned by Roster Definition
-release v0.1 and their mapping is deferred to one consolidated cycle.
-That slice does not replace the G3 runtime or establish historical validity.
+release v0.1. The accepted consolidated mapping under
+`agents/bindings/panic_1907/consolidated/` covers all twelve products but is
+not executable. It does not replace the G3 runtime or establish historical
+validity.
 The earlier `0.1.0-dev` three-tick unit is retained under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/` as a frozen regression
 fixture. It is not an editable Definition line and does not claim conformance

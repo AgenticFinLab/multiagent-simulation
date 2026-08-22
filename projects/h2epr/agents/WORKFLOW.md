@@ -242,6 +242,9 @@ Knickerbocker Trust and NYCH form the completed reference pilot. The accepted
 [semantic skeleton](../scenarios/panic_1907/semantic-skeleton.md), seven Agent
 Definitions and five population models now form
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
-The next semantic-engineering stage is one separately authorized consolidated
-mapping and carrier review; no individual production role triggers a standalone
-mapping cycle.
+The accepted
+[consolidated mapping](bindings/panic_1907/consolidated/) now provides the
+full-Roster identity, observation, state, intent, lifecycle, authority,
+resource and V1 carrier design. The next eligible stage is a separately
+authorized mapping-loader/conformance implementation slice; no individual
+production role triggers a standalone mapping or implementation cycle.
