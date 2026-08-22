@@ -44,8 +44,8 @@ Generated EPG compilation.
 | Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
 | Agent research | `agents/` | Event roster, institutional behavior Definitions, source register, evidence ledger, decision situations, and derived bindings |
 | Population research | `populations/` | Reviewed heterogeneous-participant models and lightweight interface preflights |
-| Agent binding support | `src/h2epr/agents/` | Strict Definition mapping, semantic-intent validation and Contracts V1 carrier checks |
-| Event conformance slices | `scenarios/` | Event-owned policies, authoritative process state and bounded non-Ray integration paths |
+| Agent binding support | `src/h2epr/agents/` | New-format Definition profile checks, strict semantic mapping, intent validation and Contracts V1 carrier checks |
+| Event scenarios | `scenarios/` | Scenario Definition and interface-closure templates, event-owned semantics and policies, authoritative process state and bounded non-Ray paths |
 | Semantic releases | `releases/` | Hash-pinned roster, Definition, population, evidence, skeleton and interface inventories |
 
 ## Repository layout
@@ -71,8 +71,13 @@ projects/h2epr/
 │   ├── historical-evidence-research/
 │   ├── participant-behavior-research/
 │   ├── agent-definition/
-│   └── agent-definition-review/
-├── scenarios/panic_1907/
+│   ├── agent-definition-review/
+│   ├── event-scenario-design/
+│   └── roster-mapping-conformance/
+├── scenarios/
+│   ├── scenario-definition-template.md
+│   ├── scenario-interface-closure-template.md
+│   └── panic_1907/
 ├── src/h2epr/
 │   ├── construction/
 │   ├── artifacts/

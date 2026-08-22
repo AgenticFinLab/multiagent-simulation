@@ -52,8 +52,10 @@ validation unless a separate study has established it.
 
 Before writing prose, map the reviewed research to the required content in
 [`definition-content-and-style.md`](references/definition-content-and-style.md).
-Section titles and order may follow the participant, but every behaviorally
-material requirement must have a clear home.
+New candidates use the exact ten numbered top-level modules in the public
+template. Role-specific subsections and the depth of optional material remain
+flexible. Do not rewrite an accepted frozen release merely to normalize older
+heading style.
 
 The Definition should read as a coherent academic model, not a sequence of
 compliance answers. Use tables to make dense mappings precise and prose to
@@ -95,6 +97,11 @@ Define behaviorally material observations in semantic terms:
 - type, unit, domain, granularity, and uncertainty when meaningful;
 - decisions or mechanisms that consume the information;
 - information explicitly forbidden to the participant.
+
+Use the compact observation inventory from the public template so each stable
+semantic observation ID has a declared consumer. Add prose or subsections when
+the source history, dispute, or institutional meaning cannot be represented
+faithfully in one row. The inventory is not a copied runtime schema.
 
 Separate world state, participant-available observation, modeled private state, belief or
 assessment, and ephemeral reasoning. Define persistent state only when it
@@ -138,6 +145,10 @@ Describe the action and communication repertoire at the domain level. State
 the intended meaning, target, prerequisites, lifecycle, quantities or
 categories, cancellation or expiry semantics, and prohibited self-realized
 outcome.
+
+Use the compact intent inventory from the public template so every stable
+semantic intent ID is linked to at least one Decision Commitment. Keep wire
+keys, carrier slots, validators, and result records in the derived mapping.
 
 The participant may attempt, request, propose, authorize, refuse, communicate,
 delay, or abstain. The environment owns delivery, institutional admissibility,
@@ -203,6 +214,19 @@ Verify that:
 - limitations and falsifiers can force a concrete revision;
 - no scenario value, wire schema, backend detail, or known result has become a
   hidden behavior authority.
+
+For a new candidate, run the lightweight public-profile checker from the
+repository root:
+
+```bash
+PYTHONPATH=projects/h2epr/src \
+python -m h2epr.agents.definition_profile path/to/candidate.md
+```
+
+It checks the ten-module order, overview identity, observation and intent
+inventories, and Decision Commitment cross-links. Treat a failure as an
+authoring defect. Treat a pass only as structural readiness; it does not
+replace substantive review.
 
 ## Outputs
 

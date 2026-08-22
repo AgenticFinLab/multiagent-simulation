@@ -105,17 +105,18 @@ insufficient unless it becomes available to the participant through a specified 
 
 ### Information available to the participant
 
-For every behaviorally material observation, specify:
+Begin with one compact inventory row for every behaviorally material
+observation. Use stable reader-facing semantic identifiers; detailed historical
+or institutional explanation may follow in prose or role-specific subsections.
 
-| Property | Required account |
-|---|---|
-| Meaning | What the observation represents in historical and institutional terms. |
-| Source and channel | Who produced it and how the participant obtained it. |
-| Availability | Event time, delivery condition, visibility, and permissible users. |
-| Semantic domain | Category, ordering, range, unit, granularity, and uncertainty when meaningful. |
-| Freshness | When it becomes stale and how newer or conflicting information is handled. |
-| Missing behavior | The response to absent, unknown, delayed, disputed, or incomplete information. |
-| Behavioral consumers | The mechanisms and Decision Commitments allowed to use it. |
+| Observation | Meaning | Source, channel, and availability | Domain, freshness, and missing behavior | Behavioral consumers |
+|---|---|---|---|---|
+| `<observation_id>` | `<historical and institutional meaning>` | `<producer, route, event time, delivery and visibility>` | `<type/category/unit, uncertainty, stale/disputed/missing rule>` | `<Decision Commitment IDs or explicit contextual label>` |
+
+The inventory is a semantic index, not a wire schema. It should make clear who
+produced the information, how and when the participant obtained it, its
+permissible users, relevant granularity or uncertainty, and the response to
+absent, delayed, disputed, incomplete, or superseded information.
 
 List information that the Agent is explicitly forbidden to use, especially hidden world state, undelivered
 messages, other participants' private processes, future outcomes, and evaluation evidence.
@@ -202,8 +203,17 @@ minimum action where the model claims one is required, and make repeated abstent
 
 ## 7. Intent and result boundary
 
-Define the participant's domain-level action and communication repertoire. Use reader-facing labels and stable
-semantic identifiers. For each intent, describe:
+Define the participant's domain-level action and communication repertoire. Use
+reader-facing labels and stable semantic identifiers. Begin with a compact
+inventory that closes the link from Decision Commitments to the event
+environment.
+
+| Intent | Historical and institutional meaning | Target or recipient | Required content and lifecycle | Permitting commitments | Environment-owned result |
+|---|---|---|---|---|---|
+| `<intent_id>` | `<what the participant is trying to do>` | `<eligible target/scope>` | `<content, quantity/category, duplicate/expiry/cancellation semantics>` | `<Decision Commitment IDs>` | `<delivery, admissibility, execution or effect the Agent cannot declare>` |
+
+The inventory is a semantic index, not a serialization contract. For every
+intent, the surrounding text should describe:
 
 - historical and institutional meaning;
 - target or recipient;

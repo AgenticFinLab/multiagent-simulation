@@ -149,6 +149,12 @@ Content that has no explanatory, behavioral, evidentiary, or review consumer
 should be removed or identified as contextual narrative rather than mandatory
 model semantics.
 
+For new-format candidates, confirm that the authoring record includes a PASS
+from `python -m h2epr.agents.definition_profile`. Run it directly when the
+candidate is available locally. The check covers public structure and basic
+inventory links only; do not reduce this substantive review to its result or
+apply it retroactively to rewrite a frozen release.
+
 ### 9. Review cross-agent consistency when applicable
 
 Compare participants using

@@ -84,10 +84,17 @@ projects/h2epr/
 │   └── interfaces/panic_1907/
 ├── releases/panic_1907/      # 语义 release 清单与哈希
 ├── skills/
+│   ├── event-agent-batch/
 │   ├── historical-evidence-research/
 │   ├── participant-behavior-research/
 │   ├── agent-definition/
-│   └── agent-definition-review/
+│   ├── agent-definition-review/
+│   ├── event-scenario-design/
+│   └── roster-mapping-conformance/
+├── scenarios/
+│   ├── scenario-definition-template.md
+│   ├── scenario-interface-closure-template.md
+│   └── panic_1907/
 ├── src/h2epr/
 │   ├── construction/
 │   ├── artifacts/
@@ -113,12 +120,14 @@ projects/h2epr/
 | `agents/` | 当前 Agent Definition 研究资产、通用 binding 约束和冻结工程基线 |
 | `populations/` | 无法或无需逐人重建的异质参与者群体模型及轻量接口检查 |
 | `releases/` | 固定 Roster、Definitions、群体模型、证据、场景骨架和接口身份 |
+| `scenarios/` | 事件场景模板、release 接口闭合、场景语义、环境策略和有界集成路径 |
 | `runtime/` | H2EPR 的 MASim 适配、Rule runtime、detector 和 runner |
 | `compiler/` | 校验 sealed trace，并生成 EPG 和 GraphSeal |
 | `tests/` | 合同、construction、runtime、compiler 和 Agent 测试 |
 
-`skills/` 按证据研究、角色行为研究、Definition 编写和独立审核分层。每个
-Skill 以 `SKILL.md` 作为入口，并把详细研究规范放在相邻 `references/` 中。
+`skills/` 覆盖证据与角色研究、Definition 编写和审核，以及 release 之后的
+场景设计和 consolidated mapping/conformance。每个 Skill 以 `SKILL.md` 作为入口，
+并把只在特定阶段需要的详细规范放在相邻 `references/` 中。
 
 这些目录按职责组织。内部类名和文件拆分可以随着实现演进；`contracts/v1` 的公开语义保持稳定。
 

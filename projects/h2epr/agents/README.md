@@ -82,6 +82,9 @@ agents/
 
 - Definition filenames are lowercase kebab-case, matching the MASim profile
   convention. Python modules remain snake_case under `src/h2epr/agents/`.
+- New Definition candidates use the exact ten numbered top-level modules in
+  the public template. Role-specific subsections remain flexible. Existing
+  frozen releases are not rewritten solely to normalize earlier headings.
 - The event directory follows the existing `configs/panic_1907/` identifier.
 - Only the role Markdown files are Agent Definitions. The source register,
   evidence ledger, and decision-situation portfolio are adjacent research
@@ -157,6 +160,18 @@ agents/
 
 All historical outcomes used here are already exposed. This iteration is
 construction and semantic falsification work, not held-out validation.
+
+For a new Definition candidate, run the lightweight public-profile check from
+the repository root:
+
+```bash
+PYTHONPATH=projects/h2epr/src \
+python -m h2epr.agents.definition_profile path/to/candidate.md
+```
+
+The checker validates module order, overview identity, observation and intent
+inventories, and Decision Commitment links. It is not applied retroactively to
+the frozen H2EPR-0288 release and does not replace scholarly review.
 
 ## Lightweight iteration lifecycle
 

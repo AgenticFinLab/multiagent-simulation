@@ -71,18 +71,23 @@ justifies a successor contract.
 
 ## Agent Definition changes
 
-Agent Definitions, the template and the research/authoring/review Skills are
-active research assets. The tracked paths contain the current methods and
-accepted versions:
+Agent Definitions, the scenario template, and the research, authoring, review,
+scenario-design and mapping/conformance Skills are active research assets. The
+tracked paths contain the current working methods and accepted scholarly or
+engineering products:
 
 ```text
 agents/agent-definition-template.md
 agents/defines/<event>/<participant>.md
 agents/bindings/<event>/
+scenarios/scenario-definition-template.md
+scenarios/scenario-interface-closure-template.md
 skills/historical-evidence-research/
 skills/participant-behavior-research/
 skills/agent-definition/
 skills/agent-definition-review/
+skills/event-scenario-design/
+skills/roster-mapping-conformance/
 ```
 
 Update these files in place as the study produces feedback. Before promoting a
@@ -90,6 +95,13 @@ Definition change, inspect every binding, implementation, state, trace, test,
 and documentation consumer. A mapping may be updated only when it actually
 conforms to the new Definition; otherwise retire it or isolate it as an
 explicit engineering fixture instead of updating only its hash.
+
+New Definition candidates use the public ten-module profile and its lightweight
+inventory checker. Existing frozen releases remain valid under the method that
+accepted them and are not rewritten solely for heading normalization. Scenario
+and mapping/conformance methods remain working candidates until a real Event
+Scenario Definition and a second mapping/conformance use case supply feedback;
+revise them in place rather than creating parallel versioned directories.
 
 Git history keeps accepted versions. Working drafts, comparisons and rejected
 alternatives belong under:

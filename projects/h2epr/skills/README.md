@@ -27,8 +27,13 @@ Scholarly and modeling review
 Lightweight event-interface preflight
         ↓
 Roster Definition release
+        ├── Event Scenario Definition + interface closure
+        └── Consolidated mapping and carrier review
+                    └── Bounded mapping-loader conformance
+
+Accepted Scenario Definition + accepted mapping
         ↓
-Consolidated mapping and implementation conformance
+Separately authorized policy/interaction implementation
 ```
 
 The first four stages produce publication-facing research artifacts. Normal
@@ -47,10 +52,15 @@ only when that engineering feedback is the purpose of the pilot.
 | [`participant-behavior-research`](participant-behavior-research/SKILL.md) | Build a publication-facing participant behavior model from adjudicated evidence, theory, institutional analysis, and high-information decision situations. |
 | [`agent-definition`](agent-definition/SKILL.md) | Turn reviewed participant research into a canonical, publication-facing, backend-neutral Agent Definition. |
 | [`agent-definition-review`](agent-definition-review/SKILL.md) | Independently review a Definition's historical grounding, institutional model, behavior, falsifiability, consistency, and publication quality. |
+| [`event-scenario-design`](event-scenario-design/SKILL.md) | Turn an accepted event roster, semantic release, evidence boundary, and participant models into a publication-facing Scenario Definition without writing policy or running a simulation. |
+| [`roster-mapping-conformance`](roster-mapping-conformance/SKILL.md) | Derive a release-wide mapping and carrier decision, then implement only an explicitly authorized loader/conformance slice. |
 
-Dedicated scenario-design and runtime-conformance Skills will be added from
-completed use cases. Each addition must have a real consumer and reviewed
-content before it becomes part of this catalog.
+The scenario and mapping/conformance Skills are working candidates. The mapping
+method is extracted from the completed H2EPR-0288 consolidated mapping and
+bounded loader use cases; the scenario method must now be forward-tested by the
+first complete H2EPR-0288 Event Scenario Definition. Revise them only where
+real use exposes a reusable gap. They do not form a general simulation pipeline
+or authorize policy, simulation, contract, or evaluation work.
 
 The detailed roster, batching, promotion, and test process is documented in
 the [Agent development workflow](../agents/WORKFLOW.md).

@@ -140,10 +140,12 @@ evidence, representation, behavior, Definition, or scenario boundary.
 Before promotion:
 
 1. confirm Definition identity, version, claim references, and source records;
-2. check cross-section, cross-role, roster, and skeleton consistency;
-3. complete the batch interface preflight;
-4. obtain owner acceptance; and
-5. promote the Definition, adopted claims, sources, interface note, and concise
+2. for a new candidate, pass the lightweight ten-module and inventory-profile
+   check without applying it retroactively to frozen releases;
+3. check cross-section, cross-role, roster, and skeleton consistency;
+4. complete the batch interface preflight;
+5. obtain owner acceptance; and
+6. promote the Definition, adopted claims, sources, interface note, and concise
    guide updates as one coherent change.
 
 The tracked tree contains the current accepted research artifacts. Drafts,
@@ -185,12 +187,38 @@ The release closes the semantic production phase. It requires:
 The release is a coherent semantic input, not an executable bundle and not a
 scientific-validity claim.
 
+## Define the released event world
+
+After semantic release, use the
+[`event-scenario-design`](../skills/event-scenario-design/SKILL.md) Skill and
+the public Scenario Definition and interface-closure templates to specify event
+time, institutions, relationships, resources, information delivery, business
+lifecycles, adjudication, results, variants, and termination, then reconcile the
+complete released observation and intent interface.
+
+The Scenario Definition and consolidated mapping may expose requirements to
+one another, but they retain separate authorities. The scenario cannot add
+participant behavior; the mapping cannot add world or institutional meaning.
+Resolve their interface before policy implementation. A semantic skeleton is
+not by itself a complete executable scenario.
+
+The accepted Scenario Definition and accepted mapping converge before any
+policy/interaction implementation. A mapping-loader conformance slice may be
+completed earlier because it tests carrier and assembly properties rather than
+participant behavior or event dynamics.
+
 ## Map and test the released roster
 
 Consolidated mapping starts only after the release and under separate
 authorization. It derives implementation carriers for the released semantic
 system; it cannot introduce a behavior, observation, authority, state, intent,
 route, or result meaning.
+
+Use the
+[`roster-mapping-conformance`](../skills/roster-mapping-conformance/SKILL.md)
+Skill in design mode for the inventory, mapping, carrier decision, rules, and
+review. Enter its conformance mode only through a separate implementation
+authorization.
 
 Use the following test ladder:
 

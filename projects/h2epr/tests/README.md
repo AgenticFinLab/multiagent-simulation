@@ -20,6 +20,12 @@ start Ray, or run the G3 simulation.
 The fixture is documented under
 [`fixtures/agents/panic_1907/minimal_binding_v0_1/`](fixtures/agents/panic_1907/minimal_binding_v0_1/).
 
+The Agent suite also covers the lightweight format profile used by new-format
+Definition candidates. The profile checks ten-module order, overview identity,
+observation and intent inventories, and Decision Commitment links. It does not
+retroactively reject the frozen H2EPR-0288 release or replace substantive
+review.
+
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
   python -B -m pytest -p no:cacheprovider projects/h2epr/tests/agents
