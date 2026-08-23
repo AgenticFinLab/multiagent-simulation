@@ -17,6 +17,45 @@ host-scoped population state, authority/resource scope, a broker funding
 lifecycle and deterministic replay. It does not select a full-Roster policy,
 start Ray, or run the G3 simulation.
 
+The configuration-admission suite validates the project-local v0.1 schema,
+externally supplied configuration/release hash anchors, canonical identity,
+release and semantic-input integrity, actor/unit assembly, exact sensitivity
+targets, stable error classes, non-executable policy boundary, and
+deterministic static receipts:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
+  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/configuration
+```
+
+It does not create a carrier projection, bind policy/environment behavior,
+start MASim, or validate event outcomes.
+
+The bounded three-role E6 suite loads the externally anchored binding release,
+rechecks its E5/configuration/Roster inputs, validates four ActionDefinitions,
+three CommunicationRoutes, four actor-scoped observations, four ActionIntents,
+and three MessageIntents against Contracts V1, and exercises only the positive
+KT--NBC--NYCH branch:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
+  python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_panic_1907_lineage_binding.py
+```
+
+It leaves the full Scenario Configuration non-executable. The separate E7
+suite covers adversarial lineage negatives and deterministic trace/replay:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
+  python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_panic_1907_lineage_conformance.py
+```
+
+Its expected vector and review are recorded in the
+[lineage conformance closeout](../scenarios/panic_1907/lineage-conformance-v0.1/).
+The suite starts no simulator and does not widen the E6 positive branch.
+
 The fixture is documented under
 [`fixtures/agents/panic_1907/minimal_binding_v0_1/`](fixtures/agents/panic_1907/minimal_binding_v0_1/).
 

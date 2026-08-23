@@ -1,0 +1,62 @@
+{
+  "format": "h2epr.lineage-conformance-receipt.v0.1",
+  "receipt_id": "receipt.h2epr.0288.kt_nbc_nych.conformance.v0_1",
+  "status": "accepted",
+  "verdict": "PASS_BOUNDED_LINEAGE_CONFORMANCE",
+  "binding": {
+    "release_manifest_sha256": "4c263bec986fd49c260881a6dc17422598f51f5114ceb69e500a9ead3319f1c1",
+    "binding_sha256": "cafc8ed1069ea2a82e14cb49f9626971a87e1f57ac751f4c8d4762fdf9c55041",
+    "protected_e6_surfaces_unchanged": true,
+    "protected_e5_and_configuration_surfaces_unchanged": true
+  },
+  "scope": {
+    "actor_ids": [
+      "actor.knickerbocker_trust",
+      "actor.national_bank_of_commerce",
+      "actor.new_york_clearing_house"
+    ],
+    "action_count": 4,
+    "route_count": 3,
+    "logical_tick_count": 5,
+    "state_delta_count": 8,
+    "simulation_started": false,
+    "full_configuration_execution_enabled": false
+  },
+  "trace": {
+    "conformance_implementation_sha256": "af94727926106d5d1061918545cfb4a414f6185aadca3f691c63da19e31e331a",
+    "conformance_run_manifest_sha256": "5eee95c330b7bd2e40b9e7bc133f317b7b1340134e2c59854c671c6417549b58",
+    "record_count": 50,
+    "first_record_hash": "e42f4b0f6cf5b7f3e66805cbcacfa0db9cf4f8386171e2bd9862bdcec1cf0c04",
+    "final_record_hash": "1d8284dc45efaa038f4ac1b74ce20d93776d7b74c7145728e124648bda745506",
+    "ordered_tick_seal_hashes": [
+      "3df22a23a79aac2daafd1890a866504540189a729724b58b36acd4ceb0a0ce35",
+      "6fa40e5dfc749db040d172c8a1b911273a9a779472746256fbb63076d7e91d59",
+      "3281e38dd6b2d3b2d88f1baba7626bf0c0fe9352a696c9b595af54630f43228d",
+      "60b5531a6763e6df59d2082ccb63427a95f8ce344dd82d64bc4be5645a6bdf80",
+      "d890205d43a1b93dd0202d109a43133ba11c8119e4ba62eaf5eb336191ea11a0"
+    ],
+    "scientific_prefix_sha256": "19887adb3232f66f43f4bfbeb4cdbe339f967ac943077929f9935b0e059aabd4",
+    "run_seal_sha256": "ab857d7c79a1ee277796830fc3e136adbb44a0689bc822f4dd413ad96aad7451",
+    "final_state_sha256": "2ea5969077d0f60af43ebdd35bfefd375af09ecd5bbf4a1d1a9ae8c35e0971f7",
+    "replay_state_sha256": "2ea5969077d0f60af43ebdd35bfefd375af09ecd5bbf4a1d1a9ae8c35e0971f7",
+    "trace_errors": [],
+    "deterministic_repeat_equal": true
+  },
+  "verification": {
+    "focused_tests_passed": 12,
+    "configuration_and_agent_tests_passed": 130,
+    "contracts_v1_tests_passed": 349,
+    "import_boundary_tests_passed": 2,
+    "skill_validator_passed": true,
+    "package_checksums_passed": true,
+    "git_diff_check_passed": true
+  },
+  "claim_boundary": {
+    "exposure": "full_draft_exposed_conformance_only",
+    "historical_validity_claim": false,
+    "scientific_validity_claim": false,
+    "held_out_or_clean_builder_claim": false,
+    "post_seal_evaluation_performed": false
+  },
+  "next_legal_action": "forward_test_standardized_method_on_second_event"
+}

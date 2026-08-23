@@ -10,12 +10,13 @@ small research batches, promote reviewed Definitions, and prepare and review
 one consolidated mapping after the Roster Definition release.
 
 The current Panic of 1907 collection contains seven institutional or named-person
-role models. Knickerbocker Trust and the New York Clearing House form the
-current executable conformance subset; National Bank of Commerce, J. Pierpont
-Morgan, Trust Company of America, Lincoln Trust Company, and the trust-company
-presidents' committee are reviewed scholarly Definitions covered by the
-accepted consolidated event mapping but not yet by an executable
-implementation. The adjacent [population collection](../populations/README.md)
+role models. Knickerbocker Trust, National Bank of Commerce, and the New York
+Clearing House form the current bounded conformance subset; the older direct
+KT--NYCH path remains a frozen reference. J. Pierpont Morgan, Trust Company of
+America, Lincoln Trust Company, and the trust-company presidents' committee
+are reviewed scholarly Definitions covered by the accepted consolidated event
+mapping but not by this implementation. The adjacent
+[population collection](../populations/README.md)
 contains five accepted models: Knickerbocker and later-trust depositors,
 member/correspondent-bank resource decisions, call-money lenders and broker-
 borrowers. The work examines whether
@@ -42,10 +43,10 @@ reuse, and additional execution approaches require separate work.
 
 The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
-and intent semantics it was reviewed against. The current `0.2.1` Definitions
-have both the accepted V1 specification and a machine-readable implementation
-candidate. The conservative first slice exercises only the bounded
-request-to-feedback path; it is not a complete role implementation.
+and intent semantics it was reviewed against. The current `0.2.1` reference
+Definitions and the added NBC carrier have exact bounded projections. The
+completed three-role E7 slice exercises only the request--forward--classify--
+scoped-disposition path; it is not a complete role or event implementation.
 
 ## Layout and naming
 
@@ -117,10 +118,11 @@ agents/
   accepted semantic preflight for the committee and member/correspondent-bank resource-decision population.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
-  the current `0.2.1` Definitions in the executable two-role subset.
+  the current `0.2.1` Definitions retained in both the frozen two-role
+  reference and the bounded three-role lineage.
 - [`defines/panic_1907/national-bank-of-commerce.md`](defines/panic_1907/national-bank-of-commerce.md):
-  the current `0.1.0` scholarly Definition, covered by the consolidated
-  design but not yet included in an executable mapping.
+  the current `0.1.0` scholarly Definition, now projected only as the pure
+  courier in the bounded KT--NBC--NYCH binding.
 - [`defines/panic_1907/j-pierpont-morgan.md`](defines/panic_1907/j-pierpont-morgan.md),
   [`defines/panic_1907/trust-company-of-america.md`](defines/panic_1907/trust-company-of-america.md), and
   [`defines/panic_1907/lincoln-trust-company.md`](defines/panic_1907/lincoln-trust-company.md): the accepted R2

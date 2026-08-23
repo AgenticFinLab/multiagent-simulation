@@ -33,15 +33,23 @@ Roster Definition release
 
 Accepted Scenario Definition + accepted mapping
         ↓
-Separately authorized policy/interaction implementation
+Versioned Scenario Configuration + review
+        ↓
+Separately authorized bounded configuration admission
+        ↓
+Exact carrier projection + minimal policy/environment binding
+        ↓
+Conformance closeout
 ```
 
 The first four stages produce publication-facing research artifacts. Normal
 Roster batches then record a lightweight interface preflight. Roster
-Definition release v0.1 provides the stable semantic input for the accepted
-consolidated mapping design and its separately authorized mapping-loader/
-conformance implementation. A small reference pilot may reach mapping earlier
-only when that engineering feedback is the purpose of the pilot.
+Definition release v0.1 provides the stable semantic input for mapping and
+scenario convergence. Configuration remains a separate, normally non-
+executable stage; loader, binding, conformance, simulation, and evaluation each
+retain their own authorization boundary. A small reference pilot may reach
+mapping earlier only when that engineering feedback is the purpose of the
+pilot.
 
 ## Available skills
 
@@ -54,15 +62,20 @@ only when that engineering feedback is the purpose of the pilot.
 | [`agent-definition-review`](agent-definition-review/SKILL.md) | Independently review a Definition's historical grounding, institutional model, behavior, falsifiability, consistency, and publication quality. |
 | [`event-scenario-design`](event-scenario-design/SKILL.md) | Turn an accepted event roster, semantic release, evidence boundary, and participant models into a publication-facing Scenario Definition without writing policy or running a simulation. |
 | [`roster-mapping-conformance`](roster-mapping-conformance/SKILL.md) | Derive a release-wide mapping and carrier decision, then implement only an explicitly authorized loader/conformance slice. |
+| [`scenario-configuration`](scenario-configuration/SKILL.md) | Design, review, and atomically promote one declared-purpose Scenario Configuration, then delimit its later bounded engineering admission without defining schema, policy, or runtime. |
 
-The scenario and mapping/conformance Skills are working candidates. The mapping
-method is extracted from the completed H2EPR-0288 consolidated mapping and
-bounded loader use cases; the scenario method must now be forward-tested by the
-first complete H2EPR-0288 Event Scenario Definition. Revise them only where
-real use exposes a reusable gap. They do not form a general simulation pipeline
-or authorize policy, simulation, contract, or evaluation work.
+The scenario, mapping/conformance, and configuration Skills are working
+candidates. The mapping/conformance Skill now includes the bounded multi-hop
+E6--E7 method demonstrated by the completed KT--NBC--NYCH closeout. The
+configuration method is extracted retrospectively from the accepted
+H2EPR-0288 configuration. Both additions should be forward-tested on the next
+event that reaches their stage. Revise them only where real use exposes a
+reusable gap. They do not form a general simulation pipeline or authorize
+policy, simulation, contract, or evaluation work.
 
-The detailed roster, batching, promotion, and test process is documented in
+The project-level stage order, authorization boundaries, and current event
+position are documented in the [Event modeling workflow](../WORKFLOW.md). The
+detailed roster, batching, promotion, and participant test process remains in
 the [Agent development workflow](../agents/WORKFLOW.md).
 
 ## Method principles

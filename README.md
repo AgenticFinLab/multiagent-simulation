@@ -39,11 +39,15 @@ smaller validation environment.
 draft-EPG-driven participant simulation and the current single authority root
 for H2EPR-owned contracts, Agent/Scenario semantics, runtime adapters and
 compiler responsibilities. Its G1–G4 engineering chain reaches deterministic
-Rule execution, sealed trace/replay and Generated EPG compilation, but remains
-Reference-blind and architecture-demo-only. The post-advisor research mainline
-is now a smaller two-role Agent Definition pilot; neither line establishes
-historical fidelity or scientific readiness.
+Rule execution, sealed trace/replay and Generated EPG compilation. The first
+standardized event cycle, H2EPR-0288, now also reaches an accepted Scenario
+Configuration, fail-closed static admission, a bounded KT--NBC--NYCH binding,
+and focused E7 conformance/trace/replay closeout. These remain engineering and
+method baselines: neither line establishes historical fidelity or scientific
+readiness, and the accepted full configuration is not an executable event.
 
 Start with the repository-level
 [H2EPR project guide](projects/H2EPR.md), then use the
-[project README](projects/h2epr/README.md) for current implementation details.
+[project README](projects/h2epr/README.md) for implementation details and the
+[event modeling workflow](projects/h2epr/WORKFLOW.md) for stage gates, stopping
+boundaries and the current event position.

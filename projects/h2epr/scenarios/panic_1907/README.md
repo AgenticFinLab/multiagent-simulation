@@ -10,9 +10,13 @@ and reproducibility boundary. Its interface companion closes all 12 released
 products, 115 observation placements, 107 intent placements, 13 lifecycle
 families, and 34 cross-object rules.
 
-The Definition is not an executable configuration. Exact actor and population
-assembly, opening values, route and venue policies, and timing choices remain
-the next versioned design input.
+The Definition is not an executable configuration. Those choices are now
+instantiated by the accepted
+[Scenario Configuration v0.1](../../configs/panic_1907/scenario-configuration-v0.1/),
+which remains non-executable. Its fail-closed admission and separate exact
+KT--NBC--NYCH binding and its
+[lineage conformance closeout v0.1](lineage-conformance-v0.1/) are now complete
+through E7. This engineering closeout is not permission for a full-event run.
 
 ## Semantic precursor
 
@@ -22,7 +26,16 @@ variants, and interface-preflight questions used during Roster production. It
 is retained as release provenance and does not compete with the accepted
 Definition.
 
-## Current two-role reference slice
+## Current three-role bounded slice
+
+The new [three-role bounded binding](../../agents/bindings/panic_1907/kt-nbc-nych-v0.1/)
+and `lineage_v0_1/` package preserve KT-to-NBC and NBC-to-NYCH as distinct
+messages and deliveries. They implement only four positive semantic actions
+and six lineage-only environment policies. `lineage_conformance_v0_1.py` adds
+the fixed five-tick cross-hop validator and deterministic trace/replay used by
+the E7 receipt. The accepted full configuration is not made executable.
+
+## Frozen two-role reference slice
 
 This package connects the accepted Knickerbocker Trust and New York Clearing
 House Definitions to the machine mapping in `agents/bindings/panic_1907/`.

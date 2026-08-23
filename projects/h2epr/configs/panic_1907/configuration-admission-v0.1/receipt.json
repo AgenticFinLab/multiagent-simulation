@@ -1,0 +1,131 @@
+{
+  "authorization": {
+    "carrier_projection_authorized": false,
+    "configuration_surface_only": true,
+    "evaluation_authorized": false,
+    "policy_implementation_authorized": false,
+    "runtime_authorized": false,
+    "simulation_authorized": false
+  },
+  "configuration": {
+    "canonical_sha256": "fce44a347aa6504b5d26f6a3901753c1b4547359f85fed9ec1a860a92196359f",
+    "canonicalization": "h2epr_cjson.v1.full_configuration_document",
+    "configuration_id": "h2epr.0288.scenario.mechanism-coverage.v0_1",
+    "event_id": "H2EPR-0288",
+    "path": "configs/panic_1907/scenario-configuration-v0.1/scenario-configuration.json",
+    "schema_document_id": "https://agenticfinlab.local/h2epr/configs/schemas/event-scenario-configuration-v0.1.schema.json",
+    "schema_sha256": "729914c833016728e42d40b9a2ac92814692943db31ec7a728236fd0fe7aeba9",
+    "source_sha256": "6f931e81482d2a511220c467e578565b6b949b41c80874b13f56a172d9ed5e22",
+    "status": "accepted_non_executable_configuration",
+    "version": "0.1.0"
+  },
+  "coverage": {
+    "exogenous_inputs": 9,
+    "intent_placements": 107,
+    "named_actors": 7,
+    "observation_placements": 115,
+    "population_actors": 9,
+    "population_units": 10,
+    "selected_policy_semantics": 9,
+    "semantic_products": 12,
+    "sensitivity_overlays": 8,
+    "structural_selections": 8,
+    "total_actors": 16
+  },
+  "execution_boundary": {
+    "execution_eligible": false,
+    "unbound_policy_ids": [
+      "POL-AMOUNT-01",
+      "POL-FACILITY-01",
+      "POL-INFO-01",
+      "POL-LIFECYCLE-01",
+      "POL-RESULT-01",
+      "POL-REVIEW-01",
+      "POL-SERVICE-01",
+      "POL-TIME-01",
+      "POL-VENUE-01"
+    ]
+  },
+  "failure": null,
+  "gates": [
+    {
+      "gate": "P0",
+      "status": "pass"
+    },
+    {
+      "gate": "P1",
+      "status": "pass"
+    },
+    {
+      "gate": "P2",
+      "status": "pass"
+    },
+    {
+      "gate": "P3",
+      "status": "pass"
+    },
+    {
+      "gate": "P4",
+      "status": "pass"
+    },
+    {
+      "gate": "P5",
+      "status": "pass"
+    },
+    {
+      "gate": "P6",
+      "status": "pass"
+    }
+  ],
+  "next_legal_stage": "separately_authorized_E6_carrier_projection",
+  "receipt_sha256": "073efdb9702867ef812e3d755b94aec3c09f5ef5135a9243d7ad2550a6c0bc75",
+  "release": {
+    "manifest_sha256": "be9f9fb3c81380d9b6ba31414667b7594032d22a42d88b9fa3ea2abf5cf72f24",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.v0_1",
+    "mapping_profile_sha256": "b0dd1cc3caed3c6bc3239e6bf5b956cb6c01740177ffa879f40940c541275b29",
+    "release_id": "H2EPR-0288-SCENARIO-CONFIGURATION-v0.1"
+  },
+  "repository": {
+    "baseline_commit": "95aad4b656a4828f22036bf356d35aa5f25728c2",
+    "branch": "h2epr-event-simulation",
+    "root": "projects/h2epr",
+    "validation_surface_sha256s": {
+      "configs/schemas/event-scenario-configuration-v0.1.schema.json": "729914c833016728e42d40b9a2ac92814692943db31ec7a728236fd0fe7aeba9",
+      "src/h2epr/configuration/__init__.py": "0877eaa3b565bffaa532cfa6870d5e3adfedb1460269a8eca5c7e2bb267c8707",
+      "src/h2epr/configuration/errors.py": "9981ffa7ffe609b159ee2041fc2d743038059ed5da7723d0bc20840122cde979",
+      "src/h2epr/configuration/loader.py": "c6f5ad26580f836b379604f1af0c175f5a820d4d7ee1ebbfd954dabccfe88eef",
+      "tests/configuration/test_scenario_configuration_admission.py": "2aa2f1db2b60626ef4ef0827de85a53b8752caf08db93e141fb190a5981bd8ce"
+    },
+    "worktree_state": "authorized_s0_s2_changes_present_uncommitted"
+  },
+  "schema": "h2epr.configuration-admission-receipt.v0_1",
+  "semantic_inputs": {
+    "consolidated_mapping": "987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a",
+    "evidence_ledger": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933",
+    "mapping_profile": "b0dd1cc3caed3c6bc3239e6bf5b956cb6c01740177ffa879f40940c541275b29",
+    "roster_definition_release": "0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6",
+    "scenario_definition": "5904e3fc2893261fe310a5af702baa523928901dc92122b95b603b71f62f6495",
+    "scenario_definition_release": "26cabc9badde9368e485db576c5748bf0a3eb8f69c840d8fe4c156f28572fee0",
+    "scenario_interface_closure": "60538b9e280d92deace3ae10dce624bf3445868a80692ba70dac2cba5ed1bd5d",
+    "source_register": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
+  },
+  "validation_surface": "h2epr.scenario-configuration-admission.v0_1",
+  "verdict": "PASS_BOUNDED_CONFIGURATION_ADMISSION",
+  "verification": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src /home/lenovo/miniforge3/envs/LMSim/bin/python -B -m pytest -p no:cacheprovider -q projects/h2epr/tests/configuration projects/h2epr/tests/agents",
+      "result": "pass",
+      "summary": "114 passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src /home/lenovo/miniforge3/envs/LMSim/bin/python -B -m pytest -p no:cacheprovider -q projects/h2epr/tests/contracts",
+      "result": "pass",
+      "summary": "349 passed"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src /home/lenovo/miniforge3/envs/LMSim/bin/python -B -m pytest -p no:cacheprovider -q projects/h2epr/tests/construction/test_import_boundary.py",
+      "result": "pass",
+      "summary": "2 passed"
+    }
+  ]
+}

@@ -122,20 +122,26 @@ Agent Definitions and five population models as scholarly semantic inputs.
 The accepted consolidated mapping covers all twelve products, and Event
 Scenario Definition v0.1 supplies their shared event-world semantics. The
 accepted Scenario Configuration v0.1 pins their first 16-actor / 10-unit
-mechanism-coverage assembly. The added roles and populations remain outside
-the executable subset until a separately authorized implementation and
-conformance cycle supplies an exact loader, policy binding, and carrier
-projection.
+mechanism-coverage assembly. Its project-local E5 admission surface now
+verifies exact release/configuration hashes, a closed v0.1 schema, canonical
+identity, actor/unit references and the non-executable boundary. Apart from
+NBC's bounded courier projection, the other added roles and all populations
+remain outside the executable subset until a separately authorized cycle
+supplies policy binding and carrier projection. The current implementation
+goes no farther than the three-role KT--NBC--NYCH binding and its five-tick E7
+conformance trace/replay closeout.
 
 | Responsibility | Owner |
 |---|---|
 | Event question, horizon, role disposition and release membership | Research roster |
 | Event time, institutions, relationships, resources, information delivery, lifecycles, adjudication, variants and termination | Event Scenario Definition |
+| Declared purpose, actor/unit assembly, opening records, structural selections, policy references, sensitivities and completion choice | Scenario Configuration |
 | Role, legal information, decision commitments, intent meaning and limits | Agent Definition Markdown |
 | Source identity, locator, adopted scope and file hash | Source register |
 | Claim status, event time, availability and use | Evidence ledger |
 | Institutions, relationships, observation delivery, authority and results | Scenario/environment |
-| Field types, serialization and versioning | Contracts V1 |
+| Scenario Configuration serialized shape and admission identity | project-local versioned configuration schema and loader |
+| Runtime carrier field types, serialization and versioning | Contracts V1 |
 | Executable mapping from Definition to code | Binding and backend adapter |
 | State transition and action result | Authoritative reducer |
 
@@ -296,7 +302,15 @@ repository location.
   Agent Definition design permits.
 - The current `0.2.1` two-role Definitions have a bounded non-Ray conformance
   slice, but it is not integrated into the G3/G4 path. The accepted full-Roster
-  consolidated mapping is design-only and has not been implemented.
+  consolidated mapping has a bounded release-wide mapping-loader/conformance
+  profile. The accepted Scenario Configuration has a project-local schema,
+  canonical identity and fail-closed static loader. Its separate bounded E6
+  binding now projects only KT submission, NBC pure forwarding, NYCH
+  classification and NYCH scoped disposition into Contracts V1 and binds six
+  lineage-only environment policies. Its E7 closeout adds high-information
+  cross-hop negatives and one deterministic five-tick trace/replay receipt,
+  without integration into G3/G4. The full configuration itself remains
+  non-executable and unbound.
 - NYCH authority outside the member facility remains unresolved.
 - Exact Knickerbocker requester identity and corporate authorization remain
   unresolved.
@@ -309,6 +323,7 @@ iteration on the two Agent Definitions.
 
 - [Project guide](../H2EPR.md)
 - [Project README](README.md)
+- [Event modeling workflow](WORKFLOW.md)
 - [Evolution policy](EVOLUTION.md)
 - [Contracts V1](contracts/v1/README.md)
 - [Agent guide](agents/README.md)

@@ -29,7 +29,12 @@ The accepted event scope and every participant disposition are in the
 [H2EPR-0288 research roster](../../rosters/panic_1907.md). The event
 [semantic skeleton](../../../scenarios/panic_1907/semantic-skeleton.md) and the
 [Roster Definition release v0.1](../../../releases/panic_1907/roster-definition-v0.1/)
-now provide the fixed semantic input for a separate consolidated mapping cycle.
+provide the fixed participant-semantic input. The accepted
+[consolidated mapping](../../bindings/panic_1907/consolidated/),
+[Event Scenario Definition v0.1](../../../scenarios/panic_1907/definition-v0.1/),
+and [Scenario Configuration v0.1](../../../configs/panic_1907/scenario-configuration-v0.1/)
+now carry the event-level downstream authorities without changing these
+Definitions.
 
 ## Supporting research assets
 
@@ -44,6 +49,10 @@ now provide the fixed semantic input for a separate consolidated mapping cycle.
 | [R4 interface preflight](../../../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md) | accepted host-contagion, call-lender, broker-borrower and NYSE scenario boundary |
 | [Roster Definition release v0.1](../../../releases/panic_1907/roster-definition-v0.1/) | exact semantic input inventory for consolidated mapping |
 | [binding specification](../../bindings/panic_1907/) | accepted mapping of the Knickerbocker and NYCH Definitions into Contracts V1, business lifecycles, intent registry, and cross-object checks |
+| [consolidated mapping](../../bindings/panic_1907/consolidated/) | accepted release-wide identity, observation, intent, lifecycle, authority, resource, result, and carrier design |
+| [Scenario Configuration v0.1](../../../configs/panic_1907/scenario-configuration-v0.1/) | accepted non-executable mechanism-coverage instantiation |
+| [KT--NBC--NYCH E6 binding](../../bindings/panic_1907/kt-nbc-nych-v0.1/) | exact four-action, three-route positive projection with NBC as pure courier |
+| [E7 conformance closeout](../../../scenarios/panic_1907/lineage-conformance-v0.1/) | cross-hop negatives, deterministic trace/replay receipt, implementation review, and method closeout |
 
 The evidence ledger owns claim status. The source register owns source identity and custody metadata. The
 Definitions own participant behavior semantics. Scenario/environment assets will own instantiated world facts,
@@ -56,10 +65,16 @@ conformance slice under [`scenarios/panic_1907/`](../../../scenarios/panic_1907/
 their 21 intents; the first slice exercises eight decisions from support request through delivered
 facility-scoped decline and subsequent contingency preparation.
 
-The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions and all five population models
-are accepted scholarly products in Roster Definition release v0.1. None is included in the two-role binding,
-executable mapping, intent registry, or scenario implementation. Their mapping is performed as one
-consolidated cycle rather than as separate engineering work per role.
+The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions
+and all five population models are accepted scholarly products in Roster
+Definition release v0.1. NBC alone now has a separate bounded E6 courier
+projection in the KT--NBC--NYCH lineage; it is still absent from the frozen
+two-role registry. The other four Definitions and all populations have no
+participant policy implementation. Their semantics remain covered by the
+consolidated mapping profile rather than separate role-by-role engineering.
+E5--E7 have passed for the bounded lineage, but the accepted Scenario
+Configuration remains explicitly non-executable and its nine top-level policy
+selections remain unbound.
 
 The R2 Definitions are intentionally non-symmetrical. Morgan is a bounded named coordinator; TCA is an
 aggregate institutional response interface; Lincoln is a thin board-authorized communication interface because

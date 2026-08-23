@@ -88,6 +88,7 @@ skills/agent-definition/
 skills/agent-definition-review/
 skills/event-scenario-design/
 skills/roster-mapping-conformance/
+skills/scenario-configuration/
 ```
 
 Update these files in place as the study produces feedback. Before promoting a
@@ -123,8 +124,18 @@ resource decisions, call-money lenders and broker-borrowers are accepted
 `0.1.0` population products. Their hashes are pinned by Roster Definition
 release v0.1. The accepted consolidated mapping under
 `agents/bindings/panic_1907/consolidated/` covers all twelve products but is
-not executable. It does not replace the G3 runtime or establish historical
-validity.
+not itself an executable event. Its bounded release-wide mapping-loader/
+conformance profile verifies semantic hashes, assembly, carrier fit, and a
+synthetic lifecycle without selecting participant policy. The accepted
+Scenario Configuration v0.1 now has a project-local versioned schema,
+canonical identity, fail-closed static loader, stable error vocabulary and
+admission receipt. A separate KT--NBC--NYCH E6 release now supplies an exact
+four-action Contracts V1 projection and six bounded policy/environment
+implementations without changing the configuration's nine `unbound`
+selections or its non-executable status. Its E7 closeout records focused
+cross-hop negatives, deterministic trace/seal/replay evidence, implementation
+review, and a bounded method delta. None of these artifacts replaces the G3
+runtime or establishes historical validity.
 The earlier `0.1.0-dev` three-tick unit is retained under
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/` as a frozen regression
 fixture. It is not an editable Definition line and does not claim conformance

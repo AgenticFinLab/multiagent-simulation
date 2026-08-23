@@ -10,6 +10,13 @@ The accepted [consolidated mapping](consolidated/) covers the complete Roster
 Definition release as a non-executable design specification. It does not alter
 this binding or its executable registries.
 
+The [KT--NBC--NYCH bounded binding v0.1](kt-nbc-nych-v0.1/) is the separate E6
+successor slice derived from that consolidated mapping and the accepted
+Scenario Configuration. It adds NBC as a policy-bearing courier for exactly
+one positive lineage without changing this frozen two-role reference. Its
+[E7 conformance closeout](../../../scenarios/panic_1907/lineage-conformance-v0.1/)
+adds only cross-hop negatives and deterministic trace/replay evidence.
+
 The Markdown files remain the reviewed specification. The JSON files are
 strict derived projections used by the current implementation. They
 load only when the recorded Definition, evidence, specification and Contracts
@@ -30,6 +37,8 @@ V1 hashes still match.
 | [lifecycle-registry.json](lifecycle-registry.json) | executable transition rules for the seven business lifecycle families |
 | [reference-pilot-snapshot/](reference-pilot-snapshot/) | immutable shared ledger and source-register bytes reviewed by this binding |
 | [consolidated/](consolidated/) | accepted, non-executable full-Roster mapping specification and V1 carrier decision |
+| [kt-nbc-nych-v0.1/](kt-nbc-nych-v0.1/) | hash-anchored four-action, three-route E6 binding with six lineage-only policy implementations; no full runtime or validity claim |
+| [E7 closeout](../../../scenarios/panic_1907/lineage-conformance-v0.1/) | fixed five-tick conformance receipt, negative tests, implementation review, and method learning; no simulation or evaluation |
 
 The snapshot prevents later Roster-production claims from changing the identity
 of this frozen two-role reference pilot. The current event ledger and source

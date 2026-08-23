@@ -22,7 +22,10 @@ This Skill has two modes:
 
 Do not enter conformance mode merely because design mode passes. Read
 [carrier and conformance review](references/carrier-and-conformance-review.md)
-before closing either mode.
+before closing either mode. When the authorized case is an exact multi-hop
+lineage projected from an admitted Scenario Configuration, also read
+[bounded lineage conformance](references/bounded-lineage-conformance.md)
+before implementing or closing the E6--E7 handoff.
 
 Keep the artifact transition explicit:
 
@@ -228,6 +231,9 @@ Common high-information cases include:
 - deterministic result separation and replay.
 
 Add negative cases for every accepted cross-object rule touched by the slice.
+For a configuration-bound multi-hop slice, use the bounded-lineage reference
+to keep per-object carrier validation, cross-hop lineage validation, and
+trace/replay closeout separate.
 
 ### 3. Run focused and full verification
 

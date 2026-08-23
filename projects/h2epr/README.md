@@ -7,6 +7,8 @@ EPG.
 
 For the repository-level overview and the relationship with MASim, see the
 [H2EPR project guide](../H2EPR.md).
+For the event-stage order, authorization boundaries, and current progress, see
+the [Event modeling workflow](WORKFLOW.md).
 
 ## Current focus
 
@@ -30,8 +32,15 @@ input to the accepted consolidated mapping and V1 carrier review. The accepted
 provides the full event-world semantic boundary. The accepted
 [Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
 pins a 16-actor / 10-unit mechanism-coverage assembly and remains explicitly
-non-executable. A minimal loader and KT–NBC–NYCH carrier projection is the
-next separately authorized engineering question.
+non-executable. Its
+[bounded configuration admission v0.1](configs/panic_1907/configuration-admission-v0.1/)
+now supplies exact schema, raw/canonical identity, stable rejection classes,
+fail-closed loading, cross-object checks, and a deterministic static receipt.
+The approved S0--S4 cycle has completed the bounded
+[KT--NBC--NYCH binding v0.1](agents/bindings/panic_1907/kt-nbc-nych-v0.1/)
+and its [E7 conformance closeout](scenarios/panic_1907/lineage-conformance-v0.1/):
+high-information negatives, one deterministic trace/replay receipt,
+implementation review, and a reusable method delta.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -41,6 +50,7 @@ Generated EPG compilation.
 
 | Component | Location | Current role |
 |---|---|---|
+| Event workflow | `WORKFLOW.md` | Project-level stages, authorization gates, closeout audit and current event position |
 | Contracts V1 | `contracts/v1/` | Stable construction, runtime, trace, seal and Generated EPG interfaces |
 | Construction IR | `src/h2epr/construction/` | Explicit source loading and typed, lossless construction data |
 | Participant artifacts | `src/h2epr/artifacts/` | Entity registry, provenance and ParticipantArtifact assembly |
@@ -51,16 +61,22 @@ Generated EPG compilation.
 | Agent research | `agents/` | Event roster, institutional behavior Definitions, source register, evidence ledger, decision situations, and derived bindings |
 | Population research | `populations/` | Reviewed heterogeneous-participant models and lightweight interface preflights |
 | Agent binding support | `src/h2epr/agents/` | New-format Definition profile checks, strict semantic mapping, intent validation and Contracts V1 carrier checks |
+| Bounded three-role binding | `agents/bindings/panic_1907/kt-nbc-nych-v0.1/`, `scenarios/panic_1907/lineage_v0_1/` | Exact E6 identities, four action projections, three communication routes, positive participant branches and six lineage-only environment policies; not a full configuration runtime |
 | Event scenarios | `scenarios/` | Scenario Definition and interface-closure templates, event-owned semantics and policies, authoritative process state and bounded non-Ray paths |
+| Scenario configurations | `configs/`, `src/h2epr/configuration/` | Public semantic template, project-local admission schema, versioned declared-purpose instantiations, fail-closed loader and static receipts kept distinct from frozen canaries |
 | Semantic releases | `releases/` | Hash-pinned roster, Definition, population, evidence, skeleton and interface inventories |
 
 ## Repository layout
 
 ```text
 projects/h2epr/
+├── WORKFLOW.md
 ├── contracts/v1/
 ├── decisions/
-├── configs/panic_1907/
+├── configs/
+│   ├── scenario-configuration-template.md
+│   ├── schemas/
+│   └── panic_1907/
 ├── agents/
 │   ├── README.md
 │   ├── agent-definition-template.md
@@ -79,7 +95,8 @@ projects/h2epr/
 │   ├── agent-definition/
 │   ├── agent-definition-review/
 │   ├── event-scenario-design/
-│   └── roster-mapping-conformance/
+│   ├── roster-mapping-conformance/
+│   └── scenario-configuration/
 ├── scenarios/
 │   ├── scenario-definition-template.md
 │   ├── scenario-interface-closure-template.md
@@ -91,6 +108,7 @@ projects/h2epr/
 │   ├── world/
 │   ├── bundles/
 │   ├── agents/
+│   ├── configuration/
 │   ├── runtime/
 │   └── compiler/
 └── tests/
@@ -139,10 +157,11 @@ remaining intent policies are not implemented by this slice. It does not start
 Ray or the G3/G4 simulation path and makes no historical-validity claim.
 
 The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions
-are accepted scholarly role models. They are not part of the two-role binding,
-intent registry, or implementation slice. They are covered by the accepted
-[consolidated mapping design](agents/bindings/panic_1907/consolidated/). The
-accepted
+are accepted scholarly role models. None is part of the frozen two-role
+binding; NBC alone is additionally projected as the pure courier in the
+separate bounded three-role E6/E7 slice. The other four have no participant
+policy implementation. All are covered by the accepted
+[consolidated mapping design](agents/bindings/panic_1907/consolidated/). The accepted
 [R2 interface preflight](agents/interfaces/panic_1907/r2-private-and-named-trusts.md)
 finds no concrete carrier counterexample while recording expected later
 mapping extensions.
@@ -248,16 +267,23 @@ remain in H2EPR.
 
 ## Tests
 
-Contracts and the frozen Agent engineering baseline run offline and do not
-start Ray:
+Configuration admission, Contracts and the Agent binding/conformance suites
+run offline and do not start Ray:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 \
 PYTHONPATH=projects/h2epr/src \
 python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/configuration \
   projects/h2epr/tests/contracts \
   projects/h2epr/tests/agents
 ```
+
+The dedicated
+[event-standardization CI](../../.github/workflows/h2epr-event-standardization.yml)
+runs the configuration-admission suite and the exact bounded E6 binding and E7
+conformance test modules. It starts no simulator and does not merge this
+three-role method slice into the G3/G4 runtime path.
 
 Additional suites cover construction, bundles, runtime and compilation:
 
@@ -287,6 +313,15 @@ not supply full-Roster policy behavior or integrate the Roster into the G3/G4
 runtime, and none of this establishes historical or scientific validity.
 Scientific evaluation remains a later post-seal activity.
 
+The project-level workflow records H2EPR-0288 as complete through bounded E7.
+The accepted Scenario Configuration remains non-executable, while its separate
+three-role binding projects only KT submission, NBC pure forwarding, NYCH
+classification and NYCH scoped disposition. The S4 closeout adds only a fixed
+five-tick cross-hop validator, negative conformance, deterministic
+trace/replay, review and method learning. It does not authorize full-roster
+execution, calibration, or scientific evaluation; the next normal step is a
+second-event forward test rather than deeper H2EPR-0288 implementation.
+
 H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
 required before a future shared-core claim. It is not scheduled as the next
 development task.
@@ -295,6 +330,7 @@ development task.
 
 - [Research projects index](../README.md)
 - [Project guide](../H2EPR.md)
+- [Event modeling workflow](WORKFLOW.md)
 - [Architecture](ARCHITECTURE.md)
 - [Evolution policy](EVOLUTION.md)
 - [Agent guide](agents/README.md)
@@ -303,6 +339,9 @@ development task.
 - [Panic of 1907 semantic skeleton](scenarios/panic_1907/semantic-skeleton.md)
 - [Panic of 1907 Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
 - [Panic of 1907 Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
+- [Panic of 1907 bounded configuration admission v0.1](configs/panic_1907/configuration-admission-v0.1/)
+- [Scenario Configuration guide and template](configs/README.md)
+- [Scenario Configuration Skill](skills/scenario-configuration/SKILL.md)
 - [Panic of 1907 consolidated mapping](agents/bindings/panic_1907/consolidated/)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

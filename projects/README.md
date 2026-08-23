@@ -12,11 +12,16 @@ multiple event configurations, compilers or evaluation protocols.
 H2EPR studies auditable multi-agent reconstruction of real event processes.
 Its current engineering path covers typed construction, participant artifacts,
 deterministic Rule execution, sealed traces and Generated EPG compilation.
-Current research focuses on event-specific Agent Definitions for the Panic of
-1907.
+For the Panic of 1907, the first event-standardization cycle is complete
+through a non-executable Scenario Configuration, fail-closed static admission,
+a bounded KT--NBC--NYCH binding and focused E7 conformance/trace/replay. This is
+a reusable engineering baseline, not a full-event simulation or a historical-
+validity claim; the normal next method step is a separately selected second-
+event forward test.
 
 - [Project guide](H2EPR.md)
 - [Source and tests](h2epr/)
+- [Event modeling workflow](h2epr/WORKFLOW.md)
 - [Architecture](h2epr/ARCHITECTURE.md)
 - [Evolution policy](h2epr/EVOLUTION.md)
 

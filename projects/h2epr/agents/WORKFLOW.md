@@ -5,6 +5,11 @@ take a few roles through the whole semantic and engineering path to test the
 method. Roster production then builds the remaining scholarly Definitions
 against a shared event skeleton before the event is mapped as one system.
 
+This is the participant-production sub-process of the project-level
+[Event modeling workflow](../WORKFLOW.md). That workflow owns the later
+Scenario Configuration, bounded admission, policy/environment binding, and
+conformance-closeout stages.
+
 ## Two operating modes
 
 | Mode | Use | Normal endpoint |
@@ -25,8 +30,9 @@ event question and horizon
        evidence -> behavior -> Definition -> review -> promotion
        -> lightweight interface preflight
   -> Roster Definition release
-  -> consolidated mapping and carrier review
-  -> conformance, interaction, and replay tests
+  -> consolidated mapping and Event Scenario Definition convergence
+  -> accepted non-executable Scenario Configuration
+  -> separately authorized bounded admission, binding, and conformance
   -> separately approved simulation
 ```
 
@@ -202,10 +208,13 @@ participant behavior; the mapping cannot add world or institutional meaning.
 Resolve their interface before policy implementation. A semantic skeleton is
 not by itself a complete executable scenario.
 
-The accepted Scenario Definition and accepted mapping converge before any
-policy/interaction implementation. A mapping-loader conformance slice may be
-completed earlier because it tests carrier and assembly properties rather than
-participant behavior or event dynamics.
+The accepted Scenario Definition and accepted mapping converge before Scenario
+Configuration. Configuration then fixes one declared-purpose assembly,
+structural selection, policy semantics, sensitivities, and completion boundary
+without silently becoming executable. A mapping-loader conformance slice may
+be completed earlier because it tests carrier and assembly properties rather
+than participant behavior or event dynamics; a configuration loader or policy
+binding remains a later, separately authorized stage.
 
 ## Map and test the released roster
 
@@ -277,4 +286,12 @@ resource and V1 carrier design. Its bounded
 [mapping-loader/conformance profile](bindings/panic_1907/roster-v0.1/) now
 checks the release-wide carrier and assembly risks without selecting policy or
 running a scenario; no individual production role triggers a standalone
-mapping or implementation cycle.
+mapping or implementation cycle. The accepted
+[Event Scenario Definition v0.1](../scenarios/panic_1907/definition-v0.1/) and
+[Scenario Configuration v0.1](../configs/panic_1907/scenario-configuration-v0.1/)
+now close the event-world and first mechanism-coverage configuration stages.
+The project-level E5 admission, KT--NBC--NYCH E6 binding, and
+[bounded E7 closeout](../scenarios/panic_1907/lineage-conformance-v0.1/) are
+also complete. The configuration remains non-executable; the next normal
+method task is a second-event forward test, not another participant-production
+batch or deeper first-event runtime.

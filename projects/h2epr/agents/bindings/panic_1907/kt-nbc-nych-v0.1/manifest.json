@@ -1,0 +1,54 @@
+{
+  "schema": "h2epr.bounded-lineage-binding-release.v0_1",
+  "release_id": "H2EPR-0288-KT-NBC-NYCH-BINDING-v0.1",
+  "version": "0.1.0",
+  "status": "bounded_conformance_release",
+  "event_id": "H2EPR-0288",
+  "manifest_sha256": "6bde81aac64e5c3b9f995d9083fb835a39f256ce6b89f2dcc5bbc67f470d39d1",
+  "binding": {
+    "path": "agents/bindings/panic_1907/kt-nbc-nych-v0.1/binding.json",
+    "sha256": "cafc8ed1069ea2a82e14cb49f9626971a87e1f57ac751f4c8d4762fdf9c55041"
+  },
+  "implementation_surfaces": [
+    {
+      "kind": "carrier_loader",
+      "path": "scenarios/panic_1907/lineage_v0_1/binding.py",
+      "sha256": "c8fcf1ef1eec59d87710c865d8364437e19881114cf76e334e16114ed058a4ea"
+    },
+    {
+      "kind": "environment_policies",
+      "path": "scenarios/panic_1907/lineage_v0_1/environment.py",
+      "sha256": "d9609941ec9340121c861227423b673e3b783783db8f18d721fcf57a766bdf78"
+    },
+    {
+      "kind": "participant_policies",
+      "path": "scenarios/panic_1907/lineage_v0_1/policies.py",
+      "sha256": "3d38a0505b83e9492e9892f53e027de7ce6dfc90c183e84a11a05adc2ea401a6"
+    },
+    {
+      "kind": "public_api",
+      "path": "scenarios/panic_1907/lineage_v0_1/__init__.py",
+      "sha256": "c74b8e9a94329b3b5a944588ced425ae07071623b442f18e3b3bb0582e6e3e68"
+    }
+  ],
+  "upstream": {
+    "configuration_path": "configs/panic_1907/scenario-configuration-v0.1/scenario-configuration.json",
+    "configuration_release_manifest_path": "configs/panic_1907/scenario-configuration-v0.1/manifest.json",
+    "configuration_source_sha256": "6f931e81482d2a511220c467e578565b6b949b41c80874b13f56a172d9ed5e22",
+    "configuration_release_manifest_sha256": "be9f9fb3c81380d9b6ba31414667b7594032d22a42d88b9fa3ea2abf5cf72f24",
+    "configuration_canonical_sha256": "fce44a347aa6504b5d26f6a3901753c1b4547359f85fed9ec1a860a92196359f",
+    "admission_receipt_path": "configs/panic_1907/configuration-admission-v0.1/receipt.json",
+    "admission_receipt_file_sha256": "57669e2d03881a99e972e103c496b21090a5646f764c3a647769f479f931f910",
+    "admission_receipt_sha256": "073efdb9702867ef812e3d755b94aec3c09f5ef5135a9243d7ad2550a6c0bc75",
+    "mapping_profile_path": "agents/bindings/panic_1907/roster-v0.1/mapping-profile.json",
+    "mapping_profile_sha256": "b0dd1cc3caed3c6bc3239e6bf5b956cb6c01740177ffa879f40940c541275b29"
+  },
+  "authorization": {
+    "bounded_projection_authorized": true,
+    "bounded_policy_binding_authorized": true,
+    "full_roster_runtime_authorized": false,
+    "simulation_authorized": false,
+    "evaluation_authorized": false,
+    "historical_validity_claim_authorized": false
+  }
+}

@@ -31,8 +31,9 @@ projects/h2epr/
 1907 年金融恐慌事件已经完成七份 Agent Definitions、五份 population models、Roster Definition
 release v0.1、全 Roster consolidated mapping、Event Scenario Definition v0.1，以及非可执行的
 Scenario Configuration v0.1。配置已固定机制覆盖用途、精确时间边界、16 actor / 10 unit assembly、
-初始分类记录、结构基线、策略语义和敏感性边界。下一项工程问题是需要单独授权的最小 loader 与
-KT–NBC–NYCH carrier projection，不直接启动全事件模拟。
+初始分类记录、结构基线、策略语义和敏感性边界。其最小静态 admission loader、独立的
+KT–NBC–NYCH 四动作/三路由 bounded binding，以及五 tick 的 E7 negative conformance、确定性
+trace/replay、review 与方法 closeout 均已完成。S0--S4 至此停止，不直接启动全事件模拟。
 
 ## 文档导航
 
@@ -41,6 +42,7 @@ KT–NBC–NYCH carrier projection，不直接启动全事件模拟。
 | 本页 | 仓库结构、模块关系和开发方向 |
 | [Research projects](README.md) | `projects/` 目录中的研究项目索引 |
 | [H2EPR README](h2epr/README.md) | 已有功能、运行边界和测试入口 |
+| [Event modeling workflow](h2epr/WORKFLOW.md) | 事件级阶段、门禁、停止边界和当前进度 |
 | [Architecture](h2epr/ARCHITECTURE.md) | 数据流、运行职责和信息隔离 |
 | [Evolution](h2epr/EVOLUTION.md) | 合同版本与内部实现的演进规则 |
 | [Agent guide](h2epr/agents/README.md) | Agent Definition 的目录、命名和迭代方式 |
@@ -71,9 +73,13 @@ H2EPR 的源码和研究资产集中在 `projects/h2epr/`。根级 `examples/` �
 
 ```text
 projects/h2epr/
+├── WORKFLOW.md                 # 事件级标准化阶段与门禁
 ├── contracts/v1/             # 稳定合同和 JSON Schema
 ├── decisions/                # 架构决策记录
-├── configs/panic_1907/       # 1907 canary 配置
+├── configs/                  # 配置指南、语义模板、已接受配置与冻结 canary
+│   ├── scenario-configuration-template.md
+│   ├── schemas/
+│   └── panic_1907/
 ├── agents/
 │   ├── agent-definition-template.md
 │   └── defines/panic_1907/
@@ -88,7 +94,8 @@ projects/h2epr/
 │   ├── agent-definition/
 │   ├── agent-definition-review/
 │   ├── event-scenario-design/
-│   └── roster-mapping-conformance/
+│   ├── roster-mapping-conformance/
+│   └── scenario-configuration/
 ├── scenarios/
 │   ├── scenario-definition-template.md
 │   ├── scenario-interface-closure-template.md
@@ -100,6 +107,7 @@ projects/h2epr/
 │   ├── world/
 │   ├── bundles/
 │   ├── agents/
+│   ├── configuration/
 │   ├── runtime/
 │   └── compiler/
 └── tests/
@@ -109,7 +117,9 @@ projects/h2epr/
 
 | 路径 | 用途 |
 |---|---|
+| `WORKFLOW.md` | 事件级阶段、授权门禁、关闭审计和当前进度 |
 | `contracts/v1/` | Construction、runtime、trace、seal、Generated EPG 等机器接口 |
+| `configs/` | 版本化 Scenario Configuration 与冻结工程 canary，二者不得互相提供默认值 |
 | `construction/` | 加载明确授权的来源，并生成 typed、lossless Construction IR |
 | `artifacts/` | EntityRegistry、provenance 和 ParticipantArtifact |
 | `policies/` | 现有 Rule canary 使用的声明式策略 |
@@ -124,8 +134,9 @@ projects/h2epr/
 | `tests/` | 合同、construction、runtime、compiler 和 Agent 测试 |
 
 `skills/` 覆盖证据与角色研究、Definition 编写和审核，以及 release 之后的
-场景设计和 consolidated mapping/conformance。每个 Skill 以 `SKILL.md` 作为入口，
-并把只在特定阶段需要的详细规范放在相邻 `references/` 中。
+场景设计、consolidated mapping/conformance 和 Scenario Configuration。配置 Skill 已从首个
+接受用例提炼，并把窄版工程 preflight 明确限制为后续静态配置准入；它仍需由第二事件前向检验。
+每个 Skill 以 `SKILL.md` 作为入口，并把只在特定阶段需要的详细规范放在相邻 `references/` 中。
 
 这些目录按职责组织。内部类名和文件拆分可以随着实现演进；`contracts/v1` 的公开语义保持稳定。
 
@@ -217,7 +228,8 @@ projects/h2epr/agents/
 
 Knickerbocker 与 NYCH 的 `0.2.1` Definition 已有接受的 V1 mapping 和可执行的非 Ray
 conformance 切片。其他五份 Agent Definition 与五份 population model 已进入 Roster Definition
-release v0.1，尚未进入 executable binding；其 mapping 将在下一轮统一进行。旧的三 tick 路径已经作为
+release v0.1，并由已接受的全 Roster consolidated mapping 与 bounded mapping-loader/conformance
+profile 覆盖；它们仍未获得 participant policy 或全事件 executable binding。旧的三 tick 路径已经作为
 `0.1.0-dev` 冻结工程夹具移入
 `tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`，只覆盖：
 
@@ -277,6 +289,7 @@ adapter 和冻结 Agent 工程基线仍分别存在直接 MASim imports；在正
 | V1 carrier fit | 当前语义可通过内部映射和跨对象校验承载 |
 | Event Scenario Definition | v0.1 已接受，闭合 12 个产品、115 个 observation placements、107 个 intent placements、13 类生命周期和 34 项跨对象规则 |
 | Scenario Configuration | v0.1 已接受为非可执行机制覆盖配置，固定 16 actor、10 population capability units、9 个外生输入、8 个结构选择和 8 个敏感性 overlays |
+| Configuration admission | v0.1 静态准入已通过，固定 raw/canonical identity、项目本地 schema、稳定错误分类、fail-closed loader、跨对象检查和 deterministic receipt；仍不可执行 |
 | Historical evaluation | 延后到独立的 post-seal 工作 |
 
 G1–G4 证明了工程链路可以运行。当前研究仍需继续验证 Agent 和 scenario 的科学合理性。GAP-01
@@ -293,13 +306,21 @@ H2EPR-0288 的 [Roster v0.4](h2epr/agents/rosters/panic_1907.md)、
 [consolidated mapping](h2epr/agents/bindings/panic_1907/consolidated/) 与
 [Event Scenario Definition v0.1](h2epr/scenarios/panic_1907/definition-v0.1/) 已接受；
 [Scenario Configuration v0.1](h2epr/configs/panic_1907/scenario-configuration-v0.1/)
-也已作为非可执行机制覆盖配置正式提升。下一轮仅在单独授权后形成最小 fail-closed loader、精确 carrier
-projection 与 KT–NBC–NYCH policy/environment binding，不直接扩展到全 roster 或启动全事件模拟。
+也已作为非可执行机制覆盖配置正式提升；其
+[bounded configuration admission v0.1](h2epr/configs/panic_1907/configuration-admission-v0.1/)
+已完成 schema/canonical identity、稳定错误分类、fail-closed loader 和静态 receipt；独立的
+[KT–NBC–NYCH bounded binding v0.1](h2epr/agents/bindings/panic_1907/kt-nbc-nych-v0.1/)
+也已完成精确 carrier projection 与最小 policy/environment binding；其
+[E7 conformance closeout](h2epr/scenarios/panic_1907/lineage-conformance-v0.1/)
+完成 negative conformance、确定性 trace/replay、review 与方法 closeout。按照
+[事件建模工作流](h2epr/WORKFLOW.md)，S0--S4 已完成并停止，不扩展到全 roster 或启动全事件模拟。
 
 ### 后续方向
 
-Rule v2、正式 simulation、post-seal evaluation、LLM/RAG 和多事件扩展都需要各自的研究问题和
-进入条件。项目会根据前一轮结果决定下一步，而不是预先固定完整阶段表。
+完整 16-actor runtime、九项 policy 的全部实现、全事件 simulation、参数校准或历史拟合、
+held-out/clean-builder 实验、post-seal 科学评价以及历史或科学有效性声明均不属于当前 S0--S4。
+Rule v2、正式 simulation、post-seal evaluation、LLM/RAG 和多事件扩展仍需要各自的研究问题和
+进入条件；下一步优先用第二事件检验方法复用性。
 
 ## 目录演进
 
@@ -336,15 +357,21 @@ Rule v2、正式 simulation、post-seal evaluation、LLM/RAG 和多事件扩展�
 
 ## 测试
 
-冻结 Agent 工程基线和 V1 合同测试不启动 Ray：
+配置静态准入、Agent binding/conformance 和 V1 合同测试不启动 Ray：
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 \
 PYTHONPATH=projects/h2epr/src \
 python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/configuration \
   projects/h2epr/tests/agents \
   projects/h2epr/tests/contracts
 ```
+
+独立的
+[H2EPR event-standardization CI](../.github/workflows/h2epr-event-standardization.yml)
+自动运行 configuration admission、KT--NBC--NYCH Agent binding 和 E7 conformance
+三个边界测试面。该 workflow 不启动 simulator，也不把 bounded E7 并入旧 G3/G4 运行路径。
 
 其他测试入口和环境要求见 [tests/README.md](h2epr/tests/README.md)。
 
