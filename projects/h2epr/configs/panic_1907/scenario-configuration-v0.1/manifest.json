@@ -1,0 +1,143 @@
+{
+  "schema": "h2epr.event-scenario-configuration-release.v0_1",
+  "release_id": "H2EPR-0288-SCENARIO-CONFIGURATION-v0.1",
+  "event_id": "H2EPR-0288",
+  "released_on": "2026-08-23",
+  "status": "accepted_non_executable_configuration",
+  "integrity_algorithm": "sha256",
+  "configuration": {
+    "id": "h2epr.0288.scenario.mechanism-coverage.v0_1",
+    "version": "0.1.0",
+    "purpose": "mechanism_coverage",
+    "timezone": "America/New_York",
+    "start": "1907-10-18T00:00:00-05:00",
+    "primary_window": "1907-10-21T00:00:00-05:00/1907-10-26T23:59:59-05:00",
+    "analytic_horizon": "1907-11-02T23:59:59-05:00",
+    "analytic_horizon_status": "declared_construction_assumption_not_historical_end_date",
+    "execution_eligible": false,
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false
+  },
+  "reviewed_candidate": {
+    "id": "h2epr.0288.scenario.mechanism-coverage.v0_1",
+    "version": "0.1-candidate.1",
+    "status": "REVIEW_CANDIDATE",
+    "review_verdict": "PASS_WITH_RECORDED_LIMITATIONS",
+    "scenario_configuration_sha256": "afe08066cd626ed1f293364ee3bdca391377128f4eb856485afb274a8795719f",
+    "configuration_design_sha256": "86947285382608591e4910d3ef643897401ef21babf19001e02528058d8dd438",
+    "definition_closure_sha256": "b020aee058412e8051cf6d6c1536ca0d9153e1a9606f8079f73021814e128b2c",
+    "substantive_review_sha256": "822c7090cb7f84c29c021b29423dced3dfa449f9dbf896fb630e90e6f1a4dfde",
+    "baseline_commit": "2d936f5bdce76d9cb7001085372f50e26cbfa441",
+    "baseline_tree": "11e45dcca9acc5df0eda9a1cb49e65a744d0163f",
+    "promotion_delta": "status_version_links_provenance_and_owner_resolution_only"
+  },
+  "semantic_inputs": {
+    "scenario_definition_release": {
+      "release_id": "H2EPR-0288-EVENT-SCENARIO-DEFINITION-v0.1",
+      "manifest_path": "scenarios/panic_1907/definition-v0.1/manifest.json",
+      "manifest_sha256": "26cabc9badde9368e485db576c5748bf0a3eb8f69c840d8fe4c156f28572fee0"
+    },
+    "scenario_definition": {
+      "path": "scenarios/panic_1907/definition-v0.1/scenario-definition.md",
+      "sha256": "5904e3fc2893261fe310a5af702baa523928901dc92122b95b603b71f62f6495"
+    },
+    "scenario_interface_closure": {
+      "path": "scenarios/panic_1907/definition-v0.1/interface-closure.md",
+      "sha256": "60538b9e280d92deace3ae10dce624bf3445868a80692ba70dac2cba5ed1bd5d"
+    },
+    "roster_definition_release": {
+      "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
+      "manifest_path": "releases/panic_1907/roster-definition-v0.1/manifest.json",
+      "manifest_sha256": "0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6"
+    },
+    "consolidated_mapping": {
+      "release_id": "H2EPR-0288-CONSOLIDATED-MAPPING-v0.1",
+      "manifest_path": "agents/bindings/panic_1907/consolidated/manifest.json",
+      "manifest_sha256": "987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a"
+    },
+    "mapping_profile": {
+      "id": "h2epr.roster-consolidated-mapping.v0_1",
+      "path": "agents/bindings/panic_1907/roster-v0.1/mapping-profile.json",
+      "sha256": "b0dd1cc3caed3c6bc3239e6bf5b956cb6c01740177ffa879f40940c541275b29"
+    },
+    "evidence_ledger": {
+      "path": "agents/defines/panic_1907/evidence-ledger.md",
+      "sha256": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933"
+    },
+    "source_register": {
+      "path": "agents/defines/panic_1907/source-register.md",
+      "sha256": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
+    }
+  },
+  "coverage": {
+    "semantic_products": 12,
+    "observation_placements": 115,
+    "intent_placements": 107,
+    "named_actors": 7,
+    "population_actors": 9,
+    "total_actors": 16,
+    "population_capability_units": 10,
+    "exogenous_inputs": 9,
+    "structural_selections": 8,
+    "selected_policy_semantics": 9,
+    "sensitivity_overlays": 8
+  },
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "a0d4d82cf968bf53be87627c25aedc30d348e04068e653186ea9ecb8dedea46b"
+    },
+    {
+      "kind": "scenario_configuration",
+      "path": "scenario-configuration.json",
+      "sha256": "6f931e81482d2a511220c467e578565b6b949b41c80874b13f56a172d9ed5e22"
+    },
+    {
+      "kind": "configuration_design",
+      "path": "configuration-design.md",
+      "sha256": "55911c8f04d3ca4d8a069b3e824ec3b5cdab74d914f28bff37141be39c84e0da"
+    },
+    {
+      "kind": "definition_closure",
+      "path": "definition-closure.md",
+      "sha256": "de7f3f506045bc1d0edb9f33ec4ef55d46e11b7458ca809b4e0d85276e9ccf8e"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "d1c374e31f9f70ca19383137ba203381f23cfb7f17129415d45c2cef809e8423"
+    }
+  ],
+  "owner_decision": {
+    "id": "ADR-0006",
+    "resolved_items": [
+      "OD-CFG-01",
+      "OD-CFG-02",
+      "OD-CFG-03",
+      "OD-CFG-04"
+    ],
+    "path": "decisions/ADR-0006-panic-1907-scenario-configuration-boundary.md",
+    "sha256": "f3db8710a3d0ba73f05365c7f8f7a37b79d5ae69e42e86005ddb285bfa326ff8"
+  },
+  "authorization": {
+    "configuration_semantics_accepted": true,
+    "execution_eligible": false,
+    "configuration_loader_authorized": false,
+    "policy_implementation_authorized": false,
+    "full_roster_implementation_authorized": false,
+    "simulation_authorized": false,
+    "rule_v2_authorized": false,
+    "llm_rag_authorized": false,
+    "contracts_mutation_authorized": false,
+    "historical_calibration_authorized": false,
+    "historical_validation_claim_authorized": false,
+    "scientific_validity_claim_authorized": false
+  },
+  "next_stage": {
+    "name": "minimal_configuration_loader_and_kt_nbc_nych_projection",
+    "authorization": "separate",
+    "full_roster_execution": "out_of_scope"
+  }
+}

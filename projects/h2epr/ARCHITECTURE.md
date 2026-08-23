@@ -121,8 +121,11 @@ bounded non-Ray reference slice live under `agents/bindings/panic_1907/` and
 Agent Definitions and five population models as scholarly semantic inputs.
 The accepted consolidated mapping covers all twelve products, and Event
 Scenario Definition v0.1 supplies their shared event-world semantics. The
-added roles and populations remain outside the executable subset until a
-separately authorized configuration, implementation, and conformance cycle.
+accepted Scenario Configuration v0.1 pins their first 16-actor / 10-unit
+mechanism-coverage assembly. The added roles and populations remain outside
+the executable subset until a separately authorized implementation and
+conformance cycle supplies an exact loader, policy binding, and carrier
+projection.
 
 | Responsibility | Owner |
 |---|---|

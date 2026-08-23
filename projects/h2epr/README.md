@@ -27,8 +27,11 @@ and market operation remain scenario-owned. Every H2EPR-0288 roster row has a
 reviewed disposition. Roster Definition release v0.1 is the fixed semantic
 input to the accepted consolidated mapping and V1 carrier review. The accepted
 [Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/) now
-provides the full event-world semantic boundary. A minimal versioned scenario
-configuration is the next design input.
+provides the full event-world semantic boundary. The accepted
+[Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
+pins a 16-actor / 10-unit mechanism-coverage assembly and remains explicitly
+non-executable. A minimal loader and KT–NBC–NYCH carrier projection is the
+next separately authorized engineering question.
 
 The earlier G1–G4 work remains the engineering foundation: construction,
 participant artifacts, deterministic Rule execution, trace/seal/replay and
@@ -176,7 +179,10 @@ question, horizon, causal ownership, and role dispositions. The non-executable
 shared concepts and interaction routes used during Roster production. The
 accepted [Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
 supersedes it as the full event-world semantic authority while preserving the
-skeleton as release provenance.
+skeleton as release provenance. The accepted
+[Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
+pins the first mechanism-coverage instantiation while retaining a fail-closed,
+non-executable boundary.
 The hash-pinned [Roster Definition release v0.1](releases/panic_1907/roster-definition-v0.1/)
 closes semantic production and is the sole input set for consolidated mapping.
 The accepted [consolidated mapping](agents/bindings/panic_1907/consolidated/)
@@ -296,6 +302,7 @@ development task.
 - [Panic of 1907 research roster](agents/rosters/panic_1907.md)
 - [Panic of 1907 semantic skeleton](scenarios/panic_1907/semantic-skeleton.md)
 - [Panic of 1907 Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
+- [Panic of 1907 Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
 - [Panic of 1907 consolidated mapping](agents/bindings/panic_1907/consolidated/)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)
