@@ -55,6 +55,12 @@ class RuleAnchoredTrader(CanonicalRulePlayer):
         "the published fundamental (Tversky & Kahneman 1974)."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "alpha": {"type": "float", "range": (0.0, 1.0)},
+        "threshold": {"type": "float", "range": (0.0, 1.0)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["alpha"] = float(extras.get("alpha", 0.30))

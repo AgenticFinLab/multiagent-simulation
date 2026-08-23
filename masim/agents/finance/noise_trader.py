@@ -25,7 +25,6 @@ Parameters (read from ``extras``):
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict
 
 from masim.agents._base import CanonicalRulePlayer, CanonicalLLMPlayer
@@ -38,6 +37,11 @@ class RuleNoiseTrader(CanonicalRulePlayer):
     DISPLAY_NAME = "Noise Trader"
     SUMMARY = "Random uninformed retail trader supplying microstructure noise (Black 1986)."
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "trade_probability": {"type": "float", "range": (0.0, 1.0)},
+        "min_order": {"type": "float", "range": (0.0, None)},
+        "max_order": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["trade_probability"] = float(
@@ -47,18 +51,19 @@ class RuleNoiseTrader(CanonicalRulePlayer):
         self.state.custom_state["max_order"] = float(extras.get("max_order", 500.0))
 
     def decide_order(self, state: StandardMarketState) -> InvestorOrder:
-        if random.random() >= self.state.custom_state["trade_probability"]:
+        rng = self.state.custom_state["rng"]
+        if rng.random() >= self.state.custom_state["trade_probability"]:
             return InvestorOrder.hold(
                 price=state.price,
                 investor=self.identity,
                 strategy=self.STRATEGY,
             )
 
-        quantity = random.uniform(
+        quantity = rng.uniform(
             self.state.custom_state["min_order"],
             self.state.custom_state["max_order"],
         )
-        factory = InvestorOrder.buy if random.random() > 0.5 else InvestorOrder.sell
+        factory = InvestorOrder.buy if rng.random() > 0.5 else InvestorOrder.sell
         return factory(
             quantity=quantity,
             price=state.price,

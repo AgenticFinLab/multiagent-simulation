@@ -6,7 +6,7 @@ market:
   persona: !include persona.yml
   config:
     identity: "market"
-    role: market
+    role: coordinator
     steps_per_turn: 1
     group_tags: [market]
     extras:
@@ -15,6 +15,7 @@ market:
       price_impact: 0.02  # Source: target §9 market.extras.price_impact; Shiller (2003), 10.1257/089533003321164967; simulation-bases.md §6
       mean_reversion: 0.008  # Source: target §9 market.extras.mean_reversion; Garber (1990), 10.1257/jep.4.2.35; simulation-bases.md §6
       noise_std: 0.015  # Source: target §9 market.extras.noise_std; Rule/players.py Market.perceive
+      custom_state_hot_limit: 3  # runtime plumbing; hot-state ring buffer
 
 rule_trend_chaser:
   name: "TrendChaser"
@@ -31,8 +32,9 @@ rule_trend_chaser:
       initial_position: 300  # Source: target §9 trendchaser.extras.initial_position; normalization
       initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
       fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
-      trend_threshold: 0.01  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses TrendChaser activation threshold 0.02 per Shiller 2003, 10.1257/089533003321164967)
-      chase_size: 400  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses TrendChaser quantity cap 800 / slope 5000)
+      activation_threshold: 0.02  # canonical TrendChaser activation threshold (Shiller 2003)
+      scaling_factor: 5000.0  # canonical TrendChaser slope
+      max_quantity: 800.0  # canonical TrendChaser quantity cap
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
 rule_social_proof_follower:
@@ -50,8 +52,9 @@ rule_social_proof_follower:
       initial_position: 400  # Source: target §9 socialprooffollower.extras.initial_position; normalization
       initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
       fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
-      crowd_threshold: 0.3  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses SocialProofFollower activation threshold 0.02 per Bikhchandani, Hirshleifer, and Welch 1992, 10.1086/261849)
-      follow_size: 350  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses SocialProofFollower quantity cap 800 / slope 5000)
+      threshold: 0.02  # canonical SocialProofFollower activation threshold (Bikhchandani et al. 1992)
+      scale: 5000.0  # canonical SocialProofFollower slope
+      max_order: 800.0  # canonical SocialProofFollower quantity cap
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
 rule_intrinsic_value_trader:
@@ -69,8 +72,9 @@ rule_intrinsic_value_trader:
       initial_position: 600  # Source: target §9 intrinsicvaluetrader.extras.initial_position; normalization
       initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
       fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
-      overvalue_threshold: 0.2  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses IntrinsicValueTrader activation threshold 0.05 per Garber 1990, 10.1257/jep.4.2.35)
-      position_size: 350  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses IntrinsicValueTrader quantity cap 500 / slope 3000)
+      activation_threshold: 0.05  # canonical IntrinsicValueTrader activation threshold (Garber 1990)
+      scaling_factor: 3000.0  # canonical IntrinsicValueTrader slope
+      max_quantity: 500.0  # canonical IntrinsicValueTrader quantity cap
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
 rule_early_exit_trader:
@@ -88,8 +92,9 @@ rule_early_exit_trader:
       initial_position: 500  # Source: target §9 earlyexittrader.extras.initial_position; normalization
       initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
       fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
-      exit_threshold: 0.4  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses EarlyExitTrader activation threshold 0.05 per Kindleberger and Aliber 2005, 10.1057/9780230628045)
-      exit_size: 400  # Source: target §9 legacy-extras footnote (retained for backward compatibility; runtime uses EarlyExitTrader quantity cap 500 / slope 3000)
+      activation_threshold: 0.05  # canonical EarlyExitTrader activation threshold (Kindleberger & Aliber 2005)
+      scaling_factor: 3000.0  # canonical EarlyExitTrader slope
+      max_quantity: 500.0  # canonical EarlyExitTrader quantity cap
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)
 
 rule_noise_trader:
@@ -108,5 +113,6 @@ rule_noise_trader:
       initial_price: 100.0  # Source: target §9 market.extras.initial_price; mirrored for agent-local reference
       fundamental_value: 100.0  # Source: target §9 market.extras.fundamental_value; mirrored for agent-local reference
       trade_probability: 0.3  # Source: target §9 NoiseTrader trade probability row; Rule/players.py NoiseTrader._make_decision; simulation-bases.md §4.5
-      noise_size: 100  # Source: target §9 NoiseTrader min order size row (lower bound of uniform draw 100–500); Rule/players.py NoiseTrader._make_decision; simulation-bases.md §4.5
+      min_order: 100.0  # canonical NoiseTrader lower bound (100-500 uniform draw)
+      max_order: 500.0  # canonical NoiseTrader upper bound
       custom_state_hot_limit: 3  # Source: target §9 custom_state_hot_limit row (runtime plumbing; not a scenario parameter)

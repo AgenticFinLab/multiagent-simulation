@@ -1,0 +1,22 @@
+name: contract-audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Audit migrated reference scenario (gated)
+        run: PYTHONPATH=. python scripts/audit_scenario_contract.py --scenario AnchoringEffect
+
+      - name: Audit full corpus (informational, migration in progress)
+        run: PYTHONPATH=. python scripts/audit_scenario_contract.py --json > audit.json || true

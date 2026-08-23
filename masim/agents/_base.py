@@ -47,6 +47,7 @@ from typing import Any, Dict, Optional, Union
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.utils.rng import derive_rng
 from masim.format.order import (
     BUY,
     HOLD,
@@ -245,6 +246,64 @@ def _coerce_to_order(
     return dataclasses.replace(order, **updates) if updates else order
 
 
+def validate_archetype_extras(
+    strategy: str, extras: Dict[str, Any], specs: Dict[str, Any]
+) -> None:
+    """Fail-loud validation of archetype ``extras`` against ``PARAM_SPECS``.
+
+    ``PARAM_SPECS`` maps a parameter name to ``{"type": "float"|"int""
+    (optional), "range": (lo, hi) (optional, ``None`` = unbounded)}``.  Only
+    parameters actually present in ``extras`` are checked, so missing optional
+    parameters still fall back to the archetype default in ``init_extras``.
+    Out-of-range or wrongly-typed values raise :class:`ValueError` instead of
+    silently producing a malformed simulation.
+    """
+    if not specs:
+        return
+    for name, spec in specs.items():
+        if name not in extras:
+            continue
+        value = extras[name]
+        typ = spec.get("type")
+        rng = spec.get("range")
+
+        if typ == "float":
+            try:
+                number = float(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"{strategy}.extras.{name}: expected numeric, got "
+                    f"{value!r} ({type(value).__name__})."
+                ) from exc
+        elif typ == "int":
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(
+                    f"{strategy}.extras.{name}: expected integer, got "
+                    f"{value!r} ({type(value).__name__})."
+                )
+            if float(value) != int(value):
+                raise ValueError(
+                    f"{strategy}.extras.{name}: expected integer, got "
+                    f"{value!r}."
+                )
+            number = int(value)
+        else:
+            continue
+
+        if rng:
+            lo, hi = rng
+            if lo is not None and number < lo:
+                raise ValueError(
+                    f"{strategy}.extras.{name}: {number!r} below minimum "
+                    f"{lo!r}."
+                )
+            if hi is not None and number > hi:
+                raise ValueError(
+                    f"{strategy}.extras.{name}: {number!r} above maximum "
+                    f"{hi!r}."
+                )
+
+
 def _emit(
     order: InvestorOrder,
     *,
@@ -376,6 +435,7 @@ class CanonicalRulePlayer(GeneralPlayer):
     DISPLAY_NAME: str = ""
     SUMMARY: str = ""
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {}
 
     # -- lifecycle ---------------------------------------------------------
 
@@ -525,9 +585,13 @@ class CanonicalRulePlayer(GeneralPlayer):
 
     def _initialize_state(self) -> None:
         extras = self.config.extras
+        validate_archetype_extras(self.STRATEGY, extras, self.PARAM_SPECS)
         record_path = extras.get("record_path", "")
         hot_limit = extras.get("custom_state_hot_limit", 1000)
 
+        self.state.custom_state["rng"] = derive_rng(
+            extras.get("seed"), salt=self.config.identity
+        )
         self.state.custom_state["cash"] = float(extras.get("initial_cash", 0.0))
         self.state.custom_state["position"] = float(extras.get("initial_position", 0.0))
         if record_path:
@@ -618,6 +682,7 @@ class CanonicalLLMPlayer(GeneralPlayer):
     STRATEGY: str = "CanonicalLLMPlayer"
     DEFAULT_SYS_PROMPT: str = ""
     DEFAULT_USER_PROMPT: str = ""
+    PARAM_SPECS: Dict[str, Any] = {}
 
     # -- lifecycle ---------------------------------------------------------
 
@@ -725,9 +790,13 @@ class CanonicalLLMPlayer(GeneralPlayer):
 
     def _initialize_state(self) -> None:
         extras = self.config.extras
+        validate_archetype_extras(self.STRATEGY, extras, self.PARAM_SPECS)
         record_path = extras.get("record_path", "")
         hot_limit = extras.get("custom_state_hot_limit", 1000)
 
+        self.state.custom_state["rng"] = derive_rng(
+            extras.get("seed"), salt=self.config.identity
+        )
         self.state.custom_state["cash"] = float(extras.get("initial_cash", 0.0))
         self.state.custom_state["position"] = float(extras.get("initial_position", 0.0))
         if record_path:

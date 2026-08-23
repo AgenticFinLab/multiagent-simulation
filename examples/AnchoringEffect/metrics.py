@@ -117,12 +117,18 @@ def _coordinator_extras(config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _anchored_adjustment_factor(config: Dict[str, Any]) -> float:
-    """Return the AnchoredTrader's adjustment_factor (alpha)."""
+    """Return the AnchoredTrader's ``alpha`` (behaviour-driving key).
+
+    Falls back to the legacy scenario-domain ``adjustment_factor`` spelling
+    for older bundles; new configs use the archetype-canonical ``alpha``.
+    """
     for player in config["players"].values():
         extras = player["config"]["extras"]
+        if "alpha" in extras:
+            return float(extras["alpha"])
         if "adjustment_factor" in extras:
             return float(extras["adjustment_factor"])
-    raise MetricUnavailable("no adjustment_factor present in any player extras")
+    raise MetricUnavailable("no alpha (or adjustment_factor) in any player extras")
 
 
 def _initial_anchor(config: Dict[str, Any]) -> float:

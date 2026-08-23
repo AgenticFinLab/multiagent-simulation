@@ -31,7 +31,6 @@ market:
     group_tags:
       - market
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path convention per 07-step3-config.md §3.7)
       # Market dynamics parameters (price formula P(t+1) = P(t) + λ·D(t) + γ·[F−P(t)] + ε)
       fundamental_value: 100.0     # Source: target §9 F; simulation-bases.md §3.1 (normalization, 100-scale index)
       initial_price: 105.0         # Source: target §9 P0; simulation-bases.md §3.1 (5% above F, IPO-anchor seed)
@@ -57,13 +56,12 @@ rule_anchored_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization (10000-scale)
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization (100-share seed)
       custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # AnchoredTrader specific parameters (target §4.1 anchor: Tversky & Kahneman 1974)
-      adjustment_factor: 0.3       # Source: target §9 alpha; Tversky & Kahneman (1974) https://doi.org/10.1126/science.185.4157.1124
+      alpha: 0.3       # Source: target §9 alpha; Tversky & Kahneman (1974) https://doi.org/10.1126/science.185.4157.1124
       base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization, mid-range)
   persona: !include persona.yml
 
@@ -83,7 +81,6 @@ rule_historical_anchor:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
@@ -109,7 +106,6 @@ rule_rational_updater:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
@@ -134,13 +130,12 @@ rule_momentum_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
       custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # MomentumTrader specific parameters (target §4.5 anchor: Jegadeesh & Titman 1993)
-      entry_threshold: 0.02        # Source: target §9 tau_MT; Jegadeesh & Titman (1993) https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
+      threshold: 0.02        # Source: target §9 tau_MT; Jegadeesh & Titman (1993) https://doi.org/10.1111/j.1540-6261.1993.tb04702.x
       base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization)
   persona: !include persona.yml
 
@@ -160,7 +155,6 @@ rule_noise_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
@@ -187,7 +181,6 @@ rule_disposition_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
@@ -213,14 +206,13 @@ rule_contrarian_trader:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
       custom_state_hot_limit: 3    # Source: implementation infrastructure (hot-state ring buffer)
       # ContrarianTrader specific parameters (target §4.7 anchor: De Bondt & Thaler 1985)
       lookback_window: 10          # Source: target §9 L_CT; Jegadeesh (1990) https://doi.org/10.1111/j.1540-6261.1990.tb03723.x
-      entry_threshold: 0.05        # Source: target §9 tau_CT; De Bondt & Thaler (1985) https://doi.org/10.1111/j.1540-6261.1985.tb05004.x
+      threshold: 0.05        # Source: target §9 tau_CT; De Bondt & Thaler (1985) https://doi.org/10.1111/j.1540-6261.1985.tb05004.x
       base_position_size: 20.0     # Source: target §9 b; simulation-bases.md §6 (base-size normalization)
   persona: !include persona.yml
 
@@ -239,7 +231,6 @@ rule_fundamental_analyst:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 10000.0        # Source: target §9 C0; portfolio normalization
       initial_position: 100.0      # Source: target §9 Q0; portfolio normalization
@@ -264,7 +255,6 @@ rule_liquidity_provider:
     group_tags:
       - investors
     extras:
-      record_path: "EXPERIMENT/AnchoringEffect/Rule/records"  # Source: implementation infrastructure (record path)
       # Investor base parameters
       initial_cash: 15000.0        # Source: simulation-bases.md §4.9.7 (market-maker inventory buffer, 1.5x normalization)
       initial_position: 150.0      # Source: simulation-bases.md §4.9.7 (market-maker inventory, 1.5x share-normalization)

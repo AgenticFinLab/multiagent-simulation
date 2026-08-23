@@ -1,8 +1,7 @@
-"""TulipMania Rule Variant"""
+"""TulipMania Rule Variant."""
 
 from .players import (
     Market,
-    BaseInvestor,
     TrendChaser,
     SocialProofFollower,
     IntrinsicValueTrader,
@@ -12,7 +11,6 @@ from .players import (
 
 __all__ = [
     "Market",
-    "BaseInvestor",
     "TrendChaser",
     "SocialProofFollower",
     "IntrinsicValueTrader",

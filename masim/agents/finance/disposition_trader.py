@@ -49,6 +49,12 @@ class RuleDispositionTrader(CanonicalRulePlayer):
         "(Shefrin & Statman 1985; Kahneman & Tversky 1979)."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "gain_threshold": {"type": "float", "range": (0.0, 1.0)},
+        "loss_aversion_mult": {"type": "float", "range": (0.0, None)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["gain_threshold"] = float(

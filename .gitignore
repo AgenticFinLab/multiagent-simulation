@@ -220,6 +220,12 @@ tmpl/
 
 *TEST*
 
+# Unit tests are intentionally versioned (unignore the tests/ package)
+!tests/
+!tests/**
+tests/**/__pycache__/
+tests/**/*.pyc
+
 slides*
 !docs/slides/
 !docs/slides/**

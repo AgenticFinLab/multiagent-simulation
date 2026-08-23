@@ -57,8 +57,8 @@ Prerequisite Signals:
 Missing-Signal Policy: hold until at least two valid prices exist.
 
 Activation Triggers:
-- `return > entry_threshold`: submit buy order.
-- `return < -entry_threshold`: submit sell order.
+- `return > threshold`: submit buy order.
+- `return < -threshold`: submit sell order.
 - `<Default>`: hold.
 
 Deactivation Conditions:
@@ -195,7 +195,7 @@ Does NOT use: `fundamental`, `anchor`, `cost_basis`, bid-ask depth.
 
 | Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
 |-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `entry_threshold` | float | 0.02 | [0, 1] | high | Return threshold for action. | Higher -> fewer momentum trades. | Jegadeesh & Titman (1993) |
+| `threshold` | float | 0.02 | [0, 1] | high | Return threshold for action. | Higher -> fewer momentum trades. | Jegadeesh & Titman (1993) |
 | `base_position_size` | float | 20.0 | > 0 | high | Maximum order size. | Higher -> stronger trend amplification. | Standardised |
 | `sizing_scale` | float | 1000.0 | > 0 | medium | Converts return into quantity. | Higher -> more aggressive trend chasing. | Standardised |
 | `inventory_max` | float | 200.0 | > 0 | low | Inventory cap. | Higher -> longer trend exposure. | Standardised |
@@ -206,7 +206,7 @@ Does NOT use: `fundamental`, `anchor`, `cost_basis`, bid-ask depth.
 |--------|---------------|
 | Default population size | scenario-dependent |
 | Parameter heterogeneity policy | iid narrow draw |
-| Heterogeneity per parameter | `entry_threshold -> Uniform(0.015, 0.03)` |
+| Heterogeneity per parameter | `threshold -> Uniform(0.015, 0.03)` |
 | Cross-agent correlation | none |
 | Identity persistence | identical across episodes unless redrawn |
 
@@ -247,7 +247,7 @@ State update: set prev_price=100 for next tick.
 ## Validation and Calibration
 
 **Calibration data sources** (per parameter, where applicable):
-- `entry_threshold` <- Jegadeesh & Titman (1993) momentum evidence translated to scenario scale.
+- `threshold` <- Jegadeesh & Titman (1993) momentum evidence translated to scenario scale.
 
 **Expected stylized facts** when this agent dominates the population:
 - Momentum and short-run trend persistence.
@@ -263,13 +263,13 @@ State update: set prev_price=100 for next tick.
 
 | Ablation name | Setting | Hypothesis tested |
 |---------------|---------|-------------------|
-| `no_momentum` | `entry_threshold = 1.0` | Removing momentum reduces trend persistence. |
+| `no_momentum` | `threshold = 1.0` | Removing momentum reduces trend persistence. |
 | `aggressive_momentum` | `base_position_size = 100` | Higher capacity amplifies price runs. |
 
 ## Behavioral Verification and Calibration
 
-- Given a one-period return above `entry_threshold` (e.g., r = 0.03 > 0.02), agent must emit a buy order with positive quantity.
-- Given a one-period return below negative `entry_threshold` (e.g., r = -0.03 < -0.02), agent must emit a sell order with positive quantity.
+- Given a one-period return above `threshold` (e.g., r = 0.03 > 0.02), agent must emit a buy order with positive quantity.
+- Given a one-period return below negative `threshold` (e.g., r = -0.03 < -0.02), agent must emit a sell order with positive quantity.
 - Given a one-period return inside the threshold band (e.g., |r| = 0.01 < 0.02), agent must hold with zero quantity.
 - Given `prev_price` is missing or unavailable, agent must hold and not compute a return signal.
 - Given inventory at `inventory_max`, agent must not increase position further on the constrained side.
@@ -278,7 +278,7 @@ State update: set prev_price=100 for next tick.
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|
-| `no_momentum` | `entry_threshold = 1.0` | Removing momentum trading reduces short-run return autocorrelation | decrease | lag-1 return autocorrelation |
+| `no_momentum` | `threshold = 1.0` | Removing momentum trading reduces short-run return autocorrelation | decrease | lag-1 return autocorrelation |
 | `aggressive_momentum` | `base_position_size = 100` | Higher capacity amplifies trend persistence and bubble magnitude | increase | peak-to-trough price swing |
 
 ## Academic References

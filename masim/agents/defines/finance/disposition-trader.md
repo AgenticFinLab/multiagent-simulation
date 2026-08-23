@@ -202,7 +202,7 @@ Does NOT use: `fundamental`, `momentum`, `anchor`, peer flow.
 | Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
 |-----------|------|---------|-------------|-------------|-------------|--------|--------|
 | `gain_threshold` | float | 0.04 | [0, 1] | high | Gain needed to sell. | Higher -> later profit-taking. | Shefrin & Statman (1985) |
-| `loss_threshold` | float | 0.016 | [0, 1] | high | Loss needed to buy more. | Higher -> less averaging down. | Standardised |
+| `loss_aversion_mult` | float | 2.5 | > 0 | high | Loss-aversion asymmetry multiplier; derived loss threshold = `gain_threshold / loss_aversion_mult`. | Higher -> less averaging down. | Kahneman & Tversky (1979) |
 | `base_position_size` | float | 15.0 | > 0 | medium | Maximum order size. | Higher -> stronger asymmetric liquidity. | Standardised |
 | `sizing_scale` | float | 500.0 | > 0 | medium | Converts gain/loss to order size. | Higher -> larger response to P&L. | Standardised |
 | `inventory_max` | float | 200.0 | > 0 | low | Maximum long inventory. | Higher -> more averaging-down capacity. | Standardised |
@@ -263,7 +263,7 @@ State update: no cost basis until a buy fill occurs.
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|
-| `symmetric_thresholds` | `loss_threshold = gain_threshold` | Symmetry removes disposition asymmetry. | decrease | ratio of gain-realizations to loss-realizations |
+| `symmetric_thresholds` | `loss_aversion_mult = 1.0` | Symmetry removes disposition asymmetry. | decrease | ratio of gain-realizations to loss-realizations |
 | `no_average_down` | disable loss buy branch | Loss-domain demand supports price less. | increase | max drawdown during selloffs |
 
 ## Academic References

@@ -57,22 +57,26 @@ from examples.AnchoringEffect.metrics import REGISTRY
 
 
 def _get_adjustment_factor(config: dict) -> float:
-    """Return the anchoring ``adjustment_factor`` from the first player
-    config that exposes it under ``config.extras``.
+    """Return the anchoring ``alpha`` from the first player config.
 
-    Scenario-specific config parsing — kept local because
-    ``adjustment_factor`` is an AnchoringEffect-only field.  Raises if
-    no player carries the field, mirroring the pre-refactor behaviour."""
+    The behaviour-driving key is the archetype-canonical ``alpha`` (see
+    ``masim.agents.finance.anchored_trader.RuleAnchoredTrader``).  The legacy
+    scenario-domain spelling ``adjustment_factor`` is still accepted as a
+    fallback so older bundles keep working, but new configs must use ``alpha``
+    so that the same value actually reaches the archetype.
+    """
 
     players = config["players"]
     for player_cfg in players.values():
         if "config" not in player_cfg:
             continue
         extras = player_cfg["config"].get("extras", {})
+        if "alpha" in extras:
+            return float(extras["alpha"])
         if "adjustment_factor" in extras:
             return float(extras["adjustment_factor"])
     raise ValueError(
-        "No adjustment_factor found in AnchoringEffect player configs."
+        "No alpha (or legacy adjustment_factor) found in AnchoringEffect player configs."
     )
 
 

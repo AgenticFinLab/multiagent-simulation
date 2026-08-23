@@ -47,6 +47,12 @@ class RuleContrarianTrader(CanonicalRulePlayer):
         "(De Bondt & Thaler 1985; Jegadeesh 1990)."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "lookback": {"type": "int", "range": (1, None)},
+        "threshold": {"type": "float", "range": (0.0, 1.0)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["lookback"] = int(extras.get("lookback", 10))

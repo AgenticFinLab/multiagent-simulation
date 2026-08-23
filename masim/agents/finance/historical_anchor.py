@@ -45,6 +45,13 @@ class RuleHistoricalAnchor(CanonicalRulePlayer):
         "backward-looking reference that lags fundamental regime changes."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "anchor_weight": {"type": "float", "range": (0.0, 1.0)},
+        "lookback": {"type": "int", "range": (1, None)},
+        "threshold": {"type": "float", "range": (0.0, 1.0)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["anchor_weight"] = float(

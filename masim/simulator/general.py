@@ -40,8 +40,12 @@ Usage:
 """
 
 import copy
+import json
 import logging
 import os
+import subprocess
+from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import ray
@@ -69,6 +73,67 @@ from masim.utils.config import load_class
 
 # Module logger
 logger = logging.getLogger("masim.simulator")
+
+
+def derive_persona_output_paths(record_root: str) -> Dict[str, Dict[str, str]]:
+    """Derive persona storage / checkpoint / monitoring paths from the run root.
+
+    ``setting.record_path`` is the single source of truth; sibling directories
+    (``checkpoints``, ``monitoring``) are computed here so ``players.yml`` and
+    ``persona.yml`` no longer repeat paths that inevitably drift apart.
+    """
+    parent = os.path.dirname(record_root.rstrip("/")) or "."
+    return {
+        "storage": {
+            "record_path": record_root,
+            "checkpoint_dir": os.path.join(parent, "checkpoints"),
+        },
+        "monitoring": {"record_path": os.path.join(parent, "monitoring")},
+    }
+
+
+def _write_run_manifest(
+    config: "SimulationConfig", simulation_id: str, record_path: str
+) -> None:
+    """Persist a per-run provenance manifest next to the recorded data.
+
+    Captures the seed, config fingerprint inputs, git revision and start
+    time so that any ``EXPERIMENT/.../records`` directory is self-describing
+    and reproducible.  Never records secrets (only class paths, roles and
+    instance counts are serialised from ``players``).
+    """
+    commit = None
+    try:
+        root = Path(__file__).resolve().parents[2]
+        commit = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=root, capture_output=True, text=True, check=False,
+        ).stdout.strip() or None
+    except Exception:
+        commit = None
+
+    manifest = {
+        "schema_version": 1,
+        "simulation_id": simulation_id,
+        "name": config.setting.get("name"),
+        "seed": config.setting.get("seed"),
+        "total_rounds": config.setting.get("total_rounds"),
+        "started_at": datetime.now().isoformat(),
+        "git_commit": commit,
+        "players": [
+            {
+                "player_id": pid,
+                "class": cfg.get("class"),
+                "num_instances": cfg.get("num_instances"),
+                "role": (cfg.get("config") or {}).get("role"),
+            }
+            for pid, cfg in config.players.items()
+        ],
+    }
+    os.makedirs(record_path, exist_ok=True)
+    with open(os.path.join(record_path, "run_manifest.json"), "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, default=str, ensure_ascii=False)
+    logger.info("Run manifest written to %s", record_path)
 
 
 # =============================================================================
@@ -153,9 +218,26 @@ class GeneralSimulator(BaseSimulator):
             if self.config.knowledge:
                 extras = config_data.setdefault("extras", {})
                 extras.setdefault("knowledge", copy.deepcopy(self.config.knowledge))
+            seed = self.config.setting.get("seed")
+            if seed is not None:
+                # setting.seed is the single source of truth for reproducibility;
+                # it is injected into every player's extras so stochastic
+                # archetypes (market noise, noise traders, ...) derive a
+                # deterministic per-agent RNG from it.
+                config_data.setdefault("extras", {})["seed"] = seed
             player_config = PlayerConfig(
                 name=player_cfg["name"], **config_data
             )
+
+            # Single source of truth for output paths: setting.record_path.
+            # Persona storage / checkpoint / monitoring paths are derived from
+            # it here so configs no longer repeat the same path in players.yml
+            # and persona.yml (which inevitably drift apart).
+            persona_config = copy.deepcopy(player_cfg["persona"])
+            record_root = self.config.setting["record_path"]
+            proxy = persona_config.setdefault("proxy", {})
+            for section, overrides in derive_persona_output_paths(record_root).items():
+                proxy.setdefault(section, {}).update(overrides)
 
             actor_name = get_actor_name(self.config.setting["name"], player_id)
             handle = RemotePlayerPersona.options(
@@ -167,7 +249,7 @@ class GeneralSimulator(BaseSimulator):
             ).remote(
                 player_class=player_class,
                 player_config=player_config,
-                persona_config=player_cfg["persona"],
+                persona_config=persona_config,
             )
 
             handles[player_id] = handle
@@ -596,6 +678,8 @@ class GeneralSimulator(BaseSimulator):
             )
             self.status = SimulatorStatus.TERMINATED
             return self.history.recent
+
+        _write_run_manifest(self.config, self.simulation_id, record_path)
 
         # NOTE: Don't accumulate all_results in memory - use self.history (HistoryBuffer)
         # Full history is already persisted via HistoryBuffer cold storage

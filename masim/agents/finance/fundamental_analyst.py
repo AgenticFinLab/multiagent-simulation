@@ -50,6 +50,12 @@ class RuleFundamentalAnalyst(CanonicalRulePlayer):
         "conservatism bias in belief updating (Barberis-Shleifer-Vishny 1998)."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "learning_rate": {"type": "float", "range": (0.0, 1.0)},
+        "threshold": {"type": "float", "range": (0.0, 1.0)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["learning_rate"] = float(

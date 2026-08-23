@@ -7,13 +7,10 @@ debug_mode: true
 
 proxy:
   storage:
-    checkpoint_dir: "EXPERIMENT/AnchoringEffect/Rule/checkpoints"
-    record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
     record_rounds: true
     turn_block_size: 3
 
   monitoring:
-    record_path: "EXPERIMENT/AnchoringEffect/Rule/monitoring"
     monitor_hot_limit: 3
 
   communication:
