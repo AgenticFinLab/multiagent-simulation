@@ -531,56 +531,6 @@ class CanonicalRulePlayer(GeneralPlayer):
         """
         return None
 
-    def on_fill(
-        self, action: str, quantity: float, bid_price: float
-    ) -> None:
-        """Post-fill hook — the ONLY sanctioned extension point for
-        archetype-specific bookkeeping after an order clears.
-
-        Called by :func:`_apply_fill_and_emit_action` *after* the shared
-        base has:
-
-          1. Verified ``decision_payload`` carries
-             ``action`` / ``quantity`` / ``bid_price``.
-          2. Enforced ``require_positive_bid_price`` for BUY / SELL.
-          3. Mutated ``self.state.custom_state['cash']`` and
-             ``self.state.custom_state['position']``.
-
-        The tuple passed in is therefore **already validated** — for a
-        BUY/SELL fill ``bid_price > 0`` is guaranteed. Archetypes that
-        need to update VWAP anchors, cost basis, purchase price,
-        entry-time counters or similar per-fill state MUST override
-        this hook. They MUST NOT override :meth:`act` — the raw
-        ``decision_payload`` is intentionally hidden from subclasses so
-        the classic silent-fill pattern (``fill_price = bid_price if
-        bid_price > 0 else market_data['price']``) becomes unwriteable
-        by construction.
-
-        The hook fires for every action including ``hold`` so subclasses
-        can observe every step; most archetypes filter for
-        ``action == 'buy'``. Exceptions raised here propagate — do not
-        swallow them.
-
-        Parameters
-        ----------
-        action : str
-            One of the canonical action tags (``'buy'``, ``'sell'``,
-            ``'hold'``) — already normalised by the base.
-        quantity : float
-            Filled quantity. Always ``>= 0`` for BUY/SELL.
-        bid_price : float
-            The executed price. For BUY/SELL this is guaranteed
-            ``> 0`` — the wire-format guard blocks any lower value.
-
-        Notes
-        -----
-        The pre-fill ``position`` can be recovered from the post-fill
-        state as ``new_pos - quantity`` for BUY and ``new_pos +
-        quantity`` for SELL — the framework has already applied the
-        mutation before invoking this hook.
-        """
-        return None
-
     # -- helpers -----------------------------------------------------------
 
     def _initialize_state(self) -> None:
@@ -754,23 +704,6 @@ class CanonicalLLMPlayer(GeneralPlayer):
         return _apply_fill_and_emit_action(
             self, decision_payload, class_name="CanonicalLLMPlayer"
         )
-
-    def on_fill(
-        self, action: str, quantity: float, bid_price: float
-    ) -> None:
-        """Post-fill hook — LLM/RAG variant of
-        :meth:`CanonicalRulePlayer.on_fill`.
-
-        Semantics are identical to the Rule variant — see that
-        docstring for the full contract. The hook is defined here
-        (rather than inherited from a common base) because
-        :class:`CanonicalLLMPlayer` and :class:`CanonicalRulePlayer`
-        are siblings under :class:`GeneralPlayer`, not a shared
-        canonical mixin. :class:`CanonicalRagPlayer` (defined in
-        :mod:`masim.agents._rag_base`) subclasses this LLM base and
-        therefore inherits ``on_fill`` transparently.
-        """
-        return None
 
     # -- pickling: drop the live LLM client --------------------------------
 

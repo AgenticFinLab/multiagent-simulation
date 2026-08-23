@@ -27,7 +27,7 @@ import argparse
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1084,6 +1084,39 @@ def analyze_anchoring(
     return summary
 
 
+def run_anchoring_analysis(
+    config_path: str,
+    variant: str,
+    *,
+    post_process: Optional[Callable] = None,
+) -> Dict[str, Any]:
+    """Shared, argparse-free analysis entry point used by every variant.
+
+    Encapsulates the boilerplate that previously lived in each variant's
+    ``main()``::
+
+        load_config -> load_results -> _load_data -> analyze_anchoring
+        -> optional variant-specific post_process
+
+    ``post_process`` (if given) is called as
+    ``post_process(data, config, output_dir, summary)`` after the canonical
+    summary has been written, so Rag can append its knowledge-effect block
+    without duplicating the load/analyse pipeline.
+    """
+    config = load_config(config_path)
+    base_dir = os.path.dirname(config["setting"]["record_path"])
+    output_dir = os.path.join(base_dir, "analysis")
+    os.makedirs(output_dir, exist_ok=True)
+
+    results = load_results(config)
+    data = _load_data(results)
+    summary = analyze_anchoring(data, config, output_dir, variant=variant)
+
+    if post_process is not None:
+        post_process(data, config, output_dir, summary)
+    return summary
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
@@ -1098,14 +1131,7 @@ def main():
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
-    base_dir = os.path.dirname(config["setting"]["record_path"])
-    output_dir = os.path.join(base_dir, "analysis")
-    os.makedirs(output_dir, exist_ok=True)
-
-    results = load_results(config)
-    data = _load_data(results)
-    return analyze_anchoring(data, config, output_dir)
+    return run_anchoring_analysis(args.config, "Rule")
 
 
 if __name__ == "__main__":
@@ -1118,6 +1144,7 @@ __all__ = [
     "compute_all_metrics",
     "create_visualizations",
     "analyze_anchoring",
+    "run_anchoring_analysis",
     "_validate_anchoring_effect",
     "_build_interpretation",
     "_load_data",

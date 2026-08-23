@@ -241,3 +241,6 @@ docs/slides/**/*.log
 configs/.team_registry
 
 */slides/*
+
+# Local-only unit tests (kept out of the repo by policy)
+.tests/

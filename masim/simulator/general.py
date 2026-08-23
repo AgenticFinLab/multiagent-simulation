@@ -225,6 +225,20 @@ class GeneralSimulator(BaseSimulator):
                 # archetypes (market noise, noise traders, ...) derive a
                 # deterministic per-agent RNG from it.
                 config_data.setdefault("extras", {})["seed"] = seed
+
+            # Preflight: validate archetype extras against PARAM_SPECS *before*
+            # spinning up any Ray actor, so a bad parameter fails as a clean
+            # ValueError instead of a mid-run actor traceback.
+            from masim.agents._base import validate_archetype_extras
+
+            specs = getattr(player_class, "PARAM_SPECS", None)
+            if specs:
+                validate_archetype_extras(
+                    getattr(player_class, "STRATEGY", player_id),
+                    config_data.get("extras", {}),
+                    specs,
+                )
+
             player_config = PlayerConfig(
                 name=player_cfg["name"], **config_data
             )
