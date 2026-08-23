@@ -6,7 +6,9 @@ worker metadata belong in operational receipts, never in scientific bytes.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+import copy
+from dataclasses import dataclass, field, fields
+from types import MappingProxyType
 from typing import Any, Mapping
 
 
@@ -25,11 +27,38 @@ def _mapping(value: Mapping[str, Any], field_name: str) -> None:
         raise TypeError(f"{field_name}_must_be_mapping")
 
 
+def _freeze(value: Any) -> Any:
+    """Detach and recursively freeze JSON-like scientific values."""
+    if isinstance(value, Mapping):
+        return MappingProxyType({copy.deepcopy(key): _freeze(item) for key, item in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze(item) for item in value)
+    if isinstance(value, (set, frozenset)):
+        return frozenset(_freeze(item) for item in value)
+    return copy.deepcopy(value)
+
+
+def _plain(value: Any) -> Any:
+    """Return detached plain values suitable for canonical serialization."""
+    if isinstance(value, Mapping):
+        return {copy.deepcopy(key): _plain(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return tuple(_plain(item) for item in value)
+    if isinstance(value, frozenset):
+        return frozenset(_plain(item) for item in value)
+    return copy.deepcopy(value)
+
+
+def _freeze_fields(instance: Any, *names: str) -> None:
+    for name in names:
+        object.__setattr__(instance, name, _freeze(getattr(instance, name)))
+
+
 class ClosedValue:
     """Mixin providing deterministic plain-object serialization."""
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        return {item.name: _plain(getattr(self, item.name)) for item in fields(self)}
 
 
 @dataclass(frozen=True)
@@ -56,6 +85,18 @@ class ObservationEnvelope(ClosedValue):
             raise ValueError("invalid_prestate_sha256")
         _mapping(self.public_state, "public_state")
         _mapping(self.private_state, "private_state")
+        _mapping(self.prior_generated_state, "prior_generated_state")
+        if not isinstance(self.delivered_messages, (list, tuple)) or not all(
+            isinstance(item, Mapping) for item in self.delivered_messages
+        ):
+            raise TypeError("delivered_messages_must_be_sequence_of_mappings")
+        _freeze_fields(
+            self,
+            "public_state",
+            "private_state",
+            "delivered_messages",
+            "prior_generated_state",
+        )
 
 
 @dataclass(frozen=True)
@@ -79,6 +120,7 @@ class ActionIntent(ClosedValue):
         if len(self.prestate_sha256) != 64:
             raise ValueError("invalid_prestate_sha256")
         _mapping(self.parameters, "parameters")
+        _freeze_fields(self, "parameters")
 
 
 @dataclass(frozen=True)
@@ -111,6 +153,7 @@ class MessageIntent(ClosedValue):
         if isinstance(self.latency_ticks, bool) or self.latency_ticks < 1:
             raise ValueError("invalid_message_latency")
         _mapping(self.payload, "payload")
+        _freeze_fields(self, "payload")
 
 
 @dataclass(frozen=True)
@@ -130,6 +173,7 @@ class ActionDisposition(ClosedValue):
         _logical_tick(self.logical_tick)
         if self.status != "accepted" and self.state_delta_ids:
             raise ValueError("nonaccepted_disposition_has_delta")
+        _freeze_fields(self, "state_delta_ids")
 
 
 @dataclass(frozen=True)
@@ -176,3 +220,4 @@ class StateDelta(ClosedValue):
             _identifier(getattr(self, name), name)
         if self.before == self.after:
             raise ValueError("zero_effect_state_delta")
+        _freeze_fields(self, "before", "after")

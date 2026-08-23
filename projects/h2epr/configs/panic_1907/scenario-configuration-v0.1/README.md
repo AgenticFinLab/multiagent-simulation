@@ -26,9 +26,9 @@ historical-validity claim is supplied by this release.
 | [scenario-configuration.json](scenario-configuration.json) | accepted machine-readable configuration semantics and execution boundary |
 | [configuration-design.md](configuration-design.md) | explanatory design, construction choices, and accepted owner decisions |
 | [definition-closure.md](definition-closure.md) | closure against Event Scenario Definition v0.1 and the full released interface |
-| [substantive-review.md](substantive-review.md) | successor-window review, resolved findings, limitations, and owner resolution |
+| [substantive-review.md](substantive-review.md) | independent review, resolved findings, limitations, and owner resolution |
 | [manifest.json](manifest.json) | release identity, candidate provenance, semantic-input hashes, artifact hashes, decisions, and authorization boundary |
-| [SHA256SUMS](SHA256SUMS) | integrity record for this release and its fixed authorities |
+| [SHA256SUMS](SHA256SUMS) | integrity record for files owned by this release directory |
 
 [ADR-0006](../../../decisions/ADR-0006-panic-1907-scenario-configuration-boundary.md)
 records `OD-CFG-01` through `OD-CFG-04`. The manifest also preserves the

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json",
   "title": "H2EPR Core Contracts V1",
   "type": "object",
   "additionalProperties": false,

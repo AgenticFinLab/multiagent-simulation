@@ -66,7 +66,7 @@ The configuration remains fail-closed and establishes no executable policy,
 runtime carrier, simulation result, historical calibration, historical
 validation, or scientific-validity claim. This decision does not authorize
 Rule v2, LLM/RAG, Contracts mutation, broad event implementation, simulation,
-or remote publication.
+or external publication.
 
 The next eligible engineering question is a separately authorized minimal
 loader and KT–NBC–NYCH projection. A reproducible mismatch must be routed to

@@ -6,19 +6,18 @@
 - Verdict: `PASS_BOUNDED_CONFIGURATION_ADMISSION`
 - Date: 23 August 2026
 
-This E5 closeout admits the exact accepted Scenario Configuration as a static,
+This package admits the exact accepted Scenario Configuration as a static,
 non-executable semantic input. It verifies two externally supplied source
 anchors, the release package and semantic-input hashes, the project-local
 v0.1 schema, deterministic canonical identity, actor/unit assembly,
 cross-object references, typed sensitivity targets, derived coverage, and the
 declared execution boundary.
 
-The [receipt](receipt.json) pins the schema, loader, error vocabulary, focused
-tests, accepted source bytes, canonical configuration digest, release
-manifest, mapping profile, and all verified semantic inputs. Its repository
-record is intentionally honest: commit
-`95aad4b656a4828f22036bf356d35aa5f25728c2` is the baseline, and the authorized
-S0--S2 changes were present but uncommitted when the receipt was produced.
+The [receipt](receipt.json) binds the accepted source bytes, canonical
+configuration digest, schema, release manifest, mapping profile, semantic
+inputs, and portable verification identifiers. Environment-specific operator
+metadata and command lines are deliberately excluded from the content-addressed
+receipt.
 
 ## What passed
 
@@ -44,6 +43,6 @@ admission only. It does not supply a Contracts V1 carrier projection, bind a
 policy or environment, create a runtime bundle, run a simulation, calibrate a
 parameter, evaluate a trace, or establish historical/scientific validity.
 
-The next legal stage is the separately scoped E6 KT--NBC--NYCH exact carrier
+The next legal step is the separately scoped KT--NBC--NYCH exact carrier
 projection and minimal policy/environment binding. The full 16-actor runtime
 and untouched policy families remain outside that stage.

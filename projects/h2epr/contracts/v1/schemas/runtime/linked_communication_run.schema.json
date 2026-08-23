@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/linked_communication_run.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/runtime/linked_communication_run.schema.json",
   "title": "Linked Communication Run V1",
   "type": "object",
   "additionalProperties": false,
@@ -15,7 +15,7 @@
       "const": "communication.linked_run.v1"
     },
     "trace": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/SimulationTrace"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/SimulationTrace"
     },
     "decision_communication_histories": {
       "type": "array",
@@ -25,7 +25,7 @@
       }
     },
     "run_seal_closure": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json#/$defs/CommunicationRunSealClosure"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json#/$defs/CommunicationRunSealClosure"
     }
   },
   "$defs": {
@@ -38,12 +38,12 @@
       ],
       "properties": {
         "decision_record": {
-          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/DecisionRecord"
+          "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/DecisionRecord"
         },
         "attempts": {
           "type": "array",
           "items": {
-            "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json#/$defs/CommunicationAttemptHistory"
+            "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json#/$defs/CommunicationAttemptHistory"
           }
         }
       }

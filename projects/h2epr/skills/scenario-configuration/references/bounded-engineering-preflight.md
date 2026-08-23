@@ -1,24 +1,24 @@
 # Bounded engineering preflight
 
-Use this reference for H2EPR E5: static admission of one exact, accepted
-Scenario Configuration into a fail-closed configuration surface. It adapts
-the repository experiment-preflight discipline without turning E5 into an
-experiment launch.
+Use this reference for static admission of one exact, accepted Scenario
+Configuration into a fail-closed configuration surface. It adapts the
+repository experiment-preflight discipline without turning configuration
+admission into an experiment launch.
 
 Passing this preflight means only that the exact configuration can be
 identified, parsed, validated, and rejected predictably when invalid. It does
-not make the configuration executable and does not authorize E6 carrier
+not make the configuration executable and does not authorize carrier
 projection or policy/environment binding.
 
 ## Adaptation boundary
 
-| Repository preflight practice | E5 adaptation |
+| Repository preflight practice | Configuration-admission adaptation |
 |---|---|
-| identify branch/commit and document worktree state | retain |
+| identify the exact source revision and isolate overlapping changes | retain as an operator check, outside the portable receipt |
 | select exact experiment rows | replace with one exact configuration identity and bounded validation scope |
 | resolve config through the intended loader | retain as fail-closed structural admission |
 | classify failures before fixing | retain with H2EPR authority routing |
-| record exact commands and results | retain in a static receipt |
+| record checks and results | retain through portable check identifiers and summaries |
 | API keys, prompts/parsers, and RAG assets | exclude |
 | Ray/tmux scheduling, CPU budgets, timeouts, and output directories | exclude |
 | full-round run and post-run sample intake | exclude |
@@ -29,31 +29,31 @@ authorized.
 
 ## Required declaration
 
-Before any implementation or check, record:
+Before any implementation or check, establish:
 
-- repository root, branch, commit, and whether unrelated worktree changes are
-  present;
+- the exact source revision and whether unrelated changes overlap the admitted
+  surface; keep environment-specific details in the operator log;
 - accepted configuration path, ID, version, status, file digest, and promoted
   manifest/checksum identities;
 - pinned Definition, roster release, mapping, mapping-profile, evidence, and
   source identities required by the configuration;
-- authorized validation surface, allowed files, focused test command, and
-  explicit stopping point;
-- expected schema identity and canonical-identity rule, when E5 supplies them;
+- authorized validation surface, allowed files, focused checks, and explicit
+  stopping point;
+- expected schema identity and canonical-identity rule, when admission supplies them;
 - expected execution eligibility and policy-binding state; and
 - prohibited work, including carrier projection, policy implementation,
   runtime, calibration, evaluation, and validity claims.
 
-An undocumented dirty worktree is a preflight failure only when it prevents
-exact attribution or overlaps the admitted surface. Preserve and report
-unrelated user changes.
+Unrelated changes are a preflight failure only when they prevent exact
+attribution or overlap the admitted surface. Preserve them and keep them out of
+the admitted package.
 
 ## Static gates
 
-### Gate P0: authorization and repository identity
+### Gate P0: authorization and source identity
 
-- The exact configuration and E5 surface are named.
-- Repository identity and relevant worktree state are recorded.
+- The exact configuration and admission surface are named.
+- The exact source revision is known and overlapping changes are isolated.
 - Every intended write and test stays inside the authorized surface.
 - No accepted semantic artifact will be edited to make the loader pass.
 
@@ -75,9 +75,9 @@ unrelated user changes.
 - Canonical digest mismatch and unsupported schema/version fail before any
   projection or policy lookup.
 
-S1 does not define the schema, normalization algorithm, digest envelope, or
-literal machine error codes. S2 must make those choices explicit and test
-them.
+This reference does not define the schema, normalization algorithm, digest
+envelope, or literal machine error codes. The implementation must make those
+choices explicit and test them.
 
 ### Gate P3: semantic references and assembly
 
@@ -106,41 +106,41 @@ them.
   including integrity, schema/version, unknown field, reference, assembly,
   exact overlay target, and execution-policy checks as applicable.
 - Each rejection is stable, deterministic, and routed to one owning layer.
-- Focused tests run before relevant regression tests; exact commands and
-  results are retained.
+- Focused tests run before relevant regression tests; stable check identifiers
+  and results are retained.
 
 ### Gate P6: static receipt
 
 Record a machine-readable receipt containing at least:
 
 - receipt-format identity and validation-surface version;
-- repository identity and documented worktree state;
 - exact configuration identity, source digest, canonical digest, and schema
   identity;
 - exact pinned semantic-input identities and verification results;
 - authorization and prohibited-scope summary;
-- each gate result, focused command, exit status, and test summary;
+- each gate result, portable check identifier, status, and summary;
 - execution eligibility and policy-binding summary;
 - stable failure class and diagnostic for a failed admission;
 - final verdict and explicit next legal stage; and
 - receipt identity or digest sufficient to compare repeated preflights.
 
-The receipt may include observational metadata such as execution time, but
-that metadata must not alter the canonical configuration identity.
+Environment-specific paths, revision-control state, commands, and execution
+times belong in the operator log rather than the portable receipt.
 
 ## Failure ownership categories
 
-S1 fixes these semantic categories, not their eventual literal machine codes:
+This reference fixes these semantic categories, not their eventual literal
+machine codes:
 
 | Category | Owner |
 |---|---|
-| repository attribution or unauthorized scope | engineering task boundary |
+| source attribution or unauthorized scope | engineering task boundary |
 | configuration package identity or integrity | configuration promotion package |
-| parse, schema, canonicalization, or loader default | E5 implementation |
+| parse, schema, canonicalization, or loader default | configuration-admission implementation |
 | actor assembly, opening record, exogenous input, policy selection, overlay, or configured-purpose mismatch | Scenario Configuration |
 | missing world/lifecycle meaning or causal owner | Event Scenario Definition |
 | released participant meaning or evidence-time contradiction | participant product, release, or evidence authority |
-| carrier identity or projection ambiguity | consolidated mapping or E6 projection |
+| carrier identity or projection ambiguity | consolidated mapping or carrier projection |
 | absent policy implementation | later policy-binding stage |
 
 Do not edit an accepted Definition, mapping, or configuration merely to turn a
@@ -156,8 +156,8 @@ Use one of:
 - `RETURN_TO_SCENARIO_MAPPING_OR_RELEASE`; or
 - `BLOCKED_BY_AUTHORIZATION_SCOPE`.
 
-The pass verdict authorizes only the already named E5 closeout. E6 requires a
-new stage transition and exact projection scope.
+The pass verdict authorizes only the named configuration-admission closeout.
+Carrier projection requires a new stage transition and exact projection scope.
 
 ## Stop conditions
 

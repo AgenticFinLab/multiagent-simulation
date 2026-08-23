@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/construction_anchor_allowlist.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/construction/construction_anchor_allowlist.schema.json",
   "title": "Synthetic Construction Anchor Allowlist V1",
   "type": "object",
   "additionalProperties": false,
@@ -48,7 +48,7 @@
             "minLength": 1
           },
           "lineage_ref": {
-            "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
+            "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
           },
           "content_hash_preimage": {
             "const": "omit_construction_seal_and_operational_metadata"

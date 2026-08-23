@@ -1,9 +1,6 @@
-987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a  manifest.json
-4523ff61419b631cec6d8d14081c5a86da2b0bbd086d1201000ebd23544dc4ed  README.md
-6c9837d5d68d30aafb8ae196d21d38f3f0a1a43b50f60abd325154ced6ff45fa  semantic-inventory.md
-1b0acb4fba07fb209730bb406ad04794fe2adea6349ccdfa0ff828147eb9b720  mapping-specification.md
+4a0334723e3016b5fe22a84fc81a8dc10958c9513424a6bc3a30a55b79590ba2  manifest.json
+ef9f25b97c6a45565b75d4e0eb6f0ef2d5808cf5a038d7c9729a0a3c873b933a  README.md
+eb62a3f58be4b1c72053208ec28fdfde00e50e2996cbfaed1d07895c99a4b31b  semantic-inventory.md
+f2a235a19c15f019413d8fbf936b4fe251ca1e07a8eac9515f8e14b3514cced2  mapping-specification.md
 b012f11a8dd4060346617311de43639e23e5b25856bf55bdfae04b3b3c4be993  v1-carrier-review.md
 9306019567acd22d8c5e7cca288c7a12dd8a58eaf3b954a1d145de199584bff7  substantive-review.md
-43a93569fd9bd85e97ed9db36d923c4255cba7179b944a684c8fb3b5c54223da  ../../../../decisions/ADR-0004-roster-consolidated-mapping-boundary.md
-0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6  ../../../../releases/panic_1907/roster-definition-v0.1/manifest.json
-d2e692b8afa67c212e3d4af7b5923fcab58781580aca70435fc9d3f289019bb8  ../../../../releases/panic_1907/roster-definition-v0.1/SHA256SUMS

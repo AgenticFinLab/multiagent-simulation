@@ -42,7 +42,7 @@
     {
       "asset_id": "two_role_binding_specification",
       "path": "agents/bindings/panic_1907/two-role-binding.md",
-      "sha256": "efadac4f21022699933edeb5ecbeaa7fdec5fb783d5e3c3febc9e72bad2517d6"
+      "sha256": "9ad283379e7008459aba1dfa8efb0a41293091e7306067e2de40cc0f056dfc49"
     }
   ],
   "machine_registries": {
@@ -61,7 +61,7 @@
   },
   "contract_carrier": {
     "path": "contracts/v1/schemas/core/h2epr_core.schema.json",
-    "sha256": "d6bea7e1094071c5187e16c2c52e989d8353e426da4d385206a11a189c5c5cf5",
+    "sha256": "36232df97aadf276358ff93f836fe52683b7aea4cf57f8cd697f92e3669e8c25",
     "verdict": "V1_COMPATIBLE_VIA_EXPLICIT_INTERNAL_MAPPING_AND_CROSS_OBJECT_VALIDATION",
     "successor_required": false
   },

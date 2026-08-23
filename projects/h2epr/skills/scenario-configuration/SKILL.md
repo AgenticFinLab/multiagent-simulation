@@ -21,7 +21,7 @@ before authoring. Read
 [configuration review and promotion](references/configuration-review-and-promotion.md)
 before issuing a verdict or performing an authorized promotion. Read
 [bounded engineering preflight](references/bounded-engineering-preflight.md)
-only when preparing or reviewing the later E5 configuration-admission step.
+only when preparing or reviewing the later configuration-admission step.
 
 This Skill has three modes:
 
@@ -184,7 +184,7 @@ all blocking decisions. Revalidate the reviewed candidate, limit changes to
 promotion metadata and integrity packaging, and verify the resulting bytes as
 one package. Any substantive semantic edit returns to review.
 
-After promotion, use the bounded-preflight reference to define the later E5
+After promotion, use the bounded-preflight reference to define the later
 admission scope. Do not create a schema, loader, error-code vocabulary,
 carrier projection, policy binding, or runtime as part of configuration
 promotion.
@@ -207,7 +207,8 @@ finalizes:
 1. `README.md` with identity, scope, files, verification, and next legal stage;
 2. `manifest.json` with pinned inputs, artifacts, owner decisions, claim and
    execution boundaries, and artifact hashes; and
-3. `SHA256SUMS` covering the promoted payload and decision record.
+3. `SHA256SUMS` covering files owned by the promoted release directory;
+   semantic-input and decision-record identities remain in the manifest.
 
 Until an accepted machine schema exists, the candidate's serialization is
 provisional and must remain non-executable. Do not invent an event-local schema

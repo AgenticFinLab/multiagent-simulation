@@ -217,6 +217,7 @@ third-part/
 
 # Local pipeline logs (never committed)
 tmpl/
+/.local-runtime/
 
 /examples/UTEST/
 

@@ -51,8 +51,8 @@ Definitions.
 | [binding specification](../../bindings/panic_1907/) | accepted mapping of the Knickerbocker and NYCH Definitions into Contracts V1, business lifecycles, intent registry, and cross-object checks |
 | [consolidated mapping](../../bindings/panic_1907/consolidated/) | accepted release-wide identity, observation, intent, lifecycle, authority, resource, result, and carrier design |
 | [Scenario Configuration v0.1](../../../configs/panic_1907/scenario-configuration-v0.1/) | accepted non-executable mechanism-coverage instantiation |
-| [KT--NBC--NYCH E6 binding](../../bindings/panic_1907/kt-nbc-nych-v0.1/) | exact four-action, three-route positive projection with NBC as pure courier |
-| [E7 conformance closeout](../../../scenarios/panic_1907/lineage-conformance-v0.1/) | cross-hop negatives, deterministic trace/replay receipt, implementation review, and method closeout |
+| [KT--NBC--NYCH bounded binding](../../bindings/panic_1907/kt-nbc-nych-v0.1/) | exact four-action, three-route positive projection with NBC as pure courier |
+| [lineage conformance closeout](../../../scenarios/panic_1907/lineage-conformance-v0.1/) | cross-hop negatives, deterministic trace/replay receipt, implementation review, and method closeout |
 
 The evidence ledger owns claim status. The source register owns source identity and custody metadata. The
 Definitions own participant behavior semantics. Scenario/environment assets will own instantiated world facts,
@@ -67,20 +67,20 @@ facility-scoped decline and subsequent contingency preparation.
 
 The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions
 and all five population models are accepted scholarly products in Roster
-Definition release v0.1. NBC alone now has a separate bounded E6 courier
+Definition release v0.1. NBC alone has a separate bounded courier
 projection in the KT--NBC--NYCH lineage; it is still absent from the frozen
 two-role registry. The other four Definitions and all populations have no
 participant policy implementation. Their semantics remain covered by the
 consolidated mapping profile rather than separate role-by-role engineering.
-E5--E7 have passed for the bounded lineage, but the accepted Scenario
-Configuration remains explicitly non-executable and its nine top-level policy
-selections remain unbound.
+Configuration admission, bounded binding, and lineage conformance are complete
+for this lineage, but the accepted Scenario Configuration remains explicitly
+non-executable and its nine top-level policy selections remain unbound.
 
 The R2 Definitions are intentionally non-symmetrical. Morgan is a bounded named coordinator; TCA is an
 aggregate institutional response interface; Lincoln is a thin board-authorized communication interface because
 the bounded evidence did not support a focal Lincoln assistance, collateral, or operating policy.
 
-The earlier `0.1.0-dev` three-tick path is preserved only as a frozen engineering fixture under
+The legacy three-tick path is preserved only as a frozen engineering fixture under
 [`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../../../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/).
 It checks the existing binding and trace seams; it is not an older editable Definition line and does not bind
 the current files.

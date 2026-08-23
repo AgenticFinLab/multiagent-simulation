@@ -138,7 +138,7 @@ def test_required_phase0_surface_is_present() -> None:
     assert REQUIRED_PHASE0_PROJECT_FILES <= actual
     repository_root = root.parents[1]
     bridge_paths = {
-        ".github/workflows/h2epr-phase0-contracts.yml",
+        ".github/workflows/h2epr-validation.yml",
         "README.md",
         "data/h2epr/README.md",
         "docs/development-environment.md",
@@ -147,6 +147,23 @@ def test_required_phase0_surface_is_present() -> None:
         "setup.py",
     }
     assert all((repository_root / path).is_file() for path in bridge_paths)
+
+
+def test_release_manifests_use_one_public_version_convention() -> None:
+    root = Path(__file__).resolve().parents[2]
+    paths = (
+        root / "agents/bindings/panic_1907/consolidated/manifest.json",
+        root / "agents/bindings/panic_1907/kt-nbc-nych-v0.1/manifest.json",
+        root / "configs/panic_1907/scenario-configuration-v0.1/manifest.json",
+        root / "releases/panic_1907/roster-definition-v0.1/manifest.json",
+        root / "scenarios/panic_1907/definition-v0.1/manifest.json",
+    )
+    for path in paths:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        assert re.fullmatch(r"\d+\.\d+\.\d+", manifest["version"])
+        major, minor, _ = manifest["version"].split(".")
+        assert manifest["release_id"].endswith(f"-v{major}.{minor}")
+        assert re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", manifest["status"])
 
 
 def test_executable_contract_boundary_is_offline_and_reference_free() -> None:

@@ -1,6 +1,7 @@
 {
   "schema": "h2epr.roster-definition-release.v0_1",
   "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
+  "version": "0.1.0",
   "event_id": "H2EPR-0288",
   "released_on": "2026-08-21",
   "status": "accepted_semantic_release",
@@ -155,9 +156,9 @@
       "new_york_clearing_house"
     ],
     "binding_path": "agents/bindings/panic_1907/binding.json",
-    "binding_sha256": "e1368522bca22bdfc9905ef24ce167fe1080e279a9607bc254be6327070d73c2",
+    "binding_sha256": "4fc9f8d53d98a6e477b139f27b2982d78f93fbbcbc6307f29829b2641bd68bab",
     "specification_path": "agents/bindings/panic_1907/two-role-binding.md",
-    "specification_sha256": "efadac4f21022699933edeb5ecbeaa7fdec5fb783d5e3c3febc9e72bad2517d6",
+    "specification_sha256": "9ad283379e7008459aba1dfa8efb0a41293091e7306067e2de40cc0f056dfc49",
     "relation_to_release": "retained engineering reference; not the consolidated roster binding"
   },
   "next_stage": {

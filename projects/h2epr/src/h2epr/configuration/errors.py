@@ -18,7 +18,7 @@ class ConfigurationFailureClass(str, Enum):
 
 
 class ConfigurationErrorCode(str, Enum):
-    """Stable machine codes for the E5 configuration-admission surface."""
+    """Stable machine codes for the configuration-admission surface."""
 
     SOURCE_NOT_FOUND = "CONFIG_SOURCE_NOT_FOUND"
     PROJECT_ROOT_NOT_FOUND = "CONFIG_PROJECT_ROOT_NOT_FOUND"
@@ -67,7 +67,7 @@ _FAILURE_CLASS_BY_CODE = {
 
 
 class ConfigurationAdmissionError(ValueError):
-    """One deterministic, routed rejection from the E5 admission surface."""
+    """One deterministic, routed rejection from configuration admission."""
 
     def __init__(
         self,

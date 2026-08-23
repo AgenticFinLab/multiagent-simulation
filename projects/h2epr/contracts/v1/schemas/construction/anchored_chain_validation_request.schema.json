@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/anchored_chain_validation_request.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/construction/anchored_chain_validation_request.schema.json",
   "title": "Anchored Artifact Chain Validation Request V1",
   "type": "object",
   "additionalProperties": false,

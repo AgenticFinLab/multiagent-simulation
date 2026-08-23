@@ -25,13 +25,13 @@ CONFIG_RELATIVE = Path(
 MANIFEST_RELATIVE = CONFIG_RELATIVE.parent / "manifest.json"
 RECEIPT_RELATIVE = Path("configs/panic_1907/configuration-admission-v0.1/receipt.json")
 ACCEPTED_SOURCE_SHA256 = (
-    "6f931e81482d2a511220c467e578565b6b949b41c80874b13f56a172d9ed5e22"
+    "22f2566b9f0607deb66a2149a6651592eddc968c4646fda18747df25f6d60558"
 )
 ACCEPTED_MANIFEST_SHA256 = (
-    "be9f9fb3c81380d9b6ba31414667b7594032d22a42d88b9fa3ea2abf5cf72f24"
+    "0b7c343bce6a7fdb0c9815d5902e4b6c3d59fd5bdba8d9858f37ed3e3d08c93b"
 )
 ACCEPTED_CANONICAL_SHA256 = (
-    "fce44a347aa6504b5d26f6a3901753c1b4547359f85fed9ec1a860a92196359f"
+    "01dd45b46f9fbb3f9ab175dc5645d59cf635a2268a55f6a3574ea909e035ff8d"
 )
 
 
@@ -107,28 +107,11 @@ def _rewrite_package(
     return source_sha256, manifest_sha256
 
 
-def _repository_context() -> dict[str, object]:
-    paths = (
-        "configs/schemas/event-scenario-configuration-v0.1.schema.json",
-        "src/h2epr/configuration/errors.py",
-        "src/h2epr/configuration/loader.py",
-    )
-    return {
-        "root": "projects/h2epr",
-        "branch": "h2epr-event-simulation",
-        "baseline_commit": "a" * 40,
-        "worktree_state": "authorized_configuration_admission_changes_present",
-        "validation_surface_sha256s": {
-            path: _sha256(PROJECT_ROOT / path) for path in paths
-        },
-    }
-
-
 VERIFICATION = [
     {
-        "command": "pytest projects/h2epr/tests/configuration",
-        "result": "pass",
-        "summary": "focused configuration admission checks passed",
+        "check_id": "configuration-admission",
+        "status": "pass",
+        "summary": "bounded configuration admission checks passed",
     }
 ]
 
@@ -142,6 +125,11 @@ def test_accepted_configuration_admits_with_exact_nonexecutable_identity() -> No
     assert admission.source_sha256 == ACCEPTED_SOURCE_SHA256
     assert admission.canonical_sha256 == ACCEPTED_CANONICAL_SHA256
     assert admission.release_manifest_sha256 == ACCEPTED_MANIFEST_SHA256
+    assert admission.schema_document_id == (
+        "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/"
+        "main/projects/h2epr/configs/schemas/"
+        "event-scenario-configuration-v0.1.schema.json"
+    )
     assert admission.coverage["total_actors"] == 16
     assert admission.coverage["population_units"] == 10
     assert admission.coverage["observation_placements"] == 115
@@ -152,16 +140,14 @@ def test_accepted_configuration_admits_with_exact_nonexecutable_identity() -> No
         admission.document["purpose"] = "changed"
 
 
-def test_preflight_receipt_is_deterministic_and_does_not_authorize_e6() -> None:
+def test_preflight_receipt_is_deterministic_and_does_not_authorize_binding() -> None:
     admission = _load()
     first = build_configuration_preflight_receipt(
         admission=admission,
-        repository_context=_repository_context(),
         verification=VERIFICATION,
     )
     second = build_configuration_preflight_receipt(
         admission=admission,
-        repository_context=_repository_context(),
         verification=VERIFICATION,
     )
 
@@ -182,16 +168,18 @@ def test_preflight_receipt_is_deterministic_and_does_not_authorize_e6() -> None:
     }
 
 
-def test_tracked_receipt_self_hash_and_validation_surface_are_exact() -> None:
+def test_tracked_receipt_is_self_hashed_and_portable() -> None:
     receipt = json.loads((PROJECT_ROOT / RECEIPT_RELATIVE).read_text(encoding="utf-8"))
     preimage = copy.deepcopy(receipt)
     expected_receipt_sha256 = preimage.pop("receipt_sha256")
 
     assert sha256_value(preimage) == expected_receipt_sha256
-    for relative, expected_sha256 in receipt["repository"][
-        "validation_surface_sha256s"
-    ].items():
-        assert _sha256(PROJECT_ROOT / relative) == expected_sha256
+    assert "repository" not in receipt
+    assert all(set(row) == {"check_id", "status", "summary"} for row in receipt["verification"])
+    receipt_text = json.dumps(receipt, sort_keys=True)
+    assert "/home/" not in receipt_text
+    assert "h2epr-event-simulation" not in receipt_text
+    assert "worktree" not in receipt_text
     assert receipt["execution_boundary"]["execution_eligible"] is False
 
 
@@ -225,6 +213,23 @@ def test_project_root_and_prefixed_relative_configuration_path_resolve_once() ->
     )
 
     assert admission.project_relative_path == CONFIG_RELATIVE.as_posix()
+
+
+def test_checksum_inventory_is_confined_to_the_release_directory(
+    tmp_path: Path,
+) -> None:
+    root = _copy_project(tmp_path)
+    checksum_path = root / CONFIG_RELATIVE.parent / "SHA256SUMS"
+    checksum_path.write_text(
+        checksum_path.read_text(encoding="utf-8")
+        + f"{'0' * 64}  ../../../agents/defines/panic_1907/source-register.md\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigurationAdmissionError) as raised:
+        _load(root)
+    assert raised.value.code is ConfigurationErrorCode.PATH_UNSAFE
+    assert raised.value.pointer.startswith("/SHA256SUMS/")
 
 
 def test_raw_source_drift_fails_against_external_identity(tmp_path: Path) -> None:
@@ -286,7 +291,6 @@ def test_unknown_top_level_field_fails_schema_and_routes_p2(tmp_path: Path) -> N
     receipt = build_configuration_preflight_receipt(
         error=raised.value,
         attempted_configuration_path=CONFIG_RELATIVE.as_posix(),
-        repository_context=_repository_context(),
         verification=VERIFICATION,
     )
     assert receipt["verdict"] == "FAIL_CONFIGURATION_SURFACE"

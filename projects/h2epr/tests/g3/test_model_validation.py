@@ -13,6 +13,20 @@ def test_closed_action_intent_accepts_logical_scientific_fields() -> None:
     assert value.to_dict()["logical_tick"] == 1
 
 
+def test_closed_action_intent_detaches_and_deeply_freezes_parameters() -> None:
+    source = {"nested": {"values": [1, 2]}}
+    value = ActionIntent("i1", "r1", "a1", 1, 0, HASH, "no_op", source, "p1")
+    source["nested"]["values"].append(3)
+
+    assert value.to_dict()["parameters"] == {"nested": {"values": (1, 2)}}
+    with pytest.raises(TypeError):
+        value.parameters["new"] = "value"
+    with pytest.raises(TypeError):
+        value.parameters["nested"]["new"] = "value"
+    with pytest.raises(AttributeError):
+        value.parameters["nested"]["values"].append(3)
+
+
 @pytest.mark.parametrize("field,value", [("logical_tick", -1), ("prestate_sha256", "short")])
 def test_action_intent_rejects_invalid_coordinates(field: str, value: object) -> None:
     kwargs = dict(intent_id="i1", run_id="r1", actor_id="a1", logical_tick=1, prestate_version=0, prestate_sha256=HASH, action_type="no_op", parameters={}, policy_id="p1")

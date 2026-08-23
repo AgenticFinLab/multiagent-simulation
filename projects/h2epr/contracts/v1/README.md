@@ -6,7 +6,7 @@ event-process simulation design.
 - `specifications/` explains the scientific and engineering contracts.
 - `schemas/catalog.json` lists exactly 28 Draft 2020-12 schemas with stable
   identifiers rooted at
-  `https://agenticfinlab.local/h2epr/contracts/v1/schemas/`.
+  `https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/`.
 - `../../tests/` resolves every reference offline and replays the retained
   synthetic behavior suite.
 
@@ -18,4 +18,5 @@ compilation or evaluation.
 Canonical scientific JSON is UTF-8, NFC-normalized, key-sorted, compact JSON.
 Array order is semantic unless a field explicitly defines set semantics.
 Operational metadata is excluded only where the relevant hash preimage says so.
-
+Schema identifiers are persistent offline names; they do not imply network
+retrieval.

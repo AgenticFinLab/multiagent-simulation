@@ -8,8 +8,8 @@ semantics without becoming a second Agent, scenario, or contract authority.
 
 ### Release integrity
 
-- Are manifest, checksum inventory, paths, semantic product hashes, and owner
-  decisions verified from one declared root?
+- Are manifest, local checksum inventory, paths, semantic product hashes, and
+  owner decisions verified through their declared identities?
 - Are all products included exactly once and all release counts derived rather
   than copied?
 - Does every mapping artifact identify the release and contract versions it
@@ -83,7 +83,8 @@ semantics without becoming a second Agent, scenario, or contract authority.
 - Does atomic promotion add a README, manifest, checksum inventory, and owner
   decision without changing semantic content?
 - Do manifest counts derive from the pinned products rather than copied prose?
-- Can every checksum be verified from one declared root after promotion?
+- Can every release-local checksum be verified from its owning directory after
+  promotion?
 
 ## Conformance implementation review
 
@@ -98,8 +99,8 @@ semantics without becoming a second Agent, scenario, or contract authority.
 - Does any implementation-only default, synonym, threshold, action, memory, or
   repair change released meaning?
 - Are error diagnostics precise enough to route a failure to its owning layer?
-- Do focused, import/contract, and full regression tests pass from a clean
-  worktree?
+- Do focused, import/contract, and full regression tests pass from an isolated
+  source checkout?
 - Are policy, simulation, scientific validity, and contract-change claims
   withheld when outside scope?
 

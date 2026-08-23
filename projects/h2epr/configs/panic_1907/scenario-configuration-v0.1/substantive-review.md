@@ -1,9 +1,9 @@
 # H2EPR-0288 Scenario Configuration substantive review
 
 - Review date: `2026-08-23`
-- Review mode: successor-window substantive review after context recovery
+- Review mode: independent substantive review
 - Candidate: `h2epr.0288.scenario.mechanism-coverage.v0_1`
-- Candidate version: `0.1-candidate.1`
+- Candidate version: `0.1.0-candidate.1`
 - Verdict: `PASS_WITH_RECORDED_LIMITATIONS`
 - Recommendation: `ACCEPT_FOR_NON_EXECUTABLE_CONFIGURATION_RELEASE`
 
@@ -120,7 +120,7 @@ claim of runtime readiness or scientific validity:
 
 ## 7. Recommended disposition
 
-Freeze the current candidate as `REVIEW_CANDIDATE` while the project owner
+Freeze the current candidate as `review_candidate` while the project owner
 decides `OD-CFG-01` through `OD-CFG-04`. If accepted, promote it in one short,
 atomic configuration-release cycle with an exact manifest and checksum set.
 Do not combine that promotion with policy implementation or simulation.
@@ -139,8 +139,8 @@ resolution preserves the mechanism-coverage purpose, 16-actor / 10-unit
 assembly, conservative baseline, exact-identity sensitivity rule, and
 non-executable boundary.
 
-The same instruction authorizes this tracked release and one local atomic
-commit only. It does not authorize remote publication, policy implementation,
+The same instruction authorizes this tracked release only. It does not
+authorize external publication, policy implementation,
 simulation, Rule v2, LLM/RAG, Contracts mutation, historical calibration,
 historical validation, or a scientific-validity claim.
 

@@ -26,10 +26,12 @@ def test_schema_behavior_case(case: dict) -> None:
 def test_schema_catalog_is_exact_and_offline() -> None:
     catalog = json.loads((SCHEMAS / "catalog.json").read_text(encoding="utf-8"))
     assert catalog["network_resolution"] == "prohibited"
+    assert catalog["base_uri"] == "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/"
     assert catalog["schema_count"] == 28 == len(SCHEMA_PATHS)
     expected_paths = {path.relative_to(SCHEMAS).as_posix() for path in SCHEMA_PATHS}
     assert {row["path"] for row in catalog["schemas"]} == expected_paths
     assert len({row["schema_id"] for row in catalog["schemas"]}) == 28
+    assert all(row["schema_id"].startswith(catalog["base_uri"]) for row in catalog["schemas"])
     assert set(SCHEMA_STORE) == {row["schema_id"] for row in catalog["schemas"]}
     for row in catalog["schemas"]:
         path = SCHEMAS / row["path"]

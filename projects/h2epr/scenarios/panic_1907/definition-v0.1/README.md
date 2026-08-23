@@ -24,7 +24,7 @@ to a later versioned scenario configuration.
 | [interface-closure.md](interface-closure.md) | release-wide reconciliation of participant observations, intents, lifecycles, authority, and resources |
 | [substantive-review.md](substantive-review.md) | semantic review and owner-resolution record |
 | [manifest.json](manifest.json) | release identity, source identities, artifact hashes, accepted decisions, and authorization boundary |
-| [SHA256SUMS](SHA256SUMS) | integrity record for this release and its fixed upstream authorities |
+| [SHA256SUMS](SHA256SUMS) | integrity record for files owned by this release directory |
 
 [ADR-0005](../../../decisions/ADR-0005-panic-1907-event-scenario-definition-boundary.md)
 records `OD-SC-01` through `OD-SC-04`. The conservative structural baseline

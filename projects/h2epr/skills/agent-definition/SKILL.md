@@ -219,7 +219,6 @@ For a new candidate, run the lightweight public-profile checker from the
 repository root:
 
 ```bash
-PYTHONPATH=projects/h2epr/src \
 python -m h2epr.agents.definition_profile path/to/candidate.md
 ```
 

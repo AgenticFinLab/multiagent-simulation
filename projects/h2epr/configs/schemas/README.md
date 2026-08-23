@@ -9,6 +9,9 @@ assembly, input-integrity, overlay-target, coverage, and execution-boundary
 checks remain in the fail-closed loader because JSON Schema alone cannot
 derive them from the accepted roster mapping.
 
+Its stable offline identity is
+`https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/configs/schemas/event-scenario-configuration-v0.1.schema.json`.
+
 These schemas are not members of `contracts/v1/` and do not add or change a V1
 runtime carrier. A second event that needs a new field must produce an explicit
 schema evolution and compatibility review; it must not receive an unvalidated

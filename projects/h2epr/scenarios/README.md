@@ -18,7 +18,7 @@ Domain-neutral Definition loading and Contracts V1 carrier checks remain under
 The current [`panic_1907/`](panic_1907/) directory contains the accepted
 [Event Scenario Definition v0.1](panic_1907/definition-v0.1/), the frozen
 two-role reference path, and the completed
-[KT--NBC--NYCH E7 conformance closeout](panic_1907/lineage-conformance-v0.1/).
+[KT--NBC--NYCH conformance closeout](panic_1907/lineage-conformance-v0.1/).
 Its accepted Scenario Configuration is kept separately under
 [`configs/panic_1907/`](../configs/panic_1907/) so event-world meaning and one
 declared-purpose instantiation remain distinct.

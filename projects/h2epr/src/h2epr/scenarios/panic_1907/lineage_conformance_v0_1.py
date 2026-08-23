@@ -1,7 +1,7 @@
-"""Deterministic E7 conformance closeout for the KT--NBC--NYCH lineage.
+"""Deterministic conformance closeout for the KT--NBC--NYCH lineage.
 
 This module is deliberately not a simulator.  It exercises the four actions
-and three routes admitted by the E6 binding, records the resulting fixed
+and three routes admitted by the bounded binding, records the resulting fixed
 lineage with the repository trace/seal primitives, and replays only the small
 authoritative state used by this conformance case.
 """
@@ -36,10 +36,10 @@ CONFORMANCE_FORMAT = "h2epr.lineage-conformance.v0.1"
 CONFORMANCE_ID = "conformance.h2epr.0288.kt_nbc_nych.v0_1"
 RUN_ID = "run.h2epr.0288.kt_nbc_nych.conformance.001"
 BINDING_MANIFEST_SHA256 = (
-    "4c263bec986fd49c260881a6dc17422598f51f5114ceb69e500a9ead3319f1c1"
+    "3b4b93eeaec1dd99a1e387fbbf3d66c33efb593a124000982c39bd88e5c494a5"
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_BINDING_MANIFEST = (
     PROJECT_ROOT
     / "agents/bindings/panic_1907/kt-nbc-nych-v0.1/manifest.json"
@@ -144,7 +144,7 @@ def load_conformance_binding(
 def build_positive_lineage(
     binding: LineageBinding | None = None,
 ) -> LineageProjection:
-    """Project the sole E6 positive branch without executing a runtime."""
+    """Project the sole bounded positive branch without executing a runtime."""
 
     selected = binding or load_conformance_binding()
     policies = PositiveLineagePoliciesV0_1(selected)

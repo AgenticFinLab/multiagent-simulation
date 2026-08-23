@@ -1,49 +1,43 @@
 # Repository and experiment layout
 
-The stable current repository boundary is:
+The repository separates reusable MASim code, H2EPR research assets, frozen
+inputs, generated workspaces, and curated outputs:
 
 ```text
-masim/                    reusable framework
-examples/                 current standard MASim scenario examples
-configs/                  current standard MASim run configurations
-projects/h2epr/           accepted H2EPR Phase-0 V1 contract and offline tests
+masim/                    reusable framework and event-process primitives
+examples/                 standard MASim scenario implementations
+configs/                  standard MASim run configurations
+projects/h2epr/           H2EPR contracts, research assets, package, and tests
 data/h2epr/               frozen read-only development fixtures
-EXPERIMENT/H2EPR/         future generated run workspaces
-simulation-results/H2EPR/ future curated release artifacts
+EXPERIMENT/H2EPR/         generated run workspaces
+simulation-results/H2EPR/ curated release artifacts
 ```
 
-Earlier Phase-0 planning proposed `projects/h2epr/scenarios/` and
-`projects/h2epr/configs/` as default locations for future H2EPR assembly and
-run composition. They are provisional planning defaults, not reserved paths,
-installed-package ownership, or a V1 consumer compatibility promise. Neither
-directory exists in the current candidate. A reviewed Phase-1 ADR, informed by
-implementation and test evidence, may retain, refine, or replace them and may
-choose different runtime, package, scenario, configuration, or future-test
-ownership.
+Within `projects/h2epr/`, semantic and executable responsibilities are also
+separate:
 
-Research projects may combine reusable framework extensions, multiple
-scenarios, compilers, evaluators, and experiment protocols; that breadth does
-not belong in one ordinary example. Conversely, project-specific event
-identity, participant choices, and behavior policies do not belong in generic
-MASim core.
+```text
+contracts/v1/             stable serialized interfaces
+agents/ populations/      participant research and releases
+scenarios/ configs/       event semantics and declared-purpose assemblies
+src/h2epr/                independently installed Python package
+tests/                    contract, boundary, runtime, and conformance checks
+```
 
-Any future code boundary must distinguish domain-neutral reusable framework
-capabilities from event-specific identity and policy, keep evaluation-only
-Reference readers from flowing into construction or runtime, and preserve the
-accepted append-only trace/seal semantics. A separate evaluation responsibility
-and an opt-in runner/simulator remain useful design constraints, but their
-module and package locations are Phase-1 ADR decisions rather than Phase-0
-path contracts.
+Research projects may combine contracts, event configurations, compilers, and
+evaluation protocols that would not fit one standard example. Event identity,
+participant choices, and institutional policies remain inside H2EPR. Only
+domain-neutral capabilities with an independent interface belong in `masim/`.
 
-`examples/` and top-level `configs/` remain the current standard MASim
-convention, and this candidate places no H2EPR assembly there. A later ADR may
-reconsider H2EPR-specific placement, but it must prevent duplicate source
-ownership, ambiguous run configuration, and event-specific identities in
-generic MASim core.
+Evaluation-only reference material must not flow into construction or runtime.
+Frozen inputs are never overwritten by generated state, and generated
+workspaces are not treated as curated releases. Tracked test fixtures remain
+small and synthetic unless a separately reviewed data package records their
+provenance and use.
 
-Phase-0 creates only this project contract and offline-test surface. It creates
-no runnable scenario and no experiment or simulation-result directory. This
-layout clarification does not authorize Phase 1 or imply runtime or scientific
-readiness. Compatible implementation movement does not break V1 or create an
-audit-round public version; see `projects/h2epr/EVOLUTION.md` for the public
-evolution policy.
+Path changes that affect serialized identities, manifests, or published
+locators are migrations. Other internal package movement is compatible when it
+preserves the V1 interfaces and leaves one authoritative implementation.
+
+This layout defines ownership; it does not by itself authorize an event run or
+establish runtime, historical, or scientific validity.

@@ -57,7 +57,8 @@ class AuthoritativeReducer:
                 raise ValueError("intent_prestate_mismatch")
             if intent.intent_id in self._seen_intent_ids:
                 raise ValueError("cross_tick_duplicate_intent_id")
-        dispositions, deltas = self._apply_batch(self._state, ordered, run_seed, logical_tick)
+        working_state = copy.deepcopy(prestate)
+        dispositions, deltas = self._apply_batch(working_state, ordered, run_seed, logical_tick)
         if {item.intent_id for item in dispositions} != {item.intent_id for item in ordered}:
             raise ValueError("disposition_intent_closure_mismatch")
         delta_ids = {item.delta_id for item in deltas}
@@ -66,7 +67,8 @@ class AuthoritativeReducer:
         referenced = {delta for item in dispositions for delta in item.state_delta_ids}
         if referenced != delta_ids:
             raise ValueError("disposition_delta_closure_mismatch")
-        self._state["state_version"] = version + 1
+        working_state["state_version"] = version + 1
+        self._state = working_state
         self._seen_intent_ids.update(item.intent_id for item in ordered)
         poststate_hash = canonical_sha256(self._state)
         return ReducerResult(

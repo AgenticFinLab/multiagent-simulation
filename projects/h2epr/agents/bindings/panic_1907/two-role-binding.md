@@ -19,7 +19,7 @@
 | Intent registry | `63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87` |
 | Observation registry | `8bc43bd866a0b4a194168688b9d15e3e3e209eb7ffd8dbb0246541ef58cd69a2`; derived from the two Definition observation tables |
 | Cross-object conformance rules | `cf70034f13d907f4754ae76686f58746a826709539e4e19595de41a3a15df7ef` |
-| V1 core schema | `d6bea7e1094071c5187e16c2c52e989d8353e426da4d385206a11a189c5c5cf5` |
+| V1 core schema | `36232df97aadf276358ff93f836fe52683b7aea4cf57f8cd697f92e3669e8c25` |
 
 Any bound content change invalidates this mapping until the affected hash and dependent mapping are reviewed and updated.
 The current source-register and evidence-ledger snapshots also contain NBC research records. This binding

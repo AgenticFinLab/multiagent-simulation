@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/external_construction_anchor_context.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/construction/external_construction_anchor_context.schema.json",
   "title": "Synthetic External Construction Anchor Context V1",
   "type": "object",
   "additionalProperties": false,
@@ -46,7 +46,7 @@
       "minLength": 1
     },
     "expected_construction_lineage": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
     },
     "binding_policy": {
       "const": "external_exact_lineage_tuple_and_content_sha256.v1"

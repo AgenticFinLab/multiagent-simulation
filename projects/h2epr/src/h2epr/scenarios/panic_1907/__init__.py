@@ -1,4 +1,4 @@
-"""Panic of 1907 event assets and bounded conformance slices."""
+"""Panic of 1907 bounded scenario implementations."""
 
 from .feedback import BehaviorFeedbackResult, run_behavior_feedback_matrix
 from .first_slice import FirstSliceResult, run_first_slice

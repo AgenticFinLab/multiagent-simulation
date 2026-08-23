@@ -181,9 +181,9 @@ None requiring revision before owner review.
 | Lifecycle rows | 13 / PASS |
 | Cross-object rule rows | 34 / PASS |
 | Owner decisions isolated | 4 / PASS |
-| Roster release `SHA256SUMS` | PASS, all 26 assets |
+| Roster release manifest and local integrity | PASS |
 | Consolidated mapping `SHA256SUMS` | PASS |
-| Existing mapping/roster tests | PASS, 35 tests in `LMSim` environment |
+| Existing mapping/roster regression tests | PASS |
 | Fixed Definition/release files changed | none |
 | Network/simulation/model access | none |
 

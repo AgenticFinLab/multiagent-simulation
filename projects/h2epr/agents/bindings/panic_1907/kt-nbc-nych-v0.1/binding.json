@@ -6,11 +6,11 @@
   "event_id": "H2EPR-0288",
   "configuration": {
     "configuration_id": "h2epr.0288.scenario.mechanism-coverage.v0_1",
-    "source_sha256": "6f931e81482d2a511220c467e578565b6b949b41c80874b13f56a172d9ed5e22",
-    "canonical_sha256": "fce44a347aa6504b5d26f6a3901753c1b4547359f85fed9ec1a860a92196359f",
-    "admission_receipt_sha256": "073efdb9702867ef812e3d755b94aec3c09f5ef5135a9243d7ad2550a6c0bc75",
+    "source_sha256": "22f2566b9f0607deb66a2149a6651592eddc968c4646fda18747df25f6d60558",
+    "canonical_sha256": "01dd45b46f9fbb3f9ab175dc5645d59cf635a2268a55f6a3574ea909e035ff8d",
+    "admission_receipt_sha256": "ac19d8351740060bb986c500dcbe4492d2dd4af854660ea3e0ce11321f57550f",
     "mapping_profile_id": "h2epr.roster-consolidated-mapping.v0_1",
-    "mapping_profile_sha256": "b0dd1cc3caed3c6bc3239e6bf5b956cb6c01740177ffa879f40940c541275b29"
+    "mapping_profile_sha256": "e7ba57615fa95c1fc6e5b7db52e0f6e71dc893cd85766b46594f3a29491ceb5b"
   },
   "scope": {
     "purpose": "exact_carrier_and_positive_binding_conformance",

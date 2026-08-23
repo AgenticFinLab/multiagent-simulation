@@ -11,10 +11,10 @@
   "semantic_inputs": {
     "scenario_definition_id": "H2EPR-0288-EVENT-SCENARIO-DEFINITION-v0.1",
     "scenario_definition_sha256": "5904e3fc2893261fe310a5af702baa523928901dc92122b95b603b71f62f6495",
-    "scenario_release_manifest_sha256": "26cabc9badde9368e485db576c5748bf0a3eb8f69c840d8fe4c156f28572fee0",
-    "roster_release_manifest_sha256": "0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6",
-    "consolidated_mapping_manifest_sha256": "987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a",
-    "mapping_profile_sha256": "b0dd1cc3caed3c6bc3239e6bf5b956cb6c01740177ffa879f40940c541275b29",
+    "scenario_release_manifest_sha256": "00c1061ab7ee94b519b757dfb0863749cee5731bde6c9f06291f3a59937f8b20",
+    "roster_release_manifest_sha256": "d14bca5ef4486031d2c87ba3f20a2a2fe5fb3221f5c6a305c95a02dc585ea0b1",
+    "consolidated_mapping_manifest_sha256": "4a0334723e3016b5fe22a84fc81a8dc10958c9513424a6bc3a30a55b79590ba2",
+    "mapping_profile_sha256": "e7ba57615fa95c1fc6e5b7db52e0f6e71dc893cd85766b46594f3a29491ceb5b",
     "evidence_ledger_sha256": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933",
     "source_register_sha256": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
   },

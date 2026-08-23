@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/construction/typed_artifact_chain.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/construction/typed_artifact_chain.schema.json",
   "title": "Construction-through-Evaluation Typed Artifact Chain",
   "type": "object",
   "additionalProperties": false,
@@ -21,7 +21,7 @@
     "chain_anchor": {
       "allOf": [
         {
-          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
+          "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/ArtifactLineageRef"
         },
         {
           "properties": {
@@ -39,30 +39,30 @@
     "construction_bundle": {
       "oneOf": [
         {
-          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/FullDraftTargetDemoConstructionBundle"
+          "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/FullDraftTargetDemoConstructionBundle"
         },
         {
-          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixContaminatedDemoConstructionBundle"
+          "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixContaminatedDemoConstructionBundle"
         },
         {
-          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixCleanStrictConstructionBundle"
+          "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixCleanStrictConstructionBundle"
         }
       ]
     },
     "runtime_bundle": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/RuntimeScenarioBundle"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/RuntimeScenarioBundle"
     },
     "run_manifest": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/RunManifest"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/RunManifest"
     },
     "simulation_trace": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/SimulationTrace"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/SimulationTrace"
     },
     "generated_epg": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/GeneratedEPG"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/GeneratedEPG"
     },
     "evaluation_report": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/evaluation/evaluation_report.schema.json#/$defs/EvaluationReport"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/evaluation/evaluation_report.schema.json#/$defs/EvaluationReport"
     }
   }
 }

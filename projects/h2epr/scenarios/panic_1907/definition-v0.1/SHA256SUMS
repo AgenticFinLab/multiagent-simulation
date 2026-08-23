@@ -1,11 +1,5 @@
-26cabc9badde9368e485db576c5748bf0a3eb8f69c840d8fe4c156f28572fee0  manifest.json
-27bdb7d5e21029ef28d2cdcbc79eaa00ad677dda39043281efeebd633c0d1ff8  README.md
+00c1061ab7ee94b519b757dfb0863749cee5731bde6c9f06291f3a59937f8b20  manifest.json
+20658bdcc3d4d8f070a88a5125ade1ac6bc15feb72827740da15e446ce45fbf4  README.md
 5904e3fc2893261fe310a5af702baa523928901dc92122b95b603b71f62f6495  scenario-definition.md
-60538b9e280d92deace3ae10dce624bf3445868a80692ba70dac2cba5ed1bd5d  interface-closure.md
-984ea8350c0f0424cf3637988d114ad1310f38e8af977805d7f288c863b486fb  substantive-review.md
-7543a068b2b6ddcb79732da9263734dac5b89652d757a40eaf75a724d06a690c  ../../../decisions/ADR-0005-panic-1907-event-scenario-definition-boundary.md
-0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6  ../../../releases/panic_1907/roster-definition-v0.1/manifest.json
-987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a  ../../../agents/bindings/panic_1907/consolidated/manifest.json
-cfa0cb366745ddf1d04e1f812d3fc0a2d2b7e8890dbdb1a85165fb4bd37f8741  ../semantic-skeleton.md
-5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933  ../../../agents/defines/panic_1907/evidence-ledger.md
-3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae  ../../../agents/defines/panic_1907/source-register.md
+51f3923ff5997577e4639948c73a1fb9616851f587d95eada995f50c8217a990  interface-closure.md
+0e2ad57e44defe56ca3b27449341c5b62126068b63d59603f1f393c39bc636a3  substantive-review.md

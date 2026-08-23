@@ -8,9 +8,9 @@
 - Release commit: `e0cb20724db7c8f15cf344a161ab2f2b2721c1f0`
 - Release tree: `74d16ad177ff486eb5966c070c835f8c42de37ab`
 - Release manifest SHA-256:
-  `0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6`
+  `d14bca5ef4486031d2c87ba3f20a2a2fe5fb3221f5c6a305c95a02dc585ea0b1`
 - Release `SHA256SUMS` SHA-256:
-  `d2e692b8afa67c212e3d4af7b5923fcab58781580aca70435fc9d3f289019bb8`
+  `85ffba2d3a8792c05072cdf660e06c498e3db2b0256a2e19487d1f720136dbba`
 
 The release manifest, the 26 recorded assets and their hashes passed at Goal
 entry. All inventory content below is resolved from the fixed Git tree rather

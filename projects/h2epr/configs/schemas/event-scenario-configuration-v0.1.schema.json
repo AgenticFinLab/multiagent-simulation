@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/configs/schemas/event-scenario-configuration-v0.1.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/configs/schemas/event-scenario-configuration-v0.1.schema.json",
   "title": "H2EPR Event Scenario Configuration v0.1 admission schema",
   "description": "Project-local structural admission schema. It is not a Contracts V1 carrier schema and does not make a configuration executable.",
   "type": "object",

@@ -1,6 +1,7 @@
 {
   "schema": "h2epr.event-scenario-definition-release.v0_1",
   "release_id": "H2EPR-0288-EVENT-SCENARIO-DEFINITION-v0.1",
+  "version": "0.1.0",
   "event_id": "H2EPR-0288",
   "released_on": "2026-08-22",
   "status": "accepted_semantic_specification",
@@ -24,12 +25,12 @@
     "roster_definition_release": {
       "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
       "manifest_path": "releases/panic_1907/roster-definition-v0.1/manifest.json",
-      "manifest_sha256": "0d58a76682b057b290178c5c88e654b4ad779007e97e45588c33773017e7efc6"
+      "manifest_sha256": "d14bca5ef4486031d2c87ba3f20a2a2fe5fb3221f5c6a305c95a02dc585ea0b1"
     },
     "consolidated_mapping": {
       "release_id": "H2EPR-0288-CONSOLIDATED-MAPPING-v0.1",
       "manifest_path": "agents/bindings/panic_1907/consolidated/manifest.json",
-      "manifest_sha256": "987a6d27215d9c8c274974fcabadcea57c624a4f981ace96f689798cdb4e380a"
+      "manifest_sha256": "4a0334723e3016b5fe22a84fc81a8dc10958c9513424a6bc3a30a55b79590ba2"
     },
     "semantic_skeleton": {
       "version": "0.1",
@@ -69,7 +70,7 @@
     {
       "kind": "guide",
       "path": "README.md",
-      "sha256": "27bdb7d5e21029ef28d2cdcbc79eaa00ad677dda39043281efeebd633c0d1ff8"
+      "sha256": "20658bdcc3d4d8f070a88a5125ade1ac6bc15feb72827740da15e446ce45fbf4"
     },
     {
       "kind": "scenario_definition",
@@ -79,12 +80,12 @@
     {
       "kind": "interface_closure",
       "path": "interface-closure.md",
-      "sha256": "60538b9e280d92deace3ae10dce624bf3445868a80692ba70dac2cba5ed1bd5d"
+      "sha256": "51f3923ff5997577e4639948c73a1fb9616851f587d95eada995f50c8217a990"
     },
     {
       "kind": "substantive_review",
       "path": "substantive-review.md",
-      "sha256": "984ea8350c0f0424cf3637988d114ad1310f38e8af977805d7f288c863b486fb"
+      "sha256": "0e2ad57e44defe56ca3b27449341c5b62126068b63d59603f1f393c39bc636a3"
     }
   ],
   "owner_decision": {

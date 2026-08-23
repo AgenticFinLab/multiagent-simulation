@@ -133,10 +133,11 @@ particular version-control operation.
 - [ ] `manifest.json` pins all semantic inputs, lists every promoted artifact,
   records owner decisions and claim boundaries, and carries hashes for every
   non-self payload member according to one declared integrity envelope.
-- [ ] `SHA256SUMS` covers the final manifest, semantic payload, review,
-  closure, and owner-decision record according to one documented root rule.
-- [ ] Every hash is recomputed after final bytes settle and verifies from one
-  declared project root.
+- [ ] `SHA256SUMS` covers the final manifest, semantic payload, review, and
+  closure files owned by the release directory; the manifest records upstream
+  and owner-decision identities.
+- [ ] Every hash is recomputed after final bytes settle and each local package
+  verifies from its owning directory.
 - [ ] The package remains non-executable unless a separate later authority has
   satisfied every execution prerequisite.
 - [ ] No schema, loader, carrier projection, policy implementation, trace,

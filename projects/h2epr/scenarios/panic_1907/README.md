@@ -15,8 +15,8 @@ instantiated by the accepted
 [Scenario Configuration v0.1](../../configs/panic_1907/scenario-configuration-v0.1/),
 which remains non-executable. Its fail-closed admission and separate exact
 KT--NBC--NYCH binding and its
-[lineage conformance closeout v0.1](lineage-conformance-v0.1/) are now complete
-through E7. This engineering closeout is not permission for a full-event run.
+[lineage conformance closeout v0.1](lineage-conformance-v0.1/) are complete.
+This engineering closeout is not permission for a full-event run.
 
 ## Semantic precursor
 
@@ -26,14 +26,14 @@ variants, and interface-preflight questions used during Roster production. It
 is retained as release provenance and does not compete with the accepted
 Definition.
 
-## Current three-role bounded slice
+## Three-role bounded slice
 
 The new [three-role bounded binding](../../agents/bindings/panic_1907/kt-nbc-nych-v0.1/)
 and `lineage_v0_1/` package preserve KT-to-NBC and NBC-to-NYCH as distinct
 messages and deliveries. They implement only four positive semantic actions
 and six lineage-only environment policies. `lineage_conformance_v0_1.py` adds
 the fixed five-tick cross-hop validator and deterministic trace/replay used by
-the E7 receipt. The accepted full configuration is not made executable.
+the conformance receipt. The accepted full configuration is not made executable.
 
 ## Frozen two-role reference slice
 

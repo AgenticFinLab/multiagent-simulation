@@ -1,4 +1,4 @@
-"""Bounded KT--NBC--NYCH E6 carrier and binding surface."""
+"""Bounded KT--NBC--NYCH carrier and binding surface."""
 
 from .binding import (
     BINDING_FORMAT,

@@ -10,6 +10,12 @@ FORBIDDEN = {
 }
 
 
+def test_h2epr_uses_one_installable_python_source_root() -> None:
+    project_root = Path(__file__).parents[2]
+    assert (project_root / "pyproject.toml").is_file()
+    assert not list((project_root / "scenarios").rglob("*.py"))
+
+
 def test_production_modules_use_only_authorized_import_boundary() -> None:
     root = Path(__file__).parents[2] / "src/h2epr/construction"
     violations = []
@@ -30,7 +36,14 @@ def test_production_modules_use_only_authorized_import_boundary() -> None:
 
 def test_production_modules_do_not_hardcode_event_or_domain_identity() -> None:
     root = Path(__file__).parents[2] / "src/h2epr"
-    combined = "\n".join(path.read_text(encoding="utf-8") for path in root.rglob("*.py"))
+    generic_modules = [
+        path
+        for path in root.rglob("*.py")
+        if "scenarios" not in path.relative_to(root).parts
+    ]
+    combined = "\n".join(
+        path.read_text(encoding="utf-8") for path in generic_modules
+    )
     assert "H2EPR-0" not in combined
     for required_name in ("price", "portfolio", "cyberattack", "malware"):
         assert required_name not in combined.lower()

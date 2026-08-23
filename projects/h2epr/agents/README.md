@@ -45,7 +45,7 @@ The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
 and intent semantics it was reviewed against. The current `0.2.1` reference
 Definitions and the added NBC carrier have exact bounded projections. The
-completed three-role E7 slice exercises only the request--forward--classify--
+completed three-role conformance slice exercises only the request--forward--classify--
 scoped-disposition path; it is not a complete role or event implementation.
 
 ## Layout and naming
@@ -167,7 +167,6 @@ For a new Definition candidate, run the lightweight public-profile check from
 the repository root:
 
 ```bash
-PYTHONPATH=projects/h2epr/src \
 python -m h2epr.agents.definition_profile path/to/candidate.md
 ```
 
@@ -180,16 +179,16 @@ the frozen H2EPR-0288 release and does not replace scholarly review.
 The tracked paths above contain only the current accepted candidate. Do not add
 `-v2`, `-old`, date-suffixed copies, or an archive directory beside them.
 
-1. Explore and review drafts below the ignored `.local-runtime/h2epr-simulation/working/`
-   area. Store adopted raw sources and sealed evidence in its evidence area.
+1. Explore and review drafts in an untracked research workspace outside the
+   public asset tree. Store adopted raw sources and sealed evidence separately.
 2. Form an immutable local review snapshot with source hashes, candidate hashes,
    test results, and unresolved questions. Rejected alternatives remain local.
 3. Perform a lightweight interface preflight before promotion. During Roster
    production, record mapping expectations without assigning machine fields or
    updating binding hashes.
 4. Commit that coherent state. Git history is the authoritative history of
-   accepted repository versions; `.local-runtime` preserves richer research and
-   review history that should not burden the public tree.
+   accepted repository versions; private research and review history remains
+   outside the public tree.
 
 Roster Definition release v0.1 closes every roster disposition and pins the
 accepted semantic products. The consolidated mapping and carrier review are

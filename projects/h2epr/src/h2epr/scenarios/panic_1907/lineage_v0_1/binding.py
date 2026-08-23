@@ -62,10 +62,10 @@ _EXPECTED_POLICY_IMPLEMENTATIONS = {
     "POL-TIME-01": "h2epr.policy.0288.time.partial_order.v0_1",
 }
 _EXPECTED_IMPLEMENTATION_PATHS = {
-    "carrier_loader": "scenarios/panic_1907/lineage_v0_1/binding.py",
-    "environment_policies": "scenarios/panic_1907/lineage_v0_1/environment.py",
-    "participant_policies": "scenarios/panic_1907/lineage_v0_1/policies.py",
-    "public_api": "scenarios/panic_1907/lineage_v0_1/__init__.py",
+    "carrier_loader": "src/h2epr/scenarios/panic_1907/lineage_v0_1/binding.py",
+    "environment_policies": "src/h2epr/scenarios/panic_1907/lineage_v0_1/environment.py",
+    "participant_policies": "src/h2epr/scenarios/panic_1907/lineage_v0_1/policies.py",
+    "public_api": "src/h2epr/scenarios/panic_1907/lineage_v0_1/__init__.py",
 }
 
 
@@ -1346,7 +1346,7 @@ def load_lineage_binding(
     expected_manifest_sha256: str,
     project_root: str | Path | None = None,
 ) -> LineageBinding:
-    """Load the exact E6 binding only when its external manifest anchor matches."""
+    """Load the exact binding only when its external manifest anchor matches."""
 
     expected_hash = _sha256(expected_manifest_sha256, "expected_manifest_sha256")
     supplied = Path(manifest_path)

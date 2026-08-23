@@ -1,164 +1,102 @@
-# H2EPR contract tests
+# H2EPR tests
 
-The independent contract suite validates stable V1 schemas and synthetic
-fixtures without starting MASim or reading evaluation references. Activate the
-LMSim development environment, then run it from the repository root:
+The H2EPR suites validate serialized contracts, research-asset boundaries,
+configuration admission, deterministic runtime behavior, and graph
+compilation. Most suites are offline and do not start a simulator.
+
+Install the project before running tests:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python -m pytest -p no:cacheprovider projects/h2epr/tests/contracts
+python -m pip install -e "projects/h2epr[test]"
 ```
 
-The Agent suite retains the frozen two-role `0.1.0-dev` engineering baseline
-and the current two-role conformance slice. It also validates the accepted
-Roster release through a separate mapping profile: all twelve product hashes,
-62 commitments, 115 observation placements, 107 intent placements,
-capability-qualified identities, multi-capability actor composition,
-host-scoped population state, authority/resource scope, a broker funding
-lifecycle and deterministic replay. It does not select a full-Roster policy,
-start Ray, or run the G3 simulation.
+## Suite ownership
 
-The configuration-admission suite validates the project-local v0.1 schema,
-externally supplied configuration/release hash anchors, canonical identity,
-release and semantic-input integrity, actor/unit assembly, exact sensitivity
-targets, stable error classes, non-executable policy boundary, and
-deterministic static receipts:
+| Directory | Responsibility |
+|---|---|
+| `contracts/` | JSON Schemas, cross-object invariants, repository boundaries, trace, and identity |
+| `construction/` | Explicit source loading, lossless construction records, evidence isolation, and import boundaries |
+| `g2/` | Entity registry, participant artifacts, world inputs, and event-bundle construction |
+| `configuration/` | Schema admission, canonical identity, references, assembly, failure classes, and portable receipts |
+| `agents/` | Definition profiles, mappings, bindings, participant slices, and lineage conformance |
+| `g3/` | Phased runtime, policies, reducer, transport, trace, seals, replay, and detectors |
+| `g4/` | Sealed-trace inventory, deterministic graph compilation, and graph seals |
+
+The `g2`, `g3`, and `g4` directory names are retained identifiers for the
+accepted artifact, runtime, and compiler suites. They do not imply that later
+research phases run automatically.
+
+## Commands
+
+Run all H2EPR tests from the repository root:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/configuration
+python -B -m pytest -p no:cacheprovider projects/h2epr/tests
 ```
 
-It does not create a carrier projection, bind policy/environment behavior,
-start MASim, or validate event outcomes.
-
-The bounded three-role E6 suite loads the externally anchored binding release,
-rechecks its E5/configuration/Roster inputs, validates four ActionDefinitions,
-three CommunicationRoutes, four actor-scoped observations, four ActionIntents,
-and three MessageIntents against Contracts V1, and exercises only the positive
-KT--NBC--NYCH branch:
+Run the offline contract and construction surface:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/agents/test_panic_1907_lineage_binding.py
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/contracts \
+  projects/h2epr/tests/construction \
+  projects/h2epr/tests/g2
 ```
 
-It leaves the full Scenario Configuration non-executable. The separate E7
-suite covers adversarial lineage negatives and deterministic trace/replay:
+Run configuration and participant-asset checks:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -B -m pytest -p no:cacheprovider \
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/configuration \
+  projects/h2epr/tests/agents
+```
+
+The bounded KT--NBC--NYCH binding and conformance modules can be checked
+independently:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_panic_1907_lineage_binding.py \
   projects/h2epr/tests/agents/test_panic_1907_lineage_conformance.py
 ```
 
-Its expected vector and review are recorded in the
-[lineage conformance closeout](../scenarios/panic_1907/lineage-conformance-v0.1/).
-The suite starts no simulator and does not widen the E6 positive branch.
-
-The fixture is documented under
-[`fixtures/agents/panic_1907/minimal_binding_v0_1/`](fixtures/agents/panic_1907/minimal_binding_v0_1/).
-
-The Agent suite also covers the lightweight format profile used by new-format
-Definition candidates. The profile checks ten-module order, overview identity,
-observation and intent inventories, and Decision Commitment links. It does not
-retroactively reject the frozen H2EPR-0288 release or replace substantive
-review.
+Runtime and compiler checks use the MASim dependencies described in the root
+`requirements.txt`:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/agents
+RAY_USAGE_STATS_ENABLED=0 python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/g3 \
+  projects/h2epr/tests/g4
 ```
 
-The separate G1 construction suite validates the repository-local Source
-Adapter and typed Construction IR:
+These tests exercise deterministic Rule paths. They do not run model-backed
+experiments or establish historical fidelity.
 
-```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -m pytest -p no:cacheprovider projects/h2epr/tests/construction
-```
+## Fixture boundaries
 
-The G2 suite validates declarative registry/artifact/policy/world construction,
-three canonical EventBundles, the nine-row profile/seed matrix, and bounded
-serialized-input negatives without executing a simulator:
+- `fixtures/construction_ir/` contains minimized synthetic construction
+  inputs. Cross-domain tests use only explicitly listed, hash-pinned files.
+- `fixtures/g2/`, `fixtures/g3/`, and `fixtures/g4/` contain synthetic
+  closed-value inputs rather than experiment output or historical targets.
+- `fixtures/agents/panic_1907/minimal_binding_v0_1/` preserves the earlier
+  three-tick engineering baseline as a regression fixture.
+- Evaluation-only reference material is never read by construction, runtime,
+  Agent, or compiler tests.
 
-```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/g2 \
-  projects/h2epr/tests/construction \
-  projects/h2epr/tests/contracts
-```
+Real target-derived bundles and canary outputs remain generated evidence and
+are not copied into the tracked fixture tree.
 
-The G3 suite validates the opt-in phased runtime, fixed Rule policy,
-authoritative reducer, delayed-message transport, trace/seal/replay chain and
-generated-only P007 annotations. Ordinary CI runs the offline owning suite; it
-does not launch the formal Ray matrix:
+## Contract support code
 
-```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  RAY_USAGE_STATS_ENABLED=0 \
-  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/g3
-```
+Builders under `support/cases/` own schema, construction, communication,
+repository, and trace/identity cases. Declarative cases in `case_specs/v1/`
+use a closed operation and validator vocabulary. `schema_registry.py` resolves
+the schema catalog offline, while the receipt and validator modules retain
+separate serialization and semantic responsibilities.
 
-Fixtures below `fixtures/g3/` are synthetic closed-value examples, not run
-outputs or historical targets. Formal canary outputs remain ignored local
-evidence rather than tracked test fixtures.
+Each contract condition is exposed as an independent pytest parameter with a
+stable behavior-based ID. Historical suite grouping does not select behavior
+or enter public receipts.
 
-The G4 owning suite validates Reference-blind sealed-trace inventory and
-wrapper checks, deterministic event/episode/stage compilation, graph
-relations, GraphSeal closure, and fail-closed dependency boundaries:
-
-```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=projects/h2epr/src \
-  python -B -m pytest -p no:cacheprovider projects/h2epr/tests/g4
-```
-
-G4 tests use only minimized synthetic fixtures below `fixtures/g4/` and
-offline V1 contract assets. They do not read real A0 outputs or Reference
-material, start Ray or a simulation, or establish historical fidelity. The
-isolated post-seal evaluation surface remains future G5 work.
-
-Fixtures below `fixtures/g2/` are minimized and explicitly synthetic. Real
-target-derived bundles are generated only into the ignored local evidence
-area; they are not tracked fixtures or expected scientific outcomes.
-
-Construction fixtures under `fixtures/construction_ir/` are synthetic and
-minimized. The cross-domain tests consume only an explicit hash-pinned
-non-Reference manifest; they do not walk event directories or open a held-out
-evaluation file. Architecture parsing is demo-only, and strict-policy tests do
-not represent an actual clean strict build.
-
-The portable environment definition and the distinction between contract-only
-validation and full MASim runtime development are documented in
-[`docs/development-environment.md`](../../../docs/development-environment.md).
-
-The support code is split by responsibility. Builders under `support/cases/`
-own bounded communication, repository, and boundary-regression cases. The
-test-only `case_specs/v1/` JSON files hold the 255 declarative schema,
-construction, communication, and trace/identity conditions; small typed
-adapters load them with a closed field, operation, and validator vocabulary.
-They are not runtime fixtures, scenarios, experiments, contract schemas, or
-audit history. `case_registry.py` combines the exact population;
-`receipt.py` serializes it deterministically; `schema_registry.py` resolves the
-catalog offline; and the validator modules separately own construction,
-communication, identity, and trace/seal invariants. Every one of the 345
-retained behavior cases is a separate pytest parameter with a stable
-behavior-based ID and therefore appears independently in ordinary failures.
-Each ID is exactly responsibility plus expected result plus one explicit
-semantic condition. Legacy case provenance is retained only for local
-migration evidence: it cannot select behavior or enter the public receipt.
-Every case also exposes a canonical behavior-only mutation descriptor and its
-SHA-256. Receipt grouping uses only responsibility, validation category, and
-expected/observed outcome rather than historical cumulative suite slices.
-
-The contract, G1, G2, and Agent baseline suites do not run a full scenario. The
-Agent baseline executes only its frozen three-tick semantic micro-situation. G3
-exercises the bounded H2EPR Rule runtime and its deterministic interfaces; the
-separately controlled canary matrix supplies execution evidence. G4 compiles eligible
-sealed trace records into a deterministic V1 Generated EPG, but neither these
-tests nor the canary establish historical calibration, Reference alignment or
-scientific readiness. `examples/` and top-level `configs/` remain the standard
-MASim scenario convention, while the reviewed H2EPR project/runtime/compiler
-split remains evolvable. Required-surface checks deliberately allow unrelated
-future files under `projects/h2epr/`.
+See [`docs/development-environment.md`](../../../docs/development-environment.md)
+for the dependency profiles used by these suites.

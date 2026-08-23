@@ -37,6 +37,19 @@ def test_reducer_rejects_wrong_prestate_without_commit() -> None:
     assert reducer.state == initial
 
 
+def test_reducer_discards_callback_mutation_when_postconditions_fail() -> None:
+    initial = {"state_version": 0, "value": 3}
+
+    def invalid_apply(state, intents, seed, tick):
+        state["value"] = 99
+        return [], []
+
+    reducer = AuthoritativeReducer(initial, invalid_apply)
+    with pytest.raises(ValueError, match="disposition_intent_closure"):
+        reducer.reduce([_intent(initial)], logical_tick=1, run_seed=0)
+    assert reducer.state == initial
+
+
 def test_seeded_pro_rata_is_order_independent_and_conserved() -> None:
     first = pro_rata_floor_then_seeded_remainder(7, {"c": 5, "a": 5, "b": 5}, run_seed=2, logical_tick=9)
     second = pro_rata_floor_then_seeded_remainder(7, {"b": 5, "c": 5, "a": 5}, run_seed=2, logical_tick=9)

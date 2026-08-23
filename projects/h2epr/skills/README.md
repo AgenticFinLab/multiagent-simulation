@@ -64,13 +64,13 @@ pilot.
 | [`roster-mapping-conformance`](roster-mapping-conformance/SKILL.md) | Derive a release-wide mapping and carrier decision, then implement only an explicitly authorized loader/conformance slice. |
 | [`scenario-configuration`](scenario-configuration/SKILL.md) | Design, review, and atomically promote one declared-purpose Scenario Configuration, then delimit its later bounded engineering admission without defining schema, policy, or runtime. |
 
-The scenario, mapping/conformance, and configuration Skills are working
-candidates. The mapping/conformance Skill now includes the bounded multi-hop
-E6--E7 method demonstrated by the completed KT--NBC--NYCH closeout. The
-configuration method is extracted retrospectively from the accepted
-H2EPR-0288 configuration. Both additions should be forward-tested on the next
-event that reaches their stage. Revise them only where real use exposes a
-reusable gap. They do not form a general simulation pipeline or authorize
+The scenario, mapping/conformance, and configuration Skills encode the methods
+supported by the repository. The mapping/conformance Skill includes the
+bounded multi-hop binding and conformance method demonstrated by the
+KT--NBC--NYCH closeout. The configuration Skill defines the corresponding
+configuration-design and admission boundaries. Re-evaluate both methods when
+they are applied to another event, and revise them only where that use exposes
+a reusable gap. They do not form a general simulation pipeline or authorize
 policy, simulation, contract, or evaluation work.
 
 The project-level stage order, authorization boundaries, and current event

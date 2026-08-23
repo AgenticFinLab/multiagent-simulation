@@ -1,6 +1,6 @@
-"""Public G1 construction-layer API.
+"""Public construction-layer API.
 
-This repository-local API is incubating. It builds Construction IR only; it
+This project API builds Construction IR only; it
 does not construct participants, a world, a runtime bundle, or a simulation.
 """
 

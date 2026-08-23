@@ -396,7 +396,8 @@ def build_cases(existing_cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
     )
     schema_boundary_ok = all(
         load_json(path).get("$id", "").startswith(
-            "https://agenticfinlab.local/h2epr/contracts/v1/schemas/"
+            "https://raw.githubusercontent.com/AgenticFinLab/"
+            "multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/"
         )
         and ("reference_" + "epg.json") not in path.read_text(encoding="utf-8")
         for path in SCHEMA_PATHS

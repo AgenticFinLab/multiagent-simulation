@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scenarios.panic_1907.lineage_v0_1 import (
+from h2epr.scenarios.panic_1907.lineage_v0_1 import (
     LineageEnvironmentV0_1,
     PositiveLineagePoliciesV0_1,
     load_lineage_binding,
@@ -15,7 +15,7 @@ MANIFEST_PATH = (
     PROJECT_ROOT
     / "agents/bindings/panic_1907/kt-nbc-nych-v0.1/manifest.json"
 )
-MANIFEST_SHA256 = "4c263bec986fd49c260881a6dc17422598f51f5114ceb69e500a9ead3319f1c1"
+MANIFEST_SHA256 = "3b4b93eeaec1dd99a1e387fbbf3d66c33efb593a124000982c39bd88e5c494a5"
 RUN_ID = "run.h2epr.0288.kt_nbc_nych.conformance.001"
 
 

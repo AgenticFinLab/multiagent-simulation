@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from masim.integrations.event_process import canonical_sha256, validate_trace
-from scenarios.panic_1907.lineage_conformance_v0_1 import (
+from h2epr.scenarios.panic_1907.lineage_conformance_v0_1 import (
     LineageConformanceError,
     build_positive_lineage,
     load_conformance_binding,
@@ -16,7 +16,7 @@ from scenarios.panic_1907.lineage_conformance_v0_1 import (
     run_lineage_conformance,
     validate_lineage_projection,
 )
-from scenarios.panic_1907.lineage_v0_1 import (
+from h2epr.scenarios.panic_1907.lineage_v0_1 import (
     LineageBindingError,
     PositiveLineagePoliciesV0_1,
 )
@@ -259,6 +259,21 @@ def test_closeout_receipt_matches_the_regenerated_expected_vector() -> None:
     trace = receipt["trace"]
 
     assert receipt["verdict"] == "PASS_BOUNDED_LINEAGE_CONFORMANCE"
+    assert set(receipt["binding"]) == {
+        "release_manifest_sha256",
+        "binding_sha256",
+        "binding_surfaces_verified",
+        "configuration_admission_surfaces_verified",
+    }
+    assert all(
+        set(row) == {"check_id", "status", "summary"}
+        and row["status"] == "pass"
+        for row in receipt["verification"]
+    )
+    receipt_text = json.dumps(receipt, sort_keys=True)
+    assert "worktree" not in receipt_text
+    assert "git_diff" not in receipt_text
+    assert "tests_passed" not in receipt_text
     assert trace["conformance_implementation_sha256"] == run.manifest[
         "conformance_implementation_sha256"
     ]

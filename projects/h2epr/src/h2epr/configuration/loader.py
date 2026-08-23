@@ -42,7 +42,6 @@ CONFIGURATION_RELEASE_SCHEMA = "h2epr.event-scenario-configuration-release.v0_1"
 CONFIGURATION_RELEASE_STATUS = "accepted_non_executable_configuration"
 
 _SHA256 = re.compile(r"^[a-f0-9]{64}$")
-_GIT_COMMIT = re.compile(r"^[a-f0-9]{40}$")
 
 
 class _DuplicateKey(ValueError):
@@ -266,7 +265,6 @@ class ScenarioConfigurationAdmission:
 
 
 def _validate_checksum_inventory(
-    root: Path,
     package_dir: Path,
     required_paths: set[Path],
 ) -> None:
@@ -296,11 +294,10 @@ def _validate_checksum_inventory(
                 detail="sha256_double_space_path_required",
             )
         path = _resolved_file(
-            root,
+            package_dir,
             package_dir,
             parts[1],
             pointer=pointer,
-            allow_parent=True,
         )
         if path in observed:
             _raise(
@@ -479,7 +476,6 @@ def _load_release_context(
             )
         input_hashes[name] = expected
         input_paths[name] = path
-        required_paths.add(path)
 
     owner = _object(
         manifest.get("owner_decision"), pointer="/release_manifest/owner_decision"
@@ -499,8 +495,7 @@ def _load_release_context(
             pointer="/release_manifest/owner_decision",
             detail="owner_decision_sha256_mismatch",
         )
-    required_paths.add(owner_path)
-    _validate_checksum_inventory(root, package_dir, required_paths)
+    _validate_checksum_inventory(package_dir, required_paths)
 
     coverage_raw = _object(
         manifest.get("coverage"), pointer="/release_manifest/coverage"
@@ -1210,57 +1205,6 @@ def load_scenario_configuration(
     )
 
 
-def _validate_repository_context(value: Mapping[str, Any]) -> dict[str, Any]:
-    required = {
-        "root",
-        "branch",
-        "baseline_commit",
-        "worktree_state",
-        "validation_surface_sha256s",
-    }
-    if not isinstance(value, Mapping) or set(value) != required:
-        _raise(
-            ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
-            pointer="/repository",
-            detail="repository_fields_mismatch",
-        )
-    result = {name: value[name] for name in required - {"validation_surface_sha256s"}}
-    if any(
-        not isinstance(result[name], str) or not result[name]
-        for name in ("root", "branch", "worktree_state")
-    ) or _GIT_COMMIT.fullmatch(result["baseline_commit"]) is None:
-        _raise(
-            ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
-            pointer="/repository",
-            detail="repository_identity_invalid",
-        )
-    hashes = value["validation_surface_sha256s"]
-    if not isinstance(hashes, Mapping) or not hashes:
-        _raise(
-            ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
-            pointer="/repository/validation_surface_sha256s",
-            detail="nonempty_mapping_required",
-        )
-    normalized_hashes: dict[str, str] = {}
-    for path, digest in sorted(hashes.items()):
-        if (
-            not isinstance(path, str)
-            or not path
-            or Path(path).is_absolute()
-            or ".." in Path(path).parts
-            or not isinstance(digest, str)
-            or _SHA256.fullmatch(digest) is None
-        ):
-            _raise(
-                ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
-                pointer="/repository/validation_surface_sha256s",
-                detail="path_or_sha256_invalid",
-            )
-        normalized_hashes[path] = digest
-    result["validation_surface_sha256s"] = normalized_hashes
-    return {name: result[name] for name in sorted(result)}
-
-
 def _validate_verification(value: Sequence[Mapping[str, Any]]) -> list[dict[str, str]]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)) or not value:
         _raise(
@@ -1269,25 +1213,29 @@ def _validate_verification(value: Sequence[Mapping[str, Any]]) -> list[dict[str,
             detail="nonempty_sequence_required",
         )
     result: list[dict[str, str]] = []
+    check_ids: set[str] = set()
     for index, raw in enumerate(value):
-        if not isinstance(raw, Mapping) or set(raw) != {"command", "result", "summary"}:
+        if not isinstance(raw, Mapping) or set(raw) != {"check_id", "status", "summary"}:
             _raise(
                 ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
                 pointer=f"/verification/{index}",
                 detail="verification_fields_mismatch",
             )
-        row = {key: raw[key] for key in ("command", "result", "summary")}
+        row = {key: raw[key] for key in ("check_id", "status", "summary")}
         if (
             any(not isinstance(row[key], str) or not row[key] for key in row)
-            or row["result"] not in {"pass", "fail"}
+            or re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", row["check_id"]) is None
+            or row["status"] not in {"pass", "fail"}
+            or row["check_id"] in check_ids
         ):
             _raise(
                 ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
                 pointer=f"/verification/{index}",
                 detail="verification_value_invalid",
             )
+        check_ids.add(row["check_id"])
         result.append(row)
-    return result
+    return sorted(result, key=lambda row: row["check_id"])
 
 
 _FAILURE_GATE = {
@@ -1303,13 +1251,12 @@ _FAILURE_GATE = {
 
 def build_configuration_preflight_receipt(
     *,
-    repository_context: Mapping[str, Any],
     verification: Sequence[Mapping[str, Any]],
     admission: ScenarioConfigurationAdmission | None = None,
     error: ConfigurationAdmissionError | None = None,
     attempted_configuration_path: str = "",
 ) -> dict[str, Any]:
-    """Build one deterministic pass or failure receipt for E5 static admission."""
+    """Build one deterministic pass or failure receipt for static admission."""
 
     if (admission is None) == (error is None):
         _raise(
@@ -1317,9 +1264,8 @@ def build_configuration_preflight_receipt(
             pointer="/receipt",
             detail="exactly_one_of_admission_or_error_required",
         )
-    repository = _validate_repository_context(repository_context)
     checks = _validate_verification(verification)
-    if admission is not None and any(row["result"] != "pass" for row in checks):
+    if admission is not None and any(row["status"] != "pass" for row in checks):
         _raise(
             ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
             pointer="/verification",
@@ -1394,7 +1340,6 @@ def build_configuration_preflight_receipt(
     receipt: dict[str, Any] = {
         "schema": CONFIGURATION_RECEIPT_FORMAT,
         "validation_surface": CONFIGURATION_ADMISSION_VERSION,
-        "repository": repository,
         "configuration": configuration,
         "release": release,
         "semantic_inputs": semantic_inputs,
@@ -1412,7 +1357,7 @@ def build_configuration_preflight_receipt(
             "simulation_authorized": False,
             "evaluation_authorized": False,
         },
-        "next_legal_stage": "separately_authorized_E6_carrier_projection",
+        "next_legal_stage": "separately_authorized_carrier_projection",
     }
     receipt["receipt_sha256"] = sha256_value(receipt)
     return receipt

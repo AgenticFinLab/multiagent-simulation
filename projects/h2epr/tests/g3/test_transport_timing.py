@@ -38,3 +38,7 @@ def test_duplicate_message_id_is_append_only_terminal_attempt() -> None:
     transport.submit([_intent()], logical_tick=1)
     assert transport.submit([_intent()], logical_tick=1)[0].status == "duplicate"
     assert len(transport.history) == 2
+    assert transport.unresolved() == (("m1",), ("m1:b",))
+    deliveries, dispositions = transport.route_due(2)
+    assert dispositions[0].status == "delivered"
+    assert deliveries[0]["message_intent_id"] == "m1"

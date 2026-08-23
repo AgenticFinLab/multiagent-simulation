@@ -35,19 +35,14 @@ smaller validation environment.
 
 ## H2EPR research project
 
-[`projects/h2epr/`](projects/h2epr/) is a repository-local research surface for
-draft-EPG-driven participant simulation and the current single authority root
-for H2EPR-owned contracts, Agent/Scenario semantics, runtime adapters and
-compiler responsibilities. Its G1–G4 engineering chain reaches deterministic
-Rule execution, sealed trace/replay and Generated EPG compilation. The first
-standardized event cycle, H2EPR-0288, now also reaches an accepted Scenario
-Configuration, fail-closed static admission, a bounded KT--NBC--NYCH binding,
-and focused E7 conformance/trace/replay closeout. These remain engineering and
-method baselines: neither line establishes historical fidelity or scientific
-readiness, and the accepted full configuration is not an executable event.
+[`projects/h2epr/`](projects/h2epr/) is an independently packaged research
+project for auditable event-process simulation. It owns its contracts,
+participant and scenario semantics, configuration admission, runtime adapters,
+and graph compiler. The Panic of 1907 assets provide a bounded engineering
+baseline, not a full-event simulation or a historical-validity claim.
 
 Start with the repository-level
 [H2EPR project guide](projects/H2EPR.md), then use the
-[project README](projects/h2epr/README.md) for implementation details and the
-[event modeling workflow](projects/h2epr/WORKFLOW.md) for stage gates, stopping
-boundaries and the current event position.
+[project README](projects/h2epr/README.md) for installation and validation, or
+the [event modeling workflow](projects/h2epr/WORKFLOW.md) for artifact handoffs
+and stopping boundaries.

@@ -10,10 +10,10 @@ import pytest
 from h2epr.agents import load_executable_mapping, runtime_field_values
 from masim.integrations.event_process import validate_trace
 
-from scenarios.panic_1907 import run_behavior_feedback_matrix
-from scenarios.panic_1907.first_slice import FirstSliceRunner, run_first_slice
-from scenarios.panic_1907.model import StateChange
-from scenarios.panic_1907.policies import KT_ID, NYCH_ID, decide_knickerbocker
+from h2epr.scenarios.panic_1907 import run_behavior_feedback_matrix
+from h2epr.scenarios.panic_1907.first_slice import FirstSliceRunner, run_first_slice
+from h2epr.scenarios.panic_1907.model import StateChange
+from h2epr.scenarios.panic_1907.policies import KT_ID, NYCH_ID, decide_knickerbocker
 from support.schema_registry import definition_errors
 
 

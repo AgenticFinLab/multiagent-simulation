@@ -25,7 +25,7 @@ Do not enter conformance mode merely because design mode passes. Read
 before closing either mode. When the authorized case is an exact multi-hop
 lineage projected from an admitted Scenario Configuration, also read
 [bounded lineage conformance](references/bounded-lineage-conformance.md)
-before implementing or closing the E6--E7 handoff.
+before implementing or closing the binding-to-conformance handoff.
 
 Keep the artifact transition explicit:
 
@@ -278,7 +278,8 @@ Atomic promotion additionally produces or finalizes:
    stage;
 2. `manifest.json` — source release, coverage, artifact hashes, accepted owner
    decision, carrier verdict, authorization boundary, and next stage; and
-3. `SHA256SUMS` — the manifest, release files, and owner-decision record.
+3. `SHA256SUMS` — the manifest and files owned by the release directory;
+   upstream and owner-decision identities remain in the manifest.
 
 Do not describe a mutable candidate as a mapping release. Do not change
 semantic content while calculating promotion hashes.

@@ -1,347 +1,127 @@
 # H2EPR
 
-H2EPR is a repository-local research project for auditable simulation of real
-event processes. It builds participant Agents from bounded evidence, records
-their interaction as a sealed trace and compiles the generated process into an
-EPG.
+H2EPR provides research and software components for auditable simulation of
+real event processes. It turns bounded evidence and participant models into
+explicit scenario inputs, records deterministic interaction traces, and
+compiles validated traces into generated event process graphs.
 
-For the repository-level overview and the relationship with MASim, see the
-[H2EPR project guide](../H2EPR.md).
-For the event-stage order, authorization boundaries, and current progress, see
-the [Event modeling workflow](WORKFLOW.md).
+H2EPR uses MASim for general multi-agent infrastructure but is packaged and
+tested as a separate project. Event evidence, participant behavior,
+institutional rules, and generated-process semantics remain H2EPR concerns.
 
-## Current focus
+## Components
 
-The Knickerbocker Trust–New York Clearing House work is the completed reference
-pilot for Panic of 1907 Agent Definitions. Its `0.2.1` Definitions have an
-accepted V1 mapping, machine-readable intent and lifecycle registries,
-fail-closed carrier checks, and a deterministic non-Ray request-to-feedback
-conformance slice. The earlier `0.1.0-dev` fixture remains frozen as an
-engineering baseline.
-
-National Bank of Commerce, J. Pierpont Morgan, Trust Company of America,
-Lincoln Trust Company, and the trust-company presidents' committee are
-accepted scholarly Definitions outside the current two-role executable subset.
-Roster production has also accepted five event-bound population models:
-Knickerbocker depositors, later trust-company depositors, member/correspondent-
-bank resource decisions, call-money lenders and broker-borrowers. NYSE venue
-and market operation remain scenario-owned. Every H2EPR-0288 roster row has a
-reviewed disposition. Roster Definition release v0.1 is the fixed semantic
-input to the accepted consolidated mapping and V1 carrier review. The accepted
-[Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/) now
-provides the full event-world semantic boundary. The accepted
-[Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
-pins a 16-actor / 10-unit mechanism-coverage assembly and remains explicitly
-non-executable. Its
-[bounded configuration admission v0.1](configs/panic_1907/configuration-admission-v0.1/)
-now supplies exact schema, raw/canonical identity, stable rejection classes,
-fail-closed loading, cross-object checks, and a deterministic static receipt.
-The approved S0--S4 cycle has completed the bounded
-[KT--NBC--NYCH binding v0.1](agents/bindings/panic_1907/kt-nbc-nych-v0.1/)
-and its [E7 conformance closeout](scenarios/panic_1907/lineage-conformance-v0.1/):
-high-information negatives, one deterministic trace/replay receipt,
-implementation review, and a reusable method delta.
-
-The earlier G1–G4 work remains the engineering foundation: construction,
-participant artifacts, deterministic Rule execution, trace/seal/replay and
-Generated EPG compilation.
-
-## Implemented components
-
-| Component | Location | Current role |
+| Component | Location | Responsibility |
 |---|---|---|
-| Event workflow | `WORKFLOW.md` | Project-level stages, authorization gates, closeout audit and current event position |
-| Contracts V1 | `contracts/v1/` | Stable construction, runtime, trace, seal and Generated EPG interfaces |
-| Construction IR | `src/h2epr/construction/` | Explicit source loading and typed, lossless construction data |
-| Participant artifacts | `src/h2epr/artifacts/` | Entity registry, provenance and ParticipantArtifact assembly |
-| Event bundles | `src/h2epr/bundles/` | Construction seals, RuntimeScenarioBundle generation and validation |
-| Canary policy and world | `src/h2epr/policies/`, `src/h2epr/world/` | Rule policy inputs and normalized sensitivity state |
-| Runtime | `src/h2epr/runtime/` | H2EPR adapter, phased Rule runtime, detectors and orchestration |
-| Compiler | `src/h2epr/compiler/` | Sealed-trace validation and deterministic EPG/GraphSeal compilation |
-| Agent research | `agents/` | Event roster, institutional behavior Definitions, source register, evidence ledger, decision situations, and derived bindings |
-| Population research | `populations/` | Reviewed heterogeneous-participant models and lightweight interface preflights |
-| Agent binding support | `src/h2epr/agents/` | New-format Definition profile checks, strict semantic mapping, intent validation and Contracts V1 carrier checks |
-| Bounded three-role binding | `agents/bindings/panic_1907/kt-nbc-nych-v0.1/`, `scenarios/panic_1907/lineage_v0_1/` | Exact E6 identities, four action projections, three communication routes, positive participant branches and six lineage-only environment policies; not a full configuration runtime |
-| Event scenarios | `scenarios/` | Scenario Definition and interface-closure templates, event-owned semantics and policies, authoritative process state and bounded non-Ray paths |
-| Scenario configurations | `configs/`, `src/h2epr/configuration/` | Public semantic template, project-local admission schema, versioned declared-purpose instantiations, fail-closed loader and static receipts kept distinct from frozen canaries |
-| Semantic releases | `releases/` | Hash-pinned roster, Definition, population, evidence, skeleton and interface inventories |
+| Contracts | `contracts/v1/` | Stable construction, runtime, trace, seal, and graph interfaces |
+| Construction | `src/h2epr/construction/` | Explicit source loading and typed construction records |
+| Artifacts and bundles | `src/h2epr/artifacts/`, `src/h2epr/bundles/` | Participant artifacts, provenance, and validated runtime bundles |
+| Policies and world | `src/h2epr/policies/`, `src/h2epr/world/` | Declarative policy inputs and normalized world calculations |
+| Runtime and compiler | `src/h2epr/runtime/`, `src/h2epr/compiler/` | Deterministic execution, sealed traces, replay, and graph compilation |
+| Agent research | `agents/` | Definitions, rosters, evidence reviews, mappings, and bindings |
+| Population research | `populations/` | Heterogeneous participant models and interface reviews |
+| Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases and their bounded implementation modules |
+| Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
+| Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
 
-## Repository layout
+Importable Python code is contained in `src/h2epr`. The `scenarios` directory
+holds reviewed semantic assets rather than a second Python package.
+
+## First event baseline
+
+The Panic of 1907 assets exercise the complete event-modeling handoff at a
+bounded scale:
+
+- seven institutional Agent Definitions and five population models;
+- a fixed roster release and consolidated mapping;
+- an [Event Scenario Definition](scenarios/panic_1907/definition-v0.1/);
+- a non-executable [Scenario Configuration](configs/panic_1907/scenario-configuration-v0.1/)
+  with [static admission](configs/panic_1907/configuration-admission-v0.1/);
+- a bounded [KT--NBC--NYCH binding](agents/bindings/panic_1907/kt-nbc-nych-v0.1/);
+  and
+- focused [lineage conformance](scenarios/panic_1907/lineage-conformance-v0.1/)
+  with deterministic trace and replay evidence.
+
+The binding implements only the selected three-role lineage. It does not make
+the full configuration executable, supply behavior for every roster member,
+or establish historical or scientific validity.
+
+## Package layout
 
 ```text
 projects/h2epr/
-├── WORKFLOW.md
+├── agents/
+├── configs/
 ├── contracts/v1/
 ├── decisions/
-├── configs/
-│   ├── scenario-configuration-template.md
-│   ├── schemas/
-│   └── panic_1907/
-├── agents/
-│   ├── README.md
-│   ├── agent-definition-template.md
-│   ├── defines/panic_1907/
-│   ├── interfaces/panic_1907/
-│   ├── rosters/panic_1907.md
-│   └── bindings/panic_1907/
 ├── populations/
-│   ├── defines/panic_1907/
-│   └── interfaces/panic_1907/
-├── releases/panic_1907/
-├── skills/
-│   ├── event-agent-batch/
-│   ├── historical-evidence-research/
-│   ├── participant-behavior-research/
-│   ├── agent-definition/
-│   ├── agent-definition-review/
-│   ├── event-scenario-design/
-│   ├── roster-mapping-conformance/
-│   └── scenario-configuration/
+├── releases/
 ├── scenarios/
-│   ├── scenario-definition-template.md
-│   ├── scenario-interface-closure-template.md
-│   └── panic_1907/
+├── skills/
 ├── src/h2epr/
-│   ├── construction/
-│   ├── artifacts/
-│   ├── policies/
-│   ├── world/
-│   ├── bundles/
-│   ├── agents/
-│   ├── configuration/
-│   ├── runtime/
-│   └── compiler/
-└── tests/
+├── tests/
+├── ARCHITECTURE.md
+├── EVOLUTION.md
+├── WORKFLOW.md
+└── pyproject.toml
 ```
 
-The project is organized by responsibility rather than by audit round. New
-directories are added when a real implementation needs them; the tree is not
-a permanent package API.
+Research assets are organized by responsibility and event identity. Versioned
+release directories contain manifests and local integrity records; upstream
+lineage is recorded in manifests rather than copied into package checksums.
 
-## Agent Definitions and roster production
+## Installation
 
-The current event assets are under `agents/defines/panic_1907/`:
-
-| File | Purpose |
-|---|---|
-| `knickerbocker-trust.md` | Knickerbocker role, information, authority and decision commitments |
-| `new-york-clearing-house.md` | NYCH governance, eligibility and procedural commitments |
-| `national-bank-of-commerce.md` | NBC credit, request-intermediation and clearing-relationship decisions |
-| `j-pierpont-morgan.md` | bounded information, examination, proposal, solicitation and coordination choices |
-| `trust-company-of-america.md` | TCA information, examination, support-route, collateral, operating and communication choices |
-| `lincoln-trust-company.md` | thin board-authorized condition-communication interface |
-| `trust-company-presidents-committee.md` | aggregate procedural application, investigation, advice, reporting, and bounded coordination interface |
-| `source-register.md` | Adopted source identities, public locators, hashes, cited passages and limitations |
-| `evidence-ledger.md` | Claim status, participant availability, exposure and unresolved questions |
-| `decision-situations.md` | Shared role-comparison situations and falsification perturbations |
-
-The reference Definitions provide four Knickerbocker and five NYCH Decision
-Commitments. They cover information and authorization work, request/case
-lifecycle, route and facility classification, conditional proposals,
-communication, results, uncertainty and falsification. The member-facility
-restriction is common to both NYCH structures; the conservative baseline uses
-no evidenced competent alternative route, while bounded alternative-route
-discretion is retained only for structural sensitivity.
-
-The accepted mapping under `agents/bindings/panic_1907/` pins the two
-Definition hashes, seven business lifecycles, 21 semantic intents, and 21
-cross-object conformance rules to Contracts V1. Its machine projections reject
-stale hashes, undeclared parameters, carrier drift, illegal lifecycle changes,
-and action/message mismatches.
-
-The conservative first slice under `scenarios/panic_1907/` exercises eight
-decisions across request formation, case classification, information exchange,
-review, a facility-scoped decline, delivery, and Knickerbocker's subsequent
-contingency preparation. All 21 intents are registered and validated, but the
-remaining intent policies are not implemented by this slice. It does not start
-Ray or the G3/G4 simulation path and makes no historical-validity claim.
-
-The NBC, Morgan, TCA, Lincoln, and trust-company committee `0.1.0` Definitions
-are accepted scholarly role models. None is part of the frozen two-role
-binding; NBC alone is additionally projected as the pure courier in the
-separate bounded three-role E6/E7 slice. The other four have no participant
-policy implementation. All are covered by the accepted
-[consolidated mapping design](agents/bindings/panic_1907/consolidated/). The accepted
-[R2 interface preflight](agents/interfaces/panic_1907/r2-private-and-named-trusts.md)
-finds no concrete carrier counterexample while recording expected later
-mapping extensions.
-
-The accepted [Knickerbocker depositor population model](populations/defines/panic_1907/knickerbocker-depositors.md)
-is the first Roster-production product with a non-Agent representation. It
-preserves heterogeneous withdrawal and retention choices, pending-request
-discipline, and delivered-result response. Population composition and response
-profiles remain uncalibrated sensitivity inputs. Its
-[interface preflight](populations/interfaces/panic_1907/knickerbocker-depositors.md)
-found no concrete Contracts V1 counterexample and deliberately created no
-mapping or implementation.
-
-The accepted [member and correspondent bank resource-decision population](populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md)
-preserves weight-one institution identity, independent commitment authority,
-owned resources and certificate demand without inventing named-bank policies.
-The combined [R3 interface preflight](agents/interfaces/panic_1907/r3-collective-trust-support.md)
-keeps committee advice, institution commitment, resource transfer and NYCH
-certificate supply as separate causal owners and finds no concrete V1 carrier
-counterexample.
-
-The accepted [later trust-company depositor population](populations/defines/panic_1907/later-trust-company-depositors.md)
-keeps account, information and request results scoped to one host trust. The
-[call-money lender](populations/defines/panic_1907/call-money-lenders.md) and
-[broker-borrower](populations/defines/panic_1907/call-money-broker-borrowers.md)
-populations preserve the two sides of funding choice while leaving venue,
-matching, collateral truth, trading, settlement and realized effects to the
-scenario. Their [R4 interface preflight](populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md)
-finds no concrete V1 carrier counterexample.
-
-The accepted [research roster](agents/rosters/panic_1907.md) fixes the v0.1
-question, horizon, causal ownership, and role dispositions. The non-executable
-[event semantic skeleton](scenarios/panic_1907/semantic-skeleton.md) aligns
-shared concepts and interaction routes used during Roster production. The
-accepted [Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
-supersedes it as the full event-world semantic authority while preserving the
-skeleton as release provenance. The accepted
-[Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
-pins the first mechanism-coverage instantiation while retaining a fail-closed,
-non-executable boundary.
-The hash-pinned [Roster Definition release v0.1](releases/panic_1907/roster-definition-v0.1/)
-closes semantic production and is the sole input set for consolidated mapping.
-The accepted [consolidated mapping](agents/bindings/panic_1907/consolidated/)
-defines the full-Roster identity, information, authority, resource, lifecycle
-and result model while retaining Contracts V1.
-
-The earlier three-tick path is frozen under
-`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`; it exercises
-Definition hashes, observation allowlists, request state, intent/result
-separation, deterministic trace and replay only for the old `0.1.0-dev`
-fixture.
-
-Two historical questions remain open: NYCH authority over other possible
-support routes, and the exact Knickerbocker representatives and corporate
-authorization behind the request. The pilot keeps both as bounded unknowns.
-
-## Architecture
-
-```text
-evidence
-  -> Agent Definition + scenario/environment
-  -> ParticipantArtifact / EventBundle
-  -> filtered observation
-  -> Agent intent or message
-  -> environment adjudication
-  -> authoritative state update
-  -> sealed trace and replay
-  -> Generated EPG
-```
-
-Agents propose actions; the environment determines admissibility and effects.
-Only the reducer commits world state. The runtime records accepted, rejected,
-delayed, duplicate, failed and expired attempts.
-
-The full architecture and integration boundaries are described in
-[ARCHITECTURE.md](ARCHITECTURE.md).
-
-## Evidence and generated data
-
-- `data/h2epr/` contains frozen input assets.
-- `.local-runtime/h2epr-simulation/` contains local working material,
-  research history and archived evidence.
-- `EXPERIMENT/H2EPR/` is used for generated local run data.
-- `simulation-results/H2EPR/` is reserved for separately curated releases.
-
-Construction, runtime and post-seal evaluation use separate information
-boundaries. The current Panic of 1907 canary was built after exposure to the
-full draft and is classified as an architecture demo. Its outputs support
-engineering review rather than historical calibration.
-
-## Packaging
-
-The `h2epr` package is not installed by the root `setup.py`. Run project tests
-from the repository root with `projects/h2epr/src` on `PYTHONPATH`:
+Install H2EPR from the repository root:
 
 ```bash
-PYTHONPATH=projects/h2epr/src python -c "import h2epr"
+python -m pip install -e "projects/h2epr[test]"
 ```
 
-Domain-neutral phased execution and event-process primitives currently live in
-`masim/`. Event identity, Agent behavior, scenario policy and compiler logic
-remain in H2EPR.
+Runtime integration also requires the MASim dependencies described in the
+root [`requirements.txt`](../../requirements.txt). Contract, configuration,
+and most research-asset checks run without starting a simulator.
 
-## Tests
+## Validation
 
-Configuration admission, Contracts and the Agent binding/conformance suites
-run offline and do not start Ray:
+Run the project suites from the repository root after installation:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 \
-PYTHONPATH=projects/h2epr/src \
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/configuration \
-  projects/h2epr/tests/contracts \
-  projects/h2epr/tests/agents
+python -B -m pytest -p no:cacheprovider projects/h2epr/tests
 ```
 
-The dedicated
-[event-standardization CI](../../.github/workflows/h2epr-event-standardization.yml)
-runs the configuration-admission suite and the exact bounded E6 binding and E7
-conformance test modules. It starts no simulator and does not merge this
-three-role method slice into the G3/G4 runtime path.
-
-Additional suites cover construction, bundles, runtime and compilation:
+Individual directories may be used for narrower checks:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 \
-PYTHONPATH=projects/h2epr/src \
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/construction \
-  projects/h2epr/tests/g2 \
-  projects/h2epr/tests/g3 \
-  projects/h2epr/tests/g4
+python -B -m pytest -p no:cacheprovider projects/h2epr/tests/contracts
+python -B -m pytest -p no:cacheprovider projects/h2epr/tests/configuration
+python -B -m pytest -p no:cacheprovider projects/h2epr/tests/agents
 ```
 
-The G3 suite requires the project runtime environment. See
-[tests/README.md](tests/README.md) for details.
+See [the test guide](tests/README.md) for suite-specific dependencies and
+commands. Release directories that contain a `SHA256SUMS` file can be checked
+with `sha256sum --check SHA256SUMS` from that directory.
 
-## Project status
+## Information and authority boundaries
 
-G1–G4 provide a deterministic engineering chain with recorded limitations.
-The current Agent work has reached seven accepted Definitions, five accepted
-population models, one accepted full-Roster mapping design and a bounded
-release-wide mapping-loader/conformance implementation. The loader verifies
-all twelve product hashes and derives the 115 observation and 107 intent
-placements; its synthetic fixture covers capability composition, population
-scope, authority/resource ownership, one funding lifecycle and replay. It does
-not supply full-Roster policy behavior or integrate the Roster into the G3/G4
-runtime, and none of this establishes historical or scientific validity.
-Scientific evaluation remains a later post-seal activity.
+- Construction reads only explicitly declared sources and records their
+  provenance.
+- Runtime observations expose only information available to the participant.
+- Agents emit intents and messages; the environment owns adjudication and
+  results.
+- The reducer is the sole authority for state changes.
+- Trace and seal validation precede replay and graph compilation.
+- Evaluation material is not a runtime or construction input.
 
-The project-level workflow records H2EPR-0288 as complete through bounded E7.
-The accepted Scenario Configuration remains non-executable, while its separate
-three-role binding projects only KT submission, NBC pure forwarding, NYCH
-classification and NYCH scoped disposition. The S4 closeout adds only a fixed
-five-tick cross-hop validator, negative conformance, deterministic
-trace/replay, review and method learning. It does not authorize full-roster
-execution, calibration, or scientific evaluation; the next normal step is a
-second-event forward test rather than deeper H2EPR-0288 implementation.
+The current baseline stops before full-roster integration, calibration,
+historical fitting, held-out evaluation, and scientific claims. Extending one
+of those surfaces requires a separate research purpose and review.
 
-H2EPR-0616 SingHealth is retained by Contracts V1 as the cross-domain check
-required before a future shared-core claim. It is not scheduled as the next
-development task.
+## Documentation
 
-## Further reading
-
-- [Research projects index](../README.md)
 - [Project guide](../H2EPR.md)
 - [Event modeling workflow](WORKFLOW.md)
 - [Architecture](ARCHITECTURE.md)
-- [Evolution policy](EVOLUTION.md)
+- [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)
-- [Agent development workflow](agents/WORKFLOW.md)
-- [Panic of 1907 research roster](agents/rosters/panic_1907.md)
-- [Panic of 1907 semantic skeleton](scenarios/panic_1907/semantic-skeleton.md)
-- [Panic of 1907 Event Scenario Definition v0.1](scenarios/panic_1907/definition-v0.1/)
-- [Panic of 1907 Scenario Configuration v0.1](configs/panic_1907/scenario-configuration-v0.1/)
-- [Panic of 1907 bounded configuration admission v0.1](configs/panic_1907/configuration-admission-v0.1/)
-- [Scenario Configuration guide and template](configs/README.md)
-- [Scenario Configuration Skill](skills/scenario-configuration/SKILL.md)
-- [Panic of 1907 consolidated mapping](agents/bindings/panic_1907/consolidated/)
 - [Contracts V1](contracts/v1/README.md)
-- [Architecture decisions](decisions/)

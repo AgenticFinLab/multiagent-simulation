@@ -28,8 +28,8 @@ scientific-validity claim.
 
 - [`manifest.json`](manifest.json) records identities, versions, repository-
   relative paths and SHA-256 values.
-- [`SHA256SUMS`](SHA256SUMS) verifies the manifest, this README and every
-  pinned semantic input from this directory.
+- [`SHA256SUMS`](SHA256SUMS) verifies the files owned by this release
+  directory. The manifest records the identities of semantic inputs.
 - The [research roster](../../../agents/rosters/panic_1907.md) owns event
   membership and dispositions.
 - The [semantic skeleton](../../../scenarios/panic_1907/semantic-skeleton.md)

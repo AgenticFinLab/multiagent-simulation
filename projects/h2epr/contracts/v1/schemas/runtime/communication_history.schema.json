@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/runtime/communication_history.schema.json",
   "title": "Append-only Communication History and RunSeal Closure",
   "type": "object",
   "additionalProperties": false,
@@ -15,7 +15,7 @@
       "const": "communication.history.v1"
     },
     "decision_record": {
-      "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/DecisionRecord"
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/DecisionRecord"
     },
     "attempts": {
       "type": "array",
@@ -71,7 +71,7 @@
           "minLength": 1
         },
         "intent": {
-          "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageIntent"
+          "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageIntent"
         },
         "intent_content_seal": {
           "$ref": "#/$defs/IntentContentSeal"
@@ -80,7 +80,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/CommunicationDisposition"
+            "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/CommunicationDisposition"
           }
         },
         "sent": {
@@ -89,7 +89,7 @@
               "type": "null"
             },
             {
-              "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageSent"
+              "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageSent"
             }
           ]
         },
@@ -99,10 +99,10 @@
               "type": "null"
             },
             {
-              "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageDelivered"
+              "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageDelivered"
             },
             {
-              "$ref": "https://agenticfinlab.local/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageExpired"
+              "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageExpired"
             }
           ]
         }

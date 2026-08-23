@@ -14,8 +14,8 @@ from h2epr.agents import (
 )
 from masim.integrations.event_process import validate_trace
 
-from scenarios.panic_1907 import run_first_slice
-from scenarios.panic_1907.policies import (
+from h2epr.scenarios.panic_1907 import run_first_slice
+from h2epr.scenarios.panic_1907.policies import (
     KT_ID,
     NYCH_ID,
     decide_knickerbocker,

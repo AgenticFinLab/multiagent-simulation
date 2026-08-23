@@ -2,7 +2,8 @@
 
 Use this reference only when a separately authorized conformance task names
 one exact, accepted mapping/binding release and one small multi-hop lineage.
-It records the E6--E7 method learned from the H2EPR-0288 KT--NBC--NYCH case;
+It records the binding-to-conformance method used for the H2EPR-0288
+KT--NBC--NYCH case;
 it does not authorize a broader runtime or replace scenario configuration,
 policy, or scientific-evaluation methods.
 
@@ -20,9 +21,9 @@ Record before implementation:
 - explicit exclusions, including all other actors or policies, a simulator,
   calibration, evaluation, and validity claims.
 
-Do not modify a frozen E6 surface during E7 unless an adversarial case proves
-a real defect. If it does, return to E6 review and issue a new identity rather
-than silently refreshing hashes from E7.
+Do not modify a frozen binding surface during conformance validation unless an
+adversarial case proves a real defect. If it does, return to binding review and
+issue a new identity rather than silently refreshing hashes from conformance.
 
 ## Select the smallest causal lineage
 
@@ -31,7 +32,7 @@ Prefer one original sender, any indispensable carrier, one adjudicator, and
 the return route. Name excluded actors and policy families explicitly.
 
 Fix the positive branch in advance. Unsupported participant branches must
-fail closed; E7 is not an invitation to implement every valid behavior in a
+fail closed; conformance is not an invitation to implement every valid behavior in a
 Definition. A fixture may be fully exposed and synthetic when labeled as
 conformance-only and barred from historical or scientific claims.
 
@@ -68,7 +69,7 @@ runtime state merely because it exists in an action or message. The trace
 must still expose observations, decisions, intents, route adjudication,
 deliveries, dispositions, state deltas, and the final result layers.
 
-The conformance manifest should pin the E6 release, implementation identity,
+The conformance manifest should pin the accepted binding release, implementation identity,
 actors, actions, tick count, exposure, simulation flag, execution boundary,
 and validity-claim boundary. Repeated construction from identical inputs must
 produce identical manifest, record chain, seals, final state, and replayed
@@ -97,7 +98,7 @@ Add another negative only when it protects a distinct accepted invariant or
 routes a failure to a different owner. Do not implement unused policy branches
 solely to create more tests.
 
-## Close E7 and audit depth
+## Close conformance and audit depth
 
 Produce one concise implementation review and one machine-readable expected
 vector or receipt. The receipt should make the exact binding hash, conformance
@@ -110,7 +111,7 @@ Before closing, verify and report:
 
 - focused negative and trace/replay tests, relevant contract/import tests, and
   the owning regression suite;
-- all E5 and E6 protected hashes remain unchanged;
+- all configuration-admission and binding protected hashes remain unchanged;
 - actor, action, route, policy, branch, and tick inventories did not widen;
 - no simulator, full-event loop, calibration, evaluation, held-out protocol,
   or validity claim entered the implementation; and

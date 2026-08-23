@@ -28,10 +28,16 @@ class AppendOnlyTransport:
         for intent in sorted(intents, key=lambda item: item.message_intent_id):
             route = self._routes.get(intent.route_id)
             status, reason = "queued", "route_accepted"
+            predecessor_disposition_id = None
+            duplicate_of_intent_id = None
             if intent.logical_tick != logical_tick:
                 status, reason = "rejected", "send_tick_mismatch"
             elif intent.message_intent_id in self._intents:
                 status, reason = "duplicate", "duplicate_message_intent_id"
+                predecessor_disposition_id = self._latest_lifecycle()[
+                    intent.message_intent_id
+                ].disposition_id
+                duplicate_of_intent_id = intent.message_intent_id
             elif not route or route.get("source_id") != intent.sender_id or route.get("target_id") != intent.recipient_id:
                 status, reason = "rejected", "route_mismatch"
             elif route.get("latency_ticks") != intent.latency_ticks:
@@ -44,6 +50,8 @@ class AppendOnlyTransport:
                 logical_tick,
                 status,
                 reason,
+                predecessor_disposition_id=predecessor_disposition_id,
+                duplicate_of_intent_id=duplicate_of_intent_id,
             )
             self._history.append(disposition)
             emitted.append(disposition)
@@ -54,7 +62,7 @@ class AppendOnlyTransport:
     def route_due(self, logical_tick: int) -> tuple[tuple[dict, ...], tuple[MessageDisposition, ...]]:
         deliveries: list[dict] = []
         emitted: list[MessageDisposition] = []
-        latest = {item.message_intent_id: item for item in self._history}
+        latest = self._latest_lifecycle()
         for intent_id in sorted(self._intents):
             intent = self._intents[intent_id]
             if latest[intent_id].status in TERMINAL:
@@ -96,7 +104,15 @@ class AppendOnlyTransport:
         return tuple(sorted(matches, key=lambda item: item["message_intent_id"]))
 
     def unresolved(self) -> tuple[tuple[str, ...], tuple[str, ...]]:
-        latest = {item.message_intent_id: item for item in self._history}
+        latest = self._latest_lifecycle()
         unresolved = sorted(key for key, value in latest.items() if value.status not in TERMINAL)
         recipients = sorted(f"{key}:{latest[key].recipient_id}" for key in unresolved)
         return tuple(unresolved), tuple(recipients)
+
+    def _latest_lifecycle(self) -> dict[str, MessageDisposition]:
+        """Return lifecycle dispositions without letting duplicate attempts replace them."""
+        latest: dict[str, MessageDisposition] = {}
+        for item in self._history:
+            if item.status != "duplicate":
+                latest[item.message_intent_id] = item
+        return latest
