@@ -221,6 +221,12 @@ tmpl/
 
 /examples/UTEST/
 
+# Unit tests are intentionally versioned (unignore the tests/ package)
+!tests/
+!tests/**
+tests/**/__pycache__/
+tests/**/*.pyc
+
 slides*
 !docs/slides/
 !docs/slides/**
@@ -236,3 +242,6 @@ docs/slides/**/*.log
 configs/.team_registry
 
 */slides/*
+
+# Local-only unit tests (kept out of the repo by policy)
+.tests/

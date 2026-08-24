@@ -186,7 +186,7 @@ Does NOT use: `momentum`, `anchor`, `cost_basis`, peer flow.
 
 | Symbol | Meaning | Default Value | Source |
 |--------|---------|---------------|--------|
-| `beta` | belief learning rate | 0.20 | Barberis, Shleifer & Vishny (1998) |
+| `beta` | belief learning rate | 0.05 | Barberis, Shleifer & Vishny (1998) |
 | `theta` | belief deviation threshold | 0.02 | Standardised |
 
 #### Behavioral Properties
@@ -200,9 +200,9 @@ Does NOT use: `momentum`, `anchor`, `cost_basis`, peer flow.
 
 | Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
 |-----------|------|---------|-------------|-------------|-------------|--------|--------|
-| `learning_rate` | float | 0.20 | [0, 1] | high | Speed of belief movement toward fundamental. | Higher -> faster correction and less conservatism. | Barberis, Shleifer & Vishny (1998) |
+| `learning_rate` | float | 0.05 | [0, 1] | high | Speed of belief movement toward fundamental. | Higher -> faster correction and less conservatism. | Barberis, Shleifer & Vishny (1998) |
 | `threshold` | float | 0.02 | [0, 1] | high | Deviation from belief needed to trade. | Higher -> fewer trades and wider belief-price gap. | Standardised |
-| `base_position_size` | float | 20.0 | > 0 | medium | Maximum order size. | Higher -> stronger correction. | Standardised |
+| `base_position_size` | float | 25.0 | > 0 | medium | Maximum order size. | Higher -> stronger correction. | Standardised |
 | `sizing_scale` | float | 1000.0 | > 0 | medium | Converts belief deviation into quantity. | Higher -> more aggressive belief-based trading. | Standardised |
 | `inventory_max` | float | 200.0 | > 0 | low | Inventory cap. | Higher -> more correction capacity. | Standardised |
 
@@ -212,7 +212,7 @@ Does NOT use: `momentum`, `anchor`, `cost_basis`, peer flow.
 |--------|---------------|
 | Default population size | scenario-dependent |
 | Parameter heterogeneity policy | iid learning-rate draws |
-| Heterogeneity per parameter | `learning_rate -> Uniform(0.1, 0.4)` |
+| Heterogeneity per parameter | `learning_rate -> Uniform(0.02, 0.08)` |
 | Cross-agent correlation | none |
 | Identity persistence | belief persists within episode |
 
@@ -220,7 +220,7 @@ Does NOT use: `momentum`, `anchor`, `cost_basis`, peer flow.
 
 ### Case 1 - Sell overvaluation
 ```text
-Market state: P=105, F=100, prior belief=102, beta=0.2.
+Market state: P=105, F=100, prior belief=102, beta=0.05.
 Calculation: belief=102+0.2*(100-102)=101.6; dev=(105-101.6)/101.6=0.033.
 Decision: sell 20.
 State update: belief=101.6; position -20; cash +2100.

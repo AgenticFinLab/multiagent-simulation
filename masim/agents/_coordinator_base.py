@@ -48,6 +48,8 @@ from masim.format.broadcast import validate_broadcast, MarketBroadcast
 from masim.player.base import Action, Observation, StepResult
 from masim.player.general import GeneralPlayer
 from masim.utils.history import HistoryBuffer
+from masim.utils.rng import derive_rng
+from masim.agents._base import validate_archetype_extras
 
 logger = logging.getLogger("masim.agents.coordinator")
 
@@ -73,6 +75,7 @@ class CanonicalMarketCoordinator(GeneralPlayer):
     DISPLAY_NAME: str = ""
     SUMMARY: str = ""
     BROADCAST_FIELDS: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -157,6 +160,10 @@ class CanonicalMarketCoordinator(GeneralPlayer):
     def _run_initialization(self) -> None:
         """Run the state initialization sequence once."""
         extras = self.config.extras
+        validate_archetype_extras(self.STRATEGY, extras, self.PARAM_SPECS)
+        self.state.custom_state["rng"] = derive_rng(
+            extras.get("seed"), salt=self.config.identity
+        )
         self.state.custom_state["_record_path"] = extras.get("record_path", "")
         self.state.custom_state["_hot_limit"] = extras.get(
             "custom_state_hot_limit", 10000

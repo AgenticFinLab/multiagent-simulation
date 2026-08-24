@@ -50,6 +50,12 @@ class RuleLiquidityProvider(CanonicalRulePlayer):
         "(Glosten-Milgrom 1985; Hendershott et al. 2011)."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "ema_window": {"type": "int", "range": (1, None)},
+        "half_spread": {"type": "float", "range": (0.0, 1.0)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["ema_window"] = int(extras.get("ema_window", 20))

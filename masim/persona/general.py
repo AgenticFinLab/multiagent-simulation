@@ -229,15 +229,16 @@ class PlayerPersona(BasePersona):
         # "proceeding anyway" would let the Player operate on stale/missing
         # inbound messages and poison every downstream decision, so we fail
         # loudly and let the Simulator surface the topology bug.
+        received_senders = self.message_proxy.get_received_senders()
         if not self.player.is_received_ready(
             round_num,
-            self.message_proxy.get_received_senders(),
+            received_senders,
             level=level,
         ):
             raise RuntimeError(
                 f"Actor {self.identity}: is_received_ready=False at operate() "
                 f"start (round={round_num}, level={level}, "
-                f"received={self.message_proxy.get_received_senders()}, "
+                f"received={received_senders}, "
                 f"expected={self.player.expected_senders}). "
                 f"The Simulator's level-ordered execution model guarantees "
                 f"that all messages from previous levels have been delivered "

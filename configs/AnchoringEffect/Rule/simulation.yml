@@ -13,6 +13,9 @@ setting:
   description: "Anchoring bias causes traders to insufficiently adjust from reference prices, creating slow price discovery"
   total_rounds: 200
   round_history_limit: 3
+  # Run-level random seed (reproducibility). Injected into every player's extras;
+  # stochastic archetypes derive a deterministic per-agent RNG from it.
+  seed: 42
   record_path: "EXPERIMENT/AnchoringEffect/Rule/records"
   save_diagram_interval: 50
 

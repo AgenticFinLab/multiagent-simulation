@@ -86,6 +86,14 @@ class SettingSchema(BaseModel):
     total_rounds: int = Field(
         ..., ge=1, description="Number of simulation rounds to execute."
     )
+    seed: Optional[int] = Field(
+        default=None,
+        description=(
+            "Run-level random seed. When set, the simulator derives a "
+            "deterministic per-agent RNG so identical configs reproduce "
+            "identical price paths."
+        ),
+    )
     description: Optional[str] = None
     save_diagram_interval: Optional[int] = Field(default=None, ge=0)
 

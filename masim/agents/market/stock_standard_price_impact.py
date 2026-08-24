@@ -13,7 +13,6 @@ Transition equation:
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict, List
 
 from masim.agents._coordinator_base import CanonicalMarketCoordinator
@@ -44,6 +43,13 @@ class MarketStockStandardPriceImpact(CanonicalMarketCoordinator):
         "net_demand",
         "round",
     )
+    PARAM_SPECS: Dict[str, Any] = {
+        "initial_price": {"type": "float", "range": (0.0, None)},
+        "fundamental_value": {"type": "float", "range": (0.0, None)},
+        "price_impact": {"type": "float", "range": (0.0, None)},
+        "mean_reversion": {"type": "float", "range": (0.0, None)},
+        "noise_std": {"type": "float", "range": (0.0, None)},
+    }
 
     # ------------------------------------------------------------------
     # Lifecycle hooks
@@ -119,7 +125,7 @@ class MarketStockStandardPriceImpact(CanonicalMarketCoordinator):
         net_demand = agg["net_demand"]
 
         # 2. Draw noise
-        eps = random.gauss(0, sigma) if sigma > 0 else 0.0
+        eps = cs["rng"].gauss(0, sigma) if sigma > 0 else 0.0
 
         # 3. Compute raw transition
         p_raw = price_t + lam * net_demand + gamma * (fundamental - price_t) + eps

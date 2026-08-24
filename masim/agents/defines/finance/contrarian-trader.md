@@ -57,8 +57,8 @@ Prerequisite Signals:
 Missing-Signal Policy: hold until the lookback window is available.
 
 Activation Triggers:
-- `cum_ret > entry_threshold`: submit sell order.
-- `cum_ret < -entry_threshold`: submit buy order.
+- `cum_ret > threshold`: submit sell order.
+- `cum_ret < -threshold`: submit buy order.
 - `<Default>`: hold.
 
 Deactivation Conditions:
@@ -197,7 +197,7 @@ Does NOT use: `fundamental`, `anchor`, `cost_basis`, bid-ask depth.
 | Parameter | Type | Default | Valid Range | Sensitivity | Description | Impact | Source |
 |-----------|------|---------|-------------|-------------|-------------|--------|--------|
 | `lookback` | int | 10 | int >= 1 | high | Window for cumulative return. | Higher -> slower contrarian response. | Jegadeesh (1990) |
-| `entry_threshold` | float | 0.05 | [0, 1] | high | Overextension needed to trade. | Higher -> fewer contrarian trades. | Standardised |
+| `threshold` | float | 0.05 | [0, 1] | high | Overextension needed to trade. | Higher -> fewer contrarian trades. | Standardised |
 | `base_position_size` | float | 20.0 | > 0 | medium | Maximum order size. | Higher -> stronger reversal pressure. | Standardised |
 | `sizing_scale` | float | 500.0 | > 0 | medium | Converts cumulative return to quantity. | Higher -> larger counter-flow. | Standardised |
 | `inventory_max` | float | 200.0 | > 0 | low | Inventory cap. | Higher -> more contrarian capacity. | Standardised |
@@ -208,7 +208,7 @@ Does NOT use: `fundamental`, `anchor`, `cost_basis`, bid-ask depth.
 |--------|---------------|
 | Default population size | scenario-dependent |
 | Parameter heterogeneity policy | iid threshold and lookback draws |
-| Heterogeneity per parameter | `lookback -> {5, 10, 20}`, `entry_threshold -> Uniform(0.04, 0.08)` |
+| Heterogeneity per parameter | `lookback -> {5, 10, 20}`, `threshold -> Uniform(0.04, 0.08)` |
 | Cross-agent correlation | none |
 | Identity persistence | identical across episodes unless redrawn |
 
@@ -248,9 +248,9 @@ State update: append current price.
 
 ## Behavioral Verification and Calibration
 
-- Given cumulative return over the lookback window exceeds `entry_threshold` (positive), agent must emit a sell order.
-- Given cumulative return over the lookback window is below `-entry_threshold` (negative), agent must emit a buy order.
-- Given cumulative return magnitude is within `entry_threshold`, agent must hold.
+- Given cumulative return over the lookback window exceeds `threshold` (positive), agent must emit a sell order.
+- Given cumulative return over the lookback window is below `-threshold` (negative), agent must emit a buy order.
+- Given cumulative return magnitude is within `threshold`, agent must hold.
 - Given fewer than `lookback` price observations available, agent must hold without trading.
 - Given inventory cap reached on one side, agent must hibernate that side and continue trading the opposite direction if triggered.
 
@@ -258,7 +258,7 @@ State update: append current price.
 
 | Ablation name | Setting | Hypothesis tested | Expected direction | Metric |
 |---------------|---------|-------------------|--------------------|--------|
-| `no_contrarian` | `entry_threshold = 1.0` | Removing contrarian flow increases overshoot. | increase | peak-to-trough price deviation from fundamental |
+| `no_contrarian` | `threshold = 1.0` | Removing contrarian flow increases overshoot. | increase | peak-to-trough price deviation from fundamental |
 | `fast_contrarian` | `lookback = 3` | Shorter windows create more frequent reversals. | increase | number of non-hold orders per episode |
 
 ## Academic References

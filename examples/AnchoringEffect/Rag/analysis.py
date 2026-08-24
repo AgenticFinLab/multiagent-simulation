@@ -1,25 +1,15 @@
 #!/usr/bin/env python
-"""AnchoringEffect Rag Simulation Analysis (registry-driven thin wrapper).
+"""AnchoringEffect Rag Simulation Analysis (thin wrapper).
 
-The Rag variant adds a retrieval-augmented LLM persona on top of the standard
-LLM pipeline. Core analysis (data load → registry metrics → validation →
-9-panel dashboards) is delegated to
-:mod:`examples.AnchoringEffect.Rule.analysis`. This module supplies the
+Core analysis (data load -> registry metrics -> validation -> dashboards ->
+universal summary) is shared via :func:`run_anchoring_analysis` from
+:mod:`examples.AnchoringEffect.Rule.analysis`.  This module supplies the
 variant label and the Rag-specific knowledge-effect diagnostics from
 analysis-bases.md §3.
 
-Rag-specific notes (analysis-bases.md §4):
-    * Knowledge Reinforcement Events occur when retrieved context aligns with
-      action.
-    * Knowledge Correction Events occur when retrieved context reverses default
-      bias.
-    * Retrieval Failure Rounds: rounds where ``rag_context`` equals the
-      fallback string.
-    * Compare versus the RuleLLM baseline for the net RAG knowledge effect.
-
 Usage::
 
-    python examples/AnchoringEffect/Rag/analysis.py \
+    python examples/AnchoringEffect/Rag/analysis.py \\
         -c configs/AnchoringEffect/Rag/simulation.yml
 """
 
@@ -30,13 +20,9 @@ from typing import Any, Dict
 
 import numpy as np
 
-from masim.utils import load_config, load_results
 from masim.agents import RAG_FALLBACK_MESSAGE
 
-from examples.AnchoringEffect.Rule.analysis import (
-    _load_data,
-    analyze_anchoring,
-)
+from examples.AnchoringEffect.Rule.analysis import run_anchoring_analysis
 
 VARIANT = "Rag"
 
@@ -90,33 +76,13 @@ def analyze_rag_knowledge_effect(
     return rag_stats
 
 
-def main() -> None:
-    """Run full AnchoringEffect Rag analysis pipeline."""
-    parser = argparse.ArgumentParser(
-        description="Analyze AnchoringEffect Rag simulation results"
-    )
-    parser.add_argument(
-        "-c", "--config", type=str, required=True,
-        help="Path to simulation config file",
-    )
-    args = parser.parse_args()
+def _rag_post_process(data, config, output_dir, summary) -> None:
+    """Append the Rag knowledge-effect block after the canonical summary.
 
-    config = load_config(args.config)
-    base_dir = os.path.dirname(config["setting"]["record_path"])
-    output_dir = os.path.join(base_dir, "analysis")
-    os.makedirs(output_dir, exist_ok=True)
-
-    results = load_results(config)
-    data = _load_data(results)
-
-    summary = analyze_anchoring(data, config, output_dir, variant=VARIANT)
-
-    # Rag-specific augmentation. ``analyze_anchoring`` has already invoked
-    # ``write_universal_summary`` which persists the Hook-11 canonical
-    # ``summary.json`` (universal_metrics, references, config_hash, etc.);
-    # here we augment that persisted file with the Rag knowledge-effect
-    # block via read-modify-write instead of clobbering it with the small
-    # scenario-only ``summary`` dict.
+    ``run_anchoring_analysis`` has already written the Hook-11 canonical
+    ``summary.json``; here we augment it via read-modify-write rather than
+    clobbering the universal-metrics payload with the small scenario dict.
+    """
     rag_stats = analyze_rag_knowledge_effect(data["investor_payloads"])
 
     with open(os.path.join(output_dir, "rag_stats.json"), "w", encoding="utf-8") as fh:
@@ -140,7 +106,19 @@ def main() -> None:
             f"Mean RAG retrieval failure rate: "
             f"{agg['mean_retrieval_failure_rate']:.1%}"
         )
-    return summary
+
+
+def main() -> None:
+    """Run the full AnchoringEffect Rag analysis pipeline."""
+    parser = argparse.ArgumentParser(
+        description="Analyze AnchoringEffect Rag simulation results"
+    )
+    parser.add_argument(
+        "-c", "--config", type=str, required=True,
+        help="Path to simulation config file",
+    )
+    args = parser.parse_args()
+    return run_anchoring_analysis(args.config, VARIANT, post_process=_rag_post_process)
 
 
 if __name__ == "__main__":

@@ -133,6 +133,18 @@ class GeneralPlayer(BasePlayer):
             source_id=self.identity,
         )
 
+    def on_fill(self, action: str, quantity: float, bid_price: float) -> None:
+        """Post-fill hook — the single sanctioned per-fill extension point.
+
+        Canonical bases call this *after* validating ``(action, quantity,
+        bid_price)`` and mutating ``cash`` / ``position`` exactly once.  The
+        values passed in are therefore already validated (``bid_price > 0`` for
+        BUY/SELL).  The default is a no-op; archetypes override it for VWAP /
+        cost-basis / counter bookkeeping and MUST NOT override ``act`` /
+        ``decide`` instead.  See ``docs/framework-contract.md`` §4.
+        """
+        return None
+
     # =========================================================================
     #                        MAIN EXECUTION
     # =========================================================================

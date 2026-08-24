@@ -45,6 +45,11 @@ class RuleRationalUpdater(CanonicalRulePlayer):
         "converges on fundamental value (Muth 1961; Fama 1970)."
     )
     REQUIRES_FEATURES: tuple = ()
+    PARAM_SPECS: Dict[str, Any] = {
+        "threshold": {"type": "float", "range": (0.0, 1.0)},
+        "base_position_size": {"type": "float", "range": (0.0, None)},
+        "sizing_scale": {"type": "float", "range": (0.0, None)},
+    }
 
     def init_extras(self, extras: Dict[str, Any]) -> None:
         self.state.custom_state["threshold"] = float(extras.get("threshold", 0.02))
