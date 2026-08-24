@@ -5,9 +5,15 @@ source register, claim ledger, unresolved questions, and evidence-use review
 needed to set the event interval and causal responsibility map. Participant
 behavior and Agent Definition research require later, role-specific work.
 
-- Status: `REVIEW_CANDIDATE_FOR_EVENT_FRAMING`
+- Status: `ACCEPTED_EVENT_FRAME_EVIDENCE_WITH_BOUNDED_REPRESENTATION_GATES`
 - Research date: `2026-08-24`
 - Construction exposure: `FULL_DRAFT_EXPOSED`
+- Temporal owner disposition:
+  `OD-EV-01_ACCEPTED_WITH_BOUNDED_MODIFICATION_2026-08-24`
+- Representation owner disposition:
+  `OD-RP-02_ACCEPTED_WITH_BOUNDED_ROLE_LABEL_CLARIFICATION_2026-08-24`
+- Semantic review disposition:
+  `COMPLETE_WITH_RECORDED_LIMITATIONS_2026-08-24`
 - External boundary: public Singapore government, official inquiry, and
   regulatory sources; no paid, private, credentialed, Reference, draft EPG,
   held-out, or evaluation material
@@ -103,7 +109,7 @@ that the source observed a participant policy. All claims are
 | `0616-FR-C06` | IHiS administered and operated SCM, implemented cybersecurity measures, and owned security incident response and reporting responsibilities. | `0616-FR-S01`, Executive Summary para. 3 and Part II paras. 34–40, direct institutional finding. | Responsibility was distributed across deployed teams and roles; whole-organisation knowledge cannot be assumed. | `DIRECT / IDENTITY_AUTHORITY_AND_ROSTER`. | Split technical administration, security response, and management escalation interfaces instead of creating one IHiS mind. |
 | `0616-FR-C07` | IHiS was the central public-healthcare IT agency accountable to MOH, while its employees were deployed into healthcare clusters in role-specific positions. | `0616-FR-S01`, Part II paras. 34–40, direct institutional finding. | A role sees its assigned systems, communications, and authority rather than every MOH or IHiS fact. | `DIRECT / ORGANIZATIONAL_STRUCTURE`. | Preserve concurrent, deployed, and reporting relationships explicitly; organization names alone do not define Agents. |
 | `0616-FR-C08` | SingHealth retained primary and supervisory responsibility for personal-data protection while IHiS held a more direct operational responsibility; one did not erase the responsibility of the other. | `0616-FR-S02`, paras. 54–58 and 89–97, direct regulatory finding. | Later legal determination; use for authority design, not as participant-time belief. | `DIRECT / AUTHORITY_AND_SCENARIO_BOUNDARY`. | Model separate governance and operational responsibilities, with no silent delegation of all SingHealth responsibility to IHiS. |
-| `0616-FR-C09` | By the evening of 11 June, an IHiS administrator believed a local administrator password had been stolen and used for unauthorized access; passwords were changed, but the matter was not then reported to the Security Management Department. | `0616-FR-S01`, paras. 344–347, direct reconstruction. | Available to the administrator and nearby technical team through logs and investigation; not yet available to security management. | `DIRECT / PARTICIPANT_TIME_AND_ESCALATION`. | This is the first high-information internal decision point in the primary response window. |
+| `0616-FR-C09` | By the evening of 11 June, an IHiS administrator believed a local administrator password had been stolen and used for unauthorized access; passwords were changed, but the matter was not then reported to the Security Management Department. | `0616-FR-S01`, paras. 344–347, direct reconstruction. | Available to the administrator and nearby technical team through logs and investigation; not yet available to security management. | `DIRECT / PARTICIPANT_TIME_AND_ESCALATION`. | This begins the acute information-and-response window, not the first event-specific response window. |
 | `0616-FR-C10` | On 12 June the Citrix team raised abnormal database access and suspicious artifacts to Security Management, but the communication did not clearly convey all significance and follow-up was incomplete. | `0616-FR-S01`, paras. 364–368, direct reconstruction and inquiry assessment. | Different recipients received different screenshots, explanations, and context. | `DIRECT_WITH_INQUIRY_ASSESSMENT / INFORMATION_ROUTE`. | Messages require sender, content, recipient, timing, and acknowledgement; delivery does not create shared understanding. |
 | `0616-FR-C11` | By 26 June cumulative evidence was highly indicative of a security incident, yet the responsible incident-response interface did not escalate it; the COI treated this as the last major missed opportunity before data theft. | `0616-FR-S01`, paras. 452–458 and Part VI key findings, direct inquiry finding. | Relevant technical and security roles held different parts of the evidence; the later causal assessment was unavailable at event time. | `DIRECT_FINDING / ESCALATION_AND_FALSIFIER`. | Preserve incomplete information integration and an explicit escalate/defer choice; do not script the historical failure. |
 | `0616-FR-C12` | On 4 July an application-team analyst investigated monitoring alerts, identified unusual queries, and IHiS teams introduced controls that stopped further observed database copying. | `0616-FR-S01`, paras. 465–510 and 204, direct reconstruction. | Alerts and query information were initially local to the analyst and collaborating technical teams. | `DIRECT / DETECTION_AND_LOCAL_RESPONSE`. | Detection, interpretation, local mitigation, security classification, and management escalation are distinct transitions. |
@@ -111,6 +117,8 @@ that the source observed a participant policy. All claims are
 | `0616-FR-C14` | On 10 July the evidence that queries returned data changed the assessed severity; IHiS classified the matter as Category 1 and notified SingHealth management, MOH, and CSA, with a formal MOH incident report that evening. | `0616-FR-S01`, paras. 584–592; compatible summary in `0616-FR-S03` and `0616-FR-S04`. | Each body became informed through a specific call, email, hotline, meeting, or report during 10 July. | `DIRECT / CLASSIFICATION_AND_CROSS_INSTITUTION_ROUTE`. | Keep classification, notification, inter-agency coordination, and formal reporting as separate acts and deliveries. |
 | `0616-FR-C15` | After 10 July, IHiS, SingHealth, MOH, MCI, and CSA performed distinct but coordinated investigation, containment, public-communication, and patient-outreach work. | `0616-FR-S01`, Part V; `0616-FR-S04`, paras. 8–11, direct official accounts. | Teams received only routed updates needed for their functions; the public learned through later announcement and messages. | `DIRECT / RESPONSE_OWNERSHIP`. | Model a routed inter-agency process rather than one government actor with shared state and authority. |
 | `0616-FR-C16` | The COI found both vigilant technical detection and material failures in cybersecurity understanding, incident classification, and timely escalation across particular response roles. | `0616-FR-S01`, Part VI key findings 1–2, direct inquiry findings. | The evaluative synthesis is retrospective; event-time roles had only their local observations and interpretations. | `DIRECT_RETROSPECTIVE_FINDING / REPRESENTATION_AND_FALSIFICATION`. | The roles are causally distinct, but later behavior research must recover mechanisms and alternatives rather than turn findings into fixed failure policies. |
+| `0616-FR-C17` | Between 18 and 19 January 2018, an IHiS Security Management Department engineer detected suspected malware and communication with a foreign address; the reviewed logs also showed repeated callbacks from Workstation A to an address later identified as a key attacker command-and-control server. | `0616-FR-S01`, paras. 302–315, direct reconstruction with retrospective attribution of the server and workstation to the attack. | The engineer, manager, and addressed security staff received particular alerts, logs, and messages; the later command-and-control attribution and completed attack linkage were unavailable at event time. | `DIRECT_RECONSTRUCTION_WITH_RETROSPECTIVE_ATTRIBUTION / RESPONSE_WINDOW_AND_INFORMATION_BOUNDARY`. | Begin the participant response window on 18 January without giving any role the later forensic interpretation. |
+| `0616-FR-C18` | By 22 January 2018, the local investigation had closed without investigating Workstation A, blocking the suspicious address across the SingHealth network, or escalating the matter beyond the local security interface. | `0616-FR-S01`, paras. 321–327, direct reconstruction; the COI later assessed this as a significant missed opportunity. | The involved staff knew their own observations, communications, and actions; the later missed-opportunity assessment and counterfactual consequence were unavailable to them. | `DIRECT_RECONSTRUCTION_PLUS_RETROSPECTIVE_ASSESSMENT / ESCALATION_AND_FALSIFIER`. | Preserve investigate, block, and escalate alternatives without scripting the historical omission or a deterministic prevention outcome. |
 
 ## Unresolved questions and limits
 
@@ -118,10 +126,11 @@ that the source observed a participant policy. All claims are
 |---|---|---|
 | Exact initial-compromise moment and complete threat-actor decision process | `BOUNDED_UNRESOLVED` | Use about 23 August 2017 as the earliest evidenced compromise and retain the threat actor as a representation gate; do not invent identity, objective, or perfect observability. |
 | Counterfactual effect of each missed escalation | `BOUNDED_UNRESOLVED` | The COI supports prevent-or-mitigate relevance, not a unique quantitative outcome. Use alternatives or falsifiers, not deterministic outcome reversal. |
-| Individual versus role-interface representation for technical administrators | `OWNER_DECISION_REQUIRED_AFTER_BEHAVIOR_RESEARCH` | Preserve heterogeneous observations and local actions; do not create one collective technical-staff Agent. |
-| SIRM and Cluster ISO representation | `OWNER_DECISION_REQUIRED_AFTER_BEHAVIOR_RESEARCH` | Keep separate gates because they had distinct assigned responsibility, information, and response failures. |
-| IHiS senior management and SingHealth management representation | `OWNER_DECISION_REQUIRED_AFTER_BEHAVIOR_RESEARCH` | Preserve distinct authority and notification routes; admit Agents only where autonomous choice is necessary for the primary question. |
+| Technical administration and line security staff representation | `GATE_ACCEPTED_RESEARCH_REQUIRED_BEFORE_ROSTER_DISPOSITION` | Preserve heterogeneous observations and local actions across security, Citrix, application, and database work; do not create one collective technical-staff Agent. |
+| SIRM and Cluster ISO representation | `SEPARATE_GATES_ACCEPTED_RESEARCH_REQUIRED_BEFORE_AGENT_ADMISSION` | Keep separate gates because they had distinct assigned responsibility, information, and response failures. |
+| IHiS operational/SCM and senior management and SingHealth management representation | `SEPARATE_GATES_ACCEPTED_RESEARCH_REQUIRED_BEFORE_ROSTER_DISPOSITION` | Preserve operational aggregation, senior classification and reporting, and SingHealth governance or notification authority as distinct interfaces; admit Agents only where autonomous choice is necessary for the primary question. |
 | MOH, MCI, and CSA after 10 July | `RESOLVED_AS_ROUTED_INSTITUTIONAL_PROCESS_WITH_REPRESENTATION_GATES` | Keep containment, classification, communication, and public-notification authority distinct; open an Agent gate only for a material choice the scenario cannot own. |
+| End users and endpoint operators | `RESOLVED_AS_INITIAL_OR_EXOGENOUS_CONTEXT_FOR_CURRENT_QUESTION` | Create no participant product unless a revised question and later authorized evidence make user choice causally material. |
 | Affected patients | `RESOLVED_AS_AFFECTED_COHORT_FOR_CURRENT_QUESTION` | Retain exposure and delivered notification without a patient behavior model; reopen only if patient choice enters a revised question. |
 | Post-23 July inquiry, liability, penalties, and reforms | `RESOLVED_AS_RETROSPECTIVE_EVIDENCE_OR_EXCLUDED_AFTERMATH` | They may constrain interpretation and authority but are not runtime-visible in the primary incident. |
 
@@ -134,18 +143,18 @@ authorized_scope=PUBLIC_OFFICIAL_SINGAPORE_SOURCES_FOR_EVENT_FRAMING_ONLY
 sources_considered=12_LOCAL_DISCOVERY_RECORDS_PLUS_4_OFFICIAL_EXTERNAL_SOURCES
 sources_adopted=4_OFFICIAL_EXTERNAL_SOURCES
 claim_families=TIME_IDENTITY_AUTHORITY_INFORMATION_ACTION_RESULT_INTERPRETATION
-temporal_boundary=2017-08-23_APPROX_TO_2018-07-20_CORE_WITH_NOTIFICATION_TO_2018-07-23
+temporal_boundary=2017-08-23_APPROX_TO_2018-07-20_CORE_WITH_RESPONSE_FROM_2018-01-18_ACUTE_FROM_2018-06-11_AND_NOTIFICATION_TO_2018-07-23
 exposure_boundary=FULL_DRAFT_EXPOSED_NOT_CLEAN_BUILDER
 verdict=RESOLVED_FOR_EVENT_FRAMING_WITH_BOUNDED_REPRESENTATION_GATES
-supported_for=OUTER_INTERVAL_PRIMARY_RESPONSE_WINDOW_CAUSAL_TRANSITIONS_INSTITUTIONAL_RESPONSIBILITIES_AND_ROSTER_GATES
+supported_for=OUTER_INTERVAL_PARTICIPANT_AND_ACUTE_RESPONSE_WINDOWS_CAUSAL_TRANSITIONS_INSTITUTIONAL_RESPONSIBILITIES_AND_ROSTER_GATES
 not_supported_for=AGENT_BEHAVIOR_POLICY_NUMERICAL_PARAMETERS_ATTACKER_IDENTITY_COUNTERFACTUAL_MAGNITUDES_HISTORICAL_OR_SCIENTIFIC_VALIDITY
 unresolved_alternatives=THREAT_ACTOR_FORM_TECHNICAL_STAFF_GRANULARITY_SIRM_CLUSTER_ISO_AND_MANAGEMENT_AGENT_ADMISSION
-modeling_consequence=PROCEED_TO_OWNER_REVIEW_OF_EVENT_FRAME_NOT_PARTICIPANT_PRODUCTION
+modeling_consequence=STOP_AT_ACCEPTED_EVENT_FRAME_PENDING_SEPARATE_PARTICIPANT_AUTHORIZATION
 next_evidence_if_any=ROLE_SPECIFIC_BEHAVIOR_RESEARCH_ONLY_AFTER_FRAME_ACCEPTANCE_AND_BATCH_AUTHORIZATION
 ```
 
-**Evidence disposition: Resolved for event framing with bounded
-representation gates.** The source set is sufficient to propose the event
-interval, causal transitions, institutional boundaries, and roster questions.
-It does not authorize or supply participant behavior, Agent Definitions,
-runtime observations, or validity claims.
+**Evidence disposition: Accepted for event framing with bounded representation
+gates.** The source set is sufficient for the accepted event interval, causal
+transitions, institutional boundaries, and roster questions. It does not
+authorize or supply participant behavior, Agent Definitions, runtime
+observations, or validity claims.
