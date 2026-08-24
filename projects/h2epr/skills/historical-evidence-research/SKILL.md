@@ -10,6 +10,11 @@ support an H2EPR participant, scenario, behavioral mechanism, parameter range,
 or falsification claim. The result is an auditable research record, not a
 biographical narrative or a collection of links.
 
+Match the record depth to the participant production profile. A standard row
+may close through a shared event source register, shared evidence ledger, and
+one concise use verdict. Use separate, fuller research records only when a
+deep row has material source, conflict, custody, or claim risk.
+
 ## Required inputs
 
 Establish these inputs before searching:
@@ -148,7 +153,7 @@ whole participant or event as historically valid.
 
 ## Outputs
 
-A complete run normally produces:
+A complete run closes the applicable evidence responsibilities:
 
 1. a research brief and source strategy;
 2. a source register;
@@ -159,7 +164,9 @@ A complete run normally produces:
 7. a concise research closure stating what is and is not supported.
 
 Project-specific paths and serialization belong to the working context. This
-skill defines the research semantics, not a required file tree or JSON schema.
+skill defines the research semantics, not seven required artifacts, a fixed
+source count, a file tree, or a JSON schema. Shared event records may carry
+several outputs when source and claim ownership remains clear.
 
 ## Stop conditions
 

@@ -20,6 +20,7 @@ institutional rules, and generated-process semantics remain H2EPR concerns.
 | Runtime and compiler | `src/h2epr/runtime/`, `src/h2epr/compiler/` | Deterministic execution, sealed traces, replay, and graph compilation |
 | Agent research | `agents/` | Definitions, rosters, evidence reviews, mappings, and bindings |
 | Population research | `populations/` | Heterogeneous participant models and interface reviews |
+| Event coordination | `events/` | One lightweight Build Brief and cross-directory index per event |
 | Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases and their bounded implementation modules |
 | Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
 | Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
@@ -54,6 +55,7 @@ projects/h2epr/
 ├── configs/
 ├── contracts/v1/
 ├── decisions/
+├── events/
 ├── populations/
 ├── releases/
 ├── scenarios/
@@ -63,12 +65,17 @@ projects/h2epr/
 ├── ARCHITECTURE.md
 ├── EVOLUTION.md
 ├── WORKFLOW.md
+├── event-build-brief-template.md
+├── phase-closeout-checklist.md
 └── pyproject.toml
 ```
 
 Research assets are organized by responsibility and event identity. Versioned
 release directories contain manifests and local integrity records; upstream
 lineage is recorded in manifests rather than copied into package checksums.
+Each event has at most one lightweight coordination entry under `events/`;
+accepted research and release assets remain in their responsibility-owned
+directories rather than being copied into an event package.
 
 ## Installation
 
@@ -121,6 +128,9 @@ of those surfaces requires a separate research purpose and review.
 
 - [Project guide](../H2EPR.md)
 - [Event modeling workflow](WORKFLOW.md)
+- [Event coordination entries](events/README.md)
+- [Event Build Brief template](event-build-brief-template.md)
+- [Phase closeout checklist](phase-closeout-checklist.md)
 - [Architecture](ARCHITECTURE.md)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)

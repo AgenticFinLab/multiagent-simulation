@@ -1,6 +1,6 @@
 ---
 name: h2epr-agent-definition
-description: Author a mature, publication-facing H2EPR Agent Definition from a reviewed participant behavior dossier and adjudicated evidence. Use to standardize one event-bound participant's representation, institutional role, theory, information, state, mechanisms, decision commitments, intents, parameters, worked cases, uncertainty, falsifiers, references, and version provenance while keeping runtime bindings and code in separate derived artifacts.
+description: Author a mature, publication-facing H2EPR Agent Definition from reviewed participant behavior research and adjudicated evidence. Use to standardize an event-bound Agent's representation, institutional role, information, state, mechanisms, decision commitments, intents, uncertainty, falsifiers, references, and provenance while keeping runtime bindings and code separate.
 ---
 
 # Agent Definition authoring
@@ -21,7 +21,8 @@ intent/result separation, structural uncertainty, and exposed-outcome control.
 
 Confirm that the following have been substantively reviewed:
 
-- participant behavior dossier and readiness verdict;
+- participant behavior dossier, or an equivalent combined research record,
+  and readiness verdict;
 - participant representation and aggregation rationale;
 - evidence ledger, source register, use partition, and exposure status;
 - candidate and competing behavioral mechanisms;
@@ -31,7 +32,7 @@ Confirm that the following have been substantively reviewed:
 - applicable scenario concepts and machine-contract semantic types;
 - Definition identity, event scope, version policy, and publication audience.
 
-If the behavior dossier is absent or marked `MORE_EVIDENCE_REQUIRED` or
+If the behavior research is absent or marked `MORE_EVIDENCE_REQUIRED` or
 `REPRESENTATION_RECONSIDERATION_REQUIRED`, do not compensate by drafting a
 more elaborate Definition. Return to
 [`participant-behavior-research`](../participant-behavior-research/SKILL.md).
@@ -236,6 +237,11 @@ A complete run produces:
 3. a claim-to-mechanism and mechanism-to-decision traceability summary;
 4. a list of unresolved alternatives and Definition withdrawal conditions;
 5. an input package for independent scholarly and modeling review.
+
+Only the canonical Definition is a required publication-facing product. The
+other outputs may be sections or pointers in one authoring record for a
+standard row; separate them for a deep row only where traceability or review
+risk requires it.
 
 Do not produce the executable binding in the same document. A later derived
 mapping may cite the frozen Definition and record runtime identifiers, types,

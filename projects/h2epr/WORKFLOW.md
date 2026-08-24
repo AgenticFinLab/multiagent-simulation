@@ -23,7 +23,7 @@ authority, and stopping boundaries.
 
 | Phase | Required result | Stopping boundary |
 |---|---|---|
-| Frame the event | Research question, interval, evidence boundary, causal role map, roster, and semantic skeleton | Does not authorize participant production or code |
+| Frame the event | Accepted [Event Build Brief](event-build-brief-template.md) covering the research question, interval, evidence boundary, causal role map, roster, and semantic skeleton | Does not authorize participant production or code |
 | Define participants | Reviewed Agent Definitions and population models with evidence and interface reviews | Does not determine release membership or implementation |
 | Release the semantic roster | Hash-pinned inventory of the accepted participant products | Remains non-executable and makes no validity claim |
 | Close scenario and mapping | Event Scenario Definition, interface closure, and consolidated carrier mapping | Mapping cannot add scenario meaning; scenario cannot supply participant behavior |
@@ -41,6 +41,49 @@ their own authority. Configuration admission and lineage binding may be
 reviewed in one bounded engineering change only when their outputs and
 acceptance questions remain separate.
 
+## Opening and closing phases
+
+Open a new event with the
+[Event Build Brief template](event-build-brief-template.md), instantiated as
+the event's single coordination entry under [`events/`](events/README.md). A
+small event may keep its role map, roster, and semantic skeleton in the brief;
+a larger event may link separate versioned artifacts. In either case the brief
+remains the authority for the primary question, evidence and exposure boundary,
+current authorization, and scope-change policy. It is not a full Scenario
+Definition or an authorization for every phase on the roadmap. Complete its
+minimum profile and use conditional extensions only when the event triggers
+them.
+
+Apply the [phase closeout checklist](phase-closeout-checklist.md) before
+declaring any maintained phase complete, not after every edit, artifact, role,
+or production batch. Record the result in the existing artifact that owns
+closure whenever possible. The checklist provides common mainline,
+minimality, authority, evidence, integrity, and handoff questions while
+preserving the more specific verdicts of scholarly, semantic, carrier,
+configuration, or implementation reviews. Its core is intentionally short;
+the checks do not require separate reports or sign-offs, and phase- and
+risk-specific questions apply only to surfaces changed by the work.
+
+## Protected inputs and construction exposure
+
+Choose the construction and claim mode before reading target material. Unless
+post-seal evaluation is explicitly authorized, repository searches, file
+inventories, retrieval indexes, prompts, and working sets exclude
+`reference_epg.json`, held-out suffixes, and evaluation-only directories. A
+Reference filename appearing in a checksum inventory may be verified as an
+identity without opening its content.
+
+If a human, tool context, or builder sees protected target content, record the
+exposure and treat its target-specific descendants as full-draft-exposed. Do
+not relabel that context as clean. This operational rule applies to ordinary
+repository audits as well as event construction; it does not require a
+held-out experiment for routine architecture or method work.
+
+Strict continuation, clean-builder, domain-transfer, and post-seal evaluation
+gates apply only when the corresponding claim or phase is separately
+authorized. They are not prerequisites for closing an ordinary event-framing,
+participant, scenario, or bounded engineering phase.
+
 ## Phase record
 
 Each completed phase must leave a discoverable record in an existing brief,
@@ -54,9 +97,10 @@ must identify:
 5. verification and unresolved findings; and
 6. the next legal action and its entry conditions.
 
-At closeout, confirm that the work still answers the event question and is no
-deeper than necessary to test the intended interface. Avoid creating a second
-tracker when a release manifest or review already carries this information.
+At closeout, use the project checklist to confirm that the work still answers
+the event question and is no deeper than necessary to test the intended
+interface. Avoid creating a second tracker when a brief, release manifest,
+review, decision, or receipt already carries this information.
 
 ## Failure routing
 

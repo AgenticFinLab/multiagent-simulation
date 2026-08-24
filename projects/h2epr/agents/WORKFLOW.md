@@ -2,19 +2,26 @@
 
 H2EPR develops event-bound participant models in two modes. Reference pilots
 take a few roles through the whole semantic and engineering path to test the
-method. Roster production then builds the remaining scholarly Definitions
-against a shared event skeleton before the event is mapped as one system.
+method. Roster production then builds the remaining scholarly participant
+products against a shared event skeleton before the event is mapped as one
+system.
 
 This is the participant-production sub-process of the project-level
 [Event modeling workflow](../WORKFLOW.md). That workflow owns the later
 Scenario Configuration, bounded admission, policy/environment binding, and
 conformance-closeout stages.
 
+Participant production starts from an accepted
+[Event Build Brief](../event-build-brief-template.md), whether its roster and
+semantic skeleton are embedded or linked as separate versioned artifacts.
+The brief's event question, evidence permissions, current authorization, and
+scope-change policy remain binding on every batch.
+
 ## Two operating modes
 
 | Mode | Use | Normal endpoint |
 |---|---|---|
-| reference pilot | test a new representation, Definition method, carrier boundary, or interaction pattern with a small number of roles | accepted Definitions plus an explicitly authorized mapping and conformance slice |
+| reference pilot | test a new representation, participant-product method, carrier boundary, or interaction pattern with a small number of roles | accepted products plus an explicitly authorized mapping and conformance slice |
 | Roster batch production | complete the accepted event roster efficiently and consistently | accepted role or population products plus a lightweight interface preflight |
 
 Choose the mode in the batch brief. Do not run the reference-pilot engineering
@@ -27,7 +34,7 @@ event question and horizon
   -> event semantic skeleton
   -> reference pilot, when the method needs testing
   -> Roster production batches
-       evidence -> behavior -> Definition -> review -> promotion
+       evidence -> behavior -> representation product -> review -> promotion
        -> lightweight interface preflight
   -> Roster Definition release
   -> consolidated mapping and Event Scenario Definition convergence
@@ -60,6 +67,29 @@ drift; it does not make the model immutable. A change to the event question,
 horizon, causal owner, or disposition requires an owner decision and a new
 roster version. Evidence refinement within an accepted row does not.
 
+## Choose participant production depth
+
+Assign one production profile when a roster row is accepted. The profile
+controls working-document and review depth; it does not relax evidence,
+participant-time, causal-ownership, or claim standards.
+
+| Profile | Use | Normal product |
+|---|---|---|
+| `disposition-only` | scenario, exogenous, excluded, or deferred rows that do not require a participant model | accepted roster disposition and owner |
+| `standard` | a causally necessary Agent or population whose representation and evidence boundary are established | one accepted participant product, concise review, and interface preflight |
+| `deep` | a new or disputed representation, a central causal choice, high evidence or claim risk, or a proposed reusable abstraction | fuller separate research and review records as the risk requires |
+
+A standard profile still closes the evidence and behavior questions needed for
+its use. Its working records may be combined, and routine findings may be
+reviewed at batch level. A deep profile separates evidence, behavior,
+authoring, and review when that separation makes a material judgment easier to
+audit. Do not promote a row to `deep` merely because a detailed template is
+available.
+
+The production profile is independent of the batch mode. A `deep` participant
+does not authorize mapping or implementation, and a reference pilot still
+requires explicit authorization for its engineering tail.
+
 ## Establish the event semantic skeleton
 
 Before Roster production, define a short event-level skeleton that names:
@@ -79,10 +109,11 @@ silently redefine the shared event language.
 
 ## Open a small batch
 
-A normal batch contains two or three roles from one causal segment. A
-single-role batch is appropriate for a materially different representation,
-such as the first population/cohort model, or an unusually difficult evidence
-boundary.
+Use the smallest coherent batch that shares a causal segment and evidence
+boundary; two or three rows will often be enough. A single-row batch is
+appropriate for a materially different representation, such as the first
+population/cohort model, or an unusually difficult evidence boundary. Do not
+split a routine batch only to create extra review or closeout records.
 
 Use one concise batch brief to record:
 
@@ -90,69 +121,84 @@ Use one concise batch brief to record:
 - roster rows and causal choices assigned to the batch;
 - interactions and scenario-owned processes in scope;
 - local evidence, exposed outcomes, and source permissions;
+- the production profile for each row;
 - whether promotion is per role or per batch;
 - the authorized endpoint; and
 - stopping conditions and owner decisions.
 
-Use the mutable working root and one directory per batch:
+When a batch needs a working directory, use a compact structure such as:
 
 ```text
 batches/<batch-id>/
 ├── BATCH.md
 ├── roles/<role-id>/
-│   ├── RESEARCH.md
-│   ├── BEHAVIOR.md
-│   ├── DEFINITION.md
-│   └── REVIEW.md
+│   └── <working records needed for the selected profile>
 ├── INTERFACE.md
 └── CLOSE.md
 ```
 
-Small roles may share research notes when ownership remains clear. Raw source
-bytes belong in the evidence area rather than the batch directory.
+These filenames describe responsibilities, not mandatory public artifacts.
+Standard rows may combine research and review notes when claim and participant
+ownership remains clear. Raw source bytes belong in the evidence area rather
+than the batch directory.
 
 Permissions are batch-specific. Research permission for one role does not
-authorize another participant or source boundary. Definition promotion does
-not authorize mapping, implementation, simulation, or contract changes.
+authorize another participant or source boundary. Participant-product
+promotion does not authorize mapping, implementation, simulation, or contract
+changes.
 
-## Develop each role
+## Develop each participant
 
-Each role follows four research stages. They may share adopted sources and
-decision situations, but retain separate participant boundaries and review
-verdicts.
+Every admitted Agent or population closes the evidence and behavior questions
+needed for its stated use. Rows may share adopted sources and decision
+situations, but never participant policy, private state, or authority.
 
-| Stage | Project Skill | Required result |
+| Route | Methods | Required result |
 |---|---|---|
-| Evidence | [historical-evidence-research](../skills/historical-evidence-research/SKILL.md) | adopted source records, atomic claims, participant-time and use boundaries, conflicts, and a scoped closure verdict |
-| Behavior | [participant-behavior-research](../skills/participant-behavior-research/SKILL.md) | representation, governance, information, mechanisms, high-information situations, worked cases, and falsifiers |
-| Definition | [agent-definition](../skills/agent-definition/SKILL.md) | one canonical, publication-facing, event-bound Definition candidate |
-| Review | [agent-definition-review](../skills/agent-definition-review/SKILL.md) | independent findings, revision routing, and an acceptance or return verdict |
+| Agent | [historical evidence](../skills/historical-evidence-research/SKILL.md), [participant behavior](../skills/participant-behavior-research/SKILL.md), [Agent Definition](../skills/agent-definition/SKILL.md), and [Definition review](../skills/agent-definition-review/SKILL.md) | one canonical, publication-facing, event-bound Agent Definition and a profile-proportionate verdict |
+| population or cohort | historical evidence, participant behavior, the [Population model template](../populations/population-model-template.md), and profile-proportionate review | one heterogeneous population model and interface without a collective personality |
+| disposition-only | roster adjudication | an explicit scenario, exogenous, excluded, or deferred owner; no participant product |
+
+The stages name semantic responsibilities, not a required file sequence. A
+standard Agent may combine its supporting working records, but its accepted
+Definition remains canonical. A population does not use the Agent Definition
+profile unless the roster decision actually admits an Agent.
 
 Review local sources and event claims before opening new research. External
 research uses the approved scope and archives only sources that enter claim
 adjudication. Search results and unused downloads remain working notes.
 
-The ten-module template provides a common reading order. It does not force
-institutions, individuals, and populations to share mechanisms, variables, or
-commitment counts. Every material observation, state, parameter, and intent
-needs an explanatory or review consumer.
+The ten-module template provides a common reading order for Agent Definitions.
+It does not govern population products or force institutions and individuals
+to share mechanisms, variables, or commitment counts. Every material
+observation, state, parameter, and intent still needs an explanatory or review
+consumer.
 
 ## Review and promote
 
 Review a stable candidate independently of backend code and simulation output.
+Use a fresh, authoring-independent reviewing context where practical. A
+standard row may close with a concise batch-level review; a deep row uses a
+separate report when its novelty, centrality, or claim risk requires one.
+Review independence is a judgment boundary, not a clean-builder claim,
+mandatory external signoff, or extra public file.
+
 Resolve blocking and major findings in the layer that owns the problem:
-evidence, representation, behavior, Definition, or scenario boundary.
+evidence, representation, behavior, Definition, population model, or scenario
+boundary.
 
 Before promotion:
 
-1. confirm Definition identity, version, claim references, and source records;
-2. for a new candidate, pass the lightweight ten-module and inventory-profile
-   check without applying it retroactively to frozen releases;
+1. confirm product identity, version, claim references, and source records;
+2. for a new Agent Definition, pass the lightweight ten-module and
+   inventory-profile check without applying it retroactively to frozen
+   releases;
 3. check cross-section, cross-role, roster, and skeleton consistency;
 4. complete the batch interface preflight;
-5. obtain owner acceptance; and
-6. promote the Definition, adopted claims, sources, interface note, and concise
-   guide updates as one coherent change.
+5. record the review verdict and any triggered owner decision under the
+   declared promotion authority; and
+6. promote the participant product, adopted claims, sources, interface note,
+   and concise guide updates as one coherent change.
 
 The tracked tree contains the current accepted research artifacts. Drafts,
 search notes, rejected alternatives, raw sources, and detailed review history
@@ -260,13 +306,22 @@ shared change against accepted Definitions before using it in the next batch.
 
 ## Completion criteria
 
-A role is complete for Definition work when its evidence question is closed
-for the stated use, its behavior model is review-ready, its Definition has
-passed independent substantive review, its interface preflight closes, and the
-owner accepts its promotion.
+A participant is complete for semantic production when its evidence question
+is closed for the stated use, its accepted product and interface preflight
+close, and it has a review appropriate to the selected profile. Promotion uses
+the authority declared in the batch brief; a separate owner decision is needed
+only when a material scope, representation, or claim boundary changes.
 
-A production batch is complete when every admitted role reaches that state and
-the close record names any roster, skeleton, evidence, or later-mapping issue.
+A production batch is complete when every admitted row reaches its declared
+endpoint and the close record names any roster, skeleton, evidence, or
+later-mapping issue.
+
+Apply the project [phase closeout checklist](../phase-closeout-checklist.md) to
+the participant-production phase. A batch `CLOSE.md` may carry supporting
+detail, but it does not replace the phase-level acceptance record or create a
+second project status authority. Do not repeat the project checklist for every
+role; aggregate accepted batch and role reviews at the maintained phase
+boundary.
 
 The Roster Definition release is complete when all roster dispositions and
 semantic products meet the release gate. Consolidated conformance is complete

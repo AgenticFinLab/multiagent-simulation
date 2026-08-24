@@ -1,9 +1,9 @@
 ---
 name: h2epr-event-agent-batch
-description: Coordinate an approved H2EPR event-role batch in either reference-pilot or Roster-production mode. Use when several event roles need a shared scope, specialist evidence/behavior/Definition/review routing, atomic promotion, and either an explicitly authorized conformance pilot or a lightweight interface preflight.
+description: Coordinate a risk-proportionate H2EPR participant batch in reference-pilot or Roster-production mode. Use when event rows need shared scope, evidence and behavior routing, coherent promotion, and either an authorized conformance pilot or a lightweight interface preflight.
 ---
 
-# Event Agent batch
+# Event participant batch
 
 Use this Skill to coordinate repeated role work without merging the roles'
 evidence, policy, or review boundaries. It routes work through the specialist
@@ -33,9 +33,10 @@ Confirm:
 - event identity, horizon, research question, roster version, and skeleton
   version;
 - admitted roster rows and their causal choices;
-- batch mode and promotion unit;
+- batch mode, production profile per row, and promotion unit;
 - local evidence, exposed outcomes, and source permissions;
-- the current template and specialist Skill identities;
+- the method baseline: repository commit and selected template and specialist
+  Skill paths;
 - working, evidence, and tracked output locations; and
 - the exact stopping point and unresolved owner decisions.
 
@@ -51,14 +52,30 @@ promotion unit, stopping conditions, and outputs. Reuse the current mutable
 plan and status rather than creating parallel trackers. Keep raw source bytes
 in the evidence area.
 
-### 2. Research each role
+### 2. Select the route and depth
 
-For each role, apply:
+Use the accepted roster disposition and production profile:
 
-1. [`h2epr-historical-evidence-research`](../historical-evidence-research/SKILL.md);
-2. [`h2epr-participant-behavior-research`](../participant-behavior-research/SKILL.md);
-3. [`h2epr-agent-definition`](../agent-definition/SKILL.md); and
-4. [`h2epr-agent-definition-review`](../agent-definition-review/SKILL.md).
+- `disposition-only` closes with an explicit scenario, exogenous, excluded, or
+  deferred owner; do not create a participant product;
+- a `standard` Agent uses the evidence, behavior, Agent Definition, and review
+  methods, but its supporting working records and routine review may be
+  combined;
+- a `standard` population uses the evidence and behavior methods, the
+  [Population model template](../../populations/population-model-template.md),
+  and a concise profile-proportionate review; and
+- `deep` uses the same representation route with fuller separate research or
+  review records only where the declared risk requires them.
+
+Evidence and behavior are semantic responsibilities for every admitted Agent
+or population, not mandatory filenames. Apply
+[`h2epr-historical-evidence-research`](../historical-evidence-research/SKILL.md)
+and
+[`h2epr-participant-behavior-research`](../participant-behavior-research/SKILL.md)
+to the depth required by the row. Invoke
+[`h2epr-agent-definition`](../agent-definition/SKILL.md) and
+[`h2epr-agent-definition-review`](../agent-definition-review/SKILL.md) only for
+an Agent route. Do not make a population satisfy the Agent ten-module profile.
 
 Share adopted source identity and event claims through the event source
 register and evidence ledger. Do not share participant policy, private state,
@@ -98,8 +115,11 @@ registry, update binding hashes, implement policy, or run replay tests.
 ### 5. Promote accepted products
 
 Promote the accepted Definition or population product with adopted claim and
-source updates, `INTERFACE.md`, and concise guide changes. Keep candidates,
-search history, raw sources, and detailed reviews in ignored local areas.
+source updates, `INTERFACE.md`, and concise guide changes. Record the review
+verdict under the batch's declared promotion authority; seek a separate owner
+decision only for a material scope, representation, or claim change. Keep
+candidates, search history, raw sources, and detailed reviews in ignored local
+areas.
 
 Promotion does not add the role to an executable participant set.
 
@@ -127,9 +147,9 @@ batch permits the project to claim and what remains external.
 Roster-production mode produces:
 
 1. one batch brief and roster slice;
-2. reviewed research and an accepted product per row;
+2. reviewed research and an accepted product for each admitted participant;
 3. adopted event source and claim updates;
-4. independent review verdicts;
+4. profile-proportionate review verdicts;
 5. one lightweight `INTERFACE.md`;
 6. coherent promotion; and
 7. one concise close record.

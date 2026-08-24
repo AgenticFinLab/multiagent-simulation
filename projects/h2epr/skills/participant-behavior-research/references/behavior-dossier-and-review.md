@@ -1,13 +1,18 @@
 # Behavior dossier and review
 
-The participant behavior dossier is a publication-facing model specification.
-It should be readable as serious historical and behavioral modeling work before
-any runtime implementation is considered.
+The participant behavior record supplies the research basis for a
+publication-facing Agent Definition or population model. A standard row may
+combine the applicable content below in one compact working record; a deep row
+may use a separate dossier. In either form, it should be readable as serious
+historical and behavioral modeling work before runtime implementation is
+considered.
 
 ## Recommended content
 
-Section titles and order may follow the participant and paper. Cover the
-following content when it is behaviorally material.
+Section titles and order may follow the participant and intended product.
+Cover the following content when it is behaviorally material; do not preserve
+empty headings. A population route carries the selected material into the
+project Population model template rather than an Agent Definition.
 
 ### Research scope and historical setting
 
@@ -176,6 +181,12 @@ and falsification account are coherent enough to standardize into a canonical
 Agent Definition. Remaining limitations do not change the core representation
 or legal intent envelope.
 
+### `READY_FOR_POPULATION_MODEL_DRAFT`
+
+The evidence, choice-unit boundary, retained heterogeneity, information,
+mechanisms, uncertainty, and falsification account are coherent enough to
+draft a population model without inventing a collective Agent.
+
 ### `READY_WITH_EXPLICIT_ALTERNATIVES`
 
 The dossier is sufficiently grounded, but two or more evidence-bounded
@@ -197,7 +208,7 @@ the representation before enriching the narrative.
 
 ## Review record
 
-A concise review should report:
+A concise review may report the applicable fields inline or in a batch record:
 
 ```text
 participant=
@@ -210,7 +221,7 @@ decision_situations=
 material_uncertainties=
 strongest_counterexample=
 publication_readiness=
-definition_readiness=
+product_readiness=
 verdict=
 required_revision=
 ```

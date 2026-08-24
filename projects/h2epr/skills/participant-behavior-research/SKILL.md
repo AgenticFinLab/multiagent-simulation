@@ -1,16 +1,21 @@
 ---
 name: h2epr-participant-behavior-research
-description: Develop a historically grounded, institutionally explicit, publication-facing behavior model for an H2EPR participant from an adjudicated evidence set. Use after historical evidence research and before drafting a canonical Agent Definition; covers representation, governance, information, private state, mechanisms, decision situations, intents, uncertainty, worked cases, predictions, and falsifiers without writing runtime code.
+description: Develop a historically grounded, institutionally explicit, publication-facing behavior model for an H2EPR participant from an adjudicated evidence set. Use after historical evidence research and before drafting an Agent Definition or population model; covers representation, information, private state, mechanisms, choices, uncertainty, cases, and falsifiers without writing runtime code.
 ---
 
 # Participant behavior research
 
 Use this skill to explain how a real-event participant is represented and why
-that participant may act as modeled. The output is a scholarly behavior
-dossier: rich enough to support an Agent Definition, transparent enough to
-support a paper, and bounded enough to be challenged by evidence.
+that participant may act as modeled. The output is a scholarly behavior record
+that can support an Agent Definition or population model and can be challenged
+by evidence.
 
-This stage sits between evidence adjudication and formal Agent Definition
+For a standard row, this may be a compact combined working record whose
+applicable parts feed the accepted participant product. Use a separate, fuller
+dossier for a deep row only when a material representation, causal, or evidence
+judgment benefits from it.
+
+This stage sits between evidence adjudication and participant-product
 authoring. It does not turn historical outcomes into rules, design the whole
 scenario, or translate the model into backend code.
 
@@ -19,7 +24,8 @@ scenario, or translate the model into backend code.
 Establish:
 
 - event identity, modeled interval, and focal decision time or times;
-- participant or institutional decision interface under study;
+- participant, institutional decision interface, or population choice unit
+  under study;
 - research question and intended explanatory scope;
 - adopted claim records, source register, use partition, and exposure record;
 - material unresolved or conflicting claims;
@@ -51,11 +57,13 @@ Separate:
 
 ### 2. Define the represented actor
 
-Explain whether the modeled Agent represents a person, office, management
-group, committee, firm, association, public body, or another decision
-interface. For an institution, identify who can speak or act for it, which
-internal actors are aggregated, what disagreement is suppressed, and what
-evidence would require a finer representation.
+Explain whether the participant is a person, office, management group,
+committee, firm, association, public body, population choice unit, or another
+decision interface. For an institution, identify who can speak or act for it,
+which internal actors are aggregated, what disagreement is suppressed, and
+what evidence would require a finer representation. For a population, define
+the unit, retained heterogeneity, host boundaries, and split triggers without
+inventing a collective voice.
 
 Read
 [`participant-scope-and-governance.md`](references/participant-scope-and-governance.md).
@@ -101,9 +109,10 @@ unknown state.
 
 ### 6. Analyze decision situations
 
-Begin with two to four high-information situations that expose different
-aspects of the participant. Add more only when they contribute a distinct
-mechanism, authority boundary, information problem, or behavior.
+Begin with the smallest set of high-information situations needed to expose
+the participant's material mechanisms and boundaries. Add another only when it
+contributes a distinct mechanism, authority boundary, information problem, or
+behavior.
 
 For each situation, examine:
 
@@ -133,7 +142,7 @@ Keep parameter uncertainty, uncertain world state, uncertain participant
 belief, competing mechanisms, and conflicting historical evidence separate.
 Do not average structural alternatives into a single confidence score.
 
-### 8. Write the scholarly behavior dossier
+### 8. Write the scholarly behavior record
 
 Present a coherent account that a historian, domain scholar, modeler, and
 implementation reviewer can read without consulting source code. Use concise
@@ -141,8 +150,8 @@ tables where they clarify evidence, information, authority, mechanisms, or
 decision situations, but retain enough prose to explain causal reasoning and
 historical context.
 
-The dossier should include citations and claim references, assumptions and
-limitations, worked cases, alternative explanations, and explicit
+The record should include the applicable citations and claim references,
+assumptions and limitations, cases, alternative explanations, and explicit
 falsification conditions. Use
 [`behavior-dossier-and-review.md`](references/behavior-dossier-and-review.md).
 
@@ -163,12 +172,14 @@ Review the dossier for:
   publication-facing account.
 
 Resolve the review as `READY_FOR_DEFINITION_DRAFT`,
-`READY_WITH_EXPLICIT_ALTERNATIVES`, `MORE_EVIDENCE_REQUIRED`, or
-`REPRESENTATION_RECONSIDERATION_REQUIRED`, and explain the consequence.
+`READY_FOR_POPULATION_MODEL_DRAFT`, `READY_WITH_EXPLICIT_ALTERNATIVES`,
+`MORE_EVIDENCE_REQUIRED`, or `REPRESENTATION_RECONSIDERATION_REQUIRED`, and
+explain the consequence. Use the first two only for their matching
+representation routes.
 
 ## Outputs
 
-A complete run normally produces:
+A complete run closes the applicable behavior responsibilities:
 
 1. an explanatory-scope statement;
 2. a participant representation and aggregation rationale;
@@ -178,12 +189,14 @@ A complete run normally produces:
 6. a portfolio of high-information decision situations;
 7. parameter and structural-uncertainty records;
 8. worked cases, behavioral predictions, counterexamples, and falsifiers;
-9. a publication-facing participant behavior dossier;
+9. a publication-facing participant behavior record;
 10. a substantive review and readiness verdict.
 
-These are research assets. The later Agent Definition selects and standardizes
-their canonical behavioral content; later conformance work maps that Definition
-to executable backends.
+These are coverage responsibilities, not ten required documents or a fixed
+case count. A standard row may combine them in one working record and refer to
+shared evidence records rather than copying them. The accepted Agent
+Definition or population model selects the canonical behavioral content;
+later conformance work maps that product to executable backends.
 
 ## Stop conditions
 

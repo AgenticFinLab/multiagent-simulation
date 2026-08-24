@@ -15,6 +15,7 @@ operational processes, adjudication, and realized effects.
 ```text
 populations/
 ├── README.md
+├── population-model-template.md
 ├── defines/
 │   └── panic_1907/
 │       ├── call-money-broker-borrowers.md
@@ -33,6 +34,13 @@ contains the lightweight preflight used by Roster production. Exact machine
 mapping is now specified by the accepted event-level consolidated mapping;
 executable composition still requires a separately authorized implementation
 and conformance slice.
+
+Start a new population product from the
+[Population model template](population-model-template.md). It covers the
+shared semantic and review requirements without forcing Agent Definition
+structure or a separate document for every working stage. The accepted 1907
+models predate the template and remain frozen in their accepted form; the
+template is not a reason to rewrite them.
 
 ## Current models
 

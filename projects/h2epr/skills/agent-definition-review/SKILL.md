@@ -1,6 +1,6 @@
 ---
 name: h2epr-agent-definition-review
-description: Conduct an independent substantive review of an H2EPR Agent Definition as a historical, institutional, behavioral, and publication-facing model. Use after authoring and before reference-candidate freeze or implementation mapping; checks evidence, representation, theory, information, state, mechanisms, intents, parameters, cases, uncertainty, falsifiability, scholarly quality, and cross-agent consistency without treating format or engineering tests as scientific validity.
+description: Conduct a risk-proportionate substantive review of an H2EPR Agent Definition as a historical, institutional, behavioral, and publication-facing model. Use after authoring and before promotion or implementation mapping; checks evidence, representation, information, mechanisms, intents, uncertainty, falsifiability, and scholarly quality without treating format or engineering tests as scientific validity.
 ---
 
 # Agent Definition review
@@ -20,7 +20,8 @@ precision.
 Obtain:
 
 - the exact Agent Definition candidate and semantic version;
-- participant behavior dossier and its readiness review;
+- participant behavior dossier, or an equivalent combined research record, and
+  its readiness judgment;
 - evidence ledger, adopted-source register, use/exposure partition, and
   unresolved claims;
 - cited original theory and empirical sources;
@@ -46,6 +47,24 @@ itself authorize new evidence acquisition.
   exists only in code, prompts, tests, or private author explanations.
 - Distinguish model failure, evidence gap, representation failure, and later
   implementation nonconformance.
+
+## Choose review depth
+
+Use the participant production profile declared by the batch:
+
+- **Standard:** evaluate every material criterion, but record one concise
+  verdict and only findings that affect acceptance, revision, or limitations.
+  The verdict may sit in the batch review record; omit empty sections and
+  repeated pass statements.
+- **Deep:** use a separate, fuller report when the representation is new or
+  disputed, the participant owns a central causal choice, or the evidence and
+  claim risk needs a more explicit audit trail.
+
+Use a fresh, authoring-independent reviewing context or a different reviewer
+where practical. Independence means that authoring assumptions are challenged
+without relying on backend behavior; it is not a clean-builder claim and does
+not require an external reviewer, an additional approval layer, or a separate
+public file.
 
 ## Workflow
 
@@ -170,7 +189,9 @@ For each finding give the evidence, why it matters, required revision, and
 where the work must return: Definition editing, behavior research, evidence
 research, or participant representation.
 
-Use [`review-report-and-verdict.md`](references/review-report-and-verdict.md).
+For a deep review, use
+[`review-report-and-verdict.md`](references/review-report-and-verdict.md). A
+standard review may combine the applicable fields in the batch record.
 
 ## Finding severity
 
@@ -190,16 +211,18 @@ protocol defines what the score means and how reliability is established.
 
 ## Outputs
 
-A complete review produces:
+A review records the applicable parts of:
 
-1. review identity and evidence boundary;
-2. concise model and claim summary;
-3. strongest contributions and strongest counterargument;
-4. severity-ranked findings with exact evidence and revision paths;
-5. cross-section and, when applicable, cross-agent consistency results;
-6. unresolved evidence and alternative-mechanism register;
-7. publication-readiness and Definition-readiness verdict;
-8. a rereview checklist tied to the findings.
+- review identity, candidate identity, and evidence boundary;
+- a concise model and claim summary;
+- the strongest supported aspect and strongest material counterargument;
+- severity-ranked findings with evidence and revision paths;
+- cross-section and, when applicable, cross-agent consistency;
+- unresolved evidence or alternative mechanisms; and
+- a promotion or return verdict.
+
+These may be combined in one standard review record. Add a rereview checklist
+only when the findings require another pass.
 
 ## Stop conditions
 

@@ -151,19 +151,29 @@ def test_required_phase0_surface_is_present() -> None:
 
 def test_release_manifests_use_one_public_version_convention() -> None:
     root = Path(__file__).resolve().parents[2]
-    paths = (
-        root / "agents/bindings/panic_1907/consolidated/manifest.json",
-        root / "agents/bindings/panic_1907/kt-nbc-nych-v0.1/manifest.json",
-        root / "configs/panic_1907/scenario-configuration-v0.1/manifest.json",
-        root / "releases/panic_1907/roster-definition-v0.1/manifest.json",
-        root / "scenarios/panic_1907/definition-v0.1/manifest.json",
+    release_roots = (
+        root / "agents/bindings",
+        root / "configs",
+        root / "releases",
+        root / "scenarios",
     )
+    paths = tuple(
+        sorted(
+            path
+            for release_root in release_roots
+            for path in release_root.rglob("manifest.json")
+        )
+    )
+    assert paths
+    release_ids = []
     for path in paths:
         manifest = json.loads(path.read_text(encoding="utf-8"))
         assert re.fullmatch(r"\d+\.\d+\.\d+", manifest["version"])
         major, minor, _ = manifest["version"].split(".")
         assert manifest["release_id"].endswith(f"-v{major}.{minor}")
         assert re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", manifest["status"])
+        release_ids.append(manifest["release_id"])
+    assert len(release_ids) == len(set(release_ids))
 
 
 def test_executable_contract_boundary_is_offline_and_reference_free() -> None:
@@ -263,7 +273,9 @@ def _named_values(value):
 
 
 REQUIRED_PHASE0_PROJECT_FILES = {
-    "README.md", "ARCHITECTURE.md", "EVOLUTION.md",
+    "README.md", "ARCHITECTURE.md", "EVOLUTION.md", "WORKFLOW.md",
+    "event-build-brief-template.md", "phase-closeout-checklist.md",
+    "events/README.md", "populations/population-model-template.md",
     "contracts/v1/README.md",
     "contracts/v1/specifications/g0-baseline.md",
     "contracts/v1/specifications/research-protocol.md",

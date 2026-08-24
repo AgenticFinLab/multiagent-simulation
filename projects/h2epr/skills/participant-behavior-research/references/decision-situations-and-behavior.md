@@ -18,9 +18,9 @@ as:
 - denial, delay, partial realization, or failed action;
 - a role, relationship, or information perturbation.
 
-Two to four situations are often enough for the first dossier. Add another only
-when it introduces a distinct mechanism, authority boundary, information
-problem, or behavioral prediction.
+Use the smallest set that exposes the material mechanisms and boundaries. Add
+another situation only when it introduces a distinct mechanism, authority
+boundary, information problem, or behavioral prediction.
 
 ## Situation record
 
@@ -137,8 +137,9 @@ Agent action.
 
 ## Worked cases
 
-For each major mechanism include at least one worked case in prose or a compact
-table. A useful case shows:
+Ensure every major mechanism appears in a worked case or explicit
+falsification check; one case may cover several mechanisms. A useful case in
+prose or a compact table shows:
 
 - exactly what the participant knows;
 - what remains unknown;
