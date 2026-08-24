@@ -17,12 +17,14 @@ populations/
 ├── README.md
 ├── population-model-template.md
 ├── defines/
-│   └── panic_1907/
-│       ├── call-money-broker-borrowers.md
-│       ├── call-money-lenders.md
-│       ├── knickerbocker-depositors.md
-│       ├── later-trust-company-depositors.md
-│       └── member-and-correspondent-bank-resource-decisions.md
+│   ├── panic_1907/
+│   │   ├── call-money-broker-borrowers.md
+│   │   ├── call-money-lenders.md
+│   │   ├── knickerbocker-depositors.md
+│   │   ├── later-trust-company-depositors.md
+│   │   └── member-and-correspondent-bank-resource-decisions.md
+│   └── singhealth_data_breach/
+│       └── technical-administration-and-line-security-staff.md
 └── interfaces/
     └── panic_1907/
         ├── knickerbocker-depositors.md
@@ -73,7 +75,16 @@ venue policy. Their accepted
 keeps call, offer, matching, booking, repayment, liquidation and market effect
 under distinct owners. NYSE remains scenario-owned in this release.
 
-All five population models belong to the Panic of 1907
+[IHiS technical administration and line security staff](defines/singhealth_data_breach/technical-administration-and-line-security-staff.md)
+are represented as event-time technical responsibility units across
+application/database, Citrix/infrastructure, and security-engineering/CERT
+functions. Units retain their own observations, local assessment, authority,
+and response intents; population composition, assignments, delivery, technical
+execution, and effects remain scenario-owned. This accepted `0.1.0` model
+belongs only to the first H2EPR-0616 participant batch and is not part of a
+complete Roster release or executable configuration.
+
+The five Panic of 1907 population models belong to its
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
 They are covered by the accepted
 [consolidated mapping](../agents/bindings/panic_1907/consolidated/), while

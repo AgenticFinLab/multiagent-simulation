@@ -24,6 +24,11 @@ participant-available information, persistent state, authority, procedure, and
 intent/result separation can support auditable behavior. Calibration, cross-event
 reuse, and additional execution approaches require separate work.
 
+The H2EPR-0616 SingHealth collection adds two non-executable office-level
+Definitions—the SIRM and Cluster ISO—and one technical responsibility-unit
+Population Model. They close only the first detection-and-escalation participant
+batch and do not form a complete Roster release.
+
 ## Authority map
 
 | Asset | Owns | Does not own |
@@ -60,23 +65,29 @@ agents/
 │       ├── consolidated/
 │       └── roster-v0.1/
 ├── defines/
-│   └── panic_1907/
+│   ├── panic_1907/
+│   │   ├── README.md
+│   │   ├── decision-situations.md
+│   │   ├── evidence-ledger.md
+│   │   ├── j-pierpont-morgan.md
+│   │   ├── knickerbocker-trust.md
+│   │   ├── lincoln-trust-company.md
+│   │   ├── national-bank-of-commerce.md
+│   │   ├── new-york-clearing-house.md
+│   │   ├── source-register.md
+│   │   ├── trust-company-presidents-committee.md
+│   │   └── trust-company-of-america.md
+│   └── singhealth_data_breach/
 │       ├── README.md
-│       ├── decision-situations.md
-│       ├── evidence-ledger.md
-│       ├── j-pierpont-morgan.md
-│       ├── knickerbocker-trust.md
-│       ├── lincoln-trust-company.md
-│       ├── national-bank-of-commerce.md
-│       ├── new-york-clearing-house.md
-│       ├── source-register.md
-│       ├── trust-company-presidents-committee.md
-│       └── trust-company-of-america.md
+│       ├── cluster-information-security-officer.md
+│       └── security-incident-response-manager.md
 ├── interfaces/
-│   └── panic_1907/
-│       ├── national-bank-of-commerce.md
-│       ├── r2-private-and-named-trusts.md
-│       └── r3-collective-trust-support.md
+│   ├── panic_1907/
+│   │   ├── national-bank-of-commerce.md
+│   │   ├── r2-private-and-named-trusts.md
+│   │   └── r3-collective-trust-support.md
+│   └── singhealth_data_breach/
+│       └── r1-detection-and-escalation.md
 └── rosters/
     └── panic_1907.md
 ```
@@ -132,6 +143,11 @@ agents/
 - [`defines/panic_1907/trust-company-presidents-committee.md`](defines/panic_1907/trust-company-presidents-committee.md):
   the accepted R3 `0.1.0` aggregate procedural committee Definition, with advice, contributor commitment and
   resource ownership kept separate.
+- [`defines/singhealth_data_breach/`](defines/singhealth_data_breach/): the
+  accepted `0.1.0` SIRM and Cluster ISO office-level Definitions for the first
+  H2EPR-0616 detection-and-escalation batch. Their shared
+  [interface preflight](interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
+  closes the non-executable semantic routes.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the accepted `0.1.0` event-bound population model produced by the first
   Roster batch.
