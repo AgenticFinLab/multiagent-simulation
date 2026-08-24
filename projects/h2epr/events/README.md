@@ -1,16 +1,18 @@
 # H2EPR event coordination
 
-This directory provides one lightweight entry point for each event under
-active construction. It makes a multi-event project discoverable without
-copying participant, scenario, configuration, or release assets into a second
-event package.
+This directory provides one lightweight coordination entry for each event
+admitted to H2EPR construction or retained as a project baseline. It makes a
+multi-event project discoverable without copying participant, scenario,
+configuration, or release assets into a second event package.
 
-## Layout
+## Directory layout
 
 ```text
 events/
-└── <event-slug>/
-    └── README.md
+└── <lowercase_snake_case_event_slug>/
+    ├── README.md
+    ├── frame-evidence-v<major>.<minor>.md
+    └── <other-phase-owned-record>-v<major>.<minor>.md  # optional
 ```
 
 The event `README.md` instantiates the
@@ -25,6 +27,45 @@ Definitions remain under `agents/`, population models under `populations/`,
 scenario semantics under `scenarios/`, configurations under `configs/`, and
 accepted inventories under `releases/`. A larger event links those artifacts
 from its coordination entry as they become authorized and accepted.
+
+An event may open with its `README.md` alone. Before its event frame is
+accepted, it adds one versioned `frame-evidence` record that owns or integrates
+the source register, claim ledger, unresolved questions, exposure boundary,
+and evidence-use closure for that frame. A retrospective entry may integrate
+existing accepted evidence by reference; it does not duplicate or supersede
+the original authorities.
+
+Other supporting records are added only when a later phase needs an authority
+that would make the entry difficult to read. Their names state their bounded
+purpose and version. Do not create placeholder files or repeat the same record
+under several phase names.
+
+## Event entries
+
+| Event | Coordination entry | Current position |
+|---|---|---|
+| `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline; retrospective frame evidence accepted. |
+| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Second event; event-frame review candidate. |
+
+## README convention
+
+Event entries use the same core order:
+
+1. `Event profile` records identity, question, boundary, exposure, current
+   authorization, exclusions, and exact upstream authorities.
+2. Phase-specific sections follow the Event Build Brief order when needed:
+   `Evidence readiness`, `Causal scope`, `Causal role map and roster
+   dispositions`, and `Shared semantics and ownership`.
+3. `Responsibility-owned assets` links accepted or candidate records without
+   copying their contents.
+4. `Current work package` states what is active and where it stops.
+5. `Open decisions` appears only while a material owner decision remains.
+6. `Phase status` gives the concise readiness or closeout disposition.
+
+An active event may retain the phase-specific tables needed for its current
+decision. A completed baseline replaces those details with links to accepted
+authorities. This keeps the entries visually consistent without forcing every
+event to carry the same amount of documentation.
 
 ## Opening an event
 
@@ -43,6 +84,14 @@ The entry is updated in place when the event question, current phase, or linked
 authorities change. Git history preserves earlier accepted states. It is not a
 daily status log, build transcript, or substitute for release manifests and
 phase-owned reviews.
+
+## Retaining a completed baseline
+
+When an event stops at an accepted project boundary, keep a short coordination
+entry that identifies the final question, accepted assets, claim boundary,
+and next legal action. Do not reconstruct earlier working notes or move
+accepted assets into this directory. Deeper work begins only under a new
+research question and authorization.
 
 ## Protected inputs
 
