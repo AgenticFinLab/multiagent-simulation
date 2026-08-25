@@ -11,8 +11,7 @@
 | Decision cadence | event-driven when a material observation, authorization, request state, disposition, or relationship state changes; an activated situation must produce a response record |
 | Decision form | constrained set-valued policy: all implementations share the permitted response classes and minimum response obligations, while more than one intent may remain admissible |
 | State authority | business-process and relationship truth is environment-owned; the Agent retains only declared decision posture and references to authoritative records |
-| Evidence status | exploratory construction using fully exposed draft material; request formation in `DC-KT-02` is an exposed event-specific calibration hypothesis, not independent validation |
-| Definition identity | `h2epr.agent-definition.0288.knickerbocker-trust`, version `0.2.1` |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; `DC-KT-02` is an event-specific calibration hypothesis rather than independent validation |
 
 This Agent represents Knickerbocker Trust Company as an authorized institutional decision interface under
 withdrawal pressure and changing clearing access. It explains how an institution may assess immediate
@@ -525,7 +524,7 @@ omitted because they lack a defensible construct and update path.
 
 ## Worked cases and falsification
 
-### Case A — incomplete early-pressure assessment (`ILLUSTRATIVE`)
+### Case A — incomplete early-pressure assessment (illustrative)
 
 **Evidence class.** Modeled institutional capability; not a reconstructed act.
 
@@ -542,7 +541,7 @@ the emitted intent.
 **Perturbation.** Replace the stale assessment with a fresh adequate one. Liquidity escalation should weaken
 while authorization and channel facts remain unchanged.
 
-### Case B — authorized request through NBC (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case B — authorized request through NBC (reconstructed from outcome-known evidence)
 
 **Evidence class.** Reconstructed, with the known request/refusal sequence already exposed.
 
@@ -556,7 +555,7 @@ an active NBC channel, sufficient request content, and no unresolved equivalent 
 **Perturbation.** Set authorization to `unknown`. The request is no longer permitted; authorization seeking or a
 recorded inability to proceed replaces submission.
 
-### Case C — information requested while the case is pending (`ILLUSTRATIVE`)
+### Case C — information requested while the case is pending (illustrative)
 
 **Evidence class.** Modeled process capability; not a claim about the exact focal dossier.
 
@@ -571,7 +570,7 @@ stale, or asks for clarification of scope. It preserves the existing request ide
 **Perturbation.** Mark the information stale. The response must disclose the date and uncertainty or seek
 verification; it cannot silently label the package complete.
 
-### Case D — delivered termination notice after an adverse disposition (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case D — delivered termination notice after an adverse disposition (reconstructed from outcome-known evidence)
 
 **Evidence class.** Reconstructed, with the later adverse outcome already exposed.
 
@@ -605,7 +604,7 @@ The behavioral model should be narrowed or rejected if direct evidence shows tha
 entirely to another institution, that no internal authorization distinction mattered, or that the proposed
 mechanisms make no distinguishable process prediction.
 
-## Limitations, references, and provenance
+## Limitations and references
 
 ### Assumptions, limitations, and withdrawal conditions
 
@@ -631,14 +630,6 @@ Withdraw or materially revise:
 - `M-KT-04` if the company did not control the modeled communication;
 - the aggregate representation if internal actors produce necessary independent observations and intents; and
 - any quantitative bound whose source definition or event time proves incompatible with the modeled use.
-
-### Design provenance
-
-Version `0.2.1` retains the reviewed institutional and behavioral model while making the
-owner-approved `DC-KT-02` calibration hypothesis operationally explicit. It replaces the ambiguous phrases
-“material pressure,” “relevant resource assessments,” and “sufficient request content” with five categorical,
-dated, auditable gates. The change introduces no fitted numeric threshold and remains an exposed focal-event
-construction, not historical validation or a cross-event policy claim.
 
 ### References
 

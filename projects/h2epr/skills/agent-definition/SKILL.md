@@ -30,7 +30,8 @@ Confirm that the following have been substantively reviewed:
   relationship analysis;
 - decision situations, worked cases, predictions, and falsifiers;
 - applicable scenario concepts and machine-contract semantic types;
-- Definition identity, event scope, version policy, and publication audience.
+- event scope, publication audience, and the project record that will own any
+  stable machine identity or release version.
 
 If the behavior research is absent or marked `MORE_EVIDENCE_REQUIRED` or
 `REPRESENTATION_RECONSIDERATION_REQUIRED`, do not compensate by drafting a
@@ -41,10 +42,11 @@ more elaborate Definition. Return to
 
 ### 1. Fix identity, scope, and authority
 
-Assign one stable identity to the participant Definition. State the event,
-modeled interval, decision situations, represented interface, excluded actors,
-and validity limits. Explain whether the document is a mutable candidate,
-reviewed version, or released scholarly artifact.
+State the historical participant, event, modeled interval, decision situations,
+represented interface, excluded actors, and explanatory limits. The title and
+event scope identify the model for readers; stable machine identity, semantic
+version, review state, and release status belong in project records rather than
+the public Definition.
 
 Do not claim cross-event portability, historical calibration, prediction, or
 validation unless a separate study has established it.
@@ -191,10 +193,11 @@ List event-specific assumptions, unresolved claims, aggregation losses,
 unmodeled actors or procedures, exposed outcomes, parameter limitations,
 external-validity limits, and future evidence that would require revision.
 
-Provide a complete bibliography and a concise design provenance/version
-history. Record meaningful semantic changes and their rationale; keep Git
-hashes, file hashes, runtime bindings, test output, and work-window status in
-derived project records.
+Provide a complete bibliography. Keep stable IDs, semantic versions, review
+states, owner decisions, Git and file hashes, runtime bindings, test output,
+and work-window history in the project records that own them. State evidence
+use and scientific limitations once in ordinary prose rather than repeating
+internal workflow labels or later-phase authorization disclaimers.
 
 ### 11. Perform cross-section consistency checks
 
@@ -223,7 +226,7 @@ repository root:
 python -m h2epr.agents.definition_profile path/to/candidate.md
 ```
 
-It checks the ten-module order, overview identity, observation and intent
+It checks the ten-module order, publication surface, observation and intent
 inventories, and Decision Commitment cross-links. Treat a failure as an
 authoring defect. Treat a pass only as structural readiness; it does not
 replace substantive review.

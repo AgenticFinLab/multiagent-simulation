@@ -4,14 +4,11 @@
 
 | Item | Definition |
 |---|---|
-| Model identity | `H2EPR-0288-LATER-TRUST-DEPOSITOR-POPULATIONS` |
-| Semantic version | `0.1.0` |
 | Event | Panic of 1907, acute New York phase |
 | Focal interval | approximately 22–26 October 1907 |
 | Representation | event-bound, institution-indexed populations of weighted depositor choice units |
 | Focal choices | request withdrawal, retain for the current interval, await a pending result and adapt to a delivered result |
-| Evidence status | exploratory construction with focal contagion and withdrawal outcomes fully exposed |
-| Calibration status | no individual, host-cohort or cross-host response calibration |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; individual, host-cohort, and cross-host responses are not calibrated |
 
 The model represents heterogeneous holders of deposit claims against Trust
 Company of America, Lincoln Trust Company and other later New York trust
@@ -336,7 +333,7 @@ profile mixture.
 
 ## 9. Worked cases and falsification
 
-### Case A — TCA signal, line and service (`RECONSTRUCTED / EXPOSED`)
+### Case A — TCA signal, line and service (reconstructed from outcome-known evidence)
 
 A TCA unit receives a dated materially adverse host signal and observes local
 delay. The applicable responsive profiles request; a need-only unit without
@@ -345,14 +342,14 @@ decision to expand paying windows and the actual payment remain external. If
 the access observation is removed, only the delivered signal and private need
 can affect the choice.
 
-### Case B — Lincoln board statement (`RECONSTRUCTED / EXPOSED`)
+### Case B — Lincoln board statement (reconstructed from outcome-known evidence)
 
 A Lincoln unit receives a board-authorized reassuring statement after issue.
 The unit records it as a fallible host signal. A host-responsive profile
 follows its declared conflict rule if earlier adverse information remains.
 The statement does not reveal authoritative condition or future withdrawal.
 
-### Case C — public contagion without private leakage (`ILLUSTRATIVE`)
+### Case C — public contagion without private leakage (illustrative)
 
 A TCA unit receives a materially adverse public report about Knickerbocker. A
 contagion-responsive profile requests after the hard claim and lifecycle gates;
@@ -360,14 +357,14 @@ the other profiles do not acquire a signal-based request duty. The unit does
 not acquire Knickerbocker claim, queue, access or payment information. Removing
 the public delivery eliminates the signal effect.
 
-### Case D — pending request under new stress (`ILLUSTRATIVE`)
+### Case D — pending request under new stress (illustrative)
 
 A unit has an equivalent pending request when a new adverse host signal
 arrives. It updates the information inventory and awaits. When a partial result
 is delivered and the lifecycle reopens, it may request the remaining eligible
 claim.
 
-### Case E — certified-check payment (`RECONSTRUCTED`)
+### Case E — certified-check payment (reconstructed)
 
 A delivered result reports partial payment by certified check. The paid claim
 changes; the remainder persists. The population cannot infer cash usability,
@@ -387,7 +384,7 @@ successful deposit elsewhere or host stability.
   heterogeneity remains an explanatory claim; or
 - an exogenous demand series is described as endogenous depositor behavior.
 
-## 10. Limitations, references and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -415,12 +412,3 @@ is no longer part of the research question.
   System*. National Monetary Commission, Senate Document No. 538.
 - U.S. House Committee on Investigation of United States Steel Corporation.
   1911. *Hearings*, testimony of Oakleigh Thorne, printed pp. 1661–1669.
-
-### Provenance
-
-Version `0.1.0` records the owner-accepted R4 representation as an
-institution-indexed population model. It reuses the accepted depositor choice-
-unit and request/result method while adding mandatory host identity,
-host/public signal separation, cross-host information prohibition, explicit
-minimum response rules and certified-check result semantics. It includes no
-executable mapping, calibrated profile mixture or historical validation.

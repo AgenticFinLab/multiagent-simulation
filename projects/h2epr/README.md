@@ -64,6 +64,7 @@ projects/h2epr/
 ├── tests/
 ├── ARCHITECTURE.md
 ├── EVOLUTION.md
+├── PUBLICATION_STANDARD.md
 ├── WORKFLOW.md
 ├── event-build-brief-template.md
 ├── phase-closeout-checklist.md
@@ -131,6 +132,7 @@ of those surfaces requires a separate research purpose and review.
 - [Event coordination entries](events/README.md)
 - [Event Build Brief template](event-build-brief-template.md)
 - [Phase closeout checklist](phase-closeout-checklist.md)
+- [Publication-facing research standard](PUBLICATION_STANDARD.md)
 - [Architecture](ARCHITECTURE.md)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)

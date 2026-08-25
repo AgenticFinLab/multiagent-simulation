@@ -24,7 +24,7 @@ EXPECTED_MODULES = (
     "7. Intent and result boundary",
     "8. Operationalization and uncertainty",
     "9. Worked cases and falsification",
-    "10. Limitations, references, and provenance",
+    "10. Limitations and references",
 )
 
 REQUIRED_OVERVIEW_FIELDS = (
@@ -35,8 +35,7 @@ REQUIRED_OVERVIEW_FIELDS = (
     "Decision cadence",
     "Decision form",
     "State authority",
-    "Evidence and model status",
-    "Definition identity",
+    "Evidence use and explanatory scope",
 )
 
 _H1 = re.compile(r"^# (?!#)(?P<title>\S.*)$", re.MULTILINE)
@@ -48,10 +47,66 @@ _COMMITMENT_HEADING = re.compile(
 _COMMITMENT_REFERENCE = re.compile(r"\bDC-[A-Z][A-Z0-9]*-[0-9]+\b")
 _SEMANTIC_ID = re.compile(r"^[a-z][a-z0-9_]*$")
 _CODE_SPAN = re.compile(r"`([^`]+)`")
-_SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$")
 _INTENT_LABEL = re.compile(
     r"\*\*(?:Permitted\s+intents?|Intents?)\.\*\*(?P<value>.*?)(?=\n\n\*\*|\n#{2,4} |\Z)",
     re.DOTALL,
+)
+
+_PUBLICATION_SURFACE_RULES = (
+    (
+        "project_identity_metadata",
+        re.compile(
+            r"^\|\s*(?:Definition identity|Model identity|Agent identity|"
+            r"Definition ID|Model ID|Semantic version|Identity, version, and status)\s*\||"
+            r"^(?:Version|Semantic version)\s+`?\d+\.\d+(?:\.\d+)?`?(?![\w.])",
+            re.MULTILINE | re.IGNORECASE,
+        ),
+        "move stable IDs and semantic versions to a release or project manifest",
+    ),
+    (
+        "workflow_status_metadata",
+        re.compile(
+            r"(?:FULL_DRAFT_EXPOSED|OUTCOME_EXPOSED|READY_FOR_REFERENCE_CANDIDATE|"
+            r"MAPPING_EXTENSION_EXPECTED|KNOWN_FIT|CONCRETE_CARRIER_COUNTEREXAMPLE|"
+            r"PASS_[A-Z0-9_]+)|^(?:Review )?Status\s*:|"
+            r"^\|\s*(?:Evidence|Calibration|Model|Review|Release|Workflow|Publication)\s+status\s*\|",
+            re.MULTILINE | re.IGNORECASE,
+        ),
+        "replace internal workflow labels with ordinary scholarly prose",
+    ),
+    (
+        "project_provenance_metadata",
+        re.compile(
+            r"^#{3,4}\s+(?:Design )?Provenance\s*$|^Provenance:\s*$|"
+            r"\b(?:Git|repository) commit\b|\bmethod baseline\b|\b[0-9a-f]{40}\b",
+            re.MULTILINE | re.IGNORECASE,
+        ),
+        "keep Git identities, hashes, and method baselines in project provenance records",
+    ),
+    (
+        "local_workflow_metadata",
+        re.compile(
+            r"\b(?:standard|deep) production profile\b|\bOD-[A-Z0-9-]+\b|"
+            r"\bnon-executable\b",
+            re.IGNORECASE,
+        ),
+        "remove local production depth, owner-decision, and executability labels",
+    ),
+    (
+        "implementation_authorization_metadata",
+        re.compile(
+            r"(?:(?:does not|doesn't|cannot|not)[ \t]+(?:itself[ \t]+)?authorize[ \t]+"
+            r"(?:mapping|configuration|policy|binding|runtime|simulation|implementation)|"
+            r"authorizes?[ \t]+no[ \t]+(?:mapping|configuration|policy|binding|runtime|simulation|implementation))",
+            re.IGNORECASE,
+        ),
+        "state the model boundary substantively instead of listing later phases it does not authorize",
+    ),
+    (
+        "local_path_metadata",
+        re.compile(r"(?:/home/[^\s`]+|\.local-runtime/[^\s`]+)"),
+        "remove local filesystem paths from publication-facing artifacts",
+    ),
 )
 
 
@@ -61,6 +116,16 @@ class DefinitionFormatIssue:
 
     code: str
     detail: str
+
+
+def check_publication_surface(text: str) -> tuple[DefinitionFormatIssue, ...]:
+    """Reject project-only metadata from a publication-facing research text."""
+
+    return tuple(
+        DefinitionFormatIssue(code, detail)
+        for code, pattern, detail in _PUBLICATION_SURFACE_RULES
+        if pattern.search(text)
+    )
 
 
 def _cells(line: str) -> tuple[str, ...]:
@@ -154,7 +219,7 @@ def _permitted_intents(body: str) -> tuple[str, ...] | None:
 def check_definition_text(text: str) -> tuple[DefinitionFormatIssue, ...]:
     """Check one new candidate against the lightweight public profile."""
 
-    issues: list[DefinitionFormatIssue] = []
+    issues = list(check_publication_surface(text))
 
     titles = tuple(match.group("title") for match in _H1.finditer(text))
     if len(titles) != 1:
@@ -187,20 +252,6 @@ def check_definition_text(text: str) -> tuple[DefinitionFormatIssue, ...]:
                 "overview_fields_missing", ", ".join(missing_fields)
             )
         )
-    else:
-        identity_value = " ".join(overview_rows["Definition identity"])
-        code_values = _CODE_SPAN.findall(identity_value)
-        if (
-            len(code_values) < 2
-            or any(not value or any(char.isspace() for char in value) for value in code_values[:2])
-            or not _SEMVER.fullmatch(code_values[1])
-        ):
-            issues.append(
-                DefinitionFormatIssue(
-                    "definition_identity_invalid",
-                    "Definition identity must include `stable-id` and semantic `x.y.z` version",
-                )
-            )
 
     behavior = _section(text, EXPECTED_MODULES[5])
     commitment_matches = tuple(_COMMITMENT_HEADING.finditer(behavior))

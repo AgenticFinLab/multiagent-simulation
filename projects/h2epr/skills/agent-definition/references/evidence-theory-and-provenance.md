@@ -98,7 +98,7 @@ Avoid assumptions that invent a person, authority, participant-available observa
 historical fact, or later outcome. If the research question cannot proceed
 without such an invention, narrow or stop the model.
 
-## Design provenance and versioning
+## Revision responsibility
 
 Record semantic changes such as:
 
@@ -111,7 +111,7 @@ Record semantic changes such as:
 - worked case or falsifier added;
 - limitations or validity scope revised.
 
-Give the reason and evidence basis for each released semantic version. Source
-hashes, Definition file hashes, Git commits, generated bindings, and test
-receipts belong to the project provenance layer rather than the public model
-narrative.
+Record these changes and their evidence basis in the release or project record
+that owns revision history. Stable IDs, semantic versions, source and Definition
+hashes, Git commits, generated bindings, and test receipts do not belong in the
+public model narrative.

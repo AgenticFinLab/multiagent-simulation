@@ -42,6 +42,9 @@ They impose no universal source, participant, test, or document count.
 - [ ] **Repository discipline:** tracked assets are accepted and discoverable;
   mutable notes, duplicate trackers, hidden defaults, and event-specific
   content in shared layers were avoided.
+- [ ] **Publication surface:** reader-facing research artifacts satisfy the
+  [publication standard](PUBLICATION_STANDARD.md); project-only identity and
+  integrity metadata remain in the records that own them.
 - [ ] **Handoff:** limitations and owner decisions are visible, and completion
   does not automatically authorize the next phase; note a reusable method
   finding only when one actually emerged.

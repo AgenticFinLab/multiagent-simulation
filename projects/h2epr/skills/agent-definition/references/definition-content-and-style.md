@@ -17,10 +17,10 @@ omissions within a module should be deliberate and explained.
 ### 1. Model overview
 
 - clear participant and event title;
-- stable Definition identity and semantic version;
 - concise summary of what the participant represents and why it matters;
 - modeled interval, focal decision situations, and explanatory scope;
-- candidate/review/release and evidence-exposure status;
+- how the evidence was used, including whether later outcomes informed
+  construction;
 - claims explicitly outside the Definition.
 
 ### 2. Historical participant and representation
@@ -103,14 +103,13 @@ omissions within a module should be deliberate and explained.
 - expected and forbidden process patterns;
 - calibration and validation use stated without circularity.
 
-### 10. Limitations, references, and provenance
+### 10. Limitations and references
 
 - historical gaps and disputed claims;
 - aggregation, mechanism, parameter, and external-validity limits;
 - unmodeled actors and processes;
 - falsifying evidence and Definition withdrawal conditions;
-- complete scholarly references;
-- semantic version history and design rationale.
+- complete scholarly references.
 
 ## Writing style
 
@@ -133,6 +132,11 @@ specification:
 Avoid generic AI-style headings such as “one-sentence positioning,” repetitive
 negative disclaimers, promotional claims, and lists that substitute for an
 argument.
+
+Do not include stable machine IDs, semantic versions, workflow states,
+production profiles, owner-decision codes, Git identities, file hashes, local
+paths, or implementation authorization inventories. Release manifests and
+other project records own those details.
 
 ## Tables and notation
 

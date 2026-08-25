@@ -11,8 +11,7 @@
 | Decision cadence | event-driven by delivered requests, information, reports, authority records, contributor replies, proposal changes, and execution results |
 | Decision form | constrained set-valued coordination policy with explicit information, attribution, authority, proposal, commitment, and result boundaries |
 | State authority | case, invitation, examination, contributor commitment, resource and result truth is scenario-owned; the Agent retains only declared coordination posture and references to delivered authoritative records |
-| Evidence and model status | event-bound exploratory construction using fully exposed contemporary reports, retrospective testimony and scholarship; no private decision record, historical calibration or independent validation |
-| Definition identity | `h2epr.agent-definition.0288.j-pierpont-morgan`, version `0.1.0` |
+| Evidence use and explanatory scope | Contemporary reports, retrospective testimony, and scholarship informed an event-bound reconstruction; no private decision record supports a calibrated or independently validated policy |
 
 This Definition models Morgan's **coordinating choices**, not a private central
 bank or a generalized “Morgan network.” Its central claim is that a named
@@ -91,7 +90,7 @@ named interface reduces to venue and message relay with no autonomous choice.
 | `MG-C05`–`MG-C06`, based on `R2-S03` | direct-capital boundary and a retrospective relationship-history hypothesis | a contemporaneous decision rule, exact weight or validated mechanism |
 | `MG-C07`–`MG-C09` | attribution conflict, causal ownership and unavailable private records | permission to fill gaps from reputation or known outcomes |
 
-All focal decisions and outcomes are `FULL_DRAFT_EXPOSED`. The model uses them
+All focal decisions and outcomes were known during construction. The model uses them
 for construction, worked cases and falsification design, not held-out
 validation. Later testimony is participant evidence with retrospective and
 self-interest limits; later scholarship is a candidate interpretation.
@@ -455,7 +454,7 @@ from the known result.
 
 ## 9. Worked cases and falsification
 
-### Case A — incomplete applicant information (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case A — incomplete applicant information (reconstructed from outcome-known evidence)
 
 **Situation.** A valid applicant concern is delivered, but no independent
 report and only a partial company statement exist. **Required response.** Name
@@ -465,7 +464,7 @@ applicant owns disclosure; examiner owns the report. **Perturbation.** Deliver
 a scoped report. Proposal formation becomes admissible but no aid result
 follows automatically.
 
-### Case B — committee report not delivered (`ILLUSTRATIVE`)
+### Case B — committee report not delivered (illustrative)
 
 **Situation.** The five-person committee has produced a report in world state,
 but Morgan has not received it. **Required response.** The Agent may request or
@@ -473,7 +472,7 @@ await the report; it cannot use its content. **Boundary.** Committee and
 transport own production/delivery. **Perturbation.** Deliver the report with a
 disputed scope; Morgan must preserve the dispute and may request clarification.
 
-### Case C — partial contributor replies (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case C — partial contributor replies (reconstructed from outcome-known evidence)
 
 **Situation.** A pool proposal is circulating. Two contributors commit, one
 conditions its reply and another declines. **Required response.** Record each
@@ -481,7 +480,7 @@ reply, assemble only validated commitments and revise, solicit or communicate
 the remaining gap. **Boundary.** No world resources change until authoritative
 execution. **Perturbation.** Expire one commitment; plan readiness must fall.
 
-### Case D — personal versus firm coordination authority (`STRUCTURAL_SENSITIVITY`)
+### Case D — personal versus firm coordination authority (structural sensitivity)
 
 **Situation.** A proposal is to be circulated as a J. P. Morgan & Co. position,
 but only Morgan's personal coordination authority is known. **Required
@@ -490,7 +489,7 @@ or keep the firm attribution pending. **Perturbation.** Deliver a scoped firm
 delegation; circulation under that provenance becomes admissible. Any firm
 resource commitment still requires a separately owned contributor record.
 
-### Case E — relationship-history sensitivity (`STRUCTURAL_SENSITIVITY`)
+### Case E — relationship-history sensitivity (structural sensitivity)
 
 **Situation.** Two applicants have comparable delivered information but
 different dated prior syndicate histories. **Required response.** Baseline
@@ -514,7 +513,7 @@ winners, it is rejected as outcome fitting.
 | always-abstain | valid informed/authorized case produces a bounded response | behaviorally empty policy |
 | aggregate/split | firm/associate split occurs only for independent information and decisions | granularity chosen for appearance |
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -542,14 +541,6 @@ the committee, firm or other actors; split it if associates have independent
 information and interacting intents; remove `M-MG-04` if relationship history
 does not generate a predeclared process difference; and reject any
 implementation that requires hidden outcome knowledge or resource ownership.
-
-### Design provenance
-
-Version `0.1.0` is the first accepted Roster-production Definition. It was
-derived from the accepted event roster and semantic skeleton, the R2 evidence
-archive, the claim adjudication in the event ledger candidate, and the H2EPR
-ten-module template. It is not derived from simulation output, a Rule mapping,
-an LLM response or a desired historical endpoint.
 
 ### References
 

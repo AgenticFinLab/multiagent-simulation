@@ -35,8 +35,8 @@ Confirm:
 - admitted roster rows and their causal choices;
 - batch mode, production profile per row, and promotion unit;
 - local evidence, exposed outcomes, and source permissions;
-- the method baseline: repository commit and selected template and specialist
-  Skill paths;
+- the selected template and specialist Skill paths, with any repository commit
+  retained only in the local batch record;
 - working, evidence, and tracked output locations; and
 - the exact stopping point and unresolved owner decisions.
 
@@ -120,6 +120,11 @@ verdict under the batch's declared promotion authority; seek a separate owner
 decision only for a material scope, representation, or claim change. Keep
 candidates, search history, raw sources, and detailed reviews in ignored local
 areas.
+
+Before promotion, apply the repository
+[publication standard](../../PUBLICATION_STANDARD.md). Do not copy batch status,
+production profile, owner decisions, semantic versions, Git identities, local
+paths, or mapping-readiness labels into the public participant product.
 
 Promotion does not add the role to an executable participant set.
 

@@ -16,7 +16,7 @@ All reference Definitions should apply the same discipline to:
 - observation, private state, and belief;
 - Decision Commitments and intent/result separation;
 - parameters, worked cases, uncertainty, and falsification;
-- references, limitations, and version provenance.
+- references and limitations.
 
 Parity does not require the same number of sections, observations, parameters,
 mechanisms, or actions.

@@ -11,8 +11,7 @@
 | Decision cadence | event-driven when a participant-visible review notice, counterparty-information change, authority result, request, direction, notice, or result record arrives; the notice's research provenance remains outside Agent input, and routine per-item clearing does not create a fresh Agent decision |
 | Decision form | constrained set-valued institutional policy with explicit authority, information, obligation, lifecycle, and minimum-response boundaries |
 | State authority | credit, clearing, request, authorization, communication, and relationship truth is environment-owned; NBC retains only declared decision posture and references to delivered authoritative records |
-| Evidence and model status | reviewed event-bound construction using outcome-exposed local sources plus three adopted public sources; the legal rule's identity and narrow effect are resolved, while focal internal authority, information, credit terms, exact ordering, and termination provenance remain explicitly unresolved; no historical calibration or held-out validation is claimed |
-| Definition identity | `h2epr.agent-definition.0288.national-bank-of-commerce`, version `0.1.0` |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; the legal rule's identity and narrow effect are established, while focal internal authority, information, credit terms, exact ordering, and termination provenance remain unresolved |
 
 This Agent represents NBC as a large member bank with its own resources,
 clearing obligations, counterparty exposure, and authority constraints. It
@@ -709,7 +708,7 @@ rescue propensity, and an undocumented exposure limit are omitted.
 
 ## 9. Worked cases and falsification
 
-### Case A — routine clearing without a new NBC choice (`HISTORICALLY_GROUNDED_BASELINE`)
+### Case A — routine clearing without a new NBC choice (historically grounded baseline)
 
 **Evidence class.** Historically grounded institutional baseline, not a
 reconstruction of one focal credit decision.
@@ -731,7 +730,7 @@ classifier/version and labels this perturbation `sensitivity_assignment`. NBC
 now owes a bounded response under `DC-NBC-01`; the notice does not predetermine
 termination and is not represented as an observed NBC threshold.
 
-### Case B — exposure rises while counterparty information is stale (`ILLUSTRATIVE`)
+### Case B — exposure rises while counterparty information is stale (illustrative)
 
 **Evidence class.** Illustrative mechanism test using evidence-supported
 categories, not a claim about NBC's exact focal books.
@@ -760,7 +759,7 @@ existing position, but the legal tail-risk category remains available for new
 activity. Termination remains one possible future choice only if independently
 activated and authorized.
 
-### Case C — one request, courier versus sponsor (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case C — one request, courier versus sponsor (reconstructed from outcome-known evidence)
 
 **Evidence class.** Reconstructed from later title-level accounts; the exact
 request, participant, and mandate remain unresolved.
@@ -780,7 +779,7 @@ and support remain outside NBC.
 **Perturbation.** Deliver scoped NBC sponsorship authority. Sponsorship becomes
 admissible and must add a distinct NBC basis; NYCH acceptance remains external.
 
-### Case D — bank-selected versus committee-directed notice (`STRUCTURAL_SENSITIVITY`)
+### Case D — bank-selected versus committee-directed notice (structural sensitivity)
 
 **Evidence class.** Structural sensitivity grounded in the two general
 authority paths; neither is historically selected for the focal action.
@@ -803,7 +802,7 @@ effective termination remain authoritative process results.
 **Perturbation.** Remove the delivered direction. Compliance no longer
 justifies notice; an NBC-selected response requires its own authority and basis.
 
-### Case E — notice issued but not yet effective (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case E — notice issued but not yet effective (reconstructed from outcome-known evidence)
 
 **Evidence class.** Reconstructed notice-lifecycle case using the known
 announcement without inferring NBC's internal policy.
@@ -848,7 +847,7 @@ is shown to be mechanically fixed; if exposure, mandate, authority, and
 direction perturbations produce no distinguishable path; or if the aggregate
 conceals necessary independent NBC actors.
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Assumptions, limitations, and withdrawal conditions
 
@@ -886,23 +885,6 @@ Withdraw or materially revise:
   observations and intents; and
 - any qualitative or numerical bound whose source time or definition is
   incompatible with its modeled use.
-
-### Design provenance
-
-Version `0.1.0` is the first accepted NBC Definition. It is derived from the
-H2EPR ten-module template, the event role map, reviewed evidence and
-participant-behavior research, and comparison with the two existing
-participant Definitions. No executable mapping or simulation result is used
-as evidence for the behavioral model.
-
-The bounded public-source study is complete. It resolved the legal rule's
-identity and narrow effect and strengthened the structural authority and
-post-action exposure record; it did not locate a focal NBC decision record. The
-Definition therefore remains intentionally incomplete on exact authority,
-ordering, credit terms, information, pre-possession coverage, Section 25's
-focal applicability, and internal decision evidence. The accepted version
-preserves these limits rather than selecting a historical policy from the
-known outcome.
 
 ### References
 

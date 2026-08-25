@@ -1,7 +1,7 @@
 # H2EPR Agents
 
-This directory is the mutable, tracked research surface for H2EPR Agent
-Definitions and their supporting evidence. It borrows MASim's useful
+This directory contains H2EPR Agent Definitions and their supporting research
+assets. It borrows MASim's useful
 separation between Markdown definitions and Python implementations, while
 keeping H2EPR profiles event-bound until reuse is demonstrated.
 
@@ -24,10 +24,10 @@ participant-available information, persistent state, authority, procedure, and
 intent/result separation can support auditable behavior. Calibration, cross-event
 reuse, and additional execution approaches require separate work.
 
-The H2EPR-0616 SingHealth collection adds two non-executable office-level
-Definitions—the SIRM and Cluster ISO—and one technical responsibility-unit
-Population Model. They close only the first detection-and-escalation participant
-batch and do not form a complete Roster release.
+The H2EPR-0616 SingHealth collection adds two office-level Definitions—the
+SIRM and Cluster ISO—and one technical responsibility-unit Population Model.
+Together they cover the first detection-and-escalation participant set rather
+than the complete event roster.
 
 ## Authority map
 
@@ -35,10 +35,10 @@ batch and do not form a complete Roster release.
 |---|---|---|
 | event roster | selected question and horizon, role dispositions, causal ownership, and release membership | participant policy, scenario state, or executable membership |
 | event semantic skeleton | shared event concepts, interaction routes, ownership boundaries, and structural variants | numerical state, wire fields, policy, or realized outcomes |
-| Agent Definition Markdown | representation, participant-available information semantics, decision commitments, intent meaning, assumptions, falsifiers | source status, actual world values, wire schemas, adjudicated results |
+| Agent Definition Markdown | representation, participant-available information semantics, decision commitments, intent meaning, assumptions, falsifiers | source classification, actual world values, wire schemas, adjudicated results |
 | population model Markdown | distributed choice semantics, retained heterogeneity, aggregation meaning, assumptions, and falsifiers | one collective personality, population composition, service process, or realized effects |
 | `source-register.md` | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
-| `evidence-ledger.md` | claim status, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
+| `evidence-ledger.md` | claim classification, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
 | `decision-situations.md` | shared research situations and perturbations | participant policy or executable scenario state |
 | interface preflight | semantic inventory, route and lifecycle dependencies, skeleton compatibility, and preliminary carrier classification | wire mapping, registries, implementation, or conformance claims |
 | accepted binding specification | reviewed mapping of a released Definition set, observations, commitments and intents | independent behavior semantics |
@@ -48,10 +48,9 @@ batch and do not form a complete Roster release.
 
 The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
-and intent semantics it was reviewed against. The current `0.2.1` reference
-Definitions and the added NBC carrier have exact bounded projections. The
-completed three-role conformance slice exercises only the request--forward--classify--
-scoped-disposition path; it is not a complete role or event implementation.
+and intent semantics it was reviewed against. The bounded three-role example
+exercises only the request--forward--classify--scoped-disposition path; it is
+not a complete role or event implementation.
 
 ## Layout and naming
 
@@ -95,8 +94,8 @@ agents/
 - Definition filenames are lowercase kebab-case, matching the MASim profile
   convention. Python modules remain snake_case under `src/h2epr/agents/`.
 - New Definition candidates use the exact ten numbered top-level modules in
-  the public template. Role-specific subsections remain flexible. Existing
-  frozen releases are not rewritten solely to normalize earlier headings.
+  the public template. Role-specific subsections remain flexible. All
+  canonical Definitions share the same publication-facing metadata rules.
 - The event directory follows the existing `configs/panic_1907/` identifier.
 - Only the role Markdown files are Agent Definitions. The source register,
   evidence ledger, and decision-situation portfolio are adjacent research
@@ -114,8 +113,8 @@ agents/
 - [`rosters/panic_1907.md`](rosters/panic_1907.md): accepted H2EPR-0288
   research boundary, role dispositions, production order, and Definition
   release gate.
-- [`defines/panic_1907/README.md`](defines/panic_1907/README.md): current event assets,
-  authority boundaries, and implementation status.
+- [`defines/panic_1907/README.md`](defines/panic_1907/README.md): event research assets,
+  authority boundaries, and relation to implemented examples.
 - [`defines/panic_1907/source-register.md`](defines/panic_1907/source-register.md) and
   [`defines/panic_1907/evidence-ledger.md`](defines/panic_1907/evidence-ledger.md): adopted sources,
   claim adjudication, exposure, and bounded unresolved gaps.
@@ -129,34 +128,33 @@ agents/
   accepted semantic preflight for the committee and member/correspondent-bank resource-decision population.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
-  the current `0.2.1` Definitions retained in both the frozen two-role
-  reference and the bounded three-role lineage.
+  the Definitions used by both the retained two-role reference and the bounded
+  three-role lineage.
 - [`defines/panic_1907/national-bank-of-commerce.md`](defines/panic_1907/national-bank-of-commerce.md):
-  the current `0.1.0` scholarly Definition, now projected only as the pure
-  courier in the bounded KT--NBC--NYCH binding.
+  the scholarly Definition projected as a pure courier in the bounded
+  KT--NBC--NYCH binding.
 - [`defines/panic_1907/j-pierpont-morgan.md`](defines/panic_1907/j-pierpont-morgan.md),
   [`defines/panic_1907/trust-company-of-america.md`](defines/panic_1907/trust-company-of-america.md), and
-  [`defines/panic_1907/lincoln-trust-company.md`](defines/panic_1907/lincoln-trust-company.md): the accepted R2
-  `0.1.0` Definitions for bounded private coordination, an aggregate named-trust response, and a thin
+  [`defines/panic_1907/lincoln-trust-company.md`](defines/panic_1907/lincoln-trust-company.md): Definitions for
+  bounded private coordination, an aggregate named-trust response, and a thin
   board-authorized institutional communication interface. They are covered by
   the accepted consolidated design.
 - [`defines/panic_1907/trust-company-presidents-committee.md`](defines/panic_1907/trust-company-presidents-committee.md):
-  the accepted R3 `0.1.0` aggregate procedural committee Definition, with advice, contributor commitment and
+  an aggregate procedural committee Definition, with advice, contributor commitment and
   resource ownership kept separate.
 - [`defines/singhealth_data_breach/`](defines/singhealth_data_breach/): the
-  accepted `0.1.0` SIRM and Cluster ISO office-level Definitions for the first
-  H2EPR-0616 detection-and-escalation batch. Their shared
-  [interface preflight](interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
-  closes the non-executable semantic routes.
+  SIRM and Cluster ISO office-level Definitions for the first H2EPR-0616
+  detection-and-escalation participant set. Their shared
+  [interface account](interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
+  describes the semantic routes between them.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
-  the accepted `0.1.0` event-bound population model produced by the first
-  Roster batch.
+  the event-bound Knickerbocker depositor population model.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):
-  the accepted R3 `0.1.0` institution-preserving resource-decision population.
+  the institution-preserving resource-decision population.
 - [`../populations/defines/panic_1907/later-trust-company-depositors.md`](../populations/defines/panic_1907/later-trust-company-depositors.md),
   [`../populations/defines/panic_1907/call-money-lenders.md`](../populations/defines/panic_1907/call-money-lenders.md), and
   [`../populations/defines/panic_1907/call-money-broker-borrowers.md`](../populations/defines/panic_1907/call-money-broker-borrowers.md):
-  the accepted R4 `0.1.0` host-contagion and call-money population models.
+  the host-contagion and call-money population models.
 - [`../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md`](../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md):
   accepted R4 semantic preflight, including the scenario-owned NYSE boundary.
 - [`../releases/panic_1907/roster-definition-v0.1/`](../releases/panic_1907/roster-definition-v0.1/):
@@ -186,38 +184,16 @@ the repository root:
 python -m h2epr.agents.definition_profile path/to/candidate.md
 ```
 
-The checker validates module order, overview identity, observation and intent
-inventories, and Decision Commitment links. It is not applied retroactively to
-the frozen H2EPR-0288 release and does not replace scholarly review.
+The checker validates module order, overview fields, observation and intent
+inventories, Decision Commitment links, and the absence of project-only
+metadata. It applies the publication-surface check to all canonical participant
+models and does not replace scholarly review.
 
-## Lightweight iteration lifecycle
+## Contribution and release records
 
-The tracked paths above contain only the current accepted candidate. Do not add
-`-v2`, `-old`, date-suffixed copies, or an archive directory beside them.
-
-1. Explore and review drafts in an untracked research workspace outside the
-   public asset tree. Store adopted raw sources and sealed evidence separately.
-2. Form an immutable local review snapshot with source hashes, candidate hashes,
-   test results, and unresolved questions. Rejected alternatives remain local.
-3. Perform a lightweight interface preflight before promotion. During Roster
-   production, record mapping expectations without assigning machine fields or
-   updating binding hashes.
-4. Commit that coherent state. Git history is the authoritative history of
-   accepted repository versions; private research and review history remains
-   outside the public tree.
-
-Roster Definition release v0.1 closes every roster disposition and pins the
-accepted semantic products. The consolidated mapping and carrier review are
-accepted design inputs, and the bounded release-wide loader/conformance slice
-is implemented separately from policy and simulation. The current two-role
-implementation remains the reference pilot, not the per-role production
-pattern.
-
-Contract successors or intentionally supported public release lines may coexist
-when compatibility requires it. Mutable Agent drafts do not receive that
-exception merely to retain history.
-
-The `0.1.0-dev` three-tick path is retained under
-[`tests/fixtures/agents/panic_1907/minimal_binding_v0_1/`](../tests/fixtures/agents/panic_1907/minimal_binding_v0_1/)
-as a frozen engineering fixture. It is not a current Definition line and cannot
-be cited as conformance evidence for any current Definition.
+Canonical participant files contain the current scholarly account rather than
+an archive of drafts. The [publication standard](../PUBLICATION_STANDARD.md)
+defines their public surface, and the [Agent workflow](WORKFLOW.md) describes
+research, review, integration, and release. Exact identities, hashes,
+compatibility lines, and test fixtures remain in the manifests, bindings, and
+test records that need them.

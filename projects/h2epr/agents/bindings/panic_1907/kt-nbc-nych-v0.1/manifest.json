@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "status": "bounded_conformance_release",
   "event_id": "H2EPR-0288",
-  "manifest_sha256": "c1f20d861f0a86e7be0c6de291e70cea2fdb1fa8afc3fdabbfef4a2713d73fa9",
+  "manifest_sha256": "b7cba33116f55917d9113d0554ed880f68b291ec4424e7431cbacb959a6d251a",
   "binding": {
     "path": "agents/bindings/panic_1907/kt-nbc-nych-v0.1/binding.json",
-    "sha256": "8a818df39e832f3bd45789e1f41aed7b82ecd8549619dbfd7adb924773a76035"
+    "sha256": "2d3fc3cff91a4f9c171b111a65caf4e4a02ed52c16c9eca2e4f81c3a334fb9fa"
   },
   "implementation_surfaces": [
     {
@@ -34,14 +34,14 @@
   "upstream": {
     "configuration_path": "configs/panic_1907/scenario-configuration-v0.1/scenario-configuration.json",
     "configuration_release_manifest_path": "configs/panic_1907/scenario-configuration-v0.1/manifest.json",
-    "configuration_source_sha256": "22f2566b9f0607deb66a2149a6651592eddc968c4646fda18747df25f6d60558",
-    "configuration_release_manifest_sha256": "0b7c343bce6a7fdb0c9815d5902e4b6c3d59fd5bdba8d9858f37ed3e3d08c93b",
-    "configuration_canonical_sha256": "01dd45b46f9fbb3f9ab175dc5645d59cf635a2268a55f6a3574ea909e035ff8d",
+    "configuration_source_sha256": "f9352ca2da66d0cc774b7c505a074ea63883689c6556720d77a4802506632bd6",
+    "configuration_release_manifest_sha256": "8d8f2b7093f5b2a7308bac5ee34a73d6eb86853677be040d01e0f1aac40b27e2",
+    "configuration_canonical_sha256": "d74a5382d705e6b25decd4dfd4a4f04cebf4f8278bf685ff7ffddcbbc9e6fef1",
     "admission_receipt_path": "configs/panic_1907/configuration-admission-v0.1/receipt.json",
-    "admission_receipt_file_sha256": "06209ede3c98e7980ccf694df598d78e9e1b0ab6c2aaf366d7d6b45e49b600a8",
-    "admission_receipt_sha256": "ac19d8351740060bb986c500dcbe4492d2dd4af854660ea3e0ce11321f57550f",
+    "admission_receipt_file_sha256": "f9ae766d7d1082625311f94b51d40c12da9bd6f46b06d51e54a98e349bd1ff37",
+    "admission_receipt_sha256": "c10782a04a7a33905bddc0d131f85b8eeb582b1b3f2b7e26161e1f827ec50331",
     "mapping_profile_path": "agents/bindings/panic_1907/roster-v0.1/mapping-profile.json",
-    "mapping_profile_sha256": "e7ba57615fa95c1fc6e5b7db52e0f6e71dc893cd85766b46594f3a29491ceb5b"
+    "mapping_profile_sha256": "efa341364d12f8b1be8035ebd1cdde7b6ef2446f4015db3e28b6f2bdbaab25e7"
   },
   "authorization": {
     "bounded_projection_authorized": true,

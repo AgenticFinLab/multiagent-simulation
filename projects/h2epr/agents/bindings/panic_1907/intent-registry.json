@@ -4,7 +4,7 @@
   "version": "0.2.1",
   "authority": "derived_mapping_only",
   "source_path": "agents/bindings/panic_1907/intent-registry.md",
-  "source_sha256": "63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87",
+  "source_sha256": "2e2e008f4e34edafba8a506ae86c64fee89fc3f9c206768bc8e01a66e2dff50d",
   "action_schema_version": "h2epr.intent.v0_2_1",
   "message_content_schema_version": "h2epr.message-content.v0_2_1",
   "actor_intent_counts": {

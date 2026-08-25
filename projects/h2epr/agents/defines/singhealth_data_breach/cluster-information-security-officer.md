@@ -6,13 +6,12 @@
 |---|---|
 | Historical participant | IHiS Cluster Information Security Officer for SingHealth; the office held by Wee Jia Huo during the modeled interval |
 | Modeled role | Office-level interface for independent security clarification, response accountability, coordination, and incident reporting or escalation |
-| Event and interval | `H2EPR-0616`, SingHealth Data Breach; participant response from 18 January through 20 July 2018, with acute response from 11 June |
+| Event and interval | SingHealth Data Breach; decisions from 11 June through 10 July 2018, with later response context through 20 July |
 | Primary decision situations | Partial or ambiguous security message; possible CII compromise while technical investigation remains open; cross-team meeting with unresolved reporting concerns |
 | Decision cadence | Event-driven by delivered security messages, response updates, material scope indicators, meetings, team-state changes, and reporting feedback |
 | Decision form | Qualitative constrained set-valued procedure preserving clarification, coordination, independent escalation, and bounded deferral alternatives |
 | State authority | The scenario owns delivery, institutional roles, SIRT and reporting state, technical facts, and results; the Agent owns only its current assessment, open clarifications, and declared coordination or escalation intents |
-| Evidence and model status | `FULL_DRAFT_EXPOSED`; accepted event-specific, outcome-exposed, uncalibrated, non-executable Definition; standard production profile; no held-out or validity claim |
-| Definition identity | `h2epr-0616-cluster-iso`, `0.1.0` |
+| Evidence use and explanatory scope | Official retrospective inquiry evidence supports an event-bound qualitative reconstruction; later outcomes informed construction but are excluded from participant-time information and independent evaluation |
 
 This Definition represents the Cluster ISO as a distinct accountable decision
 interface, not as a duplicate of the SIRM and not as all of SingHealth or IHiS.
@@ -53,13 +52,14 @@ organizational personality.
 The [R1 participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
 provides the adopted source and claim ledger. This Definition relies on:
 
-- `0616-R1-C01` for the distinct ISO reporting and accountability interface;
+- `0616-R1-C13` for the distinct ISO reporting and accountability interface;
 - `0616-R1-C09` for June messages, questions, response oversight, and the
   independent escalation route;
 - `0616-R1-C10` for the 4--5 July interpretation and ongoing-investigation
   alternative; and
 - `0616-R1-C11`--`0616-R1-C12` for cross-team integration and retrospective
-  falsification boundaries.
+  falsification boundaries; and
+- `0616-R1-C19` for the observed SIRT activation state.
 
 The evidence is a retrospective official inquiry. It supports assigned duties,
 delivered messages, meetings, reconstructed actions, and attributed
@@ -91,8 +91,8 @@ delivered security information plus independent accountability
   -> scenario and recipients own delivery, activation, classification, and result
 ```
 
-Withdrawing `0616-R1-C01` or the authority component of `0616-R1-C09` reopens
-the Agent representation. Withdrawing `0616-R1-C10` removes the
+Withdrawing `0616-R1-C13` reopens the Agent representation. Withdrawing
+`0616-R1-C10` removes the
 ongoing-investigation mechanism and its July case without establishing another
 historical policy.
 
@@ -134,6 +134,7 @@ silently transfer the office's authority.
 | `reporting_framework_context` | Applicable reporting role, route, incident category, and timing known to the office | Institutional process or delivered procedure | Uncertainty may qualify the message but does not authorize invented restrictions | `DC-CISO-2`, `DC-CISO-3` |
 | `coordination_meeting_record` | Agenda, presented evidence, questions, decisions, and acknowledged action owners from a meeting the office attends | Scenario-owned meeting delivery | The Agent sees only presented or delivered content, not every attendee's knowledge | `DC-CISO-1`, `DC-CISO-2`, `DC-CISO-3` |
 | `office_availability_status` | Event-time availability of the office and any acknowledged coverage | Scenario-owned institutional state | Absence or leave does not imply automatic delegation | `DC-CISO-2`, `DC-CISO-3` |
+| `intent_lifecycle_notice` | Delivered acknowledgement, progress, completion, partial result, failure, expiry, cancellation, or supersession for an earlier Cluster ISO intent | Named recipient or institutional process through scenario-owned delivery | No notice leaves the intent unresolved; silence is not success or failure | `DC-CISO-1`, `DC-CISO-2`, `DC-CISO-3` |
 
 The Agent cannot use undelivered SIRM or technical information, private
 assessments of other roles, complete network state, later data-loss results,
@@ -147,7 +148,8 @@ evidence.
 | `current_iso_assessment` | Cluster ISO Agent; starts `unassessed` for a new bounded signal | Delivered evidence, clarification, meeting record, or reasoned reassessment | Qualitative position among `unclear`, `potential_incident`, and `reporting_concern`; not authoritative classification |
 | `open_clarifications` | Cluster ISO Agent; initially empty | Request, delivered answer, cancellation, or expiry | Makes reliance on technical investigation inspectable and bounded |
 | `last_response_status` | Cluster ISO Agent; initially none | Delivered SIRM or SIRT status and later superseding record | Determines whether independent follow-up is required |
-| `last_reporting_intent` | Cluster ISO Agent; initially none | Issuance, withdrawal before delivery, or recipient feedback | Supports follow-up without assuming delivery or acceptance |
+| `active_coordination_intents` | Cluster ISO Agent; initially empty; keyed by intent reference for response-status requests, coordination directions, and SIRT-activation requests | Issuance and delivered acknowledgement, completion, partial result, failure, expiry, cancellation, or supersession | Suppresses unresolved duplicates and distinguishes never issued, pending, and unsuccessful coordination attempts |
+| `active_reporting_intents` | Cluster ISO Agent; initially empty; keyed by reporting or escalation intent reference | Issuance and delivered acknowledgement, report contribution, completion, failure, expiry, cancellation, or supersession | Supports follow-up without assuming delivery, acceptance, or institutional action |
 
 SIRT activation, incident category, meeting decisions, report delivery, office
 coverage, and system state remain authoritative outside the Agent.
@@ -158,11 +160,14 @@ coverage, and system state remain authoritative outside the Agent.
 
 On a decision occasion, the Agent checks what was delivered, whether CII or
 sensitive scope is indicated, what response status is actually known, which
-clarifications remain open, and what independent duty applies. It may preserve
-uncertainty, but it must issue a clarification, coordination, or escalation
-intent when a material concern cannot be resolved from current information.
+clarifications and prior intents remain open, and what independent duty
+applies. An acknowledged pending equivalent intent normally suppresses a
+duplicate; failure, expiry, cancellation, supersession, or material new scope
+reopens the choice. The Agent may preserve uncertainty, but it must issue a
+clarification, coordination, or escalation intent when a material concern
+cannot be resolved from current information.
 
-Every conforming implementation must preserve these invariants:
+The model imposes the following substantive constraints:
 
 - receipt, understanding, agreement, and response remain distinct;
 - the Agent never inherits the SIRM's assessment or technical units' hidden
@@ -186,7 +191,7 @@ different choices.
 |---|---|
 | Situation | The office receives a partial, ambiguous, or technically unclear security message, finding, or meeting account. |
 | Claim and theory basis | `0616-R1-C09`--`0616-R1-C10`; event-specific institutional alternatives only. |
-| Available information and state | Delivered signal, SIRM update, scope indicator, technical summary, meeting record, current assessment, and open clarifications. |
+| Available information and state | Delivered signal, SIRM update, scope indicator, technical summary, meeting record, current assessment, open clarifications, and active coordination or reporting intents. |
 | Alternatives | Ask a bounded technical question, request explicit response status, issue a coordination direction, or escalate the concern with uncertainty stated. |
 | Behavioral hypothesis | Missing context can favor clarification, while CII scope, recurrence, or unresolved response state increases the value of independent follow-up. |
 | Permitted intents | `request_incident_clarification`, `request_response_status`, `issue_security_coordination_direction`, `escalate_potential_cii_incident` |
@@ -202,8 +207,8 @@ different choices.
 | Element | Account |
 |---|---|
 | Situation | A potential incident has open technical work, uncertain SIRM or SIRT status, or unresolved coordination across units. |
-| Claim and theory basis | `0616-R1-C01`, `0616-R1-C09`, and `0616-R1-C11`. |
-| Available information and state | Response status, technical summaries, meeting record, reporting context, availability, open clarifications, and current assessment. |
+| Claim and theory basis | `0616-R1-C09`, `0616-R1-C11`, `0616-R1-C13`, and `0616-R1-C19`. |
+| Available information and state | Response status, technical summaries, meeting record, reporting context, availability, open clarifications, current assessment, and active coordination intents. |
 | Alternatives | Request SIRT activation, issue a bounded coordination direction, coordinate reporting information, request response status, or escalate a material gap. |
 | Behavioral hypothesis | Independent accountability can produce action even when technical investigation remains open; reliance on the SIRM competes with that route. |
 | Permitted intents | `request_sirt_activation`, `issue_security_coordination_direction`, `coordinate_incident_reporting`, `request_response_status`, `escalate_potential_cii_incident` |
@@ -219,8 +224,8 @@ different choices.
 | Element | Account |
 |---|---|
 | Situation | Delivered evidence indicates possible CII compromise, unauthorized access, unresolved cross-system activity, or a reporting concern while confirmation remains incomplete. |
-| Claim and theory basis | `0616-R1-C01`, `0616-R1-C09`--`0616-R1-C12`. |
-| Available information and state | Delivered signals and uncertainty, SIRM status, CII indicator, meeting record, reporting context, availability, and last reporting intent. |
+| Claim and theory basis | `0616-R1-C09`--`0616-R1-C13` and `0616-R1-C19`. |
+| Available information and state | Delivered signals and uncertainty, SIRM status, CII indicator, meeting record, reporting context, availability, and active reporting intents. |
 | Alternatives | Escalate a bounded potential incident, coordinate a report, request a time-bounded decisive clarification, or request explicit response action. |
 | Behavioral hypothesis | CII scope and unresolved unauthorized activity favor escalation; unconfirmed-incident interpretation, incomplete understanding, or reliance on investigation may favor bounded clarification. |
 | Permitted intents | `escalate_potential_cii_incident`, `coordinate_incident_reporting`, `request_incident_clarification`, `request_sirt_activation` |
@@ -303,37 +308,35 @@ Neither form is validated by matching the exposed outcome.
 - **Diagnostic value:** tests whether integration and authority change behavior
   without requiring certainty.
 
+### Controlled perturbations across cases
+
+| Controlled change | Expected behavioral difference |
+|---|---|
+| Add an explicit response request to the otherwise unchanged June message | A bounded response-status or coordination intent becomes due; ambiguity may qualify its content but no longer supports silent receipt |
+| Replace an unresolved SIRT-activation request with an acknowledged pending request | An equivalent duplicate is suppressed and follow-up waits for the stated review condition |
+| Replace that pending state with failure or expiry | The office must reconsider activation, coordination, or escalation rather than treating the earlier attempt as active |
+| Remove the CII scope indicator from the 4–5 July account | Clarification may remain warranted, but the independent CII-escalation basis narrows |
+| Deliver the 9 July cross-system connection while keeping final data loss unknown | Integration should increase coordination or escalation without granting later verified impact |
+
 The Definition must be revised if independent reporting or accountability
 authority is withdrawn, if the office could not access the stated routes, or if
 information and response status make no difference to its admissible choices.
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
-This is a qualitative, event-bound, non-executable Definition. It does not
-assign a personality, legal judgment, or blame; reproduce every ISO duty;
-calibrate an escalation threshold; predict incident response; prove a
-counterfactual prevention effect; or validate an event simulation. It does not
-authorize mapping, configuration, policy, binding, runtime, or simulation.
+This qualitative, event-bound Definition does not assign a personality, legal
+judgment, or blame; reproduce every Cluster ISO duty; identify an escalation
+threshold; predict response outside the modeled episode; or establish the
+effect of a counterfactual intervention. Reliance on ongoing technical work,
+message comprehension, availability, and independent accountability remain
+competing explanations whose relative importance is not identified.
 
-The construction context is outcome-exposed. Historical actions and later
-inquiry findings support bounded reconstruction and falsification only, not a
-held-out, clean-builder, historical-validity, scientific-validity, or transfer
-claim.
+The complete historical outcome and the inquiry's later assessments informed
+construction. They help bound cases and falsifiers but provide no independent
+evaluation of the model or basis for transfer to another incident.
 
 Reference:
 
 - Committee of Inquiry. *Public Report into the Cyber Attack on Singapore
   Health Services Private Limited's Patient Database on or around 27 June
   2018*. 10 January 2019. https://file.go.gov.sg/singhealthcoi.pdf
-
-Provenance:
-
-- accepted H2EPR-0616 Event Build Brief v0.1 and frame evidence v0.1;
-- participant claims `0616-R1-C01`, `0616-R1-C09`--`0616-R1-C12`;
-- `OD-R1-03`, accepted by the project owner on 24 August 2026; and
-- H2EPR participant method baseline `bea83b1a`.
-
-Review status: `READY_FOR_REFERENCE_CANDIDATE`; accepted after concise
-standard-profile evidence, behavior, representation, cross-role, and interface
-review. The interface classification is `MAPPING_EXTENSION_EXPECTED`; it
-selects no wire mapping or carrier and authorizes no later phase.

@@ -1,21 +1,11 @@
-# R1 detection-and-escalation interface
-
-| Item | Value |
-|---|---|
-| Status | accepted Roster-production semantic preflight |
-| Event | `H2EPR-0616`, SingHealth Data Breach |
-| Batch | `R1-DETECTION-AND-ESCALATION` |
-| Event frame | accepted Event Build Brief v0.1 and frame evidence v0.1 |
-| Products | technical response role-set Population Model `0.1.0`; SIRM Agent Definition `0.1.0`; Cluster ISO Agent Definition `0.1.0` |
-| Construction exposure | `FULL_DRAFT_EXPOSED` |
+# SingHealth detection-and-escalation participant interface
 
 ## Purpose
 
-This preflight checks that the three first-batch participant products form a
-coherent information, authority, action, and result surface for CT-4 of the
-accepted event frame. It does not choose wire fields, define a scenario,
-complete the Roster, add configuration, select a carrier, create a policy, or
-authorize implementation or simulation.
+This account examines whether the three participant models form a coherent
+information, authority, action, and result structure for delayed detection and
+escalation. The historical outcome was known during construction, but it never
+enters a participant's decision-time information.
 
 The reviewed products are:
 
@@ -82,19 +72,19 @@ classification, delivery, or containment.
 |---|---|---|---|
 | Technical unit `share_technical_finding` or `request_security_review` | Named SIRM route; evidence, event time, uncertainty, local actions, and open question | SIRM `delivered_security_signal`; assess, investigate, coordinate, contain, or escalate under `DC-SIRM-1`--`DC-SIRM-3` | Delivery, acknowledgement, access to attachments, and later technical or institutional state |
 | Technical unit `share_technical_finding` | Named Cluster ISO route; bounded facts and uncertainty | ISO `delivered_incident_signal` or `technical_finding_summary`; clarify, check response, coordinate, or escalate under `DC-CISO-1`--`DC-CISO-3` | Delivery, comprehension is not guaranteed, and no shared assessment is created |
-| SIRM `request_security_investigation` | Named technical responsibility unit; signal, scope, question, priority, and reply route | Technical `security_response_request`; inspect, seek peer context, share a finding, or apply an authorized local control | Request admissibility, delivery, access, work, returned evidence, failure, and timing |
+| SIRM `request_security_investigation` | Named technical responsibility unit; signal, scope, question, priority, and reply route | Technical `security_response_request`; inspect, seek peer context, share a finding, or apply an authorized local control | Request admissibility, delivery, access, work, returned evidence, failure, expiry, and timing |
 | SIRM `coordinate_incident_response` or `direct_local_containment` | Named technical unit; task, target, intended restriction, dependencies, and review condition | Technical `security_response_request`; choose an authorized local response and later consume the delivered result | Delivery, authority check, technical feasibility, execution, partial effect, failure, recurrence, and side effects |
 | Cluster ISO `request_incident_clarification` or `issue_security_coordination_direction` | Named technical unit; question or bounded follow-up with scope and timing | Technical `security_response_request`; investigate, request context, or share a bounded finding | Delivery, admissibility, action, reply, and technical effect |
 | Cluster ISO `request_response_status` | Named SIRM route; incident reference, requested status, and review condition | SIRM `delivered_response_request`; coordinate and optionally `provide_incident_response_status` under `DC-SIRM-2` | Delivery, reply availability, recipient interpretation, and follow-up |
 | Cluster ISO `request_sirt_activation` | SIRM and institutional incident-response route; known evidence, uncertainty, requested functions, and urgency | SIRM `delivered_response_request`; assess and optionally `activate_incident_response_team` under `DC-SIRM-2` | Authority check, delivery, member availability, authoritative activation, and attendance |
 | SIRM `provide_incident_response_status` | Named Cluster ISO route; known evidence, uncertainty, active work, capacity, and next review | ISO `sirm_response_update`; clarify, exercise accountability, or escalate | Delivery, acknowledgement, interpretation, and institutional use |
-| SIRM `escalate_suspected_incident` | Cluster ISO or authorized management route; evidence, scope, uncertainty, actions, and requested decision | ISO `delivered_incident_signal` when addressed, or an external management observation outside R1 | Delivery, acknowledgement, institutional classification, direction, resources, and further routing |
-| Cluster ISO `coordinate_incident_reporting` or `escalate_potential_cii_incident` | SIRM, technical contributor, GCIO, or authorized process; bounded facts, sources, uncertainty, and requested decision | In-batch recipients receive only the message addressed to them; management recipients remain outside R1 | Contribution, report creation, authorization, delivery, acknowledgement, classification, and further reporting |
+| SIRM `escalate_suspected_incident` | Cluster ISO or authorized management route; evidence, scope, uncertainty, actions, and requested decision | ISO `delivered_incident_signal` when addressed, or an external management observation outside these three models | Delivery, acknowledgement, institutional classification, direction, resources, and further routing |
+| Cluster ISO `coordinate_incident_reporting` or `escalate_potential_cii_incident` | SIRM, technical contributor, GCIO, or authorized process; bounded facts, sources, uncertainty, and requested decision | Addressed technical or SIRM recipients receive only their delivered message; management recipients remain outside these three models | Contribution, report creation, authorization, delivery, acknowledgement, classification, and further reporting |
 
-Every route has a sender-owned intent, scenario-owned delivery, recipient-owned
-interpretation, and scenario- or recipient-owned result. No adapter may fill a
-missing response policy or convert a participant intent into its historical
-outcome.
+Every route has a sender-owned intent, externally adjudicated delivery,
+recipient-owned interpretation, and scenario- or recipient-owned result. A
+missing response cannot be supplied by the transport layer, and an intent
+cannot be converted directly into its historical outcome.
 
 ## Information and state boundaries
 
@@ -108,9 +98,12 @@ outcome.
 - Office availability, delegation, SIRT activation, participant assignments,
   host and account state, incident category, and reporting status are
   authoritative institutional or scenario state.
-- Participants may retain only their declared assessment, open requests,
-  active intents, and acknowledged records. They cannot create a private copy
-  of institutional truth.
+- Technical units retain their local assessment, open questions, last shared
+  finding, and referenced intent lifecycles. SIRM and Cluster ISO retain their
+  separate assessments, open requests, active coordination or reporting
+  intents, and acknowledged records. These memories distinguish never issued,
+  pending, completed, partial, failed, expired, cancelled, and superseded
+  attempts without becoming private copies of institutional truth.
 - Later command-and-control attribution, full attack scope, query-result
   verification, final data loss, inquiry judgments, and public hindsight remain
   unavailable until a legitimate event-time route supplies the relevant fact.
@@ -141,7 +134,7 @@ share it. SIRM acts only after delivery and may coordinate or assess escalation.
 Cluster ISO acts only on its own delivered content and may independently seek
 clarification or response status. The historical outcome is not available to
 any of them. A model in which one email creates identical beliefs across all
-three products fails this preflight.
+three participants is inconsistent with their information boundaries.
 
 ### 4 July active database queries
 
@@ -157,32 +150,30 @@ Undelivered requests produce no recipient observation. A pending or failed
 investigation remains open; a failed or partial control does not change world
 state as intended; an unacknowledged escalation remains pending. Each product
 contains a minimum response and reopening condition, so an always-wait policy
-cannot conform after material new evidence or lifecycle failure.
+is inconsistent with the models after material new evidence or lifecycle
+failure.
 
-## Interface classification and stopping point
+## Integration implications
 
-| Interface family | Classification | Later question, if separately authorized |
-|---|---|---|
-| role-typed population identity and isolation | `MAPPING_EXTENSION_EXPECTED` | Represent responsibility-unit type, assignment, and host/account scope without a collective mind |
-| office-level SIRM and Cluster ISO identity | `MAPPING_EXTENSION_EXPECTED` | Preserve separate institutional authority and private assessment surfaces |
-| delivered technical and incident information | `MAPPING_EXTENSION_EXPECTED` | Select event semantic identities carrying sender, recipient, time, uncertainty, and freshness |
-| investigation, coordination, status, activation, and escalation messages | `MAPPING_EXTENSION_EXPECTED` | Define message and request lifecycles without embedding response policy |
-| technical control and containment | `MAPPING_EXTENSION_EXPECTED` | Keep target, authority, request, execution, partial effect, recurrence, and observation distinct |
-| SIRT, reporting, and institutional classification state | `MAPPING_EXTENSION_EXPECTED` | Choose one authoritative scenario-owned lifecycle rather than participant copies |
-| delayed, missing, failed, partial, expired, and superseded results | `MAPPING_EXTENSION_EXPECTED` | Preserve lifecycle and causal references if mapping is later opened |
+| Interface family | Required semantic distinction |
+|---|---|
+| Technical responsibility units | Preserve role type, assignment, host or account scope, and unit-local memory without creating a collective mind |
+| SIRM and Cluster ISO offices | Preserve separate authority, assessment, and active-intent histories |
+| Delivered information | Retain sender, recipient, event time, uncertainty, freshness, and the content actually delivered |
+| Investigation, coordination, activation, and reporting | Link each request or message to its origin, recipient, lifecycle, and follow-up without embedding a recipient's decision |
+| Technical control | Distinguish target, authority, request, execution, partial effect, recurrence, and observation |
+| Institutional state | Keep SIRT activation, reporting, and incident classification under one authoritative institutional account |
+| Delayed or adverse results | Preserve pending, missing, partial, failed, expired, cancelled, and superseded states with causal references |
 
-The classifications state that later semantic mapping work would be required;
-they are not a carrier decision or a concrete Contracts V1 counterexample. No
-mapping question is opened in this batch.
+The three models therefore form a closed participant account for the bounded
+detection-and-escalation process. Management decisions, institutional reporting
+beyond these offices, external assistance, message transport, technical
+execution, and realized incident effects remain separate event processes.
 
-## Preflight conclusion
+## Falsification conditions
 
-`PASS_R1_SEMANTIC_INTERFACE_WITH_MAPPING_EXTENSION_EXPECTED`
-
-The three products close the accepted CT-4 participant interface without
-sharing private state, inventing collective authority, or allowing an intent to
-self-realize its result. Out-of-batch management, reporting, delegation, and
-external-assistance routes are named as external interfaces rather than hidden
-inside an R1 participant. This preflight stops before complete Roster release,
-scenario closure, mapping, configuration, binding, policy, runtime, simulation,
-calibration, held-out construction, or evaluation.
+The account must be revised if one office can read the other's private
+assessment, if a technical unit's undelivered finding changes an office's
+choice, if pending and failed intents produce indistinguishable follow-up, if a
+request creates its own execution result, or if exchanging SIRM and Cluster ISO
+authority leaves the predicted process unchanged.

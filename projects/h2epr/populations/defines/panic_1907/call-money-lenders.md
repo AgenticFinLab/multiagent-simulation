@@ -4,14 +4,11 @@
 
 | Item | Definition |
 |---|---|
-| Model identity | `H2EPR-0288-CALL-MONEY-LENDER-POPULATION` |
-| Semantic version | `0.1.0` |
 | Event | Panic of 1907, acute New York phase |
 | Focal interval | approximately 22–26 October 1907 |
 | Representation | event-bound population of institution-preserving call-lender choice units |
 | Focal choices | review, continue, condition or call an existing loan; review, offer, revise or decline new/replacement call credit |
-| Evidence status | exploratory construction with loan-call, rate and money-pool outcomes fully exposed |
-| Calibration status | no named-lender policy, response probability, amount rule, rate tolerance or haircut calibration |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; named-lender policies, response probabilities, amount rules, rate tolerances, and haircuts are not calibrated |
 
 The model represents banks, trust companies and other financial institutions
 that a scenario assigns a call-lending capability. It preserves their
@@ -355,7 +352,7 @@ total, use another institution's resources or hide a rate/haircut threshold.
 
 ## 9. Worked cases and falsification
 
-### Case A — valid call under recovery need (`RECONSTRUCTED / EXPOSED`)
+### Case A — valid call under recovery need (reconstructed from outcome-known evidence)
 
 A trust-company lender receives a material own recovery need and holds a loan
 with `call_right_available` under valid authority. Under
@@ -365,27 +362,27 @@ environment determines delivery, repayment and effects. Removing callability
 or authority changes the response to information request, condition or typed
 inability.
 
-### Case B — regular-bank accommodation (`RECONSTRUCTED / EXPOSED`)
+### Case B — regular-bank accommodation (reconstructed from outcome-known evidence)
 
 A bank receives a replacement request from a broker whose regular-account
 relationship is delivered. With nonzero capacity and
 `relationship_conditioned`, it may make a conditional offer. The relation
 does not force lending; removing it yields decline or another supported route.
 
-### Case C — money-pool route (`RECONSTRUCTED / EXPOSED`)
+### Case C — money-pool route (reconstructed from outcome-known evidence)
 
 An authorized market/pool route and request are delivered. A
 `market_support_permissive` unit makes at least a conditional offer within its
 capacity; `no_new_call_credit` declines. Morgan's target, reported market rate
 and eventual allocation do not determine amount or booking.
 
-### Case D — stale collateral information (`ILLUSTRATIVE`)
+### Case D — stale collateral information (illustrative)
 
 A borrower request cites collateral whose control/value projection is stale.
 The lender requests a fresh package or conditions an offer. It cannot silently
 apply an invented haircut or declare collateral acceptable.
 
-### Case E — partial booking and repayment (`ILLUSTRATIVE`)
+### Case E — partial booking and repayment (illustrative)
 
 Only part of an accepted offer is booked and later only part is repaid. The
 unit updates exposure/resource state by delivered realized components. Offer,
@@ -408,7 +405,7 @@ a rate spike that creates authority, an undelivered pool announcement used as
 capacity, future prices in observation and a policy selected from the known
 lender list.
 
-## 10. Limitations, references and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -438,12 +435,3 @@ the current institutional description.
   *Report of the Committee Appointed Pursuant to House Resolutions 429 and
   504 to Investigate the Concentration of Control of Money and Credit*,
   report pp. 33–34.
-
-### Provenance
-
-Version `0.1.0` records the owner-accepted R4 call-lender representation as an
-institution-preserving population model. It distinguishes delivered contract
-status from lender judgment, makes qualitative term classification explicit,
-requires bounded responses from disclosed postures and preserves one
-institutional resource truth across capabilities. It includes no executable
-mapping, named-lender policy reconstruction or historical calibration.

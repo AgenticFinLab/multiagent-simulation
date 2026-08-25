@@ -1,7 +1,5 @@
 # H2EPR Agent Definition Template
 
-> Status: working research template · event-bound · versioned
-
 An H2EPR Agent Definition is the canonical account of how one historical participant is represented as a
 decision-making actor in a bounded event model. It serves two audiences: readers evaluating the historical and
 behavioral model, and implementers translating that model into Rule-based or future model-based Agents.
@@ -24,8 +22,7 @@ Begin with a compact table that lets a reader understand the model before readin
 | Decision cadence | Event-driven, scheduled, or mixed; identify what creates a decision occasion. |
 | Decision form | Decision table, state machine, constrained set-valued policy, equation, or another justified form. |
 | State authority | Where institutional truth and behaviorally material participant state are recorded. |
-| Evidence and model status | Construction status, exposure boundary, calibration status, and appropriate claims. |
-| Definition identity | Stable identifier and semantic version. |
+| Evidence use and explanatory scope | How the evidence was used, whether later outcomes informed construction, and the claims the model can support. |
 
 Follow the table with a short account of the participant's modeled purpose, central mechanism, and principal
 research questions. State the situations the Definition explains and the adjacent processes it leaves to other
@@ -130,7 +127,9 @@ Separate:
 - transient reasoning that does not persist across decision occasions.
 
 For each persistent item, identify its owner, initial condition, legitimate update event, duration, visibility,
-and behavioral consequence. A persistent state that influences later choices must be versioned and replayable.
+and behavioral consequence. When a prior intent can remain pending, fail, expire, or be superseded, retain its
+reference and last observed lifecycle state so later choices can distinguish those cases from an intent that
+was never issued.
 The Agent may observe or propose changes to institutional process state; it does not create a second private
 copy of that truth.
 
@@ -265,17 +264,17 @@ Add cross-case tests for name erasure, role or authority swaps, information remo
 persistent-state replay, invalid intents, intent/result separation, mechanism ablation, aggregation changes, and
 the always-abstain policy. Recompute all quantitative examples independently.
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 State the model's unresolved evidence, aggregation losses, unmodeled actors and procedures, exposed outcomes,
 parameter limits, external-validity boundary, and structural alternatives. Give concrete withdrawal or revision
 conditions for the participant boundary and central mechanisms.
 
-Provide a conventional bibliography and a concise version history. Record what changed in the behavioral model
-and why. Project records may separately maintain file identities, derived implementation mappings, review
-results, and release status.
+Provide a conventional bibliography. Stable identifiers, semantic versions,
+file identities, review results, implementation mappings, and release status
+belong in the project records that own those responsibilities.
 
-### Promotion review
+### Publication review
 
 Before treating a Definition as the current scholarly candidate, confirm that:
 
@@ -293,6 +292,7 @@ Before treating a Definition as the current scholarly candidate, confirm that:
 11. the Definition contains no hidden future outcome or evaluation evidence; and
 12. the document's scope claims match what the evidence and participant set can support.
 
-Executable mappings are derived from a reviewed Definition. They should preserve its identity, information
-boundary, state ownership, Decision Commitment inventory, intent semantics, and uncertainty choices without
-becoming a competing account of participant behavior.
+Derived implementations should preserve the Definition's information boundary,
+state ownership, Decision Commitment inventory, intent semantics, and
+uncertainty choices without becoming a competing account of participant
+behavior.

@@ -11,8 +11,7 @@
 | Decision cadence | event-driven when a request, relationship fact, information item, forum/authority state, proposal state, or result changes; an activated case must produce a procedural response record |
 | Decision form | constrained set-valued procedural policy: all implementations share classification, minimum response, authority, and result boundaries while some institutionally permitted choices remain open |
 | State authority | case, review, authority, commitment, and result truth is environment-owned institutional process state; the Agent may propose transitions and retain delivered references |
-| Evidence status | exploratory construction using fully exposed draft material; the alternative-route baseline and sensitivity variant are modeling choices, not historically validated procedures |
-| Definition identity | `h2epr.agent-definition.0288.new-york-clearing-house`, version `0.2.1` |
+| Evidence use and explanatory scope | Contemporary, institutional, and retrospective sources informed an event-bound reconstruction; the alternative-route baseline and sensitivity variant are modeling choices rather than validated procedures |
 
 This Agent represents the New York Clearing House Association as a member-based procedural institution, not as
 a single banker or a modern central bank. It explains how a support-related request may be received, classified
@@ -573,7 +572,7 @@ loss function are omitted.
 
 ## Worked cases and falsification
 
-### Case A — ordinary nonmember clearing administration (`HISTORICALLY_GROUNDED_BASELINE`)
+### Case A — ordinary nonmember clearing administration (historically grounded baseline)
 
 **Evidence class.** Historically grounded institutional baseline; it is not a reconstruction of the October 21
 support decision.
@@ -591,7 +590,7 @@ institutional status remain authoritative process facts rather than Agent-create
 **Perturbation.** Remove current statement information. Examination or information-seeking behavior may change;
 membership does not.
 
-### Case B — incomplete support request (`ILLUSTRATIVE`)
+### Case B — incomplete support request (illustrative)
 
 **Evidence class.** Illustrative case used to test the modeled information and authority boundary.
 
@@ -610,7 +609,7 @@ or governance events. The Agent cannot make them true by recording an assessment
 advance, but a resource proposal remains unauthorized and the next required response concerns forum or
 authority.
 
-### Case C — nonmember request for a member facility (`RECONSTRUCTED / OUTCOME_EXPOSED`)
+### Case C — nonmember request for a member facility (reconstructed from outcome-known evidence)
 
 **Evidence class.** Reconstructed, outcome-exposed facility-boundary case; it cannot serve as held-out
 validation.
@@ -629,7 +628,7 @@ effect.
 **Perturbation.** Change only membership to `member`. The shared facility boundary changes, but examination,
 collateral, authority, and resource feasibility may still block or condition a proposal.
 
-### Case D — other-route authority unresolved (`STRUCTURAL_SENSITIVITY`)
+### Case D — other-route authority unresolved (structural sensitivity)
 
 **Evidence class.** Structural-sensitivity case for the unresolved existence of a competent alternative route.
 
@@ -649,7 +648,7 @@ authorization, commitments, and execution remain environment-owned.
 **Perturbation.** Supply direct evidence of a competent route. The conservative baseline is retired for that
 situation; approval and execution still remain unresolved.
 
-### Case E — authorized proposal with failed execution (`ILLUSTRATIVE`)
+### Case E — authorized proposal with failed execution (illustrative)
 
 **Evidence class.** Illustrative adverse-result case used to test proposal, commitment, execution, and result
 separation.
@@ -685,7 +684,7 @@ The model should be narrowed or rejected if focal minutes show that no alternati
 review and authority never affect any prediction under the sensitivity variant, or if member/committee
 heterogeneity is necessary but hidden inside the aggregate.
 
-## Limitations, references, and provenance
+## Limitations and references
 
 ### Assumptions, limitations, and withdrawal conditions
 
@@ -715,15 +714,6 @@ Withdraw or materially revise:
 - the aggregate representation if separate committees/members require independent observations and intents;
   and
 - any procedural state imported only from the later October 26 mechanism.
-
-### Design provenance
-
-Version `0.2.1` retains the reviewed procedural institution model and owner-approved structural
-treatment. It replaces the ambiguous `communicated_disposition` input with two explicit observations:
-`case_disposition_status` for the environment-owned business disposition and
-`case_communication_status` for issue/transport/delivery state; `delivered_case_result` remains the separate
-later execution/resource/process result. The member-facility restriction remains common to both route variants,
-and neither variant is presented as historically validated.
 
 ### References
 

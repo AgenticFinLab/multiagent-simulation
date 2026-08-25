@@ -22,7 +22,7 @@
     {
       "asset_id": "intent_registry_specification",
       "path": "agents/bindings/panic_1907/intent-registry.md",
-      "sha256": "63bb8c9d39d190c139a62b9dd14df9d95b3d19534e562516417aac462cccbe87"
+      "sha256": "2e2e008f4e34edafba8a506ae86c64fee89fc3f9c206768bc8e01a66e2dff50d"
     },
     {
       "asset_id": "observation_registry_specification",
@@ -42,13 +42,13 @@
     {
       "asset_id": "two_role_binding_specification",
       "path": "agents/bindings/panic_1907/two-role-binding.md",
-      "sha256": "9ad283379e7008459aba1dfa8efb0a41293091e7306067e2de40cc0f056dfc49"
+      "sha256": "490193f9bb29c1e597e2aeb75ad07ddbca1cd72f08b1b6062054ecec71e2cb36"
     }
   ],
   "machine_registries": {
     "intent": {
       "path": "agents/bindings/panic_1907/intent-registry.json",
-      "sha256": "8bc6db5e17b7e4af6180d4df59caf68b103b75d4ac1880c256b81501e0070b27"
+      "sha256": "40f1747837b7525b3de9475de08f46251531b0469c366d4dfce9148242f25692"
     },
     "lifecycle": {
       "path": "agents/bindings/panic_1907/lifecycle-registry.json",
@@ -85,7 +85,7 @@
       "definition_id": "h2epr.agent-definition.0288.knickerbocker-trust",
       "version": "0.2.1",
       "definition_path": "agents/defines/panic_1907/knickerbocker-trust.md",
-      "content_sha256": "df800bea6820eb5087c02fbcdb446b0f4ca558be143ed0d89d81074d75562758",
+      "content_sha256": "7e495ea40a79751187098c4578218341822049fab188259fb25f431b59a09f20",
       "representation_class": "aggregate_authorized_company_decision_interface",
       "decision_commitments": {
         "DC-KT-01": ["prepare_information_package", "prepare_operational_contingency", "seek_institutional_authorization", "verify_internal_condition"],
@@ -104,7 +104,7 @@
       "definition_id": "h2epr.agent-definition.0288.new-york-clearing-house",
       "version": "0.2.1",
       "definition_path": "agents/defines/panic_1907/new-york-clearing-house.md",
-      "content_sha256": "8b4e66fc18c4c032cca2d3028d598a5ad4256303599e3d1a055cc9d83dd1a4df",
+      "content_sha256": "b0c2aeb86154235e3268badc86d656317bb0f3b3a35760b7979274b26d2f214f",
       "representation_class": "aggregate_procedural_institutional_interface",
       "decision_commitments": {
         "DC-NYCH-01": ["communicate_case_status", "record_and_classify_request", "refer_request", "request_case_information", "seek_procedural_authority"],

@@ -4,15 +4,12 @@
 
 | Item | Definition |
 |---|---|
-| Model identity | `H2EPR-0288-BANK-RESOURCE-DECISION-POPULATION` |
-| Semantic version | `0.1.0` |
 | Event | Panic of 1907, acute New York phase |
 | Focal interval | approximately 23–26 October 1907 |
 | Representation | event-bound population of institution-preserving contributor choice units |
 | Historical referent | NYCH member banks and large correspondent banks participating in, declining or using collective-support/resource mechanisms |
 | Focal choices | information request, conditional offer, commitment, decline, commitment revision and member-certificate application |
-| Evidence status | exploratory construction; focal participation and outcomes fully exposed |
-| Calibration status | no recovered named-bank policy, response probability, commitment amount rule or posture distribution |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; named-bank policies, response probabilities, commitment rules, and posture distributions are not recovered or calibrated |
 
 The population represents independent institutional decisions that lie between
 a coordinator's solicitation and an environment's realized resource effect.
@@ -365,31 +362,31 @@ These remain exposed variants, not probability estimates.
 
 ## 9. Worked cases and falsification
 
-### Case A — heterogeneous response to one proposal (`ILLUSTRATIVE`)
+### Case A — heterogeneous response to one proposal (illustrative)
 
 Two units receive identical terms. One has authority and available capacity;
 one has a constrained own projection. They may respond differently without a
 name-based rule. The coordinator receives separate replies.
 
-### Case B — target pool and incomplete replies (`RECONSTRUCTED / EXPOSED`)
+### Case B — target pool and incomplete replies (reconstructed from outcome-known evidence)
 
 A proposal names a target total. Some units commit, others decline or remain
 pending. Only delivered commitments enter the current plan; target and realized
 funds remain separate.
 
-### Case C — collateralized route (`RECONSTRUCTED`)
+### Case C — collateralized route (reconstructed)
 
 A bank considers a route involving another institution's collateral. It may
 request information, condition or decline within its mandate. Collateral
 acceptance, public-deposit availability and transfer are external outcomes.
 
-### Case D — optional certificate demand (`LATER_CONTEXT`)
+### Case D — optional certificate demand (later contextual case)
 
 Two eligible members receive the same facility terms. One applies and the
 other declines under disclosed postures. The NYCH process separately reviews
 the application; eligibility alone predicts neither use nor issuance.
 
-### Case E — partial execution (`ILLUSTRATIVE`)
+### Case E — partial execution (illustrative)
 
 A firm commitment is only partly executed. The unit's delivered state and
 available-capacity projection change by the realized portion. Aggregation does
@@ -406,7 +403,7 @@ not count the remainder as aid.
 | partial execution replaces full execution | only realized amount affects state and aggregate | lifecycle/result collapse if unchanged |
 | hide another unit's reply | focal unit behavior does not use it unless an authorized aggregate is delivered | illegal information sharing if it changes |
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -419,15 +416,6 @@ Promote a named bank only when direct evidence and the research question
 require a distinct policy. Reduce behavior to scenario input when contribution
 choice is no longer part of the question. Revise the capability set if a
 resource route is shown to have a different owner or institutional mechanism.
-
-### Design provenance
-
-Version `0.1.0` records the owner-accepted R3 model after substantive review.
-It was produced from the accepted Roster and semantic skeleton, the H2EPR
-population/Agent methods, and the adopted
-local source register and evidence ledger, and the R3 research/behavior
-dossiers. No new network material, implementation output or held-out evidence
-was used.
 
 ### References
 

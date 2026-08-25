@@ -35,7 +35,7 @@ collapsing distinct institutional processes.
 | mapping profile family | `h2epr.roster-consolidated-mapping.v0_1` |
 | source release | `H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1` |
 | release commit | `e0cb20724db7c8f15cf344a161ab2f2b2721c1f0` |
-| release manifest SHA-256 | `d14bca5ef4486031d2c87ba3f20a2a2fe5fb3221f5c6a305c95a02dc585ea0b1` |
+| release manifest SHA-256 | `a03188f8a3ef45c500fa49ddd4230b99999c9b6759bf3cae73bf8040e0e73ec6` |
 | event semantic skeleton | `H2EPR-0288 event semantic skeleton`, version `0.1` |
 | carrier target | H2EPR Contracts V1 |
 | current status | accepted design specification; no executable binding |

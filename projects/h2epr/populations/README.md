@@ -31,18 +31,16 @@ populations/
         └── r4-trust-contagion-and-call-money.md
 ```
 
-`defines/` contains the accepted scholarly behavior model. `interfaces/`
-contains the lightweight preflight used by Roster production. Exact machine
-mapping is now specified by the accepted event-level consolidated mapping;
-executable composition still requires a separately authorized implementation
-and conformance slice.
+`defines/` contains the scholarly behavior model. `interfaces/` contains the
+event-integration account used during roster construction. Exact machine
+mapping, when needed, is recorded separately from these models.
 
 Start a new population product from the
 [Population model template](population-model-template.md). It covers the
 shared semantic and review requirements without forcing Agent Definition
-structure or a separate document for every working stage. The accepted 1907
-models predate the template and remain frozen in their accepted form; the
-template is not a reason to rewrite them.
+structure or a separate document for every working stage. Earlier models may
+use a deeper ten-module structure, but they share the same publication-facing
+metadata rules.
 
 ## Current models
 
@@ -50,7 +48,7 @@ template is not a reason to rewrite them.
 is an event-bound population of weighted choice units. It models withdrawal,
 retention, pending-request discipline, and delivered-result adaptation under
 explicitly uncalibrated heterogeneity. Its
-[interface preflight](interfaces/panic_1907/knickerbocker-depositors.md)
+[interface account](interfaces/panic_1907/knickerbocker-depositors.md)
 records the later integration surface without selecting carriers or changing
 Contracts V1.
 
@@ -58,7 +56,7 @@ Contracts V1.
 are modeled as weight-one institution-preserving choice units. The population
 keeps authority, resource ownership, commitments and certificate demand with
 each institution instead of inventing a collective bank personality or named
-bank policies. Its accepted [combined R3 interface preflight](../agents/interfaces/panic_1907/r3-collective-trust-support.md)
+bank policies. Its [combined R3 interface account](../agents/interfaces/panic_1907/r3-collective-trust-support.md)
 also covers the trust-company committee interaction boundary.
 
 [Later trust-company depositors](defines/panic_1907/later-trust-company-depositors.md)
@@ -70,8 +68,8 @@ request lifecycle; private account or result state never crosses hosts.
 lending institution, contract, controlled exposure and resource envelope.
 [Broker-borrowers](defines/panic_1907/call-money-broker-borrowers.md) preserve
 an authorized firm funding interface without importing customer trading or
-venue policy. Their accepted
-[R4 interface preflight](interfaces/panic_1907/r4-trust-contagion-and-call-money.md)
+venue policy. Their
+[R4 interface account](interfaces/panic_1907/r4-trust-contagion-and-call-money.md)
 keeps call, offer, matching, booking, repayment, liquidation and market effect
 under distinct owners. NYSE remains scenario-owned in this release.
 
@@ -80,15 +78,14 @@ are represented as event-time technical responsibility units across
 application/database, Citrix/infrastructure, and security-engineering/CERT
 functions. Units retain their own observations, local assessment, authority,
 and response intents; population composition, assignments, delivery, technical
-execution, and effects remain scenario-owned. This accepted `0.1.0` model
-belongs only to the first H2EPR-0616 participant batch and is not part of a
-complete Roster release or executable configuration.
+execution, and effects remain scenario-owned. The model covers the first
+H2EPR-0616 participant set rather than the complete event roster.
 
 The five Panic of 1907 population models belong to its
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
-They are covered by the accepted
-[consolidated mapping](../agents/bindings/panic_1907/consolidated/), while
-their executable composition remains pending.
+Their machine-facing relationships are recorded in the
+[consolidated mapping](../agents/bindings/panic_1907/consolidated/).
 
-Drafts and detailed review records stay in the ignored local research area.
-Git history records accepted population-model revisions.
+The [publication standard](../PUBLICATION_STANDARD.md) governs the public model
+surface; the [Agent workflow](../agents/WORKFLOW.md) governs research, review,
+and integration records.

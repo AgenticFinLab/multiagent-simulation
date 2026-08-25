@@ -1,25 +1,19 @@
-# H2EPR-0616 R1 participant evidence
+# SingHealth Data Breach participant evidence: detection and escalation
 
-This record supports the first H2EPR-0616 participant batch: technical
-administration and line security staff, the Security Incident Response Manager
-(SIRM), and the Cluster Information Security Officer for SingHealth (Cluster
-ISO). It extends the accepted event frame only for those representation and
-behavior questions.
+This record supports three participant models: IHiS technical administration
+and line security staff, the Security Incident Response Manager (SIRM), and the
+Cluster Information Security Officer for SingHealth (Cluster ISO). It extends
+the event frame only where their representation, information, authority, and
+behavior require more specific evidence.
 
-- Status: `ACCEPTED_R1_PARTICIPANT_EVIDENCE_WITH_EXPLICIT_ALTERNATIVES`
-- Event: `H2EPR-0616`, SingHealth Data Breach
-- Modeled interval: participant response from 18 January through 20 July 2018;
-  acute response from 11 June
-- Production profiles: technical role set `standard`; SIRM `deep`; Cluster ISO
-  `standard`
-- Construction exposure: `FULL_DRAFT_EXPOSED`
-- External boundary: existing local copies of accepted public official sources;
-  no new network, private, credentialed, paid, Reference, draft EPG, held-out,
-  or evaluation material
+The analysis uses an official retrospective inquiry. The authors had access to
+the reported outcome while constructing the models, so later findings may
+inform representation, cases, and falsifiers but never a participant's
+event-time information or an independent test of the model.
 
 ## Evidence basis
 
-The role study reuses one source already adopted by the
+The role study reuses one source already cited in the
 [event-frame evidence](frame-evidence-v0.1.md):
 
 ### `0616-FR-S01` — Committee of Inquiry public report
@@ -28,105 +22,87 @@ The role study reuses one source already adopted by the
   Singapore Health Services Private Limited's Patient Database on or around
   27 June 2018*. 10 January 2019.
 - Public file: https://file.go.gov.sg/singhealthcoi.pdf
-- Locations used here: paragraphs 68--76, 92--120, 302--327, 329--458, and
+- Locations used here: paragraphs 67--76, 92--120, 302--327, 329--458, and
   465--593.
+- Identity locator: paragraph 67 gives the SIRM officeholder's source-form
+  name, Tan Choon Kiat Ernest.
 - Source relation: official retrospective investigation drawing on testimony,
   messages, documents, forensic work, and expert evidence.
 - Use: assigned responsibilities, event-time messages and observations,
   reconstructed actions, bounded participant explanations, representation,
   decision situations, mechanism alternatives, and falsifiers.
-- Limitation: the report is outcome-exposed and retrospective. Committee
-  judgments and later attack attribution are not participant-time observations
-  and are not evidence of a general behavioral law.
+- Limitation: Committee judgments and later attack attribution were not
+  available to participants during the event and do not establish a general
+  behavioral law.
 
-The accepted Event Build Brief and frame claims provide scope and lineage, not
-independent corroboration. The other three accepted official sources add no
-role-specific detail needed for this batch and are not counted again merely to
-increase the source total. The frozen 12-record bundle remains discovery-only.
+The Event Build Brief and frame evidence supply scope and lineage rather than
+independent corroboration. Three other official sources used for the frame add
+no role-specific detail needed here and are not counted again merely to
+increase the source total.
 
 ## Participant claims
 
-`Direct` below means the adopted source records the stated institutional fact,
-message, action, or attributed explanation for the bounded use. `Retrospective`
-marks a later inquiry assessment that may be used only as a falsifier or
-construction warning.
+“Direct” denotes an institutional fact, message, action, or attributed
+explanation recorded by the inquiry. “Retrospective” denotes a later assessment
+used only to challenge or delimit a model. Claims are separated when different
+participant models or different withdrawal consequences are involved.
 
-| ID | Atomic proposition and event time | Support and relation | Participant availability | Status and allowed use | Withdrawal consequence |
+| ID | Proposition and event time | Support and relation | Participant availability | Evidence use | Withdrawal consequence |
 |---|---|---|---|---|---|
-| `0616-R1-C01` | The SIRM led and coordinated technical incident response, while the Cluster ISO owned communication and reporting duties and stood in the initial reporting chain; the SIRT joined security, infrastructure, and application roles. | `0616-FR-S01`, paras. 75--76 and 107--113, direct institutional account. | Assigned authority, not shared knowledge. | `DIRECT / REPRESENTATION_AND_AUTHORITY`. | Reopen both office-level gates and the shared routing model. |
-| `0616-R1-C02` | Line technical staff had no written incident-reporting protocol; the SIRF was not widely communicated and the IR-SOP was shared only with limited security-management recipients. | Paras. 101--105 and 352--354, direct institutional finding. | The absence or limited delivery is a participant-time information constraint. | `DIRECT / INFORMATION_AND_HETEROGENEITY`. | Remove the reporting-knowledge mechanism and reassess scenario externalization. |
-| `0616-R1-C03` | Between 18 and 22 January, a security engineer investigated malware and callbacks, applied local controls, and shared findings, while the SIRM treated the matter as contained common malware and did not escalate it. | Paras. 302--327, direct reconstruction. | The engineer and addressed recipients saw particular alerts and messages; later attacker attribution and missed-opportunity findings were unavailable. | `DIRECT_RECONSTRUCTION / TECHNICAL_AND_SIRM_DECISION_SITUATION`. | Remove the January situation from the technical and SIRM products. |
-| `0616-R1-C04` | From 11 to 13 June, database and Citrix staff independently observed unauthorized activity, changed credentials, gathered artifacts, and routed only parts of the emerging account to Security Management. | Paras. 329--386, direct reconstruction. | Each team held local observations; email delivery did not create common interpretation. | `DIRECT_RECONSTRUCTION / LOCAL_CHOICE_AND_INFORMATION_ROUTE`. | Narrow the technical representation or remove the multi-route interface. |
-| `0616-R1-C05` | Material facts remained compartmentalized: the Citrix team initially restricted distribution of its investigation, and the security engineer did not learn of the S.A. account until 26 June. | Paras. 387--398, direct reconstruction. | Available only to named local recipients until later delivery. | `DIRECT_RECONSTRUCTION / INFORMATION_FRAGMENTATION`. | Remove the fragmentation mechanism and reconsider a smaller role set. |
-| `0616-R1-C06` | From 4 through 7 July, technical staff independently investigated or stopped suspicious queries, sought logs or advice, terminated sessions, bypassed normal change procedure for a blocking script, and altered account or network controls. | Paras. 465--509 and 516--540, direct reconstruction. | Choices and observations remain with the involved application, database, Citrix, directory, and security units; effects remain scenario-owned. | `DIRECT_RECONSTRUCTION / POPULATION_CHOICE_REPERTOIRE`. | Externalize these operations to scenario and close the technical participant row. |
-| `0616-R1-C07` | The SIRM office was unstaffed during the manager's June absence, no covering officer was designated, and neither the SIRM nor Cluster ISO activated the SIRT. | Paras. 412--416, direct reconstruction with institutional assessment. | Absence and activation state were event-time organizational facts; the later adequacy judgment was unavailable. | `DIRECT_WITH_ASSESSMENT / CAPACITY_AND_DELEGATION`. | Remove delegation and response-capacity state from the SIRM model. |
-| `0616-R1-C08` | Across January, June, and early July, the SIRM could investigate, coordinate, isolate, seek help, or escalate, but applied a high confirmation standard; by 6 July the manager also described escalation-update pressure as a reason for delay. | Paras. 313--327, 420--458, 483--496, and 541--544, reconstructed actions plus attributed explanation. | Received messages and the manager's own assessments are bounded to their dates. Later causal condemnation is excluded from participant state. | `DIRECT_RECONSTRUCTION_AND_ATTRIBUTED_EXPLANATION / SIRM_MECHANISM_ALTERNATIVES`. | Remove the confirmation-and-coordination hypothesis; retain only institutional duties or reopen representation. |
-| `0616-R1-C09` | The Cluster ISO had an independent reporting and accountability role, received or viewed June messages, asked questions, but did not confirm response state, activate the team, instruct the investigation, or escalate. | Paras. 75--76, 108, 367--386, and 409--416, direct reconstruction with institutional finding. | Only delivered messages, meetings, and assigned duties are available; the ISO does not inherit all SIRM or team knowledge. | `DIRECT_WITH_FINDING / ISO_AUTHORITY_AND_DECISION_SITUATION`. | Merge the ISO into routing context or reopen the separate Agent row. |
-| `0616-R1-C10` | On 4 and 5 July, the Cluster ISO joined review and meetings but treated the evidence as an unconfirmed potential breach, assumed investigation should precede escalation, and did not integrate unauthorized access with suspicious queries. | Paras. 488--499 and 516--522, attributed assessment and direct reconstruction. | The interpretation is bounded to the information described at those times. | `DIRECT_RECONSTRUCTION_AND_ATTRIBUTED_INTERPRETATION / ISO_MECHANISM_ALTERNATIVES`. | Remove the July ISO commitment and reassess whether independent discretion remains material. |
-| `0616-R1-C11` | On 9 July, cross-team consolidation assembled previously separated facts; senior escalation followed despite incomplete and partly incorrect information. | Paras. 548--570, direct reconstruction. | Participants received only the meeting account and routed reports; later query verification was unavailable until 10 July. | `DIRECT_RECONSTRUCTION / INFORMATION_INTEGRATION_FALSIFIER`. | Remove the information-integration contrast used to test all three products. |
-| `0616-R1-C12` | The inquiry later found strong front-line initiative alongside inadequate classification, coordination, and escalation by particular response roles. | Paras. 510--515, 544--546, and 593, retrospective finding. | Unavailable during the event. | `RETROSPECTIVE / FALSIFIER_AND_CONSTRUCTION_WARNING_ONLY`. | Remove the exposed-outcome falsifier; no participant boundary otherwise changes. |
+| `0616-R1-C01` | The SIRM led and coordinated technical incident response. | `0616-FR-S01`, paras. 75--76 and 107--113, direct institutional account. | Assigned authority, not shared technical knowledge. | Supports the SIRM representation and response authority. | Reopen the SIRM representation and its coordination commitments. |
+| `0616-R1-C02` | Line technical staff had no written incident-reporting protocol; the SIRF was not widely communicated and the IR-SOP reached only limited Security Management recipients. | Paras. 101--105 and 352--354, direct institutional finding. | The absence or limited delivery is a participant-time information constraint. | Supports reporting-knowledge heterogeneity among technical units. | Remove that heterogeneity mechanism and reconsider whether reporting is scenario-prescribed. |
+| `0616-R1-C03` | Between 18 and 22 January, a security engineer investigated malware and callbacks, applied local controls, and shared findings. | Paras. 302--327, direct reconstruction. | The engineer and addressed recipients saw particular alerts and messages; later attacker attribution was unavailable. | Supports the January technical decision situation and intent repertoire. | Remove the January case from the technical population model. |
+| `0616-R1-C04` | From 11 to 13 June, database and Citrix staff independently observed unauthorized activity, changed credentials, gathered artifacts, and routed only parts of the emerging account to Security Management. | Paras. 329--386, direct reconstruction. | Each team held local observations; email delivery did not create common interpretation. | Supports local choice and multiple information routes. | Narrow the technical representation or remove the multiple-route account. |
+| `0616-R1-C05` | Material facts remained compartmentalized: the Citrix team initially restricted distribution of its investigation, and the security engineer did not learn of the S.A. account until 26 June. | Paras. 387--398, direct reconstruction. | Available only to named local recipients until later delivery. | Supports the fragmented-information mechanism. | Remove that mechanism and reconsider whether fewer technical units suffice. |
+| `0616-R1-C06` | From 4 through 7 July, application and database staff investigated suspicious queries, sought logs or advice, and terminated queries or sessions. | Paras. 465--509 and 516--540, direct reconstruction. | Observations and choices remained with the responsible units; effects remained external to their decisions. | Supports application/database investigation and local-control choices. | Remove those choices from the population repertoire. |
+| `0616-R1-C07` | The SIRM office was unstaffed during the manager's June absence and no covering officer was designated. | Paras. 412--416, direct reconstruction. | Office availability and designated coverage were event-time organizational facts. | Supports the SIRM coverage decision situation. | Remove coverage and delegation from the SIRM model. |
+| `0616-R1-C08` | Across January, June, and early July, the SIRM repeatedly sought stronger confirmation before treating the activity as an incident requiring escalation. | Paras. 313--327, 420--458, and 483--496, reconstructed actions and attributed assessments. | The SIRM's assessment is bounded to the evidence received at each date. | Supports confirmation-seeking as one event-specific mechanism. | Remove that mechanism while retaining the office's institutional duties. |
+| `0616-R1-C09` | During June, the Cluster ISO received or viewed security messages and asked questions but did not establish the response state, direct the investigation, or escalate the concern. | Paras. 367--386 and 409--416, direct reconstruction with an institutional finding. | Only delivered messages, meetings, and assigned duties were available; the ISO did not inherit all team knowledge. | Supports the June ISO decision situation. | Remove that case without removing the office's independently evidenced role. |
+| `0616-R1-C10` | On 4 and 5 July, the Cluster ISO treated the evidence as an unconfirmed potential breach, expected investigation to precede escalation, and did not connect unauthorized access with suspicious queries. | Paras. 488--499 and 516--522, attributed assessment and direct reconstruction. | The interpretation is bounded to the information described at those times. | Supports the ongoing-investigation mechanism and July case. | Remove that mechanism and case while retaining other ISO alternatives. |
+| `0616-R1-C11` | On 9 July, cross-team consolidation assembled previously separated facts, and senior escalation followed despite incomplete and partly incorrect information. | Paras. 548--570, direct reconstruction. | Participants received only the meeting account and routed reports; later query verification was unavailable until 10 July. | Supports the information-integration contrast used across the three models. | Remove that contrast from their cases and shared interface. |
+| `0616-R1-C12` | The inquiry later found strong front-line initiative alongside inadequate classification, coordination, and escalation by particular response roles. | Paras. 510--515, 544--546, and 593, retrospective finding. | Unavailable during the event. | Used only as a falsifier and warning against scripting the observed response. | Remove this retrospective falsifier; participant boundaries otherwise remain unchanged. |
+| `0616-R1-C13` | The Cluster ISO held communication and incident-reporting responsibilities and stood in the initial reporting chain. | Paras. 75--76 and 108, direct institutional account. | Assigned authority, not automatic access to the SIRM's or technical teams' information. | Supports a distinct Cluster ISO representation and reporting authority. | Reopen the Cluster ISO representation and reporting commitments. |
+| `0616-R1-C14` | The SIRT brought together Security Management, infrastructure, and application roles. | Paras. 109--113, direct institutional account. | Membership did not imply activation, attendance, or shared knowledge. | Supports a multi-unit coordination route rather than a single technical actor. | Remove the SIRT membership assumptions from the shared interface. |
+| `0616-R1-C15` | In January, the SIRM assessed the malware matter as common and contained and did not escalate it. | Paras. 313--327, direct reconstruction and attributed assessment. | The SIRM had only the routed January evidence and its own assessment. | Supports the January SIRM case, not a fixed non-escalation policy. | Remove that SIRM case without removing the technical-unit reconstruction. |
+| `0616-R1-C16` | In early July, technical staff developed and deployed a blocking script outside the normal change procedure. | Paras. 465--509 and 516--540, direct reconstruction. | The responsible units knew the proposed change and local reason; execution and effect remained separate facts. | Supports an urgent local-control choice under procedural pressure. | Remove the procedure-sensitive control case from the population model. |
+| `0616-R1-C17` | In early July, technical units changed bounded account or network controls in response to suspicious activity. | Paras. 465--509 and 516--540, direct reconstruction. | Each unit observed only the controls and results delivered within its assignment. | Supports infrastructure/security local-control choices. | Remove those control choices from the population repertoire. |
+| `0616-R1-C18` | By 6 July, the SIRM described the expected pressure of frequent escalation updates on the response team as a reason for delay. | Paras. 541--544, attributed explanation. | The explanation belongs to the SIRM at that time; the inquiry's later judgment was unavailable. | Supports escalation burden as a competing mechanism. | Remove that mechanism without changing confirmation seeking or formal duties. |
+| `0616-R1-C19` | Neither the SIRM nor the Cluster ISO activated the SIRT during the June period reconstructed by the inquiry. | Paras. 412--416, direct reconstruction. | Activation state was an event-time institutional fact; later adequacy judgments were unavailable. | Supports an observed coordination outcome used in both office-level cases. | Remove that outcome from the cases without changing independently supported authority. |
 
 ## Evidence-to-model findings
 
 ### Technical role set
 
-The evidence supports role-typed choice units in application and database
-operations, Citrix or infrastructure administration, and security engineering
-or CERT. They had different observations and local control authority. A
-Population Model is preferable to either one collective technical-staff Agent
-or named biographies for every employee.
+The evidence supports distinct application/database, Citrix/infrastructure,
+and security-engineering/CERT responsibility units. Their observations and
+local control authority differ, making a population model preferable to either
+one collective technical-staff Agent or a biography for every employee.
 
-The bounded mechanisms are local problem ownership under incomplete reporting
-guidance and fragmented cross-team information integration. Workload,
-expertise, and message quality remain competing explanations. The evidence is
-`RESOLVED_FOR_STATED_USE` for a standard Population Model, not for weights,
-population composition, numerical thresholds, or a universal cybersecurity
-response policy.
+Local problem ownership under incomplete reporting guidance and fragmented
+cross-team information are the principal mechanisms. Workload, expertise, and
+message quality remain alternatives. The record does not identify population
+weights, numerical thresholds, or a general cybersecurity response policy.
 
 ### Security Incident Response Manager
 
-The SIRM office had a defensible decision interface for investigation
-coordination, incident-response activation, containment direction, outside
-assistance, and escalation. The evidence supports explicit alternatives among
-a high confirmation standard, incomplete information, limited forensic
-capacity, office availability, escalation burden, and false-alarm concern.
-
-The evidence is `READY_WITH_EXPLICIT_ALTERNATIVES` for a deep office-level
-Agent Definition. It does not select one explanation, authorize a precise
-threshold, or make the historical delay mandatory.
+The SIRM office has a defensible decision interface for investigation
+coordination, response-team activation, containment direction, outside
+assistance, and escalation. Confirmation seeking, incomplete information,
+limited forensic capacity, office availability, escalation burden, and
+false-alarm concern remain explicit alternatives rather than one fitted rule.
 
 ### Cluster Information Security Officer
 
-The Cluster ISO had a distinct communication, reporting, accountability, and
-independent escalation interface. Treating the role as a SIRM proxy would erase
-a causally material route by which incomplete information could be queried,
-coordinated, or escalated.
+The Cluster ISO has a distinct communication, reporting, accountability, and
+escalation interface. Treating the role as a SIRM proxy would erase a route by
+which incomplete information could be queried, coordinated, or escalated.
+Reliance on ongoing investigation, incomplete messages, limited comprehension,
+availability, and role ambiguity remain competing explanations.
 
-The evidence is `READY_WITH_EXPLICIT_ALTERNATIVES` for a standard office-level
-Agent Definition. Reliance on technical investigation, incomplete message
-content, limited comprehension, availability, and role ambiguity remain
-separate possible explanations.
+## Evidence limits
 
-## Evidence closure
-
-```text
-research_question=H2EPR_0616_R1_REPRESENTATION_AND_ROLE_BEHAVIOR
-authorized_scope=EXISTING_LOCAL_OFFICIAL_ARCHIVE_AND_ACCEPTED_FRAME
-sources_considered=FOUR_ACCEPTED_OFFICIAL_SOURCES
-sources_adopted=ONE_ROLE_RELEVANT_OFFICIAL_INQUIRY_SOURCE
-claim_families=REPRESENTATION_AUTHORITY_INFORMATION_ACTION_MECHANISM_FALSIFIER
-new_claims=12
-temporal_boundary=2018_01_18_TO_2018_07_20_WITH_ACUTE_WINDOW_FROM_2018_06_11
-exposure_boundary=FULL_DRAFT_EXPOSED_NOT_CLEAN_BUILDER
-verdict=RESOLVED_FOR_THREE_ACCEPTED_R1_PRODUCTS_WITH_EXPLICIT_ALTERNATIVES
-supported_for=ROLE_BOUNDARIES_PARTICIPANT_TIME_INFORMATION_DECISION_SITUATIONS_INTENT_REPERTOIRES_AND_FALSIFIERS
-not_supported_for=GENERAL_BEHAVIORAL_LAW_NUMERICAL_PARAMETERS_FIXED_HISTORICAL_POLICY_RUNTIME_VALIDITY_OR_OTHER_ROLES
-unresolved_alternatives=SIRM_AND_CLUSTER_ISO_MECHANISM_WEIGHTS_AND_TECHNICAL_UNIT_COMPOSITION
-modeling_consequence=PRESERVE_SET_VALUED_BEHAVIOR_INFORMATION_ISOLATION_AND_SCENARIO_OWNED_RESULTS
-next_evidence_if_any=NONE_FOR_CURRENT_PRODUCTS_REOPEN_ONLY_IF_A_MATERIAL_BOUNDARY_OR_CLAIM_CHANGES
-```
-
-**Evidence disposition: Accepted for the three R1 participant products with
-explicit mechanism alternatives.**
-This record supplies no executable policy, event schedule, mapping, runtime
-value, historical validation, or scientific validation.
+This source set is sufficient for the three bounded participant models and
+their shared detection-and-escalation account. It does not identify numerical
+mechanism weights, complete technical-unit composition, fixed historical
+policies, or behavior for other roster roles. New evidence is needed only if a
+material participant boundary, authority claim, or mechanism changes.

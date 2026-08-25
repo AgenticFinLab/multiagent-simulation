@@ -11,8 +11,7 @@
 | Decision cadence | event-driven by communication proposals, dated condition reports, governance records, transport results and material corrections |
 | Decision form | constrained set-valued governance-and-communication policy |
 | State authority | condition, board authorization, message and transport truth is scenario/institutional-process owned; the Agent retains only declared communication posture and references to delivered records |
-| Evidence and model status | narrow event-bound construction using one directly supported board-authorized focal communication plus explicit evidence-unavailability findings; no reconstructed support, collateral or operating policy |
-| Definition identity | `h2epr.agent-definition.0288.lincoln-trust-company`, version `0.1.0` |
+| Evidence use and explanatory scope | One directly supported board-authorized communication and explicit evidence-unavailability findings support a narrow event-bound model; support, collateral, and operating policy are not reconstructed |
 
 This Agent models one small but causally meaningful interface: whether Lincoln
 authorizes and issues a bounded public statement about its asserted condition.
@@ -58,7 +57,7 @@ independently acting governance interface.
 | `LTC-C04`, `P4-S01`, `R2-S03` | exposed outside reports of assistance and possible Morgan-related context | Lincoln request, authorization, route, collateral or behavior |
 | `LTC-C05`–`LTC-C06` | bounded evidence absence and communication lifecycle | permission to import TCA mechanisms |
 
-The focal statement and later outcome are `FULL_DRAFT_EXPOSED`. The statement
+The focal statement and later outcome were known during construction. The statement
 is evidence of an authorized communication action and participant claim, not
 evidence that its content was true or effective.
 
@@ -264,7 +263,7 @@ unknown and narrows content.
 
 ## 9. Worked cases and falsification
 
-### Case A — focal board-authorized statement (`RECONSTRUCTED / EXPOSED`)
+### Case A — focal board-authorized statement (reconstructed from outcome-known evidence)
 
 **Situation.** A proposal attributed to Louis Stern contains bounded claims
 about capacity and recent withdrawal direction; dated information and board
@@ -273,7 +272,7 @@ and issue or narrow/withhold unsupported content. **Boundary.** Accuracy,
 delivery and depositor response remain external. **Perturbation.** Remove board
 authority; issue becomes prohibited until authority is obtained.
 
-### Case B — stale information (`ILLUSTRATIVE`)
+### Case B — stale information (illustrative)
 
 **Situation.** The proposal cites an older condition report and a newer report
 is missing. **Required response.** Request current information, narrow claims or
@@ -281,14 +280,14 @@ withhold; do not reuse the exposed historical statement automatically.
 **Perturbation.** Deliver current corroborating information; authorization
 becomes admissible but truth/effect remain external.
 
-### Case C — issue without delivery (`ILLUSTRATIVE`)
+### Case C — issue without delivery (illustrative)
 
 **Situation.** An authorized message is issued but transport fails. **Required
 response.** Preserve issue, request clarification/reissue if authorized, and do
 not expose content to the public observation layer. **Perturbation.** Deliver
 successfully; only then may the scenario make it public.
 
-### Case D — corrective update (`COUNTERFACTUAL PROCESS TEST`)
+### Case D — corrective update (counterfactual process test)
 
 **Situation.** A fresh authorized report materially contradicts an issued
 claim. **Required response.** Review and authorize a correction/update,
@@ -307,7 +306,7 @@ correction is required merely for cosmetic change.
 | future-fact injection | later assistance/survival excluded | temporal leakage |
 | always-abstain | complete authorized proposal receives response | empty policy |
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -323,14 +322,6 @@ Return Lincoln to a scenario-owned process if the board statement proves
 mechanically fixed with no meaningful choice. Broaden or split only if direct
 evidence establishes autonomous support, resource, operational or separate
 governance decisions. Never broaden it by copying TCA.
-
-### Design provenance
-
-Version `0.1.0` is the first accepted R2 Roster-production Definition. It is
-deliberately narrower than the Morgan and TCA candidates because the bounded
-evidence supports a narrower causal interface. It derives from the accepted
-roster and semantic skeleton, the evidence ledger candidate and H2EPR
-ten-module template, not from simulation or a desired historical action.
 
 ### References
 

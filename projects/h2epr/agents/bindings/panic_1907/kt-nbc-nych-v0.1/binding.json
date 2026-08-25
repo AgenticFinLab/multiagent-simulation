@@ -6,11 +6,11 @@
   "event_id": "H2EPR-0288",
   "configuration": {
     "configuration_id": "h2epr.0288.scenario.mechanism-coverage.v0_1",
-    "source_sha256": "22f2566b9f0607deb66a2149a6651592eddc968c4646fda18747df25f6d60558",
-    "canonical_sha256": "01dd45b46f9fbb3f9ab175dc5645d59cf635a2268a55f6a3574ea909e035ff8d",
-    "admission_receipt_sha256": "ac19d8351740060bb986c500dcbe4492d2dd4af854660ea3e0ce11321f57550f",
+    "source_sha256": "f9352ca2da66d0cc774b7c505a074ea63883689c6556720d77a4802506632bd6",
+    "canonical_sha256": "d74a5382d705e6b25decd4dfd4a4f04cebf4f8278bf685ff7ffddcbbc9e6fef1",
+    "admission_receipt_sha256": "c10782a04a7a33905bddc0d131f85b8eeb582b1b3f2b7e26161e1f827ec50331",
     "mapping_profile_id": "h2epr.roster-consolidated-mapping.v0_1",
-    "mapping_profile_sha256": "e7ba57615fa95c1fc6e5b7db52e0f6e71dc893cd85766b46594f3a29491ceb5b"
+    "mapping_profile_sha256": "efa341364d12f8b1be8035ebd1cdde7b6ef2446f4015db3e28b6f2bdbaab25e7"
   },
   "scope": {
     "purpose": "exact_carrier_and_positive_binding_conformance",
@@ -52,7 +52,7 @@
       "capability_id": "knickerbocker_trust",
       "authority_graph_id": "authority_graph.knickerbocker_trust",
       "resource_owner_id": "entity.knickerbocker_trust",
-      "definition_sha256": "df800bea6820eb5087c02fbcdb446b0f4ca558be143ed0d89d81074d75562758"
+      "definition_sha256": "7e495ea40a79751187098c4578218341822049fab188259fb25f431b59a09f20"
     },
     {
       "actor_id": "actor.national_bank_of_commerce",
@@ -61,7 +61,7 @@
       "capability_id": "national_bank_of_commerce",
       "authority_graph_id": "authority_graph.national_bank_of_commerce",
       "resource_owner_id": "entity.national_bank_of_commerce",
-      "definition_sha256": "90f311c203bf61d97c3aabda2c9440e4c6357f7b52c35ea765340213ad33ba7c"
+      "definition_sha256": "7bc9c10053842848d18a5ea0ee622420faa2800f345cbe311c4c75e366e234a1"
     },
     {
       "actor_id": "actor.new_york_clearing_house",
@@ -70,7 +70,7 @@
       "capability_id": "new_york_clearing_house",
       "authority_graph_id": "authority_graph.new_york_clearing_house",
       "resource_owner_id": "entity.new_york_clearing_house",
-      "definition_sha256": "8b4e66fc18c4c032cca2d3028d598a5ad4256303599e3d1a055cc9d83dd1a4df"
+      "definition_sha256": "b0c2aeb86154235e3268badc86d656317bb0f3b3a35760b7979274b26d2f214f"
     }
   ],
   "relationship_refs": [

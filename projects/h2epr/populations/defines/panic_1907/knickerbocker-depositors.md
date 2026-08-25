@@ -4,14 +4,11 @@
 
 | Item | Definition |
 |---|---|
-| Model identity | `H2EPR-0288-KNICKERBOCKER-DEPOSITOR-POPULATION` |
-| Semantic version | `0.1.0` |
 | Event | Panic of 1907, acute New York phase |
 | Focal interval | approximately 18–22 October 1907 |
 | Representation | event-bound population of weighted depositor choice units |
 | Focal choices | request withdrawal, retain for the current interval, await a pending result, and respond to a delivered result |
-| Evidence status | exploratory construction with fully exposed focal outcomes |
-| Calibration status | no individual or cohort calibration; population composition and response profiles are sensitivity assumptions |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; individual behavior and population composition are not calibrated, and response profiles remain sensitivity assumptions |
 
 The model represents heterogeneous holders of deposit claims against the
 Knickerbocker Trust Company. It connects private withdrawal needs, delivered
@@ -409,7 +406,7 @@ population mechanism from a scenario trajectory.
   claims heterogeneity is explanatory; or
 - a scenario-owned demand path is described as endogenous depositor behavior.
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Limits
 
@@ -441,15 +438,3 @@ with the corresponding explanatory claim withdrawn.
   October 26, pp. 999–1001.
 - *New-York Tribune*. 1907. “C. T. Barney Out of Knickerbocker Trust.” October
   22, p. 1.
-
-### Provenance
-
-Version `0.1.0` resolves the roster representation gate as an
-event-bound population model. It rejects a unitary cohort Agent and limits a
-scenario-owned demand process to an ablation or alternative research boundary.
-The model introduces five population commitments, three sensitivity profiles,
-three qualitative mixed-signal tie rules, explicit request/result separation,
-and a bounded aggregation identity. It keeps known access infeasibility as an
-observation rather than allowing the model to suppress an auditable attempted
-request. No executable mapping, population generator, or historical
-calibration is included.

@@ -11,8 +11,7 @@
 | Decision cadence | event-driven by dated condition reports, authority records, examination requests/results, support-route events, resource/collateral information, service-condition reports, communication proposals and delivered results |
 | Decision form | constrained set-valued institutional policy with route-specific request lifecycles and explicit information, governance, resource, operational and communication boundaries |
 | State authority | condition, request, examination, collateral control, service, communication, resource and result truth is scenario-owned; the Agent retains declared decision posture and references to delivered records |
-| Evidence and model status | event-bound exploratory construction using fully exposed contemporary reports and retrospective participant testimony; exact governance, participant-time values and numerical policy remain unresolved; no historical calibration or held-out validation |
-| Definition identity | `h2epr.agent-definition.0288.trust-company-of-america`, version `0.1.0` |
+| Evidence use and explanatory scope | Contemporary reports and retrospective participant testimony informed an event-bound reconstruction; exact governance, participant-time values, and numerical policy remain unresolved |
 
 This Definition represents the choices made through TCA's authorized
 institutional interface while the company faced large withdrawals and sought
@@ -81,7 +80,7 @@ fixed by an external assistance or operating protocol.
 The 1911 hearing is retrospective participant testimony in an adversarial
 setting. It is valuable for actions, distinctions and proposed routes but not
 an independent finding of financial condition or motive. Reported run amounts,
-support and continued operation are `FULL_DRAFT_EXPOSED`.
+support and continued operation were known during model construction.
 
 ### Theory and empirical research
 
@@ -396,7 +395,7 @@ Agent as secret numbers.
 
 ## 9. Worked cases and falsification
 
-### Case A — examination request with incomplete authority (`RECONSTRUCTED`)
+### Case A — examination request with incomplete authority (reconstructed)
 
 **Situation.** An examiner requests a daily statement and access; recipient
 identity and scope are clear but TCA disclosure authority is pending.
@@ -405,7 +404,7 @@ only information already authorized. **Boundary.** Examiner cannot receive or
 conclude until scenario results. **Perturbation.** Deliver scoped authority;
 consent/package becomes admissible, not a favorable finding.
 
-### Case B — two independent support routes (`RECONSTRUCTED / EXPOSED`)
+### Case B — two independent support routes (reconstructed from outcome-known evidence)
 
 **Situation.** A Morgan-routed request is pending while a separately authorized
 bank route offers different terms. **Required response.** Keep separate request
@@ -413,7 +412,7 @@ identities and compare only delivered terms; update either, propose a scoped
 package, wait for named results or withdraw one. **Perturbation.** Decline one
 route. The other remains unresolved, not globally failed.
 
-### Case C — collateral proposed but partially accepted (`ILLUSTRATIVE`)
+### Case C — collateral proposed but partially accepted (illustrative)
 
 **Situation.** TCA proposes a package it is authorized to control; recipient
 accepts only part. **Required response.** Record partial disposition and revise,
@@ -421,7 +420,7 @@ supplement, use another route or close. **Boundary.** Accepted collateral is not
 cash until execution. **Perturbation.** Remove control authority; proposal is
 inadmissible.
 
-### Case D — service demand rises (`RECONSTRUCTED / EXPOSED`)
+### Case D — service demand rises (reconstructed from outcome-known evidence)
 
 **Situation.** A sourced service-condition notice indicates material demand;
 actual future withdrawals are unknown. **Required response.** Verify, propose
@@ -430,7 +429,7 @@ blocker. **Boundary.** Scenario controls windows, queue, payments and depletion.
 **Perturbation.** Capacity execution fails; the next posture must differ from a
 successful result.
 
-### Case E — public liquidity statement (`RECONSTRUCTED / EXPOSED`)
+### Case E — public liquidity statement (reconstructed from outcome-known evidence)
 
 **Situation.** Current records support a scoped claim about valuable but
 illiquid assets; precise immediate cash is disputed. **Required response.**
@@ -455,7 +454,7 @@ nonconforming unless the contradiction is explicitly addressed.
 | always-abstain | activated informed/authorized case produces bounded response | empty model |
 | aggregate/split | split only when independent bodies add explanatory process | aesthetic granularity |
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -476,13 +475,6 @@ Narrow a mechanism if evidence shows it was mechanically dictated externally;
 split the Agent if board, management, treasury or communications had
 independent information and choices required by the research question; remove
 any threshold or amount whose source cannot support its decision-time use.
-
-### Design provenance
-
-Version `0.1.0` is the first accepted R2 Roster-production Definition. It is
-derived from the event roster and semantic skeleton, the sealed R2 evidence,
-the claim adjudication and the H2EPR template. No simulation, executable
-mapping, Rule output or model-generated rationale was used as evidence.
 
 ### References
 

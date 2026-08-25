@@ -15,7 +15,7 @@ MANIFEST_PATH = (
     PROJECT_ROOT
     / "agents/bindings/panic_1907/kt-nbc-nych-v0.1/manifest.json"
 )
-MANIFEST_SHA256 = "3b4b93eeaec1dd99a1e387fbbf3d66c33efb593a124000982c39bd88e5c494a5"
+MANIFEST_SHA256 = "047af69a88a94a968f291995567872de1affed610aa4ea8f70a88dc4bd4ae59d"
 RUN_ID = "run.h2epr.0288.kt_nbc_nych.conformance.001"
 
 

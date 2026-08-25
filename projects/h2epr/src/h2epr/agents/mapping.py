@@ -1275,9 +1275,10 @@ def _parse_participant(
     if _sha256_file(path) != content_sha256:
         raise MappingValidationError(f"definition_sha256_mismatch:{participant_id}")
     markdown = path.read_text(encoding="utf-8")
-    marker = f"`{definition_id}`, version `{version}`"
-    if marker not in markdown:
-        raise MappingValidationError(f"definition_identity_marker_mismatch:{participant_id}")
+
+    # Project identity belongs to the exact-hash binding record.  The public
+    # Definition remains a scholarly account and need not repeat its machine ID
+    # or release version in the narrative.
 
     raw_commitments = row["decision_commitments"]
     if not isinstance(raw_commitments, dict) or not raw_commitments:

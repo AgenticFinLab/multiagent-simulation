@@ -1,23 +1,21 @@
 # SingHealth Data Breach Agent Definitions
 
-This directory contains the two accepted office-level Agent Definitions from
-the first H2EPR-0616 participant batch:
+This directory contains two office-level Agent Definitions for the SingHealth
+Data Breach:
 
-- [Security Incident Response Manager](security-incident-response-manager.md),
-  version `0.1.0`, deep production profile; and
-- [Cluster Information Security Officer for SingHealth](cluster-information-security-officer.md),
-  version `0.1.0`, standard production profile.
+- [Security Incident Response Manager](security-incident-response-manager.md);
+  and
+- [Cluster Information Security Officer for SingHealth](cluster-information-security-officer.md).
 
 The adjacent [technical administration and line security staff Population
 Model](../../../populations/defines/singhealth_data_breach/technical-administration-and-line-security-staff.md)
 preserves distributed technical choices without constructing a collective
 Agent. The shared [participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
-owns the R1 role claims, and the accepted [interface
-preflight](../../interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
-closes their information, authority, intent, and result boundaries.
+contains the participant claims, and the shared
+[detection-and-escalation account](../../interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
+compares their information, authority, intent, lifecycle, and result semantics.
 
-Both Definitions are qualitative, event-bound, outcome-exposed, uncalibrated,
-and non-executable. They preserve multiple evidence-bounded mechanisms and do
-not script the historical response. Neither product belongs to a complete
-Roster Definition release or authorizes mapping, configuration, policy,
-binding, runtime, simulation, or evaluation.
+Both Definitions are qualitative and event-bound. The complete historical
+outcome informed construction, so the models preserve multiple evidence-
+bounded mechanisms without treating their resemblance to the reported response
+as independent validation.

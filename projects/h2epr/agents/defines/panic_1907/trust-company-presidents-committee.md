@@ -4,15 +4,12 @@
 
 | Item | Definition |
 |---|---|
-| Model identity | `H2EPR-0288-TRUST-PRESIDENTS-COMMITTEE` |
-| Semantic version | `0.1.0` |
 | Event | Panic of 1907, acute New York phase |
 | Focal interval | 23 October–early November 1907, with the main decision window beginning on 23 October |
 | Representation | aggregate procedural committee Agent |
 | Historical referent | five trust-company presidents appointed at the 23 October meeting |
 | Focal choices | case intake, information calls, examination, findings, advice, reporting and bounded contribution coordination |
-| Evidence status | event-bound exploratory construction; focal outcomes fully exposed |
-| Calibration status | no recovered voting rule, case-scoring rule, contribution rule or historical parameter calibration |
+| Evidence use and explanatory scope | Contemporary and retrospective evidence informed an event-bound reconstruction; no recovered voting, case-scoring, contribution, or historically calibrated parameter rule |
 
 The Agent represents the committee's documented institutional decision
 interface. It explains how an assistance application could become an
@@ -381,30 +378,30 @@ conditions, not blended into a probability.
 
 ## 9. Worked cases and falsification
 
-### Case A — incomplete application (`RECONSTRUCTED`)
+### Case A — incomplete application (reconstructed)
 
 A valid referral lacks a current authorized information package. The committee
 opens a case and requests the missing class or examination. It may issue a
 qualified status report, but no unqualified support recommendation.
 
-### Case B — contested findings (`ILLUSTRATIVE`)
+### Case B — contested findings (illustrative)
 
 Delivered evidence conflicts. The committee requests clarification, qualifies
 its finding or records no supportable conclusion. A hidden average or
 researcher-selected truth violates `DC-TPC-02`.
 
-### Case C — advice without funds (`RECONSTRUCTED`)
+### Case C — advice without funds (reconstructed)
 
 The committee advises conditional support. No contributor has committed. The
 trace contains advice and delivery only; resource state is unchanged.
 
-### Case D — incomplete contribution plan (`RECONSTRUCTED / EXPOSED`)
+### Case D — incomplete contribution plan (reconstructed from outcome-known evidence)
 
 Some targets commit, some decline and others remain pending. The committee
 issues a versioned plan containing only delivered replies and conditions. The
 requested total is not reported as available.
 
-### Case E — later institutional procedure (`TEMPORAL_NEGATIVE`)
+### Case E — later institutional procedure (temporal negative control)
 
 The researcher knows the October 26 NYCH certificate mechanism. It is not this
 committee's mandate or an earlier observation and cannot supply rules,
@@ -421,7 +418,7 @@ collateral percentages or member eligibility.
 | recommendation issued with no commitments | no resource effect follows | recommendation/result conflation |
 | make later NYCH rule unavailable | October 23 behavior remains valid | temporal leakage if behavior changes |
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -435,14 +432,6 @@ Withdraw or narrow the Agent if the committee proves to have been a purely
 mechanical conduit. Split it if member-level choices become necessary to the
 event question. Move an action to Union Trust, Morgan, a presidents' forum or
 a contributor when direct evidence establishes that owner.
-
-### Design provenance
-
-Version `0.1.0` records the owner-accepted R3 model after substantive review.
-It was derived from the accepted event Roster and semantic skeleton, the
-H2EPR Agent Definition Template, and the local
-evidence ledger and source register, and the R3 research/behavior dossiers. No
-new internet source, runtime output or held-out historical evidence was used.
 
 ### References
 

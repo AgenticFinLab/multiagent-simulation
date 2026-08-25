@@ -177,6 +177,10 @@ Resolve the review as `READY_FOR_DEFINITION_DRAFT`,
 explain the consequence. Use the first two only for their matching
 representation routes.
 
+These readiness labels belong to the working or batch review record. Translate
+their substantive consequence into ordinary scholarly prose when material is
+carried into a publication-facing Definition or population model.
+
 ## Outputs
 
 A complete run closes the applicable behavior responsibilities:

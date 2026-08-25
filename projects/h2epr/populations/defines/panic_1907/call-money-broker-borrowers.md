@@ -4,14 +4,11 @@
 
 | Item | Definition |
 |---|---|
-| Model identity | `H2EPR-0288-CALL-MONEY-BROKER-BORROWER-POPULATION` |
-| Semantic version | `0.1.0` |
 | Event | Panic of 1907, acute New York phase |
 | Focal interval | approximately 22–26 October 1907 |
 | Representation | event-bound population of broker-borrower funding choice units |
 | Focal choices | clarify a call, authorize controlled repayment, seek renewal/replacement funds, submit controlled collateral, respond to terms, request authorized position reduction or record inability |
-| Evidence status | exploratory construction with call, replacement-funding and money-pool outcomes fully exposed |
-| Calibration status | no named-broker policy, leverage target, rate tolerance, liquidation threshold or funding-demand calibration |
+| Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; named-broker policies, leverage targets, rate tolerances, liquidation thresholds, and funding demand are not calibrated |
 
 The model represents broker-borrowers facing demand-call obligations and
 funding disruption in the New York call-money market. It retains a bounded
@@ -351,7 +348,7 @@ Unknown is not zero and a high rate is not automatic inability.
 
 ## 9. Worked cases and falsification
 
-### Case A — called loan and regular-bank route (`RECONSTRUCTED / EXPOSED`)
+### Case A — called loan and regular-bank route (reconstructed from outcome-known evidence)
 
 A valid call creates a positive gap and a regular-account bank route is
 delivered. Under `renewal_or_replacement_first`, the unit requests replacement
@@ -359,35 +356,35 @@ funding. The bank may ask for information, condition, decline or offer; the
 environment owns booking and funds. Removing the relationship requires
 another route, controlled repayment, authorized reduction or typed inability.
 
-### Case B — sufficient controlled repayment (`ILLUSTRATIVE`)
+### Case B — sufficient controlled repayment (illustrative)
 
 A valid call is matched by sufficient delivered controlled cash. Under
 `controlled_repayment_first`, the unit authorizes repayment. Transfer and
 closure remain external. Replacing `sufficient` with `partial` leaves a
 positive gap and activates another response.
 
-### Case C — pool announcement without borrower offer (`RECONSTRUCTED / EXPOSED`)
+### Case C — pool announcement without borrower offer (reconstructed from outcome-known evidence)
 
 The public knows that a pool is being assembled, but the unit has no delivered
 eligible route or offer. It cannot record funding or accept terms. Once a
 route/offer is delivered, the relevant request and term-response commitments
 activate.
 
-### Case D — stale or uncontrolled collateral (`ILLUSTRATIVE`)
+### Case D — stale or uncontrolled collateral (illustrative)
 
 A lender requests collateral, but the package is stale or owned by a customer
 without mandate. The unit corrects information, proposes only controlled
 assets, seeks another route or records inability. It may not pledge or value
 the customer asset.
 
-### Case E — parallel response under authority (`COUNTERFACTUAL`)
+### Case E — parallel response under authority (counterfactual)
 
 A unit with explicit position-reduction authority and a positive gap uses
 `parallel_funding_and_reduction`. It sends separate nonduplicate funding and
 bounded reduction intents. A funding result may cancel or narrow the still-
 pending reduction only through a supported lifecycle.
 
-### Case F — partial replacement (`ILLUSTRATIVE`)
+### Case F — partial replacement (illustrative)
 
 Only part of a funding offer is booked and transferred. The realized part
 reduces the gap; the remainder remains open. Match or acceptance alone does
@@ -410,7 +407,7 @@ The model also fails if all postures respond identically to controlled cash
 and route changes, if collateral submission self-validates, or if a scenario
 funding-demand path is described as borrower choice.
 
-## 10. Limitations, references and provenance
+## 10. Limitations and references
 
 ### Limitations and withdrawal conditions
 
@@ -439,12 +436,3 @@ an endogenous research claim.
   *Report of the Committee Appointed Pursuant to House Resolutions 429 and
   504 to Investigate the Concentration of Control of Money and Credit*,
   report pp. 33–34.
-
-### Provenance
-
-Version `0.1.0` records the owner-accepted R4 broker-borrower representation as
-an authorized firm/exchange-member funding-interface population. It separates
-call obligations, funding requests, offer revision/acceptance, controlled
-collateral and repayment from venue matching and realized effects. It includes
-no customer trading model, executable mapping, named-broker policy
-reconstruction or historical calibration.

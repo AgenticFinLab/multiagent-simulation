@@ -2,7 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from h2epr.agents.definition_profile import check_definition_text, main
+from h2epr.agents.definition_profile import (
+    check_definition_text,
+    check_publication_surface,
+    main,
+)
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _valid_definition() -> str:
@@ -19,8 +26,7 @@ def _valid_definition() -> str:
 | Decision cadence | event-driven |
 | Decision form | constrained set-valued policy |
 | State authority | business truth is environment-owned |
-| Evidence and model status | event-bound candidate; not calibrated |
-| Definition identity | `h2epr.agent-definition.test.example`, version `0.1.0` |
+| Evidence use and explanatory scope | illustrative structural fixture; not calibrated |
 
 ## 2. Historical participant and representation
 
@@ -64,7 +70,7 @@ The test uses qualitative state.
 
 Removing the request prevents the response.
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
 This is a structural fixture.
 """
@@ -89,12 +95,26 @@ def test_profile_requires_exact_numbered_module_order() -> None:
     assert "module_profile_mismatch" in _codes(text)
 
 
-def test_profile_requires_stable_identity_and_semantic_version() -> None:
+def test_profile_rejects_project_metadata_from_public_definition() -> None:
     text = _valid_definition().replace(
-        "`h2epr.agent-definition.test.example`, version `0.1.0`",
-        "Example Institution",
+        "| Evidence use and explanatory scope | illustrative structural fixture; not calibrated |",
+        "| Evidence use and explanatory scope | `FULL_DRAFT_EXPOSED` |\n"
+        "| Definition identity | `h2epr.agent-definition.test.example`, version `0.1.0` |",
     )
-    assert "definition_identity_invalid" in _codes(text)
+    codes = _codes(text)
+    assert "project_identity_metadata" in codes
+    assert "workflow_status_metadata" in codes
+
+
+def test_publication_surface_rejects_prose_version_and_status_rows() -> None:
+    text = _valid_definition().replace(
+        "This is a structural fixture.",
+        "Version `0.1.0` records the current candidate.\n\n"
+        "| Evidence status | accepted |\n"
+        "|---|---|",
+    )
+    codes = {issue.code for issue in check_publication_surface(text)}
+    assert codes == {"project_identity_metadata", "workflow_status_metadata"}
 
 
 def test_profile_rejects_dangling_commitment_and_observation_without_consumer() -> None:
@@ -157,3 +177,27 @@ def test_cli_reports_pass_and_fail(tmp_path: Path, capsys) -> None:
     output = capsys.readouterr().out
     assert output.startswith("FAIL ")
     assert "module_profile_mismatch" in output
+
+
+def test_canonical_participant_models_have_clean_publication_surfaces() -> None:
+    paths = [
+        path
+        for event_dir in (PROJECT_ROOT / "agents/defines").iterdir()
+        if event_dir.is_dir()
+        for path in event_dir.glob("*.md")
+        if path.name not in {"README.md", "decision-situations.md", "evidence-ledger.md", "source-register.md"}
+    ]
+    paths.extend((PROJECT_ROOT / "populations/defines").glob("*/*.md"))
+
+    findings = {
+        str(path.relative_to(PROJECT_ROOT)): check_publication_surface(
+            path.read_text(encoding="utf-8")
+        )
+        for path in paths
+    }
+    failures = {
+        path: tuple(issue.code for issue in issues)
+        for path, issues in findings.items()
+        if issues
+    }
+    assert failures == {}

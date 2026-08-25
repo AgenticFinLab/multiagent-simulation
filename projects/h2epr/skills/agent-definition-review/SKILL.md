@@ -19,7 +19,8 @@ precision.
 
 Obtain:
 
-- the exact Agent Definition candidate and semantic version;
+- the exact Agent Definition candidate and, separately, any project record that
+  identifies the reviewed revision;
 - participant behavior dossier, or an equivalent combined research record, and
   its readiness judgment;
 - evidence ledger, adopted-source register, use/exposure partition, and
@@ -70,9 +71,10 @@ public file.
 
 ### 1. Identify the review object and claims
 
-Record the Definition identity, version, event scope, participant boundary,
-candidate status, evidence exposure, and the scientific or modeling claims the
-document makes. List claims it explicitly does not make.
+Record the event scope, participant boundary, evidence use, and the scientific
+or modeling claims the document makes. Keep exact revision identity and review
+state in the review record rather than requiring them inside the Definition.
+List claims it explicitly does not make.
 
 Review a stable candidate. If the author changes it during review, close the
 current findings against the reviewed version and start a new review pass.
@@ -155,6 +157,8 @@ artifact:
 - readable tables and defined notation;
 - transparent limitations and competing interpretations;
 - absence of internal code, test, Git, binding, and work-window detail;
+- absence of semantic versions, workflow states, production profiles,
+  owner-decision codes, and later-phase authorization inventories;
 - claims calibrated to the evidence and pilot scope.
 
 ### 8. Review cross-section consistency
@@ -213,7 +217,7 @@ protocol defines what the score means and how reliability is established.
 
 A review records the applicable parts of:
 
-- review identity, candidate identity, and evidence boundary;
+- review object, event scope, and evidence boundary;
 - a concise model and claim summary;
 - the strongest supported aspect and strongest material counterargument;
 - severity-ranked findings with evidence and revision paths;

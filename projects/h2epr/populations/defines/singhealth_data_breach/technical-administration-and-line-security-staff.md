@@ -5,12 +5,11 @@
 | Field | Value |
 |---|---|
 | Model name | IHiS technical detection and local response role set |
-| Event and modeled interval | `H2EPR-0616`; participant response from 18 January through 20 July 2018, with acute response from 11 June |
+| Event and modeled interval | SingHealth Data Breach; decisions from 18 January through 10 July 2018, with later response context through 20 July |
 | Choice unit | One institution-preserving technical responsibility unit: the smallest event-time assignment that receives the observation and can choose a local response |
 | Host, institution, or account scope | IHiS personnel and units deployed to or supporting SingHealth systems; each unit remains attached to its own function, information, access, and authority |
 | Causal role in the event | Detect, interpret, investigate, communicate, and locally respond to technical signals before or alongside formal incident classification and escalation |
-| Evidence and outcome-exposure boundary | `FULL_DRAFT_EXPOSED`; official retrospective inquiry evidence; no held-out, clean-builder, calibration, or validity claim |
-| Identity, version, and status | `h2epr-0616-technical-response-role-set`, `0.1.0`, accepted standard Population Model |
+| Evidence use and explanatory scope | Official retrospective inquiry evidence supports an event-bound qualitative reconstruction; later outcomes informed construction but are excluded from participant-time information |
 
 This model preserves distributed technical choices needed to explain CT-4 of
 the accepted event frame. It does not model “IHiS technical staff” as a single
@@ -59,15 +58,15 @@ no role-local interpretation or choice.
 ## 2. Evidence and institutional basis
 
 The [R1 participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
-supplies the shared source identity, claim status, participant-time limits, and
+supplies the shared source identity, claim classification, participant-time limits, and
 withdrawal consequences. This model relies principally on:
 
-- `0616-R1-C01`--`0616-R1-C02` for the multi-unit response structure and
+- `0616-R1-C02` and `0616-R1-C14` for the multi-unit response structure and
   uneven reporting guidance;
 - `0616-R1-C03`--`0616-R1-C05` for January and June observations, local action,
   communication, and compartmentalization; and
-- `0616-R1-C06` for independent investigation and local-control choices in
-  early July.
+- `0616-R1-C06` and `0616-R1-C16`--`0616-R1-C17` for investigation and
+  local-control choices in early July.
 
 The institutional basis is event-specific. The official inquiry reconstructs
 actions and messages from testimony and records, but its later attribution and
@@ -100,18 +99,25 @@ cross-event response law is adopted.
 | `security_response_request` | A delivered request or direction from an authorized security interface | Available to the addressed unit after delivery | No request does not remove local authority already established by role and scenario |
 | `action_result_notice` | Delivered result of a prior investigation, communication, or local-control intent | Produced by the scenario or receiving participant | Missing results keep the matter open; the unit may not assume success |
 
-Each unit may retain three qualitative private items:
+Each unit may retain four qualitative private items:
 
 - `local_assessment`: `unexamined`, `routine_possible`, `suspicious`, or
   `security_review_needed`;
 - `open_questions`: the bounded artifacts, identities, routes, or explanations
-  still sought; and
+  still sought;
 - `last_shared_finding`: an identifier for the most recent communication the
-  unit itself issued or acknowledged.
+  unit itself issued or acknowledged; and
+- `active_intent_references`: one entry for each investigation, peer request,
+  security-review request, communication, or local-control intent that can
+  affect a later choice. An entry records the intent kind, target, issue time,
+  and latest delivered lifecycle notice: pending, acknowledged, completed,
+  partial, failed, expired, cancelled, or superseded.
 
 These items belong to the unit, begin empty or unexamined, and change only
-after a legitimate local observation or delivered message. They are not
-authoritative incident state and are never shared automatically.
+after a legitimate local observation, intent issuance, or delivered message.
+An active-intent entry records what the unit has attempted and the result it
+has observed; it is not authoritative execution or incident state. None of
+these items is shared automatically.
 
 Role type supplies only event-relevant heterogeneity. Application/database
 units can inspect queries and application behavior; Citrix/infrastructure units
@@ -147,10 +153,12 @@ delivered to Security Management.
 
 ### Situation C — incomplete or adverse result
 
-Failure, ambiguity, or reappearance after a local-control attempt keeps the
-underlying question open. The unit may retry an authorized control, broaden a
+Failure, ambiguity, expiry, or reappearance after an issued intent keeps the
+underlying question open. A pending equivalent intent normally suppresses a
+duplicate, while a failed, expired, cancelled, or superseded intent permits a
+new or revised response. The unit may retry an authorized control, broaden a
 request, seek another unit's evidence, or request security coordination. It may
-not rewrite an attempted or partial result as successful containment.
+not treat an attempted, pending, or partial result as successful containment.
 
 The baseline is set-valued. Local problem ownership can favor investigation or
 control, while fragmented information can delay cross-team integration.
@@ -182,6 +190,10 @@ review. A historical local containment action is admissible but not required.
 The model fails if it gives the unit later command-and-control attribution or
 guarantees that a network-wide block would prevent the breach.
 
+**Controlled perturbation.** Remove the callback evidence while preserving the
+initial alert. The response may remain a bounded local inspection, but a
+callback-specific control or broader review request loses its stated basis.
+
 ### June unauthorized account use — reconstructed, exposed outcome
 
 A Citrix/infrastructure unit observes unauthorized credential use while other
@@ -189,6 +201,10 @@ units have not received its full account. Local password or host actions and a
 security-review request are both admissible. The model fails if every technical
 unit automatically learns the account identity, investigation results, or
 message significance.
+
+**Controlled perturbation.** Deliver the same account-use finding to Security
+Management. The producing unit's local authority is unchanged, but a security-
+review response becomes available to the addressed office only after delivery.
 
 ### July active database queries — reconstructed, exposed outcome
 
@@ -198,43 +214,31 @@ fragmented communications. The model must permit both urgent local control and
 explicit reporting. It fails if intended query termination declares that data
 was not returned or that the attacker was contained.
 
+**Controlled perturbation.** Replace a pending termination intent with a
+delivered failure notice. Duplicate issuance remains inappropriate while the
+intent is pending; after failure the unit must reconsider control, evidence
+collection, or security coordination.
+
 The principal structural uncertainty is unit composition: the event record
 supports role types and particular examples, not a complete population census
 or numerical weights. A later accepted source showing unique cross-unit
 authority would trigger a split into an Agent; evidence that all material
 choices were centrally mandatory would trigger scenario externalization.
 
-## 7. Limitations, provenance, and review
+## 7. Limitations and references
 
-This model is event-bound, qualitative, uncalibrated, and non-executable. It
-does not claim to reproduce every technical employee, measure cybersecurity
-competence, predict staff behavior, establish the effect of a counterfactual
-control, or validate the event simulation. It describes permissible
-participant intents and information boundaries, not an implementation policy.
+This event-bound qualitative model does not reconstruct every technical
+employee, measure cybersecurity competence, estimate population composition,
+predict staff behavior outside the event, or identify the effect of an
+unobserved counterfactual control. The complete historical outcome informed
+construction, so the cases show explanatory behavior rather than independent
+validation.
 
-Provenance:
+The [participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
+contains the claim-level source locations and withdrawal consequences. The
+shared [detection-and-escalation account](../../../agents/interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
+describes the model's relations with the SIRM and Cluster ISO.
 
-- Event Build Brief v0.1 and frame evidence v0.1 accepted at repository commit
-  `6228dee373743317e8984d8ef55303f8557e301b`;
-- participant claims `0616-R1-C01`--`0616-R1-C06` in the adjacent R1 evidence
-  record;
-- `OD-R1-01`, accepted by the project owner on 24 August 2026; and
-- method baseline `bea83b1a51256198d264760a88268e041d990700`.
-
-Review status: `READY_FOR_REFERENCE_CANDIDATE`; accepted after concise
-standard-profile review and the shared R1 interface preflight.
-
-## Interface handoff
-
-| Surface | Meaning and owner |
-|---|---|
-| observations and timing | Role-local technical signals and delivered messages; scenario owns production, delivery, event time, and freshness |
-| private state and isolation | Unit-local assessment, open questions, and last shared finding; never visible to another unit without an explicit message |
-| intents and counterparties | Investigate, request peer context, share findings, request security review, and apply bounded local control |
-| routes and scenario dependencies | Named technical, SIRM, Cluster ISO, and authorized group routes; scenario owns delivery, access, and technical effects |
-| authority, resources, and lifecycles | Authority is unit- and assignment-specific; scenario owns hosts, accounts, tools, requests, results, expiry, and failure |
-| aggregation or analysis output | Counts or sequences of unit intents and delivered findings; no collective decision or belief |
-| interface classification | `MAPPING_EXTENSION_EXPECTED`; semantic fit is reviewable, but no wire mapping or carrier is selected |
-
-This handoff authorizes no mapping, configuration, policy, binding, runtime, or
-simulation work.
+- Committee of Inquiry. *Public Report into the Cyber Attack on Singapore
+  Health Services Private Limited's Patient Database on or around 27 June
+  2018*. 10 January 2019. https://file.go.gov.sg/singhealthcoi.pdf

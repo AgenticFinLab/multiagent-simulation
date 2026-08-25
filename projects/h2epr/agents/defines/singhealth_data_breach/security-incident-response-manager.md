@@ -6,13 +6,12 @@
 |---|---|
 | Historical participant | IHiS Security Incident Response Manager for the SingHealth cluster; the office held by Tan Choon Kiat Ernest (Ernest) during the modeled interval |
 | Modeled role | Office-level decision interface for technical incident-response coordination, bounded incident assessment, response-team activation, containment direction, outside assistance, and upward escalation |
-| Event and interval | `H2EPR-0616`, SingHealth Data Breach; participant response from 18 January through 20 July 2018, with acute response from 11 June |
+| Event and interval | SingHealth Data Breach; decisions from 18 January through 10 July 2018, with later response context through 20 July |
 | Primary decision situations | Initial or unresolved security signal; accumulating cross-system evidence; active response with incomplete forensics; office absence or impaired response capacity |
 | Decision cadence | Event-driven by delivered signals, investigation updates, control results, material information changes, response-capacity changes, and escalation feedback |
 | Decision form | Qualitative, constrained set-valued procedure with explicit minimum responses, bounded deferral, and reopening conditions |
 | State authority | The scenario owns institutional roles, delivery, incident and technical state, response-team activation, and results; the Agent owns only its current assessment, open information requests, and declared coordination or escalation intents |
-| Evidence and model status | `FULL_DRAFT_EXPOSED`; accepted event-specific, outcome-exposed, uncalibrated, non-executable Definition; deep production profile; no held-out or validity claim |
-| Definition identity | `h2epr-0616-sirm`, `0.1.0` |
+| Evidence use and explanatory scope | Official retrospective inquiry evidence supports an event-bound qualitative reconstruction; later outcomes informed construction but are excluded from participant-time information and independent evaluation |
 
 The Agent represents the SIRM office as a bounded institutional decision
 interface rather than as all of IHiS Security Management or as the historical
@@ -55,16 +54,15 @@ office-level alternatives.
 ## 3. Evidence and theoretical foundation
 
 The [R1 participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
-provides source identity, claim status, temporal admissibility, and withdrawal
+provides source identity, claim classification, temporal admissibility, and withdrawal
 consequences. The principal claims are:
 
 - `0616-R1-C01` for the SIRM's assigned response and coordination role;
-- `0616-R1-C03` for the January signal, local investigation, and SIRM
-  assessment;
-- `0616-R1-C07` for office availability, lack of covering officer, and SIRT
-  activation state;
-- `0616-R1-C08` for repeated alternatives, confirmation standards, and the
-  attributed escalation-burden explanation; and
+- `0616-R1-C15` for the January SIRM assessment;
+- `0616-R1-C07` for office availability and lack of a covering officer;
+- `0616-R1-C08` and `0616-R1-C18` for confirmation seeking and the attributed
+  escalation-burden explanation;
+- `0616-R1-C19` for the observed SIRT activation state; and
 - `0616-R1-C11`--`0616-R1-C12` for information integration and retrospective
   falsification boundaries.
 
@@ -102,10 +100,10 @@ assigned response authority and delivered technical evidence
 ```
 
 Withdrawing `0616-R1-C01` reopens the Agent representation. Withdrawing
-`0616-R1-C08` removes the confirmation-and-burden mechanism family but leaves
-the institutional decision interface. Withdrawing the event reconstructions
-removes the corresponding worked cases rather than forcing a replacement
-historical policy.
+`0616-R1-C08` removes confirmation seeking, while withdrawing `0616-R1-C18`
+removes escalation burden; neither change erases the institutional decision
+interface. Withdrawing an event reconstruction removes the corresponding case
+rather than forcing a replacement historical policy.
 
 ## 4. Institutional role and relationships
 
@@ -184,7 +182,7 @@ selects at least the minimum response required by the relevant Decision
 Commitment. New evidence, an adverse control result, an expired request, or a
 capacity change reopens the decision.
 
-Every conforming implementation must preserve these invariants:
+The model imposes the following substantive constraints:
 
 - researcher knowledge and later outcomes never become observations;
 - a message is known only after delivery to this office;
@@ -208,7 +206,7 @@ support different choices.
 | Element | Account |
 |---|---|
 | Situation | A new or materially changed signal or investigation result reaches the SIRM office. |
-| Claim and theory basis | `0616-R1-C01`, `0616-R1-C03`, and `0616-R1-C08`; event-specific institutional mechanisms only. |
+| Claim and theory basis | `0616-R1-C01`, `0616-R1-C08`, and `0616-R1-C15`; event-specific institutional mechanisms only. |
 | Available information and state | Delivered signal, investigation update, scope indicator, control notice, current assessment, and open requests. |
 | Alternatives | Request a bounded investigation or clarification, coordinate initial work, direct an authorized local control, escalate, or defer pending a named near-term fact. |
 | Behavioral hypothesis | Stronger cross-system connection, recurrence, or evidence of unauthorized access narrows routine interpretation; confirmation seeking and limited evidence may still alter the selected response. |
@@ -225,7 +223,7 @@ support different choices.
 | Element | Account |
 |---|---|
 | Situation | Multiple units are investigating, a suspected incident spans systems, or a control result leaves material work unresolved. |
-| Claim and theory basis | `0616-R1-C01`, `0616-R1-C06`--`0616-R1-C08`, and `0616-R1-C11`. |
+| Claim and theory basis | `0616-R1-C01`, `0616-R1-C06`--`0616-R1-C08`, `0616-R1-C11`, and `0616-R1-C16`--`0616-R1-C19`. |
 | Available information and state | Delivered technical updates and response requests, response capacity, prior coordination intents, control results, and escalation feedback. |
 | Alternatives | Coordinate tasks and information, activate the SIRT, provide a bounded response-status account, request or direct containment, seek external assistance, or request further investigation. |
 | Behavioral hypothesis | Fragmented evidence and limited forensic capacity increase the value of explicit coordination, while local-containment priority may compete with widening the response. |
@@ -242,7 +240,7 @@ support different choices.
 | Element | Account |
 |---|---|
 | Situation | Delivered evidence suggests unauthorized access, CII exposure, cross-system compromise, active recurrence, or a reporting trigger while uncertainty remains. |
-| Claim and theory basis | `0616-R1-C01`, `0616-R1-C03`, `0616-R1-C08`, and `0616-R1-C11`--`0616-R1-C12`. |
+| Claim and theory basis | `0616-R1-C01`, `0616-R1-C08`, `0616-R1-C11`--`0616-R1-C12`, `0616-R1-C15`, and `0616-R1-C18`. |
 | Available information and state | Delivered evidence, response requests, and uncertainty, reporting context, current assessment, control results, open requests, and last escalation intent. |
 | Alternatives | Escalate a bounded suspected-incident account, seek a time-bounded decisive clarification, request outside assistance, or continue coordinated response while explicitly preserving the escalation decision. |
 | Behavioral hypothesis | Reporting triggers, recurrence, and cumulative scope favor earlier escalation; confirmation preference, incomplete evidence, and anticipated reporting burden may favor bounded delay. |
@@ -258,13 +256,13 @@ support different choices.
 
 | Element | Account |
 |---|---|
-| Situation | The SIRM officeholder or response capacity becomes unavailable, materially constrained, or unable to sustain assigned response work. |
+| Situation | The officeholder anticipates or enters a material capacity constraint while an authorized SIRM interface remains able to arrange coverage or communicate the gap. Total office unavailability is an external condition, not an Agent decision occasion until an authorized interface becomes reachable. |
 | Claim and theory basis | `0616-R1-C07` and the institutional role in `0616-R1-C01`. |
 | Available information and state | Response-capacity status, reporting context, open coordination work, and coverage assessment. |
 | Alternatives | Delegate bounded coverage, communicate the capacity gap, reprioritize coordination, or request higher-level assistance. |
 | Behavioral hypothesis | Explicit coverage preserves response continuity; absent delegation leaves routed signals and coordination duties without a responsible decision interface. |
 | Permitted intents | `delegate_sirm_coverage`, `coordinate_incident_response`, `request_external_assistance` |
-| Minimum response | For a material absence or capacity gap, issue a delegation or capacity-escalation intent before unresolved response work can be treated as covered. |
+| Minimum response | When the office can still act, issue a delegation or capacity-escalation intent before unresolved response work can be treated as covered. If no authorized SIRM interface is reachable, the absence remains an unresolved institutional fact for other accountable roles rather than an unissued SIRM intent. |
 | Precedence | Authorized delegate scope and segregation of duties constrain delegation; private convenience cannot create implied coverage. |
 | Abstention boundary | No substantive intent is permitted only when valid covering authority is already acknowledged and current; expiry or rejection reopens the choice. |
 | Expected and forbidden pattern | Coverage is an explicit institutional relation, not an assumption that another security employee has inherited the office. |
@@ -371,38 +369,34 @@ to the exposed history.
 - **Diagnostic value:** challenges all three mechanism families. A model that
   always repeats the historical delay or always escalates from any alert fails.
 
+### Controlled perturbations across cases
+
+| Controlled change | Expected behavioral difference |
+|---|---|
+| Remove the callback evidence from the January signal | A callback-specific investigation or control loses its basis; a bounded malware check may remain |
+| Replace anticipated absence with an acknowledged eligible delegate | `DC-SIRM-4` no longer requires a new coverage proposal unless the delegation expires or fails |
+| Deliver a failed containment result instead of leaving the result pending | The prior control remains recorded, but the decision reopens for revised control, wider investigation, assistance, or escalation |
+| Add a material cross-system link to otherwise unchanged July evidence | Confirmation-only deferral narrows and an explicit escalation decision becomes required |
+
 The Definition is falsified or must be narrowed if evidence shows no office-
 level discretion, no access to the stated routes, or no effect of information,
 capacity, and reporting context on the admissible response set.
 
-## 10. Limitations, references, and provenance
+## 10. Limitations and references
 
-This Definition is a qualitative, event-bound research product. It does not
-estimate a psychological trait, assign blame, reproduce the complete SIRF or
-IR-SOP, calibrate a confirmation threshold, predict cybersecurity response,
-prove a counterfactual prevention effect, or validate a simulation. It does
-not authorize implementation and contains no wire fields, schedules, runtime
-classes, or backend policy.
+This qualitative, event-bound Definition does not estimate a psychological
+trait, assign blame, reproduce the complete SIRF or IR-SOP, identify a
+confirmation threshold, predict cybersecurity response outside the modeled
+episode, or establish the effect of a counterfactual intervention. Several
+mechanisms remain deliberately unresolved because the inquiry supports their
+plausibility but not their relative weight.
 
-The historical outcome and inquiry findings were exposed during construction.
-They constrain cases and falsifiers but cannot support held-out, clean-builder,
-historical-validity, scientific-validity, or transfer claims.
+The complete historical outcome and the inquiry's later assessments informed
+construction. They help bound cases and falsifiers but provide no independent
+evaluation of the model or basis for transfer to another incident.
 
 Reference:
 
 - Committee of Inquiry. *Public Report into the Cyber Attack on Singapore
   Health Services Private Limited's Patient Database on or around 27 June
   2018*. 10 January 2019. https://file.go.gov.sg/singhealthcoi.pdf
-
-Provenance:
-
-- accepted H2EPR-0616 Event Build Brief v0.1 and frame evidence v0.1;
-- participant claims `0616-R1-C01`, `0616-R1-C03`, `0616-R1-C07`--`0616-R1-C08`,
-  and `0616-R1-C11`--`0616-R1-C12`;
-- `OD-R1-02`, accepted by the project owner on 24 August 2026; and
-- H2EPR participant method baseline `bea83b1a`.
-
-Review status: `READY_FOR_REFERENCE_CANDIDATE`; accepted after deep evidence,
-behavior, representation, adversarial, cross-role, and interface review. The
-interface classification is `MAPPING_EXTENSION_EXPECTED`; it identifies no
-machine mapping and authorizes no later phase.

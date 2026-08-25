@@ -20,8 +20,7 @@ warrants it.
 | Choice unit | |
 | Host, institution, or account scope | |
 | Causal role in the event | |
-| Evidence and outcome-exposure boundary | |
-| Identity, version, and status | |
+| Evidence use and explanatory scope | |
 
 ## 1. Scope and representation
 
@@ -51,6 +50,12 @@ single interpretation.
 Define what a unit can observe at the modeled time, including missing, delayed,
 or stale information. For each behaviorally material private state, state its
 owner, initialization basis, update rule, and isolation boundary.
+
+If an issued investigation, request, message, or control can remain pending or
+later fail, expire, or be superseded, retain a reference and the most recent
+observed lifecycle state. This memory must distinguish “never issued” from
+“issued but unresolved” without becoming a private copy of the authoritative
+result.
 
 Describe only the heterogeneity needed for the event question. Profiles,
 weights, thresholds, or distributions need a semantic interpretation and an
@@ -86,48 +91,33 @@ heterogeneity, missing data, competing mechanisms, and adverse results change
 the model's choices. Label any exposed outcome used to construct a case.
 
 State plausible alternatives and observations that would revise the mechanism,
-the heterogeneity model, or the population representation. Add numerical
-sensitivity or calibration only when a later research question requires it.
+the heterogeneity model, or the population representation. Each principal case
+should name one controlled change and the behavior expected to change or remain
+invariant. Add numerical sensitivity or calibration only when a later research
+question requires it.
 
-## 7. Limitations, provenance, and review
+## 7. Limitations and references
 
 State what the model does not claim, including any limits on historical
-realism, prediction, calibration, or transfer. Record the accepted claim and
-source identities, the method baseline, and the review verdict.
+realism, prediction, calibration, or transfer. Provide conventional references
+and identify the evidence claims on which the model materially depends.
 
 A standard model may use a concise batch-level review. Use a separate review
 record for a deep model when a material representation, evidence, or causal
-judgment needs independent treatment.
-
-## Interface handoff
-
-Record only the semantic surface needed for later event integration.
-
-| Surface | Meaning and owner |
-|---|---|
-| observations and timing | |
-| private state and isolation | |
-| intents and counterparties | |
-| routes and scenario dependencies | |
-| authority, resources, and lifecycles | |
-| aggregation or analysis output | |
-| interface classification | `KNOWN_FIT`, `MAPPING_EXTENSION_EXPECTED`, or `CONCRETE_CARRIER_COUNTEREXAMPLE` |
-
-This handoff does not select wire fields, policy classes, parameters, or
-runtime bindings. Population units may later be instantiated by an accepted
-configuration, but this template does not prescribe their executable form.
+judgment needs independent treatment. Event integration is recorded in the
+batch interface account rather than appended to the public population model.
 
 ## Completion check
 
-A population model is ready for promotion when:
+A population model is complete for its stated research use when:
 
 - the evidence question is closed for its stated use;
 - the representation preserves meaningful heterogeneity and ownership;
 - information, private state, intent, scenario process, and result are
   separated;
 - mechanisms, uncertainty, alternatives, and revision conditions are clear;
-- review depth matches the selected production profile; and
-- the interface handoff closes without inventing implementation semantics.
+- review depth matches the model's representation, evidence, and causal risk; and
+- relations with the shared event model are explicit without inventing implementation semantics.
 
 The Agent Definition ten-module profile applies only if the roster later
 changes this product into an Agent Definition.
