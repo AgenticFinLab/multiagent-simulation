@@ -21,10 +21,16 @@ with the
 | bounded configuration admission | exact schema/canonical/hash/reference validation plus a static receipt | proves configuration-surface admission only; never supplies projection, policy, or execution |
 | frozen engineering canary | regression input for an older bounded engineering path | never supplies semantic defaults or release authority to a new configuration |
 
-Event-specific packages live under an event directory, for example
-`panic_1907/scenario-configuration-v0.1/`. A promoted package normally contains
-the machine document, publication-facing design, Definition closure,
-substantive review, README, manifest, and checksum inventory.
+## Current configurations
+
+| Event | Scenario Configuration | Admission status |
+|---|---|---|
+| Panic of 1907 (`H2EPR-0288`) | [v0.1](panic_1907/scenario-configuration-v0.1/) | [bounded static admission v0.1](panic_1907/configuration-admission-v0.1/) |
+| SingHealth Data Breach (`H2EPR-0616`) | [v0.1](singhealth_data_breach/scenario-configuration-v0.1/) | not opened; requires separate authorization |
+
+Event-specific packages live under their event directory. A promoted package
+normally contains the machine document, publication-facing design, Definition
+closure, substantive review, README, manifest, and checksum inventory.
 
 Project-local admission schemas live under [`schemas/`](schemas/). The first
 bounded admission record lives under

@@ -1,0 +1,173 @@
+{
+  "schema": "h2epr.event-scenario-configuration-release.v0_1",
+  "release_id": "H2EPR-0616-SCENARIO-CONFIGURATION-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0616",
+  "released_on": "2026-08-25",
+  "status": "accepted_non_executable_configuration",
+  "integrity_algorithm": "sha256",
+  "configuration": {
+    "id": "h2epr.0616.scenario.mechanism-coverage.v0_1",
+    "version": "0.1.0",
+    "purpose": "mechanism_coverage",
+    "timezone": "Asia/Singapore",
+    "modeled_start": {
+      "value": "2017-08-23",
+      "precision": "approximate_date"
+    },
+    "participant_response_start": "2018-01-18",
+    "acute_window": "2018-06-11/2018-07-20",
+    "core_horizon": "2018-07-20",
+    "notification_observation_horizon": "2018-07-23",
+    "execution_eligible": false,
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false
+  },
+  "reviewed_candidate": {
+    "id": "h2epr.0616.scenario.mechanism-coverage.v0_1",
+    "version": "0.1.0-candidate.2",
+    "status": "review_candidate_non_executable",
+    "review_verdict": "ACCEPT_FOR_OWNER_REVIEW_AS_NON_EXECUTABLE_CONFIGURATION",
+    "scenario_configuration_sha256": "81a0e43ee6d8cb4fed823b4ca73f1692d0703f9c7cc8c56efdcded198836dc3d",
+    "configuration_design_sha256": "ddde54aabc56bbed44943d59d9275f93edf1b5923c29a9a84c531f5bcf6bee7c",
+    "definition_closure_sha256": "62e90216016e81f5559c9abdcdb90b2e1b8be641adffa565363d465bc4f63287",
+    "substantive_review_sha256": "4ffbae7b9e13791f37041f3158f1dddf4b274df570866dc7811b00a54d642f34",
+    "machine_semantic_delta": "none",
+    "promotion_delta": [
+      "machine_version_and_acceptance_status_only",
+      "release_identity_owner_decision_links_and_integrity_packaging",
+      "publication_template_alignment_of_already_reviewed_completion_validation_closure_lineage_limitations_and_next_stage"
+    ]
+  },
+  "semantic_inputs": {
+    "scenario_definition_release": {
+      "release_id": "H2EPR-0616-EVENT-SCENARIO-DEFINITION-v0.1",
+      "manifest_path": "scenarios/singhealth_data_breach/definition-v0.1/manifest.json",
+      "manifest_sha256": "948b9ba9e29ba6947abefd65663bd4e9ef1ff47ebb1f465a08524378b20b8795"
+    },
+    "scenario_definition": {
+      "id": "h2epr.scenario.0616.singhealth_data_breach@0.1.0",
+      "path": "scenarios/singhealth_data_breach/definition-v0.1/scenario-definition.md",
+      "sha256": "1e670f70c6755243dad354b268b1bad16a8240b2220b7577f18708af9cb07401"
+    },
+    "scenario_interface_closure": {
+      "path": "scenarios/singhealth_data_breach/definition-v0.1/interface-closure.md",
+      "sha256": "3d3909b3454780205289167531b60fa0b02640296b2e25441972bbe336216039"
+    },
+    "roster_definition_release": {
+      "release_id": "H2EPR-0616-ROSTER-DEFINITION-RELEASE-v0.1",
+      "manifest_path": "releases/singhealth_data_breach/roster-definition-v0.1/manifest.json",
+      "manifest_sha256": "188f5117f02958997f8e1140d3d19fcbada296b1750223d8b3025e1cf537625e"
+    },
+    "consolidated_mapping": {
+      "release_id": "H2EPR-0616-CONSOLIDATED-MAPPING-v0.1",
+      "manifest_path": "agents/bindings/singhealth_data_breach/consolidated/manifest.json",
+      "manifest_sha256": "7a603d97bb25f8dddab08d7a8865fd6305a94e4db108f5f32b8ad65d28695bb9"
+    },
+    "mapping_profile": {
+      "id": "h2epr.roster-consolidated-mapping.0616.v0_1",
+      "path": "agents/bindings/singhealth_data_breach/consolidated/mapping-specification.md",
+      "sha256": "1249dbe94dcad61b40c4e543435186e6e71eaab0d95c7f2877e31c0e3575a1bb"
+    },
+    "semantic_skeleton": {
+      "version": "0.2",
+      "path": "scenarios/singhealth_data_breach/semantic-skeleton.md",
+      "sha256": "8c68e9b3f52d2d31f3482be7588418fe9b4209770e8e28cce8d1c16b3bf5556f"
+    },
+    "event_frame_evidence": {
+      "path": "events/singhealth_data_breach/frame-evidence-v0.1.md",
+      "sha256": "b3dc712fcf182bedbb7654cbc7ab7d4e09f8022c737c12ea152171fe26d56f74"
+    },
+    "participant_evidence": {
+      "path": "events/singhealth_data_breach/participant-evidence-v0.1.md",
+      "sha256": "d37bcd8df93082226a69c10674f61b76d4f36eb6651344273f38768091e1f5f0"
+    }
+  },
+  "coverage": {
+    "semantic_products": 9,
+    "decision_and_population_commitments": 29,
+    "observation_placements": 62,
+    "private_state_placements": 44,
+    "intent_placements": 54,
+    "lifecycle_families": 11,
+    "named_actors": 7,
+    "population_actors": 6,
+    "total_semantic_actor_instances": 13,
+    "population_units": 6,
+    "technical_assets": 8,
+    "opening_records": 33,
+    "route_records": 8,
+    "exogenous_inputs": 6,
+    "structural_selections": 6,
+    "selected_policy_semantics": 9,
+    "sensitivity_overlays": 6
+  },
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "5250f8ff2d9acc2aa49224ac5961cbeabaf488811074a55ec222d6e7a7f626ec"
+    },
+    {
+      "kind": "scenario_configuration",
+      "path": "scenario-configuration.json",
+      "sha256": "00fe7d799b5f944da09c64ddbeea85d2addfc7948bb9f0865316962fe2d37d3d"
+    },
+    {
+      "kind": "configuration_design",
+      "path": "configuration-design.md",
+      "sha256": "9bb57ae5eae93c8c7fe7c0151bfbb54981e698b4cc4195ba6db1aa03283926b0"
+    },
+    {
+      "kind": "definition_closure",
+      "path": "definition-closure.md",
+      "sha256": "16414cc6b03b69d68657596e7abdb880fc21af62f4dd81d3d9be790b05ca0d1b"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "473d8af16dc1d7f0e0038ec164503c2d052ff4a114e414ea8481198ec91fd9f4"
+    }
+  ],
+  "owner_decision": {
+    "id": "ADR-0009",
+    "resolved_items": ["OD-CFG-05", "OD-CFG-06", "OD-CFG-07", "OD-CFG-08"],
+    "path": "decisions/ADR-0009-singhealth-scenario-configuration-boundary.md",
+    "sha256": "5aac94ffc823b58d7f496b6e8e027628c2e9310dd2477de5bcb554fe8dfae630"
+  },
+  "claim_boundary": {
+    "supported": "accepted_non_executable_mechanism_coverage_configuration",
+    "excluded": [
+      "historical_baseline_or_replay",
+      "historical_calibration_or_validation",
+      "prediction_or_policy_effectiveness",
+      "runtime_or_simulation_readiness",
+      "historical_or_scientific_validity"
+    ]
+  },
+  "execution_boundary": {
+    "execution_eligible": false,
+    "admission_status": "not_admitted",
+    "unbound_policy_count": 9,
+    "authorization_conferred_by_release": "configuration_semantics_only",
+    "required_before_execution": [
+      "accepted_machine_schema_or_explicit_admission_profile",
+      "exact_fail_closed_release_and_configuration_loader",
+      "validated_event_qualified_carrier_projection",
+      "versioned_implementation_for_every_enabled_policy",
+      "bounded_lineage_binding",
+      "runtime_bundle_and_trace_identity",
+      "separate_execution_authorization"
+    ]
+  },
+  "next_stage": {
+    "name": "bounded_configuration_admission_preflight",
+    "authorization": "separate",
+    "schema_evolution_authorized": false,
+    "loader_authorized": false,
+    "binding_authorized": false,
+    "policy_implementation_authorized": false,
+    "runtime_or_simulation_authorized": false
+  }
+}

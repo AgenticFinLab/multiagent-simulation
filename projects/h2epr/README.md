@@ -55,10 +55,13 @@ design boundary: seven Agent Definitions, two Population Models, a fixed
 an accepted
 [consolidated mapping](agents/bindings/singhealth_data_breach/consolidated/),
 and an accepted
-[Event Scenario Definition](scenarios/singhealth_data_breach/definition-v0.1/).
-These assets close the complete participant interface while remaining
-qualitative and non-executable. Configuration, admission, binding, runtime,
-simulation, calibration, and evaluation require later bounded stages.
+[Event Scenario Definition](scenarios/singhealth_data_breach/definition-v0.1/),
+followed by an accepted non-executable
+[Scenario Configuration](configs/singhealth_data_breach/scenario-configuration-v0.1/).
+These assets close the complete participant interface and one declared-purpose
+semantic assembly while remaining qualitative and non-executable. Admission,
+binding, runtime, simulation, calibration, and evaluation require later
+bounded stages.
 
 ## Package layout
 

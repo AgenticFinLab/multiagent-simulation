@@ -5,8 +5,9 @@ H2EPR event. The event frame remains accepted with its bounded temporal and
 representation decisions. The semantic Roster release closes two participant
 batches and the remaining disposition-only rows across the technical,
 institutional, and patient-communication boundaries. The accepted Event
-Scenario Definition and consolidated mapping now close the event-world and
-participant-interface semantics without opening an executable configuration.
+Scenario Definition and consolidated mapping close the event-world and
+participant interfaces. Scenario Configuration v0.1 now fixes one
+mechanism-coverage assembly while remaining non-executable.
 
 The event follows a **same-stage quality, proportionate-work** rule: it may use
 fewer files and less engineering than the Panic of 1907 baseline, but an
@@ -19,16 +20,16 @@ ownership boundaries.
 |---|---|
 | Event | `H2EPR-0616`, SingHealth Data Breach; slug `singhealth_data_breach` |
 | Coordination entry | `projects/h2epr/events/singhealth_data_breach/README.md` |
-| Brief identity and status | Event Build Brief v0.2; accepted semantic Roster, consolidated mapping, and Event Scenario Definition |
+| Brief identity and status | Event Build Brief v0.2; accepted semantic Roster, consolidated mapping, Event Scenario Definition, and non-executable Scenario Configuration |
 | Roster and semantic skeleton | [Research roster v0.2](../../agents/rosters/singhealth_data_breach.md) and [event semantic skeleton v0.2](../../scenarios/singhealth_data_breach/semantic-skeleton.md) |
 | Method baseline | Repository commit `bea83b1a51256198d264760a88268e041d990700`; [event workflow](../../WORKFLOW.md), [Event Build Brief template](../../event-build-brief-template.md), [participant workflow](../../agents/WORKFLOW.md), and [historical evidence research](../../skills/historical-evidence-research/SKILL.md) |
 | Primary question | Within the accepted event boundary, which interactions across information, authority, and response chains turned an initial intrusion into a large-scale healthcare data breach, and how did the timing of detection, escalation, containment, and notification alter the event's evolution? |
 | Purpose and claim boundary | Forward-test whether the H2EPR event method transfers from a financial crisis to a healthcare cybersecurity event without treating financial state as universal. The intended depth is semantically complete and engineering-minimal. This work makes no clean-builder, held-out, historical-validity, scientific-validity, calibration, predictive, or policy-effectiveness claim. |
 | Temporal boundary | Accepted analytic interval: about 23 August 2017, the earliest evidenced compromise, through the public announcement on 20 July 2018; observe patient-notification delivery through 23 July. The participant response window begins on 18 January 2018, when event-specific malware and callback signals entered IHiS Security Management. An acute information-and-response window begins on 11 June, when unauthorized credential use was specifically recognized, and includes exfiltration from 27 June through 4 July, cross-institution escalation on 10 July, later containment, and notification. Earlier general preparedness and vulnerabilities remain initial context. Post-23 July investigation, liability, penalties, and reform are retrospective evidence or excluded aftermath. |
 | Evidence and exposure | The [event-frame evidence](frame-evidence-v0.1.md) adopts four official sources for framing. The complete historical outcome and target Reference material had already been seen during discovery, so this is not clean or held-out construction. `draft_epg.json` was not read in this framing cycle, and evaluation-only material remains outside the evidence set. |
-| Current authorized phase and endpoint | **Define Scenario and mapping complete**: the accepted releases close the fixed Roster interface. Stop before Scenario Configuration, mapping-loader implementation, binding, policy, runtime, or simulation work. |
-| Excluded work | Reference, draft EPG, held-out, or evaluation access; new external research without bounded permission; participant products outside the released roster; configuration; binding; policy or runtime work; simulation; calibration; post-seal evaluation; external repository actions; and validity claims. |
-| Decision owner and review | The project owner accepted `OD-EV-01`, `OD-RP-02`, `OD-R1-01` through `OD-R1-03`, `OD-R2-01` through `OD-R2-06`, `OD-RC-01` through `OD-RC-04`, `OD-CM-05` through `OD-CM-08`, and `OD-SC-05` through `OD-SC-08`. Participant products received profile-proportionate review; the complete roster, consolidated mapping, carrier decision, Scenario Definition, and interface closure received their respective release reviews. |
+| Current authorized phase and endpoint | **Scenario Configuration complete**: the accepted non-executable release fixes the purpose, assembly, opening state, structural choices, bounded inputs, policy meanings, sensitivities, completion, and one later lineage. Stop before configuration admission, schema or loader work, binding, policy implementation, runtime, or simulation. |
+| Excluded work | Reference, draft EPG, held-out, or evaluation access; new external research without bounded permission; participant products outside the released roster; configuration admission or schema evolution; binding; policy or runtime work; simulation; calibration; post-seal evaluation; external repository actions; and validity claims. |
+| Decision owner and review | The project owner accepted `OD-EV-01`, `OD-RP-02`, `OD-R1-01` through `OD-R1-03`, `OD-R2-01` through `OD-R2-06`, `OD-RC-01` through `OD-RC-04`, `OD-CM-05` through `OD-CM-08`, `OD-SC-05` through `OD-SC-08`, and `OD-CFG-05` through `OD-CFG-08`. Participant products and the Roster, mapping, Scenario, configuration, and closure products received their stage-appropriate reviews. |
 | Exact upstream inputs | Method baseline `bea83b1a51256198d264760a88268e041d990700`; event specification SHA-256 `5a69486c0c3cff4dab019e43a75b9f959ebb47e3b52b17241bb637dd0cdfbbfb`; frozen evidence SHA-256 `ea356fc9f0f7dfede9e7415f61d144e8ba13e61c3ad5647318abe7b5449f5e7c`; [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/); [research roster v0.2](../../agents/rosters/singhealth_data_breach.md); [event semantic skeleton v0.2](../../scenarios/singhealth_data_breach/semantic-skeleton.md); accepted event-frame and participant evidence |
 
 > The accepted roster contains nine event-bound qualitative models, two shared
@@ -94,23 +95,24 @@ behavior, evidence, authority, or realized results.
 | Semantic roster inventory | [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/) | Accepted non-executable release of the complete semantic roster |
 | Consolidated mapping | [Consolidated mapping v0.1](../../agents/bindings/singhealth_data_breach/consolidated/) | Accepted non-executable mapping and Contracts V1 carrier decision |
 | Event Scenario Definition | [Event Scenario Definition v0.1](../../scenarios/singhealth_data_breach/definition-v0.1/) | Accepted semantic specification and complete Roster-interface closure |
-| Configuration and implementation authorities | None | Not opened for this event |
+| Scenario Configuration | [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/) | Accepted non-executable mechanism-coverage assembly |
+| Configuration admission and implementation authorities | None | Not opened for this event |
 
 ## Current work package
 
 | Field | Current decision |
 |---|---|
-| Work mode | Accepted Scenario and consolidated mapping closeout against the fixed semantic Roster release |
+| Work mode | Accepted Scenario Configuration promotion against the fixed Scenario, mapping, Roster, and evidence releases |
 | Represented surface | Seven office-level Agents, two role-typed Populations, a bounded adversarial process, distinct government routes, initial/exogenous endpoint context, an affected-patient cohort, and Scenario-owned institutional processes |
 | Participant production profiles | Two standard Population Models; five standard Agent Definitions; deep SIRM and Sector Lead Agent Definitions |
-| Applied workflow assets | Event Scenario design, Scenario Definition and interface-closure templates, roster mapping and conformance in design mode, Scenario and carrier reviews, and one phase closeout |
-| Accepted outputs | One ten-module Event Scenario Definition, one release-derived interface closure, one consolidated semantic inventory and mapping, one V1 carrier review, and substantive reviews |
-| Review and verification | Exact release integrity, complete observation/intent/state reconciliation, Scenario and carrier reviews, authority and result separation, links, checksums, and release tests |
-| Stop conditions | Any change to the question, roster, evidence permission, causal owner, or Contracts V1; any attempt to enter configuration, implementation, or simulation without separate authorization |
-| Next legal action | Explicit stop. A separately authorized stage may produce one minimal non-executable purpose configuration; the accepted releases do not authorize it. |
+| Applied workflow assets | Scenario Configuration Skill, semantic design template, Definition closure, post-revision substantive review, owner decision, and atomic promotion checklist |
+| Accepted outputs | One non-executable Scenario Configuration v0.1 with machine semantics, publication-facing design, closure, review, manifest, checksum inventory, and ADR |
+| Review and verification | Exact upstream and candidate integrity, complete actor/unit/opening/input/policy/sensitivity closure, semantic-equivalence checks, links, checksums, and release tests |
+| Stop conditions | Any change to the question, roster, evidence permission, causal owner, Contracts V1, or accepted configuration semantics; any attempt to enter admission, implementation, or simulation without separate authorization |
+| Next legal action | Explicit stop. A separately authorized bounded configuration-admission preflight may test the provisional representation; schema evolution, loader, binding, policy, runtime, and simulation remain unopened. |
 
 The maintained target remains **semantically complete, engineering-minimal**:
-close the Scenario and mapping interface needed for one high-information
+close one declared-purpose semantic assembly for a high-information
 non-financial lineage without opening a full-roster runtime or broad
 simulation.
 
@@ -136,6 +138,7 @@ simulation.
 | `OD-RC-04` | Accept the seven Agent Definitions, two Population Models, two interfaces, and disposition-only rows as the complete semantic roster; open no R3 batch | Project owner | R1 and R2 closeouts, complete causal role map, and roster-completion audit | Semantic Roster release | `ACCEPTED_2026-08-25` |
 | `OD-CM-05`–`OD-CM-08` | Accept the event-qualified identity and full semantic placement mapping, retain Contracts V1, and bound any later implementation to a fail-closed loader and one lineage | Project owner | Roster release, consolidated inventory, mapping specification, carrier review, and substantive review | Consolidated mapping release | [Accepted in ADR-0007](../../decisions/ADR-0007-singhealth-consolidated-mapping-boundary.md) |
 | `OD-SC-05`–`OD-SC-08` | Accept the event boundary, exogenous and institutional ownership, structural baseline, and complete release-interface semantic closure | Project owner | Roster release, consolidated mapping, Scenario Definition, interface closure, and substantive review | Event Scenario Definition release | [Accepted in ADR-0008](../../decisions/ADR-0008-singhealth-event-scenario-definition-boundary.md) |
+| `OD-CFG-05`–`OD-CFG-08` | Accept the mechanism-coverage purpose and horizon, thirteen-actor assembly and bounded lineage, exact structural/input/policy/sensitivity boundary, and non-executable configuration release | Project owner | Accepted Scenario and mapping, revised configuration candidate, closure, and substantive review | Scenario Configuration release | [Accepted in ADR-0009](../../decisions/ADR-0009-singhealth-scenario-configuration-boundary.md) |
 
 ## Event-frame review and closeout
 
@@ -317,3 +320,20 @@ validity claim.
 The accepted releases establish a stable design boundary. They do not claim a
 historical replay, executable event, calibrated mechanism, or scientific
 validation result.
+
+## Scenario Configuration closeout
+
+| Field | Closeout record |
+|---|---|
+| Event, phase, object, and inputs | `H2EPR-0616`; **Configure the Scenario**; accepted Event Scenario Definition v0.1, consolidated mapping v0.1, Roster release v0.1, accepted evidence, and owner dispositions `OD-CFG-05` through `OD-CFG-08` |
+| Authorized purpose and endpoint | Select one mechanism-coverage purpose, thirteen-actor assembly, bounded opening projection, structural/input/policy/sensitivity space, completion rule, and later lineage; stop before admission or implementation |
+| Outputs and status | [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/); **accepted non-executable release** |
+| Verification and limitations | All nine products, thirteen actors, six units, eight technical assets, 33 opening records, six exogenous inputs, nine unbound policy meanings, and six exact overlays close against pinned inputs. The serialization remains provisional, outcome-exposed, qualitative, uncalibrated, and non-executable. |
+| Mainline and depth judgment | The phase fixes only choices deferred by the accepted Scenario and mapping. It adds no participant, evidence, policy implementation, carrier, runtime, experiment, or validity claim. |
+| Next legal action | Explicit stop. A separately authorized bounded configuration-admission preflight may test compatibility and define the smallest fail-closed admission surface; schema evolution and all implementation remain unopened. |
+
+The release brings the second event to the same semantic configuration stage as
+the first event, while retaining its healthcare-specific institutions,
+technical objects, information routes, and responsibility units. It does not
+yet bring H2EPR-0616 to the first event's later admission, binding, or bounded
+lineage-conformance stages.

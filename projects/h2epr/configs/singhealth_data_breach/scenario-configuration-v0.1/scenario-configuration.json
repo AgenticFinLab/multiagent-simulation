@@ -1,0 +1,1171 @@
+{
+  "format_identity": "h2epr.scenario-configuration-semantic-candidate.v0_1",
+  "configuration_id": "h2epr.0616.scenario.mechanism-coverage.v0_1",
+  "version": "0.1.0",
+  "status": "accepted_non_executable_configuration",
+  "event_id": "H2EPR-0616",
+  "purpose": "mechanism_coverage",
+  "historical_calibration": false,
+  "historical_validation": false,
+  "known_outcome_fitting": false,
+  "semantic_inputs": {
+    "scenario_definition_release_id": "H2EPR-0616-EVENT-SCENARIO-DEFINITION-v0.1",
+    "scenario_definition_id": "h2epr.scenario.0616.singhealth_data_breach@0.1.0",
+    "scenario_release_manifest_sha256": "948b9ba9e29ba6947abefd65663bd4e9ef1ff47ebb1f465a08524378b20b8795",
+    "scenario_definition_sha256": "1e670f70c6755243dad354b268b1bad16a8240b2220b7577f18708af9cb07401",
+    "scenario_interface_closure_sha256": "3d3909b3454780205289167531b60fa0b02640296b2e25441972bbe336216039",
+    "roster_release_id": "H2EPR-0616-ROSTER-DEFINITION-RELEASE-v0.1",
+    "roster_release_manifest_sha256": "188f5117f02958997f8e1140d3d19fcbada296b1750223d8b3025e1cf537625e",
+    "consolidated_mapping_release_id": "H2EPR-0616-CONSOLIDATED-MAPPING-v0.1",
+    "consolidated_mapping_manifest_sha256": "7a603d97bb25f8dddab08d7a8865fd6305a94e4db108f5f32b8ad65d28695bb9",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0616.v0_1",
+    "mapping_profile_sha256": "1249dbe94dcad61b40c4e543435186e6e71eaab0d95c7f2877e31c0e3575a1bb",
+    "semantic_skeleton_sha256": "8c68e9b3f52d2d31f3482be7588418fe9b4209770e8e28cce8d1c16b3bf5556f",
+    "event_frame_evidence_sha256": "b3dc712fcf182bedbb7654cbc7ab7d4e09f8022c737c12ea152171fe26d56f74",
+    "participant_evidence_sha256": "d37bcd8df93082226a69c10674f61b76d4f36eb6651344273f38768091e1f5f0"
+  },
+  "owner_decisions": ["OD-CFG-05", "OD-CFG-06", "OD-CFG-07", "OD-CFG-08"],
+  "execution_boundary": {
+    "execution_eligible": false,
+    "reason": "semantic configuration only; schema admission, exact loading, carrier projection, policy implementations, binding, runtime identity, and execution authorization are absent",
+    "required_before_execution": [
+      "accepted_machine_schema_or_explicit_admission_profile",
+      "exact_fail_closed_release_and_configuration_loader",
+      "validated_event_qualified_carrier_projection",
+      "versioned_implementation_for_every_enabled_policy",
+      "bounded_lineage_binding",
+      "runtime_bundle_and_trace_identity",
+      "separate_execution_authorization"
+    ],
+    "unbound_policy_behavior": "reject_configuration_for_execution",
+    "parsing_does_not_change_eligibility": true,
+    "authorization_conferred_by_configuration": "none"
+  },
+  "clock": {
+    "timezone": "Asia/Singapore",
+    "mode": "event_driven",
+    "modeled_start": {"value": "2017-08-23", "precision": "approximate_date"},
+    "participant_response_start": {"value": "2018-01-18", "precision": "date"},
+    "acute_window": {
+      "start": "2018-06-11",
+      "end": "2018-07-20",
+      "precision": "date_or_bounded_interval"
+    },
+    "core_horizon": {"value": "2018-07-20", "precision": "date"},
+    "notification_observation_horizon": {"value": "2018-07-23", "precision": "date"},
+    "same_time_precedence": [
+      "exogenous_input_admission",
+      "scenario_or_technical_event",
+      "information_product_production",
+      "route_transport_and_delivery",
+      "observation_projection_and_freeze",
+      "participant_decision_and_issue",
+      "adjudication",
+      "execution_and_typed_result",
+      "reducer_state_delta",
+      "later_information_or_observation"
+    ],
+    "equal_time_tie_break": "stable_event_id_after_causal_precedence",
+    "invented_intraday_precision_forbidden": true
+  },
+  "structural_variants": [
+    {
+      "id": "SV-0616-ATTACK-PRESSURE",
+      "family": "attack_pressure",
+      "allowed_domain": [
+        "BOUNDED_ADVERSARIAL_OPPORTUNITY_PROCESS",
+        "LOWER_OR_DELAYED_BOUNDED_OPPORTUNITY",
+        "DIFFERENT_SOURCE_BOUNDED_OPPORTUNITY"
+      ],
+      "selection": "BOUNDED_ADVERSARIAL_OPPORTUNITY_PROCESS",
+      "basis": ["0616-FR-C01", "0616-FR-C02", "0616-FR-C03"],
+      "identification": "accepted_structural_baseline_not_historical_sequence",
+      "causal_limit": "opens adjudicated attack opportunities but selects no success, persistence, access, query, copy, or disclosure result",
+      "sensitivity_overlay_id": "SENS-0616-ATTACK-DELAY"
+    },
+    {
+      "id": "SV-0616-ROUTE-DELIVERY",
+      "family": "route_and_delivery",
+      "allowed_domain": [
+        "DISTINCT_NAMED_ROUTES_WITH_EXPLICIT_DELIVERY",
+        "ROUTE_DELAY_OR_FAILURE",
+        "PARTIAL_OR_MISADDRESSED_DELIVERY",
+        "CORRECTED_DELIVERY"
+      ],
+      "selection": "DISTINCT_NAMED_ROUTES_WITH_EXPLICIT_DELIVERY",
+      "basis": ["0616-FR-C11", "0616-FR-C12", "0616-FR-C14", "0616-FR-C15"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "route eligibility never implies issue, transport, receipt, acknowledgement, interpretation, or action",
+      "sensitivity_overlay_id": "SENS-0616-ROUTE-DELAY"
+    },
+    {
+      "id": "SV-0616-RESPONSIBILITY-UNITS",
+      "family": "responsibility_units",
+      "allowed_domain": [
+        "INSTITUTION_PRESERVING_FUNCTION_SPECIFIC_UNITS",
+        "NARROWER_DECLARED_UNIT_SET_WITH_INFORMATION_LOSS"
+      ],
+      "selection": "INSTITUTION_PRESERVING_FUNCTION_SPECIFIC_UNITS",
+      "basis": ["OD-R1-01", "OD-R2-01", "OD-SC-07"],
+      "identification": "owner_accepted_structural_baseline",
+      "causal_limit": "unit composition cannot create shared observations, authority, private state, or collective policy",
+      "sensitivity_overlay_id": "SENS-0616-NARROWER-UNIT-SET"
+    },
+    {
+      "id": "SV-0616-OFFICE-CAPACITY",
+      "family": "office_capacity",
+      "allowed_domain": [
+        "CAPACITY_QUALIFIED_AUTHORITY_AND_ROUTES",
+        "OFFICE_ABSENT_OR_DELAYED_COVERAGE",
+        "EVIDENCE_SUPPORTED_CONCURRENT_CAPACITY"
+      ],
+      "selection": "CAPACITY_QUALIFIED_AUTHORITY_AND_ROUTES",
+      "basis": ["0616-R1-C07", "0616-R2-C31", "0616-R2-C32", "OD-SC-07"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "office title or appointment never supplies availability, access, delivery, or authority outside the effective capacity",
+      "sensitivity_overlay_id": "SENS-0616-OFFICE-COVERAGE-DELAY"
+    },
+    {
+      "id": "SV-0616-TECHNICAL-RESULT",
+      "family": "technical_result",
+      "allowed_domain": [
+        "AUTHORITY_PRESTATE_ACCESS_AND_FEASIBILITY_ADJUDICATED",
+        "DELAYED_OR_PARTIAL_RESULT",
+        "NO_EFFECT_OR_ADVERSE_RESULT",
+        "RECURRENT_ACTIVITY_AFTER_RESULT"
+      ],
+      "selection": "AUTHORITY_PRESTATE_ACCESS_AND_FEASIBILITY_ADJUDICATED",
+      "basis": ["OD-SC-07", "OD-CM-06"],
+      "identification": "accepted_result_policy_family_not_realized_outcome",
+      "causal_limit": "the selection defines adjudication dimensions and never selects the realized technical result",
+      "sensitivity_overlay_id": "SENS-0616-TECHNICAL-NO-EFFECT"
+    },
+    {
+      "id": "SV-0616-NOTIFICATION",
+      "family": "notification",
+      "allowed_domain": [
+        "PLANNING_AUTHORIZATION_ISSUE_DELIVERY_SEPARATED",
+        "DELAYED_OR_DECLINED_AUTHORIZATION",
+        "PARTIAL_OR_FAILED_DELIVERY",
+        "CORRECTED_DELIVERY"
+      ],
+      "selection": "PLANNING_AUTHORIZATION_ISSUE_DELIVERY_SEPARATED",
+      "basis": ["0616-FR-C04", "0616-R2-C20", "0616-R2-C21", "0616-R2-C22", "0616-R2-C23", "0616-R2-C24"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "planning, advice, authorization, issue, delivery, correction, and patient receipt remain different objects and results",
+      "sensitivity_overlay_id": "SENS-0616-NOTIFICATION-PARTIAL"
+    }
+  ],
+  "variant_materialization": {
+    "attack_pressure_profile": {
+      "selection": "bounded_adversarial_opportunity_process",
+      "opportunity_schedule": "bounded_opportunities_admitted_by_exogenous_input",
+      "realized_result": "adjudicated_not_selected"
+    },
+    "route_delivery_profile": {
+      "selection": "distinct_named_routes_with_explicit_delivery",
+      "delivery_result": "adjudicated_per_explicitly_addressed_message"
+    },
+    "active_population_actor_ids": [
+      "actor.0616.unit.technical.security-engineering",
+      "actor.0616.unit.technical.infrastructure-citrix",
+      "actor.0616.unit.technical.scm-application-database",
+      "actor.0616.unit.operations.infrastructure-coordination",
+      "actor.0616.unit.operations.application-scm-coordination",
+      "actor.0616.unit.operations.cluster-coordination"
+    ],
+    "inactive_population_actor_rule": "declared assignments and route endpoints remain referentially valid but are ineligible for issue, delivery, observation, or action",
+    "office_capacity_profile": {
+      "selection": "capacity_qualified_authority_and_routes",
+      "unavailable_actor_ids": [],
+      "availability_gate": "opening_record_then_admitted_capacity_change"
+    },
+    "technical_result_profile": {
+      "selection": "authority_prestate_access_and_feasibility_adjudicated",
+      "realized_result": "adjudicated_not_selected"
+    },
+    "notification_profile": {
+      "selection": "planning_authorization_issue_delivery_separated",
+      "realized_delivery_result": "adjudicated_not_selected"
+    },
+    "overlay_precedence": "an applied overlay replaces only its named fields; all unmentioned fields and causal limits remain unchanged"
+  },
+  "canonical_institutions": [
+    {
+      "id": "institution.0616.ihis",
+      "name": "Integrated Health Information Systems",
+      "resource_owner_id": "resource-owner.0616.ihis"
+    },
+    {
+      "id": "institution.0616.singhealth",
+      "name": "Singapore Health Services",
+      "resource_owner_id": "resource-owner.0616.singhealth"
+    },
+    {
+      "id": "institution.0616.moh",
+      "name": "Ministry of Health",
+      "resource_owner_id": "resource-owner.0616.moh",
+      "participant_disposition": "distinct_routed_institutional_process"
+    },
+    {
+      "id": "institution.0616.mci",
+      "name": "Ministry of Communications and Information",
+      "resource_owner_id": "resource-owner.0616.mci",
+      "participant_disposition": "distinct_routed_institutional_process"
+    },
+    {
+      "id": "institution.0616.csa",
+      "name": "Cyber Security Agency of Singapore",
+      "resource_owner_id": "resource-owner.0616.csa",
+      "participant_disposition": "distinct_routed_institutional_process"
+    }
+  ],
+  "scenario_processes": [
+    "process.0616.attack",
+    "process.0616.technical-state-and-monitoring",
+    "process.0616.information-route-and-delivery",
+    "process.0616.incident-and-response",
+    "process.0616.meeting-and-assignment",
+    "process.0616.notification",
+    "process.0616.affected-cohort"
+  ],
+  "named_actors": [
+    {
+      "entity_id": "entity.0616.office.cluster-iso",
+      "actor_id": "actor.0616.office.cluster-iso",
+      "participant_product_id": "h2epr.agent-definition.0616.cluster-information-security-officer",
+      "capability_id": "cluster_information_security_officer",
+      "capacity_ids": ["capacity.0616.ihis.cluster-iso"],
+      "primary_institution_id": "institution.0616.ihis",
+      "additional_route_institution_ids": ["institution.0616.singhealth"],
+      "authority_graph_id": "authority.0616.office.cluster-iso",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0616.office.sector-lead",
+      "actor_id": "actor.0616.office.sector-lead",
+      "participant_product_id": "h2epr.agent-definition.0616.cyber-security-governance-director-and-healthcare-sector-lead",
+      "capability_id": "cyber_security_governance_director_and_healthcare_sector_lead",
+      "capacity_ids": ["capacity.0616.ihis.csg-director", "capacity.0616.moh.healthcare-sector-lead"],
+      "primary_institution_id": "institution.0616.ihis",
+      "additional_route_institution_ids": ["institution.0616.moh", "institution.0616.csa"],
+      "authority_graph_id": "authority.0616.office.sector-lead",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0616.office.ihis-ceo",
+      "actor_id": "actor.0616.office.ihis-ceo",
+      "participant_product_id": "h2epr.agent-definition.0616.ihis-chief-executive-officer",
+      "capability_id": "ihis_chief_executive_officer",
+      "capacity_ids": ["capacity.0616.ihis.ceo", "capacity.0616.moh.cio"],
+      "primary_institution_id": "institution.0616.ihis",
+      "additional_route_institution_ids": ["institution.0616.moh"],
+      "authority_graph_id": "authority.0616.office.ihis-ceo",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0616.office.sirm",
+      "actor_id": "actor.0616.office.sirm",
+      "participant_product_id": "h2epr.agent-definition.0616.security-incident-response-manager",
+      "capability_id": "security_incident_response_manager",
+      "capacity_ids": ["capacity.0616.ihis.sirm"],
+      "primary_institution_id": "institution.0616.ihis",
+      "additional_route_institution_ids": [],
+      "authority_graph_id": "authority.0616.office.sirm",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0616.office.singhealth-deputy-gceo",
+      "actor_id": "actor.0616.office.singhealth-deputy-gceo",
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-deputy-group-chief-executive-officer",
+      "capability_id": "singhealth_deputy_group_chief_executive_officer",
+      "capacity_ids": ["capacity.0616.singhealth.deputy-gceo"],
+      "primary_institution_id": "institution.0616.singhealth",
+      "additional_route_institution_ids": ["institution.0616.moh"],
+      "authority_graph_id": "authority.0616.office.singhealth-deputy-gceo",
+      "resource_owner_id": "resource-owner.0616.singhealth",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0616.office.singhealth-gceo",
+      "actor_id": "actor.0616.office.singhealth-gceo",
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-group-chief-executive-officer",
+      "capability_id": "singhealth_group_chief_executive_officer",
+      "capacity_ids": ["capacity.0616.singhealth.gceo"],
+      "primary_institution_id": "institution.0616.singhealth",
+      "additional_route_institution_ids": ["institution.0616.moh"],
+      "authority_graph_id": "authority.0616.office.singhealth-gceo",
+      "resource_owner_id": "resource-owner.0616.singhealth",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0616.office.singhealth-gcio",
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-group-chief-information-officer",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "capacity_ids": ["capacity.0616.ihis.gcio-service-lead", "capacity.0616.singhealth.gcio"],
+      "primary_institution_id": "institution.0616.ihis",
+      "additional_route_institution_ids": ["institution.0616.singhealth"],
+      "authority_graph_id": "authority.0616.office.singhealth-gcio",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "private_state_initialization": "definition_declared_default"
+    }
+  ],
+  "population_actors": [
+    {
+      "entity_id": "entity.0616.unit.technical.security-engineering",
+      "actor_id": "actor.0616.unit.technical.security-engineering",
+      "unit_id": "unit.0616.technical.security-engineering",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "capacity_id": "capacity.0616.unit.technical.security-engineering",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.technical.security-engineering",
+      "authority_graph_id": "authority.0616.unit.technical.security-engineering",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "weighting": "none"
+    },
+    {
+      "entity_id": "entity.0616.unit.technical.infrastructure-citrix",
+      "actor_id": "actor.0616.unit.technical.infrastructure-citrix",
+      "unit_id": "unit.0616.technical.infrastructure-citrix",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "capacity_id": "capacity.0616.unit.technical.infrastructure-citrix",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.technical.infrastructure-citrix",
+      "authority_graph_id": "authority.0616.unit.technical.infrastructure-citrix",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "weighting": "none"
+    },
+    {
+      "entity_id": "entity.0616.unit.technical.scm-application-database",
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "unit_id": "unit.0616.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "capacity_id": "capacity.0616.unit.technical.scm-application-database",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.technical.scm-application-database",
+      "authority_graph_id": "authority.0616.unit.technical.scm-application-database",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "weighting": "none"
+    },
+    {
+      "entity_id": "entity.0616.unit.operations.infrastructure-coordination",
+      "actor_id": "actor.0616.unit.operations.infrastructure-coordination",
+      "unit_id": "unit.0616.operations.infrastructure-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "capacity_id": "capacity.0616.unit.operations.infrastructure-coordination",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.operations.infrastructure-coordination",
+      "authority_graph_id": "authority.0616.unit.operations.infrastructure-coordination",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "weighting": "none"
+    },
+    {
+      "entity_id": "entity.0616.unit.operations.application-scm-coordination",
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "unit_id": "unit.0616.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "capacity_id": "capacity.0616.unit.operations.application-scm-coordination",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.operations.application-scm-coordination",
+      "authority_graph_id": "authority.0616.unit.operations.application-scm-coordination",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "weighting": "none"
+    },
+    {
+      "entity_id": "entity.0616.unit.operations.cluster-coordination",
+      "actor_id": "actor.0616.unit.operations.cluster-coordination",
+      "unit_id": "unit.0616.operations.cluster-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "capacity_id": "capacity.0616.unit.operations.cluster-coordination",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.operations.cluster-coordination",
+      "authority_graph_id": "authority.0616.unit.operations.cluster-coordination",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "weighting": "none"
+    }
+  ],
+  "population_units": [
+    {
+      "unit_id": "unit.0616.technical.security-engineering",
+      "actor_id": "actor.0616.unit.technical.security-engineering",
+      "population_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "host_institution_id": "institution.0616.ihis",
+      "functional_type": "security_engineering",
+      "assignment_id": "opening.0616.assignment.technical.security-engineering",
+      "capacity_id": "capacity.0616.unit.technical.security-engineering",
+      "availability_record_id": "opening.0616.assignment.technical.security-engineering",
+      "composition": "one_semantic_responsibility_unit_actor",
+      "access_mode": "assigned_technical_action_and_observation_scope",
+      "access_scope_ids": ["asset.0616.host.supporting-context", "asset.0616.account.assigned-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "opening_private_state": "definition_declared_default"
+    },
+    {
+      "unit_id": "unit.0616.technical.infrastructure-citrix",
+      "actor_id": "actor.0616.unit.technical.infrastructure-citrix",
+      "population_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "host_institution_id": "institution.0616.ihis",
+      "functional_type": "infrastructure_and_citrix",
+      "assignment_id": "opening.0616.assignment.technical.infrastructure-citrix",
+      "capacity_id": "capacity.0616.unit.technical.infrastructure-citrix",
+      "availability_record_id": "opening.0616.assignment.technical.infrastructure-citrix",
+      "composition": "one_semantic_responsibility_unit_actor",
+      "access_mode": "assigned_technical_action_and_observation_scope",
+      "access_scope_ids": ["asset.0616.host.supporting-context", "asset.0616.account.assigned-context", "asset.0616.credential.assigned-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "opening_private_state": "definition_declared_default"
+    },
+    {
+      "unit_id": "unit.0616.technical.scm-application-database",
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "population_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "host_institution_id": "institution.0616.ihis",
+      "functional_type": "scm_application_and_database",
+      "assignment_id": "opening.0616.assignment.technical.scm-application-database",
+      "capacity_id": "capacity.0616.unit.technical.scm-application-database",
+      "availability_record_id": "opening.0616.assignment.technical.scm-application-database",
+      "composition": "one_semantic_responsibility_unit_actor",
+      "access_mode": "assigned_technical_action_and_observation_scope",
+      "access_scope_ids": ["asset.0616.system.scm", "asset.0616.application.scm", "asset.0616.database.scm", "asset.0616.account.assigned-context", "asset.0616.credential.assigned-context", "asset.0616.monitoring-control.assigned-context"],
+      "opening_private_state": "definition_declared_default"
+    },
+    {
+      "unit_id": "unit.0616.operations.infrastructure-coordination",
+      "actor_id": "actor.0616.unit.operations.infrastructure-coordination",
+      "population_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "host_institution_id": "institution.0616.ihis",
+      "functional_type": "infrastructure_coordination",
+      "assignment_id": "opening.0616.assignment.operations.infrastructure-coordination",
+      "capacity_id": "capacity.0616.unit.operations.infrastructure-coordination",
+      "availability_record_id": "opening.0616.assignment.operations.infrastructure-coordination",
+      "composition": "one_semantic_responsibility_unit_actor",
+      "access_mode": "coordination_context_only",
+      "access_scope_ids": ["asset.0616.host.supporting-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "opening_private_state": "definition_declared_default"
+    },
+    {
+      "unit_id": "unit.0616.operations.application-scm-coordination",
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "population_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "host_institution_id": "institution.0616.ihis",
+      "functional_type": "application_and_scm_service_coordination",
+      "assignment_id": "opening.0616.assignment.operations.application-scm-coordination",
+      "capacity_id": "capacity.0616.unit.operations.application-scm-coordination",
+      "availability_record_id": "opening.0616.assignment.operations.application-scm-coordination",
+      "composition": "one_semantic_responsibility_unit_actor",
+      "access_mode": "coordination_context_only",
+      "access_scope_ids": ["asset.0616.system.scm", "asset.0616.application.scm", "asset.0616.database.scm"],
+      "opening_private_state": "definition_declared_default"
+    },
+    {
+      "unit_id": "unit.0616.operations.cluster-coordination",
+      "actor_id": "actor.0616.unit.operations.cluster-coordination",
+      "population_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "host_institution_id": "institution.0616.ihis",
+      "functional_type": "singhealth_cluster_operational_coordination",
+      "assignment_id": "opening.0616.assignment.operations.cluster-coordination",
+      "capacity_id": "capacity.0616.unit.operations.cluster-coordination",
+      "availability_record_id": "opening.0616.assignment.operations.cluster-coordination",
+      "composition": "one_semantic_responsibility_unit_actor",
+      "access_mode": "coordination_context_only",
+      "access_scope_ids": ["asset.0616.system.scm", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "opening_private_state": "definition_declared_default"
+    }
+  ],
+  "technical_assets": [
+    {"id": "asset.0616.system.scm", "kind": "system", "owning_institution_id": "institution.0616.singhealth", "operating_institution_id": "institution.0616.ihis", "identity_scope": "canonical_scm_system"},
+    {"id": "asset.0616.application.scm", "kind": "application", "owning_institution_id": "institution.0616.singhealth", "operating_institution_id": "institution.0616.ihis", "identity_scope": "canonical_scm_application"},
+    {"id": "asset.0616.database.scm", "kind": "database", "owning_institution_id": "institution.0616.singhealth", "operating_institution_id": "institution.0616.ihis", "identity_scope": "canonical_scm_database"},
+    {"id": "asset.0616.host.supporting-context", "kind": "host_context", "owning_institution_id": null, "ownership_identification": "explicit_unknown_within_ihis_operated_singhealth_context", "operating_institution_id": "institution.0616.ihis", "identity_scope": "bounded_envelope_not_host_enumeration"},
+    {"id": "asset.0616.account.assigned-context", "kind": "account_context", "owning_institution_id": null, "ownership_identification": "explicit_unknown_within_ihis_operated_singhealth_context", "operating_institution_id": "institution.0616.ihis", "identity_scope": "bounded_envelope_not_account_enumeration"},
+    {"id": "asset.0616.credential.assigned-context", "kind": "credential_context", "owning_institution_id": null, "ownership_identification": "explicit_unknown_within_ihis_operated_singhealth_context", "operating_institution_id": "institution.0616.ihis", "identity_scope": "bounded_envelope_not_credential_enumeration"},
+    {"id": "asset.0616.network.assigned-route-context", "kind": "network_route_context", "owning_institution_id": null, "ownership_identification": "explicit_unknown_within_ihis_operated_singhealth_context", "operating_institution_id": "institution.0616.ihis", "identity_scope": "bounded_envelope_not_route_enumeration"},
+    {"id": "asset.0616.monitoring-control.assigned-context", "kind": "monitoring_and_control_context", "owning_institution_id": null, "ownership_identification": "explicit_unknown_within_ihis_operated_singhealth_context", "operating_institution_id": "institution.0616.ihis", "identity_scope": "bounded_envelope_not_control_enumeration"}
+  ],
+  "initial_records": [
+    {
+      "id": "opening.0616.authority.cluster-iso",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "actor.0616.office.cluster-iso",
+      "capacity_scopes": [{"capacity_id": "capacity.0616.ihis.cluster-iso", "institution_id": "institution.0616.ihis"}],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_admitted_capacity_change",
+      "value": "effective_subject_to_capacity_and_scope",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R1-C13", "OD-SC-07", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.authority.sector-lead",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "actor.0616.office.sector-lead",
+      "capacity_scopes": [
+        {"capacity_id": "capacity.0616.ihis.csg-director", "institution_id": "institution.0616.ihis"},
+        {"capacity_id": "capacity.0616.moh.healthcare-sector-lead", "institution_id": "institution.0616.moh"}
+      ],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_capacity_selection_per_intent_and_admitted_change",
+      "value": "capacity_qualified_ihis_and_healthcare_route",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R2-C10", "0616-R2-C32", "OD-SC-07", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.authority.ihis-ceo",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "actor.0616.office.ihis-ceo",
+      "capacity_scopes": [
+        {"capacity_id": "capacity.0616.ihis.ceo", "institution_id": "institution.0616.ihis"},
+        {"capacity_id": "capacity.0616.moh.cio", "institution_id": "institution.0616.moh"}
+      ],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_capacity_selection_per_intent_and_admitted_change",
+      "value": "capacity_qualified_executive_authority",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R2-C11", "0616-R2-C31", "OD-SC-07", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.authority.sirm",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "actor.0616.office.sirm",
+      "capacity_scopes": [{"capacity_id": "capacity.0616.ihis.sirm", "institution_id": "institution.0616.ihis"}],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_admitted_absence_or_coverage_change",
+      "value": "effective_subject_to_availability_and_coverage",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R1-C01", "0616-R1-C07", "OD-SC-07", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.authority.singhealth-deputy-gceo",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.singhealth",
+      "target_id": "actor.0616.office.singhealth-deputy-gceo",
+      "capacity_scopes": [{"capacity_id": "capacity.0616.singhealth.deputy-gceo", "institution_id": "institution.0616.singhealth"}],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_admitted_capacity_change",
+      "value": "effective_singhealth_supervisory_route",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R2-C18", "0616-R2-C20", "0616-R2-C21", "0616-R2-C22", "0616-R2-C23", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.authority.singhealth-gceo",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.singhealth",
+      "target_id": "actor.0616.office.singhealth-gceo",
+      "capacity_scopes": [{"capacity_id": "capacity.0616.singhealth.gceo", "institution_id": "institution.0616.singhealth"}],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_admitted_capacity_change",
+      "value": "effective_singhealth_executive_route",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R2-C19", "0616-R2-C20", "0616-R2-C22", "0616-R2-C23", "0616-R2-C24", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.authority.singhealth-gcio",
+      "family": "authority_and_capacity",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "actor.0616.office.singhealth-gcio",
+      "capacity_scopes": [
+        {"capacity_id": "capacity.0616.ihis.gcio-service-lead", "institution_id": "institution.0616.ihis"},
+        {"capacity_id": "capacity.0616.singhealth.gcio", "institution_id": "institution.0616.singhealth"}
+      ],
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_tenure"},
+      "availability": "available_subject_to_capacity_selection_per_intent_and_admitted_change",
+      "value": "dual_accountability_without_shared_knowledge_or_authority",
+      "identification": "evidence_bounded_configuration_baseline",
+      "visibility": "office_and_eligible_routes",
+      "source_class": "accepted_participant_evidence_and_configuration_selection",
+      "basis": ["0616-R2-C08", "0616-R2-C09", "0616-R2-C17", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.assignment.technical.security-engineering",
+      "family": "unit_assignment",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "unit.0616.technical.security-engineering",
+      "capacity_id": "capacity.0616.unit.technical.security-engineering",
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_staffing"},
+      "availability": "available_for_eligible_configuration_opportunities",
+      "access_scope_ids": ["asset.0616.host.supporting-context", "asset.0616.account.assigned-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "value": "assigned_security_engineering_scope",
+      "identification": "mechanism_coverage_construction",
+      "visibility": "unit_and_authorized_routes",
+      "source_class": "configuration_selection",
+      "basis": ["0616-R1-C03", "0616-R1-C14", "0616-R1-C17", "OD-R1-01", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.assignment.technical.infrastructure-citrix",
+      "family": "unit_assignment",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "unit.0616.technical.infrastructure-citrix",
+      "capacity_id": "capacity.0616.unit.technical.infrastructure-citrix",
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_staffing"},
+      "availability": "available_for_eligible_configuration_opportunities",
+      "access_scope_ids": ["asset.0616.host.supporting-context", "asset.0616.account.assigned-context", "asset.0616.credential.assigned-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "value": "assigned_infrastructure_and_citrix_scope",
+      "identification": "mechanism_coverage_construction",
+      "visibility": "unit_and_authorized_routes",
+      "source_class": "configuration_selection",
+      "basis": ["0616-R1-C04", "0616-R1-C05", "0616-R1-C17", "OD-R1-01", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.assignment.technical.scm-application-database",
+      "family": "unit_assignment",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "unit.0616.technical.scm-application-database",
+      "capacity_id": "capacity.0616.unit.technical.scm-application-database",
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_staffing"},
+      "availability": "available_for_eligible_configuration_opportunities",
+      "access_scope_ids": ["asset.0616.system.scm", "asset.0616.application.scm", "asset.0616.database.scm", "asset.0616.account.assigned-context", "asset.0616.credential.assigned-context", "asset.0616.monitoring-control.assigned-context"],
+      "value": "assigned_scm_application_and_database_scope",
+      "identification": "mechanism_coverage_construction",
+      "visibility": "unit_and_authorized_routes",
+      "source_class": "configuration_selection",
+      "basis": ["0616-R1-C06", "0616-R1-C16", "0616-R2-C02", "OD-R1-01", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.assignment.operations.infrastructure-coordination",
+      "family": "unit_assignment",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "unit.0616.operations.infrastructure-coordination",
+      "capacity_id": "capacity.0616.unit.operations.infrastructure-coordination",
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_staffing"},
+      "availability": "available_for_eligible_configuration_opportunities",
+      "access_scope_ids": ["asset.0616.host.supporting-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "value": "assigned_infrastructure_coordination_scope",
+      "identification": "mechanism_coverage_construction",
+      "visibility": "unit_and_authorized_routes",
+      "source_class": "configuration_selection",
+      "basis": ["0616-R2-C01", "0616-R2-C03", "0616-R2-C05", "0616-R2-C06", "OD-R2-01", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.assignment.operations.application-scm-coordination",
+      "family": "unit_assignment",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "unit.0616.operations.application-scm-coordination",
+      "capacity_id": "capacity.0616.unit.operations.application-scm-coordination",
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_staffing"},
+      "availability": "available_for_eligible_configuration_opportunities",
+      "access_scope_ids": ["asset.0616.system.scm", "asset.0616.application.scm", "asset.0616.database.scm"],
+      "value": "assigned_application_and_scm_coordination_scope",
+      "identification": "mechanism_coverage_construction",
+      "visibility": "unit_and_authorized_routes",
+      "source_class": "configuration_selection",
+      "basis": ["0616-R2-C02", "0616-R2-C04", "0616-R2-C07", "0616-R2-C25", "OD-R2-01", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.assignment.operations.cluster-coordination",
+      "family": "unit_assignment",
+      "owner_id": "institution.0616.ihis",
+      "target_id": "unit.0616.operations.cluster-coordination",
+      "capacity_id": "capacity.0616.unit.operations.cluster-coordination",
+      "effective_interval": {"start": "2017-08-23", "end": "2018-07-23", "precision": "configuration_boundary_not_historical_staffing"},
+      "availability": "available_for_eligible_configuration_opportunities",
+      "access_scope_ids": ["asset.0616.system.scm", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "value": "assigned_singhealth_cluster_coordination_scope",
+      "identification": "mechanism_coverage_construction",
+      "visibility": "unit_and_authorized_routes",
+      "source_class": "configuration_selection",
+      "basis": ["0616-R2-C01", "0616-R2-C03", "0616-FR-C07", "OD-R2-01", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.relationship.ihis-singhealth-scm",
+      "family": "institutional_relationship",
+      "owner_id": "process.0616.incident-and-response",
+      "parties": ["institution.0616.ihis", "institution.0616.singhealth"],
+      "value": "ihis_operates_scm_singhealth_retains_ownership_and_supervision",
+      "identification": "evidence_supported",
+      "visibility": "role_scoped",
+      "source_class": "accepted_event_evidence",
+      "basis": ["0616-FR-C05", "0616-FR-C06", "0616-FR-C07", "0616-FR-C08"]
+    },
+    {
+      "id": "opening.0616.route.technical-security",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {
+        "side_a": ["actor.0616.unit.technical.security-engineering", "actor.0616.unit.technical.infrastructure-citrix", "actor.0616.unit.technical.scm-application-database"],
+        "side_b": ["actor.0616.office.sirm", "actor.0616.office.cluster-iso"]
+      },
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "eligible_subject_to_sender_recipient_scope_and_delivery",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R1-C02", "0616-R1-C03", "0616-R1-C04", "0616-R1-C14"]
+    },
+    {
+      "id": "opening.0616.route.technical-operations",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {
+        "side_a": ["actor.0616.unit.technical.security-engineering", "actor.0616.unit.technical.infrastructure-citrix", "actor.0616.unit.technical.scm-application-database"],
+        "side_b": ["actor.0616.unit.operations.infrastructure-coordination", "actor.0616.unit.operations.application-scm-coordination", "actor.0616.unit.operations.cluster-coordination"]
+      },
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "eligible_subject_to_assignment_scope_and_delivery",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R1-C04", "0616-R1-C05", "0616-R1-C06", "0616-R2-C03", "0616-R2-C04"]
+    },
+    {
+      "id": "opening.0616.route.operations-gcio",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {
+        "side_a": ["actor.0616.unit.operations.infrastructure-coordination", "actor.0616.unit.operations.application-scm-coordination", "actor.0616.unit.operations.cluster-coordination"],
+        "side_b": ["actor.0616.office.singhealth-gcio"]
+      },
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "eligible_subject_to_assignment_capacity_and_delivery",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R2-C04", "0616-R2-C05", "0616-R2-C06", "0616-R2-C07", "0616-R2-C09"]
+    },
+    {
+      "id": "opening.0616.route.gcio-ihis",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {
+        "side_a": ["actor.0616.office.singhealth-gcio"],
+        "side_b": ["actor.0616.office.ihis-ceo", "actor.0616.office.sector-lead"]
+      },
+      "required_sender_capacity_id": "capacity.0616.ihis.gcio-service-lead",
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "ihis_accountability_route_with_distinct_recipient_histories",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R2-C08", "0616-R2-C09"]
+    },
+    {
+      "id": "opening.0616.route.gcio-singhealth",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {
+        "side_a": ["actor.0616.office.singhealth-gcio"],
+        "side_b": ["actor.0616.office.singhealth-deputy-gceo", "actor.0616.office.singhealth-gceo"]
+      },
+      "required_sender_capacity_id": "capacity.0616.singhealth.gcio",
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "singhealth_accountability_route_with_distinct_recipient_histories",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R2-C08", "0616-R2-C17", "0616-R2-C18", "0616-R2-C19"]
+    },
+    {
+      "id": "opening.0616.route.sector-csa",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {"side_a": ["actor.0616.office.sector-lead"], "side_b": ["institution.0616.csa"]},
+      "required_sender_capacity_id": "capacity.0616.moh.healthcare-sector-lead",
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "eligible_subject_to_capacity_scope_and_delivery",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R2-C10", "0616-R2-C12", "0616-R2-C14", "0616-R2-C16"]
+    },
+    {
+      "id": "opening.0616.route.singhealth-moh",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {
+        "side_a": ["actor.0616.office.singhealth-gcio", "actor.0616.office.singhealth-deputy-gceo", "actor.0616.office.singhealth-gceo"],
+        "side_b": ["institution.0616.moh"]
+      },
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast",
+      "value": "eligible_subject_to_sender_capacity_authority_and_delivery",
+      "identification": "evidence_supported",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_participant_evidence",
+      "basis": ["0616-R2-C17", "0616-R2-C18", "0616-R2-C19", "0616-R2-C20", "0616-R2-C21", "0616-R2-C22", "0616-R2-C23", "0616-R2-C24"]
+    },
+    {
+      "id": "opening.0616.route.institutional-mci",
+      "family": "institutional_route",
+      "owner_id": "process.0616.information-route-and-delivery",
+      "endpoints": {"side_a": ["institution.0616.singhealth"], "side_b": ["institution.0616.mci"]},
+      "directionality": "bidirectional_explicit_address_only",
+      "addressing_rule": "one_exact_issuing_institutional_process_and_one_exact_recipient_institution_per_message",
+      "value": "distinct_route_not_shared_with_moh_or_csa",
+      "identification": "evidence_bounded",
+      "visibility": "addressed_route_parties_only",
+      "source_class": "accepted_event_evidence",
+      "basis": ["0616-FR-C14", "0616-FR-C15"]
+    },
+    {
+      "id": "opening.0616.technical.system.scm",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.system.scm",
+      "value": "identity_present_operational_and_security_state_explicitly_unknown",
+      "identification": "evidence_bounded_with_explicit_unknowns",
+      "visibility": "assigned_units_only_after_eligible_projection",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C05", "0616-FR-C06", "0616-FR-C08", "0616-FR-C09", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.application.scm",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.application.scm",
+      "value": "identity_present_operational_and_security_state_explicitly_unknown",
+      "identification": "evidence_bounded_with_explicit_unknowns",
+      "visibility": "assigned_units_only_after_eligible_projection",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C05", "0616-FR-C06", "0616-FR-C08", "0616-FR-C09", "0616-R2-C02", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.database.scm",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.database.scm",
+      "value": "identity_present_operational_and_security_state_explicitly_unknown",
+      "identification": "evidence_bounded_with_explicit_unknowns",
+      "visibility": "assigned_units_only_after_eligible_projection",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C05", "0616-FR-C06", "0616-FR-C08", "0616-FR-C09", "0616-R1-C06", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.host-context",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.host.supporting-context",
+      "value": "exact_instances_and_prestate_unknown_until_admitted_context",
+      "identification": "bounded_identity_envelope_with_explicit_unknowns",
+      "visibility": "assignment_and_access_scoped_after_delivery",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C09", "0616-FR-C17", "0616-R1-C03", "0616-R1-C04", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.account-context",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.account.assigned-context",
+      "value": "exact_instances_assignments_and_prestate_unknown_until_admitted_context",
+      "identification": "bounded_identity_envelope_with_explicit_unknowns",
+      "visibility": "assignment_and_access_scoped_after_delivery",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C09", "0616-R1-C04", "0616-R1-C17", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.credential-context",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.credential.assigned-context",
+      "value": "exact_instances_assignments_and_prestate_unknown_until_admitted_context",
+      "identification": "bounded_identity_envelope_with_explicit_unknowns",
+      "visibility": "assignment_and_access_scoped_after_delivery",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C09", "0616-R1-C04", "0616-R1-C17", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.network-route-context",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.network.assigned-route-context",
+      "value": "exact_routes_reachability_and_prestate_unknown_until_admitted_context",
+      "identification": "bounded_identity_envelope_with_explicit_unknowns",
+      "visibility": "assignment_and_access_scoped_after_delivery",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C09", "0616-FR-C17", "0616-R1-C03", "0616-R1-C17", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.technical.monitoring-control-context",
+      "family": "technical_asset_state",
+      "owner_id": "process.0616.technical-state-and-monitoring",
+      "target_id": "asset.0616.monitoring-control.assigned-context",
+      "value": "exact_controls_coverage_and_prestate_unknown_until_admitted_context",
+      "identification": "bounded_identity_envelope_with_explicit_unknowns",
+      "visibility": "assignment_and_access_scoped_after_delivery",
+      "source_class": "accepted_event_evidence_and_configuration_identity",
+      "basis": ["0616-FR-C17", "0616-FR-C18", "0616-R1-C03", "0616-R1-C06", "0616-R1-C16", "0616-R1-C17", "OD-CFG-07"]
+    },
+    {
+      "id": "opening.0616.incident-process",
+      "family": "business_object_state",
+      "owner_id": "process.0616.incident-and-response",
+      "target_id": "process.0616.incident-and-response",
+      "value": "no_authoritative_incident_object_open_at_modeled_start",
+      "identification": "configuration_selection_consistent_with_boundary",
+      "visibility": "process_truth_only",
+      "source_class": "configuration_selection",
+      "basis": ["OD-CFG-05", "OD-CFG-07", "OD-SC-07"]
+    },
+    {
+      "id": "opening.0616.notification-process",
+      "family": "business_object_state",
+      "owner_id": "process.0616.notification",
+      "target_id": "process.0616.notification",
+      "value": "no_plan_authorization_issue_or_delivery_object_open_at_modeled_start",
+      "identification": "configuration_selection_consistent_with_boundary",
+      "visibility": "process_truth_only",
+      "source_class": "configuration_selection",
+      "basis": ["OD-CFG-05", "OD-CFG-07", "OD-SC-07"]
+    },
+    {
+      "id": "opening.0616.affected-cohort",
+      "family": "affected_cohort_state",
+      "owner_id": "process.0616.affected-cohort",
+      "target_id": "process.0616.affected-cohort",
+      "value": "no_authoritative_exposure_or_notification_delivery_result_open_at_modeled_start",
+      "identification": "configuration_selection_consistent_with_boundary",
+      "visibility": "process_truth_only",
+      "source_class": "configuration_selection",
+      "basis": ["OD-CFG-05", "OD-CFG-07", "OD-SC-07"]
+    }
+  ],
+  "exogenous_inputs": [
+    {
+      "id": "exo.0616.bounded-attack-opportunity",
+      "family": "bounded_attack_attempt",
+      "activation": {"window_start": "2017-08-23", "precision": "approximate_date_or_bounded_window"},
+      "target_kind": "scenario_process",
+      "target_ids": ["process.0616.attack"],
+      "typed_effect": "open_adjudicated_access_or_execution_attempt_opportunity",
+      "visibility": "none_until_a_technical_product_is_produced_and_delivered",
+      "basis": ["0616-FR-C01", "0616-FR-C02", "0616-FR-C03"],
+      "causal_limit": "does_not_select_success_persistence_scope_detection_query_copy_disclosure_or_containment",
+      "sensitivity_overlay_id": "SENS-0616-ATTACK-DELAY",
+      "outcome_forcing": false
+    },
+    {
+      "id": "exo.0616.endpoint-account-context",
+      "family": "endpoint_and_account_context",
+      "activation": {"condition": "admitted_technical_opportunity_requires_context"},
+      "target_kind": "technical_asset_set",
+      "target_ids": ["asset.0616.host.supporting-context", "asset.0616.account.assigned-context", "asset.0616.credential.assigned-context", "asset.0616.network.assigned-route-context", "asset.0616.monitoring-control.assigned-context"],
+      "typed_effect": "supply_bounded_precondition_context_to_exact_assets_and_only_then_to_assigned_eligible_units",
+      "visibility": "assignment_and_access_scoped_after_delivery",
+      "basis": ["0616-FR-C09", "0616-FR-C17"],
+      "causal_limit": "does_not_supply_endpoint_user_choice_attack_success_or_shared_technical_knowledge",
+      "sensitivity_overlay_id": null,
+      "outcome_forcing": false
+    },
+    {
+      "id": "exo.0616.institutional-framework-and-appointments",
+      "family": "institutional_framework_and_appointments",
+      "activation": {"condition": "modeled_boundary_or_later_effective_capacity_change"},
+      "target_kind": "authority_record_set",
+      "target_ids": [
+        "opening.0616.authority.cluster-iso",
+        "opening.0616.authority.sector-lead",
+        "opening.0616.authority.ihis-ceo",
+        "opening.0616.authority.sirm",
+        "opening.0616.authority.singhealth-deputy-gceo",
+        "opening.0616.authority.singhealth-gceo",
+        "opening.0616.authority.singhealth-gcio"
+      ],
+      "typed_effect": "version_effective_authority_capacity_and_route_context",
+      "visibility": "office_and_route_scoped",
+      "basis": ["0616-FR-C05", "0616-FR-C06", "0616-FR-C07", "0616-FR-C08", "0616-R2-C10", "0616-R2-C11", "0616-R2-C31", "0616-R2-C32"],
+      "causal_limit": "appointment_or_framework_never_supplies_information_delivery_or_participant_action",
+      "sensitivity_overlay_id": "SENS-0616-OFFICE-COVERAGE-DELAY",
+      "outcome_forcing": false
+    },
+    {
+      "id": "exo.0616.office-capacity-events",
+      "family": "office_availability_or_capacity",
+      "activation": {"condition": "accepted_capacity_record_becomes_effective_or_is_delivered"},
+      "target_kind": "authority_record_set",
+      "target_ids": ["opening.0616.authority.sirm", "opening.0616.authority.sector-lead", "opening.0616.authority.ihis-ceo"],
+      "typed_effect": "version_availability_coverage_or_capacity_qualification",
+      "visibility": "affected_office_and_named_routes_after_delivery",
+      "basis": ["0616-R1-C07", "0616-R2-C31", "0616-R2-C32"],
+      "causal_limit": "does_not_assume_delegation_access_or_response",
+      "sensitivity_overlay_id": "SENS-0616-OFFICE-COVERAGE-DELAY",
+      "outcome_forcing": false
+    },
+    {
+      "id": "exo.0616.government-response-opportunities",
+      "family": "government_and_institutional_response",
+      "activation": {"condition": "eligible_report_or_request_reaches_a_named_institutional_route"},
+      "target_kind": "institutional_route_set",
+      "target_ids": ["opening.0616.route.sector-csa", "opening.0616.route.singhealth-moh", "opening.0616.route.institutional-mci"],
+      "typed_effect": "admit_distinct_acknowledgement_coordination_or_authorization_result_opportunity",
+      "visibility": "recipient_specific_after_delivery",
+      "basis": ["0616-FR-C14", "0616-FR-C15"],
+      "causal_limit": "does_not_merge_institutions_or_guarantee_acknowledgement_coordination_authorization_or_action",
+      "sensitivity_overlay_id": "SENS-0616-ROUTE-DELAY",
+      "outcome_forcing": false
+    },
+    {
+      "id": "exo.0616.notification-authorization-and-delivery-opportunity",
+      "family": "notification_authorization_and_delivery",
+      "activation": {"condition": "eligible_outreach_plan_or_institutional_process_reaches_authorization_or_delivery_gate"},
+      "target_kind": "scenario_process",
+      "target_ids": ["process.0616.notification", "process.0616.affected-cohort"],
+      "typed_effect": "admit_authorization_issue_recipient_delivery_failure_or_correction_result_opportunity",
+      "visibility": "planning_offices_then_recipient_specific_after_delivery",
+      "basis": ["0616-FR-C04", "0616-R2-C20", "0616-R2-C21", "0616-R2-C22", "0616-R2-C23", "0616-R2-C24"],
+      "causal_limit": "does_not_select_plan_approval_issue_delivery_patient_receipt_or_historical_success",
+      "sensitivity_overlay_id": "SENS-0616-NOTIFICATION-PARTIAL",
+      "outcome_forcing": false
+    }
+  ],
+  "policy_selections": [
+    {"policy_id": "POL-0616-TIME-01", "semantic_version": "0.1.0", "selection": "event_driven_partial_order_with_declared_same_time_precedence", "definition_family": "clock_phase_order_and_reopening", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-INFO-01", "semantic_version": "0.1.0", "selection": "source_version_route_delivery_freshness_correction_and_visibility_separated", "definition_family": "information_production_routing_observation_and_correction", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-TECH-01", "semantic_version": "0.1.0", "selection": "authority_prestate_access_and_feasibility_adjudicated_without_selected_result", "definition_family": "technical_access_control_query_copy_disclosure_and_monitoring", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-ROUTE-01", "semantic_version": "0.1.0", "selection": "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement", "definition_family": "communication_escalation_reporting_and_feedback", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-COORD-01", "semantic_version": "0.1.0", "selection": "invitation_attendance_presented_material_assignment_and_result_separated", "definition_family": "meeting_coordination_sirt_and_assignment", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-AUTH-01", "semantic_version": "0.1.0", "selection": "capacity_qualified_authority_relationship_access_and_resource_checks", "definition_family": "institution_office_unit_authority_capacity_relationship_and_resource", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-INCIDENT-01", "semantic_version": "0.1.0", "selection": "proposal_assessment_category_report_and_institutional_acceptance_separated", "definition_family": "incident_assessment_category_reporting_and_executive_direction", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-LIFECYCLE-01", "semantic_version": "0.1.0", "selection": "typed_lifecycle_idempotency_adjudication_result_delta_and_later_observation", "definition_family": "eleven_shared_lifecycle_families_and_results", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0616-NOTIFY-01", "semantic_version": "0.1.0", "selection": "preparation_consultation_authorization_issue_delivery_and_correction_separated", "definition_family": "outreach_notification_and_affected_cohort", "implementation_status": "unbound", "execution_consequence": "fail_closed"}
+  ],
+  "sensitivity_overlays": [
+    {
+      "overlay_id": "SENS-0616-ATTACK-DELAY",
+      "uncertainty": "attack_opportunity_pressure_and_order",
+      "basis": ["0616-FR-C01", "0616-FR-C02", "0616-FR-C03"],
+      "operations": [
+        {"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0616-ATTACK-PRESSURE", "field": "selection", "replacement_value": "LOWER_OR_DELAYED_BOUNDED_OPPORTUNITY"},
+        {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "attack_pressure_profile", "replacement_value": {"selection": "lower_or_delayed_bounded_opportunity", "opportunity_schedule": "lower_or_delayed_opportunities_admitted_by_exogenous_input", "realized_result": "adjudicated_not_selected"}}
+      ],
+      "coupled_operations_disclosed": true
+    },
+    {
+      "overlay_id": "SENS-0616-ROUTE-DELAY",
+      "uncertainty": "route_availability_and_delivery_delay",
+      "basis": ["0616-FR-C11", "0616-FR-C12", "0616-FR-C14", "0616-FR-C15"],
+      "operations": [
+        {"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0616-ROUTE-DELIVERY", "field": "selection", "replacement_value": "ROUTE_DELAY_OR_FAILURE"},
+        {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "route_delivery_profile", "replacement_value": {"selection": "route_delay_or_failure", "delivery_result": "delayed_or_failed_per_explicitly_addressed_message"}}
+      ],
+      "coupled_operations_disclosed": true
+    },
+    {
+      "overlay_id": "SENS-0616-NARROWER-UNIT-SET",
+      "uncertainty": "responsibility_unit_composition",
+      "basis": ["OD-R1-01", "OD-R2-01", "OD-SC-07"],
+      "operations": [
+        {"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0616-RESPONSIBILITY-UNITS", "field": "selection", "replacement_value": "NARROWER_DECLARED_UNIT_SET_WITH_INFORMATION_LOSS"},
+        {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "active_population_actor_ids", "replacement_value": ["actor.0616.unit.technical.scm-application-database", "actor.0616.unit.operations.application-scm-coordination"]}
+      ],
+      "derived_effects": ["inactive unit assignments and route endpoints become ineligible under inactive_population_actor_rule"],
+      "coupled_operations_disclosed": true
+    },
+    {
+      "overlay_id": "SENS-0616-OFFICE-COVERAGE-DELAY",
+      "uncertainty": "office_availability_and_capacity_interpretation",
+      "basis": ["0616-R1-C07", "0616-R2-C31", "0616-R2-C32"],
+      "operations": [
+        {"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0616-OFFICE-CAPACITY", "field": "selection", "replacement_value": "OFFICE_ABSENT_OR_DELAYED_COVERAGE"},
+        {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "office_capacity_profile", "replacement_value": {"selection": "office_absent_or_delayed_coverage", "unavailable_actor_ids": ["actor.0616.office.sirm"], "availability_gate": "sirm_unavailable_until_admitted_capacity_change"}}
+      ],
+      "coupled_operations_disclosed": true
+    },
+    {
+      "overlay_id": "SENS-0616-TECHNICAL-NO-EFFECT",
+      "uncertainty": "technical_control_result",
+      "basis": ["OD-SC-07", "OD-CM-06"],
+      "operations": [
+        {"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0616-TECHNICAL-RESULT", "field": "selection", "replacement_value": "NO_EFFECT_OR_ADVERSE_RESULT"},
+        {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "technical_result_profile", "replacement_value": {"selection": "no_effect_or_adverse_result", "realized_result": "no_effect_or_adverse_result_branch"}}
+      ],
+      "coupled_operations_disclosed": true
+    },
+    {
+      "overlay_id": "SENS-0616-NOTIFICATION-PARTIAL",
+      "uncertainty": "notification_authorization_and_delivery",
+      "basis": ["0616-FR-C04", "0616-R2-C20", "0616-R2-C21", "0616-R2-C22", "0616-R2-C23", "0616-R2-C24"],
+      "operations": [
+        {"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0616-NOTIFICATION", "field": "selection", "replacement_value": "PARTIAL_OR_FAILED_DELIVERY"},
+        {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "notification_profile", "replacement_value": {"selection": "partial_or_failed_delivery", "realized_delivery_result": "partial_or_failed_delivery_branch"}}
+      ],
+      "coupled_operations_disclosed": true
+    }
+  ],
+  "bounded_lineage": {
+    "id": "lineage.0616.scm-technical-operations-gcio.v0_1",
+    "role": "illustrative_bounded_semantic_lineage",
+    "participant_ids": [
+      "actor.0616.unit.technical.scm-application-database",
+      "actor.0616.unit.operations.application-scm-coordination",
+      "actor.0616.office.singhealth-gcio"
+    ],
+    "route_ids": ["opening.0616.route.technical-operations", "opening.0616.route.operations-gcio"],
+    "semantic_intent_sequence": [
+      "technical_administration_and_line_security_staff.share_technical_finding",
+      "ihis_operational_and_scm_management.request_fact_verification",
+      "ihis_operational_and_scm_management.escalate_operational_concern",
+      "singhealth_group_chief_information_officer.request_operational_clarification"
+    ],
+    "required_separations": [
+      "intent_and_message",
+      "issue_and_delivery",
+      "delivery_and_acknowledgement",
+      "verification_request_and_result",
+      "escalation_and_recipient_interpretation",
+      "result_and_later_observation"
+    ],
+    "implementation_included": false,
+    "authorization_conferred_by_configuration": "none",
+    "full_roster_implication": "none"
+  },
+  "completion_policy": {
+    "normal": ["CORE_HORIZON_REACHED", "NOTIFICATION_OBSERVATION_HORIZON_REACHED", "EARLY_PROCESS_CLOSURE"],
+    "bounded_incomplete": "INCOMPLETE_WITH_PENDING_OBJECTS",
+    "pending_object_rule": "preserve_owner_state_version_reason_and_next_eligible_event",
+    "failed_closed": "INVARIANT_FAILURE",
+    "historical_outcome_required": false
+  },
+  "validation_expectations": {
+    "semantic_products": 9,
+    "decision_and_population_commitments": 29,
+    "observation_placements": 62,
+    "private_state_placements": 44,
+    "intent_placements": 54,
+    "lifecycle_families": 11,
+    "named_actors": 7,
+    "population_actors": 6,
+    "total_semantic_actor_instances": 13,
+    "population_units": 6,
+    "technical_assets": 8,
+    "canonical_institutions": 5,
+    "opening_records": 33,
+    "route_records": 8,
+    "structural_selections": 6,
+    "exogenous_inputs": 6,
+    "selected_policy_semantics": 9,
+    "sensitivity_overlays": 6,
+    "one_actor_per_office_or_unit": true,
+    "one_resource_owner_per_canonical_institution": true,
+    "host_scope_required_for_population_units": true,
+    "capacity_scope_required_for_office_authority": true,
+    "exact_addressing_required_for_routes": true,
+    "opening_record_basis_required": true,
+    "intent_result_separation_required": true,
+    "correction_preserves_prior_decision_basis": true,
+    "unresolved_active_objects_carried_at_horizon": true,
+    "deterministic_replay_required_before_execution": true,
+    "execution_eligible": false
+  }
+}
