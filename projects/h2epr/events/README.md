@@ -45,7 +45,7 @@ under several phase names.
 | Event | Coordination entry | Current position |
 |---|---|---|
 | `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline; retrospective frame evidence accepted. |
-| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Frame accepted; first detection-and-escalation participant batch complete. |
+| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Frame accepted; detection-and-escalation and classification-and-institutional-escalation participant batches complete. |
 
 ## README convention
 

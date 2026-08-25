@@ -2,9 +2,9 @@
 
 This is the coordination entry and accepted Event Build Brief for the second
 H2EPR event. The event frame remains accepted with its bounded temporal and
-representation decisions. The first small Roster-production batch for the
-technical detection and escalation chain is complete with three reviewed,
-non-executable participant products.
+representation decisions. Two participant batches now cover the technical
+detection-and-escalation chain and the classification-and-institutional-
+escalation chain through SingHealth patient-communication planning.
 
 The event follows a **same-stage quality, proportionate-work** rule: it may use
 fewer files and less engineering than the Panic of 1907 baseline, but an
@@ -23,14 +23,14 @@ ownership boundaries.
 | Purpose and claim boundary | Forward-test whether the H2EPR event method transfers from a financial crisis to a healthcare cybersecurity event without treating financial state as universal. The intended depth is semantically complete and engineering-minimal. This work makes no clean-builder, held-out, historical-validity, scientific-validity, calibration, predictive, or policy-effectiveness claim. |
 | Temporal boundary | Accepted analytic interval: about 23 August 2017, the earliest evidenced compromise, through the public announcement on 20 July 2018; observe patient-notification delivery through 23 July. The participant response window begins on 18 January 2018, when event-specific malware and callback signals entered IHiS Security Management. An acute information-and-response window begins on 11 June, when unauthorized credential use was specifically recognized, and includes exfiltration from 27 June through 4 July, cross-institution escalation on 10 July, later containment, and notification. Earlier general preparedness and vulnerabilities remain initial context. Post-23 July investigation, liability, penalties, and reform are retrospective evidence or excluded aftermath. |
 | Evidence and exposure | The [event-frame evidence](frame-evidence-v0.1.md) adopts four official sources for framing. The complete historical outcome and target Reference material had already been seen during discovery, so this is not clean or held-out construction. `draft_epg.json` was not read in this framing cycle, and evaluation-only material remains outside the evidence set. |
-| Current authorized phase and endpoint | **Define participants**, first Roster-production batch complete: one technical role-set Population Model and separate SIRM and Cluster ISO Agent Definitions accepted; stop after batch interface review and closeout. |
-| Excluded work | Reference, draft EPG, held-out, or evaluation access; new external research without a bounded permission; roles outside the first batch; complete Roster release; scenario or mapping closure; configuration; binding; policy or runtime work; simulation; calibration; post-seal evaluation; external repository actions; and validity claims. |
-| Decision owner and review | The project owner accepted `OD-EV-01`, `OD-RP-02`, and `OD-R1-01` through `OD-R1-03` on 24 August 2026. The SIRM received deep review; the Population and Cluster ISO received standard review; the shared interface preflight passed. |
+| Current authorized phase and endpoint | **Define participants**, R1 detection-and-escalation and R2 classification-and-institutional-escalation batches complete: two Population Models and seven office-level Agent Definitions reviewed with one interface account per batch. |
+| Excluded work | Reference, draft EPG, held-out, or evaluation access; new external research without a bounded permission; roles outside the two accepted batches; complete Roster release; scenario or mapping closure; configuration; binding; policy or runtime work; simulation; calibration; post-seal evaluation; external repository actions; and validity claims. |
+| Decision owner and review | The project owner accepted `OD-EV-01`, `OD-RP-02`, `OD-R1-01` through `OD-R1-03`, and `OD-R2-01` through `OD-R2-06`. The SIRM and Sector Lead received deep review; the other products received standard review; both shared interfaces passed cross-role review. |
 | Exact upstream inputs | Method baseline `bea83b1a51256198d264760a88268e041d990700`; event specification SHA-256 `5a69486c0c3cff4dab019e43a75b9f959ebb47e3b52b17241bb637dd0cdfbbfb`; frozen evidence SHA-256 `ea356fc9f0f7dfede9e7415f61d144e8ba13e61c3ad5647318abe7b5449f5e7c`; accepted event-frame evidence v0.1 |
 
-> This cycle accepted only the three first-batch non-executable participant
-> products and their shared interface. It stops before another participant
-> batch, complete Roster release, or any later event phase.
+> The accepted participant scope contains nine event-bound qualitative models
+> and two shared interfaces. It stops before another participant batch,
+> complete Roster release, or any later event phase.
 
 ## Evidence readiness
 
@@ -50,12 +50,12 @@ because it is official.
 | Event identity and broad incident class | `RESOLVED_FOR_STATED_USE` from the event specification | The event and research question may be framed. |
 | Authoritative chronology from initial compromise through notification | `RESOLVED_FOR_EVENT_FRAMING` | Supports the accepted outer interval, participant response window, acute response window, exfiltration period, and notification horizon; it does not supply a runtime schedule. |
 | Organizational authority and responsibility across SingHealth, IHiS, technical units, and government response bodies | `RESOLVED_FOR_EVENT_FRAMING_WITH_ACCEPTED_REPRESENTATION_GATES` | Supports the accepted separate responsibility interfaces; it does not decide which gates become Agents. |
-| Participant-time information and escalation channels | `RESOLVED_FOR_EVENT_FRAMING`; separately `RESOLVED_FOR_THREE_R1_PRODUCTS_WITH_EXPLICIT_ALTERNATIVES` in the participant-evidence record | Supports the accepted causal route and the three first-batch behavior products only; no other role or runtime schedule is inferred. |
+| Participant-time information and escalation channels | Resolved for event framing and for the accepted R1 and R2 products, with explicit alternatives in the participant-evidence record | Supports nine participant models and their two bounded interfaces; no other role or runtime schedule is inferred. |
 | Later investigation, attribution, penalties, and recommendations | Retrospective and outcome-exposed | May guide source discovery and later interpretation; not participant-time input. |
 
-The official-source search is closed for its stated uses. R1 behavior research
-reused the archived inquiry report without new retrieval; another role or claim
-requires its own bounded evidence question.
+The official-source search is closed for its stated uses. R1 and R2 behavior
+research reused the archived inquiry report without new retrieval; another
+role or claim requires its own bounded evidence question.
 
 ## Causal scope
 
@@ -67,9 +67,9 @@ semantic transitions rather than a runtime script.
 | `CT-1` | Exposed organizational or technical opportunity | Initial access becomes a persistent foothold | Threat actor; pre-existing security responsibilities remain institutional context | Scenario-owned access and system state | Supported outer boundary; exact initial action unresolved |
 | `CT-2` | Foothold with bounded access | Access expands across credentials, hosts, and privileges toward SCM | Threat actor and IHiS operational interfaces | Scenario-owned authorization and network state | Supported for framing |
 | `CT-3` | Access to SCM through compromised infrastructure | Queries, returned records, copying, and transfer produce material data exposure | Threat actor; IHiS access, database, and monitoring interfaces | Scenario-owned request, access, and disclosure results | Supported for framing |
-| `CT-4` | Role-local alerts, unauthorized access findings, or anomalous activity | Signals are interpreted, communicated, classified, deferred, or escalated | Accepted technical role-set Population, SIRM Agent, and Cluster ISO Agent for R1; operational or senior management interfaces remain gated | Institutional communication and incident-lifecycle process | Supported from 18 January; acute escalation window begins 11 June; R1 participant products accepted |
+| `CT-4` | Role-local alerts, unauthorized access findings, or anomalous activity | Signals are interpreted, communicated, classified, deferred, or escalated | Accepted R1 technical role set, SIRM, and Cluster ISO; accepted R2 operational role set, GCIO, Sector Lead, and IHiS CEO | Institutional communication, category, reporting, investigation, and incident-lifecycle processes | Supported from 18 January through the 10 July classification and reporting transition |
 | `CT-5` | Suspected or confirmed incident | Local and inter-agency containment changes continued access and observed malicious activity | IHiS operational and management roles with SingHealth, MOH, and CSA response interfaces | Scenario-owned containment result and system state | Supported for framing |
-| `CT-6` | Material breach and bounded organizational knowledge | Public announcement and patient notification are authorized and delivered | SingHealth management in routed coordination with IHiS, MOH, MCI, and CSA | Institutional notification and delivery process | Supported for framing; internal authority granularity gated |
+| `CT-6` | Material breach and bounded organizational knowledge | Public announcement and patient notification are authorized and delivered | Accepted SingHealth Deputy GCEO and GCEO interfaces in routed coordination with IHiS, MOH, MCI, and CSA | Institutional notification approval, execution, and delivery process | Supported for planning choices through 20 July; external authorization and delivery remain outside the participant models |
 
 ## Causal role map and roster dispositions
 
@@ -82,8 +82,12 @@ Representation gates preserve decisions that must precede Agent admission.
 | IHiS technical administration and line security staff | Accepted standard role-typed Population Model for R1 | Observe alerts and logs, investigate, communicate, and apply bounded local controls across security, Citrix, application, and database work | Preserves responsibility-unit information and choices without a collective technical-staff Agent. |
 | IHiS Security Incident Response Manager | Accepted deep office-level Agent Definition for R1 | Lead and coordinate security incident response; decide whether and how to escalate | Central causal choice retains explicit confirmation, capacity, containment-priority, burden, and false-alarm alternatives. |
 | IHiS Cluster Information Security Officer for SingHealth | Accepted standard office-level Agent Definition for R1 | Hold accountability for the response team and exercise independent classification or escalation judgement | Preserves an independent clarification, coordination, and reporting route distinct from the SIRM. |
-| IHiS operational/SCM and senior management interfaces | Representation gate | Aggregate role-local information, receive compressed reports, classify severity, mobilize resources, and notify higher or external authorities | Preserve operational aggregation separately from senior classification and reporting; later research determines whether one or several participant products are needed. |
-| SingHealth governance and data-owner management | Representation gate | Retain ownership and supervisory responsibility; authorize or coordinate incident reporting and patient communication | Keep responsibility distinct from IHiS operation; admit only choices required by the primary question. |
+| IHiS operational and SCM management | Accepted standard role-typed Population Model for R2 | Aggregate role-local information, convene review, request verification, assign follow-up, and escalate a qualified account | Preserves functional heterogeneity without constructing a collective IHiS management Agent. |
+| SingHealth GCIO | Accepted standard office-level Agent Definition for R2 | Bridge operational accounts to distinct IHiS and SingHealth routes and maintain patient-impact updates | Preserves dual accountability without merging recipient knowledge or authority. |
+| IHiS CSG Director and healthcare Sector Lead | Accepted deep office-level Agent Definition for R2 | Assess category, seek verification, and use the CSA-reporting route | Preserves classification and reporting discretion, report lifecycle, and the concurrent-office boundary. |
+| IHiS CEO | Accepted standard office-level Agent Definition for R2 | Review the executive account, request evidence, direct Sector Lead reporting, and assign investigation leadership | Keeps executive direction separate from Sector Lead classification and recipient execution. |
+| SingHealth Deputy GCEO | Accepted standard office-level Agent Definition for R2 | Route the incident and lead reversible patient-outreach preparation and plan revision | Preserves its distinct receipt history and proposal role. |
+| SingHealth GCEO | Accepted standard office-level Agent Definition for R2 | Direct the SingHealth reporting route and advise on audience and communication channel through consultation | Keeps senior direction and recommendation separate from collective adoption and delivery. |
 | End users and endpoint operators | Initial or exogenous context | Supply endpoint and account context; no causally necessary autonomous choice is established for the accepted question | Reopen only if later authorized evidence makes user choice material to the causal model. |
 | Access control, network, database, monitoring, and incident lifecycle | Scenario or institutional process | Enforce requests, routes, permissions, signals, results, and timing | Must not be given participant policy or hidden discretion. |
 | Affected patients | Affected cohort; no participant product currently proposed | Receive the consequences and notifications of the breach | Admit a population only if patient choices enter the accepted question. |
@@ -112,25 +116,28 @@ defined at this phase.
 |---|---|---|
 | Event question, boundary, and authorization | This coordination entry | Accepted event frame |
 | Source register, claim ledger, and evidence-use review | [Event-frame evidence v0.1](frame-evidence-v0.1.md) | Accepted for framing with bounded representation gates |
-| First-batch participant evidence | [Participant evidence v0.1](participant-evidence-v0.1.md) | Accepted for three R1 products with explicit mechanism alternatives |
+| Participant evidence | [Participant evidence](participant-evidence-v0.1.md) | Accepted for the R1 and R2 participant products with explicit mechanism alternatives |
 | Technical administration and line security staff | [Technical response role-set Population Model](../../populations/defines/singhealth_data_breach/technical-administration-and-line-security-staff.md) | Accepted `0.1.0`, standard profile |
 | Security Incident Response Manager | [SIRM Agent Definition](../../agents/defines/singhealth_data_breach/security-incident-response-manager.md) | Accepted `0.1.0`, deep profile |
 | Cluster Information Security Officer | [Cluster ISO Agent Definition](../../agents/defines/singhealth_data_breach/cluster-information-security-officer.md) | Accepted `0.1.0`, standard profile |
 | First-batch participant interface | [R1 detection-and-escalation preflight](../../agents/interfaces/singhealth_data_breach/r1-detection-and-escalation.md) | Accepted semantic interface; mapping extension expected but not opened |
+| IHiS operational and SCM management | [Operational-management role-set Population Model](../../populations/defines/singhealth_data_breach/ihis-operational-and-scm-management.md) | Accepted standard profile |
+| R2 office-level participants | [SingHealth Agent Definition index](../../agents/defines/singhealth_data_breach/README.md) | Five reviewed R2 Agent Definitions, including the deep Sector Lead profile |
+| Second-batch participant interface | [R2 classification-and-institutional-escalation account](../../agents/interfaces/singhealth_data_breach/r2-classification-and-institutional-escalation.md) | Accepted semantic interface; mapping remains unopened |
 | Scenario, mapping, configuration, implementation, and release authorities | None | Not authorized or opened for this event |
 
 ## Current work package
 
 | Field | Current decision |
 |---|---|
-| Work mode | Roster production, R1 detection-and-escalation batch closed |
-| Roles or processes in this package | IHiS technical administration and line security staff; Security Incident Response Manager; Cluster Information Security Officer for SingHealth |
-| Participant production profiles | Technical administration and line security staff: `standard` Population Model; SIRM: `deep` Agent Definition; Cluster ISO: `standard` Agent Definition |
+| Work mode | Roster production, R1 and R2 participant batches closed |
+| Roles or processes in this package | R1 technical role set, SIRM, and Cluster ISO; R2 operational-management role set, GCIO, Sector Lead, IHiS CEO, Deputy GCEO, and GCEO |
+| Participant production profiles | Two standard Population Models; five standard Agent Definitions; deep SIRM and Sector Lead Agent Definitions |
 | Required project Skills and templates | Event participant batch, historical evidence research, participant behavior research, Agent Definition or Population model only after disposition, profile-proportionate review, and phase closeout |
-| Expected outputs | Three accepted dispositions, 19 role claims, one Population Model, two Agent Definitions, one semantic interface account, and this compact closeout |
-| Review and verification | Deep SIRM review; concise Population and Cluster ISO reviews; participant-time, intent/result, cross-role, public-profile, link, identity, repository-boundary, and final-diff checks |
-| Stop conditions | Closed at the accepted R1 boundary; another role batch, source boundary, or later phase needs separate authorization |
-| Next legal action | Explicit stop. A later action must name another bounded participant batch or separately authorize complete Roster release; neither follows from R1 completion. |
+| Accepted outputs | Thirty-two R2 claims appended to the shared ledger; two Population Models, seven Agent Definitions, and two semantic interface accounts across both batches |
+| Review and verification | Deep SIRM and Sector Lead reviews; concise standard reviews; participant-time, intent/result, cross-role, public-profile, link, identity, repository-boundary, and final-diff checks |
+| Stop conditions | Closed at the accepted R2 participant boundary; another role batch, source boundary, or later phase needs separate authorization |
+| Next legal action | Explicit stop. A later action must name another bounded participant batch or separately authorize semantic Roster release; neither follows automatically from R2 completion. |
 
 The non-authorizing target for later phases is **semantically complete,
 engineering-minimal**: complete dispositions and accepted products for the
@@ -148,6 +155,12 @@ not imply a full-roster runtime or broad simulation.
 | `OD-R1-01` | Admit technical administration and line security staff as a role-typed Population Model at `standard` depth | Project owner | Participant claims `0616-R1-C02`–`0616-R1-C06`, `0616-R1-C14`, and `0616-R1-C16`–`0616-R1-C17`; representation alternatives; shared information boundary | R1 participant production | `ACCEPTED_2026-08-24` |
 | `OD-R1-02` | Admit the SIRM office as an Agent Definition at `deep` depth | Project owner | Participant claims `0616-R1-C01`, `0616-R1-C07`–`0616-R1-C08`, `0616-R1-C11`–`0616-R1-C12`, `0616-R1-C15`, and `0616-R1-C18`–`0616-R1-C19`; outcome-exposure risk; explicit competing mechanisms | R1 participant production | `ACCEPTED_2026-08-24` |
 | `OD-R1-03` | Admit the Cluster ISO office as an Agent Definition at `standard` depth | Project owner | Participant claims `0616-R1-C09`–`0616-R1-C13` and `0616-R1-C19`; independent-authority counterfactual; explicit alternatives | R1 participant production | `ACCEPTED_2026-08-24` |
+| `OD-R2-01` | Admit IHiS operational and SCM management as a role-typed Population Model at standard depth | Project owner | `0616-R2-C01`–`C07` and `C25`; aggregation alternatives and responsibility-unit boundary | R2 participant production | `ACCEPTED_2026-08-25` |
+| `OD-R2-02` | Admit the SingHealth GCIO as a standard office-level Agent Definition | Project owner | `0616-R2-C08`, `C09`, `C17`, and `C29`; dual-accountability boundary | R2 participant production | `ACCEPTED_2026-08-25` |
+| `OD-R2-03` | Admit the IHiS CSG Director and healthcare Sector Lead as a deep office-level Agent Definition | Project owner | `0616-R2-C10`, `C12`, `C14`, `C16`, `C28`, and `C32`; classification alternatives and concurrent-office boundary | R2 participant production | `ACCEPTED_2026-08-25` |
+| `OD-R2-04` | Admit the IHiS CEO as a standard office-level Agent Definition | Project owner | `0616-R2-C11`, `C13`, `C15`, `C26`, `C27`, and `C31`; executive direction and assignment boundary | R2 participant production | `ACCEPTED_2026-08-25` |
+| `OD-R2-05` | Admit the SingHealth Deputy GCEO as a standard office-level Agent Definition | Project owner | `0616-R2-C18`, `C20`–`C23`, and `C30`; distinct receipt and outreach-preparation role | R2 participant production | `ACCEPTED_2026-08-25` |
+| `OD-R2-06` | Admit the SingHealth GCEO as a standard office-level Agent Definition | Project owner | `0616-R2-C19`, `C20`, and `C22`–`C24`; senior reporting and consultation role | R2 participant production | `ACCEPTED_2026-08-25` |
 
 ## Event-frame review and closeout
 
@@ -240,4 +253,53 @@ and the handoff names limitations without opening the next phase.
 
 The batch stops at the **reviewed R1 participant boundary** because additional
 roles, semantic release, scenario, mapping, or implementation would answer a
+different or later question.
+
+## Second participant batch
+
+The classification-and-institutional-escalation batch follows the bounded R1
+handoff from operational correlation through IHiS classification and reporting
+and into SingHealth governance and patient-communication planning. It resolves
+three representation questions:
+
+- whether operational and SCM management requires named individuals, a role-
+  typed population, or scenario-owned routing;
+- whether the GCIO bridge, Sector Lead classification, and IHiS CEO direction
+  remain causally distinct; and
+- whether the Deputy GCEO and GCEO require separate information and authority
+  interfaces for reporting and patient communication.
+
+The adopted evidence supports one operational-management Population Model,
+separate GCIO, Sector Lead, and IHiS CEO Agent Definitions, and separate Deputy
+GCEO and GCEO Agent Definitions. Government recipients remain institutional
+routes, not additional Agents. The same archived official inquiry supplies the
+event-bound behavior evidence; no new source or later engineering layer was
+opened.
+
+**Batch disposition: Complete with recorded limitations.** The six products
+passed their profile-proportionate reviews and the shared R2 interface review.
+The products retain qualitative alternatives because the evidence does not
+identify population weights, numerical classification or notification
+thresholds, or transferable mechanism weights.
+
+## Second-batch closeout
+
+| Field | Closeout record |
+|---|---|
+| Event, phase, object, and inputs | `H2EPR-0616`; **Define participants**, classification-and-institutional-escalation batch; accepted event frame, shared participant evidence, accepted R1 products and interface, and owner dispositions `OD-R2-01` through `OD-R2-06` |
+| Authorized purpose and endpoint | Resolve and produce only the operational-management, IHiS senior-office, and SingHealth governance interfaces needed to connect R1 escalation with classification, reporting, and bounded patient-communication planning |
+| Outputs and status | Thirty-two R2 claims, one Population Model, five Agent Definitions, and one cross-role interface; **Complete with recorded limitations** |
+| Verification and limitations | All Agent Definitions pass the public profile; standard and deep substantive reviews have no open blocking, major, or minor finding; the interface closes represented routes. One retrospective official inquiry remains the role-specific behavior source, the model is qualitative, and the completed outcome was known during construction. |
+| Mainline and depth judgment | The batch adds the smallest six decision interfaces needed for the accepted 9–20 July transition; deep treatment is limited to the outcome-exposed Sector Lead classification and concurrent-office boundary. |
+| Next legal action | Explicit stop before another participant batch, complete semantic Roster release, Scenario, Mapping, configuration, binding, policy, runtime, simulation, calibration, held-out construction, or evaluation. |
+
+The closeout checks pass: the products remain on the accepted primary question;
+every participant and intent has an evidence, behavior, or interface consumer;
+upstream frame and R1 authorities remain unchanged; evidence, participant,
+scenario, and result ownership stay separate; participant-time and source
+limits are explicit; review depth follows the accepted profiles; and the
+public products are linked from their responsibility-owned directories.
+
+The batch stops at the **reviewed R2 participant boundary** because a wider
+roster, semantic release, scenario, mapping, or implementation would answer a
 different or later question.
