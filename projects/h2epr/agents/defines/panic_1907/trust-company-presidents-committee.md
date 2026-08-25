@@ -2,13 +2,15 @@
 
 ## 1. Model overview
 
-| Item | Definition |
+| Field | Description |
 |---|---|
-| Event | Panic of 1907, acute New York phase |
-| Focal interval | 23 October–early November 1907, with the main decision window beginning on 23 October |
-| Representation | aggregate procedural committee Agent |
-| Historical referent | five trust-company presidents appointed at the 23 October meeting |
-| Focal choices | case intake, information calls, examination, findings, advice, reporting and bounded contribution coordination |
+| Historical participant | Five-person committee appointed by the 23 October 1907 meeting of trust-company presidents |
+| Modeled role | Mandate-bounded aggregate procedural interface for case intake, investigation, advice, reporting, and independent-contributor coordination |
+| Event and interval | H2EPR-0288, Panic of 1907; 23 October through early November 1907, with the main decision window beginning on 23 October |
+| Primary decision situations | Case referral, information sufficiency, examination, qualified recommendation, reporting opportunity, contribution coordination, and delivered process results |
+| Decision cadence | Event-driven when a case, information item, report, forum opportunity, coordination mandate, contributor reply, or process result is delivered |
+| Decision form | Constrained set-valued procedural policy with a run-pinned recommendation variant and explicit mandate, information, and lifecycle boundaries |
+| State authority | Case delivery, examination, forum response, contributor commitment, transfer, resource, and realized-result truth remains scenario- or institution-owned; the Agent retains only declared findings, advice, plan versions, and delivered references |
 | Evidence use and explanatory scope | Contemporary and retrospective evidence informed an event-bound reconstruction; no recovered voting, case-scoring, contribution, or historically calibrated parameter rule |
 
 The Agent represents the committee's documented institutional decision
@@ -170,16 +172,16 @@ contributor reply or process result is delivered.
 
 | Observation | Meaning and domain | Freshness/uncertainty | Consumer |
 |---|---|---|---|
-| `committee_mandate` | current scope, forum and permitted procedure | versioned; unknown elements remain unknown | all decisions |
-| `case_type_review_standard` | required information classes, permitted waivers and recommendation-policy variant for the case type | pinned before the focal application/outcome is evaluated | sufficiency and advice |
-| `assistance_application` | applicant, route, request scope, provenance, authority reference and lifecycle identity | delivered only; may be incomplete/disputed | intake and case review |
-| `case_information_package` | declared qualitative information classes and source/as-of metadata | never hidden world truth; conflict preserved | sufficiency and finding |
-| `examination_status_or_report` | requested scope, status, findings and limitations | only after delivery; report may be contested | review and advice |
-| `reporting_opportunity` | recipient, deadline and agenda scope | scenario-owned | report issuance |
-| `delivered_continuity_assessment` | competent-source qualitative relevance assessment with basis and uncertainty | optional; hidden system truth is prohibited | supportive policy sensitivity only |
-| `coordination_authority` | whether targets/routes may be solicited and plans assembled | explicit; urgency is not authority | coordination |
-| `contributor_reply` | target-specific decline, condition, offer or commitment | institution-specific and versioned | plan assembly |
-| `process_disposition_or_result` | delivered state of report, solicitation, commitment or transfer | no inference from acceptance to effect | adaptation |
+| `committee_mandate` | current scope, forum and permitted procedure | versioned; unknown elements remain unknown | `DC-TPC-01`, `DC-TPC-02`, `DC-TPC-03`, `DC-TPC-04`, `DC-TPC-05`, `DC-TPC-06` |
+| `case_type_review_standard` | required information classes, permitted waivers and recommendation-policy variant for the case type | pinned before the focal application/outcome is evaluated | `DC-TPC-02`, `DC-TPC-03` |
+| `assistance_application` | applicant, route, request scope, provenance, authority reference and lifecycle identity | delivered only; may be incomplete/disputed | `DC-TPC-01`, `DC-TPC-02` |
+| `case_information_package` | declared qualitative information classes and source/as-of metadata | never hidden world truth; conflict preserved | `DC-TPC-02`, `DC-TPC-03` |
+| `examination_status_or_report` | requested scope, status, findings and limitations | only after delivery; report may be contested | `DC-TPC-02`, `DC-TPC-03` |
+| `reporting_opportunity` | recipient, deadline and agenda scope | scenario-owned | `DC-TPC-03`, `DC-TPC-04` |
+| `delivered_continuity_assessment` | competent-source qualitative relevance assessment with basis and uncertainty | optional; hidden system truth is prohibited | `DC-TPC-03` |
+| `coordination_authority` | whether targets/routes may be solicited and plans assembled | explicit; urgency is not authority | `DC-TPC-05` |
+| `contributor_reply` | target-specific decline, condition, offer or commitment | institution-specific and versioned | `DC-TPC-05`, `DC-TPC-06` |
+| `process_disposition_or_result` | delivered state of report, solicitation, commitment or transfer | no inference from acceptance to effect | `DC-TPC-06` |
 
 ### Forbidden information
 
@@ -288,6 +290,9 @@ A valid new application must yield case opening, a request to correct an
 identity/authority defect, or a typed referral/decline. Duplicate pending work
 yields an await response. Indefinite silence is not conformant.
 
+**Permitted intents.** `open_or_refer_assistance_case` or
+`await_case_or_plan_result`.
+
 #### `DC-TPC-02` — establish information sufficiency
 
 Before substantive advice, each case-specific required information class must
@@ -296,6 +301,9 @@ waived within authority or marked unavailable with a qualified consequence.
 The committee must request information/examination or
 proceed with a qualified/no-conclusion report. Hidden numeric thresholds are
 forbidden.
+
+**Permitted intents.** `request_case_information`,
+`request_scoped_examination`, or `issue_case_recommendation`.
 
 #### `DC-TPC-03` — form findings and advice
 
@@ -306,10 +314,14 @@ limits are part of the output. The pre-run recommendation-policy variant,
 declared information state and competent-route state constrain the choice; a
 backend cannot select freely among all classes.
 
+**Permitted intent.** `issue_case_recommendation`.
+
 #### `DC-TPC-04` — report to the competent forum
 
 Issued findings/advice must enter a recipient-specific delivery lifecycle.
 Draft, issue, delivery, forum receipt and collective response remain distinct.
+
+**Permitted intent.** `report_case_status`.
 
 #### `DC-TPC-05` — coordinate independent contributions
 
@@ -318,11 +330,17 @@ The committee may not infer a commitment from attendance, silence, advice or a
 target amount. The committee must own the referenced plan version; each reply
 and condition remains institution-specific.
 
+**Permitted intents.** `solicit_independent_contribution`,
+`assemble_or_revise_support_plan`, or `await_case_or_plan_result`.
+
 #### `DC-TPC-06` — respond to delivered results
 
 Before another action on the same case/plan, delivered dispositions update
 case stage, outstanding requests, commitment references and plan totals.
 Partial, delayed, failed and expired items remain visible and version-linked.
+
+**Permitted intents.** `assemble_or_revise_support_plan`,
+`report_case_status`, or `await_case_or_plan_result`.
 
 ## 7. Intent and result boundary
 

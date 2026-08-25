@@ -63,7 +63,8 @@ Use the accepted roster disposition and production profile:
   combined;
 - a `standard` population uses the evidence and behavior methods, the
   [Population model template](../../populations/population-model-template.md),
-  and a concise profile-proportionate review; and
+  its exact ten-module publication structure, and a concise
+  profile-proportionate review; and
 - `deep` uses the same representation route with fuller separate research or
   review records only where the declared risk requires them.
 
@@ -75,11 +76,14 @@ and
 to the depth required by the row. Invoke
 [`h2epr-agent-definition`](../agent-definition/SKILL.md) and
 [`h2epr-agent-definition-review`](../agent-definition-review/SKILL.md) only for
-an Agent route. Do not make a population satisfy the Agent ten-module profile.
+an Agent route. A population uses its own ten-module profile rather than the
+Agent profile; production depth never changes either public module order.
 
-Share adopted source identity and event claims through the event source
-register and evidence ledger. Do not share participant policy, private state,
-or authority merely because roles belong to one batch.
+Share adopted source identity and event claims through the event-owned source
+register and participant-evidence record. Keep these shared authorities under
+`events/<event>/`; `agents/defines/<event>/` contains only its index and Agent
+Definitions. Do not share participant policy, private state, or authority
+merely because roles belong to one batch.
 
 A representation-gate row may close as an Agent Definition, a reviewed
 population/cohort interface, or an explicit scenario disposition. Do not force

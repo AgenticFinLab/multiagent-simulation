@@ -8,10 +8,10 @@
 | Field | Value |
 |---|---|
 | Event and scenario | `H2EPR-0288`; `h2epr.scenario.0288.panic_1907@0.1.0` |
-| Participant semantic input | `H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1`; manifest SHA-256 `a03188f8a3ef45c500fa49ddd4230b99999c9b6759bf3cae73bf8040e0e73ec6` |
-| Evidence/time boundary | event evidence ledger SHA-256 `5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933`; all focal outcomes `FULL_DRAFT_EXPOSED` |
-| Consolidated mapping | `H2EPR-0288-CONSOLIDATED-MAPPING-v0.1`; manifest SHA-256 `d2aef35116df2df5f99cad7d0cdd69136e8c8e5b69261f387ea4cfd301eb72d5` |
-| Mapping profile | `h2epr.roster-consolidated-mapping.v0_1`; SHA-256 `efa341364d12f8b1be8035ebd1cdde7b6ef2446f4015db3e28b6f2bdbaab25e7` |
+| Participant semantic input | `H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1`; manifest SHA-256 `89a344d1972b9df7ff9adde5f9c5b762404c32bfeb3c81199d56a58039e45554` |
+| Evidence/time boundary | event participant-evidence SHA-256 `1596edaeadf9dc5aaffd22cdb2fe88090b9202170d7ba41c16c6c9d01e69eb92`; all focal outcomes `FULL_DRAFT_EXPOSED` |
+| Consolidated mapping | `H2EPR-0288-CONSOLIDATED-MAPPING-v0.1`; manifest SHA-256 `b4505c659b3f4be52f4f4768f4e571c1fd676fdc3ebf45d39a2cf6b62fe8fcb2` |
+| Mapping profile | `h2epr.roster-consolidated-mapping.v0_1`; SHA-256 `cfe3f096e710cc3101fc5dd81fd48332712e19ff49debb328ba9fee8eba5487b` |
 | Carrier | H2EPR Contracts V1; accepted verdict `V1_COMPATIBLE_VIA_CONSOLIDATED_INTERNAL_MAPPING_AND_SCENARIO_SEMANTIC_EXTENSION` |
 | Structural baseline | `SV-NYCH-ROUTE=NO_EVIDENCED_COMPETENT_ALTERNATIVE_ROUTE`; `SV-NBC-DIRECTION=NO_NYCH_DIRECTION_DELIVERED`; `SV-TPC-RECOMMENDATION=PROCEDURE_CONSERVATIVE`; `SV-POOL-OWNERSHIP=INDEPENDENT_RESOURCE_OWNERS`; Morgan personal baseline and relationship sensitivity disabled |
 | Review state | substantive review passed; `OD-SC-01` through `OD-SC-04` accepted by owner |

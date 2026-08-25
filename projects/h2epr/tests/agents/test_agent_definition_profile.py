@@ -4,6 +4,7 @@ from pathlib import Path
 
 from h2epr.agents.definition_profile import (
     check_definition_text,
+    check_population_text,
     check_publication_surface,
     main,
 )
@@ -80,6 +81,60 @@ def _codes(text: str) -> set[str]:
     return {issue.code for issue in check_definition_text(text)}
 
 
+def _valid_population() -> str:
+    return """# Example Choice-Unit Population
+
+## 1. Model overview
+
+| Field | Description |
+|---|---|
+| Model name | Example choice units |
+| Event and interval | H2EPR-TEST, one bounded interval |
+| Choice unit | one responsibility-bounded unit |
+| Population scope | units admitted by the event roster |
+| Primary decision situations | one delivered signal and one pending result |
+| Aggregation boundary | summaries retain unit identity and ownership |
+| State authority | delivery and realized results are scenario-owned |
+| Evidence use and explanatory scope | illustrative structural fixture; not calibrated |
+
+## 2. Population scope and representation
+
+Units remain heterogeneous and do not form one actor.
+
+## 3. Evidence and theoretical foundation
+
+The behavior is an explicit test assumption.
+
+## 4. Event role and relationships
+
+Each unit retains its own information and authority.
+
+## 5. Decision situations, information, and state
+
+Only delivered signals and own lifecycle notices are observed.
+
+## 6. Behavioral model
+
+The unit may respond or wait for a named pending result.
+
+## 7. Intent and result boundary
+
+The unit emits an intent; delivery and effect remain elsewhere.
+
+## 8. Operationalization and uncertainty
+
+The fixture uses qualitative unit types without fitted weights.
+
+## 9. Worked cases and falsification
+
+Removing the signal removes the response.
+
+## 10. Limitations and references
+
+This is a structural fixture.
+"""
+
+
 def test_new_definition_profile_accepts_closed_inventory() -> None:
     assert check_definition_text(_valid_definition()) == ()
 
@@ -93,6 +148,13 @@ def test_profile_accepts_wrapped_label_and_collective_consumer() -> None:
 def test_profile_requires_exact_numbered_module_order() -> None:
     text = _valid_definition().replace("## 5. Decision", "## Decision", 1)
     assert "module_profile_mismatch" in _codes(text)
+
+
+def test_population_profile_requires_its_exact_ten_module_order() -> None:
+    assert check_population_text(_valid_population()) == ()
+    text = _valid_population().replace("## 4. Event role", "## 4. Institutional role")
+    codes = {issue.code for issue in check_population_text(text)}
+    assert "population_module_profile_mismatch" in codes
 
 
 def test_profile_rejects_project_metadata_from_public_definition() -> None:
@@ -179,18 +241,33 @@ def test_cli_reports_pass_and_fail(tmp_path: Path, capsys) -> None:
     assert "module_profile_mismatch" in output
 
 
-def test_canonical_participant_models_have_clean_publication_surfaces() -> None:
+def test_canonical_agent_definitions_follow_the_public_profile() -> None:
     paths = [
         path
         for event_dir in (PROJECT_ROOT / "agents/defines").iterdir()
         if event_dir.is_dir()
         for path in event_dir.glob("*.md")
-        if path.name not in {"README.md", "decision-situations.md", "evidence-ledger.md", "source-register.md"}
+        if path.name != "README.md"
     ]
-    paths.extend((PROJECT_ROOT / "populations/defines").glob("*/*.md"))
 
     findings = {
-        str(path.relative_to(PROJECT_ROOT)): check_publication_surface(
+        str(path.relative_to(PROJECT_ROOT)): check_definition_text(
+            path.read_text(encoding="utf-8")
+        )
+        for path in paths
+    }
+    failures = {
+        path: tuple(issue.code for issue in issues)
+        for path, issues in findings.items()
+        if issues
+    }
+    assert failures == {}
+
+
+def test_canonical_population_models_follow_the_public_profile() -> None:
+    paths = (PROJECT_ROOT / "populations/defines").glob("*/*.md")
+    findings = {
+        str(path.relative_to(PROJECT_ROOT)): check_population_text(
             path.read_text(encoding="utf-8")
         )
         for path in paths

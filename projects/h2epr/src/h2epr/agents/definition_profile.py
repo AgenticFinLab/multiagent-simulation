@@ -1,8 +1,9 @@
-"""Lightweight structural checks for new-format Agent Definition candidates.
+"""Lightweight structural checks for publication-facing participant models.
 
-The checker enforces the public ten-module reading profile and a few
-machine-auditable inventory links. It deliberately does not judge evidence,
-behavioral quality, historical validity, or runtime conformance.
+The checker enforces the respective ten-module reading profiles for Agent
+Definitions and population models. Agent checks also close a few
+machine-auditable inventory links. The checker deliberately does not judge
+evidence, behavioral quality, historical validity, or runtime conformance.
 """
 
 from __future__ import annotations
@@ -34,6 +35,30 @@ REQUIRED_OVERVIEW_FIELDS = (
     "Primary decision situations",
     "Decision cadence",
     "Decision form",
+    "State authority",
+    "Evidence use and explanatory scope",
+)
+
+EXPECTED_POPULATION_MODULES = (
+    "1. Model overview",
+    "2. Population scope and representation",
+    "3. Evidence and theoretical foundation",
+    "4. Event role and relationships",
+    "5. Decision situations, information, and state",
+    "6. Behavioral model",
+    "7. Intent and result boundary",
+    "8. Operationalization and uncertainty",
+    "9. Worked cases and falsification",
+    "10. Limitations and references",
+)
+
+REQUIRED_POPULATION_OVERVIEW_FIELDS = (
+    "Model name",
+    "Event and interval",
+    "Choice unit",
+    "Population scope",
+    "Primary decision situations",
+    "Aggregation boundary",
     "State authority",
     "Evidence use and explanatory scope",
 )
@@ -378,6 +403,54 @@ def check_definition_file(path: str | Path) -> tuple[DefinitionFormatIssue, ...]
     return check_definition_text(Path(path).read_text(encoding="utf-8"))
 
 
+def check_population_text(text: str) -> tuple[DefinitionFormatIssue, ...]:
+    """Check one population model against its public reading profile."""
+
+    issues = list(check_publication_surface(text))
+
+    titles = tuple(match.group("title") for match in _H1.finditer(text))
+    if len(titles) != 1:
+        issues.append(
+            DefinitionFormatIssue("h1_cardinality", f"expected 1 H1, found {len(titles)}")
+        )
+
+    modules = tuple(match.group("title") for match in _H2.finditer(text))
+    if modules != EXPECTED_POPULATION_MODULES:
+        issues.append(
+            DefinitionFormatIssue(
+                "population_module_profile_mismatch",
+                "expected exact ten-module order; found " + repr(modules),
+            )
+        )
+
+    overview = _section(text, EXPECTED_POPULATION_MODULES[0])
+    overview_rows = {
+        row[0]: row[1:]
+        for table in _tables(overview)
+        for row in table
+        if row and row[0] in REQUIRED_POPULATION_OVERVIEW_FIELDS
+    }
+    missing_fields = tuple(
+        field
+        for field in REQUIRED_POPULATION_OVERVIEW_FIELDS
+        if field not in overview_rows
+    )
+    if missing_fields:
+        issues.append(
+            DefinitionFormatIssue(
+                "population_overview_fields_missing", ", ".join(missing_fields)
+            )
+        )
+
+    return tuple(issues)
+
+
+def check_population_file(path: str | Path) -> tuple[DefinitionFormatIssue, ...]:
+    """Read and check one UTF-8 population-model candidate."""
+
+    return check_population_text(Path(path).read_text(encoding="utf-8"))
+
+
 def _render(path: Path, issues: Iterable[DefinitionFormatIssue]) -> tuple[str, ...]:
     findings = tuple(issues)
     if not findings:
@@ -391,7 +464,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry point for candidate authoring and review."""
 
     parser = argparse.ArgumentParser(
-        description="Check new H2EPR Agent Definition candidates against the public format profile."
+        description="Check H2EPR participant models against their public format profile."
+    )
+    parser.add_argument(
+        "--kind",
+        choices=("agent", "population"),
+        default="agent",
+        help="select the Agent Definition or population-model profile",
     )
     parser.add_argument("paths", nargs="+", type=Path)
     args = parser.parse_args(argv)
@@ -399,7 +478,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     failed = False
     for path in args.paths:
         try:
-            issues = check_definition_file(path)
+            issues = (
+                check_definition_file(path)
+                if args.kind == "agent"
+                else check_population_file(path)
+            )
         except (OSError, UnicodeError) as exc:
             issues = (DefinitionFormatIssue("definition_unreadable", str(exc)),)
         for line in _render(path, issues):

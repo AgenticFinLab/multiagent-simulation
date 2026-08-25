@@ -25,13 +25,13 @@ CONFIG_RELATIVE = Path(
 MANIFEST_RELATIVE = CONFIG_RELATIVE.parent / "manifest.json"
 RECEIPT_RELATIVE = Path("configs/panic_1907/configuration-admission-v0.1/receipt.json")
 ACCEPTED_SOURCE_SHA256 = (
-    "f9352ca2da66d0cc774b7c505a074ea63883689c6556720d77a4802506632bd6"
+    "ee5f2b6a250ea67eccf08cb44217df404fddb39dc6943bd4aa00c495263ade25"
 )
 ACCEPTED_MANIFEST_SHA256 = (
-    "8d8f2b7093f5b2a7308bac5ee34a73d6eb86853677be040d01e0f1aac40b27e2"
+    "33242b3864801a1ecb03e5e65c65c5db81d601f85ef42783afe707d93dde0f5c"
 )
 ACCEPTED_CANONICAL_SHA256 = (
-    "d74a5382d705e6b25decd4dfd4a4f04cebf4f8278bf685ff7ffddcbbc9e6fef1"
+    "edc9e877a3c99593914d63e3025076c9af13590f58c13b03c9c58d296c8fa1d9"
 )
 
 
@@ -222,7 +222,7 @@ def test_checksum_inventory_is_confined_to_the_release_directory(
     checksum_path = root / CONFIG_RELATIVE.parent / "SHA256SUMS"
     checksum_path.write_text(
         checksum_path.read_text(encoding="utf-8")
-        + f"{'0' * 64}  ../../../agents/defines/panic_1907/source-register.md\n",
+        + f"{'0' * 64}  ../../../events/panic_1907/source-register-v0.1.md\n",
         encoding="utf-8",
     )
 

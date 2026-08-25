@@ -2,13 +2,15 @@
 
 ## 1. Model overview
 
-| Item | Definition |
+| Field | Description |
 |---|---|
-| Event | Panic of 1907, acute New York phase |
-| Focal interval | approximately 23–26 October 1907 |
-| Representation | event-bound population of institution-preserving contributor choice units |
-| Historical referent | NYCH member banks and large correspondent banks participating in, declining or using collective-support/resource mechanisms |
-| Focal choices | information request, conditional offer, commitment, decline, commitment revision and member-certificate application |
+| Model name | NYCH member and large correspondent bank resource-decision units |
+| Event and interval | Panic of 1907, acute New York phase, approximately 23–26 October 1907 |
+| Choice unit | One institution with its own authority, resource envelope, relationship role, and request or commitment lifecycles |
+| Population scope | NYCH member banks and large correspondent banks participating in, declining, or using collective-support and resource mechanisms |
+| Primary decision situations | Request information, make a conditional offer or commitment, decline, revise a commitment, or apply for member certificates |
+| Aggregation boundary | Historical institutions remain weight-one units and retain independent resources and commitments; weighted synthetic compression requires a separate representation review |
+| State authority | Resource, collateral, certificate, transfer, settlement, and realized support truth remains scenario- or facility-owned; each unit retains only its decision posture and observed lifecycles |
 | Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; named-bank policies, response probabilities, commitment rules, and posture distributions are not recovered or calibrated |
 
 The population represents independent institutional decisions that lie between
@@ -21,7 +23,7 @@ The product is not a general banking-sector Agent and not a call-money market
 model. It addresses only the collective-support and closely related NYCH
 member-resource interfaces needed by H2EPR-0288.
 
-## 2. Historical population and representation
+## 2. Population scope and representation
 
 ### Historical population
 
@@ -96,7 +98,7 @@ utility function.
 | conflicting amounts/attribution | cases and sensitivity, not fitted totals | withdraw exact reconstruction claims |
 | known outcomes | future-information exclusion | any fitted participation/output invalidates the model |
 
-## 4. Institutional role and relationships
+## 4. Event role and relationships
 
 ### Role and capability boundary
 

@@ -2,12 +2,15 @@
 
 ## 1. Model overview
 
-| Item | Definition |
+| Field | Description |
 |---|---|
-| Event | Panic of 1907, acute New York phase |
-| Focal interval | approximately 18–22 October 1907 |
-| Representation | event-bound population of weighted depositor choice units |
-| Focal choices | request withdrawal, retain for the current interval, await a pending result, and respond to a delivered result |
+| Model name | Knickerbocker depositor choice units |
+| Event and interval | Panic of 1907, acute New York phase, approximately 18–22 October 1907 |
+| Choice unit | One deposit account or a scenario-declared weighted set of accounts that are exchangeable for the modeled conditions |
+| Population scope | Holders of deposit claims against Knickerbocker; company management, support institutions, other depositors' accounts, and the operating service process remain separate |
+| Primary decision situations | Request withdrawal, retain for the current interval, await a pending result, and respond to a delivered result |
+| Aggregation boundary | Weights compress equivalent account conditions but do not create shared information, authority, coordination, claim ownership, or a collective depositor decision |
+| State authority | Account truth, service, request admission, payment, cash effects, and suspension remain scenario-owned; each unit retains its private need, delivered information, and own request history |
 | Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; individual behavior and population composition are not calibrated, and response profiles remain sensitivity assumptions |
 
 The model represents heterogeneous holders of deposit claims against the
@@ -25,7 +28,7 @@ It does not explain Knickerbocker management decisions, NBC's credit or
 clearing decisions, NYCH support policy, the operating queue, cash allocation,
 suspension, or later trust-company runs.
 
-## 2. Historical population and representation
+## 2. Population scope and representation
 
 ### Historical population
 
@@ -116,7 +119,7 @@ The research team knows the run and suspension. They are used for
 construction, explanatory cases, and falsification design. No part of this
 model has an independent held-out historical outcome.
 
-## 4. Institutional role and relationships
+## 4. Event role and relationships
 
 Depositors hold claims against Knickerbocker and may request payment according
 to the account and operational conditions represented by the scenario. They do
@@ -269,7 +272,7 @@ request or a known access/lifecycle blocker and ends when a relevant result or
 reopening event is delivered. A known operational problem changes expectation;
 it does not authorize the population model to erase an attempted request.
 
-## 7. Withdrawal choice and result boundary
+## 7. Intent and result boundary
 
 ### Population outputs
 

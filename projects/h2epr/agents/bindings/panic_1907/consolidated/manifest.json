@@ -11,9 +11,9 @@
     "commit": "e0cb20724db7c8f15cf344a161ab2f2b2721c1f0",
     "tree": "74d16ad177ff486eb5966c070c835f8c42de37ab",
     "manifest_path": "releases/panic_1907/roster-definition-v0.1/manifest.json",
-    "manifest_sha256": "a03188f8a3ef45c500fa49ddd4230b99999c9b6759bf3cae73bf8040e0e73ec6",
+    "manifest_sha256": "89a344d1972b9df7ff9adde5f9c5b762404c32bfeb3c81199d56a58039e45554",
     "checksums_path": "releases/panic_1907/roster-definition-v0.1/SHA256SUMS",
-    "checksums_sha256": "5249a21d04d57e275bea83b32bd0e2fb6aef58c8fd9bc36bf47a07ace90b9899",
+    "checksums_sha256": "3a58213177aa2ea856ee2d9ea4411ca6e2887d3603dff226c86562ef00cab420",
     "semantic_products": 12,
     "agent_definitions": 7,
     "population_models": 5
@@ -33,12 +33,12 @@
     {
       "kind": "semantic_inventory",
       "path": "semantic-inventory.md",
-      "sha256": "bd8e27e26bf31f940fbe203cd88b2976caf77e61ef35743415e364bf0bff3efe"
+      "sha256": "18e3e73db88bb475c4f3becf9f03722af60c7ead6030ef6820efa93c7b3a677a"
     },
     {
       "kind": "mapping_specification",
       "path": "mapping-specification.md",
-      "sha256": "ab2006be857f9c34be8fc59e527aee1818a1ea0deef0c8139f889e92bea27294"
+      "sha256": "9d6ab8a3573cc8e3211b6acfd097935f9d1c40b3aedb676ac2338fe092c12f7a"
     },
     {
       "kind": "carrier_review",

@@ -8,12 +8,12 @@
   "source_release": {
     "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
     "manifest_path": "releases/panic_1907/roster-definition-v0.1/manifest.json",
-    "manifest_sha256": "a03188f8a3ef45c500fa49ddd4230b99999c9b6759bf3cae73bf8040e0e73ec6"
+    "manifest_sha256": "89a344d1972b9df7ff9adde5f9c5b762404c32bfeb3c81199d56a58039e45554"
   },
   "accepted_mapping": {
     "release_id": "H2EPR-0288-CONSOLIDATED-MAPPING-v0.1",
     "manifest_path": "agents/bindings/panic_1907/consolidated/manifest.json",
-    "manifest_sha256": "d2aef35116df2df5f99cad7d0cdd69136e8c8e5b69261f387ea4cfd301eb72d5"
+    "manifest_sha256": "b4505c659b3f4be52f4f4768f4e571c1fd676fdc3ebf45d39a2cf6b62fe8fcb2"
   },
   "coverage": {
     "semantic_products": 12,

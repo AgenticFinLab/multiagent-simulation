@@ -22,7 +22,7 @@ Five non-Agent Roster products sit in the adjacent population collection: the
 [later trust-company depositor model](../../../populations/defines/panic_1907/later-trust-company-depositors.md),
 [call-money lender model](../../../populations/defines/panic_1907/call-money-lenders.md),
 and [broker-borrower model](../../../populations/defines/panic_1907/call-money-broker-borrowers.md).
-They reuse this event's source register and evidence ledger while keeping their
+They reuse this event's source register and participant-evidence record while keeping their
 distributed behavior semantics under `populations/`.
 
 The accepted event scope and every participant disposition are in the
@@ -36,13 +36,13 @@ and [Scenario Configuration v0.1](../../../configs/panic_1907/scenario-configura
 now carry the event-level downstream authorities without changing these
 Definitions.
 
-## Supporting research assets
+## Event-owned research authorities
 
 | File | Purpose |
 |---|---|
-| [source-register.md](source-register.md) | adopted public sources, stable source identities, public locators, byte hashes, adopted passages, and limitations |
-| [evidence-ledger.md](evidence-ledger.md) | claim-level classification, participant or population availability, allowed use, model consequence, and withdrawal consequence |
-| [decision-situations.md](decision-situations.md) | shared situations and perturbations used to compare Knickerbocker and NYCH |
+| [source register v0.1](../../../events/panic_1907/source-register-v0.1.md) | adopted public sources, stable source identities, public locators, byte hashes, adopted passages, and limitations |
+| [participant evidence v0.1](../../../events/panic_1907/participant-evidence-v0.1.md) | claim-level classification, participant or population availability, allowed use, model consequence, and withdrawal consequence |
+| [decision situations v0.1](../../../events/panic_1907/decision-situations-v0.1.md) | shared situations and perturbations used to compare Knickerbocker and NYCH |
 | [NBC interface preflight](../../interfaces/panic_1907/national-bank-of-commerce.md) | accepted compound-observation, route-hop and lifecycle impact for NBC |
 | [R2 interface preflight](../../interfaces/panic_1907/r2-private-and-named-trusts.md) | accepted semantic fit and deferred-mapping note for Morgan, TCA, and Lincoln |
 | [R3 interface preflight](../../interfaces/panic_1907/r3-collective-trust-support.md) | accepted semantic fit and deferred-mapping note for the committee and bank resource-decision population |
@@ -54,8 +54,10 @@ Definitions.
 | [KT--NBC--NYCH bounded binding](../../bindings/panic_1907/kt-nbc-nych-v0.1/) | exact four-action, three-route positive projection with NBC as pure courier |
 | [lineage conformance closeout](../../../scenarios/panic_1907/lineage-conformance-v0.1/) | cross-hop negatives, deterministic trace/replay receipt, implementation review, and method closeout |
 
-The evidence ledger owns claim classification. The source register owns source identity and custody metadata. The
-Definitions own participant behavior semantics. Scenario/environment assets will own instantiated world facts,
+The event-owned participant-evidence record owns claim classification. The
+event-owned source register owns source identity and custody metadata. This
+directory owns only the Agent Definition index and participant behavior
+semantics. Scenario and environment assets own instantiated world facts,
 delivery, institutional process, adjudication, and results.
 
 ## Relationship to implemented examples

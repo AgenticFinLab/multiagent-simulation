@@ -18,7 +18,7 @@ institutional rules, and generated-process semantics remain H2EPR concerns.
 | Artifacts and bundles | `src/h2epr/artifacts/`, `src/h2epr/bundles/` | Participant artifacts, provenance, and validated runtime bundles |
 | Policies and world | `src/h2epr/policies/`, `src/h2epr/world/` | Declarative policy inputs and normalized world calculations |
 | Runtime and compiler | `src/h2epr/runtime/`, `src/h2epr/compiler/` | Deterministic execution, sealed traces, replay, and graph compilation |
-| Agent research | `agents/` | Definitions, rosters, evidence reviews, mappings, and bindings |
+| Agent research | `agents/` | Definitions, rosters, interface accounts, mappings, and bindings |
 | Population research | `populations/` | Heterogeneous participant models and interface reviews |
 | Event coordination | `events/` | One lightweight Build Brief and cross-directory index per event |
 | Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases and their bounded implementation modules |
@@ -121,7 +121,7 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Trace and seal validation precede replay and graph compilation.
 - Evaluation material is not a runtime or construction input.
 
-The current baseline stops before full-roster integration, calibration,
+The current baseline stops before full-roster runtime integration, calibration,
 historical fitting, held-out evaluation, and scientific claims. Extending one
 of those surfaces requires a separate research purpose and review.
 

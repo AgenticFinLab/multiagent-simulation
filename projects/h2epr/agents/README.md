@@ -1,7 +1,9 @@
 # H2EPR Agents
 
-This directory contains H2EPR Agent Definitions and their supporting research
-assets. It borrows MASim's useful
+This directory contains H2EPR Agent Definitions, participant interface
+accounts, rosters, and machine-facing bindings. Shared source, claim, and
+decision-situation records belong to the corresponding event directory. H2EPR
+borrows MASim's useful
 separation between Markdown definitions and Python implementations, while
 keeping H2EPR profiles event-bound until reuse is demonstrated.
 
@@ -24,10 +26,10 @@ participant-available information, persistent state, authority, procedure, and
 intent/result separation can support auditable behavior. Calibration, cross-event
 reuse, and additional execution approaches require separate work.
 
-The H2EPR-0616 SingHealth collection adds two office-level Definitions—the
-SIRM and Cluster ISO—and one technical responsibility-unit Population Model.
-Together they cover the first detection-and-escalation participant set rather
-than the complete event roster.
+The H2EPR-0616 SingHealth collection currently contains seven office-level
+Definitions and two responsibility-unit Population Models across the accepted
+detection-and-escalation and classification-and-institutional-escalation
+batches. They do not yet constitute a released complete event roster.
 
 ## Authority map
 
@@ -37,9 +39,9 @@ than the complete event roster.
 | event semantic skeleton | shared event concepts, interaction routes, ownership boundaries, and structural variants | numerical state, wire fields, policy, or realized outcomes |
 | Agent Definition Markdown | representation, participant-available information semantics, decision commitments, intent meaning, assumptions, falsifiers | source classification, actual world values, wire schemas, adjudicated results |
 | population model Markdown | distributed choice semantics, retained heterogeneity, aggregation meaning, assumptions, and falsifiers | one collective personality, population composition, service process, or realized effects |
-| `source-register.md` | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
-| `evidence-ledger.md` | claim classification, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
-| `decision-situations.md` | shared research situations and perturbations | participant policy or executable scenario state |
+| event source register | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
+| event participant-evidence record | claim classification, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
+| event decision-situation record | shared research situations and perturbations when a separate record is useful | participant policy or executable scenario state |
 | interface preflight | semantic inventory, route and lifecycle dependencies, skeleton compatibility, and preliminary carrier classification | wire mapping, registries, implementation, or conformance claims |
 | accepted binding specification | reviewed mapping of a released Definition set, observations, commitments and intents | independent behavior semantics |
 | executable mapping and carrier checks | exact-hash loading, parameter/lifecycle validation and Contracts V1 projection | new historical claims or result adjudication |
@@ -66,20 +68,16 @@ agents/
 ├── defines/
 │   ├── panic_1907/
 │   │   ├── README.md
-│   │   ├── decision-situations.md
-│   │   ├── evidence-ledger.md
 │   │   ├── j-pierpont-morgan.md
 │   │   ├── knickerbocker-trust.md
 │   │   ├── lincoln-trust-company.md
 │   │   ├── national-bank-of-commerce.md
 │   │   ├── new-york-clearing-house.md
-│   │   ├── source-register.md
 │   │   ├── trust-company-presidents-committee.md
 │   │   └── trust-company-of-america.md
 │   └── singhealth_data_breach/
 │       ├── README.md
-│       ├── cluster-information-security-officer.md
-│       └── security-incident-response-manager.md
+│       └── <agent-definition>.md
 ├── interfaces/
 │   ├── panic_1907/
 │   │   ├── national-bank-of-commerce.md
@@ -97,9 +95,10 @@ agents/
   the public template. Role-specific subsections remain flexible. All
   canonical Definitions share the same publication-facing metadata rules.
 - The event directory follows the existing `configs/panic_1907/` identifier.
-- Only the role Markdown files are Agent Definitions. The source register,
-  evidence ledger, and decision-situation portfolio are adjacent research
-  assets with separate authority.
+- A `defines/<event>/` directory contains only its concise `README.md` index and
+  canonical Agent Definitions. Shared source registers, participant evidence,
+  and decision-situation portfolios are event-owned research authorities under
+  `events/<event>/`.
 - H2EPR framework Skills use one directory per workflow. `SKILL.md` is the
   entry point; detailed research and review guidance lives in `references/`.
   The current catalog is documented in [`../skills/README.md`](../skills/README.md).
@@ -113,13 +112,13 @@ agents/
 - [`rosters/panic_1907.md`](rosters/panic_1907.md): accepted H2EPR-0288
   research boundary, role dispositions, production order, and Definition
   release gate.
-- [`defines/panic_1907/README.md`](defines/panic_1907/README.md): event research assets,
-  authority boundaries, and relation to implemented examples.
-- [`defines/panic_1907/source-register.md`](defines/panic_1907/source-register.md) and
-  [`defines/panic_1907/evidence-ledger.md`](defines/panic_1907/evidence-ledger.md): adopted sources,
-  claim adjudication, exposure, and bounded unresolved gaps.
-- [`defines/panic_1907/decision-situations.md`](defines/panic_1907/decision-situations.md): shared role-comparison
-  situations and falsification perturbations.
+- [`defines/panic_1907/README.md`](defines/panic_1907/README.md): Definition
+  index, authority boundaries, and relation to implemented examples.
+- [`../events/panic_1907/source-register-v0.1.md`](../events/panic_1907/source-register-v0.1.md)
+  and [`../events/panic_1907/participant-evidence-v0.1.md`](../events/panic_1907/participant-evidence-v0.1.md):
+  adopted sources, claim adjudication, exposure, and bounded unresolved gaps.
+- [`../events/panic_1907/decision-situations-v0.1.md`](../events/panic_1907/decision-situations-v0.1.md):
+  shared role-comparison situations and falsification perturbations.
 - [`interfaces/panic_1907/r2-private-and-named-trusts.md`](interfaces/panic_1907/r2-private-and-named-trusts.md):
   accepted semantic preflight for the Morgan, TCA, and Lincoln R2 batch; no executable mapping is implied.
 - [`interfaces/panic_1907/national-bank-of-commerce.md`](interfaces/panic_1907/national-bank-of-commerce.md):
@@ -142,11 +141,13 @@ agents/
 - [`defines/panic_1907/trust-company-presidents-committee.md`](defines/panic_1907/trust-company-presidents-committee.md):
   an aggregate procedural committee Definition, with advice, contributor commitment and
   resource ownership kept separate.
-- [`defines/singhealth_data_breach/`](defines/singhealth_data_breach/): the
-  SIRM and Cluster ISO office-level Definitions for the first H2EPR-0616
-  detection-and-escalation participant set. Their shared
-  [interface account](interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
-  describes the semantic routes between them.
+- [`defines/singhealth_data_breach/`](defines/singhealth_data_breach/): seven
+  office-level Definitions across the first two H2EPR-0616 participant
+  batches. Their shared
+  [R1](interfaces/singhealth_data_breach/r1-detection-and-escalation.md) and
+  [R2](interfaces/singhealth_data_breach/r2-classification-and-institutional-escalation.md)
+  accounts describe the semantic routes among them and the two population
+  models.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the event-bound Knickerbocker depositor population model.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):

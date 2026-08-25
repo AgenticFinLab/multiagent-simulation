@@ -2,7 +2,7 @@
 
 This portfolio organizes the shared situations used to review the two current Agent Definitions. It is a
 research companion rather than a scenario configuration or executable policy. Claim identifiers resolve in
-the [evidence ledger](evidence-ledger.md).
+the [participant-evidence record](participant-evidence-v0.1.md).
 
 ## 1. Purpose
 

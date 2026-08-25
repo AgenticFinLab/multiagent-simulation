@@ -18,17 +18,12 @@ populations/
 ├── population-model-template.md
 ├── defines/
 │   ├── panic_1907/
-│   │   ├── call-money-broker-borrowers.md
-│   │   ├── call-money-lenders.md
-│   │   ├── knickerbocker-depositors.md
-│   │   ├── later-trust-company-depositors.md
-│   │   └── member-and-correspondent-bank-resource-decisions.md
+│   │   └── <population-model>.md
 │   └── singhealth_data_breach/
-│       └── technical-administration-and-line-security-staff.md
+│       └── <population-model>.md
 └── interfaces/
-    └── panic_1907/
-        ├── knickerbocker-depositors.md
-        └── r4-trust-contagion-and-call-money.md
+    └── <event>/
+        └── <interface-account>.md
 ```
 
 `defines/` contains the scholarly behavior model. `interfaces/` contains the
@@ -38,9 +33,11 @@ mapping, when needed, is recorded separately from these models.
 Start a new population product from the
 [Population model template](population-model-template.md). It covers the
 shared semantic and review requirements without forcing Agent Definition
-structure or a separate document for every working stage. Earlier models may
-use a deeper ten-module structure, but they share the same publication-facing
-metadata rules.
+semantics or a separate document for every working stage. Every canonical
+population model uses its exact ten-module reading order. Standard and deep
+profiles change research and review depth, not the publication-facing
+structure, and impose no minimum section length or number of mechanisms,
+parameters, or cases.
 
 ## Current models
 
@@ -81,6 +78,12 @@ and response intents; population composition, assignments, delivery, technical
 execution, and effects remain scenario-owned. The model covers the first
 H2EPR-0616 participant set rather than the complete event roster.
 
+[IHiS operational and SCM management](defines/singhealth_data_breach/ihis-operational-and-scm-management.md)
+preserves distinct infrastructure, application-service, and cluster-
+operational responsibility units that integrate technical accounts, seek
+verification, convene review, assign follow-up, or route a qualified concern.
+Its aggregation never becomes a single IHiS management actor.
+
 The five Panic of 1907 population models belong to its
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
 Their machine-facing relationships are recorded in the
@@ -89,3 +92,14 @@ Their machine-facing relationships are recorded in the
 The [publication standard](../PUBLICATION_STANDARD.md) governs the public model
 surface; the [Agent workflow](../agents/WORKFLOW.md) governs research, review,
 and integration records.
+
+For a new or changed model, run the shared publication-profile checker from
+the repository root:
+
+```bash
+python -m h2epr.agents.definition_profile --kind population \
+  path/to/population-model.md
+```
+
+The check enforces the common population reading structure and public surface;
+it does not replace evidence, behavior, or interface review.

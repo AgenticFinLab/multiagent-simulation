@@ -2,12 +2,15 @@
 
 ## 1. Model overview
 
-| Item | Definition |
+| Field | Description |
 |---|---|
-| Event | Panic of 1907, acute New York phase |
-| Focal interval | approximately 22–26 October 1907 |
-| Representation | event-bound population of broker-borrower funding choice units |
-| Focal choices | clarify a call, authorize controlled repayment, seek renewal/replacement funds, submit controlled collateral, respond to terms, request authorized position reduction or record inability |
+| Model name | Call-money broker-borrower funding choice units |
+| Event and interval | Panic of 1907, acute New York phase, approximately 22–26 October 1907 |
+| Choice unit | One broker firm's or exchange member's authorized funding interface, or an explicitly synthetic equivalent declared by the scenario |
+| Population scope | Broker-borrowers assigned a call-loan obligation or funding capability; customers, beneficial owners, lenders, exchange governance, and the venue remain outside the unit |
+| Primary decision situations | Clarify a call, authorize controlled repayment, seek renewal or replacement funds, submit controlled collateral, respond to terms, request authorized position reduction, or record inability |
+| Aggregation boundary | Weighted compression is allowed only for declared exchangeable funding conditions and cannot merge firm obligations, customer mandates, controlled resources, or historical identities |
+| State authority | Loan, collateral, matching, transfer, repayment, trade, settlement, default, and market-result truth remains scenario-owned; the unit retains only its funding choice state and observed lifecycles |
 | Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; named-broker policies, leverage targets, rate tolerances, liquidation thresholds, and funding demand are not calibrated |
 
 The model represents broker-borrowers facing demand-call obligations and
@@ -25,7 +28,7 @@ default, insolvency and price effects remain environmental results.
 The population is distinct from the NYSE venue. A loan stand or money-pool
 route can create a decision situation; it cannot decide for the borrower.
 
-## 2. Historical population and representation
+## 2. Population scope and representation
 
 ### Historical population
 
@@ -117,7 +120,7 @@ The authors know the loan calls, replacement-lending response, pool and later
 market outcomes. They may guide construction and falsification design but do
 not independently validate this behavior model.
 
-## 4. Institutional role and relationships
+## 4. Event role and relationships
 
 ### Authority and control
 
@@ -143,7 +146,7 @@ allocation, value collateral or declare repayment.
 | borrower ↔ customer/position owner | no authority by default | customer choice is outside v0.1 unless separately represented |
 | borrower ↔ NYSE | use venue route and receive matching/settlement observations | venue mechanics and governance are scenario-owned |
 
-## 5. Decision situations, information and state
+## 5. Decision situations, information, and state
 
 ### Decision situations
 

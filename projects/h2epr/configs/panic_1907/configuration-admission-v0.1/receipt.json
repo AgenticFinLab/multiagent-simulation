@@ -8,14 +8,14 @@
     "simulation_authorized": false
   },
   "configuration": {
-    "canonical_sha256": "d74a5382d705e6b25decd4dfd4a4f04cebf4f8278bf685ff7ffddcbbc9e6fef1",
+    "canonical_sha256": "edc9e877a3c99593914d63e3025076c9af13590f58c13b03c9c58d296c8fa1d9",
     "canonicalization": "h2epr_cjson.v1.full_configuration_document",
     "configuration_id": "h2epr.0288.scenario.mechanism-coverage.v0_1",
     "event_id": "H2EPR-0288",
     "path": "configs/panic_1907/scenario-configuration-v0.1/scenario-configuration.json",
     "schema_document_id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/configs/schemas/event-scenario-configuration-v0.1.schema.json",
     "schema_sha256": "8fb3265d7d121f4baa9ad281ccc0f2ca2f3d710fc5ded3dde7f38c7315542edd",
-    "source_sha256": "f9352ca2da66d0cc774b7c505a074ea63883689c6556720d77a4802506632bd6",
+    "source_sha256": "ee5f2b6a250ea67eccf08cb44217df404fddb39dc6943bd4aa00c495263ade25",
     "status": "accepted_non_executable_configuration",
     "version": "0.1.0"
   },
@@ -78,22 +78,22 @@
     }
   ],
   "next_legal_stage": "separately_authorized_carrier_projection",
-  "receipt_sha256": "c10782a04a7a33905bddc0d131f85b8eeb582b1b3f2b7e26161e1f827ec50331",
+  "receipt_sha256": "debd8a2411f3afaaf0199a384ab35651cc710950b77996f4d52d5351ab973193",
   "release": {
-    "manifest_sha256": "8d8f2b7093f5b2a7308bac5ee34a73d6eb86853677be040d01e0f1aac40b27e2",
+    "manifest_sha256": "33242b3864801a1ecb03e5e65c65c5db81d601f85ef42783afe707d93dde0f5c",
     "mapping_profile_id": "h2epr.roster-consolidated-mapping.v0_1",
-    "mapping_profile_sha256": "efa341364d12f8b1be8035ebd1cdde7b6ef2446f4015db3e28b6f2bdbaab25e7",
+    "mapping_profile_sha256": "cfe3f096e710cc3101fc5dd81fd48332712e19ff49debb328ba9fee8eba5487b",
     "release_id": "H2EPR-0288-SCENARIO-CONFIGURATION-v0.1"
   },
   "schema": "h2epr.configuration-admission-receipt.v0_1",
   "semantic_inputs": {
-    "consolidated_mapping": "d2aef35116df2df5f99cad7d0cdd69136e8c8e5b69261f387ea4cfd301eb72d5",
-    "evidence_ledger": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933",
-    "mapping_profile": "efa341364d12f8b1be8035ebd1cdde7b6ef2446f4015db3e28b6f2bdbaab25e7",
-    "roster_definition_release": "a03188f8a3ef45c500fa49ddd4230b99999c9b6759bf3cae73bf8040e0e73ec6",
+    "consolidated_mapping": "b4505c659b3f4be52f4f4768f4e571c1fd676fdc3ebf45d39a2cf6b62fe8fcb2",
+    "evidence_ledger": "1596edaeadf9dc5aaffd22cdb2fe88090b9202170d7ba41c16c6c9d01e69eb92",
+    "mapping_profile": "cfe3f096e710cc3101fc5dd81fd48332712e19ff49debb328ba9fee8eba5487b",
+    "roster_definition_release": "89a344d1972b9df7ff9adde5f9c5b762404c32bfeb3c81199d56a58039e45554",
     "scenario_definition": "5904e3fc2893261fe310a5af702baa523928901dc92122b95b603b71f62f6495",
-    "scenario_definition_release": "ad5e58d4f00e2a2d3f5b6a51ba8fe39a2f5fb2bcbb10cc3bdf79aca8d1ace4e0",
-    "scenario_interface_closure": "6b2cf568f88f1b372baf1a870b79948a2683aa23d19309165ee2b1ecd5f6ffad",
+    "scenario_definition_release": "e0cba8d69e1a39fb2cd1d83a0cbaf5dffb823d749a6be59d7e9c263f0cfe0405",
+    "scenario_interface_closure": "c30c2a4f3e9082e865fe7254695a6f576b4c3c8c2a28195e267dd99a72b7f414",
     "source_register": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
   },
   "validation_surface": "h2epr.scenario-configuration-admission.v0_1",

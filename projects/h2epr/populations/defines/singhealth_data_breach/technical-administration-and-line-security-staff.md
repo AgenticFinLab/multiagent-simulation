@@ -1,14 +1,16 @@
 # IHiS technical administration and line security staff
 
-## Model overview
+## 1. Model overview
 
 | Field | Value |
 |---|---|
 | Model name | IHiS technical detection and local response role set |
-| Event and modeled interval | SingHealth Data Breach; decisions from 18 January through 10 July 2018, with later response context through 20 July |
+| Event and interval | SingHealth Data Breach; decisions from 18 January through 10 July 2018, with later response context through 20 July |
 | Choice unit | One institution-preserving technical responsibility unit: the smallest event-time assignment that receives the observation and can choose a local response |
-| Host, institution, or account scope | IHiS personnel and units deployed to or supporting SingHealth systems; each unit remains attached to its own function, information, access, and authority |
-| Causal role in the event | Detect, interpret, investigate, communicate, and locally respond to technical signals before or alongside formal incident classification and escalation |
+| Population scope | IHiS personnel and units deployed to or supporting SingHealth systems; each unit remains attached to its own function, information, access, and authority |
+| Primary decision situations | Detect, interpret, investigate, communicate, and locally respond to technical signals before or alongside formal incident classification and escalation |
+| Aggregation boundary | Units may be summarized by technical responsibility type, but observations, assessments, authority, intents, and results remain local to each unit |
+| State authority | Accounts, hosts, sessions, controls, delivery, incident classification, and technical results remain scenario- or institution-owned; units retain only their declared private state and observed intent lifecycles |
 | Evidence use and explanatory scope | Official retrospective inquiry evidence supports an event-bound qualitative reconstruction; later outcomes informed construction but are excluded from participant-time information |
 
 This model preserves distributed technical choices needed to explain CT-4 of
@@ -17,7 +19,7 @@ actor. It also does not reconstruct every named employee as an Agent when the
 research question needs their role-local information and choices rather than
 individual biography.
 
-## 1. Scope and representation
+## 2. Population scope and representation
 
 One choice unit represents the smallest documented technical responsibility
 assignment that both receives a bounded observation and can choose a local
@@ -55,7 +57,7 @@ that the typed unit cannot express. It should return to scenario ownership if
 evidence shows that the material actions were mechanically prescribed and left
 no role-local interpretation or choice.
 
-## 2. Evidence and institutional basis
+## 3. Evidence and theoretical foundation
 
 The [R1 participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
 supplies the shared source identity, claim classification, participant-time limits, and
@@ -87,7 +89,24 @@ Workload, technical expertise, message quality, and organizational direction
 remain competing explanations. No general theory, numerical distribution, or
 cross-event response law is adopted.
 
-## 3. Information, private state, and heterogeneity
+## 4. Event role and relationships
+
+Technical responsibility units supply local detection, investigation,
+communication, and control choices while preserving the organizational routes
+through which their findings may become a coordinated incident account.
+
+| Relationship | Unit-side role | Other owner |
+|---|---|---|
+| unit ↔ assigned system or account | inspect an authorized target and request a bounded local control | the scenario owns access, execution, authoritative state, and technical effect |
+| unit ↔ peer technical unit | request context or share a sourced finding | each peer retains its own observations, assessment, access, and response choice |
+| unit ↔ SIRM or Cluster ISO | deliver a bounded finding or request security review | the addressed office owns classification, coordination, and escalation choices after delivery |
+| unit ↔ operational management | answer a scoped request, provide follow-up, or communicate an unresolved issue | the management unit owns aggregation and upward routing; delivery remains institutional |
+
+No relationship gives all technical units a common view or permits the
+population to classify the incident, direct senior management, or declare a
+control successful.
+
+## 5. Decision situations, information, and state
 
 ### Participant observations
 
@@ -126,7 +145,7 @@ security-engineering units can perform the investigation available to them and
 route findings through Security Management. Actual access and feasibility
 remain scenario facts.
 
-## 4. Behavior and choice
+## 6. Behavioral model
 
 A unit activates when it receives a new local signal, a delivered technical
 finding, a security request, or a result that leaves a material question open.
@@ -165,7 +184,7 @@ control, while fragmented information can delay cross-team integration.
 Expertise, workload, message clarity, and received direction may alter the
 admissible selection. No parameter fixes the historical action.
 
-## 5. Intent, result, and scenario boundary
+## 7. Intent and result boundary
 
 | Intent | Meaning | Target | Required content | Scenario-owned result |
 |---|---|---|---|---|
@@ -179,7 +198,24 @@ Population-level counts, clusters, or sequences of these intents are analysis
 outputs only. They do not create a population instruction, incident decision,
 or authoritative technical state.
 
-## 6. Cases, uncertainty, and falsification
+## 8. Operationalization and uncertainty
+
+A scenario instantiates responsibility units by technical function and binds
+each unit to explicit systems, accounts, access, availability, and reporting
+routes. The model assigns no fixed population weights or response
+probabilities. Aggregates such as the number of investigations, controls, or
+shared findings are derived analysis outputs and retain the originating unit
+and host.
+
+Initial private state is `unexamined`, with empty questions, sharing history,
+and intent references unless a dated participant-time prehistory is supplied.
+Role composition, expertise, workload, message clarity, and reporting guidance
+remain exposed qualitative uncertainties. The principal structural uncertainty
+is unit composition: evidence of unique cross-unit authority would trigger a
+split into an Agent, while evidence that all material actions were centrally
+mandatory would return the behavior to the scenario.
+
+## 9. Worked cases and falsification
 
 ### January callback signal — reconstructed, exposed outcome
 
@@ -219,13 +255,7 @@ delivered failure notice. Duplicate issuance remains inappropriate while the
 intent is pending; after failure the unit must reconsider control, evidence
 collection, or security coordination.
 
-The principal structural uncertainty is unit composition: the event record
-supports role types and particular examples, not a complete population census
-or numerical weights. A later accepted source showing unique cross-unit
-authority would trigger a split into an Agent; evidence that all material
-choices were centrally mandatory would trigger scenario externalization.
-
-## 7. Limitations and references
+## 10. Limitations and references
 
 This event-bound qualitative model does not reconstruct every technical
 employee, measure cybersecurity competence, estimate population composition,

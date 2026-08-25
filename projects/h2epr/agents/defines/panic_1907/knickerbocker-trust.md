@@ -1,13 +1,13 @@
 # Knickerbocker Trust Company
 
-## Model overview
+## 1. Model overview
 
 | Field | Description |
 |---|---|
 | Historical participant | Knickerbocker Trust Company |
 | Modeled role | authorized company-level interface for liquidity assessment, institutional support seeking, communication, and operational preparation |
 | Event and interval | H2EPR-0288, Panic of 1907; the October 21 support-request and clearing-channel boundary, with adjacent operational response only where stated |
-| Primary situations | incomplete liquidity information; authorization; support-request formation and maintenance; delivered disposition or channel change |
+| Primary decision situations | incomplete liquidity information; authorization; support-request formation and maintenance; delivered disposition or channel change |
 | Decision cadence | event-driven when a material observation, authorization, request state, disposition, or relationship state changes; an activated situation must produce a response record |
 | Decision form | constrained set-valued policy: all implementations share the permitted response classes and minimum response obligations, while more than one intent may remain admissible |
 | State authority | business-process and relationship truth is environment-owned; the Agent retains only declared decision posture and references to authoritative records |
@@ -23,8 +23,9 @@ access**, **corporate authority**, and **solvency assessment**. These concepts m
 latent “health” or “fear” variable. The participant can emit requests and communications; it cannot create
 external support, preserve confidence, or suspend itself merely by declaring an outcome.
 
-Claim identifiers resolve in the adjacent [evidence ledger](evidence-ledger.md); source identities, public
-locators, adopted passages, and file hashes are recorded in the [source register](source-register.md).
+Claim identifiers resolve in the event-owned [participant-evidence record](../../../events/panic_1907/participant-evidence-v0.1.md);
+source identities, public locators, adopted passages, and file hashes are recorded in the
+[source register](../../../events/panic_1907/source-register-v0.1.md).
 
 ### Scope and research purpose
 
@@ -40,7 +41,7 @@ It does not explain depositor choice, NBC’s decision to terminate clearing, NY
 eventual severity of the panic. It does not claim that the first two roles form a reusable trust-company
 archetype.
 
-## Historical participant and representation
+## 2. Historical participant and representation
 
 Knickerbocker was a large New York trust company and was not a NYCH member. It cleared through the National
 Bank of Commerce and appears to have remained an important trust-company exception under the clearinghouse’s
@@ -60,7 +61,7 @@ can be attributed to a duly authorized company interface. It excludes:
 The aggregation is provisional. It must be split if direct evidence shows that separate internal bodies held
 different information or issued interacting intents necessary to explain the focal process.
 
-## Evidence and theoretical foundation
+## 3. Evidence and theoretical foundation
 
 ### Event-specific foundation
 
@@ -100,7 +101,7 @@ dated cash, withdrawals, and channel observations
 
 The claim ledger remains authoritative for source class, time, exposure, conflict, and withdrawal consequence.
 
-## Institutional role and relationships
+## 4. Institutional role and relationships
 
 ### Role and priorities
 
@@ -140,7 +141,7 @@ NBC is a scenario-owned institutional channel and counterparty. NYCH is the rece
 for the focal two-role study. Depositors and other possible financiers are outside the modeled Agent roster; they
 may influence the world only through authorized scenario processes.
 
-## Decision situations, information, and state
+## 5. Decision situations, information, and state
 
 ### Activation and decision situations
 
@@ -167,7 +168,7 @@ world truth.
 | `withdrawal_pressure` | `{ordinary, elevated, severe, unknown}` plus observation interval | internal payment/withdrawal records | missing does not default to severe; a later historical run cannot be backfilled | `DC-KT-01`, `DC-KT-04` |
 | `asset_liquidity_assessment` | `{readily_available, conditionally_liquid, illiquid, disputed, unknown}` | authorized internal assessment | distinguishes expected conversion from book or ultimate value | `DC-KT-02`, `DC-KT-04` |
 | `collateral_package_status` | `{not_prepared, preparing, available, submitted, disputed, unknown}` | internal preparation and delivered process events | does not assert recipient acceptance or valuation | `DC-KT-02`, `DC-KT-03` |
-| `corporate_authorization` | `{not_requested, pending, authorized, denied, unknown}` with scope and authoritative record identity | environment-owned internal governance result delivered to the Agent | only `authorized` for the named scope permits the material intent; the Agent cannot privately rewrite the result | all material commitments |
+| `corporate_authorization` | `{not_requested, pending, authorized, denied, unknown}` with scope and authoritative record identity | environment-owned internal governance result delivered to the Agent | only `authorized` for the named scope permits the material intent; the Agent cannot privately rewrite the result | `DC-KT-01`, `DC-KT-02`, `DC-KT-03`, `DC-KT-04` |
 | `clearing_channel_status` | `{active, termination_notice_delivered, ending_at_time, inactive, disputed, unknown}` plus recipient, channel, route, effective time, and declared content-requirement refs | delivered NBC/scenario relationship event | researcher knowledge of NBC’s choice is not delivery; missing route requirements remain explicit | `DC-KT-02`, `DC-KT-04` |
 | `support_request_status` | `{none, prepared, sent, delivered, awaiting_information, under_review, refused, expired, withdrawn, partial, failed, executed, unknown}` plus request identity | environment-owned process projection | sent is not delivered; delivered is not accepted; executed is not inferred | `DC-KT-02`–`DC-KT-04` |
 | `received_information_request` | requested material and request identity, or none | delivered message from recipient/process | only delivered requests may trigger disclosure work | `DC-KT-03` |
@@ -208,7 +209,7 @@ Belief is qualitative and optional. The Agent may hold an assessment of whether 
 adequate or whether a channel remains viable, but that assessment must derive from participant-available observations. No
 private probability of failure, rescue, or confidence is required.
 
-## Behavioral model
+## 6. Behavioral model
 
 ### Decision procedure and determinacy
 
@@ -467,7 +468,7 @@ capability rather than treating refusal as automatic suspension.
 or automatic conversion of refusal into suspension. **Falsifier:** result class and channel status do not change
 any subsequent behavior.
 
-## Intent and result boundary
+## 7. Intent and result boundary
 
 The entries below are **modeled institutional capabilities** unless a nearby citation or worked-case label
 identifies a reconstructed action. Reader-facing labels carry the argument; stable semantic identifiers in
@@ -491,7 +492,7 @@ Abstention is a recorded no-intent decision with a reason such as insufficient i
 unavailable channel, unresolved equivalent request, or absence of a permitted institutional alternative. It is
 subject to the commitment-specific boundaries above and is not a universal default.
 
-## Operationalization and uncertainty
+## 8. Operationalization and uncertainty
 
 This revision uses categorical and dated states. It introduces no fitted behavioral constants.
 
@@ -522,7 +523,7 @@ the categories and references; it may not replace them with an undocumented scal
 Generic risk tolerance, fear, confidence, rescue probability, and precise subjective solvency probability are
 omitted because they lack a defensible construct and update path.
 
-## Worked cases and falsification
+## 9. Worked cases and falsification
 
 ### Case A — incomplete early-pressure assessment (illustrative)
 
@@ -604,7 +605,7 @@ The behavioral model should be narrowed or rejected if direct evidence shows tha
 entirely to another institution, that no internal authorization distinction mattered, or that the proposed
 mechanisms make no distinguishable process prediction.
 
-## Limitations and references
+## 10. Limitations and references
 
 ### Assumptions, limitations, and withdrawal conditions
 

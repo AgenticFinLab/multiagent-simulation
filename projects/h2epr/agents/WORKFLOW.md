@@ -168,9 +168,10 @@ Review local sources and event claims before opening new research. External
 research uses the approved scope and archives only sources that enter claim
 adjudication. Search results and unused downloads remain working notes.
 
-The ten-module template provides a common reading order for Agent Definitions.
-It does not govern population products or force institutions and individuals
-to share mechanisms, variables, or commitment counts. Every material
+Agent Definitions and population models have separate, exact ten-module
+templates. The common length makes cross-event reading predictable; it does
+not force the two representation types to share mechanisms, variables,
+commitment forms, aggregation rules, or document length. Every material
 observation, state, parameter, and intent still needs an explanatory or review
 consumer.
 
@@ -190,9 +191,8 @@ boundary.
 Before promotion:
 
 1. confirm product identity, version, claim references, and source records;
-2. for a new Agent Definition, pass the lightweight ten-module and
-   inventory-profile check without applying it retroactively to frozen
-   releases;
+2. pass the applicable ten-module publication-profile check for every new or
+   changed Agent Definition or population model;
 3. check cross-section, cross-role, roster, and skeleton consistency;
 4. complete the batch interface preflight;
 5. record the review verdict and any triggered owner decision under the

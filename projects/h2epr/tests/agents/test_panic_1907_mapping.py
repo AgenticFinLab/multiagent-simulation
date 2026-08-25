@@ -24,6 +24,19 @@ def _mapping():
     return load_executable_mapping(BINDING_PATH)
 
 
+def _copy_mapping_surface(tmp_path: Path) -> Path:
+    copied_root = tmp_path / "h2epr"
+    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
+    for relative in (
+        Path("contracts/v1/schemas/core/h2epr_core.schema.json"),
+        Path("events/panic_1907/decision-situations-v0.1.md"),
+    ):
+        target = copied_root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(PROJECT_ROOT / relative, target)
+    return copied_root
+
+
 def _support_request_parameters(**overrides):
     values = {
         "channel_id": "channel.nbc_mediated",
@@ -79,12 +92,7 @@ def test_current_mapping_closes_reviewed_inventory() -> None:
 
 
 def test_machine_mapping_fails_after_reviewed_definition_drift(tmp_path: Path) -> None:
-    copied_root = tmp_path / "h2epr"
-    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
-    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract.parent.mkdir(parents=True)
-    shutil.copy2(contract, copied_contract)
+    copied_root = _copy_mapping_surface(tmp_path)
     definition = copied_root / "agents/defines/panic_1907/knickerbocker-trust.md"
     definition.write_text(
         definition.read_text(encoding="utf-8") + "\n<!-- drift -->\n",
@@ -98,12 +106,7 @@ def test_machine_mapping_fails_after_reviewed_definition_drift(tmp_path: Path) -
 
 
 def test_machine_registry_hash_is_bound_by_mapping(tmp_path: Path) -> None:
-    copied_root = tmp_path / "h2epr"
-    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
-    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract.parent.mkdir(parents=True)
-    shutil.copy2(contract, copied_contract)
+    copied_root = _copy_mapping_surface(tmp_path)
     registry = copied_root / "agents/bindings/panic_1907/intent-registry.json"
     value = json.loads(registry.read_text(encoding="utf-8"))
     value["actor_intent_counts"]["knickerbocker_trust"] = 12
@@ -120,12 +123,7 @@ def test_machine_registry_hash_is_bound_by_mapping(tmp_path: Path) -> None:
 def test_observation_registry_rejects_an_implementation_only_synonym(
     tmp_path: Path,
 ) -> None:
-    copied_root = tmp_path / "h2epr"
-    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
-    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract.parent.mkdir(parents=True)
-    shutil.copy2(contract, copied_contract)
+    copied_root = _copy_mapping_surface(tmp_path)
 
     registry = copied_root / "agents/bindings/panic_1907/observation-registry.json"
     registry_value = json.loads(registry.read_text(encoding="utf-8"))
@@ -159,12 +157,7 @@ def test_observation_registry_rejects_an_implementation_only_synonym(
 def test_observation_registry_value_must_match_the_same_actor_definition_row(
     tmp_path: Path,
 ) -> None:
-    copied_root = tmp_path / "h2epr"
-    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
-    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract.parent.mkdir(parents=True)
-    shutil.copy2(contract, copied_contract)
+    copied_root = _copy_mapping_surface(tmp_path)
 
     registry = copied_root / "agents/bindings/panic_1907/observation-registry.json"
     registry_value = json.loads(registry.read_text(encoding="utf-8"))
@@ -285,12 +278,7 @@ def test_nych_cannot_observe_sufficient_request_authority_without_a_request() ->
 
 
 def test_intent_cannot_introduce_hidden_participant_state(tmp_path: Path) -> None:
-    copied_root = tmp_path / "h2epr"
-    shutil.copytree(PROJECT_ROOT / "agents", copied_root / "agents")
-    contract = PROJECT_ROOT / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract = copied_root / "contracts/v1/schemas/core/h2epr_core.schema.json"
-    copied_contract.parent.mkdir(parents=True)
-    shutil.copy2(contract, copied_contract)
+    copied_root = _copy_mapping_surface(tmp_path)
 
     registry = copied_root / "agents/bindings/panic_1907/intent-registry.json"
     registry_value = json.loads(registry.read_text(encoding="utf-8"))

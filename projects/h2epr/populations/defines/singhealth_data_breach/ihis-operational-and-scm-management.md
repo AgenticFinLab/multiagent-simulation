@@ -1,14 +1,16 @@
 # IHiS operational and SCM management
 
-## Model overview
+## 1. Model overview
 
 | Field | Value |
 |---|---|
 | Model name | IHiS operational information-integration and escalation role set |
-| Event and modeled interval | SingHealth Data Breach; operational-management decisions on 9 and 10 July 2018 |
+| Event and interval | SingHealth Data Breach; operational-management decisions on 9 and 10 July 2018 |
 | Choice unit | One IHiS operational-management responsibility holder who can gather cross-team information, convene review, assign follow-up, or route a bounded concern upward |
-| Host, institution, or account scope | Infrastructure Services, application or SCM service leadership, and cluster-operational coordination within IHiS; each unit retains its own function, information, and authority |
-| Causal role in the event | Convert fragmented R1 technical findings into a source-preserving management account and decide whether further verification or senior escalation is required |
+| Population scope | Infrastructure Services, application or SCM service leadership, and cluster-operational coordination within IHiS; each unit retains its own function, information, and authority |
+| Primary decision situations | Integrate fragmented technical findings, seek verification, convene cross-functional review, assign follow-up, or escalate a qualified account |
+| Aggregation boundary | Units may be grouped by responsibility type for analysis, but their information, authority, intents, and results remain unit-specific |
+| State authority | Meeting, reporting, incident, assignment, delivery, and technical-result truth remains with the scenario or responsible institution; units retain only their assessments and observed intent lifecycles |
 | Evidence use and explanatory scope | Official retrospective inquiry evidence supports an event-bound qualitative reconstruction; later findings informed construction but are excluded from participant-time information |
 
 The role set represents the operational bridge between technical investigation
@@ -17,7 +19,7 @@ made the 9 July cross-team integration possible without treating IHiS
 management as a single actor or reconstructing every named manager as an
 individual Agent.
 
-## 1. Scope and representation
+## 2. Population scope and representation
 
 One choice unit is the smallest operational-management assignment that can
 receive reports from several technical responsibility units and decide how to
@@ -50,7 +52,7 @@ responsibility, determined the transition. The model should instead return to
 scenario ownership if convening and escalation are shown to have been
 mechanical routing steps with no role-local interpretation or choice.
 
-## 2. Evidence and institutional basis
+## 3. Evidence and theoretical foundation
 
 The [participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
 provides the source and claim ledger. This model relies principally on:
@@ -80,7 +82,24 @@ Message quality, role-local expertise, reporting knowledge, and the presence
 of a sufficiently senior convenor remain competing explanations. The model
 does not assign mechanism weights or a universal escalation threshold.
 
-## 3. Information, private state, and heterogeneity
+## 4. Event role and relationships
+
+Operational-management units connect responsibility-bounded technical work to
+senior institutional routes without absorbing either side's information or
+authority.
+
+| Relationship | Unit-side role | Other owner |
+|---|---|---|
+| unit ↔ technical responsibility unit | request and receive a sourced account, verification, or follow-up result | the technical unit owns its finding and choice; delivery and technical effects are scenario-owned |
+| unit ↔ another operational-management unit | exchange a bounded account or convene a shared review | each unit retains its own assessment, authority, and intent history |
+| unit ↔ GCIO or another senior route | escalate a qualified source-preserving account and respond to later requests | the recipient owns interpretation and direction; institutional routing owns delivery |
+| unit ↔ meeting or assignment process | request convening or follow-up and observe delivered records | attendance, assignments, completion, and results remain institution- or scenario-owned |
+
+The population owns no common incident classification, executive direction,
+or collective management memory. Counting several unit responses for analysis
+does not create an additional IHiS management actor.
+
+## 5. Decision situations, information, and state
 
 ### Participant observations
 
@@ -116,7 +135,7 @@ query context; cluster-operational units can relate the issue to local service
 responsibility. Actual assignments, access, staffing, and meeting membership
 remain scenario facts.
 
-## 4. Behavior and choice
+## 6. Behavioral model
 
 A unit activates when it receives a material role-local account, a new fact
 connecting previously separated accounts, a request for management
@@ -155,7 +174,7 @@ convening, while precautionary communication favors escalation when the
 source remains unexplained or the connected scope is material. The evidence
 does not select a unique action in every admissible case.
 
-## 5. Intent, result, and scenario boundary
+## 7. Intent and result boundary
 
 | Intent | Meaning | Target | Required content | Scenario-owned result |
 |---|---|---|---|---|
@@ -171,7 +190,25 @@ cancelled, or superseded intent may be revised. Counts or sequences of unit
 intents are analysis outputs only and do not create a collective management
 decision maker.
 
-## 6. Cases, uncertainty, and falsification
+## 8. Operationalization and uncertainty
+
+A scenario instantiates only the responsibility units needed for the accepted
+event question and assigns each one a functional type, institutional route,
+event-time availability, and legitimate observations. The model uses no
+population weights: multiple units remain separately identifiable, and any
+summary by responsibility type is derived from their recorded intents and
+delivered results.
+
+Initial assessments are `unassembled`, with no open verification item,
+consolidated account, or active intent unless the scenario supplies a dated
+prehistory. Functional type, route availability, message quality, expertise,
+and reporting knowledge are exposed qualitative dimensions rather than fitted
+parameters. The main structural uncertainty is whether a documented choice
+belongs to a typed responsibility unit or to a uniquely authorized named
+office; evidence of durable personal authority would trigger a representation
+review rather than a hidden type adjustment.
+
+## 9. Worked cases and falsification
 
 ### Afternoon cross-team review — reconstructed, exposed outcome
 
@@ -213,7 +250,7 @@ unverified result becomes truth, if repeated abstention remains possible after
 material integration, or if an intent creates its own meeting, delivery, or
 senior response.
 
-## 7. Limitations and references
+## 10. Limitations and references
 
 The inquiry supports event-specific responsibility types and decisions, not a
 complete census, population weights, a numerical escalation threshold, or a

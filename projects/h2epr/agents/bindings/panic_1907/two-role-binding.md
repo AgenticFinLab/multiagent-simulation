@@ -10,13 +10,13 @@
 
 | Input | Version or SHA-256 |
 |---|---|
-| Knickerbocker Definition | `0.2.1`; `7e495ea40a79751187098c4578218341822049fab188259fb25f431b59a09f20` |
-| NYCH Definition | `0.2.1`; `b0c2aeb86154235e3268badc86d656317bb0f3b3a35760b7979274b26d2f214f` |
+| Knickerbocker Definition | `0.2.1`; `d844a7a10c11bfee29c6ec2260a31ddd70748eb290e624f88dc81883d587754d` |
+| NYCH Definition | `0.2.1`; `e5cdc9e3f440d6243bf3407cc27e46b2dc280ffd68178d8f66511f6b9bd6996b` |
 | Source register | `4ad53e0f81afb25b769f376783e5a9ecdee594fc068e9bb1768cb85c4d7b4775` |
 | Evidence ledger | `94268266893cdea11d2e274a645de4512d580ca051e9391622cd1245d17e0c2a` |
-| Decision situations | `b9cd28a6b95481e75135ad91a3651ea9f286b757142e22189ce266423d8c0883` |
+| Decision situations | `377b9dce910cfb16bdc95e26eafde0ceea2b704f9a8d3b35113e037e2acc43a9` |
 | Scenario identity/lifecycles | `8a60c1607cf1226bb8249d087f35b01c6d1a0b1ac5b16f68c1b383f6779837b7` |
-| Intent registry | `2e2e008f4e34edafba8a506ae86c64fee89fc3f9c206768bc8e01a66e2dff50d` |
+| Intent registry | `03bbffe536d70c9a8dab930f4c272de432e327c08c807dc6f74943b1a7db99ca` |
 | Observation registry | `8bc43bd866a0b4a194168688b9d15e3e3e209eb7ffd8dbb0246541ef58cd69a2`; derived from the two Definition observation tables |
 | Cross-object conformance rules | `cf70034f13d907f4754ae76686f58746a826709539e4e19595de41a3a15df7ef` |
 | V1 core schema | `36232df97aadf276358ff93f836fe52683b7aea4cf57f8cd697f92e3669e8c25` |

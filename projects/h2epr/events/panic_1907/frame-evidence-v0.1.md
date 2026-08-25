@@ -6,9 +6,9 @@ event-level chronology, causal responsibility, participant-time, and
 representation boundaries that were later fixed by the Roster and Event
 Scenario Definition.
 
-The underlying [source register](../../agents/defines/panic_1907/source-register.md)
+The underlying [source register](source-register-v0.1.md)
 remains authoritative for citations, locators, custody, adopted passages,
-archive identities, and hashes. The adjacent [evidence ledger](../../agents/defines/panic_1907/evidence-ledger.md)
+archive identities, and hashes. The adjacent [participant-evidence record](participant-evidence-v0.1.md)
 remains authoritative for participant and population claims. This record
 creates a frame-level crosswalk; it adopts no new source, changes no source
 byte, and does not reopen an accepted participant, scenario, configuration,
@@ -22,7 +22,7 @@ binding, or conformance decision.
 - Exact evidence inputs: source register SHA-256
   `3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae`;
   evidence ledger SHA-256
-  `5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933`
+  `1596edaeadf9dc5aaffd22cdb2fe88090b9202170d7ba41c16c6c9d01e69eb92`
 - Protected inputs: no Reference EPG, draft EPG, held-out suffix, or
   evaluation-only material was accessed in this integration cycle
 - Archive policy: existing sealed local collections remain unchanged; this

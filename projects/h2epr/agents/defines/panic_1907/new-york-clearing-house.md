@@ -1,13 +1,13 @@
 # New York Clearing House Association
 
-## Model overview
+## 1. Model overview
 
 | Field | Description |
 |---|---|
 | Historical participant | New York Clearing House Association (NYCH) |
 | Modeled role | member-governed procedural interface for request receipt, route and eligibility classification, information review, authority formation, and institutional disposition |
 | Event and interval | H2EPR-0288, Panic of 1907; the October 21 request receipt, classification, review, authority, and response boundary |
-| Primary situations | request classification; incomplete information or authority; member-facility boundary; conditioned proposal; case disposition, communication delivery, and later result |
+| Primary decision situations | request classification; incomplete information or authority; member-facility boundary; conditioned proposal; case disposition, communication delivery, and later result |
 | Decision cadence | event-driven when a request, relationship fact, information item, forum/authority state, proposal state, or result changes; an activated case must produce a procedural response record |
 | Decision form | constrained set-valued procedural policy: all implementations share classification, minimum response, authority, and result boundaries while some institutionally permitted choices remain open |
 | State authority | case, review, authority, commitment, and result truth is environment-owned institutional process state; the Agent may propose transitions and retain delivered references |
@@ -24,8 +24,9 @@ resources, collateral review, and particular facilities. It therefore rejects bo
 refer, request, communicate, decline, delay, or abstain within a documented interface. It cannot directly
 transfer member resources or declare that a requester or the financial system has been stabilized.
 
-Claim identifiers resolve in the adjacent [evidence ledger](evidence-ledger.md); source identities, public
-locators, adopted passages, and file hashes are recorded in the [source register](source-register.md).
+Claim identifiers resolve in the event-owned [participant-evidence record](../../../events/panic_1907/participant-evidence-v0.1.md);
+source identities, public locators, adopted passages, and file hashes are recorded in the
+[source register](../../../events/panic_1907/source-register-v0.1.md).
 
 ### Scope and research purpose
 
@@ -44,7 +45,7 @@ The model does not endogenize individual member-bank preferences, NBC’s cleari
 private coordination, depositor response, or the later October 26 certificate program as if it governed
 October 21.
 
-## Historical participant and representation
+## 2. Historical participant and representation
 
 NYCH was an association of member banks with a general meeting, officers, manager, standing committees, and
 special committees. Cannon describes one vote per member, a clearing-house committee second in authority to
@@ -69,7 +70,7 @@ Split the participant if focal archival evidence shows that committees or member
 participant-available observations and issued interacting intents that cannot be represented as transparent
 procedural states.
 
-## Evidence and theoretical foundation
+## 3. Evidence and theoretical foundation
 
 ### Institutional foundation
 
@@ -110,7 +111,7 @@ delivered request and relationship facts
 
 The claim ledger remains authoritative for evidence status, time, exposure, conflict, and withdrawal.
 
-## Institutional role and relationships
+## 4. Institutional role and relationships
 
 ### Mandate and duties represented
 
@@ -145,7 +146,7 @@ an authorized facility; and coordinate or propose member commitments. It does no
 credit, reserves, or risk capacity. Actual member commitment, collateral acceptance, scheduling, transfer, and
 effect belong to authoritative institutional/environment processes.
 
-## Decision situations, information, and state
+## 5. Decision situations, information, and state
 
 ### Activation and decision situations
 
@@ -216,7 +217,7 @@ The Agent may form qualitative institutional assessments—such as information a
 member obligations materially constrained—but these assessments must derive from participant-available
 observations. It does not possess a generic willingness, benevolence, panic, or confidence state.
 
-## Behavioral model
+## 6. Behavioral model
 
 ### Decision procedure and determinacy
 
@@ -529,7 +530,7 @@ and later observation occur as distinct linked records. **Forbidden pattern:** a
 delivered, or a proposal immediately rescues the requester. **Falsifier:** communication status or result class
 has no behavioral or trace consequence.
 
-## Intent and result boundary
+## 7. Intent and result boundary
 
 The entries below are **modeled institutional capabilities** unless a nearby citation or worked-case label
 identifies a reconstructed action. Reader-facing labels carry the argument; stable semantic identifiers in
@@ -552,7 +553,7 @@ Abstention is a recorded no-intent decision with a scoped reason: no delivered c
 route, missing information, no competent authority, unresolved prior process, or no institutionally permitted
 alternative. It is subject to the commitment-specific boundaries above and is not a universal default.
 
-## Operationalization and uncertainty
+## 8. Operationalization and uncertainty
 
 | Construct | Representation | Evidence and use |
 |---|---|---|
@@ -570,7 +571,7 @@ alternative. It is subject to the commitment-specific boundaries above and is no
 Generic confidence, institutional fear, benevolence, willingness, rescue probability, and a modern central-bank
 loss function are omitted.
 
-## Worked cases and falsification
+## 9. Worked cases and falsification
 
 ### Case A — ordinary nonmember clearing administration (historically grounded baseline)
 
@@ -684,7 +685,7 @@ The model should be narrowed or rejected if focal minutes show that no alternati
 review and authority never affect any prediction under the sensitivity variant, or if member/committee
 heterogeneity is necessary but hidden inside the aggregate.
 
-## Limitations and references
+## 10. Limitations and references
 
 ### Assumptions, limitations, and withdrawal conditions
 

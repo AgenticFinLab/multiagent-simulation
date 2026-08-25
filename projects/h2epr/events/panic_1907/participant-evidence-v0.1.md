@@ -1,11 +1,11 @@
-# Panic of 1907 participant-model evidence ledger
+# Panic of 1907 participant evidence
 
-This ledger is the claim-level authority for the current Knickerbocker Trust, New York Clearing House,
+This record is the claim-level authority for the current Knickerbocker Trust, New York Clearing House,
 National Bank of Commerce, J. Pierpont Morgan, Trust Company of America, Lincoln Trust Company, and the
 trust-company presidents' committee Definitions, together with the Knickerbocker depositor, later trust-
 company depositor, bank resource-decision, call-money lender, and broker-borrower population models. Source
 identities, public locators, adopted passages, file hashes, and source-specific limits are recorded in the
-adjacent [source register](source-register.md).
+adjacent [source register](source-register-v0.1.md).
 
 ## Reading rules
 

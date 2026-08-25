@@ -17,7 +17,7 @@ records in their responsibility-owned directories remain authoritative.
 | Primary question | How institution-specific information, authority, clearing and support routes, depositor requests, distributed resource commitments, and call-money obligations interact, and which process differences arise from participant mechanisms rather than a scripted chronology. |
 | Purpose and claim boundary | Establish a bounded end-to-end H2EPR method baseline. It does not claim a full-event runtime, calibration, historical fit, held-out evaluation, prediction, or historical or scientific validity. |
 | Temporal boundary | Analytic interval from 18 October through the configuration-selected 2 November 1907 horizon; primary acute window 21–26 October. The horizon is a construction choice rather than a claimed historical endpoint. |
-| Evidence and exposure | The [retrospective event-frame evidence](frame-evidence-v0.1.md) integrates the accepted [source register](../../agents/defines/panic_1907/source-register.md) and [evidence ledger](../../agents/defines/panic_1907/evidence-ledger.md). Construction is `FULL_DRAFT_EXPOSED` and supports no clean-builder claim. |
+| Evidence and exposure | The [retrospective event-frame evidence](frame-evidence-v0.1.md) integrates the accepted [source register](source-register-v0.1.md) and [participant-evidence record](participant-evidence-v0.1.md). Construction is `FULL_DRAFT_EXPOSED` and supports no clean-builder claim. |
 | Current authorized phase and endpoint | Baseline closed at `PASS_BOUNDED_LINEAGE_CONFORMANCE`; retrospective frame evidence is accepted as a documentation authority, and no deeper H2EPR-0288 work is authorized. |
 | Excluded work | Full 16-actor runtime, implementation of all configured policies, full-event simulation, calibration or historical fitting, held-out or clean-builder construction, post-seal evaluation, and validity claims. |
 | Decision owner and review | Accepted ADRs and release reviews own the closed boundaries. The project owner accepted the retrospective integration on 24 August 2026; deeper work still requires a new research question and owner authorization. |
@@ -31,6 +31,7 @@ records in their responsibility-owned directories remain authoritative.
 | Responsibility | Current asset | Status |
 |---|---|---|
 | Event-frame evidence integration | [Event-frame evidence v0.1](frame-evidence-v0.1.md) | Accepted retrospective documentation authority; no new source adoption or semantic reopening |
+| Participant evidence and shared situations | [Participant evidence v0.1](participant-evidence-v0.1.md), [source register v0.1](source-register-v0.1.md), and [decision situations v0.1](decision-situations-v0.1.md) | Accepted event-owned evidence authorities, with the decision portfolio retained for the Knickerbocker--NYCH reference pair |
 | Participant roster and semantic products | [Roster Definition release v0.1](../../releases/panic_1907/roster-definition-v0.1/) | Accepted: seven Agent Definitions and five population models |
 | Carrier mapping | [Consolidated mapping](../../agents/bindings/panic_1907/consolidated/) | Accepted, non-executable |
 | Event-world semantics | [Event Scenario Definition v0.1](../../scenarios/panic_1907/definition-v0.1/) | Accepted semantic authority |

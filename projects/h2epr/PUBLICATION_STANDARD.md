@@ -56,8 +56,15 @@ model, shared evidence record, concise review, and existing interface account.
 
 ## Repository check
 
-The Agent Definition profile checker also screens canonical Agent Definitions
-and population models for project-only metadata. It is a small admission aid,
-not a substitute for evidence, historical, behavioral, or publication review.
-Release manifests and other integrity records remain outside this check because
-their purpose is to retain exact project identity.
+Agent Definitions and population models each use one exact ten-module reading
+profile across events. The profiles keep their different representation
+semantics: an Agent explains one defensible decision interface, while a
+population model preserves heterogeneous choice units and aggregation
+boundaries. Standard and deep production may differ in research and review
+depth, but not in the public module order.
+
+The participant profile checker screens both artifact classes for their module
+order, overview responsibilities, and project-only metadata. It is a small
+admission aid, not a substitute for evidence, historical, behavioral, or
+publication review. Release manifests and other integrity records remain
+outside this check because their purpose is to retain exact project identity.

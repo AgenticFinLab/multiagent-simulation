@@ -12,7 +12,9 @@ events/
 └── <lowercase_snake_case_event_slug>/
     ├── README.md
     ├── frame-evidence-v<major>.<minor>.md
-    └── <other-phase-owned-record>-v<major>.<minor>.md  # optional
+    ├── participant-evidence-v<major>.<minor>.md  # once participant production begins
+    ├── source-register-v<major>.<minor>.md        # optional separate authority
+    └── decision-situations-v<major>.<minor>.md    # optional shared portfolio
 ```
 
 The event `README.md` instantiates the
@@ -25,20 +27,28 @@ semantic skeleton.
 Do not create empty phase directories or duplicate accepted files here.
 Definitions remain under `agents/`, population models under `populations/`,
 scenario semantics under `scenarios/`, configurations under `configs/`, and
-accepted inventories under `releases/`. A larger event links those artifacts
-from its coordination entry as they become authorized and accepted.
+accepted inventories under `releases/`. The event directory owns shared source
+identity, claim adjudication, participant-time evidence, and cross-participant
+research situations. A larger event links all other artifacts from its
+coordination entry as they become authorized and accepted.
 
 An event may open with its `README.md` alone. Before its event frame is
 accepted, it adds one versioned `frame-evidence` record that owns or integrates
 the source register, claim ledger, unresolved questions, exposure boundary,
-and evidence-use closure for that frame. A retrospective entry may integrate
-existing accepted evidence by reference; it does not duplicate or supersede
-the original authorities.
+and evidence-use closure for that frame. Once participant production begins,
+one versioned `participant-evidence` record becomes the event-level claim
+authority shared by its Agent Definitions and population models.
+
+A compact event may integrate adopted participant source identities and
+decision situations in that record. A larger event may separate a versioned
+source register or shared decision-situation portfolio when this improves
+reading and custody without duplicating claims. These are alternate file
+arrangements under one evidence responsibility, not different review paths.
 
 Other supporting records are added only when a later phase needs an authority
 that would make the entry difficult to read. Their names state their bounded
-purpose and version. Do not create placeholder files or repeat the same record
-under several phase names.
+purpose and version. Do not create placeholder files, a separate evidence file
+per role, or repeat the same record under several phase names.
 
 ## Event entries
 
@@ -89,9 +99,10 @@ phase-owned reviews.
 
 When an event stops at an accepted project boundary, keep a short coordination
 entry that identifies the final question, accepted assets, claim boundary,
-and next legal action. Do not reconstruct earlier working notes or move
-accepted assets into this directory. Deeper work begins only under a new
-research question and authorization.
+and next legal action. Preserve accepted research content and do not reconstruct
+working notes; repository maintenance may normalize an authority's canonical
+path while updating every pinned reference and checksum as one coherent
+change. Deeper research begins only under a new question and authorization.
 
 ## Protected inputs
 

@@ -13,8 +13,8 @@
 
 | Definition | Version | Content SHA-256 |
 |---|---|---|
-| `h2epr.agent-definition.0288.knickerbocker-trust` | `0.2.1` | `7e495ea40a79751187098c4578218341822049fab188259fb25f431b59a09f20` |
-| `h2epr.agent-definition.0288.new-york-clearing-house` | `0.2.1` | `b0c2aeb86154235e3268badc86d656317bb0f3b3a35760b7979274b26d2f214f` |
+| `h2epr.agent-definition.0288.knickerbocker-trust` | `0.2.1` | `d844a7a10c11bfee29c6ec2260a31ddd70748eb290e624f88dc81883d587754d` |
+| `h2epr.agent-definition.0288.new-york-clearing-house` | `0.2.1` | `e5cdc9e3f440d6243bf3407cc27e46b2dc280ffd68178d8f66511f6b9bd6996b` |
 
 If either Definition changes, this registry becomes stale until its binding and content identity are updated.
 

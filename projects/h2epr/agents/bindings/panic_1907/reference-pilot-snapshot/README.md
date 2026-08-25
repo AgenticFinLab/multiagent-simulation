@@ -14,7 +14,7 @@ the binding hashes. They are immutable derived inputs for the reference pilot,
 not a second editable evidence authority.
 
 Current research continues in
-`agents/defines/panic_1907/evidence-ledger.md` and
-`agents/defines/panic_1907/source-register.md`. Roster-production additions
+`events/panic_1907/participant-evidence-v0.1.md` and
+`events/panic_1907/source-register-v0.1.md`. Roster-production additions
 must update those canonical files and must not modify this snapshot. A future
 consolidated Roster binding will pin its own accepted research identities.

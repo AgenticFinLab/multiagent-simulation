@@ -2,12 +2,15 @@
 
 ## 1. Model overview
 
-| Item | Definition |
+| Field | Description |
 |---|---|
-| Event | Panic of 1907, acute New York phase |
-| Focal interval | approximately 22–26 October 1907 |
-| Representation | event-bound, institution-indexed populations of weighted depositor choice units |
-| Focal choices | request withdrawal, retain for the current interval, await a pending result and adapt to a delivered result |
+| Model name | Later trust-company depositor choice units |
+| Event and interval | Panic of 1907, acute New York phase, approximately 22–26 October 1907 |
+| Choice unit | One account or scenario-declared weighted set of exchangeable accounts tied to one host trust company |
+| Population scope | Depositors of Trust Company of America, Lincoln Trust Company, or another explicitly configured later trust; host companies and their service processes remain separate |
+| Primary decision situations | Request withdrawal, retain for the current interval, await a pending result, and adapt to a delivered result |
+| Aggregation boundary | Every unit retains a host identity and claim; weights may compress equivalent within-host conditions but never merge information, requests, or results across hosts |
+| State authority | Claims, host condition, service access, request admission, payment, cash effects, and suspension remain scenario-owned; units retain private need and their own delivered histories |
 | Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; individual, host-cohort, and cross-host responses are not calibrated |
 
 The model represents heterogeneous holders of deposit claims against Trust
@@ -27,7 +30,7 @@ The population produces requested demand. It does not operate paying windows,
 choose a trust company's communication, allocate cash, issue certified checks,
 move funds to another bank or suspend an institution.
 
-## 2. Historical population and representation
+## 2. Population scope and representation
 
 ### Historical population
 
@@ -127,7 +130,7 @@ The authors know the runs, public statements, service responses and later
 outcomes. They are used for construction, worked cases and falsification
 design. None supplies independent held-out validation for this version.
 
-## 4. Institutional role and relationships
+## 4. Event role and relationships
 
 Depositors hold claims against one host trust company and may request payment
 through its service process. They do not control host cash, support, operating
@@ -144,7 +147,7 @@ capacity, communications or suspension.
 The populations possess no collective mandate, committee, shared resource or
 authority. Claim ownership, request lifecycle and access constrain each unit.
 
-## 5. Decision situations, information and state
+## 5. Decision situations, information, and state
 
 ### Decision situations
 
@@ -285,7 +288,7 @@ an identified pending request or access/lifecycle blocker and ends when a
 relevant result or reopening event is delivered. Generic abstention is not a
 population output.
 
-## 7. Withdrawal choice and result boundary
+## 7. Intent and result boundary
 
 | Output | Required semantic content | Lifecycle | Result the population may not declare |
 |---|---|---|---|

@@ -84,7 +84,7 @@ the [Agent development workflow](../agents/WORKFLOW.md).
 | Template | Use |
 |---|---|
 | [Event Build Brief](../event-build-brief-template.md) | Open an event with one accepted question, temporal and evidence boundary, causal role map, roster dispositions, semantic skeleton, and current authorization. |
-| [Population model](../populations/population-model-template.md) | Specify heterogeneous choice units, information, private state, behavior, uncertainty, and interface ownership without inventing a collective Agent. |
+| [Population model](../populations/population-model-template.md) | Specify heterogeneous choice units, information, private state, behavior, uncertainty, and interface ownership in the canonical ten-module population structure. |
 | [Phase closeout checklist](../phase-closeout-checklist.md) | Close any maintained event phase with common mainline, depth, authority, evidence, integrity, and handoff checks, recording a reusable method finding only when one emerged. |
 
 These project-level templates route work into the specialist Skills; they do
@@ -122,7 +122,7 @@ separate choice and is never implied by `deep`.
   modeling assumptions as different kinds of support.
 - Record what a participant could know at the modeled decision time, not only
   what a researcher knows afterward.
-- Keep the evidence ledger, Agent Definition, scenario, machine contracts, and
+- Keep the participant-evidence record, Agent Definition, scenario, machine contracts, and
   authoritative state transition as complementary sources of truth.
 - Write Agent Definitions as scholarly model specifications. Keep file hashes,
   runtime bindings, code identifiers, and test mechanics in derived

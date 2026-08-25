@@ -19,18 +19,18 @@
   "evidence_authorities": [
     {
       "kind": "source_register",
-      "path": "agents/defines/panic_1907/source-register.md",
+      "path": "events/panic_1907/source-register-v0.1.md",
       "sha256": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
     },
     {
       "kind": "evidence_ledger",
-      "path": "agents/defines/panic_1907/evidence-ledger.md",
-      "sha256": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933"
+      "path": "events/panic_1907/participant-evidence-v0.1.md",
+      "sha256": "1596edaeadf9dc5aaffd22cdb2fe88090b9202170d7ba41c16c6c9d01e69eb92"
     },
     {
       "kind": "decision_situations",
-      "path": "agents/defines/panic_1907/decision-situations.md",
-      "sha256": "b9cd28a6b95481e75135ad91a3651ea9f286b757142e22189ce266423d8c0883"
+      "path": "events/panic_1907/decision-situations-v0.1.md",
+      "sha256": "377b9dce910cfb16bdc95e26eafde0ceea2b704f9a8d3b35113e037e2acc43a9"
     }
   ],
   "agent_definitions": [
@@ -38,19 +38,19 @@
       "id": "h2epr.agent-definition.0288.knickerbocker-trust",
       "version": "0.2.1",
       "path": "agents/defines/panic_1907/knickerbocker-trust.md",
-      "sha256": "7e495ea40a79751187098c4578218341822049fab188259fb25f431b59a09f20"
+      "sha256": "d844a7a10c11bfee29c6ec2260a31ddd70748eb290e624f88dc81883d587754d"
     },
     {
       "id": "h2epr.agent-definition.0288.new-york-clearing-house",
       "version": "0.2.1",
       "path": "agents/defines/panic_1907/new-york-clearing-house.md",
-      "sha256": "b0c2aeb86154235e3268badc86d656317bb0f3b3a35760b7979274b26d2f214f"
+      "sha256": "e5cdc9e3f440d6243bf3407cc27e46b2dc280ffd68178d8f66511f6b9bd6996b"
     },
     {
       "id": "h2epr.agent-definition.0288.national-bank-of-commerce",
       "version": "0.1.0",
       "path": "agents/defines/panic_1907/national-bank-of-commerce.md",
-      "sha256": "7bc9c10053842848d18a5ea0ee622420faa2800f345cbe311c4c75e366e234a1"
+      "sha256": "2e634a7d1161aa9eca76e44cc992c3e19136f886c0f10fd308aae18b05cbbcfb"
     },
     {
       "id": "h2epr.agent-definition.0288.j-pierpont-morgan",
@@ -62,19 +62,19 @@
       "id": "h2epr.agent-definition.0288.trust-company-of-america",
       "version": "0.1.0",
       "path": "agents/defines/panic_1907/trust-company-of-america.md",
-      "sha256": "b257ae3c47a598909cc7a38736a51b03c014ee8d457c53e9da1083266aa69839"
+      "sha256": "3047af3f87cdf36fae3c5f38efa0d41abfd0fe91ebe9826034f393e542f7d214"
     },
     {
       "id": "h2epr.agent-definition.0288.lincoln-trust-company",
       "version": "0.1.0",
       "path": "agents/defines/panic_1907/lincoln-trust-company.md",
-      "sha256": "66a2c48544609f936691c989ee9d74135a2f43209cd0828ac0cf4c7ade599251"
+      "sha256": "1eb9652300aee8d8d32cccaf8eeab3fe1cf4a281da51514459f55039dc8e2ef4"
     },
     {
       "id": "H2EPR-0288-TRUST-PRESIDENTS-COMMITTEE",
       "version": "0.1.0",
       "path": "agents/defines/panic_1907/trust-company-presidents-committee.md",
-      "sha256": "5dcc15340e9f4459967b19a6df7374038c8fa356ee9230daff524626808bdae8"
+      "sha256": "7ccc97b2b238af38177fbe71cb90811360def29430164cd17cc0a8fdd8fde236"
     }
   ],
   "population_models": [
@@ -82,31 +82,31 @@
       "id": "H2EPR-0288-KNICKERBOCKER-DEPOSITOR-POPULATION",
       "version": "0.1.0",
       "path": "populations/defines/panic_1907/knickerbocker-depositors.md",
-      "sha256": "c313adfa509cb6bacec3b6e7dcb02b195a2dba6dc109568d988a63df9401f221"
+      "sha256": "f910f157eb9df034c4e989d27cee36de562f6863d84748530d1fb3a52e5b9957"
     },
     {
       "id": "H2EPR-0288-BANK-RESOURCE-DECISION-POPULATION",
       "version": "0.1.0",
       "path": "populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md",
-      "sha256": "aef13894a8aaa9c922d1a0f3ec8ed0a52c85f527c9c57575fa1c2ae0709eea7b"
+      "sha256": "7d399bc707527881c42f07b1686727bd652e59c7bb9389aed69771cac15c17a1"
     },
     {
       "id": "H2EPR-0288-LATER-TRUST-DEPOSITOR-POPULATIONS",
       "version": "0.1.0",
       "path": "populations/defines/panic_1907/later-trust-company-depositors.md",
-      "sha256": "e26a069b7adcb5192c6cd08e36cc16f41a89eb35437740db0ee4e43e8062234c"
+      "sha256": "0e02abdc80bbb8fa90cd19b1d2c6d93c2389f3d9a26fa042720ea045399984b6"
     },
     {
       "id": "H2EPR-0288-CALL-MONEY-LENDER-POPULATION",
       "version": "0.1.0",
       "path": "populations/defines/panic_1907/call-money-lenders.md",
-      "sha256": "14596ab9a3f1939473f65447c7f560176dcd71e273ed1ce65365f6f5fa6c7ad4"
+      "sha256": "eb2d00b28aba7cc66ac183c095a7674d17e67f88fe3f00083ced55770d974239"
     },
     {
       "id": "H2EPR-0288-CALL-MONEY-BROKER-BORROWER-POPULATION",
       "version": "0.1.0",
       "path": "populations/defines/panic_1907/call-money-broker-borrowers.md",
-      "sha256": "08419b6038db40ac77a6cada8248f619230fe2e322492839b2a1f79e7f776dc4"
+      "sha256": "eb31290cafc8c9594571b258687d795ec36c575ef2a5a7399bfd54a57f5b6ba8"
     }
   ],
   "interface_preflights": [
@@ -156,9 +156,9 @@
       "new_york_clearing_house"
     ],
     "binding_path": "agents/bindings/panic_1907/binding.json",
-    "binding_sha256": "b747933f34e897b894d8f8341e72ded476f3d910625d40272e31040d912f56cb",
+    "binding_sha256": "f44bba5942880f8557154be0956e74d04842c799d31f2d906a84d068f6750e3e",
     "specification_path": "agents/bindings/panic_1907/two-role-binding.md",
-    "specification_sha256": "490193f9bb29c1e597e2aeb75ad07ddbca1cd72f08b1b6062054ecec71e2cb36",
+    "specification_sha256": "342e7d93437b54c96cd60bcf73fbcd9e9bf41d56eb163d344a97adccd10a6802",
     "relation_to_release": "retained engineering reference; not the consolidated roster binding"
   },
   "next_stage": {

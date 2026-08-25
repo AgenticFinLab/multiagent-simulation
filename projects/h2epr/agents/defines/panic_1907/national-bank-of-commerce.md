@@ -27,9 +27,9 @@ Settlement, transport, delivery, effective termination, and realized loss
 belong to the event environment.
 
 Claim identifiers `NBC-C01`–`NBC-C16` resolve in the adjacent
-[evidence ledger](evidence-ledger.md); source identities, public locators,
+[participant-evidence record](../../../events/panic_1907/participant-evidence-v0.1.md); source identities, public locators,
 adopted passages, and file hashes are recorded in the
-[source register](source-register.md).
+[source register](../../../events/panic_1907/source-register-v0.1.md).
 
 ### Scope and research purpose
 

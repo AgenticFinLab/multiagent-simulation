@@ -2,12 +2,15 @@
 
 ## 1. Model overview
 
-| Item | Definition |
+| Field | Description |
 |---|---|
-| Event | Panic of 1907, acute New York phase |
-| Focal interval | approximately 22–26 October 1907 |
-| Representation | event-bound population of institution-preserving call-lender choice units |
-| Focal choices | review, continue, condition or call an existing loan; review, offer, revise or decline new/replacement call credit |
+| Model name | Institution-preserving call-money lender choice units |
+| Event and interval | Panic of 1907, acute New York phase, approximately 22–26 October 1907 |
+| Choice unit | One lending institution with its own authority, controlled resource envelope, loan exposure, and delivered information |
+| Population scope | Banks, trust companies, and other institutions assigned a call-lending capability; borrowers, collective coordinators, the market, and the venue remain separate |
+| Primary decision situations | Review, continue, condition, or call an existing loan; review, offer, revise, or decline new or replacement call credit |
+| Aggregation boundary | Historical institutions remain weight-one units; any synthetic sensitivity units are explicit and cannot own a named institution's resources, contracts, or commitments |
+| State authority | Contracts, collateral, matching, transfer, repayment, liquidation, resource effects, and market outcomes remain scenario-owned; the unit retains only its own decision and observed lifecycle state |
 | Evidence use and explanatory scope | Contemporary and retrospective sources informed an event-bound reconstruction; named-lender policies, response probabilities, amount rules, rate tolerances, and haircuts are not calibrated |
 
 The model represents banks, trust companies and other financial institutions
@@ -25,7 +28,7 @@ The population is not a unitary money market, a modern central bank or a
 general finance Agent. It does not control Morgan, NYCH, broker-borrowers or
 the New York Stock Exchange.
 
-## 2. Historical population and representation
+## 2. Population scope and representation
 
 ### Historical population
 
@@ -118,7 +121,7 @@ Loan calls, replacement lending, rate spikes, pool amounts and later market
 outcomes are known. They support construction and diagnostic cases, not
 independent validation or target fitting.
 
-## 4. Institutional role and relationships
+## 4. Event role and relationships
 
 ### Authority and resource control
 
@@ -144,7 +147,7 @@ create a market rate.
 | lender ↔ NYSE | use a delivered venue route/market observation | NYSE mechanics, matching, rates and settlement are scenario-owned |
 | lender ↔ other lenders | no private shared state by default | only delivered public/authorized aggregate information is visible |
 
-## 5. Decision situations, information and state
+## 5. Decision situations, information, and state
 
 ### Decision situations
 

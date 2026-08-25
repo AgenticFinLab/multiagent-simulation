@@ -36,7 +36,7 @@ CONFORMANCE_FORMAT = "h2epr.lineage-conformance.v0.1"
 CONFORMANCE_ID = "conformance.h2epr.0288.kt_nbc_nych.v0_1"
 RUN_ID = "run.h2epr.0288.kt_nbc_nych.conformance.001"
 BINDING_MANIFEST_SHA256 = (
-    "047af69a88a94a968f291995567872de1affed610aa4ea8f70a88dc4bd4ae59d"
+    "99ad27ebc050fc89b782dad1b120e43a6ec31f0f3a324659431f321a89cafb8a"
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]

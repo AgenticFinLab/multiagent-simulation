@@ -226,7 +226,8 @@ message or trace. **Falsifier.** Contradiction never changes posture.
 disputed. **Basis.** `LTC-C06`, `M-LTC-03`. **Information.** Message identity and
 authoritative transport result. **Alternatives.** Request clarification;
 reissue only under current authority; close after delivered/expired result.
-**Intent.** `request_message_delivery_clarification` or an authorized reissue.
+**Intents.** `request_message_delivery_clarification`, an authorized reissue,
+or `close_communication_matter` after a delivered or expired result.
 **Minimum response.** Preserve issue and delivery as distinct. **Forbidden.**
 Invent public knowledge or effect. **Falsifier.** All delivery states produce
 the same trace and later information environment.

@@ -162,9 +162,9 @@ are not inputs.
 
 | Observation | Meaning/channel | Domain, freshness and missing behavior | Consumers |
 |---|---|---|---|
-| `participant_condition_notice` | dated participant-visible notice citing the company records/signals that require review | `{routine, changed, material_review_due, disputed, unknown}`; source/basis required; missing basis becomes unknown | all condition-activated commitments |
+| `participant_condition_notice` | dated participant-visible notice citing the company records/signals that require review | `{routine, changed, material_review_due, disputed, unknown}`; source/basis required; missing basis becomes unknown | `DC-TCA-01`, `DC-TCA-04`, `DC-TCA-05` |
 | `company_condition_information` | dated cash/liquidity, asset category, obligation and service information authorized for management | typed categories/intervals with source and uncertainty; stale/disputed values trigger verification | `DC-TCA-01`, `DC-TCA-04`, `DC-TCA-05` |
-| `governance_authority` | scope-specific board/officer/delegated authorization | `{authorized, pending, denied, disputed, absent, unknown}`; unknown grants no authority | all material intents |
+| `governance_authority` | scope-specific board/officer/delegated authorization | `{authorized, pending, denied, disputed, absent, unknown}`; unknown grants no authority | `DC-TCA-01`, `DC-TCA-02`, `DC-TCA-03`, `DC-TCA-04`, `DC-TCA-05`, `DC-TCA-06` |
 | `examination_request_or_result` | requester, scope, conditions, required package and delivered report | request/report lifecycle with producer and `as-of`; report not available before delivery | `DC-TCA-02`, `DC-TCA-06` |
 | `support_route_state` | recipient, route, request identity, content, status, terms and expiry | separate per route; `{not_open, draft, submitted, pending, information_needed, conditioned, declined, withdrawn, closed}` | `DC-TCA-03`, `DC-TCA-06` |
 | `collateral_control_information` | company authority/control over proposed note/security categories and dated description | qualitative/typed; valuation and eligibility remain external; missing control prevents proposal | `DC-TCA-03` |
@@ -275,7 +275,11 @@ Condition notice, dated company information, authority and active processes.
 **Alternatives.** Verify; seek information/authority; open/update a support
 route; propose operating posture; prepare communication; or record a blocker.
 **Minimum response.** Name the condition and select at least one bounded
-response or a specific missing item/revisit event. **Precedence.** Authority and
+response or a specific missing item/revisit event. **Permitted intents.**
+`verify_institutional_condition`, `request_information_or_terms`,
+`open_or_update_support_request`, `propose_operational_capacity_change`,
+`authorize_operational_posture`, `authorize_condition_statement`, or
+`narrow_or_withhold_condition_statement`. **Precedence.** Authority and
 current information precede urgency. **Abstention.** Only for missing authority,
 unobtainable material information or a named active process. **Forbidden.**
 Hidden scalar triggers “seek aid.” **Falsifier.** Removing the cited condition

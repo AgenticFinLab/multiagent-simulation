@@ -37,7 +37,7 @@
     "scenario_definition_release": {
       "release_id": "H2EPR-0288-EVENT-SCENARIO-DEFINITION-v0.1",
       "manifest_path": "scenarios/panic_1907/definition-v0.1/manifest.json",
-      "manifest_sha256": "ad5e58d4f00e2a2d3f5b6a51ba8fe39a2f5fb2bcbb10cc3bdf79aca8d1ace4e0"
+      "manifest_sha256": "e0cba8d69e1a39fb2cd1d83a0cbaf5dffb823d749a6be59d7e9c263f0cfe0405"
     },
     "scenario_definition": {
       "path": "scenarios/panic_1907/definition-v0.1/scenario-definition.md",
@@ -45,29 +45,29 @@
     },
     "scenario_interface_closure": {
       "path": "scenarios/panic_1907/definition-v0.1/interface-closure.md",
-      "sha256": "6b2cf568f88f1b372baf1a870b79948a2683aa23d19309165ee2b1ecd5f6ffad"
+      "sha256": "c30c2a4f3e9082e865fe7254695a6f576b4c3c8c2a28195e267dd99a72b7f414"
     },
     "roster_definition_release": {
       "release_id": "H2EPR-0288-ROSTER-DEFINITION-RELEASE-v0.1",
       "manifest_path": "releases/panic_1907/roster-definition-v0.1/manifest.json",
-      "manifest_sha256": "a03188f8a3ef45c500fa49ddd4230b99999c9b6759bf3cae73bf8040e0e73ec6"
+      "manifest_sha256": "89a344d1972b9df7ff9adde5f9c5b762404c32bfeb3c81199d56a58039e45554"
     },
     "consolidated_mapping": {
       "release_id": "H2EPR-0288-CONSOLIDATED-MAPPING-v0.1",
       "manifest_path": "agents/bindings/panic_1907/consolidated/manifest.json",
-      "manifest_sha256": "d2aef35116df2df5f99cad7d0cdd69136e8c8e5b69261f387ea4cfd301eb72d5"
+      "manifest_sha256": "b4505c659b3f4be52f4f4768f4e571c1fd676fdc3ebf45d39a2cf6b62fe8fcb2"
     },
     "mapping_profile": {
       "id": "h2epr.roster-consolidated-mapping.v0_1",
       "path": "agents/bindings/panic_1907/roster-v0.1/mapping-profile.json",
-      "sha256": "efa341364d12f8b1be8035ebd1cdde7b6ef2446f4015db3e28b6f2bdbaab25e7"
+      "sha256": "cfe3f096e710cc3101fc5dd81fd48332712e19ff49debb328ba9fee8eba5487b"
     },
     "evidence_ledger": {
-      "path": "agents/defines/panic_1907/evidence-ledger.md",
-      "sha256": "5314f7cd526586be824ba330cba566170d725499a42a4635d475ad5186e4d933"
+      "path": "events/panic_1907/participant-evidence-v0.1.md",
+      "sha256": "1596edaeadf9dc5aaffd22cdb2fe88090b9202170d7ba41c16c6c9d01e69eb92"
     },
     "source_register": {
-      "path": "agents/defines/panic_1907/source-register.md",
+      "path": "events/panic_1907/source-register-v0.1.md",
       "sha256": "3e0200d293794086a6c0a3b46ea2b50e27d51b33056ac63b77d26265e6f0c0ae"
     }
   },
@@ -93,7 +93,7 @@
     {
       "kind": "scenario_configuration",
       "path": "scenario-configuration.json",
-      "sha256": "f9352ca2da66d0cc774b7c505a074ea63883689c6556720d77a4802506632bd6"
+      "sha256": "ee5f2b6a250ea67eccf08cb44217df404fddb39dc6943bd4aa00c495263ade25"
     },
     {
       "kind": "configuration_design",
