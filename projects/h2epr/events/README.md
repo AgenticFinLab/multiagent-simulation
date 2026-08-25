@@ -55,7 +55,7 @@ per role, or repeat the same record under several phase names.
 | Event | Coordination entry | Current position |
 |---|---|---|
 | `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline; retrospective frame evidence accepted. |
-| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Semantic Roster release accepted; Scenario and consolidated mapping design active. |
+| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Semantic Roster, consolidated mapping, and Event Scenario Definition accepted; stopped before configuration. |
 
 ## README convention
 

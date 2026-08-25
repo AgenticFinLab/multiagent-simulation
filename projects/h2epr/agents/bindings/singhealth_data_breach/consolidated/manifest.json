@@ -1,0 +1,95 @@
+{
+  "schema": "h2epr.consolidated-mapping-release.v0_1",
+  "release_id": "H2EPR-0616-CONSOLIDATED-MAPPING-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0616",
+  "released_on": "2026-08-25",
+  "status": "accepted_design_specification",
+  "integrity_algorithm": "sha256",
+  "source_release": {
+    "release_id": "H2EPR-0616-ROSTER-DEFINITION-RELEASE-v0.1",
+    "commit": "97052fe527b8c56f0011fd5dcfd02e9b82c62e14",
+    "tree": "003b85a1c511dd2860cdeceea742be572c33570c",
+    "manifest_path": "releases/singhealth_data_breach/roster-definition-v0.1/manifest.json",
+    "manifest_sha256": "188f5117f02958997f8e1140d3d19fcbada296b1750223d8b3025e1cf537625e",
+    "checksums_path": "releases/singhealth_data_breach/roster-definition-v0.1/SHA256SUMS",
+    "checksums_sha256": "fa92cc4d61dfbfafff97b12506deeb820ef51743b0ce315dcb470d98dec693f2",
+    "semantic_products": 9,
+    "agent_definitions": 7,
+    "population_models": 2
+  },
+  "reviewed_candidate": {
+    "semantic_inventory_sha256": "35389ccd929650920b3a515ca7a128b3ae972bcb98baad8ef2a9bee9da12d0d8",
+    "mapping_specification_sha256": "9f4a948a3cde6b3e34cff0a3f1f0c4e6312992a7a1935427debe3e6ff3fca3eb",
+    "carrier_review_sha256": "b5b5fd61a24e295a438441d9f99c6429fe9af3413c017df111399b6973931fe8",
+    "substantive_review_sha256": "287995267bb01b9627741b33b33afd48955aac2db3c585c052400c6e7edd8366",
+    "promotion_delta": "status_owner_resolution_links_and_provenance_only"
+  },
+  "coverage": {
+    "decision_and_population_commitments": 29,
+    "observation_placements": 62,
+    "private_state_placements": 44,
+    "intent_placements": 54,
+    "lifecycle_families": 11,
+    "cross_object_rules": 22
+  },
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "72985c56f6a7d8f00f138f13358cd70b3078ec4eb9d2380e358b1a55cac2ad3e"
+    },
+    {
+      "kind": "semantic_inventory",
+      "path": "semantic-inventory.md",
+      "sha256": "a9a7f2ceaf2ce0727bbf6f81399b0da00a88d5b64b7198a7ecf105b1d9f3578f"
+    },
+    {
+      "kind": "mapping_specification",
+      "path": "mapping-specification.md",
+      "sha256": "1249dbe94dcad61b40c4e543435186e6e71eaab0d95c7f2877e31c0e3575a1bb"
+    },
+    {
+      "kind": "carrier_review",
+      "path": "v1-carrier-review.md",
+      "sha256": "634f969ff6aae51d2944f09878536ae9fcc866273f645ea61de7963dc32f9f3b"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "af070e5240cb0d8ccb035e6e9d9ab7a74e6d1b3db86385e29d9587a389626326"
+    }
+  ],
+  "owner_decision": {
+    "id": "ADR-0007",
+    "resolved_items": [
+      "OD-CM-05",
+      "OD-CM-06",
+      "OD-CM-07",
+      "OD-CM-08"
+    ],
+    "path": "decisions/ADR-0007-singhealth-consolidated-mapping-boundary.md",
+    "sha256": "7a128e5af4ea268ae786fa1e6976f3aa4178c145b16b5342ae1983751cc92ef7"
+  },
+  "carrier_decision": {
+    "verdict": "V1_COMPATIBLE_VIA_EVENT_QUALIFIED_INTERNAL_MAPPING_AND_SCENARIO_SEMANTICS",
+    "contracts_v1_successor_required": false,
+    "event_qualified_mapping_profile_required": true,
+    "scenario_semantics_required": true,
+    "reference_profile_disposition": "panic_1907_retained_as_event_specific_reference"
+  },
+  "authorization": {
+    "configuration_authorized": false,
+    "implementation_authorized": false,
+    "simulation_authorized": false,
+    "rule_v2_authorized": false,
+    "llm_rag_authorized": false,
+    "contracts_mutation_authorized": false,
+    "historical_validity_claim_authorized": false
+  },
+  "next_stage": {
+    "name": "non_executable_purpose_configuration",
+    "authorization": "separate",
+    "future_implementation_slice": "fail_closed_mapping_loader_and_one_bounded_lineage"
+  }
+}

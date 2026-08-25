@@ -47,6 +47,19 @@ The binding implements only the selected three-role lineage. It does not make
 the full configuration executable, supply behavior for every roster member,
 or establish historical or scientific validity.
 
+## Second event construction
+
+The SingHealth Data Breach collection has reached the corresponding semantic
+design boundary: seven Agent Definitions, two Population Models, a fixed
+[Roster Definition release](releases/singhealth_data_breach/roster-definition-v0.1/),
+an accepted
+[consolidated mapping](agents/bindings/singhealth_data_breach/consolidated/),
+and an accepted
+[Event Scenario Definition](scenarios/singhealth_data_breach/definition-v0.1/).
+These assets close the complete participant interface while remaining
+qualitative and non-executable. Configuration, admission, binding, runtime,
+simulation, calibration, and evaluation require later bounded stages.
+
 ## Package layout
 
 ```text

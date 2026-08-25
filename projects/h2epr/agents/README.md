@@ -32,6 +32,10 @@ detection-and-escalation and classification-and-institutional-escalation
 batches. Together with the reviewed non-participant dispositions, they form
 the accepted [research roster v0.2](rosters/singhealth_data_breach.md) and
 [Roster Definition release v0.1](../releases/singhealth_data_breach/roster-definition-v0.1/).
+The accepted
+[consolidated mapping v0.1](bindings/singhealth_data_breach/consolidated/)
+reconciles the complete release with Contracts V1 and the Event Scenario
+Definition without making the collection executable.
 
 ## Authority map
 
@@ -64,9 +68,11 @@ agents/
 ├── WORKFLOW.md
 ├── agent-definition-template.md
 ├── bindings/
-│   └── panic_1907/
-│       ├── consolidated/
-│       └── roster-v0.1/
+│   ├── panic_1907/
+│   │   ├── consolidated/
+│   │   └── roster-v0.1/
+│   └── singhealth_data_breach/
+│       └── consolidated/
 ├── defines/
 │   ├── panic_1907/
 │   │   ├── README.md
@@ -158,6 +164,9 @@ agents/
 - [`../releases/singhealth_data_breach/roster-definition-v0.1/`](../releases/singhealth_data_breach/roster-definition-v0.1/):
   hash-pinned, non-executable inventory of the complete H2EPR-0616 semantic
   roster and its non-participant dispositions.
+- [`bindings/singhealth_data_breach/consolidated/`](bindings/singhealth_data_breach/consolidated/):
+  accepted non-executable full-Roster mapping, Contracts V1 carrier decision,
+  release-interface inventory, and owner-resolution record.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the event-bound Knickerbocker depositor population model.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):

@@ -60,6 +60,14 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/agents/test_panic_1907_lineage_conformance.py
 ```
 
+The SingHealth semantic releases can be checked independently:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_singhealth_roster_release.py \
+  projects/h2epr/tests/agents/test_singhealth_scenario_mapping_release.py
+```
+
 Runtime and compiler checks use the MASim dependencies described in the root
 `requirements.txt`:
 

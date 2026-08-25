@@ -1,0 +1,118 @@
+{
+  "schema": "h2epr.event-scenario-definition-release.v0_1",
+  "release_id": "H2EPR-0616-EVENT-SCENARIO-DEFINITION-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0616",
+  "released_on": "2026-08-25",
+  "status": "accepted_semantic_specification",
+  "integrity_algorithm": "sha256",
+  "scenario": {
+    "id": "h2epr.scenario.0616.singhealth_data_breach",
+    "version": "0.1.0",
+    "modeled_start": "2017-08-23_approximate",
+    "participant_response_start": "2018-01-18",
+    "primary_acute_window": "2018-06-11/2018-07-20",
+    "public_announcement_horizon": "2018-07-20",
+    "notification_observation_horizon": "2018-07-23",
+    "outcome_exposure": "FULL_OUTCOME_EXPOSED"
+  },
+  "reviewed_candidate": {
+    "id": "h2epr.scenario.0616.singhealth_data_breach@0.1.0-candidate.1",
+    "scenario_definition_sha256": "a4e9d9ea6028068d2321a31df2e24b6ba615723bd0b6dab57bc84cc7729837ce",
+    "interface_closure_sha256": "ed4cf8d4ecab08e54326c716e867bd262d888093d7ed2296e22bf6ce03b5c2f0",
+    "substantive_review_sha256": "4aeab601aa62973ae94591d7d857018870b69a7431fc37e2378c88e734079776",
+    "promotion_delta": "status_version_owner_resolution_links_and_provenance_only"
+  },
+  "semantic_inputs": {
+    "roster_definition_release": {
+      "release_id": "H2EPR-0616-ROSTER-DEFINITION-RELEASE-v0.1",
+      "manifest_path": "releases/singhealth_data_breach/roster-definition-v0.1/manifest.json",
+      "manifest_sha256": "188f5117f02958997f8e1140d3d19fcbada296b1750223d8b3025e1cf537625e"
+    },
+    "consolidated_mapping": {
+      "release_id": "H2EPR-0616-CONSOLIDATED-MAPPING-v0.1",
+      "manifest_path": "agents/bindings/singhealth_data_breach/consolidated/manifest.json",
+      "manifest_sha256": "7a603d97bb25f8dddab08d7a8865fd6305a94e4db108f5f32b8ad65d28695bb9"
+    },
+    "semantic_skeleton": {
+      "version": "0.2",
+      "path": "scenarios/singhealth_data_breach/semantic-skeleton.md",
+      "sha256": "8c68e9b3f52d2d31f3482be7588418fe9b4209770e8e28cce8d1c16b3bf5556f"
+    },
+    "event_frame_evidence": {
+      "path": "events/singhealth_data_breach/frame-evidence-v0.1.md",
+      "sha256": "b3dc712fcf182bedbb7654cbc7ab7d4e09f8022c737c12ea152171fe26d56f74"
+    },
+    "participant_evidence": {
+      "path": "events/singhealth_data_breach/participant-evidence-v0.1.md",
+      "sha256": "d37bcd8df93082226a69c10674f61b76d4f36eb6651344273f38768091e1f5f0"
+    },
+    "carrier": {
+      "contract_family": "H2EPR Contracts V1",
+      "verdict": "V1_COMPATIBLE_VIA_EVENT_QUALIFIED_INTERNAL_MAPPING_AND_SCENARIO_SEMANTICS"
+    }
+  },
+  "coverage": {
+    "semantic_products": 9,
+    "decision_and_population_commitments": 29,
+    "observation_placements": 62,
+    "private_state_placements": 44,
+    "intent_placements": 54,
+    "lifecycle_families": 11
+  },
+  "structural_baseline": {
+    "attack_process": "BOUNDED_ADVERSARIAL_OPPORTUNITY_PROCESS",
+    "responsibility_units": "INSTITUTION_PRESERVING_FUNCTION_SPECIFIC_UNITS",
+    "institutional_routes": "DISTINCT_RECIPIENT_AND_DELIVERY_HISTORIES",
+    "office_capacity": "EXPLICIT_CAPACITY_QUALIFICATION",
+    "technical_results": "AUTHORITY_PRESTATE_AND_FEASIBILITY_ADJUDICATED",
+    "notification": "PLAN_AUTHORIZATION_ISSUE_AND_DELIVERY_SEPARATED"
+  },
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "ac59d54c3f9ad34dbb6909c0b8cc962860df600e6888735120fd6a0b77db7d29"
+    },
+    {
+      "kind": "scenario_definition",
+      "path": "scenario-definition.md",
+      "sha256": "1e670f70c6755243dad354b268b1bad16a8240b2220b7577f18708af9cb07401"
+    },
+    {
+      "kind": "interface_closure",
+      "path": "interface-closure.md",
+      "sha256": "3d3909b3454780205289167531b60fa0b02640296b2e25441972bbe336216039"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "4a40afa821a769395bca4e71bc4ba1cfeb32d294ed7dd810e76b13c39bf1035b"
+    }
+  ],
+  "owner_decision": {
+    "id": "ADR-0008",
+    "resolved_items": [
+      "OD-SC-05",
+      "OD-SC-06",
+      "OD-SC-07",
+      "OD-SC-08"
+    ],
+    "path": "decisions/ADR-0008-singhealth-event-scenario-definition-boundary.md",
+    "sha256": "007a832a9dcdb5c065186a3718da31287b12bfc03f893c8ab62f9276c289f1bb"
+  },
+  "authorization": {
+    "scenario_configuration_authorized": false,
+    "mapping_loader_authorized": false,
+    "policy_implementation_authorized": false,
+    "simulation_authorized": false,
+    "rule_v2_authorized": false,
+    "llm_rag_authorized": false,
+    "contracts_mutation_authorized": false,
+    "historical_validity_claim_authorized": false
+  },
+  "next_stage": {
+    "name": "minimal_non_executable_purpose_configuration",
+    "authorization": "separate"
+  }
+}
