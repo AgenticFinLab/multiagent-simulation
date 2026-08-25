@@ -29,7 +29,9 @@ reuse, and additional execution approaches require separate work.
 The H2EPR-0616 SingHealth collection currently contains seven office-level
 Definitions and two responsibility-unit Population Models across the accepted
 detection-and-escalation and classification-and-institutional-escalation
-batches. They do not yet constitute a released complete event roster.
+batches. Together with the reviewed non-participant dispositions, they form
+the accepted [research roster v0.2](rosters/singhealth_data_breach.md) and
+[Roster Definition release v0.1](../releases/singhealth_data_breach/roster-definition-v0.1/).
 
 ## Authority map
 
@@ -84,9 +86,11 @@ agents/
 │   │   ├── r2-private-and-named-trusts.md
 │   │   └── r3-collective-trust-support.md
 │   └── singhealth_data_breach/
-│       └── r1-detection-and-escalation.md
+│       ├── r1-detection-and-escalation.md
+│       └── r2-classification-and-institutional-escalation.md
 └── rosters/
-    └── panic_1907.md
+    ├── panic_1907.md
+    └── singhealth_data_breach.md
 ```
 
 - Definition filenames are lowercase kebab-case, matching the MASim profile
@@ -112,6 +116,9 @@ agents/
 - [`rosters/panic_1907.md`](rosters/panic_1907.md): accepted H2EPR-0288
   research boundary, role dispositions, production order, and Definition
   release gate.
+- [`rosters/singhealth_data_breach.md`](rosters/singhealth_data_breach.md):
+  accepted H2EPR-0616 research boundary, participant and process dispositions,
+  release membership, and change policy.
 - [`defines/panic_1907/README.md`](defines/panic_1907/README.md): Definition
   index, authority boundaries, and relation to implemented examples.
 - [`../events/panic_1907/source-register-v0.1.md`](../events/panic_1907/source-register-v0.1.md)
@@ -142,12 +149,15 @@ agents/
   an aggregate procedural committee Definition, with advice, contributor commitment and
   resource ownership kept separate.
 - [`defines/singhealth_data_breach/`](defines/singhealth_data_breach/): seven
-  office-level Definitions across the first two H2EPR-0616 participant
-  batches. Their shared
+  office-level Definitions in the accepted H2EPR-0616 semantic roster. Their
+  shared
   [R1](interfaces/singhealth_data_breach/r1-detection-and-escalation.md) and
   [R2](interfaces/singhealth_data_breach/r2-classification-and-institutional-escalation.md)
   accounts describe the semantic routes among them and the two population
   models.
+- [`../releases/singhealth_data_breach/roster-definition-v0.1/`](../releases/singhealth_data_breach/roster-definition-v0.1/):
+  hash-pinned, non-executable inventory of the complete H2EPR-0616 semantic
+  roster and its non-participant dispositions.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the event-bound Knickerbocker depositor population model.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):

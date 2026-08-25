@@ -33,6 +33,10 @@ and
 accounts compare the models' information, authority, intent, lifecycle, and
 result semantics.
 
+The [Roster Definition release v0.1](../../../releases/singhealth_data_breach/roster-definition-v0.1/)
+pins these nine models, both interfaces, their evidence authorities, and the
+reviewed dispositions of external processes and affected cohorts.
+
 The Definitions and Population Models are qualitative and event-bound. The
 complete historical outcome informed construction, so their worked cases
 provide explanatory and falsifying surfaces rather than independent

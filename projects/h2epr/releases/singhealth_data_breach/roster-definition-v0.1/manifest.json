@@ -1,0 +1,141 @@
+{
+  "schema": "h2epr.roster-definition-release.v0_1",
+  "release_id": "H2EPR-0616-ROSTER-DEFINITION-RELEASE-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0616",
+  "released_on": "2026-08-25",
+  "status": "accepted_semantic_release",
+  "integrity_algorithm": "sha256",
+  "roster": {
+    "version": "0.2",
+    "path": "agents/rosters/singhealth_data_breach.md",
+    "sha256": "4bcb427ffe62602fdd12fcdb97f3242dad06d039b75750265a8f024d3d5185f0"
+  },
+  "semantic_skeleton": {
+    "version": "0.2",
+    "path": "scenarios/singhealth_data_breach/semantic-skeleton.md",
+    "sha256": "8c68e9b3f52d2d31f3482be7588418fe9b4209770e8e28cce8d1c16b3bf5556f"
+  },
+  "evidence_authorities": [
+    {
+      "kind": "event_frame_evidence",
+      "path": "events/singhealth_data_breach/frame-evidence-v0.1.md",
+      "sha256": "b3dc712fcf182bedbb7654cbc7ab7d4e09f8022c737c12ea152171fe26d56f74"
+    },
+    {
+      "kind": "participant_evidence",
+      "path": "events/singhealth_data_breach/participant-evidence-v0.1.md",
+      "sha256": "d37bcd8df93082226a69c10674f61b76d4f36eb6651344273f38768091e1f5f0"
+    }
+  ],
+  "agent_definitions": [
+    {
+      "id": "h2epr.agent-definition.0616.cluster-information-security-officer",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/cluster-information-security-officer.md",
+      "sha256": "6c8842e50d5192156a6d87916044ed4527ebec08ea4f1daad1f50d3f68feb995"
+    },
+    {
+      "id": "h2epr.agent-definition.0616.cyber-security-governance-director-and-healthcare-sector-lead",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/cyber-security-governance-director-and-healthcare-sector-lead.md",
+      "sha256": "615868ec53231aea78947a1c528f645f2f8e720d93c71692f652b6e2b01ae957"
+    },
+    {
+      "id": "h2epr.agent-definition.0616.ihis-chief-executive-officer",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/ihis-chief-executive-officer.md",
+      "sha256": "94b2ae824adfc02da2e24b3a0c130e922cd5c7381399483ebb33c0df4c734e1f"
+    },
+    {
+      "id": "h2epr.agent-definition.0616.security-incident-response-manager",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/security-incident-response-manager.md",
+      "sha256": "1986db1d3f2036d4aae2f3929b34453e6a441b1077d1d1ff079d3432eee97231"
+    },
+    {
+      "id": "h2epr.agent-definition.0616.singhealth-deputy-group-chief-executive-officer",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/singhealth-deputy-group-chief-executive-officer.md",
+      "sha256": "c3ce2439b5905bb665fe58c54ce2bca671698da6d2b09192f35906fb9d205fe3"
+    },
+    {
+      "id": "h2epr.agent-definition.0616.singhealth-group-chief-executive-officer",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/singhealth-group-chief-executive-officer.md",
+      "sha256": "ea2a02def9e88fc452b4e3d325e74504571973e06722a579a84c3a9701d73bc5"
+    },
+    {
+      "id": "h2epr.agent-definition.0616.singhealth-group-chief-information-officer",
+      "version": "0.1.0",
+      "path": "agents/defines/singhealth_data_breach/singhealth-group-chief-information-officer.md",
+      "sha256": "7397c3053e3359919e15bcdedc307eadb65b1a2ab2e84ef46b1c5e4d8e6baba6"
+    }
+  ],
+  "population_models": [
+    {
+      "id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "version": "0.1.0",
+      "path": "populations/defines/singhealth_data_breach/ihis-operational-and-scm-management.md",
+      "sha256": "c200f75b5fc672187995ba99273ec1b7b037412f9bd2b592caf1b91305e2b713"
+    },
+    {
+      "id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "version": "0.1.0",
+      "path": "populations/defines/singhealth_data_breach/technical-administration-and-line-security-staff.md",
+      "sha256": "5f144f2ef78f4931c763d2dc161e6a98ee916c61b3ec3a4d0f648850f144674b"
+    }
+  ],
+  "interface_preflights": [
+    {
+      "scope": "r1_detection_and_escalation",
+      "path": "agents/interfaces/singhealth_data_breach/r1-detection-and-escalation.md",
+      "sha256": "5e967750456bea2acc577af30b8ec3c05696437ef2d4f010c35dc66c603beb87"
+    },
+    {
+      "scope": "r2_classification_and_institutional_escalation",
+      "path": "agents/interfaces/singhealth_data_breach/r2-classification-and-institutional-escalation.md",
+      "sha256": "551bbe84043ae5b4f08018943106d03405bfa8454f2e6410536217217125c6a9"
+    }
+  ],
+  "scenario_dispositions": [
+    {
+      "id": "external_threat_actor",
+      "disposition": "bounded_adversarial_process_with_exogenous_attack_attempt_inputs"
+    },
+    {
+      "id": "moh_mci_and_csa_response",
+      "disposition": "distinct_routed_institutional_processes"
+    },
+    {
+      "id": "end_users_and_endpoint_operators",
+      "disposition": "initial_or_exogenous_context"
+    },
+    {
+      "id": "affected_patients",
+      "disposition": "affected_cohort_with_scenario_owned_exposure_and_delivery"
+    },
+    {
+      "id": "access_network_database_monitoring_and_incident_lifecycle",
+      "disposition": "scenario_or_institutional_process"
+    },
+    {
+      "id": "later_investigation_penalties_and_reforms",
+      "disposition": "retrospective_evidence_or_excluded_aftermath"
+    }
+  ],
+  "accepted_owner_decisions": [
+    "OD-RC-01",
+    "OD-RC-02",
+    "OD-RC-03",
+    "OD-RC-04"
+  ],
+  "next_stage": {
+    "name": "event_scenario_definition_and_consolidated_semantic_mapping",
+    "authorization": "separate",
+    "configuration_authorized": false,
+    "implementation_authorized": false,
+    "simulation_authorized": false,
+    "contracts_change_authorized": false
+  }
+}

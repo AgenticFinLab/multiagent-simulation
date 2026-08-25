@@ -50,11 +50,12 @@ over evidence seeking, timing, assignment, or response scope.
 The [participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
 provides the adopted claim ledger. This Definition relies principally on:
 
-- `0616-R2-C11` for receipt of an executive incident account;
+- `0616-R2-C11` for ultimate responsibility for ensuring that reportable
+  incidents reached CSA;
 - `0616-R2-C13` and `0616-R2-C15` for evidence-responsive executive review;
 - `0616-R2-C26` for the Sector Lead reporting direction;
 - `0616-R2-C27` for investigation-lead assignment; and
-- `0616-R2-C31` for direction that the Sector Lead report the matter.
+- `0616-R2-C31` for the concurrent IHiS CEO and MOH CIO authority boundary.
 
 The inquiry reconstructs calls, briefings, directions, assigned work, and the
 later institutional response. The model preserves two epistemic separations:
@@ -196,7 +197,7 @@ The following boundaries apply:
 | Element | Account |
 |---|---|
 | Situation | Delivered evidence materially strengthens the incident account, and the Sector Lead route is available to assess and report it. |
-| Claim and theory basis | `0616-R2-C15`, `0616-R2-C31`; material-evidence revision and delegated institutional action. |
+| Claim and theory basis | `0616-R2-C15`, `0616-R2-C26`, and `0616-R2-C31`; material-evidence revision, delegated institutional action, and the represented-capacity boundary. |
 | Available information and state | Latest brief, supporting evidence, Sector Lead assessment, GCIO update, current assessment, open questions, and reporting-intent lifecycle. |
 | Alternatives | Request a final bounded clarification, direct the Sector Lead to proceed with reporting, or request an immediate executive update while reporting proceeds. |
 | Behavioral hypothesis | Stronger evidence should change urgency or action; executive review should not silently absorb a material correction. |

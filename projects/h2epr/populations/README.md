@@ -76,13 +76,18 @@ application/database, Citrix/infrastructure, and security-engineering/CERT
 functions. Units retain their own observations, local assessment, authority,
 and response intents; population composition, assignments, delivery, technical
 execution, and effects remain scenario-owned. The model covers the first
-H2EPR-0616 participant set rather than the complete event roster.
+technical participant batch within the accepted H2EPR-0616 semantic roster.
 
 [IHiS operational and SCM management](defines/singhealth_data_breach/ihis-operational-and-scm-management.md)
 preserves distinct infrastructure, application-service, and cluster-
 operational responsibility units that integrate technical accounts, seek
 verification, convene review, assign follow-up, or route a qualified concern.
 Its aggregation never becomes a single IHiS management actor.
+
+Both SingHealth models belong to its
+[Roster Definition release v0.1](../releases/singhealth_data_breach/roster-definition-v0.1/),
+alongside seven office-level Agent Definitions and reviewed dispositions for
+the event's non-participant processes and cohorts.
 
 The five Panic of 1907 population models belong to its
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).

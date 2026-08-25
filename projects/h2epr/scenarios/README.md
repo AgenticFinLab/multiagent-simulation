@@ -24,3 +24,10 @@ Its accepted Scenario Configuration is kept separately under
 declared-purpose instantiation remain distinct.
 The earlier semantic skeleton remains the Roster-production precursor recorded
 by the accepted Definition; it is not a competing scenario authority.
+
+The [`singhealth_data_breach/`](singhealth_data_breach/) directory currently
+contains the accepted
+[event semantic skeleton v0.2](singhealth_data_breach/semantic-skeleton.md).
+It is the stable Roster-production precursor for the active Scenario and
+consolidated mapping design phase; no Event Scenario Definition is accepted
+for H2EPR-0616 yet.
