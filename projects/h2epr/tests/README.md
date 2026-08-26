@@ -69,6 +69,15 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_release.py
 ```
 
+The two configuration-admission profiles and their focused rejection cases can
+be checked together:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/configuration/test_scenario_configuration_admission.py \
+  projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_admission.py
+```
+
 Runtime and compiler checks use the MASim dependencies described in the root
 `requirements.txt`:
 

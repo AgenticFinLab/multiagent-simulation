@@ -1,0 +1,1505 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/configs/schemas/event-scenario-configuration-semantic-v0.1.schema.json",
+  "title": "H2EPR semantic Scenario Configuration v0.1 admission schema",
+  "description": "Project-local structural admission schema for explicit semantic Scenario Configurations. It is not a Contracts V1 carrier schema and does not make a configuration executable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_identity",
+    "configuration_id",
+    "version",
+    "status",
+    "event_id",
+    "purpose",
+    "historical_calibration",
+    "historical_validation",
+    "known_outcome_fitting",
+    "semantic_inputs",
+    "owner_decisions",
+    "execution_boundary",
+    "clock",
+    "structural_variants",
+    "variant_materialization",
+    "canonical_institutions",
+    "scenario_processes",
+    "named_actors",
+    "population_actors",
+    "population_units",
+    "technical_assets",
+    "initial_records",
+    "exogenous_inputs",
+    "policy_selections",
+    "sensitivity_overlays",
+    "bounded_lineage",
+    "completion_policy",
+    "validation_expectations"
+  ],
+  "properties": {
+    "format_identity": {
+      "const": "h2epr.scenario-configuration-semantic-candidate.v0_1"
+    },
+    "configuration_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "version": {
+      "$ref": "#/$defs/semanticVersion"
+    },
+    "status": {
+      "$ref": "#/$defs/semanticToken"
+    },
+    "event_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "purpose": {
+      "$ref": "#/$defs/semanticToken"
+    },
+    "historical_calibration": {
+      "type": "boolean"
+    },
+    "historical_validation": {
+      "type": "boolean"
+    },
+    "known_outcome_fitting": {
+      "type": "boolean"
+    },
+    "semantic_inputs": {
+      "$ref": "#/$defs/semanticInputs"
+    },
+    "owner_decisions": {
+      "$ref": "#/$defs/stringArray"
+    },
+    "execution_boundary": {
+      "$ref": "#/$defs/executionBoundary"
+    },
+    "clock": {
+      "$ref": "#/$defs/clock"
+    },
+    "structural_variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/structuralVariant"
+      }
+    },
+    "variant_materialization": {
+      "$ref": "#/$defs/variantMaterialization"
+    },
+    "canonical_institutions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/canonicalInstitution"
+      }
+    },
+    "scenario_processes": {
+      "$ref": "#/$defs/stringArray"
+    },
+    "named_actors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/namedActor"
+      }
+    },
+    "population_actors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/populationActor"
+      }
+    },
+    "population_units": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/populationUnit"
+      }
+    },
+    "technical_assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/technicalAsset"
+      }
+    },
+    "initial_records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/initialRecord"
+      }
+    },
+    "exogenous_inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/exogenousInput"
+      }
+    },
+    "policy_selections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/policySelection"
+      }
+    },
+    "sensitivity_overlays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sensitivityOverlay"
+      }
+    },
+    "bounded_lineage": {
+      "$ref": "#/$defs/boundedLineage"
+    },
+    "completion_policy": {
+      "$ref": "#/$defs/completionPolicy"
+    },
+    "validation_expectations": {
+      "$ref": "#/$defs/validationExpectations"
+    }
+  },
+  "$defs": {
+    "nonemptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@-]{0,255}$"
+    },
+    "semanticToken": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "stringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonemptyString"
+      }
+    },
+    "optionalStringArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/nonemptyString"
+      }
+    },
+    "semanticInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_definition_release_id",
+        "scenario_definition_id",
+        "scenario_release_manifest_sha256",
+        "scenario_definition_sha256",
+        "scenario_interface_closure_sha256",
+        "roster_release_id",
+        "roster_release_manifest_sha256",
+        "consolidated_mapping_release_id",
+        "consolidated_mapping_manifest_sha256",
+        "mapping_profile_id",
+        "mapping_profile_sha256",
+        "semantic_skeleton_sha256",
+        "event_frame_evidence_sha256",
+        "participant_evidence_sha256"
+      ],
+      "properties": {
+        "scenario_definition_release_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "scenario_definition_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "scenario_release_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "scenario_definition_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "scenario_interface_closure_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "roster_release_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "roster_release_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "consolidated_mapping_release_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "consolidated_mapping_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "mapping_profile_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "mapping_profile_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "semantic_skeleton_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "event_frame_evidence_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "participant_evidence_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "executionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_eligible",
+        "reason",
+        "required_before_execution",
+        "unbound_policy_behavior",
+        "parsing_does_not_change_eligibility",
+        "authorization_conferred_by_configuration"
+      ],
+      "properties": {
+        "execution_eligible": {
+          "type": "boolean"
+        },
+        "reason": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "required_before_execution": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "unbound_policy_behavior": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "parsing_does_not_change_eligibility": {
+          "type": "boolean"
+        },
+        "authorization_conferred_by_configuration": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "datedValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "precision"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "date"
+        },
+        "precision": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "datedInterval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end",
+        "precision"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date"
+        },
+        "end": {
+          "type": "string",
+          "format": "date"
+        },
+        "precision": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "clock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timezone",
+        "mode",
+        "modeled_start",
+        "participant_response_start",
+        "acute_window",
+        "core_horizon",
+        "notification_observation_horizon",
+        "same_time_precedence",
+        "equal_time_tie_break",
+        "invented_intraday_precision_forbidden"
+      ],
+      "properties": {
+        "timezone": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "mode": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "modeled_start": {
+          "$ref": "#/$defs/datedValue"
+        },
+        "participant_response_start": {
+          "$ref": "#/$defs/datedValue"
+        },
+        "acute_window": {
+          "$ref": "#/$defs/datedInterval"
+        },
+        "core_horizon": {
+          "$ref": "#/$defs/datedValue"
+        },
+        "notification_observation_horizon": {
+          "$ref": "#/$defs/datedValue"
+        },
+        "same_time_precedence": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "equal_time_tie_break": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "invented_intraday_precision_forbidden": {
+          "type": "boolean"
+        }
+      }
+    },
+    "structuralVariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "allowed_domain",
+        "selection",
+        "basis",
+        "identification",
+        "causal_limit",
+        "sensitivity_overlay_id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "family": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "allowed_domain": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "selection": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "causal_limit": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "sensitivity_overlay_id": {
+          "$ref": "#/$defs/stableId"
+        }
+      }
+    },
+    "attackPressureProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection",
+        "opportunity_schedule",
+        "realized_result"
+      ],
+      "properties": {
+        "selection": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "opportunity_schedule": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "realized_result": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "routeDeliveryProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection",
+        "delivery_result"
+      ],
+      "properties": {
+        "selection": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "delivery_result": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "officeCapacityProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection",
+        "unavailable_actor_ids",
+        "availability_gate"
+      ],
+      "properties": {
+        "selection": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "unavailable_actor_ids": {
+          "$ref": "#/$defs/optionalStringArray"
+        },
+        "availability_gate": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "resultProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection",
+        "realized_result"
+      ],
+      "properties": {
+        "selection": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "realized_result": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "notificationProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection",
+        "realized_delivery_result"
+      ],
+      "properties": {
+        "selection": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "realized_delivery_result": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "variantMaterialization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attack_pressure_profile",
+        "route_delivery_profile",
+        "active_population_actor_ids",
+        "inactive_population_actor_rule",
+        "office_capacity_profile",
+        "technical_result_profile",
+        "notification_profile",
+        "overlay_precedence"
+      ],
+      "properties": {
+        "attack_pressure_profile": {
+          "$ref": "#/$defs/attackPressureProfile"
+        },
+        "route_delivery_profile": {
+          "$ref": "#/$defs/routeDeliveryProfile"
+        },
+        "active_population_actor_ids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "inactive_population_actor_rule": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "office_capacity_profile": {
+          "$ref": "#/$defs/officeCapacityProfile"
+        },
+        "technical_result_profile": {
+          "$ref": "#/$defs/resultProfile"
+        },
+        "notification_profile": {
+          "$ref": "#/$defs/notificationProfile"
+        },
+        "overlay_precedence": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      }
+    },
+    "canonicalInstitution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "resource_owner_id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "name": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "resource_owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "participant_disposition": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "namedActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "actor_id",
+        "participant_product_id",
+        "capability_id",
+        "capacity_ids",
+        "primary_institution_id",
+        "additional_route_institution_ids",
+        "authority_graph_id",
+        "resource_owner_id",
+        "private_state_initialization"
+      ],
+      "properties": {
+        "entity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "actor_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "participant_product_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "capability_id": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "capacity_ids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "primary_institution_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "additional_route_institution_ids": {
+          "$ref": "#/$defs/optionalStringArray"
+        },
+        "authority_graph_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "resource_owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "private_state_initialization": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "populationActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "actor_id",
+        "unit_id",
+        "capability_id",
+        "capacity_id",
+        "host_institution_id",
+        "assignment_id",
+        "authority_graph_id",
+        "resource_owner_id",
+        "weighting"
+      ],
+      "properties": {
+        "entity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "actor_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "unit_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "capability_id": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "capacity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "host_institution_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "assignment_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "authority_graph_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "resource_owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "weighting": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "populationUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit_id",
+        "actor_id",
+        "population_product_id",
+        "host_institution_id",
+        "functional_type",
+        "assignment_id",
+        "capacity_id",
+        "availability_record_id",
+        "composition",
+        "access_mode",
+        "access_scope_ids",
+        "opening_private_state"
+      ],
+      "properties": {
+        "unit_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "actor_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "population_product_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "host_institution_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "functional_type": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "assignment_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "capacity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "availability_record_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "composition": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "access_mode": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "access_scope_ids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "opening_private_state": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "technicalAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "owning_institution_id",
+        "operating_institution_id",
+        "identity_scope"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "kind": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "owning_institution_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ownership_identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "operating_institution_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "identity_scope": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owning_institution_id": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "owning_institution_id"
+            ]
+          },
+          "then": {
+            "required": [
+              "ownership_identification"
+            ]
+          }
+        }
+      ]
+    },
+    "capacityScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capacity_id",
+        "institution_id"
+      ],
+      "properties": {
+        "capacity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "institution_id": {
+          "$ref": "#/$defs/stableId"
+        }
+      }
+    },
+    "routeEndpoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "side_a",
+        "side_b"
+      ],
+      "properties": {
+        "side_a": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "side_b": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "authorityRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "owner_id",
+        "target_id",
+        "capacity_scopes",
+        "effective_interval",
+        "availability",
+        "value",
+        "identification",
+        "visibility",
+        "source_class",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "value": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "visibility": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "source_class": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "family": {
+          "const": "authority_and_capacity"
+        },
+        "target_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "capacity_scopes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/capacityScope"
+          }
+        },
+        "effective_interval": {
+          "$ref": "#/$defs/datedInterval"
+        },
+        "availability": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "unitAssignmentRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "owner_id",
+        "target_id",
+        "capacity_id",
+        "effective_interval",
+        "availability",
+        "access_scope_ids",
+        "value",
+        "identification",
+        "visibility",
+        "source_class",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "value": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "visibility": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "source_class": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "family": {
+          "const": "unit_assignment"
+        },
+        "target_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "capacity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "effective_interval": {
+          "$ref": "#/$defs/datedInterval"
+        },
+        "availability": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "access_scope_ids": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "relationshipRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "owner_id",
+        "parties",
+        "value",
+        "identification",
+        "visibility",
+        "source_class",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "value": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "visibility": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "source_class": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "family": {
+          "const": "institutional_relationship"
+        },
+        "parties": {
+          "$ref": "#/$defs/stringArray"
+        }
+      }
+    },
+    "routeRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "owner_id",
+        "endpoints",
+        "directionality",
+        "addressing_rule",
+        "value",
+        "identification",
+        "visibility",
+        "source_class",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "value": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "visibility": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "source_class": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "family": {
+          "const": "institutional_route"
+        },
+        "endpoints": {
+          "$ref": "#/$defs/routeEndpoints"
+        },
+        "required_sender_capacity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "directionality": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "addressing_rule": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "stateRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "owner_id",
+        "target_id",
+        "value",
+        "identification",
+        "visibility",
+        "source_class",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "owner_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "value": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "identification": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "visibility": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "source_class": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "family": {
+          "enum": [
+            "technical_asset_state",
+            "business_object_state",
+            "affected_cohort_state"
+          ]
+        },
+        "target_id": {
+          "$ref": "#/$defs/stableId"
+        }
+      }
+    },
+    "initialRecord": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/authorityRecord"
+        },
+        {
+          "$ref": "#/$defs/unitAssignmentRecord"
+        },
+        {
+          "$ref": "#/$defs/relationshipRecord"
+        },
+        {
+          "$ref": "#/$defs/routeRecord"
+        },
+        {
+          "$ref": "#/$defs/stateRecord"
+        }
+      ]
+    },
+    "activation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "window_start",
+            "precision"
+          ],
+          "properties": {
+            "window_start": {
+              "type": "string",
+              "format": "date"
+            },
+            "precision": {
+              "$ref": "#/$defs/semanticToken"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "condition"
+          ],
+          "properties": {
+            "condition": {
+              "$ref": "#/$defs/semanticToken"
+            }
+          }
+        }
+      ]
+    },
+    "exogenousInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "family",
+        "activation",
+        "target_kind",
+        "target_ids",
+        "typed_effect",
+        "visibility",
+        "basis",
+        "causal_limit",
+        "sensitivity_overlay_id",
+        "outcome_forcing"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "family": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "activation": {
+          "$ref": "#/$defs/activation"
+        },
+        "target_kind": {
+          "enum": [
+            "scenario_process",
+            "technical_asset_set",
+            "authority_record_set",
+            "institutional_route_set"
+          ]
+        },
+        "target_ids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "typed_effect": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "visibility": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "causal_limit": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "sensitivity_overlay_id": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome_forcing": {
+          "type": "boolean"
+        }
+      }
+    },
+    "policySelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "semantic_version",
+        "selection",
+        "definition_family",
+        "implementation_status",
+        "execution_consequence"
+      ],
+      "properties": {
+        "policy_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "semantic_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "selection": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "definition_family": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "implementation_status": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "execution_consequence": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "overlayOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "target_kind",
+        "target_id",
+        "field",
+        "replacement_value"
+      ],
+      "properties": {
+        "operation": {
+          "const": "replace"
+        },
+        "target_kind": {
+          "enum": [
+            "structural_variant",
+            "variant_materialization"
+          ]
+        },
+        "target_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "field": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "replacement_value": {}
+      }
+    },
+    "sensitivityOverlay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overlay_id",
+        "uncertainty",
+        "basis",
+        "operations",
+        "coupled_operations_disclosed"
+      ],
+      "properties": {
+        "overlay_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "basis": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/overlayOperation"
+          }
+        },
+        "derived_effects": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "coupled_operations_disclosed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "boundedLineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "participant_ids",
+        "route_ids",
+        "semantic_intent_sequence",
+        "required_separations",
+        "implementation_included",
+        "authorization_conferred_by_configuration",
+        "full_roster_implication"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "role": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "participant_ids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "route_ids": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "semantic_intent_sequence": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "required_separations": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "implementation_included": {
+          "type": "boolean"
+        },
+        "authorization_conferred_by_configuration": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "full_roster_implication": {
+          "$ref": "#/$defs/semanticToken"
+        }
+      }
+    },
+    "completionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normal",
+        "bounded_incomplete",
+        "pending_object_rule",
+        "failed_closed",
+        "historical_outcome_required"
+      ],
+      "properties": {
+        "normal": {
+          "$ref": "#/$defs/stringArray"
+        },
+        "bounded_incomplete": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "pending_object_rule": {
+          "$ref": "#/$defs/semanticToken"
+        },
+        "failed_closed": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "historical_outcome_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "validationExpectations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantic_products",
+        "decision_and_population_commitments",
+        "observation_placements",
+        "private_state_placements",
+        "intent_placements",
+        "lifecycle_families",
+        "named_actors",
+        "population_actors",
+        "total_semantic_actor_instances",
+        "population_units",
+        "technical_assets",
+        "canonical_institutions",
+        "opening_records",
+        "route_records",
+        "structural_selections",
+        "exogenous_inputs",
+        "selected_policy_semantics",
+        "sensitivity_overlays",
+        "one_actor_per_office_or_unit",
+        "one_resource_owner_per_canonical_institution",
+        "host_scope_required_for_population_units",
+        "capacity_scope_required_for_office_authority",
+        "exact_addressing_required_for_routes",
+        "opening_record_basis_required",
+        "intent_result_separation_required",
+        "correction_preserves_prior_decision_basis",
+        "unresolved_active_objects_carried_at_horizon",
+        "deterministic_replay_required_before_execution",
+        "execution_eligible"
+      ],
+      "properties": {
+        "semantic_products": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "decision_and_population_commitments": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observation_placements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "private_state_placements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "intent_placements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lifecycle_families": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "named_actors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "population_actors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_semantic_actor_instances": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "population_units": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "technical_assets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "canonical_institutions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "opening_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "route_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "structural_selections": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "exogenous_inputs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "selected_policy_semantics": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sensitivity_overlays": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "one_actor_per_office_or_unit": {
+          "type": "boolean"
+        },
+        "one_resource_owner_per_canonical_institution": {
+          "type": "boolean"
+        },
+        "host_scope_required_for_population_units": {
+          "type": "boolean"
+        },
+        "capacity_scope_required_for_office_authority": {
+          "type": "boolean"
+        },
+        "exact_addressing_required_for_routes": {
+          "type": "boolean"
+        },
+        "opening_record_basis_required": {
+          "type": "boolean"
+        },
+        "intent_result_separation_required": {
+          "type": "boolean"
+        },
+        "correction_preserves_prior_decision_basis": {
+          "type": "boolean"
+        },
+        "unresolved_active_objects_carried_at_horizon": {
+          "type": "boolean"
+        },
+        "deterministic_replay_required_before_execution": {
+          "type": "boolean"
+        },
+        "execution_eligible": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -33,10 +33,19 @@ from .errors import (
 
 CONFIGURATION_FORMAT_ID = "h2epr.event-scenario-configuration.v0_1"
 CONFIGURATION_ADMISSION_VERSION = "h2epr.scenario-configuration-admission.v0_1"
+SEMANTIC_CONFIGURATION_FORMAT_ID = (
+    "h2epr.scenario-configuration-semantic-candidate.v0_1"
+)
+SEMANTIC_CONFIGURATION_ADMISSION_VERSION = (
+    "h2epr.scenario-configuration-admission.v0_2"
+)
 CONFIGURATION_RECEIPT_FORMAT = "h2epr.configuration-admission-receipt.v0_1"
 CONFIGURATION_CANONICALIZATION = "h2epr_cjson.v1.full_configuration_document"
 CONFIGURATION_SCHEMA_RELATIVE_PATH = Path(
     "configs/schemas/event-scenario-configuration-v0.1.schema.json"
+)
+SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH = Path(
+    "configs/schemas/event-scenario-configuration-semantic-v0.1.schema.json"
 )
 CONFIGURATION_RELEASE_SCHEMA = "h2epr.event-scenario-configuration-release.v0_1"
 CONFIGURATION_RELEASE_STATUS = "accepted_non_executable_configuration"
@@ -262,6 +271,7 @@ class ScenarioConfigurationAdmission:
     execution_eligible: bool
     unbound_policy_ids: tuple[str, ...]
     document: Mapping[str, Any]
+    validation_surface: str = CONFIGURATION_ADMISSION_VERSION
 
 
 def _validate_checksum_inventory(
@@ -348,6 +358,45 @@ _SEMANTIC_INPUT_SPECS = {
     "source_register": ("path", "sha256", "source_register_sha256"),
 }
 
+_SEMANTIC_CONFIGURATION_INPUT_SPECS = {
+    "scenario_definition_release": (
+        "manifest_path",
+        "manifest_sha256",
+        "scenario_release_manifest_sha256",
+    ),
+    "scenario_definition": (
+        "path",
+        "sha256",
+        "scenario_definition_sha256",
+    ),
+    "scenario_interface_closure": (
+        "path",
+        "sha256",
+        "scenario_interface_closure_sha256",
+    ),
+    "roster_definition_release": (
+        "manifest_path",
+        "manifest_sha256",
+        "roster_release_manifest_sha256",
+    ),
+    "consolidated_mapping": (
+        "manifest_path",
+        "manifest_sha256",
+        "consolidated_mapping_manifest_sha256",
+    ),
+    "mapping_profile": ("path", "sha256", "mapping_profile_sha256"),
+    "semantic_skeleton": ("path", "sha256", "semantic_skeleton_sha256"),
+    "event_frame_evidence": (
+        "path",
+        "sha256",
+        "event_frame_evidence_sha256",
+    ),
+    "participant_evidence": (
+        "path",
+        "sha256",
+        "participant_evidence_sha256",
+    ),
+}
 
 def _load_release_context(
     root: Path,
@@ -355,6 +404,10 @@ def _load_release_context(
     source_sha256: str,
     manifest_path: Path,
     expected_manifest_sha256: str,
+    *,
+    semantic_input_specs: Mapping[str, tuple[str, str, str | None]] = (
+        _SEMANTIC_INPUT_SPECS
+    ),
 ) -> tuple[_ReleaseContext, Mapping[str, Any]]:
     manifest_path = _inside_root(manifest_path, root, pointer="/release_manifest")
     if not manifest_path.is_file():
@@ -450,7 +503,7 @@ def _load_release_context(
     semantic = _object(
         manifest.get("semantic_inputs"), pointer="/release_manifest/semantic_inputs"
     )
-    if set(semantic) != set(_SEMANTIC_INPUT_SPECS):
+    if set(semantic) != set(semantic_input_specs):
         _raise(
             ConfigurationErrorCode.RELEASE_MANIFEST_INVALID,
             pointer="/release_manifest/semantic_inputs",
@@ -458,7 +511,7 @@ def _load_release_context(
         )
     input_hashes: dict[str, str] = {}
     input_paths: dict[str, Path] = {}
-    for name, (path_key, hash_key, _) in _SEMANTIC_INPUT_SPECS.items():
+    for name, (path_key, hash_key, _) in semantic_input_specs.items():
         pointer = f"/release_manifest/semantic_inputs/{name}"
         item = _object(semantic[name], pointer=pointer)
         path = _resolved_file(
@@ -520,19 +573,15 @@ def _load_release_context(
     return context, manifest
 
 
-def _load_and_validate_schema(
-    root: Path, document: Mapping[str, Any]
+def _validate_against_schema(
+    root: Path,
+    document: Mapping[str, Any],
+    schema_relative_path: Path,
 ) -> tuple[str, str]:
-    if document.get("schema") != CONFIGURATION_FORMAT_ID:
-        _raise(
-            ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
-            pointer="/schema",
-            detail=f"expected={CONFIGURATION_FORMAT_ID}",
-        )
     schema_path = _resolved_file(
         root,
         root,
-        CONFIGURATION_SCHEMA_RELATIVE_PATH.as_posix(),
+        schema_relative_path.as_posix(),
         pointer="/configuration_schema",
     )
     schema, schema_raw = _read_json(schema_path, pointer="/configuration_schema")
@@ -565,6 +614,34 @@ def _load_and_validate_schema(
             detail="id_required",
         )
     return schema_id, _sha256_bytes(schema_raw)
+
+
+def _load_and_validate_schema(
+    root: Path, document: Mapping[str, Any]
+) -> tuple[str, str]:
+    if document.get("schema") != CONFIGURATION_FORMAT_ID:
+        _raise(
+            ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
+            pointer="/schema",
+            detail=f"expected={CONFIGURATION_FORMAT_ID}",
+        )
+    return _validate_against_schema(
+        root, document, CONFIGURATION_SCHEMA_RELATIVE_PATH
+    )
+
+
+def _load_and_validate_semantic_schema(
+    root: Path, document: Mapping[str, Any]
+) -> tuple[str, str]:
+    if document.get("format_identity") != SEMANTIC_CONFIGURATION_FORMAT_ID:
+        _raise(
+            ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
+            pointer="/format_identity",
+            detail=f"expected={SEMANTIC_CONFIGURATION_FORMAT_ID}",
+        )
+    return _validate_against_schema(
+        root, document, SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH
+    )
 
 
 def _canonical_identity(document: Mapping[str, Any]) -> str:
@@ -1147,6 +1224,22 @@ def load_scenario_configuration(
             detail="expected_source_sha256_mismatch",
         )
     document = _parse_json_bytes(raw, pointer="/configuration")
+    if "format_identity" in document:
+        if document.get("format_identity") != SEMANTIC_CONFIGURATION_FORMAT_ID:
+            _raise(
+                ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
+                pointer="/format_identity",
+                detail=f"expected={SEMANTIC_CONFIGURATION_FORMAT_ID}",
+            )
+        semantic_profile = True
+    else:
+        if document.get("schema") != CONFIGURATION_FORMAT_ID:
+            _raise(
+                ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
+                pointer="/schema",
+                detail=f"expected={CONFIGURATION_FORMAT_ID}",
+            )
+        semantic_profile = False
     if release_manifest_path is None:
         manifest_path = path.parent / "manifest.json"
     else:
@@ -1166,21 +1259,49 @@ def load_scenario_configuration(
         source_sha256,
         manifest_path,
         expected_release_manifest_sha256,
+        semantic_input_specs=(
+            _SEMANTIC_CONFIGURATION_INPUT_SPECS
+            if semantic_profile
+            else _SEMANTIC_INPUT_SPECS
+        ),
     )
-    schema_id, schema_sha256 = _load_and_validate_schema(root, document)
-    canonical_sha256 = _canonical_identity(document)
-    _validate_release_document_consistency(document, manifest, release)
-    try:
-        profile = load_roster_mapping_profile(
-            release.mapping_profile_path, project_root=root
+    if semantic_profile:
+        from ._semantic_profile import (
+            _load_semantic_reference_profile,
+            _validate_semantic_configuration,
+            _validate_semantic_release_document_consistency,
         )
-    except RosterMappingError as exc:
-        _raise(
-            ConfigurationErrorCode.MAPPING_PROFILE_INVALID,
-            pointer="/semantic_inputs/mapping_profile_sha256",
-            detail=str(exc),
+
+        schema_id, schema_sha256 = _load_and_validate_semantic_schema(root, document)
+        canonical_sha256 = _canonical_identity(document)
+        _validate_semantic_release_document_consistency(document, manifest, release)
+        semantic_references = _load_semantic_reference_profile(
+            root, document, manifest, release
         )
-    coverage, unbound = _validate_semantics(document, profile, release.coverage)
+        coverage, unbound = _validate_semantic_configuration(
+            document, semantic_references, release.coverage
+        )
+        validation_surface = SEMANTIC_CONFIGURATION_ADMISSION_VERSION
+        mapping_profile_id = semantic_references.mapping_profile_id
+    else:
+        schema_id, schema_sha256 = _load_and_validate_schema(root, document)
+        canonical_sha256 = _canonical_identity(document)
+        _validate_release_document_consistency(document, manifest, release)
+        try:
+            profile = load_roster_mapping_profile(
+                release.mapping_profile_path, project_root=root
+            )
+        except RosterMappingError as exc:
+            _raise(
+                ConfigurationErrorCode.MAPPING_PROFILE_INVALID,
+                pointer="/semantic_inputs/mapping_profile_sha256",
+                detail=str(exc),
+            )
+        coverage, unbound = _validate_semantics(
+            document, profile, release.coverage
+        )
+        validation_surface = CONFIGURATION_ADMISSION_VERSION
+        mapping_profile_id = profile.profile_id
     return ScenarioConfigurationAdmission(
         project_relative_path=path.relative_to(root).as_posix(),
         configuration_id=document["configuration_id"],
@@ -1191,11 +1312,12 @@ def load_scenario_configuration(
         source_sha256=source_sha256,
         canonical_sha256=canonical_sha256,
         canonicalization=CONFIGURATION_CANONICALIZATION,
+        validation_surface=validation_surface,
         schema_document_id=schema_id,
         schema_sha256=schema_sha256,
         release_id=release.release_id,
         release_manifest_sha256=release.manifest_sha256,
-        mapping_profile_id=profile.profile_id,
+        mapping_profile_id=mapping_profile_id,
         mapping_profile_sha256=release.semantic_input_sha256s["mapping_profile"],
         semantic_input_sha256s=release.semantic_input_sha256s,
         coverage=coverage,
@@ -1255,6 +1377,7 @@ def build_configuration_preflight_receipt(
     admission: ScenarioConfigurationAdmission | None = None,
     error: ConfigurationAdmissionError | None = None,
     attempted_configuration_path: str = "",
+    validation_surface: str | None = None,
 ) -> dict[str, Any]:
     """Build one deterministic pass or failure receipt for static admission."""
 
@@ -1263,6 +1386,26 @@ def build_configuration_preflight_receipt(
             ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
             pointer="/receipt",
             detail="exactly_one_of_admission_or_error_required",
+        )
+    supported_surfaces = {
+        CONFIGURATION_ADMISSION_VERSION,
+        SEMANTIC_CONFIGURATION_ADMISSION_VERSION,
+    }
+    if admission is not None:
+        selected_surface = admission.validation_surface
+        if validation_surface not in {None, selected_surface}:
+            _raise(
+                ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
+                pointer="/validation_surface",
+                detail="admission_surface_mismatch",
+            )
+    else:
+        selected_surface = validation_surface or CONFIGURATION_ADMISSION_VERSION
+    if selected_surface not in supported_surfaces:
+        _raise(
+            ConfigurationErrorCode.PREFLIGHT_CONTEXT_INVALID,
+            pointer="/validation_surface",
+            detail="supported_validation_surface_required",
         )
     checks = _validate_verification(verification)
     if admission is not None and any(row["status"] != "pass" for row in checks):
@@ -1339,7 +1482,7 @@ def build_configuration_preflight_receipt(
         coverage = {}
     receipt: dict[str, Any] = {
         "schema": CONFIGURATION_RECEIPT_FORMAT,
-        "validation_surface": CONFIGURATION_ADMISSION_VERSION,
+        "validation_surface": selected_surface,
         "configuration": configuration,
         "release": release,
         "semantic_inputs": semantic_inputs,
@@ -1369,6 +1512,9 @@ __all__ = [
     "CONFIGURATION_FORMAT_ID",
     "CONFIGURATION_RECEIPT_FORMAT",
     "CONFIGURATION_SCHEMA_RELATIVE_PATH",
+    "SEMANTIC_CONFIGURATION_ADMISSION_VERSION",
+    "SEMANTIC_CONFIGURATION_FORMAT_ID",
+    "SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH",
     "ScenarioConfigurationAdmission",
     "build_configuration_preflight_receipt",
     "load_scenario_configuration",

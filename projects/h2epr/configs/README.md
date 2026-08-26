@@ -26,17 +26,15 @@ with the
 | Event | Scenario Configuration | Admission status |
 |---|---|---|
 | Panic of 1907 (`H2EPR-0288`) | [v0.1](panic_1907/scenario-configuration-v0.1/) | [bounded static admission v0.1](panic_1907/configuration-admission-v0.1/) |
-| SingHealth Data Breach (`H2EPR-0616`) | [v0.1](singhealth_data_breach/scenario-configuration-v0.1/) | not opened; requires separate authorization |
+| SingHealth Data Breach (`H2EPR-0616`) | [v0.1](singhealth_data_breach/scenario-configuration-v0.1/) | [bounded static admission v0.1](singhealth_data_breach/configuration-admission-v0.1/) |
 
 Event-specific packages live under their event directory. A promoted package
 normally contains the machine document, publication-facing design, Definition
 closure, substantive review, README, manifest, and checksum inventory.
 
-Project-local admission schemas live under [`schemas/`](schemas/). The first
-bounded admission record lives under
-[`panic_1907/configuration-admission-v0.1/`](panic_1907/configuration-admission-v0.1/)
-and pins the accepted source and canonical identities without changing the
-accepted configuration release.
+Project-local admission schemas live under [`schemas/`](schemas/). Each bounded
+admission record pins its accepted source, canonical, schema, release, and
+semantic-input identities without changing the accepted configuration release.
 
 Schema/canonical admission, carrier projection, policy binding, runtime, and
 evaluation are separately governed stages. Successful parsing or static
