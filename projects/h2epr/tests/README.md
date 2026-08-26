@@ -69,6 +69,14 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_release.py
 ```
 
+The bounded SingHealth carrier binding and its focused rejection cases can be
+checked independently:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_singhealth_data_breach_lineage_binding.py
+```
+
 The two configuration-admission profiles and their focused rejection cases can
 be checked together:
 

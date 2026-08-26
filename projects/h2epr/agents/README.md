@@ -35,7 +35,10 @@ the accepted [research roster v0.2](rosters/singhealth_data_breach.md) and
 The accepted
 [consolidated mapping v0.1](bindings/singhealth_data_breach/consolidated/)
 reconciles the complete release with Contracts V1 and the Event Scenario
-Definition without making the collection executable.
+Definition without making the collection executable. The bounded
+[SCM technical--operations--GCIO binding](bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/)
+then projects four selected intents while preserving the non-executable
+full-configuration boundary.
 
 ## Authority map
 
@@ -56,9 +59,8 @@ Definition without making the collection executable.
 
 The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
-and intent semantics it was reviewed against. The bounded three-role example
-exercises only the request--forward--classify--scoped-disposition path; it is
-not a complete role or event implementation.
+and intent semantics it was reviewed against. Each bounded binding exercises
+only its declared lineage; neither is a complete role or event implementation.
 
 ## Layout and naming
 
@@ -72,7 +74,9 @@ agents/
 │   │   ├── consolidated/
 │   │   └── roster-v0.1/
 │   └── singhealth_data_breach/
-│       └── consolidated/
+│       ├── README.md
+│       ├── consolidated/
+│       └── scm-technical-operations-gcio-v0.1/
 ├── defines/
 │   ├── panic_1907/
 │   │   ├── README.md
@@ -167,6 +171,10 @@ agents/
 - [`bindings/singhealth_data_breach/consolidated/`](bindings/singhealth_data_breach/consolidated/):
   accepted non-executable full-Roster mapping, Contracts V1 carrier decision,
   release-interface inventory, and owner-resolution record.
+- [`bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/`](bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/):
+  exact three-participant binding for four source-preserving finding,
+  verification, escalation, and clarification intents, with event-qualified
+  catalog derivation and focused Contracts V1 checks.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the event-bound Knickerbocker depositor population model.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):

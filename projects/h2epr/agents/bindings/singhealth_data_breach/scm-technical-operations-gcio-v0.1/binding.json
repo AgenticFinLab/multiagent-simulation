@@ -1,0 +1,604 @@
+{
+  "schema": "h2epr.bounded-lineage-binding.v0_1",
+  "binding_id": "h2epr.0616.scm-technical-operations-gcio.binding.v0_1",
+  "version": "0.1.0",
+  "status": "bounded_conformance_binding",
+  "event_id": "H2EPR-0616",
+  "configuration": {
+    "configuration_id": "h2epr.0616.scenario.mechanism-coverage.v0_1",
+    "source_sha256": "00fe7d799b5f944da09c64ddbeea85d2addfc7948bb9f0865316962fe2d37d3d",
+    "canonical_sha256": "288c1539221cce894545234cbc477f342e609ee92130cfc9925426e9d0edb9fd",
+    "admission_receipt_sha256": "6cff3efc74a5fe42764d8a89217ce08734f868b09f30f34e1d476dfc309eee8d",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0616.v0_1",
+    "mapping_profile_sha256": "1249dbe94dcad61b40c4e543435186e6e71eaab0d95c7f2877e31c0e3575a1bb"
+  },
+  "scope": {
+    "lineage_id": "lineage.0616.scm-technical-operations-gcio.v0_1",
+    "purpose": "exact_carrier_and_positive_binding_conformance",
+    "actor_ids": [
+      "actor.0616.unit.technical.scm-application-database",
+      "actor.0616.unit.operations.application-scm-coordination",
+      "actor.0616.office.singhealth-gcio"
+    ],
+    "capability_ids": [
+      "technical_administration_and_line_security_staff",
+      "ihis_operational_and_scm_management",
+      "singhealth_group_chief_information_officer"
+    ],
+    "source_route_ids": [
+      "opening.0616.route.operations-gcio",
+      "opening.0616.route.technical-operations"
+    ],
+    "bound_policy_ids": [
+      "POL-0616-AUTH-01",
+      "POL-0616-INFO-01",
+      "POL-0616-LIFECYCLE-01",
+      "POL-0616-ROUTE-01",
+      "POL-0616-TECH-01",
+      "POL-0616-TIME-01"
+    ],
+    "unbound_policy_ids": [
+      "POL-0616-COORD-01",
+      "POL-0616-INCIDENT-01",
+      "POL-0616-NOTIFY-01"
+    ],
+    "excluded_actor_count": 10,
+    "excluded_intent_count": 50,
+    "logical_tick_start": 0,
+    "logical_tick_end": 8,
+    "full_configuration_execution_enabled": false,
+    "simulation_enabled": false,
+    "historical_validity_claim": false,
+    "scientific_validity_claim": false,
+    "positive_fixture_exposure": "full_outcome_exposed_synthetic_conformance_only"
+  },
+  "derived_inventory": {
+    "semantic_products": 9,
+    "decision_and_population_commitments": 29,
+    "observation_placements": 62,
+    "private_state_placements": 44,
+    "intent_placements": 54,
+    "selected_observation_placements": 17,
+    "selected_private_state_placements": 13,
+    "selected_decision_placements": 9,
+    "selected_intent_placements": 16
+  },
+  "actors": [
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "entity_id": "entity.0616.unit.technical.scm-application-database",
+      "assembly_kind": "responsibility_unit",
+      "unit_id": "unit.0616.technical.scm-application-database",
+      "participant_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "selected_capacity_id": "capacity.0616.unit.technical.scm-application-database",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.technical.scm-application-database",
+      "authority_record_id": "opening.0616.assignment.technical.scm-application-database",
+      "authority_graph_id": "authority.0616.unit.technical.scm-application-database",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "access_scope_ids": [
+        "asset.0616.system.scm",
+        "asset.0616.application.scm",
+        "asset.0616.database.scm",
+        "asset.0616.account.assigned-context",
+        "asset.0616.credential.assigned-context",
+        "asset.0616.monitoring-control.assigned-context"
+      ],
+      "definition_sha256": "5f144f2ef78f4931c763d2dc161e6a98ee916c61b3ec3a4d0f648850f144674b",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "entity_id": "entity.0616.unit.operations.application-scm-coordination",
+      "assembly_kind": "responsibility_unit",
+      "unit_id": "unit.0616.operations.application-scm-coordination",
+      "participant_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "capability_id": "ihis_operational_and_scm_management",
+      "selected_capacity_id": "capacity.0616.unit.operations.application-scm-coordination",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": "opening.0616.assignment.operations.application-scm-coordination",
+      "authority_record_id": "opening.0616.assignment.operations.application-scm-coordination",
+      "authority_graph_id": "authority.0616.unit.operations.application-scm-coordination",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "access_scope_ids": [
+        "asset.0616.system.scm",
+        "asset.0616.application.scm",
+        "asset.0616.database.scm"
+      ],
+      "definition_sha256": "c200f75b5fc672187995ba99273ec1b7b037412f9bd2b592caf1b91305e2b713",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "entity_id": "entity.0616.office.singhealth-gcio",
+      "assembly_kind": "office",
+      "unit_id": null,
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-group-chief-information-officer",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "selected_capacity_id": "capacity.0616.ihis.gcio-service-lead",
+      "host_institution_id": "institution.0616.ihis",
+      "assignment_id": null,
+      "authority_record_id": "opening.0616.authority.singhealth-gcio",
+      "authority_graph_id": "authority.0616.office.singhealth-gcio",
+      "resource_owner_id": "resource-owner.0616.ihis",
+      "access_scope_ids": [],
+      "definition_sha256": "7397c3053e3359919e15bcdedc307eadb65b1a2ab2e84ef46b1c5e4d8e6baba6",
+      "representation_class": "autonomous_participant_agent"
+    }
+  ],
+  "relationship_refs": [
+    "opening.0616.relationship.ihis-singhealth-scm"
+  ],
+  "policy_bindings": [
+    {
+      "policy_id": "POL-0616-AUTH-01",
+      "semantic_version": "0.1.0",
+      "selection": "capacity_qualified_authority_relationship_access_and_resource_checks",
+      "implementation_id": "h2epr.policy.0616.auth.capacity_scope.v0_1",
+      "status": "bound_for_bounded_lineage_only"
+    },
+    {
+      "policy_id": "POL-0616-INFO-01",
+      "semantic_version": "0.1.0",
+      "selection": "source_version_route_delivery_freshness_correction_and_visibility_separated",
+      "implementation_id": "h2epr.policy.0616.info.source_delivery.v0_1",
+      "status": "bound_for_bounded_lineage_only"
+    },
+    {
+      "policy_id": "POL-0616-LIFECYCLE-01",
+      "semantic_version": "0.1.0",
+      "selection": "typed_lifecycle_idempotency_adjudication_result_delta_and_later_observation",
+      "implementation_id": "h2epr.policy.0616.lifecycle.typed_idempotency.v0_1",
+      "status": "bound_for_bounded_lineage_only"
+    },
+    {
+      "policy_id": "POL-0616-ROUTE-01",
+      "semantic_version": "0.1.0",
+      "selection": "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement",
+      "implementation_id": "h2epr.policy.0616.route.exact_delivery.v0_1",
+      "status": "bound_for_bounded_lineage_only"
+    },
+    {
+      "policy_id": "POL-0616-TECH-01",
+      "semantic_version": "0.1.0",
+      "selection": "authority_prestate_access_and_feasibility_adjudicated_without_selected_result",
+      "implementation_id": "h2epr.policy.0616.tech.verification_result.v0_1",
+      "status": "bound_for_bounded_lineage_only"
+    },
+    {
+      "policy_id": "POL-0616-TIME-01",
+      "semantic_version": "0.1.0",
+      "selection": "event_driven_partial_order_with_declared_same_time_precedence",
+      "implementation_id": "h2epr.policy.0616.time.partial_order.v0_1",
+      "status": "bound_for_bounded_lineage_only"
+    }
+  ],
+  "routes": [
+    {
+      "route_id": "route.0616.technical_to_operations.finding",
+      "source_opening_route_id": "opening.0616.route.technical-operations",
+      "source_actor_id": "actor.0616.unit.technical.scm-application-database",
+      "target_actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "required_source_capacity_id": "capacity.0616.unit.technical.scm-application-database",
+      "channel_id": "channel.0616.technical_operations.finding",
+      "performative": "inform",
+      "confidentiality": "restricted",
+      "latency_ticks": 1
+    },
+    {
+      "route_id": "route.0616.operations_to_technical.verification_request",
+      "source_opening_route_id": "opening.0616.route.technical-operations",
+      "source_actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "target_actor_id": "actor.0616.unit.technical.scm-application-database",
+      "required_source_capacity_id": "capacity.0616.unit.operations.application-scm-coordination",
+      "channel_id": "channel.0616.operations_technical.verification_request",
+      "performative": "request",
+      "confidentiality": "restricted",
+      "latency_ticks": 1
+    },
+    {
+      "route_id": "route.0616.operations_to_gcio.escalation",
+      "source_opening_route_id": "opening.0616.route.operations-gcio",
+      "source_actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "target_actor_id": "actor.0616.office.singhealth-gcio",
+      "required_source_capacity_id": "capacity.0616.unit.operations.application-scm-coordination",
+      "channel_id": "channel.0616.operations_gcio.escalation",
+      "performative": "inform",
+      "confidentiality": "restricted",
+      "latency_ticks": 1
+    },
+    {
+      "route_id": "route.0616.gcio_to_operations.clarification",
+      "source_opening_route_id": "opening.0616.route.operations-gcio",
+      "source_actor_id": "actor.0616.office.singhealth-gcio",
+      "target_actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "required_source_capacity_id": "capacity.0616.ihis.gcio-service-lead",
+      "channel_id": "channel.0616.gcio_operations.clarification",
+      "performative": "request",
+      "confidentiality": "restricted",
+      "latency_ticks": 1
+    }
+  ],
+  "observation_contracts": [
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "reader_observation_id": "local_technical_signal",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "reader_observation_id": "delivered_peer_finding",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "reader_observation_id": "local_control_state",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "reader_observation_id": "security_response_request",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "reader_observation_id": "action_result_notice",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_observation_id": "delivered_role_local_account",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_observation_id": "coordination_meeting_record",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_observation_id": "verification_result_notice",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_observation_id": "management_route_context",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_observation_id": "intent_lifecycle_notice",
+      "value_type": "enum",
+      "values": [
+        "never_issued",
+        "pending",
+        "acknowledged",
+        "partial",
+        "completed",
+        "failed",
+        "expired",
+        "cancelled",
+        "superseded"
+      ]
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "delivered_operational_account",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "technical_verification_update",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "ihis_executive_direction",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "sector_lead_update",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "singhealth_management_response",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "patient_impact_update",
+      "value_type": "stable_id",
+      "values": []
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_observation_id": "intent_lifecycle_notice",
+      "value_type": "enum",
+      "values": [
+        "never_issued",
+        "pending",
+        "acknowledged",
+        "partial",
+        "completed",
+        "failed",
+        "expired",
+        "cancelled",
+        "superseded"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "action_key": "technical.share_technical_finding",
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "reader_intent_id": "share_technical_finding",
+      "action_type": "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+      "action_schema_version": "h2epr.intent.0616.technical_administration_and_line_security_staff.share_technical_finding.v0_1",
+      "commitment_ids": [
+        "h2epr.commitment.0616.technical_administration_and_line_security_staff.situation_b"
+      ],
+      "observation_ids": [
+        "local_technical_signal",
+        "local_control_state"
+      ],
+      "authority_ref_ids": [
+        "opening.0616.assignment.technical.scm-application-database"
+      ],
+      "target_actor_ids": [
+        "actor.0616.unit.operations.application-scm-coordination"
+      ],
+      "lifecycle_family": "information_product",
+      "adjudication_family": "named_route_delivery",
+      "object_id_parameter": "finding_id",
+      "object_version_parameter": "finding_version",
+      "parameters": [
+        {"name": "finding_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "finding_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "sender_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "recipient_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "capacity_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "route_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "event_time_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_signal_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "control_state_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "artifact_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "proposition_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_record_sha256", "value_type": "sha256", "carrier": "parameters", "values": []},
+        {"name": "uncertainty", "value_type": "enum", "carrier": "parameters", "values": ["bounded", "disputed", "unknown"]},
+        {"name": "requested_attention", "value_type": "enum", "carrier": "parameters", "values": ["fact_verification", "operational_attention", "security_review"]},
+        {"name": "expiry_time", "value_type": "nullable_time_interval", "carrier": "expiry_time", "values": []}
+      ],
+      "message_route_id": "route.0616.technical_to_operations.finding",
+      "forbidden_self_results": [
+        "delivery_result",
+        "acknowledgement_result",
+        "interpretation_result",
+        "follow_up_result"
+      ]
+    },
+    {
+      "action_key": "operations.request_fact_verification",
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_intent_id": "request_fact_verification",
+      "action_type": "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+      "action_schema_version": "h2epr.intent.0616.ihis_operational_and_scm_management.request_fact_verification.v0_1",
+      "commitment_ids": [
+        "h2epr.commitment.0616.ihis_operational_and_scm_management.situation_a"
+      ],
+      "observation_ids": [
+        "delivered_role_local_account",
+        "management_route_context",
+        "intent_lifecycle_notice"
+      ],
+      "authority_ref_ids": [
+        "opening.0616.assignment.operations.application-scm-coordination"
+      ],
+      "target_actor_ids": [
+        "actor.0616.unit.technical.scm-application-database"
+      ],
+      "lifecycle_family": "investigation_or_verification_request",
+      "adjudication_family": "technical_verification",
+      "object_id_parameter": "request_id",
+      "object_version_parameter": "request_version",
+      "parameters": [
+        {"name": "request_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "request_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "sender_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "recipient_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "capacity_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "route_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "claim_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_finding_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_finding_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "source_message_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_delivery_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "requested_check", "value_type": "enum", "carrier": "parameters", "values": ["audit_claim", "identity_claim", "query_result", "scope_claim", "source_claim"]},
+        {"name": "urgency", "value_type": "enum", "carrier": "parameters", "values": ["routine", "priority", "urgent"]},
+        {"name": "review_condition_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "expiry_time", "value_type": "nullable_time_interval", "carrier": "expiry_time", "values": []}
+      ],
+      "message_route_id": "route.0616.operations_to_technical.verification_request",
+      "forbidden_self_results": [
+        "access_result",
+        "execution_result",
+        "verification_result",
+        "timing_result"
+      ]
+    },
+    {
+      "action_key": "operations.escalate_operational_concern",
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "reader_intent_id": "escalate_operational_concern",
+      "action_type": "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+      "action_schema_version": "h2epr.intent.0616.ihis_operational_and_scm_management.escalate_operational_concern.v0_1",
+      "commitment_ids": [
+        "h2epr.commitment.0616.ihis_operational_and_scm_management.situation_b"
+      ],
+      "observation_ids": [
+        "delivered_role_local_account",
+        "verification_result_notice",
+        "management_route_context",
+        "intent_lifecycle_notice"
+      ],
+      "authority_ref_ids": [
+        "opening.0616.assignment.operations.application-scm-coordination"
+      ],
+      "target_actor_ids": [
+        "actor.0616.office.singhealth-gcio"
+      ],
+      "lifecycle_family": "information_product",
+      "adjudication_family": "named_route_delivery",
+      "object_id_parameter": "account_id",
+      "object_version_parameter": "account_version",
+      "parameters": [
+        {"name": "account_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "account_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "sender_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "recipient_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "capacity_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "route_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "event_time_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_finding_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "source_finding_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "verification_request_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "verification_request_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "verification_result_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "verification_result_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "verification_status", "value_type": "enum", "carrier": "parameters", "values": ["verified", "disputed", "partial", "failed"]},
+        {"name": "source_refs", "value_type": "stable_id_array", "carrier": "parameters", "values": []},
+        {"name": "source_delivery_refs", "value_type": "stable_id_array", "carrier": "parameters", "values": []},
+        {"name": "known_fact_refs", "value_type": "stable_id_array", "carrier": "parameters", "values": []},
+        {"name": "uncertainty", "value_type": "enum", "carrier": "parameters", "values": ["bounded", "disputed", "unknown"]},
+        {"name": "action_ref_ids", "value_type": "stable_id_array", "carrier": "parameters", "values": []},
+        {"name": "open_question_refs", "value_type": "stable_id_array", "carrier": "parameters", "values": []},
+        {"name": "requested_decision", "value_type": "enum", "carrier": "parameters", "values": ["clarification", "management_review", "senior_attention"]},
+        {"name": "expiry_time", "value_type": "nullable_time_interval", "carrier": "expiry_time", "values": []}
+      ],
+      "message_route_id": "route.0616.operations_to_gcio.escalation",
+      "forbidden_self_results": [
+        "delivery_result",
+        "acknowledgement_result",
+        "recipient_interpretation_result",
+        "direction_result",
+        "classification_result",
+        "further_routing_result"
+      ]
+    },
+    {
+      "action_key": "gcio.request_operational_clarification",
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "reader_intent_id": "request_operational_clarification",
+      "action_type": "h2epr.action.0616.singhealth_group_chief_information_officer.request_operational_clarification",
+      "action_schema_version": "h2epr.intent.0616.singhealth_group_chief_information_officer.request_operational_clarification.v0_1",
+      "commitment_ids": [
+        "h2epr.commitment.0616.singhealth_group_chief_information_officer.DC-GCIO-1"
+      ],
+      "observation_ids": [
+        "delivered_operational_account",
+        "intent_lifecycle_notice"
+      ],
+      "authority_ref_ids": [
+        "opening.0616.authority.singhealth-gcio"
+      ],
+      "target_actor_ids": [
+        "actor.0616.unit.operations.application-scm-coordination"
+      ],
+      "lifecycle_family": "investigation_or_verification_request",
+      "adjudication_family": "named_route_delivery",
+      "object_id_parameter": "clarification_id",
+      "object_version_parameter": "clarification_version",
+      "parameters": [
+        {"name": "clarification_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "clarification_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "sender_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "recipient_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "capacity_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "route_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "cited_account_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "cited_account_version", "value_type": "integer", "carrier": "parameters", "values": []},
+        {"name": "cited_message_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "cited_delivery_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "question_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "scope_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "urgency", "value_type": "enum", "carrier": "parameters", "values": ["routine", "priority", "urgent"]},
+        {"name": "reply_route_id", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "review_condition_ref", "value_type": "stable_id", "carrier": "parameters", "values": []},
+        {"name": "expiry_time", "value_type": "nullable_time_interval", "carrier": "expiry_time", "values": []}
+      ],
+      "message_route_id": "route.0616.gcio_to_operations.clarification",
+      "forbidden_self_results": [
+        "delivery_result",
+        "access_result",
+        "reply_result",
+        "reply_content",
+        "delay_result",
+        "failure_result"
+      ]
+    }
+  ],
+  "decision_bindings": [
+    {
+      "decision_policy_id": "h2epr.decision.0616.technical.cross_system_finding.v0_1",
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "action_keys": [
+        "technical.share_technical_finding"
+      ],
+      "status": "positive_branch_only"
+    },
+    {
+      "decision_policy_id": "h2epr.decision.0616.operations.verify_then_escalate.v0_1",
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "action_keys": [
+        "operations.request_fact_verification",
+        "operations.escalate_operational_concern"
+      ],
+      "status": "positive_branch_only"
+    },
+    {
+      "decision_policy_id": "h2epr.decision.0616.gcio.clarification.v0_1",
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "action_keys": [
+        "gcio.request_operational_clarification"
+      ],
+      "status": "positive_branch_only"
+    }
+  ]
+}

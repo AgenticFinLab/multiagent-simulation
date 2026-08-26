@@ -49,21 +49,23 @@ or establish historical or scientific validity.
 
 ## Second event construction
 
-The SingHealth Data Breach collection has reached the corresponding static
-configuration-admission boundary: seven Agent Definitions, two Population Models, a fixed
+The SingHealth Data Breach collection has progressed beyond static admission
+to one bounded carrier binding: seven Agent Definitions, two Population Models, a fixed
 [Roster Definition release](releases/singhealth_data_breach/roster-definition-v0.1/),
 an accepted
 [consolidated mapping](agents/bindings/singhealth_data_breach/consolidated/),
 and an accepted
 [Event Scenario Definition](scenarios/singhealth_data_breach/definition-v0.1/),
 followed by an accepted non-executable
-[Scenario Configuration](configs/singhealth_data_breach/scenario-configuration-v0.1/)
-and its [bounded static admission](configs/singhealth_data_breach/configuration-admission-v0.1/).
-These assets close the complete participant interface and one declared-purpose
-semantic assembly while remaining qualitative and non-executable. The next
-bounded stage may project and bind only its named three-participant lineage;
-full-roster runtime, simulation, calibration, and evaluation remain outside
-the current baseline.
+[Scenario Configuration](configs/singhealth_data_breach/scenario-configuration-v0.1/),
+its [bounded static admission](configs/singhealth_data_breach/configuration-admission-v0.1/),
+and an exact
+[SCM technical--operations--GCIO binding](agents/bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/).
+These assets close the complete participant interface, one declared-purpose
+semantic assembly, and the Contracts V1 projection for four selected intents.
+The complete configuration remains non-executable. The next bounded stage is
+deterministic lineage trace and replay conformance; full-roster runtime,
+simulation, calibration, and evaluation remain outside the current baseline.
 
 ## Package layout
 
