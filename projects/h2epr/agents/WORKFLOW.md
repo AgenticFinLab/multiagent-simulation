@@ -22,7 +22,7 @@ scope-change policy remain binding on every batch.
 | Mode | Use | Normal endpoint |
 |---|---|---|
 | reference pilot | test a new representation, participant-product method, carrier boundary, or interaction pattern with a small number of roles | accepted products plus an explicitly authorized mapping and conformance slice |
-| Roster batch production | complete the accepted event roster efficiently and consistently | accepted role or population products plus a lightweight interface preflight |
+| Roster batch production | complete the accepted event roster efficiently and consistently | accepted role or population products, a lightweight semantic interface review, and shared publication-facing interface coverage |
 
 Choose the mode in the batch brief. Do not run the reference-pilot engineering
 tail for every production role.
@@ -34,8 +34,9 @@ event question and horizon
   -> event semantic skeleton
   -> reference pilot, when the method needs testing
   -> Roster production batches
-       evidence -> behavior -> representation product -> review -> promotion
-       -> lightweight interface preflight
+       evidence -> behavior -> representation product -> review
+       -> lightweight semantic interface review
+       -> promotion with shared publication-facing account
   -> Roster Definition release
   -> consolidated mapping and Event Scenario Definition convergence
   -> accepted non-executable Scenario Configuration
@@ -76,7 +77,7 @@ participant-time, causal-ownership, or claim standards.
 | Profile | Use | Normal product |
 |---|---|---|
 | `disposition-only` | scenario, exogenous, excluded, or deferred rows that do not require a participant model | accepted roster disposition and owner |
-| `standard` | a causally necessary Agent or population whose representation and evidence boundary are established | one accepted participant product, concise review, and interface preflight |
+| `standard` | a causally necessary Agent or population whose representation and evidence boundary are established | one accepted participant product, concise review, and coverage in a shared publication-facing interface account |
 | `deep` | a new or disputed representation, a central causal choice, high evidence or claim risk, or a proposed reusable abstraction | fuller separate research and review records as the risk requires |
 
 A standard profile still closes the evidence and behavior questions needed for
@@ -100,7 +101,7 @@ Before Roster production, define a short event-level skeleton that names:
 - the main interaction routes and causal lineage requirements;
 - what Agents, populations, scenario, contracts, mapping, and reducer each own;
 - known structural variants and exogenous inputs; and
-- the interface-preflight questions every batch must answer.
+- the semantic interface questions every batch must answer.
 
 The skeleton aligns vocabulary and ownership. It is not a scenario
 implementation, wire schema, parameter registry, or event script. A role batch
@@ -156,7 +157,7 @@ situations, but never participant policy, private state, or authority.
 | Route | Methods | Required result |
 |---|---|---|
 | Agent | [historical evidence](../skills/historical-evidence-research/SKILL.md), [participant behavior](../skills/participant-behavior-research/SKILL.md), [Agent Definition](../skills/agent-definition/SKILL.md), and [Definition review](../skills/agent-definition-review/SKILL.md) | one canonical, publication-facing, event-bound Agent Definition and a profile-proportionate verdict |
-| population or cohort | historical evidence, participant behavior, the [Population model template](../populations/population-model-template.md), and profile-proportionate review | one heterogeneous population model and interface without a collective personality |
+| population or cohort | historical evidence, participant behavior, the [Population model template](../populations/population-model-template.md), and profile-proportionate review | one heterogeneous population model with interface coverage and no collective personality |
 | disposition-only | roster adjudication | an explicit scenario, exogenous, excluded, or deferred owner; no participant product |
 
 The stages name semantic responsibilities, not a required file sequence. A
@@ -194,11 +195,12 @@ Before promotion:
 2. pass the applicable ten-module publication-profile check for every new or
    changed Agent Definition or population model;
 3. check cross-section, cross-role, roster, and skeleton consistency;
-4. complete the batch interface preflight;
+4. complete the batch semantic interface review;
 5. record the review verdict and any triggered owner decision under the
    declared promotion authority; and
-6. promote the participant product, adopted claims, sources, interface note,
-   and concise guide updates as one coherent change.
+6. promote the participant product, adopted claims, sources, corresponding
+   publication-facing interface coverage, and concise guide updates as one
+   coherent change.
 
 The tracked tree contains the current accepted research artifacts. Drafts,
 search notes, rejected alternatives, raw sources, and detailed review history
@@ -208,9 +210,10 @@ history.
 Promotion adds an accepted research product. It does not silently add an
 executable participant, update a binding hash, or authorize implementation.
 
-## Lightweight preflight for production batches
+## Lightweight interface review for production batches
 
-Roster batches stop after a semantic interface check. `INTERFACE.md` records:
+Roster batches stop after a semantic interface check. The working
+`INTERFACE.md` records:
 
 - representation and causal choices;
 - observations, private state, intents, counterparties, and routes;
@@ -219,22 +222,38 @@ Roster batches stop after a semantic interface check. `INTERFACE.md` records:
 - whether each material interface is a known fit, expects an internal mapping
   extension, or presents a concrete carrier counterexample.
 
-The preflight does not choose machine fields, build registries, bind hashes,
+The review does not choose machine fields, build registries, bind hashes,
 implement policy, or run replay tests. A suspected carrier issue is recorded
 for consolidated review; only a concrete, irreducible counterexample pauses
 production for an owner decision.
+
+The publication-facing interface account retains the domain meaning needed by
+an external reader: information routes, separate participant state, authority,
+resource and result ownership, lifecycle distinctions, and informative
+perturbations. Internal classifications such as mapping readiness, carrier
+fit, candidate status, and implementation authorization remain in the batch
+review or release record. A release may pin that exact review for provenance;
+the current directory guide should identify it as a release-time record rather
+than presenting it as participant behavior.
+
+These are two responsibilities, not two mandatory files. A coherent batch may
+extend one shared event-level account, and no separate public interface file is
+required for every participant.
 
 ## Create the Roster Definition release
 
 The release closes the semantic production phase. It requires:
 
 - a reviewed disposition for every roster row;
-- an accepted Definition for every admitted Agent;
-- an accepted interface for every retained population/cohort;
+- an accepted Definition for every admitted Agent and an accepted Population
+  Model for every admitted population;
+- publication-facing semantic interface coverage for every admitted
+  participant, normally through a shared batch- or event-level account;
 - explicit scenario ownership for externalized processes;
 - resolved blocking conflicts across Definitions and the skeleton; and
-- a manifest pinning roster, skeleton, Definition, evidence, and preflight
-  identities.
+- a manifest pinning the roster, skeleton, Definitions, Population Models,
+  evidence, released publication-facing interface accounts, and any exact
+  release-time interface reviews used for provenance.
 
 The release is a coherent semantic input, not an executable bundle and not a
 scientific-validity claim.
@@ -279,7 +298,7 @@ Use the following test ladder:
 
 | Level | Question |
 |---|---|
-| release integrity | Do roster, evidence, Definitions, population interfaces, skeleton, IDs, links, and inventories close? |
+| release integrity | Do roster, evidence, Definitions, Population Models, semantic interface coverage, skeleton, IDs, links, and inventories close? |
 | mapping and carrier | Can every material semantic element be carried without loss or hidden defaults? |
 | role conformance | Do information, authority, lifecycle, mechanism, and adverse-result changes affect behavior as declared? |
 | cross-role interaction | Do sender, receiver, route, authorization, disposition, result, and causal lineage close? |
@@ -307,10 +326,11 @@ shared change against accepted Definitions before using it in the next batch.
 ## Completion criteria
 
 A participant is complete for semantic production when its evidence question
-is closed for the stated use, its accepted product and interface preflight
-close, and it has a review appropriate to the selected profile. Promotion uses
-the authority declared in the batch brief; a separate owner decision is needed
-only when a material scope, representation, or claim boundary changes.
+is closed for the stated use, its accepted product and semantic interface
+coverage close, the working interface review has no blocking issue, and it has
+a review appropriate to the selected profile. Promotion uses the authority
+declared in the batch brief; a separate owner decision is needed only when a
+material scope, representation, or claim boundary changes.
 
 A production batch is complete when every admitted row reaches its declared
 endpoint and the close record names any roster, skeleton, evidence, or
@@ -327,26 +347,19 @@ The Roster Definition release is complete when all roster dispositions and
 semantic products meet the release gate. Consolidated conformance is complete
 only after the released system is mapped and the agreed test ladder passes.
 
-## Current H2EPR-0288 application
+## Current cross-event application
 
-Knickerbocker Trust and NYCH form the completed reference pilot. The accepted
-[Roster v0.4](rosters/panic_1907.md), event
-[semantic skeleton](../scenarios/panic_1907/semantic-skeleton.md), seven Agent
-Definitions and five population models form
-[Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).
-The accepted
-[consolidated mapping](bindings/panic_1907/consolidated/) provides the
-full-Roster identity, observation, state, intent, lifecycle, authority,
-resource and V1 carrier design. Its bounded
-[mapping-loader/conformance profile](bindings/panic_1907/roster-v0.1/)
-checks the release-wide carrier and assembly risks without selecting policy or
-running a scenario; no individual production role triggers a standalone
-mapping or implementation cycle. The accepted
-[Event Scenario Definition v0.1](../scenarios/panic_1907/definition-v0.1/) and
-[Scenario Configuration v0.1](../configs/panic_1907/scenario-configuration-v0.1/)
-close the event-world and first mechanism-coverage configuration stages.
-Configuration admission, the KT--NBC--NYCH bounded binding, and its
-[lineage conformance closeout](../scenarios/panic_1907/lineage-conformance-v0.1/)
-are also complete. The configuration remains non-executable; the next normal
-method task is a second-event forward test, not another participant-production
-batch or deeper first-event runtime.
+The Panic of 1907 roster combines seven Agent Definitions and five Population
+Models. It established the reference pilot and the first complete bounded
+handoff through roster release, Scenario and mapping, non-executable
+configuration, static admission, the KT--NBC--NYCH binding, and deterministic
+[lineage conformance](../scenarios/panic_1907/lineage-conformance-v0.1/).
+
+The SingHealth Data Breach roster combines seven Agent Definitions and two
+Population Models. It applies the same stage responsibilities through the
+technical--operations--GCIO
+[lineage conformance](../scenarios/singhealth_data_breach/lineage-conformance-v0.1/)
+while retaining healthcare-specific information, authority, and result
+boundaries. Both complete configurations remain non-executable. Further work
+requires a new event question or a separately justified method question rather
+than deeper participant production by default.

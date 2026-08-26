@@ -27,6 +27,8 @@ collective organizational Agents:
 
 The shared [participant-evidence record](../../../events/singhealth_data_breach/participant-evidence-v0.1.md)
 contains the adopted participant claims. The
+[participant interface guide](../../interfaces/singhealth_data_breach/)
+organizes the two cross-role accounts. Its
 [detection-and-escalation](../../interfaces/singhealth_data_breach/r1-detection-and-escalation.md)
 and
 [classification-and-institutional-escalation](../../interfaces/singhealth_data_breach/r2-classification-and-institutional-escalation.md)

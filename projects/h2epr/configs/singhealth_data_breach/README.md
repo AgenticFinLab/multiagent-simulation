@@ -14,7 +14,10 @@ It is not a historical baseline, runtime bundle, simulation, calibration, or
 validity result.
 
 The bounded loader admits the exact release without changing its semantics or
-execution eligibility. The next legal stage is a separately authorized carrier
-projection and minimal binding for the named SCM technical--operations--GCIO
-lineage. This directory supplies no ParticipantArtifact, policy implementation,
-runtime, trace, simulation, calibration, or evaluation.
+execution eligibility. A separate
+[SCM technical--operations--GCIO binding](../../agents/bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/)
+now projects only the selected lineage, and its
+[lineage-conformance package](../../scenarios/singhealth_data_breach/lineage-conformance-v0.1/)
+checks deterministic trace, seals, and replay. Neither package makes the full
+configuration executable or supplies a full-roster runtime, simulation,
+calibration, evaluation, or validity result.

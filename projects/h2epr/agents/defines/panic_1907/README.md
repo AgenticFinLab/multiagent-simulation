@@ -43,10 +43,8 @@ Definitions.
 | [source register v0.1](../../../events/panic_1907/source-register-v0.1.md) | adopted public sources, stable source identities, public locators, byte hashes, adopted passages, and limitations |
 | [participant evidence v0.1](../../../events/panic_1907/participant-evidence-v0.1.md) | claim-level classification, participant or population availability, allowed use, model consequence, and withdrawal consequence |
 | [decision situations v0.1](../../../events/panic_1907/decision-situations-v0.1.md) | shared situations and perturbations used to compare Knickerbocker and NYCH |
-| [NBC interface preflight](../../interfaces/panic_1907/national-bank-of-commerce.md) | accepted compound-observation, route-hop and lifecycle impact for NBC |
-| [R2 interface preflight](../../interfaces/panic_1907/r2-private-and-named-trusts.md) | accepted semantic fit and deferred-mapping note for Morgan, TCA, and Lincoln |
-| [R3 interface preflight](../../interfaces/panic_1907/r3-collective-trust-support.md) | accepted semantic fit and deferred-mapping note for the committee and bank resource-decision population |
-| [R4 interface preflight](../../../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md) | accepted host-contagion, call-lender, broker-borrower and NYSE scenario boundary |
+| [participant interface guide](../../interfaces/panic_1907/) | current scholarly account of information routes, separate state, authority, lifecycles, results, and informative perturbations across all twelve products |
+| [roster-production interface reviews](../../interfaces/panic_1907/national-bank-of-commerce.md) | frozen release-time records for NBC, [R2](../../interfaces/panic_1907/r2-private-and-named-trusts.md), [R3](../../interfaces/panic_1907/r3-collective-trust-support.md), and [R4](../../../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md) integration questions |
 | [Roster Definition release v0.1](../../../releases/panic_1907/roster-definition-v0.1/) | exact semantic input inventory for consolidated mapping |
 | [binding specification](../../bindings/panic_1907/) | accepted mapping of the Knickerbocker and NYCH Definitions into Contracts V1, business lifecycles, intent registry, and cross-object checks |
 | [consolidated mapping](../../bindings/panic_1907/consolidated/) | accepted release-wide identity, observation, intent, lifecycle, authority, resource, result, and carrier design |

@@ -33,7 +33,7 @@ holds reviewed semantic assets rather than a second Python package.
 The Panic of 1907 assets exercise the complete event-modeling handoff at a
 bounded scale:
 
-- seven institutional Agent Definitions and five population models;
+- seven Agent Definitions and five population models;
 - a fixed roster release and consolidated mapping;
 - an [Event Scenario Definition](scenarios/panic_1907/definition-v0.1/);
 - a non-executable [Scenario Configuration](configs/panic_1907/scenario-configuration-v0.1/)

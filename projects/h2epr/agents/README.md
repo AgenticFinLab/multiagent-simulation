@@ -51,7 +51,8 @@ full-configuration boundary.
 | event source register | adopted source identity, locator, byte hash, cited passages and source limitations | claim adjudication or behavior rules |
 | event participant-evidence record | claim classification, participant availability, exposure, allowed use and withdrawal consequence | behavior rules or runtime values |
 | event decision-situation record | shared research situations and perturbations when a separate record is useful | participant policy or executable scenario state |
-| interface preflight | semantic inventory, route and lifecycle dependencies, skeleton compatibility, and preliminary carrier classification | wire mapping, registries, implementation, or conformance claims |
+| publication-facing interface account | information routes, separate participant state, authority, lifecycles, result ownership, and informative perturbations | wire mapping, carrier readiness, implementation, or conformance claims |
+| release-time interface review | exact batch integration questions, skeleton compatibility, and preliminary carrier classification at the reviewed boundary | participant behavior or the current project position |
 | accepted binding specification | reviewed mapping of a released Definition set, observations, commitments and intents | independent behavior semantics |
 | executable mapping and carrier checks | exact-hash loading, parameter/lifecycle validation and Contracts V1 projection | new historical claims or result adjudication |
 | machine contracts | encoding, type, shape, serialization and versioning | historical or behavioral claims |
@@ -92,10 +93,10 @@ agents/
 │       └── <agent-definition>.md
 ├── interfaces/
 │   ├── panic_1907/
-│   │   ├── national-bank-of-commerce.md
-│   │   ├── r2-private-and-named-trusts.md
-│   │   └── r3-collective-trust-support.md
+│   │   ├── README.md
+│   │   └── <release-time-interface-review>.md
 │   └── singhealth_data_breach/
+│       ├── README.md
 │       ├── r1-detection-and-escalation.md
 │       └── r2-classification-and-institutional-escalation.md
 └── rosters/
@@ -136,12 +137,11 @@ agents/
   adopted sources, claim adjudication, exposure, and bounded unresolved gaps.
 - [`../events/panic_1907/decision-situations-v0.1.md`](../events/panic_1907/decision-situations-v0.1.md):
   shared role-comparison situations and falsification perturbations.
-- [`interfaces/panic_1907/r2-private-and-named-trusts.md`](interfaces/panic_1907/r2-private-and-named-trusts.md):
-  accepted semantic preflight for the Morgan, TCA, and Lincoln R2 batch; no executable mapping is implied.
-- [`interfaces/panic_1907/national-bank-of-commerce.md`](interfaces/panic_1907/national-bank-of-commerce.md):
-  accepted NBC compound-observation, route-hop and lifecycle preflight for consolidated mapping.
-- [`interfaces/panic_1907/r3-collective-trust-support.md`](interfaces/panic_1907/r3-collective-trust-support.md):
-  accepted semantic preflight for the committee and member/correspondent-bank resource-decision population.
+- [`interfaces/panic_1907/README.md`](interfaces/panic_1907/README.md): the
+  publication-facing account of the focal clearing route, private and
+  collective support, depositor service, and call-money interfaces. The three
+  adjacent Agent preflights and two population preflights remain exact
+  release-time inputs rather than current carrier guidance.
 - [`defines/panic_1907/knickerbocker-trust.md`](defines/panic_1907/knickerbocker-trust.md) and
   [`defines/panic_1907/new-york-clearing-house.md`](defines/panic_1907/new-york-clearing-house.md):
   the Definitions used by both the retained two-role reference and the bounded
@@ -159,12 +159,10 @@ agents/
   an aggregate procedural committee Definition, with advice, contributor commitment and
   resource ownership kept separate.
 - [`defines/singhealth_data_breach/`](defines/singhealth_data_breach/): seven
-  office-level Definitions in the accepted H2EPR-0616 semantic roster. Their
-  shared
-  [R1](interfaces/singhealth_data_breach/r1-detection-and-escalation.md) and
-  [R2](interfaces/singhealth_data_breach/r2-classification-and-institutional-escalation.md)
-  accounts describe the semantic routes among them and the two population
-  models.
+  office-level Definitions in the accepted H2EPR-0616 semantic roster. The
+  [participant interface guide](interfaces/singhealth_data_breach/) organizes
+  the R1 detection-and-escalation and R2 classification-and-institutional-
+  escalation accounts shared with the two population models.
 - [`../releases/singhealth_data_breach/roster-definition-v0.1/`](../releases/singhealth_data_breach/roster-definition-v0.1/):
   hash-pinned, non-executable inventory of the complete H2EPR-0616 semantic
   roster and its non-participant dispositions.
@@ -184,7 +182,9 @@ agents/
   [`../populations/defines/panic_1907/call-money-broker-borrowers.md`](../populations/defines/panic_1907/call-money-broker-borrowers.md):
   the host-contagion and call-money population models.
 - [`../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md`](../populations/interfaces/panic_1907/r4-trust-contagion-and-call-money.md):
-  accepted R4 semantic preflight, including the scenario-owned NYSE boundary.
+  frozen R4 release-time review, including the Scenario-owned NYSE boundary;
+  its scholarly interface is summarized in the
+  [Panic participant guide](interfaces/panic_1907/).
 - [`../releases/panic_1907/roster-definition-v0.1/`](../releases/panic_1907/roster-definition-v0.1/):
   hash-pinned semantic release and sole consolidated-mapping input inventory.
 - [`bindings/panic_1907/consolidated/`](bindings/panic_1907/consolidated/):

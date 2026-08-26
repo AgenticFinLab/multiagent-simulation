@@ -25,7 +25,7 @@ Accepted representation route
         ├── Population model + proportionate review
         └── Scenario, exogenous, excluded, or deferred disposition
         ↓
-Lightweight event-interface preflight
+Lightweight semantic interface review and shared publication-facing account
         ↓
 Roster Definition release
         ├── Event Scenario Definition + interface closure
@@ -45,8 +45,10 @@ Conformance closeout
 
 Evidence and behavior research feed the representation chosen by the roster.
 Normal Roster batches produce only the participant products required by that
-route and one lightweight interface preflight. Roster Definition release v0.1
-provides the stable semantic input for mapping and scenario convergence.
+route, one lightweight working interface review, and corresponding coverage in
+a shared publication-facing account. These are two responsibilities, not two
+required files per participant. Roster Definition release v0.1 provides the
+stable semantic input for mapping and scenario convergence.
 Configuration remains a separate, normally non-executable stage; loader,
 binding, conformance, simulation, and evaluation each retain their own
 authorization boundary. A small reference pilot may reach mapping earlier only

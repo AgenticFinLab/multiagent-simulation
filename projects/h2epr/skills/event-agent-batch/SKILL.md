@@ -1,6 +1,6 @@
 ---
 name: h2epr-event-agent-batch
-description: Coordinate a risk-proportionate H2EPR participant batch in reference-pilot or Roster-production mode. Use when event rows need shared scope, evidence and behavior routing, coherent promotion, and either an authorized conformance pilot or a lightweight interface preflight.
+description: Coordinate a risk-proportionate H2EPR participant batch in reference-pilot or Roster-production mode. Use when event rows need shared scope, evidence and behavior routing, coherent promotion, and either an authorized conformance pilot or a lightweight semantic interface review with publication-facing coverage.
 ---
 
 # Event participant batch
@@ -20,8 +20,9 @@ Record one mode in `BATCH.md`:
   carrier boundary, or interaction pattern needs end-to-end testing. Mapping
   and conformance require explicit authorization.
 - **Roster production:** use for normal event-roster completion. It ends at
-  accepted research products and a lightweight interface preflight. Do not map
-  or implement each batch.
+  accepted research products, a lightweight semantic interface review, and
+  publication-facing coverage in a shared account. Do not map or implement
+  each batch.
 
 When the request does not explicitly authorize the reference-pilot engineering
 tail, use Roster-production mode.
@@ -100,9 +101,9 @@ Check that:
 - no role relies on another role's hidden state or a later outcome; and
 - shared Template or Skill changes answer a demonstrated reusable gap.
 
-### 4. Complete `INTERFACE.md`
+### 4. Complete the semantic interface review
 
-Record only what later integration needs to know:
+The working `INTERFACE.md` records only what later integration needs to know:
 
 - representation and causal choices;
 - observations and participant-time limits;
@@ -116,19 +117,27 @@ Record only what later integration needs to know:
 In Roster-production mode, stop here. Do not select wire fields, build a
 registry, update binding hashes, implement policy, or run replay tests.
 
+This is a working or release-time integration review, not the scholarly
+interface account. It may retain exact carrier classifications when a release
+needs to pin them.
+
 ### 5. Promote accepted products
 
 Promote the accepted Definition or population product with adopted claim and
-source updates, `INTERFACE.md`, and concise guide changes. Record the review
-verdict under the batch's declared promotion authority; seek a separate owner
-decision only for a material scope, representation, or claim change. Keep
-candidates, search history, raw sources, and detailed reviews in ignored local
-areas.
+source updates and corresponding coverage in a publication-facing interface
+account. Normally extend one shared batch- or event-level account rather than
+creating a public file for each participant. If a release deliberately pins
+the working `INTERFACE.md`, retain it unchanged as a release-time review and
+identify that role from the current guide. Record the review verdict under the
+batch's declared promotion authority; seek a separate owner decision only for
+a material scope, representation, or claim change. Keep candidates, search
+history, raw sources, and detailed reviews in ignored local areas.
 
 Before promotion, apply the repository
 [publication standard](../../PUBLICATION_STANDARD.md). Do not copy batch status,
 production profile, owner decisions, semantic versions, Git identities, local
-paths, or mapping-readiness labels into the public participant product.
+paths, or mapping-readiness labels into the public participant product or
+scholarly interface account.
 
 Promotion does not add the role to an executable participant set.
 
@@ -159,7 +168,9 @@ Roster-production mode produces:
 2. reviewed research and an accepted product for each admitted participant;
 3. adopted event source and claim updates;
 4. profile-proportionate review verdicts;
-5. one lightweight `INTERFACE.md`;
+5. one lightweight semantic interface review plus corresponding coverage in a
+   shared publication-facing account, without requiring a separate public file
+   per participant;
 6. coherent promotion; and
 7. one concise close record.
 
@@ -175,6 +186,6 @@ Stop and request direction when:
 - evidence needs an unapproved source boundary;
 - a role lacks a defensible decision interface or material evidence;
 - a product conflicts with the frozen skeleton or another accepted role;
-- preflight exposes a concrete carrier counterexample;
+- interface review exposes a concrete carrier counterexample;
 - mapping would invent behavior or historical knowledge; or
 - implementation, simulation, or contract work is not separately authorized.

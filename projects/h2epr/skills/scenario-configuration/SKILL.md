@@ -5,9 +5,9 @@ description: Design, revise, review, or promote a versioned H2EPR Scenario Confi
 
 # Scenario Configuration
 
-> Method status: working candidate extracted from the accepted H2EPR-0288
-> Scenario Configuration. It has passed retrospective conformance against that
-> case and should be forward-tested when a second event reaches this stage.
+> This method has been exercised by the accepted H2EPR-0288 and H2EPR-0616
+> Scenario Configurations. Revise it only when further event use exposes a
+> reusable method gap.
 
 Use this Skill after both the Event Scenario Definition and the consolidated
 mapping have been accepted. It turns their semantic possibilities into one

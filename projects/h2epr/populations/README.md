@@ -26,9 +26,11 @@ populations/
         └── <interface-account>.md
 ```
 
-`defines/` contains the scholarly behavior model. `interfaces/` contains the
-event-integration account used during roster construction. Exact machine
-mapping, when needed, is recorded separately from these models.
+`defines/` contains the scholarly behavior model. Current event-level
+interface guides organize participant interactions for external readers. The
+files under `interfaces/` retain population-specific integration reviews used
+during roster construction, including exact release-time preflights where a
+manifest pins them. Machine mapping remains separate from both.
 
 Start a new population product from the
 [Population model template](population-model-template.md). It covers the
@@ -45,15 +47,15 @@ parameters, or cases.
 is an event-bound population of weighted choice units. It models withdrawal,
 retention, pending-request discipline, and delivered-result adaptation under
 explicitly uncalibrated heterogeneity. Its
-[interface account](interfaces/panic_1907/knickerbocker-depositors.md)
-records the later integration surface without selecting carriers or changing
-Contracts V1.
+interaction with host service and result ownership is summarized in the
+[Panic participant interface guide](../agents/interfaces/panic_1907/). The
+population-specific preflight remains an exact Roster-release input.
 
 [NYCH member and large correspondent bank resource decisions](defines/panic_1907/member-and-correspondent-bank-resource-decisions.md)
 are modeled as weight-one institution-preserving choice units. The population
 keeps authority, resource ownership, commitments and certificate demand with
 each institution instead of inventing a collective bank personality or named
-bank policies. Its [combined R3 interface account](../agents/interfaces/panic_1907/r3-collective-trust-support.md)
+bank policies. The [Panic participant interface guide](../agents/interfaces/panic_1907/)
 also covers the trust-company committee interaction boundary.
 
 [Later trust-company depositors](defines/panic_1907/later-trust-company-depositors.md)
@@ -66,9 +68,10 @@ lending institution, contract, controlled exposure and resource envelope.
 [Broker-borrowers](defines/panic_1907/call-money-broker-borrowers.md) preserve
 an authorized firm funding interface without importing customer trading or
 venue policy. Their
-[R4 interface account](interfaces/panic_1907/r4-trust-contagion-and-call-money.md)
-keeps call, offer, matching, booking, repayment, liquidation and market effect
-under distinct owners. NYSE remains scenario-owned in this release.
+[Panic participant interface guide](../agents/interfaces/panic_1907/)
+keeps call, offer, matching, booking, repayment, liquidation, and market effect
+under distinct owners. The exact R4 preflight remains a release-time record,
+and NYSE remains Scenario-owned.
 
 [IHiS technical administration and line security staff](defines/singhealth_data_breach/technical-administration-and-line-security-staff.md)
 are represented as event-time technical responsibility units across
@@ -87,7 +90,9 @@ Its aggregation never becomes a single IHiS management actor.
 Both SingHealth models belong to its
 [Roster Definition release v0.1](../releases/singhealth_data_breach/roster-definition-v0.1/),
 alongside seven office-level Agent Definitions and reviewed dispositions for
-the event's non-participant processes and cohorts.
+the event's non-participant processes and cohorts. Their cross-role routes are
+organized by the
+[SingHealth participant interface guide](../agents/interfaces/singhealth_data_breach/).
 
 The five Panic of 1907 population models belong to its
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).

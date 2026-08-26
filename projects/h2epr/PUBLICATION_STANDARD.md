@@ -20,6 +20,28 @@ that a workflow step occurred. Conversely, a manifest or integrity record
 should not be rewritten as narrative prose when exact machine identity is its
 purpose.
 
+## Frozen releases and current reading surfaces
+
+An accepted, content-addressed release records the project boundary that
+existed when it was issued. Later editorial conventions do not justify
+rewriting that object and changing its identity. Status labels, candidate
+hashes, carrier classifications, or a then-eligible next stage may therefore
+remain in a frozen release-time review when they are necessary to understand
+what was accepted at that boundary.
+
+The current event entry and directory guides own the present reading path.
+They should distinguish a scholarly account from a release-time review, link
+the latest accepted endpoint, and explain older "next stage" language as an
+as-of-release statement. A short guide may organize immutable inputs and state
+their shared boundaries, but it must not reproduce their full claim ledger or
+silently replace their authority. Create a new semantic version only when the
+research content changes; use ordinary guide and index maintenance for
+editorial clarification.
+
+One interface account may cover a coherent participant batch or a complete
+event. This standard does not require a separate public interface document for
+every Agent or population model.
+
 When a release first needs a machine identity, new participant records use
 `h2epr.agent-definition.<event_namespace>.<role-slug>` for Agent Definitions
 and `h2epr.population-model.<event_namespace>.<role-slug>` for population

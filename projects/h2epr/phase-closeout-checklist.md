@@ -6,10 +6,10 @@ in the brief, manifest, release README, review, decision, or receipt that
 already owns the result. Do not create a new closeout file when that would
 duplicate an existing authority.
 
-Apply the eight core checks to every phase. Apply a conditional check only
+Apply the core checks to every phase. Apply a conditional check only
 when the phase touched that surface. Artifact-specific reviews remain
 authoritative; this checklist confirms scope, depth, and handoff. The checks
-are review questions, not eight required reports, approvals, or sign-offs.
+are review questions, not separate required reports, approvals, or sign-offs.
 They impose no universal source, participant, test, or document count.
 
 ## 1. Compact closeout record
@@ -23,7 +23,7 @@ They impose no universal source, participant, test, or document count.
 | Mainline and depth judgment | `<why the result is sufficient without entering later work>` |
 | Next legal action | `<action and entry conditions, or explicit stop>` |
 
-## 2. Eight core checks
+## 2. Core checks
 
 - [ ] **Mainline:** the result still answers the accepted event or method
   question.
@@ -44,7 +44,9 @@ They impose no universal source, participant, test, or document count.
   content in shared layers were avoided.
 - [ ] **Publication surface:** reader-facing research artifacts satisfy the
   [publication standard](PUBLICATION_STANDARD.md); project-only identity and
-  integrity metadata remain in the records that own them.
+  integrity metadata remain in the records that own them; current event and
+  directory guides point to the accepted endpoint rather than preserving a
+  completed phase transcript.
 - [ ] **Handoff:** limitations and owner decisions are visible, and completion
   does not automatically authorize the next phase; note a reusable method
   finding only when one actually emerged.
@@ -85,13 +87,14 @@ Apply only the rows touched by the phase.
 | Triggered surface | Additional closeout question |
 |---|---|
 | New or changed evidence | Are adopted claims, conflicts, source custody, event time, participant availability, use, and exposure recorded? |
-| Participant or population product | Did evidence, behavior, Definition/interface review, and roster/skeleton consistency close without implementation material? |
+| Participant or population product | Did evidence, behavior, the participant product, publication-facing interface coverage, the proportionate working interface review, and roster/skeleton consistency close without implementation material? |
 | Semantic release | Does every roster row have a disposition, and do the manifest and integrity records pin the accepted products? |
 | Scenario or mapping | Does scenario own event-world meaning while mapping preserves released meaning without adding behavior or requesting a successor for convenience? |
 | Scenario Configuration | Are purpose, assembly, selections, sensitivities, completion, and the non-executable boundary explicit and reviewed? |
 | Admission or binding code | Do exact identities, fail-closed errors, the selected lineage, required policies, focused negatives, and affected regressions pass? |
 | Trace or conformance | Are per-object and cross-lineage checks, deterministic trace/seals, replay, expected evidence, and depth review complete? |
 | Evaluation or external claim | Is there a separate authorized protocol with the required evidence isolation and claim review? |
+| Completed event baseline | Is the event entry concise and current, while hash-pinned phase records remain clearly readable as release-time boundaries? |
 
 Verification is proportional. Run focused checks first. Full regression,
 release checksums, or CI are required at the release or engineering boundary
@@ -103,7 +106,7 @@ change.
 | Phase | Minimum result | Do not infer |
 |---|---|---|
 | Frame the event | Accepted question, boundary, evidence permission, causal ownership, dispositions, and shared semantics. | Participant production or code authorization. |
-| Define participants | Reviewed Agent Definitions or population products and interface preflight. | Release membership, mapping, or implementation. |
+| Define participants | Reviewed Agent Definitions or Population Models, a lightweight semantic interface review, and shared publication-facing interface coverage. | Release membership, mapping, or implementation. |
 | Release the semantic roster | Pinned accepted products and resolved dispositions. | Executability or validity. |
 | Close scenario and mapping | Separate accepted event-world semantics and lossless carrier mapping. | Participant behavior from scenario or scenario meaning from mapping. |
 | Configure a purpose | Reviewed declared-purpose configuration. | Executability, calibration, or outcome fit. |

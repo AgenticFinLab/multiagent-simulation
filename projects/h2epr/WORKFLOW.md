@@ -24,7 +24,7 @@ authority, and stopping boundaries.
 | Phase | Required result | Stopping boundary |
 |---|---|---|
 | Frame the event | Accepted [Event Build Brief](event-build-brief-template.md) covering the research question, interval, evidence boundary, causal role map, roster, and semantic skeleton | Does not authorize participant production or code |
-| Define participants | Reviewed Agent Definitions and population models with evidence and interface reviews | Does not determine release membership or implementation |
+| Define participants | Reviewed Agent Definitions and Population Models with evidence, a lightweight semantic interface review, and shared publication-facing interface coverage | Does not determine release membership or implementation |
 | Release the semantic roster | Hash-pinned inventory of the accepted participant products | Remains non-executable and makes no validity claim |
 | Close scenario and mapping | Event Scenario Definition, interface closure, and consolidated carrier mapping | Mapping cannot add scenario meaning; scenario cannot supply participant behavior |
 | Configure a purpose | Versioned actor/unit assembly, opening records, selections, sensitivities, and completion criteria | Configuration remains non-executable |
@@ -124,16 +124,18 @@ receipt. Runtime credentials, distributed resources, output locations,
 timeouts, and post-run quality intake belong to a later experiment preflight
 and are required only when a run is authorized.
 
-## Panic of 1907 baseline
+## Completed cross-event baseline
 
-The first event has completed all phases through bounded conformance. Its
-accepted products include the roster release, consolidated mapping, Event
-Scenario Definition, non-executable Scenario Configuration, static admission,
-and the three-role KT--NBC--NYCH binding with deterministic trace/replay
-evidence.
+The Panic of 1907 and SingHealth Data Breach events have each completed all
+phases through one bounded lineage-conformance case. Both include an accepted
+roster release, consolidated mapping, Event Scenario Definition,
+non-executable Scenario Configuration, static admission, minimal
+three-participant binding, and deterministic trace and replay evidence.
 
-This closes the method baseline without implementing the full 16-actor
-runtime, all configured policies, a full-event simulation, calibration,
-held-out evaluation, or a historical-validity claim. The preferred next test
-is to apply the workflow to another event. Deeper work on the first event
-requires a new research question and explicit scope.
+Together they exercise the same stage responsibilities across a financial
+crisis and a healthcare cybersecurity event while retaining event-specific
+participants, semantics, policies, identifiers, and causal checks. Neither
+baseline includes a full-roster runtime, full-event simulation, calibration,
+held-out evaluation, or historical-validity claim. Further work requires a new
+event question or a separately justified method question; deeper work on either
+completed event is not the default continuation.

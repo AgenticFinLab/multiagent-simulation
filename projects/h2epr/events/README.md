@@ -54,8 +54,8 @@ per role, or repeat the same record under several phase names.
 
 | Event | Coordination entry | Current position |
 |---|---|---|
-| `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline; retrospective frame evidence accepted. |
-| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Semantic Roster, consolidated mapping, and Event Scenario Definition accepted; stopped before configuration. |
+| `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline through one bounded lineage-conformance case; retrospective frame evidence accepted. |
+| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Retained second-event baseline through one bounded lineage-conformance case. |
 
 ## README convention
 
@@ -68,7 +68,8 @@ Event entries use the same core order:
    dispositions`, and `Shared semantics and ownership`.
 3. `Responsibility-owned assets` links accepted or candidate records without
    copying their contents.
-4. `Current work package` states what is active and where it stops.
+4. `Current work package` states what is active and where it stops; a completed
+   baseline uses `Current position` instead.
 5. `Open decisions` appears only while a material owner decision remains.
 6. `Phase status` gives the concise readiness or closeout disposition.
 
@@ -103,6 +104,11 @@ and next legal action. Preserve accepted research content and do not reconstruct
 working notes; repository maintenance may normalize an authority's canonical
 path while updating every pinned reference and checksum as one coherent
 change. Deeper research begins only under a new question and authorization.
+
+The event entry owns the current position. A hash-pinned phase package remains
+an as-of-release record, so its description of the next eligible stage need not
+be rewritten after that stage is completed. Current guides should make this
+distinction clear and link the final accepted endpoint.
 
 ## Protected inputs
 

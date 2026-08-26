@@ -1,69 +1,63 @@
 # H2EPR-0288: Panic of 1907
 
-This retrospective coordination entry indexes the accepted first-event
-baseline. H2EPR-0288 is complete through one bounded KT--NBC--NYCH lineage
-conformance case and is not under active event construction. The retrospective
-event-frame evidence integration is accepted as a documentation authority; the
-records in their responsibility-owned directories remain authoritative.
+This coordination entry indexes the accepted first-event baseline. H2EPR-0288
+is complete through one bounded Knickerbocker Trust--National Bank of
+Commerce--New York Clearing House lineage-conformance case and is not under
+active construction. The records linked below remain authoritative for their
+respective responsibilities.
 
 ## Event profile
 
 | Field | Event record |
 |---|---|
 | Event | `H2EPR-0288`, Panic of 1907; slug `panic_1907` |
-| Coordination entry | `projects/h2epr/events/panic_1907/README.md` |
-| Brief identity and status | Retrospective coordination entry v0.1; retained first-event baseline with accepted retrospective frame evidence |
-| Method baseline | Accepted manifests, reviews, and decisions linked below; this entry follows the current [event workflow](../../WORKFLOW.md), [Event Build Brief](../../event-build-brief-template.md), and [phase closeout](../../phase-closeout-checklist.md) convention. |
-| Primary question | How institution-specific information, authority, clearing and support routes, depositor requests, distributed resource commitments, and call-money obligations interact, and which process differences arise from participant mechanisms rather than a scripted chronology. |
-| Purpose and claim boundary | Establish a bounded end-to-end H2EPR method baseline. It does not claim a full-event runtime, calibration, historical fit, held-out evaluation, prediction, or historical or scientific validity. |
-| Temporal boundary | Analytic interval from 18 October through the configuration-selected 2 November 1907 horizon; primary acute window 21–26 October. The horizon is a construction choice rather than a claimed historical endpoint. |
-| Evidence and exposure | The [retrospective event-frame evidence](frame-evidence-v0.1.md) integrates the accepted [source register](source-register-v0.1.md) and [participant-evidence record](participant-evidence-v0.1.md). Construction is `FULL_DRAFT_EXPOSED` and supports no clean-builder claim. |
-| Current authorized phase and endpoint | Baseline closed at `PASS_BOUNDED_LINEAGE_CONFORMANCE`; retrospective frame evidence is accepted as a documentation authority, and no deeper H2EPR-0288 work is authorized. |
-| Excluded work | Full 16-actor runtime, implementation of all configured policies, full-event simulation, calibration or historical fitting, held-out or clean-builder construction, post-seal evaluation, and validity claims. |
-| Decision owner and review | Accepted ADRs and release reviews own the closed boundaries. The project owner accepted the retrospective integration on 24 August 2026; deeper work still requires a new research question and owner authorization. |
+| Primary question | How do institution-specific information, authority, clearing and support routes, depositor requests, distributed resource commitments, and call-money obligations interact, and which process differences arise from participant mechanisms rather than a scripted chronology? |
+| Purpose and claim boundary | Establish a bounded end-to-end H2EPR method baseline. The event does not support claims of full-event execution, calibration, historical fit, held-out evaluation, prediction, or historical or scientific validity. |
+| Temporal boundary | The analytic interval begins on 18 October and ends at the configuration-selected 2 November 1907 horizon; the primary acute window is 21--26 October. The terminal horizon is a modeling choice rather than a claimed historical endpoint. |
+| Evidence and exposure | The [retrospective event-frame evidence](frame-evidence-v0.1.md) integrates the accepted [source register](source-register-v0.1.md) and [participant-evidence record](participant-evidence-v0.1.md). The historical outcome was known during construction, so the event supports no clean-builder or held-out claim. |
+| Participant boundary | Seven individual, institutional, or procedural Agent Definitions and five heterogeneous Population Models own the accepted participant choices. Market operation, message transport, adjudication, resource effects, Treasury inputs, and wider aftermath remain Scenario-owned, exogenous, or outside the question. |
+| Current endpoint | Static admission, one three-participant carrier binding, and deterministic lineage conformance are complete. The full 16-actor configuration remains non-executable. |
+| Excluded work | Full-roster policy implementation, full-event runtime or simulation, calibration or historical fitting, held-out construction, post-seal evaluation, and validity claims. |
+| Review record | Phase-owned manifests, reviews, receipts, and decisions preserve the exact accepted boundaries. Reopening the event requires a new research question. |
 | Exact upstream inputs | [Roster Definition release v0.1](../../releases/panic_1907/roster-definition-v0.1/), [consolidated mapping](../../agents/bindings/panic_1907/consolidated/), [Event Scenario Definition v0.1](../../scenarios/panic_1907/definition-v0.1/), and [Scenario Configuration v0.1](../../configs/panic_1907/scenario-configuration-v0.1/). |
-
-> This entry retains the accepted retrospective event-frame evidence and stops
-> before any new modeling, implementation, simulation, or evaluation work.
 
 ## Responsibility-owned assets
 
-| Responsibility | Current asset | Status |
+| Responsibility | Current asset | Role in baseline |
 |---|---|---|
-| Event-frame evidence integration | [Event-frame evidence v0.1](frame-evidence-v0.1.md) | Accepted retrospective documentation authority; no new source adoption or semantic reopening |
-| Participant evidence and shared situations | [Participant evidence v0.1](participant-evidence-v0.1.md), [source register v0.1](source-register-v0.1.md), and [decision situations v0.1](decision-situations-v0.1.md) | Accepted event-owned evidence authorities, with the decision portfolio retained for the Knickerbocker--NYCH reference pair |
-| Participant roster and semantic products | [Roster Definition release v0.1](../../releases/panic_1907/roster-definition-v0.1/) | Accepted: seven Agent Definitions and five population models |
-| Carrier mapping | [Consolidated mapping](../../agents/bindings/panic_1907/consolidated/) | Accepted, non-executable |
-| Event-world semantics | [Event Scenario Definition v0.1](../../scenarios/panic_1907/definition-v0.1/) | Accepted semantic authority |
-| Mechanism-coverage assembly | [Scenario Configuration v0.1](../../configs/panic_1907/scenario-configuration-v0.1/) | Accepted, non-executable |
-| Static configuration validation | [Configuration admission v0.1](../../configs/panic_1907/configuration-admission-v0.1/) | `PASS_BOUNDED_CONFIGURATION_ADMISSION` |
-| Selected three-role implementation | [KT--NBC--NYCH binding v0.1](../../agents/bindings/panic_1907/kt-nbc-nych-v0.1/) | Bounded binding; configuration remains non-executable |
-| Cross-hop trace, seal, and replay check | [Lineage conformance v0.1](../../scenarios/panic_1907/lineage-conformance-v0.1/) | `PASS_BOUNDED_LINEAGE_CONFORMANCE` |
+| Event-frame evidence | [Event-frame evidence v0.1](frame-evidence-v0.1.md) | Accepted retrospective synthesis of the event boundary and evidence limits |
+| Participant evidence and shared situations | [Participant evidence v0.1](participant-evidence-v0.1.md), [source register v0.1](source-register-v0.1.md), and [decision situations v0.1](decision-situations-v0.1.md) | Accepted evidence authorities and role-comparison portfolio |
+| Participant roster and models | [Roster Definition release v0.1](../../releases/panic_1907/roster-definition-v0.1/) | Seven Agent Definitions and five Population Models |
+| Cross-participant semantics | [Participant interface guide](../../agents/interfaces/panic_1907/) | Current scholarly reading path; frozen production preflights remain release-time records |
+| Carrier mapping | [Consolidated mapping](../../agents/bindings/panic_1907/consolidated/) | Accepted non-executable mapping of the complete roster |
+| Event-world semantics | [Event Scenario Definition v0.1](../../scenarios/panic_1907/definition-v0.1/) | Accepted Scenario authority |
+| Mechanism-coverage assembly | [Scenario Configuration v0.1](../../configs/panic_1907/scenario-configuration-v0.1/) | Accepted non-executable configuration |
+| Static configuration validation | [Configuration admission v0.1](../../configs/panic_1907/configuration-admission-v0.1/) | Exact bounded admission passed |
+| Selected implementation | [KT--NBC--NYCH binding v0.1](../../agents/bindings/panic_1907/kt-nbc-nych-v0.1/) | Four-action, three-route lineage only |
+| Trace, seal, and replay review | [Lineage conformance v0.1](../../scenarios/panic_1907/lineage-conformance-v0.1/) | Deterministic bounded conformance passed |
 
-## Current work package
+Versioned packages retain the review language and next-stage boundary that
+applied when they were released. This entry records the current event position.
 
-| Field | Current decision |
+## Current position
+
+| Field | Current record |
 |---|---|
-| Work mode | Retained baseline; no active event construction |
-| Roles or processes in this package | Event-frame evidence crosswalk only; no participant or scenario production |
-| Participant production profiles | Not applicable; no participant production is active |
-| Required project Skills and templates | No production Skill is active; the accepted retrospective integration used the Event Build Brief, historical evidence research, and proportionate phase closeout |
-| Expected outputs | Accepted coordination entry and retrospective frame evidence; no new semantic or executable product |
-| Review and verification | Source/claim crosswalk, temporal and exposure boundaries, link integrity, scope consistency, and documentation checks |
-| Stop conditions | Any proposed change to participants, semantics, configuration, binding, runtime, evidence claim, or evaluation boundary |
-| Next legal action | Continue the standardized method on another event. Reopen H2EPR-0288 only with a new research question and explicit authorization. |
+| Work mode | Retained first-event baseline; no active event construction |
+| Current use | Cross-event method reference for participant semantics, Scenario ownership, non-executable configuration, static admission, minimal binding, and lineage conformance |
+| Verification boundary | The selected synthetic lineage tests identity, routing, result separation, trace, seals, and replay. It is not evidence about full-event behavior or historical validity. |
+| Reopening condition | A new research question and explicit scope are required before changing evidence, participants, semantics, configuration, implementation, or evaluation boundaries. |
+| Next action | Continue the standardized method on another event unless H2EPR-0288 is deliberately reopened. |
 
 ## Phase status
 
-- [x] Participant roster and semantic production accepted.
+- [x] Event evidence and participant-time boundaries accepted.
+- [x] Participant roster, Agent Definitions, and Population Models accepted.
 - [x] Consolidated mapping and Event Scenario Definition accepted.
 - [x] Non-executable Scenario Configuration and static admission accepted.
-- [x] One bounded three-role carrier projection and lineage conformance case
+- [x] One bounded three-participant carrier binding and lineage-conformance case
   closed.
-- [x] Scope review stopped before full-event implementation or scientific
-  evaluation.
-- [x] Retrospective event-frame evidence integration accepted as a
-  documentation authority.
+- [x] Work stopped before full-event execution or scientific evaluation.
 
-**Current disposition: retained first-event baseline with accepted
-retrospective frame evidence; no active H2EPR-0288 model work package.**
+**Current disposition: retained first-event baseline; no active H2EPR-0288
+work package.**
