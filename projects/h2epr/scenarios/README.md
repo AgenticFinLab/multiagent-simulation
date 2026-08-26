@@ -27,9 +27,11 @@ by the accepted Definition; it is not a competing scenario authority.
 
 The [`singhealth_data_breach/`](singhealth_data_breach/) directory contains the
 accepted
-[Event Scenario Definition v0.1](singhealth_data_breach/definition-v0.1/)
+[Event Scenario Definition v0.1](singhealth_data_breach/definition-v0.1/),
+the completed
+[SCM technical--operations--GCIO conformance closeout](singhealth_data_breach/lineage-conformance-v0.1/),
 and its stable Roster-production precursor, the
 [event semantic skeleton v0.2](singhealth_data_breach/semantic-skeleton.md).
-The Definition closes the nine-product semantic interface but remains
-non-executable; exact opening values and structural selections belong to a
-separately authorized Scenario Configuration.
+The conformance path exercises only four selected intents from the accepted
+binding. The complete nine-product Scenario Configuration remains
+non-executable.

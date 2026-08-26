@@ -47,25 +47,33 @@ The binding implements only the selected three-role lineage. It does not make
 the full configuration executable, supply behavior for every roster member,
 or establish historical or scientific validity.
 
-## Second event construction
+## Second event baseline
 
-The SingHealth Data Breach collection has progressed beyond static admission
-to one bounded carrier binding: seven Agent Definitions, two Population Models, a fixed
-[Roster Definition release](releases/singhealth_data_breach/roster-definition-v0.1/),
-an accepted
-[consolidated mapping](agents/bindings/singhealth_data_breach/consolidated/),
-and an accepted
-[Event Scenario Definition](scenarios/singhealth_data_breach/definition-v0.1/),
-followed by an accepted non-executable
-[Scenario Configuration](configs/singhealth_data_breach/scenario-configuration-v0.1/),
-its [bounded static admission](configs/singhealth_data_breach/configuration-admission-v0.1/),
-and an exact
-[SCM technical--operations--GCIO binding](agents/bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/).
-These assets close the complete participant interface, one declared-purpose
-semantic assembly, and the Contracts V1 projection for four selected intents.
-The complete configuration remains non-executable. The next bounded stage is
-deterministic lineage trace and replay conformance; full-roster runtime,
-simulation, calibration, and evaluation remain outside the current baseline.
+The SingHealth Data Breach assets apply the complete bounded handoff to a
+healthcare cybersecurity event:
+
+- seven Agent Definitions and two Population Models;
+- a fixed
+  [Roster Definition release](releases/singhealth_data_breach/roster-definition-v0.1/)
+  and accepted
+  [consolidated mapping](agents/bindings/singhealth_data_breach/consolidated/);
+- an accepted
+  [Event Scenario Definition](scenarios/singhealth_data_breach/definition-v0.1/);
+- a non-executable
+  [Scenario Configuration](configs/singhealth_data_breach/scenario-configuration-v0.1/)
+  with
+  [bounded static admission](configs/singhealth_data_breach/configuration-admission-v0.1/);
+- an exact
+  [SCM technical--operations--GCIO binding](agents/bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/);
+  and
+- focused
+  [lineage conformance](scenarios/singhealth_data_breach/lineage-conformance-v0.1/)
+  with deterministic trace, seal, and replay evidence.
+
+The two event baselines use the same stage responsibilities and release
+structure while retaining event-specific participants, policies, identifiers,
+and causal checks. Neither complete configuration is executable; full-roster
+runtime, simulation, calibration, and evaluation remain outside the baseline.
 
 ## Package layout
 

@@ -1,0 +1,84 @@
+{
+  "format": "h2epr.lineage-conformance-receipt.v0.1",
+  "receipt_id": "receipt.h2epr.0616.scm_technical_operations_gcio.conformance.v0_1",
+  "status": "accepted",
+  "verdict": "PASS_BOUNDED_LINEAGE_CONFORMANCE",
+  "binding": {
+    "release_manifest_sha256": "377b93361a6e47307ed8498f7bd86a7adc4174b09a49baf37803623181195343",
+    "binding_sha256": "6ed3eb4949f2f112c2c9e60975af4635cd19a042e7676132af82fc887a058f88",
+    "binding_surfaces_verified": true,
+    "configuration_admission_surfaces_verified": true
+  },
+  "scope": {
+    "actor_ids": [
+      "actor.0616.unit.technical.scm-application-database",
+      "actor.0616.unit.operations.application-scm-coordination",
+      "actor.0616.office.singhealth-gcio"
+    ],
+    "action_count": 4,
+    "route_count": 4,
+    "logical_tick_count": 9,
+    "state_delta_count": 10,
+    "verification_result_count": 1,
+    "simulation_started": false,
+    "full_configuration_execution_enabled": false
+  },
+  "trace": {
+    "conformance_implementation_sha256": "2d49cfb68034d675f4da766372f30f5002e17e5eaa846e2fcfc80b6186a1d317",
+    "conformance_run_manifest_sha256": "23d7cb3c339c1d171337cafb909f879593f20ecf70ecb14a571402ce17fb9444",
+    "record_count": 64,
+    "first_record_hash": "35794b3bfcea01d4a450e8cfdbcb7637906e6fbf6d77c42f4b2b197deda68c31",
+    "final_record_hash": "b45f7d5682b40c6b9111d703bcb9964f4c6e0c7c430135825ce2fdc5465c52ff",
+    "ordered_tick_seal_hashes": [
+      "b13558795a9f6425f9810edf0d0ac573588c44147d64f2e0e265c9773295bd25",
+      "3197543e6df72875f7190f2f2dbcff9f829e81a03d1bc1b371d38a2f7120a278",
+      "d973f1b2fb556a299f4548b493a6b231607421fcffc70485d252d8497ff5abc8",
+      "b14e7eed93c9beef3f14bbf6edcdd8c5906e0829be7c371e0aeeec210a7bd002",
+      "9e2b9d0f985355a2629dc0d738d0032fdc874ec2ce5137add9f058c9b5302097",
+      "238342d24c2aa50707f9d760e993cfe6d3f4404f1e9d5ccabfda9859dd2c2743",
+      "06e72582e46437f89632117d4d0680acc207a828401cb79bec5c64566df845c1",
+      "d7f6ae269a8c2fdb6f7248761bd2e9fc43b6de77c3e7b0bbdb89722a65178f5c",
+      "ff0f64083a38315fe56bc05634c26ae0fe61943ab0e03604f882b5224d1e33a9"
+    ],
+    "scientific_prefix_sha256": "ee1588b352ed3fa0a804731b405a9aa4f1e708350c456478da8c03529b00183e",
+    "run_seal_sha256": "bb7badd64ad3f5f4c1cf151fed8c84901f7d77bac106b2a3eb4d02778216ff39",
+    "final_state_sha256": "6ff970089cd3dd4d46f047c494f9f2a200af1be1eb1347a8c5f3514e8ef3404a",
+    "replay_state_sha256": "6ff970089cd3dd4d46f047c494f9f2a200af1be1eb1347a8c5f3514e8ef3404a",
+    "trace_errors": [],
+    "deterministic_repeat_equal": true
+  },
+  "open_boundary": {
+    "unresolved_intent_ids": [
+      "intent.0616.gcio.request_clarification.001"
+    ],
+    "unresolved_recipient_ids": [
+      "actor.0616.unit.operations.application-scm-coordination"
+    ],
+    "interpretation": "clarification was delivered; no reply is represented"
+  },
+  "verification": [
+    {
+      "check_id": "contracts-v1-payloads",
+      "status": "pass",
+      "summary": "selected observations, actions, messages, dispositions, and state deltas conform"
+    },
+    {
+      "check_id": "cross-hop-negative-conformance",
+      "status": "pass",
+      "summary": "identity, capacity, delivery, request, result, escalation, and clarification drift is rejected"
+    },
+    {
+      "check_id": "trace-seal-replay",
+      "status": "pass",
+      "summary": "causal order, trace validation, seals, deterministic repetition, and replay agree"
+    }
+  ],
+  "claim_boundary": {
+    "exposure": "full_draft_exposed_conformance_only",
+    "historical_validity_claim": false,
+    "scientific_validity_claim": false,
+    "held_out_or_clean_builder_claim": false,
+    "post_seal_evaluation_performed": false
+  },
+  "next_legal_action": "stop_or_authorize_a_new_research_question"
+}

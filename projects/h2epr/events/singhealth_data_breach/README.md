@@ -11,6 +11,9 @@ mechanism-coverage assembly, and bounded static admission validates that exact
 release. A bounded SCM technical--operations--GCIO binding projects four
 selected intents to Contracts V1 while preserving the non-executable
 full-configuration boundary.
+The corresponding deterministic lineage closeout now validates cross-hop
+identity, trace order, seals, and replay for that exact binding without
+starting a simulator.
 
 The event follows a **same-stage quality, proportionate-work** rule: it may use
 fewer files and less engineering than the Panic of 1907 baseline, but an
@@ -23,16 +26,16 @@ ownership boundaries.
 |---|---|
 | Event | `H2EPR-0616`, SingHealth Data Breach; slug `singhealth_data_breach` |
 | Coordination entry | `projects/h2epr/events/singhealth_data_breach/README.md` |
-| Brief identity and status | Event Build Brief v0.2; accepted semantic Roster, consolidated mapping, Event Scenario Definition, non-executable Scenario Configuration, bounded static admission, and one bounded carrier binding |
+| Brief identity and status | Event Build Brief v0.2; accepted semantic Roster, consolidated mapping, Event Scenario Definition, non-executable Scenario Configuration, bounded static admission, bounded carrier binding, and deterministic lineage conformance |
 | Roster and semantic skeleton | [Research roster v0.2](../../agents/rosters/singhealth_data_breach.md) and [event semantic skeleton v0.2](../../scenarios/singhealth_data_breach/semantic-skeleton.md) |
 | Method baseline | Repository commit `bea83b1a51256198d264760a88268e041d990700`; [event workflow](../../WORKFLOW.md), [Event Build Brief template](../../event-build-brief-template.md), [participant workflow](../../agents/WORKFLOW.md), and [historical evidence research](../../skills/historical-evidence-research/SKILL.md) |
 | Primary question | Within the accepted event boundary, which interactions across information, authority, and response chains turned an initial intrusion into a large-scale healthcare data breach, and how did the timing of detection, escalation, containment, and notification alter the event's evolution? |
 | Purpose and claim boundary | Forward-test whether the H2EPR event method transfers from a financial crisis to a healthcare cybersecurity event without treating financial state as universal. The intended depth is semantically complete and engineering-minimal. This work makes no clean-builder, held-out, historical-validity, scientific-validity, calibration, predictive, or policy-effectiveness claim. |
 | Temporal boundary | Accepted analytic interval: about 23 August 2017, the earliest evidenced compromise, through the public announcement on 20 July 2018; observe patient-notification delivery through 23 July. The participant response window begins on 18 January 2018, when event-specific malware and callback signals entered IHiS Security Management. An acute information-and-response window begins on 11 June, when unauthorized credential use was specifically recognized, and includes exfiltration from 27 June through 4 July, cross-institution escalation on 10 July, later containment, and notification. Earlier general preparedness and vulnerabilities remain initial context. Post-23 July investigation, liability, penalties, and reform are retrospective evidence or excluded aftermath. |
 | Evidence and exposure | The [event-frame evidence](frame-evidence-v0.1.md) adopts four official sources for framing. The complete historical outcome and target Reference material had already been seen during discovery, so this is not clean or held-out construction. `draft_epg.json` was not read in this framing cycle, and evaluation-only material remains outside the evidence set. |
-| Current authorized phase and endpoint | **Bounded carrier binding complete**: the exact release derives the nine-product semantic inventory and projects only the named three-participant, four-intent lineage through Contracts V1. Stop before deterministic trace/replay conformance, full runtime, or simulation. |
+| Current authorized phase and endpoint | **Bounded lineage conformance complete**: the exact three-participant, four-intent binding passes deterministic trace, seal, and replay review through tick eight. Stop before full runtime, simulation, calibration, or evaluation. |
 | Excluded work | Reference, draft EPG, held-out, or evaluation access; new external research without bounded permission; participant products outside the released roster; Contracts mutation or another schema profile; carrier projection or binding beyond the accepted minimal lineage; unrelated policy implementation; full runtime; simulation; calibration; post-seal evaluation; external repository actions; and validity claims. |
-| Decision owner and review | The project owner accepted `OD-EV-01`, `OD-RP-02`, `OD-R1-01` through `OD-R1-03`, `OD-R2-01` through `OD-R2-06`, `OD-RC-01` through `OD-RC-04`, `OD-CM-05` through `OD-CM-08`, `OD-SC-05` through `OD-SC-08`, `OD-CFG-05` through `OD-CFG-08`, `OD-ADM-01` through `OD-ADM-04`, and `OD-BND-01` through `OD-BND-04`. Participant products and the Roster, mapping, Scenario, configuration, admission, binding, and closure products received their stage-appropriate reviews. |
+| Decision owner and review | The project owner accepted `OD-EV-01`, `OD-RP-02`, `OD-R1-01` through `OD-R1-03`, `OD-R2-01` through `OD-R2-06`, `OD-RC-01` through `OD-RC-04`, `OD-CM-05` through `OD-CM-08`, `OD-SC-05` through `OD-SC-08`, `OD-CFG-05` through `OD-CFG-08`, `OD-ADM-01` through `OD-ADM-04`, `OD-BND-01` through `OD-BND-04`, and `OD-CNF-01` through `OD-CNF-04`. Participant products and the Roster, mapping, Scenario, configuration, admission, binding, and conformance products received their stage-appropriate reviews. |
 | Exact upstream inputs | Method baseline `bea83b1a51256198d264760a88268e041d990700`; event specification SHA-256 `5a69486c0c3cff4dab019e43a75b9f959ebb47e3b52b17241bb637dd0cdfbbfb`; frozen evidence SHA-256 `ea356fc9f0f7dfede9e7415f61d144e8ba13e61c3ad5647318abe7b5449f5e7c`; [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/); [research roster v0.2](../../agents/rosters/singhealth_data_breach.md); [event semantic skeleton v0.2](../../scenarios/singhealth_data_breach/semantic-skeleton.md); accepted event-frame and participant evidence |
 
 > The accepted roster contains nine event-bound qualitative models, two shared
@@ -101,19 +104,20 @@ behavior, evidence, authority, or realized results.
 | Scenario Configuration | [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/) | Accepted non-executable mechanism-coverage assembly |
 | Configuration admission | [Bounded configuration admission v0.1](../../configs/singhealth_data_breach/configuration-admission-v0.1/) | Exact static admission passed; no execution authority |
 | Bounded carrier binding | [SCM technical--operations--GCIO binding v0.1](../../agents/bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/) | Exact three-participant, four-intent projection; full configuration remains non-executable |
+| Lineage conformance | [SCM technical--operations--GCIO lineage conformance v0.1](../../scenarios/singhealth_data_breach/lineage-conformance-v0.1/) | Deterministic trace, seal, replay, and focused cross-hop rejection evidence |
 
 ## Current work package
 
 | Field | Current decision |
 |---|---|
-| Work mode | Exact carrier projection and positive-branch conformance for one bounded lineage |
+| Work mode | Deterministic trace, seal, and replay conformance for one bounded lineage |
 | Represented surface | One SCM technical responsibility unit, one application/SCM operational responsibility unit, the SingHealth GCIO in its IHiS service-lead capacity, two configuration routes, and four directed message carriers |
 | Participant production profiles | Two standard Population Models; five standard Agent Definitions; deep SIRM and Sector Lead Agent Definitions |
-| Applied workflow assets | Roster mapping and conformance workflow, exact release-derived semantic profile, fail-closed loader, Contracts V1 projection, bounded participant and environment policies, and focused rejection tests |
-| Accepted outputs | One integrity-pinned binding release, event-qualified profile and carrier implementation, focused tests, and ADR without changing the accepted Definitions, mapping, Scenario Configuration, or Contracts V1 |
-| Review and verification | Exact upstream and implementation integrity; all nine released semantic products and mapping counts; three actor/capacity assemblies; two source routes and four directed carriers; 17 selected observations; four actions; lifecycle, idempotency, delivery, and verification-result boundaries |
-| Stop conditions | Any drift in a pinned authority; ambiguous Definition grammar; wrong capacity or route; hidden delivery or result; need for Contracts mutation, unrelated policy behavior, full runtime, or simulation |
-| Next legal action | Explicit stop. A separately authorized deterministic lineage-conformance phase may add trace, seal, replay, and mutation checks for only this lineage. |
+| Applied workflow assets | Roster mapping and conformance workflow, exact release-derived semantic profile, fail-closed loader, Contracts V1 payload checks, domain-neutral trace and seal primitives, minimal replay state, and focused rejection tests |
+| Accepted outputs | One integrity-pinned binding release, deterministic conformance runner, expected-vector receipt, focused tests, implementation review, and ADR without changing the accepted Definitions, mapping, Scenario Configuration, Contracts V1, or MASim |
+| Review and verification | Exact binding identity; four selected actions and directed carriers; request, result, escalation, and clarification lineage; 64 hash-chained records; nine tick seals; one run seal; ten replayed deltas; unresolved final clarification; deterministic repetition |
+| Stop conditions | Any drift in a pinned authority; wrong identity, capacity, route, predecessor, or lifecycle; conflated request, result, delivery, or state; need for unrelated policy behavior, full runtime, or simulation |
+| Next legal action | Explicit stop. Further work on this event requires a separately stated research question and authorization. |
 
 The maintained target remains **semantically complete, engineering-minimal**:
 close one declared-purpose semantic assembly for a high-information
@@ -145,6 +149,7 @@ simulation.
 | `OD-CFG-05`–`OD-CFG-08` | Accept the mechanism-coverage purpose and horizon, thirteen-actor assembly and bounded lineage, exact structural/input/policy/sensitivity boundary, and non-executable configuration release | Project owner | Accepted Scenario and mapping, revised configuration candidate, closure, and substantive review | Scenario Configuration release | [Accepted in ADR-0009](../../decisions/ADR-0009-singhealth-scenario-configuration-boundary.md) |
 | `OD-ADM-01`–`OD-ADM-04` | Admit the exact release through a versioned event-neutral semantic profile, validate the accepted Roster/mapping references and internal graph, and stop after a non-authorizing receipt | Project owner | Compatibility preflight, exact configuration and release identities, focused failure plan, and first-event regression anchors | Bounded configuration admission | [Accepted in ADR-0010](../../decisions/ADR-0010-singhealth-configuration-admission-boundary.md) |
 | `OD-BND-01`–`OD-BND-04` | Bind the exact three-participant lineage and ticks zero through eight, derive the semantic catalog from pinned releases, implement only six required local policies, and stop before trace/replay or broader execution | Project owner | Accepted configuration and receipt, Roster and consolidated mapping releases, carrier compatibility preflight, and focused failure plan | Bounded carrier binding | [Accepted in ADR-0011](../../decisions/ADR-0011-singhealth-bounded-lineage-binding-boundary.md) |
+| `OD-CNF-01`–`OD-CNF-04` | Pin the exact binding and nine-tick horizon, record one deterministic trace with minimal replay state, test focused cross-hop and trace failures, and stop at bounded lineage conformance | Project owner | Accepted binding release, domain-neutral trace primitives, fixed positive vector, and focused failure plan | Lineage conformance closeout | [Accepted in ADR-0012](../../decisions/ADR-0012-singhealth-lineage-conformance-boundary.md) |
 
 ## Event-frame review and closeout
 
@@ -370,6 +375,20 @@ It does not make either event's complete configuration executable.
 | Mainline and depth judgment | The phase removes the carrier-compatibility gap for the minimum high-information lineage without modifying Contracts V1, the accepted Definitions, Scenario, configuration, admission profile, or first-event assets. It adds no full roster, unrelated policy behavior, simulation, calibration, evaluation, or validity claim. |
 | Next legal action | Explicit stop. A separately authorized deterministic lineage-conformance phase may add trace identity, seal, replay equivalence, and mutation rejection for this bounded lineage only. |
 
-The second event now matches the first event through exact carrier binding. Its
-remaining same-stage gap is deterministic trace and replay conformance, not
-participant, evidence, Scenario, configuration, or carrier-definition work.
+The carrier binding supplies the exact upstream surface for the separately
+reviewed conformance closeout below.
+
+## Lineage-conformance closeout
+
+| Field | Closeout record |
+|---|---|
+| Event, phase, object, and inputs | `H2EPR-0616`; **Validate the bounded lineage**; exact SCM technical--operations--GCIO binding and owner dispositions `OD-CNF-01` through `OD-CNF-04` |
+| Authorized purpose and endpoint | Prove cross-hop identity, causal order, result separation, deterministic seals, and replay for the selected nine-tick branch; stop before broader execution |
+| Outputs and status | [Lineage conformance v0.1](../../scenarios/singhealth_data_breach/lineage-conformance-v0.1/), deterministic runner, focused tests, expected-vector receipt, implementation review, and [ADR-0012](../../decisions/ADR-0012-singhealth-lineage-conformance-boundary.md); **bounded lineage conformance passed** |
+| Verification and limitations | The vector contains three actors, four actions, four directed messages and deliveries, one produced-and-delivered verification result, 64 records, nine tick seals, one run seal, and ten state deltas. Repeated construction and replay agree. The branch is synthetic and outcome-exposed; the final clarification is delivered but unanswered. |
+| Mainline and depth judgment | The phase closes the remaining same-stage gap with existing domain-neutral primitives and no change to Contracts, MASim, the binding, configuration, participant assets, or evidence. It adds no full roster, unrelated policy, simulation, calibration, evaluation, or validity claim. |
+| Next legal action | Explicit stop. Deeper work on either completed event requires a new research question and authorization. |
+
+The second event now matches the first through bounded lineage conformance.
+Together they establish a repeatable cross-event handoff while preserving
+event-specific semantics and non-executable full configurations.
