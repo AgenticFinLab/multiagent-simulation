@@ -75,6 +75,22 @@ structure while retaining event-specific participants, policies, identifiers,
 and causal checks. Neither complete configuration is executable; full-roster
 runtime, simulation, calibration, and evaluation remain outside the baseline.
 
+## Reading the event baselines
+
+Use the [event coordination index](events/README.md) as the default entry to
+the two baselines. Each completed event entry separates two tracked reading
+paths without moving or duplicating the underlying assets:
+
+- **Research-facing assets** lead from the event frame and evidence to
+  participant models, cross-participant semantics, the Event Scenario
+  Definition, and the configuration design.
+- **Reproducibility and release records** retain exact roster, mapping,
+  admission, binding, conformance, manifest, and checksum identities.
+
+Both paths are part of the formal repository. Ignored source archives, working
+notes, and local status records support construction but are not formal event
+authorities and must not be required to follow a tracked research claim.
+
 ## Package layout
 
 ```text

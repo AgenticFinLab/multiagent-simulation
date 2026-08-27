@@ -12,12 +12,13 @@ multiple event configurations, compilers or evaluation protocols.
 H2EPR studies auditable multi-agent reconstruction of real event processes.
 It combines typed construction, participant and scenario semantics,
 fail-closed configuration admission, deterministic runtime records, and graph
-compilation. The Panic of 1907 assets provide its first bounded method
-baseline; they do not constitute a full-event simulation or a scientific-
-validity claim.
+compilation. The Panic of 1907 and SingHealth Data Breach assets provide a
+bounded cross-event method baseline; they do not constitute full-event
+simulations or scientific-validity claims.
 
 - [Project guide](H2EPR.md)
 - [Source and tests](h2epr/)
+- [Event entries](h2epr/events/README.md)
 - [Event modeling workflow](h2epr/WORKFLOW.md)
 - [Architecture](h2epr/ARCHITECTURE.md)
 - [Evolution policy](h2epr/EVOLUTION.md)

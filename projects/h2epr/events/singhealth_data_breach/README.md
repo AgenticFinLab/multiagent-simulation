@@ -20,17 +20,24 @@ linked below remain authoritative for their respective responsibilities.
 | Review record | Phase-owned manifests, reviews, receipts, and decisions preserve the exact accepted boundaries. Reopening the event requires a new research question. |
 | Exact upstream inputs | [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/), [consolidated mapping](../../agents/bindings/singhealth_data_breach/consolidated/), [Event Scenario Definition v0.1](../../scenarios/singhealth_data_breach/definition-v0.1/), and [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/). |
 
-## Responsibility-owned assets
+## Research-facing assets
 
-| Responsibility | Current asset | Role in baseline |
+| Research responsibility | Scholarly asset | What it explains |
 |---|---|---|
 | Event-frame evidence | [Event-frame evidence v0.1](frame-evidence-v0.1.md) | Accepted source and claim ledger for event framing |
 | Participant evidence | [Participant evidence v0.1](participant-evidence-v0.1.md) | Accepted role-specific evidence and participant-time limits |
-| Participant roster and models | [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/) | Seven Agent Definitions and two Population Models |
+| Participant models | [SingHealth Agent Definitions and linked Population Models](../../agents/defines/singhealth_data_breach/) | Seven office-level decision interfaces and two heterogeneous responsibility-unit models |
 | Cross-participant semantics | [Participant interface guide](../../agents/interfaces/singhealth_data_breach/) | Current guide to the two scholarly interface accounts |
+| Event-world semantics | [Event Scenario Definition](../../scenarios/singhealth_data_breach/definition-v0.1/scenario-definition.md) | Intrusion, detection, escalation, containment, notification, authority, and result semantics |
+| Mechanism-coverage assembly | [Configuration design](../../configs/singhealth_data_breach/scenario-configuration-v0.1/configuration-design.md) | Non-executable assembly of participants, mechanisms, routes, and exclusions |
+
+## Reproducibility and release records
+
+| Verification responsibility | Accepted record | Role in baseline |
+|---|---|---|
+| Participant inventory | [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/) | Exact seven-Agent and two-Population semantic input inventory |
 | Carrier mapping | [Consolidated mapping](../../agents/bindings/singhealth_data_breach/consolidated/) | Accepted non-executable mapping of the complete roster |
-| Event-world semantics | [Event Scenario Definition v0.1](../../scenarios/singhealth_data_breach/definition-v0.1/) | Accepted Scenario authority |
-| Mechanism-coverage assembly | [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/) | Accepted non-executable configuration |
+| Versioned semantic packages | [Event Scenario Definition v0.1](../../scenarios/singhealth_data_breach/definition-v0.1/) and [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/) | Manifests, reviews, and integrity records for the accepted semantic inputs |
 | Static configuration validation | [Configuration admission v0.1](../../configs/singhealth_data_breach/configuration-admission-v0.1/) | Exact bounded admission passed |
 | Selected implementation | [SCM technical--operations--GCIO binding v0.1](../../agents/bindings/singhealth_data_breach/scm-technical-operations-gcio-v0.1/) | Four-intent, four-route lineage only |
 | Trace, seal, and replay review | [Lineage conformance v0.1](../../scenarios/singhealth_data_breach/lineage-conformance-v0.1/) | Deterministic bounded conformance passed |

@@ -43,31 +43,34 @@ Domain-neutral event-process primitives live in
 `masim.integrations.event_process`. Event identities, historical assumptions,
 institutional policies, and interpretation remain inside H2EPR.
 
-## First event baseline
+## Cross-event baseline
 
-The Panic of 1907 assets provide the first complete standardization baseline.
-They include:
+The current baseline covers two events in different domains. The Panic of 1907
+establishes the first complete standardization baseline with seven Agent
+Definitions, five population models, and one bounded
+Knickerbocker Trust--National Bank of Commerce--New York Clearing House
+lineage. The SingHealth Data Breach applies the same handoff to a healthcare
+cybersecurity event with seven Agent Definitions, two population models, and
+one bounded technical--operations--GCIO lineage.
 
-- seven institutional Agent Definitions and five population models;
-- a hash-pinned roster release and consolidated semantic mapping;
-- an Event Scenario Definition and a non-executable Scenario Configuration;
-- fail-closed static configuration admission; and
-- a bounded Knickerbocker Trust--National Bank of Commerce--New York Clearing
-  House binding with deterministic conformance, trace, and replay evidence.
-
-This baseline tests the repository interfaces and modeling method. It is not a
-full-event simulation, a calibrated historical reconstruction, or a claim of
-scientific validity. Broader runtime integration or evaluation requires a
-separate research question and authorization. The next normal method check is
-to apply the same workflow to another event.
+Both events connect accepted evidence and participant semantics to a fixed
+roster, consolidated mapping, Event Scenario Definition, non-executable
+Scenario Configuration, fail-closed static admission, deterministic trace,
+seals, and replay. Together they show that the same bounded construction method
+can be applied across domains. They are not full-event simulations, calibrated
+historical reconstructions, or claims of scientific validity. Broader runtime
+integration or evaluation requires a separate research question and
+authorization.
 
 ## Reading order
 
 1. [Project README](h2epr/README.md) for installation, layout, and validation.
-2. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
+2. [Event entries](h2epr/events/README.md) for the research-facing path through
+   each accepted baseline and the separate reproducibility records.
+3. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
    stopping boundaries.
-3. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
+4. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
    boundaries.
-4. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
-5. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
+5. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
+6. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
    interfaces.

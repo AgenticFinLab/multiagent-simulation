@@ -20,6 +20,22 @@ that a workflow step occurred. Conversely, a manifest or integrity record
 should not be rewritten as narrative prose when exact machine identity is its
 purpose.
 
+## Default reading path
+
+The tracked repository has two complementary reading paths. Event entries
+present research-facing assets first: evidence, participant models,
+cross-participant semantics, Scenario semantics, and configuration design.
+They then link the reproducibility and release records that preserve exact
+inventory, mapping, admission, binding, conformance, manifest, and checksum
+identities. The second surface remains formal repository content; it is an
+appendix to the scholarly path rather than local working material.
+
+Ignored source archives, drafts, review notes, and status pointers may support
+construction, but they are not event authorities. A tracked research claim
+must remain intelligible without a local path or local working file. This
+reading convention does not require moving accepted assets, duplicating an
+event package, or adding a new approval step.
+
 ## Frozen releases and current reading surfaces
 
 An accepted, content-addressed release records the project boundary that

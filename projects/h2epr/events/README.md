@@ -57,6 +57,12 @@ per role, or repeat the same record under several phase names.
 | `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline through one bounded lineage-conformance case; retrospective frame evidence accepted. |
 | `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Retained second-event baseline through one bounded lineage-conformance case. |
 
+Completed entries present accepted assets in two groups. The research-facing
+group is the default scholarly path through evidence, participant models, and
+event semantics. The reproducibility group retains exact release, mapping,
+admission, binding, conformance, manifest, and checksum identities. Both groups
+remain tracked; the distinction changes navigation, not custody or authority.
+
 ## README convention
 
 Event entries use the same core order:
@@ -66,12 +72,16 @@ Event entries use the same core order:
 2. Phase-specific sections follow the Event Build Brief order when needed:
    `Evidence readiness`, `Causal scope`, `Causal role map and roster
    dispositions`, and `Shared semantics and ownership`.
-3. `Responsibility-owned assets` links accepted or candidate records without
+3. `Research-facing assets` links accepted evidence, participant models,
+   interface accounts, Scenario semantics, and configuration design without
    copying their contents.
-4. `Current work package` states what is active and where it stops; a completed
+4. `Reproducibility and release records` links the exact accepted packages and
+   validation records. An active event may keep candidate material under its
+   `Current work package` rather than presenting it as an accepted asset.
+5. `Current work package` states what is active and where it stops; a completed
    baseline uses `Current position` instead.
-5. `Open decisions` appears only while a material owner decision remains.
-6. `Phase status` gives the concise readiness or closeout disposition.
+6. `Open decisions` appears only while a material owner decision remains.
+7. `Phase status` gives the concise readiness or closeout disposition.
 
 An active event may retain the phase-specific tables needed for its current
 decision. A completed baseline replaces those details with links to accepted
@@ -84,8 +94,10 @@ event to carry the same amount of documentation.
    event-owned directories.
 2. Copy only the useful prompts from the Event Build Brief template into the
    event `README.md`; remove unused optional sections.
-3. Record the repository commit that supplies the method baseline and list
-   only the Skills and templates selected for the current work package.
+3. Identify the current method baseline and list only the Skills and templates
+   selected for the work package. Keep its exact Git identity in the local work
+   record during construction and include it in the first release manifest
+   when the inputs are promoted.
 4. Declare construction mode, allowed source roots, protected paths, and any
    prior target exposure before broad file discovery or research.
 5. Close only the Frame the event phase. Participant production begins through

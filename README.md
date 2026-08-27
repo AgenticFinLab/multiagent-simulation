@@ -38,11 +38,14 @@ smaller validation environment.
 [`projects/h2epr/`](projects/h2epr/) is an independently packaged research
 project for auditable event-process simulation. It owns its contracts,
 participant and scenario semantics, configuration admission, runtime adapters,
-and graph compiler. The Panic of 1907 assets provide a bounded engineering
-baseline, not a full-event simulation or a historical-validity claim.
+and graph compiler. The Panic of 1907 and SingHealth Data Breach assets provide
+a bounded cross-event method baseline, not full-event simulations or
+historical-validity claims.
 
 Start with the repository-level
 [H2EPR project guide](projects/H2EPR.md), then use the
 [project README](projects/h2epr/README.md) for installation and validation, or
-the [event modeling workflow](projects/h2epr/WORKFLOW.md) for artifact handoffs
+the [event index](projects/h2epr/events/README.md) for the research-facing and
+reproducibility paths through each baseline. The
+[event modeling workflow](projects/h2epr/WORKFLOW.md) defines artifact handoffs
 and stopping boundaries.
