@@ -82,14 +82,19 @@ healthcare cybersecurity event:
   and
 - focused
   [lineage conformance](scenarios/singhealth_data_breach/lineage-conformance-v0.1/)
-  with deterministic trace, seal, and replay evidence.
+  with deterministic trace, seal, and replay evidence; and
+- an accepted
+  [full-roster Policy Realization](execution/singhealth_data_breach/policy-realization-v0.1/)
+  covering all configured actor placements, selected Scenario policies, and
+  lifecycle families.
 
 The two bounded event baselines use the same stage responsibilities and
 release structure while retaining event-specific participants, policies,
 identifiers, and causal checks. Panic now has a separately versioned
 end-to-end Rule execution and generated-graph closure. The SingHealth
-configuration remains non-executable until it receives the corresponding
-Policy Realization and full-roster package. Calibration and evaluation remain
+Policy Realization now closes its semantic-to-Rule boundary; the configuration
+remains non-executable until the separate full-roster package binds carriers,
+runtime components, and completion checks. Calibration and evaluation remain
 outside both baselines.
 
 ## Reading the event baselines
@@ -185,9 +190,11 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Evaluation material is not a runtime or construction input.
 
 The accepted bounded baselines remain distinct from full-roster execution.
-The Panic executable successor and run release now establish deterministic
-runtime, replay, and graph closure, but not calibration, historical fitting,
-held-out evaluation, policy effectiveness, or a scientific claim.
+The Panic executable successor and run release establish deterministic
+runtime, replay, and graph closure. The SingHealth Policy Realization closes
+its Rule behavior but does not yet constitute a runtime or run. Neither event
+claims calibration, historical fitting, held-out evaluation, policy
+effectiveness, or scientific validity.
 The separately governed [Rule-execution layer](execution/) provides the
 authorized engineering extension without changing the scope of those earlier
 releases.

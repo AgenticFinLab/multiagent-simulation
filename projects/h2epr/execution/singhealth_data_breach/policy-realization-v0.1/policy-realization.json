@@ -1,0 +1,2855 @@
+{
+  "format_identity": "h2epr.policy-realization.v0_1",
+  "realization_id": "h2epr.0616.policy-realization.v0_1",
+  "version": "0.1.0",
+  "status": "accepted_policy_realization",
+  "event_id": "H2EPR-0616",
+  "purpose": "mechanism_coverage",
+  "semantic_parent": {
+    "configuration_id": "h2epr.0616.scenario.mechanism-coverage.v0_1",
+    "configuration_version": "0.1.0",
+    "configuration_status": "accepted_non_executable_configuration",
+    "configuration_path": "configs/singhealth_data_breach/scenario-configuration-v0.1/scenario-configuration.json",
+    "configuration_source_sha256": "00fe7d799b5f944da09c64ddbeea85d2addfc7948bb9f0865316962fe2d37d3d",
+    "configuration_canonical_sha256": "288c1539221cce894545234cbc477f342e609ee92130cfc9925426e9d0edb9fd",
+    "configuration_release_manifest_path": "configs/singhealth_data_breach/scenario-configuration-v0.1/manifest.json",
+    "configuration_release_manifest_sha256": "96e9fbc4b6d4a52305450b7f38b0524da3949ff1262d84d8b6222e638d8268a9",
+    "configuration_admission_receipt_path": "configs/singhealth_data_breach/configuration-admission-v0.1/receipt.json",
+    "configuration_admission_receipt_sha256": "2ba6e893178ec16158acfd774ff0db36f21d4fd65b9a9049bd6e566f24e04cc9",
+    "roster_release_manifest_path": "releases/singhealth_data_breach/roster-definition-v0.1/manifest.json",
+    "roster_release_manifest_sha256": "188f5117f02958997f8e1140d3d19fcbada296b1750223d8b3025e1cf537625e",
+    "consolidated_mapping_manifest_path": "agents/bindings/singhealth_data_breach/consolidated/manifest.json",
+    "consolidated_mapping_manifest_sha256": "7a603d97bb25f8dddab08d7a8865fd6305a94e4db108f5f32b8ad65d28695bb9",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0616.v0_1",
+    "mapping_profile_path": "agents/bindings/singhealth_data_breach/consolidated/mapping-specification.md",
+    "mapping_profile_sha256": "1249dbe94dcad61b40c4e543435186e6e71eaab0d95c7f2877e31c0e3575a1bb",
+    "scenario_release_manifest_path": "scenarios/singhealth_data_breach/definition-v0.1/manifest.json",
+    "scenario_release_manifest_sha256": "948b9ba9e29ba6947abefd65663bd4e9ef1ff47ebb1f465a08524378b20b8795"
+  },
+  "participant_policy_realizations": [
+    {
+      "realization_key": "actor.0616.office.cluster-iso::cluster_information_security_officer",
+      "actor_id": "actor.0616.office.cluster-iso",
+      "capability_id": "cluster_information_security_officer",
+      "participant_product_id": "h2epr.agent-definition.0616.cluster-information-security-officer",
+      "implementation_id": "h2epr.policy.0616.participant.cluster_information_security_officer",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.cluster_information_security_officer.active_coordination_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.coordinate_incident_reporting",
+            "h2epr.action.0616.cluster_information_security_officer.issue_security_coordination_direction",
+            "h2epr.action.0616.cluster_information_security_officer.request_response_status",
+            "h2epr.action.0616.cluster_information_security_officer.request_sirt_activation"
+          ]
+        },
+        {
+          "state_id": "state.cluster_information_security_officer.active_reporting_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.coordinate_incident_reporting",
+            "h2epr.action.0616.cluster_information_security_officer.escalate_potential_cii_incident"
+          ]
+        },
+        {
+          "state_id": "state.cluster_information_security_officer.current_iso_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.escalate_potential_cii_incident"
+          ]
+        },
+        {
+          "state_id": "state.cluster_information_security_officer.last_response_status",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice",
+            "obs.cluster_information_security_officer.office_availability_status",
+            "obs.cluster_information_security_officer.reporting_framework_context",
+            "obs.cluster_information_security_officer.response_team_status",
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.technical_finding_summary"
+          ]
+        },
+        {
+          "state_id": "state.cluster_information_security_officer.open_clarifications",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.request_incident_clarification"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.cluster_information_security_officer.DC-CISO-1",
+          "consumed_observation_ids": [
+            "obs.cluster_information_security_officer.delivered_incident_signal",
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.cii_scope_indicator",
+            "obs.cluster_information_security_officer.technical_finding_summary",
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cluster_information_security_officer.current_iso_assessment",
+            "state.cluster_information_security_officer.open_clarifications",
+            "state.cluster_information_security_officer.active_coordination_intents",
+            "state.cluster_information_security_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.request_incident_clarification",
+            "h2epr.action.0616.cluster_information_security_officer.request_response_status",
+            "h2epr.action.0616.cluster_information_security_officer.issue_security_coordination_direction",
+            "h2epr.action.0616.cluster_information_security_officer.escalate_potential_cii_incident"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cluster_information_security_officer.delivered_incident_signal",
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.cii_scope_indicator",
+            "obs.cluster_information_security_officer.technical_finding_summary",
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.incident_assessment_and_category"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.cluster_information_security_officer.DC-CISO-2",
+          "consumed_observation_ids": [
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.technical_finding_summary",
+            "obs.cluster_information_security_officer.response_team_status",
+            "obs.cluster_information_security_officer.reporting_framework_context",
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.office_availability_status",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cluster_information_security_officer.current_iso_assessment",
+            "state.cluster_information_security_officer.open_clarifications",
+            "state.cluster_information_security_officer.last_response_status",
+            "state.cluster_information_security_officer.active_coordination_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.request_sirt_activation",
+            "h2epr.action.0616.cluster_information_security_officer.issue_security_coordination_direction",
+            "h2epr.action.0616.cluster_information_security_officer.coordinate_incident_reporting",
+            "h2epr.action.0616.cluster_information_security_officer.request_response_status",
+            "h2epr.action.0616.cluster_information_security_officer.escalate_potential_cii_incident"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.technical_finding_summary",
+            "obs.cluster_information_security_officer.response_team_status",
+            "obs.cluster_information_security_officer.reporting_framework_context",
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.office_availability_status",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.response_team_activation",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.report_and_notification"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.cluster_information_security_officer.DC-CISO-3",
+          "consumed_observation_ids": [
+            "obs.cluster_information_security_officer.delivered_incident_signal",
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.cii_scope_indicator",
+            "obs.cluster_information_security_officer.technical_finding_summary",
+            "obs.cluster_information_security_officer.reporting_framework_context",
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.office_availability_status",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cluster_information_security_officer.current_iso_assessment",
+            "state.cluster_information_security_officer.open_clarifications",
+            "state.cluster_information_security_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cluster_information_security_officer.escalate_potential_cii_incident",
+            "h2epr.action.0616.cluster_information_security_officer.coordinate_incident_reporting",
+            "h2epr.action.0616.cluster_information_security_officer.request_incident_clarification",
+            "h2epr.action.0616.cluster_information_security_officer.request_sirt_activation"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cluster_information_security_officer.delivered_incident_signal",
+            "obs.cluster_information_security_officer.sirm_response_update",
+            "obs.cluster_information_security_officer.cii_scope_indicator",
+            "obs.cluster_information_security_officer.technical_finding_summary",
+            "obs.cluster_information_security_officer.reporting_framework_context",
+            "obs.cluster_information_security_officer.coordination_meeting_record",
+            "obs.cluster_information_security_officer.office_availability_status",
+            "obs.cluster_information_security_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.response_team_activation",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.report_and_notification"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.office.ihis-ceo::ihis_chief_executive_officer",
+      "actor_id": "actor.0616.office.ihis-ceo",
+      "capability_id": "ihis_chief_executive_officer",
+      "participant_product_id": "h2epr.agent-definition.0616.ihis-chief-executive-officer",
+      "implementation_id": "h2epr.policy.0616.participant.ihis_chief_executive_officer",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.ihis_chief_executive_officer.active_direction_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.assign_investigation_lead",
+            "h2epr.action.0616.ihis_chief_executive_officer.issue_ihis_executive_update",
+            "h2epr.action.0616.ihis_chief_executive_officer.request_executive_incident_briefing",
+            "h2epr.action.0616.ihis_chief_executive_officer.request_supporting_evidence"
+          ]
+        },
+        {
+          "state_id": "state.ihis_chief_executive_officer.active_reporting_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.direct_sector_lead_reporting",
+            "h2epr.action.0616.ihis_chief_executive_officer.issue_ihis_executive_update"
+          ]
+        },
+        {
+          "state_id": "state.ihis_chief_executive_officer.current_executive_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.direct_sector_lead_reporting",
+            "h2epr.action.0616.ihis_chief_executive_officer.issue_ihis_executive_update"
+          ]
+        },
+        {
+          "state_id": "state.ihis_chief_executive_officer.last_investigation_assignment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.assign_investigation_lead"
+          ]
+        },
+        {
+          "state_id": "state.ihis_chief_executive_officer.open_evidence_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.request_supporting_evidence"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_chief_executive_officer.DC-ICEO-1",
+          "consumed_observation_ids": [
+            "obs.ihis_chief_executive_officer.delivered_executive_incident_brief",
+            "obs.ihis_chief_executive_officer.supporting_evidence_summary",
+            "obs.ihis_chief_executive_officer.sector_lead_assessment",
+            "obs.ihis_chief_executive_officer.gcio_update",
+            "obs.ihis_chief_executive_officer.acting_capacity_context",
+            "obs.ihis_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_chief_executive_officer.current_executive_assessment",
+            "state.ihis_chief_executive_officer.open_evidence_questions",
+            "state.ihis_chief_executive_officer.active_direction_intents",
+            "state.ihis_chief_executive_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.request_executive_incident_briefing",
+            "h2epr.action.0616.ihis_chief_executive_officer.request_supporting_evidence",
+            "h2epr.action.0616.ihis_chief_executive_officer.assign_investigation_lead",
+            "h2epr.action.0616.ihis_chief_executive_officer.issue_ihis_executive_update"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_chief_executive_officer.delivered_executive_incident_brief",
+            "obs.ihis_chief_executive_officer.supporting_evidence_summary",
+            "obs.ihis_chief_executive_officer.sector_lead_assessment",
+            "obs.ihis_chief_executive_officer.gcio_update",
+            "obs.ihis_chief_executive_officer.acting_capacity_context",
+            "obs.ihis_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.investigation_assignment",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_chief_executive_officer.DC-ICEO-2",
+          "consumed_observation_ids": [
+            "obs.ihis_chief_executive_officer.delivered_executive_incident_brief",
+            "obs.ihis_chief_executive_officer.supporting_evidence_summary",
+            "obs.ihis_chief_executive_officer.sector_lead_assessment",
+            "obs.ihis_chief_executive_officer.gcio_update",
+            "obs.ihis_chief_executive_officer.acting_capacity_context",
+            "obs.ihis_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_chief_executive_officer.current_executive_assessment",
+            "state.ihis_chief_executive_officer.open_evidence_questions",
+            "state.ihis_chief_executive_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.request_supporting_evidence",
+            "h2epr.action.0616.ihis_chief_executive_officer.direct_sector_lead_reporting",
+            "h2epr.action.0616.ihis_chief_executive_officer.issue_ihis_executive_update"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_chief_executive_officer.delivered_executive_incident_brief",
+            "obs.ihis_chief_executive_officer.supporting_evidence_summary",
+            "obs.ihis_chief_executive_officer.sector_lead_assessment",
+            "obs.ihis_chief_executive_officer.gcio_update",
+            "obs.ihis_chief_executive_officer.acting_capacity_context",
+            "obs.ihis_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_chief_executive_officer.DC-ICEO-3",
+          "consumed_observation_ids": [
+            "obs.ihis_chief_executive_officer.delivered_executive_incident_brief",
+            "obs.ihis_chief_executive_officer.supporting_evidence_summary",
+            "obs.ihis_chief_executive_officer.gcio_update",
+            "obs.ihis_chief_executive_officer.investigation_capacity_status",
+            "obs.ihis_chief_executive_officer.acting_capacity_context",
+            "obs.ihis_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_chief_executive_officer.open_evidence_questions",
+            "state.ihis_chief_executive_officer.last_investigation_assignment",
+            "state.ihis_chief_executive_officer.active_direction_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_chief_executive_officer.assign_investigation_lead",
+            "h2epr.action.0616.ihis_chief_executive_officer.request_supporting_evidence",
+            "h2epr.action.0616.ihis_chief_executive_officer.issue_ihis_executive_update"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_chief_executive_officer.delivered_executive_incident_brief",
+            "obs.ihis_chief_executive_officer.supporting_evidence_summary",
+            "obs.ihis_chief_executive_officer.gcio_update",
+            "obs.ihis_chief_executive_officer.investigation_capacity_status",
+            "obs.ihis_chief_executive_officer.acting_capacity_context",
+            "obs.ihis_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.investigation_assignment",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.participant_intent"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.office.sector-lead::cyber_security_governance_director_and_healthcare_sector_lead",
+      "actor_id": "actor.0616.office.sector-lead",
+      "capability_id": "cyber_security_governance_director_and_healthcare_sector_lead",
+      "participant_product_id": "h2epr.agent-definition.0616.cyber-security-governance-director-and-healthcare-sector-lead",
+      "implementation_id": "h2epr.policy.0616.participant.cyber_security_governance_director_and_healthcare_sector_lead",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.cyber_security_governance_director_and_healthcare_sector_lead.active_classification_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.propose_incident_category"
+          ]
+        },
+        {
+          "state_id": "state.cyber_security_governance_director_and_healthcare_sector_lead.active_reporting_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.notify_authorized_healthcare_leadership",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.report_cii_incident_to_csa",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_report_status"
+          ]
+        },
+        {
+          "state_id": "state.cyber_security_governance_director_and_healthcare_sector_lead.active_verification_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_classification_verification"
+          ]
+        },
+        {
+          "state_id": "state.cyber_security_governance_director_and_healthcare_sector_lead.current_sector_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.propose_incident_category",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.report_cii_incident_to_csa"
+          ]
+        },
+        {
+          "state_id": "state.cyber_security_governance_director_and_healthcare_sector_lead.last_classification_basis",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.propose_incident_category"
+          ]
+        },
+        {
+          "state_id": "state.cyber_security_governance_director_and_healthcare_sector_lead.open_classification_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_classification_verification"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.cyber_security_governance_director_and_healthcare_sector_lead.DC-SL-1",
+          "consumed_observation_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.delivered_incident_account",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.cii_scope_indicator",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.classification_verification_update",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.reporting_framework_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.executive_briefing_state"
+          ],
+          "persistent_state_ids": [
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.current_sector_assessment",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.open_classification_questions",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_verification_intents",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_classification_intents",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_classification_verification",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.propose_incident_category",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_executive_briefing",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.report_cii_incident_to_csa"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.delivered_incident_account",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.cii_scope_indicator",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.classification_verification_update",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.reporting_framework_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.executive_briefing_state"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.cyber_security_governance_director_and_healthcare_sector_lead.DC-SL-2",
+          "consumed_observation_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.cii_scope_indicator",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.classification_verification_update",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.executive_briefing_state",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.ihis_executive_direction"
+          ],
+          "persistent_state_ids": [
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.current_sector_assessment",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.open_classification_questions",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.last_classification_basis",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_classification_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_classification_verification",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.propose_incident_category",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_executive_briefing",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.report_cii_incident_to_csa"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.cii_scope_indicator",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.classification_verification_update",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.executive_briefing_state",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.ihis_executive_direction"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.report_and_notification"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.cyber_security_governance_director_and_healthcare_sector_lead.DC-SL-3",
+          "consumed_observation_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.cii_scope_indicator",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.classification_verification_update",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.reporting_framework_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.executive_briefing_state",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.ihis_executive_direction",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.acting_capacity_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.report_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.current_sector_assessment",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.open_classification_questions",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.last_classification_basis",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_classification_intents",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.report_cii_incident_to_csa",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.propose_incident_category",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_executive_briefing",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.notify_authorized_healthcare_leadership",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_classification_verification"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.cii_scope_indicator",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.classification_verification_update",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.reporting_framework_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.executive_briefing_state",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.ihis_executive_direction",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.acting_capacity_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.report_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.cyber_security_governance_director_and_healthcare_sector_lead.DC-SL-4",
+          "consumed_observation_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.reporting_framework_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.ihis_executive_direction",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.acting_capacity_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.report_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.open_classification_questions",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.last_classification_basis",
+            "state.cyber_security_governance_director_and_healthcare_sector_lead.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.request_report_status",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.report_cii_incident_to_csa",
+            "h2epr.action.0616.cyber_security_governance_director_and_healthcare_sector_lead.notify_authorized_healthcare_leadership"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.reporting_framework_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.ihis_executive_direction",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.acting_capacity_context",
+            "obs.cyber_security_governance_director_and_healthcare_sector_lead.report_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.office.singhealth-deputy-gceo::singhealth_deputy_group_chief_executive_officer",
+      "actor_id": "actor.0616.office.singhealth-deputy-gceo",
+      "capability_id": "singhealth_deputy_group_chief_executive_officer",
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-deputy-group-chief-executive-officer",
+      "implementation_id": "h2epr.policy.0616.participant.singhealth_deputy_group_chief_executive_officer",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.singhealth_deputy_group_chief_executive_officer.active_outreach_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.mobilize_outreach_preparation",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_audience",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_plan",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.provide_outreach_status"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_deputy_group_chief_executive_officer.active_reporting_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.notify_singhealth_gceo",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_incident_clarification",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_moh_reporting"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_deputy_group_chief_executive_officer.current_supervisory_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.mobilize_outreach_preparation",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.notify_singhealth_gceo"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_deputy_group_chief_executive_officer.last_scope_update",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_audience",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_plan"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_deputy_group_chief_executive_officer.open_information_needs",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_incident_clarification"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_deputy_group_chief_executive_officer.DC-DGCEO-1",
+          "consumed_observation_ids": [
+            "obs.singhealth_deputy_group_chief_executive_officer.delivered_gcio_incident_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.singhealth_gceo_direction",
+            "obs.singhealth_deputy_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_deputy_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_deputy_group_chief_executive_officer.current_supervisory_assessment",
+            "state.singhealth_deputy_group_chief_executive_officer.open_information_needs",
+            "state.singhealth_deputy_group_chief_executive_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_incident_clarification",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.notify_singhealth_gceo",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_moh_reporting"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_deputy_group_chief_executive_officer.delivered_gcio_incident_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.singhealth_gceo_direction",
+            "obs.singhealth_deputy_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_deputy_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_deputy_group_chief_executive_officer.DC-DGCEO-2",
+          "consumed_observation_ids": [
+            "obs.singhealth_deputy_group_chief_executive_officer.delivered_gcio_incident_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.singhealth_gceo_direction",
+            "obs.singhealth_deputy_group_chief_executive_officer.investigation_scope_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.data_integrity_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_deputy_group_chief_executive_officer.outreach_readiness_status",
+            "obs.singhealth_deputy_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_deputy_group_chief_executive_officer.current_supervisory_assessment",
+            "state.singhealth_deputy_group_chief_executive_officer.open_information_needs",
+            "state.singhealth_deputy_group_chief_executive_officer.active_outreach_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_incident_clarification",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.mobilize_outreach_preparation",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_audience",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_plan",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.provide_outreach_status"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_deputy_group_chief_executive_officer.delivered_gcio_incident_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.singhealth_gceo_direction",
+            "obs.singhealth_deputy_group_chief_executive_officer.investigation_scope_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.data_integrity_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_deputy_group_chief_executive_officer.outreach_readiness_status",
+            "obs.singhealth_deputy_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.outreach_plan",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_deputy_group_chief_executive_officer.DC-DGCEO-3",
+          "consumed_observation_ids": [
+            "obs.singhealth_deputy_group_chief_executive_officer.singhealth_gceo_direction",
+            "obs.singhealth_deputy_group_chief_executive_officer.investigation_scope_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.data_integrity_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_deputy_group_chief_executive_officer.outreach_readiness_status",
+            "obs.singhealth_deputy_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_deputy_group_chief_executive_officer.open_information_needs",
+            "state.singhealth_deputy_group_chief_executive_officer.last_scope_update",
+            "state.singhealth_deputy_group_chief_executive_officer.active_outreach_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.request_incident_clarification",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_audience",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.propose_notification_plan",
+            "h2epr.action.0616.singhealth_deputy_group_chief_executive_officer.provide_outreach_status"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_deputy_group_chief_executive_officer.singhealth_gceo_direction",
+            "obs.singhealth_deputy_group_chief_executive_officer.investigation_scope_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.data_integrity_update",
+            "obs.singhealth_deputy_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_deputy_group_chief_executive_officer.outreach_readiness_status",
+            "obs.singhealth_deputy_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.outreach_plan",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.office.singhealth-gceo::singhealth_group_chief_executive_officer",
+      "actor_id": "actor.0616.office.singhealth-gceo",
+      "capability_id": "singhealth_group_chief_executive_officer",
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-group-chief-executive-officer",
+      "implementation_id": "h2epr.policy.0616.participant.singhealth_group_chief_executive_officer",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.singhealth_group_chief_executive_officer.active_notification_directions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.advise_notification_audience",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.consult_on_outreach_plan",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.recommend_primary_notification_channel",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_outreach_plan"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_executive_officer.active_reporting_directions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.direct_moh_reporting",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_incident_detail"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_executive_officer.current_gceo_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.advise_notification_audience",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.direct_moh_reporting",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.recommend_primary_notification_channel"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_executive_officer.last_consultation_record",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.consult_on_outreach_plan"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_executive_officer.open_governance_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_incident_detail"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_group_chief_executive_officer.DC-GCEO-1",
+          "consumed_observation_ids": [
+            "obs.singhealth_group_chief_executive_officer.delivered_incident_update",
+            "obs.singhealth_group_chief_executive_officer.unauthorized_access_indicator",
+            "obs.singhealth_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_group_chief_executive_officer.current_gceo_assessment",
+            "state.singhealth_group_chief_executive_officer.open_governance_questions",
+            "state.singhealth_group_chief_executive_officer.active_reporting_directions"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_incident_detail",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.direct_moh_reporting"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_group_chief_executive_officer.delivered_incident_update",
+            "obs.singhealth_group_chief_executive_officer.unauthorized_access_indicator",
+            "obs.singhealth_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_group_chief_executive_officer.DC-GCEO-2",
+          "consumed_observation_ids": [
+            "obs.singhealth_group_chief_executive_officer.delivered_incident_update",
+            "obs.singhealth_group_chief_executive_officer.unauthorized_access_indicator",
+            "obs.singhealth_group_chief_executive_officer.deputy_gceo_outreach_proposal",
+            "obs.singhealth_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_group_chief_executive_officer.notification_readiness_summary",
+            "obs.singhealth_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_group_chief_executive_officer.current_gceo_assessment",
+            "state.singhealth_group_chief_executive_officer.open_governance_questions",
+            "state.singhealth_group_chief_executive_officer.active_notification_directions"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_incident_detail",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_outreach_plan",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.consult_on_outreach_plan",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.advise_notification_audience"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_group_chief_executive_officer.delivered_incident_update",
+            "obs.singhealth_group_chief_executive_officer.unauthorized_access_indicator",
+            "obs.singhealth_group_chief_executive_officer.deputy_gceo_outreach_proposal",
+            "obs.singhealth_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_group_chief_executive_officer.notification_readiness_summary",
+            "obs.singhealth_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.outreach_plan",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_group_chief_executive_officer.DC-GCEO-3",
+          "consumed_observation_ids": [
+            "obs.singhealth_group_chief_executive_officer.deputy_gceo_outreach_proposal",
+            "obs.singhealth_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_group_chief_executive_officer.notification_readiness_summary",
+            "obs.singhealth_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_group_chief_executive_officer.current_gceo_assessment",
+            "state.singhealth_group_chief_executive_officer.open_governance_questions",
+            "state.singhealth_group_chief_executive_officer.last_consultation_record",
+            "state.singhealth_group_chief_executive_officer.active_notification_directions"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.request_outreach_plan",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.consult_on_outreach_plan",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.advise_notification_audience",
+            "h2epr.action.0616.singhealth_group_chief_executive_officer.recommend_primary_notification_channel"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_group_chief_executive_officer.deputy_gceo_outreach_proposal",
+            "obs.singhealth_group_chief_executive_officer.interagency_consultation_record",
+            "obs.singhealth_group_chief_executive_officer.notification_readiness_summary",
+            "obs.singhealth_group_chief_executive_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.outreach_plan",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.office.singhealth-gcio::singhealth_group_chief_information_officer",
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_id": "singhealth_group_chief_information_officer",
+      "participant_product_id": "h2epr.agent-definition.0616.singhealth-group-chief-information-officer",
+      "implementation_id": "h2epr.policy.0616.participant.singhealth_group_chief_information_officer",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.singhealth_group_chief_information_officer.active_reporting_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.escalate_to_ihis_leadership",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.notify_singhealth_management",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.provide_patient_impact_update",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_singhealth_reporting_advice"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_information_officer.active_review_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.convene_management_review",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_operational_clarification"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_information_officer.current_gcio_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.escalate_to_ihis_leadership"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_information_officer.last_routed_account",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.escalate_to_ihis_leadership",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.notify_singhealth_management",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.provide_patient_impact_update"
+          ]
+        },
+        {
+          "state_id": "state.singhealth_group_chief_information_officer.open_information_requests",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_operational_clarification"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_group_chief_information_officer.DC-GCIO-1",
+          "consumed_observation_ids": [
+            "obs.singhealth_group_chief_information_officer.delivered_operational_account",
+            "obs.singhealth_group_chief_information_officer.technical_verification_update",
+            "obs.singhealth_group_chief_information_officer.ihis_executive_direction",
+            "obs.singhealth_group_chief_information_officer.sector_lead_update",
+            "obs.singhealth_group_chief_information_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_group_chief_information_officer.current_gcio_assessment",
+            "state.singhealth_group_chief_information_officer.open_information_requests",
+            "state.singhealth_group_chief_information_officer.active_review_intents",
+            "state.singhealth_group_chief_information_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_operational_clarification",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.convene_management_review",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.escalate_to_ihis_leadership"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_group_chief_information_officer.delivered_operational_account",
+            "obs.singhealth_group_chief_information_officer.technical_verification_update",
+            "obs.singhealth_group_chief_information_officer.ihis_executive_direction",
+            "obs.singhealth_group_chief_information_officer.sector_lead_update",
+            "obs.singhealth_group_chief_information_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_group_chief_information_officer.DC-GCIO-2",
+          "consumed_observation_ids": [
+            "obs.singhealth_group_chief_information_officer.delivered_operational_account",
+            "obs.singhealth_group_chief_information_officer.technical_verification_update",
+            "obs.singhealth_group_chief_information_officer.ihis_executive_direction",
+            "obs.singhealth_group_chief_information_officer.sector_lead_update",
+            "obs.singhealth_group_chief_information_officer.singhealth_management_response",
+            "obs.singhealth_group_chief_information_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_group_chief_information_officer.current_gcio_assessment",
+            "state.singhealth_group_chief_information_officer.last_routed_account",
+            "state.singhealth_group_chief_information_officer.active_review_intents",
+            "state.singhealth_group_chief_information_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.notify_singhealth_management",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_singhealth_reporting_advice",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_operational_clarification",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.escalate_to_ihis_leadership"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_group_chief_information_officer.delivered_operational_account",
+            "obs.singhealth_group_chief_information_officer.technical_verification_update",
+            "obs.singhealth_group_chief_information_officer.ihis_executive_direction",
+            "obs.singhealth_group_chief_information_officer.sector_lead_update",
+            "obs.singhealth_group_chief_information_officer.singhealth_management_response",
+            "obs.singhealth_group_chief_information_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.singhealth_group_chief_information_officer.DC-GCIO-3",
+          "consumed_observation_ids": [
+            "obs.singhealth_group_chief_information_officer.technical_verification_update",
+            "obs.singhealth_group_chief_information_officer.singhealth_management_response",
+            "obs.singhealth_group_chief_information_officer.patient_impact_update",
+            "obs.singhealth_group_chief_information_officer.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.singhealth_group_chief_information_officer.current_gcio_assessment",
+            "state.singhealth_group_chief_information_officer.open_information_requests",
+            "state.singhealth_group_chief_information_officer.last_routed_account",
+            "state.singhealth_group_chief_information_officer.active_reporting_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.singhealth_group_chief_information_officer.provide_patient_impact_update",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.request_operational_clarification",
+            "h2epr.action.0616.singhealth_group_chief_information_officer.notify_singhealth_management"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.singhealth_group_chief_information_officer.technical_verification_update",
+            "obs.singhealth_group_chief_information_officer.singhealth_management_response",
+            "obs.singhealth_group_chief_information_officer.patient_impact_update",
+            "obs.singhealth_group_chief_information_officer.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.outreach_plan",
+            "lifecycle.0616.report_and_notification",
+            "lifecycle.0616.participant_intent"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.office.sirm::security_incident_response_manager",
+      "actor_id": "actor.0616.office.sirm",
+      "capability_id": "security_incident_response_manager",
+      "participant_product_id": "h2epr.agent-definition.0616.security-incident-response-manager",
+      "implementation_id": "h2epr.policy.0616.participant.security_incident_response_manager",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.security_incident_response_manager.active_coordination_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.security_incident_response_manager.activate_incident_response_team",
+            "h2epr.action.0616.security_incident_response_manager.coordinate_incident_response",
+            "h2epr.action.0616.security_incident_response_manager.delegate_sirm_coverage",
+            "h2epr.action.0616.security_incident_response_manager.direct_local_containment",
+            "h2epr.action.0616.security_incident_response_manager.request_external_assistance",
+            "h2epr.action.0616.security_incident_response_manager.request_security_investigation"
+          ]
+        },
+        {
+          "state_id": "state.security_incident_response_manager.coverage_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "authoritative_projection",
+          "update_trigger_ids": [
+            "h2epr.action.0616.security_incident_response_manager.delegate_sirm_coverage",
+            "h2epr.action.0616.security_incident_response_manager.request_external_assistance"
+          ]
+        },
+        {
+          "state_id": "state.security_incident_response_manager.current_incident_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.security_incident_response_manager.coordinate_incident_response",
+            "h2epr.action.0616.security_incident_response_manager.direct_local_containment",
+            "h2epr.action.0616.security_incident_response_manager.escalate_suspected_incident",
+            "h2epr.action.0616.security_incident_response_manager.request_security_investigation"
+          ]
+        },
+        {
+          "state_id": "state.security_incident_response_manager.last_escalation_intent",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.security_incident_response_manager.escalate_suspected_incident"
+          ]
+        },
+        {
+          "state_id": "state.security_incident_response_manager.open_information_requests",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.security_incident_response_manager.request_security_investigation"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.security_incident_response_manager.DC-SIRM-1",
+          "consumed_observation_ids": [
+            "obs.security_incident_response_manager.delivered_security_signal",
+            "obs.security_incident_response_manager.technical_investigation_update",
+            "obs.security_incident_response_manager.incident_scope_indicator",
+            "obs.security_incident_response_manager.control_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.security_incident_response_manager.current_incident_assessment",
+            "state.security_incident_response_manager.open_information_requests"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.security_incident_response_manager.request_security_investigation",
+            "h2epr.action.0616.security_incident_response_manager.coordinate_incident_response",
+            "h2epr.action.0616.security_incident_response_manager.direct_local_containment",
+            "h2epr.action.0616.security_incident_response_manager.escalate_suspected_incident"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.security_incident_response_manager.delivered_security_signal",
+            "obs.security_incident_response_manager.technical_investigation_update",
+            "obs.security_incident_response_manager.incident_scope_indicator",
+            "obs.security_incident_response_manager.control_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.security_incident_response_manager.DC-SIRM-2",
+          "consumed_observation_ids": [
+            "obs.security_incident_response_manager.technical_investigation_update",
+            "obs.security_incident_response_manager.delivered_response_request",
+            "obs.security_incident_response_manager.response_capacity_status",
+            "obs.security_incident_response_manager.control_result_notice",
+            "obs.security_incident_response_manager.escalation_feedback"
+          ],
+          "persistent_state_ids": [
+            "state.security_incident_response_manager.current_incident_assessment",
+            "state.security_incident_response_manager.active_coordination_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.security_incident_response_manager.coordinate_incident_response",
+            "h2epr.action.0616.security_incident_response_manager.activate_incident_response_team",
+            "h2epr.action.0616.security_incident_response_manager.provide_incident_response_status",
+            "h2epr.action.0616.security_incident_response_manager.direct_local_containment",
+            "h2epr.action.0616.security_incident_response_manager.request_external_assistance",
+            "h2epr.action.0616.security_incident_response_manager.request_security_investigation"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.security_incident_response_manager.technical_investigation_update",
+            "obs.security_incident_response_manager.delivered_response_request",
+            "obs.security_incident_response_manager.response_capacity_status",
+            "obs.security_incident_response_manager.control_result_notice",
+            "obs.security_incident_response_manager.escalation_feedback"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.response_team_activation",
+            "lifecycle.0616.meeting_or_consultation"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.security_incident_response_manager.DC-SIRM-3",
+          "consumed_observation_ids": [
+            "obs.security_incident_response_manager.delivered_security_signal",
+            "obs.security_incident_response_manager.technical_investigation_update",
+            "obs.security_incident_response_manager.delivered_response_request",
+            "obs.security_incident_response_manager.incident_scope_indicator",
+            "obs.security_incident_response_manager.control_result_notice",
+            "obs.security_incident_response_manager.reporting_framework_context"
+          ],
+          "persistent_state_ids": [
+            "state.security_incident_response_manager.current_incident_assessment",
+            "state.security_incident_response_manager.open_information_requests",
+            "state.security_incident_response_manager.last_escalation_intent"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.security_incident_response_manager.escalate_suspected_incident",
+            "h2epr.action.0616.security_incident_response_manager.request_security_investigation",
+            "h2epr.action.0616.security_incident_response_manager.request_external_assistance",
+            "h2epr.action.0616.security_incident_response_manager.coordinate_incident_response"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.security_incident_response_manager.delivered_security_signal",
+            "obs.security_incident_response_manager.technical_investigation_update",
+            "obs.security_incident_response_manager.delivered_response_request",
+            "obs.security_incident_response_manager.incident_scope_indicator",
+            "obs.security_incident_response_manager.control_result_notice",
+            "obs.security_incident_response_manager.reporting_framework_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.incident_assessment_and_category",
+            "lifecycle.0616.report_and_notification"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.security_incident_response_manager.DC-SIRM-4",
+          "consumed_observation_ids": [
+            "obs.security_incident_response_manager.delivered_response_request",
+            "obs.security_incident_response_manager.response_capacity_status",
+            "obs.security_incident_response_manager.reporting_framework_context"
+          ],
+          "persistent_state_ids": [
+            "state.security_incident_response_manager.active_coordination_intents",
+            "state.security_incident_response_manager.coverage_assessment"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.security_incident_response_manager.delegate_sirm_coverage",
+            "h2epr.action.0616.security_incident_response_manager.coordinate_incident_response",
+            "h2epr.action.0616.security_incident_response_manager.request_external_assistance"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.security_incident_response_manager.delivered_response_request",
+            "obs.security_incident_response_manager.response_capacity_status",
+            "obs.security_incident_response_manager.reporting_framework_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_assignment",
+            "lifecycle.0616.meeting_or_consultation"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.unit.operations.application-scm-coordination::ihis_operational_and_scm_management",
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "participant_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "implementation_id": "h2epr.policy.0616.participant.ihis_operational_and_scm_management",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.ihis_operational_and_scm_management.active_management_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.assign_operational_follow_up",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.last_consolidated_account",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.open_verification_items",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-A",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+            "state.ihis_operational_and_scm_management.open_verification_items",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-B",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+            "state.ihis_operational_and_scm_management.last_consolidated_account",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.investigation_assignment",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-C",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context",
+            "obs.ihis_operational_and_scm_management.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.open_verification_items",
+            "state.ihis_operational_and_scm_management.last_consolidated_account",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.assign_operational_follow_up",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context",
+            "obs.ihis_operational_and_scm_management.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_assignment"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.unit.operations.cluster-coordination::ihis_operational_and_scm_management",
+      "actor_id": "actor.0616.unit.operations.cluster-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "participant_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "implementation_id": "h2epr.policy.0616.participant.ihis_operational_and_scm_management",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.ihis_operational_and_scm_management.active_management_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.assign_operational_follow_up",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.last_consolidated_account",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.open_verification_items",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-A",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+            "state.ihis_operational_and_scm_management.open_verification_items",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-B",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+            "state.ihis_operational_and_scm_management.last_consolidated_account",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.investigation_assignment",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-C",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context",
+            "obs.ihis_operational_and_scm_management.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.open_verification_items",
+            "state.ihis_operational_and_scm_management.last_consolidated_account",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.assign_operational_follow_up",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context",
+            "obs.ihis_operational_and_scm_management.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_assignment"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.unit.operations.infrastructure-coordination::ihis_operational_and_scm_management",
+      "actor_id": "actor.0616.unit.operations.infrastructure-coordination",
+      "capability_id": "ihis_operational_and_scm_management",
+      "participant_product_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "implementation_id": "h2epr.policy.0616.participant.ihis_operational_and_scm_management",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.ihis_operational_and_scm_management.active_management_intents",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.assign_operational_follow_up",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.last_consolidated_account",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ]
+        },
+        {
+          "state_id": "state.ihis_operational_and_scm_management.open_verification_items",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-A",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+            "state.ihis_operational_and_scm_management.open_verification_items",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-B",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.current_cross_team_assessment",
+            "state.ihis_operational_and_scm_management.last_consolidated_account",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.delivered_role_local_account",
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.investigation_assignment",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.ihis_operational_and_scm_management.SITUATION-C",
+          "consumed_observation_ids": [
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context",
+            "obs.ihis_operational_and_scm_management.intent_lifecycle_notice"
+          ],
+          "persistent_state_ids": [
+            "state.ihis_operational_and_scm_management.open_verification_items",
+            "state.ihis_operational_and_scm_management.last_consolidated_account",
+            "state.ihis_operational_and_scm_management.active_management_intents"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_operational_account",
+            "h2epr.action.0616.ihis_operational_and_scm_management.convene_cross_functional_review",
+            "h2epr.action.0616.ihis_operational_and_scm_management.assign_operational_follow_up",
+            "h2epr.action.0616.ihis_operational_and_scm_management.request_fact_verification",
+            "h2epr.action.0616.ihis_operational_and_scm_management.escalate_operational_concern"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.ihis_operational_and_scm_management.coordination_meeting_record",
+            "obs.ihis_operational_and_scm_management.verification_result_notice",
+            "obs.ihis_operational_and_scm_management.management_route_context",
+            "obs.ihis_operational_and_scm_management.intent_lifecycle_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.meeting_or_consultation",
+            "lifecycle.0616.investigation_assignment"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.unit.technical.infrastructure-citrix::technical_administration_and_line_security_staff",
+      "actor_id": "actor.0616.unit.technical.infrastructure-citrix",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "participant_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "implementation_id": "h2epr.policy.0616.participant.technical_administration_and_line_security_staff",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.last_shared_finding",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.local_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.open_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-A",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.local_assessment",
+            "state.technical_administration_and_line_security_staff.open_questions",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-B",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.local_assessment",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-C",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request",
+            "obs.technical_administration_and_line_security_staff.action_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.open_questions",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request",
+            "obs.technical_administration_and_line_security_staff.action_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.unit.technical.scm-application-database::technical_administration_and_line_security_staff",
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "participant_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "implementation_id": "h2epr.policy.0616.participant.technical_administration_and_line_security_staff",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.last_shared_finding",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.local_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.open_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-A",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.local_assessment",
+            "state.technical_administration_and_line_security_staff.open_questions",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-B",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.local_assessment",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-C",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request",
+            "obs.technical_administration_and_line_security_staff.action_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.open_questions",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request",
+            "obs.technical_administration_and_line_security_staff.action_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0616.unit.technical.security-engineering::technical_administration_and_line_security_staff",
+      "actor_id": "actor.0616.unit.technical.security-engineering",
+      "capability_id": "technical_administration_and_line_security_staff",
+      "participant_product_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "implementation_id": "h2epr.policy.0616.participant.technical_administration_and_line_security_staff",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.last_shared_finding",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.local_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review"
+          ]
+        },
+        {
+          "state_id": "state.technical_administration_and_line_security_staff.open_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-A",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.local_assessment",
+            "state.technical_administration_and_line_security_staff.open_questions",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-B",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.local_assessment",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.share_technical_finding",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.local_technical_signal",
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.information_product",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.participant_intent"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0616.technical_administration_and_line_security_staff.SITUATION-C",
+          "consumed_observation_ids": [
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request",
+            "obs.technical_administration_and_line_security_staff.action_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.technical_administration_and_line_security_staff.open_questions",
+            "state.technical_administration_and_line_security_staff.last_shared_finding",
+            "state.technical_administration_and_line_security_staff.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0616.technical_administration_and_line_security_staff.investigate_local_signal",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.apply_local_control",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_security_review",
+            "h2epr.action.0616.technical_administration_and_line_security_staff.request_peer_context"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent"
+          ],
+          "revisit_trigger_ids": [
+            "obs.technical_administration_and_line_security_staff.delivered_peer_finding",
+            "obs.technical_administration_and_line_security_staff.local_control_state",
+            "obs.technical_administration_and_line_security_staff.security_response_request",
+            "obs.technical_administration_and_line_security_staff.action_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0616.participant_intent",
+            "lifecycle.0616.investigation_or_verification_request",
+            "lifecycle.0616.local_control_request",
+            "lifecycle.0616.attack_and_technical_effect"
+          ]
+        }
+      ]
+    }
+  ],
+  "scenario_policy_realizations": [
+    {
+      "policy_id": "POL-0616-AUTH-01",
+      "semantic_version": "0.1.0",
+      "selection": "capacity_qualified_authority_relationship_access_and_resource_checks",
+      "implementation_id": "h2epr.policy.0616.scenario.authority",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/5"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.authority.capacity_relationship_access_resource"
+      ],
+      "rejection_reason_codes": [
+        "authority_capacity_inactive",
+        "authority_scope_not_effective",
+        "authority_relationship_missing",
+        "authority_access_missing",
+        "authority_resource_owner_mismatch",
+        "authority_resource_unavailable"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-COORD-01",
+      "semantic_version": "0.1.0",
+      "selection": "invitation_attendance_presented_material_assignment_and_result_separated",
+      "implementation_id": "h2epr.policy.0616.scenario.coordination",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/4"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.coordination.meeting_sirt_assignment"
+      ],
+      "rejection_reason_codes": [
+        "coordination_unauthorized",
+        "coordination_capacity_unavailable",
+        "coordination_transition_invalid",
+        "coordination_attendance_invalid",
+        "coordination_material_invalid"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-INCIDENT-01",
+      "semantic_version": "0.1.0",
+      "selection": "proposal_assessment_category_report_and_institutional_acceptance_separated",
+      "implementation_id": "h2epr.policy.0616.scenario.incident",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "configuration_source_pointers": [
+        "/policy_selections/6"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.incident.assessment_category_reporting_direction"
+      ],
+      "rejection_reason_codes": [
+        "incident_transition_invalid",
+        "incident_classification_unauthorized",
+        "incident_reporting_unauthorized",
+        "incident_issue_without_classification",
+        "incident_acceptance_without_delivery"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-INFO-01",
+      "semantic_version": "0.1.0",
+      "selection": "source_version_route_delivery_freshness_correction_and_visibility_separated",
+      "implementation_id": "h2epr.policy.0616.scenario.information",
+      "implementation_version": "0.1.0",
+      "owner_layer": "information",
+      "configuration_source_pointers": [
+        "/policy_selections/1"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.information.source_route_delivery_freshness_correction"
+      ],
+      "rejection_reason_codes": [
+        "information_supersession_invalid",
+        "information_delivery_without_route",
+        "information_delivery_without_transport",
+        "information_projection_without_delivery",
+        "information_visibility_rejected"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-LIFECYCLE-01",
+      "semantic_version": "0.1.0",
+      "selection": "typed_lifecycle_idempotency_adjudication_result_delta_and_later_observation",
+      "implementation_id": "h2epr.policy.0616.scenario.lifecycle",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "configuration_source_pointers": [
+        "/policy_selections/7"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.lifecycle.typed_adjudication_result_observation",
+        "lifecycle.0616.participant_intent",
+        "lifecycle.0616.information_product",
+        "lifecycle.0616.investigation_or_verification_request",
+        "lifecycle.0616.local_control_request",
+        "lifecycle.0616.meeting_or_consultation",
+        "lifecycle.0616.response_team_activation",
+        "lifecycle.0616.incident_assessment_and_category",
+        "lifecycle.0616.report_and_notification",
+        "lifecycle.0616.investigation_assignment",
+        "lifecycle.0616.outreach_plan",
+        "lifecycle.0616.attack_and_technical_effect"
+      ],
+      "rejection_reason_codes": [
+        "lifecycle_duplicate_prior_disposition",
+        "lifecycle_intent_rejected",
+        "lifecycle_result_without_new_admission",
+        "lifecycle_result_kind_unsupported",
+        "lifecycle_invalid_transition"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-NOTIFY-01",
+      "semantic_version": "0.1.0",
+      "selection": "preparation_consultation_authorization_issue_delivery_and_correction_separated",
+      "implementation_id": "h2epr.policy.0616.scenario.notification",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "configuration_source_pointers": [
+        "/policy_selections/8"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.notification.preparation_authorization_delivery"
+      ],
+      "rejection_reason_codes": [
+        "notification_preparation_transition_invalid",
+        "notification_issue_without_authorization",
+        "notification_recipient_ineligible",
+        "notification_recipient_already_resolved",
+        "notification_correction_prestate_invalid"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-ROUTE-01",
+      "semantic_version": "0.1.0",
+      "selection": "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement",
+      "implementation_id": "h2epr.policy.0616.scenario.route",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/3"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.route.issue_transport_delivery_acknowledgement"
+      ],
+      "rejection_reason_codes": [
+        "route_recipient_ineligible",
+        "route_unavailable",
+        "route_transition_invalid",
+        "route_target_state_unknown",
+        "route_admission_prestate_invalid"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-TECH-01",
+      "semantic_version": "0.1.0",
+      "selection": "authority_prestate_access_and_feasibility_adjudicated_without_selected_result",
+      "implementation_id": "h2epr.policy.0616.scenario.technical",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/2"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.technical.authority_prestate_access_feasibility"
+      ],
+      "rejection_reason_codes": [
+        "technical_authority_mismatch",
+        "technical_prestate_mismatch",
+        "technical_access_denied",
+        "technical_resource_owner_mismatch",
+        "technical_infeasible",
+        "technical_result_kind_unsupported"
+      ]
+    },
+    {
+      "policy_id": "POL-0616-TIME-01",
+      "semantic_version": "0.1.0",
+      "selection": "event_driven_partial_order_with_declared_same_time_precedence",
+      "implementation_id": "h2epr.policy.0616.scenario.time",
+      "implementation_version": "0.1.0",
+      "owner_layer": "scheduler",
+      "configuration_source_pointers": [
+        "/policy_selections/0"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0616.time.event_partial_order_and_reopening"
+      ],
+      "rejection_reason_codes": [
+        "time_event_duplicate",
+        "time_phase_unknown",
+        "time_predecessor_unknown",
+        "time_causal_precedence_conflict",
+        "time_predecessor_cycle"
+      ]
+    }
+  ],
+  "lifecycle_realizations": [
+    {
+      "lifecycle_id": "lifecycle.0616.participant_intent",
+      "implementation_id": "h2epr.lifecycle.0616.participant_intent",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "cyber_security_governance_director_and_healthcare_sector_lead",
+        "ihis_chief_executive_officer",
+        "ihis_operational_and_scm_management",
+        "security_incident_response_manager",
+        "singhealth_deputy_group_chief_executive_officer",
+        "singhealth_group_chief_executive_officer",
+        "singhealth_group_chief_information_officer",
+        "technical_administration_and_line_security_staff"
+      ],
+      "state_ids": [
+        "issued",
+        "admitted",
+        "rejected",
+        "pending",
+        "acknowledged",
+        "partial",
+        "completed",
+        "failed",
+        "expired",
+        "cancelled",
+        "superseded"
+      ],
+      "terminal_state_ids": [
+        "rejected",
+        "completed",
+        "failed",
+        "expired",
+        "cancelled",
+        "superseded"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.information_product",
+      "implementation_id": "h2epr.lifecycle.0616.information_product",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "cyber_security_governance_director_and_healthcare_sector_lead",
+        "ihis_chief_executive_officer",
+        "ihis_operational_and_scm_management",
+        "security_incident_response_manager",
+        "singhealth_deputy_group_chief_executive_officer",
+        "singhealth_group_chief_executive_officer",
+        "singhealth_group_chief_information_officer",
+        "technical_administration_and_line_security_staff"
+      ],
+      "state_ids": [
+        "drafted",
+        "produced",
+        "versioned",
+        "routed",
+        "delivered",
+        "acknowledged",
+        "corrected",
+        "superseded",
+        "stale",
+        "expired"
+      ],
+      "terminal_state_ids": [
+        "superseded",
+        "stale",
+        "expired"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.investigation_or_verification_request",
+      "implementation_id": "h2epr.lifecycle.0616.investigation_or_verification_request",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "cyber_security_governance_director_and_healthcare_sector_lead",
+        "ihis_chief_executive_officer",
+        "ihis_operational_and_scm_management",
+        "security_incident_response_manager",
+        "singhealth_deputy_group_chief_executive_officer",
+        "singhealth_group_chief_executive_officer",
+        "singhealth_group_chief_information_officer",
+        "technical_administration_and_line_security_staff"
+      ],
+      "state_ids": [
+        "requested",
+        "authority_checked",
+        "assigned",
+        "executing",
+        "partial",
+        "completed",
+        "failed",
+        "declined",
+        "expired",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.local_control_request",
+      "implementation_id": "h2epr.lifecycle.0616.local_control_request",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "security_incident_response_manager",
+        "technical_administration_and_line_security_staff"
+      ],
+      "state_ids": [
+        "proposed",
+        "authority_checked",
+        "scheduled",
+        "executing",
+        "partial",
+        "effective",
+        "no_effect",
+        "adverse",
+        "reversed",
+        "released"
+      ],
+      "terminal_state_ids": [
+        "released"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.meeting_or_consultation",
+      "implementation_id": "h2epr.lifecycle.0616.meeting_or_consultation",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "cyber_security_governance_director_and_healthcare_sector_lead",
+        "ihis_chief_executive_officer",
+        "ihis_operational_and_scm_management",
+        "security_incident_response_manager",
+        "singhealth_deputy_group_chief_executive_officer",
+        "singhealth_group_chief_executive_officer",
+        "singhealth_group_chief_information_officer"
+      ],
+      "state_ids": [
+        "requested",
+        "admitted",
+        "rejected",
+        "invited",
+        "invitation_partial",
+        "attended",
+        "no_attendance",
+        "material_presented",
+        "decision_recorded",
+        "action_assigned",
+        "record_delivered",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.response_team_activation",
+      "implementation_id": "h2epr.lifecycle.0616.response_team_activation",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "security_incident_response_manager"
+      ],
+      "state_ids": [
+        "requested",
+        "authority_checked",
+        "activated",
+        "declined",
+        "staffed",
+        "partially_staffed",
+        "operating",
+        "failed",
+        "stood_down"
+      ],
+      "terminal_state_ids": [
+        "declined",
+        "failed",
+        "stood_down"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.incident_assessment_and_category",
+      "implementation_id": "h2epr.lifecycle.0616.incident_assessment_and_category",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "cyber_security_governance_director_and_healthcare_sector_lead",
+        "ihis_chief_executive_officer",
+        "security_incident_response_manager"
+      ],
+      "state_ids": [
+        "suspected",
+        "under_review",
+        "provisionally_assessed",
+        "category_proposed",
+        "institutionally_classified",
+        "revised",
+        "reopened",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.report_and_notification",
+      "implementation_id": "h2epr.lifecycle.0616.report_and_notification",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cluster_information_security_officer",
+        "cyber_security_governance_director_and_healthcare_sector_lead",
+        "ihis_chief_executive_officer",
+        "security_incident_response_manager",
+        "singhealth_deputy_group_chief_executive_officer",
+        "singhealth_group_chief_executive_officer",
+        "singhealth_group_chief_information_officer"
+      ],
+      "state_ids": [
+        "proposed",
+        "drafted",
+        "authorized",
+        "authorization_declined",
+        "issued",
+        "transported",
+        "delivered",
+        "acknowledged",
+        "corrected",
+        "superseded",
+        "failed",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "authorization_declined",
+        "superseded",
+        "failed",
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.investigation_assignment",
+      "implementation_id": "h2epr.lifecycle.0616.investigation_assignment",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "ihis_chief_executive_officer",
+        "ihis_operational_and_scm_management",
+        "security_incident_response_manager"
+      ],
+      "state_ids": [
+        "proposed",
+        "authority_checked",
+        "accepted",
+        "declined",
+        "active",
+        "partial",
+        "completed",
+        "failed",
+        "reassigned",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.outreach_plan",
+      "implementation_id": "h2epr.lifecycle.0616.outreach_plan",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "singhealth_deputy_group_chief_executive_officer",
+        "singhealth_group_chief_executive_officer",
+        "singhealth_group_chief_information_officer"
+      ],
+      "state_ids": [
+        "preparation_requested",
+        "drafting",
+        "consultation",
+        "revised",
+        "readiness_assessed",
+        "approved",
+        "declined",
+        "executing",
+        "completed",
+        "cancelled"
+      ],
+      "terminal_state_ids": [
+        "completed",
+        "cancelled"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0616.attack_and_technical_effect",
+      "implementation_id": "h2epr.lifecycle.0616.attack_and_technical_effect",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "security_incident_response_manager",
+        "technical_administration_and_line_security_staff"
+      ],
+      "state_ids": [
+        "attempt",
+        "access_adjudication",
+        "executed",
+        "blocked",
+        "failed",
+        "persisted",
+        "detected",
+        "contained",
+        "later_observed"
+      ],
+      "terminal_state_ids": [
+        "later_observed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    }
+  ],
+  "coverage_expectations": {
+    "actor_instances": 13,
+    "actor_capability_bindings": 13,
+    "population_units": 6,
+    "exogenous_inputs": 6,
+    "structural_selections": 6,
+    "decision_commitments": 41,
+    "observation_placements": 82,
+    "private_state_placements": 60,
+    "configuration_parameter_bindings": 0,
+    "intent_placements": 74,
+    "lifecycle_families": 11,
+    "selected_policies": 9,
+    "actor_capabilities_exact": true,
+    "configuration_semantics_exact": true,
+    "observations_and_private_state_exact": true,
+    "commitments_and_intents_exact": true,
+    "lifecycle_families_exact": true,
+    "selected_policies_exact": true,
+    "unsupported_semantics_rejected": true
+  },
+  "failure_policy": {
+    "missing_implementation": "reject_before_run",
+    "unknown_actor_or_capability": "reject_before_run",
+    "unknown_observation_or_intent": "reject_before_run",
+    "unresolved_configuration_parameter": "reject_before_run",
+    "invalid_lifecycle_definition": "reject_before_run",
+    "invalid_runtime_transition": "typed_failure_without_state_change",
+    "authority_or_resource_mismatch": "fail_closed_without_state_change",
+    "hidden_default": "forbidden",
+    "participant_authored_result": "forbidden"
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}

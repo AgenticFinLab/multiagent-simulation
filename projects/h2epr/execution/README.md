@@ -63,6 +63,13 @@ authoritative replay, and a trace-closed generated EPG. Full traces and graphs
 remain in ignored event custody; the tracked release retains their exact
 identities and compact closure evidence.
 
+The accepted
+[SingHealth Data Breach Policy Realization v0.1](singhealth_data_breach/policy-realization-v0.1/)
+maps all thirteen configured actor placements, nine selected Scenario
+policies, and eleven lifecycle families to closed Rule implementations. It is
+the semantic parent of the later SingHealth executable successor, not itself
+a runtime or generated graph.
+
 ## Shared execution kernel
 
 The importable [`h2epr.execution`](../src/h2epr/execution/) package owns the
@@ -73,7 +80,9 @@ parts of run closure that do not depend on an event domain:
 - trace, terminal seal, replay, graph-parent, graph-reference, and execution
   receipt validation;
 - byte-level and canonical comparison of independent materializations;
-- strict JSON and repository-contained path handling; and
+- strict JSON and repository-contained path handling;
+- deterministic participant-decision and lifecycle state-graph interfaces;
+  and
 - non-destructive writing and checksumming of ignored run custody.
 
 The kernel accepts event identity and expected coverage as explicit inputs. It
@@ -81,8 +90,9 @@ does not contain actor IDs, participant rules, institutional policies,
 event-specific state, clock schedules, reducers, or graph semantics. Those
 remain in the relevant scenario module. Conformance against the accepted Panic
 run shows that the shared algorithms reproduce its compact comparison and
-graph receipt exactly; later event implementations can consume the same
-surface without changing the Panic release.
+graph receipt exactly. SingHealth consumes the shared participant and
+lifecycle interfaces while retaining its event-qualified semantics and
+registries, without changing the Panic release.
 
 ## Admission boundary
 
