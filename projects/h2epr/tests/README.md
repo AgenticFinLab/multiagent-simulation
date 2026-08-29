@@ -18,7 +18,7 @@ python -m pip install -e "projects/h2epr[test]"
 | `construction/` | Explicit source loading, lossless construction records, evidence isolation, and import boundaries |
 | `g2/` | Entity registry, participant artifacts, world inputs, and event-bundle construction |
 | `configuration/` | Schema admission, canonical identity, references, assembly, failure classes, and portable receipts |
-| `execution/` | Policy Realization, executable-successor, repeated-run, replay, graph-closure, and fail-closed release boundaries |
+| `execution/` | Policy Realization, executable successors, shared run-closure kernel, repeated runs, replay, graph closure, custody, and fail-closed release boundaries |
 | `agents/` | Definition profiles, mappings, bindings, participant slices, and lineage conformance |
 | `g3/` | Phased runtime, policies, reducer, transport, trace, seals, replay, and detectors |
 | `g4/` | Sealed-trace inventory, deterministic graph compilation, and graph seals |
@@ -87,6 +87,14 @@ be checked together:
 python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/configuration/test_scenario_configuration_admission.py \
   projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_admission.py
+```
+
+The shared execution kernel and its exact Panic conformance can be checked
+independently:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/execution/test_shared_execution_kernel.py
 ```
 
 Runtime and compiler checks use the MASim dependencies described in the root

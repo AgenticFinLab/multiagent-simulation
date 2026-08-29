@@ -19,12 +19,13 @@ execution logic, and generated-process semantics remain H2EPR concerns.
 | Artifacts and bundles | `src/h2epr/artifacts/`, `src/h2epr/bundles/` | Participant artifacts, provenance, and validated runtime bundles |
 | Policies and world | `src/h2epr/policies/`, `src/h2epr/world/` | Declarative policy inputs and normalized world calculations |
 | Runtime and compiler | `src/h2epr/runtime/`, `src/h2epr/compiler/` | Deterministic execution, sealed traces, replay, and graph compilation |
+| Shared execution closure | `src/h2epr/execution/` | Event-neutral run documents, closure validation, deterministic comparison, strict release input, and ignored custody |
 | Agent research | `agents/` | Definitions, rosters, interface accounts, mappings, and bindings |
 | Population research | `populations/` | Heterogeneous participant models and interface reviews |
 | Event coordination | `events/` | One lightweight Build Brief and cross-directory index per event |
 | Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases and their bounded implementation modules |
 | Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
-| Rule execution | `execution/` | Policy Realizations, executable successors, runtime-bundle contracts, and compact run/graph records |
+| Rule execution releases | `execution/` | Policy Realizations, executable successors, runtime-bundle contracts, and compact run/graph records |
 | Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
 
 Importable Python code is contained in `src/h2epr`. The `scenarios` directory

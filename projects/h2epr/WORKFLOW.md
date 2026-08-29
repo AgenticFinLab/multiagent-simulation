@@ -145,11 +145,13 @@ three-participant binding, and deterministic trace and replay evidence.
 
 Together they exercise the same stage responsibilities across a financial
 crisis and a healthcare cybersecurity event while retaining event-specific
-participants, semantics, policies, identifiers, and causal checks. Neither
-baseline includes a full-roster runtime, full-event simulation, calibration,
-held-out evaluation, or historical-validity claim. Further work requires a new
-event question or a separately justified method question; deeper work on either
-completed event is not the default continuation.
+participants, semantics, policies, identifiers, and causal checks. A separate
+Panic executable successor now closes full-roster Rule execution, replay, and
+a generated event graph; SingHealth remains at the bounded baseline. Neither
+event includes calibration, held-out evaluation, or a historical-validity
+claim. Further work requires a new event question or a separately justified
+method question; deeper work on either completed event is not the default
+continuation.
 
 The full-roster Rule-execution program is one such separately authorized
 method question. It builds executable successors from the frozen semantic

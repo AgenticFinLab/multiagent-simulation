@@ -70,6 +70,7 @@ cross-event H2EPR code both remain in the H2EPR package.
 | `world/` | Normalized world values and pure calculations |
 | `agents/` | Definition profiles, semantic mapping, intent, and carrier checks |
 | `configuration/` | Configuration schema admission, canonical identity, and receipts |
+| `execution/` | Event-neutral run documents, closure checks, deterministic comparison, strict input handling, and local run custody |
 | `scenarios/` | Event-specific bindings, environment policies, and bounded conformance paths |
 | `runtime/` | H2EPR simulation adapter, phased execution, detectors, and orchestration |
 | `compiler/` | Sealed-trace validation and deterministic graph generation |
@@ -143,15 +144,16 @@ hashes of upstream inputs are recorded in manifests.
 ## Current limitations
 
 The Panic of 1907 construction canary was created with access to the full event
-draft and supports architecture review rather than held-out evaluation. The
-accepted configuration is non-executable, and the current event binding covers
-only the KT--NBC--NYCH lineage. Most roster members and configured policies
-remain semantic assets without participant implementations.
+draft and supports architecture review rather than held-out evaluation. Its
+bounded KT--NBC--NYCH binding remains a limited conformance release, while a
+separate executable successor now covers the complete configured roster and
+has produced deterministic trace, replay, and generated-graph closure.
 
-The project therefore does not yet provide a full-event runtime, calibrated
-parameters, historical fit, or a scientific-validity result. Those are
-separate research activities, not implied by conformance of the engineering
-interfaces.
+The SingHealth Data Breach currently stops at bounded lineage conformance and
+does not yet have the corresponding full-roster executable successor. Neither
+event has calibrated parameters, historical fit, held-out evaluation, or a
+scientific-validity result. Those are separate research activities, not
+implied by closure of the engineering interfaces.
 
 ## Related documents
 
