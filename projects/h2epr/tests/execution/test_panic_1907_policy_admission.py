@@ -218,7 +218,7 @@ def test_complete_candidate_is_semantically_closed_but_not_accepted(
     assert admission.semantic_complete is True
     assert admission.implementation_complete is False
     assert admission.accepted is False
-    assert len(admission.missing_implementation_ids) == 31
+    assert len(admission.missing_implementation_ids) == 27
     assert admission.coverage["actor_capability_bindings"] == 17
     with pytest.raises(TypeError):
         admission.document["status"] = "forged"

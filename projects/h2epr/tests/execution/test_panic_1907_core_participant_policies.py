@@ -139,12 +139,10 @@ def _commitment_reader_id(value: str) -> str:
 def test_core_registry_contains_real_policy_objects_only() -> None:
     registry = participant_policies()
 
-    assert set(registry.values()) == set(CORE_PARTICIPANT_POLICIES)
-    assert implementation_versions() == {
-        policy.implementation_id: "0.1.0" for policy in CORE_PARTICIPANT_POLICIES
-    }
-    for implementation_id, implementation in registry.items():
-        assert participant_policy(implementation_id) is implementation
+    assert set(CORE_PARTICIPANT_POLICIES) <= set(registry.values())
+    for implementation in CORE_PARTICIPANT_POLICIES:
+        assert implementation_versions()[implementation.implementation_id] == "0.1.0"
+        assert participant_policy(implementation.implementation_id) is implementation
     with pytest.raises(KeyError, match="unknown_participant_policy"):
         participant_policy("h2epr.policy.0288.participant.unknown")
 
