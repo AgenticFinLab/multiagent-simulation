@@ -13,8 +13,9 @@ H2EPR studies auditable multi-agent reconstruction of real event processes.
 It combines typed construction, participant and scenario semantics,
 fail-closed configuration admission, deterministic runtime records, and graph
 compilation. The Panic of 1907 and SingHealth Data Breach assets provide a
-bounded cross-event method baseline; they do not constitute full-event
-simulations or scientific-validity claims.
+two-event method baseline with deterministic full-roster Rule execution,
+authoritative replay, and trace-derived generated graphs. The result is
+uncalibrated engineering mechanism coverage, not a scientific-validity claim.
 
 - [Project guide](H2EPR.md)
 - [Source and tests](h2epr/)
@@ -22,13 +23,15 @@ simulations or scientific-validity claims.
 - [Event modeling workflow](h2epr/WORKFLOW.md)
 - [Architecture](h2epr/ARCHITECTURE.md)
 - [Evolution policy](h2epr/EVOLUTION.md)
+- [Cross-event execution conformance](h2epr/execution/cross-event-conformance-v0.1/)
 
 ## Repository convention
 
 Project-specific evidence, Agent behavior, scenarios and evaluation methods
-stay inside the project that owns them. Reusable capabilities move into
-`masim/` only after they have a clear domain-neutral interface and more than
-one credible consumer.
+stay inside the project that owns them. Shared H2EPR capabilities remain under
+`projects/h2epr/`, even when more than one H2EPR event uses them. MASim changes
+only through separately scoped base-framework work; H2EPR does not promote its
+project code back into `masim/`.
 
 Standard MASim scenarios continue to use the root `examples/` and `configs/`
 directories.

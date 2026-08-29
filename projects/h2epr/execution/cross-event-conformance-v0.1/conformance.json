@@ -1,0 +1,236 @@
+{
+  "format_identity": "h2epr.cross-event-execution-conformance.v0_1",
+  "conformance_id": "h2epr.cross-event.execution-conformance.v0_1",
+  "status": "pass",
+  "events": [
+    {
+      "event_id": "H2EPR-0288",
+      "event_name": "Panic of 1907",
+      "event_slug": "panic_1907",
+      "run_release": {
+        "release_id": "H2EPR-0288-RUN-AND-GRAPH-v0.1",
+        "path": "execution/panic_1907/run-and-graph-v0.1",
+        "manifest_source_sha256": "f2bbda06ce6d582820e2d2658f96563eb3043e1c089c2b3f404416dcc160e48d",
+        "run_id": "run.h2epr.0288.canonical.v0_1",
+        "run_profile_id": "h2epr.0288.run-profile.canonical.v0_1",
+        "run_seed": 1907
+      },
+      "full_roster_coverage": {
+        "actors_operated": 16,
+        "actor_capability_bindings": 17,
+        "commitments_evaluated": 88,
+        "scenario_policies_exercised": 9,
+        "lifecycle_families_realized": 13
+      },
+      "execution_inventory": {
+        "logical_coordinate_count": 32,
+        "trace_record_count": 2002,
+        "record_type_counts": {
+          "action_disposition": 87,
+          "action_intent": 87,
+          "carry_forward": 88,
+          "completion": 1,
+          "exogenous_input_release": 8,
+          "message_disposition": 300,
+          "message_intent": 150,
+          "observation": 512,
+          "participant_decision": 88,
+          "run_seal": 1,
+          "scenario_policy_application": 443,
+          "state_delta": 141,
+          "tick_commit": 32,
+          "tick_open": 32,
+          "tick_seal": 32
+        }
+      },
+      "generated_epg_inventory": {
+        "document_canonical_sha256": "5912924617a453bedc250e899f2e1682de811bf24883e5a7d4109aa3f96917cd",
+        "artifact_sha256": "9353b1a6a93d01d04e1f50df7e9ff3273838d107bd550c2c9970ffac3bdd56e1",
+        "node_count": 1392,
+        "edge_count": 1121,
+        "node_type_counts": {
+          "action_disposition": 87,
+          "action_intent": 87,
+          "carry_forward": 88,
+          "exogenous_input_release": 8,
+          "message_disposition": 300,
+          "message_intent": 150,
+          "participant_decision": 88,
+          "scenario_policy_application": 443,
+          "state_delta": 141
+        },
+        "edge_relation_counts": {
+          "adjudicates": 87,
+          "causes": 141,
+          "emits": 150,
+          "governs": 443,
+          "routes": 300
+        }
+      },
+      "closure": {
+        "deterministic_materialization_pair": true,
+        "authoritative_replay": true,
+        "trace_derived_graph": true,
+        "unresolved_message_intent_count": 0,
+        "unresolved_graph_reference_count": 0
+      }
+    },
+    {
+      "event_id": "H2EPR-0616",
+      "event_name": "SingHealth Data Breach",
+      "event_slug": "singhealth_data_breach",
+      "run_release": {
+        "release_id": "H2EPR-0616-RUN-AND-GRAPH-v0.1",
+        "path": "execution/singhealth_data_breach/run-and-graph-v0.1",
+        "manifest_source_sha256": "37fc936ae1fdee49f41728fc4c7e4f7ca9bb16eefd455aa25b7f306774720c43",
+        "run_id": "run.h2epr.0616.canonical.v0_1",
+        "run_profile_id": "h2epr.0616.run-profile.canonical.v0_1",
+        "run_seed": 616
+      },
+      "full_roster_coverage": {
+        "actors_operated": 13,
+        "actor_capability_bindings": 13,
+        "commitments_evaluated": 41,
+        "scenario_policies_exercised": 9,
+        "lifecycle_families_realized": 11
+      },
+      "execution_inventory": {
+        "logical_coordinate_count": 50,
+        "trace_record_count": 1554,
+        "record_type_counts": {
+          "action_disposition": 41,
+          "action_intent": 41,
+          "carry_forward": 41,
+          "completion": 1,
+          "exogenous_input_release": 6,
+          "message_disposition": 146,
+          "message_intent": 73,
+          "observation": 650,
+          "participant_decision": 41,
+          "run_seal": 1,
+          "scenario_policy_application": 222,
+          "state_delta": 141,
+          "tick_commit": 50,
+          "tick_open": 50,
+          "tick_seal": 50
+        }
+      },
+      "generated_epg_inventory": {
+        "document_canonical_sha256": "aea490a5c142d7b57ea3f0512fbbe294ff4b11560ea16cbab5d360e432b5c681",
+        "artifact_sha256": "327f129b2ac73f92e3da9b54211695f30477ceacfdc9f5e9ee72f462316fa599",
+        "node_count": 752,
+        "edge_count": 623,
+        "node_type_counts": {
+          "action_disposition": 41,
+          "action_intent": 41,
+          "carry_forward": 41,
+          "exogenous_input_release": 6,
+          "message_disposition": 146,
+          "message_intent": 73,
+          "participant_decision": 41,
+          "scenario_policy_application": 222,
+          "state_delta": 141
+        },
+        "edge_relation_counts": {
+          "adjudicates": 41,
+          "causes": 141,
+          "emits": 73,
+          "governs": 222,
+          "routes": 146
+        }
+      },
+      "closure": {
+        "deterministic_materialization_pair": true,
+        "authoritative_replay": true,
+        "trace_derived_graph": true,
+        "unresolved_message_intent_count": 0,
+        "unresolved_graph_reference_count": 0
+      }
+    }
+  ],
+  "shared_contract": {
+    "complete_run_documents": [
+      "run-manifest.json",
+      "simulation-trace.json",
+      "final-state.json",
+      "tick-seals.json",
+      "run-seal.json",
+      "replay-receipt.json",
+      "generated-epg.json",
+      "execution-receipt.json"
+    ],
+    "compact_release_documents": [
+      "run-manifest.json",
+      "run-seal.json",
+      "replay-receipt.json",
+      "execution-receipt.json",
+      "determinism-comparison.json",
+      "generated-epg-receipt.json"
+    ],
+    "format_identities": {
+      "run-manifest.json": "h2epr.rule-run-manifest.v0_1",
+      "run-seal.json": "event_process_cjson.v1/run_seal",
+      "replay-receipt.json": "h2epr.replay-receipt.v0_1",
+      "execution-receipt.json": "h2epr.rule-execution-receipt.v0_1",
+      "determinism-comparison.json": "h2epr.rule-run-determinism-comparison.v0_1",
+      "generated-epg-receipt.json": "h2epr.generated-epg-receipt.v0_1"
+    },
+    "trace_record_types": [
+      "action_disposition",
+      "action_intent",
+      "carry_forward",
+      "completion",
+      "exogenous_input_release",
+      "message_disposition",
+      "message_intent",
+      "observation",
+      "participant_decision",
+      "run_seal",
+      "scenario_policy_application",
+      "state_delta",
+      "tick_commit",
+      "tick_open",
+      "tick_seal"
+    ],
+    "generated_epg_node_types": [
+      "action_disposition",
+      "action_intent",
+      "carry_forward",
+      "exogenous_input_release",
+      "message_disposition",
+      "message_intent",
+      "participant_decision",
+      "scenario_policy_application",
+      "state_delta"
+    ],
+    "generated_epg_edge_relations": [
+      "adjudicates",
+      "causes",
+      "emits",
+      "governs",
+      "routes"
+    ],
+    "materializations_per_event": 2,
+    "same_input_and_seed_within_each_pair": true,
+    "event_identity_and_coverage_are_parameters": true
+  },
+  "verified_properties": {
+    "both_compact_releases_fail_closed_and_admitted": true,
+    "both_full_roster_executable_parents_resolved": true,
+    "both_materialization_pairs_byte_identical": true,
+    "both_authoritative_replays_closed": true,
+    "both_generated_epgs_trace_closed": true,
+    "both_transports_resolved_at_completion": true,
+    "event_specific_coverage_values_preserved": true,
+    "masim_used_as_read_only_base_framework": true
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}

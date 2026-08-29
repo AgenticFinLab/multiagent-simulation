@@ -35,10 +35,12 @@ python -m pip install -e "projects/h2epr[test]"
 python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/g2 \
   projects/h2epr/tests/g3 \
-  projects/h2epr/tests/g4
+  projects/h2epr/tests/g4 \
+  projects/h2epr/tests/execution
 ```
 
-The deterministic runtime suites do not require model-provider credentials.
+The deterministic runtime and full-roster Rule suites do not require
+model-provider credentials.
 An actual distributed or model-backed run has additional resource, credential,
 and output requirements and must pass the experiment preflight described in
 `docs/experiment-preflight-skill/`.

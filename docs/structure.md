@@ -75,6 +75,7 @@ multiagent-simulation/
 |       |-- populations/      # 异质参与者群体模型
 |       |-- releases/         # 语义 release、manifest 与完整性记录
 |       |-- scenarios/        # 场景语义、接口闭合与 conformance 记录
+|       |-- execution/        # Rule execution 与精简 run/graph release
 |       |-- skills/           # H2EPR 设计期方法；不参与运行时
 |       |-- src/h2epr/        # 独立安装的 H2EPR Python 包
 |       |   |-- construction/ # 显式输入适配和 typed Construction IR
@@ -84,6 +85,7 @@ multiagent-simulation/
 |       |   |-- bundles/      # sealed construction / EventBundle 编译（不运行）
 |       |   |-- agents/       # Definition、mapping、intent 与 carrier 检查
 |       |   |-- configuration/# 配置准入、canonical identity 与 receipt
+|       |   |-- execution/    # 事件中立的运行闭合、重放比较与本地 custody
 |       |   |-- scenarios/    # 事件专用 binding 与有界 conformance 路径
 |       |   |-- runtime/      # MASim adapter、policy、detector 与 runner
 |       |   `-- compiler/     # sealed-trace 校验与 Generated EPG 编译

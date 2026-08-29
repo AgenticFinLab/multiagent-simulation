@@ -28,6 +28,7 @@ the rest of H2EPR:
 
 ```text
 execution/
+  cross-event-conformance-v0.1/
   panic_1907/
     policy-realization-v0.1/
     full-roster-rule-v0.1/
@@ -38,10 +39,12 @@ execution/
     run-and-graph-v0.1/
 ```
 
-Create a directory only when its artifact exists. A release package may keep a
-machine document, concise guide, review, manifest, and checksum inventory
-together; the workflow does not require a separate report for every policy or
-actor.
+Event-specific assets remain under the matching event slug. The cross-event
+directory contains only a comparison of accepted event releases and does not
+own either event's semantics. Create a directory only when its artifact exists.
+A release package may keep a machine document, concise guide, review, manifest,
+and checksum inventory together; the workflow does not require a separate
+report for every policy or actor.
 
 ## Current releases
 
@@ -84,6 +87,13 @@ records two byte-identical materializations, successful authoritative replay,
 and a trace-closed generated EPG. It is the second event consumer of the shared
 H2EPR execution-closure and custody kernel; event behavior and graph semantics
 remain in the SingHealth scenario module.
+
+The accepted
+[cross-event Rule execution conformance v0.1](cross-event-conformance-v0.1/)
+admits both compact run releases and their executable parents, compares their
+shared document and graph grammar, and preserves their distinct coverage
+vectors. It closes the two-event engineering baseline without adding another
+simulation or changing either event model.
 
 ## Shared execution kernel
 

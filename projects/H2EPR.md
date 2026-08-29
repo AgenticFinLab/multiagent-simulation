@@ -6,8 +6,9 @@ rules, runtime records, and generated process graphs connected through explicit
 interfaces and provenance.
 
 The project is developed under [`projects/h2epr/`](h2epr/). MASim supplies
-general multi-agent execution infrastructure; H2EPR owns the event-specific
-research and interpretation.
+general multi-agent execution infrastructure; H2EPR owns event-specific
+research and interpretation together with the execution logic shared by its
+events.
 
 ## Engineering flow
 
@@ -35,6 +36,7 @@ activity performed only when an experiment is specifically authorized.
 | `projects/h2epr/populations/` | Event-bound heterogeneous population models |
 | `projects/h2epr/scenarios/` | Scenario semantics and versioned event releases |
 | `projects/h2epr/configs/` | Declared-purpose configurations and admission records |
+| `projects/h2epr/execution/` | Policy Realizations, executable successors, compact run records, and cross-event conformance |
 | `projects/h2epr/src/h2epr/` | Installable construction, runtime, and compiler code |
 | `projects/h2epr/tests/` | Contract, boundary, runtime, and conformance tests |
 | `data/h2epr/` | Versioned source and development input packages |
@@ -55,22 +57,31 @@ one bounded technical--operations--GCIO lineage.
 
 Both events connect accepted evidence and participant semantics to a fixed
 roster, consolidated mapping, Event Scenario Definition, non-executable
-Scenario Configuration, fail-closed static admission, deterministic trace,
-seals, and replay. Together they show that the same bounded construction method
-can be applied across domains. They are not full-event simulations, calibrated
-historical reconstructions, or claims of scientific validity. Broader runtime
-integration or evaluation requires a separate research question and
-authorization.
+Scenario Configuration, and fail-closed static admission. Separately versioned
+executable successors then operate each complete configured roster, produce
+repeatable sealed traces, replay authoritative state, and compile a
+trace-derived generated event graph.
+
+The accepted
+[cross-event conformance release](h2epr/execution/cross-event-conformance-v0.1/)
+shows that both event paths close under the same run-document and verification
+contract while retaining different participants, policies, schedules, state,
+and graph inventories. This is an uncalibrated engineering result, not a
+historical reconstruction, cross-domain validity result, or claim of
+scientific validity. Calibration or evaluation requires a separate research
+question and scope.
 
 ## Reading order
 
 1. [Project README](h2epr/README.md) for installation, layout, and validation.
 2. [Event entries](h2epr/events/README.md) for the research-facing path through
    each accepted baseline and the separate reproducibility records.
-3. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
+3. [Cross-event execution conformance](h2epr/execution/cross-event-conformance-v0.1/)
+   for the compact comparison of the two completed Rule paths.
+4. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
    stopping boundaries.
-4. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
+5. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
    boundaries.
-5. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
-6. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
+6. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
+7. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
    interfaces.

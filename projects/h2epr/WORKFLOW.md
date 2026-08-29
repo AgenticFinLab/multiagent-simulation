@@ -146,15 +146,18 @@ three-participant binding, and deterministic trace and replay evidence.
 Together they exercise the same stage responsibilities across a financial
 crisis and a healthcare cybersecurity event while retaining event-specific
 participants, semantics, policies, identifiers, and causal checks. A separate
-Panic and SingHealth each have a separate executable successor that closes
-full-roster Rule execution, replay, and a generated event graph. The second
-event consumes the same event-neutral H2EPR closure and custody kernel while
-retaining its own participant, institutional, time, and graph semantics.
+executable successor for each event closes full-roster Rule execution, replay,
+and a generated event graph. The second event consumes the same event-neutral
+H2EPR closure and custody kernel while retaining its own participant,
+institutional, time, and graph semantics.
 Neither event includes calibration, held-out evaluation, or a
 historical-validity claim.
 
-The separately authorized full-roster Rule-execution program builds executable
+The separately authorized full-roster Rule-execution program built executable
 successors from the frozen semantic parents, first for Panic and then for
-SingHealth, without changing what either earlier release established. Its
-remaining work is a narrow cross-event conformance and publication-surface
-closeout, not deeper event modeling.
+SingHealth, without changing what either earlier release established. The
+[cross-event conformance release](execution/cross-event-conformance-v0.1/)
+now closes the shared run-document, replay, generated-graph, framework, and
+claim boundaries. This is the completed engineering endpoint for the two-event
+baseline, not an authorization for deeper modeling, calibration, or scientific
+evaluation.

@@ -23,7 +23,7 @@ execution logic, and generated-process semantics remain H2EPR concerns.
 | Agent research | `agents/` | Definitions, rosters, interface accounts, mappings, and bindings |
 | Population research | `populations/` | Heterogeneous participant models and interface reviews |
 | Event coordination | `events/` | One lightweight Build Brief and cross-directory index per event |
-| Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases and their bounded implementation modules |
+| Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases, event-qualified implementations, and comparisons that name specific events |
 | Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
 | Rule execution releases | `execution/` | Policy Realizations, executable successors, runtime-bundle contracts, and compact run/graph records |
 | Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
@@ -82,11 +82,11 @@ healthcare cybersecurity event:
   and
 - focused
   [lineage conformance](scenarios/singhealth_data_breach/lineage-conformance-v0.1/)
-  with deterministic trace, seal, and replay evidence; and
+  with deterministic trace, seal, and replay evidence;
 - an accepted
   [full-roster Policy Realization](execution/singhealth_data_breach/policy-realization-v0.1/)
   covering all configured actor placements, selected Scenario policies, and
-  lifecycle families; and
+  lifecycle families;
 - an accepted
   [full-roster Rule package](execution/singhealth_data_breach/full-roster-rule-v0.1/)
   binding all thirteen carriers, 74 actor-qualified actions, 41 decision
@@ -101,6 +101,12 @@ release structure while retaining event-specific participants, policies,
 identifiers, and causal checks. Both now have separately versioned end-to-end
 Rule execution, authoritative replay, and generated-graph closure. Calibration
 and evaluation remain outside both baselines.
+
+The accepted
+[cross-event Rule execution conformance release](execution/cross-event-conformance-v0.1/)
+compares their exact run releases. It verifies one shared document, replay, and
+graph-closure contract while preserving event-specific coverage values and
+semantics.
 
 ## Reading the event baselines
 
@@ -213,6 +219,7 @@ releases.
 - [Publication-facing research standard](PUBLICATION_STANDARD.md)
 - [Architecture](ARCHITECTURE.md)
 - [Rule execution](execution/README.md)
+- [Cross-event execution conformance](execution/cross-event-conformance-v0.1/)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)
 - [Contracts V1](contracts/v1/README.md)

@@ -71,7 +71,7 @@ cross-event H2EPR code both remain in the H2EPR package.
 | `agents/` | Definition profiles, semantic mapping, intent, and carrier checks |
 | `configuration/` | Configuration schema admission, canonical identity, and receipts |
 | `execution/` | Event-neutral run documents, closure checks, deterministic comparison, strict input handling, and local run custody |
-| `scenarios/` | Event-specific bindings, environment policies, and bounded conformance paths |
+| `scenarios/` | Event-specific bindings, environment policies, bounded conformance paths, and accepted comparisons that name specific events |
 | `runtime/` | H2EPR simulation adapter, phased execution, detectors, and orchestration |
 | `compiler/` | Sealed-trace validation and deterministic graph generation |
 
@@ -155,10 +155,17 @@ event has calibrated parameters, historical fit, held-out evaluation, or a
 scientific-validity result. Those are separate research activities, not
 implied by closure of the engineering interfaces.
 
+The accepted
+[cross-event conformance release](execution/cross-event-conformance-v0.1/)
+validates both compact run releases through one H2EPR contract. It demonstrates
+two-event reuse of closure mechanics; it does not establish support for every
+event domain.
+
 ## Related documents
 
 - [Event modeling workflow](WORKFLOW.md)
 - [Rule execution](execution/README.md)
+- [Cross-event execution conformance](execution/cross-event-conformance-v0.1/)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

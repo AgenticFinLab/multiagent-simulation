@@ -97,6 +97,14 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/execution/test_shared_execution_kernel.py
 ```
 
+The accepted Panic and SingHealth run releases can be checked together at the
+cross-event closure boundary:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/execution/test_cross_event_execution_conformance.py
+```
+
 Runtime and compiler checks use the MASim dependencies described in the root
 `requirements.txt`:
 

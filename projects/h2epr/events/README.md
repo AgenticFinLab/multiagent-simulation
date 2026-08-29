@@ -57,6 +57,10 @@ per role, or repeat the same record under several phase names.
 | `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | First event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
 | `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Second event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
 
+The [cross-event Rule execution conformance release](../execution/cross-event-conformance-v0.1/)
+compares these two endpoints without relocating or duplicating their event
+assets.
+
 Completed entries present accepted assets in two groups. The research-facing
 group is the default scholarly path through evidence, participant models, and
 event semantics. The reproducibility group retains exact release, mapping,

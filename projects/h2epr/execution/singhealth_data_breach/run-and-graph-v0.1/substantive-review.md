@@ -87,7 +87,6 @@ semantics do not enter the shared kernel.
 
 The same kernel had already reproduced the accepted Panic comparison and graph
 receipt. SingHealth is its independent second event consumer; no H2EPR code is
-receipt. SingHealth is its separate second event consumer; no H2EPR code is
 moved into MASim and no MASim source is modified.
 
 Finding: **pass**.
