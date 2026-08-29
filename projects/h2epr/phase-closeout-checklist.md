@@ -93,6 +93,9 @@ Apply only the rows touched by the phase.
 | Scenario Configuration | Are purpose, assembly, selections, sensitivities, completion, and the non-executable boundary explicit and reviewed? |
 | Admission or binding code | Do exact identities, fail-closed errors, the selected lineage, required policies, focused negatives, and affected regressions pass? |
 | Trace or conformance | Are per-object and cross-lineage checks, deterministic trace/seals, replay, expected evidence, and depth review complete? |
+| Policy Realization or executable successor | Does exact coverage close every configured actor capability, decision commitment, intent, selected policy, required lifecycle, and declared failure path without rewriting a semantic parent? |
+| Full-roster Rule run | Is every configured actor instantiated, is authoritative state changed only by the environment/reducer, and are the canonical run and same-input repeat byte-identical in their scientific outputs? |
+| Generated event graph | Does every graph item resolve to sealed trace provenance, do graph identity and closure checks pass, and is the claim limited to the declared uncalibrated mechanism-coverage run? |
 | Evaluation or external claim | Is there a separate authorized protocol with the required evidence isolation and claim review? |
 | Completed event baseline | Is the event entry concise and current, while hash-pinned phase records remain clearly readable as release-time boundaries? |
 
@@ -113,6 +116,9 @@ change.
 | Admit the configuration | Fail-closed static identity, schema, reference, and receipt evidence. | Policy behavior or runtime readiness. |
 | Bind a minimal lineage | Exact projection and only the policies required by the selected lineage. | Full-roster integration or broad simulation. |
 | Review conformance | Focused negatives and deterministic trace/replay closeout for the bounded slice. | Scientific evaluation or historical validity. |
+| Realize complete Rule behavior | Exact participant and Scenario-policy implementations with complete semantic and failure coverage. | A changed semantic configuration, hidden defaults, or run authority. |
+| Assemble full-roster execution | Admitted executable successor, complete projection, explicit environment ownership, and reproducible run identity. | Calibration, outcome fitting, or an implicit run. |
+| Close a generated event graph | Deterministic sealed runs, replay closure, trace-derived graph, and compact release evidence. | Historical reconstruction, policy effectiveness, or scientific validity. |
 
 An event may intentionally stop after any authorized phase. Later rows are not
 missing work unless the accepted research question requires them.

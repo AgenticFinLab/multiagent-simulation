@@ -26,8 +26,10 @@ tests/                    contract, boundary, runtime, and conformance checks
 
 Research projects may combine contracts, event configurations, compilers, and
 evaluation protocols that would not fit one standard example. Event identity,
-participant choices, and institutional policies remain inside H2EPR. Only
-domain-neutral capabilities with an independent interface belong in `masim/`.
+participant choices, institutional policies, and H2EPR's cross-event execution
+layer remain inside H2EPR. `masim/` is the read-only base framework: H2EPR may
+reuse its public execution primitives, but does not promote project code back
+into that directory.
 
 Evaluation-only reference material must not flow into construction or runtime.
 Frozen inputs are never overwritten by generated state, and generated

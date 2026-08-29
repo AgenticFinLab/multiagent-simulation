@@ -5,9 +5,10 @@ real event processes. It turns bounded evidence and participant models into
 explicit scenario inputs, records deterministic interaction traces, and
 compiles validated traces into generated event process graphs.
 
-H2EPR uses MASim for general multi-agent infrastructure but is packaged and
-tested as a separate project. Event evidence, participant behavior,
-institutional rules, and generated-process semantics remain H2EPR concerns.
+H2EPR uses MASim's public interfaces as a read-only base for general
+multi-agent infrastructure but is packaged and tested as a separate project.
+Event evidence, participant behavior, institutional rules, shared H2EPR
+execution logic, and generated-process semantics remain H2EPR concerns.
 
 ## Components
 
@@ -23,6 +24,7 @@ institutional rules, and generated-process semantics remain H2EPR concerns.
 | Event coordination | `events/` | One lightweight Build Brief and cross-directory index per event |
 | Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases and their bounded implementation modules |
 | Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
+| Rule execution | `execution/` | Policy Realizations, executable successors, runtime-bundle contracts, and compact run/graph records |
 | Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
 
 Importable Python code is contained in `src/h2epr`. The `scenarios` directory
@@ -100,6 +102,7 @@ projects/h2epr/
 ├── contracts/v1/
 ├── decisions/
 ├── events/
+├── execution/
 ├── populations/
 ├── releases/
 ├── scenarios/
@@ -147,6 +150,7 @@ Individual directories may be used for narrower checks:
 ```bash
 python -B -m pytest -p no:cacheprovider projects/h2epr/tests/contracts
 python -B -m pytest -p no:cacheprovider projects/h2epr/tests/configuration
+python -B -m pytest -p no:cacheprovider projects/h2epr/tests/execution
 python -B -m pytest -p no:cacheprovider projects/h2epr/tests/agents
 ```
 
@@ -165,9 +169,11 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Trace and seal validation precede replay and graph compilation.
 - Evaluation material is not a runtime or construction input.
 
-The current baseline stops before full-roster runtime integration, calibration,
-historical fitting, held-out evaluation, and scientific claims. Extending one
-of those surfaces requires a separate research purpose and review.
+The accepted two-event baseline stops before full-roster runtime integration,
+calibration, historical fitting, held-out evaluation, and scientific claims.
+The separately governed [Rule-execution layer](execution/) provides the
+authorized engineering extension without changing the scope of those earlier
+releases.
 
 ## Documentation
 
@@ -178,6 +184,7 @@ of those surfaces requires a separate research purpose and review.
 - [Phase closeout checklist](phase-closeout-checklist.md)
 - [Publication-facing research standard](PUBLICATION_STANDARD.md)
 - [Architecture](ARCHITECTURE.md)
+- [Rule execution](execution/README.md)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)
 - [Contracts V1](contracts/v1/README.md)

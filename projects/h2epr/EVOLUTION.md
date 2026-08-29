@@ -115,19 +115,19 @@ Moving the package or changing a path that participates in an identity is a
 migration. Review construction identities, manifests, input inventories,
 seals, and published locators before such a change.
 
-## Promoting reusable code to MASim
+## H2EPR reuse boundary
 
-Code belongs in `masim/` only when it has:
+Cross-event reuse does not change project ownership. A shared H2EPR component
+remains under `projects/h2epr/` even when it has a domain-neutral interface and
+more than one event consumer. Such components should have explicit failure and
+replay behavior, avoid embedding one event's identity or institutional policy,
+and preserve H2EPR information and authority boundaries.
 
-- a domain-neutral interface;
-- no H2EPR event identity or institutional policy;
-- explicit failure and replay behavior;
-- a credible consumer beyond one event-specific implementation; and
-- tests that preserve H2EPR information and authority boundaries.
-
-The event-process transport, reducer, trace, and seal primitives meet this
-boundary. Agent Definitions, historical evidence, institutional behavior,
-event policies, and evaluation remain H2EPR responsibilities.
+The event-process transport, reducer, trace, and seal primitives already
+provided by MASim are consumed as read-only framework interfaces. Agent
+Definitions, historical evidence, institutional behavior, event policies,
+graph compilation, and H2EPR's shared execution layer remain H2EPR
+responsibilities; this project does not promote them into `masim/`.
 
 ## Related documents
 

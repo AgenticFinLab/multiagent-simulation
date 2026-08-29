@@ -1,0 +1,570 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/execution/schemas/executable-scenario-package-v0.1.schema.json",
+  "title": "H2EPR executable Scenario package v0.1",
+  "description": "Project-local full-roster Rule assembly. Cross-object admission and accepted status are required before execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_identity",
+    "package_id",
+    "version",
+    "status",
+    "execution_eligible",
+    "event_id",
+    "purpose",
+    "semantic_parent",
+    "policy_realization",
+    "actor_bindings",
+    "component_bindings",
+    "masim_usage",
+    "runtime_bundle_contract",
+    "run_plan",
+    "completion",
+    "coverage_expectations",
+    "output_contract",
+    "claim_boundary"
+  ],
+  "properties": {
+    "format_identity": {
+      "const": "h2epr.executable-scenario-package.v0_1"
+    },
+    "package_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "version": {
+      "$ref": "#/$defs/semanticVersion"
+    },
+    "status": {
+      "enum": [
+        "candidate",
+        "accepted_executable_package"
+      ]
+    },
+    "execution_eligible": {
+      "type": "boolean"
+    },
+    "event_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "purpose": {
+      "const": "mechanism_coverage"
+    },
+    "semantic_parent": {
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/execution/schemas/policy-realization-v0.1.schema.json#/$defs/semanticParent"
+    },
+    "policy_realization": {
+      "$ref": "#/$defs/policyRealizationRef"
+    },
+    "actor_bindings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/actorBinding"
+      }
+    },
+    "component_bindings": {
+      "$ref": "#/$defs/componentBindings"
+    },
+    "masim_usage": {
+      "$ref": "#/$defs/masimUsage"
+    },
+    "runtime_bundle_contract": {
+      "$ref": "#/$defs/runtimeBundleContract"
+    },
+    "run_plan": {
+      "$ref": "#/$defs/runPlan"
+    },
+    "completion": {
+      "$ref": "#/$defs/completion"
+    },
+    "coverage_expectations": {
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/execution/schemas/policy-realization-v0.1.schema.json#/$defs/coverageExpectations"
+    },
+    "output_contract": {
+      "$ref": "#/$defs/outputContract"
+    },
+    "claim_boundary": {
+      "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/execution/schemas/policy-realization-v0.1.schema.json#/$defs/claimBoundary"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "accepted_executable_package"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_eligible": {
+            "const": true
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "execution_eligible": {
+            "const": false
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,191}$"
+    },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z][A-Za-z0-9+.-]*:)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+    },
+    "stableIdArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    },
+    "policyRealizationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realization_id",
+        "version",
+        "status",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "realization_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "status": {
+          "const": "accepted_policy_realization"
+        },
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "actorBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "capability_ids",
+        "participant_policy_realization_keys",
+        "participant_artifact_id",
+        "carrier_projection_id",
+        "carrier_projection_version",
+        "representation_class"
+      ],
+      "properties": {
+        "actor_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "capability_ids": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableIdArray"
+            },
+            {
+              "minItems": 1
+            }
+          ]
+        },
+        "participant_policy_realization_keys": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableIdArray"
+            },
+            {
+              "minItems": 1
+            }
+          ]
+        },
+        "participant_artifact_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "carrier_projection_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "carrier_projection_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "representation_class": {
+          "enum": [
+            "autonomous_participant_agent",
+            "aggregate_population_agent",
+            "institutional_environment_agent"
+          ]
+        }
+      }
+    },
+    "componentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation_id",
+        "implementation_version"
+      ],
+      "properties": {
+        "implementation_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "implementation_version": {
+          "$ref": "#/$defs/semanticVersion"
+        }
+      }
+    },
+    "componentBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_registry",
+        "scheduler",
+        "observation_projector",
+        "participant_executor",
+        "message_transport",
+        "environment",
+        "reducer",
+        "trace",
+        "compiler"
+      ],
+      "properties": {
+        "policy_registry": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "scheduler": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "observation_projector": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "participant_executor": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "message_transport": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "environment": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "reducer": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "trace": {
+          "$ref": "#/$defs/componentRef"
+        },
+        "compiler": {
+          "$ref": "#/$defs/componentRef"
+        }
+      }
+    },
+    "masimUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "package_version",
+        "public_interface_ids",
+        "phased_runner_used",
+        "source_modification_allowed"
+      ],
+      "properties": {
+        "mode": {
+          "const": "read_only_public_interfaces"
+        },
+        "package_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "public_interface_ids": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableIdArray"
+            },
+            {
+              "minItems": 1
+            }
+          ]
+        },
+        "phased_runner_used": {
+          "type": "boolean"
+        },
+        "source_modification_allowed": {
+          "const": false
+        }
+      }
+    },
+    "runtimeBundleSections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_registry",
+        "participant_artifacts",
+        "carrier_projections",
+        "initial_state",
+        "action_registry",
+        "policy_registry",
+        "communication_routes",
+        "observation_rules",
+        "clock",
+        "structural_selections",
+        "exogenous_inputs",
+        "lifecycle_registry",
+        "completion_policy",
+        "compiler_inputs",
+        "component_registry"
+      ],
+      "properties": {
+        "actor_registry": {
+          "const": true
+        },
+        "participant_artifacts": {
+          "const": true
+        },
+        "carrier_projections": {
+          "const": true
+        },
+        "initial_state": {
+          "const": true
+        },
+        "action_registry": {
+          "const": true
+        },
+        "policy_registry": {
+          "const": true
+        },
+        "communication_routes": {
+          "const": true
+        },
+        "observation_rules": {
+          "const": true
+        },
+        "clock": {
+          "const": true
+        },
+        "structural_selections": {
+          "const": true
+        },
+        "exogenous_inputs": {
+          "const": true
+        },
+        "lifecycle_registry": {
+          "const": true
+        },
+        "completion_policy": {
+          "const": true
+        },
+        "compiler_inputs": {
+          "const": true
+        },
+        "component_registry": {
+          "const": true
+        }
+      }
+    },
+    "runtimeBundleContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format_identity",
+        "builder_implementation_id",
+        "builder_implementation_version",
+        "deterministic_materialization",
+        "sections"
+      ],
+      "properties": {
+        "format_identity": {
+          "const": "h2epr.rule-runtime-bundle.v0_1"
+        },
+        "builder_implementation_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "builder_implementation_version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "deterministic_materialization": {
+          "const": true
+        },
+        "sections": {
+          "$ref": "#/$defs/runtimeBundleSections"
+        }
+      }
+    },
+    "runPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_profile_id",
+        "run_seed",
+        "materialization_count",
+        "same_input_required",
+        "same_seed_required",
+        "independent_materialization_required",
+        "resume_allowed",
+        "targeted_perturbation_profile_ids"
+      ],
+      "properties": {
+        "run_profile_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "run_seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "materialization_count": {
+          "const": 2
+        },
+        "same_input_required": {
+          "const": true
+        },
+        "same_seed_required": {
+          "const": true
+        },
+        "independent_materialization_required": {
+          "const": true
+        },
+        "resume_allowed": {
+          "const": false
+        },
+        "targeted_perturbation_profile_ids": {
+          "$ref": "#/$defs/stableIdArray"
+        }
+      }
+    },
+    "completion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normal_condition_ids",
+        "unresolved_object_behavior",
+        "failure_behavior"
+      ],
+      "properties": {
+        "normal_condition_ids": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableIdArray"
+            },
+            {
+              "minItems": 1
+            }
+          ]
+        },
+        "unresolved_object_behavior": {
+          "$ref": "#/$defs/stableId"
+        },
+        "failure_behavior": {
+          "const": "fail_closed_without_output_claim"
+        }
+      }
+    },
+    "outputContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulation_trace",
+        "tick_seals",
+        "run_seal",
+        "replay_receipt",
+        "generated_epg",
+        "execution_receipt",
+        "determinism_comparison",
+        "large_artifact_custody",
+        "tracked_surface"
+      ],
+      "properties": {
+        "simulation_trace": {
+          "const": true
+        },
+        "tick_seals": {
+          "const": true
+        },
+        "run_seal": {
+          "const": true
+        },
+        "replay_receipt": {
+          "const": true
+        },
+        "generated_epg": {
+          "const": true
+        },
+        "execution_receipt": {
+          "const": true
+        },
+        "determinism_comparison": {
+          "$ref": "#/$defs/determinismComparison"
+        },
+        "large_artifact_custody": {
+          "const": "gitignored_event_run_directory"
+        },
+        "tracked_surface": {
+          "const": "code_inputs_manifest_receipt_checksums_tests_documentation"
+        }
+      }
+    },
+    "determinismComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_bundle_sha256_match",
+        "simulation_trace_sha256_match",
+        "tick_seals_sha256_match",
+        "run_seal_sha256_match",
+        "replay_receipt_sha256_match",
+        "generated_epg_sha256_match",
+        "replay_final_state_match",
+        "generated_epg_trace_closure"
+      ],
+      "properties": {
+        "runtime_bundle_sha256_match": {
+          "const": true
+        },
+        "simulation_trace_sha256_match": {
+          "const": true
+        },
+        "tick_seals_sha256_match": {
+          "const": true
+        },
+        "run_seal_sha256_match": {
+          "const": true
+        },
+        "replay_receipt_sha256_match": {
+          "const": true
+        },
+        "generated_epg_sha256_match": {
+          "const": true
+        },
+        "replay_final_state_match": {
+          "const": true
+        },
+        "generated_epg_trace_closure": {
+          "const": true
+        }
+      }
+    }
+  }
+}

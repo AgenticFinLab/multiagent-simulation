@@ -14,8 +14,9 @@ authority, and stopping boundaries.
   repairing downstream copies.
 - A configuration is non-executable until admission and binding have been
   accepted for its exact identity.
-- Implement the smallest lineage that can test a new interface. A complete
-  roster is an integration target, not the default unit of work.
+- Implement the smallest lineage that can test a new interface. Move to a
+  complete roster only after that interface is closed and a full-event
+  integration question is separately authorized.
 - Route defects to the layer that owns the meaning instead of adding hidden
   defaults or implementation-only exceptions.
 
@@ -31,10 +32,18 @@ authority, and stopping boundaries.
 | Admit the configuration | Schema, canonical identity, references, failure classes, fail-closed loading, and a static receipt | Admission supplies neither policy behavior nor a runtime carrier |
 | Bind a minimal lineage | Exact carrier projection and only the participant/environment policies needed for the selected lineage | Unselected roles and policies remain unbound |
 | Review conformance | Focused negative cases, deterministic trace/replay evidence, implementation review, and reusable method findings | Stops before broad simulation or scientific evaluation |
+| Realize complete Rule behavior | Independent Policy Realization covering every configured actor capability, decision commitment, intent, selected policy, required lifecycle, and declared failure behavior | Does not alter the accepted semantic configuration or authorize a run by itself |
+| Assemble full-roster execution | An executable successor package with exact semantic parents, complete carrier projection, participant policies, environment/reducer ownership, clock, routes, exogenous inputs, and fail-closed admission | Starts no run until the exact package and output boundary pass preflight |
+| Close a generated event graph | Repeated same-input Rule runs with identical trace and seals, successful replay, a trace-derived generated EPG, and compact integrity evidence | Establishes engineering mechanism coverage only, not calibration, historical fit, or scientific validity |
 
 Some early H2EPR release records identify these phases as E0 through E7. The
 names above are the maintained workflow vocabulary; the older identifiers
 remain useful for interpreting those records.
+
+The final three phases are optional extensions of a conformance-complete
+event, not new requirements for every event build. They may be combined into
+one release cycle when policy, assembly, run, and graph evidence remain
+separately identifiable.
 
 Scenario design and carrier mapping may inform one another, but both retain
 their own authority. Configuration admission and lineage binding may be
@@ -113,7 +122,9 @@ review, decision, or receipt already carries this information.
 | Semantic loss, ambiguous released identity, or carrier mismatch | Consolidated mapping |
 | Schema, canonicalization, hash, reference, or admission error | Configuration admission |
 | Hidden default, policy mismatch, or implementation-only state | Binding or policy implementation |
+| Missing actor, commitment, intent, selected-policy, lifecycle, or failure coverage | Policy Realization or executable-package admission |
 | Nondeterministic transition, trace, seal, or replay failure | Runtime and event-process implementation |
+| Graph item without trace provenance, unresolved graph identity, or nondeterministic compilation | H2EPR graph compiler |
 | Empirical or historical comparison problem | Separately authorized evaluation |
 
 ## Runtime preflight boundary
@@ -139,3 +150,8 @@ baseline includes a full-roster runtime, full-event simulation, calibration,
 held-out evaluation, or historical-validity claim. Further work requires a new
 event question or a separately justified method question; deeper work on either
 completed event is not the default continuation.
+
+The full-roster Rule-execution program is one such separately authorized
+method question. It builds executable successors from the frozen semantic
+parents, first for Panic and then for SingHealth, without changing what either
+earlier release established.

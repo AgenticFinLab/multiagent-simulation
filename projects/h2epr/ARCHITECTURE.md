@@ -48,13 +48,16 @@ silently manufacturing results and makes replay meaningful.
 
 ### H2EPR and MASim
 
-MASim owns reusable execution infrastructure. Domain-neutral event-process
-values, transport, reduction, trace, and seal types live under
-`masim.integrations.event_process`.
+MASim provides the repository's existing reusable execution infrastructure.
+Domain-neutral event-process values, transport, reduction, trace, and seal
+types live under `masim.integrations.event_process` and are consumed through
+their public interfaces. H2EPR treats that package as a read-only base
+framework.
 
 H2EPR owns event evidence, participant semantics, institutional policies,
-observation rules, event identities, interpretation, and graph compilation.
-Event-specific code remains in the H2EPR package.
+observation rules, event identities, interpretation, graph compilation, and
+the shared execution layer needed across H2EPR events. Event-specific and
+cross-event H2EPR code both remain in the H2EPR package.
 
 ## Project modules
 
@@ -74,6 +77,11 @@ Event-specific code remains in the H2EPR package.
 All modules in this table are under `projects/h2epr/src/h2epr`. Reviewed
 Markdown, JSON, and release records remain in the adjacent project asset
 directories.
+
+Policy Realizations, executable successors, and compact run/graph release
+records live under `execution/`. Large materialized traces, states, replay
+outputs, and generated graphs remain in event-qualified ignored run
+directories unless separately selected for release.
 
 ## Construction and bundle assembly
 
@@ -148,6 +156,7 @@ interfaces.
 ## Related documents
 
 - [Event modeling workflow](WORKFLOW.md)
+- [Rule execution](execution/README.md)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

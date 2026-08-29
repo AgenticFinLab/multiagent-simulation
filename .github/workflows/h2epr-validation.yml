@@ -52,7 +52,7 @@ jobs:
         run: python -m pip install -e "projects/h2epr[test]"
       - name: Build the H2EPR wheel
         run: python -m pip wheel --no-deps --wheel-dir .ci/wheels projects/h2epr
-      - name: Validate contracts, construction, artifacts, and configuration
+      - name: Validate contracts, construction, artifacts, configuration, and execution profiles
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: >-
@@ -61,6 +61,7 @@ jobs:
           projects/h2epr/tests/construction
           projects/h2epr/tests/g2
           projects/h2epr/tests/configuration
+          projects/h2epr/tests/execution
 
   runtime-and-conformance:
     runs-on: ubuntu-latest
