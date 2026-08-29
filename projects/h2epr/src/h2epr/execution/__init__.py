@@ -18,6 +18,13 @@ from .custody import (
     require_fresh_directory,
 )
 from .io import ExecutionIOCode, ExecutionIOError, path_within, read_json_object
+from .lifecycle import (
+    LifecycleRecord,
+    LifecycleRule,
+    LifecycleRuleError,
+    LifecycleTransitionResult,
+    chain_states,
+)
 from .model import (
     FORMAL_RUN_DOCUMENTS,
     RUN_DOCUMENTS,
@@ -48,6 +55,10 @@ __all__ = [
     "ExecutionIOError",
     "FORMAL_RUN_DOCUMENTS",
     "IntentBranch",
+    "LifecycleRecord",
+    "LifecycleRule",
+    "LifecycleRuleError",
+    "LifecycleTransitionResult",
     "ParticipantDecision",
     "ParticipantDecisionContext",
     "ParticipantPolicyError",
@@ -64,6 +75,7 @@ __all__ = [
     "RuleParticipantPolicy",
     "build_formal_run_documents",
     "build_graph_receipt",
+    "chain_states",
     "compare_run_artifacts",
     "document_descriptor",
     "materialize_run_pair",
