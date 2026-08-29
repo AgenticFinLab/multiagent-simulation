@@ -52,9 +52,11 @@ or establish historical or scientific validity.
 The separately accepted
 [full-roster Policy Realization](execution/panic_1907/policy-realization-v0.1/)
 now supplies Rule behavior for all twelve participant capabilities, all nine
-selected Scenario policies, and all thirteen lifecycle families. It remains a
-parent of, rather than a substitute for, the future executable package and
-canonical run.
+selected Scenario policies, and all thirteen lifecycle families. Its accepted
+[full-roster Rule package](execution/panic_1907/full-roster-rule-v0.1/) binds
+those policies to all sixteen actor carriers, the closed runtime input, and
+the deterministic MASim component boundary. The package contains no canonical
+run or generated EPG; those remain separate successor records.
 
 ## Second event baseline
 
@@ -79,10 +81,12 @@ healthcare cybersecurity event:
   [lineage conformance](scenarios/singhealth_data_breach/lineage-conformance-v0.1/)
   with deterministic trace, seal, and replay evidence.
 
-The two event baselines use the same stage responsibilities and release
-structure while retaining event-specific participants, policies, identifiers,
-and causal checks. Neither complete configuration is executable; full-roster
-runtime, simulation, calibration, and evaluation remain outside the baseline.
+The two bounded event baselines use the same stage responsibilities and
+release structure while retaining event-specific participants, policies,
+identifiers, and causal checks. The Panic baseline now has a separately
+versioned executable successor. The SingHealth configuration remains
+non-executable until it receives the corresponding Policy Realization and
+full-roster package. Calibration and evaluation remain outside both baselines.
 
 ## Reading the event baselines
 
@@ -176,8 +180,10 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Trace and seal validation precede replay and graph compilation.
 - Evaluation material is not a runtime or construction input.
 
-The accepted two-event baseline stops before full-roster runtime integration,
-calibration, historical fitting, held-out evaluation, and scientific claims.
+The accepted bounded baselines remain distinct from full-roster execution.
+The Panic executable successor establishes runtime integration but not a
+released canonical run, calibration, historical fitting, held-out evaluation,
+or a scientific claim.
 The separately governed [Rule-execution layer](execution/) provides the
 authorized engineering extension without changing the scope of those earlier
 releases.

@@ -43,12 +43,18 @@ machine document, concise guide, review, manifest, and checksum inventory
 together; the workflow does not require a separate report for every policy or
 actor.
 
-## Current release
+## Current releases
 
 The [Panic of 1907 Policy Realization v0.1](panic_1907/policy-realization-v0.1/)
 closes the first event's 12 participant implementations, nine selected
-Scenario policies, and thirteen lifecycle families. It is an accepted input
-to the later executable successor; it is not itself a runtime bundle or run.
+Scenario policies, and thirteen lifecycle families.
+
+The accepted
+[Panic of 1907 full-roster Rule package v0.1](panic_1907/full-roster-rule-v0.1/)
+then binds all sixteen actor carriers, seventeen capability projections, 127
+actor-qualified actions, eighty-eight decision rules, thirteen lifecycle
+families, and nine concrete runtime components to one deterministic bundle.
+It is execution-eligible but is not itself a canonical run or generated EPG.
 
 ## Admission boundary
 

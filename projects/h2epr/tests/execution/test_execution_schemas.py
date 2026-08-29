@@ -216,6 +216,14 @@ def _executable_package() -> dict:
             "path": "execution/example/policy-realization.json",
             "sha256": digest,
         },
+        "runtime_bundle": {
+            "runtime_bundle_id": "h2epr.example.runtime-bundle.v0_1",
+            "version": "0.1.0",
+            "status": "accepted_runtime_bundle",
+            "path": "execution/example/runtime-bundle.json",
+            "source_sha256": digest,
+            "canonical_sha256": digest,
+        },
         "actor_bindings": [
             {
                 "actor_id": "actor.example",
@@ -490,6 +498,10 @@ def test_execution_profiles_reject_unsafe_paths_and_duplicate_ids() -> None:
         unsafe_package = _executable_package()
         unsafe_package["policy_realization"]["path"] = unsafe_path
         assert list(package_validator.iter_errors(unsafe_package))
+
+        unsafe_bundle = _executable_package()
+        unsafe_bundle["runtime_bundle"]["path"] = unsafe_path
+        assert list(package_validator.iter_errors(unsafe_bundle))
 
     duplicate = _executable_package()
     duplicate["actor_bindings"][0]["capability_ids"] *= 2

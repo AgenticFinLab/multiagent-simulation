@@ -6,7 +6,7 @@ H2EPR full-roster Rule run:
 | Schema | Responsibility |
 |---|---|
 | `policy-realization-v0.1.schema.json` | Participant decision, private-state, lifecycle, and selected Scenario-policy implementations with explicit configuration pointers |
-| `executable-scenario-package-v0.1.schema.json` | Exact semantic lineage, versioned actor/carrier and component binding, runtime-bundle contract, repeated run plan, output custody, and claim boundary |
+| `executable-scenario-package-v0.1.schema.json` | Exact semantic lineage, versioned actor/carrier and component binding, runtime-bundle identity and hashes, repeated run plan, output custody, and claim boundary |
 
 The schemas reject unknown fields and constrain the stable structural surface.
 They do not infer semantic coverage. Executable admission must also load the

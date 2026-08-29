@@ -1,0 +1,126 @@
+{
+  "schema": "h2epr.executable-successor-release.v0_1",
+  "release_id": "H2EPR-0288-FULL-ROSTER-RULE-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0288",
+  "released_on": "2026-08-29",
+  "status": "accepted_executable_package",
+  "integrity_algorithm": "sha256",
+  "package": {
+    "id": "h2epr.0288.full-roster-rule.v0_1",
+    "path": "executable-package.json",
+    "source_sha256": "ccd850a8622db2358b3ffa656eaf203c8232ce56f30efe6d8ed0f525cf5e86e6",
+    "canonical_sha256": "296405c7e8bee37105e89e05bb5ac41282a4c046e52e44dcbd27cd8e633a07f3",
+    "format_identity": "h2epr.executable-scenario-package.v0_1",
+    "schema_path": "execution/schemas/executable-scenario-package-v0.1.schema.json",
+    "schema_sha256": "d7cfef11766b3b5580416df30ac588212fecbbb5c5ef5a70ef318412b0f1b8d9",
+    "admission_verdict": "PASS_ACCEPTED_EXECUTABLE_PACKAGE"
+  },
+  "runtime_bundle": {
+    "id": "h2epr.0288.rule-runtime-bundle.v0_1",
+    "path": "runtime-bundle.json",
+    "source_sha256": "a18140f49690cddcc135c299bb0cf96a354b99161a72c7fda04fa9f0f933be49",
+    "canonical_sha256": "c1a12ba873b5e1dc789bda14a316242b4daa6e9adc0555b60b459dd94a28843c",
+    "format_identity": "h2epr.rule-runtime-bundle.v0_1",
+    "status": "accepted_runtime_bundle",
+    "deterministic_materialization": true
+  },
+  "policy_realization": {
+    "id": "h2epr.0288.policy-realization.v0_1",
+    "path": "execution/panic_1907/policy-realization-v0.1/policy-realization.json",
+    "source_sha256": "b64548ea6c2d47228008f3021e952c6066f5cc65ddea83e47c660dba0642dd7e",
+    "canonical_sha256": "85ff5b5db80bfd3d4276d9735272aba146a8e8fc6ecc1aa9e5454029e53e808e"
+  },
+  "coverage": {
+    "actor_instances": 16,
+    "actor_carriers": 16,
+    "actor_capability_bindings": 17,
+    "participant_artifacts": 12,
+    "decision_observation_rules": 88,
+    "planned_emitting_decisions": 87,
+    "planned_no_intent_decisions": 1,
+    "action_bindings": 127,
+    "communication_routes": 35,
+    "selected_scenario_policies": 9,
+    "lifecycle_families": 13,
+    "runtime_components": 9
+  },
+  "schemas": [
+    {
+      "path": "execution/schemas/executable-scenario-package-v0.1.schema.json",
+      "sha256": "d7cfef11766b3b5580416df30ac588212fecbbb5c5ef5a70ef318412b0f1b8d9"
+    },
+    {
+      "path": "execution/schemas/policy-realization-v0.1.schema.json",
+      "sha256": "6a2bb9f88b665b40abd977a443f6554ae7c8d246521332832e590fdb2d303afe"
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/__init__.py",
+      "sha256": "8226c5c50027f440b423da540f0578a304333a4366175eb194d76720803dad09"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/assembly.py",
+      "sha256": "7607c5c350368b68dbd5dc4a8d870a9fac4c3ff54d226a3c6bacde26a5dbb54c"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/components.py",
+      "sha256": "6690ad7ba8949dd5054674f4b91c5be91455a037edcbefb2645a68f21639fe65"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/executable_admission.py",
+      "sha256": "ec0352093fcc8c6a4fbf8835401cef43d07a72ae6ebeb50832836a1c9b16a3e8"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/runtime_components.py",
+      "sha256": "c51f9b93751b3f8ef2883aedce44047b21ed64c4ef28e23768ae5958e70144f5"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/runtime_execution.py",
+      "sha256": "610364dd30aa762805905823c598b64b99faac048681b0669d1598b423e29ed6"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "017a1dd8cb9c34b7a2da17c0227449bd86d11d7641ecef0ec58af765507f57df"
+    },
+    {
+      "kind": "executable_package",
+      "path": "executable-package.json",
+      "sha256": "ccd850a8622db2358b3ffa656eaf203c8232ce56f30efe6d8ed0f525cf5e86e6"
+    },
+    {
+      "kind": "runtime_bundle",
+      "path": "runtime-bundle.json",
+      "sha256": "a18140f49690cddcc135c299bb0cf96a354b99161a72c7fda04fa9f0f933be49"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "ca800e238295144d76dd3a3911031c95e32d40f9ecb4a9efe645fbe7800b0f74"
+    }
+  ],
+  "masim_boundary": {
+    "package_version": "0.0.1",
+    "usage": "read_only_public_interfaces",
+    "source_modification_allowed": false
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "panic_repeated_run_and_generated_epg_closure",
+    "canonical_run_present": false,
+    "repeat_comparison_present": false,
+    "generated_epg_present": false
+  }
+}

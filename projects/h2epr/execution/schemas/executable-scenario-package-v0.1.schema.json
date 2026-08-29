@@ -15,6 +15,7 @@
     "purpose",
     "semantic_parent",
     "policy_realization",
+    "runtime_bundle",
     "actor_bindings",
     "component_bindings",
     "masim_usage",
@@ -55,6 +56,9 @@
     },
     "policy_realization": {
       "$ref": "#/$defs/policyRealizationRef"
+    },
+    "runtime_bundle": {
+      "$ref": "#/$defs/runtimeBundleRef"
     },
     "actor_bindings": {
       "type": "array",
@@ -165,6 +169,38 @@
           "$ref": "#/$defs/relativePath"
         },
         "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "runtimeBundleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_bundle_id",
+        "version",
+        "status",
+        "path",
+        "source_sha256",
+        "canonical_sha256"
+      ],
+      "properties": {
+        "runtime_bundle_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "version": {
+          "$ref": "#/$defs/semanticVersion"
+        },
+        "status": {
+          "const": "accepted_runtime_bundle"
+        },
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "canonical_sha256": {
           "$ref": "#/$defs/sha256"
         }
       }
