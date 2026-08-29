@@ -32,12 +32,25 @@ from .model import (
     source_sha256_bytes,
     source_sha256_path,
 )
+from .participant import (
+    DecisionSpec,
+    IntentBranch,
+    ParticipantDecision,
+    ParticipantDecisionContext,
+    ParticipantPolicyError,
+    RuleParticipantPolicy,
+)
 
 __all__ = [
     "CompactRunClosure",
+    "DecisionSpec",
     "ExecutionIOCode",
     "ExecutionIOError",
     "FORMAL_RUN_DOCUMENTS",
+    "IntentBranch",
+    "ParticipantDecision",
+    "ParticipantDecisionContext",
+    "ParticipantPolicyError",
     "RUN_DOCUMENTS",
     "RunArtifacts",
     "RunArtifactsLike",
@@ -48,6 +61,7 @@ __all__ = [
     "RunCustodyError",
     "RunCustodyIdentity",
     "RunPair",
+    "RuleParticipantPolicy",
     "build_formal_run_documents",
     "build_graph_receipt",
     "compare_run_artifacts",
