@@ -1,10 +1,11 @@
 # H2EPR-0288: Panic of 1907
 
 This coordination entry indexes the accepted first-event baseline. H2EPR-0288
-is complete through one bounded Knickerbocker Trust--National Bank of
-Commerce--New York Clearing House lineage-conformance case and is not under
-active construction. The records linked below remain authoritative for their
-respective responsibilities.
+is complete through deterministic full-roster Rule execution, authoritative
+replay, and a trace-derived generated EPG. Its earlier bounded Knickerbocker
+Trust--National Bank of Commerce--New York Clearing House case remains the
+focused lineage reference. The records linked below remain authoritative for
+their respective responsibilities.
 
 ## Event profile
 
@@ -12,12 +13,12 @@ respective responsibilities.
 |---|---|
 | Event | `H2EPR-0288`, Panic of 1907; slug `panic_1907` |
 | Primary question | How do institution-specific information, authority, clearing and support routes, depositor requests, distributed resource commitments, and call-money obligations interact, and which process differences arise from participant mechanisms rather than a scripted chronology? |
-| Purpose and claim boundary | Establish a bounded end-to-end H2EPR method baseline. The event does not support claims of full-event execution, calibration, historical fit, held-out evaluation, prediction, or historical or scientific validity. |
+| Purpose and claim boundary | Establish an end-to-end H2EPR engineering baseline from event evidence through deterministic generated graph. The event does not support claims of calibration, historical fit, held-out evaluation, prediction, policy effectiveness, or historical or scientific validity. |
 | Temporal boundary | The analytic interval begins on 18 October and ends at the configuration-selected 2 November 1907 horizon; the primary acute window is 21--26 October. The terminal horizon is a modeling choice rather than a claimed historical endpoint. |
 | Evidence and exposure | The [retrospective event-frame evidence](frame-evidence-v0.1.md) integrates the accepted [source register](source-register-v0.1.md) and [participant-evidence record](participant-evidence-v0.1.md). The historical outcome was known during construction, so the event supports no clean-builder or held-out claim. |
 | Participant boundary | Seven individual, institutional, or procedural Agent Definitions and five heterogeneous Population Models own the accepted participant choices. Market operation, message transport, adjudication, resource effects, Treasury inputs, and wider aftermath remain Scenario-owned, exogenous, or outside the question. |
-| Current endpoint | Static admission, one three-participant carrier binding, and deterministic lineage conformance are complete. The full 16-actor configuration remains non-executable. |
-| Excluded work | Full-roster policy implementation, full-event runtime or simulation, calibration or historical fitting, held-out construction, post-seal evaluation, and validity claims. |
+| Current endpoint | Full-roster Policy Realization, executable admission, two byte-identical 16-actor Rule materializations, authoritative replay, and generated-EPG closure are complete. |
+| Excluded work | Historical parameter calibration or fitting, held-out construction, post-seal scientific evaluation, policy-effectiveness analysis, and historical or scientific validity claims. |
 | Review record | Phase-owned manifests, reviews, receipts, and decisions preserve the exact accepted boundaries. Reopening the event requires a new research question. |
 | Exact upstream inputs | [Roster Definition release v0.1](../../releases/panic_1907/roster-definition-v0.1/), [consolidated mapping](../../agents/bindings/panic_1907/consolidated/), [Event Scenario Definition v0.1](../../scenarios/panic_1907/definition-v0.1/), and [Scenario Configuration v0.1](../../configs/panic_1907/scenario-configuration-v0.1/). |
 
@@ -42,6 +43,9 @@ respective responsibilities.
 | Static configuration validation | [Configuration admission v0.1](../../configs/panic_1907/configuration-admission-v0.1/) | Exact bounded admission passed |
 | Selected implementation | [KT--NBC--NYCH binding v0.1](../../agents/bindings/panic_1907/kt-nbc-nych-v0.1/) | Four-action, three-route lineage only |
 | Trace, seal, and replay review | [Lineage conformance v0.1](../../scenarios/panic_1907/lineage-conformance-v0.1/) | Deterministic bounded conformance passed |
+| Full-roster policy implementation | [Policy Realization v0.1](../../execution/panic_1907/policy-realization-v0.1/) | Twelve participant policies, nine Scenario policies, and thirteen lifecycle families accepted |
+| Executable assembly | [Full-roster Rule package v0.1](../../execution/panic_1907/full-roster-rule-v0.1/) | Sixteen actor carriers, closed runtime bundle, components, routes, and fail-closed admission |
+| Run, replay, and generated graph | [Run and generated graph v0.1](../../execution/panic_1907/run-and-graph-v0.1/) | Canonical and repeat materializations are byte-identical; replay and graph references close |
 
 Versioned packages retain the review language and next-stage boundary that
 applied when they were released. This entry records the current event position.
@@ -50,11 +54,11 @@ applied when they were released. This entry records the current event position.
 
 | Field | Current record |
 |---|---|
-| Work mode | Retained first-event baseline; no active event construction |
-| Current use | Cross-event method reference for participant semantics, Scenario ownership, non-executable configuration, static admission, minimal binding, and lineage conformance |
-| Verification boundary | The selected synthetic lineage tests identity, routing, result separation, trace, seals, and replay. It is not evidence about full-event behavior or historical validity. |
-| Reopening condition | A new research question and explicit scope are required before changing evidence, participants, semantics, configuration, implementation, or evaluation boundaries. |
-| Next action | Retain this event as one half of the completed cross-event method baseline unless H2EPR-0288 is deliberately reopened. |
+| Work mode | End-to-end first-event engineering baseline complete; accepted semantic parents remain frozen |
+| Current use | Source implementation for extracting the smallest event-neutral H2EPR execution and run-release kernel before the second event |
+| Verification boundary | The full-roster run establishes deterministic mechanism coverage, authoritative replay, and trace-derived graph closure. It is not evidence of historical fidelity or scientific validity. |
+| Reopening condition | A new research question and explicit scope are required before changing evidence, participant semantics, configuration, calibration, or evaluation boundaries. Reusable execution code may be extracted without rewriting the event releases. |
+| Next action | Extract only demonstrated event-neutral execution mechanisms under H2EPR, then use SingHealth as the independent second consumer. |
 
 ## Phase status
 
@@ -64,7 +68,9 @@ applied when they were released. This entry records the current event position.
 - [x] Non-executable Scenario Configuration and static admission accepted.
 - [x] One bounded three-participant carrier binding and lineage-conformance case
   closed.
-- [x] Work stopped before full-event execution or scientific evaluation.
+- [x] Full-roster Policy Realization and executable package accepted.
+- [x] Canonical and repeat Rule runs, replay, and generated EPG closed.
+- [x] Work stopped before calibration or scientific evaluation.
 
-**Current disposition: retained first-event baseline; no active H2EPR-0288
-work package.**
+**Current disposition: first-event deterministic execution and generated-graph
+baseline complete; semantic releases remain frozen.**

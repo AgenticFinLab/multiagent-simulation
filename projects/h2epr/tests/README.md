@@ -18,7 +18,7 @@ python -m pip install -e "projects/h2epr[test]"
 | `construction/` | Explicit source loading, lossless construction records, evidence isolation, and import boundaries |
 | `g2/` | Entity registry, participant artifacts, world inputs, and event-bundle construction |
 | `configuration/` | Schema admission, canonical identity, references, assembly, failure classes, and portable receipts |
-| `execution/` | Policy Realization and executable-successor structural contracts and fail-closed boundaries |
+| `execution/` | Policy Realization, executable-successor, repeated-run, replay, graph-closure, and fail-closed release boundaries |
 | `agents/` | Definition profiles, mappings, bindings, participant slices, and lineage conformance |
 | `g3/` | Phased runtime, policies, reducer, transport, trace, seals, replay, and detectors |
 | `g4/` | Sealed-trace inventory, deterministic graph compilation, and graph seals |

@@ -55,8 +55,10 @@ now supplies Rule behavior for all twelve participant capabilities, all nine
 selected Scenario policies, and all thirteen lifecycle families. Its accepted
 [full-roster Rule package](execution/panic_1907/full-roster-rule-v0.1/) binds
 those policies to all sixteen actor carriers, the closed runtime input, and
-the deterministic MASim component boundary. The package contains no canonical
-run or generated EPG; those remain separate successor records.
+the deterministic MASim component boundary. Its separate
+[run and generated-graph release](execution/panic_1907/run-and-graph-v0.1/)
+records byte-identical canonical and repeat materializations, authoritative
+replay, and a trace-closed generated EPG.
 
 ## Second event baseline
 
@@ -83,10 +85,11 @@ healthcare cybersecurity event:
 
 The two bounded event baselines use the same stage responsibilities and
 release structure while retaining event-specific participants, policies,
-identifiers, and causal checks. The Panic baseline now has a separately
-versioned executable successor. The SingHealth configuration remains
-non-executable until it receives the corresponding Policy Realization and
-full-roster package. Calibration and evaluation remain outside both baselines.
+identifiers, and causal checks. Panic now has a separately versioned
+end-to-end Rule execution and generated-graph closure. The SingHealth
+configuration remains non-executable until it receives the corresponding
+Policy Realization and full-roster package. Calibration and evaluation remain
+outside both baselines.
 
 ## Reading the event baselines
 
@@ -181,9 +184,9 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Evaluation material is not a runtime or construction input.
 
 The accepted bounded baselines remain distinct from full-roster execution.
-The Panic executable successor establishes runtime integration but not a
-released canonical run, calibration, historical fitting, held-out evaluation,
-or a scientific claim.
+The Panic executable successor and run release now establish deterministic
+runtime, replay, and graph closure, but not calibration, historical fitting,
+held-out evaluation, policy effectiveness, or a scientific claim.
 The separately governed [Rule-execution layer](execution/) provides the
 authorized engineering extension without changing the scope of those earlier
 releases.

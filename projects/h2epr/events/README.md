@@ -54,7 +54,7 @@ per role, or repeat the same record under several phase names.
 
 | Event | Coordination entry | Current position |
 |---|---|---|
-| `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | Retained first-event baseline through one bounded lineage-conformance case; retrospective frame evidence accepted. |
+| `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | First event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
 | `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Retained second-event baseline through one bounded lineage-conformance case. |
 
 Completed entries present accepted assets in two groups. The research-facing

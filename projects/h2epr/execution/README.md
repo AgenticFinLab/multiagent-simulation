@@ -31,11 +31,11 @@ execution/
   panic_1907/
     policy-realization-v0.1/
     full-roster-rule-v0.1/
-    generated-epg-v0.1/
+    run-and-graph-v0.1/
   singhealth_data_breach/
     policy-realization-v0.1/
     full-roster-rule-v0.1/
-    generated-epg-v0.1/
+    run-and-graph-v0.1/
 ```
 
 Create a directory only when its artifact exists. A release package may keep a
@@ -55,6 +55,13 @@ then binds all sixteen actor carriers, seventeen capability projections, 127
 actor-qualified actions, eighty-eight decision rules, thirteen lifecycle
 families, and nine concrete runtime components to one deterministic bundle.
 It is execution-eligible but is not itself a canonical run or generated EPG.
+
+The accepted
+[Panic of 1907 run and generated graph v0.1](panic_1907/run-and-graph-v0.1/)
+records two byte-identical full-roster materializations, successful
+authoritative replay, and a trace-closed generated EPG. Full traces and graphs
+remain in ignored event custody; the tracked release retains their exact
+identities and compact closure evidence.
 
 ## Admission boundary
 
