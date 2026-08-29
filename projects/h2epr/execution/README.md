@@ -67,8 +67,16 @@ The accepted
 [SingHealth Data Breach Policy Realization v0.1](singhealth_data_breach/policy-realization-v0.1/)
 maps all thirteen configured actor placements, nine selected Scenario
 policies, and eleven lifecycle families to closed Rule implementations. It is
-the semantic parent of the later SingHealth executable successor, not itself
-a runtime or generated graph.
+the semantic parent of the executable successor, not itself a runtime or
+generated graph.
+
+The accepted
+[SingHealth Data Breach full-roster Rule package v0.1](singhealth_data_breach/full-roster-rule-v0.1/)
+binds thirteen independent carriers, 74 actor-qualified actions, 41 decision
+rules, eleven lifecycle families, and nine concrete runtime components. Its
+event-driven clock preserves the configuration's five event anchors and ten
+same-time precedence barriers without adding intraday precision. The package
+is execution-eligible but is not itself a canonical run or generated EPG.
 
 ## Shared execution kernel
 

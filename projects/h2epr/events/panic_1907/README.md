@@ -55,10 +55,10 @@ applied when they were released. This entry records the current event position.
 | Field | Current record |
 |---|---|
 | Work mode | End-to-end first-event engineering baseline complete; accepted semantic parents remain frozen |
-| Current use | Source implementation for extracting the smallest event-neutral H2EPR execution and run-release kernel before the second event |
+| Current use | First-event reference implementation for the shared H2EPR execution and run-closure kernel and for cross-event conformance |
 | Verification boundary | The full-roster run establishes deterministic mechanism coverage, authoritative replay, and trace-derived graph closure. It is not evidence of historical fidelity or scientific validity. |
 | Reopening condition | A new research question and explicit scope are required before changing evidence, participant semantics, configuration, calibration, or evaluation boundaries. Reusable execution code may be extracted without rewriting the event releases. |
-| Next action | Extract only demonstrated event-neutral execution mechanisms under H2EPR, then use SingHealth as the independent second consumer. |
+| Next action | Compare the completed release with the independent SingHealth run-and-graph closure and retain only demonstrated cross-event invariants in the shared H2EPR layer. |
 
 ## Phase status
 

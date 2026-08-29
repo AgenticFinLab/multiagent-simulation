@@ -1,0 +1,128 @@
+{
+  "schema": "h2epr.executable-successor-release.v0_1",
+  "release_id": "H2EPR-0616-FULL-ROSTER-RULE-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0616",
+  "released_on": "2026-08-29",
+  "status": "accepted_executable_package",
+  "integrity_algorithm": "sha256",
+  "package": {
+    "id": "h2epr.0616.full-roster-rule.v0_1",
+    "path": "executable-package.json",
+    "source_sha256": "3042fedbc42f6154d8646e21ab6a44984459b3edea8e49cbffe1d8992eca0762",
+    "canonical_sha256": "e0b6b39c0e4a200df3af011d9abe095a3ea89400da027ca93c8b036e3a4ca927",
+    "format_identity": "h2epr.executable-scenario-package.v0_1",
+    "schema_path": "execution/schemas/executable-scenario-package-v0.1.schema.json",
+    "schema_sha256": "d7cfef11766b3b5580416df30ac588212fecbbb5c5ef5a70ef318412b0f1b8d9",
+    "admission_verdict": "PASS_ACCEPTED_EXECUTABLE_PACKAGE"
+  },
+  "runtime_bundle": {
+    "id": "h2epr.0616.rule-runtime-bundle.v0_1",
+    "path": "runtime-bundle.json",
+    "source_sha256": "58b980607ab4582addb2d93df53baf239407a874ee9c74370e680a52c2e9fba3",
+    "canonical_sha256": "037d8f3a9e34ac8190b5f6e58dd1a0e35963e81b60f84876e49c5addac34244a",
+    "format_identity": "h2epr.rule-runtime-bundle.v0_1",
+    "status": "accepted_runtime_bundle",
+    "deterministic_materialization": true
+  },
+  "policy_realization": {
+    "id": "h2epr.0616.policy-realization.v0_1",
+    "path": "execution/singhealth_data_breach/policy-realization-v0.1/policy-realization.json",
+    "source_sha256": "247197860e9f3ef420203d799f45d4d448a9ef32170aa9ec4fd463ba5f2415e3",
+    "canonical_sha256": "c828aa21b40ade2f750341129f11c666ae686c926a0f662bdf2e2e56eca8f1f6"
+  },
+  "coverage": {
+    "actor_instances": 13,
+    "actor_carriers": 13,
+    "actor_capability_bindings": 13,
+    "participant_artifacts": 9,
+    "decision_observation_rules": 41,
+    "planned_emitting_decisions": 41,
+    "planned_no_intent_decisions": 0,
+    "action_bindings": 74,
+    "communication_routes": 46,
+    "configured_route_records": 8,
+    "selected_scenario_policies": 9,
+    "lifecycle_families": 11,
+    "runtime_components": 9,
+    "logical_coordinates": 50
+  },
+  "schemas": [
+    {
+      "path": "execution/schemas/executable-scenario-package-v0.1.schema.json",
+      "sha256": "d7cfef11766b3b5580416df30ac588212fecbbb5c5ef5a70ef318412b0f1b8d9"
+    },
+    {
+      "path": "execution/schemas/policy-realization-v0.1.schema.json",
+      "sha256": "6a2bb9f88b665b40abd977a443f6554ae7c8d246521332832e590fdb2d303afe"
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/__init__.py",
+      "sha256": "6a5a8d28685a3647265520f2179db0354ae7a3a2005f937d45faf4a8ef478f83"
+    },
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/assembly.py",
+      "sha256": "0d2fcf4f49cdb25763fe0121cc4c90dfd0c9ca6286203de049f05cdd88017698"
+    },
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/components.py",
+      "sha256": "5a0831ca470e93288c9f968e9fa23aa6608683f8b2dad0e7baa07bf0216cc038"
+    },
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/executable_admission.py",
+      "sha256": "d51f9b09c9b4e70590763d29828af46c616336f0882a406323bc563b8b04ac59"
+    },
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/runtime_components.py",
+      "sha256": "3728dacff86c261a943ac80d1d0f37cb85e9e66941ec39f2eab963524c4cc391"
+    },
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/runtime_execution.py",
+      "sha256": "cf75632b66b5d55eb8b57a84be75e595449e365505ea8d3070cfb9e65eb12fcd"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "f8ac4d9638de79150acda47e45541c4f8b876dde5ffc14ff5c7695b1369de0c0"
+    },
+    {
+      "kind": "executable_package",
+      "path": "executable-package.json",
+      "sha256": "3042fedbc42f6154d8646e21ab6a44984459b3edea8e49cbffe1d8992eca0762"
+    },
+    {
+      "kind": "runtime_bundle",
+      "path": "runtime-bundle.json",
+      "sha256": "58b980607ab4582addb2d93df53baf239407a874ee9c74370e680a52c2e9fba3"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "1b4635cc92c0482eec7819ac3d193cf4b2ece1c2b8806047bceda43738b34d71"
+    }
+  ],
+  "masim_boundary": {
+    "package_version": "0.0.1",
+    "usage": "read_only_public_interfaces",
+    "source_modification_allowed": false
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "singhealth_repeated_run_and_generated_epg_closure",
+    "canonical_run_present": false,
+    "repeat_comparison_present": false,
+    "generated_epg_present": false
+  }
+}

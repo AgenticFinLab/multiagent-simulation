@@ -1,0 +1,365 @@
+{
+  "format_identity": "h2epr.executable-scenario-package.v0_1",
+  "package_id": "h2epr.0616.full-roster-rule.v0_1",
+  "version": "0.1.0",
+  "status": "accepted_executable_package",
+  "execution_eligible": true,
+  "event_id": "H2EPR-0616",
+  "purpose": "mechanism_coverage",
+  "semantic_parent": {
+    "configuration_id": "h2epr.0616.scenario.mechanism-coverage.v0_1",
+    "configuration_version": "0.1.0",
+    "configuration_status": "accepted_non_executable_configuration",
+    "configuration_path": "configs/singhealth_data_breach/scenario-configuration-v0.1/scenario-configuration.json",
+    "configuration_source_sha256": "00fe7d799b5f944da09c64ddbeea85d2addfc7948bb9f0865316962fe2d37d3d",
+    "configuration_canonical_sha256": "288c1539221cce894545234cbc477f342e609ee92130cfc9925426e9d0edb9fd",
+    "configuration_release_manifest_path": "configs/singhealth_data_breach/scenario-configuration-v0.1/manifest.json",
+    "configuration_release_manifest_sha256": "96e9fbc4b6d4a52305450b7f38b0524da3949ff1262d84d8b6222e638d8268a9",
+    "configuration_admission_receipt_path": "configs/singhealth_data_breach/configuration-admission-v0.1/receipt.json",
+    "configuration_admission_receipt_sha256": "2ba6e893178ec16158acfd774ff0db36f21d4fd65b9a9049bd6e566f24e04cc9",
+    "roster_release_manifest_path": "releases/singhealth_data_breach/roster-definition-v0.1/manifest.json",
+    "roster_release_manifest_sha256": "188f5117f02958997f8e1140d3d19fcbada296b1750223d8b3025e1cf537625e",
+    "consolidated_mapping_manifest_path": "agents/bindings/singhealth_data_breach/consolidated/manifest.json",
+    "consolidated_mapping_manifest_sha256": "7a603d97bb25f8dddab08d7a8865fd6305a94e4db108f5f32b8ad65d28695bb9",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0616.v0_1",
+    "mapping_profile_path": "agents/bindings/singhealth_data_breach/consolidated/mapping-specification.md",
+    "mapping_profile_sha256": "1249dbe94dcad61b40c4e543435186e6e71eaab0d95c7f2877e31c0e3575a1bb",
+    "scenario_release_manifest_path": "scenarios/singhealth_data_breach/definition-v0.1/manifest.json",
+    "scenario_release_manifest_sha256": "948b9ba9e29ba6947abefd65663bd4e9ef1ff47ebb1f465a08524378b20b8795"
+  },
+  "policy_realization": {
+    "realization_id": "h2epr.0616.policy-realization.v0_1",
+    "version": "0.1.0",
+    "status": "accepted_policy_realization",
+    "path": "execution/singhealth_data_breach/policy-realization-v0.1/policy-realization.json",
+    "sha256": "247197860e9f3ef420203d799f45d4d448a9ef32170aa9ec4fd463ba5f2415e3"
+  },
+  "runtime_bundle": {
+    "runtime_bundle_id": "h2epr.0616.rule-runtime-bundle.v0_1",
+    "version": "0.1.0",
+    "status": "accepted_runtime_bundle",
+    "path": "execution/singhealth_data_breach/full-roster-rule-v0.1/runtime-bundle.json",
+    "source_sha256": "58b980607ab4582addb2d93df53baf239407a874ee9c74370e680a52c2e9fba3",
+    "canonical_sha256": "037d8f3a9e34ac8190b5f6e58dd1a0e35963e81b60f84876e49c5addac34244a"
+  },
+  "actor_bindings": [
+    {
+      "actor_id": "actor.0616.office.cluster-iso",
+      "capability_ids": [
+        "cluster_information_security_officer"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.cluster-iso::cluster_information_security_officer"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.cluster-information-security-officer",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.cluster-iso.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.ihis-ceo",
+      "capability_ids": [
+        "ihis_chief_executive_officer"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.ihis-ceo::ihis_chief_executive_officer"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.ihis-chief-executive-officer",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.ihis-ceo.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.sector-lead",
+      "capability_ids": [
+        "cyber_security_governance_director_and_healthcare_sector_lead"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.sector-lead::cyber_security_governance_director_and_healthcare_sector_lead"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.cyber-security-governance-director-and-healthcare-sector-lead",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.sector-lead.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-deputy-gceo",
+      "capability_ids": [
+        "singhealth_deputy_group_chief_executive_officer"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.singhealth-deputy-gceo::singhealth_deputy_group_chief_executive_officer"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.singhealth-deputy-group-chief-executive-officer",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.singhealth-deputy-gceo.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gceo",
+      "capability_ids": [
+        "singhealth_group_chief_executive_officer"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.singhealth-gceo::singhealth_group_chief_executive_officer"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.singhealth-group-chief-executive-officer",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.singhealth-gceo.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.singhealth-gcio",
+      "capability_ids": [
+        "singhealth_group_chief_information_officer"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.singhealth-gcio::singhealth_group_chief_information_officer"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.singhealth-group-chief-information-officer",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.singhealth-gcio.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.office.sirm",
+      "capability_ids": [
+        "security_incident_response_manager"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.office.sirm::security_incident_response_manager"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0616.security-incident-response-manager",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.office.sirm.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.application-scm-coordination",
+      "capability_ids": [
+        "ihis_operational_and_scm_management"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.unit.operations.application-scm-coordination::ihis_operational_and_scm_management"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.unit.operations.application-scm-coordination.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.cluster-coordination",
+      "capability_ids": [
+        "ihis_operational_and_scm_management"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.unit.operations.cluster-coordination::ihis_operational_and_scm_management"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.unit.operations.cluster-coordination.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.operations.infrastructure-coordination",
+      "capability_ids": [
+        "ihis_operational_and_scm_management"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.unit.operations.infrastructure-coordination::ihis_operational_and_scm_management"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0616.ihis-operational-and-scm-management",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.unit.operations.infrastructure-coordination.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.infrastructure-citrix",
+      "capability_ids": [
+        "technical_administration_and_line_security_staff"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.unit.technical.infrastructure-citrix::technical_administration_and_line_security_staff"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.unit.technical.infrastructure-citrix.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.scm-application-database",
+      "capability_ids": [
+        "technical_administration_and_line_security_staff"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.unit.technical.scm-application-database::technical_administration_and_line_security_staff"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.unit.technical.scm-application-database.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0616.unit.technical.security-engineering",
+      "capability_ids": [
+        "technical_administration_and_line_security_staff"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0616.unit.technical.security-engineering::technical_administration_and_line_security_staff"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0616.technical-administration-and-line-security-staff",
+      "carrier_projection_id": "h2epr.carrier.0616.actor.0616.unit.technical.security-engineering.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    }
+  ],
+  "component_bindings": {
+    "policy_registry": {
+      "implementation_id": "h2epr.component.0616.policy-registry",
+      "implementation_version": "0.1.0"
+    },
+    "scheduler": {
+      "implementation_id": "h2epr.component.0616.event-anchor-partial-order-scheduler",
+      "implementation_version": "0.1.0"
+    },
+    "observation_projector": {
+      "implementation_id": "h2epr.component.0616.observation-projector",
+      "implementation_version": "0.1.0"
+    },
+    "participant_executor": {
+      "implementation_id": "h2epr.component.0616.participant-executor",
+      "implementation_version": "0.1.0"
+    },
+    "message_transport": {
+      "implementation_id": "masim.event-process.append-only-transport",
+      "implementation_version": "0.0.1"
+    },
+    "environment": {
+      "implementation_id": "h2epr.component.0616.environment",
+      "implementation_version": "0.1.0"
+    },
+    "reducer": {
+      "implementation_id": "h2epr.component.0616.reducer",
+      "implementation_version": "0.1.0"
+    },
+    "trace": {
+      "implementation_id": "masim.event-process.trace-writer",
+      "implementation_version": "0.0.1"
+    },
+    "compiler": {
+      "implementation_id": "h2epr.component.0616.trace-compiler",
+      "implementation_version": "0.1.0"
+    }
+  },
+  "masim_usage": {
+    "mode": "read_only_public_interfaces",
+    "package_version": "0.0.1",
+    "public_interface_ids": [
+      "masim.integrations.event_process.ActionIntent",
+      "masim.integrations.event_process.AppendOnlyTransport",
+      "masim.integrations.event_process.AuthoritativeReducer",
+      "masim.integrations.event_process.MessageIntent",
+      "masim.integrations.event_process.ObservationEnvelope",
+      "masim.integrations.event_process.StateDelta",
+      "masim.integrations.event_process.TraceWriter",
+      "masim.integrations.event_process.replay_trace",
+      "masim.integrations.event_process.validate_trace",
+      "masim.simulator.phased.PhasedSimulationRunner"
+    ],
+    "phased_runner_used": true,
+    "source_modification_allowed": false
+  },
+  "runtime_bundle_contract": {
+    "format_identity": "h2epr.rule-runtime-bundle.v0_1",
+    "builder_implementation_id": "h2epr.runtime.0616.bundle-builder",
+    "builder_implementation_version": "0.1.0",
+    "deterministic_materialization": true,
+    "sections": {
+      "actor_registry": true,
+      "participant_artifacts": true,
+      "carrier_projections": true,
+      "initial_state": true,
+      "action_registry": true,
+      "policy_registry": true,
+      "communication_routes": true,
+      "observation_rules": true,
+      "clock": true,
+      "structural_selections": true,
+      "exogenous_inputs": true,
+      "lifecycle_registry": true,
+      "completion_policy": true,
+      "compiler_inputs": true,
+      "component_registry": true
+    }
+  },
+  "run_plan": {
+    "run_profile_id": "h2epr.0616.run-profile.canonical.v0_1",
+    "run_seed": 616,
+    "materialization_count": 2,
+    "same_input_required": true,
+    "same_seed_required": true,
+    "independent_materialization_required": true,
+    "resume_allowed": false,
+    "targeted_perturbation_profile_ids": []
+  },
+  "completion": {
+    "normal_condition_ids": [
+      "core_horizon_reached",
+      "notification_observation_horizon_reached",
+      "due_messages_delivered",
+      "open_objects_terminal_or_carried_forward"
+    ],
+    "unresolved_object_behavior": "carry_forward_with_typed_reason",
+    "failure_behavior": "fail_closed_without_output_claim"
+  },
+  "coverage_expectations": {
+    "actor_instances": 13,
+    "actor_capability_bindings": 13,
+    "population_units": 6,
+    "exogenous_inputs": 6,
+    "structural_selections": 6,
+    "decision_commitments": 41,
+    "observation_placements": 82,
+    "private_state_placements": 60,
+    "configuration_parameter_bindings": 0,
+    "intent_placements": 74,
+    "lifecycle_families": 11,
+    "selected_policies": 9,
+    "actor_capabilities_exact": true,
+    "configuration_semantics_exact": true,
+    "observations_and_private_state_exact": true,
+    "commitments_and_intents_exact": true,
+    "lifecycle_families_exact": true,
+    "selected_policies_exact": true,
+    "unsupported_semantics_rejected": true
+  },
+  "output_contract": {
+    "simulation_trace": true,
+    "tick_seals": true,
+    "run_seal": true,
+    "replay_receipt": true,
+    "generated_epg": true,
+    "execution_receipt": true,
+    "determinism_comparison": {
+      "runtime_bundle_sha256_match": true,
+      "simulation_trace_sha256_match": true,
+      "tick_seals_sha256_match": true,
+      "run_seal_sha256_match": true,
+      "replay_receipt_sha256_match": true,
+      "generated_epg_sha256_match": true,
+      "replay_final_state_match": true,
+      "generated_epg_trace_closure": true
+    },
+    "large_artifact_custody": "gitignored_event_run_directory",
+    "tracked_surface": "code_inputs_manifest_receipt_checksums_tests_documentation"
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}
