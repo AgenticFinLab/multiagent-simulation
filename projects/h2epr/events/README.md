@@ -55,7 +55,7 @@ per role, or repeat the same record under several phase names.
 | Event | Coordination entry | Current position |
 |---|---|---|
 | `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | First event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
-| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Full-roster Policy Realization and executable package accepted; deterministic run, replay, and generated-EPG closure next. |
+| `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Second event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
 
 Completed entries present accepted assets in two groups. The research-facing
 group is the default scholarly path through evidence, participant models, and

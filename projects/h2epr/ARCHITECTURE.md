@@ -149,8 +149,8 @@ bounded KT--NBC--NYCH binding remains a limited conformance release, while a
 separate executable successor now covers the complete configured roster and
 has produced deterministic trace, replay, and generated-graph closure.
 
-The SingHealth Data Breach has an accepted full-roster executable successor;
-its repeated run, replay, and generated-graph closure remain pending. Neither
+The SingHealth Data Breach also has an accepted full-roster executable
+successor and deterministic run, replay, and generated-graph closure. Neither
 event has calibrated parameters, historical fit, held-out evaluation, or a
 scientific-validity result. Those are separate research activities, not
 implied by closure of the engineering interfaces.

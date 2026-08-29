@@ -78,6 +78,13 @@ event-driven clock preserves the configuration's five event anchors and ten
 same-time precedence barriers without adding intraday precision. The package
 is execution-eligible but is not itself a canonical run or generated EPG.
 
+The accepted
+[SingHealth Data Breach run and generated graph v0.1](singhealth_data_breach/run-and-graph-v0.1/)
+records two byte-identical materializations, successful authoritative replay,
+and a trace-closed generated EPG. It is the second event consumer of the shared
+H2EPR execution-closure and custody kernel; event behavior and graph semantics
+remain in the SingHealth scenario module.
+
 ## Shared execution kernel
 
 The importable [`h2epr.execution`](../src/h2epr/execution/) package owns the

@@ -1,0 +1,186 @@
+{
+  "schema": "h2epr.rule-run-and-graph-release.v0_1",
+  "release_id": "H2EPR-0616-RUN-AND-GRAPH-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0616",
+  "run_id": "run.h2epr.0616.canonical.v0_1",
+  "released_on": "2026-08-29",
+  "status": "accepted_run_and_graph_closure",
+  "integrity_algorithm": "sha256",
+  "executable_parent": {
+    "release_id": "H2EPR-0616-FULL-ROSTER-RULE-v0.1",
+    "release_manifest_path": "execution/singhealth_data_breach/full-roster-rule-v0.1/manifest.json",
+    "release_manifest_source_sha256": "7421165bac5d8d379c66d7881137a0fd10a1f96860d5b73ceb45b13f0cad2cbd",
+    "package_id": "h2epr.0616.full-roster-rule.v0_1",
+    "package_path": "execution/singhealth_data_breach/full-roster-rule-v0.1/executable-package.json",
+    "package_source_sha256": "3042fedbc42f6154d8646e21ab6a44984459b3edea8e49cbffe1d8992eca0762",
+    "package_canonical_sha256": "e0b6b39c0e4a200df3af011d9abe095a3ea89400da027ca93c8b036e3a4ca927",
+    "runtime_bundle_id": "h2epr.0616.rule-runtime-bundle.v0_1",
+    "runtime_bundle_source_sha256": "58b980607ab4582addb2d93df53baf239407a874ee9c74370e680a52c2e9fba3",
+    "runtime_bundle_canonical_sha256": "037d8f3a9e34ac8190b5f6e58dd1a0e35963e81b60f84876e49c5addac34244a"
+  },
+  "materialization": {
+    "count": 2,
+    "labels": [
+      "canonical",
+      "independent_repeat"
+    ],
+    "same_input": true,
+    "same_seed": true,
+    "all_source_bytes_identical": true,
+    "all_canonical_documents_identical": true
+  },
+  "formal_artifacts": [
+    {
+      "kind": "run-manifest",
+      "document_name": "run-manifest",
+      "filename": "run-manifest.json",
+      "source_sha256": "1a5a04f7824128939331757cc548f8c53bc96d78fb29f12c0b70f235b4fe3227",
+      "canonical_sha256": "cbe39534d708a2ce18c736f0098658a23268637a9cfc0111d7562b53fbf0a954",
+      "byte_count": 16058
+    },
+    {
+      "kind": "run-seal",
+      "document_name": "run-seal",
+      "filename": "run-seal.json",
+      "source_sha256": "7dfc1e04daf518c366f415cf39ab6751b1f4f344bd9ef860748f0593e6d313ec",
+      "canonical_sha256": "7248466c0f339ae5f51eac323e08b40b27da94dbb1df461847092773f64b0a0e",
+      "byte_count": 4196
+    },
+    {
+      "kind": "replay-receipt",
+      "document_name": "replay-receipt",
+      "filename": "replay-receipt.json",
+      "source_sha256": "cd3742ab4604deb2eb61b7307dced0396d5fe26e3e60998ddcc04c95061c4224",
+      "canonical_sha256": "2f593a7a95e01bf5cef279ecad5eeadde5564eb0d2ba5c9fec6b476340fc1bcd",
+      "byte_count": 457
+    },
+    {
+      "kind": "execution-receipt",
+      "document_name": "execution-receipt",
+      "filename": "execution-receipt.json",
+      "source_sha256": "ee3469437752a63eab176917b54a9ae53cb70b734b02206b2330e3c739b70f01",
+      "canonical_sha256": "34b207366cd197590790df2b11604a34d7e382b4813237157104ea8efdc50577",
+      "byte_count": 1860
+    },
+    {
+      "kind": "determinism-comparison",
+      "document_name": "determinism-comparison",
+      "filename": "determinism-comparison.json",
+      "source_sha256": "591abbfc447f2cc1269b898f29706f2a03c5fac5f5598baf513f53c8f0d4bc4e",
+      "canonical_sha256": "b1327749d9067b6eac6dea1cd70c35182f7e06e05ed7cb8d5b6901dbfd6ee33e",
+      "byte_count": 6808
+    },
+    {
+      "kind": "generated-epg-receipt",
+      "document_name": "generated-epg-receipt",
+      "filename": "generated-epg-receipt.json",
+      "source_sha256": "675248c9da1f682cc929b3ef17ed5a09026c7c6b201a3d61ddc2b572697deb36",
+      "canonical_sha256": "be9d428af65f8c90ae8d7fdc307123243725203469f921f020100f3fc5d8f6c4",
+      "byte_count": 1782
+    }
+  ],
+  "publication_artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "00a4408126f1f0d9c47cc7d27f5d9c16577ac2f279b221d8e1dd7bf76977c4b7"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "8797b345f7804f48691d6ce0675951fd9e4e1ff5311f25bd913b7d6ddf878b41"
+    }
+  ],
+  "large_artifact_inventory": [
+    {
+      "document_name": "simulation_trace",
+      "filename": "simulation-trace.json",
+      "source_sha256": "bf56f2c5812c781be6f111985ad9cda40acd8efeb96bedd079a934effc5b5a27",
+      "canonical_sha256": "cc898fadf9b16724f6cf2e8062870a14587493fdf00beedd8eeb1499d0dcf783",
+      "byte_count": 3566766,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    },
+    {
+      "document_name": "final_state",
+      "filename": "final-state.json",
+      "source_sha256": "e0ba0240abb39bd97314d1b2fd62a5047090ae6eada032bebe648efbb45f7cab",
+      "canonical_sha256": "35e7918e7658a1314a01b8fd794be42c83dadb9b610737d568124086674c51b3",
+      "byte_count": 66998,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    },
+    {
+      "document_name": "tick_seals",
+      "filename": "tick-seals.json",
+      "source_sha256": "97815db966dbb3f0e48cdb07ed24c2f8620b41380ffa02651c94fe70271c4fbb",
+      "canonical_sha256": "aaad63802542376053cf9a8e72bf48c9130c689645149cb8dc487fb2b33ee225",
+      "byte_count": 32546,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    },
+    {
+      "document_name": "generated_epg",
+      "filename": "generated-epg.json",
+      "source_sha256": "515094262784d8c57cbf14f454dda443343b3d39c6bf1bbf90eb08c2b9bb870e",
+      "canonical_sha256": "aea490a5c142d7b57ea3f0512fbbe294ff4b11560ea16cbab5d360e432b5c681",
+      "byte_count": 2101322,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/execution/__init__.py",
+      "sha256": "48e5e3ce7e4bbc2705d6754b3fa2c550fc140729a3be4ba330666759252024f6"
+    },
+    {
+      "path": "src/h2epr/execution/closure.py",
+      "sha256": "f9bb429da9b2a8333b591758fe930fd99c0448ba93d243c0284549c96cf6cb84"
+    },
+    {
+      "path": "src/h2epr/execution/custody.py",
+      "sha256": "548dbf99ad77e9b4b0480a65de63dbb6dfd3dbb6957e00c0f857ea257917ba83"
+    },
+    {
+      "path": "src/h2epr/execution/io.py",
+      "sha256": "63e817378bc6407931b5e72cd1ee35ae0eecfbc619143e80462d7d921081d362"
+    },
+    {
+      "path": "src/h2epr/execution/model.py",
+      "sha256": "b54867f42f94c6115d0e3e7c0ba2df719e2c8e3710a5781396d2aa37bfd6f251"
+    },
+    {
+      "path": "src/h2epr/scenarios/singhealth_data_breach/full_roster_v0_1/run_release.py",
+      "sha256": "9cb77a3fb6ba4cf75593475df76607294b55c34d27000f00d1150c3426a0d77b"
+    }
+  ],
+  "closure": {
+    "trace_valid": true,
+    "tick_and_run_sealed": true,
+    "authoritative_replay_closed": true,
+    "generated_epg_trace_closed": true,
+    "unresolved_message_intent_count": 0,
+    "deterministic_pair": true
+  },
+  "masim_boundary": {
+    "package_version": "0.0.1",
+    "usage": "read_only_public_interfaces",
+    "source_modification_allowed": false
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "cross_event_execution_and_publication_closeout",
+    "singhealth_run_closed": true,
+    "shared_kernel_second_consumer": true
+  }
+}

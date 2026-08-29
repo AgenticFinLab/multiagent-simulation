@@ -1,0 +1,514 @@
+{
+  "format_identity": "h2epr.rule-run-manifest.v0_1",
+  "run_id": "run.h2epr.0616.canonical.v0_1",
+  "event_id": "H2EPR-0616",
+  "package_id": "h2epr.0616.full-roster-rule.v0_1",
+  "package_version": "0.1.0",
+  "package_source_sha256": "3042fedbc42f6154d8646e21ab6a44984459b3edea8e49cbffe1d8992eca0762",
+  "runtime_bundle_id": "h2epr.0616.rule-runtime-bundle.v0_1",
+  "runtime_bundle_version": "0.1.0",
+  "runtime_bundle_source_sha256": "58b980607ab4582addb2d93df53baf239407a874ee9c74370e680a52c2e9fba3",
+  "runtime_bundle_canonical_sha256": "037d8f3a9e34ac8190b5f6e58dd1a0e35963e81b60f84876e49c5addac34244a",
+  "run_profile_id": "h2epr.0616.run-profile.canonical.v0_1",
+  "run_seed": 616,
+  "participant_ids": [
+    "actor.0616.office.cluster-iso",
+    "actor.0616.office.ihis-ceo",
+    "actor.0616.office.sector-lead",
+    "actor.0616.office.singhealth-deputy-gceo",
+    "actor.0616.office.singhealth-gceo",
+    "actor.0616.office.singhealth-gcio",
+    "actor.0616.office.sirm",
+    "actor.0616.unit.operations.application-scm-coordination",
+    "actor.0616.unit.operations.cluster-coordination",
+    "actor.0616.unit.operations.infrastructure-coordination",
+    "actor.0616.unit.technical.infrastructure-citrix",
+    "actor.0616.unit.technical.scm-application-database",
+    "actor.0616.unit.technical.security-engineering"
+  ],
+  "logical_clock": {
+    "timezone": "Asia/Singapore",
+    "mode": "event_driven",
+    "modeled_start": {
+      "value": "2017-08-23",
+      "precision": "approximate_date"
+    },
+    "participant_response_start": {
+      "value": "2018-01-18",
+      "precision": "date"
+    },
+    "acute_window": {
+      "start": "2018-06-11",
+      "end": "2018-07-20",
+      "precision": "date_or_bounded_interval"
+    },
+    "core_horizon": {
+      "value": "2018-07-20",
+      "precision": "date"
+    },
+    "notification_observation_horizon": {
+      "value": "2018-07-23",
+      "precision": "date"
+    },
+    "same_time_precedence": [
+      "exogenous_input_admission",
+      "scenario_process_or_technical_event",
+      "information_product_production",
+      "route_transport_and_delivery",
+      "observation_projection_and_freeze",
+      "participant_decision_and_issue",
+      "adjudication",
+      "execution_and_typed_result",
+      "reducer_state_delta",
+      "later_information_or_observation"
+    ],
+    "equal_time_tie_break": "stable_event_id_after_causal_precedence",
+    "coordinate_meaning": "event-anchor and declared partial-order barrier; repeated coordinates do not assert an unobserved intraday time",
+    "invented_intraday_precision": false,
+    "logical_ticks": [
+      {
+        "logical_tick": 0,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 0,
+        "phase_id": "exogenous_input_admission"
+      },
+      {
+        "logical_tick": 1,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 1,
+        "phase_id": "scenario_process_or_technical_event"
+      },
+      {
+        "logical_tick": 2,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 2,
+        "phase_id": "information_product_production"
+      },
+      {
+        "logical_tick": 3,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 3,
+        "phase_id": "route_transport_and_delivery"
+      },
+      {
+        "logical_tick": 4,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 4,
+        "phase_id": "observation_projection_and_freeze"
+      },
+      {
+        "logical_tick": 5,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 5,
+        "phase_id": "participant_decision_and_issue"
+      },
+      {
+        "logical_tick": 6,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 6,
+        "phase_id": "adjudication"
+      },
+      {
+        "logical_tick": 7,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 7,
+        "phase_id": "execution_and_typed_result"
+      },
+      {
+        "logical_tick": 8,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 8,
+        "phase_id": "reducer_state_delta"
+      },
+      {
+        "logical_tick": 9,
+        "logical_date": "2017-08-23",
+        "anchor_id": "modeled_start",
+        "anchor_index": 0,
+        "partial_order_slot": 9,
+        "phase_id": "later_information_or_observation"
+      },
+      {
+        "logical_tick": 10,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 0,
+        "phase_id": "exogenous_input_admission"
+      },
+      {
+        "logical_tick": 11,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 1,
+        "phase_id": "scenario_process_or_technical_event"
+      },
+      {
+        "logical_tick": 12,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 2,
+        "phase_id": "information_product_production"
+      },
+      {
+        "logical_tick": 13,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 3,
+        "phase_id": "route_transport_and_delivery"
+      },
+      {
+        "logical_tick": 14,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 4,
+        "phase_id": "observation_projection_and_freeze"
+      },
+      {
+        "logical_tick": 15,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 5,
+        "phase_id": "participant_decision_and_issue"
+      },
+      {
+        "logical_tick": 16,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 6,
+        "phase_id": "adjudication"
+      },
+      {
+        "logical_tick": 17,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 7,
+        "phase_id": "execution_and_typed_result"
+      },
+      {
+        "logical_tick": 18,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 8,
+        "phase_id": "reducer_state_delta"
+      },
+      {
+        "logical_tick": 19,
+        "logical_date": "2018-01-18",
+        "anchor_id": "participant_response_start",
+        "anchor_index": 1,
+        "partial_order_slot": 9,
+        "phase_id": "later_information_or_observation"
+      },
+      {
+        "logical_tick": 20,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 0,
+        "phase_id": "exogenous_input_admission"
+      },
+      {
+        "logical_tick": 21,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 1,
+        "phase_id": "scenario_process_or_technical_event"
+      },
+      {
+        "logical_tick": 22,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 2,
+        "phase_id": "information_product_production"
+      },
+      {
+        "logical_tick": 23,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 3,
+        "phase_id": "route_transport_and_delivery"
+      },
+      {
+        "logical_tick": 24,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 4,
+        "phase_id": "observation_projection_and_freeze"
+      },
+      {
+        "logical_tick": 25,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 5,
+        "phase_id": "participant_decision_and_issue"
+      },
+      {
+        "logical_tick": 26,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 6,
+        "phase_id": "adjudication"
+      },
+      {
+        "logical_tick": 27,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 7,
+        "phase_id": "execution_and_typed_result"
+      },
+      {
+        "logical_tick": 28,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 8,
+        "phase_id": "reducer_state_delta"
+      },
+      {
+        "logical_tick": 29,
+        "logical_date": "2018-06-11",
+        "anchor_id": "acute_window_start",
+        "anchor_index": 2,
+        "partial_order_slot": 9,
+        "phase_id": "later_information_or_observation"
+      },
+      {
+        "logical_tick": 30,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 0,
+        "phase_id": "exogenous_input_admission"
+      },
+      {
+        "logical_tick": 31,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 1,
+        "phase_id": "scenario_process_or_technical_event"
+      },
+      {
+        "logical_tick": 32,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 2,
+        "phase_id": "information_product_production"
+      },
+      {
+        "logical_tick": 33,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 3,
+        "phase_id": "route_transport_and_delivery"
+      },
+      {
+        "logical_tick": 34,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 4,
+        "phase_id": "observation_projection_and_freeze"
+      },
+      {
+        "logical_tick": 35,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 5,
+        "phase_id": "participant_decision_and_issue"
+      },
+      {
+        "logical_tick": 36,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 6,
+        "phase_id": "adjudication"
+      },
+      {
+        "logical_tick": 37,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 7,
+        "phase_id": "execution_and_typed_result"
+      },
+      {
+        "logical_tick": 38,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 8,
+        "phase_id": "reducer_state_delta"
+      },
+      {
+        "logical_tick": 39,
+        "logical_date": "2018-07-20",
+        "anchor_id": "core_horizon",
+        "anchor_index": 3,
+        "partial_order_slot": 9,
+        "phase_id": "later_information_or_observation"
+      },
+      {
+        "logical_tick": 40,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 0,
+        "phase_id": "exogenous_input_admission"
+      },
+      {
+        "logical_tick": 41,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 1,
+        "phase_id": "scenario_process_or_technical_event"
+      },
+      {
+        "logical_tick": 42,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 2,
+        "phase_id": "information_product_production"
+      },
+      {
+        "logical_tick": 43,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 3,
+        "phase_id": "route_transport_and_delivery"
+      },
+      {
+        "logical_tick": 44,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 4,
+        "phase_id": "observation_projection_and_freeze"
+      },
+      {
+        "logical_tick": 45,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 5,
+        "phase_id": "participant_decision_and_issue"
+      },
+      {
+        "logical_tick": 46,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 6,
+        "phase_id": "adjudication"
+      },
+      {
+        "logical_tick": 47,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 7,
+        "phase_id": "execution_and_typed_result"
+      },
+      {
+        "logical_tick": 48,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 8,
+        "phase_id": "reducer_state_delta"
+      },
+      {
+        "logical_tick": 49,
+        "logical_date": "2018-07-23",
+        "anchor_id": "notification_observation_horizon",
+        "anchor_index": 4,
+        "partial_order_slot": 9,
+        "phase_id": "later_information_or_observation"
+      }
+    ]
+  },
+  "component_bindings": {
+    "policy_registry": {
+      "implementation_id": "h2epr.component.0616.policy-registry",
+      "implementation_version": "0.1.0"
+    },
+    "scheduler": {
+      "implementation_id": "h2epr.component.0616.event-anchor-partial-order-scheduler",
+      "implementation_version": "0.1.0"
+    },
+    "observation_projector": {
+      "implementation_id": "h2epr.component.0616.observation-projector",
+      "implementation_version": "0.1.0"
+    },
+    "participant_executor": {
+      "implementation_id": "h2epr.component.0616.participant-executor",
+      "implementation_version": "0.1.0"
+    },
+    "message_transport": {
+      "implementation_id": "masim.event-process.append-only-transport",
+      "implementation_version": "0.0.1"
+    },
+    "environment": {
+      "implementation_id": "h2epr.component.0616.environment",
+      "implementation_version": "0.1.0"
+    },
+    "reducer": {
+      "implementation_id": "h2epr.component.0616.reducer",
+      "implementation_version": "0.1.0"
+    },
+    "trace": {
+      "implementation_id": "masim.event-process.trace-writer",
+      "implementation_version": "0.0.1"
+    },
+    "compiler": {
+      "implementation_id": "h2epr.component.0616.trace-compiler",
+      "implementation_version": "0.1.0"
+    }
+  },
+  "resume_allowed": false,
+  "historical_calibration": false,
+  "historical_validation": false,
+  "output_interpretation": "simulation_generated_mechanism_coverage",
+  "manifest_sha256": "f6eb54c703030e77fd76a49ebca68735700d6db70cf77e0e71dfe1dcda6bd042"
+}

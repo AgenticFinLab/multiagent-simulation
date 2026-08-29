@@ -90,14 +90,17 @@ healthcare cybersecurity event:
 - an accepted
   [full-roster Rule package](execution/singhealth_data_breach/full-roster-rule-v0.1/)
   binding all thirteen carriers, 74 actor-qualified actions, 41 decision
-  rules, eleven lifecycle families, and nine runtime components.
+  rules, eleven lifecycle families, and nine runtime components; and
+- an accepted
+  [run and generated-graph release](execution/singhealth_data_breach/run-and-graph-v0.1/)
+  recording byte-identical materializations, authoritative replay, and a
+  trace-closed generated EPG.
 
 The two bounded event baselines use the same stage responsibilities and
 release structure while retaining event-specific participants, policies,
-identifiers, and causal checks. Panic has a separately versioned end-to-end
-Rule execution and generated-graph closure. SingHealth now has an admitted
-executable successor; its repeated run, replay, and generated graph remain a
-separate release. Calibration and evaluation remain outside both baselines.
+identifiers, and causal checks. Both now have separately versioned end-to-end
+Rule execution, authoritative replay, and generated-graph closure. Calibration
+and evaluation remain outside both baselines.
 
 ## Reading the event baselines
 
@@ -192,11 +195,10 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Evaluation material is not a runtime or construction input.
 
 The accepted bounded baselines remain distinct from full-roster execution.
-The Panic executable successor and run release establish deterministic
-runtime, replay, and graph closure. The SingHealth executable successor closes
-its full-roster runtime input but does not yet constitute a completed run.
-Neither event claims calibration, historical fitting, held-out evaluation,
-policy effectiveness, or scientific validity.
+The two executable successors and run releases establish deterministic
+runtime, replay, and graph closure for their declared mechanism-coverage
+profiles. Neither event claims calibration, historical fitting, held-out
+evaluation, policy effectiveness, or scientific validity.
 The separately governed [Rule-execution layer](execution/) provides the
 authorized engineering extension without changing the scope of those earlier
 releases.

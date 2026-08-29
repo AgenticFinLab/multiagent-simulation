@@ -1,0 +1,141 @@
+{
+  "format_identity": "h2epr.rule-run-determinism-comparison.v0_1",
+  "comparison_id": "h2epr.0616.run-comparison.canonical.v0_1",
+  "status": "pass",
+  "event_id": "H2EPR-0616",
+  "run_id": "run.h2epr.0616.canonical.v0_1",
+  "run_profile_id": "h2epr.0616.run-profile.canonical.v0_1",
+  "run_seed": 616,
+  "materializations": [
+    "canonical",
+    "independent_repeat"
+  ],
+  "operational_coordinates_excluded_from_identity": true,
+  "document_comparisons": [
+    {
+      "document_name": "run_manifest",
+      "filename": "run-manifest.json",
+      "canonical_materialization_source_sha256": "1a5a04f7824128939331757cc548f8c53bc96d78fb29f12c0b70f235b4fe3227",
+      "repeat_materialization_source_sha256": "1a5a04f7824128939331757cc548f8c53bc96d78fb29f12c0b70f235b4fe3227",
+      "canonical_materialization_canonical_sha256": "cbe39534d708a2ce18c736f0098658a23268637a9cfc0111d7562b53fbf0a954",
+      "repeat_materialization_canonical_sha256": "cbe39534d708a2ce18c736f0098658a23268637a9cfc0111d7562b53fbf0a954",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 16058
+    },
+    {
+      "document_name": "simulation_trace",
+      "filename": "simulation-trace.json",
+      "canonical_materialization_source_sha256": "bf56f2c5812c781be6f111985ad9cda40acd8efeb96bedd079a934effc5b5a27",
+      "repeat_materialization_source_sha256": "bf56f2c5812c781be6f111985ad9cda40acd8efeb96bedd079a934effc5b5a27",
+      "canonical_materialization_canonical_sha256": "cc898fadf9b16724f6cf2e8062870a14587493fdf00beedd8eeb1499d0dcf783",
+      "repeat_materialization_canonical_sha256": "cc898fadf9b16724f6cf2e8062870a14587493fdf00beedd8eeb1499d0dcf783",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 3566766
+    },
+    {
+      "document_name": "final_state",
+      "filename": "final-state.json",
+      "canonical_materialization_source_sha256": "e0ba0240abb39bd97314d1b2fd62a5047090ae6eada032bebe648efbb45f7cab",
+      "repeat_materialization_source_sha256": "e0ba0240abb39bd97314d1b2fd62a5047090ae6eada032bebe648efbb45f7cab",
+      "canonical_materialization_canonical_sha256": "35e7918e7658a1314a01b8fd794be42c83dadb9b610737d568124086674c51b3",
+      "repeat_materialization_canonical_sha256": "35e7918e7658a1314a01b8fd794be42c83dadb9b610737d568124086674c51b3",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 66998
+    },
+    {
+      "document_name": "tick_seals",
+      "filename": "tick-seals.json",
+      "canonical_materialization_source_sha256": "97815db966dbb3f0e48cdb07ed24c2f8620b41380ffa02651c94fe70271c4fbb",
+      "repeat_materialization_source_sha256": "97815db966dbb3f0e48cdb07ed24c2f8620b41380ffa02651c94fe70271c4fbb",
+      "canonical_materialization_canonical_sha256": "aaad63802542376053cf9a8e72bf48c9130c689645149cb8dc487fb2b33ee225",
+      "repeat_materialization_canonical_sha256": "aaad63802542376053cf9a8e72bf48c9130c689645149cb8dc487fb2b33ee225",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 32546
+    },
+    {
+      "document_name": "run_seal",
+      "filename": "run-seal.json",
+      "canonical_materialization_source_sha256": "7dfc1e04daf518c366f415cf39ab6751b1f4f344bd9ef860748f0593e6d313ec",
+      "repeat_materialization_source_sha256": "7dfc1e04daf518c366f415cf39ab6751b1f4f344bd9ef860748f0593e6d313ec",
+      "canonical_materialization_canonical_sha256": "7248466c0f339ae5f51eac323e08b40b27da94dbb1df461847092773f64b0a0e",
+      "repeat_materialization_canonical_sha256": "7248466c0f339ae5f51eac323e08b40b27da94dbb1df461847092773f64b0a0e",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 4196
+    },
+    {
+      "document_name": "replay_receipt",
+      "filename": "replay-receipt.json",
+      "canonical_materialization_source_sha256": "cd3742ab4604deb2eb61b7307dced0396d5fe26e3e60998ddcc04c95061c4224",
+      "repeat_materialization_source_sha256": "cd3742ab4604deb2eb61b7307dced0396d5fe26e3e60998ddcc04c95061c4224",
+      "canonical_materialization_canonical_sha256": "2f593a7a95e01bf5cef279ecad5eeadde5564eb0d2ba5c9fec6b476340fc1bcd",
+      "repeat_materialization_canonical_sha256": "2f593a7a95e01bf5cef279ecad5eeadde5564eb0d2ba5c9fec6b476340fc1bcd",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 457
+    },
+    {
+      "document_name": "generated_epg",
+      "filename": "generated-epg.json",
+      "canonical_materialization_source_sha256": "515094262784d8c57cbf14f454dda443343b3d39c6bf1bbf90eb08c2b9bb870e",
+      "repeat_materialization_source_sha256": "515094262784d8c57cbf14f454dda443343b3d39c6bf1bbf90eb08c2b9bb870e",
+      "canonical_materialization_canonical_sha256": "aea490a5c142d7b57ea3f0512fbbe294ff4b11560ea16cbab5d360e432b5c681",
+      "repeat_materialization_canonical_sha256": "aea490a5c142d7b57ea3f0512fbbe294ff4b11560ea16cbab5d360e432b5c681",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 2101322
+    },
+    {
+      "document_name": "execution_receipt",
+      "filename": "execution-receipt.json",
+      "canonical_materialization_source_sha256": "ee3469437752a63eab176917b54a9ae53cb70b734b02206b2330e3c739b70f01",
+      "repeat_materialization_source_sha256": "ee3469437752a63eab176917b54a9ae53cb70b734b02206b2330e3c739b70f01",
+      "canonical_materialization_canonical_sha256": "34b207366cd197590790df2b11604a34d7e382b4813237157104ea8efdc50577",
+      "repeat_materialization_canonical_sha256": "34b207366cd197590790df2b11604a34d7e382b4813237157104ea8efdc50577",
+      "byte_identical": true,
+      "canonical_identical": true,
+      "byte_count": 1860
+    }
+  ],
+  "all_source_bytes_identical": true,
+  "all_canonical_documents_identical": true,
+  "replay_closed_in_both": true,
+  "graph_closed_in_both": true,
+  "coverage": {
+    "actors_operated": 13,
+    "actor_capability_bindings": 13,
+    "commitments_evaluated": 41,
+    "scenario_policies_exercised": 9,
+    "lifecycle_families_realized": 11,
+    "record_counts": {
+      "action_disposition": 41,
+      "action_intent": 41,
+      "carry_forward": 41,
+      "completion": 1,
+      "exogenous_input_release": 6,
+      "message_disposition": 146,
+      "message_intent": 73,
+      "observation": 650,
+      "participant_decision": 41,
+      "run_seal": 1,
+      "scenario_policy_application": 222,
+      "state_delta": 141,
+      "tick_commit": 50,
+      "tick_open": 50,
+      "tick_seal": 50
+    }
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}

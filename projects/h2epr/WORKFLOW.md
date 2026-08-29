@@ -146,12 +146,15 @@ three-participant binding, and deterministic trace and replay evidence.
 Together they exercise the same stage responsibilities across a financial
 crisis and a healthcare cybersecurity event while retaining event-specific
 participants, semantics, policies, identifiers, and causal checks. A separate
-Panic executable successor closes full-roster Rule execution, replay, and a
-generated event graph. SingHealth now has its own accepted Policy Realization
-and executable successor; repeated execution and graph closure remain the next
-boundary. Neither event includes calibration, held-out evaluation, or a
+Panic and SingHealth each have a separate executable successor that closes
+full-roster Rule execution, replay, and a generated event graph. The second
+event consumes the same event-neutral H2EPR closure and custody kernel while
+retaining its own participant, institutional, time, and graph semantics.
+Neither event includes calibration, held-out evaluation, or a
 historical-validity claim.
 
 The separately authorized full-roster Rule-execution program builds executable
 successors from the frozen semantic parents, first for Panic and then for
-SingHealth, without changing what either earlier release established.
+SingHealth, without changing what either earlier release established. Its
+remaining work is a narrow cross-event conformance and publication-surface
+closeout, not deeper event modeling.

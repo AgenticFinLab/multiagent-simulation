@@ -1,10 +1,10 @@
 # H2EPR-0616: SingHealth Data Breach
 
 This coordination entry indexes the accepted second-event assets. H2EPR-0616
-has completed its bounded technical--operations--GCIO lineage case and now has
-an independently admitted full-roster executable successor. The records linked
-below remain authoritative for their respective responsibilities; repeated
-execution, replay, and generated-graph closure form the next release boundary.
+has completed its bounded technical--operations--GCIO lineage case and a
+separate full-roster Rule path through repeated execution, authoritative
+replay, and a trace-derived generated EPG. The records linked below remain
+authoritative for their respective responsibilities.
 
 ## Event profile
 
@@ -16,7 +16,7 @@ execution, replay, and generated-graph closure form the next release boundary.
 | Temporal boundary | The analytic interval begins with the earliest evidenced compromise around 23 August 2017 and runs through the public announcement on 20 July 2018, with patient-notification delivery observed through 23 July. Participant response begins on 18 January 2018; the acute information-and-response window begins on 11 June. Later investigation, liability, penalties, and reform are retrospective evidence or excluded aftermath. |
 | Evidence and exposure | The [event-frame evidence](frame-evidence-v0.1.md) adopts four official sources; the [participant-evidence record](participant-evidence-v0.1.md) locates the role-specific claims used by the models. The historical outcome was known during construction, so the event supports no clean-builder or held-out claim. |
 | Participant boundary | Seven office-level Agent Definitions and two responsibility-unit Population Models own the necessary autonomous choices. External attack pressure remains a bounded adversarial process; government bodies remain routed institutional processes; endpoint users remain context; affected patients remain a consequence cohort. |
-| Current endpoint | Static admission and bounded lineage conformance are complete. A separate full-roster Policy Realization and executable package bind all thirteen configured actors and are accepted as the exact input to a deterministic Rule run; no canonical SingHealth run or generated EPG has yet been released. |
+| Current endpoint | Static admission and bounded lineage conformance are complete. A separate full-roster Policy Realization, executable package, two byte-identical thirteen-actor Rule materializations, authoritative replay, and generated-EPG closure are accepted. |
 | Excluded work | Historical calibration or fitting, held-out construction, post-seal scientific evaluation, policy-effectiveness claims, and historical or scientific validity claims. |
 | Review record | Phase-owned manifests, reviews, receipts, and decisions preserve the exact accepted boundaries. The semantic parents remain unchanged; later execution work is recorded in versioned successors. |
 | Exact upstream inputs | [Roster Definition release v0.1](../../releases/singhealth_data_breach/roster-definition-v0.1/), [consolidated mapping](../../agents/bindings/singhealth_data_breach/consolidated/), [Event Scenario Definition v0.1](../../scenarios/singhealth_data_breach/definition-v0.1/), [Scenario Configuration v0.1](../../configs/singhealth_data_breach/scenario-configuration-v0.1/), and [Policy Realization v0.1](../../execution/singhealth_data_breach/policy-realization-v0.1/). |
@@ -44,6 +44,7 @@ execution, replay, and generated-graph closure form the next release boundary.
 | Trace, seal, and replay review | [Lineage conformance v0.1](../../scenarios/singhealth_data_breach/lineage-conformance-v0.1/) | Deterministic bounded conformance passed |
 | Full-roster policy implementation | [Policy Realization v0.1](../../execution/singhealth_data_breach/policy-realization-v0.1/) | Thirteen actor placements, nine selected Scenario policies, and eleven lifecycle families accepted |
 | Executable assembly | [Full-roster Rule package v0.1](../../execution/singhealth_data_breach/full-roster-rule-v0.1/) | Thirteen actor carriers, closed runtime bundle, components, routes, and fail-closed admission |
+| Run, replay, and generated graph | [Run and generated graph v0.1](../../execution/singhealth_data_breach/run-and-graph-v0.1/) | Canonical and repeat materializations are byte-identical; replay and graph references close |
 
 Versioned packages retain the review language and next-stage boundary that
 applied when they were released. This entry records the current event position.
@@ -52,11 +53,11 @@ applied when they were released. This entry records the current event position.
 
 | Field | Current record |
 |---|---|
-| Work mode | Full-roster executable input accepted; deterministic run and generated-graph closure next |
-| Current use | Cross-domain execution input preserving the accepted participant, Scenario, configuration, mapping, and bounded-lineage authorities |
-| Verification boundary | The package establishes complete, deterministic, fail-closed assembly for uncalibrated mechanism coverage. It is not a completed run and is not evidence of historical fidelity or scientific validity. |
-| Reopening condition | Evidence, participant semantics, Scenario meaning, and configuration remain frozen unless a new research question requires a reviewed successor. Run and graph work consumes the executable package without rewriting those parents. |
-| Next action | Materialize two fresh same-input Rule runs, verify authoritative replay, compile the trace-derived EPG, and retain compact integrity evidence. |
+| Work mode | End-to-end second-event engineering baseline complete; accepted semantic parents remain frozen |
+| Current use | Healthcare-cybersecurity demonstration of the full H2EPR semantic-to-execution-to-graph path and its shared closure kernel |
+| Verification boundary | The run establishes deterministic mechanism coverage, authoritative replay, and trace-derived graph closure. It is not evidence of historical fidelity or scientific validity. |
+| Reopening condition | Evidence, participant semantics, Scenario meaning, and configuration remain frozen unless a new research question requires a reviewed successor. |
+| Next action | Compare the two accepted event paths, close shared-kernel conformance and publication-surface consistency, and stop before calibration or scientific evaluation. |
 
 ## Phase status
 
@@ -67,8 +68,8 @@ applied when they were released. This entry records the current event position.
 - [x] One bounded three-participant carrier binding and lineage-conformance case
   closed.
 - [x] Full-roster Policy Realization and executable package accepted.
-- [ ] Repeated Rule execution, replay, and generated EPG closed.
+- [x] Repeated Rule execution, replay, and generated EPG closed.
 - [x] Calibration and scientific evaluation remain outside the work package.
 
-**Current disposition: full-roster executable successor accepted; deterministic
-run and generated-graph closure next.**
+**Current disposition: second-event deterministic execution and
+generated-graph baseline complete; semantic releases remain frozen.**

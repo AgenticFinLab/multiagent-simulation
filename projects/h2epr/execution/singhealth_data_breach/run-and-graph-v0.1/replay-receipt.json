@@ -1,0 +1,11 @@
+{
+  "format_identity": "h2epr.replay-receipt.v0_1",
+  "status": "pass",
+  "run_id": "run.h2epr.0616.canonical.v0_1",
+  "record_count": 1554,
+  "tick_count": 50,
+  "trace_sha256": "cc898fadf9b16724f6cf2e8062870a14587493fdf00beedd8eeb1499d0dcf783",
+  "final_state_sha256": "35e7918e7658a1314a01b8fd794be42c83dadb9b610737d568124086674c51b3",
+  "replayed_state_sha256": "35e7918e7658a1314a01b8fd794be42c83dadb9b610737d568124086674c51b3",
+  "trace_errors": []
+}

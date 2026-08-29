@@ -1,0 +1,48 @@
+{
+  "format_identity": "h2epr.rule-execution-receipt.v0_1",
+  "status": "pass",
+  "event_id": "H2EPR-0616",
+  "run_id": "run.h2epr.0616.canonical.v0_1",
+  "manifest_sha256": "f6eb54c703030e77fd76a49ebca68735700d6db70cf77e0e71dfe1dcda6bd042",
+  "runtime_bundle_sha256": "037d8f3a9e34ac8190b5f6e58dd1a0e35963e81b60f84876e49c5addac34244a",
+  "simulation_trace_sha256": "cc898fadf9b16724f6cf2e8062870a14587493fdf00beedd8eeb1499d0dcf783",
+  "run_seal_sha256": "55f747772481a22a0002524c5c1d7f71d73dce2a1f642f43804902481ac16e31",
+  "final_state_sha256": "35e7918e7658a1314a01b8fd794be42c83dadb9b610737d568124086674c51b3",
+  "replay_receipt_sha256": "2f593a7a95e01bf5cef279ecad5eeadde5564eb0d2ba5c9fec6b476340fc1bcd",
+  "generated_epg_sha256": "327f129b2ac73f92e3da9b54211695f30477ceacfdc9f5e9ee72f462316fa599",
+  "coverage": {
+    "actors_operated": 13,
+    "actor_capability_bindings": 13,
+    "commitments_evaluated": 41,
+    "scenario_policies_exercised": 9,
+    "lifecycle_families_realized": 11,
+    "record_counts": {
+      "action_disposition": 41,
+      "action_intent": 41,
+      "carry_forward": 41,
+      "completion": 1,
+      "exogenous_input_release": 6,
+      "message_disposition": 146,
+      "message_intent": 73,
+      "observation": 650,
+      "participant_decision": 41,
+      "run_seal": 1,
+      "scenario_policy_application": 222,
+      "state_delta": 141,
+      "tick_commit": 50,
+      "tick_open": 50,
+      "tick_seal": 50
+    }
+  },
+  "completion_status": "normal",
+  "unresolved_message_intent_ids": [],
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}

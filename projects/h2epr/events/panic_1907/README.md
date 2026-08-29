@@ -58,7 +58,7 @@ applied when they were released. This entry records the current event position.
 | Current use | First-event reference implementation for the shared H2EPR execution and run-closure kernel and for cross-event conformance |
 | Verification boundary | The full-roster run establishes deterministic mechanism coverage, authoritative replay, and trace-derived graph closure. It is not evidence of historical fidelity or scientific validity. |
 | Reopening condition | A new research question and explicit scope are required before changing evidence, participant semantics, configuration, calibration, or evaluation boundaries. Reusable execution code may be extracted without rewriting the event releases. |
-| Next action | Compare the completed release with the independent SingHealth run-and-graph closure and retain only demonstrated cross-event invariants in the shared H2EPR layer. |
+| Next action | Complete the narrow cross-event conformance and publication-surface review against the accepted SingHealth run-and-graph release. |
 
 ## Phase status
 
