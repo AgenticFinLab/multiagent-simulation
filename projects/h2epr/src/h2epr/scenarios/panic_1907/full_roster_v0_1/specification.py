@@ -37,6 +37,7 @@ def branch(
     *,
     when_all: Mapping[str, str | Sequence[str]],
     state_updates: Mapping[str, str] | None = None,
+    branch_name: str | None = None,
 ) -> IntentBranch:
     """Declare one ordered branch using already namespaced fact identifiers."""
 
@@ -48,7 +49,7 @@ def branch(
         for field_id, values in when_all.items()
     )
     return IntentBranch(
-        branch_id=f"branch.{capability_id}.{intent_name}",
+        branch_id=f"branch.{capability_id}.{branch_name or intent_name}",
         intent_id=intent_id(capability_id, intent_name),
         when_all=conditions,
         private_state_updates=tuple((state_updates or {}).items()),
@@ -61,6 +62,7 @@ def decision(
     *,
     observation_domains: Mapping[str, Sequence[str]],
     state_domains: Mapping[str, Sequence[str]],
+    configuration_parameter_domains: Mapping[str, Sequence[str]] | None = None,
     branches: Sequence[IntentBranch],
     lifecycle_names: Sequence[str],
     no_intent_reason_codes: Sequence[str] = ("no_declared_activation_condition",),
@@ -76,14 +78,23 @@ def decision(
         state_id(capability_id, name): tuple(values)
         for name, values in state_domains.items()
     }
-    fact_domains = {**observation_domains_by_id, **state_domains_by_id}
+    parameter_domains_by_id = {
+        name: tuple(values)
+        for name, values in (configuration_parameter_domains or {}).items()
+    }
+    fact_domains = {
+        **observation_domains_by_id,
+        **state_domains_by_id,
+        **parameter_domains_by_id,
+    }
     baseline = {field_id: values[0] for field_id, values in fact_domains.items()}
     revisit_names = tuple(revisit_observation_names or observation_domains)
     return DecisionSpec(
         commitment_id=commitment_id(capability_id, commitment_name),
         observation_ids=tuple(observation_domains_by_id),
         private_state_ids=tuple(state_domains_by_id),
-        intent_ids=tuple(item.intent_id for item in branches),
+        configuration_parameter_ids=tuple(parameter_domains_by_id),
+        intent_ids=tuple(dict.fromkeys(item.intent_id for item in branches)),
         lifecycle_ids=tuple(lifecycle_id(name) for name in lifecycle_names),
         no_intent_reason_codes=tuple(no_intent_reason_codes),
         revisit_trigger_ids=tuple(

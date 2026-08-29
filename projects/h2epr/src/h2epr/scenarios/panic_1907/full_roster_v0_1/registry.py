@@ -8,12 +8,17 @@ from typing import Mapping
 from .participant import RuleParticipantPolicy
 from .participant_rules_core import CORE_PARTICIPANT_POLICIES
 from .participant_rules_institutions import INSTITUTION_PARTICIPANT_POLICIES
+from .participant_rules_populations import POPULATION_PARTICIPANT_POLICIES
 
 
 _PARTICIPANT_POLICIES: Mapping[str, RuleParticipantPolicy] = MappingProxyType(
     {
         item.implementation_id: item
-        for item in (*CORE_PARTICIPANT_POLICIES, *INSTITUTION_PARTICIPANT_POLICIES)
+        for item in (
+            *CORE_PARTICIPANT_POLICIES,
+            *INSTITUTION_PARTICIPANT_POLICIES,
+            *POPULATION_PARTICIPANT_POLICIES,
+        )
     }
 )
 

@@ -28,6 +28,7 @@ class DecisionSpec:
     commitment_id: str
     observation_ids: tuple[str, ...]
     private_state_ids: tuple[str, ...]
+    configuration_parameter_ids: tuple[str, ...]
     intent_ids: tuple[str, ...]
     lifecycle_ids: tuple[str, ...]
     no_intent_reason_codes: tuple[str, ...]
@@ -85,6 +86,7 @@ class ParticipantDecision:
     revisit_trigger_ids: tuple[str, ...]
     consumed_observation_ids: tuple[str, ...]
     persistent_state_ids: tuple[str, ...]
+    consumed_configuration_parameter_ids: tuple[str, ...]
     lifecycle_ids: tuple[str, ...]
     proposed_private_state_updates: Mapping[str, str]
 
@@ -206,7 +208,17 @@ class RuleParticipantPolicy:
                 f"duplicate_configuration_parameter:{self.implementation_id}"
             )
         for decision in self._decisions.values():
-            fact_ids = (*decision.observation_ids, *decision.private_state_ids)
+            if set(decision.configuration_parameter_ids) != set(
+                self.configuration_parameter_ids
+            ):
+                raise ParticipantPolicyError(
+                    f"configuration_parameter_coverage:{decision.commitment_id}"
+                )
+            fact_ids = (
+                *decision.observation_ids,
+                *decision.private_state_ids,
+                *decision.configuration_parameter_ids,
+            )
             if _duplicates(fact_ids):
                 raise ParticipantPolicyError(
                     f"duplicate_fact:{decision.commitment_id}"
@@ -232,6 +244,7 @@ class RuleParticipantPolicy:
                 )
             if (
                 not decision.intent_ids
+                or _duplicates(decision.intent_ids)
                 or not decision.no_intent_reason_codes
                 or not decision.revisit_trigger_ids
                 or not set(decision.revisit_trigger_ids)
@@ -245,8 +258,9 @@ class RuleParticipantPolicy:
                 raise ParticipantPolicyError(
                     f"duplicate_branch:{decision.commitment_id}"
                 )
-            branch_intents = {branch.intent_id for branch in decision.branches}
-            if branch_intents != set(decision.intent_ids):
+            if {branch.intent_id for branch in decision.branches} != set(
+                decision.intent_ids
+            ):
                 raise ParticipantPolicyError(
                     f"intent_branch_coverage:{decision.commitment_id}"
                 )
@@ -326,6 +340,10 @@ class RuleParticipantPolicy:
             facts.update(
                 {field_id: values[0] for field_id, values in branch.when_all}
             )
+        configured = {
+            key: facts[key] for key in decision.configuration_parameter_ids
+        }
+        configured.update(configuration_parameters or {})
         return ParticipantDecisionContext(
             actor_id=actor_id,
             capability_id=self.capability_id,
@@ -336,9 +354,7 @@ class RuleParticipantPolicy:
             private_state=MappingProxyType(
                 {key: facts[key] for key in decision.private_state_ids}
             ),
-            configuration_parameters=MappingProxyType(
-                dict(configuration_parameters or {})
-            ),
+            configuration_parameters=MappingProxyType(configured),
         )
 
     def decide(self, context: ParticipantDecisionContext) -> ParticipantDecision:
@@ -363,12 +379,16 @@ class RuleParticipantPolicy:
                 f"private_state_scope_mismatch:{context.commitment_id}"
             )
         if set(context.configuration_parameters) != set(
-            self.configuration_parameter_ids
+            decision.configuration_parameter_ids
         ):
             raise ParticipantPolicyError(
                 f"configuration_parameter_scope_mismatch:{context.commitment_id}"
             )
-        facts = {**context.observations, **context.private_state}
+        facts = {
+            **context.observations,
+            **context.private_state,
+            **context.configuration_parameters,
+        }
         if any(
             facts[field_id] not in decision.fact_domains[field_id]
             for field_id in facts
@@ -391,6 +411,9 @@ class RuleParticipantPolicy:
                 revisit_trigger_ids=decision.revisit_trigger_ids,
                 consumed_observation_ids=decision.observation_ids,
                 persistent_state_ids=decision.private_state_ids,
+                consumed_configuration_parameter_ids=(
+                    decision.configuration_parameter_ids
+                ),
                 lifecycle_ids=decision.lifecycle_ids,
                 proposed_private_state_updates=MappingProxyType({}),
             )
@@ -404,6 +427,7 @@ class RuleParticipantPolicy:
             revisit_trigger_ids=(),
             consumed_observation_ids=decision.observation_ids,
             persistent_state_ids=decision.private_state_ids,
+            consumed_configuration_parameter_ids=decision.configuration_parameter_ids,
             lifecycle_ids=decision.lifecycle_ids,
             proposed_private_state_updates=MappingProxyType(
                 dict(branch.private_state_updates)
