@@ -308,6 +308,221 @@ CAPABILITY_INVENTORIES: Mapping[str, CapabilityInventory] = MappingProxyType(
 )
 
 
+DECISION_INTENT_INVENTORIES: Mapping[
+    str, Mapping[str, tuple[str, ...]]
+] = MappingProxyType(
+    {
+        "technical_administration_and_line_security_staff": MappingProxyType(
+            {
+                "SITUATION-A": (
+                    "investigate_local_signal",
+                    "request_peer_context",
+                    "share_technical_finding",
+                    "request_security_review",
+                    "apply_local_control",
+                ),
+                "SITUATION-B": (
+                    "investigate_local_signal",
+                    "share_technical_finding",
+                    "request_security_review",
+                    "apply_local_control",
+                ),
+                "SITUATION-C": (
+                    "investigate_local_signal",
+                    "request_peer_context",
+                    "request_security_review",
+                    "apply_local_control",
+                ),
+            }
+        ),
+        "security_incident_response_manager": MappingProxyType(
+            {
+                "DC-SIRM-1": (
+                    "request_security_investigation",
+                    "coordinate_incident_response",
+                    "direct_local_containment",
+                    "escalate_suspected_incident",
+                ),
+                "DC-SIRM-2": (
+                    "coordinate_incident_response",
+                    "activate_incident_response_team",
+                    "provide_incident_response_status",
+                    "direct_local_containment",
+                    "request_external_assistance",
+                    "request_security_investigation",
+                ),
+                "DC-SIRM-3": (
+                    "escalate_suspected_incident",
+                    "request_security_investigation",
+                    "request_external_assistance",
+                    "coordinate_incident_response",
+                ),
+                "DC-SIRM-4": (
+                    "delegate_sirm_coverage",
+                    "coordinate_incident_response",
+                    "request_external_assistance",
+                ),
+            }
+        ),
+        "cluster_information_security_officer": MappingProxyType(
+            {
+                "DC-CISO-1": (
+                    "request_incident_clarification",
+                    "request_response_status",
+                    "issue_security_coordination_direction",
+                    "escalate_potential_cii_incident",
+                ),
+                "DC-CISO-2": (
+                    "request_sirt_activation",
+                    "issue_security_coordination_direction",
+                    "coordinate_incident_reporting",
+                    "request_response_status",
+                    "escalate_potential_cii_incident",
+                ),
+                "DC-CISO-3": (
+                    "escalate_potential_cii_incident",
+                    "coordinate_incident_reporting",
+                    "request_incident_clarification",
+                    "request_sirt_activation",
+                ),
+            }
+        ),
+        "ihis_operational_and_scm_management": MappingProxyType(
+            {
+                "SITUATION-A": (
+                    "request_operational_account",
+                    "request_fact_verification",
+                    "convene_cross_functional_review",
+                ),
+                "SITUATION-B": (
+                    "convene_cross_functional_review",
+                    "escalate_operational_concern",
+                ),
+                "SITUATION-C": (
+                    "request_operational_account",
+                    "convene_cross_functional_review",
+                    "request_fact_verification",
+                    "assign_operational_follow_up",
+                    "escalate_operational_concern",
+                ),
+            }
+        ),
+        "singhealth_group_chief_information_officer": MappingProxyType(
+            {
+                "DC-GCIO-1": (
+                    "request_operational_clarification",
+                    "convene_management_review",
+                    "escalate_to_ihis_leadership",
+                ),
+                "DC-GCIO-2": (
+                    "notify_singhealth_management",
+                    "request_singhealth_reporting_advice",
+                    "request_operational_clarification",
+                    "escalate_to_ihis_leadership",
+                ),
+                "DC-GCIO-3": (
+                    "provide_patient_impact_update",
+                    "request_operational_clarification",
+                    "notify_singhealth_management",
+                ),
+            }
+        ),
+        "cyber_security_governance_director_and_healthcare_sector_lead": (
+            MappingProxyType(
+                {
+                    "DC-SL-1": (
+                        "request_classification_verification",
+                        "propose_incident_category",
+                        "request_executive_briefing",
+                        "report_cii_incident_to_csa",
+                    ),
+                    "DC-SL-2": (
+                        "request_classification_verification",
+                        "propose_incident_category",
+                        "request_executive_briefing",
+                        "report_cii_incident_to_csa",
+                    ),
+                    "DC-SL-3": (
+                        "report_cii_incident_to_csa",
+                        "propose_incident_category",
+                        "request_executive_briefing",
+                        "notify_authorized_healthcare_leadership",
+                        "request_classification_verification",
+                    ),
+                    "DC-SL-4": (
+                        "request_report_status",
+                        "report_cii_incident_to_csa",
+                        "notify_authorized_healthcare_leadership",
+                    ),
+                }
+            )
+        ),
+        "ihis_chief_executive_officer": MappingProxyType(
+            {
+                "DC-ICEO-1": (
+                    "request_executive_incident_briefing",
+                    "request_supporting_evidence",
+                    "assign_investigation_lead",
+                    "issue_ihis_executive_update",
+                ),
+                "DC-ICEO-2": (
+                    "request_supporting_evidence",
+                    "direct_sector_lead_reporting",
+                    "issue_ihis_executive_update",
+                ),
+                "DC-ICEO-3": (
+                    "assign_investigation_lead",
+                    "request_supporting_evidence",
+                    "issue_ihis_executive_update",
+                ),
+            }
+        ),
+        "singhealth_deputy_group_chief_executive_officer": MappingProxyType(
+            {
+                "DC-DGCEO-1": (
+                    "request_incident_clarification",
+                    "notify_singhealth_gceo",
+                    "request_moh_reporting",
+                ),
+                "DC-DGCEO-2": (
+                    "request_incident_clarification",
+                    "mobilize_outreach_preparation",
+                    "propose_notification_audience",
+                    "propose_notification_plan",
+                    "provide_outreach_status",
+                ),
+                "DC-DGCEO-3": (
+                    "request_incident_clarification",
+                    "propose_notification_audience",
+                    "propose_notification_plan",
+                    "provide_outreach_status",
+                ),
+            }
+        ),
+        "singhealth_group_chief_executive_officer": MappingProxyType(
+            {
+                "DC-GCEO-1": (
+                    "request_incident_detail",
+                    "direct_moh_reporting",
+                ),
+                "DC-GCEO-2": (
+                    "request_incident_detail",
+                    "request_outreach_plan",
+                    "consult_on_outreach_plan",
+                    "advise_notification_audience",
+                ),
+                "DC-GCEO-3": (
+                    "request_outreach_plan",
+                    "consult_on_outreach_plan",
+                    "advise_notification_audience",
+                    "recommend_primary_notification_channel",
+                ),
+            }
+        ),
+    }
+)
+
+
 LIFECYCLE_FAMILIES = (
     "participant_intent",
     "information_product",
@@ -325,6 +540,7 @@ LIFECYCLE_FAMILIES = (
 
 __all__ = [
     "CAPABILITY_INVENTORIES",
+    "DECISION_INTENT_INVENTORIES",
     "LIFECYCLE_FAMILIES",
     "CapabilityInventory",
 ]
