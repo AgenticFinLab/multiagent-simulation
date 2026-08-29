@@ -15,6 +15,9 @@ from h2epr.scenarios.panic_1907.full_roster_v0_1 import (
     expected_panic_semantic_parent,
     load_panic_policy_realization,
 )
+from h2epr.scenarios.panic_1907.full_roster_v0_1.realization import (
+    build_panic_policy_realization_document,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -204,7 +207,7 @@ def _write(root: Path, name: str, document: dict) -> tuple[Path, str]:
     return path, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_complete_candidate_is_semantically_closed_but_not_accepted(
+def test_complete_candidate_is_implementation_closed_but_not_accepted(
     project_copy: Path,
 ) -> None:
     path, digest = _write(project_copy, "complete", _candidate(project_copy))
@@ -216,9 +219,9 @@ def test_complete_candidate_is_semantically_closed_but_not_accepted(
     )
 
     assert admission.semantic_complete is True
-    assert admission.implementation_complete is False
+    assert admission.implementation_complete is True
     assert admission.accepted is False
-    assert len(admission.missing_implementation_ids) == 22
+    assert admission.missing_implementation_ids == ()
     assert admission.coverage["actor_capability_bindings"] == 17
     with pytest.raises(TypeError):
         admission.document["status"] = "forged"
@@ -229,6 +232,9 @@ def test_accepted_status_rejects_an_unimplemented_realization(
 ) -> None:
     document = _candidate(project_copy)
     document["status"] = "accepted_policy_realization"
+    document["scenario_policy_realizations"][0]["implementation_id"] = (
+        "h2epr.policy.0288.scenario.unimplemented"
+    )
     path, digest = _write(project_copy, "false-acceptance", document)
 
     with pytest.raises(PolicyRealizationAdmissionError) as raised:
@@ -238,6 +244,44 @@ def test_accepted_status_rejects_an_unimplemented_realization(
             expected_source_sha256=digest,
         )
     assert raised.value.code is PolicyRealizationErrorCode.IMPLEMENTATION_MISSING
+
+
+def test_accepted_status_admits_the_closed_implementation_registry(
+    project_copy: Path,
+) -> None:
+    document = _candidate(project_copy)
+    document["status"] = "accepted_policy_realization"
+    path, digest = _write(project_copy, "accepted", document)
+
+    admission = load_panic_policy_realization(
+        path,
+        project_root=project_copy,
+        expected_source_sha256=digest,
+    )
+
+    assert admission.accepted is True
+    assert admission.implementation_complete is True
+    assert admission.missing_implementation_ids == ()
+
+
+def test_static_implementations_build_the_accepted_realization(
+    project_copy: Path,
+) -> None:
+    document = build_panic_policy_realization_document(
+        project_root=project_copy,
+    )
+    path, digest = _write(project_copy, "built-accepted", document)
+
+    admission = load_panic_policy_realization(
+        path,
+        project_root=project_copy,
+        expected_source_sha256=digest,
+    )
+
+    assert admission.accepted is True
+    assert len(document["participant_policy_realizations"]) == 17
+    assert len(document["scenario_policy_realizations"]) == 9
+    assert len(document["lifecycle_realizations"]) == 13
 
 
 def test_missing_actor_capability_placement_fails_exact_coverage(

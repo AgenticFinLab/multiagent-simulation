@@ -49,6 +49,13 @@ The binding implements only the selected three-role lineage. It does not make
 the full configuration executable, supply behavior for every roster member,
 or establish historical or scientific validity.
 
+The separately accepted
+[full-roster Policy Realization](execution/panic_1907/policy-realization-v0.1/)
+now supplies Rule behavior for all twelve participant capabilities, all nine
+selected Scenario policies, and all thirteen lifecycle families. It remains a
+parent of, rather than a substitute for, the future executable package and
+canonical run.
+
 ## Second event baseline
 
 The SingHealth Data Breach assets apply the complete bounded handoff to a

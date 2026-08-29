@@ -43,6 +43,13 @@ machine document, concise guide, review, manifest, and checksum inventory
 together; the workflow does not require a separate report for every policy or
 actor.
 
+## Current release
+
+The [Panic of 1907 Policy Realization v0.1](panic_1907/policy-realization-v0.1/)
+closes the first event's 12 participant implementations, nine selected
+Scenario policies, and thirteen lifecycle families. It is an accepted input
+to the later executable successor; it is not itself a runtime bundle or run.
+
 ## Admission boundary
 
 An executable successor is admitted only when:

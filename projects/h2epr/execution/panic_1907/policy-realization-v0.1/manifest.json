@@ -1,0 +1,109 @@
+{
+  "schema": "h2epr.policy-realization-release.v0_1",
+  "release_id": "H2EPR-0288-POLICY-REALIZATION-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0288",
+  "released_on": "2026-08-29",
+  "status": "accepted_policy_realization",
+  "integrity_algorithm": "sha256",
+  "realization": {
+    "id": "h2epr.0288.policy-realization.v0_1",
+    "path": "policy-realization.json",
+    "source_sha256": "b64548ea6c2d47228008f3021e952c6066f5cc65ddea83e47c660dba0642dd7e",
+    "canonical_sha256": "85ff5b5db80bfd3d4276d9735272aba146a8e8fc6ecc1aa9e5454029e53e808e",
+    "format_identity": "h2epr.policy-realization.v0_1",
+    "schema_path": "execution/schemas/policy-realization-v0.1.schema.json",
+    "schema_sha256": "6a2bb9f88b665b40abd977a443f6554ae7c8d246521332832e590fdb2d303afe",
+    "admission_verdict": "PASS_ACCEPTED_POLICY_REALIZATION"
+  },
+  "coverage": {
+    "actor_instances": 16,
+    "actor_capability_bindings": 17,
+    "decision_commitments": 88,
+    "observation_placements": 158,
+    "private_state_placements": 56,
+    "configuration_parameter_bindings": 23,
+    "intent_placements": 127,
+    "participant_implementations": 12,
+    "selected_scenario_policies": 9,
+    "lifecycle_families": 13,
+    "registered_implementations": 34
+  },
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/admission.py",
+      "sha256": "ec181a3cd3ae876ee3e0971a27d57d895da991976c2539dc8053584d1fb3ec3f"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/catalog.py",
+      "sha256": "c7a62c41ba12bb51d9548910d0bc2044c54339f78e06194e05a18668d9dfdf6f"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/lifecycle_rules.py",
+      "sha256": "e20423a84d99bb427633d06b7fcf90a120e9ff6253ab5fc591ce8d8847bb0388"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/participant.py",
+      "sha256": "5778f36ecfb61107ff1041cf4a7b9fcc5ca85d1467ee74e4ce19f055b3f27448"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/participant_rules_core.py",
+      "sha256": "4b529eeb95e2a6b242fc9494765786c91b045d1916e68eeb4626d5743296313a"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/participant_rules_institutions.py",
+      "sha256": "acdb3d2bf148ce9333fff61357b3db65f4dd50164ebaa81c09cc0d95c4002646"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/participant_rules_populations.py",
+      "sha256": "67ca759661660724674d511c87e35c3063842bd462fed62fe08eead37279e0ae"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/realization.py",
+      "sha256": "01c7699d24467a5d059126decd143c1163c904096895582b3738fb07be2aa190"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/registry.py",
+      "sha256": "11cd751739588d47fc1824d190bc94ab624c1b6122c250d4e78a805d12c0bf61"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/scenario_rules.py",
+      "sha256": "cd9c4dd46d19800192543562f110cc942c4506c426e7281d64d8efd112abe0f1"
+    },
+    {
+      "path": "src/h2epr/scenarios/panic_1907/full_roster_v0_1/specification.py",
+      "sha256": "923824ca75a242ac68ffba229a2878a3ab82c2af0d9d3c1442bd84c238140077"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "99d35f1d35540dba6f06f6b1840034c489b50a823605374ffc6a0688ad80f843"
+    },
+    {
+      "kind": "policy_realization",
+      "path": "policy-realization.json",
+      "sha256": "b64548ea6c2d47228008f3021e952c6066f5cc65ddea83e47c660dba0642dd7e"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "3d1b72f3e445807f0c228ac2503e3e449c4a41ef5e1389eab3d235901ad1c8ca"
+    }
+  ],
+  "claim_boundary": {
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "panic_full_roster_rule_executable_successor",
+    "runtime_bundle_present": false,
+    "canonical_run_present": false,
+    "generated_epg_present": false
+  }
+}

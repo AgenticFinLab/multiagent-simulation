@@ -15,6 +15,7 @@ from .errors import (
     PolicyRealizationAdmissionError,
     PolicyRealizationErrorCode,
 )
+from .realization import build_panic_policy_realization_document
 
 __all__ = [
     "CapabilityPlacement",
@@ -23,6 +24,7 @@ __all__ = [
     "PolicyRealizationAdmission",
     "PolicyRealizationAdmissionError",
     "PolicyRealizationErrorCode",
+    "build_panic_policy_realization_document",
     "build_panic_policy_catalog",
     "expected_panic_semantic_parent",
     "load_panic_policy_realization",
