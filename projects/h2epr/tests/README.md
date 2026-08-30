@@ -15,7 +15,7 @@ python -m pip install -e "projects/h2epr[test]"
 | Directory | Responsibility |
 |---|---|
 | `contracts/` | JSON Schemas, cross-object invariants, repository boundaries, trace, and identity |
-| `construction/` | Explicit source loading, lossless construction records, evidence isolation, and import boundaries |
+| `construction/` | Explicit source loading, lossless construction records, evidence isolation, import boundaries, and repository-level formal-asset integrity |
 | `g2/` | Entity registry, participant artifacts, world inputs, and event-bundle construction |
 | `configuration/` | Schema admission, canonical identity, references, assembly, failure classes, and portable receipts |
 | `execution/` | Policy Realization, executable successors, shared run-closure kernel, repeated runs, replay, graph closure, custody, and fail-closed release boundaries |
@@ -104,6 +104,18 @@ cross-event closure boundary:
 python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/execution/test_cross_event_execution_conformance.py
 ```
+
+Formal H2EPR JSON, release checksum inventories, and publication-surface local
+links share one repository-level check:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/construction/test_repository_publication_surface.py
+```
+
+The main H2EPR workflow runs this check with the construction suite. A small
+publication-only workflow runs the same check when one of the outer repository
+guides changes without a project-tree change.
 
 Runtime and compiler checks use the MASim dependencies described in the root
 `requirements.txt`:

@@ -26,6 +26,7 @@ execution logic, and generated-process semantics remain H2EPR concerns.
 | Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases, event-qualified implementations, and comparisons that name specific events |
 | Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
 | Rule execution releases | `execution/` | Policy Realizations, executable successors, runtime-bundle contracts, and compact run/graph records |
+| Methods and templates | `skills/` and project templates | Evidence-to-execution authoring methods, proportionate review, and phase closeout |
 | Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
 
 Importable Python code is contained in `src/h2epr`. The `scenarios` directory
@@ -219,6 +220,8 @@ releases.
 - [Publication-facing research standard](PUBLICATION_STANDARD.md)
 - [Architecture](ARCHITECTURE.md)
 - [Rule execution](execution/README.md)
+- [Full-roster Rule-execution Skill](skills/full-roster-rule-execution/SKILL.md)
+- [Execution-cycle closeout template](execution/execution-cycle-closeout-template.md)
 - [Cross-event execution conformance](execution/cross-event-conformance-v0.1/)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)

@@ -37,6 +37,7 @@ activity performed only when an experiment is specifically authorized.
 | `projects/h2epr/scenarios/` | Scenario semantics and versioned event releases |
 | `projects/h2epr/configs/` | Declared-purpose configurations and admission records |
 | `projects/h2epr/execution/` | Policy Realizations, executable successors, compact run records, and cross-event conformance |
+| `projects/h2epr/skills/` | Evidence-to-execution authoring methods and proportionate review routes |
 | `projects/h2epr/src/h2epr/` | Installable construction, runtime, and compiler code |
 | `projects/h2epr/tests/` | Contract, boundary, runtime, and conformance tests |
 | `data/h2epr/` | Versioned source and development input packages |
@@ -80,8 +81,10 @@ question and scope.
    for the compact comparison of the two completed Rule paths.
 4. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
    stopping boundaries.
-5. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
+5. [H2EPR Skills](h2epr/skills/README.md) for the specialist methods used by
+   each authorized stage, including the optional full-roster execution tail.
+6. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
    boundaries.
-6. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
-7. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
+7. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
+8. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
    interfaces.

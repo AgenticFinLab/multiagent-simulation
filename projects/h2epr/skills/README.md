@@ -41,6 +41,11 @@ Separately authorized bounded configuration admission
 Exact carrier projection + minimal policy/environment binding
         ↓
 Conformance closeout
+        ↓ when a full-event engineering extension is authorized
+Full-roster Rule execution
+        ├── Policy Realization
+        ├── executable successor and fail-closed admission
+        └── repeated runs, replay, and trace-derived generated EPG
 ```
 
 Evidence and behavior research feed the representation chosen by the roster.
@@ -66,15 +71,19 @@ when that engineering feedback is the purpose of the pilot.
 | [`event-scenario-design`](event-scenario-design/SKILL.md) | Turn an accepted event roster, semantic release, evidence boundary, and participant models into a publication-facing Scenario Definition without writing policy or running a simulation. |
 | [`roster-mapping-conformance`](roster-mapping-conformance/SKILL.md) | Derive a release-wide mapping and carrier decision, then implement only an explicitly authorized loader/conformance slice. |
 | [`scenario-configuration`](scenario-configuration/SKILL.md) | Design, review, and atomically promote one declared-purpose Scenario Configuration, then delimit its later bounded engineering admission without defining schema, policy, or runtime. |
+| [`full-roster-rule-execution`](full-roster-rule-execution/SKILL.md) | Extend an accepted, conformance-complete event through Policy Realization, executable successor admission, deterministic repeated runs, replay, and trace-derived generated-EPG closure. |
 
-The scenario, mapping/conformance, and configuration Skills encode the methods
-supported by the repository. The mapping/conformance Skill includes the
-bounded multi-hop binding and conformance method demonstrated by the
-KT--NBC--NYCH closeout. The configuration Skill defines the corresponding
-configuration-design and admission boundaries. Re-evaluate both methods when
-they are applied to another event, and revise them only where that use exposes
-a reusable gap. They do not form a general simulation pipeline or authorize
-policy, simulation, contract, or evaluation work.
+The scenario, mapping/conformance, configuration, and full-roster execution
+Skills encode the methods supported by the repository. The mapping/conformance
+Skill includes the bounded multi-hop binding and conformance method
+demonstrated by the KT--NBC--NYCH closeout. The configuration Skill defines
+the corresponding configuration-design and admission boundaries. The
+full-roster execution Skill owns the separately authorized optional tail
+demonstrated by both accepted events; it does not make that tail a requirement
+for every event. Re-evaluate the methods when they are applied to another
+event, and revise them only where that use exposes a reusable gap. None of
+them silently authorizes a later phase, contract change, model-backed
+experiment, or evaluation.
 
 The project-level stage order, authorization boundaries, and current event
 position are documented in the [Event modeling workflow](../WORKFLOW.md). The
@@ -88,6 +97,7 @@ the [Agent development workflow](../agents/WORKFLOW.md).
 | [Event Build Brief](../event-build-brief-template.md) | Open an event with one accepted question, temporal and evidence boundary, causal role map, roster dispositions, semantic skeleton, and current authorization. |
 | [Population model](../populations/population-model-template.md) | Specify heterogeneous choice units, information, private state, behavior, uncertainty, and interface ownership in the canonical ten-module population structure. |
 | [Phase closeout checklist](../phase-closeout-checklist.md) | Close any maintained event phase with common mainline, depth, authority, evidence, integrity, and handoff checks, recording a reusable method finding only when one emerged. |
+| [Full-roster Rule execution cycle](../execution/execution-cycle-closeout-template.md) | Keep Policy Realization, executable assembly, paired materialization, replay, graph closure, and their claim boundary visible in one compact record. |
 
 These project-level templates route work into the specialist Skills; they do
 not replace the Skills' artifact-specific inputs, outputs, reviews, or stop

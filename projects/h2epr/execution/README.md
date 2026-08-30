@@ -21,6 +21,18 @@ semantics. Policy Realization supplies implementation behavior but cannot add
 an observation, intent, authority, route, lifecycle, or result absent from
 those parents.
 
+## Authoring and closeout method
+
+Use the project
+[full-roster Rule-execution Skill](../skills/full-roster-rule-execution/SKILL.md)
+after configuration admission and bounded lineage conformance have been
+accepted and a full-event engineering extension is authorized. Its
+[execution-cycle template](execution-cycle-closeout-template.md) keeps the
+coverage inventory, product verdicts, run custody, verification, and claim
+boundary in one compact view. The fields may be carried by existing manifests,
+receipts, READMEs, and reviews; the method does not require another release
+document merely to repeat them.
+
 ## Event layout
 
 Execution assets are event-qualified and use the same event directory names as

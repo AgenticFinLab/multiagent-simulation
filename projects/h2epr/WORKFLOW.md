@@ -45,6 +45,13 @@ event, not new requirements for every event build. They may be combined into
 one release cycle when policy, assembly, run, and graph evidence remain
 separately identifiable.
 
+When that extension is authorized, use the
+[full-roster Rule-execution Skill](skills/full-roster-rule-execution/SKILL.md)
+and its compact
+[execution-cycle template](execution/execution-cycle-closeout-template.md).
+They preserve the three product boundaries without requiring three parallel
+plans, approval records, or status documents.
+
 Scenario design and carrier mapping may inform one another, but both retain
 their own authority. Configuration admission and lineage binding may be
 reviewed in one bounded engineering change only when their outputs and

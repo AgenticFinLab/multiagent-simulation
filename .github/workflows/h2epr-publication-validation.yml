@@ -1,0 +1,44 @@
+name: H2EPR publication validation
+
+"on":
+  pull_request:
+    paths:
+      - ".github/workflows/h2epr-publication-validation.yml"
+      - "README.md"
+      - "docs/development-environment.md"
+      - "docs/structure.md"
+      - "projects/H2EPR.md"
+      - "projects/README.md"
+  push:
+    paths:
+      - ".github/workflows/h2epr-publication-validation.yml"
+      - "README.md"
+      - "docs/development-environment.md"
+      - "docs/structure.md"
+      - "projects/H2EPR.md"
+      - "projects/README.md"
+
+permissions:
+  contents: read
+
+jobs:
+  publication-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install the H2EPR validation package
+        run: python -m pip install -e "projects/h2epr[test]"
+      - name: Validate formal H2EPR assets and publication links
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: >-
+          python -B -m pytest -p no:cacheprovider
+          projects/h2epr/tests/construction/test_repository_publication_surface.py
