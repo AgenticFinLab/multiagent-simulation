@@ -44,6 +44,13 @@ _SEMANTIC_VARIANT_MATERIALIZATION_FIELDS = {
     "office_capacity": "office_capacity_profile",
     "technical_result": "technical_result_profile",
     "notification": "notification_profile",
+    # The v0.2 domain-neutral vocabulary retains the same closed six-slot
+    # semantics without changing the frozen v0.1 cyber schema.
+    "exogenous_pressure": "exogenous_pressure_profile",
+    "population_assembly": "active_population_actor_ids",
+    "authority_capacity": "authority_capacity_profile",
+    "operational_result": "operational_result_profile",
+    "public_action_delivery": "public_action_delivery_profile",
 }
 
 
@@ -1033,13 +1040,19 @@ def _validate_semantic_configuration(
         pointer="/variant_materialization/active_population_actor_ids",
         detail="population_actor_unresolved",
     )
+    authority_capacity_profile = materialization.get(
+        "office_capacity_profile"
+    ) or materialization.get("authority_capacity_profile")
+    if authority_capacity_profile is None:
+        _raise(
+            ConfigurationErrorCode.ASSEMBLY_INVALID,
+            pointer="/variant_materialization",
+            detail="authority_capacity_profile_required",
+        )
     _require_references(
-        materialization["office_capacity_profile"]["unavailable_actor_ids"],
+        authority_capacity_profile["unavailable_actor_ids"],
         {row["actor_id"] for row in named},
-        pointer=(
-            "/variant_materialization/office_capacity_profile/"
-            "unavailable_actor_ids"
-        ),
+        pointer="/variant_materialization/authority_capacity/unavailable_actor_ids",
         detail="named_actor_unresolved",
     )
 
@@ -1125,17 +1138,21 @@ def _validate_semantic_configuration(
         intent_id.split(".", 1)[0]
         for intent_id in lineage["semantic_intent_sequence"]
     ]
-    if (
-        not set(intent_capabilities) <= set(capability_positions)
-        or set(intent_capabilities) != set(lineage_capabilities)
-        or [capability_positions[item] for item in intent_capabilities]
-        != sorted(capability_positions[item] for item in intent_capabilities)
-    ):
+    if set(intent_capabilities) != set(lineage_capabilities):
         _raise(
             ConfigurationErrorCode.ASSEMBLY_INVALID,
             pointer="/bounded_lineage/semantic_intent_sequence",
-            detail="lineage_capability_order_mismatch",
+            detail="lineage_capability_coverage_mismatch",
         )
+    for prior, current in zip(intent_capabilities, intent_capabilities[1:]):
+        if prior == current:
+            continue
+        if abs(capability_positions[prior] - capability_positions[current]) != 1:
+            _raise(
+                ConfigurationErrorCode.ASSEMBLY_INVALID,
+                pointer="/bounded_lineage/semantic_intent_sequence",
+                detail="lineage_capability_transition_unrouted",
+            )
 
     policies = document["policy_selections"]
     policy_by_id = _indexed_rows(

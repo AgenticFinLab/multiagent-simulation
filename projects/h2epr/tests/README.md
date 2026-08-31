@@ -71,6 +71,16 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_release.py
 ```
 
+The Note7 mapping, Scenario, configuration, and bounded admission releases can
+be checked independently:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_samsung_note7_mapping_scenario_release.py \
+  projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_release.py \
+  projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_admission.py
+```
+
 The bounded SingHealth carrier binding and lineage conformance can be checked
 independently:
 
@@ -80,13 +90,14 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/agents/test_singhealth_data_breach_lineage_conformance.py
 ```
 
-The two configuration-admission profiles and their focused rejection cases can
+The three configuration-admission profiles and their focused rejection cases can
 be checked together:
 
 ```bash
 python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/configuration/test_scenario_configuration_admission.py \
-  projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_admission.py
+  projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_admission.py \
+  projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_admission.py
 ```
 
 The shared execution kernel and its exact Panic conformance can be checked

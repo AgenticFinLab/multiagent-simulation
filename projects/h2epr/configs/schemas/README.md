@@ -8,7 +8,20 @@ Two explicit profiles are available:
 | Schema | Configuration family |
 |---|---|
 | `event-scenario-configuration-v0.1.schema.json` | the accepted original v0.1 shape used by the Panic of 1907 |
-| `event-scenario-configuration-semantic-v0.1.schema.json` | the closed semantic shape for configurations with explicit institutions, processes, assets, materialization, and bounded lineage |
+| `event-scenario-configuration-semantic-v0.1.schema.json` | the frozen cyber-oriented semantic shape accepted for SingHealth |
+| `event-scenario-configuration-semantic-v0.2.schema.json` | the closed domain-neutral semantic shape for configurations with explicit institutions or scoped resource domains, processes, assets, materialization, and bounded lineage |
+
+The semantic loader accepts two versioned six-slot structural vocabularies.
+The v0.1 schema retains the original cyber-oriented names and hash for
+byte-stable SingHealth descendants. New domains use the v0.2 neutral names
+`exogenous_pressure`, `route_and_delivery`, `population_assembly`,
+`authority_capacity`, `operational_result`, and
+`public_action_delivery`, with matching materialization profiles. A package
+must use the complete vocabulary selected by its format identity.
+Registry entries may also declare `semantic_kind` so a scoped market,
+consumer, or operator resource domain is not misrepresented as a legal
+institution merely because the v0.1 carrier field retains its historical
+name.
 
 Cross-object identity, assembly, input-integrity, overlay-target, coverage, and
 execution-boundary checks remain in the fail-closed loader because JSON Schema

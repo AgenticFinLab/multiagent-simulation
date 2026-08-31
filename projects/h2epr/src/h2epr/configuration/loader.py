@@ -47,6 +47,18 @@ CONFIGURATION_SCHEMA_RELATIVE_PATH = Path(
 SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH = Path(
     "configs/schemas/event-scenario-configuration-semantic-v0.1.schema.json"
 )
+DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_FORMAT_ID = (
+    "h2epr.scenario-configuration-semantic-candidate.v0_2"
+)
+DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH = Path(
+    "configs/schemas/event-scenario-configuration-semantic-v0.2.schema.json"
+)
+_SEMANTIC_CONFIGURATION_SCHEMAS = {
+    SEMANTIC_CONFIGURATION_FORMAT_ID: SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH,
+    DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_FORMAT_ID: (
+        DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH
+    ),
+}
 CONFIGURATION_RELEASE_SCHEMA = "h2epr.event-scenario-configuration-release.v0_1"
 CONFIGURATION_RELEASE_STATUS = "accepted_non_executable_configuration"
 
@@ -633,15 +645,16 @@ def _load_and_validate_schema(
 def _load_and_validate_semantic_schema(
     root: Path, document: Mapping[str, Any]
 ) -> tuple[str, str]:
-    if document.get("format_identity") != SEMANTIC_CONFIGURATION_FORMAT_ID:
+    format_identity = document.get("format_identity")
+    try:
+        schema_path = _SEMANTIC_CONFIGURATION_SCHEMAS[format_identity]
+    except (KeyError, TypeError):
         _raise(
             ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
             pointer="/format_identity",
-            detail=f"expected={SEMANTIC_CONFIGURATION_FORMAT_ID}",
+            detail="supported_semantic_format_required",
         )
-    return _validate_against_schema(
-        root, document, SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH
-    )
+    return _validate_against_schema(root, document, schema_path)
 
 
 def _canonical_identity(document: Mapping[str, Any]) -> str:
@@ -1225,11 +1238,11 @@ def load_scenario_configuration(
         )
     document = _parse_json_bytes(raw, pointer="/configuration")
     if "format_identity" in document:
-        if document.get("format_identity") != SEMANTIC_CONFIGURATION_FORMAT_ID:
+        if document.get("format_identity") not in _SEMANTIC_CONFIGURATION_SCHEMAS:
             _raise(
                 ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
                 pointer="/format_identity",
-                detail=f"expected={SEMANTIC_CONFIGURATION_FORMAT_ID}",
+                detail="supported_semantic_format_required",
             )
         semantic_profile = True
     else:
@@ -1512,6 +1525,8 @@ __all__ = [
     "CONFIGURATION_FORMAT_ID",
     "CONFIGURATION_RECEIPT_FORMAT",
     "CONFIGURATION_SCHEMA_RELATIVE_PATH",
+    "DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_FORMAT_ID",
+    "DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH",
     "SEMANTIC_CONFIGURATION_ADMISSION_VERSION",
     "SEMANTIC_CONFIGURATION_FORMAT_ID",
     "SEMANTIC_CONFIGURATION_SCHEMA_RELATIVE_PATH",

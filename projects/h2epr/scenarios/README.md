@@ -35,3 +35,12 @@ and its stable Roster-production precursor, the
 The conformance path exercises only four selected intents from the accepted
 binding. The complete nine-product Scenario Configuration remains
 non-executable.
+
+The [`samsung_note7_battery_recall/`](samsung_note7_battery_recall/) directory
+contains the accepted authoring-window
+[Event Scenario Definition v0.1](samsung_note7_battery_recall/definition-v0.1/)
+and its stable participant-production precursor, the
+[event semantic skeleton](samsung_note7_battery_recall/semantic-skeleton.md).
+The Definition closes four Agent and four Population products across product,
+remedy, recall, transport, and consumer decision boundaries. Its qualitative
+configuration remains non-executable after static admission.

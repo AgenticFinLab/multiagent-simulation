@@ -1,0 +1,129 @@
+{
+  "schema": "h2epr.event-scenario-configuration-release.v0_1",
+  "release_id": "H2EPR-0481-SCENARIO-CONFIGURATION-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0481",
+  "released_on": "2026-08-31",
+  "status": "accepted_non_executable_configuration",
+  "integrity_algorithm": "sha256",
+  "configuration": {
+    "id": "h2epr.0481.scenario.mechanism-coverage.v0_1",
+    "version": "0.1.0",
+    "purpose": "mechanism_coverage",
+    "timezone": "UTC",
+    "modeled_start": {"value": "2016-08-19", "precision": "date"},
+    "participant_response_start": "2016-09-02",
+    "acute_window": "2016-09-02/2016-10-15",
+    "core_horizon": "2016-10-15",
+    "notification_observation_horizon": "2016-10-15",
+    "execution_eligible": false,
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false
+  },
+  "semantic_inputs": {
+    "scenario_definition_release": {
+      "release_id": "H2EPR-0481-EVENT-SCENARIO-DEFINITION-v0.1",
+      "manifest_path": "scenarios/samsung_note7_battery_recall/definition-v0.1/manifest.json",
+      "manifest_sha256": "fa90d60c8eccdad6e903de6e5ed761e49615d6cdf5edb7815aadf12d0761582e"
+    },
+    "scenario_definition": {
+      "id": "h2epr.scenario.0481.samsung_note7_battery_recall@0.1.0",
+      "path": "scenarios/samsung_note7_battery_recall/definition-v0.1/scenario-definition.md",
+      "sha256": "40a366c25b9c47d2cde5a9961a248c35ad9c22265694bbd0e7cd86eddb149818"
+    },
+    "scenario_interface_closure": {
+      "path": "scenarios/samsung_note7_battery_recall/definition-v0.1/interface-closure.md",
+      "sha256": "c51c94e0a713af2bc061277d35b947afcd7b071d5219a984d9adbf5380d3428b"
+    },
+    "roster_definition_release": {
+      "release_id": "H2EPR-0481-ROSTER-DEFINITION-RELEASE-v0.1",
+      "manifest_path": "releases/samsung_note7_battery_recall/roster-definition-v0.1/manifest.json",
+      "manifest_sha256": "761a33c7de250ab8383f0844c48e6f7c7598cdaca52ee158ccf3eecdfb54f174"
+    },
+    "consolidated_mapping": {
+      "release_id": "H2EPR-0481-CONSOLIDATED-MAPPING-v0.1",
+      "manifest_path": "agents/bindings/samsung_note7_battery_recall/consolidated/manifest.json",
+      "manifest_sha256": "c52d27ce2e753fee7394480ca70355b7c293e70b755470da360f58e917e7ceb1"
+    },
+    "mapping_profile": {
+      "id": "h2epr.roster-consolidated-mapping.0481.v0_1",
+      "path": "agents/bindings/samsung_note7_battery_recall/consolidated/mapping-specification.md",
+      "sha256": "c08b9273df303b483f8716671d5936bd550f9fc1be8c26005484c0f06df402ff"
+    },
+    "semantic_skeleton": {
+      "version": "0.1",
+      "path": "scenarios/samsung_note7_battery_recall/semantic-skeleton.md",
+      "sha256": "f9e22534fca74b8ab40856da8f71387dd5ae311313390b7d25bbe9b4b6528ef5"
+    },
+    "event_frame_evidence": {
+      "path": "events/samsung_note7_battery_recall/frame-evidence-v0.1.md",
+      "sha256": "3994b9e9c09af05cb1b7d32ad11fd4c012647de746173794e25156aadc618b85"
+    },
+    "participant_evidence": {
+      "path": "events/samsung_note7_battery_recall/participant-evidence-v0.1.md",
+      "sha256": "aef904f0fb5259493f0688e2f936fe266889663e9de8ca43fccd176feb24efbe"
+    }
+  },
+  "coverage": {
+    "semantic_products": 8,
+    "decision_and_population_commitments": 22,
+    "observation_placements": 40,
+    "private_state_placements": 28,
+    "intent_placements": 37,
+    "lifecycle_families": 12,
+    "named_actors": 4,
+    "population_actors": 4,
+    "total_semantic_actor_instances": 8,
+    "population_units": 4,
+    "technical_assets": 8,
+    "opening_records": 34,
+    "route_records": 8,
+    "structural_selections": 6,
+    "exogenous_inputs": 6,
+    "selected_policy_semantics": 9,
+    "sensitivity_overlays": 6
+  },
+  "artifacts": [
+    {"kind": "guide", "path": "README.md", "sha256": "71ca9b9180bedc8332824f07475e673dc8c04f566eea18cc10210256c86d7efc"},
+    {"kind": "scenario_configuration", "path": "scenario-configuration.json", "sha256": "8faa3b0a03e57f2ab4ece46a82f16d838476c9562019b8137c7ff0856ee103e9"},
+    {"kind": "configuration_design", "path": "configuration-design.md", "sha256": "d1a3c72edf65a4169f5c0630c10b34e9dd3af161af657475c14ddab3a7c95171"},
+    {"kind": "definition_closure", "path": "definition-closure.md", "sha256": "f8eb6a5b159a29cae94f7831fb3ea571478cc15888605f82ddf684ac732e90b6"},
+    {"kind": "substantive_review", "path": "substantive-review.md", "sha256": "7f54b330d0bbc647bf19fff52dfaf8909249a67de06f26175b73ea421fa6b32d"}
+  ],
+  "owner_decision": {
+    "id": "ADR-0016",
+    "resolved_items": ["OD-0481-CFG-01", "OD-0481-CFG-02", "OD-0481-CFG-03", "OD-0481-CFG-04"],
+    "path": "decisions/ADR-0016-note7-scenario-configuration-boundary.md",
+    "sha256": "3d626426ec58fba7f396d96025720ddc7ba12c5e8e5e34d1c53eb801378975ff"
+  },
+  "claim_boundary": {
+    "supported": "accepted_non_executable_mechanism_coverage_configuration",
+    "excluded": ["historical_baseline_or_replay", "historical_calibration_or_validation", "prediction_or_policy_effectiveness", "runtime_or_simulation_readiness", "historical_or_scientific_validity"]
+  },
+  "execution_boundary": {
+    "execution_eligible": false,
+    "admission_status": "not_admitted",
+    "unbound_policy_count": 9,
+    "authorization_conferred_by_release": "configuration_semantics_only",
+    "required_before_execution": [
+      "accepted_machine_schema_or_explicit_admission_profile",
+      "exact_fail_closed_release_and_configuration_loader",
+      "validated_event_qualified_carrier_projection",
+      "versioned_implementation_for_every_enabled_policy",
+      "bounded_lineage_binding",
+      "runtime_bundle_and_trace_identity",
+      "separate_execution_authorization"
+    ]
+  },
+  "review_limitation": "authoring_exposed_final_independent_supervisor_review_pending",
+  "next_stage": {
+    "name": "bounded_configuration_admission_preflight",
+    "authorization": "authorized_by_active_goal",
+    "schema_evolution_authorized": false,
+    "loader_authorized": false,
+    "binding_authorized": false,
+    "policy_implementation_authorized": false,
+    "runtime_or_simulation_authorized": false
+  }
+}

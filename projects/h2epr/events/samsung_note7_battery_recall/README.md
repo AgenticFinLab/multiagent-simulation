@@ -14,10 +14,10 @@ pins the qualitative participant inventory used by later event work.
 | Domain / category | Science & Engineering / Engineering & Product Safety |
 | Stable slug | `samsung_note7_battery_recall` |
 | Frame version | `v0.1` |
-| Status | `ACCEPTED_ROSTER_DEFINITION_RELEASE_v0.1` |
+| Status | `PASS_BOUNDED_CONFIGURATION_ADMISSION_v0.1` |
 | Construction mode | `DRAFT_SEEDED_REFERENCE_BLIND` |
-| Current authorization | Frame and participant semantics complete; consolidated mapping and Event Scenario Definition are the next bounded work |
-| Phase endpoint | accepted [Roster Definition release `v0.1`](../../releases/samsung_note7_battery_recall/roster-definition-v0.1/) |
+| Current authorization | mapping, Event Scenario Definition, qualitative configuration, and static admission complete; event-qualified carrier projection and bounded binding are next |
+| Phase endpoint | [bounded configuration admission `v0.1`](../../configs/samsung_note7_battery_recall/configuration-admission-v0.1/) over the accepted [Scenario Configuration](../../configs/samsung_note7_battery_recall/scenario-configuration-v0.1/) |
 | Review | Frame independently accepted; participant phase closed by authoring-exposed substantive review and remains subject to final independent supervisor review |
 | Method baseline | H2EPR mainline at commit `592fb706bdf6c8720a0884f1d5ee76d237fe4ebd`, tree `03d3062742d3643688c60cd36f74b0476cc0275e`; the maintained workflow, architecture, publication standard, Event Build Brief, phase closeout checklist, and historical-evidence-research Skill govern this Frame |
 
@@ -183,8 +183,12 @@ autonomy evidence. These are structural limits, not hidden parameters.
 
 Later work must stop if it would require protected content, a new causal
 scope, unsupported organizational authority, a silent roster change, or a
-shared H2EPR contract change. The next bounded work is a consolidated semantic
-mapping and Event Scenario Definition derived from the exact Roster release.
+shared H2EPR contract change. The accepted
+[consolidated mapping](../../agents/bindings/samsung_note7_battery_recall/consolidated/),
+[Event Scenario Definition](../../scenarios/samsung_note7_battery_recall/definition-v0.1/),
+and [Scenario Configuration](../../configs/samsung_note7_battery_recall/scenario-configuration-v0.1/)
+derive from the exact Roster release. Static admission preserves their
+non-executable boundary.
 
 ## Phase closeout
 
@@ -201,6 +205,8 @@ release. Structural checks, release pin verification, strict JSON, checksum,
 and publication-link validation pass. Final independent supervisor review is
 deferred until the full third-event cycle is handed back.
 
-**Closeout disposition:** participant definition and Roster Definition release
-`v0.1` complete with recorded limitations. **Next bounded work:** consolidated
-mapping and Event Scenario Definition from the exact released inventory.
+**Current disposition:** Frame, participant definition, Roster Definition
+release, consolidated mapping, Event Scenario Definition, qualitative
+configuration, and bounded static admission are complete with recorded
+limitations. **Next bounded work:** event-qualified carrier projection and
+minimal binding for the Samsung--regional--outlet--consumer lineage.

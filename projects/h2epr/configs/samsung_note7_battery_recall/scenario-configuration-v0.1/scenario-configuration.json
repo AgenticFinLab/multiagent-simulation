@@ -1,0 +1,373 @@
+{
+  "format_identity": "h2epr.scenario-configuration-semantic-candidate.v0_2",
+  "configuration_id": "h2epr.0481.scenario.mechanism-coverage.v0_1",
+  "version": "0.1.0",
+  "status": "accepted_non_executable_configuration",
+  "event_id": "H2EPR-0481",
+  "purpose": "mechanism_coverage",
+  "historical_calibration": false,
+  "historical_validation": false,
+  "known_outcome_fitting": false,
+  "semantic_inputs": {
+    "scenario_definition_release_id": "H2EPR-0481-EVENT-SCENARIO-DEFINITION-v0.1",
+    "scenario_definition_id": "h2epr.scenario.0481.samsung_note7_battery_recall@0.1.0",
+    "scenario_release_manifest_sha256": "fa90d60c8eccdad6e903de6e5ed761e49615d6cdf5edb7815aadf12d0761582e",
+    "scenario_definition_sha256": "40a366c25b9c47d2cde5a9961a248c35ad9c22265694bbd0e7cd86eddb149818",
+    "scenario_interface_closure_sha256": "c51c94e0a713af2bc061277d35b947afcd7b071d5219a984d9adbf5380d3428b",
+    "roster_release_id": "H2EPR-0481-ROSTER-DEFINITION-RELEASE-v0.1",
+    "roster_release_manifest_sha256": "761a33c7de250ab8383f0844c48e6f7c7598cdaca52ee158ccf3eecdfb54f174",
+    "consolidated_mapping_release_id": "H2EPR-0481-CONSOLIDATED-MAPPING-v0.1",
+    "consolidated_mapping_manifest_sha256": "c52d27ce2e753fee7394480ca70355b7c293e70b755470da360f58e917e7ceb1",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0481.v0_1",
+    "mapping_profile_sha256": "c08b9273df303b483f8716671d5936bd550f9fc1be8c26005484c0f06df402ff",
+    "semantic_skeleton_sha256": "f9e22534fca74b8ab40856da8f71387dd5ae311313390b7d25bbe9b4b6528ef5",
+    "event_frame_evidence_sha256": "3994b9e9c09af05cb1b7d32ad11fd4c012647de746173794e25156aadc618b85",
+    "participant_evidence_sha256": "aef904f0fb5259493f0688e2f936fe266889663e9de8ca43fccd176feb24efbe"
+  },
+  "owner_decisions": ["OD-0481-CFG-01", "OD-0481-CFG-02", "OD-0481-CFG-03", "OD-0481-CFG-04"],
+  "execution_boundary": {
+    "execution_eligible": false,
+    "reason": "semantic configuration only; exact admission, carrier projection, policy implementations, binding, runtime identity, and execution authorization remain separate",
+    "required_before_execution": [
+      "accepted_machine_schema_or_explicit_admission_profile",
+      "exact_fail_closed_release_and_configuration_loader",
+      "validated_event_qualified_carrier_projection",
+      "versioned_implementation_for_every_enabled_policy",
+      "bounded_lineage_binding",
+      "runtime_bundle_and_trace_identity",
+      "separate_execution_authorization"
+    ],
+    "unbound_policy_behavior": "reject_configuration_for_execution",
+    "parsing_does_not_change_eligibility": true,
+    "authorization_conferred_by_configuration": "none"
+  },
+  "clock": {
+    "timezone": "UTC",
+    "mode": "event_driven",
+    "modeled_start": {"value": "2016-08-19", "precision": "date"},
+    "participant_response_start": {"value": "2016-09-02", "precision": "date"},
+    "acute_window": {"start": "2016-09-02", "end": "2016-10-15", "precision": "date_or_bounded_interval"},
+    "core_horizon": {"value": "2016-10-15", "precision": "date"},
+    "notification_observation_horizon": {"value": "2016-10-15", "precision": "date"},
+    "same_time_precedence": [
+      "exogenous_input_admission",
+      "scenario_physical_or_institutional_event",
+      "information_product_production",
+      "route_transport_and_delivery",
+      "observation_projection_and_freeze",
+      "participant_decision_and_issue",
+      "adjudication",
+      "execution_and_typed_result",
+      "reducer_state_delta",
+      "later_information_or_observation"
+    ],
+    "equal_time_tie_break": "stable_event_id_after_causal_precedence",
+    "invented_intraday_precision_forbidden": true
+  },
+  "structural_variants": [
+    {
+      "id": "SV-0481-EXOGENOUS-PRESSURE",
+      "family": "exogenous_pressure",
+      "allowed_domain": ["BOUNDED_HAZARD_SIGNAL_OPPORTUNITY_PROCESS", "LOWER_OR_DELAYED_BOUNDED_SIGNAL_OPPORTUNITY", "DIFFERENT_SOURCE_BOUNDED_SIGNAL_OPPORTUNITY"],
+      "selection": "BOUNDED_HAZARD_SIGNAL_OPPORTUNITY_PROCESS",
+      "basis": ["0481-FR-C01", "0481-FR-C02", "OD-0481-SC-03"],
+      "identification": "accepted_structural_baseline_not_historical_sequence",
+      "causal_limit": "opens device-local hazard or report opportunities but selects no failure, report, receipt, investigation, response, or diagnosis",
+      "sensitivity_overlay_id": "SENS-0481-SIGNAL-DELAY"
+    },
+    {
+      "id": "SV-0481-ROUTE-DELIVERY",
+      "family": "route_and_delivery",
+      "allowed_domain": ["DISTINCT_NAMED_ROUTES_WITH_EXPLICIT_DELIVERY", "ROUTE_DELAY_OR_FAILURE", "PARTIAL_OR_CORRECTED_DELIVERY"],
+      "selection": "DISTINCT_NAMED_ROUTES_WITH_EXPLICIT_DELIVERY",
+      "basis": ["0481-FR-C11", "0481-R2-C04", "OD-0481-SC-03"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "route eligibility never implies issue, transport, receipt, acknowledgement, interpretation, or action",
+      "sensitivity_overlay_id": "SENS-0481-ROUTE-DELAY"
+    },
+    {
+      "id": "SV-0481-POPULATION-ASSEMBLY",
+      "family": "population_assembly",
+      "allowed_domain": ["EVIDENCE_GATED_SCOPE_PRESERVING_UNITS", "NARROWER_ACTIVE_UNIT_SET_WITH_INFORMATION_LOSS"],
+      "selection": "EVIDENCE_GATED_SCOPE_PRESERVING_UNITS",
+      "basis": ["OD-0481-CM-02", "OD-0481-SC-03"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "unit assembly cannot create shared observations, private state, authority, policy, or results",
+      "sensitivity_overlay_id": "SENS-0481-NARROWER-UNIT-SET"
+    },
+    {
+      "id": "SV-0481-AUTHORITY-CAPACITY",
+      "family": "authority_capacity",
+      "allowed_domain": ["JURISDICTION_AND_CAPACITY_QUALIFIED", "DELAYED_OR_UNAVAILABLE_AUTHORITY_CAPACITY", "NARROWER_ROUTE_AVAILABILITY"],
+      "selection": "JURISDICTION_AND_CAPACITY_QUALIFIED",
+      "basis": ["0481-R2-C31", "0481-R2-C32", "OD-0481-SC-03"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "identity or title never supplies availability, route delivery, or authority outside the effective capacity",
+      "sensitivity_overlay_id": "SENS-0481-AUTHORITY-DELAY"
+    },
+    {
+      "id": "SV-0481-OPERATIONAL-RESULT",
+      "family": "operational_result",
+      "allowed_domain": ["AUTHORITY_PRESTATE_RESOURCE_AND_FEASIBILITY_ADJUDICATED", "DELAYED_OR_PARTIAL_OPERATIONAL_RESULT", "NO_EFFECT_OR_ADVERSE_OPERATIONAL_RESULT"],
+      "selection": "AUTHORITY_PRESTATE_RESOURCE_AND_FEASIBILITY_ADJUDICATED",
+      "basis": ["OD-0481-SC-03", "OD-0481-CM-03"],
+      "identification": "accepted_result_family_not_realized_outcome",
+      "causal_limit": "defines adjudication dimensions for product, production, inventory, remedy, custody, and handling without selecting a result",
+      "sensitivity_overlay_id": "SENS-0481-OPERATIONAL-PARTIAL"
+    },
+    {
+      "id": "SV-0481-PUBLIC-ACTION-DELIVERY",
+      "family": "public_action_delivery",
+      "allowed_domain": ["PROPOSAL_ISSUANCE_EFFECT_DELIVERY_AND_IMPLEMENTATION_SEPARATED", "DELAYED_EFFECT_OR_DELIVERY", "PARTIAL_OR_FAILED_PUBLIC_ACTION_DELIVERY"],
+      "selection": "PROPOSAL_ISSUANCE_EFFECT_DELIVERY_AND_IMPLEMENTATION_SEPARATED",
+      "basis": ["0481-FR-C14", "0481-R2-C20", "OD-0481-SC-03"],
+      "identification": "accepted_structural_baseline",
+      "causal_limit": "warning, recall, order, or message proposal, issue, publication, effect, delivery, implementation, enforcement, and response remain distinct",
+      "sensitivity_overlay_id": "SENS-0481-PUBLIC-ACTION-PARTIAL"
+    }
+  ],
+  "variant_materialization": {
+    "exogenous_pressure_profile": {
+      "selection": "bounded_hazard_signal_opportunity_process",
+      "opportunity_schedule": "bounded_device_local_opportunities_admitted_by_exogenous_input",
+      "realized_result": "adjudicated_not_selected"
+    },
+    "route_delivery_profile": {
+      "selection": "distinct_named_routes_with_explicit_delivery",
+      "delivery_result": "adjudicated_per_explicitly_addressed_message"
+    },
+    "active_population_actor_ids": [
+      "actor.0481.unit.samsung-regional-singapore",
+      "actor.0481.unit.outlet-singapore-channel",
+      "actor.0481.unit.consumer-primary",
+      "actor.0481.unit.air-operator-primary"
+    ],
+    "inactive_population_actor_rule": "declared assignments and route endpoints remain referentially valid but are ineligible for issue, delivery, observation, or action",
+    "authority_capacity_profile": {
+      "selection": "jurisdiction_and_capacity_qualified",
+      "unavailable_actor_ids": [],
+      "availability_gate": "opening_record_then_admitted_capacity_change"
+    },
+    "operational_result_profile": {
+      "selection": "authority_prestate_resource_and_feasibility_adjudicated",
+      "realized_result": "adjudicated_not_selected"
+    },
+    "public_action_delivery_profile": {
+      "selection": "proposal_issuance_effect_delivery_and_implementation_separated",
+      "realized_delivery_result": "adjudicated_not_selected"
+    },
+    "overlay_precedence": "an applied overlay replaces only its named fields; all unmentioned fields and causal limits remain unchanged"
+  },
+  "canonical_institutions": [
+    {"id": "institution.0481.samsung", "name": "Samsung Electronics corporate product-safety scope", "resource_owner_id": "resource-owner.0481.samsung", "semantic_kind": "institution"},
+    {"id": "institution.0481.cpsc", "name": "United States Consumer Product Safety Commission", "resource_owner_id": "resource-owner.0481.cpsc", "semantic_kind": "institution"},
+    {"id": "institution.0481.caac", "name": "Civil Aviation Administration of China", "resource_owner_id": "resource-owner.0481.caac", "semantic_kind": "institution"},
+    {"id": "institution.0481.us-dot", "name": "United States Department of Transportation emergency-order scope", "resource_owner_id": "resource-owner.0481.us-dot", "semantic_kind": "institution"},
+    {"id": "institution.0481.singapore-market-channel", "name": "Modeled Singapore carrier and retail channel domain", "resource_owner_id": "resource-owner.0481.singapore-market-channel", "participant_disposition": "scenario_scoped_resource_domain_not_single_legal_institution", "semantic_kind": "market_domain"},
+    {"id": "institution.0481.consumer-domain", "name": "Modeled owner and prospective-consumer decision-unit domain", "resource_owner_id": "resource-owner.0481.consumer-domain", "participant_disposition": "scenario_scoped_resource_domain_not_legal_institution", "semantic_kind": "consumer_domain"},
+    {"id": "institution.0481.air-operator-domain", "name": "Modeled air-transport operator-function domain", "resource_owner_id": "resource-owner.0481.air-operator-domain", "participant_disposition": "scenario_scoped_resource_domain_not_single_legal_institution", "semantic_kind": "operator_domain"}
+  ],
+  "scenario_processes": [
+    "process.0481.safety-signal-and-investigation",
+    "process.0481.product-flow-and-production",
+    "process.0481.information-route-and-delivery",
+    "process.0481.recall",
+    "process.0481.inventory-remedy-and-custody",
+    "process.0481.transport-action",
+    "process.0481.transport-encounter",
+    "process.0481.participant-intent-and-result",
+    "process.0481.completion"
+  ],
+  "named_actors": [
+    {
+      "entity_id": "entity.0481.interface.samsung-crisis",
+      "actor_id": "actor.0481.interface.samsung-crisis",
+      "participant_product_id": "h2epr.agent-definition.0481.samsung-note7-crisis-decision-interface",
+      "capability_id": "samsung_crisis_decision_interface",
+      "capacity_ids": ["capacity.0481.samsung.product-safety", "capacity.0481.samsung.represented-production"],
+      "primary_institution_id": "institution.0481.samsung",
+      "additional_route_institution_ids": ["institution.0481.cpsc", "institution.0481.caac", "institution.0481.us-dot", "institution.0481.singapore-market-channel"],
+      "authority_graph_id": "authority.0481.interface.samsung-crisis",
+      "resource_owner_id": "resource-owner.0481.samsung",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0481.interface.cpsc-recall",
+      "actor_id": "actor.0481.interface.cpsc-recall",
+      "participant_product_id": "h2epr.agent-definition.0481.cpsc-recall-decision-interface",
+      "capability_id": "cpsc_recall_decision_interface",
+      "capacity_ids": ["capacity.0481.cpsc.recall-authority"],
+      "primary_institution_id": "institution.0481.cpsc",
+      "additional_route_institution_ids": ["institution.0481.samsung", "institution.0481.us-dot", "institution.0481.consumer-domain"],
+      "authority_graph_id": "authority.0481.interface.cpsc-recall",
+      "resource_owner_id": "resource-owner.0481.cpsc",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0481.interface.caac-warning",
+      "actor_id": "actor.0481.interface.caac-warning",
+      "participant_product_id": "h2epr.agent-definition.0481.caac-warning-decision-interface",
+      "capability_id": "caac_warning_decision_interface",
+      "capacity_ids": ["capacity.0481.caac.warning-issuance"],
+      "primary_institution_id": "institution.0481.caac",
+      "additional_route_institution_ids": ["institution.0481.samsung", "institution.0481.air-operator-domain"],
+      "authority_graph_id": "authority.0481.interface.caac-warning",
+      "resource_owner_id": "resource-owner.0481.caac",
+      "private_state_initialization": "definition_declared_default"
+    },
+    {
+      "entity_id": "entity.0481.interface.us-dot-order",
+      "actor_id": "actor.0481.interface.us-dot-order",
+      "participant_product_id": "h2epr.agent-definition.0481.us-dot-emergency-order-decision-interface",
+      "capability_id": "us_dot_emergency_order_decision_interface",
+      "capacity_ids": ["capacity.0481.us-dot.secretary-emergency-order"],
+      "primary_institution_id": "institution.0481.us-dot",
+      "additional_route_institution_ids": ["institution.0481.cpsc", "institution.0481.samsung", "institution.0481.air-operator-domain"],
+      "authority_graph_id": "authority.0481.interface.us-dot-order",
+      "resource_owner_id": "resource-owner.0481.us-dot",
+      "private_state_initialization": "definition_declared_default"
+    }
+  ],
+  "population_actors": [
+    {"entity_id": "entity.0481.unit.samsung-regional-singapore", "actor_id": "actor.0481.unit.samsung-regional-singapore", "unit_id": "unit.0481.samsung-regional-singapore", "capability_id": "samsung_regional_implementation_units", "capacity_id": "capacity.0481.unit.samsung-regional-singapore", "host_institution_id": "institution.0481.samsung", "assignment_id": "opening.0481.assignment.samsung-regional-singapore", "authority_graph_id": "authority.0481.unit.samsung-regional-singapore", "resource_owner_id": "resource-owner.0481.samsung", "weighting": "none"},
+    {"entity_id": "entity.0481.unit.outlet-singapore-channel", "actor_id": "actor.0481.unit.outlet-singapore-channel", "unit_id": "unit.0481.outlet-singapore-channel", "capability_id": "carrier_and_retail_remedy_outlets", "capacity_id": "capacity.0481.unit.outlet-singapore-channel", "host_institution_id": "institution.0481.singapore-market-channel", "assignment_id": "opening.0481.assignment.outlet-singapore-channel", "authority_graph_id": "authority.0481.unit.outlet-singapore-channel", "resource_owner_id": "resource-owner.0481.singapore-market-channel", "weighting": "none"},
+    {"entity_id": "entity.0481.unit.consumer-primary", "actor_id": "actor.0481.unit.consumer-primary", "unit_id": "unit.0481.consumer-primary", "capability_id": "note7_owners_and_prospective_consumers", "capacity_id": "capacity.0481.unit.consumer-primary", "host_institution_id": "institution.0481.consumer-domain", "assignment_id": "opening.0481.assignment.consumer-primary", "authority_graph_id": "authority.0481.unit.consumer-primary", "resource_owner_id": "resource-owner.0481.consumer-domain", "weighting": "none"},
+    {"entity_id": "entity.0481.unit.air-operator-primary", "actor_id": "actor.0481.unit.air-operator-primary", "unit_id": "unit.0481.air-operator-primary", "capability_id": "air_transport_operators", "capacity_id": "capacity.0481.unit.air-operator-primary", "host_institution_id": "institution.0481.air-operator-domain", "assignment_id": "opening.0481.assignment.air-operator-primary", "authority_graph_id": "authority.0481.unit.air-operator-primary", "resource_owner_id": "resource-owner.0481.air-operator-domain", "weighting": "none"}
+  ],
+  "population_units": [
+    {"unit_id": "unit.0481.samsung-regional-singapore", "actor_id": "actor.0481.unit.samsung-regional-singapore", "population_product_id": "h2epr.population-model.0481.samsung-regional-implementation-units", "host_institution_id": "institution.0481.samsung", "functional_type": "singapore_regional_implementation", "assignment_id": "opening.0481.assignment.samsung-regional-singapore", "capacity_id": "capacity.0481.unit.samsung-regional-singapore", "availability_record_id": "opening.0481.assignment.samsung-regional-singapore", "composition": "one_semantic_jurisdiction_scoped_unit_actor", "access_mode": "regional_product_remedy_and_route_context", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.product-flow", "asset.0481.inventory-remedy"], "opening_private_state": "definition_declared_default"},
+    {"unit_id": "unit.0481.outlet-singapore-channel", "actor_id": "actor.0481.unit.outlet-singapore-channel", "population_product_id": "h2epr.population-model.0481.carrier-and-retail-remedy-outlets", "host_institution_id": "institution.0481.singapore-market-channel", "functional_type": "carrier_and_retail_remedy_channel", "assignment_id": "opening.0481.assignment.outlet-singapore-channel", "capacity_id": "capacity.0481.unit.outlet-singapore-channel", "availability_record_id": "opening.0481.assignment.outlet-singapore-channel", "composition": "one_semantic_channel_scoped_unit_actor", "access_mode": "outlet_product_inventory_and_remedy_context", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.product-flow", "asset.0481.inventory-remedy"], "opening_private_state": "definition_declared_default"},
+    {"unit_id": "unit.0481.consumer-primary", "actor_id": "actor.0481.unit.consumer-primary", "population_product_id": "h2epr.population-model.0481.note7-owners-and-prospective-consumers", "host_institution_id": "institution.0481.consumer-domain", "functional_type": "individual_or_household_choice_unit", "assignment_id": "opening.0481.assignment.consumer-primary", "capacity_id": "capacity.0481.unit.consumer-primary", "availability_record_id": "opening.0481.assignment.consumer-primary", "composition": "one_semantic_consumer_choice_unit_actor", "access_mode": "associated_device_offer_and_delivery_context", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.device.associated-context", "asset.0481.inventory-remedy"], "opening_private_state": "definition_declared_default"},
+    {"unit_id": "unit.0481.air-operator-primary", "actor_id": "actor.0481.unit.air-operator-primary", "population_product_id": "h2epr.population-model.0481.air-transport-operators", "host_institution_id": "institution.0481.air-operator-domain", "functional_type": "air_transport_operator_function_unit", "assignment_id": "opening.0481.assignment.air-operator-primary", "capacity_id": "capacity.0481.unit.air-operator-primary", "availability_record_id": "opening.0481.assignment.air-operator-primary", "composition": "one_semantic_operator_function_unit_actor", "access_mode": "transport_rule_encounter_and_handling_context", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.device.associated-context", "asset.0481.transport-encounter"], "opening_private_state": "definition_declared_default"}
+  ],
+  "technical_assets": [
+    {"id": "asset.0481.product.original", "kind": "original_device_class", "owning_institution_id": "institution.0481.samsung", "operating_institution_id": "institution.0481.samsung", "identity_scope": "canonical_product_class_not_device_enumeration"},
+    {"id": "asset.0481.product.replacement", "kind": "replacement_device_class", "owning_institution_id": "institution.0481.samsung", "operating_institution_id": "institution.0481.samsung", "identity_scope": "canonical_product_class_not_safety_guarantee"},
+    {"id": "asset.0481.device.associated-context", "kind": "associated_device_context", "owning_institution_id": null, "ownership_identification": "explicit_unknown_or_unit_local_custody", "operating_institution_id": "institution.0481.consumer-domain", "identity_scope": "bounded_context_not_device_inventory"},
+    {"id": "asset.0481.incident-context", "kind": "incident_and_hazard_context", "owning_institution_id": null, "ownership_identification": "scenario_owned_physical_and_report_context", "operating_institution_id": "institution.0481.samsung", "identity_scope": "bounded_opportunity_not_realized_outcome"},
+    {"id": "asset.0481.product-flow", "kind": "product_flow_context", "owning_institution_id": "institution.0481.samsung", "operating_institution_id": "institution.0481.samsung", "identity_scope": "sales_shipment_exchange_and_return_state"},
+    {"id": "asset.0481.production", "kind": "production_context", "owning_institution_id": "institution.0481.samsung", "operating_institution_id": "institution.0481.samsung", "identity_scope": "bounded_posture_and_capacity_state"},
+    {"id": "asset.0481.inventory-remedy", "kind": "inventory_and_remedy_context", "owning_institution_id": null, "ownership_identification": "scope_and_custody_versioned_by_process", "operating_institution_id": "institution.0481.singapore-market-channel", "identity_scope": "bounded_stock_offer_handoff_and_payment_context"},
+    {"id": "asset.0481.transport-encounter", "kind": "transport_encounter_context", "owning_institution_id": null, "ownership_identification": "operator_function_scoped_encounter", "operating_institution_id": "institution.0481.air-operator-domain", "identity_scope": "bounded_encounter_not_enforcement_inventory"}
+  ],
+  "initial_records": [
+    {"id": "opening.0481.authority.samsung", "family": "authority_and_capacity", "owner_id": "institution.0481.samsung", "target_id": "actor.0481.interface.samsung-crisis", "capacity_scopes": [{"capacity_id": "capacity.0481.samsung.product-safety", "institution_id": "institution.0481.samsung"}, {"capacity_id": "capacity.0481.samsung.represented-production", "institution_id": "institution.0481.samsung"}], "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_complete_historical_tenure"}, "availability": "available_subject_to_admitted_capacity_change", "value": "capacity_qualified_product_and_represented_production_authority", "identification": "evidence_bounded_configuration_baseline", "visibility": "actor_and_eligible_routes", "source_class": "accepted_participant_evidence_and_configuration_selection", "basis": ["0481-R1-C01", "0481-R2-C01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.authority.cpsc", "family": "authority_and_capacity", "owner_id": "institution.0481.cpsc", "target_id": "actor.0481.interface.cpsc-recall", "capacity_scopes": [{"capacity_id": "capacity.0481.cpsc.recall-authority", "institution_id": "institution.0481.cpsc"}], "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_complete_historical_tenure"}, "availability": "available_subject_to_jurisdiction_and_admitted_change", "value": "jurisdiction_qualified_warning_and_recall_authority", "identification": "evidence_bounded_configuration_baseline", "visibility": "actor_and_eligible_routes", "source_class": "accepted_participant_evidence_and_configuration_selection", "basis": ["0481-R1-C08", "0481-R2-C08", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.authority.caac", "family": "authority_and_capacity", "owner_id": "institution.0481.caac", "target_id": "actor.0481.interface.caac-warning", "capacity_scopes": [{"capacity_id": "capacity.0481.caac.warning-issuance", "institution_id": "institution.0481.caac"}], "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_complete_historical_tenure"}, "availability": "available_subject_to_jurisdiction_and_admitted_change", "value": "jurisdiction_qualified_warning_issuance_authority", "identification": "evidence_bounded_configuration_baseline", "visibility": "actor_and_eligible_routes", "source_class": "accepted_participant_evidence_and_configuration_selection", "basis": ["0481-R2-C25", "OD-0481-SC-02", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.authority.us-dot", "family": "authority_and_capacity", "owner_id": "institution.0481.us-dot", "target_id": "actor.0481.interface.us-dot-order", "capacity_scopes": [{"capacity_id": "capacity.0481.us-dot.secretary-emergency-order", "institution_id": "institution.0481.us-dot"}], "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_complete_historical_tenure"}, "availability": "available_subject_to_jurisdiction_and_admitted_change", "value": "secretary_level_emergency_order_issuance_authority", "identification": "evidence_bounded_configuration_baseline", "visibility": "actor_and_eligible_routes", "source_class": "accepted_participant_evidence_and_configuration_selection", "basis": ["0481-R2-C28", "0481-R2-C29", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.assignment.samsung-regional-singapore", "family": "unit_assignment", "owner_id": "institution.0481.samsung", "target_id": "unit.0481.samsung-regional-singapore", "capacity_id": "capacity.0481.unit.samsung-regional-singapore", "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_complete_historical_staffing"}, "availability": "available_for_evidence_supported_singapore_opportunities", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.product-flow", "asset.0481.inventory-remedy"], "value": "singapore_regional_product_remedy_and_route_scope", "identification": "evidence_gated_configuration_selection", "visibility": "unit_and_authorized_routes", "source_class": "accepted_participant_evidence_and_configuration_selection", "basis": ["0481-R2-C33", "0481-R2-C34", "OD-0481-CFG-02"]},
+    {"id": "opening.0481.assignment.outlet-singapore-channel", "family": "unit_assignment", "owner_id": "institution.0481.singapore-market-channel", "target_id": "unit.0481.outlet-singapore-channel", "capacity_id": "capacity.0481.unit.outlet-singapore-channel", "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_complete_historical_staffing"}, "availability": "available_for_bounded_channel_opportunities", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.product-flow", "asset.0481.inventory-remedy"], "value": "channel_local_product_inventory_and_remedy_scope", "identification": "mechanism_coverage_construction", "visibility": "unit_and_authorized_routes", "source_class": "configuration_selection", "basis": ["0481-R2-C33", "0481-R2-C34", "OD-0481-CFG-02"]},
+    {"id": "opening.0481.assignment.consumer-primary", "family": "unit_assignment", "owner_id": "institution.0481.consumer-domain", "target_id": "unit.0481.consumer-primary", "capacity_id": "capacity.0481.unit.consumer-primary", "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_population_claim"}, "availability": "available_for_bounded_choice_opportunities", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.device.associated-context", "asset.0481.inventory-remedy"], "value": "one_individual_or_household_choice_unit_scope", "identification": "mechanism_coverage_construction", "visibility": "unit_and_delivered_routes", "source_class": "configuration_selection", "basis": ["OD-0481-CM-02", "OD-0481-CFG-02"]},
+    {"id": "opening.0481.assignment.air-operator-primary", "family": "unit_assignment", "owner_id": "institution.0481.air-operator-domain", "target_id": "unit.0481.air-operator-primary", "capacity_id": "capacity.0481.unit.air-operator-primary", "effective_interval": {"start": "2016-08-19", "end": "2016-10-15", "precision": "configuration_boundary_not_operator_population_claim"}, "availability": "available_for_bounded_transport_opportunities", "access_scope_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.device.associated-context", "asset.0481.transport-encounter"], "value": "one_operator_function_unit_scope", "identification": "mechanism_coverage_construction", "visibility": "unit_and_delivered_routes", "source_class": "configuration_selection", "basis": ["0481-R2-C27", "0481-R2-C30", "OD-0481-CFG-02"]},
+    {"id": "opening.0481.relationship.samsung-cpsc", "family": "institutional_relationship", "owner_id": "process.0481.recall", "parties": ["institution.0481.samsung", "institution.0481.cpsc"], "value": "firm_and_jurisdictional_recall_interfaces_remain_distinct", "identification": "evidence_supported", "visibility": "role_scoped", "source_class": "accepted_event_evidence", "basis": ["0481-FR-C05", "0481-FR-C06"]},
+    {"id": "opening.0481.relationship.samsung-market", "family": "institutional_relationship", "owner_id": "process.0481.product-flow-and-production", "parties": ["institution.0481.samsung", "institution.0481.singapore-market-channel"], "value": "corporate_regional_and_channel_scopes_distinct", "identification": "evidence_bounded", "visibility": "role_scoped", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C33", "0481-R2-C34"]},
+    {"id": "opening.0481.relationship.market-consumer", "family": "institutional_relationship", "owner_id": "process.0481.inventory-remedy-and-custody", "parties": ["institution.0481.singapore-market-channel", "institution.0481.consumer-domain"], "value": "offer_request_handoff_and_custody_scopes_distinct", "identification": "mechanism_coverage_construction", "visibility": "role_scoped", "source_class": "configuration_selection", "basis": ["OD-0481-CM-03", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.relationship.transport-domains", "family": "institutional_relationship", "owner_id": "process.0481.transport-action", "parties": ["institution.0481.caac", "institution.0481.us-dot", "institution.0481.air-operator-domain"], "value": "issuer_jurisdiction_and_operator_function_scopes_distinct", "identification": "evidence_bounded", "visibility": "role_scoped", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C25", "0481-R2-C28", "0481-R2-C30"]},
+    {"id": "opening.0481.route.consumer-intake", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.unit.consumer-primary"], "side_b": ["actor.0481.interface.samsung-crisis", "actor.0481.interface.cpsc-recall", "actor.0481.unit.outlet-singapore-channel"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_intake_scope_and_delivery", "identification": "mechanism_coverage_construction", "visibility": "addressed_route_parties_only", "source_class": "configuration_selection", "basis": ["OD-0481-CM-02", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.route.samsung-cpsc", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.interface.samsung-crisis"], "side_b": ["actor.0481.interface.cpsc-recall"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_firm_authority_scope_and_delivery", "identification": "evidence_supported", "visibility": "addressed_route_parties_only", "source_class": "accepted_event_evidence", "basis": ["0481-FR-C05", "0481-FR-C06"]},
+    {"id": "opening.0481.route.samsung-regional", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.interface.samsung-crisis"], "side_b": ["actor.0481.unit.samsung-regional-singapore"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_regional_scope_and_delivery", "identification": "evidence_supported", "visibility": "addressed_route_parties_only", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C33", "0481-R2-C34"]},
+    {"id": "opening.0481.route.regional-outlet", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.unit.samsung-regional-singapore"], "side_b": ["actor.0481.unit.outlet-singapore-channel"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_channel_scope_and_delivery", "identification": "evidence_supported", "visibility": "addressed_route_parties_only", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C33", "0481-R2-C34"]},
+    {"id": "opening.0481.route.outlet-consumer", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.unit.outlet-singapore-channel"], "side_b": ["actor.0481.unit.consumer-primary"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_offer_request_and_delivery_scope", "identification": "mechanism_coverage_construction", "visibility": "addressed_route_parties_only", "source_class": "configuration_selection", "basis": ["OD-0481-CM-03", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.route.safety-caac", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.interface.samsung-crisis", "actor.0481.interface.cpsc-recall"], "side_b": ["actor.0481.interface.caac-warning"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_jurisdiction_scope_and_delivery", "identification": "evidence_bounded", "visibility": "addressed_route_parties_only", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C25", "OD-0481-SC-02"]},
+    {"id": "opening.0481.route.safety-us-dot", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.interface.samsung-crisis", "actor.0481.interface.cpsc-recall"], "side_b": ["actor.0481.interface.us-dot-order"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_jurisdiction_scope_and_delivery", "identification": "evidence_bounded", "visibility": "addressed_route_parties_only", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C28", "0481-R2-C29", "OD-0481-SC-02"]},
+    {"id": "opening.0481.route.transport-operator", "family": "institutional_route", "owner_id": "process.0481.information-route-and-delivery", "endpoints": {"side_a": ["actor.0481.interface.caac-warning", "actor.0481.interface.us-dot-order"], "side_b": ["actor.0481.unit.air-operator-primary"]}, "directionality": "bidirectional_explicit_address_only", "addressing_rule": "one_exact_sender_and_one_exact_recipient_per_message_no_set_broadcast", "value": "eligible_subject_to_issuer_jurisdiction_operator_scope_and_delivery", "identification": "evidence_bounded", "visibility": "addressed_route_parties_only", "source_class": "accepted_participant_evidence", "basis": ["0481-R2-C25", "0481-R2-C28", "0481-R2-C30"]},
+    {"id": "opening.0481.asset.product-original", "family": "technical_asset_state", "owner_id": "process.0481.product-flow-and-production", "target_id": "asset.0481.product.original", "value": "canonical_class_present_exact_device_population_and_state_unknown", "identification": "evidence_bounded_with_explicit_unknowns", "visibility": "scope_and_delivery_qualified", "source_class": "accepted_event_evidence_and_configuration_identity", "basis": ["0481-FR-C01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.product-replacement", "family": "technical_asset_state", "owner_id": "process.0481.product-flow-and-production", "target_id": "asset.0481.product.replacement", "value": "canonical_class_present_future_availability_and_safety_state_unknown", "identification": "evidence_bounded_with_explicit_unknowns", "visibility": "scope_and_delivery_qualified", "source_class": "accepted_event_evidence_and_configuration_identity", "basis": ["0481-FR-C02", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.associated-device", "family": "technical_asset_state", "owner_id": "process.0481.inventory-remedy-and-custody", "target_id": "asset.0481.device.associated-context", "value": "exact_device_custody_and_prestate_unknown_until_admitted_context", "identification": "bounded_identity_envelope_with_explicit_unknowns", "visibility": "consumer_and_authorized_routes_after_delivery", "source_class": "configuration_selection", "basis": ["OD-0481-CM-02", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.incident-context", "family": "technical_asset_state", "owner_id": "process.0481.safety-signal-and-investigation", "target_id": "asset.0481.incident-context", "value": "no_realized_incident_or_diagnosis_preloaded", "identification": "bounded_opportunity_with_explicit_unknowns", "visibility": "none_until_product_and_delivery", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.product-flow", "family": "technical_asset_state", "owner_id": "process.0481.product-flow-and-production", "target_id": "asset.0481.product-flow", "value": "identity_present_exact_sales_shipment_exchange_return_state_unknown", "identification": "evidence_bounded_with_explicit_unknowns", "visibility": "scope_and_delivery_qualified", "source_class": "configuration_selection", "basis": ["OD-0481-CM-03", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.production", "family": "technical_asset_state", "owner_id": "process.0481.product-flow-and-production", "target_id": "asset.0481.production", "value": "identity_present_exact_capacity_and_posture_unknown", "identification": "evidence_bounded_with_explicit_unknowns", "visibility": "scope_and_delivery_qualified", "source_class": "configuration_selection", "basis": ["OD-0481-CM-03", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.inventory-remedy", "family": "technical_asset_state", "owner_id": "process.0481.inventory-remedy-and-custody", "target_id": "asset.0481.inventory-remedy", "value": "exact_stock_offer_eligibility_handoff_and_payment_state_unknown", "identification": "bounded_identity_envelope_with_explicit_unknowns", "visibility": "unit_scope_and_delivery_qualified", "source_class": "configuration_selection", "basis": ["OD-0481-CM-03", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.asset.transport-encounter", "family": "technical_asset_state", "owner_id": "process.0481.transport-encounter", "target_id": "asset.0481.transport-encounter", "value": "no_encounter_identity_handling_or_enforcement_result_preloaded", "identification": "bounded_identity_envelope_with_explicit_unknowns", "visibility": "operator_scope_then_delivered_routes", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.process.safety-signal", "family": "business_object_state", "owner_id": "process.0481.safety-signal-and-investigation", "target_id": "process.0481.safety-signal-and-investigation", "value": "no_authoritative_signal_intake_or_investigation_object_open_at_start", "identification": "configuration_selection_consistent_with_boundary", "visibility": "process_truth_only", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.process.product-flow", "family": "business_object_state", "owner_id": "process.0481.product-flow-and-production", "target_id": "process.0481.product-flow-and-production", "value": "no_future_stop_replacement_or_production_result_preloaded", "identification": "configuration_selection_consistent_with_boundary", "visibility": "process_truth_only", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.process.recall", "family": "business_object_state", "owner_id": "process.0481.recall", "target_id": "process.0481.recall", "value": "no_warning_recall_or_expansion_object_open_at_start", "identification": "configuration_selection_consistent_with_boundary", "visibility": "process_truth_only", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.process.remedy", "family": "business_object_state", "owner_id": "process.0481.inventory-remedy-and-custody", "target_id": "process.0481.inventory-remedy-and-custody", "value": "no_offer_eligibility_stock_handoff_refund_or_exchange_result_open_at_start", "identification": "configuration_selection_consistent_with_boundary", "visibility": "process_truth_only", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.process.transport-action", "family": "business_object_state", "owner_id": "process.0481.transport-action", "target_id": "process.0481.transport-action", "value": "no_warning_order_effect_delivery_or_enforcement_object_open_at_start", "identification": "configuration_selection_consistent_with_boundary", "visibility": "process_truth_only", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]},
+    {"id": "opening.0481.process.transport-encounter", "family": "business_object_state", "owner_id": "process.0481.transport-encounter", "target_id": "process.0481.transport-encounter", "value": "no_transport_encounter_or_handling_result_open_at_start", "identification": "configuration_selection_consistent_with_boundary", "visibility": "process_truth_only", "source_class": "configuration_selection", "basis": ["OD-0481-SC-01", "OD-0481-CFG-03"]}
+  ],
+  "exogenous_inputs": [
+    {"id": "exo.0481.bounded-hazard-signal", "family": "bounded_hazard_or_report_opportunity", "activation": {"window_start": "2016-08-19", "precision": "date_or_bounded_window"}, "target_kind": "scenario_process", "target_ids": ["process.0481.safety-signal-and-investigation"], "typed_effect": "open_adjudicated_device_local_hazard_or_report_opportunity", "visibility": "none_until_information_product_and_delivery", "basis": ["0481-FR-C01", "0481-FR-C02"], "causal_limit": "does_not_select_failure_report_receipt_investigation_response_or_diagnosis", "sensitivity_overlay_id": "SENS-0481-SIGNAL-DELAY", "outcome_forcing": false},
+    {"id": "exo.0481.device-and-product-context", "family": "device_and_product_context", "activation": {"condition": "admitted_opportunity_requires_product_or_device_context"}, "target_kind": "technical_asset_set", "target_ids": ["asset.0481.product.original", "asset.0481.product.replacement", "asset.0481.device.associated-context", "asset.0481.incident-context"], "typed_effect": "supply_bounded_identity_and_precondition_context_to_exact_assets", "visibility": "scope_and_delivery_qualified", "basis": ["0481-FR-C01", "0481-FR-C02"], "causal_limit": "does_not_supply_failure_cause_future_safety_finding_or_another_device_state", "sensitivity_overlay_id": null, "outcome_forcing": false},
+    {"id": "exo.0481.institutional-authority-context", "family": "institutional_framework_and_authority", "activation": {"condition": "modeled_boundary_or_later_effective_capacity_change"}, "target_kind": "authority_record_set", "target_ids": ["opening.0481.authority.samsung", "opening.0481.authority.cpsc", "opening.0481.authority.caac", "opening.0481.authority.us-dot"], "typed_effect": "version_effective_capacity_jurisdiction_and_authority_context", "visibility": "actor_and_route_scoped", "basis": ["0481-R1-C08", "0481-R2-C25", "0481-R2-C28"], "causal_limit": "does_not_select_participant_intent_valid_issuance_delivery_or_result", "sensitivity_overlay_id": "SENS-0481-AUTHORITY-DELAY", "outcome_forcing": false},
+    {"id": "exo.0481.product-flow-and-resource-opportunity", "family": "product_flow_production_inventory_and_remedy_context", "activation": {"condition": "admitted_intent_requires_operational_prestate_or_resource_context"}, "target_kind": "technical_asset_set", "target_ids": ["asset.0481.product-flow", "asset.0481.production", "asset.0481.inventory-remedy"], "typed_effect": "supply_bounded_prestate_and_resource_opportunity_for_adjudication", "visibility": "scope_and_delivery_qualified", "basis": ["OD-0481-CM-03", "OD-0481-CFG-03"], "causal_limit": "does_not_select_stop_halt_stock_eligibility_handoff_refund_exchange_or_completion", "sensitivity_overlay_id": "SENS-0481-OPERATIONAL-PARTIAL", "outcome_forcing": false},
+    {"id": "exo.0481.recall-and-remedy-process-opportunity", "family": "recall_and_remedy_process", "activation": {"condition": "eligible_authority_or_remedy_intent_reaches_process_gate"}, "target_kind": "scenario_process", "target_ids": ["process.0481.recall", "process.0481.inventory-remedy-and-custody"], "typed_effect": "admit_review_issue_effect_stock_handoff_or_result_opportunity", "visibility": "participant_then_recipient_specific_after_delivery", "basis": ["0481-FR-C05", "0481-FR-C06"], "causal_limit": "does_not_create_authority_guarantee_issue_supply_stock_or_establish_effectiveness", "sensitivity_overlay_id": "SENS-0481-PUBLIC-ACTION-PARTIAL", "outcome_forcing": false},
+    {"id": "exo.0481.transport-process-opportunity", "family": "transport_post_issuance_and_encounter_process", "activation": {"condition": "valid_issuance_or_bounded_encounter_reaches_transport_gate"}, "target_kind": "scenario_process", "target_ids": ["process.0481.transport-action", "process.0481.transport-encounter"], "typed_effect": "admit_publication_effect_delivery_duty_encounter_handling_or_result_opportunity", "visibility": "issuer_operator_and_recipient_specific_after_delivery", "basis": ["0481-R2-C25", "0481-R2-C28", "0481-R2-C30"], "causal_limit": "does_not_replace_issuance_choice_force_effect_delivery_enforcement_or_handling_result", "sensitivity_overlay_id": "SENS-0481-PUBLIC-ACTION-PARTIAL", "outcome_forcing": false}
+  ],
+  "policy_selections": [
+    {"policy_id": "POL-0481-TIME-01", "semantic_version": "0.1.0", "selection": "event_driven_partial_order_with_declared_same_time_precedence", "definition_family": "clock_phase_order_and_reopening", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-INFO-01", "semantic_version": "0.1.0", "selection": "source_version_route_delivery_freshness_correction_and_visibility_separated", "definition_family": "information_production_routing_observation_and_correction", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-HAZARD-01", "semantic_version": "0.1.0", "selection": "device_local_hazard_report_investigation_and_finding_separated", "definition_family": "hazard_signal_incident_intake_and_investigation", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-ROUTE-01", "semantic_version": "0.1.0", "selection": "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement", "definition_family": "communication_publication_reporting_and_feedback", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-AUTH-01", "semantic_version": "0.1.0", "selection": "capacity_jurisdiction_relationship_object_and_resource_checks", "definition_family": "institution_unit_authority_capacity_relationship_and_resource", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-PRODUCT-01", "semantic_version": "0.1.0", "selection": "product_flow_production_inventory_and_custody_results_adjudicated", "definition_family": "product_flow_production_inventory_and_partner_action", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-REMEDY-01", "semantic_version": "0.1.0", "selection": "offer_eligibility_stock_selection_handoff_payment_and_completion_separated", "definition_family": "remedy_offer_request_and_fulfillment", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-PUBLIC-ACTION-01", "semantic_version": "0.1.0", "selection": "proposal_valid_issuance_publication_effect_delivery_implementation_and_enforcement_separated", "definition_family": "recall_warning_emergency_order_and_public_message", "implementation_status": "unbound", "execution_consequence": "fail_closed"},
+    {"policy_id": "POL-0481-LIFECYCLE-01", "semantic_version": "0.1.0", "selection": "typed_lifecycle_idempotency_adjudication_result_delta_and_later_observation", "definition_family": "twelve_shared_lifecycle_families_and_results", "implementation_status": "unbound", "execution_consequence": "fail_closed"}
+  ],
+  "sensitivity_overlays": [
+    {"overlay_id": "SENS-0481-SIGNAL-DELAY", "uncertainty": "hazard_signal_opportunity_pressure_and_order", "basis": ["0481-FR-C01", "0481-FR-C02"], "operations": [{"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0481-EXOGENOUS-PRESSURE", "field": "selection", "replacement_value": "LOWER_OR_DELAYED_BOUNDED_SIGNAL_OPPORTUNITY"}, {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "exogenous_pressure_profile", "replacement_value": {"selection": "lower_or_delayed_bounded_signal_opportunity", "opportunity_schedule": "lower_or_delayed_device_local_opportunities_admitted_by_exogenous_input", "realized_result": "adjudicated_not_selected"}}], "coupled_operations_disclosed": true},
+    {"overlay_id": "SENS-0481-ROUTE-DELAY", "uncertainty": "route_availability_and_delivery_delay", "basis": ["0481-FR-C11", "0481-R2-C04"], "operations": [{"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0481-ROUTE-DELIVERY", "field": "selection", "replacement_value": "ROUTE_DELAY_OR_FAILURE"}, {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "route_delivery_profile", "replacement_value": {"selection": "route_delay_or_failure", "delivery_result": "delayed_or_failed_per_explicitly_addressed_message"}}], "coupled_operations_disclosed": true},
+    {"overlay_id": "SENS-0481-NARROWER-UNIT-SET", "uncertainty": "population_unit_instantiation", "basis": ["OD-0481-CM-02", "OD-0481-SC-03"], "operations": [{"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0481-POPULATION-ASSEMBLY", "field": "selection", "replacement_value": "NARROWER_ACTIVE_UNIT_SET_WITH_INFORMATION_LOSS"}, {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "active_population_actor_ids", "replacement_value": ["actor.0481.unit.samsung-regional-singapore", "actor.0481.unit.outlet-singapore-channel"]}], "derived_effects": ["consumer and operator assignments and route endpoints become ineligible but remain referentially present"], "coupled_operations_disclosed": true},
+    {"overlay_id": "SENS-0481-AUTHORITY-DELAY", "uncertainty": "authority_capacity_and_route_availability", "basis": ["0481-R2-C25", "0481-R2-C28"], "operations": [{"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0481-AUTHORITY-CAPACITY", "field": "selection", "replacement_value": "DELAYED_OR_UNAVAILABLE_AUTHORITY_CAPACITY"}, {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "authority_capacity_profile", "replacement_value": {"selection": "delayed_or_unavailable_authority_capacity", "unavailable_actor_ids": ["actor.0481.interface.cpsc-recall"], "availability_gate": "cpsc_unavailable_until_admitted_capacity_change"}}], "coupled_operations_disclosed": true},
+    {"overlay_id": "SENS-0481-OPERATIONAL-PARTIAL", "uncertainty": "product_remedy_inventory_custody_or_handling_result", "basis": ["OD-0481-CM-03", "OD-0481-SC-03"], "operations": [{"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0481-OPERATIONAL-RESULT", "field": "selection", "replacement_value": "DELAYED_OR_PARTIAL_OPERATIONAL_RESULT"}, {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "operational_result_profile", "replacement_value": {"selection": "delayed_or_partial_operational_result", "realized_result": "delayed_or_partial_result_branch"}}], "coupled_operations_disclosed": true},
+    {"overlay_id": "SENS-0481-PUBLIC-ACTION-PARTIAL", "uncertainty": "recall_warning_order_or_message_delivery_and_implementation", "basis": ["0481-FR-C14", "0481-R2-C20"], "operations": [{"operation": "replace", "target_kind": "structural_variant", "target_id": "SV-0481-PUBLIC-ACTION-DELIVERY", "field": "selection", "replacement_value": "PARTIAL_OR_FAILED_PUBLIC_ACTION_DELIVERY"}, {"operation": "replace", "target_kind": "variant_materialization", "target_id": "variant_materialization", "field": "public_action_delivery_profile", "replacement_value": {"selection": "partial_or_failed_public_action_delivery", "realized_delivery_result": "partial_or_failed_delivery_or_implementation_branch"}}], "coupled_operations_disclosed": true}
+  ],
+  "bounded_lineage": {
+    "id": "lineage.0481.samsung-regional-outlet-consumer.v0_1",
+    "role": "illustrative_bounded_semantic_lineage",
+    "participant_ids": ["actor.0481.interface.samsung-crisis", "actor.0481.unit.samsung-regional-singapore", "actor.0481.unit.outlet-singapore-channel", "actor.0481.unit.consumer-primary"],
+    "route_ids": ["opening.0481.route.samsung-regional", "opening.0481.route.regional-outlet", "opening.0481.route.outlet-consumer"],
+    "semantic_intent_sequence": [
+      "samsung_crisis_decision_interface.issue_product_flow_direction",
+      "samsung_crisis_decision_interface.announce_replacement_program",
+      "samsung_regional_implementation_units.coordinate_local_partner_response",
+      "samsung_regional_implementation_units.propose_local_remedy",
+      "carrier_and_retail_remedy_outlets.set_local_product_posture",
+      "note7_owners_and_prospective_consumers.request_exchange_or_refund",
+      "carrier_and_retail_remedy_outlets.respond_to_remedy_request"
+    ],
+    "required_separations": ["intent_and_message", "issue_and_delivery", "direction_and_partner_choice", "offer_and_stock", "request_and_eligibility", "handoff_and_completion", "result_and_later_observation"],
+    "implementation_included": false,
+    "authorization_conferred_by_configuration": "none",
+    "full_roster_implication": "none"
+  },
+  "completion_policy": {
+    "normal": ["CORE_HORIZON_REACHED", "EARLY_PROCESS_CLOSURE"],
+    "bounded_incomplete": "INCOMPLETE_WITH_PENDING_OBJECTS",
+    "pending_object_rule": "preserve_owner_state_version_reason_and_next_eligible_event",
+    "failed_closed": "INVARIANT_FAILURE",
+    "historical_outcome_required": false
+  },
+  "validation_expectations": {
+    "semantic_products": 8,
+    "decision_and_population_commitments": 22,
+    "observation_placements": 40,
+    "private_state_placements": 28,
+    "intent_placements": 37,
+    "lifecycle_families": 12,
+    "named_actors": 4,
+    "population_actors": 4,
+    "total_semantic_actor_instances": 8,
+    "population_units": 4,
+    "technical_assets": 8,
+    "canonical_institutions": 7,
+    "opening_records": 34,
+    "route_records": 8,
+    "structural_selections": 6,
+    "exogenous_inputs": 6,
+    "selected_policy_semantics": 9,
+    "sensitivity_overlays": 6,
+    "one_actor_per_office_or_unit": true,
+    "one_resource_owner_per_canonical_institution": true,
+    "host_scope_required_for_population_units": true,
+    "capacity_scope_required_for_office_authority": true,
+    "exact_addressing_required_for_routes": true,
+    "opening_record_basis_required": true,
+    "intent_result_separation_required": true,
+    "correction_preserves_prior_decision_basis": true,
+    "unresolved_active_objects_carried_at_horizon": true,
+    "deterministic_replay_required_before_execution": true,
+    "execution_eligible": false
+  }
+}

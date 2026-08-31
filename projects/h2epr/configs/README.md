@@ -27,6 +27,7 @@ with the
 |---|---|---|
 | Panic of 1907 (`H2EPR-0288`) | [v0.1](panic_1907/scenario-configuration-v0.1/) | [bounded static admission v0.1](panic_1907/configuration-admission-v0.1/) |
 | SingHealth Data Breach (`H2EPR-0616`) | [v0.1](singhealth_data_breach/scenario-configuration-v0.1/) | [bounded static admission v0.1](singhealth_data_breach/configuration-admission-v0.1/) |
+| Samsung Galaxy Note7 (`H2EPR-0481`) | [v0.1](samsung_note7_battery_recall/scenario-configuration-v0.1/) | [bounded static admission v0.1](samsung_note7_battery_recall/configuration-admission-v0.1/) |
 
 Event-specific packages live under their event directory. A promoted package
 normally contains the machine document, publication-facing design, Definition
