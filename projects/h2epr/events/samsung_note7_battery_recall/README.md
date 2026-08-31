@@ -1,9 +1,9 @@
 # H2EPR-0481: Samsung Galaxy Note7 Battery Recall Crisis
 
-This entry is the accepted Event Build Brief for the H2EPR-0481 Frame. It fixes
-the question, causal boundary, temporal contract, and bounded representation
-dispositions needed for later work. Frame acceptance does not itself authorize
-participant production or any subsequent H2EPR phase.
+This coordination entry indexes the accepted H2EPR-0481 Frame and participant
+semantics. The Frame fixes the question, causal boundary, and temporal
+contract; the Roster Definition release resolves its representation gates and
+pins the qualitative participant inventory used by later event work.
 
 ## Identity and construction contract
 
@@ -14,11 +14,11 @@ participant production or any subsequent H2EPR phase.
 | Domain / category | Science & Engineering / Engineering & Product Safety |
 | Stable slug | `samsung_note7_battery_recall` |
 | Frame version | `v0.1` |
-| Status | `ACCEPTED_EVENT_FRAME_WITH_BOUNDED_REPRESENTATION_GATES` |
+| Status | `ACCEPTED_ROSTER_DEFINITION_RELEASE_v0.1` |
 | Construction mode | `DRAFT_SEEDED_REFERENCE_BLIND` |
-| Current authorization | Frame complete; no later phase currently authorized |
-| Phase endpoint | accepted event-specific Frame `v0.1` |
-| Supervisor review | `COMPLETE_WITH_RECORDED_LIMITATIONS_2026-08-31` |
+| Current authorization | Frame and participant semantics complete; consolidated mapping and Event Scenario Definition are the next bounded work |
+| Phase endpoint | accepted [Roster Definition release `v0.1`](../../releases/samsung_note7_battery_recall/roster-definition-v0.1/) |
+| Review | Frame independently accepted; participant phase closed by authoring-exposed substantive review and remains subject to final independent supervisor review |
 | Method baseline | H2EPR mainline at commit `592fb706bdf6c8720a0884f1d5ee76d237fe4ebd`, tree `03d3062742d3643688c60cd36f74b0476cc0275e`; the maintained workflow, architecture, publication standard, Event Build Brief, phase closeout checklist, and historical-evidence-research Skill govern this Frame |
 
 The permitted seeded inputs are fixed by content identity:
@@ -29,9 +29,11 @@ The permitted seeded inputs are fixed by content identity:
 | `frozen_evidence.json` | `c57db941c601de94e0f8826bd74537b2d4b4bc08c94d1ea3d7cec249b1a3c325` | Claim-family discovery; every material proposition was independently adjudicated |
 | `draft_epg.json` | `9883cae0a41d1345de43efa4658b8d4162fdf5843dadf94da36be5a6e9a26254` | Disclosed process seed; no stage, episode, participant, mechanism, or outcome assertion was accepted on its authority |
 
-The complete evidence authority for this accepted Frame is
+The complete evidence authority for the accepted Frame is
 [frame-evidence-v0.1.md](./frame-evidence-v0.1.md). The two files form one
-accepted review unit.
+accepted Frame review unit. The later
+[participant-evidence record](participant-evidence-v0.1.md) owns role-specific
+claims and participant-time limits.
 
 ## Event question and claim boundary
 
@@ -87,14 +89,17 @@ parsed, searched, indexed, hashed through a content reader, or used. A
 Reference filename or inventory identity is not treated as content exposure.
 
 The completed Frame authorization permitted public-source research and the
-two event-specific Markdown records only. It excluded roster release,
-participant production, Scenario or mapping, configuration, admission,
-lineage, conformance, Policy Realization, executable assembly, runtime work,
-simulation, generated-EPG work, evaluation, and paper claims. The Builder
-stopped at its self-reviewed candidate. Independent supervisor review returned
-one bounded causal-ownership correction and accepted the Frame only after the
-two transport-issuance gates were separated from their institutional
-lifecycles.
+two initial event-specific Markdown records only. The Frame Builder stopped at
+that boundary. Independent supervisor review returned one bounded
+causal-ownership correction and accepted the Frame only after the two
+transport-issuance gates were separated from their institutional lifecycles.
+
+A later authorized participant phase adopted three additional official pages,
+resolved every representation gate, authored four Agent Definitions and four
+Population Models, and produced the hash-pinned Roster Definition release. It
+did not open protected content or add Scenario, mapping, configuration,
+implementation, simulation, generated-graph, calibration, or evaluation
+semantics to the participant products.
 
 ## Bounded causal scope
 
@@ -120,25 +125,26 @@ lifecycles. This is a sourced process synthesis, not proof that any one action
 caused the next or that all jurisdictions and intermediaries behaved
 uniformly.
 
-## Provisional causal-role map
+## Accepted causal-role map
 
-These are Frame dispositions, not a released roster. Historical prominence
-does not itself make an entity an Agent, and this Frame sets no roster-size
+The [research roster](../../agents/rosters/samsung_note7_battery_recall.md)
+owns the full dispositions and reopening conditions. Historical prominence
+does not itself make an entity an Agent, and the release sets no roster-size
 target.
 
-| Historical entity or process | Provisional disposition | Reason and owner gate |
+| Historical entity or process | Accepted disposition | Causal boundary |
 |---|---|---|
-| Samsung Electronics product-safety decision interface | **Agent** | It made behaviorally material investigation, sales, replacement, partner, and production decisions. A later phase must identify the narrow organizational decision carrier without treating an entire multinational corporation as one unexamined mind. |
-| Samsung regional sales, service, and communications units | **representation gate** | Sources show local implementation and communication, but the evidence does not yet close which units held independent choice authority rather than executing a corporate decision. |
-| Battery suppliers and supplier-facing technical teams | **representation gate** | Supplier inspection is contemporaneously documented; supplier identity, knowledge, autonomy, and liability are not closed and cannot be inferred from the later diagnosis. |
-| U.S. Consumer Product Safety Commission recall interface | **Agent** | The warning, remedy review, formal recall, and expanded recall changed the legal and informational process. The future participant must be the relevant decision interface, not a generic government actor. |
-| Wireless carriers and retail outlets | **population or cohort** | They were heterogeneous distribution, communication, exchange, refund, and stop-sale intermediaries. Organization-specific elevation requires evidence of distinct endogenous authority. |
-| Galaxy Note7 owners and prospective consumers | **population or cohort** | Power-down, continued-use, exchange, refund, and reporting behavior matter in aggregate; prominence or an isolated incident does not justify individual historical Agents. |
-| CAAC transport-warning issuance decision interface | **representation gate** | CL06 establishes a material, authority-specific issuance result but does not close the autonomous decision carrier. Before production continues for this row, the gate must choose among Agent, population or cohort, and scenario or institutional process, and justify how the issuance choice is explained. |
-| CAAC warning lifecycle after issuance | **scenario or institutional process** | Once a warning is validly issued, this process owns publication, routing and delivery, airline and airport communication obligations, enforcement conditions, and observable results; it does not choose whether to issue the warning. |
-| U.S. DOT/FAA/PHMSA emergency-order issuance decision interface | **representation gate** | CL15 and the signed order establish a material issuance and imminent-hazard finding, but the evidence does not close the narrow autonomous decision carrier across the authority chain. The gate must choose a formal disposition before production continues for this row. |
-| U.S. emergency-order lifecycle after issuance | **scenario or institutional process** | Once the order is validly issued, this process owns publication, its 15 October effective-time transition, routing and delivery, carrier notification and denial duties, enforcement, and observable results; it does not choose whether to issue the order. |
-| Passenger airlines, airports, and cargo operators | **population or cohort** | They receive and implement transport constraints through heterogeneous operations; the Frame does not prove uniform receipt or compliance. |
+| Samsung Electronics product-safety decision interface | **deep Agent Definition** | A narrow outward interface owns investigation, product-flow, replacement, partner, communication, and production intents without becoming a whole-company mind. |
+| Samsung regional sales, service, and communications units | **standard Population Model** | Only evidence-supported jurisdictional units own local partner, remedy, and communication intents; the Singapore record is not generalized to every region. |
+| Battery suppliers and supplier-facing technical teams | **deferred Scenario/investigation context** | Supplier-facing inspection may be routed, but 2016 autonomy, knowledge, fault, and causally necessary choice remain unsupported. |
+| U.S. Consumer Product Safety Commission recall interface | **deep Agent Definition** | A bounded authority interface owns warning, information/remedy review, formal-recall, and expansion intents; legal state and effectiveness remain external. |
+| Wireless carriers and retail outlets | **standard Population Model** | Unit-local sales, notice, inventory-request, exchange, and refund intents remain distinct from inventory and completion. |
+| Galaxy Note7 owners and prospective consumers | **standard Population Model** | Individual purchase, use, power-down, reporting, exchange, and refund choices remain unit-local. |
+| CAAC transport-warning issuance decision interface | **standard Agent Definition** | A narrow CAAC interface owns information, warning, and qualification intents; unresolved internal governance remains a split trigger. |
+| CAAC warning lifecycle after issuance | **Scenario or institutional process** | Publication, routing, delivery, operator duties, enforcement conditions, and results begin only after valid issuance. |
+| U.S. DOT/FAA/PHMSA emergency-order issuance decision interface | **standard Agent Definition** | A Secretary-level interface owns information, qualification, and issuance intents while bounded FAA/PHMSA inputs remain external observations. |
+| U.S. emergency-order lifecycle after issuance | **Scenario or institutional process** | Publication, the 15 October effective-time transition, routing, duties, enforcement, petition, and results begin only after valid issuance. |
+| Passenger airlines, airports, and cargo operators | **standard Population Model** | Jurisdiction- and function-local communication, handling, denial, escalation, and permitted stricter-measure intents remain heterogeneous. |
 | Device and battery population, incident arrival, and physical hazard realization | **initial or exogenous context** | They provide evolving conditions and signals. They are not Agents, and their timing must be independently sourced or modeled without outcome forcing. |
 | Media coverage, courts, investors, competitors, and later remediation programs | **excluded** | They are outside the question's minimum causal boundary or postdate the core interval. |
 
@@ -161,69 +167,40 @@ their meanings without entering Scenario or participant design.
 | Supplier / battery lineage | Evidence and product-state provenance | Lineage cannot imply cause, knowledge, negligence, or liability; later diagnostic categories are future-only |
 | Availability clock | Evidence-delivery boundary | Event time, participant-time availability, source time, and research-access time are recorded separately |
 
-## Accepted work package and retained owner gates
+## Accepted semantic work package and retained limits
 
-The accepted work package consists only of this event entry and the linked
-Frame evidence record. Independent supervisor review confirmed that each
-causal transition has an identified source role, authority-specific actions
-remain separate, the CAAC and U.S. transport issuance choices stay with their
-own bounded representation gates rather than their downstream lifecycles,
-representation follows causal responsibility rather than fame, and
-future-only facts remain quarantined. The evidence record owns the source
-register, atomic claims, chronology, conflicts, bounded inferences, use
-closure, and unused-source log for that result.
+The accepted semantic package now consists of the event entry, Frame and
+participant evidence, research roster, semantic skeleton, four Agent
+Definitions, four Population Models, one shared interface, and the
+[Roster Definition release](../../releases/samsung_note7_battery_recall/roster-definition-v0.1/).
+The manifest pins each input by content identity.
 
-Material open decisions are deliberately narrow:
+The participant phase resolves both transport issuance gates without changing
+their downstream ownership. It retains explicit reopening conditions for
+internal Samsung, CPSC, CAAC, and DOT/FAA/PHMSA boundaries; limits regional
+instantiation to supported units; and defers suppliers absent contemporaneous
+autonomy evidence. These are structural limits, not hidden parameters.
 
-- the organizational boundary of the Samsung decision carrier and whether any
-  regional unit warrants independent agency;
-- whether supplier-facing investigation can be represented without exposing
-  post-crisis defect conclusions or unsupported supplier knowledge;
-- whether the evidence can justify organization-specific carrier or retailer
-  Agents rather than a cohort;
-- how jurisdiction-specific warnings and formal recalls are delivered to
-  participants without equating publication with receipt;
-- which formal disposition owns the CAAC warning-issuance choice, distinct
-  from the scenario-owned warning lifecycle; and
-- which formal disposition owns the U.S. DOT/FAA/PHMSA emergency-order
-  issuance choice, distinct from the scenario-owned order lifecycle.
-
-Later work must stop if resolving one of these questions would require
-protected content, a new causal scope, unsupported organizational authority,
-or a change to a shared H2EPR asset. The current next legal action is **stop**.
-A participant phase may begin only through a separate supervisor dispatch that
-names a bounded role batch and its behavior-research questions. Production
-cannot continue for either transport-issuance row until its own representation
-gate records an owner disposition; the lifecycle rows need no participant
-product.
+Later work must stop if it would require protected content, a new causal
+scope, unsupported organizational authority, a silent roster change, or a
+shared H2EPR contract change. The next bounded work is a consolidated semantic
+mapping and Event Scenario Definition derived from the exact Roster release.
 
 ## Phase closeout
 
-The accepted Frame remains on the maintained H2EPR mainline and is minimal: two
-owning files, no alternate workflow, no new schema, and no event-specific
-workaround for a shared gap. Input identities are explicit. Event identity,
-evidence authority, institutional authority, participant-time availability,
-and research access are separated. The primary question, four time layers,
-known-outcome firewall, causal roles, semantic ownership, exclusions, and
-limitations are publication-facing and linked to claim-level evidence.
-The CAAC and U.S. transport issuance choices now have separate bounded owner
-gates, while the post-issuance institutional lifecycles retain publication,
-effective-time, routing, obligation, enforcement, and result ownership.
+The accepted Frame remains the event-boundary authority. Participant evidence
+adds only the role resolution needed to produce the eight qualitative models.
+All products retain the four-clock firewall, known-outcome exposure, explicit
+alternatives and falsifiers, finite intent lifecycles, and the separation of
+participant intent from institutional or physical result. The release adds no
+new shared schema or H2EPR contract.
 
-Repository discipline is preserved: no shared method or contract asset,
-accepted prior event, test, dependency, MASim source, or project-memory pointer
-is changed; the parent event index changes only to register this accepted
-endpoint. No generated artifact or duplicate closeout file is introduced. The
-evidence is deep enough to distinguish the first corporate replacement action,
-formal recall authority, replacement-device reopening, partner and production
-stops, expanded recall, and transport restrictions. It goes no deeper than
-Frame:
-there are no participant artifacts, roster commitments, parameters,
-Scenario, policy, runtime, simulation, evaluation, or scientific conclusions.
-The two transport gates are readiness conditions for any later production,
-not admissions, roster expansion, or implicit Agent decisions.
+The authoring-exposed substantive review closed the original-source,
+representation, lifecycle, deep-case, and cross-region findings before
+release. Structural checks, release pin verification, strict JSON, checksum,
+and publication-link validation pass. Final independent supervisor review is
+deferred until the full third-event cycle is handed back.
 
-**Closeout disposition:** complete with recorded limitations as accepted
-event-specific Frame `v0.1`. The phase stops here because participant behavior
-research would test a later question. **Next legal action:** stop pending a
-separate supervisor dispatch for a bounded participant batch.
+**Closeout disposition:** participant definition and Roster Definition release
+`v0.1` complete with recorded limitations. **Next bounded work:** consolidated
+mapping and Event Scenario Definition from the exact released inventory.

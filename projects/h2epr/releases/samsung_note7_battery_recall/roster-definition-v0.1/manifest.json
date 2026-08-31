@@ -1,0 +1,124 @@
+{
+  "schema": "h2epr.roster-definition-release.v0_1",
+  "release_id": "H2EPR-0481-ROSTER-DEFINITION-RELEASE-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0481",
+  "released_on": "2026-08-31",
+  "status": "accepted_semantic_release",
+  "integrity_algorithm": "sha256",
+  "roster": {
+    "version": "0.1",
+    "path": "agents/rosters/samsung_note7_battery_recall.md",
+    "sha256": "72c5247aa0d73cf19e920655a79ae2d451b51c3ac290e3eb261ff2a92a393a24"
+  },
+  "semantic_skeleton": {
+    "version": "0.1",
+    "path": "scenarios/samsung_note7_battery_recall/semantic-skeleton.md",
+    "sha256": "f9e22534fca74b8ab40856da8f71387dd5ae311313390b7d25bbe9b4b6528ef5"
+  },
+  "evidence_authorities": [
+    {
+      "kind": "event_frame_evidence",
+      "path": "events/samsung_note7_battery_recall/frame-evidence-v0.1.md",
+      "sha256": "3994b9e9c09af05cb1b7d32ad11fd4c012647de746173794e25156aadc618b85"
+    },
+    {
+      "kind": "participant_evidence",
+      "path": "events/samsung_note7_battery_recall/participant-evidence-v0.1.md",
+      "sha256": "aef904f0fb5259493f0688e2f936fe266889663e9de8ca43fccd176feb24efbe"
+    }
+  ],
+  "agent_definitions": [
+    {
+      "id": "h2epr.agent-definition.0481.caac-warning-decision-interface",
+      "version": "0.1.0",
+      "path": "agents/defines/samsung_note7_battery_recall/caac-warning-decision-interface.md",
+      "sha256": "af92173367cb2ee68b0e2bea88140afdd35c37bfd551deb55e0191a35f85cd6f"
+    },
+    {
+      "id": "h2epr.agent-definition.0481.cpsc-recall-decision-interface",
+      "version": "0.1.0",
+      "path": "agents/defines/samsung_note7_battery_recall/cpsc-recall-decision-interface.md",
+      "sha256": "517e15722b38ce13af9f325c63d90ecdb5c78b072ab72cc3de7511b4dd18c4ff"
+    },
+    {
+      "id": "h2epr.agent-definition.0481.samsung-note7-crisis-decision-interface",
+      "version": "0.1.0",
+      "path": "agents/defines/samsung_note7_battery_recall/samsung-note7-crisis-decision-interface.md",
+      "sha256": "da52353d2fa2412f3f30bdfbddeed907715ca229080df1ae64f3b3cf86e5164a"
+    },
+    {
+      "id": "h2epr.agent-definition.0481.us-dot-emergency-order-decision-interface",
+      "version": "0.1.0",
+      "path": "agents/defines/samsung_note7_battery_recall/us-dot-emergency-order-decision-interface.md",
+      "sha256": "7c34be9c1a588505bcdcf689e9bb89f22f80cec3535b323ba9f77f740828c90c"
+    }
+  ],
+  "population_models": [
+    {
+      "id": "h2epr.population-model.0481.air-transport-operators",
+      "version": "0.1.0",
+      "path": "populations/defines/samsung_note7_battery_recall/air-transport-operators.md",
+      "sha256": "a5f9c777935e823b67c00d5b0c2dda549673f70a23f97942714b66fdf6bdaa2a"
+    },
+    {
+      "id": "h2epr.population-model.0481.carrier-and-retail-remedy-outlets",
+      "version": "0.1.0",
+      "path": "populations/defines/samsung_note7_battery_recall/carrier-and-retail-remedy-outlets.md",
+      "sha256": "fdaebb17d43af25e36801e7aeecfd95bb3224ea68620c0b89213e7b66730996b"
+    },
+    {
+      "id": "h2epr.population-model.0481.note7-owners-and-prospective-consumers",
+      "version": "0.1.0",
+      "path": "populations/defines/samsung_note7_battery_recall/note7-owners-and-prospective-consumers.md",
+      "sha256": "4db29c925d1e367ec90777b3c725474adc62e95fa923f8b49f2fa68f1796b24f"
+    },
+    {
+      "id": "h2epr.population-model.0481.samsung-regional-implementation-units",
+      "version": "0.1.0",
+      "path": "populations/defines/samsung_note7_battery_recall/samsung-regional-implementation-units.md",
+      "sha256": "b3dae3f9fd5c0395ce3d672686a0eb7241239187a0b54214a1b00a74ce592ea2"
+    }
+  ],
+  "interface_preflights": [
+    {
+      "scope": "participant_authority_remedy_and_transport",
+      "path": "agents/interfaces/samsung_note7_battery_recall/README.md",
+      "sha256": "964218aa65c230d74bd77bfa973b8dfd3227b0e73b1ff0b7a362ede13fcdf557"
+    }
+  ],
+  "scenario_dispositions": [
+    {
+      "id": "supplier_facing_investigation_and_suppliers",
+      "disposition": "deferred_scenario_or_investigation_context"
+    },
+    {
+      "id": "caac_post_issuance_lifecycle",
+      "disposition": "scenario_or_institutional_process_after_valid_issuance"
+    },
+    {
+      "id": "us_emergency_order_post_issuance_lifecycle",
+      "disposition": "scenario_or_institutional_process_after_valid_issuance"
+    },
+    {
+      "id": "device_failures_and_incident_arrivals",
+      "disposition": "initial_or_exogenous_context_with_scenario_delivery"
+    },
+    {
+      "id": "media_courts_investors_competitors_and_later_remediation",
+      "disposition": "excluded_context"
+    },
+    {
+      "id": "litigation_liability_market_environmental_disposal_and_return_rate_outcomes",
+      "disposition": "excluded_aftermath"
+    }
+  ],
+  "next_stage": {
+    "name": "event_scenario_definition_and_consolidated_semantic_mapping",
+    "authorization": "separate",
+    "configuration_authorized": false,
+    "implementation_authorized": false,
+    "simulation_authorized": false,
+    "contracts_change_authorized": false
+  }
+}
