@@ -149,23 +149,25 @@ bounded KT--NBC--NYCH binding remains a limited conformance release, while a
 separate executable successor now covers the complete configured roster and
 has produced deterministic trace, replay, and generated-graph closure.
 
-The SingHealth Data Breach also has an accepted full-roster executable
-successor and deterministic run, replay, and generated-graph closure. Neither
-event has calibrated parameters, historical fit, held-out evaluation, or a
-scientific-validity result. Those are separate research activities, not
-implied by closure of the engineering interfaces.
+The SingHealth Data Breach and Note7 battery recall also have accepted
+full-roster executable successors and deterministic run, replay, and
+generated-graph closure. None of the three events has calibrated parameters,
+historical fit, held-out evaluation, or a scientific-validity result. Those
+are separate research activities, not implied by closure of the engineering
+interfaces.
 
 The accepted
-[cross-event conformance release](execution/cross-event-conformance-v0.1/)
-validates both compact run releases through one H2EPR contract. It demonstrates
-two-event reuse of closure mechanics; it does not establish support for every
-event domain.
+[three-event conformance successor](execution/cross-event-conformance-v0.2/)
+validates three compact run releases through one H2EPR contract while
+preserving the accepted [two-event v0.1 record](execution/cross-event-conformance-v0.1/).
+It demonstrates reuse of closure mechanics across three event domains; it does
+not establish support for every domain.
 
 ## Related documents
 
 - [Event modeling workflow](WORKFLOW.md)
 - [Rule execution](execution/README.md)
-- [Cross-event execution conformance](execution/cross-event-conformance-v0.1/)
+- [Three-event execution conformance](execution/cross-event-conformance-v0.2/)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Contracts V1](contracts/v1/README.md)
 - [Architecture decisions](decisions/)

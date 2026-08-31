@@ -12,10 +12,11 @@ multiple event configurations, compilers or evaluation protocols.
 H2EPR studies auditable multi-agent reconstruction of real event processes.
 It combines typed construction, participant and scenario semantics,
 fail-closed configuration admission, deterministic runtime records, and graph
-compilation. The Panic of 1907 and SingHealth Data Breach assets provide a
-two-event method baseline with deterministic full-roster Rule execution,
-authoritative replay, and trace-derived generated graphs. The result is
-uncalibrated engineering mechanism coverage, not a scientific-validity claim.
+compilation. The Panic of 1907, SingHealth Data Breach, and Samsung Galaxy
+Note7 Battery Recall Crisis assets provide a three-event method baseline with
+deterministic full-roster Rule execution, authoritative replay, and
+trace-derived generated graphs. The result is uncalibrated engineering
+mechanism coverage, not a scientific-validity claim.
 
 - [Project guide](H2EPR.md)
 - [Source and tests](h2epr/)
@@ -23,7 +24,7 @@ uncalibrated engineering mechanism coverage, not a scientific-validity claim.
 - [Event modeling workflow](h2epr/WORKFLOW.md)
 - [Architecture](h2epr/ARCHITECTURE.md)
 - [Evolution policy](h2epr/EVOLUTION.md)
-- [Cross-event execution conformance](h2epr/execution/cross-event-conformance-v0.1/)
+- [Three-event execution conformance](h2epr/execution/cross-event-conformance-v0.2/)
 
 ## Repository convention
 

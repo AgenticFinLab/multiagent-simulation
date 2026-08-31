@@ -97,22 +97,38 @@ healthcare cybersecurity event:
   recording byte-identical materializations, authoritative replay, and a
   trace-closed generated EPG.
 
-The two bounded event baselines use the same stage responsibilities and
+## Third event baseline
+
+The Samsung Galaxy Note7 Battery Recall Crisis applies the same bounded
+handoff to a product-safety and transport event. Its
+[event entry](events/samsung_note7_battery_recall/README.md) links the accepted
+evidence, six Agent Definitions, two Population Models, roster, mapping,
+Scenario Definition, Scenario Configuration, admission, bounded binding, and
+lineage conformance. Separately versioned
+[Policy Realization](execution/samsung_note7_battery_recall/policy-realization-v0.1/),
+[full-roster Rule package](execution/samsung_note7_battery_recall/full-roster-rule-v0.1/),
+and [run and generated-graph release](execution/samsung_note7_battery_recall/run-and-graph-v0.1/)
+close its eight carriers, 22 commitments, nine selected policies, twelve
+lifecycle families, paired deterministic materializations, authoritative
+replay, and trace-derived generated EPG.
+
+The three bounded event baselines use the same stage responsibilities and
 release structure while retaining event-specific participants, policies,
-identifiers, and causal checks. Both now have separately versioned end-to-end
-Rule execution, authoritative replay, and generated-graph closure. Calibration
-and evaluation remain outside both baselines.
+identifiers, and causal checks. Each has separately versioned end-to-end Rule
+execution, authoritative replay, and generated-graph closure. Calibration and
+evaluation remain outside all three baselines.
 
 The accepted
-[cross-event Rule execution conformance release](execution/cross-event-conformance-v0.1/)
-compares their exact run releases. It verifies one shared document, replay, and
-graph-closure contract while preserving event-specific coverage values and
-semantics.
+[three-event Rule execution conformance successor](execution/cross-event-conformance-v0.2/)
+compares their exact run releases. It verifies one shared document, replay,
+and graph-closure contract while preserving event-specific coverage values
+and semantics. The accepted [v0.1 release](execution/cross-event-conformance-v0.1/)
+remains the immutable two-event record.
 
 ## Reading the event baselines
 
 Use the [event coordination index](events/README.md) as the default entry to
-the two baselines. Each completed event entry separates two tracked reading
+the three baselines. Each completed event entry separates two tracked reading
 paths without moving or duplicating the underlying assets:
 
 - **Research-facing assets** lead from the event frame and evidence to
@@ -202,9 +218,9 @@ with `sha256sum --check SHA256SUMS` from that directory.
 - Evaluation material is not a runtime or construction input.
 
 The accepted bounded baselines remain distinct from full-roster execution.
-The two executable successors and run releases establish deterministic
+The three executable successors and run releases establish deterministic
 runtime, replay, and graph closure for their declared mechanism-coverage
-profiles. Neither event claims calibration, historical fitting, held-out
+profiles. None of the events claims calibration, historical fitting, held-out
 evaluation, policy effectiveness, or scientific validity.
 The separately governed [Rule-execution layer](execution/) provides the
 authorized engineering extension without changing the scope of those earlier
@@ -222,7 +238,7 @@ releases.
 - [Rule execution](execution/README.md)
 - [Full-roster Rule-execution Skill](skills/full-roster-rule-execution/SKILL.md)
 - [Execution-cycle closeout template](execution/execution-cycle-closeout-template.md)
-- [Cross-event execution conformance](execution/cross-event-conformance-v0.1/)
+- [Three-event execution conformance](execution/cross-event-conformance-v0.2/)
 - [Evolution and compatibility](EVOLUTION.md)
 - [Agent guide](agents/README.md)
 - [Contracts V1](contracts/v1/README.md)

@@ -48,26 +48,30 @@ institutional policies, and interpretation remain inside H2EPR.
 
 ## Cross-event baseline
 
-The current baseline covers two events in different domains. The Panic of 1907
-establishes the first complete standardization baseline with seven Agent
-Definitions, five population models, and one bounded
-Knickerbocker Trust--National Bank of Commerce--New York Clearing House
-lineage. The SingHealth Data Breach applies the same handoff to a healthcare
-cybersecurity event with seven Agent Definitions, two population models, and
-one bounded technical--operations--GCIO lineage.
+The current baseline covers three events in different domains. The Panic of
+1907 establishes the first complete standardization baseline with seven Agent
+Definitions, five population models, and one bounded Knickerbocker
+Trust--National Bank of Commerce--New York Clearing House lineage. The
+SingHealth Data Breach applies the same handoff to a healthcare cybersecurity
+event with seven Agent Definitions, two population models, and one bounded
+technical--operations--GCIO lineage. The Samsung Galaxy Note7 Battery Recall
+Crisis adds a product-safety and transport event with four Agent Definitions,
+four Population Models, and a bounded
+Samsung--regional-unit--outlet--consumer remedy lineage.
 
-Both events connect accepted evidence and participant semantics to a fixed
-roster, consolidated mapping, Event Scenario Definition, non-executable
-Scenario Configuration, and fail-closed static admission. Separately versioned
-executable successors then operate each complete configured roster, produce
-repeatable sealed traces, replay authoritative state, and compile a
+All three events connect accepted evidence and participant semantics to a
+fixed roster, consolidated mapping, Event Scenario Definition, non-executable
+Scenario Configuration, and fail-closed static admission. Separately
+versioned executable successors then operate each complete configured roster,
+produce repeatable sealed traces, replay authoritative state, and compile a
 trace-derived generated event graph.
 
 The accepted
-[cross-event conformance release](h2epr/execution/cross-event-conformance-v0.1/)
-shows that both event paths close under the same run-document and verification
-contract while retaining different participants, policies, schedules, state,
-and graph inventories. This is an uncalibrated engineering result, not a
+[three-event conformance successor](h2epr/execution/cross-event-conformance-v0.2/)
+shows that all three event paths close under the same run-document and
+verification contract while retaining different participants, policies,
+schedules, state, and graph inventories. The accepted v0.1 release remains an
+immutable two-event record. This is an uncalibrated engineering result, not a
 historical reconstruction, cross-domain validity result, or claim of
 scientific validity. Calibration or evaluation requires a separate research
 question and scope.
@@ -77,8 +81,8 @@ question and scope.
 1. [Project README](h2epr/README.md) for installation, layout, and validation.
 2. [Event entries](h2epr/events/README.md) for the research-facing path through
    each accepted baseline and the separate reproducibility records.
-3. [Cross-event execution conformance](h2epr/execution/cross-event-conformance-v0.1/)
-   for the compact comparison of the two completed Rule paths.
+3. [Three-event execution conformance](h2epr/execution/cross-event-conformance-v0.2/)
+   for the compact comparison of the three completed Rule paths.
 4. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
    stopping boundaries.
 5. [H2EPR Skills](h2epr/skills/README.md) for the specialist methods used by

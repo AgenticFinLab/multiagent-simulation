@@ -7,9 +7,10 @@ description: Realize and close an accepted H2EPR Scenario Configuration as deter
 
 Use this Skill to extend a conformance-complete H2EPR event into one
 deterministic, replayable full-roster Rule execution. The method was derived
-from the accepted Panic of 1907 and SingHealth Data Breach implementations.
-It preserves the same engineering responsibilities without copying either
-event's participants, policies, clock, state, or graph semantics.
+from the accepted Panic of 1907 and SingHealth Data Breach implementations
+and independently exercised by the Samsung Galaxy Note7 Battery Recall
+Crisis. It preserves the same engineering responsibilities without copying
+any event's participants, policies, clock, state, or graph semantics.
 
 This is an optional event phase. It is not required for ordinary event
 framing, participant production, configuration, or bounded conformance.

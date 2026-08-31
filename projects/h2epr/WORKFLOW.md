@@ -144,27 +144,28 @@ and are required only when a run is authorized.
 
 ## Completed cross-event baseline
 
-The Panic of 1907 and SingHealth Data Breach events have each completed all
-phases through one bounded lineage-conformance case. Both include an accepted
+The Panic of 1907, SingHealth Data Breach, and Samsung Galaxy Note7 battery
+recall events have each completed all phases through bounded lineage
+conformance. All three include an accepted
 roster release, consolidated mapping, Event Scenario Definition,
 non-executable Scenario Configuration, static admission, minimal
-three-participant binding, and deterministic trace and replay evidence.
+binding, and deterministic trace and replay evidence.
 
 Together they exercise the same stage responsibilities across a financial
-crisis and a healthcare cybersecurity event while retaining event-specific
-participants, semantics, policies, identifiers, and causal checks. A separate
-executable successor for each event closes full-roster Rule execution, replay,
-and a generated event graph. The second event consumes the same event-neutral
-H2EPR closure and custody kernel while retaining its own participant,
-institutional, time, and graph semantics.
-Neither event includes calibration, held-out evaluation, or a
+crisis, a healthcare cybersecurity event, and a product-safety and transport
+crisis while retaining event-specific participants, semantics, policies,
+identifiers, and causal checks. A separate executable successor for each event
+closes full-roster Rule execution, replay, and a generated event graph. The
+second and third events consume the same event-neutral H2EPR closure and
+custody kernel while retaining their own participant, institutional, time,
+and graph semantics. None includes calibration, held-out evaluation, or a
 historical-validity claim.
 
 The separately authorized full-roster Rule-execution program built executable
-successors from the frozen semantic parents, first for Panic and then for
-SingHealth, without changing what either earlier release established. The
-[cross-event conformance release](execution/cross-event-conformance-v0.1/)
-now closes the shared run-document, replay, generated-graph, framework, and
-claim boundaries. This is the completed engineering endpoint for the two-event
-baseline, not an authorization for deeper modeling, calibration, or scientific
-evaluation.
+successors from frozen semantic parents, first for Panic, then SingHealth, and
+then Note7, without changing what an earlier release established. The accepted
+[three-event conformance successor](execution/cross-event-conformance-v0.2/)
+closes the shared run-document, replay, generated-graph, framework, and claim
+boundaries while retaining [v0.1](execution/cross-event-conformance-v0.1/) as
+the immutable two-event record. This is an engineering endpoint, not an
+authorization for deeper modeling, calibration, or scientific evaluation.

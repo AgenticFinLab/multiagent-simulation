@@ -5,9 +5,9 @@ description: Design, revise, review, or promote a versioned H2EPR Scenario Confi
 
 # Scenario Configuration
 
-> This method has been exercised by the accepted H2EPR-0288 and H2EPR-0616
-> Scenario Configurations. Revise it only when further event use exposes a
-> reusable method gap.
+> This method has been exercised by the accepted H2EPR-0288, H2EPR-0616, and
+> H2EPR-0481 Scenario Configurations. Revise it only when further event use
+> exposes a reusable method gap.
 
 Use this Skill after both the Event Scenario Definition and the consolidated
 mapping have been accepted. It turns their semantic possibilities into one

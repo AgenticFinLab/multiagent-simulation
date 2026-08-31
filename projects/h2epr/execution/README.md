@@ -41,11 +41,16 @@ the rest of H2EPR:
 ```text
 execution/
   cross-event-conformance-v0.1/
+  cross-event-conformance-v0.2/
   panic_1907/
     policy-realization-v0.1/
     full-roster-rule-v0.1/
     run-and-graph-v0.1/
   singhealth_data_breach/
+    policy-realization-v0.1/
+    full-roster-rule-v0.1/
+    run-and-graph-v0.1/
+  samsung_note7_battery_recall/
     policy-realization-v0.1/
     full-roster-rule-v0.1/
     run-and-graph-v0.1/
@@ -104,8 +109,31 @@ The accepted
 [cross-event Rule execution conformance v0.1](cross-event-conformance-v0.1/)
 admits both compact run releases and their executable parents, compares their
 shared document and graph grammar, and preserves their distinct coverage
-vectors. It closes the two-event engineering baseline without adding another
-simulation or changing either event model.
+vectors. It remains the immutable two-event engineering baseline.
+
+The accepted
+[Note7 Policy Realization v0.1](samsung_note7_battery_recall/policy-realization-v0.1/)
+maps eight configured actor-capability placements, 22 commitments, 37 intents,
+nine selected policies, and twelve lifecycle families to closed Rule
+implementations.
+
+The accepted
+[Note7 full-roster Rule package v0.1](samsung_note7_battery_recall/full-roster-rule-v0.1/)
+binds eight independent carriers, 37 action bindings, 22 decision rules, 24
+routes, twelve lifecycles, and nine runtime components over 50 UTC logical
+coordinates.
+
+The accepted
+[Note7 run and generated graph v0.1](samsung_note7_battery_recall/run-and-graph-v0.1/)
+records two byte-identical materializations, authoritative replay, and a
+trace-closed generated EPG. It is the third consumer of the shared H2EPR
+execution-closure and custody kernel.
+
+The accepted
+[three-event conformance successor v0.2](cross-event-conformance-v0.2/)
+re-admits all three run releases and executable parents, verifies their shared
+document, replay, determinism, graph, custody, and claim contracts, and retains
+their unequal event-specific coverage vectors.
 
 ## Shared execution kernel
 
@@ -127,9 +155,10 @@ does not contain actor IDs, participant rules, institutional policies,
 event-specific state, clock schedules, reducers, or graph semantics. Those
 remain in the relevant scenario module. Conformance against the accepted Panic
 run shows that the shared algorithms reproduce its compact comparison and
-graph receipt exactly. SingHealth consumes the shared participant and
-lifecycle interfaces while retaining its event-qualified semantics and
-registries, without changing the Panic release.
+graph receipt exactly. SingHealth and Note7 consume the same shared
+participant, lifecycle, closure, and custody interfaces while retaining their
+event-qualified semantics and registries, without changing either earlier
+release.
 
 ## Admission boundary
 

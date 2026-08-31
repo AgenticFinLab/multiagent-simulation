@@ -1,0 +1,82 @@
+{
+  "schema": "h2epr.cross-event-execution-conformance-release.v0_1",
+  "release_id": "H2EPR-CROSS-EVENT-EXECUTION-CONFORMANCE-v0.2",
+  "version": "0.2.0",
+  "released_on": "2026-08-31",
+  "status": "accepted_three_event_execution_conformance",
+  "integrity_algorithm": "sha256",
+  "source_releases": [
+    {
+      "event_id": "H2EPR-0288",
+      "release_id": "H2EPR-0288-RUN-AND-GRAPH-v0.1",
+      "path": "execution/panic_1907/run-and-graph-v0.1",
+      "manifest_source_sha256": "f2bbda06ce6d582820e2d2658f96563eb3043e1c089c2b3f404416dcc160e48d"
+    },
+    {
+      "event_id": "H2EPR-0616",
+      "release_id": "H2EPR-0616-RUN-AND-GRAPH-v0.1",
+      "path": "execution/singhealth_data_breach/run-and-graph-v0.1",
+      "manifest_source_sha256": "37fc936ae1fdee49f41728fc4c7e4f7ca9bb16eefd455aa25b7f306774720c43"
+    },
+    {
+      "event_id": "H2EPR-0481",
+      "release_id": "H2EPR-0481-RUN-AND-GRAPH-v0.1",
+      "path": "execution/samsung_note7_battery_recall/run-and-graph-v0.1",
+      "manifest_source_sha256": "9f3eb3bc3006cb073bc5a841534bb8367d68265a4da87477d514280f61f27f16"
+    }
+  ],
+  "conformance_artifact": {
+    "kind": "cross-event-execution-conformance",
+    "document_name": "cross-event-execution-conformance",
+    "filename": "conformance.json",
+    "source_sha256": "b0caee242af3c3f8598c74a3e7b90e198390a66f5724b90669706f8c9061bc85",
+    "canonical_sha256": "46f4650c66f308b424c09835456402b29fba29b6e6817403f2c1c8754e86d263",
+    "byte_count": 10341
+  },
+  "publication_artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "4d9f4feac38609e0dc6106ebc59a0a5b4203fcfb3b22f26388d6401b8149e7d2"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "e4ae2bbc4e42c0f480bc75b18a4f2998a94a495bcc0dfd455f776f6f65de9229"
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/scenarios/cross_event_conformance_v0_2.py",
+      "sha256": "bef6c62fe4d771f572dff2313872ab00b4a1369f7f265a6dd70da63527b42e76"
+    }
+  ],
+  "closure": {
+    "source_release_count": 3,
+    "compact_releases_admitted": true,
+    "full_roster_executable_parents_resolved": true,
+    "shared_document_contract_closed": true,
+    "authoritative_replay_closed": true,
+    "generated_epg_trace_closed": true,
+    "event_specific_semantics_preserved": true
+  },
+  "masim_boundary": {
+    "package_version": "0.0.1",
+    "usage": "read_only_public_interfaces",
+    "source_modification_allowed": false
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "endpoint": {
+    "three_event_rule_execution_closed": true,
+    "further_events_follow_the_maintained_workflow": true,
+    "calibration_and_evaluation_require_separate_scope": true
+  }
+}

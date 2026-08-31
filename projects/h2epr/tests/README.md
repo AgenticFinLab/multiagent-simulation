@@ -118,11 +118,27 @@ python -B -m pytest -p no:cacheprovider \
 ```
 
 The accepted Panic and SingHealth run releases can be checked together at the
-cross-event closure boundary:
+immutable two-event closure boundary:
 
 ```bash
 python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/execution/test_cross_event_execution_conformance.py
+```
+
+The Note7 full-roster implementation and its compact run release have one
+event-qualified closeout suite:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/execution/test_samsung_note7_full_roster_execution.py
+```
+
+All three accepted run releases can be re-admitted through the additive v0.2
+conformance successor:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/execution/test_cross_event_execution_conformance_v0_2.py
 ```
 
 Formal H2EPR JSON, release checksum inventories, and publication-surface local

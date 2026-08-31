@@ -17,7 +17,8 @@ suffix-absence receipts must be frozen independently.
 Later gates must separately prove scheduler/barrier behavior, authoritative
 world reduction, trace writing, compiler closure, offline evaluator isolation,
 H2EPR-0288 deterministic replay, clean-build strict rerun, and H2EPR-0616
-domain transfer. A waiver may document a noncritical limitation but cannot
-waive Reference isolation, future-information leakage, trace integrity, or
-scientific lineage.
-
+domain transfer. The additive H2EPR-0481 successor must independently close
+the same execution, replay, graph, custody, and claim contracts without
+rewriting either accepted predecessor. A waiver may document a noncritical
+limitation but cannot waive Reference isolation, future-information leakage,
+trace integrity, or scientific lineage.
