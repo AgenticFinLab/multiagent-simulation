@@ -1,0 +1,53 @@
+{
+  "format_identity": "h2epr.generated-epg-receipt.v0_1",
+  "status": "pass",
+  "event_id": "H2EPR-0481",
+  "run_id": "run.h2epr.0481.canonical.v0_1",
+  "source_trace": {
+    "record_count": 926,
+    "canonical_sha256": "0fa8fdbb4dcde4c6b89d940bf870b912230e261cc2fca9bc26981b9c68dbfe1f",
+    "terminal_record_hash": "ee468b521f650962706fc08b70b09dd5e07a36f90ebfaf35648006c5465c1419"
+  },
+  "source_run_seal_sha256": "b40e9337797aeb275e5373206b7387fb11f439336f354f2bfcc6bbbd3ca5520a",
+  "generated_epg": {
+    "document_canonical_sha256": "3a14ab572f8278363c7369e1ab2ce6e3813828308f2da7a82e1d2e91b9aeb860",
+    "artifact_sha256": "821d9e2d5e995576ba46c705e3aab7f84a3eb577bc39ce7661310d3f8198bb1e",
+    "node_count": 374,
+    "edge_count": 302,
+    "node_type_counts": {
+      "action_disposition": 22,
+      "action_intent": 22,
+      "carry_forward": 22,
+      "exogenous_input_release": 6,
+      "message_disposition": 74,
+      "message_intent": 37,
+      "participant_decision": 22,
+      "scenario_policy_application": 117,
+      "state_delta": 52
+    },
+    "edge_relation_counts": {
+      "adjudicates": 22,
+      "causes": 52,
+      "emits": 37,
+      "governs": 117,
+      "routes": 74
+    }
+  },
+  "closure": {
+    "trace_valid": true,
+    "run_seal_resolved": true,
+    "node_trace_references_resolved": true,
+    "edge_endpoints_resolved": true,
+    "edge_trace_references_resolved": true,
+    "unresolved_reference_count": 0
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}

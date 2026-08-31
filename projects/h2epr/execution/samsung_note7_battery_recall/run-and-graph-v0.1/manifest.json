@@ -1,0 +1,186 @@
+{
+  "schema": "h2epr.rule-run-and-graph-release.v0_1",
+  "release_id": "H2EPR-0481-RUN-AND-GRAPH-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0481",
+  "run_id": "run.h2epr.0481.canonical.v0_1",
+  "released_on": "2026-08-31",
+  "status": "accepted_run_and_graph_closure",
+  "integrity_algorithm": "sha256",
+  "executable_parent": {
+    "release_id": "H2EPR-0481-FULL-ROSTER-RULE-v0.1",
+    "release_manifest_path": "execution/samsung_note7_battery_recall/full-roster-rule-v0.1/manifest.json",
+    "release_manifest_source_sha256": "dbe986d052d31c2699f3d295167d686885be233fd583078bc269bec1aa6b62d5",
+    "package_id": "h2epr.0481.full-roster-rule.v0_1",
+    "package_path": "execution/samsung_note7_battery_recall/full-roster-rule-v0.1/executable-package.json",
+    "package_source_sha256": "bd3f9d0c350ac5e224a2a27a42814c2a3bda98db736dc02eafe4ce2e9bb193b7",
+    "package_canonical_sha256": "4966057b1e93fda8018cbdc0dc23b7ac88b33d7085b3437f1fb4011d5f7c4b15",
+    "runtime_bundle_id": "h2epr.0481.rule-runtime-bundle.v0_1",
+    "runtime_bundle_source_sha256": "33aeed0a8a795e6975340a361c1e3ffc0fcdb3dc10e36e5352cc619c731ddb03",
+    "runtime_bundle_canonical_sha256": "2696ed112e546e475b47037a0f20846a6e51e7a4d1404fc53f2df3244cf00102"
+  },
+  "materialization": {
+    "count": 2,
+    "labels": [
+      "canonical",
+      "independent_repeat"
+    ],
+    "same_input": true,
+    "same_seed": true,
+    "all_source_bytes_identical": true,
+    "all_canonical_documents_identical": true
+  },
+  "formal_artifacts": [
+    {
+      "kind": "run-manifest",
+      "document_name": "run-manifest",
+      "filename": "run-manifest.json",
+      "source_sha256": "ef38e3f6d0be0b4da60d5a3530c052e55a158074ca3195ccc8f6d0401c8268ad",
+      "canonical_sha256": "4bc8132ea71205e7937cf5304348bfc765b6324a154b8b364f343b2e4977ada9",
+      "byte_count": 15797
+    },
+    {
+      "kind": "run-seal",
+      "document_name": "run-seal",
+      "filename": "run-seal.json",
+      "source_sha256": "c2025a04ac24d5c2409e0ad69aefb704d0845c84392cc2cbb5025121a474b452",
+      "canonical_sha256": "28e32ab9faad35ddcc21c88d4e983767f2cd1a1acadd81c3596a4123fca002f9",
+      "byte_count": 4196
+    },
+    {
+      "kind": "replay-receipt",
+      "document_name": "replay-receipt",
+      "filename": "replay-receipt.json",
+      "source_sha256": "ee528254a274b45b1a983210941315104ffc38128350e922f585164cc250e94a",
+      "canonical_sha256": "8ea1b62a81841f66473fe3e5fff51d72927b4b93ceaf46afa8f06bad9bb2f439",
+      "byte_count": 456
+    },
+    {
+      "kind": "execution-receipt",
+      "document_name": "execution-receipt",
+      "filename": "execution-receipt.json",
+      "source_sha256": "037c20b0d8d4e3ce649cd1a500d4728ada523b550394ea970ed428cbdbf830ba",
+      "canonical_sha256": "b10e09666da93d96c11fa89313e674502239d33f7233f4214623f3b00f73b3f3",
+      "byte_count": 1856
+    },
+    {
+      "kind": "determinism-comparison",
+      "document_name": "determinism-comparison",
+      "filename": "determinism-comparison.json",
+      "source_sha256": "cfb78c52544d7c9caeea95dd7a01a54af2cb438b641a58aad6717090ed35e450",
+      "canonical_sha256": "99a82fd41195d4a0e702ac8e24985c86d70d903aace70f278efdca586e92fcbe",
+      "byte_count": 6803
+    },
+    {
+      "kind": "generated-epg-receipt",
+      "document_name": "generated-epg-receipt",
+      "filename": "generated-epg-receipt.json",
+      "source_sha256": "2d2a26279c3c9625f6c51dda4ed577f06a6ec317c4c5902857145456615c4e89",
+      "canonical_sha256": "7c6cc0295f713500adc9a1ef2d186e8543e6da57e7d2f1bca9f9de18bc93437b",
+      "byte_count": 1777
+    }
+  ],
+  "publication_artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "31bf501257788372494afa5f3c5c84495340bae5987fea9d53c826d3fb0dcaa1"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "f788c2dcd43dce0522fab10edd9968140339dc0b6567ec4c4f5968d79bebcf3a"
+    }
+  ],
+  "large_artifact_inventory": [
+    {
+      "document_name": "simulation_trace",
+      "filename": "simulation-trace.json",
+      "source_sha256": "2354d8352cc44718c5cee96219939ede790df4ac12b84c0d6f1eaa7535f8bf7e",
+      "canonical_sha256": "0fa8fdbb4dcde4c6b89d940bf870b912230e261cc2fca9bc26981b9c68dbfe1f",
+      "byte_count": 1756783,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    },
+    {
+      "document_name": "final_state",
+      "filename": "final-state.json",
+      "source_sha256": "75d97eb08115befac67a421bc90c38d1b79fcf3daa20325943e2d76e2e0d5d0c",
+      "canonical_sha256": "459704b59bf2a99f00831f96ed43968eaacfc01f07834e93cd82decf6be3a9e5",
+      "byte_count": 45115,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    },
+    {
+      "document_name": "tick_seals",
+      "filename": "tick-seals.json",
+      "source_sha256": "d925dedd8ef394df18ab173706e7ae192cb63f32a9c5bf63a1d3c182d3760061",
+      "canonical_sha256": "3e16f7fd5d55f72c06bbc1210763bf5143a23288be572502e9052c7b7b2a8e2e",
+      "byte_count": 32545,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    },
+    {
+      "document_name": "generated_epg",
+      "filename": "generated-epg.json",
+      "source_sha256": "d8459a3983e19a2f58a0adb4bcaa93a6186b7b129f8b772e3961eacfaab92d51",
+      "canonical_sha256": "3a14ab572f8278363c7369e1ab2ce6e3813828308f2da7a82e1d2e91b9aeb860",
+      "byte_count": 833144,
+      "tracked_in_release": false,
+      "custody_class": "gitignored_event_run_directory"
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/execution/__init__.py",
+      "sha256": "48e5e3ce7e4bbc2705d6754b3fa2c550fc140729a3be4ba330666759252024f6"
+    },
+    {
+      "path": "src/h2epr/execution/closure.py",
+      "sha256": "f9bb429da9b2a8333b591758fe930fd99c0448ba93d243c0284549c96cf6cb84"
+    },
+    {
+      "path": "src/h2epr/execution/custody.py",
+      "sha256": "548dbf99ad77e9b4b0480a65de63dbb6dfd3dbb6957e00c0f857ea257917ba83"
+    },
+    {
+      "path": "src/h2epr/execution/io.py",
+      "sha256": "63e817378bc6407931b5e72cd1ee35ae0eecfbc619143e80462d7d921081d362"
+    },
+    {
+      "path": "src/h2epr/execution/model.py",
+      "sha256": "b54867f42f94c6115d0e3e7c0ba2df719e2c8e3710a5781396d2aa37bfd6f251"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/run_release.py",
+      "sha256": "3332bed5a8ad73b0e2e6142565544c0ff793b1ba19ea5c9d1bbc9271a73004fb"
+    }
+  ],
+  "closure": {
+    "trace_valid": true,
+    "tick_and_run_sealed": true,
+    "authoritative_replay_closed": true,
+    "generated_epg_trace_closed": true,
+    "unresolved_message_intent_count": 0,
+    "deterministic_pair": true
+  },
+  "masim_boundary": {
+    "package_version": "0.0.1",
+    "usage": "read_only_public_interfaces",
+    "source_modification_allowed": false
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "three_event_execution_conformance_and_publication_closeout",
+    "note7_run_closed": true,
+    "shared_kernel_third_consumer": true
+  }
+}

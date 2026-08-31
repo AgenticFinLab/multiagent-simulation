@@ -1,0 +1,300 @@
+{
+  "format_identity": "h2epr.executable-scenario-package.v0_1",
+  "package_id": "h2epr.0481.full-roster-rule.v0_1",
+  "version": "0.1.0",
+  "status": "accepted_executable_package",
+  "execution_eligible": true,
+  "event_id": "H2EPR-0481",
+  "purpose": "mechanism_coverage",
+  "semantic_parent": {
+    "configuration_id": "h2epr.0481.scenario.mechanism-coverage.v0_1",
+    "configuration_version": "0.1.0",
+    "configuration_status": "accepted_non_executable_configuration",
+    "configuration_path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/scenario-configuration.json",
+    "configuration_source_sha256": "8faa3b0a03e57f2ab4ece46a82f16d838476c9562019b8137c7ff0856ee103e9",
+    "configuration_canonical_sha256": "e97181d06def36359e1fc73a53d1e7ea220ae9bd614533b07132b7e00fb585fc",
+    "configuration_release_manifest_path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/manifest.json",
+    "configuration_release_manifest_sha256": "5086d78cf4dff9d8416f652b30ce206da367c92b82f11bdd42d7636fe0c0d519",
+    "configuration_admission_receipt_path": "configs/samsung_note7_battery_recall/configuration-admission-v0.1/receipt.json",
+    "configuration_admission_receipt_sha256": "b275dd83ac63e443a3d1ac4893066eae81c1b8d790402f3fcb4253deb6ae2af3",
+    "roster_release_manifest_path": "releases/samsung_note7_battery_recall/roster-definition-v0.1/manifest.json",
+    "roster_release_manifest_sha256": "761a33c7de250ab8383f0844c48e6f7c7598cdaca52ee158ccf3eecdfb54f174",
+    "consolidated_mapping_manifest_path": "agents/bindings/samsung_note7_battery_recall/consolidated/manifest.json",
+    "consolidated_mapping_manifest_sha256": "c52d27ce2e753fee7394480ca70355b7c293e70b755470da360f58e917e7ceb1",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0481.v0_1",
+    "mapping_profile_path": "agents/bindings/samsung_note7_battery_recall/consolidated/mapping-specification.md",
+    "mapping_profile_sha256": "c08b9273df303b483f8716671d5936bd550f9fc1be8c26005484c0f06df402ff",
+    "scenario_release_manifest_path": "scenarios/samsung_note7_battery_recall/definition-v0.1/manifest.json",
+    "scenario_release_manifest_sha256": "fa90d60c8eccdad6e903de6e5ed761e49615d6cdf5edb7815aadf12d0761582e"
+  },
+  "policy_realization": {
+    "realization_id": "h2epr.0481.policy-realization.v0_1",
+    "version": "0.1.0",
+    "status": "accepted_policy_realization",
+    "path": "execution/samsung_note7_battery_recall/policy-realization-v0.1/policy-realization.json",
+    "sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a"
+  },
+  "runtime_bundle": {
+    "runtime_bundle_id": "h2epr.0481.rule-runtime-bundle.v0_1",
+    "version": "0.1.0",
+    "status": "accepted_runtime_bundle",
+    "path": "execution/samsung_note7_battery_recall/full-roster-rule-v0.1/runtime-bundle.json",
+    "source_sha256": "33aeed0a8a795e6975340a361c1e3ffc0fcdb3dc10e36e5352cc619c731ddb03",
+    "canonical_sha256": "2696ed112e546e475b47037a0f20846a6e51e7a4d1404fc53f2df3244cf00102"
+  },
+  "actor_bindings": [
+    {
+      "actor_id": "actor.0481.interface.caac-warning",
+      "capability_ids": [
+        "caac_warning_decision_interface"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.interface.caac-warning::caac_warning_decision_interface"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0481.caac-warning-decision-interface",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.interface.caac-warning.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0481.interface.cpsc-recall",
+      "capability_ids": [
+        "cpsc_recall_decision_interface"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.interface.cpsc-recall::cpsc_recall_decision_interface"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0481.cpsc-recall-decision-interface",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.interface.cpsc-recall.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0481.interface.samsung-crisis",
+      "capability_ids": [
+        "samsung_crisis_decision_interface"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.interface.samsung-crisis::samsung_crisis_decision_interface"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0481.samsung-note7-crisis-decision-interface",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.interface.samsung-crisis.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0481.interface.us-dot-order",
+      "capability_ids": [
+        "us_dot_emergency_order_decision_interface"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.interface.us-dot-order::us_dot_emergency_order_decision_interface"
+      ],
+      "participant_artifact_id": "h2epr.agent-definition.0481.us-dot-emergency-order-decision-interface",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.interface.us-dot-order.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "autonomous_participant_agent"
+    },
+    {
+      "actor_id": "actor.0481.unit.air-operator-primary",
+      "capability_ids": [
+        "air_transport_operators"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.unit.air-operator-primary::air_transport_operators"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0481.air-transport-operators",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.unit.air-operator-primary.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0481.unit.consumer-primary",
+      "capability_ids": [
+        "note7_owners_and_prospective_consumers"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.unit.consumer-primary::note7_owners_and_prospective_consumers"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0481.note7-owners-and-prospective-consumers",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.unit.consumer-primary.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0481.unit.outlet-singapore-channel",
+      "capability_ids": [
+        "carrier_and_retail_remedy_outlets"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.unit.outlet-singapore-channel::carrier_and_retail_remedy_outlets"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0481.carrier-and-retail-remedy-outlets",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.unit.outlet-singapore-channel.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    },
+    {
+      "actor_id": "actor.0481.unit.samsung-regional-singapore",
+      "capability_ids": [
+        "samsung_regional_implementation_units"
+      ],
+      "participant_policy_realization_keys": [
+        "actor.0481.unit.samsung-regional-singapore::samsung_regional_implementation_units"
+      ],
+      "participant_artifact_id": "h2epr.population-model.0481.samsung-regional-implementation-units",
+      "carrier_projection_id": "h2epr.carrier.0481.actor.0481.unit.samsung-regional-singapore.v0_1",
+      "carrier_projection_version": "0.1.0",
+      "representation_class": "aggregate_population_agent"
+    }
+  ],
+  "component_bindings": {
+    "policy_registry": {
+      "implementation_id": "h2epr.component.0481.policy-registry",
+      "implementation_version": "0.1.0"
+    },
+    "scheduler": {
+      "implementation_id": "h2epr.component.0481.event-anchor-partial-order-scheduler",
+      "implementation_version": "0.1.0"
+    },
+    "observation_projector": {
+      "implementation_id": "h2epr.component.0481.observation-projector",
+      "implementation_version": "0.1.0"
+    },
+    "participant_executor": {
+      "implementation_id": "h2epr.component.0481.participant-executor",
+      "implementation_version": "0.1.0"
+    },
+    "message_transport": {
+      "implementation_id": "masim.event-process.append-only-transport",
+      "implementation_version": "0.0.1"
+    },
+    "environment": {
+      "implementation_id": "h2epr.component.0481.environment",
+      "implementation_version": "0.1.0"
+    },
+    "reducer": {
+      "implementation_id": "h2epr.component.0481.reducer",
+      "implementation_version": "0.1.0"
+    },
+    "trace": {
+      "implementation_id": "masim.event-process.trace-writer",
+      "implementation_version": "0.0.1"
+    },
+    "compiler": {
+      "implementation_id": "h2epr.component.0481.trace-compiler",
+      "implementation_version": "0.1.0"
+    }
+  },
+  "masim_usage": {
+    "mode": "read_only_public_interfaces",
+    "package_version": "0.0.1",
+    "public_interface_ids": [
+      "masim.integrations.event_process.ActionIntent",
+      "masim.integrations.event_process.AppendOnlyTransport",
+      "masim.integrations.event_process.AuthoritativeReducer",
+      "masim.integrations.event_process.MessageIntent",
+      "masim.integrations.event_process.ObservationEnvelope",
+      "masim.integrations.event_process.StateDelta",
+      "masim.integrations.event_process.TraceWriter",
+      "masim.integrations.event_process.replay_trace",
+      "masim.integrations.event_process.validate_trace",
+      "masim.simulator.phased.PhasedSimulationRunner"
+    ],
+    "phased_runner_used": true,
+    "source_modification_allowed": false
+  },
+  "runtime_bundle_contract": {
+    "format_identity": "h2epr.rule-runtime-bundle.v0_1",
+    "builder_implementation_id": "h2epr.runtime.0481.bundle-builder",
+    "builder_implementation_version": "0.1.0",
+    "deterministic_materialization": true,
+    "sections": {
+      "actor_registry": true,
+      "participant_artifacts": true,
+      "carrier_projections": true,
+      "initial_state": true,
+      "action_registry": true,
+      "policy_registry": true,
+      "communication_routes": true,
+      "observation_rules": true,
+      "clock": true,
+      "structural_selections": true,
+      "exogenous_inputs": true,
+      "lifecycle_registry": true,
+      "completion_policy": true,
+      "compiler_inputs": true,
+      "component_registry": true
+    }
+  },
+  "run_plan": {
+    "run_profile_id": "h2epr.0481.run-profile.canonical.v0_1",
+    "run_seed": 481,
+    "materialization_count": 2,
+    "same_input_required": true,
+    "same_seed_required": true,
+    "independent_materialization_required": true,
+    "resume_allowed": false,
+    "targeted_perturbation_profile_ids": []
+  },
+  "completion": {
+    "normal_condition_ids": [
+      "core_horizon_reached",
+      "notification_observation_horizon_reached",
+      "due_messages_delivered",
+      "open_objects_terminal_or_carried_forward"
+    ],
+    "unresolved_object_behavior": "carry_forward_with_typed_reason",
+    "failure_behavior": "fail_closed_without_output_claim"
+  },
+  "coverage_expectations": {
+    "actor_instances": 8,
+    "actor_capability_bindings": 8,
+    "population_units": 4,
+    "exogenous_inputs": 6,
+    "structural_selections": 6,
+    "decision_commitments": 22,
+    "observation_placements": 40,
+    "private_state_placements": 28,
+    "configuration_parameter_bindings": 0,
+    "intent_placements": 37,
+    "lifecycle_families": 12,
+    "selected_policies": 9,
+    "actor_capabilities_exact": true,
+    "configuration_semantics_exact": true,
+    "observations_and_private_state_exact": true,
+    "commitments_and_intents_exact": true,
+    "lifecycle_families_exact": true,
+    "selected_policies_exact": true,
+    "unsupported_semantics_rejected": true
+  },
+  "output_contract": {
+    "simulation_trace": true,
+    "tick_seals": true,
+    "run_seal": true,
+    "replay_receipt": true,
+    "generated_epg": true,
+    "execution_receipt": true,
+    "determinism_comparison": {
+      "runtime_bundle_sha256_match": true,
+      "simulation_trace_sha256_match": true,
+      "tick_seals_sha256_match": true,
+      "run_seal_sha256_match": true,
+      "replay_receipt_sha256_match": true,
+      "generated_epg_sha256_match": true,
+      "replay_final_state_match": true,
+      "generated_epg_trace_closure": true
+    },
+    "large_artifact_custody": "gitignored_event_run_directory",
+    "tracked_surface": "code_inputs_manifest_receipt_checksums_tests_documentation"
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}

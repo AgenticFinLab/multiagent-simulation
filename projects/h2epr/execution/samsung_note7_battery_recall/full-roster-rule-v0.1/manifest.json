@@ -1,0 +1,128 @@
+{
+  "schema": "h2epr.executable-successor-release.v0_1",
+  "release_id": "H2EPR-0481-FULL-ROSTER-RULE-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0481",
+  "released_on": "2026-08-31",
+  "status": "accepted_executable_package",
+  "integrity_algorithm": "sha256",
+  "package": {
+    "id": "h2epr.0481.full-roster-rule.v0_1",
+    "path": "executable-package.json",
+    "source_sha256": "bd3f9d0c350ac5e224a2a27a42814c2a3bda98db736dc02eafe4ce2e9bb193b7",
+    "canonical_sha256": "4966057b1e93fda8018cbdc0dc23b7ac88b33d7085b3437f1fb4011d5f7c4b15",
+    "format_identity": "h2epr.executable-scenario-package.v0_1",
+    "schema_path": "../../schemas/executable-scenario-package-v0.1.schema.json",
+    "schema_sha256": "d7cfef11766b3b5580416df30ac588212fecbbb5c5ef5a70ef318412b0f1b8d9",
+    "admission_verdict": "accepted"
+  },
+  "runtime_bundle": {
+    "id": "h2epr.0481.rule-runtime-bundle.v0_1",
+    "path": "runtime-bundle.json",
+    "source_sha256": "33aeed0a8a795e6975340a361c1e3ffc0fcdb3dc10e36e5352cc619c731ddb03",
+    "canonical_sha256": "2696ed112e546e475b47037a0f20846a6e51e7a4d1404fc53f2df3244cf00102",
+    "format_identity": "h2epr.rule-runtime-bundle.v0_1",
+    "status": "accepted_runtime_bundle",
+    "deterministic_materialization": true
+  },
+  "policy_realization": {
+    "id": "h2epr.0481.policy-realization.v0_1",
+    "path": "../policy-realization-v0.1/policy-realization.json",
+    "source_sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a",
+    "canonical_sha256": "9fb4fdec68d2c55b90c016d60296963015fe82d459cd4e76e8cae3d47ec64f70"
+  },
+  "coverage": {
+    "actor_instances": 8,
+    "actor_carriers": 8,
+    "actor_capability_bindings": 8,
+    "participant_artifacts": 8,
+    "decision_observation_rules": 22,
+    "planned_emitting_decisions": 22,
+    "planned_no_intent_decisions": 0,
+    "action_bindings": 37,
+    "communication_routes": 24,
+    "configured_route_records": 8,
+    "selected_scenario_policies": 9,
+    "lifecycle_families": 12,
+    "runtime_components": 9,
+    "logical_coordinates": 50
+  },
+  "schemas": [
+    {
+      "path": "execution/schemas/executable-scenario-package-v0.1.schema.json",
+      "sha256": "d7cfef11766b3b5580416df30ac588212fecbbb5c5ef5a70ef318412b0f1b8d9"
+    },
+    {
+      "path": "execution/schemas/policy-realization-v0.1.schema.json",
+      "sha256": "6a2bb9f88b665b40abd977a443f6554ae7c8d246521332832e590fdb2d303afe"
+    }
+  ],
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/__init__.py",
+      "sha256": "2bff82617a81995f3a462f133754e48a40afd5e70733e2ce7962ecb5cd96a4d6"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/assembly.py",
+      "sha256": "6fcd70f47cb5f3b452c504c5105e25fba393f22988f4cd923b1de6f4969946b7"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/components.py",
+      "sha256": "2716973ce56bc645305e44767adb2dfd6fc67b70123aa86fd537be5d520471d9"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/executable_admission.py",
+      "sha256": "a548c3a6a5acaff5076f9d077c8f1741c5823d277679c6b474bf4f3ca6e0dccf"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/runtime_components.py",
+      "sha256": "08491886aede693fd894184e167810da7ef4027e9e41742d81bf9ed01aa7a21a"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/runtime_execution.py",
+      "sha256": "042b243ef462545a01524ecde3f9e79c8efa6cbea00fe15e1bfd62c0082357dc"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "17ec2d227c104fa97743c3f4d117356af211e1d077b0f2624e08cbc216ef5b2b"
+    },
+    {
+      "kind": "executable_package",
+      "path": "executable-package.json",
+      "sha256": "bd3f9d0c350ac5e224a2a27a42814c2a3bda98db736dc02eafe4ce2e9bb193b7"
+    },
+    {
+      "kind": "runtime_bundle",
+      "path": "runtime-bundle.json",
+      "sha256": "33aeed0a8a795e6975340a361c1e3ffc0fcdb3dc10e36e5352cc619c731ddb03"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "8985877d5651672844a544010895376ae15b449c6e25f11cc23ed6396357b404"
+    }
+  ],
+  "masim_boundary": {
+    "package_version": "0.0.1",
+    "usage": "read_only_public_interfaces",
+    "source_modification_allowed": false
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "note7_repeated_run_and_generated_epg_closure",
+    "canonical_run_present": false,
+    "repeat_comparison_present": false,
+    "generated_epg_present": false
+  }
+}

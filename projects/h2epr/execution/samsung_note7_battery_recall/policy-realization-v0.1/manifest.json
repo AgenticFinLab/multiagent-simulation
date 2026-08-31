@@ -1,0 +1,114 @@
+{
+  "schema": "h2epr.policy-realization-release.v0_1",
+  "release_id": "H2EPR-0481-POLICY-REALIZATION-v0.1",
+  "version": "0.1.0",
+  "event_id": "H2EPR-0481",
+  "released_on": "2026-08-31",
+  "status": "accepted_policy_realization",
+  "integrity_algorithm": "sha256",
+  "realization": {
+    "id": "h2epr.0481.policy-realization.v0_1",
+    "path": "policy-realization.json",
+    "source_sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a",
+    "canonical_sha256": "9fb4fdec68d2c55b90c016d60296963015fe82d459cd4e76e8cae3d47ec64f70",
+    "format_identity": "h2epr.policy-realization.v0_1",
+    "schema_path": "../../schemas/policy-realization-v0.1.schema.json",
+    "schema_sha256": "6a2bb9f88b665b40abd977a443f6554ae7c8d246521332832e590fdb2d303afe",
+    "admission_verdict": "accepted"
+  },
+  "coverage": {
+    "semantic_participant_products": 8,
+    "actor_instances": 8,
+    "actor_capability_bindings": 8,
+    "decision_commitments": 22,
+    "observation_placements": 40,
+    "private_state_placements": 28,
+    "configuration_parameter_bindings": 0,
+    "intent_placements": 37,
+    "participant_implementations": 8,
+    "selected_scenario_policies": 9,
+    "lifecycle_families": 12,
+    "registered_implementations": 29
+  },
+  "implementation_sources": [
+    {
+      "path": "src/h2epr/execution/lifecycle.py",
+      "sha256": "2aa818da51af0791d7ffd8d81b12d28a5333b1162c75fd60b033224ad1a7c6e0"
+    },
+    {
+      "path": "src/h2epr/execution/participant.py",
+      "sha256": "b77ae09f627c90b6b6bf0b1f08f326354ad5b1dbb897063b56d753664cba52a9"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/admission.py",
+      "sha256": "b97c3303a1087a620130c4aeef1ec6f6f809a34c5cc28e50fe583b6b39de20ff"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/catalog.py",
+      "sha256": "52d70b24406aaef10ef8f12766e3c8335a5d347c7a1b5302bfaa8e1f86ea0136"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/errors.py",
+      "sha256": "2df766d75a30f242ce76b44afbf064784140452bff78f623cc6754e41e45d2ba"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/lifecycle_rules.py",
+      "sha256": "4d2eeec152ed40aa211e2a5ed254ce0ce713e998a96f88201d2bf85ba3a7094f"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/participant_rules.py",
+      "sha256": "de9bed99213ebb00c6f994d2ab3ed9ac866262a6f3eff6530b15c4d7fb00bebe"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/realization.py",
+      "sha256": "5596b8a1229fad1400aae9c62f5057ca3aa23196fc144f0cdd6b39b3cd037510"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/registry.py",
+      "sha256": "9361855e4fd8e1a50acb53a36dc4e3160d50e8bcc69d39dd2560d356ca18078d"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/scenario_rules.py",
+      "sha256": "005f5f00ac2d7140010c95964ebcb7e556c5bccff5f4597ccb1224c79bbb5382"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/semantic_inventory.py",
+      "sha256": "8a54ee5d3e0d6175f75a4f3eadabdabd16ac577e6010b41de3833072880ea31e"
+    },
+    {
+      "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/specification.py",
+      "sha256": "6ac9e424bfe379a62b62a6e16ea0f2e50391d684465c7333c1bcd3130052eb7f"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "guide",
+      "path": "README.md",
+      "sha256": "d668fc2ba9f73abe7e9cbc32c4549ad76666caefec28dd27e3150b05398fa47e"
+    },
+    {
+      "kind": "policy_realization",
+      "path": "policy-realization.json",
+      "sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a"
+    },
+    {
+      "kind": "substantive_review",
+      "path": "substantive-review.md",
+      "sha256": "0f054e15ceb2030721dc05ec1d600aefa22834347d930a63e5293e0a2e4bfb01"
+    }
+  ],
+  "claim_boundary": {
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  },
+  "next_stage": {
+    "name": "note7_full_roster_rule_executable_successor",
+    "runtime_bundle_present": false,
+    "canonical_run_present": false,
+    "generated_epg_present": false
+  }
+}

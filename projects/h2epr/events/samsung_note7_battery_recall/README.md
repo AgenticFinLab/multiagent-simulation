@@ -1,9 +1,10 @@
 # H2EPR-0481: Samsung Galaxy Note7 Battery Recall Crisis
 
-This coordination entry indexes the accepted H2EPR-0481 Frame and participant
-semantics. The Frame fixes the question, causal boundary, and temporal
-contract; the Roster Definition release resolves its representation gates and
-pins the qualitative participant inventory used by later event work.
+This coordination entry indexes the accepted H2EPR-0481 research,
+configuration, bounded lineage, full-roster Rule execution, replay, and
+generated-graph releases. The Frame fixes the question, causal boundary, and
+temporal contract; later releases preserve those authorities while closing
+the deterministic engineering path.
 
 ## Identity and construction contract
 
@@ -14,11 +15,11 @@ pins the qualitative participant inventory used by later event work.
 | Domain / category | Science & Engineering / Engineering & Product Safety |
 | Stable slug | `samsung_note7_battery_recall` |
 | Frame version | `v0.1` |
-| Status | `PASS_BOUNDED_CONFIGURATION_ADMISSION_v0.1` |
+| Status | `PASS_FULL_ROSTER_RULE_RUN_AND_GRAPH_v0.1` |
 | Construction mode | `DRAFT_SEEDED_REFERENCE_BLIND` |
-| Current authorization | mapping, Event Scenario Definition, qualitative configuration, and static admission complete; event-qualified carrier projection and bounded binding are next |
-| Phase endpoint | [bounded configuration admission `v0.1`](../../configs/samsung_note7_battery_recall/configuration-admission-v0.1/) over the accepted [Scenario Configuration](../../configs/samsung_note7_battery_recall/scenario-configuration-v0.1/) |
-| Review | Frame independently accepted; participant phase closed by authoring-exposed substantive review and remains subject to final independent supervisor review |
+| Current authorization | third-event engineering cycle complete; no calibration, evaluation, policy, or new-event scope is implied |
+| Phase endpoint | [accepted run and generated graph `v0.1`](../../execution/samsung_note7_battery_recall/run-and-graph-v0.1/) and [three-event conformance successor `v0.2`](../../execution/cross-event-conformance-v0.2/) |
+| Review | event phases self-reviewed in the independent execution window; final review remains with the designated supervisor window |
 | Method baseline | H2EPR mainline at commit `592fb706bdf6c8720a0884f1d5ee76d237fe4ebd`, tree `03d3062742d3643688c60cd36f74b0476cc0275e`; the maintained workflow, architecture, publication standard, Event Build Brief, phase closeout checklist, and historical-evidence-research Skill govern this Frame |
 
 The permitted seeded inputs are fixed by content identity:
@@ -190,6 +191,16 @@ and [Scenario Configuration](../../configs/samsung_note7_battery_recall/scenario
 derive from the exact Roster release. Static admission preserves their
 non-executable boundary.
 
+## Reproducibility and execution records
+
+- [configuration admission](../../configs/samsung_note7_battery_recall/configuration-admission-v0.1/)
+- [bounded lineage binding](../../agents/bindings/samsung_note7_battery_recall/samsung-regional-outlet-consumer-v0.1/)
+- [bounded lineage conformance](../../scenarios/samsung_note7_battery_recall/lineage-conformance-v0.1/)
+- [Policy Realization](../../execution/samsung_note7_battery_recall/policy-realization-v0.1/)
+- [full-roster executable package](../../execution/samsung_note7_battery_recall/full-roster-rule-v0.1/)
+- [run and generated graph](../../execution/samsung_note7_battery_recall/run-and-graph-v0.1/)
+- [three-event execution conformance](../../execution/cross-event-conformance-v0.2/)
+
 ## Phase closeout
 
 The accepted Frame remains the event-boundary authority. Participant evidence
@@ -202,11 +213,15 @@ new shared schema or H2EPR contract.
 The authoring-exposed substantive review closed the original-source,
 representation, lifecycle, deep-case, and cross-region findings before
 release. Structural checks, release pin verification, strict JSON, checksum,
-and publication-link validation pass. Final independent supervisor review is
-deferred until the full third-event cycle is handed back.
+trace, authoritative replay, deterministic-pair, graph-reference, and
+publication checks pass. The optional MASim history-dependency limitation is
+recorded in the run review. Final independent supervisor review is deferred
+until the completed third-event cycle is handed back.
 
-**Current disposition:** Frame, participant definition, Roster Definition
-release, consolidated mapping, Event Scenario Definition, qualitative
-configuration, and bounded static admission are complete with recorded
-limitations. **Next bounded work:** event-qualified carrier projection and
-minimal binding for the Samsung--regional--outlet--consumer lineage.
+**Current disposition:** Frame, participant definition, roster, mapping,
+Scenario Definition, qualitative configuration, static admission, bounded
+lineage, Policy Realization, full-roster executable successor, two-run
+determinism, authoritative replay, generated EPG, and three-event conformance
+are complete with recorded limitations. **Next legal action:** independent
+final supervisor review; no scientific or new research cycle starts
+automatically.

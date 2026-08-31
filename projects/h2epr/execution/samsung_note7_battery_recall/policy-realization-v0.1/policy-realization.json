@@ -1,0 +1,1760 @@
+{
+  "format_identity": "h2epr.policy-realization.v0_1",
+  "realization_id": "h2epr.0481.policy-realization.v0_1",
+  "version": "0.1.0",
+  "status": "accepted_policy_realization",
+  "event_id": "H2EPR-0481",
+  "purpose": "mechanism_coverage",
+  "semantic_parent": {
+    "configuration_id": "h2epr.0481.scenario.mechanism-coverage.v0_1",
+    "configuration_version": "0.1.0",
+    "configuration_status": "accepted_non_executable_configuration",
+    "configuration_path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/scenario-configuration.json",
+    "configuration_source_sha256": "8faa3b0a03e57f2ab4ece46a82f16d838476c9562019b8137c7ff0856ee103e9",
+    "configuration_canonical_sha256": "e97181d06def36359e1fc73a53d1e7ea220ae9bd614533b07132b7e00fb585fc",
+    "configuration_release_manifest_path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/manifest.json",
+    "configuration_release_manifest_sha256": "5086d78cf4dff9d8416f652b30ce206da367c92b82f11bdd42d7636fe0c0d519",
+    "configuration_admission_receipt_path": "configs/samsung_note7_battery_recall/configuration-admission-v0.1/receipt.json",
+    "configuration_admission_receipt_sha256": "b275dd83ac63e443a3d1ac4893066eae81c1b8d790402f3fcb4253deb6ae2af3",
+    "roster_release_manifest_path": "releases/samsung_note7_battery_recall/roster-definition-v0.1/manifest.json",
+    "roster_release_manifest_sha256": "761a33c7de250ab8383f0844c48e6f7c7598cdaca52ee158ccf3eecdfb54f174",
+    "consolidated_mapping_manifest_path": "agents/bindings/samsung_note7_battery_recall/consolidated/manifest.json",
+    "consolidated_mapping_manifest_sha256": "c52d27ce2e753fee7394480ca70355b7c293e70b755470da360f58e917e7ceb1",
+    "mapping_profile_id": "h2epr.roster-consolidated-mapping.0481.v0_1",
+    "mapping_profile_path": "agents/bindings/samsung_note7_battery_recall/consolidated/mapping-specification.md",
+    "mapping_profile_sha256": "c08b9273df303b483f8716671d5936bd550f9fc1be8c26005484c0f06df402ff",
+    "scenario_release_manifest_path": "scenarios/samsung_note7_battery_recall/definition-v0.1/manifest.json",
+    "scenario_release_manifest_sha256": "fa90d60c8eccdad6e903de6e5ed761e49615d6cdf5edb7815aadf12d0761582e"
+  },
+  "participant_policy_realizations": [
+    {
+      "realization_key": "actor.0481.interface.caac-warning::caac_warning_decision_interface",
+      "actor_id": "actor.0481.interface.caac-warning",
+      "capability_id": "caac_warning_decision_interface",
+      "participant_product_id": "h2epr.agent-definition.0481.caac-warning-decision-interface",
+      "implementation_id": "h2epr.policy.0481.participant.caac_warning_decision_interface",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.caac_warning_decision_interface.active_warning_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.caac_warning_decision_interface.issue_transport_warning",
+            "h2epr.action.0481.caac_warning_decision_interface.qualify_transport_warning",
+            "h2epr.action.0481.caac_warning_decision_interface.request_transport_risk_information"
+          ]
+        },
+        {
+          "state_id": "state.caac_warning_decision_interface.current_transport_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.caac_warning_decision_interface.delivered_device_safety_record",
+            "obs.caac_warning_decision_interface.intent_result_notice",
+            "obs.caac_warning_decision_interface.operator_risk_record"
+          ]
+        },
+        {
+          "state_id": "state.caac_warning_decision_interface.open_information_requests",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.caac_warning_decision_interface.delivered_device_safety_record",
+            "obs.caac_warning_decision_interface.intent_result_notice",
+            "obs.caac_warning_decision_interface.operator_risk_record"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.caac_warning_decision_interface.DC-CAAC-1",
+          "consumed_observation_ids": [
+            "obs.caac_warning_decision_interface.delivered_device_safety_record",
+            "obs.caac_warning_decision_interface.delivered_recall_record",
+            "obs.caac_warning_decision_interface.dangerous_goods_context",
+            "obs.caac_warning_decision_interface.operator_risk_record",
+            "obs.caac_warning_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.caac_warning_decision_interface.current_transport_assessment",
+            "state.caac_warning_decision_interface.open_information_requests",
+            "state.caac_warning_decision_interface.active_warning_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.caac_warning_decision_interface.request_transport_risk_information",
+            "h2epr.action.0481.caac_warning_decision_interface.issue_transport_warning"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.caac_warning_decision_interface.delivered_device_safety_record",
+            "obs.caac_warning_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.warning_or_emergency_order_action"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.caac_warning_decision_interface.DC-CAAC-2",
+          "consumed_observation_ids": [
+            "obs.caac_warning_decision_interface.delivered_device_safety_record",
+            "obs.caac_warning_decision_interface.delivered_recall_record",
+            "obs.caac_warning_decision_interface.dangerous_goods_context",
+            "obs.caac_warning_decision_interface.operator_risk_record",
+            "obs.caac_warning_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.caac_warning_decision_interface.current_transport_assessment",
+            "state.caac_warning_decision_interface.open_information_requests",
+            "state.caac_warning_decision_interface.active_warning_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.caac_warning_decision_interface.request_transport_risk_information",
+            "h2epr.action.0481.caac_warning_decision_interface.qualify_transport_warning"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.caac_warning_decision_interface.operator_risk_record",
+            "obs.caac_warning_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.warning_or_emergency_order_action"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.interface.cpsc-recall::cpsc_recall_decision_interface",
+      "actor_id": "actor.0481.interface.cpsc-recall",
+      "capability_id": "cpsc_recall_decision_interface",
+      "participant_product_id": "h2epr.agent-definition.0481.cpsc-recall-decision-interface",
+      "implementation_id": "h2epr.policy.0481.participant.cpsc_recall_decision_interface",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.cpsc_recall_decision_interface.active_action_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.cpsc_recall_decision_interface.expand_recall_action",
+            "h2epr.action.0481.cpsc_recall_decision_interface.issue_consumer_warning",
+            "h2epr.action.0481.cpsc_recall_decision_interface.issue_recall_action",
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_incident_information",
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_remedy_information"
+          ]
+        },
+        {
+          "state_id": "state.cpsc_recall_decision_interface.current_authority_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.cpsc_recall_decision_interface.delivered_firm_safety_report",
+            "obs.cpsc_recall_decision_interface.intent_result_notice",
+            "obs.cpsc_recall_decision_interface.remedy_proposal",
+            "obs.cpsc_recall_decision_interface.replacement_device_signal"
+          ]
+        },
+        {
+          "state_id": "state.cpsc_recall_decision_interface.open_information_requests",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.cpsc_recall_decision_interface.delivered_firm_safety_report",
+            "obs.cpsc_recall_decision_interface.intent_result_notice",
+            "obs.cpsc_recall_decision_interface.remedy_proposal",
+            "obs.cpsc_recall_decision_interface.replacement_device_signal"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.cpsc_recall_decision_interface.DC-CPSC-1",
+          "consumed_observation_ids": [
+            "obs.cpsc_recall_decision_interface.delivered_firm_safety_report",
+            "obs.cpsc_recall_decision_interface.incident_summary",
+            "obs.cpsc_recall_decision_interface.remedy_proposal",
+            "obs.cpsc_recall_decision_interface.replacement_device_signal",
+            "obs.cpsc_recall_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cpsc_recall_decision_interface.current_authority_assessment",
+            "state.cpsc_recall_decision_interface.open_information_requests",
+            "state.cpsc_recall_decision_interface.active_action_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.cpsc_recall_decision_interface.issue_consumer_warning",
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_incident_information",
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_remedy_information"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cpsc_recall_decision_interface.delivered_firm_safety_report",
+            "obs.cpsc_recall_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.information_product_and_message",
+            "lifecycle.0481.investigation_and_information_request"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.cpsc_recall_decision_interface.DC-CPSC-2",
+          "consumed_observation_ids": [
+            "obs.cpsc_recall_decision_interface.delivered_firm_safety_report",
+            "obs.cpsc_recall_decision_interface.incident_summary",
+            "obs.cpsc_recall_decision_interface.remedy_proposal",
+            "obs.cpsc_recall_decision_interface.replacement_device_signal",
+            "obs.cpsc_recall_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cpsc_recall_decision_interface.current_authority_assessment",
+            "state.cpsc_recall_decision_interface.open_information_requests",
+            "state.cpsc_recall_decision_interface.active_action_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_incident_information",
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_remedy_information",
+            "h2epr.action.0481.cpsc_recall_decision_interface.issue_recall_action"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cpsc_recall_decision_interface.remedy_proposal",
+            "obs.cpsc_recall_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.recall_authority_action"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.cpsc_recall_decision_interface.DC-CPSC-3",
+          "consumed_observation_ids": [
+            "obs.cpsc_recall_decision_interface.delivered_firm_safety_report",
+            "obs.cpsc_recall_decision_interface.incident_summary",
+            "obs.cpsc_recall_decision_interface.remedy_proposal",
+            "obs.cpsc_recall_decision_interface.replacement_device_signal",
+            "obs.cpsc_recall_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.cpsc_recall_decision_interface.current_authority_assessment",
+            "state.cpsc_recall_decision_interface.open_information_requests",
+            "state.cpsc_recall_decision_interface.active_action_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_incident_information",
+            "h2epr.action.0481.cpsc_recall_decision_interface.request_remedy_information",
+            "h2epr.action.0481.cpsc_recall_decision_interface.expand_recall_action"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.cpsc_recall_decision_interface.replacement_device_signal",
+            "obs.cpsc_recall_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.recall_authority_action"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.interface.samsung-crisis::samsung_crisis_decision_interface",
+      "actor_id": "actor.0481.interface.samsung-crisis",
+      "capability_id": "samsung_crisis_decision_interface",
+      "participant_product_id": "h2epr.agent-definition.0481.samsung-note7-crisis-decision-interface",
+      "implementation_id": "h2epr.policy.0481.participant.samsung_crisis_decision_interface",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.samsung_crisis_decision_interface.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.samsung_crisis_decision_interface.announce_replacement_program",
+            "h2epr.action.0481.samsung_crisis_decision_interface.decide_production_posture",
+            "h2epr.action.0481.samsung_crisis_decision_interface.issue_product_flow_direction",
+            "h2epr.action.0481.samsung_crisis_decision_interface.publish_safety_message",
+            "h2epr.action.0481.samsung_crisis_decision_interface.request_partner_stop",
+            "h2epr.action.0481.samsung_crisis_decision_interface.request_safety_investigation"
+          ]
+        },
+        {
+          "state_id": "state.samsung_crisis_decision_interface.current_safety_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.samsung_crisis_decision_interface.authority_or_partner_record",
+            "obs.samsung_crisis_decision_interface.delivered_incident_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice",
+            "obs.samsung_crisis_decision_interface.investigation_update"
+          ]
+        },
+        {
+          "state_id": "state.samsung_crisis_decision_interface.open_investigation_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.samsung_crisis_decision_interface.authority_or_partner_record",
+            "obs.samsung_crisis_decision_interface.delivered_incident_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice",
+            "obs.samsung_crisis_decision_interface.investigation_update"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.samsung_crisis_decision_interface.DC-SAM-1",
+          "consumed_observation_ids": [
+            "obs.samsung_crisis_decision_interface.delivered_incident_record",
+            "obs.samsung_crisis_decision_interface.investigation_update",
+            "obs.samsung_crisis_decision_interface.product_flow_snapshot",
+            "obs.samsung_crisis_decision_interface.authority_or_partner_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.samsung_crisis_decision_interface.current_safety_assessment",
+            "state.samsung_crisis_decision_interface.open_investigation_questions",
+            "state.samsung_crisis_decision_interface.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.samsung_crisis_decision_interface.request_safety_investigation",
+            "h2epr.action.0481.samsung_crisis_decision_interface.publish_safety_message"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.samsung_crisis_decision_interface.delivered_incident_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.information_product_and_message"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.samsung_crisis_decision_interface.DC-SAM-2",
+          "consumed_observation_ids": [
+            "obs.samsung_crisis_decision_interface.delivered_incident_record",
+            "obs.samsung_crisis_decision_interface.investigation_update",
+            "obs.samsung_crisis_decision_interface.product_flow_snapshot",
+            "obs.samsung_crisis_decision_interface.authority_or_partner_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.samsung_crisis_decision_interface.current_safety_assessment",
+            "state.samsung_crisis_decision_interface.open_investigation_questions",
+            "state.samsung_crisis_decision_interface.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.samsung_crisis_decision_interface.request_safety_investigation",
+            "h2epr.action.0481.samsung_crisis_decision_interface.issue_product_flow_direction",
+            "h2epr.action.0481.samsung_crisis_decision_interface.announce_replacement_program",
+            "h2epr.action.0481.samsung_crisis_decision_interface.publish_safety_message"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.samsung_crisis_decision_interface.investigation_update",
+            "obs.samsung_crisis_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.product_flow_posture",
+            "lifecycle.0481.remedy_offer_and_fulfillment",
+            "lifecycle.0481.information_product_and_message"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.samsung_crisis_decision_interface.DC-SAM-3",
+          "consumed_observation_ids": [
+            "obs.samsung_crisis_decision_interface.delivered_incident_record",
+            "obs.samsung_crisis_decision_interface.investigation_update",
+            "obs.samsung_crisis_decision_interface.product_flow_snapshot",
+            "obs.samsung_crisis_decision_interface.authority_or_partner_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.samsung_crisis_decision_interface.current_safety_assessment",
+            "state.samsung_crisis_decision_interface.open_investigation_questions",
+            "state.samsung_crisis_decision_interface.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.samsung_crisis_decision_interface.request_safety_investigation",
+            "h2epr.action.0481.samsung_crisis_decision_interface.issue_product_flow_direction",
+            "h2epr.action.0481.samsung_crisis_decision_interface.request_partner_stop",
+            "h2epr.action.0481.samsung_crisis_decision_interface.decide_production_posture",
+            "h2epr.action.0481.samsung_crisis_decision_interface.publish_safety_message"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.samsung_crisis_decision_interface.authority_or_partner_record",
+            "obs.samsung_crisis_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.product_flow_posture",
+            "lifecycle.0481.production_posture",
+            "lifecycle.0481.information_product_and_message"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.interface.us-dot-order::us_dot_emergency_order_decision_interface",
+      "actor_id": "actor.0481.interface.us-dot-order",
+      "capability_id": "us_dot_emergency_order_decision_interface",
+      "participant_product_id": "h2epr.agent-definition.0481.us-dot-emergency-order-decision-interface",
+      "implementation_id": "h2epr.policy.0481.participant.us_dot_emergency_order_decision_interface",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.us_dot_emergency_order_decision_interface.active_order_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.issue_emergency_order",
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.qualify_emergency_order",
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.request_hazard_information"
+          ]
+        },
+        {
+          "state_id": "state.us_dot_emergency_order_decision_interface.current_hazard_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.us_dot_emergency_order_decision_interface.authority_context",
+            "obs.us_dot_emergency_order_decision_interface.delivered_safety_predicate",
+            "obs.us_dot_emergency_order_decision_interface.intent_result_notice"
+          ]
+        },
+        {
+          "state_id": "state.us_dot_emergency_order_decision_interface.open_authority_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.us_dot_emergency_order_decision_interface.authority_context",
+            "obs.us_dot_emergency_order_decision_interface.delivered_safety_predicate",
+            "obs.us_dot_emergency_order_decision_interface.intent_result_notice"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.us_dot_emergency_order_decision_interface.DC-DOT-1",
+          "consumed_observation_ids": [
+            "obs.us_dot_emergency_order_decision_interface.delivered_safety_predicate",
+            "obs.us_dot_emergency_order_decision_interface.delivered_recall_scope",
+            "obs.us_dot_emergency_order_decision_interface.transport_feasibility_record",
+            "obs.us_dot_emergency_order_decision_interface.authority_context",
+            "obs.us_dot_emergency_order_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.us_dot_emergency_order_decision_interface.current_hazard_assessment",
+            "state.us_dot_emergency_order_decision_interface.open_authority_questions",
+            "state.us_dot_emergency_order_decision_interface.active_order_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.request_hazard_information",
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.qualify_emergency_order"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.us_dot_emergency_order_decision_interface.delivered_safety_predicate",
+            "obs.us_dot_emergency_order_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.warning_or_emergency_order_action"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.us_dot_emergency_order_decision_interface.DC-DOT-2",
+          "consumed_observation_ids": [
+            "obs.us_dot_emergency_order_decision_interface.delivered_safety_predicate",
+            "obs.us_dot_emergency_order_decision_interface.delivered_recall_scope",
+            "obs.us_dot_emergency_order_decision_interface.transport_feasibility_record",
+            "obs.us_dot_emergency_order_decision_interface.authority_context",
+            "obs.us_dot_emergency_order_decision_interface.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.us_dot_emergency_order_decision_interface.current_hazard_assessment",
+            "state.us_dot_emergency_order_decision_interface.open_authority_questions",
+            "state.us_dot_emergency_order_decision_interface.active_order_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.request_hazard_information",
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.qualify_emergency_order",
+            "h2epr.action.0481.us_dot_emergency_order_decision_interface.issue_emergency_order"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.us_dot_emergency_order_decision_interface.authority_context",
+            "obs.us_dot_emergency_order_decision_interface.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.warning_or_emergency_order_action"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.unit.air-operator-primary::air_transport_operators",
+      "actor_id": "actor.0481.unit.air-operator-primary",
+      "capability_id": "air_transport_operators",
+      "participant_product_id": "h2epr.population-model.0481.air-transport-operators",
+      "implementation_id": "h2epr.policy.0481.participant.air_transport_operators",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.air_transport_operators.active_encounter_reference",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.air_transport_operators.adopt_stricter_local_measure",
+            "h2epr.action.0481.air_transport_operators.escalate_transport_ambiguity",
+            "h2epr.action.0481.air_transport_operators.propose_carriage_denial_or_handling",
+            "h2epr.action.0481.air_transport_operators.publish_operator_notice",
+            "h2epr.action.0481.air_transport_operators.request_device_identification",
+            "h2epr.action.0481.air_transport_operators.request_transport_clarification"
+          ]
+        },
+        {
+          "state_id": "state.air_transport_operators.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.intent_result_notice"
+          ]
+        },
+        {
+          "state_id": "state.air_transport_operators.current_rule_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.intent_result_notice"
+          ]
+        },
+        {
+          "state_id": "state.air_transport_operators.open_scope_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.intent_result_notice"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.air_transport_operators.situation_a",
+          "consumed_observation_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.local_procedure_record",
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.peer_or_authority_message",
+            "obs.air_transport_operators.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.air_transport_operators.current_rule_assessment",
+            "state.air_transport_operators.open_scope_questions",
+            "state.air_transport_operators.active_encounter_reference",
+            "state.air_transport_operators.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.air_transport_operators.request_transport_clarification",
+            "h2epr.action.0481.air_transport_operators.publish_operator_notice",
+            "h2epr.action.0481.air_transport_operators.adopt_stricter_local_measure"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.information_product_and_message",
+            "lifecycle.0481.transport_encounter_and_handling"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.air_transport_operators.situation_b",
+          "consumed_observation_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.local_procedure_record",
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.peer_or_authority_message",
+            "obs.air_transport_operators.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.air_transport_operators.current_rule_assessment",
+            "state.air_transport_operators.open_scope_questions",
+            "state.air_transport_operators.active_encounter_reference",
+            "state.air_transport_operators.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.air_transport_operators.request_device_identification",
+            "h2epr.action.0481.air_transport_operators.propose_carriage_denial_or_handling",
+            "h2epr.action.0481.air_transport_operators.escalate_transport_ambiguity"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.transport_encounter_and_handling"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.air_transport_operators.situation_c",
+          "consumed_observation_ids": [
+            "obs.air_transport_operators.delivered_transport_record",
+            "obs.air_transport_operators.local_procedure_record",
+            "obs.air_transport_operators.device_encounter",
+            "obs.air_transport_operators.peer_or_authority_message",
+            "obs.air_transport_operators.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.air_transport_operators.current_rule_assessment",
+            "state.air_transport_operators.open_scope_questions",
+            "state.air_transport_operators.active_encounter_reference",
+            "state.air_transport_operators.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.air_transport_operators.request_transport_clarification",
+            "h2epr.action.0481.air_transport_operators.publish_operator_notice",
+            "h2epr.action.0481.air_transport_operators.adopt_stricter_local_measure",
+            "h2epr.action.0481.air_transport_operators.escalate_transport_ambiguity"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.air_transport_operators.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.information_product_and_message",
+            "lifecycle.0481.transport_encounter_and_handling"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.unit.consumer-primary::note7_owners_and_prospective_consumers",
+      "actor_id": "actor.0481.unit.consumer-primary",
+      "capability_id": "note7_owners_and_prospective_consumers",
+      "participant_product_id": "h2epr.population-model.0481.note7-owners-and-prospective-consumers",
+      "implementation_id": "h2epr.policy.0481.participant.note7_owners_and_prospective_consumers",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.note7_owners_and_prospective_consumers.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.choose_device_use_posture",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.choose_purchase_posture",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_exchange_or_refund",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_safety_information",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.submit_incident_report"
+          ]
+        },
+        {
+          "state_id": "state.note7_owners_and_prospective_consumers.associated_device_reference",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice",
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity"
+          ]
+        },
+        {
+          "state_id": "state.note7_owners_and_prospective_consumers.current_remedy_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice",
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity"
+          ]
+        },
+        {
+          "state_id": "state.note7_owners_and_prospective_consumers.current_safety_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice",
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.note7_owners_and_prospective_consumers.situation_a",
+          "consumed_observation_ids": [
+            "obs.note7_owners_and_prospective_consumers.local_device_experience",
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.note7_owners_and_prospective_consumers.current_safety_assessment",
+            "state.note7_owners_and_prospective_consumers.current_remedy_assessment",
+            "state.note7_owners_and_prospective_consumers.associated_device_reference",
+            "state.note7_owners_and_prospective_consumers.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.choose_device_use_posture",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_safety_information",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.choose_purchase_posture"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.device_use_and_purchase_posture",
+            "lifecycle.0481.investigation_and_information_request"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.note7_owners_and_prospective_consumers.situation_b",
+          "consumed_observation_ids": [
+            "obs.note7_owners_and_prospective_consumers.local_device_experience",
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.note7_owners_and_prospective_consumers.current_safety_assessment",
+            "state.note7_owners_and_prospective_consumers.current_remedy_assessment",
+            "state.note7_owners_and_prospective_consumers.associated_device_reference",
+            "state.note7_owners_and_prospective_consumers.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.choose_device_use_posture",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.submit_incident_report",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_safety_information",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_exchange_or_refund"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.device_use_and_purchase_posture",
+            "lifecycle.0481.incident_report_and_intake",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.remedy_offer_and_fulfillment"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.note7_owners_and_prospective_consumers.situation_c",
+          "consumed_observation_ids": [
+            "obs.note7_owners_and_prospective_consumers.local_device_experience",
+            "obs.note7_owners_and_prospective_consumers.delivered_safety_message",
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.purchase_opportunity",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.note7_owners_and_prospective_consumers.current_safety_assessment",
+            "state.note7_owners_and_prospective_consumers.current_remedy_assessment",
+            "state.note7_owners_and_prospective_consumers.associated_device_reference",
+            "state.note7_owners_and_prospective_consumers.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.choose_device_use_posture",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_safety_information",
+            "h2epr.action.0481.note7_owners_and_prospective_consumers.request_exchange_or_refund"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.note7_owners_and_prospective_consumers.local_remedy_offer",
+            "obs.note7_owners_and_prospective_consumers.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.device_use_and_purchase_posture",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.remedy_offer_and_fulfillment"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.unit.outlet-singapore-channel::carrier_and_retail_remedy_outlets",
+      "actor_id": "actor.0481.unit.outlet-singapore-channel",
+      "capability_id": "carrier_and_retail_remedy_outlets",
+      "participant_product_id": "h2epr.population-model.0481.carrier-and-retail-remedy-outlets",
+      "implementation_id": "h2epr.policy.0481.participant.carrier_and_retail_remedy_outlets",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.carrier_and_retail_remedy_outlets.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.publish_outlet_notice",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.request_channel_clarification",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.request_inventory_action",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.respond_to_remedy_request",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.set_local_product_posture"
+          ]
+        },
+        {
+          "state_id": "state.carrier_and_retail_remedy_outlets.local_action_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ]
+        },
+        {
+          "state_id": "state.carrier_and_retail_remedy_outlets.observed_inventory_reference",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ]
+        },
+        {
+          "state_id": "state.carrier_and_retail_remedy_outlets.open_instruction_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.carrier_and_retail_remedy_outlets.situation_a",
+          "consumed_observation_ids": [
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.delivered_authority_notice",
+            "obs.carrier_and_retail_remedy_outlets.local_inventory_observation",
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.carrier_and_retail_remedy_outlets.local_action_assessment",
+            "state.carrier_and_retail_remedy_outlets.open_instruction_questions",
+            "state.carrier_and_retail_remedy_outlets.observed_inventory_reference",
+            "state.carrier_and_retail_remedy_outlets.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.request_channel_clarification",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.set_local_product_posture",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.publish_outlet_notice",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.request_inventory_action"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.product_flow_posture",
+            "lifecycle.0481.information_product_and_message",
+            "lifecycle.0481.inventory_and_partner_action"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.carrier_and_retail_remedy_outlets.situation_b",
+          "consumed_observation_ids": [
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.delivered_authority_notice",
+            "obs.carrier_and_retail_remedy_outlets.local_inventory_observation",
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.carrier_and_retail_remedy_outlets.local_action_assessment",
+            "state.carrier_and_retail_remedy_outlets.open_instruction_questions",
+            "state.carrier_and_retail_remedy_outlets.observed_inventory_reference",
+            "state.carrier_and_retail_remedy_outlets.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.respond_to_remedy_request"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.remedy_offer_and_fulfillment"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.carrier_and_retail_remedy_outlets.situation_c",
+          "consumed_observation_ids": [
+            "obs.carrier_and_retail_remedy_outlets.delivered_product_direction",
+            "obs.carrier_and_retail_remedy_outlets.delivered_authority_notice",
+            "obs.carrier_and_retail_remedy_outlets.local_inventory_observation",
+            "obs.carrier_and_retail_remedy_outlets.consumer_request",
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.carrier_and_retail_remedy_outlets.local_action_assessment",
+            "state.carrier_and_retail_remedy_outlets.open_instruction_questions",
+            "state.carrier_and_retail_remedy_outlets.observed_inventory_reference",
+            "state.carrier_and_retail_remedy_outlets.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.request_channel_clarification",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.set_local_product_posture",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.publish_outlet_notice",
+            "h2epr.action.0481.carrier_and_retail_remedy_outlets.request_inventory_action"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.carrier_and_retail_remedy_outlets.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.product_flow_posture",
+            "lifecycle.0481.information_product_and_message",
+            "lifecycle.0481.inventory_and_partner_action"
+          ]
+        }
+      ]
+    },
+    {
+      "realization_key": "actor.0481.unit.samsung-regional-singapore::samsung_regional_implementation_units",
+      "actor_id": "actor.0481.unit.samsung-regional-singapore",
+      "capability_id": "samsung_regional_implementation_units",
+      "participant_product_id": "h2epr.population-model.0481.samsung-regional-implementation-units",
+      "implementation_id": "h2epr.policy.0481.participant.samsung_regional_implementation_units",
+      "implementation_version": "0.1.0",
+      "configuration_parameter_bindings": [],
+      "private_state_realizations": [
+        {
+          "state_id": "state.samsung_regional_implementation_units.active_intent_references",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.intent_result_notice",
+            "obs.samsung_regional_implementation_units.local_inventory_observation"
+          ]
+        },
+        {
+          "state_id": "state.samsung_regional_implementation_units.active_offer_reference",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "h2epr.action.0481.samsung_regional_implementation_units.coordinate_local_partner_response",
+            "h2epr.action.0481.samsung_regional_implementation_units.propose_local_remedy",
+            "h2epr.action.0481.samsung_regional_implementation_units.publish_local_safety_message",
+            "h2epr.action.0481.samsung_regional_implementation_units.request_regional_clarification"
+          ]
+        },
+        {
+          "state_id": "state.samsung_regional_implementation_units.local_resolution_assessment",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.intent_result_notice",
+            "obs.samsung_regional_implementation_units.local_inventory_observation"
+          ]
+        },
+        {
+          "state_id": "state.samsung_regional_implementation_units.open_partner_questions",
+          "replay_path": "reducer_owned_actor_private_state",
+          "initialization": "empty",
+          "update_trigger_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.intent_result_notice",
+            "obs.samsung_regional_implementation_units.local_inventory_observation"
+          ]
+        }
+      ],
+      "decision_realizations": [
+        {
+          "commitment_id": "h2epr.commitment.0481.samsung_regional_implementation_units.situation_a",
+          "consumed_observation_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.local_authority_record",
+            "obs.samsung_regional_implementation_units.partner_response",
+            "obs.samsung_regional_implementation_units.local_inventory_observation",
+            "obs.samsung_regional_implementation_units.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.samsung_regional_implementation_units.local_resolution_assessment",
+            "state.samsung_regional_implementation_units.open_partner_questions",
+            "state.samsung_regional_implementation_units.active_offer_reference",
+            "state.samsung_regional_implementation_units.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.samsung_regional_implementation_units.request_regional_clarification",
+            "h2epr.action.0481.samsung_regional_implementation_units.coordinate_local_partner_response",
+            "h2epr.action.0481.samsung_regional_implementation_units.publish_local_safety_message"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.information_product_and_message"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.samsung_regional_implementation_units.situation_b",
+          "consumed_observation_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.local_authority_record",
+            "obs.samsung_regional_implementation_units.partner_response",
+            "obs.samsung_regional_implementation_units.local_inventory_observation",
+            "obs.samsung_regional_implementation_units.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.samsung_regional_implementation_units.local_resolution_assessment",
+            "state.samsung_regional_implementation_units.open_partner_questions",
+            "state.samsung_regional_implementation_units.active_offer_reference",
+            "state.samsung_regional_implementation_units.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.samsung_regional_implementation_units.request_regional_clarification",
+            "h2epr.action.0481.samsung_regional_implementation_units.propose_local_remedy",
+            "h2epr.action.0481.samsung_regional_implementation_units.publish_local_safety_message"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.samsung_regional_implementation_units.local_inventory_observation",
+            "obs.samsung_regional_implementation_units.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.remedy_offer_and_fulfillment",
+            "lifecycle.0481.information_product_and_message"
+          ]
+        },
+        {
+          "commitment_id": "h2epr.commitment.0481.samsung_regional_implementation_units.situation_c",
+          "consumed_observation_ids": [
+            "obs.samsung_regional_implementation_units.delivered_central_direction",
+            "obs.samsung_regional_implementation_units.local_authority_record",
+            "obs.samsung_regional_implementation_units.partner_response",
+            "obs.samsung_regional_implementation_units.local_inventory_observation",
+            "obs.samsung_regional_implementation_units.intent_result_notice"
+          ],
+          "persistent_state_ids": [
+            "state.samsung_regional_implementation_units.local_resolution_assessment",
+            "state.samsung_regional_implementation_units.open_partner_questions",
+            "state.samsung_regional_implementation_units.active_offer_reference",
+            "state.samsung_regional_implementation_units.active_intent_references"
+          ],
+          "emittable_intent_ids": [
+            "h2epr.action.0481.samsung_regional_implementation_units.request_regional_clarification",
+            "h2epr.action.0481.samsung_regional_implementation_units.coordinate_local_partner_response",
+            "h2epr.action.0481.samsung_regional_implementation_units.propose_local_remedy",
+            "h2epr.action.0481.samsung_regional_implementation_units.publish_local_safety_message"
+          ],
+          "no_intent_reason_codes": [
+            "no_new_material_or_acknowledged_equivalent",
+            "required_information_or_authority_unavailable"
+          ],
+          "revisit_trigger_ids": [
+            "obs.samsung_regional_implementation_units.intent_result_notice"
+          ],
+          "lifecycle_ids": [
+            "lifecycle.0481.participant_intent",
+            "lifecycle.0481.investigation_and_information_request",
+            "lifecycle.0481.information_product_and_message",
+            "lifecycle.0481.remedy_offer_and_fulfillment"
+          ]
+        }
+      ]
+    }
+  ],
+  "scenario_policy_realizations": [
+    {
+      "policy_id": "POL-0481-AUTH-01",
+      "semantic_version": "0.1.0",
+      "selection": "capacity_jurisdiction_relationship_object_and_resource_checks",
+      "implementation_id": "h2epr.policy.0481.scenario.authority",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/4"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.authority.capacity_relationship_access_resource"
+      ],
+      "rejection_reason_codes": [
+        "authority_capacity_inactive",
+        "authority_scope_not_effective",
+        "authority_relationship_missing",
+        "authority_access_missing",
+        "authority_resource_owner_mismatch",
+        "authority_resource_unavailable"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-HAZARD-01",
+      "semantic_version": "0.1.0",
+      "selection": "device_local_hazard_report_investigation_and_finding_separated",
+      "implementation_id": "h2epr.policy.0481.scenario.hazard",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "configuration_source_pointers": [
+        "/policy_selections/2"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.hazard.signal_incident_intake_investigation"
+      ],
+      "rejection_reason_codes": [
+        "incident_transition_invalid",
+        "incident_classification_unauthorized",
+        "incident_reporting_unauthorized",
+        "incident_issue_without_classification",
+        "incident_acceptance_without_delivery"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-INFO-01",
+      "semantic_version": "0.1.0",
+      "selection": "source_version_route_delivery_freshness_correction_and_visibility_separated",
+      "implementation_id": "h2epr.policy.0481.scenario.information",
+      "implementation_version": "0.1.0",
+      "owner_layer": "information",
+      "configuration_source_pointers": [
+        "/policy_selections/1"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.information.source_route_delivery_freshness_correction"
+      ],
+      "rejection_reason_codes": [
+        "information_supersession_invalid",
+        "information_delivery_without_route",
+        "information_delivery_without_transport",
+        "information_projection_without_delivery",
+        "information_visibility_rejected"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-LIFECYCLE-01",
+      "semantic_version": "0.1.0",
+      "selection": "typed_lifecycle_idempotency_adjudication_result_delta_and_later_observation",
+      "implementation_id": "h2epr.policy.0481.scenario.lifecycle",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "configuration_source_pointers": [
+        "/policy_selections/8"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.lifecycle.typed_adjudication_result_observation",
+        "lifecycle.0481.participant_intent",
+        "lifecycle.0481.information_product_and_message",
+        "lifecycle.0481.investigation_and_information_request",
+        "lifecycle.0481.incident_report_and_intake",
+        "lifecycle.0481.product_flow_posture",
+        "lifecycle.0481.production_posture",
+        "lifecycle.0481.inventory_and_partner_action",
+        "lifecycle.0481.remedy_offer_and_fulfillment",
+        "lifecycle.0481.recall_authority_action",
+        "lifecycle.0481.warning_or_emergency_order_action",
+        "lifecycle.0481.device_use_and_purchase_posture",
+        "lifecycle.0481.transport_encounter_and_handling"
+      ],
+      "rejection_reason_codes": [
+        "lifecycle_duplicate_prior_disposition",
+        "lifecycle_intent_rejected",
+        "lifecycle_result_without_new_admission",
+        "lifecycle_result_kind_unsupported",
+        "lifecycle_invalid_transition"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-PRODUCT-01",
+      "semantic_version": "0.1.0",
+      "selection": "product_flow_production_inventory_and_custody_results_adjudicated",
+      "implementation_id": "h2epr.policy.0481.scenario.product",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/5"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.product.flow_production_inventory_custody"
+      ],
+      "rejection_reason_codes": [
+        "technical_authority_mismatch",
+        "technical_prestate_mismatch",
+        "technical_access_denied",
+        "technical_resource_owner_mismatch",
+        "technical_infeasible",
+        "technical_result_kind_unsupported"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-PUBLIC-ACTION-01",
+      "semantic_version": "0.1.0",
+      "selection": "proposal_valid_issuance_publication_effect_delivery_implementation_and_enforcement_separated",
+      "implementation_id": "h2epr.policy.0481.scenario.public_action",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "configuration_source_pointers": [
+        "/policy_selections/7"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.public_action.proposal_issue_effect_delivery"
+      ],
+      "rejection_reason_codes": [
+        "notification_preparation_transition_invalid",
+        "notification_issue_without_authorization",
+        "notification_recipient_ineligible",
+        "notification_recipient_already_resolved",
+        "notification_correction_prestate_invalid"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-REMEDY-01",
+      "semantic_version": "0.1.0",
+      "selection": "offer_eligibility_stock_selection_handoff_payment_and_completion_separated",
+      "implementation_id": "h2epr.policy.0481.scenario.remedy",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/6"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.remedy.offer_request_fulfillment"
+      ],
+      "rejection_reason_codes": [
+        "coordination_unauthorized",
+        "coordination_capacity_unavailable",
+        "coordination_transition_invalid",
+        "coordination_attendance_invalid",
+        "coordination_material_invalid"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-ROUTE-01",
+      "semantic_version": "0.1.0",
+      "selection": "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement",
+      "implementation_id": "h2epr.policy.0481.scenario.route",
+      "implementation_version": "0.1.0",
+      "owner_layer": "environment",
+      "configuration_source_pointers": [
+        "/policy_selections/3"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.route.issue_transport_delivery_acknowledgement"
+      ],
+      "rejection_reason_codes": [
+        "route_recipient_ineligible",
+        "route_unavailable",
+        "route_transition_invalid",
+        "route_target_state_unknown",
+        "route_admission_prestate_invalid"
+      ]
+    },
+    {
+      "policy_id": "POL-0481-TIME-01",
+      "semantic_version": "0.1.0",
+      "selection": "event_driven_partial_order_with_declared_same_time_precedence",
+      "implementation_id": "h2epr.policy.0481.scenario.time",
+      "implementation_version": "0.1.0",
+      "owner_layer": "scheduler",
+      "configuration_source_pointers": [
+        "/policy_selections/0"
+      ],
+      "governed_semantic_ids": [
+        "scenario.0481.time.event_partial_order_and_reopening"
+      ],
+      "rejection_reason_codes": [
+        "time_event_duplicate",
+        "time_phase_unknown",
+        "time_predecessor_unknown",
+        "time_causal_precedence_conflict",
+        "time_predecessor_cycle"
+      ]
+    }
+  ],
+  "lifecycle_realizations": [
+    {
+      "lifecycle_id": "lifecycle.0481.participant_intent",
+      "implementation_id": "h2epr.lifecycle.0481.participant_intent",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "samsung_crisis_decision_interface",
+        "cpsc_recall_decision_interface",
+        "caac_warning_decision_interface",
+        "us_dot_emergency_order_decision_interface",
+        "samsung_regional_implementation_units",
+        "carrier_and_retail_remedy_outlets",
+        "note7_owners_and_prospective_consumers",
+        "air_transport_operators"
+      ],
+      "state_ids": [
+        "issued",
+        "admitted",
+        "rejected",
+        "pending",
+        "acknowledged",
+        "partial",
+        "completed",
+        "failed",
+        "expired",
+        "cancelled",
+        "superseded"
+      ],
+      "terminal_state_ids": [
+        "rejected",
+        "completed",
+        "failed",
+        "expired",
+        "cancelled",
+        "superseded"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.information_product_and_message",
+      "implementation_id": "h2epr.lifecycle.0481.information_product_and_message",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "samsung_crisis_decision_interface",
+        "cpsc_recall_decision_interface",
+        "samsung_regional_implementation_units",
+        "carrier_and_retail_remedy_outlets",
+        "air_transport_operators"
+      ],
+      "state_ids": [
+        "produced",
+        "routed",
+        "delivered",
+        "corrected",
+        "superseded",
+        "stale",
+        "failed"
+      ],
+      "terminal_state_ids": [
+        "delivered",
+        "superseded",
+        "stale",
+        "failed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.investigation_and_information_request",
+      "implementation_id": "h2epr.lifecycle.0481.investigation_and_information_request",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "samsung_crisis_decision_interface",
+        "cpsc_recall_decision_interface",
+        "caac_warning_decision_interface",
+        "us_dot_emergency_order_decision_interface",
+        "samsung_regional_implementation_units",
+        "carrier_and_retail_remedy_outlets",
+        "note7_owners_and_prospective_consumers",
+        "air_transport_operators"
+      ],
+      "state_ids": [
+        "requested",
+        "admitted",
+        "assigned",
+        "active",
+        "partial",
+        "completed",
+        "failed",
+        "declined",
+        "expired"
+      ],
+      "terminal_state_ids": [
+        "completed",
+        "failed",
+        "declined",
+        "expired"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.incident_report_and_intake",
+      "implementation_id": "h2epr.lifecycle.0481.incident_report_and_intake",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "note7_owners_and_prospective_consumers"
+      ],
+      "state_ids": [
+        "alleged",
+        "submitted",
+        "delivered",
+        "admitted",
+        "aggregated",
+        "corrected",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.product_flow_posture",
+      "implementation_id": "h2epr.lifecycle.0481.product_flow_posture",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "samsung_crisis_decision_interface",
+        "carrier_and_retail_remedy_outlets"
+      ],
+      "state_ids": [
+        "proposed",
+        "admitted",
+        "active",
+        "partial",
+        "completed",
+        "failed",
+        "reversed",
+        "superseded"
+      ],
+      "terminal_state_ids": [
+        "completed",
+        "failed",
+        "reversed",
+        "superseded"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.production_posture",
+      "implementation_id": "h2epr.lifecycle.0481.production_posture",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "samsung_crisis_decision_interface"
+      ],
+      "state_ids": [
+        "proposed",
+        "admitted",
+        "active",
+        "suspended",
+        "halted",
+        "resumed",
+        "failed",
+        "superseded"
+      ],
+      "terminal_state_ids": [
+        "halted",
+        "failed",
+        "superseded"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.inventory_and_partner_action",
+      "implementation_id": "h2epr.lifecycle.0481.inventory_and_partner_action",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "carrier_and_retail_remedy_outlets"
+      ],
+      "state_ids": [
+        "requested",
+        "acknowledged",
+        "allocated",
+        "moved",
+        "unavailable",
+        "refused",
+        "completed"
+      ],
+      "terminal_state_ids": [
+        "unavailable",
+        "refused",
+        "completed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.remedy_offer_and_fulfillment",
+      "implementation_id": "h2epr.lifecycle.0481.remedy_offer_and_fulfillment",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "samsung_crisis_decision_interface",
+        "samsung_regional_implementation_units",
+        "carrier_and_retail_remedy_outlets",
+        "note7_owners_and_prospective_consumers"
+      ],
+      "state_ids": [
+        "proposed",
+        "reviewed",
+        "available",
+        "selected",
+        "accepted",
+        "handed_off",
+        "refunded",
+        "exchanged",
+        "failed"
+      ],
+      "terminal_state_ids": [
+        "refunded",
+        "exchanged",
+        "failed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.recall_authority_action",
+      "implementation_id": "h2epr.lifecycle.0481.recall_authority_action",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "cpsc_recall_decision_interface"
+      ],
+      "state_ids": [
+        "proposed",
+        "issued",
+        "effective",
+        "expanded",
+        "corrected",
+        "superseded",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "superseded",
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.warning_or_emergency_order_action",
+      "implementation_id": "h2epr.lifecycle.0481.warning_or_emergency_order_action",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "caac_warning_decision_interface",
+        "us_dot_emergency_order_decision_interface"
+      ],
+      "state_ids": [
+        "proposed",
+        "qualified",
+        "issued",
+        "published",
+        "effective",
+        "delivered",
+        "superseded",
+        "expired"
+      ],
+      "terminal_state_ids": [
+        "delivered",
+        "superseded",
+        "expired"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.device_use_and_purchase_posture",
+      "implementation_id": "h2epr.lifecycle.0481.device_use_and_purchase_posture",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "note7_owners_and_prospective_consumers"
+      ],
+      "state_ids": [
+        "proposed",
+        "admitted",
+        "transferred",
+        "used",
+        "ceased",
+        "retained",
+        "failed",
+        "superseded"
+      ],
+      "terminal_state_ids": [
+        "ceased",
+        "retained",
+        "failed",
+        "superseded"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    },
+    {
+      "lifecycle_id": "lifecycle.0481.transport_encounter_and_handling",
+      "implementation_id": "h2epr.lifecycle.0481.transport_encounter_and_handling",
+      "implementation_version": "0.1.0",
+      "owner_layer": "reducer",
+      "participant_capability_ids": [
+        "air_transport_operators"
+      ],
+      "state_ids": [
+        "encountered",
+        "identified",
+        "admitted",
+        "denied",
+        "unloaded",
+        "isolated",
+        "returned",
+        "escalated",
+        "closed"
+      ],
+      "terminal_state_ids": [
+        "closed"
+      ],
+      "invalid_transition_behavior": "typed_failure_without_state_change"
+    }
+  ],
+  "coverage_expectations": {
+    "actor_instances": 8,
+    "actor_capability_bindings": 8,
+    "population_units": 4,
+    "exogenous_inputs": 6,
+    "structural_selections": 6,
+    "decision_commitments": 22,
+    "observation_placements": 40,
+    "private_state_placements": 28,
+    "configuration_parameter_bindings": 0,
+    "intent_placements": 37,
+    "lifecycle_families": 12,
+    "selected_policies": 9,
+    "actor_capabilities_exact": true,
+    "configuration_semantics_exact": true,
+    "observations_and_private_state_exact": true,
+    "commitments_and_intents_exact": true,
+    "lifecycle_families_exact": true,
+    "selected_policies_exact": true,
+    "unsupported_semantics_rejected": true
+  },
+  "failure_policy": {
+    "missing_implementation": "reject_before_run",
+    "unknown_actor_or_capability": "reject_before_run",
+    "unknown_observation_or_intent": "reject_before_run",
+    "unresolved_configuration_parameter": "reject_before_run",
+    "invalid_lifecycle_definition": "reject_before_run",
+    "invalid_runtime_transition": "typed_failure_without_state_change",
+    "authority_or_resource_mismatch": "fail_closed_without_state_change",
+    "hidden_default": "forbidden",
+    "participant_authored_result": "forbidden"
+  },
+  "claim_boundary": {
+    "construction_exposure": "full_event_evidence",
+    "historical_calibration": false,
+    "historical_validation": false,
+    "known_outcome_fitting": false,
+    "held_out_evaluation": false,
+    "scientific_validity_claim": false,
+    "output_interpretation": "simulation_generated_mechanism_coverage"
+  }
+}
