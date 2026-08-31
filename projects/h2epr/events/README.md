@@ -56,6 +56,7 @@ per role, or repeat the same record under several phase names.
 |---|---|---|
 | `H2EPR-0288`, Panic of 1907 | [panic_1907](panic_1907/README.md) | First event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
 | `H2EPR-0616`, SingHealth Data Breach | [singhealth_data_breach](singhealth_data_breach/README.md) | Second event closed through deterministic full-roster Rule execution, replay, and a trace-derived generated EPG. |
+| `H2EPR-0481`, Samsung Galaxy Note7 Battery Recall Crisis | [samsung_note7_battery_recall](samsung_note7_battery_recall/README.md) | Third-event Frame accepted with bounded representation gates; participant production not authorized. |
 
 The [cross-event Rule execution conformance release](../execution/cross-event-conformance-v0.1/)
 compares these two endpoints without relocating or duplicating their event
