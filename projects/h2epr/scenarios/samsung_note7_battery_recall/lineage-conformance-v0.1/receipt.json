@@ -1,0 +1,93 @@
+{
+  "format": "h2epr.lineage-conformance-receipt.v0.1",
+  "receipt_id": "receipt.h2epr.0481.samsung_regional_outlet_consumer.conformance.v0_1",
+  "status": "accepted",
+  "verdict": "PASS_BOUNDED_LINEAGE_CONFORMANCE",
+  "binding": {
+    "release_manifest_sha256": "368637163b3d6d18120f378f9dbe8277a67a69ee679c1d72e93df22a366d43c8",
+    "binding_sha256": "987ac94495ec1a038119d0fa1b21ddc6954a5ed988321c8fbeac59559df22ab8",
+    "binding_surfaces_verified": true,
+    "configuration_admission_surfaces_verified": true
+  },
+  "scope": {
+    "actor_ids": [
+      "actor.0481.interface.samsung-crisis",
+      "actor.0481.unit.samsung-regional-singapore",
+      "actor.0481.unit.outlet-singapore-channel",
+      "actor.0481.unit.consumer-primary"
+    ],
+    "action_count": 7,
+    "route_count": 4,
+    "logical_tick_count": 15,
+    "state_delta_count": 15,
+    "product_posture_result_count": 1,
+    "remedy_offer_delivery_count": 1,
+    "simulation_started": false,
+    "full_configuration_execution_enabled": false
+  },
+  "trace": {
+    "conformance_implementation_sha256": "b0493503f0ac07731f07d334a5daf83efeb0ef36e4b28e7583869713d3f83e7d",
+    "conformance_run_manifest_sha256": "b59418312aa4a042be34e1d37a7f1136c8e95229393f93960af80e424afc63ca",
+    "record_count": 101,
+    "first_record_hash": "5b2db9ac5880082b006461bd72e217b6f75da185bc71136fbe8d58af4b8b4fe9",
+    "final_record_hash": "de5a130fb13815fcfe5daf3bbbcc24dc8ee6915c69f7d5a629c5df75b0c51861",
+    "ordered_tick_seal_hashes": [
+      "0fdf2fb53bbcb434138bd8244d46cdce9f50ac2c93d64b7d77f9e0cadd8a8cf6",
+      "8c4f4797c445b7561dbd2edd101eb19c37bd3620900009deb01f659391db4504",
+      "7a994c194876c6d9d7e16f98949c4d860db1671237497fa69fec62db28e46546",
+      "b98230190590e1088f89008868477be3c509e8dbcc5a36cabf6211160c300c2c",
+      "d2e1436943ea2bcc7deda783ea2dc9623f6646aa6534d24d165003a4666435a9",
+      "dae9cb3a45fdb3f6c97a8c703aeee4f421e8a1b9e888fcc14ac5dee97fb75f87",
+      "e3de34f601e3d1282aa3b6d0659b1096e846930c55343eb720a714e5f88765d7",
+      "9337f170061f9c8450a4bcc8ecf9de0153804e085b9711945786ffb02d302479",
+      "f9018e33e0aafe2209e0c73f8e7287eb8f05b142a552ea3dd5598bd90dea8e3f",
+      "69c4c8449f2ee7dec5b5a11537852b608e534ac1a06c8e7b987b719eb6c33cf7",
+      "1cb38b2d268d4c0dd1fc40ad08c4af0df7b594355f009388afbdeb8a131aa16d",
+      "dbf453bb5e9fc07ffbacab26aadb852da57b623ea4c6dfc6fee137cdac219b3c",
+      "6064e3fd522f01c36e76550715dee877cf700f9985694c70832e1ecac53d3271",
+      "ec24402427aa6935ee996f42c732a63ef052ac579176448eaf386bde7ab835ad",
+      "f8f21575e692e86980d0f758dfda1c6d8ce536a311ca65112389646938cbd829"
+    ],
+    "scientific_prefix_sha256": "129cbdbdacee6f0dd4c84f9a7319bc72e12e841420c5038736ce53efdfcb23ea",
+    "run_seal_sha256": "751270e22ad14511218db1d2c7386bce89b3eff745280b52567febdf1ed91c37",
+    "final_state_sha256": "53b47a7ae85bfe6bcda40aa73ec82250a2d586538572e0f6a9b70f1bbeceefbb",
+    "replay_state_sha256": "53b47a7ae85bfe6bcda40aa73ec82250a2d586538572e0f6a9b70f1bbeceefbb",
+    "trace_errors": [],
+    "deterministic_repeat_equal": true
+  },
+  "open_boundary": {
+    "unresolved_intent_ids": [
+      "intent.0481.consumer.request.001"
+    ],
+    "unresolved_recipient_ids": [
+      "actor.0481.unit.outlet-singapore-channel"
+    ],
+    "interpretation": "the response was delivered; eligibility, stock, handoff, payment, and fulfillment remain unrepresented"
+  },
+  "verification": [
+    {
+      "check_id": "contracts-v1-payloads",
+      "status": "pass",
+      "summary": "selected observations, actions, messages, dispositions, and state deltas conform"
+    },
+    {
+      "check_id": "cross-hop-negative-conformance",
+      "status": "pass",
+      "summary": "identity, authority, route, result, offer, request, response, and future-reference drift is rejected"
+    },
+    {
+      "check_id": "trace-seal-replay",
+      "status": "pass",
+      "summary": "causal order, trace validation, seals, deterministic repetition, and replay agree"
+    }
+  ],
+  "claim_boundary": {
+    "exposure": "full_draft_exposed_conformance_only",
+    "historical_validity_claim": false,
+    "scientific_validity_claim": false,
+    "held_out_or_clean_builder_claim": false,
+    "post_seal_evaluation_performed": false,
+    "reference_epg_read": false
+  },
+  "next_legal_action": "authorized_full_roster_policy_realization_successor"
+}

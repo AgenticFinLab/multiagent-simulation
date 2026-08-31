@@ -90,6 +90,15 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/agents/test_singhealth_data_breach_lineage_conformance.py
 ```
 
+The bounded Note7 carrier binding and lineage conformance can be checked
+independently:
+
+```bash
+python -B -m pytest -p no:cacheprovider \
+  projects/h2epr/tests/agents/test_samsung_note7_lineage_binding.py \
+  projects/h2epr/tests/agents/test_samsung_note7_lineage_conformance.py
+```
+
 The three configuration-admission profiles and their focused rejection cases can
 be checked together:
 
