@@ -394,7 +394,14 @@
           "$ref": "#/$defs/stableId"
         },
         "family": {
-          "$ref": "#/$defs/semanticToken"
+          "enum": [
+            "exogenous_pressure",
+            "route_and_delivery",
+            "population_assembly",
+            "authority_capacity",
+            "operational_result",
+            "public_action_delivery"
+          ]
         },
         "allowed_domain": {
           "$ref": "#/$defs/stringArray"
@@ -416,7 +423,7 @@
         }
       }
     },
-    "attackPressureProfile": {
+    "exogenousPressureProfile": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -452,7 +459,7 @@
         }
       }
     },
-    "officeCapacityProfile": {
+    "authorityCapacityProfile": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -472,7 +479,7 @@
         }
       }
     },
-    "resultProfile": {
+    "operationalResultProfile": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -488,7 +495,7 @@
         }
       }
     },
-    "notificationProfile": {
+    "publicActionDeliveryProfile": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -508,51 +515,18 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "exogenous_pressure_profile",
         "route_delivery_profile",
         "active_population_actor_ids",
         "inactive_population_actor_rule",
+        "authority_capacity_profile",
+        "operational_result_profile",
+        "public_action_delivery_profile",
         "overlay_precedence"
       ],
-      "oneOf": [
-        {
-          "required": [
-            "attack_pressure_profile",
-            "office_capacity_profile",
-            "technical_result_profile",
-            "notification_profile"
-          ],
-          "not": {
-            "anyOf": [
-              {"required": ["exogenous_pressure_profile"]},
-              {"required": ["authority_capacity_profile"]},
-              {"required": ["operational_result_profile"]},
-              {"required": ["public_action_delivery_profile"]}
-            ]
-          }
-        },
-        {
-          "required": [
-            "exogenous_pressure_profile",
-            "authority_capacity_profile",
-            "operational_result_profile",
-            "public_action_delivery_profile"
-          ],
-          "not": {
-            "anyOf": [
-              {"required": ["attack_pressure_profile"]},
-              {"required": ["office_capacity_profile"]},
-              {"required": ["technical_result_profile"]},
-              {"required": ["notification_profile"]}
-            ]
-          }
-        }
-      ],
       "properties": {
-        "attack_pressure_profile": {
-          "$ref": "#/$defs/attackPressureProfile"
-        },
         "exogenous_pressure_profile": {
-          "$ref": "#/$defs/attackPressureProfile"
+          "$ref": "#/$defs/exogenousPressureProfile"
         },
         "route_delivery_profile": {
           "$ref": "#/$defs/routeDeliveryProfile"
@@ -563,23 +537,14 @@
         "inactive_population_actor_rule": {
           "$ref": "#/$defs/nonemptyString"
         },
-        "office_capacity_profile": {
-          "$ref": "#/$defs/officeCapacityProfile"
-        },
         "authority_capacity_profile": {
-          "$ref": "#/$defs/officeCapacityProfile"
-        },
-        "technical_result_profile": {
-          "$ref": "#/$defs/resultProfile"
+          "$ref": "#/$defs/authorityCapacityProfile"
         },
         "operational_result_profile": {
-          "$ref": "#/$defs/resultProfile"
-        },
-        "notification_profile": {
-          "$ref": "#/$defs/notificationProfile"
+          "$ref": "#/$defs/operationalResultProfile"
         },
         "public_action_delivery_profile": {
-          "$ref": "#/$defs/notificationProfile"
+          "$ref": "#/$defs/publicActionDeliveryProfile"
         },
         "overlay_precedence": {
           "$ref": "#/$defs/nonemptyString"
@@ -1295,7 +1260,54 @@
           "$ref": "#/$defs/semanticToken"
         },
         "replacement_value": {}
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "target_kind": {
+                "const": "structural_variant"
+              }
+            },
+            "required": [
+              "target_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "field": {
+                "const": "selection"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "target_kind": {
+                "const": "variant_materialization"
+              }
+            },
+            "required": [
+              "target_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "field": {
+                "enum": [
+                  "exogenous_pressure_profile",
+                  "route_delivery_profile",
+                  "active_population_actor_ids",
+                  "authority_capacity_profile",
+                  "operational_result_profile",
+                  "public_action_delivery_profile"
+                ]
+              }
+            }
+          }
+        }
+      ]
     },
     "sensitivityOverlay": {
       "type": "object",

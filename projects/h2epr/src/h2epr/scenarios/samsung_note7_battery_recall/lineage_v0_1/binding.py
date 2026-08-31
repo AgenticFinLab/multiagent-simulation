@@ -549,25 +549,85 @@ class Note7LineageBinding:
 
     def validate_action(self, action_key: str, payload: Mapping[str, Any]) -> None:
         contract = self._action(action_key)
-        _exact(payload, {"intent_id", "run_id", "logical_tick", "actor_id", "action_type", "action_schema_version", "target_entity_ids", "parameters", "claimed_authority_refs", "resource_offer_or_request", "earliest_effect_time", "expiry_time", "observation_refs", "decision_ref", "idempotency_key", "visibility"}, f"action.{action_key}")
+        label = f"action.{action_key}"
+        payload = _object(payload, label)
+        _exact(
+            payload,
+            {
+                "intent_id",
+                "run_id",
+                "logical_tick",
+                "actor_id",
+                "action_type",
+                "action_schema_version",
+                "target_entity_ids",
+                "parameters",
+                "claimed_authority_refs",
+                "resource_offer_or_request",
+                "earliest_effect_time",
+                "expiry_time",
+                "observation_refs",
+                "decision_ref",
+                "idempotency_key",
+                "visibility",
+            },
+            label,
+        )
+        _stable(payload["intent_id"], f"{label}.intent_id")
+        _stable(payload["run_id"], f"{label}.run_id")
+        _integer(payload["logical_tick"], f"{label}.logical_tick")
+        _stable(payload["actor_id"], f"{label}.actor_id")
+        _stable(payload["action_type"], f"{label}.action_type")
+        _stable(
+            payload["action_schema_version"],
+            f"{label}.action_schema_version",
+        )
+        for field_name in (
+            "target_entity_ids",
+            "parameters",
+            "claimed_authority_refs",
+            "resource_offer_or_request",
+            "observation_refs",
+        ):
+            if not isinstance(payload[field_name], list):
+                _fail("NOTE7_LINEAGE_ARRAY_REQUIRED", f"{label}.{field_name}")
+        target_entity_ids = _ids(
+            payload["target_entity_ids"],
+            f"{label}.target_entity_ids",
+            empty=True,
+        )
+        authority_refs = _ids(
+            payload["claimed_authority_refs"],
+            f"{label}.claimed_authority_refs",
+            empty=True,
+        )
+        _ids(payload["observation_refs"], f"{label}.observation_refs")
+        _stable(payload["decision_ref"], f"{label}.decision_ref")
+        _stable(payload["idempotency_key"], f"{label}.idempotency_key")
+        _stable(payload["visibility"], f"{label}.visibility")
+        earliest_effect_time = _time(
+            payload["earliest_effect_time"],
+            f"{label}.earliest_effect_time",
+            nullable=True,
+        )
         if (
             payload["actor_id"] != contract.actor_id
             or payload["action_type"] != contract.action_type
             or payload["action_schema_version"] != contract.action_schema_version
-            or tuple(payload["target_entity_ids"]) != contract.target_entity_ids
-            or tuple(payload["claimed_authority_refs"]) != contract.authority_ref_ids
+            or target_entity_ids != contract.target_entity_ids
+            or authority_refs != contract.authority_ref_ids
             or payload["resource_offer_or_request"] != []
             or payload["visibility"] != "restricted"
         ):
             _fail("NOTE7_LINEAGE_ACTION_ENVELOPE_MISMATCH", action_key)
-        values = _runtime_values(payload["parameters"], f"action.{action_key}.parameters")
+        values = _runtime_values(payload["parameters"], f"{label}.parameters")
         expected = {row.name for row in contract.parameters if row.carrier == "parameters"}
         if set(values) != expected:
             _fail("NOTE7_LINEAGE_ACTION_CARRIER_MISMATCH", action_key)
         expiry = next(row for row in contract.parameters if row.carrier == "expiry_time")
         values[expiry.name] = expiry.validate(payload["expiry_time"])
         values = {name: contract.parameter_by_name[name].validate(value) for name, value in values.items()}
-        _reject_future_reference(payload["earliest_effect_time"], f"action.{action_key}.earliest_effect_time")
+        _reject_future_reference(earliest_effect_time, f"{label}.earliest_effect_time")
         actor = self.actors[contract.actor_id]
         if values.get("capacity_id") != actor["selected_capacity_id"]:
             _fail("NOTE7_LINEAGE_ACTION_CAPACITY_MISMATCH", action_key)

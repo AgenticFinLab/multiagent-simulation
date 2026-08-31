@@ -8,7 +8,7 @@
     "configuration_id": "h2epr.0481.scenario.mechanism-coverage.v0_1",
     "source_sha256": "8faa3b0a03e57f2ab4ece46a82f16d838476c9562019b8137c7ff0856ee103e9",
     "canonical_sha256": "e97181d06def36359e1fc73a53d1e7ea220ae9bd614533b07132b7e00fb585fc",
-    "admission_receipt_sha256": "93179b0dc9ca341c1ada33e74c2b734553a01ebbb778b383da602362bd6aefb0",
+    "admission_receipt_sha256": "afbafacf7a57291c15b56cfd3c9480b3e0c95e342a6d5bee9544987cf76f33bf",
     "mapping_profile_id": "h2epr.roster-consolidated-mapping.0481.v0_1",
     "mapping_profile_sha256": "c08b9273df303b483f8716671d5936bd550f9fc1be8c26005484c0f06df402ff"
   },

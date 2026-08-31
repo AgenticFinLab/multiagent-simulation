@@ -11,6 +11,8 @@ from typing import Any, Mapping, Sequence
 
 from .errors import ConfigurationErrorCode
 from .loader import (
+    DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_FORMAT_ID,
+    SEMANTIC_CONFIGURATION_FORMAT_ID,
     _ReleaseContext,
     _SEMANTIC_CONFIGURATION_INPUT_SPECS,
     _array,
@@ -37,21 +39,34 @@ class _SemanticReferenceProfile:
     mapping_coverage: Mapping[str, int]
 
 
-_SEMANTIC_VARIANT_MATERIALIZATION_FIELDS = {
-    "attack_pressure": "attack_pressure_profile",
-    "route_and_delivery": "route_delivery_profile",
-    "responsibility_units": "active_population_actor_ids",
-    "office_capacity": "office_capacity_profile",
-    "technical_result": "technical_result_profile",
-    "notification": "notification_profile",
-    # The v0.2 domain-neutral vocabulary retains the same closed six-slot
-    # semantics without changing the frozen v0.1 cyber schema.
-    "exogenous_pressure": "exogenous_pressure_profile",
-    "population_assembly": "active_population_actor_ids",
-    "authority_capacity": "authority_capacity_profile",
-    "operational_result": "operational_result_profile",
-    "public_action_delivery": "public_action_delivery_profile",
-}
+_LEGACY_VARIANT_MATERIALIZATION_FIELDS = MappingProxyType(
+    {
+        "attack_pressure": "attack_pressure_profile",
+        "route_and_delivery": "route_delivery_profile",
+        "responsibility_units": "active_population_actor_ids",
+        "office_capacity": "office_capacity_profile",
+        "technical_result": "technical_result_profile",
+        "notification": "notification_profile",
+    }
+)
+_DOMAIN_NEUTRAL_VARIANT_MATERIALIZATION_FIELDS = MappingProxyType(
+    {
+        "exogenous_pressure": "exogenous_pressure_profile",
+        "route_and_delivery": "route_delivery_profile",
+        "population_assembly": "active_population_actor_ids",
+        "authority_capacity": "authority_capacity_profile",
+        "operational_result": "operational_result_profile",
+        "public_action_delivery": "public_action_delivery_profile",
+    }
+)
+_SEMANTIC_VARIANT_MATERIALIZATION_FIELDS_BY_FORMAT = MappingProxyType(
+    {
+        SEMANTIC_CONFIGURATION_FORMAT_ID: _LEGACY_VARIANT_MATERIALIZATION_FIELDS,
+        DOMAIN_NEUTRAL_SEMANTIC_CONFIGURATION_FORMAT_ID: (
+            _DOMAIN_NEUTRAL_VARIANT_MATERIALIZATION_FIELDS
+        ),
+    }
+)
 
 
 def _load_semantic_reference_profile(
@@ -904,11 +919,30 @@ def _validate_semantic_configuration(
     variant_by_id = _indexed_rows(
         variants, "id", pointer="/structural_variants"
     )
-    if _duplicates([variant["family"] for variant in variants]):
+    try:
+        variant_materialization_fields = (
+            _SEMANTIC_VARIANT_MATERIALIZATION_FIELDS_BY_FORMAT[
+                document["format_identity"]
+            ]
+        )
+    except (KeyError, TypeError):
+        _raise(
+            ConfigurationErrorCode.SCHEMA_VERSION_UNSUPPORTED,
+            pointer="/format_identity",
+            detail="supported_semantic_format_required",
+        )
+    variant_families = [variant["family"] for variant in variants]
+    if _duplicates(variant_families):
         _raise(
             ConfigurationErrorCode.ASSEMBLY_INVALID,
             pointer="/structural_variants",
             detail="variant_family_reused",
+        )
+    if set(variant_families) != set(variant_materialization_fields):
+        _raise(
+            ConfigurationErrorCode.ASSEMBLY_INVALID,
+            pointer="/structural_variants",
+            detail="variant_family_vocabulary_mismatch",
         )
     variant_overlay_ids: set[str] = set()
     for index, variant in enumerate(variants):
@@ -918,7 +952,7 @@ def _validate_semantic_configuration(
                 pointer=f"/structural_variants/{index}/selection",
                 detail="selection_outside_allowed_domain",
             )
-        materialization_field = _SEMANTIC_VARIANT_MATERIALIZATION_FIELDS.get(
+        materialization_field = variant_materialization_fields.get(
             variant["family"]
         )
         if materialization_field is None:
@@ -937,10 +971,14 @@ def _validate_semantic_configuration(
 
     materialization = document["variant_materialization"]
     for index, variant in enumerate(variants):
-        materialization_field = _SEMANTIC_VARIANT_MATERIALIZATION_FIELDS[
-            variant["family"]
-        ]
-        materialized = materialization[materialization_field]
+        materialization_field = variant_materialization_fields[variant["family"]]
+        materialized = materialization.get(materialization_field)
+        if materialized is None:
+            _raise(
+                ConfigurationErrorCode.ASSEMBLY_INVALID,
+                pointer=f"/variant_materialization/{materialization_field}",
+                detail="variant_materialization_missing",
+            )
         if (
             isinstance(materialized, Mapping)
             and materialized["selection"] != variant["selection"].lower()
@@ -987,7 +1025,7 @@ def _validate_semantic_configuration(
                 detail="structural_target_unresolved",
             )
         replacement = by_kind["variant_materialization"]
-        expected_materialization_field = _SEMANTIC_VARIANT_MATERIALIZATION_FIELDS[
+        expected_materialization_field = variant_materialization_fields[
             variant["family"]
         ]
         if (

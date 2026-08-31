@@ -24,7 +24,7 @@ the still-open fulfillment boundary.
 ### `OD-0481-CNF-01` — exact release and bounded horizon
 
 Use only the binding release identified by raw manifest SHA-256
-`368637163b3d6d18120f378f9dbe8277a67a69ee679c1d72e93df22a366d43c8`.
+`e97b0eda9a0f5d7abf5b9d0d9f6a4702787a03c0a637f93278ad6b1a6cd88e6b`.
 The conformance horizon is four actors, seven actions, four directed carriers,
 one product-posture result, one Scenario-owned remedy-offer delivery, and
 logical ticks zero through fourteen. Pinned identity drift returns to the

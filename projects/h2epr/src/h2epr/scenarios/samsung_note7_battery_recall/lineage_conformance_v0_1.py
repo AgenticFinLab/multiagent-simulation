@@ -33,7 +33,7 @@ from .lineage_v0_1 import (
 CONFORMANCE_FORMAT = "h2epr.lineage-conformance.v0.1"
 CONFORMANCE_ID = "conformance.h2epr.0481.samsung_regional_outlet_consumer.v0_1"
 RUN_ID = "run.h2epr.0481.remedy_lineage.conformance.001"
-BINDING_MANIFEST_SHA256 = "368637163b3d6d18120f378f9dbe8277a67a69ee679c1d72e93df22a366d43c8"
+BINDING_MANIFEST_SHA256 = "e97b0eda9a0f5d7abf5b9d0d9f6a4702787a03c0a637f93278ad6b1a6cd88e6b"
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_BINDING_MANIFEST = PROJECT_ROOT / "agents/bindings/samsung_note7_battery_recall/samsung-regional-outlet-consumer-v0.1/manifest.json"
 

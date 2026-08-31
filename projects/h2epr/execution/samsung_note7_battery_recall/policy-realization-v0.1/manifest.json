@@ -9,8 +9,8 @@
   "realization": {
     "id": "h2epr.0481.policy-realization.v0_1",
     "path": "policy-realization.json",
-    "source_sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a",
-    "canonical_sha256": "9fb4fdec68d2c55b90c016d60296963015fe82d459cd4e76e8cae3d47ec64f70",
+    "source_sha256": "c9dec7107c85fbc0d25ca14b3dfbcf2ff1c54531fa5143d10a812392c9f9eeb0",
+    "canonical_sha256": "6e3a7b4a08142ea3b0fbce13c07d75c6bd3ab9a4c5a0b44c2d61d69bcd640c19",
     "format_identity": "h2epr.policy-realization.v0_1",
     "schema_path": "../../schemas/policy-realization-v0.1.schema.json",
     "schema_sha256": "6a2bb9f88b665b40abd977a443f6554ae7c8d246521332832e590fdb2d303afe",
@@ -41,7 +41,7 @@
     },
     {
       "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/admission.py",
-      "sha256": "b97c3303a1087a620130c4aeef1ec6f6f809a34c5cc28e50fe583b6b39de20ff"
+      "sha256": "9e6d7d09b20643358a77d69df6cd38184428b17a95e756cceff093c08441d1f3"
     },
     {
       "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/catalog.py",
@@ -69,7 +69,7 @@
     },
     {
       "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/scenario_rules.py",
-      "sha256": "005f5f00ac2d7140010c95964ebcb7e556c5bccff5f4597ccb1224c79bbb5382"
+      "sha256": "fb6b7e8f6da0afbd2014b86645e74976a4f6d6bc1a8a985ddcb2bac760b577e3"
     },
     {
       "path": "src/h2epr/scenarios/samsung_note7_battery_recall/full_roster_v0_1/semantic_inventory.py",
@@ -89,7 +89,7 @@
     {
       "kind": "policy_realization",
       "path": "policy-realization.json",
-      "sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a"
+      "sha256": "c9dec7107c85fbc0d25ca14b3dfbcf2ff1c54531fa5143d10a812392c9f9eeb0"
     },
     {
       "kind": "substantive_review",

@@ -5,13 +5,13 @@
   "run_id": "run.h2epr.0481.canonical.v0_1",
   "source_trace": {
     "record_count": 926,
-    "canonical_sha256": "0fa8fdbb4dcde4c6b89d940bf870b912230e261cc2fca9bc26981b9c68dbfe1f",
-    "terminal_record_hash": "ee468b521f650962706fc08b70b09dd5e07a36f90ebfaf35648006c5465c1419"
+    "canonical_sha256": "49e34cbce9c99b9ef2abe1530a436aaccb75dac08746a6366b75965d17b2afcd",
+    "terminal_record_hash": "9c517dd69270eb2c2ba6660d9f1c4497bd9ab5f1ab9e225ca3a027d8668d354a"
   },
-  "source_run_seal_sha256": "b40e9337797aeb275e5373206b7387fb11f439336f354f2bfcc6bbbd3ca5520a",
+  "source_run_seal_sha256": "fd32d6e564973b233895f7b8dc2d964b64d2a5e5c9a8d6609b0346c20b474756",
   "generated_epg": {
-    "document_canonical_sha256": "3a14ab572f8278363c7369e1ab2ce6e3813828308f2da7a82e1d2e91b9aeb860",
-    "artifact_sha256": "821d9e2d5e995576ba46c705e3aab7f84a3eb577bc39ce7661310d3f8198bb1e",
+    "document_canonical_sha256": "2e570500f93540449969f15191c0ea8e4d51041087c80ca0759da95ebb433fda",
+    "artifact_sha256": "b957a03bb186d9fc5148f393fae84fb085a4093d7c7c5e2c1bb9001a066d8aac",
     "node_count": 374,
     "edge_count": 302,
     "node_type_counts": {

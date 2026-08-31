@@ -301,6 +301,32 @@ def test_semantic_unknown_field_is_rejected_by_closed_schema(tmp_path: Path) -> 
     ] == "fail"
 
 
+def test_legacy_cross_vocabulary_drift_has_typed_failure_routing(
+    tmp_path: Path,
+) -> None:
+    root = _copy_project(tmp_path)
+
+    def mutation(document):
+        variant = next(
+            row
+            for row in document["structural_variants"]
+            if row["family"] == "attack_pressure"
+        )
+        variant["family"] = "exogenous_pressure"
+
+    source_sha256, manifest_sha256 = _rewrite_package(root, mutation)
+    with pytest.raises(ConfigurationAdmissionError) as raised:
+        _load(
+            root,
+            source_sha256=source_sha256,
+            manifest_sha256=manifest_sha256,
+        )
+    assert raised.value.code is ConfigurationErrorCode.ASSEMBLY_INVALID
+    assert raised.value.failure_class is ConfigurationFailureClass.ASSEMBLY
+    assert raised.value.pointer == "/structural_variants"
+    assert raised.value.detail == "variant_family_vocabulary_mismatch"
+
+
 def test_semantic_input_hash_drift_cannot_be_repacked(tmp_path: Path) -> None:
     root = _copy_project(tmp_path)
 

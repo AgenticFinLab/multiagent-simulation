@@ -22,15 +22,15 @@
       "event_id": "H2EPR-0481",
       "release_id": "H2EPR-0481-RUN-AND-GRAPH-v0.1",
       "path": "execution/samsung_note7_battery_recall/run-and-graph-v0.1",
-      "manifest_source_sha256": "9f3eb3bc3006cb073bc5a841534bb8367d68265a4da87477d514280f61f27f16"
+      "manifest_source_sha256": "8c3afc257ab18caf354214ae8a572ab7a179f223d5918ba6b274a0fc4cb40592"
     }
   ],
   "conformance_artifact": {
     "kind": "cross-event-execution-conformance",
     "document_name": "cross-event-execution-conformance",
     "filename": "conformance.json",
-    "source_sha256": "b0caee242af3c3f8598c74a3e7b90e198390a66f5724b90669706f8c9061bc85",
-    "canonical_sha256": "46f4650c66f308b424c09835456402b29fba29b6e6817403f2c1c8754e86d263",
+    "source_sha256": "0c9b467fd0abd36df477c7ef848ab8319caf868fe43f0248aadc0632f2d2d431",
+    "canonical_sha256": "96b4ce971883f7462524b7b071e7ffdf95eca89f6d66b94f57b1436ce94bc49e",
     "byte_count": 10341
   },
   "publication_artifacts": [

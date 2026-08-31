@@ -16,7 +16,7 @@
     "configuration_release_manifest_path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/manifest.json",
     "configuration_release_manifest_sha256": "5086d78cf4dff9d8416f652b30ce206da367c92b82f11bdd42d7636fe0c0d519",
     "configuration_admission_receipt_path": "configs/samsung_note7_battery_recall/configuration-admission-v0.1/receipt.json",
-    "configuration_admission_receipt_sha256": "b275dd83ac63e443a3d1ac4893066eae81c1b8d790402f3fcb4253deb6ae2af3",
+    "configuration_admission_receipt_sha256": "07c94c5df9836b4b1838a512a3a81dddcb07493d2d9995d98d27f94bba502a71",
     "roster_release_manifest_path": "releases/samsung_note7_battery_recall/roster-definition-v0.1/manifest.json",
     "roster_release_manifest_sha256": "761a33c7de250ab8383f0844c48e6f7c7598cdaca52ee158ccf3eecdfb54f174",
     "consolidated_mapping_manifest_path": "agents/bindings/samsung_note7_battery_recall/consolidated/manifest.json",
@@ -32,15 +32,15 @@
     "version": "0.1.0",
     "status": "accepted_policy_realization",
     "path": "execution/samsung_note7_battery_recall/policy-realization-v0.1/policy-realization.json",
-    "sha256": "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a"
+    "sha256": "c9dec7107c85fbc0d25ca14b3dfbcf2ff1c54531fa5143d10a812392c9f9eeb0"
   },
   "runtime_bundle": {
     "runtime_bundle_id": "h2epr.0481.rule-runtime-bundle.v0_1",
     "version": "0.1.0",
     "status": "accepted_runtime_bundle",
     "path": "execution/samsung_note7_battery_recall/full-roster-rule-v0.1/runtime-bundle.json",
-    "source_sha256": "33aeed0a8a795e6975340a361c1e3ffc0fcdb3dc10e36e5352cc619c731ddb03",
-    "canonical_sha256": "2696ed112e546e475b47037a0f20846a6e51e7a4d1404fc53f2df3244cf00102"
+    "source_sha256": "57b2f3556b9be7534fb2886be2ec2385184f4781c42d02794e33695492e1b171",
+    "canonical_sha256": "d9b9f11ebd9137ad0fe764b8c4f4d8fd5abd04678a45a93a47893a4840794859"
   },
   "actor_bindings": [
     {

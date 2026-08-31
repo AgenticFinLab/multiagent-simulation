@@ -33,6 +33,9 @@ from h2epr.scenarios.samsung_note7_battery_recall.full_roster_v0_1.run_release i
 from h2epr.scenarios.samsung_note7_battery_recall.full_roster_v0_1.runtime_components import (
     Note7Environment,
 )
+from h2epr.scenarios.samsung_note7_battery_recall.full_roster_v0_1.scenario_rules import (
+    ROUTE_POLICY,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -196,6 +199,45 @@ def test_lifecycle_registry_is_exact_reachable_and_deterministic() -> None:
             assert first == second
             assert first.applied is True
             assert first.after.version == 4
+
+
+def test_delayed_route_can_be_readmitted_only_after_route_recovery() -> None:
+    assert ROUTE_POLICY.implementation_version == "0.1.1"
+    issued = ROUTE_POLICY.issue(
+        message_id="message.test.note7.route-recovery",
+        issuer_id="actor.test.note7.issuer",
+        recipient_id="actor.test.note7.recipient",
+        route_id="route.test.note7.recovery",
+        cause_id="event.test.note7.issue",
+    )
+    delayed = ROUTE_POLICY.admit_route(
+        issued,
+        recipient_eligible=True,
+        route_available=False,
+        cause_id="event.test.note7.route-unavailable",
+    )
+    assert delayed.applied is True
+    assert delayed.after.state_id == "delayed"
+
+    still_delayed = ROUTE_POLICY.admit_route(
+        delayed.after,
+        recipient_eligible=True,
+        route_available=False,
+        cause_id="event.test.note7.route-still-unavailable",
+    )
+    assert still_delayed.applied is False
+    assert still_delayed.after == delayed.after
+
+    recovered = ROUTE_POLICY.admit_route(
+        delayed.after,
+        recipient_eligible=True,
+        route_available=True,
+        cause_id="event.test.note7.route-restored",
+    )
+    assert recovered.applied is True
+    assert recovered.reason_code == "route_admitted"
+    assert recovered.after.state_id == "route_admitted"
+    assert recovered.after.version == delayed.after.version + 1
 
 
 def test_runtime_bundle_and_executable_admission_close() -> None:

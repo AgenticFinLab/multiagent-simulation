@@ -14,7 +14,7 @@
     "event_id": "H2EPR-0481",
     "path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/scenario-configuration.json",
     "schema_document_id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/configs/schemas/event-scenario-configuration-semantic-v0.2.schema.json",
-    "schema_sha256": "12e50596089e48473387bc091f7a75bbcc5b4ec2b09bedc09bb6ae807ffa0d57",
+    "schema_sha256": "ffa4fc999e8b8347bc3e507b9ddba96165603307bbc4a68b37ca8231070c23a6",
     "source_sha256": "8faa3b0a03e57f2ab4ece46a82f16d838476c9562019b8137c7ff0856ee103e9",
     "status": "accepted_non_executable_configuration",
     "version": "0.1.0"
@@ -64,7 +64,7 @@
     {"gate": "P6", "status": "pass"}
   ],
   "next_legal_stage": "separately_authorized_carrier_projection",
-  "receipt_sha256": "93179b0dc9ca341c1ada33e74c2b734553a01ebbb778b383da602362bd6aefb0",
+  "receipt_sha256": "afbafacf7a57291c15b56cfd3c9480b3e0c95e342a6d5bee9544987cf76f33bf",
   "release": {
     "manifest_sha256": "5086d78cf4dff9d8416f652b30ce206da367c92b82f11bdd42d7636fe0c0d519",
     "mapping_profile_id": "h2epr.roster-consolidated-mapping.0481.v0_1",
@@ -87,7 +87,7 @@
   "verdict": "PASS_BOUNDED_CONFIGURATION_ADMISSION",
   "verification": [
     {"check_id": "formal-release-integrity", "status": "pass", "summary": "repository-wide strict JSON and checksum checks passed"},
-    {"check_id": "note7-configuration-admission", "status": "pass", "summary": "7 focused Note7 admission checks passed"},
+    {"check_id": "note7-configuration-admission", "status": "pass", "summary": "8 focused Note7 admission checks passed"},
     {"check_id": "note7-configuration-release", "status": "pass", "summary": "4 focused Note7 configuration release checks passed"},
     {"check_id": "note7-mapping-scenario-release", "status": "pass", "summary": "5 focused Note7 mapping and Scenario release checks passed"},
     {"check_id": "project-documentation-links", "status": "pass", "summary": "repository-wide H2EPR local-link check passed"},

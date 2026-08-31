@@ -61,7 +61,7 @@ CONFIGURATION_ADMISSION_RECEIPT_PATH = Path(
     "configs/samsung_note7_battery_recall/configuration-admission-v0.1/receipt.json"
 )
 CONFIGURATION_ADMISSION_RECEIPT_SHA256 = (
-    "b275dd83ac63e443a3d1ac4893066eae81c1b8d790402f3fcb4253deb6ae2af3"
+    "07c94c5df9836b4b1838a512a3a81dddcb07493d2d9995d98d27f94bba502a71"
 )
 CONSOLIDATED_MAPPING_MANIFEST_PATH = Path(
     "agents/bindings/samsung_note7_battery_recall/consolidated/manifest.json"

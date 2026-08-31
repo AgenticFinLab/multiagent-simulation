@@ -4,11 +4,11 @@
   "event_id": "H2EPR-0481",
   "package_id": "h2epr.0481.full-roster-rule.v0_1",
   "package_version": "0.1.0",
-  "package_source_sha256": "bd3f9d0c350ac5e224a2a27a42814c2a3bda98db736dc02eafe4ce2e9bb193b7",
+  "package_source_sha256": "fe7ffe6ba48fe6e597dcf6a4547918a59a3032d46bb81b17f5719465b001b922",
   "runtime_bundle_id": "h2epr.0481.rule-runtime-bundle.v0_1",
   "runtime_bundle_version": "0.1.0",
-  "runtime_bundle_source_sha256": "33aeed0a8a795e6975340a361c1e3ffc0fcdb3dc10e36e5352cc619c731ddb03",
-  "runtime_bundle_canonical_sha256": "2696ed112e546e475b47037a0f20846a6e51e7a4d1404fc53f2df3244cf00102",
+  "runtime_bundle_source_sha256": "57b2f3556b9be7534fb2886be2ec2385184f4781c42d02794e33695492e1b171",
+  "runtime_bundle_canonical_sha256": "d9b9f11ebd9137ad0fe764b8c4f4d8fd5abd04678a45a93a47893a4840794859",
   "run_profile_id": "h2epr.0481.run-profile.canonical.v0_1",
   "run_seed": 481,
   "participant_ids": [
@@ -505,5 +505,5 @@
   "historical_calibration": false,
   "historical_validation": false,
   "output_interpretation": "simulation_generated_mechanism_coverage",
-  "manifest_sha256": "f3a6c647cbd65a3eb54f28de070e2aad754cca243e437d4d4019cbf3290871fb"
+  "manifest_sha256": "0e163910738e494eabb617f71c92b5d2d3449d746e99000ea0f0154a114279bd"
 }

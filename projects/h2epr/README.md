@@ -102,7 +102,7 @@ healthcare cybersecurity event:
 The Samsung Galaxy Note7 Battery Recall Crisis applies the same bounded
 handoff to a product-safety and transport event. Its
 [event entry](events/samsung_note7_battery_recall/README.md) links the accepted
-evidence, six Agent Definitions, two Population Models, roster, mapping,
+evidence, four Agent Definitions, four Population Models, roster, mapping,
 Scenario Definition, Scenario Configuration, admission, bounded binding, and
 lineage conformance. Separately versioned
 [Policy Realization](execution/samsung_note7_battery_recall/policy-realization-v0.1/),

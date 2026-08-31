@@ -56,7 +56,7 @@ TRACKED_VERIFICATION = [
     {
         "check_id": "note7-configuration-admission",
         "status": "pass",
-        "summary": "7 focused Note7 admission checks passed",
+        "summary": "8 focused Note7 admission checks passed",
     },
     {
         "check_id": "note7-configuration-release",
@@ -198,6 +198,46 @@ def test_mixed_structural_vocabulary_fails_closed_schema() -> None:
             assert error.code is ConfigurationErrorCode.SCHEMA_VALIDATION_FAILED
         else:
             raise AssertionError("mixed vocabulary admitted")
+    finally:
+        temporary.cleanup()
+
+
+def test_domain_neutral_format_rejects_complete_legacy_vocabulary() -> None:
+    family_names = {
+        "exogenous_pressure": "attack_pressure",
+        "route_and_delivery": "route_and_delivery",
+        "population_assembly": "responsibility_units",
+        "authority_capacity": "office_capacity",
+        "operational_result": "technical_result",
+        "public_action_delivery": "notification",
+    }
+    materialization_fields = {
+        "exogenous_pressure_profile": "attack_pressure_profile",
+        "authority_capacity_profile": "office_capacity_profile",
+        "operational_result_profile": "technical_result_profile",
+        "public_action_delivery_profile": "notification_profile",
+    }
+
+    def mutation(document):
+        for variant in document["structural_variants"]:
+            variant["family"] = family_names[variant["family"]]
+        materialization = document["variant_materialization"]
+        for neutral, legacy in materialization_fields.items():
+            materialization[legacy] = materialization.pop(neutral)
+        for overlay in document["sensitivity_overlays"]:
+            for operation in overlay["operations"]:
+                operation["field"] = materialization_fields.get(
+                    operation["field"], operation["field"]
+                )
+
+    temporary, root, source, manifest = _mutated_project(mutation)
+    try:
+        try:
+            _load(root, source, manifest)
+        except ConfigurationAdmissionError as error:
+            assert error.code is ConfigurationErrorCode.SCHEMA_VALIDATION_FAILED
+        else:
+            raise AssertionError("complete legacy vocabulary admitted as v0.2")
     finally:
         temporary.cleanup()
 

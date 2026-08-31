@@ -15,7 +15,7 @@
     "configuration_release_manifest_path": "configs/samsung_note7_battery_recall/scenario-configuration-v0.1/manifest.json",
     "configuration_release_manifest_sha256": "5086d78cf4dff9d8416f652b30ce206da367c92b82f11bdd42d7636fe0c0d519",
     "configuration_admission_receipt_path": "configs/samsung_note7_battery_recall/configuration-admission-v0.1/receipt.json",
-    "configuration_admission_receipt_sha256": "b275dd83ac63e443a3d1ac4893066eae81c1b8d790402f3fcb4253deb6ae2af3",
+    "configuration_admission_receipt_sha256": "07c94c5df9836b4b1838a512a3a81dddcb07493d2d9995d98d27f94bba502a71",
     "roster_release_manifest_path": "releases/samsung_note7_battery_recall/roster-definition-v0.1/manifest.json",
     "roster_release_manifest_sha256": "761a33c7de250ab8383f0844c48e6f7c7598cdaca52ee158ccf3eecdfb54f174",
     "consolidated_mapping_manifest_path": "agents/bindings/samsung_note7_battery_recall/consolidated/manifest.json",
@@ -1349,7 +1349,7 @@
       "semantic_version": "0.1.0",
       "selection": "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement",
       "implementation_id": "h2epr.policy.0481.scenario.route",
-      "implementation_version": "0.1.0",
+      "implementation_version": "0.1.1",
       "owner_layer": "environment",
       "configuration_source_pointers": [
         "/policy_selections/3"

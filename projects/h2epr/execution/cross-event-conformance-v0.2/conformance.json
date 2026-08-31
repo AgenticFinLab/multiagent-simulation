@@ -154,7 +154,7 @@
       "run_release": {
         "release_id": "H2EPR-0481-RUN-AND-GRAPH-v0.1",
         "path": "execution/samsung_note7_battery_recall/run-and-graph-v0.1",
-        "manifest_source_sha256": "9f3eb3bc3006cb073bc5a841534bb8367d68265a4da87477d514280f61f27f16",
+        "manifest_source_sha256": "8c3afc257ab18caf354214ae8a572ab7a179f223d5918ba6b274a0fc4cb40592",
         "run_id": "run.h2epr.0481.canonical.v0_1",
         "run_profile_id": "h2epr.0481.run-profile.canonical.v0_1",
         "run_seed": 481
@@ -188,8 +188,8 @@
         }
       },
       "generated_epg_inventory": {
-        "document_canonical_sha256": "3a14ab572f8278363c7369e1ab2ce6e3813828308f2da7a82e1d2e91b9aeb860",
-        "artifact_sha256": "821d9e2d5e995576ba46c705e3aab7f84a3eb577bc39ce7661310d3f8198bb1e",
+        "document_canonical_sha256": "2e570500f93540449969f15191c0ea8e4d51041087c80ca0759da95ebb433fda",
+        "artifact_sha256": "b957a03bb186d9fc5148f393fae84fb085a4093d7c7c5e2c1bb9001a066d8aac",
         "node_count": 374,
         "edge_count": 302,
         "node_type_counts": {

@@ -33,7 +33,7 @@ POLICY_REALIZATION_PATH = Path(
     "policy-realization.json"
 )
 POLICY_REALIZATION_SOURCE_SHA256 = (
-    "339c9bc7c709c64a3b06a3819b39764aa6f1b70e8a2a4b7f31e1874b8c53ac0a"
+    "c9dec7107c85fbc0d25ca14b3dfbcf2ff1c54531fa5143d10a812392c9f9eeb0"
 )
 RUNTIME_BUNDLE_PATH = Path(
     "execution/samsung_note7_battery_recall/full-roster-rule-v0.1/"

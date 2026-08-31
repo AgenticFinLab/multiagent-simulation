@@ -157,6 +157,33 @@ def test_message_schema_idempotency_and_action_correlation_are_exact() -> None:
         )
 
 
+@pytest.mark.parametrize(
+    ("field_name", "invalid_value", "error_code"),
+    (
+        ("intent_id", 123, "STRING_INVALID"),
+        ("run_id", {}, "STRING_INVALID"),
+        ("logical_tick", "not-a-tick", "INTEGER_INVALID"),
+        ("decision_ref", [], "STRING_INVALID"),
+        ("observation_refs", [123], "STRING_INVALID"),
+    ),
+)
+def test_action_intent_top_level_carrier_types_fail_closed(
+    field_name: str,
+    invalid_value,
+    error_code: str,
+) -> None:
+    projection = build_positive_note7_lineage(_binding())
+    invalid = copy.deepcopy(projection.request_action)
+    invalid[field_name] = invalid_value
+
+    assert definition_errors("ActionIntent", invalid)
+    with pytest.raises(Note7LineageBindingError, match=error_code):
+        projection.binding.validate_action(
+            "consumer.request_exchange_or_refund",
+            invalid,
+        )
+
+
 def test_future_reference_and_request_result_conflation_are_rejected() -> None:
     projection = build_positive_note7_lineage(_binding())
     binding = projection.binding

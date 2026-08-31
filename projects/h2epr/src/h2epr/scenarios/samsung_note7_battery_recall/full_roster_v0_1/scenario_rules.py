@@ -550,7 +550,7 @@ class RoutePolicy(ScenarioPolicy):
         cause_id: str,
     ) -> MessageRouteTransition:
         self._validate_record(record)
-        if record.state_id != "issued":
+        if record.state_id not in {"issued", "delayed"}:
             return MessageRouteTransition(
                 False,
                 "route_admission_prestate_invalid",
@@ -565,6 +565,20 @@ class RoutePolicy(ScenarioPolicy):
             route_available,
             "route_availability_flag_invalid",
         )
+        if record.state_id == "delayed" and not eligible:
+            return MessageRouteTransition(
+                False,
+                "route_recipient_ineligible",
+                record,
+                record,
+            )
+        if record.state_id == "delayed" and not available:
+            return MessageRouteTransition(
+                False,
+                "route_unavailable",
+                record,
+                record,
+            )
         if not eligible:
             target, reason = "route_rejected", "route_recipient_ineligible"
         elif not available:
@@ -1713,7 +1727,7 @@ ROUTE_POLICY = RoutePolicy(
         "named_recipient_routes_with_distinct_issue_transport_delivery_and_acknowledgement"
     ),
     implementation_id="h2epr.policy.0481.scenario.route",
-    implementation_version="0.1.0",
+    implementation_version="0.1.1",
     owner_layer="environment",
     governed_semantic_ids=(
         "scenario.0481.route.issue_transport_delivery_acknowledgement",

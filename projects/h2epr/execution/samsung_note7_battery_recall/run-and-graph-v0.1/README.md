@@ -62,7 +62,7 @@ tests and checksum validation from the repository root:
 
 ```bash
 python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/execution/test_samsung_note7_run_release.py
+  projects/h2epr/tests/execution/test_samsung_note7_full_roster_execution.py
 
 cd projects/h2epr/execution/samsung_note7_battery_recall/run-and-graph-v0.1
 sha256sum --check SHA256SUMS
