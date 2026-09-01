@@ -17,6 +17,7 @@ explicit sources
   -> authoritative state reduction
   -> trace, seals, and replay
   -> generated event process graph
+  -> separately scoped human process analysis
 ```
 
 ## Responsibility boundaries
@@ -31,6 +32,11 @@ governed evidence after a run.
 Evaluation data is not a construction input, runtime state, prompt, memory, or
 retrieval source. A model built with access to the target continuation cannot
 later be described as a clean held-out construction of that event.
+
+Human analysis may begin from a sealed generated graph without opening an
+evaluation target. It explains the simulated trajectory and its visible
+limits. Comparison with a Draft graph, historical evidence, or a held-out
+target is a later activity with its own exposure and claim boundary.
 
 ### Participant intent and environment result
 
@@ -83,6 +89,11 @@ Policy Realizations, executable successors, and compact run/graph release
 records live under `execution/`. Large materialized traces, states, replay
 outputs, and generated graphs remain in event-qualified ignored run
 directories unless separately selected for release.
+
+Tracked human readings and authorized comparison studies live under
+`analysis/`. They reference immutable run identities rather than duplicating
+the generated graphs or taking authority from event evidence and execution
+releases.
 
 ## Construction and bundle assembly
 

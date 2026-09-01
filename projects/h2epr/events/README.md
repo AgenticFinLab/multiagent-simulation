@@ -63,6 +63,11 @@ compares all three endpoints without relocating or duplicating their event
 assets. The [v0.1 release](../execution/cross-event-conformance-v0.1/) remains
 the immutable two-event record.
 
+Complete human readings of the three accepted Generated EPGs are indexed in
+the [generated-process analysis guide](../analysis/README.md). These readings
+interpret sealed simulation output and stop before Draft or historical
+comparison; they do not change the accepted event or run releases.
+
 Completed entries present accepted assets in two groups. The research-facing
 group is the default scholarly path through evidence, participant models, and
 event semantics. The reproducibility group retains exact release, mapping,

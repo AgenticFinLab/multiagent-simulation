@@ -32,6 +32,7 @@ their respective responsibilities.
 | Cross-participant semantics | [Participant interface guide](../../agents/interfaces/panic_1907/) | Current scholarly reading path; frozen production preflights remain release-time records |
 | Event-world semantics | [Event Scenario Definition](../../scenarios/panic_1907/definition-v0.1/scenario-definition.md) | Historical boundary, event state, processes, authority, and result semantics |
 | Mechanism-coverage assembly | [Configuration design](../../configs/panic_1907/scenario-configuration-v0.1/configuration-design.md) | Non-executable assembly of participants, mechanisms, routes, and exclusions |
+| Generated-process interpretation | [Simulation-only reading](../../analysis/panic_1907/historical-process-comparison-v0.1/generated-process-reading.md) | Complete reading of the accepted Generated EPG, sealed-run context, simulated trajectory, and visible limits before historical comparison |
 
 ## Reproducibility and release records
 

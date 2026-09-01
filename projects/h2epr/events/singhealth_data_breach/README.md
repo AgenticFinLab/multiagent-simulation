@@ -31,6 +31,7 @@ authoritative for their respective responsibilities.
 | Cross-participant semantics | [Participant interface guide](../../agents/interfaces/singhealth_data_breach/) | Current guide to the two scholarly interface accounts |
 | Event-world semantics | [Event Scenario Definition](../../scenarios/singhealth_data_breach/definition-v0.1/scenario-definition.md) | Intrusion, detection, escalation, containment, notification, authority, and result semantics |
 | Mechanism-coverage assembly | [Configuration design](../../configs/singhealth_data_breach/scenario-configuration-v0.1/configuration-design.md) | Non-executable assembly of participants, mechanisms, routes, and exclusions |
+| Generated-process interpretation | [Simulation-only reading](../../analysis/singhealth_data_breach/historical-process-comparison-v0.1/generated-process-reading.md) | Complete reading of the accepted Generated EPG, sealed-run context, simulated trajectory, and visible limits before historical comparison |
 
 ## Reproducibility and release records
 

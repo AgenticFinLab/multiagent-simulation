@@ -26,6 +26,7 @@ execution logic, and generated-process semantics remain H2EPR concerns.
 | Event scenarios | `scenarios/`, `src/h2epr/scenarios/` | Semantic releases, event-qualified implementations, and comparisons that name specific events |
 | Configurations | `configs/`, `src/h2epr/configuration/` | Declared-purpose configurations and fail-closed admission |
 | Rule execution releases | `execution/` | Policy Realizations, executable successors, runtime-bundle contracts, and compact run/graph records |
+| Process analysis | `analysis/` | Human-readable interpretation and separately authorized comparison of sealed generated processes |
 | Methods and templates | `skills/` and project templates | Evidence-to-execution authoring methods, proportionate review, and phase closeout |
 | Tests | `tests/` | Contract, boundary, runtime, compiler, and conformance checks |
 
@@ -146,6 +147,7 @@ authorities and must not be required to follow a tracked research claim.
 ```text
 projects/h2epr/
 ├── agents/
+├── analysis/
 ├── configs/
 ├── contracts/v1/
 ├── decisions/
@@ -236,6 +238,7 @@ releases.
 - [Phase closeout checklist](phase-closeout-checklist.md)
 - [Publication-facing research standard](PUBLICATION_STANDARD.md)
 - [Architecture](ARCHITECTURE.md)
+- [Generated-process analysis](analysis/README.md)
 - [Rule execution](execution/README.md)
 - [Full-roster Rule-execution Skill](skills/full-roster-rule-execution/SKILL.md)
 - [Execution-cycle closeout template](execution/execution-cycle-closeout-template.md)

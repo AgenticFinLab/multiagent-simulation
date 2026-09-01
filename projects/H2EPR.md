@@ -19,6 +19,7 @@ bounded sources and evidence
   -> admitted, explicitly bound runtime inputs
   -> deterministic trace, seals, and replay
   -> generated event process graph
+  -> human reading and separately scoped comparison
 ```
 
 The boundaries in this flow are deliberate. A configuration is not executable
@@ -38,6 +39,7 @@ activity performed only when an experiment is specifically authorized.
 | `projects/h2epr/scenarios/` | Scenario semantics and versioned event releases |
 | `projects/h2epr/configs/` | Declared-purpose configurations and admission records |
 | `projects/h2epr/execution/` | Policy Realizations, executable successors, compact run records, and cross-event conformance |
+| `projects/h2epr/analysis/` | Human-readable generated-process interpretation and authorized comparison studies |
 | `projects/h2epr/skills/` | Evidence-to-execution authoring methods and proportionate review routes |
 | `projects/h2epr/src/h2epr/` | Installable construction, runtime, and compiler code |
 | `projects/h2epr/tests/` | Contract, boundary, runtime, and conformance tests |
@@ -84,12 +86,14 @@ question and scope.
    each accepted baseline and the separate reproducibility records.
 3. [Three-event execution conformance](h2epr/execution/cross-event-conformance-v0.2/)
    for the compact comparison of the three completed Rule paths.
-4. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
+4. [Generated-process analysis](h2epr/analysis/README.md) for complete human
+   readings of the three accepted simulation outputs.
+5. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
    stopping boundaries.
-5. [H2EPR Skills](h2epr/skills/README.md) for the specialist methods used by
+6. [H2EPR Skills](h2epr/skills/README.md) for the specialist methods used by
    each authorized stage, including the optional full-roster execution tail.
-6. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
+7. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
    boundaries.
-7. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
-8. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
+8. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
+9. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
    interfaces.

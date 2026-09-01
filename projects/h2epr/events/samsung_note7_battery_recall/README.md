@@ -31,6 +31,7 @@ for their respective responsibilities.
 | Cross-participant semantics | [Participant interface guide](../../agents/interfaces/samsung_note7_battery_recall/) | Product-safety, remedy, recall, consumer, and transport chains with separate intent, delivery, authority, and result ownership |
 | Event-world semantics | [Event Scenario Definition](../../scenarios/samsung_note7_battery_recall/definition-v0.1/scenario-definition.md) | Event time, product and remedy state, institutions, routing, adjudication, lifecycles, transport processes, and termination |
 | Mechanism-coverage assembly | [Configuration design](../../configs/samsung_note7_battery_recall/scenario-configuration-v0.1/configuration-design.md) | Non-executable assembly of the eight participants, domain-neutral structural vocabulary, routes, mechanisms, and exclusions |
+| Generated-process interpretation | [Simulation-only reading](../../analysis/samsung_note7_battery_recall/historical-process-comparison-v0.1/generated-process-reading.md) | Complete reading of the accepted Generated EPG, sealed-run context, simulated trajectory, and visible limits before historical comparison |
 
 ## Reproducibility and release records
 
