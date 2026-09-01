@@ -231,6 +231,7 @@ releases.
 - [Project guide](../H2EPR.md)
 - [Event modeling workflow](WORKFLOW.md)
 - [Event coordination entries](events/README.md)
+- [Roster Definition releases](releases/README.md)
 - [Event Build Brief template](event-build-brief-template.md)
 - [Phase closeout checklist](phase-closeout-checklist.md)
 - [Publication-facing research standard](PUBLICATION_STANDARD.md)

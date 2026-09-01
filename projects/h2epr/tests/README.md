@@ -27,6 +27,28 @@ The `g2`, `g3`, and `g4` directory names are retained identifiers for the
 accepted artifact, runtime, and compiler suites. They do not imply that later
 research phases run automatically.
 
+## Event-qualified test names
+
+New event-specific test modules use the complete stable event slug:
+`test_panic_1907_*`, `test_singhealth_data_breach_*`, or
+`test_samsung_note7_battery_recall_*`. A shorter display name is not a new
+event namespace.
+
+Several accepted release guides already cite earlier test locators. Those
+paths remain compatibility names so immutable release records and their
+documented commands continue to resolve:
+
+| Event | Retained compatibility locator | Canonical name for new modules |
+|---|---|---|
+| Panic of 1907 | `test_scenario_configuration_admission.py` for the original configuration profile | `test_panic_1907_*` |
+| SingHealth Data Breach | existing `test_singhealth_*` modules; the bounded-lineage modules already use the full slug | `test_singhealth_data_breach_*` |
+| Samsung Galaxy Note7 Battery Recall Crisis | existing `test_samsung_note7_*` modules | `test_samsung_note7_battery_recall_*` |
+
+The repository publication check fixes the current compatibility-locator set
+and rejects new shorthand variants. Removing or renaming one of these retained
+paths requires migration of every accepted document that cites it; ordinary
+test maintenance must not rewrite a frozen release for cosmetic uniformity.
+
 ## Commands
 
 Run all H2EPR tests from the repository root:
@@ -141,8 +163,8 @@ python -B -m pytest -p no:cacheprovider \
   projects/h2epr/tests/execution/test_cross_event_execution_conformance_v0_2.py
 ```
 
-Formal H2EPR JSON, release checksum inventories, and publication-surface local
-links share one repository-level check:
+Formal H2EPR JSON, release checksum inventories, publication-surface local
+links, and event-test locator names share one repository-level check:
 
 ```bash
 python -B -m pytest -p no:cacheprovider \

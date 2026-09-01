@@ -19,7 +19,9 @@ populations/
 ├── defines/
 │   ├── panic_1907/
 │   │   └── <population-model>.md
-│   └── singhealth_data_breach/
+│   ├── singhealth_data_breach/
+│   │   └── <population-model>.md
+│   └── samsung_note7_battery_recall/
 │       └── <population-model>.md
 └── interfaces/
     └── <event>/
@@ -93,6 +95,24 @@ alongside seven office-level Agent Definitions and reviewed dispositions for
 the event's non-participant processes and cohorts. Their cross-role routes are
 organized by the
 [SingHealth participant interface guide](../agents/interfaces/singhealth_data_breach/).
+
+The Samsung Galaxy Note7 collection contains four event-bound population
+models. [Regional implementation units](defines/samsung_note7_battery_recall/samsung-regional-implementation-units.md)
+retain jurisdiction-local partner, remedy, and communication choices, while
+[carrier and retail remedy outlets](defines/samsung_note7_battery_recall/carrier-and-retail-remedy-outlets.md)
+retain unit-local sales, notice, stock-request, exchange, and refund choices.
+[Owners and prospective consumers](defines/samsung_note7_battery_recall/note7-owners-and-prospective-consumers.md)
+remain individual choice units, and
+[air-transport operators](defines/samsung_note7_battery_recall/air-transport-operators.md)
+remain jurisdiction- and function-local operator units. None becomes a
+collective corporate, consumer, or transport authority.
+
+All four models belong to the
+[Note7 Roster Definition release v0.1](../releases/samsung_note7_battery_recall/roster-definition-v0.1/).
+Their shared routes and result boundaries are organized by the
+[Note7 participant interface guide](../agents/interfaces/samsung_note7_battery_recall/),
+and their machine-facing relationships are recorded in the
+[consolidated mapping](../agents/bindings/samsung_note7_battery_recall/consolidated/).
 
 The five Panic of 1907 population models belong to its
 [Roster Definition release v0.1](../releases/panic_1907/roster-definition-v0.1/).

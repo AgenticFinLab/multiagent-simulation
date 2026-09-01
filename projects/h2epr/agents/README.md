@@ -40,6 +40,16 @@ Definition without making the collection executable. The bounded
 then projects four selected intents while preserving the non-executable
 full-configuration boundary.
 
+The H2EPR-0481 Samsung Galaxy Note7 collection contains four authority-bearing
+Agent Definitions and four adjacent Population Models. Its accepted
+[Roster Definition release v0.1](../releases/samsung_note7_battery_recall/roster-definition-v0.1/)
+feeds the
+[consolidated mapping](bindings/samsung_note7_battery_recall/consolidated/),
+while the bounded
+[Samsung--regional-unit--outlet--consumer binding](bindings/samsung_note7_battery_recall/samsung-regional-outlet-consumer-v0.1/)
+projects only the selected lineage. Product, recall, remedy, transport, and
+consumer results remain outside participant policy.
+
 ## Authority map
 
 | Asset | Owns | Does not own |
@@ -61,7 +71,7 @@ full-configuration boundary.
 The Markdown Definitions are canonical for participant behavior. A binding is
 valid only for the exact Definition hashes, commitment inventory, observation
 and intent semantics it was reviewed against. Each bounded binding exercises
-only its declared lineage; neither is a complete role or event implementation.
+only its declared lineage; none is a complete role or event implementation.
 
 ## Layout and naming
 
@@ -74,10 +84,14 @@ agents/
 │   ├── panic_1907/
 │   │   ├── consolidated/
 │   │   └── roster-v0.1/
-│   └── singhealth_data_breach/
+│   ├── singhealth_data_breach/
+│   │   ├── README.md
+│   │   ├── consolidated/
+│   │   └── scm-technical-operations-gcio-v0.1/
+│   └── samsung_note7_battery_recall/
 │       ├── README.md
 │       ├── consolidated/
-│       └── scm-technical-operations-gcio-v0.1/
+│       └── samsung-regional-outlet-consumer-v0.1/
 ├── defines/
 │   ├── panic_1907/
 │   │   ├── README.md
@@ -88,20 +102,26 @@ agents/
 │   │   ├── new-york-clearing-house.md
 │   │   ├── trust-company-presidents-committee.md
 │   │   └── trust-company-of-america.md
-│   └── singhealth_data_breach/
+│   ├── singhealth_data_breach/
+│   │   ├── README.md
+│   │   └── <agent-definition>.md
+│   └── samsung_note7_battery_recall/
 │       ├── README.md
 │       └── <agent-definition>.md
 ├── interfaces/
 │   ├── panic_1907/
 │   │   ├── README.md
 │   │   └── <release-time-interface-review>.md
-│   └── singhealth_data_breach/
-│       ├── README.md
-│       ├── r1-detection-and-escalation.md
-│       └── r2-classification-and-institutional-escalation.md
+│   ├── singhealth_data_breach/
+│   │   ├── README.md
+│   │   ├── r1-detection-and-escalation.md
+│   │   └── r2-classification-and-institutional-escalation.md
+│   └── samsung_note7_battery_recall/
+│       └── README.md
 └── rosters/
     ├── panic_1907.md
-    └── singhealth_data_breach.md
+    ├── singhealth_data_breach.md
+    └── samsung_note7_battery_recall.md
 ```
 
 - Definition filenames are lowercase kebab-case, matching the MASim profile
@@ -109,7 +129,8 @@ agents/
 - New Definition candidates use the exact ten numbered top-level modules in
   the public template. Role-specific subsections remain flexible. All
   canonical Definitions share the same publication-facing metadata rules.
-- The event directory follows the existing `configs/panic_1907/` identifier.
+- Every event-owned directory and roster filename uses the event's stable
+  lowercase snake-case slug.
 - A `defines/<event>/` directory contains only its concise `README.md` index and
   canonical Agent Definitions. Shared source registers, participant evidence,
   and decision-situation portfolios are event-owned research authorities under
@@ -173,6 +194,22 @@ agents/
   exact three-participant binding for four source-preserving finding,
   verification, escalation, and clarification intents, with event-qualified
   catalog derivation and focused Contracts V1 checks.
+- [`rosters/samsung_note7_battery_recall.md`](rosters/samsung_note7_battery_recall.md):
+  accepted H2EPR-0481 question, participant dispositions, representation
+  boundaries, production record, and release gate.
+- [`defines/samsung_note7_battery_recall/`](defines/samsung_note7_battery_recall/)
+  and [`interfaces/samsung_note7_battery_recall/`](interfaces/samsung_note7_battery_recall/):
+  four authority-bearing Definitions and the current cross-participant guide,
+  linked to four event-bound Population Models.
+- [`../releases/samsung_note7_battery_recall/roster-definition-v0.1/`](../releases/samsung_note7_battery_recall/roster-definition-v0.1/):
+  hash-pinned inventory of the complete eight-product H2EPR-0481 semantic
+  roster and its non-participant dispositions.
+- [`bindings/samsung_note7_battery_recall/consolidated/`](bindings/samsung_note7_battery_recall/consolidated/):
+  accepted non-executable full-Roster mapping and domain-neutral carrier
+  classification.
+- [`bindings/samsung_note7_battery_recall/samsung-regional-outlet-consumer-v0.1/`](bindings/samsung_note7_battery_recall/samsung-regional-outlet-consumer-v0.1/):
+  exact bounded projection of the selected Samsung, regional-unit, outlet, and
+  consumer lineage.
 - [`../populations/defines/panic_1907/knickerbocker-depositors.md`](../populations/defines/panic_1907/knickerbocker-depositors.md):
   the event-bound Knickerbocker depositor population model.
 - [`../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md`](../populations/defines/panic_1907/member-and-correspondent-bank-resource-decisions.md):

@@ -54,7 +54,7 @@ applied when they were released. This entry records the current event position.
 | Field | Current record |
 |---|---|
 | Work mode | End-to-end second-event engineering baseline complete; accepted semantic parents remain frozen |
-| Current use | Healthcare-cybersecurity demonstration of the full H2EPR semantic-to-execution-to-graph path; included in the accepted [cross-event conformance release](../../execution/cross-event-conformance-v0.1/) |
+| Current use | Healthcare-cybersecurity demonstration of the full H2EPR semantic-to-execution-to-graph path; included in the immutable [two-event conformance release v0.1](../../execution/cross-event-conformance-v0.1/) and the accepted [three-event successor v0.2](../../execution/cross-event-conformance-v0.2/) |
 | Verification boundary | The run establishes deterministic mechanism coverage, authoritative replay, and trace-derived graph closure. It is not evidence of historical fidelity or scientific validity. |
 | Reopening condition | Evidence, participant semantics, Scenario meaning, and configuration remain frozen unless a new research question requires a reviewed successor. |
 | Next action | Reuse as a closed baseline for later events. Reopening evidence, semantics, calibration, or evaluation requires a separately scoped research question. |

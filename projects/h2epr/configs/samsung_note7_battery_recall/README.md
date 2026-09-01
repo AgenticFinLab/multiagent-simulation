@@ -12,6 +12,12 @@ The configuration uses a backward-compatible domain-neutral structural
 vocabulary and explicitly types market, consumer, and operator resource
 domains. Every policy remains unbound and execution eligibility remains false.
 
-The next responsibility is event-qualified carrier projection and bounded
-binding. Neither asset supplies runtime behavior, simulation, calibration,
-historical fit, evaluation, or scientific validity.
+The configuration itself remains unbound and non-executable. Separately
+versioned successors now provide the accepted
+[bounded carrier binding](../../agents/bindings/samsung_note7_battery_recall/samsung-regional-outlet-consumer-v0.1/),
+[lineage conformance](../../scenarios/samsung_note7_battery_recall/lineage-conformance-v0.1/),
+[Policy Realization](../../execution/samsung_note7_battery_recall/policy-realization-v0.1/),
+[full-roster Rule package](../../execution/samsung_note7_battery_recall/full-roster-rule-v0.1/),
+and [run and generated graph](../../execution/samsung_note7_battery_recall/run-and-graph-v0.1/).
+Those successors do not change this configuration's semantic authority or
+establish calibration, historical fit, evaluation, or scientific validity.

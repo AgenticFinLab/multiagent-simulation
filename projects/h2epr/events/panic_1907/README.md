@@ -55,7 +55,7 @@ applied when they were released. This entry records the current event position.
 | Field | Current record |
 |---|---|
 | Work mode | End-to-end first-event engineering baseline complete; accepted semantic parents remain frozen |
-| Current use | First-event reference implementation for the shared H2EPR execution and run-closure kernel; included in the accepted [cross-event conformance release](../../execution/cross-event-conformance-v0.1/) |
+| Current use | First-event reference implementation for the shared H2EPR execution and run-closure kernel; included in the immutable [two-event conformance release v0.1](../../execution/cross-event-conformance-v0.1/) and the accepted [three-event successor v0.2](../../execution/cross-event-conformance-v0.2/) |
 | Verification boundary | The full-roster run establishes deterministic mechanism coverage, authoritative replay, and trace-derived graph closure. It is not evidence of historical fidelity or scientific validity. |
 | Reopening condition | A new research question and explicit scope are required before changing evidence, participant semantics, configuration, calibration, or evaluation boundaries. Reusable execution code may be extracted without rewriting the event releases. |
 | Next action | Reuse as a closed baseline for later events. Reopening evidence, semantics, calibration, or evaluation requires a separately scoped research question. |

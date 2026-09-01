@@ -3,7 +3,8 @@
 This directory contains project-local, versioned schemas used by the bounded
 H2EPR configuration-admission surface.
 
-Two explicit profiles are available:
+Three explicit schemas are available: the original configuration shape and
+two semantic profiles.
 
 | Schema | Configuration family |
 |---|---|

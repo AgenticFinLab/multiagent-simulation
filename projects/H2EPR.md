@@ -34,6 +34,7 @@ activity performed only when an experiment is specifically authorized.
 | `projects/h2epr/contracts/` | Stable serialized interfaces and JSON Schemas |
 | `projects/h2epr/agents/` | Participant definitions, rosters, reviews, and bindings |
 | `projects/h2epr/populations/` | Event-bound heterogeneous population models |
+| `projects/h2epr/releases/` | Hash-pinned Roster Definition release inventories |
 | `projects/h2epr/scenarios/` | Scenario semantics and versioned event releases |
 | `projects/h2epr/configs/` | Declared-purpose configurations and admission records |
 | `projects/h2epr/execution/` | Policy Realizations, executable successors, compact run records, and cross-event conformance |

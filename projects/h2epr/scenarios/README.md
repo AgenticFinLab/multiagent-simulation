@@ -37,10 +37,31 @@ binding. The complete nine-product Scenario Configuration remains
 non-executable.
 
 The [`samsung_note7_battery_recall/`](samsung_note7_battery_recall/) directory
-contains the accepted authoring-window
+contains the accepted
 [Event Scenario Definition v0.1](samsung_note7_battery_recall/definition-v0.1/)
 and its stable participant-production precursor, the
 [event semantic skeleton](samsung_note7_battery_recall/semantic-skeleton.md).
 The Definition closes four Agent and four Population products across product,
 remedy, recall, transport, and consumer decision boundaries. Its qualitative
-configuration remains non-executable after static admission.
+configuration remains a non-executable semantic parent after static admission;
+separate bounded-lineage and full-roster successors now close the selected
+implementation and complete event path.
+
+## Accepted heading compatibility
+
+The immutable Note7 Scenario Definition uses an event-specific ten-heading
+organization rather than the exact labels in the current
+[Scenario Definition template](scenario-definition-template.md). Its modules
+still cover the template responsibilities for overview and claim boundary,
+event and temporal scope, process and exogenous inputs, participant ownership,
+world state and resources, information routing, intent and lifecycle
+adjudication, structural variants, termination, and falsification. In
+particular, its exogenous-input account appears in module 7 instead of the
+template's module 4.
+
+The accepted release, manifest, downstream configuration, and admission
+receipt pin that document by content identity, so the heading organization is
+retained as a publication-structure compatibility exception. It does not
+change semantic ownership or authorize a second Scenario authority. New or
+successor Event Scenario Definitions use the template's stable ten-module
+reading order and exact top-level labels.

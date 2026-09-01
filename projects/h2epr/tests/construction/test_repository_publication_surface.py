@@ -29,6 +29,42 @@ GENERATED_DIRECTORY_NAMES = {
     "__pycache__",
     "build",
 }
+CANONICAL_EVENT_TEST_PREFIXES = (
+    "test_panic_1907_",
+    "test_singhealth_data_breach_",
+    "test_samsung_note7_battery_recall_",
+)
+RETAINED_EVENT_TEST_LOCATORS = frozenset(
+    {
+        "projects/h2epr/tests/configuration/test_scenario_configuration_admission.py",
+        "projects/h2epr/tests/agents/test_singhealth_roster_release.py",
+        "projects/h2epr/tests/agents/test_singhealth_scenario_mapping_release.py",
+        "projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_admission.py",
+        "projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_release.py",
+        "projects/h2epr/tests/execution/test_singhealth_executable_assembly.py",
+        "projects/h2epr/tests/execution/test_singhealth_executable_release.py",
+        "projects/h2epr/tests/execution/test_singhealth_full_roster_runtime.py",
+        "projects/h2epr/tests/execution/test_singhealth_lifecycle_rules.py",
+        "projects/h2epr/tests/execution/test_singhealth_participant_policies.py",
+        "projects/h2epr/tests/execution/test_singhealth_policy_admission.py",
+        "projects/h2epr/tests/execution/test_singhealth_policy_catalog.py",
+        "projects/h2epr/tests/execution/test_singhealth_policy_realization_release.py",
+        "projects/h2epr/tests/execution/test_singhealth_run_release.py",
+        "projects/h2epr/tests/execution/test_singhealth_scenario_rules.py",
+        "projects/h2epr/tests/agents/test_samsung_note7_lineage_binding.py",
+        "projects/h2epr/tests/agents/test_samsung_note7_lineage_conformance.py",
+        "projects/h2epr/tests/agents/test_samsung_note7_mapping_scenario_release.py",
+        "projects/h2epr/tests/agents/test_samsung_note7_roster_release.py",
+        "projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_admission.py",
+        "projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_release.py",
+        "projects/h2epr/tests/execution/test_samsung_note7_full_roster_execution.py",
+    }
+)
+RETAINED_EVENT_TEST_PREFIXES = (
+    "test_panic_",
+    "test_singhealth_",
+    "test_samsung_note7_",
+)
 
 
 def _repository_paths(*pathspecs: str) -> tuple[Path, ...]:
@@ -218,3 +254,29 @@ def test_publication_surface_local_links_resolve() -> None:
                     f"missing link target: {destination}"
                 )
     assert not failures, "publication link failures:\n" + "\n".join(failures)
+
+
+def test_event_test_module_names_follow_slug_policy() -> None:
+    """Keep historical test locators closed while new modules use full slugs."""
+
+    test_modules = {
+        path.relative_to(REPOSITORY_ROOT).as_posix(): path
+        for path in _repository_paths("projects/h2epr/tests")
+        if path.name.startswith("test_") and path.suffix == ".py"
+    }
+    missing = sorted(RETAINED_EVENT_TEST_LOCATORS - set(test_modules))
+    failures = [
+        f"retained event-test locator is missing: {path}" for path in missing
+    ]
+
+    for relative, path in sorted(test_modules.items()):
+        if relative in RETAINED_EVENT_TEST_LOCATORS:
+            continue
+        if path.name.startswith(CANONICAL_EVENT_TEST_PREFIXES):
+            continue
+        if path.name.startswith(RETAINED_EVENT_TEST_PREFIXES):
+            failures.append(
+                f"new shorthand event-test locator is not admitted: {relative}"
+            )
+
+    assert not failures, "event-test locator failures:\n" + "\n".join(failures)
