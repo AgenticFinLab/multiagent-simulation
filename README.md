@@ -9,8 +9,7 @@ broader computational-social-science scenarios.
 
 1. Read [the development-environment guide](docs/development-environment.md)
    and install the environment appropriate to your task.
-2. Review [the repository structure](docs/structure.md),
-   [framework contract](docs/framework-contract.md), and
+2. Review [the repository structure](docs/structure.md) and
    [simulation guide](docs/run-simulation.md).
 3. Explore the standard scenarios in [`examples/`](examples/) and their
    matching configurations in [`configs/`](configs/). Each scenario runner
