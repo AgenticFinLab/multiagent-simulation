@@ -15,6 +15,8 @@ self-hash, or outer checksum is never sufficient for publication; the
 publisher rederives semantic lineage, replay, graph coverage, and deterministic
 Rule output.
 
-The sole current run release is [H2EPR-0196 East Palestine Train
-Derailment, Rule](east_palestine_train_derailment/rule/). With one current
-event, cross-event conformance is not applicable.
+Current run releases are [H2EPR-0196 East Palestine Train Derailment,
+Rule](east_palestine_train_derailment/rule/) and [H2EPR-0551 Angola Yellow
+Fever Outbreak of 2016, Rule](angola_yellow_fever_outbreak/rule/). The
+[two-event Rule conformance release](cross-event/rule/) covers the complete
+current registry.

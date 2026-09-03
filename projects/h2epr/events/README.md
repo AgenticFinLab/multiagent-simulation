@@ -10,8 +10,9 @@ exists and validates. The registry may be empty while the framework is being
 validated; an empty registry makes no event-result claim.
 
 The current registry contains [H2EPR-0196 East Palestine Train
-Derailment](east_palestine_train_derailment/), with Rule implemented and LLM
-and RuleLLM planned.
+Derailment](east_palestine_train_derailment/) and [H2EPR-0551 Angola Yellow
+Fever Outbreak of 2016](angola_yellow_fever_outbreak/). Both implement Rule;
+LLM and RuleLLM remain planned.
 
 Use the maintained [event entry template](../templates/event-entry.md) for the
 reader-facing landing page and keep its four completion-state sections in the

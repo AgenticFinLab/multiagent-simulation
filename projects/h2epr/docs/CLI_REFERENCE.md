@@ -61,7 +61,7 @@ python -B -m h2epr.cli materialize \
 
 Materialize B into a distinct physical root with the same logical locator,
 then materialize an identity probe with a distinct locator and
-`--identity-variant opaque-generated-ids`. Use the two conformance/publication
+`--identity-variant generated-id-probe`. Use the two conformance/publication
 commands only after all roots pass direct validation. The release guide owns
 the evidence interpretation.
 

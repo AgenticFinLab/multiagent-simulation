@@ -18,9 +18,12 @@ assets, never to common Python. The machine authority for published events is
 [events/current-events.json](events/current-events.json); only rows in that
 registry are current results.
 
-The current publication registry contains one completed Rule event:
-[H2EPR-0196 East Palestine Train Derailment](events/east_palestine_train_derailment/).
-Cross-event conformance is therefore not applicable yet.
+The current publication registry contains two completed Rule events:
+[H2EPR-0196 East Palestine Train Derailment](events/east_palestine_train_derailment/)
+and [H2EPR-0551 Angola Yellow Fever Outbreak of
+2016](events/angola_yellow_fever_outbreak/). Their
+[cross-event release](releases/cross-event/rule/) verifies the shared package,
+runtime, output, replay, graph, transport, and claim-boundary contracts.
 
 ## Method boundary
 

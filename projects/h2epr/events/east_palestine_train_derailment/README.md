@@ -26,7 +26,10 @@ The accepted canonical seed-0 Rule run is `run.4cc6658590d5447313ff426b`. Packag
 
 Seven actors execute 11 coordinates. The trace has 405 records; the trace-derived graph has 432 nodes and 1,056 edges; terminal transport has zero unresolved messages. Canonical A/B outputs are byte-identical, the generated-ID perturbation preserves semantic trace/graph and exact final state, and authoritative replay passes. The [simulation-only reading](../../reports/east_palestine_train_derailment/rule/simulation-reading.md) traverses every record, node, and edge. Raw custody remains under ignored `.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/current/`.
 
-This event is the sole row in `current-events.json`. Cross-event conformance is not applicable until at least two current events exist.
+This event is one of two rows in `current-events.json`. The
+[two-event Rule conformance release](../../releases/cross-event/rule/) covers
+the complete registry and passes with receipt
+`0d5d612447e8541e4f5f2f387574649a9d7f2f7880e9de7f31a674445bf88364`.
 
 Validation uses `python -B -m h2epr.cli validate-package`, three fresh materializations, independent `publish-run-release`, `python -B -m h2epr.cli validate-registry`, and the complete dependency-light unittest suite from the repository root with `PYTHONPATH=projects/h2epr/src:projects/h2epr/tests`.
 
@@ -36,4 +39,6 @@ The current result supports dataset-conditioned semantic construction, package a
 
 It does not support historical fit, parameter calibration, held-out evaluation or performance, cleanup or policy effectiveness, medical or environmental causality, scientific validity, or universal generality. Process labels such as `filed`, `characterization`, and `announced` do not prove downstream implementation or real-world outcome.
 
-The next legal action is a separately admitted perturbation or future backend comparison after explicit authorization. This release does not authorize LLM/RuleLLM development, scientific evaluation, or construction of a second real event.
+The next legal action is a separately authorized third unseen event,
+perturbation, or future backend comparison. This release does not authorize
+LLM/RuleLLM development or scientific evaluation.

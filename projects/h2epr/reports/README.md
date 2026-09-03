@@ -14,5 +14,7 @@ belong in a simulation-only reading.
 Build diaries, audits, supervisor notes, and migration records remain in
 ignored `.local-runtime/` project memory.
 
-The current complete-output reading is [H2EPR-0196 East Palestine Train
-Derailment, Rule](east_palestine_train_derailment/rule/simulation-reading.md).
+Current complete-output readings cover [H2EPR-0196 East Palestine Train
+Derailment, Rule](east_palestine_train_derailment/rule/simulation-reading.md)
+and [H2EPR-0551 Angola Yellow Fever Outbreak of 2016,
+Rule](angola_yellow_fever_outbreak/rule/simulation-reading.md).

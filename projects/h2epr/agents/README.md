@@ -17,7 +17,8 @@ settings, runtime IDs, and successful outcomes belong elsewhere. Population
 choice units live under [populations/](../populations/).
 
 Current event assets are discoverable only through
-[events/current-events.json](../events/current-events.json). Its current
-participant release is [H2EPR-0196 East Palestine Train
-Derailment](rosters/east_palestine_train_derailment/). Empty directories are
-not evidence of an accepted participant release.
+[events/current-events.json](../events/current-events.json). Current
+participant releases are [H2EPR-0196 East Palestine Train
+Derailment](rosters/east_palestine_train_derailment/) and [H2EPR-0551 Angola
+Yellow Fever Outbreak of 2016](rosters/angola_yellow_fever_outbreak/). Empty
+directories are not evidence of an accepted participant release.
