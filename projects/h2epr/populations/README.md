@@ -13,4 +13,6 @@ When the dataset exposes no microdata, the model records that limitation
 instead of inventing individual trajectories.
 
 Current models are reached through the event rows in
-[events/current-events.json](../events/current-events.json).
+[events/current-events.json](../events/current-events.json). H2EPR-0196 uses
+the [East Palestine residents](models/east_palestine_train_derailment/east_palestine_residents.md)
+Population Model.

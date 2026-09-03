@@ -19,3 +19,11 @@ The logical-name sequence is exactly `event_spec`, `frozen_evidence`,
 classes, and all scientific claim exclusions are required. Admission validates
 the exposed Draft stage, episode, participant, and action structure in addition
 to file identity.
+
+The machine-required vocabulary is exact. `prohibited_inputs` must include
+`reference_epg`, `held_out_suffix`, `evaluation_only_content`,
+`external_research`, and `network_retrieval`. `claim_boundary.does_not_support`
+must include `held-out evaluation`, `historical fit`, `parameter calibration`,
+`causal validity`, `scientific validity`, and `universal generality`.
+Additional exclusions may be appended, but a synonym such as `held-out
+performance` does not replace the required `held-out evaluation` token.

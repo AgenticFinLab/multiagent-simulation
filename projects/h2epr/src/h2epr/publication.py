@@ -140,8 +140,10 @@ def publish_rule_run_release(
 
 This compact release records the dataset-conditioned Rule materialization of
 `{manifest['event_id']}`. Raw trace, state, seals, replay output, and Generated
-EPG bytes remain in ignored local custody at
+EPG bytes remain in ignored local custody. The receipt records this logical
+custody locator:
 `{receipt['custody']['relative_locator']}`.
+Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 

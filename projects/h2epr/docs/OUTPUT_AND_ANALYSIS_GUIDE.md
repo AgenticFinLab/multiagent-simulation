@@ -96,3 +96,8 @@ A publishable reading names exact identities, coverage counts, scope,
 trajectory, mechanisms, terminal state, limitations, and falsifiers. It uses
 natural prose and compact tables where they clarify repeated mappings. Build
 history, supervisor dialogue, and defensive process narration stay local.
+
+Use exactly the five level-two sections in the maintained simulation-reading
+template. Evidence-class labels and event-specific analysis belong within
+those sections; interpretation may be a level-three subsection of `Mechanism
+reading`.

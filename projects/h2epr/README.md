@@ -18,6 +18,10 @@ assets, never to common Python. The machine authority for published events is
 [events/current-events.json](events/current-events.json); only rows in that
 registry are current results.
 
+The current publication registry contains one completed Rule event:
+[H2EPR-0196 East Palestine Train Derailment](events/east_palestine_train_derailment/).
+Cross-event conformance is therefore not applicable yet.
+
 ## Method boundary
 
 Construction admits exactly three files for a selected event:

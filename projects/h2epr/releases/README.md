@@ -14,3 +14,7 @@ Raw traces and graphs remain under ignored custody. A producer's success flag,
 self-hash, or outer checksum is never sufficient for publication; the
 publisher rederives semantic lineage, replay, graph coverage, and deterministic
 Rule output.
+
+The sole current run release is [H2EPR-0196 East Palestine Train
+Derailment, Rule](east_palestine_train_derailment/rule/). With one current
+event, cross-event conformance is not applicable.

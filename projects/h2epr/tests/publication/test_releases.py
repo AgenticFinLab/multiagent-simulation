@@ -239,6 +239,9 @@ class PublicationAdversarialTests(unittest.TestCase):
         )
         self.assertEqual(self.event.event_id, summary["event_id"])
         _assert_inventory(self, release)
+        readme = (release / "README.md").read_text(encoding="utf-8")
+        self.assertIn("logical\ncustody locator:", readme)
+        self.assertIn("physical directories may differ", readme)
 
     def test_publisher_rejects_resealed_graph_identity_forgery(self) -> None:
         forged = self.root / "forged-graph"

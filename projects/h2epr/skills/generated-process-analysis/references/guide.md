@@ -59,3 +59,8 @@ Publish run identities, exact coverage counts, trajectory and graph ledgers,
 direct findings, mechanism attributions, interpretations, anomalies, exposure,
 limitations, routed findings, and next legal action. The report is
 simulation-only unless a separately accepted evaluation protocol says more.
+
+The formal simulation reading keeps exactly the five level-two headings in
+`templates/simulation-reading.md`. Separate interpretation with an evidence
+label or a level-three subsection under `Mechanism reading`; “separate” does
+not mean adding a sixth level-two chapter.

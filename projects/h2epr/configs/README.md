@@ -15,4 +15,6 @@ endpoints are never tracked.
 
 Use [scenario-configuration-template.md](scenario-configuration-template.md).
 Current configurations are listed indirectly by
-[events/current-events.json](../events/current-events.json).
+[events/current-events.json](../events/current-events.json). The current
+H2EPR-0196 values are under
+[`east_palestine_train_derailment/`](east_palestine_train_derailment/).

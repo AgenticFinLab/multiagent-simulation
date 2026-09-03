@@ -23,6 +23,11 @@ The Source Profile must state:
 - transformations or aggregation that construction will perform; and
 - the strongest permitted and prohibited claims.
 
+Use the exact prohibited-input and claim-exclusion tokens printed in the
+[Source Profile template](../templates/source-profile/README.md). They are
+contract vocabulary, not free-form labels; additional reader-facing synonyms
+may be added only after the required set is present.
+
 Stop if the requested event cannot be identified without protected-directory
 discovery, if any permitted byte drifts, or if a source conflict would need an
 unrecorded repair.

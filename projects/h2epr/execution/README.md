@@ -12,4 +12,6 @@ implementation, provenance, parser, retry, and failure contracts exist.
 Use [backend-realization-template.md](backend-realization-template.md) and
 [execution-cycle-closeout-template.md](execution-cycle-closeout-template.md).
 Accepted realizations are reached through
-[events/current-events.json](../events/current-events.json).
+[events/current-events.json](../events/current-events.json). The current Rule
+realization is [H2EPR-0196 East Palestine Train
+Derailment](east_palestine_train_derailment/rule/).

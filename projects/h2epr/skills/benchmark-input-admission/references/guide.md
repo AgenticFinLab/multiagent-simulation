@@ -46,6 +46,8 @@ must propagate into the package, run, report, and any comparison claim.
    episodes, participants, names, types, roles, actions, and timestamps.
 6. Record dataset shape defects rather than silently repairing them.
 7. State dataset limitations and the complete scientific claim exclusion set.
+   Copy the machine tokens from the Source Profile template; do not substitute
+   prose synonyms for required values.
 8. Self-hash the profile with its hash field omitted, validate the schema, and
    hand off the exact profile identity.
 
@@ -73,3 +75,9 @@ the three file hashes and sizes, exposure mode, protocol eligibility, all
 prohibited classes, dataset limitations, validation command and result, Git
 state, and next legal action. No semantic asset may be started after a failed
 or drifting admission.
+
+The minimum exact `does_not_support` set is `held-out evaluation`, `historical
+fit`, `parameter calibration`, `causal validity`, `scientific validity`, and
+`universal generality`. Terms such as `held-out performance` or `causality`
+may be useful additions, but they do not satisfy the corresponding machine
+token.

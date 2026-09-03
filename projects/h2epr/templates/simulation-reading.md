@@ -1,5 +1,9 @@
 # Simulation reading template
 
+Keep the five `##` sections below in this exact order. Put evidence labels,
+interpretation, graph ledgers, or event-specific discussion inside them as
+paragraphs, tables, or `###` subsections; do not add a peer-level `##` section.
+
 ## Run identity
 
 Record event, package, backend, realization, configuration, seed/model,
@@ -26,7 +30,7 @@ name sounds temporary.
 
 Explain which participant, backend, environment, transport, or reducer
 mechanisms produced the trajectory. Separate direct run evidence from
-interpretation.
+interpretation. An explicit `### Interpretation` subsection is allowed here.
 
 ## Limitations
 

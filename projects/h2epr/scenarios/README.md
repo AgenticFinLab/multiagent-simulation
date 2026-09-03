@@ -13,4 +13,6 @@ and an exact checksum inventory. Use
 and [scenario-mechanism-template.md](scenario-mechanism-template.md).
 
 Accepted event directories are listed in
-[events/current-events.json](../events/current-events.json).
+[events/current-events.json](../events/current-events.json). The sole current
+Scenario is [H2EPR-0196 East Palestine Train
+Derailment](east_palestine_train_derailment/).
