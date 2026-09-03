@@ -1,0 +1,1 @@
+"""Experiment admission tests."""

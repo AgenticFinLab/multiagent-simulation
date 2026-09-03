@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.event-package-assembly.v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "assembly_id",
+    "assembly_version",
+    "event_id",
+    "package_id",
+    "package_version",
+    "compiler_id",
+    "source_profile",
+    "semantic_releases",
+    "backend_releases",
+    "semantic_assembly_sha256",
+    "backend_catalog_sha256",
+    "assembly_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.event-package-assembly.v4"},
+    "assembly_id": {"type": "string", "minLength": 1},
+    "assembly_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "package_id": {"type": "string", "minLength": 1},
+    "package_version": {"type": "string", "minLength": 1},
+    "compiler_id": {"const": "h2epr.semantic-package-compiler.v4"},
+    "source_profile": {"$ref": "#/$defs/artifact"},
+    "semantic_releases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roster", "participant_interfaces", "scenario_definition", "scenario_configuration"],
+      "properties": {
+        "roster": {"$ref": "#/$defs/release"},
+        "participant_interfaces": {"$ref": "#/$defs/release"},
+        "scenario_definition": {"$ref": "#/$defs/release"},
+        "scenario_configuration": {"$ref": "#/$defs/release"}
+      }
+    },
+    "backend_releases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "llm", "rulellm"],
+      "properties": {
+        "rule": {"$ref": "#/$defs/backend"},
+        "llm": {"$ref": "#/$defs/backend"},
+        "rulellm": {"$ref": "#/$defs/backend"}
+      }
+    },
+    "semantic_assembly_sha256": {"$ref": "#/$defs/sha"},
+    "backend_catalog_sha256": {"$ref": "#/$defs/sha"},
+    "assembly_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "relative_path", "artifact_sha256"],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "relative_path": {"$ref": "#/$defs/path"},
+        "artifact_sha256": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_id", "release_root", "manifest_sha256"],
+      "properties": {
+        "release_id": {"type": "string", "minLength": 1},
+        "release_root": {"$ref": "#/$defs/path"},
+        "manifest_sha256": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "backend": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "release_id", "release_root", "manifest_sha256"],
+          "properties": {
+            "status": {"const": "implemented"},
+            "release_id": {"type": "string", "minLength": 1},
+            "release_root": {"$ref": "#/$defs/path"},
+            "manifest_sha256": {"$ref": "#/$defs/sha"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {"status": {"const": "planned"}}
+        }
+      ]
+    }
+  }
+}

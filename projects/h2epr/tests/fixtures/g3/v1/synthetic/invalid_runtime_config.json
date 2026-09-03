@@ -1,6 +1,0 @@
-{
-  "backend": "rule",
-  "model": "forbidden-model",
-  "remote_ray_address": "ray://public.example.invalid:10001",
-  "resume": true
-}

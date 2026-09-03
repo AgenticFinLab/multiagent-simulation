@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.source-profile.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "profile_version",
+    "event_id",
+    "event_slug",
+    "exposure_mode",
+    "protocol_eligibility",
+    "allowed_inputs",
+    "prohibited_inputs",
+    "discovery_policy",
+    "dataset_limitations",
+    "claim_boundary",
+    "profile_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.source-profile.v3"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "profile_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "event_slug": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"},
+    "exposure_mode": {"enum": ["prefix_clean", "full_draft_exposed"]},
+    "protocol_eligibility": {"type": "string", "minLength": 1},
+    "allowed_inputs": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/input"}
+    },
+    "prohibited_inputs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "discovery_policy": {"const": "direct_paths_only_no_sibling_inventory"},
+    "dataset_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"$ref": "#/$defs/claim"},
+    "profile_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logical_name", "relative_path", "sha256", "size_bytes"],
+      "properties": {
+        "logical_name": {"enum": ["event_spec", "frozen_evidence", "draft_epg"]},
+        "relative_path": {"$ref": "#/$defs/path"},
+        "sha256": {"$ref": "#/$defs/sha"},
+        "size_bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supports", "does_not_support"],
+      "properties": {
+        "supports": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "does_not_support": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

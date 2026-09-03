@@ -1,208 +1,23 @@
-# H2EPR Rule execution
+# Backend realization
 
-This directory owns the reviewed assets that turn an accepted, non-executable
-Scenario Configuration into a deterministic Rule execution. It sits between
-semantic configuration and generated run output; it does not replace either
-one.
+This directory owns reviewed executable projections of admitted semantic
+assets. A realization maps every configured decision unit and intent to one
+implemented backend without changing roster, scenario, observation,
+authority, or environment meaning.
 
-## Responsibilities
+Current releases live at `<event>/<backend>/`. Run identities and evidence
+live under [releases/](../releases/).
 
-| Asset | Responsibility |
+Rule realization records deterministic policy and exact implementation
+sources. A future LLM realization must record prompt projection, parser, model
+controls, retries, and typed failures. RuleLLM additionally owns constraint,
+repair, rejection, and fallback semantics.
+
+| Event | Current realization |
 |---|---|
-| Policy Realization | Maps every configured actor capability and selected Scenario policy to explicit, versioned Rule behavior, including configuration inputs, replayable private state, no-intent reasons, revisit triggers, lifecycle implementations, and failure behavior |
-| executable successor package | Pins the accepted semantic parents and closes actor, carrier, policy, lifecycle, component, and completion coverage |
-| runtime bundle | Materializes the exact actor registry, participant artifacts, initial state, routes, exogenous inputs, policy registry, clock, environment, reducer, and compiler inputs used by a run |
-| run and graph record | Preserves deterministic trace, seals, replay, generated-EPG identity, and compact verification evidence |
+| H2EPR-0288 Panic of 1907 | [Rule](panic_1907/rule/) |
+| H2EPR-0616 SingHealth Data Breach | [Rule](singhealth_data_breach/rule/) |
+| H2EPR-0481 Galaxy Note7 Recall | [Rule](samsung_note7_battery_recall/rule/) |
 
-The accepted Scenario Configuration remains the authority for actor assembly,
-opening records, selections, sensitivities, and completion meaning. Agent
-Definitions and Population Models remain the authorities for participant
-semantics. Policy Realization supplies implementation behavior but cannot add
-an observation, intent, authority, route, lifecycle, or result absent from
-those parents.
-
-## Authoring and closeout method
-
-Use the project
-[full-roster Rule-execution Skill](../skills/full-roster-rule-execution/SKILL.md)
-after configuration admission and bounded lineage conformance have been
-accepted and a full-event engineering extension is authorized. Its
-[execution-cycle template](execution-cycle-closeout-template.md) keeps the
-coverage inventory, product verdicts, run custody, verification, and claim
-boundary in one compact view. The fields may be carried by existing manifests,
-receipts, READMEs, and reviews; the method does not require another release
-document merely to repeat them.
-
-## Event layout
-
-Execution assets are event-qualified and use the same event directory names as
-the rest of H2EPR:
-
-```text
-execution/
-  cross-event-conformance-v0.1/
-  cross-event-conformance-v0.2/
-  panic_1907/
-    policy-realization-v0.1/
-    full-roster-rule-v0.1/
-    run-and-graph-v0.1/
-  singhealth_data_breach/
-    policy-realization-v0.1/
-    full-roster-rule-v0.1/
-    run-and-graph-v0.1/
-  samsung_note7_battery_recall/
-    policy-realization-v0.1/
-    full-roster-rule-v0.1/
-    run-and-graph-v0.1/
-```
-
-Event-specific assets remain under the matching event slug. The cross-event
-directory contains only a comparison of accepted event releases and does not
-own either event's semantics. Create a directory only when its artifact exists.
-A release package may keep a machine document, concise guide, review, manifest,
-and checksum inventory together; the workflow does not require a separate
-report for every policy or actor.
-
-## Current releases
-
-The [Panic of 1907 Policy Realization v0.1](panic_1907/policy-realization-v0.1/)
-closes the first event's 12 participant implementations, nine selected
-Scenario policies, and thirteen lifecycle families.
-
-The accepted
-[Panic of 1907 full-roster Rule package v0.1](panic_1907/full-roster-rule-v0.1/)
-then binds all sixteen actor carriers, seventeen capability projections, 127
-actor-qualified actions, eighty-eight decision rules, thirteen lifecycle
-families, and nine concrete runtime components to one deterministic bundle.
-It is execution-eligible but is not itself a canonical run or generated EPG.
-
-The accepted
-[Panic of 1907 run and generated graph v0.1](panic_1907/run-and-graph-v0.1/)
-records two byte-identical full-roster materializations, successful
-authoritative replay, and a trace-closed generated EPG. Full traces and graphs
-remain in ignored event custody; the tracked release retains their exact
-identities and compact closure evidence.
-
-The accepted
-[SingHealth Data Breach Policy Realization v0.1](singhealth_data_breach/policy-realization-v0.1/)
-maps all thirteen configured actor placements, nine selected Scenario
-policies, and eleven lifecycle families to closed Rule implementations. It is
-the semantic parent of the executable successor, not itself a runtime or
-generated graph.
-
-The accepted
-[SingHealth Data Breach full-roster Rule package v0.1](singhealth_data_breach/full-roster-rule-v0.1/)
-binds thirteen independent carriers, 74 actor-qualified actions, 41 decision
-rules, eleven lifecycle families, and nine concrete runtime components. Its
-event-driven clock preserves the configuration's five event anchors and ten
-same-time precedence barriers without adding intraday precision. The package
-is execution-eligible but is not itself a canonical run or generated EPG.
-
-The accepted
-[SingHealth Data Breach run and generated graph v0.1](singhealth_data_breach/run-and-graph-v0.1/)
-records two byte-identical materializations, successful authoritative replay,
-and a trace-closed generated EPG. It is the second event consumer of the shared
-H2EPR execution-closure and custody kernel; event behavior and graph semantics
-remain in the SingHealth scenario module.
-
-The accepted
-[cross-event Rule execution conformance v0.1](cross-event-conformance-v0.1/)
-admits both compact run releases and their executable parents, compares their
-shared document and graph grammar, and preserves their distinct coverage
-vectors. It remains the immutable two-event engineering baseline.
-
-The accepted
-[Note7 Policy Realization v0.1](samsung_note7_battery_recall/policy-realization-v0.1/)
-maps eight configured actor-capability placements, 22 commitments, 37 intents,
-nine selected policies, and twelve lifecycle families to closed Rule
-implementations.
-
-The accepted
-[Note7 full-roster Rule package v0.1](samsung_note7_battery_recall/full-roster-rule-v0.1/)
-binds eight independent carriers, 37 action bindings, 22 decision rules, 24
-routes, twelve lifecycles, and nine runtime components over 50 UTC logical
-coordinates.
-
-The accepted
-[Note7 run and generated graph v0.1](samsung_note7_battery_recall/run-and-graph-v0.1/)
-records two byte-identical materializations, authoritative replay, and a
-trace-closed generated EPG. It is the third consumer of the shared H2EPR
-execution-closure and custody kernel.
-
-The accepted
-[three-event conformance successor v0.2](cross-event-conformance-v0.2/)
-re-admits all three run releases and executable parents, verifies their shared
-document, replay, determinism, graph, custody, and claim contracts, and retains
-their unequal event-specific coverage vectors.
-
-## Shared execution kernel
-
-The importable [`h2epr.execution`](../src/h2epr/execution/) package owns the
-parts of run closure that do not depend on an event domain:
-
-- the ordered eight-document run surface and compact six-document release
-  surface;
-- trace, terminal seal, replay, graph-parent, graph-reference, and execution
-  receipt validation;
-- byte-level and canonical comparison of independent materializations;
-- strict JSON and repository-contained path handling;
-- deterministic participant-decision and lifecycle state-graph interfaces;
-  and
-- non-destructive writing and checksumming of ignored run custody.
-
-The kernel accepts event identity and expected coverage as explicit inputs. It
-does not contain actor IDs, participant rules, institutional policies,
-event-specific state, clock schedules, reducers, or graph semantics. Those
-remain in the relevant scenario module. Conformance against the accepted Panic
-run shows that the shared algorithms reproduce its compact comparison and
-graph receipt exactly. SingHealth and Note7 consume the same shared
-participant, lifecycle, closure, and custody interfaces while retaining their
-event-qualified semantics and registries, without changing either earlier
-release.
-
-## Admission boundary
-
-An executable successor is admitted only when:
-
-1. its configuration, release, mapping, roster, and Scenario parents resolve
-   by exact identity and content hash;
-2. every configured actor capability, population unit, structural selection,
-   exogenous input, decision commitment, intent placement, selected policy,
-   and required lifecycle has exactly one declared realization or an explicit
-   non-emitting disposition;
-3. actor-specific profiles, postures, and other fixed policy parameters resolve
-   through explicit pointers into the hash-pinned configuration;
-4. implementation IDs resolve through the H2EPR code registry without dynamic
-   imports or event-local defaults;
-5. participant intent, environment adjudication, authoritative reduction, and
-   later observation remain separate;
-6. unsupported or incomplete inputs are rejected before a run;
-7. the same package and seed are materialized twice and must yield identical
-   runtime bundles, traces, seals, replay receipts, and generated EPGs; and
-8. the output claim remains limited to uncalibrated mechanism coverage.
-
-These are cross-object checks, not eight independent approval steps.
-The closed structural profiles are documented under [`schemas/`](schemas/).
-
-Coverage is counted at the configured actor-capability placement. A shared
-population capability instantiated for several actors is checked once for each
-actor's information, state, parameters, and lifecycle scope, while its released
-semantic identity remains singular. Branch tests close every declared intent
-or non-emitting response; a canonical event run follows one predeclared policy
-path and is not shaped to emit every alternative.
-
-## Framework boundary
-
-All H2EPR execution code lives under `projects/h2epr/src/h2epr`. MASim is a
-read-only base framework. H2EPR may consume its public event-process values,
-transport, reducer, trace, seal, and phased-runner interfaces, but cross-event
-H2EPR code remains part of H2EPR even after reuse has been demonstrated.
-
-## Output custody
-
-Large traces, state snapshots, replay materializations, and generated graphs
-are written to an event-qualified ignored run directory. The tracked release
-surface contains the code and inputs needed to reproduce them together with a
-compact manifest, receipt, checksum inventory, tests, and explanatory
-documentation. A larger generated artifact enters Git only through a separate
-release decision.
+All three bind the same registered `DeclarativeRuleBackend`. Event behavior
+resides in admitted mechanism and Rule-configuration assets.

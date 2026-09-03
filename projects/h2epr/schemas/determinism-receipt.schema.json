@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.determinism-receipt.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "package_sha256",
+    "binding_sha256",
+    "run_a_id",
+    "run_b_id",
+    "compared_artifacts",
+    "all_byte_identical",
+    "identity_conformance_receipt_sha256",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.determinism-receipt.v3"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "package_sha256": {"$ref": "#/$defs/sha"},
+    "binding_sha256": {"$ref": "#/$defs/sha"},
+    "run_a_id": {"type": "string", "minLength": 1},
+    "run_b_id": {"type": "string", "minLength": 1},
+    "compared_artifacts": {"type": "array", "minItems": 8, "items": {"$ref": "#/$defs/comparison"}},
+    "all_byte_identical": {"const": true},
+    "identity_conformance_receipt_sha256": {"$ref": "#/$defs/sha"},
+    "receipt_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_role", "run_a_sha256", "run_b_sha256", "identical"],
+      "properties": {
+        "artifact_role": {"type": "string", "minLength": 1},
+        "run_a_sha256": {"$ref": "#/$defs/sha"},
+        "run_b_sha256": {"$ref": "#/$defs/sha"},
+        "identical": {"const": true}
+      }
+    }
+  }
+}

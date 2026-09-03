@@ -52,15 +52,16 @@ jobs:
         run: python -m pip install -e "projects/h2epr[test]"
       - name: Build the H2EPR wheel
         run: python -m pip wheel --no-deps --wheel-dir .ci/wheels projects/h2epr
-      - name: Validate contracts, construction, artifacts, and configuration
+      - name: Validate current contracts, assets, and publication boundaries
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: >-
           python -B -m pytest -p no:cacheprovider
-          projects/h2epr/tests/contracts
-          projects/h2epr/tests/construction
-          projects/h2epr/tests/g2
-          projects/h2epr/tests/configuration
+          projects/h2epr/tests/standards
+          projects/h2epr/tests/semantic
+          projects/h2epr/tests/benchmark
+          projects/h2epr/tests/experiments
+          projects/h2epr/tests/publication
 
   runtime-and-conformance:
     runs-on: ubuntu-latest
@@ -118,28 +119,11 @@ jobs:
           source=Path(lmbase.__file__).resolve();
           assert source == root/"__init__.py", (source, root);
           assert BlockBasedStoreManager.__module__ == "lmbase.utils.tools"'
-      - name: Validate Agent bindings and lineage conformance
+      - name: Validate execution, replay, graph, and cross-event closure
         env:
           MPLBACKEND: Agg
           PYTHONDONTWRITEBYTECODE: "1"
           RAY_USAGE_STATS_ENABLED: "0"
         run: >-
           python -B -m pytest -p no:cacheprovider
-          projects/h2epr/tests/agents
-      - name: Validate full-roster execution and release closure
-        env:
-          MPLBACKEND: Agg
-          PYTHONDONTWRITEBYTECODE: "1"
-          RAY_USAGE_STATS_ENABLED: "0"
-        run: >-
-          python -B -m pytest -p no:cacheprovider
-          projects/h2epr/tests/execution
-      - name: Validate deterministic runtime and compilation
-        env:
-          MPLBACKEND: Agg
-          PYTHONDONTWRITEBYTECODE: "1"
-          RAY_USAGE_STATS_ENABLED: "0"
-        run: >-
-          python -B -m pytest -p no:cacheprovider
-          projects/h2epr/tests/g3
-          projects/h2epr/tests/g4
+          projects/h2epr/tests/runtime

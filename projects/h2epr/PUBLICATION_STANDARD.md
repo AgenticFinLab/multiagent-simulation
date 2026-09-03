@@ -1,108 +1,120 @@
-# Publication-facing research artifacts
+# Publication standard
 
-H2EPR keeps its research account separate from the records used to manage and
-verify the repository. Every tracked document should be intelligible to an
-external reader, while Agent Definitions, population models, and evidence
-syntheses should also be suitable for use as paper appendices or supplementary
-methods.
+A maintained H2EPR asset must let another contributor answer four questions
+without reconstructing chat or local development history:
 
-## Artifact responsibilities
+1. What does this asset own?
+2. Which exact inputs does it use?
+3. How can its claims be reproduced or falsified?
+4. What does it not establish?
 
-| Artifact | Primary reader and responsibility | Project metadata |
-|---|---|---|
-| Agent Definition or population model | Explains a participant, its evidence, information, state, mechanisms, choices, and limitations | Stable IDs, versions, review states, Git identities, and file hashes belong in a release manifest or other project record |
-| Evidence synthesis or source register | States the claims, source locations, temporal availability, interpretation, and withdrawal consequences | Source identifiers and evidence classes may be retained when they improve scholarly traceability |
-| Cross-participant interface account | Explains information routes, authority, lifecycles, and ownership across models | Mapping readiness and implementation decisions belong in the batch or release record |
-| Roster, event entry, release, mapping, configuration, receipt, or test record | Coordinates scope or verifies an exact repository object | May retain the minimum IDs, versions, statuses, paths, and hashes needed for that responsibility |
+Reader-facing Agent Definitions, Population Models, Scenario Definitions, and
+simulation readings should be concise enough for a paper appendix. Machine
+registries, manifests, receipts, and checksums make those accounts testable;
+they do not replace them.
 
-Project metadata must not be copied into a research artifact merely to show
-that a workflow step occurred. Conversely, a manifest or integrity record
-should not be rewritten as narrative prose when exact machine identity is its
-purpose.
+## Writing and evidence quality
 
-## Default reading path
+- Use direct prose, stable names, and only as much structure as the content
+  needs.
+- Separate dataset records, executable construction choices, generated facts,
+  and interpretation.
+- Give participant and scenario products a stable reading order, explicit
+  authority, dataset anchors, worked cases, falsification conditions,
+  limitations, and change triggers.
+- Declare meanings and value domains in semantic products. Put selected values
+  in shared or backend configuration.
+- Express participant outputs as intents and messages. Delivery, admission,
+  allocation, effects, and success remain environment-owned.
+- Record unresolved messages, excluded participants, source defects, missing
+  values, and open terminal fields as visible results.
+- State exposure and claim limits next to each result.
 
-The tracked repository has two complementary reading paths. Event entries
-present research-facing assets first: evidence, participant models,
-cross-participant semantics, Scenario semantics, and configuration design.
-They then link the reproducibility and release records that preserve exact
-inventory, mapping, admission, binding, conformance, manifest, and checksum
-identities. The second surface remains formal repository content; it is an
-appendix to the scholarly path rather than local working material.
+## Current-surface rule
 
-Ignored source archives, drafts, review notes, and status pointers may support
-construction, but they are not event authorities. A tracked research claim
-must remain intelligible without a local path or local working file. This
-reading convention does not require moving accepted assets, duplicating an
-event package, or adding a new approval step.
+The tracked repository publishes one current path for each asset role:
 
-## Frozen releases and current reading surfaces
+```text
+agents/defines/<event>/
+agents/rosters/<event>/
+agents/interfaces/<event>/
+populations/models/<event>/
+scenarios/<event>/
+configs/<event>/shared/
+configs/<event>/backends/<backend>/
+execution/<event>/<backend>/
+events/<event>/package/
+releases/<event>/<backend>/
+reports/<event>/<backend>/simulation-reading.md
+```
 
-An accepted, content-addressed release records the project boundary that
-existed when it was issued. Later editorial conventions do not justify
-rewriting that object and changing its identity. Status labels, candidate
-hashes, carrier classifications, or a then-eligible next stage may therefore
-remain in a frozen release-time review when they are necessary to understand
-what was accepted at that boundary.
+Paths and public Python imports do not carry development-generation suffixes.
+Schema files also have stable names under `schemas/`, cataloged by
+`schemas/catalog.json`.
 
-The current event entry and directory guides own the present reading path.
-They should distinguish a scholarly account from a release-time review, link
-the latest accepted endpoint, and explain older "next stage" language as an
-as-of-release statement. A short guide may organize immutable inputs and state
-their shared boundaries, but it must not reproduce their full claim ledger or
-silently replace their authority. Create a new semantic version only when the
-research content changes; use ordinary guide and index maintenance for
-editorial clarification.
+Machine documents keep explicit `schema_version`, semantic artifact IDs,
+content hashes, and release identities. These values are part of validation
+and replay, not a second reader-facing version hierarchy. A replaced tracked
+state remains recoverable through Git and the local history branch; it does
+not stay beside the current state as a compatibility directory, migration
+note, audit diary, or commit map.
 
-One interface account may cover a coherent participant batch or a complete
-event. This standard does not require a separate public interface document for
-every Agent or population model.
+## Identity and naming
 
-When a release first needs a machine identity, new participant records use
-`h2epr.agent-definition.<event_namespace>.<role-slug>` for Agent Definitions
-and `h2epr.population-model.<event_namespace>.<role-slug>` for population
-models. The release record assigns that identity once; the public title and
-body do not repeat it. Existing released identities remain stable compatibility
-identifiers rather than being renamed for appearance.
+Use the benchmark ID in machine identity and one stable lowercase event slug
+in paths. Backend names are exactly `rule`, `llm`, and `rulellm`.
 
-## Admission standard for research artifacts
+The backend-neutral package, complete manifest, each backend binding, H2EPR
+runtime, MASim kernel, run, trace, terminal state, Generated EPG, and compact
+release have distinct content identities. Attaching a backend must leave
+`package_sha256` unchanged.
 
-A new or changed publication-facing artifact should satisfy six questions:
+Templates and Skills keep stable paths and evolve through reviewed commits.
+An accepted event points only to current paths through
+`events/current-events.json`.
 
-1. **Scholarly account.** Does it explain the event-bound representation and
-   causal model in domain language that can be read without repository context?
-2. **Evidence and limits.** Are evidence use, hindsight, uncertainty,
-   calibration, and explanatory limits stated directly and without repeated
-   disclaimer language?
-3. **Clean public surface.** Are Git commits, file hashes, local paths, owner
-   decision codes, workflow states, production profiles, semantic versions,
-   release readiness labels, and implementation authorization notes absent?
-4. **Lifecycle memory.** If a sent request, direction, investigation, control,
-   or message can be delayed, rejected, fail, expire, or be superseded, does
-   declared persistent state let later behavior distinguish those outcomes
-   from an intent that was never issued?
-5. **Claim precision.** Is a claim split when its parts have different model
-   owners, evidence relations, or withdrawal consequences? Claims need not be
-   reduced to sentence fragments when those responsibilities remain the same.
-6. **Falsifiability.** Do the high-information cases include at least one
-   controlled change and the corresponding change, or invariance, in predicted
-   behavior?
+## Release quality
 
-These are content responsibilities, not six new documents or approvals. A
-standard participant row normally closes them in its Definition or population
-model, shared evidence record, concise review, and existing interface account.
+A Rule release requires:
 
-## Repository check
+- package and backend admission;
+- complete source and implementation inventories;
+- a sealed, hash-chained trace;
+- tick and run seals;
+- authoritative replay to exact terminal bytes;
+- zero unresolved transport;
+- a trace-derived Generated EPG with exact source-record coverage;
+- two byte-identical deterministic materializations;
+- generated-identity perturbation with unchanged trajectory semantics;
+- independent custody, lineage, count, summary, replay, graph, and checksum
+  verification; and
+- a complete-output simulation reading within the claim boundary.
 
-Agent Definitions and population models each use one exact ten-module reading
-profile across events. The profiles keep their different representation
-semantics: an Agent explains one defensible decision interface, while a
-population model preserves heterogeneous choice units and aggregation
-boundaries. Standard and deep production may differ in research and review
-depth, but not in the public module order.
+The publisher rebuilds evidence from admitted bytes and, for Rule, repeats the
+materialization in temporary custody. A producer-resealed trace, receipt, or
+boolean success field is not independent publication evidence.
 
-The participant profile checker screens both artifact classes for their module
-order, overview responsibilities, and project-only metadata. It is a small
-admission aid, not a substitute for evidence, historical, behavioral, or
-publication review. Release manifests and other integrity records remain
-outside this check because their purpose is to retain exact project identity.
+Large generated bytes stay in ignored custody. The tracked release contains
+only compact identities, counts, checks, exact reproduction commands, and
+checksums.
+
+## Experiment quality
+
+An experiment plan precedes execution and pins the complete planned
+denominator: package and binding rows, seeds, unique custody, model controls,
+comparison parity, scheduling, timeouts, failure policy, analysis definitions,
+and claim limits. A closeout accounts for every attempt, retry, failure,
+exclusion, and unavailable analysis. Only independently verified run releases
+enter a published comparison.
+
+## Commands and Git quality
+
+Reproduction commands start at the repository root and do not depend on hidden
+shell state, ignored source files, undeclared packages, or a network service.
+The committed tree must pass the same checks in a clean clone/archive.
+
+Use a few coherent commits with imperative Conventional Commit subjects. Keep
+framework changes, evidence rematerialization, and documentation closeout
+separable when that improves review. Do not mix MASim changes with H2EPR work.
+Generated custody, meeting notes, supervisor handoffs, local audit output, and
+development commit mappings do not enter tracked history.

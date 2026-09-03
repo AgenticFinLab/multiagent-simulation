@@ -1,171 +1,131 @@
-# H2EPR event modeling workflow
+# Workflow
 
-This workflow defines how an H2EPR event moves from a research question to a
-reviewed engineering baseline. Specialist methods under `skills/` describe
-how to produce individual artifacts; this document defines their order,
-authority, and stopping boundaries.
+## 1. Admit one event
 
-## Working principles
+Choose the H2EPR event ID and exposure mode. Resolve exactly
+`event_spec.json`, `frozen_evidence.json`, and `draft_epg.json`; record their
+paths and hashes in a Source Profile. Stop on an identity, hash, shape, or
+prohibited-input violation.
 
-- Every phase consumes named, versioned, or hash-identified inputs.
-- Evidence, participant semantics, scenario rules, configuration, machine
-  projection, runtime behavior, and evaluation have separate owners.
-- An accepted artifact is changed through a reviewed successor, not by silently
-  repairing downstream copies.
-- A configuration is non-executable until admission and binding have been
-  accepted for its exact identity.
-- Implement the smallest lineage that can test a new interface. Move to a
-  complete roster only after that interface is closed and a full-event
-  integration question is separately authorized.
-- Route defects to the layer that owns the meaning instead of adding hidden
-  defaults or implementation-only exceptions.
+## 2. Close the source roster
 
-## Event phases
+Extract every Draft participant occurrence. Assign each one to a named Agent,
+Population, initial context, world-state object, institutional process,
+outside-window record, or explicit source defect. Record aggregation,
+exclusion, and information loss before runtime work.
 
-| Phase | Required result | Stopping boundary |
-|---|---|---|
-| Frame the event | Accepted [Event Build Brief](event-build-brief-template.md) covering the research question, interval, evidence boundary, causal role map, roster, and semantic skeleton | Does not authorize participant production or code |
-| Define participants | Reviewed Agent Definitions and Population Models with evidence, a lightweight semantic interface review, and shared publication-facing interface coverage | Does not determine release membership or implementation |
-| Release the semantic roster | Hash-pinned inventory of the accepted participant products | Remains non-executable and makes no validity claim |
-| Close scenario and mapping | Event Scenario Definition, interface closure, and consolidated carrier mapping | Mapping cannot add scenario meaning; scenario cannot supply participant behavior |
-| Configure a purpose | Versioned actor/unit assembly, opening records, selections, sensitivities, and completion criteria | Configuration remains non-executable |
-| Admit the configuration | Schema, canonical identity, references, failure classes, fail-closed loading, and a static receipt | Admission supplies neither policy behavior nor a runtime carrier |
-| Bind a minimal lineage | Exact carrier projection and only the participant/environment policies needed for the selected lineage | Unselected roles and policies remain unbound |
-| Review conformance | Focused negative cases, deterministic trace/replay evidence, implementation review, and reusable method findings | Stops before broad simulation or scientific evaluation |
-| Realize complete Rule behavior | Independent Policy Realization covering every configured actor capability, decision commitment, intent, selected policy, required lifecycle, and declared failure behavior | Does not alter the accepted semantic configuration or authorize a run by itself |
-| Assemble full-roster execution | An executable successor package with exact semantic parents, complete carrier projection, participant policies, environment/reducer ownership, clock, routes, exogenous inputs, and fail-closed admission | Starts no run until the exact package and output boundary pass preflight |
-| Close a generated event graph | Repeated same-input Rule runs with identical trace and seals, successful replay, a trace-derived generated EPG, and compact integrity evidence | Establishes engineering mechanism coverage only, not calibration, historical fit, or scientific validity |
+## 3. Define active decision units
 
-Some early H2EPR release records identify these phases as E0 through E7. The
-names above are the maintained workflow vocabulary; the older identifiers
-remain useful for interpreting those records.
+Write one Agent Definition or Population Model for every active unit. Close
+dataset provenance, observation limits, state visibility, authority,
+admissible intents, parameter domains, environment-result boundaries, worked
+cases, falsification conditions, and limitations. Keep exact Rule or model
+settings out of these backend-neutral products.
 
-The final three phases are optional extensions of a conformance-complete
-event, not new requirements for every event build. They may be combined into
-one release cycle when policy, assembly, run, and graph evidence remain
-separately identifiable.
+## 4. Close participant interfaces
 
-When that extension is authorized, use the
-[full-roster Rule-execution Skill](skills/full-roster-rule-execution/SKILL.md)
-and its compact
-[execution-cycle template](execution/execution-cycle-closeout-template.md).
-They preserve the three product boundaries without requiring three parallel
-plans, approval records, or status documents.
+Publish the observation, intent, and lifecycle registries. Resolve every
+active actor to one semantic parent and close producers, consumers, routes,
+handlers, lifecycle states, and state owners. Any unresolved actor or intent
+stops construction.
 
-Scenario design and carrier mapping may inform one another, but both retain
-their own authority. Configuration admission and lineage binding may be
-reviewed in one bounded engineering change only when their outputs and
-acceptance questions remain separate.
+## 5. Define and configure the scenario
 
-## Opening and closing phases
+Define the event world, institutions, logical clock, observations,
+communication, action admission, concurrent effects, failure routing,
+termination, and annotations. Complete the Interface Closure.
 
-Open a new event with the
-[Event Build Brief template](event-build-brief-template.md), instantiated as
-the event's single coordination entry under [`events/`](events/README.md). A
-small event may keep its role map, roster, and semantic skeleton in the brief;
-a larger event may link separate versioned artifacts. In either case the brief
-remains the authority for the primary question, evidence and exposure boundary,
-current authorization, and scope-change policy. It is not a full Scenario
-Definition or an authorization for every phase on the roadmap. Complete its
-minimum profile and use conditional extensions only when the event triggers
-them.
+Publish `scenario-mechanism.json` with executable state fields, handlers,
+preconditions, effects, message kinds, annotation rules, conflict policy, and
+terminal invariants. Put the exact timeline, opening state, routes, and other
+shared selections in the shared configuration. Give every selected top-level
+value a dataset provenance pointer or an explicit construction-choice
+exemption.
 
-Apply the [phase closeout checklist](phase-closeout-checklist.md) before
-declaring any maintained phase complete, not after every edit, artifact, role,
-or production batch. Record the result in the existing artifact that owns
-closure whenever possible. The checklist provides common mainline,
-minimality, authority, evidence, integrity, and handoff questions while
-preserving the more specific verdicts of scholarly, semantic, carrier,
-configuration, or implementation reviews. Its core is intentionally short;
-the checks do not require separate reports or sign-offs, and phase- and
-risk-specific questions apply only to surfaces changed by the work.
+## 6. Compile the backend-neutral package
 
-## Protected inputs and construction exposure
+Validate all paths, hashes, actor identities, semantic parents, interfaces,
+routes, configuration provenance, and claim exclusions. Compile portable
+participant and scenario projections, then seal the package core before
+attaching a backend. `package_sha256` must exclude catalog and binding state.
 
-Choose the construction and claim mode before reading target material. Unless
-post-seal evaluation is explicitly authorized, repository searches, file
-inventories, retrieval indexes, prompts, and working sets exclude
-`reference_epg.json`, held-out suffixes, and evaluation-only directories. A
-Reference filename appearing in a checksum inventory may be verified as an
-identity without opening its content.
+## 7. Realize and bind a backend
 
-If a human, tool context, or builder sees protected target content, record the
-exposure and treat its target-specific descendants as full-draft-exposed. Do
-not relabel that context as clean. This operational rule applies to ordinary
-repository audits as well as event construction; it does not require a
-held-out experiment for routine architecture or method work.
+Choose `rule`, `llm`, or `rulellm`. Publish its configuration and Backend
+Realization, including exact implementation sources. Verify actor and action
+space parity with the package.
 
-Strict continuation, clean-builder, domain-transfer, and post-seal evaluation
-gates apply only when the corresponding claim or phase is separately
-authorized. They are not prerequisites for closing an ordinary event-framing,
-participant, scenario, or bounded engineering phase.
+Attach the backend through its registered factory. Recompute catalog,
+manifest, and binding identities while proving that the backend-neutral
+package hash did not change. A planned backend, unavailable factory, stale
+source hash, or identity mismatch stops before setup; no fallback backend is
+permitted.
 
-## Phase record
+## 8. Materialize into fresh custody
 
-Each completed phase must leave a discoverable record in an existing brief,
-manifest, release README, review, decision, or receipt. Together, the records
-must identify:
+For one verification run, materialize directly. Before a multi-event,
+multi-backend, or multi-seed study, publish and admit an experiment plan under
+[EXPERIMENT_STANDARD.md](EXPERIMENT_STANDARD.md).
 
-1. the event and phase;
-2. exact inputs and their identities;
-3. purpose, authorized endpoint, and excluded work;
-4. outputs and acceptance status;
-5. verification and unresolved findings; and
-6. the next legal action and its entry conditions.
+Write each run to a new ignored custody directory. At every coordinate the
+runtime uses one sealed pre-state, collects all decisions, applies one
+authoritative reduction, records transport, and seals the result. The run
+writes its manifest, trace, terminal state, tick seals, run seal, replay
+receipt, Generated EPG, and compact receipt.
 
-At closeout, use the project checklist to confirm that the work still answers
-the event question and is no deeper than necessary to test the intended
-interface. Avoid creating a second tracker when a brief, release manifest,
-review, decision, or receipt already carries this information.
+## 9. Verify determinism and publish
+
+Validate package identity, implementation inventories, trace chaining, tick
+and run seals, authoritative replay, graph provenance, endpoint closure, and
+terminal transport. Materialize the same deterministic input twice in fresh
+directories and require byte equality for every scientific output. Perturb
+only the generated run identity and require the same normalized decisions,
+dispositions, deltas, messages, annotations, and terminal state.
+
+The publisher independently rederives observation-to-decision-to-intent
+lineage, result counts, coordinate summaries, replay, graph construction, and
+custody checksums. It rematerializes the Rule variants in temporary custody
+before writing a compact release. Producer-supplied success flags are not
+publication evidence.
+
+Conflict tests also permute reducer input and opaque IDs. Distinct concurrent
+writers must be rejected together; identical writes must retain one semantic
+outcome independent of ordering.
+
+## 10. Read the complete generated process
+
+Describe the simulated trajectory before comparing it with a target. State
+the event package, backend, seed, exposure, run, trace, terminal-state, and
+graph identities. Traverse every trace record, graph node, and edge. Separate
+direct generated facts, mechanism attribution, interpretation, and
+limitations. Classify terminal fields as closed, persistent, or deliberately
+open.
+
+## 11. Register the current event
+
+Add the event to `events/current-events.json` only after every declared path
+exists, all package and release identities close, the reading is complete,
+and cross-event conformance passes. Adding an event must not require editing a
+hard-coded event tuple in common Python.
 
 ## Failure routing
 
 | Finding | Owning layer |
 |---|---|
-| Source, chronology, participant availability, or historical claim error | Evidence research |
-| Representation, mechanism, decision, parameter, or falsifier error | Participant research or Definition |
-| Institution, world state, routing, delivery, lifecycle, resource, adjudication, or termination gap | Event Scenario Definition |
-| Actor assembly, structural selection, opening record, sensitivity, or declared-purpose error | Scenario Configuration |
-| Semantic loss, ambiguous released identity, or carrier mismatch | Consolidated mapping |
-| Schema, canonicalization, hash, reference, or admission error | Configuration admission |
-| Hidden default, policy mismatch, or implementation-only state | Binding or policy implementation |
-| Missing actor, commitment, intent, selected-policy, lifecycle, or failure coverage | Policy Realization or executable-package admission |
-| Nondeterministic transition, trace, seal, or replay failure | Runtime and event-process implementation |
-| Graph item without trace provenance, unresolved graph identity, or nondeterministic compilation | H2EPR graph compiler |
-| Empirical or historical comparison problem | Separately authorized evaluation |
+| Missing or inconsistent dataset record | Source Profile or recorded source limitation |
+| Wrong participant aggregation | Roster or actor map |
+| Wrong information, authority, or intent semantics | Agent Definition, Population Model, or participant registry |
+| Wrong window, institution, or world meaning | Scenario Definition or Scenario Mechanism |
+| Wrong exact value or hidden default | Shared or backend configuration |
+| Poor Rule, LLM, or RuleLLM decision | Backend configuration or implementation |
+| Invalid authority, resource effect, or outcome | Environment |
+| Broken trace, seal, or replay | Runtime |
+| Missing trace provenance in the graph | Generated EPG compiler |
+| Incomparable rows, hidden retry, or seed drift | Experiment plan or closeout |
+| Unverified release claim | Publisher |
+| Overstated conclusion | Reading, report, or benchmark protocol |
 
-## Runtime preflight boundary
-
-Static configuration admission verifies the exact semantic identities,
-configuration shape, references, binding requirements, and deterministic
-receipt. Runtime credentials, distributed resources, output locations,
-timeouts, and post-run quality intake belong to a later experiment preflight
-and are required only when a run is authorized.
-
-## Completed cross-event baseline
-
-The Panic of 1907, SingHealth Data Breach, and Samsung Galaxy Note7 battery
-recall events have each completed all phases through bounded lineage
-conformance. All three include an accepted
-roster release, consolidated mapping, Event Scenario Definition,
-non-executable Scenario Configuration, static admission, minimal
-binding, and deterministic trace and replay evidence.
-
-Together they exercise the same stage responsibilities across a financial
-crisis, a healthcare cybersecurity event, and a product-safety and transport
-crisis while retaining event-specific participants, semantics, policies,
-identifiers, and causal checks. A separate executable successor for each event
-closes full-roster Rule execution, replay, and a generated event graph. The
-second and third events consume the same event-neutral H2EPR closure and
-custody kernel while retaining their own participant, institutional, time,
-and graph semantics. None includes calibration, held-out evaluation, or a
-historical-validity claim.
-
-The separately authorized full-roster Rule-execution program built executable
-successors from frozen semantic parents, first for Panic, then SingHealth, and
-then Note7, without changing what an earlier release established. The accepted
-[three-event conformance successor](execution/cross-event-conformance-v0.2/)
-closes the shared run-document, replay, generated-graph, framework, and claim
-boundaries while retaining [v0.1](execution/cross-event-conformance-v0.1/) as
-the immutable two-event record. This is an engineering endpoint, not an
-authorization for deeper modeling, calibration, or scientific evaluation.
+Fix a finding at its owner. A downstream layer must not silently compensate
+for an upstream semantic defect. If a current sealed identity changes, follow
+[EVOLUTION.md](EVOLUTION.md), regenerate all dependent identities, and retain
+the replaced state in Git history rather than beside the current tree.

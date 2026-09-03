@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.scenario-interface.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scenario_interface_id", "scenario_interface_version", "event_id", "actor_ids", "state_fields", "observation_registry_id", "intent_registry_id", "lifecycle_registry_id", "environment_implementation_id", "annotation_implementation_id", "scenario_interface_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.scenario-interface.v2"},
+    "scenario_interface_id": {"type": "string", "minLength": 1}, "scenario_interface_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "actor_ids": {"$ref": "#/$defs/ids"},
+    "state_fields": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/state"}},
+    "observation_registry_id": {"type": "string", "minLength": 1}, "intent_registry_id": {"type": "string", "minLength": 1},
+    "lifecycle_registry_id": {"type": "string", "minLength": 1},
+    "environment_implementation_id": {"type": "string", "minLength": 1}, "annotation_implementation_id": {"type": "string", "minLength": 1},
+    "clock_contract": {"type": "string", "minLength": 1}, "route_contract": {"type": "string", "minLength": 1},
+    "termination_contract": {"type": "string", "minLength": 1},
+    "scenario_interface_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "state": {
+      "type": "object", "additionalProperties": false,
+      "required": ["field_id", "owner", "visibility", "update_authority", "value_domain"],
+      "properties": {
+        "field_id": {"type": "string", "minLength": 1}, "owner": {"type": "string", "minLength": 1},
+        "visibility": {"enum": ["public", "actor_private", "environment_private"]},
+        "update_authority": {"type": "string", "minLength": 1}, "value_domain": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.semantic-asset-index.v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "index_id",
+    "index_version",
+    "event_id",
+    "assembly_id",
+    "semantic_assembly_sha256",
+    "source_profile_id",
+    "releases",
+    "index_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.semantic-asset-index.v4"},
+    "index_id": {"type": "string", "minLength": 1},
+    "index_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "assembly_id": {"type": "string", "minLength": 1},
+    "semantic_assembly_sha256": {"$ref": "#/$defs/sha"},
+    "source_profile_id": {"type": "string", "minLength": 1},
+    "releases": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/release"}},
+    "index_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_kind", "release_id", "manifest_sha256", "source_relative_path"],
+      "properties": {
+        "release_kind": {"type": "string", "minLength": 1},
+        "release_id": {"type": "string", "minLength": 1},
+        "manifest_sha256": {"$ref": "#/$defs/sha"},
+        "source_relative_path": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

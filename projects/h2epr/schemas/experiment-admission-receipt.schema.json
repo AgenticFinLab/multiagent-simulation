@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.experiment-admission-receipt.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "plan_id",
+    "plan_sha256",
+    "row_count",
+    "run_count",
+    "backend_counts",
+    "checks",
+    "admitted",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.experiment-admission-receipt.v3"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "plan_id": {"type": "string", "minLength": 1},
+    "plan_sha256": {"$ref": "#/$defs/sha"},
+    "row_count": {"type": "integer", "minimum": 1},
+    "run_count": {"type": "integer", "minimum": 1},
+    "backend_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule", "llm", "rulellm"],
+      "properties": {
+        "rule": {"type": "integer", "minimum": 0},
+        "llm": {"type": "integer", "minimum": 0},
+        "rulellm": {"type": "integer", "minimum": 0}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/check"}
+    },
+    "admitted": {"const": true},
+    "receipt_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "passed", "evidence_sha256"],
+      "properties": {
+        "check_id": {"type": "string", "minLength": 1},
+        "passed": {"const": true},
+        "evidence_sha256": {"$ref": "#/$defs/sha"}
+      }
+    }
+  }
+}

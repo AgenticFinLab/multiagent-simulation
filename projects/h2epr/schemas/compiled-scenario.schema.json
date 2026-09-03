@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.compiled-scenario.v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "scenario_id",
+    "scenario_interface_id",
+    "mechanism_id",
+    "mechanism_sha256",
+    "configuration_id",
+    "configuration_sha256",
+    "purpose",
+    "exposure_mode",
+    "timeline",
+    "active_actor_ids",
+    "action_spaces",
+    "communication_routes",
+    "initial_state",
+    "mechanism",
+    "observation_contract",
+    "termination",
+    "assumptions"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.compiled-scenario.v4"},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "scenario_interface_id": {"type": "string", "minLength": 1},
+    "mechanism_id": {"type": "string", "minLength": 1},
+    "mechanism_sha256": {"$ref": "#/$defs/sha"},
+    "configuration_id": {"type": "string", "minLength": 1},
+    "configuration_sha256": {"$ref": "#/$defs/sha"},
+    "purpose": {"type": "string", "minLength": 1},
+    "exposure_mode": {"enum": ["prefix_clean", "full_draft_exposed"]},
+    "timeline": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "active_actor_ids": {"$ref": "#/$defs/ids"},
+    "action_spaces": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/ids"}},
+    "communication_routes": {"type": "array", "items": {"type": "object"}},
+    "initial_state": {"type": "object", "minProperties": 1},
+    "mechanism": {"type": "object", "minProperties": 1},
+    "observation_contract": {"type": "object", "minProperties": 1},
+    "termination": {"type": "object", "minProperties": 1},
+    "assumptions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  }
+}

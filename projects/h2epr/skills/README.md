@@ -1,160 +1,29 @@
-# H2EPR Skills
+# Maintained Skills
 
-This directory contains the research and modeling methods used to build H2EPR
-event models. The skills connect historical sources to participant behavior,
-Agent Definitions, scenario semantics, and eventually executable backends.
+[benchmark-event-simulation](benchmark-event-simulation/SKILL.md) is the thin
+end-to-end orchestrator. Specialized Skills own each admission, construction,
+execution, and review boundary.
 
-H2EPR draws on the mature handbooks in `masim/skills/` and the research
-workflow in `docs/create-related-work-skill/`. Its methods add requirements
-specific to real-event modeling: participant-time information boundaries,
-institutional governance, evidence-use separation, competing historical
-interpretations, and a strict distinction between an Agent's intent and the
-environment's result.
-
-## Workflow
-
-```text
-Event Build Brief: question, boundary, role map, and current authorization
-        ↓
-Historical evidence research
-        ↓
-Participant behavior research
-        ↓
-Accepted representation route
-        ├── Agent Definition + proportionate review
-        ├── Population model + proportionate review
-        └── Scenario, exogenous, excluded, or deferred disposition
-        ↓
-Lightweight semantic interface review and shared publication-facing account
-        ↓
-Roster Definition release
-        ├── Event Scenario Definition + interface closure
-        └── Consolidated mapping and carrier review
-                    └── Bounded mapping-loader conformance
-
-Accepted Scenario Definition + accepted mapping
-        ↓
-Versioned Scenario Configuration + review
-        ↓
-Separately authorized bounded configuration admission
-        ↓
-Exact carrier projection + minimal policy/environment binding
-        ↓
-Conformance closeout
-        ↓ when a full-event engineering extension is authorized
-Full-roster Rule execution
-        ├── Policy Realization
-        ├── executable successor and fail-closed admission
-        └── repeated runs, replay, and trace-derived generated EPG
-```
-
-Evidence and behavior research feed the representation chosen by the roster.
-Normal Roster batches produce only the participant products required by that
-route, one lightweight working interface review, and corresponding coverage in
-a shared publication-facing account. These are two responsibilities, not two
-required files per participant. Roster Definition release v0.1 provides the
-stable semantic input for mapping and scenario convergence.
-Configuration remains a separate, normally non-executable stage; loader,
-binding, conformance, simulation, and evaluation each retain their own
-authorization boundary. A small reference pilot may reach mapping earlier only
-when that engineering feedback is the purpose of the pilot.
-
-## Available skills
-
-| Skill | Use |
+| Skill | Responsibility |
 |---|---|
-| [`event-agent-batch`](event-agent-batch/SKILL.md) | Coordinate an approved participant batch with risk-proportionate Agent, population, or disposition routing and stop at the correct integration boundary. |
-| [`historical-evidence-research`](historical-evidence-research/SKILL.md) | Find, read, classify, and adjudicate evidence for a participant, institution, or decision situation. |
-| [`participant-behavior-research`](participant-behavior-research/SKILL.md) | Build a publication-facing participant behavior model from adjudicated evidence, theory, institutional analysis, and high-information decision situations. |
-| [`agent-definition`](agent-definition/SKILL.md) | Turn reviewed participant research into a canonical, publication-facing, backend-neutral Agent Definition. |
-| [`agent-definition-review`](agent-definition-review/SKILL.md) | Independently review a Definition's historical grounding, institutional model, behavior, falsifiability, consistency, and publication quality. |
-| [`event-scenario-design`](event-scenario-design/SKILL.md) | Turn an accepted event roster, semantic release, evidence boundary, and participant models into a publication-facing Scenario Definition without writing policy or running a simulation. |
-| [`roster-mapping-conformance`](roster-mapping-conformance/SKILL.md) | Derive a release-wide mapping and carrier decision, then implement only an explicitly authorized loader/conformance slice. |
-| [`scenario-configuration`](scenario-configuration/SKILL.md) | Design, review, and atomically promote one declared-purpose Scenario Configuration, then delimit its later bounded engineering admission without defining schema, policy, or runtime. |
-| [`full-roster-rule-execution`](full-roster-rule-execution/SKILL.md) | Extend an accepted, conformance-complete event through Policy Realization, executable successor admission, deterministic repeated runs, replay, and trace-derived generated-EPG closure. |
+| [benchmark-input-admission](benchmark-input-admission/SKILL.md) | Closed three-file input and exposure |
+| [agent-definition](agent-definition/SKILL.md) | Dataset-bounded named decision interfaces |
+| [agent-definition-review](agent-definition-review/SKILL.md) | Substantive and adversarial review |
+| [population-model](population-model/SKILL.md) | Aggregate or heterogeneous choice units |
+| [event-agent-batch](event-agent-batch/SKILL.md) | Event-wide participant production |
+| [roster-mapping-conformance](roster-mapping-conformance/SKILL.md) | Roster, actor map, and registries |
+| [event-scenario-design](event-scenario-design/SKILL.md) | World and institutional semantics |
+| [scenario-configuration](scenario-configuration/SKILL.md) | Shared/backend selections and provenance admission |
+| [backend-realization](backend-realization/SKILL.md) | Rule, LLM, or RuleLLM implementation projection |
+| [run-release-verification](run-release-verification/SKILL.md) | Materialization, replay, graph, and release verification |
+| [generated-process-analysis](generated-process-analysis/SKILL.md) | Simulation reading and backend comparison |
+| [experiment-planning](experiment-planning/SKILL.md) | Matrix parity, scheduling, failure, and analysis admission |
 
-The scenario, mapping/conformance, configuration, and full-roster execution
-Skills encode the methods supported by the repository. The mapping/conformance
-Skill includes the bounded multi-hop binding and conformance method
-demonstrated by the KT--NBC--NYCH closeout. The configuration Skill defines
-the corresponding configuration-design and admission boundaries. The
-full-roster execution Skill owns the separately authorized optional tail
-demonstrated by both accepted events; it does not make that tail a requirement
-for every event. Re-evaluate the methods when they are applied to another
-event, and revise them only where that use exposes a reusable gap. None of
-them silently authorizes a later phase, contract change, model-backed
-experiment, or evaluation.
+Skills do not override schemas, admitted semantic parents, or the benchmark
+protocol. None authorizes external research, Reference access, remote writes,
+dependency installation, or an unimplemented backend.
 
-The project-level stage order, authorization boundaries, and current event
-position are documented in the [Event modeling workflow](../WORKFLOW.md). The
-detailed roster, batching, promotion, and participant test process remains in
-the [Agent development workflow](../agents/WORKFLOW.md).
-
-## Workflow templates
-
-| Template | Use |
-|---|---|
-| [Event Build Brief](../event-build-brief-template.md) | Open an event with one accepted question, temporal and evidence boundary, causal role map, roster dispositions, semantic skeleton, and current authorization. |
-| [Population model](../populations/population-model-template.md) | Specify heterogeneous choice units, information, private state, behavior, uncertainty, and interface ownership in the canonical ten-module population structure. |
-| [Phase closeout checklist](../phase-closeout-checklist.md) | Close any maintained event phase with common mainline, depth, authority, evidence, integrity, and handoff checks, recording a reusable method finding only when one emerged. |
-| [Full-roster Rule execution cycle](../execution/execution-cycle-closeout-template.md) | Keep Policy Realization, executable assembly, paired materialization, replay, graph closure, and their claim boundary visible in one compact record. |
-
-These project-level templates route work into the specialist Skills; they do
-not replace the Skills' artifact-specific inputs, outputs, reviews, or stop
-conditions. Use the closeout checklist inside an existing authoritative record
-when possible rather than creating a parallel status file. Complete only the
-brief's minimum profile and the checklist's core gates by default; conditional
-sections are triggered by the event and the surfaces actually changed.
-
-## Method identity and loading
-
-At event opening, record one method baseline: the repository commit plus the
-Skill and template paths selected for the authorized work. That is sufficient
-to reproduce the method; do not create a second version number for every Skill
-or copy the full directory into an event record.
-
-Read the coordinating Skill and only the specialist Skills and references used
-by the selected representation and production profile. These repository paths
-are the canonical method assets. Any execution integration should point to
-them rather than maintain a divergent copy.
-
-## Production profiles
-
-Participant production uses `disposition-only`, `standard`, or `deep` depth.
-The profile changes working-document and review depth, not evidence or semantic
-standards. Standard is the default for an established Agent or population;
-deep is triggered by a new or disputed representation, central causal choice,
-or material evidence and claim risk. Reference-pilot engineering remains a
-separate choice and is never implied by `deep`.
-
-## Method principles
-
-- Read and adjudicate evidence before writing behavior.
-- Treat historical claims, theoretical mechanisms, estimates, analogies, and
-  modeling assumptions as different kinds of support.
-- Record what a participant could know at the modeled decision time, not only
-  what a researcher knows afterward.
-- Keep the participant-evidence record, Agent Definition, scenario, machine contracts, and
-  authoritative state transition as complementary sources of truth.
-- Write Agent Definitions as scholarly model specifications. Keep file hashes,
-  runtime bindings, code identifiers, and test mechanics in derived
-  conformance artifacts.
-- Match research and review depth to causal and claim risk, and use a small
-  number of high-information decision situations before proposing cross-event
-  archetypes.
-
-## Source adaptation
-
-H2EPR adopts research discipline rather than copying whole handbooks. In
-particular:
-
-- MASim contributes evidence-grounded theory, explicit information sets,
-  behavioral mechanisms, parameters, worked cases, calibration, ablation, and
-  cross-section consistency.
-- The repository related-work guide contributes proactive and reactive search,
-  relevance-based reading depth, structured extraction, source chaining, and
-  manual verification.
-- H2EPR changes scenario-portable archetypes into event-bound participant
-  models, replaces venue-based evidence filters with claim-appropriate source
-  hierarchies, and preserves unresolved historical structure instead of
-  filling it with unsupported defaults.
+The current procedure requires a machine Scenario Mechanism, exhaustive
+configuration provenance, independent admission, trace-complete Generated
+EPG, formal custody, deterministic identity perturbation, independent
+publication, and cross-event conformance.

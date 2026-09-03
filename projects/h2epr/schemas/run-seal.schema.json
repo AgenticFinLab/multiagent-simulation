@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.run-seal.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seal_type", "canonicalization_version", "run_id", "manifest_sha256", "ordered_tick_seal_hashes", "scientific_prefix_sha256", "final_state_sha256", "unresolved_intent_ids", "unresolved_recipient_ids", "seal_sha256"],
+  "properties": {
+    "seal_type": {"const": "run_seal"}, "canonicalization_version": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1}, "manifest_sha256": {"$ref": "#/$defs/sha"},
+    "ordered_tick_seal_hashes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/sha"}},
+    "scientific_prefix_sha256": {"$ref": "#/$defs/sha"}, "final_state_sha256": {"$ref": "#/$defs/sha"},
+    "unresolved_intent_ids": {"type": "array", "items": {"type": "string"}},
+    "unresolved_recipient_ids": {"type": "array", "items": {"type": "string"}},
+    "seal_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {"sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

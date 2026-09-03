@@ -24,7 +24,7 @@ mechanism coverage, not a scientific-validity claim.
 - [Event modeling workflow](h2epr/WORKFLOW.md)
 - [Architecture](h2epr/ARCHITECTURE.md)
 - [Evolution policy](h2epr/EVOLUTION.md)
-- [Three-event execution conformance](h2epr/execution/cross-event-conformance-v0.2/)
+- [Three-event execution conformance](h2epr/releases/cross-event/rule/)
 
 ## Repository convention
 

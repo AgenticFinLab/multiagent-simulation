@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.intent-registry.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_id", "registry_version", "event_id", "intents", "registry_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.intent-registry.v2"},
+    "registry_id": {"type": "string", "minLength": 1}, "registry_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "intents": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/intent"}},
+    "registry_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "intent": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "meaning", "eligible_actors", "eligible_targets", "payload_contract", "authority_owner", "environment_handler", "lifecycle_id"],
+      "properties": {
+        "intent_id": {"type": "string", "minLength": 1}, "meaning": {"type": "string", "minLength": 1},
+        "eligible_actors": {"$ref": "#/$defs/ids"}, "eligible_targets": {"$ref": "#/$defs/ids"},
+        "payload_contract": {"type": "string", "minLength": 1}, "authority_owner": {"type": "string", "minLength": 1},
+        "environment_handler": {"type": "string", "minLength": 1}, "lifecycle_id": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

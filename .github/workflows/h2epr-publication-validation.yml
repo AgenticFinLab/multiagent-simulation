@@ -9,6 +9,7 @@ name: H2EPR publication validation
       - "docs/structure.md"
       - "projects/H2EPR.md"
       - "projects/README.md"
+      - "projects/h2epr/**/*.md"
   push:
     paths:
       - ".github/workflows/h2epr-publication-validation.yml"
@@ -17,6 +18,7 @@ name: H2EPR publication validation
       - "docs/structure.md"
       - "projects/H2EPR.md"
       - "projects/README.md"
+      - "projects/h2epr/**/*.md"
 
 permissions:
   contents: read
@@ -41,4 +43,4 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
         run: >-
           python -B -m pytest -p no:cacheprovider
-          projects/h2epr/tests/construction/test_repository_publication_surface.py
+          projects/h2epr/tests/standards/test_publication_surface.py

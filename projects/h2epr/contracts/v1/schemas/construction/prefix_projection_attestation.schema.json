@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/construction/prefix_projection_attestation.schema.json",
-  "title": "Typed Draft EPG Prefix Projection Attestation",
-  "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixProjectionAttestation"
-}

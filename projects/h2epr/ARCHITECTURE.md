@@ -1,184 +1,198 @@
-# H2EPR architecture
+# Architecture
 
-H2EPR turns bounded event evidence into participant and scenario artifacts,
-executes their interaction, and compiles the resulting trace into a generated
-event process graph. The architecture separates research meaning from runtime
-mechanics so that each result can be traced to its source and owner.
-
-## System flow
+## Execution path
 
 ```text
-explicit sources
-  -> typed construction records
-  -> participant artifacts and event bundle
-  -> actor-specific observations
-  -> participant intents and messages
-  -> environment adjudication
-  -> authoritative state reduction
-  -> trace, seals, and replay
-  -> generated event process graph
-  -> separately scoped human process analysis
+three allowed benchmark inputs
+        │
+        ▼
+Source Profile
+        │
+        ▼
+roster + actor map
+  Agent Definitions + Population Models
+  observation + intent + lifecycle registries
+        │
+        ▼
+Scenario Definition + Scenario Mechanism
+        │
+        ▼
+shared configuration
+        │
+        ▼
+backend-neutral event package
+        │
+        ├──────── Rule binding      implemented
+        ├──────── LLM binding       planned
+        └──────── RuleLLM binding   planned
+        │
+        ▼
+common participant-decision interface
+        │
+        ▼
+authoritative environment + MASim reducer
+        │
+        ▼
+hash-chained trace ──► seals ──► replay
+        │
+        ▼
+trace-derived Generated EPG
+        │
+        ▼
+compact release + simulation-only reading
 ```
 
-## Responsibility boundaries
+An optional experiment control plane sits above this path. It admits a matrix
+of package, backend, seed, custody, failure, and analysis selections. It does
+not change event semantics, decision behavior, runtime state, or graph
+construction.
 
-### Construction, runtime, and evaluation
+## Authority by layer
 
-Construction may read only explicitly declared source material. Runtime gives
-each participant the information available to that participant and records the
-generated interaction. Evaluation compares sealed outputs with separately
-governed evidence after a run.
+### Benchmark input
 
-Evaluation data is not a construction input, runtime state, prompt, memory, or
-retrieval source. A model built with access to the target continuation cannot
-later be described as a clean held-out construction of that event.
+`data/h2epr` owns event identity and benchmark-authored records. H2EPR resolves
+one event ID to exactly `event_spec.json`, `frozen_evidence.json`, and
+`draft_epg.json`. The loader neither inventories sibling files nor searches
+for fallback data.
 
-Human analysis may begin from a sealed generated graph without opening an
-evaluation target. It explains the simulated trajectory and its visible
-limits. Comparison with a Draft graph, historical evidence, or a held-out
-target is a later activity with its own exposure and claim boundary.
+### Source Profile
 
-### Participant intent and environment result
+The Source Profile owns input paths, byte hashes, exposure mode, prohibited
+inputs, transformations, and claim exclusions. A path, hash, event identity,
+or exposure mismatch stops construction.
 
-Participants emit requests, proposals, decisions, or messages. The environment
-checks institutional rules, authority, resources, and concurrent state before
-producing an outcome. These are separate records:
+### Participant products
 
-- an action is requested;
-- the request is accepted for processing;
-- an effect is executed; and
-- the effect succeeds, fails, is delayed, or has no result.
+The roster preserves every Draft participant occurrence. The actor map assigns
+each occurrence to an Agent, Population, world-state object, institutional
+process, outside-window record, or explicit source defect. Agent Definitions
+and Population Models then own identity, information, authority, admissible
+intents, parameter domains, and limitations for active decision units.
 
-Only the reducer commits authoritative state. This keeps policy code from
-silently manufacturing results and makes replay meaningful.
+The participant interface registries own observations, intents, lifecycle
+states, routes, and handler references. They do not choose an action for any
+backend and do not commit world state.
 
-### H2EPR and MASim
+### Scenario products
 
-MASim provides the repository's existing reusable execution infrastructure.
-Domain-neutral event-process values, transport, reduction, trace, and seal
-types live under `masim.integrations.event_process` and are consumed through
-their public interfaces. H2EPR treats that package as a read-only base
-framework.
+The Scenario Definition owns the event window, institutions, clock,
+communication meaning, environment authority, failure routing, and terminal
+conditions. `scenario-mechanism.json` is its executable projection: typed
+state fields, handlers, preconditions, effects, message kinds, annotation
+rules, and conflict policy.
 
-H2EPR owns event evidence, participant semantics, institutional policies,
-observation rules, event identities, interpretation, graph compilation, and
-the shared execution layer needed across H2EPR events. Event-specific and
-cross-event H2EPR code both remain in the H2EPR package.
+Shared configuration selects the exact opening state, timeline, routes, and
+other backend-neutral values. Every top-level setting is either linked to a
+dataset anchor or recorded as an explicit construction choice.
 
-## Project modules
+### Event package
 
-| Module | Responsibility |
-|---|---|
-| `construction/` | Source authorization, hash checks, parsing, and typed construction records |
-| `artifacts/` | Entity resolution, participant envelopes, and provenance |
-| `bundles/` | Construction seals, event bundles, and cross-object validation |
-| `policies/` | Declarative participant policy inputs |
-| `world/` | Normalized world values and pure calculations |
-| `agents/` | Definition profiles, semantic mapping, intent, and carrier checks |
-| `configuration/` | Configuration schema admission, canonical identity, and receipts |
-| `execution/` | Event-neutral run documents, closure checks, deterministic comparison, strict input handling, and local run custody |
-| `scenarios/` | Event-specific bindings, environment policies, bounded conformance paths, and accepted comparisons that name specific events |
-| `runtime/` | H2EPR simulation adapter, phased execution, detectors, and orchestration |
-| `compiler/` | Sealed-trace validation and deterministic graph generation |
+The compiler validates and seals portable participant and scenario
+projections. `package_sha256` identifies the backend-neutral core and excludes
+the backend catalog and attachments. A backend attachment changes the full
+manifest and binding identities without changing that core hash.
 
-All modules in this table are under `projects/h2epr/src/h2epr`. Reviewed
-Markdown, JSON, and release records remain in the adjacent project asset
-directories.
+The package contains no credential, generated decision, or successful outcome.
+It is the parity boundary for backend comparisons.
 
-Policy Realizations, executable successors, and compact run/graph release
-records live under `execution/`. Large materialized traces, states, replay
-outputs, and generated graphs remain in event-qualified ignored run
-directories unless separately selected for release.
+### Backend
 
-Tracked human readings and authorized comparison studies live under
-`analysis/`. They reference immutable run identities rather than duplicating
-the generated graphs or taking authority from event evidence and execution
-releases.
+A backend receives one observation for each active decision unit and returns
+one typed action intent plus zero or more typed message intents. It owns
+decision production only. Rule tables or model settings belong to backend
+configuration and realization, not Agent Definitions or the event package.
 
-## Construction and bundle assembly
+Rule, LLM, and RuleLLM must share the package's actors, observations, action
+schema, clock, environment, and output contracts. An unavailable or
+identity-mismatched backend fails before setup; it is never silently replaced.
 
-The source adapter receives a list of descriptors and approved roots. It does
-not discover sibling files or scan input directories. It verifies paths and
-hashes, preserves raw values and exact source pointers, and exports a
-deterministic construction snapshot.
+### Runtime and environment
 
-```text
-construction records
-  -> entity registry
-  -> reversible roster/loss report
-  -> participant artifacts
-  -> policy and world inputs
-  -> construction seal
-  -> runtime scenario bundle
-```
+For each logical coordinate, the runtime:
 
-Sensitivity values are explicit inputs rather than inferred historical facts.
-Execution seeds are runtime inputs and do not change event-bundle identity.
+1. delivers due messages;
+2. seals one pre-state;
+3. constructs all participant observations from that state;
+4. collects and canonicalizes decisions;
+5. invokes the environment once;
+6. commits one authoritative reduction;
+7. derives annotations; and
+8. seals the coordinate.
 
-## Participant, scenario, and configuration authority
+The environment owns admission, authority checks, concurrent effects, and
+typed dispositions. All intents at one coordinate are checked against the same
+pre-state. Distinct concurrent writers to the same field are rejected as a
+batch; identical writes are idempotent and ordered by semantic content.
+Opaque generated IDs and input ordering do not decide outcomes.
 
-| Question | Authority |
-|---|---|
-| Who is in scope and why? | Research roster and roster release |
-| What can a participant know, decide, request, and retain? | Agent Definition or population model |
-| What institutions, routes, resources, lifecycles, and results exist? | Event Scenario Definition |
-| Which actors, units, opening records, selections, and sensitivities are used? | Scenario Configuration |
-| How are released semantics represented by Contracts V1? | Consolidated mapping |
-| Is one exact configuration structurally admissible? | Configuration schema and loader |
-| Which semantics have executable policy behavior? | Versioned binding |
-| Which state transition occurred? | Environment and reducer |
+### MASim boundary
 
-An actor-specific observation is projected from authoritative world state. It
-contains explicit availability, freshness, source, and unresolved-value
-markers. Persistent state that affects later behavior must remain visible to
-trace and replay.
+H2EPR uses the tracked MASim event-process implementation for action and
+message values, append-only transport, authoritative reduction, trace, tick
+and run seals, and replay. H2EPR owns the benchmark-specific package,
+participant loop, declarative environment, and Generated EPG compiler.
 
-## Runtime, trace, and compilation
+When optional MASim top-level dependencies are unavailable, H2EPR loads the
+same tracked event-process subpackage through a private import path. This
+changes import mechanics only; no MASim code or scientific value is copied.
+Every run records the exact H2EPR and MASim source inventories.
 
-The H2EPR runtime follows the MASim setup, run, and shutdown lifecycle but uses
-explicit phase barriers. Every participant decision for a tick observes the
-same pre-state; completion order is canonicalized before reduction.
+### Trace, replay, and Generated EPG
 
-Runtime records use logical coordinates and deterministic ordering. Records
-are hash chained, sealed per tick, and sealed again for the run. Validation
-checks record coverage, manifests, committed states, tick identities, and the
-run prefix before replay. The compiler accepts only a validated sealed trace
-and produces a generated graph plus its graph seal.
+The trace is append-only and hash chained. Tick and run seals close the state,
+transport, and record sequence. Authoritative replay starts from the package's
+opening state and must reproduce the exact terminal bytes.
 
-## Package and release boundary
+The Generated EPG compiler accepts only the admitted package, sealed run
+manifest, and trace. Every trace record becomes a first-class graph node;
+navigation nodes for the event, coordinates, participants, and state entities
+do not replace trace provenance. Validation requires exact trace coverage,
+valid edge endpoints, matching source-trace identity, and a deterministic
+graph seal.
 
-H2EPR is distributed from `projects/h2epr/pyproject.toml`, with one importable
-package rooted at `src/h2epr`. Semantic scenario assets under `scenarios/` are
-not import roots. Release checksums cover files owned by their release package;
-hashes of upstream inputs are recorded in manifests.
+### Release and report
 
-## Current limitations
+Raw runs stay in ignored custody. A compact tracked release records package,
+binding, runtime, MASim kernel, seed, output hashes, counts, replay, graph,
+determinism, and custody identity. Publication independently reconstructs
+these claims from the raw bytes and rematerializes deterministic Rule runs.
 
-The Panic of 1907 construction canary was created with access to the full event
-draft and supports architecture review rather than held-out evaluation. Its
-bounded KT--NBC--NYCH binding remains a limited conformance release, while a
-separate executable successor now covers the complete configured roster and
-has produced deterministic trace, replay, and generated-graph closure.
+A simulation reading cites the compact release, traverses the complete trace
+and graph, describes generated facts, attributes mechanisms, and states open
+or persistent terminal fields. It remains separate from historical or
+held-out evaluation.
 
-The SingHealth Data Breach and Note7 battery recall also have accepted
-full-roster executable successors and deterministic run, replay, and
-generated-graph closure. None of the three events has calibrated parameters,
-historical fit, held-out evaluation, or a scientific-validity result. Those
-are separate research activities, not implied by closure of the engineering
-interfaces.
+## Single-current publication surface
 
-The accepted
-[three-event conformance successor](execution/cross-event-conformance-v0.2/)
-validates three compact run releases through one H2EPR contract while
-preserving the accepted [two-event v0.1 record](execution/cross-event-conformance-v0.1/).
-It demonstrates reuse of closure mechanics across three event domains; it does
-not establish support for every domain.
+The tracked tree exposes one current directory, template, Skill, schema file,
+and Python import path for each responsibility. Machine-level
+`schema_version`, artifact IDs, and content hashes remain explicit because
+they are validation inputs. Replaced development generations and construction
+history remain recoverable from Git rather than appearing beside current
+assets.
 
-## Related documents
+`events/current-events.json` is the discovery registry. Adding an event adds a
+registry row and declarative assets; it must not add an event ID, slug,
+participant, or domain branch to common Python.
 
-- [Event modeling workflow](WORKFLOW.md)
-- [Rule execution](execution/README.md)
-- [Three-event execution conformance](execution/cross-event-conformance-v0.2/)
-- [Evolution and compatibility](EVOLUTION.md)
-- [Contracts V1](contracts/v1/README.md)
-- [Architecture decisions](decisions/)
+## Backend parity and change routing
+
+A backend revision may change decision production only. Changes to actorization,
+observations, action schemas, environment behavior, clock, trace semantics, or
+analysis definitions create a new shared comparison boundary and require all
+compared backends to be rematerialized.
+
+Each defect returns to its owning layer. Participant mistakes are not repaired
+in the environment; scenario mistakes are not hidden in Rule rows; runtime or
+publication failures do not authorize a semantic change. [EVOLUTION.md](EVOLUTION.md)
+defines how a reviewed replacement becomes current without publishing parallel
+working generations.
+
+## Current boundary
+
+Panic of 1907, SingHealth Data Breach, and Galaxy Note7 Recall close the Rule
+path with symmetric assets, fresh deterministic custody, authoritative replay,
+trace-complete graphs, compact releases, readings, and cross-event
+conformance. LLM and RuleLLM are planned and fail closed. The experiment layer
+admits plans but does not yet execute a matrix.

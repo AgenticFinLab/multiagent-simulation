@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.lifecycle-registry.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_id", "registry_version", "event_id", "lifecycles", "registry_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.lifecycle-registry.v2"},
+    "registry_id": {"type": "string", "minLength": 1}, "registry_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "lifecycles": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/lifecycle"}},
+    "registry_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "strings": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "transition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["from", "to", "owner", "trigger"],
+      "properties": {"from": {"type": "string"}, "to": {"type": "string", "minLength": 1}, "owner": {"type": "string", "minLength": 1}, "trigger": {"type": "string", "minLength": 1}}
+    },
+    "lifecycle": {
+      "type": "object", "additionalProperties": false,
+      "required": ["lifecycle_id", "initial_state", "terminal_states", "transitions"],
+      "properties": {
+        "lifecycle_id": {"type": "string", "minLength": 1}, "initial_state": {"type": "string", "minLength": 1},
+        "terminal_states": {"$ref": "#/$defs/strings"}, "transitions": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/transition"}}
+      }
+    }
+  }
+}

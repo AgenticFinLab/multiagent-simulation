@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.actor-map.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "actor_map_id", "actor_map_version", "event_id", "roster_id", "mappings", "runtime_actors", "actor_map_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.actor-map.v2"},
+    "actor_map_id": {"type": "string", "minLength": 1},
+    "actor_map_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "roster_id": {"type": "string", "minLength": 1},
+    "mappings": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/mapping"}},
+    "runtime_actors": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/actor"}},
+    "actor_map_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mapping": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_participant_id", "disposition", "target_id", "rationale"],
+      "properties": {
+        "source_participant_id": {"type": "string", "minLength": 1},
+        "disposition": {"enum": ["named_agent", "population", "initial_context", "world_state", "institutional_process", "outside_window", "unresolved_source_defect"]},
+        "target_id": {"type": "string", "minLength": 1},
+        "rationale": {"type": "string", "minLength": 1},
+        "losses": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "actor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["actor_id", "representation_kind", "semantic_parent_id", "source_participant_ids"],
+      "properties": {
+        "actor_id": {"type": "string", "minLength": 1},
+        "representation_kind": {"enum": ["agent", "population"]},
+        "semantic_parent_id": {"type": "string", "minLength": 1},
+        "source_participant_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

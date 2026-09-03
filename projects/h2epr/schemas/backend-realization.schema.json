@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.backend-realization.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "realization_id", "realization_version", "event_id", "backend", "semantic_parent_ids", "configuration_id", "decision_interface", "implementation_id", "actor_realizations", "failure_routing", "implementation_sources", "realization_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.backend-realization.v2"}, "realization_id": {"type": "string", "minLength": 1}, "realization_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"}, "backend": {"enum": ["rule", "llm", "rulellm"]},
+    "semantic_parent_ids": {"$ref": "#/$defs/ids"}, "configuration_id": {"type": "string", "minLength": 1}, "decision_interface": {"const": "h2epr.participant-decision.v2"},
+    "implementation_id": {"type": "string", "minLength": 1},
+    "actor_realizations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/actor"}},
+    "failure_routing": {"type": "object", "minProperties": 1},
+    "implementation_sources": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/file"}},
+    "realization_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "actor": {"type": "object", "additionalProperties": false, "required": ["actor_id", "semantic_parent_id", "implementation_entry", "observation_ids", "intent_ids"], "properties": {"actor_id": {"type": "string", "minLength": 1}, "semantic_parent_id": {"type": "string", "minLength": 1}, "implementation_entry": {"type": "string", "minLength": 1}, "observation_ids": {"$ref": "#/$defs/ids"}, "intent_ids": {"$ref": "#/$defs/ids"}}},
+    "file": {"type": "object", "additionalProperties": false, "required": ["relative_path", "sha256"], "properties": {"relative_path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha"}}}
+  }
+}

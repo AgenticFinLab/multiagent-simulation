@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.configuration-admission-receipt.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "configuration_id",
+    "configuration_sha256",
+    "derived_by",
+    "checks",
+    "admitted",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.configuration-admission-receipt.v3"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "configuration_id": {"type": "string", "minLength": 1},
+    "configuration_sha256": {"$ref": "#/$defs/sha"},
+    "derived_by": {"const": "h2epr.configuration-admission.v3"},
+    "checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/check"}},
+    "admitted": {"type": "boolean"},
+    "receipt_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "passed", "evidence_sha256"],
+      "properties": {
+        "check_id": {"type": "string", "minLength": 1},
+        "passed": {"type": "boolean"},
+        "evidence_sha256": {"$ref": "#/$defs/sha"}
+      }
+    }
+  }
+}

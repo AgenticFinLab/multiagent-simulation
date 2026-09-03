@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.compiled-participants.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "roster_id", "actor_map_id", "participant_count", "occurrence_count", "source_id_gaps", "participants", "mappings", "runtime_actors"],
+  "properties": {
+    "schema_version": {"const": "h2epr.compiled-participants.v2"}, "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "roster_id": {"type": "string", "minLength": 1}, "actor_map_id": {"type": "string", "minLength": 1},
+    "participant_count": {"type": "integer", "minimum": 1}, "occurrence_count": {"type": "integer", "minimum": 1},
+    "source_id_gaps": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "participants": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "mappings": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "runtime_actors": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+  }
+}

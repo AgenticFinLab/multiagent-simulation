@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.observation-registry.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_id", "registry_version", "event_id", "observations", "registry_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.observation-registry.v2"},
+    "registry_id": {"type": "string", "minLength": 1}, "registry_version": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "observations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/observation"}},
+    "registry_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["observation_id", "meaning", "producer", "consumers", "availability", "missing_behavior", "visibility"],
+      "properties": {
+        "observation_id": {"type": "string", "minLength": 1}, "meaning": {"type": "string", "minLength": 1},
+        "producer": {"type": "string", "minLength": 1}, "consumers": {"$ref": "#/$defs/ids"},
+        "availability": {"type": "string", "minLength": 1}, "missing_behavior": {"type": "string", "minLength": 1},
+        "visibility": {"enum": ["public", "actor_private", "delivered_message", "lifecycle_reference"]}
+      }
+    }
+  }
+}

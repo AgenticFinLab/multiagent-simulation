@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.tick-seal.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seal_type", "canonicalization_version", "run_id", "manifest_sha256", "logical_tick", "record_count", "first_record_hash", "final_preseal_record_hash", "state_sha256", "seal_sha256"],
+  "properties": {
+    "seal_type": {"const": "tick_seal"}, "canonicalization_version": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1}, "manifest_sha256": {"$ref": "#/$defs/sha"},
+    "logical_tick": {"type": "integer", "minimum": 0}, "record_count": {"type": "integer", "minimum": 1},
+    "first_record_hash": {"$ref": "#/$defs/sha"}, "final_preseal_record_hash": {"$ref": "#/$defs/sha"},
+    "state_sha256": {"$ref": "#/$defs/sha"}, "seal_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {"sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

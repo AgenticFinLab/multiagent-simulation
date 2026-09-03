@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.participant-observation.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "actor_id", "logical_tick", "public_state", "private_state", "delivered_messages", "pending_lifecycles", "permitted_action_types"],
+  "properties": {
+    "schema_version": {"const": "h2epr.participant-observation.v2"}, "actor_id": {"type": "string", "minLength": 1}, "logical_tick": {"type": "integer", "minimum": 0},
+    "public_state": {"type": "object"}, "private_state": {"type": "object"},
+    "delivered_messages": {"type": "array", "items": {"type": "object"}}, "pending_lifecycles": {"type": "array", "items": {"type": "object"}},
+    "permitted_action_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  }
+}

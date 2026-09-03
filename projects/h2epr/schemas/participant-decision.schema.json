@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.participant-decision.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "actor_id", "logical_tick", "backend", "action", "messages", "decision_record"],
+  "properties": {
+    "schema_version": {"const": "h2epr.participant-decision.v2"}, "actor_id": {"type": "string", "minLength": 1}, "logical_tick": {"type": "integer", "minimum": 0},
+    "backend": {"enum": ["rule", "llm", "rulellm"]},
+    "action": {"$ref": "#/$defs/action"}, "messages": {"type": "array", "items": {"$ref": "#/$defs/message"}},
+    "decision_record": {"type": "object", "minProperties": 1}
+  },
+  "$defs": {
+    "action": {"type": "object", "additionalProperties": false, "required": ["action_type", "parameters"], "properties": {"action_type": {"type": "string", "minLength": 1}, "parameters": {"type": "object"}}},
+    "message": {"type": "object", "additionalProperties": false, "required": ["recipient_id", "message_type", "payload"], "properties": {"recipient_id": {"type": "string", "minLength": 1}, "message_type": {"type": "string", "minLength": 1}, "payload": {"type": "object"}}}
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.current-event-registry.v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_id",
+    "registry_version",
+    "events",
+    "registry_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.current-event-registry.v4"},
+    "registry_id": {"type": "string", "minLength": 1},
+    "registry_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "events": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/event"}
+    },
+    "registry_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"},
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_slug",
+        "title",
+        "source_profile_relative_path",
+        "package_assembly_relative_path",
+        "package_relative_path",
+        "roster_release_relative_path",
+        "participant_interface_release_relative_path",
+        "scenario_release_relative_path",
+        "shared_configuration_release_relative_path",
+        "rule_configuration_release_relative_path",
+        "rule_execution_release_relative_path",
+        "rule_run_release_relative_path",
+        "simulation_reading_relative_path"
+      ],
+      "properties": {
+        "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+        "event_slug": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+        "title": {"type": "string", "minLength": 1},
+        "source_profile_relative_path": {"$ref": "#/$defs/path"},
+        "package_assembly_relative_path": {"$ref": "#/$defs/path"},
+        "package_relative_path": {"$ref": "#/$defs/path"},
+        "roster_release_relative_path": {"$ref": "#/$defs/path"},
+        "participant_interface_release_relative_path": {"$ref": "#/$defs/path"},
+        "scenario_release_relative_path": {"$ref": "#/$defs/path"},
+        "shared_configuration_release_relative_path": {"$ref": "#/$defs/path"},
+        "rule_configuration_release_relative_path": {"$ref": "#/$defs/path"},
+        "rule_execution_release_relative_path": {"$ref": "#/$defs/path"},
+        "rule_run_release_relative_path": {"$ref": "#/$defs/path"},
+        "simulation_reading_relative_path": {"$ref": "#/$defs/path"}
+      }
+    }
+  }
+}

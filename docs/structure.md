@@ -68,27 +68,25 @@ multiagent-simulation/
 |   |-- README.md              # 研究项目索引
 |   |-- H2EPR.md               # H2EPR 仓库级项目指南
 |   `-- h2epr/                # H2EPR 研究资产和独立 Python 项目
-|       |-- contracts/v1/     # 稳定的序列化合同和 JSON Schema
-|       |-- decisions/        # 项目级架构决策
-|       |-- configs/          # 版本化场景配置与静态准入记录
-|       |-- agents/           # Agent Definitions、roster、review 与 binding
+|       |-- events/           # Source Profile、package assembly、编译包与当前事件注册表
+|       |-- agents/           # Agent Definitions、roster、actor map 与参与者接口
 |       |-- populations/      # 异质参与者群体模型
-|       |-- releases/         # 语义 release、manifest 与完整性记录
-|       |-- scenarios/        # 场景语义、接口闭合与 conformance 记录
-|       |-- execution/        # Rule execution 与精简 run/graph release
-|       |-- skills/           # H2EPR 设计期方法；不参与运行时
+|       |-- scenarios/        # 场景语义、接口闭合与环境机制
+|       |-- configs/          # 共享配置与 backend 配置及来源覆盖
+|       |-- backends/         # 决策 backend 合同与可用性目录
+|       |-- execution/        # backend realization 与实现身份
+|       |-- schemas/          # 当前序列化合同目录
+|       |-- releases/         # 精简 run release 与跨事件 conformance
+|       |-- reports/          # 完整模拟输出的人类阅读
+|       |-- templates/        # 当前作者模板
+|       |-- skills/           # H2EPR 设计和复核方法；不参与运行时
 |       |-- src/h2epr/        # 独立安装的 H2EPR Python 包
-|       |   |-- construction/ # 显式输入适配和 typed Construction IR
-|       |   |-- artifacts/    # EntityRegistry、roster 与 ParticipantArtifact 装配
-|       |   |-- policies/     # 声明式 Rule policy/skill 输入（不执行）
-|       |   |-- world/        # 归一化 canary 状态与纯计算 helper
-|       |   |-- bundles/      # sealed construction / EventBundle 编译（不运行）
-|       |   |-- agents/       # Definition、mapping、intent 与 carrier 检查
-|       |   |-- configuration/# 配置准入、canonical identity 与 receipt
-|       |   |-- execution/    # 事件中立的运行闭合、重放比较与本地 custody
-|       |   |-- scenarios/    # 事件专用 binding 与有界 conformance 路径
-|       |   |-- runtime/      # MASim adapter、policy、detector 与 runner
-|       |   `-- compiler/     # sealed-trace 校验与 Generated EPG 编译
+|       |   |-- semantic/     # 标准资产加载和完整性准入
+|       |   |-- benchmark/    # backend-neutral event package 编译与加载
+|       |   |-- backends/     # 决策接口、Rule backend 与 backend 注册表
+|       |   |-- runtime/      # 环境、runner、replay 与 Generated EPG
+|       |   |-- publication.py# run release 的独立重验和发布
+|       |   `-- experiment.py # 未来实验计划的只读准入
 |       |-- tests/            # 合同、边界、运行时、编译和 conformance 测试
 |       |-- pyproject.toml    # 独立包元数据
 |       |-- README.md         # 项目入口、安装和验证
@@ -110,9 +108,10 @@ multiagent-simulation/
 事件身份、证据、策略和配置保留在项目内；只有领域无关的 phased execution 与
 event-process primitive 位于 `masim/`。这一边界不改变 MASim 的默认运行路径。
 
-H2EPR 的冻结输入位于 `data/h2epr/`，运行生成物进入 `EXPERIMENT/H2EPR/`，经过单独
-筛选的发布包进入 `simulation-results/H2EPR/`。输入、项目装配、运行工作区和发布结果
-不得混用。项目结构和研究边界详见 `projects/H2EPR.md`。
+H2EPR 的允许输入位于 `data/h2epr/`，大型运行生成物进入被 Git 忽略的
+`.local-runtime/h2epr-simulation/runs/`，精简验证记录位于
+`projects/h2epr/releases/`。输入、项目装配、运行 custody 和正式 release 不得混用。
+项目结构和研究边界详见 `projects/H2EPR.md`。
 
 ## 4. 框架模块
 

@@ -1,217 +1,27 @@
-# H2EPR tests
+# Tests
 
-The H2EPR suites validate serialized contracts, research-asset boundaries,
-configuration admission, deterministic runtime behavior, and graph
-compilation. Most suites are offline and do not start a simulator.
+The maintained suite uses standard-library `unittest` so the Rule baseline is
+executable in the current offline environment.
 
-Install the project before running tests:
-
-```bash
-python -m pip install -e "projects/h2epr[test]"
-```
-
-## Suite ownership
-
-| Directory | Responsibility |
+| Package | Coverage |
 |---|---|
-| `contracts/` | JSON Schemas, cross-object invariants, repository boundaries, trace, and identity |
-| `construction/` | Explicit source loading, lossless construction records, evidence isolation, import boundaries, and repository-level formal-asset integrity |
-| `g2/` | Entity registry, participant artifacts, world inputs, and event-bundle construction |
-| `configuration/` | Schema admission, canonical identity, references, assembly, failure classes, and portable receipts |
-| `execution/` | Policy Realization, executable successors, shared run-closure kernel, repeated runs, replay, graph closure, custody, and fail-closed release boundaries |
-| `agents/` | Definition profiles, mappings, bindings, participant slices, and lineage conformance |
-| `g3/` | Phased runtime, policies, reducer, transport, trace, seals, replay, and detectors |
-| `g4/` | Sealed-trace inventory, deterministic graph compilation, and graph seals |
+| `benchmark` | Source admission, semantic compilation, package identities, planned-backend failure, tamper and path boundaries |
+| `semantic` | Agent/Population, roster, interface, scenario, configuration, manifest, and checksum closure |
+| `runtime` | Three timelines, decisions, environment effects, transport, trace, seals, replay, graph, determinism, identity invariance, and cross-event conformance |
+| `publication` | Independent custody derivation, compact releases, readings, and resealed-forgery rejection |
+| `experiments` | Plan identity, package/binding admission, custody uniqueness, model-control parity, scheduling, failures, analysis, and claim limits |
+| `standards` | Schema catalog, Skill inventory, current-only repository shape, local links, and publication surface |
 
-The `g2`, `g3`, and `g4` directory names are retained identifiers for the
-accepted artifact, runtime, and compiler suites. They do not imply that later
-research phases run automatically.
-
-## Event-qualified test names
-
-New event-specific test modules use the complete stable event slug:
-`test_panic_1907_*`, `test_singhealth_data_breach_*`, or
-`test_samsung_note7_battery_recall_*`. A shorter display name is not a new
-event namespace.
-
-Several accepted release guides already cite earlier test locators. Those
-paths remain compatibility names so immutable release records and their
-documented commands continue to resolve:
-
-| Event | Retained compatibility locator | Canonical name for new modules |
-|---|---|---|
-| Panic of 1907 | `test_scenario_configuration_admission.py` for the original configuration profile | `test_panic_1907_*` |
-| SingHealth Data Breach | existing `test_singhealth_*` modules; the bounded-lineage modules already use the full slug | `test_singhealth_data_breach_*` |
-| Samsung Galaxy Note7 Battery Recall Crisis | existing `test_samsung_note7_*` modules | `test_samsung_note7_battery_recall_*` |
-
-The repository publication check fixes the current compatibility-locator set
-and rejects new shorthand variants. Removing or renaming one of these retained
-paths requires migration of every accepted document that cites it; ordinary
-test maintenance must not rewrite a frozen release for cosmetic uniformity.
-
-## Commands
-
-Run all H2EPR tests from the repository root:
+Run everything from the repository root:
 
 ```bash
-python -B -m pytest -p no:cacheprovider projects/h2epr/tests
+PYTHONPATH=projects/h2epr/src python -B -m unittest discover \
+  -s projects/h2epr/tests -t projects/h2epr/tests -p 'test_*.py' -v
 ```
 
-Run the offline contract and construction surface:
+Run one package by replacing the discovery root with, for example,
+`projects/h2epr/tests/runtime` while keeping
+`-t projects/h2epr/tests`.
 
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/contracts \
-  projects/h2epr/tests/construction \
-  projects/h2epr/tests/g2 \
-  projects/h2epr/tests/execution
-```
-
-Run configuration and participant-asset checks:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/configuration \
-  projects/h2epr/tests/agents
-```
-
-The bounded KT--NBC--NYCH binding and conformance modules can be checked
-independently:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/agents/test_panic_1907_lineage_binding.py \
-  projects/h2epr/tests/agents/test_panic_1907_lineage_conformance.py
-```
-
-The SingHealth semantic releases can be checked independently:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/agents/test_singhealth_roster_release.py \
-  projects/h2epr/tests/agents/test_singhealth_scenario_mapping_release.py \
-  projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_release.py
-```
-
-The Note7 mapping, Scenario, configuration, and bounded admission releases can
-be checked independently:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/agents/test_samsung_note7_mapping_scenario_release.py \
-  projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_release.py \
-  projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_admission.py
-```
-
-The bounded SingHealth carrier binding and lineage conformance can be checked
-independently:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/agents/test_singhealth_data_breach_lineage_binding.py \
-  projects/h2epr/tests/agents/test_singhealth_data_breach_lineage_conformance.py
-```
-
-The bounded Note7 carrier binding and lineage conformance can be checked
-independently:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/agents/test_samsung_note7_lineage_binding.py \
-  projects/h2epr/tests/agents/test_samsung_note7_lineage_conformance.py
-```
-
-The three configuration-admission profiles and their focused rejection cases can
-be checked together:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/configuration/test_scenario_configuration_admission.py \
-  projects/h2epr/tests/configuration/test_singhealth_scenario_configuration_admission.py \
-  projects/h2epr/tests/configuration/test_samsung_note7_scenario_configuration_admission.py
-```
-
-The shared execution kernel and its exact Panic conformance can be checked
-independently:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/execution/test_shared_execution_kernel.py
-```
-
-The accepted Panic and SingHealth run releases can be checked together at the
-immutable two-event closure boundary:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/execution/test_cross_event_execution_conformance.py
-```
-
-The Note7 full-roster implementation and its compact run release have one
-event-qualified closeout suite:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/execution/test_samsung_note7_full_roster_execution.py
-```
-
-All three accepted run releases can be re-admitted through the additive v0.2
-conformance successor:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/execution/test_cross_event_execution_conformance_v0_2.py
-```
-
-Formal H2EPR JSON, release checksum inventories, publication-surface local
-links, and event-test locator names share one repository-level check:
-
-```bash
-python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/construction/test_repository_publication_surface.py
-```
-
-The main H2EPR workflow runs this check with the construction suite. A small
-publication-only workflow runs the same check when one of the outer repository
-guides changes without a project-tree change.
-
-Runtime and compiler checks use the MASim dependencies described in the root
-`requirements.txt`:
-
-```bash
-RAY_USAGE_STATS_ENABLED=0 python -B -m pytest -p no:cacheprovider \
-  projects/h2epr/tests/g3 \
-  projects/h2epr/tests/g4
-```
-
-These tests exercise deterministic Rule paths. They do not run model-backed
-experiments or establish historical fidelity.
-
-## Fixture boundaries
-
-- `fixtures/construction_ir/` contains minimized synthetic construction
-  inputs. Cross-domain tests use only explicitly listed, hash-pinned files.
-- `fixtures/g2/`, `fixtures/g3/`, and `fixtures/g4/` contain synthetic
-  closed-value inputs rather than experiment output or historical targets.
-- `fixtures/agents/panic_1907/minimal_binding_v0_1/` preserves the earlier
-  three-tick engineering baseline as a regression fixture.
-- Evaluation-only reference material is never read by construction, runtime,
-  Agent, or compiler tests.
-
-Real target-derived bundles and canary outputs remain generated evidence and
-are not copied into the tracked fixture tree.
-
-## Contract support code
-
-Builders under `support/cases/` own schema, construction, communication,
-repository, and trace/identity cases. Declarative cases in `case_specs/v1/`
-use a closed operation and validator vocabulary. `schema_registry.py` resolves
-the schema catalog offline, while the receipt and validator modules retain
-separate serialization and semantic responsibilities.
-
-Each contract condition is exposed as an independent pytest parameter with a
-stable behavior-based ID. Historical suite grouping does not select behavior
-or enter public receipts.
-
-See [`docs/development-environment.md`](../../../docs/development-environment.md)
-for the dependency profiles used by these suites.
+LLM and RuleLLM have no skipped success tests or placeholder implementation.
+Their admission paths fail closed while those backends remain planned.

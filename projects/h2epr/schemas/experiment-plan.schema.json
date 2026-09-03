@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.experiment-plan.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "plan_id",
+    "plan_version",
+    "purpose",
+    "rows",
+    "comparison_groups",
+    "scheduling",
+    "failure_policy",
+    "analysis_contracts",
+    "claim_boundary",
+    "plan_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.experiment-plan.v3"},
+    "plan_id": {"type": "string", "minLength": 1},
+    "plan_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "purpose": {"type": "string", "minLength": 1},
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/row"}
+    },
+    "comparison_groups": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/comparison"}
+    },
+    "scheduling": {"$ref": "#/$defs/scheduling"},
+    "failure_policy": {"$ref": "#/$defs/failurePolicy"},
+    "analysis_contracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/analysisContract"}
+    },
+    "claim_boundary": {"$ref": "#/$defs/claim"},
+    "plan_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fileRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relative_path", "sha256"],
+      "properties": {
+        "relative_path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value", "basis"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "value": {},
+        "basis": {"type": "string", "minLength": 1}
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model_id",
+        "model_version",
+        "service_mode",
+        "prompt_contract",
+        "response_contract",
+        "decoding_parameters",
+        "max_attempts"
+      ],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "model_id": {"type": "string", "minLength": 1},
+        "model_version": {"type": "string", "minLength": 1},
+        "service_mode": {"enum": ["local", "remote"]},
+        "prompt_contract": {"$ref": "#/$defs/fileRef"},
+        "response_contract": {"$ref": "#/$defs/fileRef"},
+        "decoding_parameters": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/parameter"}
+        },
+        "max_attempts": {"type": "integer", "minimum": 1}
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_id",
+        "event_id",
+        "package_relative_path",
+        "package_sha256",
+        "backend",
+        "binding_sha256",
+        "seeds",
+        "identity_variant",
+        "custody_root"
+      ],
+      "properties": {
+        "row_id": {"type": "string", "minLength": 1},
+        "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+        "package_relative_path": {"type": "string", "minLength": 1},
+        "package_sha256": {"$ref": "#/$defs/sha"},
+        "backend": {"enum": ["rule", "llm", "rulellm"]},
+        "binding_sha256": {"$ref": "#/$defs/sha"},
+        "seeds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "integer"}
+        },
+        "identity_variant": {"const": "canonical"},
+        "custody_root": {"type": "string", "pattern": "^\\.local-runtime/h2epr-simulation/experiments/"},
+        "model_provenance": {"$ref": "#/$defs/model"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"backend": {"enum": ["llm", "rulellm"]}}},
+          "then": {"required": ["model_provenance"]},
+          "else": {"not": {"required": ["model_provenance"]}}
+        }
+      ]
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group_id", "comparison_kind", "row_ids"],
+      "properties": {
+        "group_id": {"type": "string", "minLength": 1},
+        "comparison_kind": {"enum": ["within_event_backend", "cross_event_contract"]},
+        "row_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "scheduling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_parallel_runs",
+        "wall_timeout_seconds",
+        "stall_timeout_seconds",
+        "progress_poll_seconds"
+      ],
+      "properties": {
+        "max_parallel_runs": {"type": "integer", "minimum": 1},
+        "wall_timeout_seconds": {"type": "integer", "minimum": 1},
+        "stall_timeout_seconds": {"type": "integer", "minimum": 1},
+        "progress_poll_seconds": {"type": "integer", "minimum": 1}
+      }
+    },
+    "failurePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retry_limit", "retryable_classes", "preserve_failed_custody"],
+      "properties": {
+        "retry_limit": {"type": "integer", "minimum": 0},
+        "retryable_classes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["provider_transient", "resource_exhaustion", "stall"]
+          }
+        },
+        "preserve_failed_custody": {"const": true}
+      }
+    },
+    "analysisContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analysis_id", "scope", "definition"],
+      "properties": {
+        "analysis_id": {"type": "string", "minLength": 1},
+        "scope": {"enum": ["simulation_only", "within_event_backend", "cross_event_contract"]},
+        "definition": {"$ref": "#/$defs/fileRef"}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supports", "does_not_support"],
+      "properties": {
+        "supports": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "does_not_support": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

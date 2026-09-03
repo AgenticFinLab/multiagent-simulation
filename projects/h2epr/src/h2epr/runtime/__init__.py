@@ -1,20 +1,14 @@
-"""Offline Rule runtime for the project-local event-process canary."""
+"""Offline H2EPR benchmark runtime with lazy public exports."""
 
-from .adapter import AcceptedRunInput, build_accepted_run_input
-from .detectors import P007Detector
-from .participant import RuleParticipantPersona, RuleParticipantPlayer
-from .policy import POLICY_ID, RulePolicyV1
-from .runner import H2EPRSimulationRunner, H2EPRSimulator, run_case
+from typing import Any
 
-__all__ = [
-    "AcceptedRunInput",
-    "H2EPRSimulationRunner",
-    "H2EPRSimulator",
-    "P007Detector",
-    "POLICY_ID",
-    "RuleParticipantPersona",
-    "RuleParticipantPlayer",
-    "RulePolicyV1",
-    "build_accepted_run_input",
-    "run_case",
-]
+
+__all__ = ["BenchmarkRunArtifacts", "BenchmarkRunError", "materialize_run"]
+
+
+def __getattr__(name: str) -> Any:
+    if name not in __all__:
+        raise AttributeError(name)
+    from . import benchmark_runner
+
+    return getattr(benchmark_runner, name)

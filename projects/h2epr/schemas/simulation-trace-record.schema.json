@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.simulation-trace-record.v2",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["trace_id", "run_id", "sequence_in_run", "logical_tick", "record_type", "payload", "previous_record_hash", "record_hash"],
+  "properties": {
+    "trace_id": {"type": "string", "minLength": 1}, "run_id": {"type": "string", "minLength": 1},
+    "sequence_in_run": {"type": "integer", "minimum": 0},
+    "logical_tick": {"type": "integer", "minimum": 0}, "record_type": {"type": "string", "minLength": 1},
+    "actor_id": {"type": ["string", "null"]}, "payload": {"type": "object"},
+    "previous_record_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "record_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

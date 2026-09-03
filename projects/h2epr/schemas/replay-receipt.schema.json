@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.replay-receipt.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_version",
+    "status",
+    "run_id",
+    "record_count",
+    "tick_count",
+    "trace_sha256",
+    "final_state_sha256",
+    "replayed_state_sha256",
+    "trace_errors",
+    "receipt_sha256"
+  ],
+  "properties": {
+    "receipt_version": {"const": "h2epr.benchmark.replay-receipt.v3"},
+    "status": {"const": "pass"},
+    "run_id": {"type": "string", "minLength": 1},
+    "record_count": {"type": "integer", "minimum": 1},
+    "tick_count": {"type": "integer", "minimum": 1},
+    "trace_sha256": {"$ref": "#/$defs/sha"},
+    "final_state_sha256": {"$ref": "#/$defs/sha"},
+    "replayed_state_sha256": {"$ref": "#/$defs/sha"},
+    "trace_errors": {"type": "array", "maxItems": 0},
+    "receipt_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

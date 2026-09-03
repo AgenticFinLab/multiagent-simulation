@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/construction/prefix_clean_strict_construction_bundle.schema.json",
-  "title": "Prefix-Clean Strict Construction Bundle",
-  "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/PrefixCleanStrictConstructionBundle"
-}

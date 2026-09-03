@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.run-manifest.v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "event_id",
+    "package_id",
+    "package_sha256",
+    "manifest_sha256",
+    "binding_id",
+    "binding_sha256",
+    "realization_id",
+    "realization_sha256",
+    "shared_configuration_id",
+    "shared_configuration_sha256",
+    "backend_configuration_id",
+    "backend_configuration_sha256",
+    "backend",
+    "run_settings",
+    "h2epr_runtime_sources",
+    "masim_kernel_sources",
+    "run_manifest_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.run-manifest.v3"},
+    "run_id": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
+    "package_id": {"type": "string", "minLength": 1},
+    "package_sha256": {"$ref": "#/$defs/sha"},
+    "manifest_sha256": {"$ref": "#/$defs/sha"},
+    "binding_id": {"type": "string", "minLength": 1},
+    "binding_sha256": {"$ref": "#/$defs/sha"},
+    "realization_id": {"type": "string", "minLength": 1},
+    "realization_sha256": {"$ref": "#/$defs/sha"},
+    "shared_configuration_id": {"type": "string", "minLength": 1},
+    "shared_configuration_sha256": {"$ref": "#/$defs/sha"},
+    "backend_configuration_id": {"type": "string", "minLength": 1},
+    "backend_configuration_sha256": {"$ref": "#/$defs/sha"},
+    "backend": {"enum": ["rule", "llm", "rulellm"]},
+    "run_settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "tick_count",
+        "timeline_sha256",
+        "source_exposure",
+        "protocol_eligibility",
+        "model_access",
+        "network_access",
+        "historical_calibration",
+        "identity_variant"
+      ],
+      "properties": {
+        "seed": {"type": "integer"},
+        "tick_count": {"type": "integer", "minimum": 1},
+        "timeline_sha256": {"$ref": "#/$defs/sha"},
+        "source_exposure": {"enum": ["prefix_clean", "full_draft_exposed"]},
+        "protocol_eligibility": {"type": "string", "minLength": 1},
+        "model_access": {"enum": ["denied", "required"]},
+        "network_access": {"enum": ["denied", "required"]},
+        "historical_calibration": {"const": false},
+        "identity_variant": {"type": "string", "minLength": 1}
+      }
+    },
+    "h2epr_runtime_sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/file"}},
+    "masim_kernel_sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/file"}},
+    "run_manifest_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relative_path", "sha256"],
+      "properties": {
+        "relative_path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha"}
+      }
+    }
+  }
+}

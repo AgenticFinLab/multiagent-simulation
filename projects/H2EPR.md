@@ -1,99 +1,81 @@
 # H2EPR project guide
 
-H2EPR is a research project for building auditable multi-agent models of real
-event processes. It keeps event evidence, participant semantics, scenario
-rules, runtime records, and generated process graphs connected through explicit
-interfaces and provenance.
+H2EPR is the repository's benchmark-event simulation project. For each event,
+it turns three exposed H2EPR dataset files into an admitted event package, runs
+that package through a declared decision backend, and preserves enough evidence
+to replay the authoritative state and reconstruct the generated event graph.
 
-The project is developed under [`projects/h2epr/`](h2epr/). MASim supplies
-general multi-agent execution infrastructure; H2EPR owns event-specific
-research and interpretation together with the execution logic shared by its
-events.
+The project lives under [`projects/h2epr/`](h2epr/). MASim provides the
+domain-neutral event-process transport, reducer, trace, and seal primitives.
+H2EPR owns benchmark admission, participant and scenario semantics, backend
+bindings, orchestration, publication, and interpretation.
 
-## Engineering flow
+## Current flow
 
 ```text
-bounded sources and evidence
-  -> participant and population definitions
-  -> event scenario and configuration
-  -> admitted, explicitly bound runtime inputs
-  -> deterministic trace, seals, and replay
-  -> generated event process graph
-  -> human reading and separately scoped comparison
+event_spec.json + frozen_evidence.json + draft_epg.json
+  -> Source Profile
+  -> roster, actor map, Agent Definitions, and Population Models
+  -> participant interface and Scenario Mechanism
+  -> shared and backend configurations
+  -> backend-neutral event package plus explicit backend binding
+  -> participant decisions and authoritative environment transitions
+  -> hash-chained trace, seals, replay, and Generated EPG
+  -> compact run release and simulation-only reading
 ```
 
-The boundaries in this flow are deliberate. A configuration is not executable
-until it passes admission and has an explicit carrier and policy binding.
-Agent outputs describe intents; the environment adjudicates outcomes; the
-reducer alone commits authoritative state. Scientific evaluation is a separate
-activity performed only when an experiment is specifically authorized.
+Rule is the implemented deterministic baseline. LLM and RuleLLM are declared
+future backends and fail closed. Every backend must use the same event package,
+clock, environment, transport, observation boundary, and publication contract;
+only participant decision production may differ.
 
-## Repository boundary
+## Repository responsibilities
 
 | Location | Responsibility |
 |---|---|
-| `projects/h2epr/contracts/` | Stable serialized interfaces and JSON Schemas |
-| `projects/h2epr/agents/` | Participant definitions, rosters, reviews, and bindings |
-| `projects/h2epr/populations/` | Event-bound heterogeneous population models |
-| `projects/h2epr/releases/` | Hash-pinned Roster Definition release inventories |
-| `projects/h2epr/scenarios/` | Scenario semantics and versioned event releases |
-| `projects/h2epr/configs/` | Declared-purpose configurations and admission records |
-| `projects/h2epr/execution/` | Policy Realizations, executable successors, compact run records, and cross-event conformance |
-| `projects/h2epr/analysis/` | Human-readable generated-process interpretation and authorized comparison studies |
-| `projects/h2epr/skills/` | Evidence-to-execution authoring methods and proportionate review routes |
-| `projects/h2epr/src/h2epr/` | Installable construction, runtime, and compiler code |
-| `projects/h2epr/tests/` | Contract, boundary, runtime, and conformance tests |
-| `data/h2epr/` | Versioned source and development input packages |
+| `data/h2epr/` | The three allowed dataset inputs for each event |
+| `projects/h2epr/events/` | Source Profiles, package assemblies, compiled packages, and the current-event registry |
+| `projects/h2epr/agents/` | Named choice units, rosters, actor maps, and participant interfaces |
+| `projects/h2epr/populations/` | Aggregate heterogeneous choice units |
+| `projects/h2epr/scenarios/` | Event-world, institutional, authority, and transition semantics |
+| `projects/h2epr/configs/` | Shared selections and backend-specific settings with provenance |
+| `projects/h2epr/backends/` | Backend contract and availability catalog |
+| `projects/h2epr/execution/` | Backend realizations and implementation identity |
+| `projects/h2epr/src/h2epr/` | Admission, compilation, execution, replay, graph, and publication code |
+| `projects/h2epr/schemas/` | Current serialized contract catalog |
+| `projects/h2epr/releases/` | Compact run and cross-event verification evidence |
+| `projects/h2epr/reports/` | Full-output simulation readings |
+| `projects/h2epr/templates/` and `skills/` | Maintained authoring and review procedures |
+| `projects/h2epr/tests/` | Contract, boundary, execution, and publication validation |
 
-Domain-neutral event-process primitives live in
-`masim.integrations.event_process`. Event identities, historical assumptions,
-institutional policies, and interpretation remain inside H2EPR.
+Large materializations remain in the ignored
+`.local-runtime/h2epr-simulation/runs/` custody tree. Reference EPG,
+held-out, and evaluation-only content is outside construction authority.
 
-## Cross-event baseline
+## Three-event baseline
 
-The current baseline covers three events in different domains. The Panic of
-1907 establishes the first complete standardization baseline with seven Agent
-Definitions, five population models, and one bounded Knickerbocker
-Trust--National Bank of Commerce--New York Clearing House lineage. The
-SingHealth Data Breach applies the same handoff to a healthcare cybersecurity
-event with seven Agent Definitions, two population models, and one bounded
-technical--operations--GCIO lineage. The Samsung Galaxy Note7 Battery Recall
-Crisis adds a product-safety and transport event with four Agent Definitions,
-four Population Models, and a bounded
-Samsung--regional-unit--outlet--consumer remedy lineage.
+The current Rule baseline covers the Panic of 1907, SingHealth Data Breach,
+and Samsung Galaxy Note7 Battery Recall Crisis. All three packages use the
+same compiler, package loader, backend interface, declarative environment,
+runtime, replay path, graph compiler, publisher, and cross-event verifier.
+Event vocabulary and policy tables stay in admitted assets rather than common
+Python.
 
-All three events connect accepted evidence and participant semantics to a
-fixed roster, consolidated mapping, Event Scenario Definition, non-executable
-Scenario Configuration, and fail-closed static admission. Separately
-versioned executable successors then operate each complete configured roster,
-produce repeatable sealed traces, replay authoritative state, and compile a
-trace-derived generated event graph.
+The [cross-event release](h2epr/releases/cross-event/rule/) records the common
+closure contract. Individual [event entries](h2epr/events/README.md) lead to
+each package, run release, and simulation reading.
 
-The accepted
-[three-event conformance successor](h2epr/execution/cross-event-conformance-v0.2/)
-shows that all three event paths close under the same run-document and
-verification contract while retaining different participants, policies,
-schedules, state, and graph inventories. The accepted v0.1 release remains an
-immutable two-event record. This is an uncalibrated engineering result, not a
-historical reconstruction, cross-domain validity result, or claim of
-scientific validity. Calibration or evaluation requires a separate research
-question and scope.
+This baseline establishes dataset-conditioned engineering and method closure.
+It does not establish historical fit, calibration, held-out performance,
+policy effects, causality, scientific validity, or universal generality.
 
 ## Reading order
 
-1. [Project README](h2epr/README.md) for installation, layout, and validation.
-2. [Event entries](h2epr/events/README.md) for the research-facing path through
-   each accepted baseline and the separate reproducibility records.
-3. [Three-event execution conformance](h2epr/execution/cross-event-conformance-v0.2/)
-   for the compact comparison of the three completed Rule paths.
-4. [Generated-process analysis](h2epr/analysis/README.md) for complete human
-   readings of the three accepted simulation outputs.
-5. [Event modeling workflow](h2epr/WORKFLOW.md) for artifact handoffs and
-   stopping boundaries.
-6. [H2EPR Skills](h2epr/skills/README.md) for the specialist methods used by
-   each authorized stage, including the optional full-roster execution tail.
-7. [Architecture](h2epr/ARCHITECTURE.md) for responsibility and information
-   boundaries.
-8. [Evolution policy](h2epr/EVOLUTION.md) for compatibility and release rules.
-9. [Contracts V1](h2epr/contracts/v1/README.md) for machine-readable
-   interfaces.
+1. [Project README](h2epr/README.md) for the baseline, commands, and repository map.
+2. [New-event playbook](h2epr/NEW_EVENT_PLAYBOOK.md) for the maintained event-building sequence.
+3. [Workflow](h2epr/WORKFLOW.md) for handoffs, authority, and failure routing.
+4. [Architecture](h2epr/ARCHITECTURE.md) for runtime and information boundaries.
+5. [Benchmark protocol](h2epr/BENCHMARK_PROTOCOL.md) for allowed inputs and claim limits.
+6. [Publication standard](h2epr/PUBLICATION_STANDARD.md) for identity and release quality.
+7. [Event index](h2epr/events/README.md) and [cross-event release](h2epr/releases/cross-event/rule/) for current evidence.
+8. [Experiment standard](h2epr/EXPERIMENT_STANDARD.md) only when a comparison plan is authorized.

@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/runtime/message_fanout_plan.schema.json",
-  "title": "Deterministic Single-Recipient Fan-out Plan",
-  "$ref": "https://raw.githubusercontent.com/AgenticFinLab/multiagent-simulation/main/projects/h2epr/contracts/v1/schemas/core/h2epr_core.schema.json#/$defs/MessageFanoutPlan"
-}

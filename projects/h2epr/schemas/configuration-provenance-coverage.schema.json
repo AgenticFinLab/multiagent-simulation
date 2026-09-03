@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.configuration-provenance-coverage.v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "coverage_id",
+    "configuration_id",
+    "configuration_sha256",
+    "covered_setting_pointers",
+    "exemptions",
+    "coverage_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "h2epr.configuration-provenance-coverage.v4"},
+    "coverage_id": {"type": "string", "minLength": 1},
+    "configuration_id": {"type": "string", "minLength": 1},
+    "configuration_sha256": {"$ref": "#/$defs/sha"},
+    "covered_setting_pointers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^/settings/"}
+    },
+    "exemptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/exemption"}
+    },
+    "coverage_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "exemption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "json_pointer",
+        "reason",
+        "review_authority",
+        "review_status",
+        "successor_trigger"
+      ],
+      "properties": {
+        "json_pointer": {"type": "string", "pattern": "^/settings/"},
+        "reason": {"type": "string", "minLength": 1},
+        "review_authority": {"type": "string", "minLength": 1},
+        "review_status": {"const": "accepted_bounded_unavailability"},
+        "successor_trigger": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
