@@ -1,18 +1,16 @@
 # Run releases
 
-A run release is a compact index into ignored custody. It pins one event
-package, binding, backend, seed, H2EPR runtime, MASim kernel, manifest, trace,
-terminal state, replay, Generated EPG, and deterministic comparison.
+A tracked run release is a compact, independently verified index into ignored
+raw custody. It pins the package, binding, backend, seed or model controls,
+runtime and MASim source inventories, trace, seals, terminal state, replay,
+Generated EPG, determinism or variation evidence, and custody inventory.
 
-| Event | Backend | Current release |
-|---|---|---|
-| H2EPR-0288 Panic of 1907 | Rule | [release](panic_1907/rule/) |
-| H2EPR-0616 SingHealth Data Breach | Rule | [release](singhealth_data_breach/rule/) |
-| H2EPR-0481 Galaxy Note7 Recall | Rule | [release](samsung_note7_battery_recall/rule/) |
+Only releases referenced by
+[events/current-events.json](../events/current-events.json) are current.
+Cross-event evidence is published only when at least two independently
+accepted event runs share the declared contract.
 
-The shared [cross-event Rule receipt](cross-event/rule/) verifies identity
-isolation, common contracts, deterministic closure, replay, graph coverage,
-and terminal transport across all three events.
-
-Raw traces and graphs are reproducible custody outputs, not tracked release
-payloads.
+Raw traces and graphs remain under ignored custody. A producer's success flag,
+self-hash, or outer checksum is never sufficient for publication; the
+publisher rederives semantic lineage, replay, graph coverage, and deterministic
+Rule output.

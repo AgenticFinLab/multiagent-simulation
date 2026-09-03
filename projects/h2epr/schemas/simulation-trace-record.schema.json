@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.simulation-trace-record.v2",
+  "title": "H2EPR simulation trace record",
+  "description": "Represents one append-only, hash-chained observation, decision, intent, disposition, delta, lifecycle, annotation, stage, or seal record.",
   "type": "object",
   "additionalProperties": true,
   "required": ["trace_id", "run_id", "sequence_in_run", "logical_tick", "record_type", "payload", "previous_record_hash", "record_hash"],

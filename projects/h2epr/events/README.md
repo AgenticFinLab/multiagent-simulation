@@ -1,23 +1,19 @@
 # Event packages
 
-Each event directory publishes one backend-neutral package. It owns source
-identity, participants, actorization, scenario semantics, shared
-configuration, and the claim boundary used by every backend.
+Each current event directory owns one Source Profile, one package assembly,
+one compiled backend-neutral package, and its explicit backend bindings.
 
-| Event | Package | Rule | LLM | RuleLLM |
-|---|---|---|---|---|
-| H2EPR-0288 Panic of 1907 | [package](panic_1907/package/) | implemented | planned | planned |
-| H2EPR-0616 SingHealth Data Breach | [package](singhealth_data_breach/package/) | implemented | planned | planned |
-| H2EPR-0481 Galaxy Note7 Recall | [package](samsung_note7_battery_recall/package/) | implemented | planned | planned |
+[current-events.json](current-events.json) is the sole machine discovery
+registry. A row is added only after every referenced semantic release,
+configuration, realization, package, run release, and simulation reading
+exists and validates. The registry may be empty while the framework is being
+validated; an empty registry makes no event-result claim.
 
-The packages share one compiler, loader, Rule backend, environment, runtime,
-replay adapter, Generated EPG compiler, publisher, and conformance contract.
-Participant, state, mechanism, route, timeline, and Rule vocabulary remain
-event-local declarative assets.
+Use the maintained [event entry template](../templates/event-entry.md) for the
+reader-facing landing page and keep its four completion-state sections in the
+declared order.
 
-[current-events.json](current-events.json) is the machine discovery registry.
-Add a row only after every referenced current path exists and validates; no
-common Python event tuple should change.
-
-Run traces, model outputs, external research notes, and backend-specific
-outcomes do not belong here.
+The package contains no credentials, generated decisions, historical
+evaluation, or hidden fallback. Event vocabulary remains declarative and
+event-local. Adding an event must not add its ID, slug, actors, or domain
+terms to common Python.

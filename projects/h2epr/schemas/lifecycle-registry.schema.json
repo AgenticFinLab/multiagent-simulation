@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.lifecycle-registry.v2",
+  "title": "H2EPR lifecycle registry",
+  "description": "Defines initial, intermediate, and terminal states together with authoritative transition owners and triggers.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "registry_id", "registry_version", "event_id", "lifecycles", "registry_sha256"],

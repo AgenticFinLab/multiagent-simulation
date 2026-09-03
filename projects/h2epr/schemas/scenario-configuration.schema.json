@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.scenario-configuration.v3",
+  "title": "H2EPR scenario configuration",
+  "description": "Selects typed shared-world or backend decision values and records exact value provenance without redefining semantic parents.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -38,6 +38,10 @@ class SchemaCatalogTests(unittest.TestCase):
                 value = _strict_json(SCHEMA_ROOT / name)
                 jsonschema.Draft202012Validator.check_schema(value)
                 self.assertTrue(value["$id"].startswith("h2epr."))
+                self.assertIsInstance(value.get("title"), str)
+                self.assertTrue(value["title"].strip())
+                self.assertIsInstance(value.get("description"), str)
+                self.assertGreaterEqual(len(value["description"].split()), 8)
 
     def test_no_parallel_schema_generation_is_published(self) -> None:
         self.assertFalse(

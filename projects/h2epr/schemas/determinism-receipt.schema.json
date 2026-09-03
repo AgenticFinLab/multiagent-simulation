@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.determinism-receipt.v3",
+  "title": "H2EPR determinism receipt",
+  "description": "Compares two fresh same-input deterministic materializations and hash-links the separate generated-identity conformance result.",
   "type": "object",
   "additionalProperties": false,
   "required": [

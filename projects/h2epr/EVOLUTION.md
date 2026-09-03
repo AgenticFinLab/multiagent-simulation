@@ -51,7 +51,9 @@ through its manifests and dependents even though the path remains current.
 
 `events/current-events.json` is the only current-event discovery pointer. It
 may reference an event only after all declared paths, package identities,
-release checks, reading, and cross-event conformance close.
+individual release checks, and reading close. Once the registry contains two
+or more events, the current cross-event conformance release must cover every
+row. A zero- or one-event registry has no cross-event claim.
 
 ## Experiment immutability
 

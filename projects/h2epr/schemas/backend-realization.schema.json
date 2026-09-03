@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.backend-realization.v2",
+  "title": "H2EPR backend realization",
+  "description": "Projects all active participant decision situations and shared capabilities into one implemented backend.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "realization_id", "realization_version", "event_id", "backend", "semantic_parent_ids", "configuration_id", "decision_interface", "implementation_id", "actor_realizations", "failure_routing", "implementation_sources", "realization_sha256"],

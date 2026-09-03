@@ -5,6 +5,10 @@ description: Produce and review all Agent Definitions and Population Models for 
 
 # Event participant batch
 
+Read [references/guide.md](references/guide.md) for batching strategy,
+event-wide ledgers, cross-participant checks, review independence, and the
+release-ready handoff.
+
 ## Procedure
 
 1. Freeze the Source Profile, simulation window, roster candidate, actor IDs,

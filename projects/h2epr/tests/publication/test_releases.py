@@ -21,13 +21,7 @@ from support import (
     SCHEMA_ROOT,
     package_root,
 )
-
-
-EXPECTED_COUNTS = {
-    "H2EPR-0288": (12, 15, 813, 851, 2074),
-    "H2EPR-0616": (8, 11, 438, 466, 1131),
-    "H2EPR-0481": (8, 19, 729, 772, 1872),
-}
+from synthetic import SIGNAL_CASE, build_synthetic_event
 
 
 def _read(path: Path):
@@ -67,7 +61,6 @@ class FormalReleaseTests(unittest.TestCase):
             ):
                 schema = _read(SCHEMA_ROOT / schema_name)
                 jsonschema.Draft202012Validator(schema).validate(artifact)
-            actors, ticks, traces, nodes, edges = EXPECTED_COUNTS[event["event_id"]]
             with self.subTest(event_id=event["event_id"]):
                 self.assertEqual(package.package_sha256, manifest["package_sha256"])
                 self.assertEqual(package.binding_sha256, manifest["binding_sha256"])
@@ -76,15 +69,19 @@ class FormalReleaseTests(unittest.TestCase):
                 self.assertTrue(receipt["trace_coverage_passed"])
                 self.assertEqual(0, receipt["unresolved_transport_count"])
                 self.assertEqual(
-                    (actors, ticks, traces, nodes, edges),
-                    (
-                        receipt["counts"]["actors"],
-                        receipt["counts"]["ticks"],
-                        receipt["counts"]["trace_records"],
-                        receipt["counts"]["graph_nodes"],
-                        receipt["counts"]["graph_edges"],
-                    ),
+                    len(package.scenario["active_actor_ids"]),
+                    receipt["counts"]["actors"],
                 )
+                self.assertEqual(
+                    len(package.scenario["timeline"]),
+                    receipt["counts"]["ticks"],
+                )
+                self.assertGreater(receipt["counts"]["trace_records"], 0)
+                self.assertGreaterEqual(
+                    receipt["counts"]["graph_nodes"],
+                    receipt["counts"]["trace_records"],
+                )
+                self.assertGreater(receipt["counts"]["graph_edges"], 0)
                 self.assertTrue(determinism["all_byte_identical"])
                 self.assertTrue(identity["passed"])
                 self.assertEqual(
@@ -105,6 +102,9 @@ class FormalReleaseTests(unittest.TestCase):
 
     def test_current_cross_event_receipt_closes(self) -> None:
         root = PROJECT_ROOT / "releases" / "cross-event" / "rule"
+        if len(CURRENT_EVENTS) < 2:
+            self.assertFalse(root.exists())
+            return
         receipt = _read(root / "conformance-receipt.json")
         schema = _read(SCHEMA_ROOT / "conformance-receipt.schema.json")
         jsonschema.Draft202012Validator(schema).validate(receipt)
@@ -137,8 +137,20 @@ class FormalReleaseTests(unittest.TestCase):
             )
             reading = (root / "simulation-reading.md").read_text(encoding="utf-8")
             with self.subTest(event_id=event["event_id"]):
-                self.assertIn("## Complete-output coverage", reading)
-                self.assertIn("## Verification and limits", reading)
+                self.assertEqual(
+                    [
+                        "## Run identity",
+                        "## Complete-output coverage",
+                        "## Generated trajectory",
+                        "## Mechanism reading",
+                        "## Limitations",
+                    ],
+                    [
+                        line
+                        for line in reading.splitlines()
+                        if line.startswith("## ")
+                    ],
+                )
                 self.assertIn("terminal", reading.lower())
                 for value in (
                     package.package_sha256,
@@ -156,18 +168,19 @@ class PublicationAdversarialTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.temporary = tempfile.TemporaryDirectory()
         cls.root = Path(cls.temporary.name)
-        cls.event = CURRENT_EVENTS[0]
-        cls.package = package_root(cls.event)
+        cls.event = build_synthetic_event(cls.root, SIGNAL_CASE)
+        cls.package = cls.event.package_root
+        cls.data_root = cls.event.data_root
         locator = (
-            ".local-runtime/h2epr-simulation/runs/benchmark/"
-            f"{cls.event['event_slug']}/rule/test-materialization"
+            ".local-runtime/h2epr-simulation/runs/tests/"
+            f"{cls.event.slug}/rule/publication"
         )
         cls.canonical = cls.root / "canonical"
         cls.repeat = cls.root / "repeat"
         cls.probe = cls.root / "probe"
         materialize_run(
             package_root=cls.package,
-            data_root=DATA_ROOT,
+            data_root=cls.data_root,
             output_root=cls.canonical,
             backend="rule",
             run_seed=0,
@@ -176,7 +189,7 @@ class PublicationAdversarialTests(unittest.TestCase):
         )
         materialize_run(
             package_root=cls.package,
-            data_root=DATA_ROOT,
+            data_root=cls.data_root,
             output_root=cls.repeat,
             backend="rule",
             run_seed=0,
@@ -185,7 +198,7 @@ class PublicationAdversarialTests(unittest.TestCase):
         )
         materialize_run(
             package_root=cls.package,
-            data_root=DATA_ROOT,
+            data_root=cls.data_root,
             output_root=cls.probe,
             backend="rule",
             run_seed=0,
@@ -216,15 +229,15 @@ class PublicationAdversarialTests(unittest.TestCase):
         release = self.root / "published"
         summary = publish_rule_run_release(
             package_root=self.package,
-            data_root=DATA_ROOT,
+            data_root=self.data_root,
             canonical_root=self.canonical,
             repeat_root=self.repeat,
             probe_root=self.probe,
             release_root=release,
-            event_title=self.event["title"],
+            event_title=self.event.title,
             simulation_reading_link="../../../reports/example.md",
         )
-        self.assertEqual(self.event["event_id"], summary["event_id"])
+        self.assertEqual(self.event.event_id, summary["event_id"])
         _assert_inventory(self, release)
 
     def test_publisher_rejects_resealed_graph_identity_forgery(self) -> None:
@@ -247,12 +260,12 @@ class PublicationAdversarialTests(unittest.TestCase):
         ):
             publish_rule_run_release(
                 package_root=self.package,
-                data_root=DATA_ROOT,
+                data_root=self.data_root,
                 canonical_root=forged,
                 repeat_root=self.repeat,
                 probe_root=self.probe,
                 release_root=release,
-                event_title=self.event["title"],
+                event_title=self.event.title,
                 simulation_reading_link="../../../reports/example.md",
             )
         self.assertFalse(release.exists())

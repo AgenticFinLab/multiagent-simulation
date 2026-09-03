@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.participant-observation.v2",
+  "title": "H2EPR participant observation",
+  "description": "Provides one actor with a sealed decision-time view of public state, delivered messages, and pending lifecycle references.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "actor_id", "logical_tick", "public_state", "private_state", "delivered_messages", "pending_lifecycles", "permitted_action_types"],

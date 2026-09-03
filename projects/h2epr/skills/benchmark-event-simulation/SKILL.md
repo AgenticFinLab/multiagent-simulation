@@ -8,6 +8,10 @@ description: Orchestrate a complete H2EPR dataset-only event package, implemente
 Use this Skill as the thin end-to-end entry point. Invoke the specialized Skill
 for each product; do not duplicate its content here.
 
+Read [references/guide.md](references/guide.md) before starting a new event.
+It provides the phase contract, artifact handoffs, command sequence, stop/resume
+record, feedback classification, and final acceptance checklist.
+
 ## Read first
 
 Read `BENCHMARK_PROTOCOL.md`, `ARCHITECTURE.md`, `WORKFLOW.md`,
@@ -37,13 +41,15 @@ not inventory or open Reference or evaluation-only siblings.
    authorized comparison.
 10. Route reusable findings to the owning template, Skill, schema, or shared
     code; keep event-specific findings local.
-11. With at least two independent events, derive cross-event conformance for
-    package family, backend catalog, runtime/MASim source identities, output
-    roles, replay/graph/transport closure, and claim exclusions. Record the
-    exact event count; more events extend evidence without changing the
-    contract.
-12. Promote the event by adding its complete paths to the declarative current-
-    event registry; do not add an event tuple or domain branch to common code.
+11. Promote the individually closed event by adding its complete paths to the
+    declarative current-event registry; do not add an event tuple or domain
+    branch to common code.
+12. When promotion yields at least two independent current events, derive
+    cross-event conformance for package family, backend catalog, runtime/MASim
+    source identities, output roles, replay/graph/transport closure, and claim
+    exclusions. Record the exact event count; more events extend evidence
+    without changing the contract. With zero or one row, record cross-event
+    evidence as not applicable.
 
 ## Stop conditions
 

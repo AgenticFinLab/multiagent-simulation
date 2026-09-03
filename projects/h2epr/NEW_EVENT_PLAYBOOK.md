@@ -22,9 +22,10 @@ requirements remain in the linked standards, templates, Skills, and tests.
    the backend-neutral event package, attach Rule through the registry, and
    prove that attachment leaves `package_sha256` unchanged. Leave `llm` and
    `rulellm` planned until their real implementations exist.
-7. Add semantic, package, backend, environment, negative-boundary, runtime,
-   replay, graph-coverage, determinism, identity-perturbation, checksum,
-   publication, and cross-event tests. Common Python must not gain an event ID,
+7. Add current-surface and event-asset checks, then run the shared semantic,
+   package, backend, environment, negative-boundary, runtime, replay,
+   graph-coverage, determinism, identity-perturbation, checksum, publication,
+   and synthetic cross-event suite. Common Python must not gain an event ID,
    slug, participant, or domain branch.
 8. Materialize canonical, repeat, and generated-identity probe runs in fresh
    ignored custody. Publish the compact Rule release only after independent
@@ -33,14 +34,15 @@ requirements remain in the linked standards, templates, Skills, and tests.
    reading that separates generated facts, mechanism attribution,
    interpretation, open state, and limitations.
 10. Add one row to [events/current-events.json](events/current-events.json)
-    only after all current paths and identities close and cross-event
-    conformance succeeds.
+    only after all individual paths and identities close. If this creates at
+    least two current rows, publish cross-event conformance over the complete
+    registry; otherwise record it as not applicable.
 
 For multiple events, backends, or seeds, insert the
 [experiment-planning Skill](skills/experiment-planning/SKILL.md) before
 materialization. Admission fixes the intended denominator and failure policy;
 it does not launch runs or replace per-run verification.
 
-Panic, SingHealth, and Note7 demonstrate the expected repository shape across
-three domains. Reuse their structure and the common compiler/runtime, but
-derive all event vocabulary from the selected benchmark package.
+The synthetic contract tests demonstrate the required structure without
+making a historical event normative. Derive every event-specific term from
+the selected benchmark package and the maintained templates.

@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.experiment-admission-receipt.v3",
+  "title": "H2EPR experiment admission receipt",
+  "description": "Records read-only package, binding, parity, custody, model-control, scheduling, retry, analysis, and claim-boundary checks for an experiment plan.",
   "type": "object",
   "additionalProperties": false,
   "required": [

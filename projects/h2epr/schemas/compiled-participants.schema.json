@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.compiled-participants.v2",
+  "title": "H2EPR compiled participants",
+  "description": "Portable package projection of the complete roster, dispositions, active actors, and source anchors.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "event_id", "roster_id", "actor_map_id", "participant_count", "occurrence_count", "source_id_gaps", "participants", "mappings", "runtime_actors"],

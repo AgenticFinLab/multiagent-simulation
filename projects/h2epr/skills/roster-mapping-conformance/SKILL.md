@@ -5,6 +5,10 @@ description: Close the full Draft roster, actorization losses, and observation/i
 
 # Roster mapping conformance
 
+Read [references/guide.md](references/guide.md) for extraction rules,
+disposition choices, cardinality accounting, registry closure, negative cases,
+and the release evidence record.
+
 ## Procedure
 
 1. Extract every source participant occurrence, exact observed name, type,

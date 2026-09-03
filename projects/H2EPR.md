@@ -52,22 +52,20 @@ Large materializations remain in the ignored
 `.local-runtime/h2epr-simulation/runs/` custody tree. Reference EPG,
 held-out, and evaluation-only content is outside construction authority.
 
-## Three-event baseline
+## Current publication boundary
 
-The current Rule baseline covers the Panic of 1907, SingHealth Data Breach,
-and Samsung Galaxy Note7 Battery Recall Crisis. All three packages use the
-same compiler, package loader, backend interface, declarative environment,
-runtime, replay path, graph compiler, publisher, and cross-event verifier.
-Event vocabulary and policy tables stay in admitted assets rather than common
-Python.
+The shared compiler, package loader, Rule backend, declarative environment,
+runtime, replay path, graph compiler, publisher, and synthetic portability
+tests form the maintained framework. Event vocabulary and policy tables stay
+in admitted assets rather than common Python.
 
-The [cross-event release](h2epr/releases/cross-event/rule/) records the common
-closure contract. Individual [event entries](h2epr/events/README.md) lead to
-each package, run release, and simulation reading.
-
-This baseline establishes dataset-conditioned engineering and method closure.
-It does not establish historical fit, calibration, held-out performance,
-policy effects, causality, scientific validity, or universal generality.
+[Current event entries](h2epr/events/README.md) are controlled by the
+[machine registry](h2epr/events/current-events.json). A directory, old Git
+commit, local custody tree, or prose mention does not make an event current.
+Any accepted Rule result establishes only dataset-conditioned engineering and
+method closure; it does not establish historical fit, calibration, held-out
+performance, policy effects, causality, scientific validity, or universal
+generality.
 
 ## Reading order
 
@@ -77,5 +75,5 @@ policy effects, causality, scientific validity, or universal generality.
 4. [Architecture](h2epr/ARCHITECTURE.md) for runtime and information boundaries.
 5. [Benchmark protocol](h2epr/BENCHMARK_PROTOCOL.md) for allowed inputs and claim limits.
 6. [Publication standard](h2epr/PUBLICATION_STANDARD.md) for identity and release quality.
-7. [Event index](h2epr/events/README.md) and [cross-event release](h2epr/releases/cross-event/rule/) for current evidence.
+7. [Event index](h2epr/events/README.md) and [current registry](h2epr/events/current-events.json) for current evidence.
 8. [Experiment standard](h2epr/EXPERIMENT_STANDARD.md) only when a comparison plan is authorized.

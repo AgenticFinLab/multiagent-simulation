@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.run-seal.v2",
+  "title": "H2EPR run seal",
+  "description": "Commits one completed run to its manifest, tick coverage, final preseal record, terminal state, and final trace identity.",
   "type": "object",
   "additionalProperties": false,
   "required": ["seal_type", "canonicalization_version", "run_id", "manifest_sha256", "ordered_tick_seal_hashes", "scientific_prefix_sha256", "final_state_sha256", "unresolved_intent_ids", "unresolved_recipient_ids", "seal_sha256"],

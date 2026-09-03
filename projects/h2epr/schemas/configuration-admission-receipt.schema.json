@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.configuration-admission-receipt.v3",
+  "title": "H2EPR configuration admission receipt",
+  "description": "Records independently derived parent, value-domain, actor, route, and provenance checks for one shared or backend configuration.",
   "type": "object",
   "additionalProperties": false,
   "required": [

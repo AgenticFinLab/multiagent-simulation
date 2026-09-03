@@ -1,26 +1,16 @@
-# Scenario definitions
+# Scenario assets
 
-Scenario assets own the benchmark event world: time, institutions, public and
-private state, observation production, communication routes, authority,
-concurrent effects, failure routing, termination, and generated annotations.
-They do not choose participant intents.
+Scenario assets own the event world: clock, state, institutions,
+relationships, observations, communication meaning, authority, concurrent
+effects, failure routing, annotations, and termination. They never choose a
+participant's intent.
 
-Each current event directory contains:
-
-- `scenario-definition.md`, the reader-facing semantic account;
-- `interface-closure.md`, the assembly proof;
-- `scenario-interface.json`, the actor/state/route boundary;
-- `scenario-mechanism.json`, typed handlers, messages, effects, annotations,
-  conflict policy, and termination;
-- `manifest.json`; and
-- `SHA256SUMS`.
-
-| Event | Scenario |
-|---|---|
-| H2EPR-0288 Panic of 1907 | [current definition](panic_1907/) |
-| H2EPR-0616 SingHealth Data Breach | [current definition](singhealth_data_breach/) |
-| H2EPR-0481 Galaxy Note7 Recall | [current definition](samsung_note7_battery_recall/) |
-
-Use [scenario-definition-template.md](scenario-definition-template.md),
+Each current `<event>/` release contains a reader-facing Scenario Definition,
+an Interface Closure, machine interface and mechanism documents, a manifest,
+and an exact checksum inventory. Use
+[scenario-definition-template.md](scenario-definition-template.md),
 [scenario-interface-closure-template.md](scenario-interface-closure-template.md),
 and [scenario-mechanism-template.md](scenario-mechanism-template.md).
+
+Accepted event directories are listed in
+[events/current-events.json](../events/current-events.json).

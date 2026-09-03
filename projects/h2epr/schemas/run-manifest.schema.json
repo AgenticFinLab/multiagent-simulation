@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.run-manifest.v3",
+  "title": "H2EPR run manifest",
+  "description": "Pins package, backend, binding, configuration, seed or model settings, source inventories, exposure, and identity variant for one run.",
   "type": "object",
   "additionalProperties": false,
   "required": [

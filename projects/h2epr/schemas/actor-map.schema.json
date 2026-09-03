@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.actor-map.v2",
+  "title": "H2EPR actor map",
+  "description": "Maps every admitted Draft participant to one explicit simulation disposition and accounts for source-to-runtime cardinality.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "actor_map_id", "actor_map_version", "event_id", "roster_id", "mappings", "runtime_actors", "actor_map_sha256"],

@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.source-profile.v3",
+  "title": "H2EPR Source Profile",
+  "description": "Seals the exact three-file dataset construction allow-list, exposure, discovery policy, limitations, prohibited inputs, and claim boundary for one event.",
   "type": "object",
   "additionalProperties": false,
   "required": [

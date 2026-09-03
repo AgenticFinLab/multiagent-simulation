@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.generated-epg.v3",
+  "title": "H2EPR Generated EPG",
+  "description": "Represents a trace-derived process graph with complete first-class trace coverage, valid endpoints, source-trace identity, and graph seal.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -15,14 +16,7 @@ from h2epr.canonical import canonical_sha256
 from h2epr.masim_kernel import ActionIntent, AuthoritativeReducer
 from h2epr.runtime.environment import DeclarativeEnvironment
 from h2epr.runtime.benchmark_runner import _decision_message_projection
-from h2epr.semantic.assets import (
-    assembly_sha256,
-    backend_catalog_sha256,
-    semantic_assembly_sha256,
-)
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+from synthetic import SIGNAL_CASE, build_synthetic_event
 
 
 def _scenario() -> dict:
@@ -257,42 +251,34 @@ class PackageAndArbitrationTests(unittest.TestCase):
             )
 
     def test_current_implemented_attachments_have_registered_builders(self) -> None:
-        for path in sorted(
-            (PROJECT_ROOT / "events").glob("*/package-assembly.json")
-        ):
-            assembly = json.loads(path.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temporary:
+            case = build_synthetic_event(Path(temporary), SIGNAL_CASE)
+            assembly = json.loads(case.assembly_path.read_text(encoding="utf-8"))
             implemented = {
                 backend
                 for backend, declaration in assembly["backend_releases"].items()
                 if declaration["status"] == "implemented"
             }
-            with self.subTest(path=path.relative_to(PROJECT_ROOT)):
-                self.assertLessEqual(
-                    implemented,
-                    set(BACKEND_ATTACHMENT_BUILDERS),
-                )
+            self.assertEqual({"rule"}, implemented)
+            self.assertLessEqual(implemented, set(BACKEND_ATTACHMENT_BUILDERS))
 
     def test_backend_catalog_successor_keeps_package_core_stable(self) -> None:
-        source = json.loads(
-            (
-                PROJECT_ROOT
-                / "events"
-                / "panic_1907"
-                / "package"
-                / "manifest.json"
-            ).read_text(encoding="utf-8")
-        )
-        base = copy.deepcopy(source)
-        successor = copy.deepcopy(base)
-        successor["backend_catalog_sha256"] = "3" * 64
-        successor["backend_bindings"][0] = {
-            **successor["backend_bindings"][0],
-            "binding_sha256": "4" * 64,
-        }
-        self.assertEqual(
-            package_core_sha256(base),
-            package_core_sha256(successor),
-        )
+        with tempfile.TemporaryDirectory() as temporary:
+            case = build_synthetic_event(Path(temporary), SIGNAL_CASE)
+            source = json.loads(
+                (case.package_root / "manifest.json").read_text(encoding="utf-8")
+            )
+            base = copy.deepcopy(source)
+            successor = copy.deepcopy(base)
+            successor["backend_catalog_sha256"] = "3" * 64
+            successor["backend_bindings"][0] = {
+                **successor["backend_bindings"][0],
+                "binding_sha256": "4" * 64,
+            }
+            self.assertEqual(
+                package_core_sha256(base),
+                package_core_sha256(successor),
+            )
 
 
 if __name__ == "__main__":

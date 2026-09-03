@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.participant-roster.v2",
+  "title": "H2EPR participant roster",
+  "description": "Accounts for every unique Draft participant, exact appearances, counts, and identifier defects before actorization.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "roster_id", "roster_version", "event_id", "source_profile_id", "participant_count", "occurrence_count", "source_id_gaps", "participants", "roster_sha256"],

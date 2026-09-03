@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.run-receipt.v3",
+  "title": "H2EPR run receipt",
+  "description": "Summarizes independently verifiable custody, outputs, counts, trace, seals, replay, graph, transport, and bounded claim evidence for one materialization.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -5,6 +5,9 @@ description: Review an H2EPR Agent Definition or Population Model for dataset su
 
 # Agent Definition review
 
+Read [references/guide.md](references/guide.md) for the independent review
+record, severity model, adversarial probes, finding format, and routing rules.
+
 ## Inputs
 
 Review the exact candidate, Source Profile, roster/actor map, shared registries,

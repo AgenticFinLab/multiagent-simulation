@@ -5,6 +5,10 @@ description: Define a heterogeneous dataset-bounded population choice model and 
 
 # Population Model
 
+Read [references/guide.md](references/guide.md) before choosing a population
+representation. It distinguishes cohort context from a genuine choice unit and
+specifies aggregation, heterogeneity, worked cases, and handoff evidence.
+
 ## Procedure
 
 1. Confirm why a named Agent or scenario process is insufficient.

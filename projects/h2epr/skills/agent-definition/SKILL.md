@@ -5,6 +5,10 @@ description: Write a dataset-bounded H2EPR Agent Definition for one named decisi
 
 # Agent Definition
 
+Read [references/guide.md](references/guide.md) when producing a Definition.
+It contains the representation decision table, provenance rules, worked
+decision cases, falsifiers, and completion evidence used with the template.
+
 ## Read first
 
 Read `agents/README.md`, `agents/WORKFLOW.md`, the Agent Definition template,

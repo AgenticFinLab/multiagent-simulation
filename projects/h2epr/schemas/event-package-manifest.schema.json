@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.event-package.manifest.v4",
+  "title": "H2EPR event package manifest",
+  "description": "Seals the backend-neutral package core separately from backend availability, attachments, source exposure, and claim exclusions.",
   "type": "object",
   "additionalProperties": false,
   "required": [

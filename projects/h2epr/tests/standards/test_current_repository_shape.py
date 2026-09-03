@@ -234,8 +234,6 @@ class CurrentRepositoryShapeTests(unittest.TestCase):
             "BENCHMARK_SIMULATION_PLAN.md",
             "reports/framework",
             "templates/workflow-feedback.md",
-            "scripts/publish_three_event_practices_v0_3.py",
-            "scripts/publish_three_event_successors_v0_4.py",
         )
         for relative in forbidden:
             with self.subTest(path=relative):

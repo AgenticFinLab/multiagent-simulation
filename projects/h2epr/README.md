@@ -1,129 +1,108 @@
 # H2EPR benchmark simulation
 
-H2EPR turns a benchmark event into a sealed multi-agent simulation package.
-The package fixes the participants, observations, action vocabulary, event
-world, logical clock, and authoritative environment shared by every decision
-backend.
+H2EPR turns one benchmark event into an auditable multi-agent simulation
+package. The package fixes the participant universe, observations, action
+vocabulary, event world, logical clock, and authoritative environment shared
+by every decision backend.
 
 ```text
 benchmark event package
-├── Rule     deterministic participant baseline        implemented
-├── LLM      direct model-decision baseline             planned
-└── RuleLLM  model decisions under declared constraints planned
+├── Rule     deterministic participant baseline         implemented
+├── LLM      direct model-decision baseline              planned
+└── RuleLLM  model decisions under declared constraints  planned
 ```
 
-Rule is implemented for three events from different domains. LLM and RuleLLM
-remain unavailable and fail closed; the repository makes no result claim for
-either backend.
+The framework is event-neutral. Event IDs, actor names, state fields,
+mechanisms, routes, timelines, and policies belong to declarative event
+assets, never to common Python. The machine authority for published events is
+[events/current-events.json](events/current-events.json); only rows in that
+registry are current results.
 
-## Current baseline
+## Method boundary
 
-Construction reads exactly `event_spec.json`, `frozen_evidence.json`, and the
-fully exposed `draft_epg.json` for each event. It does not use external
-research, Reference EPG, held-out material, or evaluation-only inputs.
+Construction admits exactly three files for a selected event:
+`event_spec.json`, `frozen_evidence.json`, and `draft_epg.json`. Reference
+EPG, held-out material, evaluation-only content, external research, and
+network retrieval are excluded from construction.
 
-| Event | Active units | Coordinates | Trace records | Generated EPG | Evidence |
-|---|---:|---:|---:|---:|---|
-| H2EPR-0288 Panic of 1907 | 12 | 15 | 813 | 851 nodes / 2,074 edges | [Rule release](releases/panic_1907/rule/) |
-| H2EPR-0616 SingHealth Data Breach | 8 | 11 | 438 | 466 nodes / 1,131 edges | [Rule release](releases/singhealth_data_breach/rule/) |
-| H2EPR-0481 Galaxy Note7 Recall | 8 | 19 | 729 | 772 nodes / 1,872 edges | [Rule release](releases/samsung_note7_battery_recall/rule/) |
+The maintained Rule path establishes package admission, deterministic
+execution, trace integrity, replay, Generated EPG provenance, and compact
+release verification. It does not establish historical fit, parameter
+calibration, held-out performance, policy effects, causality, scientific
+validity, or universal generality.
 
-The three events use one compiler, package loader, Rule backend, declarative
-environment, named-barrier runtime, MASim event-process kernel, replay path,
-Generated EPG compiler, publisher, and conformance implementation. Event
-vocabulary stays in admitted event assets rather than common Python.
-
-Each current release records two byte-identical materializations, an
-identity-perturbation run with the same trajectory semantics, exact replay,
-complete trace-to-graph coverage, and zero unresolved transport. The shared
-[cross-event receipt](releases/cross-event/rule/) verifies that the same
-contract closes across all three packages.
-
-These results establish dataset-conditioned engineering and method closure.
-They do not establish historical fit, parameter calibration, held-out
-performance, policy effects, causality, scientific validity, or universal
-generality.
-
-## Construction and execution path
+## End-to-end path
 
 ```text
 three admitted dataset files
   → Source Profile
-  → roster and actor map
+  → complete roster and actor map
   → Agent Definitions / Population Models
-  → participant interface registries
-  → Scenario Definition and Scenario Mechanism
+  → observation, intent, and lifecycle registries
+  → Scenario Definition, interface, and mechanism
   → shared configuration
   → backend configuration and realization
-  → backend-neutral event package plus binding
+  → backend-neutral package plus explicit binding
   → participant decisions
   → authoritative environment and MASim reducer
-  → hash-chained trace, seals, and replay
+  → hash-chained trace, tick/run seals, and replay
   → trace-derived Generated EPG
   → compact release and simulation-only reading
 ```
 
-The tracked tree exposes one current path for each responsibility. Machine
-documents retain explicit schema, artifact, and content identities so that
-admission and replay remain falsifiable; development generations and local
-construction history are not parallel publication surfaces.
+Each arrow is an ownership boundary. A later layer may select or project an
+accepted parent; it may not silently repair or redefine it.
 
 ## Repository map
 
 | Path | Responsibility |
 |---|---|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Layer ownership and execution boundaries |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Runtime layers and authority boundaries |
 | [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md) | Input exposure, comparison, and claim rules |
-| [WORKFLOW.md](WORKFLOW.md) | Maintained event-to-release procedure |
-| [PUBLICATION_STANDARD.md](PUBLICATION_STANDARD.md) | Documentation, identity, release, and Git quality |
-| [EXPERIMENT_STANDARD.md](EXPERIMENT_STANDARD.md) | Future run-matrix admission and comparison parity |
-| [agents/](agents/) | Named decision units, rosters, and participant registries |
+| [WORKFLOW.md](WORKFLOW.md) | Maintained event-to-release sequence |
+| [PUBLICATION_STANDARD.md](PUBLICATION_STANDARD.md) | Evidence, identity, documentation, and Git quality |
+| [EVOLUTION.md](EVOLUTION.md) | Replacement, correction, and current-version policy |
+| [EXPERIMENT_STANDARD.md](EXPERIMENT_STANDARD.md) | Optional run-matrix admission |
+| [docs/](docs/) | Contributor guides and artifact reference |
+| [agents/](agents/) | Named units, source rosters, actor maps, and interfaces |
 | [populations/](populations/) | Aggregate choice-unit models |
-| [scenarios/](scenarios/) | Event-world, institution, authority, and transition semantics |
-| [configs/](configs/) | Shared selections and backend-specific decision settings |
+| [scenarios/](scenarios/) | Event-world, authority, transition, and termination semantics |
+| [configs/](configs/) | Shared and backend-specific selected values |
 | [execution/](execution/) | Backend realizations and implementation identities |
-| [events/](events/) | Source Profiles, assemblies, and compiled event packages |
-| [events/current-events.json](events/current-events.json) | Machine registry for complete current events |
-| [backends/](backends/) | Backend availability and ownership |
+| [events/](events/) | Source Profiles, assemblies, packages, and current registry |
+| [backends/](backends/) | Shared decision contract and backend availability |
 | [schemas/](schemas/) | Current machine-contract catalog |
-| [src/h2epr/](src/h2epr/) | Admission, compilation, execution, replay, graph, and publication code |
-| [releases/](releases/) | Compact reproducibility evidence |
-| [reports/](reports/) | Full-output simulation readings |
-| [experiments/](experiments/) | Admitted future comparison plans |
-| [templates/](templates/) | Current authoring surfaces |
-| [skills/](skills/) | Build, review, execution, and verification procedures |
-| [tests/](tests/) | Dependency-light contract and end-to-end validation |
+| [templates/](templates/) | Maintained authoring surfaces |
+| [skills/](skills/) | Task-oriented build and review procedures |
+| [src/h2epr/](src/h2epr/) | Admission, compilation, runtime, replay, graph, and publication |
+| [tests/](tests/) | Synthetic contracts, negative boundaries, and current-event checks |
+| [releases/](releases/) | Compact verified run evidence |
+| [reports/](reports/) | Generated-process readings |
+| [experiments/](experiments/) | Admitted comparison plans and closeouts |
 
-Large run outputs remain in the ignored
-`.local-runtime/h2epr-simulation/runs/` custody tree.
+Large materializations and development records remain below ignored
+`.local-runtime/h2epr-simulation/`. They are not an alternate publication
+surface.
 
-## Validate or reproduce one Rule event
+## Start here
 
-From the repository root:
+For a new event, read [NEW_EVENT_PLAYBOOK.md](NEW_EVENT_PLAYBOOK.md), then
+[docs/EVENT_AUTHORING_GUIDE.md](docs/EVENT_AUTHORING_GUIDE.md). Use the Skills
+linked by those documents at the point where their product is owned.
 
-```bash
-PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli validate-package \
-  --data-root data/h2epr \
-  --package projects/h2epr/events/panic_1907/package \
-  --backend rule
-
-PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
-  --data-root data/h2epr \
-  --package projects/h2epr/events/panic_1907/package \
-  --backend rule \
-  --seed 0 \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/panic_1907/rule/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/panic_1907/rule/reproduction
-```
-
-Run the maintained suite without pytest:
+Run the dependency-light suite from the repository root:
 
 ```bash
 PYTHONPATH=projects/h2epr/src python -B -m unittest discover \
   -s projects/h2epr/tests -t projects/h2epr/tests -p 'test_*.py' -v
 ```
 
-Use [NEW_EVENT_PLAYBOOK.md](NEW_EVENT_PLAYBOOK.md) to add another event. For a
-multi-seed or multi-backend matrix, admit a plan under [experiments/](experiments/)
-before execution. Plan admission exists; a generic matrix executor and the two
-model backends do not yet exist.
+Inspect command contracts without writing output:
+
+```bash
+PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli --help
+PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli validate-registry
+```
+
+Commands that build, materialize, or publish require explicit output paths and
+refuse to overwrite existing custody or release roots.

@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.participant-interface.v2",
+  "title": "H2EPR participant interface",
+  "description": "Projects every active actor onto its accepted semantic parent, observations, intents, lifecycles, and persistent state surface.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "interface_id", "interface_version", "event_id", "actor_map_id", "actors", "interface_sha256"],

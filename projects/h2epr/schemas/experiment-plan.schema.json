@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.experiment-plan.v3",
+  "title": "H2EPR experiment plan",
+  "description": "Defines a pre-execution run matrix with pinned parents, seeds, custody, comparison groups, scheduling, failures, analysis contracts, and exclusions.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -5,6 +5,10 @@ description: Project accepted participant and scenario semantics into one implem
 
 # Backend realization
 
+Read [references/guide.md](references/guide.md) for backend-specific ownership,
+coverage matrices, Rule/LLM/RuleLLM failure contracts, adversarial cases, and
+attachment evidence.
+
 ## Procedure
 
 1. Pin package, participant/scenario parents, shared configuration, backend

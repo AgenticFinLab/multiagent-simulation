@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.participant-semantic-index.v3",
+  "title": "H2EPR participant semantic index",
+  "description": "Pins each active actor to one human Agent Definition or Population Model, its content hash, source participant IDs, and Draft anchors.",
   "type": "object",
   "additionalProperties": false,
   "required": [

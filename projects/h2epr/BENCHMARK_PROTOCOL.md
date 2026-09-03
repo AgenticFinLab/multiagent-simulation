@@ -9,7 +9,8 @@ Every event declares its exposure before package construction.
 | `prefix_clean` | A declared prefix or opening-state subset | Future held-out protocol, once separately defined |
 | `full_draft_exposed` | The complete Draft EPG | Architecture, workflow, and descriptive baseline development |
 
-The three current Rule events use `full_draft_exposed`. Reference EPG,
+The current construction protocol uses `full_draft_exposed` unless an
+independently approved clean-prefix protocol says otherwise. Reference EPG,
 held-out data, evaluation-only content, and external research are not package
 inputs, participant observations, prompts, memory, retrieval data, runtime
 state, or compiler inputs. Producing a deterministic graph does not authorize
@@ -89,9 +90,10 @@ historically correct.
 
 ## Claim language
 
-The current releases support statements about package validation, Rule
-execution, trace integrity, replay, graph provenance, transport closure,
-deterministic repeatability, and cross-event contract reuse.
+An accepted release may support statements about package validation, Rule
+execution, trace integrity, replay, graph provenance, transport closure, and
+deterministic repeatability. Cross-event reuse requires at least two accepted
+event releases.
 
 They do not support historical fit, parameter calibration, held-out
 performance, recall or policy effectiveness, causality, scientific validity,

@@ -5,6 +5,10 @@ description: Select exact shared scenario or backend decision settings from acce
 
 # Scenario configuration
 
+Read [references/guide.md](references/guide.md) for the setting ownership
+matrix, provenance classification, exhaustive pointer coverage, worked
+admission failures, and promotion evidence.
+
 ## Procedure
 
 1. Pin exact semantic parents, schemas, environment/annotation IDs, and

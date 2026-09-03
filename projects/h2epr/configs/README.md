@@ -1,23 +1,18 @@
-# Scenario and backend configurations
+# Scenario and backend configuration
 
-Configuration selects exact executable values from admitted semantic assets.
-It is not another participant or scenario definition.
+Configuration selects exact executable values from admitted semantic domains.
+It does not redefine participants or scenario meaning.
 
-| Path | Included in backend-neutral package identity | Examples |
-|---|---:|---|
-| `<event>/shared/` | yes | timeline, opening state, routes, environment selections |
-| `<event>/backends/<backend>/` | no; sealed by the binding | Rule rows, model identity, decoding, prompt or admission policy |
-
-Credentials and mutable service endpoints are never tracked. A current
-configuration release contains a design note, machine configuration,
-exhaustive provenance coverage, admission receipt, manifest, and checksums.
-Coverage plus typed exemptions must exactly partition its top-level settings.
-
-| Event | Shared | Rule |
+| Path | Identity boundary | Typical contents |
 |---|---|---|
-| H2EPR-0288 Panic of 1907 | [configuration](panic_1907/shared/) | [Rule settings](panic_1907/backends/rule/) |
-| H2EPR-0616 SingHealth Data Breach | [configuration](singhealth_data_breach/shared/) | [Rule settings](singhealth_data_breach/backends/rule/) |
-| H2EPR-0481 Galaxy Note7 Recall | [configuration](samsung_note7_battery_recall/shared/) | [Rule settings](samsung_note7_battery_recall/backends/rule/) |
+| `<event>/shared/` | Included in the backend-neutral package | timeline, opening state, routes, observation and termination settings |
+| `<event>/backends/<backend>/` | Sealed by that backend binding | Rule rows, model controls, prompt or constraint settings |
 
-Admission receipts are independently rederived during package compilation; a
-correct self-hash without matching semantic evidence is rejected.
+Each release includes a design account, machine configuration, exhaustive
+top-level provenance coverage or typed exemptions, an independently derived
+admission receipt, a manifest, and checksums. Credentials and mutable service
+endpoints are never tracked.
+
+Use [scenario-configuration-template.md](scenario-configuration-template.md).
+Current configurations are listed indirectly by
+[events/current-events.json](../events/current-events.json).

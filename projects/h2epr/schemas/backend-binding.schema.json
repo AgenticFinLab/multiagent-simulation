@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.backend-binding.v4",
+  "title": "H2EPR backend binding",
+  "description": "Binds one implemented decision backend and its configuration, realization, source inventory, and failure contract to an event package without changing the semantic core.",
   "type": "object",
   "additionalProperties": false,
   "required": [

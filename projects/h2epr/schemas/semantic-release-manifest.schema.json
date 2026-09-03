@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.semantic-release-manifest.v2",
+  "title": "H2EPR semantic release manifest",
+  "description": "Seals the exact reader and machine artifacts of one roster, interface, Scenario, configuration, or backend realization release.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "release_id", "release_version", "event_id", "release_kind", "artifacts", "manifest_sha256"],

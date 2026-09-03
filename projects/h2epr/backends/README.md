@@ -9,7 +9,7 @@ The shared boundary is defined in
 
 | Backend | Decision mechanism | Current support |
 |---|---|---|
-| `rule` | Declarative deterministic participant policy | Implemented for all three current events |
+| `rule` | Declarative deterministic participant policy | Implemented framework backend; event availability is registry-specific |
 | `llm` | Direct model decision | Planned; fails closed |
 | `rulellm` | Model decision admitted by declared constraints | Planned; fails closed |
 

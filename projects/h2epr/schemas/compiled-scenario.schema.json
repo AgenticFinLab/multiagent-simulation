@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.compiled-scenario.v4",
+  "title": "H2EPR compiled scenario",
+  "description": "Portable executable projection of the event timeline, world mechanism, interfaces, routes, and termination contract.",
   "type": "object",
   "additionalProperties": false,
   "required": [

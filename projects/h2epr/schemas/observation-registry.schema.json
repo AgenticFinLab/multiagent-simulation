@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.observation-registry.v2",
+  "title": "H2EPR observation registry",
+  "description": "Defines event-wide observation meanings, producers, consumers, visibility, availability, and missing behavior.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "registry_id", "registry_version", "event_id", "observations", "registry_sha256"],

@@ -5,6 +5,10 @@ description: Define and admit a versioned H2EPR run matrix with package parity, 
 
 # Experiment planning
 
+Read [references/guide.md](references/guide.md) for matrix construction,
+comparison parity, custody and retry ledgers, model controls, admission
+failures, and the boundary between planning and execution.
+
 ## Read first
 
 Read `EXPERIMENT_STANDARD.md`, `BENCHMARK_PROTOCOL.md`, the selected package

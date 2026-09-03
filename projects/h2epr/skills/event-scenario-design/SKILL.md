@@ -5,6 +5,10 @@ description: Define a dataset-bounded event world and close every participant in
 
 # Event scenario design
 
+Read [references/guide.md](references/guide.md) for the authority map,
+timeline design, executable mechanism rules, interface-closure cases, failure
+routing, and release evidence.
+
 ## Procedure
 
 1. Pin Source Profile, roster release, participant products, registries, and

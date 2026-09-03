@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.participant-decision.v2",
+  "title": "H2EPR participant decision",
+  "description": "Carries one backend-produced typed action, zero or more message intents, and decision provenance for one actor and logical tick.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "actor_id", "logical_tick", "backend", "action", "messages", "decision_record"],

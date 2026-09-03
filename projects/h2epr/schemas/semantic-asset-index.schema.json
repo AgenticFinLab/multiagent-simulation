@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.semantic-asset-index.v4",
+  "title": "H2EPR semantic asset index",
+  "description": "Pins the four admitted semantic release families and their manifests to one event package assembly.",
   "type": "object",
   "additionalProperties": false,
   "required": [

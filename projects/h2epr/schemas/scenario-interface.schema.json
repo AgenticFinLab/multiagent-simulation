@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.scenario-interface.v2",
+  "title": "H2EPR scenario interface",
+  "description": "Closes actors, state, registries, environment and annotation implementations, clock, routes, and termination at the Scenario boundary.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "scenario_interface_id", "scenario_interface_version", "event_id", "actor_ids", "state_fields", "observation_registry_id", "intent_registry_id", "lifecycle_registry_id", "environment_implementation_id", "annotation_implementation_id", "scenario_interface_sha256"],

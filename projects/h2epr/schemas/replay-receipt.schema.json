@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.replay-receipt.v3",
+  "title": "H2EPR replay receipt",
+  "description": "Records authoritative reapplication of trace state deltas from opening state to an exact terminal-state identity.",
   "type": "object",
   "additionalProperties": false,
   "required": [

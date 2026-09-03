@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.conformance-receipt.v3",
+  "title": "H2EPR conformance receipt",
+  "description": "Seals independently derived generated-identity or cross-event engineering contract checks and their bounded limitations.",
   "type": "object",
   "additionalProperties": false,
   "required": [

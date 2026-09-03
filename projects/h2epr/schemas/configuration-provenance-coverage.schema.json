@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.configuration-provenance-coverage.v4",
+  "title": "H2EPR configuration provenance coverage",
+  "description": "Accounts exhaustively for every selected top-level setting by one provenance pointer or one reviewed bounded-unavailability exemption.",
   "type": "object",
   "additionalProperties": false,
   "required": [

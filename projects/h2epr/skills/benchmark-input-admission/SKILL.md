@@ -5,6 +5,11 @@ description: Admit exactly the declared H2EPR dataset files and publish a hash-c
 
 # Benchmark input admission
 
+Read [references/guide.md](references/guide.md) before performing an admission.
+It defines the preflight record, direct-path checks, exposure classifications,
+worked failures, and the exact handoff evidence. This entry point supplies the
+execution order.
+
 ## Read first
 
 Read `BENCHMARK_PROTOCOL.md`, `templates/source-profile/README.md`, and

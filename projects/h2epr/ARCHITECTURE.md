@@ -3,7 +3,7 @@
 ## Execution path
 
 ```text
-three allowed benchmark inputs
+three allowed files for one benchmark event
         │
         ▼
 Source Profile
@@ -191,8 +191,8 @@ working generations.
 
 ## Current boundary
 
-Panic of 1907, SingHealth Data Breach, and Galaxy Note7 Recall close the Rule
-path with symmetric assets, fresh deterministic custody, authoritative replay,
-trace-complete graphs, compact releases, readings, and cross-event
-conformance. LLM and RuleLLM are planned and fail closed. The experiment layer
-admits plans but does not yet execute a matrix.
+The common Rule implementation, compiler, runtime, replay, graph, publication,
+and experiment-admission contracts are implemented. Current event results are
+declared only by `events/current-events.json`. LLM and RuleLLM remain planned
+and fail closed. The experiment layer admits plans but does not execute a
+matrix.

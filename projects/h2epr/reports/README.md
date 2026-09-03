@@ -1,16 +1,15 @@
 # Simulation reports
 
-Reports read sealed generated output and cite its compact release. A
-simulation-only reading records the complete generated trajectory, mechanism
-attribution, interpretation, terminal state, and limitations. It is not a
-historical or held-out evaluation.
+Reports interpret sealed generated output. A simulation-only reading traverses
+the complete trace and Generated EPG, distinguishes direct generated facts
+from mechanism attribution and interpretation, describes terminal state, and
+cites its compact release.
 
-| Event | Backend | Current reading |
-|---|---|---|
-| H2EPR-0288 Panic of 1907 | Rule | [simulation reading](panic_1907/rule/simulation-reading.md) |
-| H2EPR-0616 SingHealth Data Breach | Rule | [simulation reading](singhealth_data_breach/rule/simulation-reading.md) |
-| H2EPR-0481 Galaxy Note7 Recall | Rule | [simulation reading](samsung_note7_battery_recall/rule/simulation-reading.md) |
+Only readings referenced by
+[events/current-events.json](../events/current-events.json) are current.
+Historical comparison, held-out scoring, calibration, causal claims, and
+scientific evaluation require a separately accepted protocol and do not
+belong in a simulation-only reading.
 
-Framework audits, build diaries, supervisor reviews, and workflow process
-notes belong in ignored `.local-runtime/` project memory rather than this
-publication surface.
+Build diaries, audits, supervisor notes, and migration records remain in
+ignored `.local-runtime/` project memory.

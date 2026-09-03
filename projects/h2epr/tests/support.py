@@ -11,20 +11,6 @@ DATA_ROOT = REPOSITORY_ROOT / "data" / "h2epr"
 SCHEMA_ROOT = PROJECT_ROOT / "schemas"
 CURRENT_REGISTRY = load_current_event_registry(PROJECT_ROOT)
 CURRENT_EVENTS = tuple(CURRENT_REGISTRY["events"])
-CURRENT_CASES = (
-    ("H2EPR-0288", "panic_1907", 16, 12, 15, 813, 851, 2074),
-    ("H2EPR-0616", "singhealth_data_breach", 9, 8, 11, 438, 466, 1131),
-    (
-        "H2EPR-0481",
-        "samsung_note7_battery_recall",
-        9,
-        8,
-        19,
-        729,
-        772,
-        1872,
-    ),
-)
 
 
 def event_row(value: dict[str, str] | str) -> dict[str, str]:
@@ -43,7 +29,6 @@ def assembly_path(value: dict[str, str] | str) -> Path:
 
 __all__ = [
     "CURRENT_EVENTS",
-    "CURRENT_CASES",
     "CURRENT_REGISTRY",
     "DATA_ROOT",
     "PROJECT_ROOT",

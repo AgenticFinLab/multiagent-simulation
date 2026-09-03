@@ -105,8 +105,13 @@ open.
 
 Add the event to `events/current-events.json` only after every declared path
 exists, all package and release identities close, the reading is complete,
-and cross-event conformance passes. Adding an event must not require editing a
-hard-coded event tuple in common Python.
+and the individual event passes the current repository checks. Adding an event
+must not require editing a hard-coded event tuple in common Python.
+
+When the registry contains at least two events, publish or refresh the
+cross-event conformance release over every current row and require it to pass.
+With zero or one current event, cross-event evidence is not applicable and must
+not be fabricated as a promotion prerequisite.
 
 ## Failure routing
 

@@ -34,22 +34,18 @@ smaller validation environment.
 
 ## H2EPR research project
 
-[`projects/h2epr/`](projects/h2epr/) is an independently packaged research
-project for auditable event-process simulation. It owns its contracts,
-participant and scenario semantics, configuration admission, runtime adapters,
-and graph compiler. The Panic of 1907, SingHealth Data Breach, and Samsung
-Galaxy Note7 Battery Recall Crisis assets now provide three deterministic
-full-roster Rule executions, authoritative replay, generated event graphs,
-and one shared cross-event closure baseline. These are dataset-conditioned,
-uncalibrated mechanism-coverage models; historical or scientific evaluation
-is a separate stage.
+[`projects/h2epr/`](projects/h2epr/) is an independently packaged project for
+auditable benchmark-event simulation. It owns its contracts, participant and
+scenario semantics, configuration admission, backend bindings, runtime
+adapters, graph compiler, and publication checks. The Rule backend is the
+implemented deterministic baseline; current event results are declared only
+by the project's machine registry. Historical or scientific evaluation is a
+separate protocol.
 
 Start with the repository-level
 [H2EPR project guide](projects/H2EPR.md), then use the
 [project README](projects/h2epr/README.md) for installation and validation, or
-the [event index](projects/h2epr/events/README.md) for the research-facing and
-reproducibility paths through each baseline. The
+the [event index](projects/h2epr/events/README.md) for current package
+discovery. The
 [event modeling workflow](projects/h2epr/WORKFLOW.md) defines artifact handoffs
-and stopping boundaries; the
-[current cross-event release](projects/h2epr/releases/cross-event/rule/)
-verifies the three completed execution paths under one contract.
+and stopping boundaries.

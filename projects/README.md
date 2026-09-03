@@ -9,14 +9,12 @@ multiple event configurations, compilers or evaluation protocols.
 
 ### H2EPR
 
-H2EPR studies auditable multi-agent reconstruction of real event processes.
-It combines typed construction, participant and scenario semantics,
-fail-closed configuration admission, deterministic runtime records, and graph
-compilation. The Panic of 1907, SingHealth Data Breach, and Samsung Galaxy
-Note7 Battery Recall Crisis assets provide a three-event method baseline with
-deterministic full-roster Rule execution, authoritative replay, and
-trace-derived generated graphs. The result is uncalibrated engineering
-mechanism coverage, not a scientific-validity claim.
+H2EPR builds auditable multi-agent simulations from bounded benchmark event
+packages. It combines typed construction, participant and scenario semantics,
+fail-closed configuration admission, deterministic runtime records, replay,
+graph compilation, and independent release verification. Rule is the current
+implemented backend. The current-event registry, rather than prose or a
+directory's presence, identifies accepted event results.
 
 - [Project guide](H2EPR.md)
 - [Source and tests](h2epr/)
@@ -24,7 +22,7 @@ mechanism coverage, not a scientific-validity claim.
 - [Event modeling workflow](h2epr/WORKFLOW.md)
 - [Architecture](h2epr/ARCHITECTURE.md)
 - [Evolution policy](h2epr/EVOLUTION.md)
-- [Three-event execution conformance](h2epr/releases/cross-event/rule/)
+- [Current event registry](h2epr/events/current-events.json)
 
 ## Repository convention
 

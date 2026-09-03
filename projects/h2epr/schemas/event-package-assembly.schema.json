@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.event-package-assembly.v4",
+  "title": "H2EPR event package assembly",
+  "description": "Names all admitted semantic releases, configurations, backend catalog entries, and identities consumed by the generic package compiler.",
   "type": "object",
   "additionalProperties": false,
   "required": [

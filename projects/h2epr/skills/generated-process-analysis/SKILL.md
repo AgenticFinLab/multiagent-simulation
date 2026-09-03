@@ -5,6 +5,10 @@ description: Read a sealed H2EPR Generated EPG and trace, then make bounded simu
 
 # Generated process analysis
 
+Read [references/guide.md](references/guide.md) for the complete-output reading
+method, evidence labels, trajectory and graph ledgers, comparison gates,
+falsifiers, and report handoff.
+
 ## Procedure
 
 1. Pin release, package, backend, realization, configuration, run, trace,

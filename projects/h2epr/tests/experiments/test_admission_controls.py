@@ -1,28 +1,22 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from h2epr.benchmark.package import load_event_package
 from h2epr.canonical import canonical_sha256, file_sha256
-from h2epr.experiment import (
-    ExperimentAdmissionError,
-    admit_experiment_plan,
-)
+from h2epr.experiment import ExperimentAdmissionError, admit_experiment_plan
 
-from support import (
-    DATA_ROOT,
-    PROJECT_ROOT,
-    CURRENT_CASES,
-    package_root,
-)
+from synthetic import DISPATCH_CASE, SIGNAL_CASE, SyntheticEvent, build_synthetic_event
 
 
-def _file_ref(relative_path: str) -> dict[str, str]:
+def _file_ref(project_root: Path, relative_path: str) -> dict[str, str]:
     return {
         "relative_path": relative_path,
-        "sha256": file_sha256(PROJECT_ROOT / relative_path),
+        "sha256": file_sha256(project_root / relative_path),
     }
 
 
@@ -33,17 +27,18 @@ def _seal(plan: dict) -> dict:
     return plan
 
 
-def _three_event_rule_plan() -> dict:
+def _rule_plan(cases: list[SyntheticEvent]) -> dict:
+    project_root = cases[0].project_root
     rows = []
-    for event_id, slug, *_ in CURRENT_CASES:
-        package = load_event_package(package_root(slug), DATA_ROOT, "rule")
+    for case in cases:
+        package = load_event_package(case.package_root, case.data_root, "rule")
         rows.append(
             {
-                "row_id": f"{slug}.rule",
-                "event_id": event_id,
-                "package_relative_path": (
-                    f"events/{slug}/package"
-                ),
+                "row_id": f"{case.slug}.rule",
+                "event_id": case.event_id,
+                "package_relative_path": case.package_root.relative_to(
+                    project_root
+                ).as_posix(),
                 "package_sha256": package.package_sha256,
                 "backend": "rule",
                 "binding_sha256": package.binding_sha256,
@@ -51,20 +46,20 @@ def _three_event_rule_plan() -> dict:
                 "identity_variant": "canonical",
                 "custody_root": (
                     ".local-runtime/h2epr-simulation/experiments/"
-                    f"three-event-rule/{slug}"
+                    f"synthetic-contract/{case.slug}"
                 ),
             }
         )
     return _seal(
         {
             "schema_version": "h2epr.experiment-plan.v3",
-            "plan_id": "h2epr.experiment.three-event-rule.test",
-            "plan_version": "0.1.0",
-            "purpose": "Exercise experiment admission across three Rule packages.",
+            "plan_id": "h2epr.experiment.synthetic-rule.test",
+            "plan_version": "1.0.0",
+            "purpose": "Exercise admission across two unrelated Rule packages.",
             "rows": rows,
             "comparison_groups": [
                 {
-                    "group_id": "three-event-rule-contract",
+                    "group_id": "synthetic-rule-contract",
                     "comparison_kind": "cross_event_contract",
                     "row_ids": [row["row_id"] for row in rows],
                 }
@@ -84,12 +79,18 @@ def _three_event_rule_plan() -> dict:
                 {
                     "analysis_id": "simulation-reading",
                     "scope": "simulation_only",
-                    "definition": _file_ref("templates/simulation-reading.md"),
+                    "definition": _file_ref(
+                        project_root,
+                        "templates/simulation-reading.md",
+                    ),
                 },
                 {
                     "analysis_id": "cross-event-analysis",
                     "scope": "cross_event_contract",
-                    "definition": _file_ref("templates/cross-event-analysis.md"),
+                    "definition": _file_ref(
+                        project_root,
+                        "templates/cross-event-analysis.md",
+                    ),
                 },
             ],
             "claim_boundary": {
@@ -111,23 +112,47 @@ def _three_event_rule_plan() -> dict:
 
 
 class ExperimentAdmissionControlTests(unittest.TestCase):
-    def test_three_event_rule_matrix_is_admitted_without_execution(self) -> None:
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        root = Path(self.temporary.name)
+        self.cases = [
+            build_synthetic_event(root, vocabulary)
+            for vocabulary in (SIGNAL_CASE, DISPATCH_CASE)
+        ]
+        self.project_root = self.cases[0].project_root
+        self.data_root = self.cases[0].data_root
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def test_two_event_rule_matrix_is_admitted_without_execution(self) -> None:
         receipt = admit_experiment_plan(
-            project_root=PROJECT_ROOT,
-            data_root=DATA_ROOT,
-            plan=_three_event_rule_plan(),
+            project_root=self.project_root,
+            data_root=self.data_root,
+            plan=_rule_plan(self.cases),
         )
         self.assertTrue(receipt["admitted"])
-        self.assertEqual(3, receipt["row_count"])
-        self.assertEqual(3, receipt["run_count"])
+        self.assertEqual(2, receipt["row_count"])
+        self.assertEqual(2, receipt["run_count"])
         self.assertEqual(
-            {"rule": 3, "llm": 0, "rulellm": 0},
+            {"rule": 2, "llm": 0, "rulellm": 0},
             receipt["backend_counts"],
         )
         self.assertEqual(8, len(receipt["checks"]))
+        for case in self.cases:
+            self.assertFalse(
+                (
+                    self.project_root.parent
+                    / ".local-runtime"
+                    / "h2epr-simulation"
+                    / "experiments"
+                    / "synthetic-contract"
+                    / case.slug
+                ).exists()
+            )
 
     def test_duplicate_or_escaping_custody_is_rejected(self) -> None:
-        duplicate = _three_event_rule_plan()
+        duplicate = _rule_plan(self.cases)
         duplicate["rows"][1]["custody_root"] = duplicate["rows"][0][
             "custody_root"
         ]
@@ -137,12 +162,12 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "experiment_custody_duplicate",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=duplicate,
             )
 
-        alias = _three_event_rule_plan()
+        alias = _rule_plan(self.cases)
         alias["rows"][1]["custody_root"] = (
             alias["rows"][0]["custody_root"] + "/"
         )
@@ -152,12 +177,12 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "experiment_custody_duplicate",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=alias,
             )
 
-        escaping = _three_event_rule_plan()
+        escaping = _rule_plan(self.cases)
         escaping["rows"][0]["custody_root"] = (
             ".local-runtime/h2epr-simulation/experiments/../escape"
         )
@@ -167,13 +192,13 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "experiment_custody_path_unsafe",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=escaping,
             )
 
     def test_planned_backend_cannot_enter_an_experiment_matrix(self) -> None:
-        plan = _three_event_rule_plan()
+        plan = _rule_plan(self.cases)
         row = plan["rows"][0]
         row["backend"] = "llm"
         row["binding_sha256"] = "0" * 64
@@ -183,10 +208,12 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "model_version": "test-version",
             "service_mode": "local",
             "prompt_contract": _file_ref(
-                "backends/llm-prompt-contract-template.md"
+                self.project_root,
+                "backends/llm-prompt-contract-template.md",
             ),
             "response_contract": _file_ref(
-                "schemas/participant-decision.schema.json"
+                self.project_root,
+                "schemas/participant-decision.schema.json",
             ),
             "decoding_parameters": [
                 {"name": "temperature", "value": 0, "basis": "test"}
@@ -196,16 +223,17 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
         _seal(plan)
         with self.assertRaisesRegex(
             ExperimentAdmissionError,
-            "experiment_backend_unavailable:panic_1907.rule:backend_not_implemented:llm",
+            "experiment_backend_unavailable:synthetic_signal.rule:"
+            "backend_not_implemented:llm",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=plan,
             )
 
     def test_timeout_and_retry_semantics_fail_closed(self) -> None:
-        plan = _three_event_rule_plan()
+        plan = _rule_plan(self.cases)
         plan["scheduling"]["stall_timeout_seconds"] = 4000
         _seal(plan)
         with self.assertRaisesRegex(
@@ -213,12 +241,12 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "experiment_timeout_order_invalid",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=plan,
             )
 
-        plan = _three_event_rule_plan()
+        plan = _rule_plan(self.cases)
         plan["failure_policy"]["retryable_classes"] = ["stall"]
         _seal(plan)
         with self.assertRaisesRegex(
@@ -226,14 +254,13 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "experiment_retry_policy_incoherent",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=plan,
             )
 
     def test_cross_event_model_comparison_requires_full_control_parity(self) -> None:
-        plan = _three_event_rule_plan()
-        plan["rows"] = plan["rows"][:2]
+        plan = _rule_plan(self.cases)
         for index, row in enumerate(plan["rows"]):
             row["backend"] = "llm"
             row["binding_sha256"] = str(index + 1) * 64
@@ -243,10 +270,12 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
                 "model_version": "test-version",
                 "service_mode": "local",
                 "prompt_contract": _file_ref(
-                    "backends/llm-prompt-contract-template.md"
+                    self.project_root,
+                    "backends/llm-prompt-contract-template.md",
                 ),
                 "response_contract": _file_ref(
-                    "schemas/participant-decision.schema.json"
+                    self.project_root,
+                    "schemas/participant-decision.schema.json",
                 ),
                 "decoding_parameters": [
                     {
@@ -257,16 +286,13 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
                 ],
                 "max_attempts": 1,
             }
-        plan["comparison_groups"][0]["row_ids"] = [
-            row["row_id"] for row in plan["rows"]
-        ]
         _seal(plan)
 
-        def _package(_root, _data, _backend):
+        def _package(root: Path, _data: Path, _backend: str):
             row = next(
                 row
                 for row in plan["rows"]
-                if row["package_relative_path"] in _root.as_posix()
+                if row["package_relative_path"] in root.as_posix()
             )
             return SimpleNamespace(
                 manifest={"event_id": row["event_id"]},
@@ -282,10 +308,11 @@ class ExperimentAdmissionControlTests(unittest.TestCase):
             "experiment_model_control_mismatch",
         ):
             admit_experiment_plan(
-                project_root=PROJECT_ROOT,
-                data_root=DATA_ROOT,
+                project_root=self.project_root,
+                data_root=self.data_root,
                 plan=plan,
             )
+
 
 if __name__ == "__main__":
     unittest.main()

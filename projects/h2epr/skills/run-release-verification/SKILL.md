@@ -5,6 +5,10 @@ description: Materialize an admitted H2EPR backend, verify trace/seals/replay/Ge
 
 # Run release verification
 
+Read [references/guide.md](references/guide.md) for custody layout, trace and
+seal invariants, replay/graph verification, deterministic and model evidence,
+tamper cases, and release disposition.
+
 ## Procedure
 
 1. Record clean Git state, exact package/binding/realization/configuration,

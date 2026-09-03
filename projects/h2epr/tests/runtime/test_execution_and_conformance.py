@@ -40,7 +40,7 @@ from h2epr.runtime.generated_epg import (
     validate_generated_epg,
 )
 
-from support import DATA_ROOT, CURRENT_CASES, package_root
+from synthetic import DISPATCH_CASE, SIGNAL_CASE, build_synthetic_event
 
 
 class RuntimeAndConformanceTests(unittest.TestCase):
@@ -49,18 +49,25 @@ class RuntimeAndConformanceTests(unittest.TestCase):
         cls.temporary = tempfile.TemporaryDirectory()
         cls.root = Path(cls.temporary.name)
         cls.cases = {}
-        for event_id, slug, *_ in CURRENT_CASES:
-            package = load_event_package(package_root(slug), DATA_ROOT, "rule")
+        for vocabulary in (SIGNAL_CASE, DISPATCH_CASE):
+            event = build_synthetic_event(cls.root, vocabulary)
+            event_id = event.event_id
+            slug = event.slug
+            package = load_event_package(
+                event.package_root,
+                event.data_root,
+                "rule",
+            )
             left = cls.root / f"{slug}-left"
             right = cls.root / f"{slug}-right"
             probe = cls.root / f"{slug}-probe"
             canonical_locator = (
-                f".local-runtime/h2epr-simulation/runs/benchmark/{slug}/"
+                f".local-runtime/h2epr-simulation/runs/tests/{slug}/"
                 "rule/materialization-a"
             )
             left_receipt = materialize_run(
-                package_root=package_root(slug),
-                data_root=DATA_ROOT,
+                package_root=event.package_root,
+                data_root=event.data_root,
                 output_root=left,
                 backend="rule",
                 run_seed=0,
@@ -68,8 +75,8 @@ class RuntimeAndConformanceTests(unittest.TestCase):
                 custody_locator=canonical_locator,
             )
             materialize_run(
-                package_root=package_root(slug),
-                data_root=DATA_ROOT,
+                package_root=event.package_root,
+                data_root=event.data_root,
                 output_root=right,
                 backend="rule",
                 run_seed=0,
@@ -77,21 +84,24 @@ class RuntimeAndConformanceTests(unittest.TestCase):
                 custody_locator=canonical_locator,
             )
             materialize_run(
-                package_root=package_root(slug),
-                data_root=DATA_ROOT,
+                package_root=event.package_root,
+                data_root=event.data_root,
                 output_root=probe,
                 backend="rule",
                 run_seed=0,
                 identity_variant="generated-id-probe",
                 custody_locator=(
-                    f".local-runtime/h2epr-simulation/runs/benchmark/{slug}/"
+                    f".local-runtime/h2epr-simulation/runs/tests/{slug}/"
                     "rule/identity-probe"
                 ),
             )
             identity = build_identity_invariance_receipt(left, probe)
             cls.cases[event_id] = {
                 "slug": slug,
+                "title": event.title,
                 "package": package,
+                "package_root": event.package_root,
+                "data_root": event.data_root,
                 "left": left,
                 "right": right,
                 "probe": probe,
@@ -104,30 +114,22 @@ class RuntimeAndConformanceTests(unittest.TestCase):
         cls.temporary.cleanup()
 
     def test_replay_trace_graph_transport_and_counts_close(self) -> None:
-        expected = {
-            event_id: (ticks, traces, nodes, edges)
-            for (
-                event_id,
-                _slug,
-                _roster,
-                _actors,
-                ticks,
-                traces,
-                nodes,
-                edges,
-            ) in CURRENT_CASES
-        }
         for event_id, case in self.cases.items():
             receipt = case["receipt"]
-            ticks, traces, nodes, edges = expected[event_id]
             with self.subTest(event_id=event_id):
                 self.assertTrue(receipt["replay_passed"])
                 self.assertTrue(receipt["trace_coverage_passed"])
                 self.assertEqual(0, receipt["unresolved_transport_count"])
-                self.assertEqual(ticks, receipt["counts"]["ticks"])
-                self.assertEqual(traces, receipt["counts"]["trace_records"])
-                self.assertEqual(nodes, receipt["counts"]["graph_nodes"])
-                self.assertEqual(edges, receipt["counts"]["graph_edges"])
+                self.assertEqual(
+                    len(case["package"].scenario["timeline"]),
+                    receipt["counts"]["ticks"],
+                )
+                self.assertGreater(receipt["counts"]["trace_records"], 0)
+                self.assertGreaterEqual(
+                    receipt["counts"]["graph_nodes"],
+                    receipt["counts"]["trace_records"],
+                )
+                self.assertGreater(receipt["counts"]["graph_edges"], 0)
                 graph = json.loads(
                     (case["left"] / "generated_epg.json").read_text(encoding="utf-8")
                 )
@@ -138,9 +140,13 @@ class RuntimeAndConformanceTests(unittest.TestCase):
                     .splitlines()
                 ]
                 validate_generated_epg(graph, trace)
-                self.assertEqual(traces, graph["trace_coverage"]["record_count"])
                 self.assertEqual(
-                    traces, graph["trace_coverage"]["referenced_record_count"]
+                    receipt["counts"]["trace_records"],
+                    graph["trace_coverage"]["record_count"],
+                )
+                self.assertEqual(
+                    receipt["counts"]["trace_records"],
+                    graph["trace_coverage"]["referenced_record_count"],
                 )
 
     def test_a_b_bytes_and_identity_perturbation_both_close(self) -> None:
@@ -193,7 +199,7 @@ class RuntimeAndConformanceTests(unittest.TestCase):
                     )
                 )
 
-    def test_three_event_contract_conformance_closes(self) -> None:
+    def test_two_unrelated_events_close_cross_event_contract(self) -> None:
         receipt = build_cross_event_contract_receipt(
             [
                 (case["package"], case["left"])
@@ -204,12 +210,12 @@ class RuntimeAndConformanceTests(unittest.TestCase):
         self.assertEqual(8, len(receipt["checks"]))
         self.assertTrue(all(row["passed"] for row in receipt["checks"]))
 
-    def test_cross_event_conformance_is_not_fixed_to_three_cases(self) -> None:
+    def test_cross_event_conformance_requires_distinct_cases(self) -> None:
         cases = [
             (case["package"], case["left"])
             for case in self.cases.values()
         ]
-        receipt = build_cross_event_contract_receipt(cases[:2])
+        receipt = build_cross_event_contract_receipt(cases)
         identity = next(
             row
             for row in receipt["checks"]
@@ -224,19 +230,19 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             build_cross_event_contract_receipt([cases[0], cases[0]])
 
     def test_release_publisher_closes_and_rejects_custody_tamper(self) -> None:
-        case = self.cases["H2EPR-0288"]
+        case = next(iter(self.cases.values()))
         release = self.root / "published-release"
         summary = publish_rule_run_release(
-            package_root=package_root(case["slug"]),
-            data_root=DATA_ROOT,
+            package_root=case["package_root"],
+            data_root=case["data_root"],
             canonical_root=case["left"],
             repeat_root=case["right"],
             probe_root=case["probe"],
             release_root=release,
-            event_title="Panic of 1907",
+            event_title=case["title"],
             simulation_reading_link="../../../reports/example.md",
         )
-        self.assertEqual("H2EPR-0288", summary["event_id"])
+        self.assertEqual(case["package"].manifest["event_id"], summary["event_id"])
         self.assertEqual(
             {
                 "README.md",
@@ -261,19 +267,19 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_output_size_mismatch:final_state.json",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=tampered,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "rejected-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
         self.assertFalse((self.root / "rejected-release").exists())
 
     def test_release_publisher_rederives_replay_and_trace_evidence(self) -> None:
-        case = self.cases["H2EPR-0288"]
+        case = next(iter(self.cases.values()))
 
         forged_replay = self.root / "forged-replay-custody"
         shutil.copytree(case["left"], forged_replay)
@@ -291,20 +297,20 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "replay_receipt_evidence_mismatch",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged_replay,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "forged-replay-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
 
     def test_release_publisher_rederives_manifest_trace_summaries_and_counts(
         self,
     ) -> None:
-        case = self.cases["H2EPR-0288"]
+        case = next(iter(self.cases.values()))
 
         forged_manifest = self.root / "forged-manifest-custody"
         shutil.copytree(case["left"], forged_manifest)
@@ -328,13 +334,13 @@ class RuntimeAndConformanceTests(unittest.TestCase):
         self._reseal_run_receipt_inventory(forged_manifest)
         with self.assertRaisesRegex(PublicationError, "run_seed_mismatch"):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged_manifest,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "forged-manifest-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
 
@@ -353,13 +359,13 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "coordinate_results_not_trace_derived",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged_summary,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "forged-summary-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
 
@@ -376,13 +382,13 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_count_evidence_mismatch",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged_counts,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "forged-counts-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
 
@@ -407,20 +413,20 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_trace_invalid:RECORD_HASH_MISMATCH",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged_trace,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "forged-trace-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
 
     def test_release_publisher_rejects_fully_resealed_semantic_forgery(
         self,
     ) -> None:
-        case = self.cases["H2EPR-0288"]
+        case = next(iter(self.cases.values()))
         forged = self.root / "fully-resealed-semantic-forgery"
         shutil.copytree(case["left"], forged)
         self._forge_semantically_inconsistent_decision(
@@ -432,19 +438,19 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_decision_action_mismatch",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "semantic-forgery-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
         self.assertFalse((self.root / "semantic-forgery-release").exists())
 
     def test_release_publisher_recompiles_generated_epg(self) -> None:
-        case = self.cases["H2EPR-0288"]
+        case = next(iter(self.cases.values()))
         forged = self.root / "forged-graph-identity"
         shutil.copytree(case["left"], forged)
         graph = json.loads(
@@ -466,13 +472,13 @@ class RuntimeAndConformanceTests(unittest.TestCase):
             "run_generated_epg_not_independently_derived",
         ):
             publish_rule_run_release(
-                package_root=package_root(case["slug"]),
-                data_root=DATA_ROOT,
+                package_root=case["package_root"],
+                data_root=case["data_root"],
                 canonical_root=forged,
                 repeat_root=case["right"],
                 probe_root=case["probe"],
                 release_root=self.root / "forged-graph-release",
-                event_title="Panic of 1907",
+                event_title=case["title"],
                 simulation_reading_link="../../../reports/example.md",
             )
 

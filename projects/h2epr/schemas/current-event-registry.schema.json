@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.current-event-registry.v4",
+  "title": "H2EPR current-event registry",
+  "description": "Declares the sole current publication and discovery paths for zero or more fully promoted event practices.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -16,7 +18,7 @@
     "registry_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
     "events": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 0,
       "items": {"$ref": "#/$defs/event"}
     },
     "registry_sha256": {"$ref": "#/$defs/sha"}

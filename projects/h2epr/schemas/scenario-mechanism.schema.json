@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "h2epr.scenario-mechanism.v4",
+  "title": "H2EPR scenario mechanism",
+  "description": "Defines authoritative state fields, typed intent handlers, messages, annotations, conflict policy, and termination invariants for the declarative environment.",
   "type": "object",
   "additionalProperties": false,
   "required": [
