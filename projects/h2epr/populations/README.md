@@ -34,3 +34,7 @@ H2EPR-0170 uses one [state and legislative restriction
 Population](models/tiktok_divestiture_and_national_security_dispute/state_and_legislative_restriction_population.md)
 for the Draft's aggregate state, campus and proposal records. It does not imply
 uniform members, counts, weights or individual policy trajectories.
+H2EPR-0892 keeps Lebanese civilian, unidentified-attacker and refugee sources
+as explicit context because the Draft exposes no choice owned by those sources;
+its eight active organizational participants therefore require no Population
+Model.

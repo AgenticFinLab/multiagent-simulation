@@ -22,5 +22,6 @@ values are under
 [`baoneng_vanke_takeover_battle/`](baoneng_vanke_takeover_battle/),
 [`samsung_galaxy_note7_battery_recall_crisis/`](samsung_galaxy_note7_battery_recall_crisis/),
 [`singhealth_data_breach/`](singhealth_data_breach/),
-[`panic_of_1907/`](panic_of_1907/), and
-[`tiktok_divestiture_and_national_security_dispute/`](tiktok_divestiture_and_national_security_dispute/).
+[`panic_of_1907/`](panic_of_1907/),
+[`tiktok_divestiture_and_national_security_dispute/`](tiktok_divestiture_and_national_security_dispute/), and
+[`lebanese_civil_war/`](lebanese_civil_war/).
