@@ -21,5 +21,6 @@ values are under
 [`angola_yellow_fever_outbreak/`](angola_yellow_fever_outbreak/),
 [`baoneng_vanke_takeover_battle/`](baoneng_vanke_takeover_battle/),
 [`samsung_galaxy_note7_battery_recall_crisis/`](samsung_galaxy_note7_battery_recall_crisis/),
-[`singhealth_data_breach/`](singhealth_data_breach/), and
-[`panic_of_1907/`](panic_of_1907/).
+[`singhealth_data_breach/`](singhealth_data_breach/),
+[`panic_of_1907/`](panic_of_1907/), and
+[`tiktok_divestiture_and_national_security_dispute/`](tiktok_divestiture_and_national_security_dispute/).

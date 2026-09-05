@@ -30,3 +30,7 @@ H2EPR-0288 uses three aggregate choice units: [general public depositors, New
 York trust companies and NYCH member banks](models/panic_of_1907/). Each model
 owns a bounded group-level record without inventing individual trajectories,
 unanimity, weights or financial quantities.
+H2EPR-0170 uses one [state and legislative restriction
+Population](models/tiktok_divestiture_and_national_security_dispute/state_and_legislative_restriction_population.md)
+for the Draft's aggregate state, campus and proposal records. It does not imply
+uniform members, counts, weights or individual policy trajectories.

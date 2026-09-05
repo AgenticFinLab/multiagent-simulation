@@ -23,6 +23,8 @@ Rule](baoneng_vanke_takeover_battle/rule/simulation-reading.md),
 [H2EPR-0481 Samsung Galaxy Note7 Battery Recall Crisis,
 Rule](samsung_galaxy_note7_battery_recall_crisis/rule/simulation-reading.md),
 [H2EPR-0616 SingHealth Data Breach,
-Rule](singhealth_data_breach/rule/simulation-reading.md), and
+Rule](singhealth_data_breach/rule/simulation-reading.md),
 [H2EPR-0288 Panic of 1907,
-Rule](panic_of_1907/rule/simulation-reading.md).
+Rule](panic_of_1907/rule/simulation-reading.md), and
+[H2EPR-0170 TikTok Divestiture and National Security Dispute,
+Rule](tiktok_divestiture_and_national_security_dispute/rule/simulation-reading.md).

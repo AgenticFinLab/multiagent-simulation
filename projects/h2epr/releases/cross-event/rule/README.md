@@ -1,6 +1,6 @@
 # Cross-event Rule conformance
 
-This release verifies 6 distinct H2EPR event packages on one Rule
+This release verifies 7 distinct H2EPR event packages on one Rule
 contract, one runtime source inventory, and one read-only MASim kernel
 inventory.
 
@@ -12,10 +12,11 @@ inventory.
 | [H2EPR-0481](../../samsung_galaxy_note7_battery_recall_crisis/rule/) | `cbcb8e37e6b3cfa8c9ffe83055dced7ed948146c60bb35046070c157f3733d5c` | `run.88051af3adbca475637d35ec` | 1101 | 1152 | 3262 |
 | [H2EPR-0616](../../singhealth_data_breach/rule/) | `9d17581f17e994b2aba4252c8a7457c7b03ecd8f3e9003c83268bf954664a16c` | `run.5db9a323beb010817c521f46` | 782 | 819 | 2317 |
 | [H2EPR-0288](../../panic_of_1907/rule/) | `cc5229cd7f77b93305450a50a068817e7d8ac786c2f2d2cde9a132749808e030` | `run.1b16d1949b2a609181e1d06d` | 1043 | 1084 | 3111 |
+| [H2EPR-0170](../../tiktok_divestiture_and_national_security_dispute/rule/) | `667de386997afde4f415f0b6ea491138acce8bfa081150bcfb88f156f67aa7fd` | `run.2cb97929423c768bbd0cf72d` | 1101 | 1142 | 3297 |
 
 `conformance-receipt.json` records distinct event identities, the shared
 package and backend-status contracts, equal H2EPR and MASim inventories, equal
 output roles, replay/trace/transport closure, and common claim exclusions. It
-establishes cross-event engineering closure for these 6 practices,
+establishes cross-event engineering closure for these 7 practices,
 not historical fit, held-out performance, calibration, causality, scientific
 validity, or universal generality.

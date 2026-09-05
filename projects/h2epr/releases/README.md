@@ -20,7 +20,9 @@ Rule](east_palestine_train_derailment/rule/), [H2EPR-0551 Angola Yellow
 Fever Outbreak of 2016, Rule](angola_yellow_fever_outbreak/rule/),
 [H2EPR-1031 Baoneng–Vanke Takeover Battle, Rule](baoneng_vanke_takeover_battle/rule/),
 [H2EPR-0481 Samsung Galaxy Note7 Battery Recall Crisis, Rule](samsung_galaxy_note7_battery_recall_crisis/rule/),
-[H2EPR-0616 SingHealth Data Breach, Rule](singhealth_data_breach/rule/), and
-[H2EPR-0288 Panic of 1907, Rule](panic_of_1907/rule/).
-The [six-event Rule conformance release](cross-event/rule/) covers the complete
+[H2EPR-0616 SingHealth Data Breach, Rule](singhealth_data_breach/rule/),
+[H2EPR-0288 Panic of 1907, Rule](panic_of_1907/rule/), and
+[H2EPR-0170 TikTok Divestiture and National Security Dispute,
+Rule](tiktok_divestiture_and_national_security_dispute/rule/).
+The [seven-event Rule conformance release](cross-event/rule/) covers the complete
 current registry.
