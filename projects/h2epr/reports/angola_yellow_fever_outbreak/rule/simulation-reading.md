@@ -12,13 +12,13 @@ verification and reproduction instructions. Model and network access are denied.
 | Package | `h2epr.event-package.0551.v2`; `938f441d834a8c928fb64ec12eb6e3692ef6e00c91d06016ba681f8d6f540e3d` |
 | Rule binding | `530e0f3316aa7af6275cc5a58cf2f9e254de00de9999cdf4c6c0f28025e7890c` |
 | Rule configuration | `h2epr.0551.rule.v2`; `e3954abe461770d5872fe53ec381e28f05dff678c6ab8b270ab9b4c0b2e13ddc` |
-| Run | `run.c8e90196fadcf5a18b9b9f9a` |
-| Run manifest | `6072990591323910c30efdeecce60c44835b46a5d829cf39ea81a707c9a786ee` |
-| Trace | `a08dd89d287d2e7d12061c6fec04584f954aaaa5306d037efd957a54320fff08` |
+| Run | `run.b21a925f5048915d999d5433` |
+| Run manifest | `5e10251862bbd661410e14d83088e7f8a4aecf89f44ab48e16290084f9348b0d` |
+| Trace | `5e965a9efb553601a63c198ffb39c7272875e2cf7b276804a3b07c0888f22ead` |
 | Terminal state | `6e43cbba3847a1df9b6dd5c5395932c964d8baf6f086717e7c04f375da0ea26e` |
-| Run seal | `57121ec6e9c26a3f7207d2e08098c79cf0a1725d0a5a302d3e86aae2ece4c8b6` |
-| Generated EPG seal | `b177447f3ba8ba8af9320599ae1e924fa2c0453897056e1b95bf85fb6be0a4c4` |
-| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-behavior/a` |
+| Run seal | `3398b1370e68f60717977daf843ba64205c6d1edfcdd8fed93aebbaa2caa26ab` |
+| Generated EPG seal | `9d7fc08164e978db67672e71f365bca58250e9d62a151df4624be5a75741eb84` |
+| Raw physical custody | `.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-passive-admission/a` |
 
 Fresh A/B materializations are byte-identical across the eight output roles and
 run receipt. A generated-ID probe changes opaque identities while preserving
@@ -61,8 +61,8 @@ provenance includes the contributing coordinate batch, not a minimal causal set.
 ## Generated trajectory
 
 The table lists every coordinate and every non-default action and state change.
-Trace suffixes abbreviate `trace.run.c8e90196fadcf5a18b9b9f9a.`; corresponding graph
-record nodes use `record.trace.run.c8e90196fadcf5a18b9b9f9a.` with the same suffix.
+Trace suffixes abbreviate `trace.run.b21a925f5048915d999d5433.`; corresponding graph
+record nodes use `record.trace.run.b21a925f5048915d999d5433.` with the same suffix.
 
 | Coordinate | Accepted choices | Recorded effects and delivery |
 |---|---|---|
@@ -87,6 +87,37 @@ record nodes use `record.trace.run.c8e90196fadcf5a18b9b9f9a.` with the same suff
 | c19 | `angola_ministry_of_health` → `activate_angola_surveillance`; `drc_ministry_of_health` → `activate_drc_surveillance`; `uganda_ministry_of_health` → `activate_uganda_surveillance`; `world_health_organization` → `activate_regional_surveillance` | `surveillance.angola_status=ongoing` `…00000780`; `surveillance.drc_status=ongoing` `…00000781`; `surveillance.uganda_status=ongoing` `…00000782`; `surveillance.who_status=ongoing` `…00000783`; 1 delivered |
 | c20 | All actors wait; no state effect | No delta; 3 delivered |
 
+Each declared expectation is assessed below; these are descriptive endpoints, not release gates.
+
+| Expectation suffix | Observed terminal value | Met |
+|---|---|---|
+| `outbreak.detection_status` | `detected` | True |
+| `laboratory.nicd_status` | `confirmed` | True |
+| `laboratory.ipd_status` | `confirmed` | True |
+| `outbreak.confirmation_status` | `recorded` | True |
+| `epidemiology.case_status` | `surge_reported` | True |
+| `vaccination.local_campaign` | `active` | True |
+| `population_response.local_status` | `participating` | True |
+| `regional_risk.imported_case_status` | `reported` | True |
+| `regional_risk.risk_status` | `documented` | True |
+| `governance.first_meeting` | `convened` | True |
+| `governance.angola_briefing` | `submitted` | True |
+| `governance.drc_briefing` | `submitted` | True |
+| `governance.first_assessment` | `serious_event_not_pheic` | True |
+| `scaled_response.coordination` | `scaled` | True |
+| `scaled_response.angola_status` | `response_recorded` | True |
+| `scaled_response.drc_status` | `fractional_response_recorded` | True |
+| `population_response.regional_status` | `participating` | True |
+| `progress.angola_status` | `no_recent_confirmed_cases_reported` | True |
+| `progress.drc_status` | `no_recent_confirmed_cases_reported` | True |
+| `governance.second_meeting` | `convened` | True |
+| `governance.second_assessment` | `serious_event_not_pheic_continued` | True |
+| `uganda_outbreak.status` | `declared_ended` | True |
+| `surveillance.who_status` | `ongoing` | True |
+| `surveillance.angola_status` | `ongoing` | True |
+| `surveillance.drc_status` | `ongoing` | True |
+| `surveillance.uganda_status` | `ongoing` | True |
+
 ## Mechanism reading
 
 The opening is a set of institutional records: no recorded detection,
@@ -102,7 +133,7 @@ it remains known until the c14 opportunity, after both country response records
 become visible. No two-tick transport alignment is needed. Country progress
 statements feed the later review, without a model estimating why case reports fell.
 
-Uganda's c18 declaration is independently owned and no longer requires the
+Uganda's c18 declaration is independently owned and does not require the
 WHO assessment. Its `not_declared`/`declared_ended` field is an announcement
 record. The second assessment and the Uganda declaration have separate paths
 into the modeled surveillance choices; the latter does not authorize every

@@ -19,6 +19,11 @@ choice units live under [populations/](../populations/).
 Current event assets are discoverable only through
 [events/current-events.json](../events/current-events.json). Current
 participant releases are [H2EPR-0196 East Palestine Train
-Derailment](rosters/east_palestine_train_derailment/) and [H2EPR-0551 Angola
-Yellow Fever Outbreak of 2016](rosters/angola_yellow_fever_outbreak/). Empty
+Derailment](rosters/east_palestine_train_derailment/), [H2EPR-0551 Angola
+Yellow Fever Outbreak of 2016](rosters/angola_yellow_fever_outbreak/), and
+[H2EPR-1031 Baoneng–Vanke Takeover Battle](rosters/baoneng_vanke_takeover_battle/). Empty
 directories are not evidence of an accepted participant release.
+
+An explicit empty action list in a source appearance is valid passive presence.
+Keep it in the roster and review that participant's whole exposed record before
+choosing an Agent, Population, context or other disposition.

@@ -14,5 +14,6 @@ Use [backend-realization-template.md](backend-realization-template.md) and
 Accepted realizations are reached through
 [events/current-events.json](../events/current-events.json). The current Rule
 realizations are [H2EPR-0196 East Palestine Train
-Derailment](east_palestine_train_derailment/rule/) and [H2EPR-0551 Angola
-Yellow Fever Outbreak of 2016](angola_yellow_fever_outbreak/rule/).
+Derailment](east_palestine_train_derailment/rule/), [H2EPR-0551 Angola
+Yellow Fever Outbreak of 2016](angola_yellow_fever_outbreak/rule/), and
+[H2EPR-1031 Baoneng–Vanke Takeover Battle](baoneng_vanke_takeover_battle/rule/).

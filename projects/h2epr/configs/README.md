@@ -17,5 +17,6 @@ Use [scenario-configuration-template.md](scenario-configuration-template.md).
 Current configurations are listed indirectly by
 [events/current-events.json](../events/current-events.json). The current
 values are under
-[`east_palestine_train_derailment/`](east_palestine_train_derailment/) and
-[`angola_yellow_fever_outbreak/`](angola_yellow_fever_outbreak/).
+[`east_palestine_train_derailment/`](east_palestine_train_derailment/),
+[`angola_yellow_fever_outbreak/`](angola_yellow_fever_outbreak/), and
+[`baoneng_vanke_takeover_battle/`](baoneng_vanke_takeover_battle/).

@@ -20,6 +20,12 @@ classes, and all scientific claim exclusions are required. Admission validates
 the exposed Draft stage, episode, participant, and action structure in addition
 to file identity.
 
+A participant may have an explicit empty `actions` list in a passive appearance.
+Retain that occurrence in the source roster and decide representation from its
+whole exposed record. A missing/non-list action field or malformed nonempty
+action wrapper remains an admission failure; never insert a synthetic source
+action to make admission pass.
+
 The machine-required vocabulary is exact. `prohibited_inputs` must include
 `reference_epg`, `held_out_suffix`, `evaluation_only_content`,
 `external_research`, and `network_retrieval`. `claim_boundary.does_not_support`

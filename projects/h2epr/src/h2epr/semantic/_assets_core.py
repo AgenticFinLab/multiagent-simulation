@@ -231,7 +231,12 @@ def _validate_source_documents(
                         f"draft_participant_{episode_id}_{participant_id}_{field}",
                     )
                 actions = participant.get("actions")
-                _require(isinstance(actions, list) and bool(actions), f"draft_actions_invalid:{episode_id}:{participant_id}")
+                # An occurrence may be passive; later episodes can expose choices.
+                # Preserve it in the roster without inventing an action row.
+                _require(
+                    isinstance(actions, list),
+                    f"draft_actions_invalid:{episode_id}:{participant_id}",
+                )
                 for action in actions:
                     _require(isinstance(action, Mapping), "draft_action_shape_invalid")
                     _field_value(action.get("name"), "draft_action_name")

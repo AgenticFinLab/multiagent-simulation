@@ -26,7 +26,9 @@ one by browsing protected directories.
    event IDs, parse failure, or any additional input.
 4. Validate event-spec identity and the exposed Draft's stage, episode,
    participant, action, name, type, role, and timestamp wrappers without
-   discovering siblings.
+   discovering siblings. An explicit empty action list is a valid passive
+   appearance; retain its participant in the roster. Missing/non-list actions
+   and malformed nonempty action wrappers still fail closed.
 5. Record byte size and SHA-256 before semantic work.
 6. State that Draft/frozen records are dataset material, not independently
    verified history. Record known shape or identifier defects without repair.

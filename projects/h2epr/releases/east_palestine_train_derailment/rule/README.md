@@ -4,21 +4,21 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0196`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-behavior/canonical`.
+`.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-passive-admission/canonical`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.af195d6305dad7006bc55759` |
+| Run | `run.293a2a817e42f1ea0578dc45` |
 | Package SHA-256 | `2dfca76550db4a9d68db3cb7e03336e39bbddafe15f575ec9109d1096014330e` |
 | Rule binding SHA-256 | `78f974583e36330d9cde19ff5f5133e7cbd42bbc1d279958f74b7baed4e711d8` |
-| Run manifest SHA-256 | `dc2101f342b8d38e9ab494699357e3510df651f4e1f2749e32af1c4805673685` |
-| Trace SHA-256 | `40bd5f55e6008cd419f21bb6125f9ef0682e7d841c087b997a7cfd5aa7199a56` |
-| Run seal SHA-256 | `45209e477e465be10a9932c5b507fc946059d82b6dc362123fd2a9cd0c7110ae` |
+| Run manifest SHA-256 | `fff11a9e17f5392ff66ea08f0e0812e8ac6c89980658876c20cfac53a9766a78` |
+| Trace SHA-256 | `71d715fd6272d5d7d89a9b487f443125a124c0a66ba2fdf3920ca7e58906c1e8` |
+| Run seal SHA-256 | `a3a0b6fb18c602982c51c2a293d0be62c0490150c290ab38260cae78cd9c4484` |
 | Final state SHA-256 | `79ed8e7961b316ff111e8add369f9de2cbfedd10f47cb45682343c27bc8cb140` |
-| Generated EPG seal | `d7d2cd47e81955c6ebe4d9211c2276ac0361954b94e151d6dd13a68b4bb5ed27` |
+| Generated EPG seal | `3d3101e92c31c36ba3dee05583bf77d6a8642f49aed226ff600290bdaa3ee13f` |
 
 The run covers 7 action-bearing representations over
 11 logical coordinates. Its sealed trace contains
@@ -47,8 +47,8 @@ PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
   --data-root data/h2epr \
   --package projects/h2epr/events/east_palestine_train_derailment/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-behavior/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-behavior/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-passive-admission/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-passive-admission/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/east_palestine_train_derailment/rule/simulation-reading.md) describes the

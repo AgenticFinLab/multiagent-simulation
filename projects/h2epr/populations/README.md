@@ -18,3 +18,6 @@ the [East Palestine residents](models/east_palestine_train_derailment/east_pales
 Population Model. H2EPR-0551 uses the [Angola-DRC affected
 residents](models/angola_yellow_fever_outbreak/angola_drc_affected_residents.md)
 Population Model, which records the Draft's changing P_3 geographic scope.
+H2EPR-1031's [actor map](../agents/rosters/baoneng_vanke_takeover_battle/)
+selects eight named Agents and no Population. That explicit zero is valid;
+directory symmetry does not require inventing an unsupported aggregate choice.

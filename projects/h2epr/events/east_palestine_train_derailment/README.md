@@ -22,7 +22,7 @@ Attaching Rule leaves the package-core identity unchanged. Planned catalog entri
 
 ## Current result
 
-The current canonical seed-0 Rule run is `run.af195d6305dad7006bc55759`. Its
+The current canonical seed-0 Rule run is `run.293a2a817e42f1ea0578dc45`. Its
 7 actors execute 11 coordinates and produce
 405 trace records, 432 graph nodes, and
 1,210 graph edges. Exact identities, deterministic A/B evidence,
@@ -36,7 +36,7 @@ transport remain mandatory. The
 [simulation reading](../../reports/east_palestine_train_derailment/rule/simulation-reading.md)
 reviews the full output with a complete machine scan and coordinate-level
 semantic analysis. Raw custody is retained under ignored
-`.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-behavior/`.
+`.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-passive-admission/`.
 
 The [current-event registry](../current-events.json) and
 [cross-event Rule conformance](../../releases/cross-event/rule/) cover the

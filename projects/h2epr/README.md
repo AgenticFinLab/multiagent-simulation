@@ -18,10 +18,11 @@ assets, never to common Python. The machine authority for published events is
 [events/current-events.json](events/current-events.json); only rows in that
 registry are current results.
 
-The current publication registry contains two completed Rule events:
-[H2EPR-0196 East Palestine Train Derailment](events/east_palestine_train_derailment/)
-and [H2EPR-0551 Angola Yellow Fever Outbreak of
-2016](events/angola_yellow_fever_outbreak/). Their
+The current publication registry contains three completed Rule events:
+[H2EPR-0196 East Palestine Train Derailment](events/east_palestine_train_derailment/),
+[H2EPR-0551 Angola Yellow Fever Outbreak of
+2016](events/angola_yellow_fever_outbreak/), and
+[H2EPR-1031 Baoneng–Vanke Takeover Battle](events/baoneng_vanke_takeover_battle/). Their
 [cross-event release](releases/cross-event/rule/) verifies the shared package,
 runtime, output, replay, graph, transport, and claim-boundary contracts.
 

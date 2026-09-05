@@ -11,6 +11,11 @@ from h2epr.benchmark.compiler import (
     validate_configuration_provenance_coverage,
 )
 from h2epr.canonical import canonical_sha256
+from h2epr.benchmark._compiler_core import _draft_roster
+from h2epr.semantic._assets_core import (
+    _AssetAdmissionCoreError,
+    _validate_source_documents,
+)
 
 from support import PROJECT_ROOT
 from synthetic import SIGNAL_CASE, build_synthetic_event
@@ -157,6 +162,98 @@ class StandardAssetTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, normalized)
         self.assertIn("do not select exact distribution parameters here", normalized)
+
+
+class SourceDocumentShapeTests(unittest.TestCase):
+    @staticmethod
+    def documents() -> dict:
+        def wrap(value: str) -> dict:
+            return {"value": value}
+
+        participant = {
+            "participant_id": "P_1",
+            "name": wrap("Observer later deciding"),
+            "participant_type": wrap("organization"),
+            "base_role": wrap("participant"),
+            "actions": [],
+        }
+        later = copy.deepcopy(participant)
+        later["actions"] = [{"name": wrap("respond"), "timestamp": wrap("later")}]
+        episodes = [
+            {
+                "episode_id": f"E{number}",
+                "name": wrap("Synthetic episode"),
+                "start_time": wrap("unknown"),
+                "end_time": wrap("unknown"),
+                "participants": [value],
+            }
+            for number, value in enumerate((participant, later), 1)
+        ]
+        return {
+            "event_spec": {
+                "public_event_id": "H2EPR-9997",
+                "title": "Synthetic passive appearance",
+                "schema_version": "synthetic",
+            },
+            "frozen_evidence": {
+                "public_event_id": "H2EPR-9997",
+                "source_count": 1,
+                "sources": [{"source_id": "synthetic-only"}],
+            },
+            "draft_epg": {
+                "event_id": "synthetic-passive-appearance",
+                "title": wrap("Synthetic passive appearance"),
+                "start_time": wrap("unknown"),
+                "end_time": wrap("unknown"),
+                "stages": [{
+                    "stage_id": "S1",
+                    "name": wrap("Synthetic stage"),
+                    "start_time": wrap("unknown"),
+                    "end_time": wrap("unknown"),
+                    "episodes": episodes,
+                }],
+            },
+        }
+
+    def test_empty_actions_preserves_a_passive_appearance(self) -> None:
+        documents = self.documents()
+        before = copy.deepcopy(documents)
+        _validate_source_documents(documents, "H2EPR-9997")
+        roster, _ = _draft_roster(documents["draft_epg"])
+        self.assertEqual(1, len(roster))
+        self.assertEqual(
+            ["draft_epg:S1/E1/P_1", "draft_epg:S1/E2/P_1"],
+            roster[0]["appearance_refs"],
+        )
+        self.assertEqual(before, documents)
+
+    def test_missing_or_non_list_actions_still_fail_closed(self) -> None:
+        for invalid in (None, {}, "", True, 0, "missing"):
+            with self.subTest(invalid=invalid):
+                documents = self.documents()
+                participant = documents["draft_epg"]["stages"][0]["episodes"][0]["participants"][0]
+                if invalid == "missing":
+                    participant.pop("actions")
+                else:
+                    participant["actions"] = invalid
+                with self.assertRaisesRegex(
+                    _AssetAdmissionCoreError, "draft_actions_invalid:E1:P_1"
+                ):
+                    _validate_source_documents(documents, "H2EPR-9997")
+
+    def test_nonempty_action_wrappers_still_require_valid_structure(self) -> None:
+        for invalid in (
+            None,
+            {},
+            {"name": "unwrapped", "timestamp": {"value": "now"}},
+            {"name": {"value": "respond"}, "timestamp": "unwrapped"},
+        ):
+            with self.subTest(invalid=invalid):
+                documents = self.documents()
+                participant = documents["draft_epg"]["stages"][0]["episodes"][0]["participants"][0]
+                participant["actions"] = [invalid]
+                with self.assertRaisesRegex(_AssetAdmissionCoreError, "draft_action"):
+                    _validate_source_documents(documents, "H2EPR-9997")
 
 
 if __name__ == "__main__":

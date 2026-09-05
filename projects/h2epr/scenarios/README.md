@@ -15,5 +15,6 @@ and [scenario-mechanism-template.md](scenario-mechanism-template.md).
 Accepted event directories are listed in
 [events/current-events.json](../events/current-events.json). Current Scenarios
 are [H2EPR-0196 East Palestine Train
-Derailment](east_palestine_train_derailment/) and [H2EPR-0551 Angola Yellow
-Fever Outbreak of 2016](angola_yellow_fever_outbreak/).
+Derailment](east_palestine_train_derailment/), [H2EPR-0551 Angola Yellow
+Fever Outbreak of 2016](angola_yellow_fever_outbreak/), and
+[H2EPR-1031 Baoneng–Vanke Takeover Battle](baoneng_vanke_takeover_battle/).

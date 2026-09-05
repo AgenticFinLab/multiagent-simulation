@@ -43,7 +43,11 @@ must propagate into the package, run, report, and any comparison claim.
 4. Match the public event ID across the event specification and every input
    location where the dataset declares it.
 5. Inspect the Draft wrappers required by the current compiler: stages,
-   episodes, participants, names, types, roles, actions, and timestamps.
+   episodes, participants, names, types, roles, actions, and timestamps. Each
+   participant needs an explicit action list, which may be empty for a passive
+   appearance. This does not remove the occurrence from later roster coverage
+   or require a fabricated no-op source action. Validate every action wrapper
+   when the list is nonempty; reject a missing field or non-list carrier.
 6. Record dataset shape defects rather than silently repairing them.
 7. State dataset limitations and the complete scientific claim exclusion set.
    Copy the machine tokens from the Source Profile template; do not substitute
@@ -55,6 +59,8 @@ must propagate into the package, run, report, and any comparison claim.
 
 | Observation | Disposition | Reason |
 |---|---|---|
+| A named participant has `actions: []` in an early episode and acts later | admit the explicit empty list and retain both appearances | passive presence and a missing/malformed field are different cases |
+| `actions` is absent, null, a mapping, or contains malformed action wrappers | reject | accepting passive appearances does not waive source-shape validation |
 | A participant ID is absent in one episode | admit with a recorded source defect | the Draft remains unchanged; roster work must account for the gap |
 | A filename differs only by capitalization | reject | logical input identity is exact, not best-effort |
 | The caller asks to inspect a Reference file to improve the roster | stop | it crosses the construction boundary |
