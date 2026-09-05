@@ -18,6 +18,7 @@ Rule output.
 Current run releases are [H2EPR-0196 East Palestine Train Derailment,
 Rule](east_palestine_train_derailment/rule/), [H2EPR-0551 Angola Yellow
 Fever Outbreak of 2016, Rule](angola_yellow_fever_outbreak/rule/), and
-[H2EPR-1031 Baoneng–Vanke Takeover Battle, Rule](baoneng_vanke_takeover_battle/rule/).
-The [three-event Rule conformance release](cross-event/rule/) covers the complete
+[H2EPR-1031 Baoneng–Vanke Takeover Battle, Rule](baoneng_vanke_takeover_battle/rule/), and
+[H2EPR-0481 Samsung Galaxy Note7 Battery Recall Crisis, Rule](samsung_galaxy_note7_battery_recall_crisis/rule/).
+The [four-event Rule conformance release](cross-event/rule/) covers the complete
 current registry.

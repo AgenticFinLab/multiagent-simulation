@@ -21,3 +21,5 @@ Population Model, which records the Draft's changing P_3 geographic scope.
 H2EPR-1031's [actor map](../agents/rosters/baoneng_vanke_takeover_battle/)
 selects eight named Agents and no Population. That explicit zero is valid;
 directory symmetry does not require inventing an unsupported aggregate choice.
+H2EPR-0481 uses three aggregate choice units: [global purchasers, mainland test-unit
+owners and mainland regular purchasers](models/samsung_galaxy_note7_battery_recall_crisis/).

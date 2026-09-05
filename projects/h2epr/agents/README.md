@@ -21,7 +21,8 @@ Current event assets are discoverable only through
 participant releases are [H2EPR-0196 East Palestine Train
 Derailment](rosters/east_palestine_train_derailment/), [H2EPR-0551 Angola
 Yellow Fever Outbreak of 2016](rosters/angola_yellow_fever_outbreak/), and
-[H2EPR-1031 Baoneng–Vanke Takeover Battle](rosters/baoneng_vanke_takeover_battle/). Empty
+[H2EPR-1031 Baoneng–Vanke Takeover Battle](rosters/baoneng_vanke_takeover_battle/), and
+[H2EPR-0481 Samsung Galaxy Note7 Battery Recall Crisis](rosters/samsung_galaxy_note7_battery_recall_crisis/). Empty
 directories are not evidence of an accepted participant release.
 
 An explicit empty action list in a source appearance is valid passive presence.
