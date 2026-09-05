@@ -54,8 +54,11 @@ sensitivity dimensions, and the owner of exact selected values.
 
 ## 9. Worked cases and falsification
 
-Exercise at least two heterogeneous responses, missing information,
-aggregation changes, and one environment rejection or partial result.
+Where microdata support them, exercise contrasting heterogeneous responses.
+For an aggregate-only model, compare supported aggregate alternatives without
+inventing individual trajectories. Include missing or stale information,
+aggregation changes, a rejected request, and a later decision after relevant
+information changes.
 
 ## 10. Limitations and source anchors
 

@@ -32,6 +32,18 @@ accepted idempotently using only semantic serialization keys. Input order and
 opaque generated IDs cannot choose a winner. A condition may reference only a
 declared field.
 
+`termination_invariants` contains safety/integrity conditions and may be empty.
+Do not use it to require every participant to reach a preferred state.
+`outcome_expectations` separately names descriptive terminal comparisons, each
+with an `expectation_id`, label, field, operator, and value. The run receipt
+reports the observed value and whether it matched. An unmet expectation does
+not invalidate a sealed, replayable run.
+
+For example, a response that arrives after a request's decision window may
+leave its domain status open while all messages have been delivered. This is
+a complete run with an unmet outcome. A notice still queued beyond the final
+transport barrier prevents a complete release; preserve the failed attempt.
+
 ## Admission
 
 Reject duplicate IDs, unknown fields/actors/targets, uncovered registry

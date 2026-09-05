@@ -15,6 +15,7 @@
     "event-package-manifest.schema.json",
     "experiment-admission-receipt.schema.json",
     "experiment-plan.schema.json",
+    "failed-attempt.schema.json",
     "generated-epg.schema.json",
     "intent-registry.schema.json",
     "lifecycle-registry.schema.json",

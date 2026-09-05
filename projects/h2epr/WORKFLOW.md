@@ -37,7 +37,8 @@ termination, and annotations. Complete the Interface Closure.
 
 Publish `scenario-mechanism.json` with executable state fields, handlers,
 preconditions, effects, message kinds, annotation rules, conflict policy, and
-terminal invariants. Put the exact timeline, opening state, routes, and other
+safety invariants and descriptive outcome expectations. Desired event outcomes
+must not be release preconditions. Put the exact timeline, opening state, routes, and other
 shared selections in the shared configuration. Give every selected top-level
 value a dataset provenance pointer or an explicit construction-choice
 exemption.
@@ -63,7 +64,8 @@ permitted.
 
 ## 8. Materialize into fresh custody
 
-For one verification run, materialize directly. Before a multi-event,
+For event construction and synthetic contract verification, materialize
+directly, including A/B and identity probes. Before a comparative multi-event,
 multi-backend, or multi-seed study, publish and admit an experiment plan under
 [EXPERIMENT_STANDARD.md](EXPERIMENT_STANDARD.md).
 
@@ -71,7 +73,9 @@ Write each run to a new ignored custody directory. At every coordinate the
 runtime uses one sealed pre-state, collects all decisions, applies one
 authoritative reduction, records transport, and seals the result. The run
 writes its manifest, trace, terminal state, tick seals, run seal, replay
-receipt, Generated EPG, and compact receipt.
+receipt, Generated EPG, and compact receipt. The horizon can end with an open
+domain state or rejected request. Trace, replay and transport integrity must
+still close; unmet outcome expectations remain visible results.
 
 ## 9. Verify determinism and publish
 

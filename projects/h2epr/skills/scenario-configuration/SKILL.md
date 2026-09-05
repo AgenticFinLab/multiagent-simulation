@@ -16,7 +16,8 @@ admission failures, and promotion evidence.
 2. For shared comparison configuration, select ordered logical coordinates,
    Draft stage/episode anchors, active actor IDs, typed initial state, explicit
    routes, observation contract, termination, and declared exogenous values.
-3. For Rule configuration, publish coordinate/actor/priority rows, guards, one
+3. For Rule configuration, publish actor/priority rows with an activation
+   window or justified exact coordinate, guards, one
    typed action, optional messages, and a declared `no_op` default. Other
    backend configurations contain only their decision-production settings.
 4. Label every top-level selected setting dataset-derived, structural,

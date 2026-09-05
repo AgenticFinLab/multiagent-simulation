@@ -6,8 +6,8 @@ inventory.
 
 | Event release | Package SHA-256 | Run | Trace | Nodes | Edges |
 |---|---|---|---:|---:|---:|
-| [H2EPR-0196](../../east_palestine_train_derailment/rule/) | `f1f30080e857417ed06cb45b3cbb25b37ea5a7fac72339978185f37dd657e297` | `run.4cc6658590d5447313ff426b` | 405 | 432 | 1056 |
-| [H2EPR-0551](../../angola_yellow_fever_outbreak/rule/) | `d6456af798b2593d264b18f7b1a4f0bf360682cfe36a26965ed3d29dbfe5c2b6` | `run.2c5f37a8e456f99bdb1eff02` | 826 | 866 | 2147 |
+| [H2EPR-0196](../../east_palestine_train_derailment/rule/README.md) | `2dfca76550db4a9d68db3cb7e03336e39bbddafe15f575ec9109d1096014330e` | `run.af195d6305dad7006bc55759` | 405 | 432 | 1210 |
+| [H2EPR-0551](../../angola_yellow_fever_outbreak/rule/README.md) | `938f441d834a8c928fb64ec12eb6e3692ef6e00c91d06016ba681f8d6f540e3d` | `run.c8e90196fadcf5a18b9b9f9a` | 826 | 866 | 2481 |
 
 `conformance-receipt.json` records distinct event identities, the shared
 package and backend-status contracts, equal H2EPR and MASim inventories, equal

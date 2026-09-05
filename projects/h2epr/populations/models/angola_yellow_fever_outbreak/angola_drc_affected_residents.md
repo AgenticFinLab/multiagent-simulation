@@ -30,17 +30,24 @@ The Population receives campaign notices and may emit aggregate participation in
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Observe campaign status |
-| delivered messages | MASim transport before decisions | Empty when none are due | Respond only to routed campaign guidance |
-| pending lifecycles | MASim transport | Empty when none exist | Keep request distinct from result |
-
-Persistent fields record only aggregate participation status under environment authority. No hidden individual or medical state is generated.
+At coordinate open, the actor receives sealed public state, its newly delivered
+messages, only its outgoing pending lifecycles, and structured received/own-action
+memory. Received messages retain their receipt tick. Its own accepted, rejected,
+and no-op results become available at the next coordinate. Private pending
+messages are not exposed to a recipient; absent information stays absent.
+Runtime clock coordinates contain no historical stage label or future Draft
+fact. Memory is evidence-derived, not an invented private deliberation.
 
 ## 6. Choice model and heterogeneity
 
-The admissible intents are `participate_local_vaccination`, `participate_scaled_vaccination` plus `no_op`. Potential heterogeneity includes location, eligibility, access, trust, and willingness, but the dataset supplies no distributions. The current Rule baseline selects one aggregate participation path. Missing guidance permits `no_op`; a participation intent does not prove vaccination.
+The Population can emit local or scaled campaign-participation requests, or
+wait. An earlier received campaign notice remains available within the selected
+window; national response records remain separate prerequisites for the scaled
+choice. Accepted participation is recorded once and does not prove a dose was
+administered. Location, eligibility, access, trust, and willingness are plausible
+heterogeneity dimensions, but the three admitted inputs supply no distributions
+or stable individual panel. This is one aggregate response surface with explicit
+Luanda-to-Angola-to-Angola/DRC scope drift, not a micro-population.
 
 ## 7. Intent and environment-result boundary
 
@@ -52,12 +59,13 @@ Aggregation scope, logical timing, route latency, and Rule selection belong to c
 
 ## 9. Worked cases and falsification
 
-- A delivered local campaign notice permits local participation; no notice permits `no_op`.
-- Scaled guidance permits a later regional participation response without proving dose receipt.
-- Environment denial leaves participation pending or rejected rather than fabricating coverage.
-- Splitting Angola and DRC may change responses and therefore requires a successor population/configuration pair.
+- Deliver scaled guidance at c13: the Population retains it until the c14 response opportunity.
+- Withhold one national response record: the selected scaled choice remains pending or rejected, without fabricated coverage.
+- Delay a notice inside its window: the Population can respond later; a notice still pending is invisible.
+- A rejected request appears in next-coordinate own-action memory. A clock tick alone does not turn it into acceptance.
+- Distinct country information or subgroup uptake requires a supported semantic successor rather than hidden individual states.
 
-The model is falsified if one source subgroup acquires independent authority or observably different information that one aggregate interface cannot preserve.
+The representation fails if one aggregate record obscures a material independent choice needed by the intended simulation.
 
 ## 10. Limitations and source anchors
 

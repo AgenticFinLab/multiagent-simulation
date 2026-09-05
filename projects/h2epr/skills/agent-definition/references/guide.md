@@ -68,6 +68,12 @@ response class, a forbidden response, and the environment boundary.
 An always-no-op interface is incomplete when an activated situation carries a
 declared duty or minimum response class.
 
+Use a concrete decision to test waiting and reopening. Name the missing
+notice, the sender, what the actor knows after receipt, and the state that may
+still cause environment rejection. Keep prior own dispositions distinct from
+other actors' private results. Exact retry selection belongs to the backend;
+the Definition explains which new information makes reconsideration meaningful.
+
 ## Falsifiers and routing
 
 Return to roster ownership when the candidate is a population, process, world

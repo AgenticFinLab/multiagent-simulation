@@ -4,26 +4,26 @@ This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0551`. Raw trace, state, seals, replay output, and Generated
 EPG bytes remain in ignored local custody. The receipt records this logical
 custody locator:
-`.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/current/canonical`.
+`.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-behavior/canonical`.
 Canonical A/B physical directories may differ while sharing that identity.
 
 ## Release identity
 
 | Item | Identity |
 |---|---|
-| Run | `run.2c5f37a8e456f99bdb1eff02` |
-| Package SHA-256 | `d6456af798b2593d264b18f7b1a4f0bf360682cfe36a26965ed3d29dbfe5c2b6` |
-| Rule binding SHA-256 | `be5013c6677d8aae4de67f0ce37064966c590c4380cf16fb523d687b1f50a269` |
-| Run manifest SHA-256 | `32527f4ebacc54e2762a392d28daf5d0c0b9b7297c44ae9f79e738b392c37dcb` |
-| Trace SHA-256 | `edec83529744119588cc50c14acb83c270f93699335121ecc791a858b404b1e0` |
-| Run seal SHA-256 | `2bdddf577ba041e109dbd804b6655bd250e7750fc72d5ca0a84ac6d2e75977ae` |
-| Final state SHA-256 | `0a0b2245ca514c0ad69a212a0f0338cc836ad08065a301e1d024bd75aae700a4` |
-| Generated EPG seal | `e76b4c4960a607af51ab274bb0634834562cc54ef8da4af1d05fb89ff7cd346f` |
+| Run | `run.c8e90196fadcf5a18b9b9f9a` |
+| Package SHA-256 | `938f441d834a8c928fb64ec12eb6e3692ef6e00c91d06016ba681f8d6f540e3d` |
+| Rule binding SHA-256 | `530e0f3316aa7af6275cc5a58cf2f9e254de00de9999cdf4c6c0f28025e7890c` |
+| Run manifest SHA-256 | `6072990591323910c30efdeecce60c44835b46a5d829cf39ea81a707c9a786ee` |
+| Trace SHA-256 | `a08dd89d287d2e7d12061c6fec04584f954aaaa5306d037efd957a54320fff08` |
+| Run seal SHA-256 | `57121ec6e9c26a3f7207d2e08098c79cf0a1725d0a5a302d3e86aae2ece4c8b6` |
+| Final state SHA-256 | `6e43cbba3847a1df9b6dd5c5395932c964d8baf6f086717e7c04f375da0ea26e` |
+| Generated EPG seal | `b177447f3ba8ba8af9320599ae1e924fa2c0453897056e1b95bf85fb6be0a4c4` |
 
 The run covers 8 action-bearing representations over
 20 logical coordinates. Its sealed trace contains
 826 records; the trace-derived graph contains
-866 nodes and 2147 edges. Terminal
+866 nodes and 2481 edges. Terminal
 transport custody contains no unresolved message.
 
 ## Independent verification
@@ -47,8 +47,8 @@ PYTHONPATH=projects/h2epr/src python -B -m h2epr.cli materialize \
   --data-root data/h2epr \
   --package projects/h2epr/events/angola_yellow_fever_outbreak/package \
   --backend rule --seed 0 --identity-variant canonical \
-  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/current/reproduction \
-  --output .local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/current/reproduction
+  --custody-locator .local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-behavior/reproduction \
+  --output .local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-behavior/reproduction
 ```
 
 The accompanying [simulation reading](../../../reports/angola_yellow_fever_outbreak/rule/simulation-reading.md) describes the

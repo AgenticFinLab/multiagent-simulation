@@ -50,6 +50,9 @@ terminal states, environment effects, and reducer authority.
 
 List configurable dimensions and their domains. Selected values live in a
 Scenario Configuration. Define semantic identity and successor rules.
+Separate the execution horizon and integrity conditions from desired domain
+outcomes. Identify which requests or processes may remain open at the horizon
+and how transport still reaches terminal accounting.
 
 ## 10. Worked cases, falsification, and limitations
 

@@ -30,6 +30,32 @@ network/model access. Require typed default no-op, decision-row coverage,
 permitted payloads, stable semantic actor prefixes, deterministic ordering,
 opaque-ID invariance, and two byte-identical same-input runs.
 
+Windowed rows have one accepted completion per run. Before acceptance, an
+unchanged rejected attempt waits; changed visible state, received messages or
+outgoing pending transport can reopen it. The fingerprint excludes the clock,
+global state version and the denial itself. Priorities order competing rows
+within their inclusive windows. Keep time bounds in configuration and explain
+their semantic basis in the participant and Scenario products.
+
+Use `message_received` for a delivery at the current tick and `message_known`
+for received history, with `max_age_ticks` when freshness matters. A remembered
+message does not imply that the world still satisfies the action preconditions.
+
+Consider a synthetic issuer and responder with one-tick transport:
+
+| Decision-time evidence | Rule response | Environment/result boundary |
+|---|---|---|
+| No received notice | wait | public status alone cannot impersonate private receipt |
+| Notice arrives after the earliest eligible tick | decide within the remaining window | actual receipt, not the original calendar row, activates choice |
+| Notice arrived earlier and remains applicable | use remembered information | current state still determines admission |
+| Prior request was rejected; nothing material changed | wait | a new tick is not evidence of feasibility |
+| Relevant information changes after rejection | reconsider within the window | another rejection remains a legitimate result |
+| Request was accepted | do not resubmit that row | another decision situation requires its own declared row |
+
+Exercise these with a synthetic fixture before adapting an event. Changing a
+deadline or route latency in a contract test is not a second backend or a
+scientific treatment by itself.
+
 ### LLM
 
 Pin renderer, prompt contract, response schema, parser, provider/model/version,

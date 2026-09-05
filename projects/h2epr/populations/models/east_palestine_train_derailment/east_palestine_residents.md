@@ -34,17 +34,29 @@ Residents receive routed evacuation, return, and settlement notices and may emit
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Read evacuation and response status |
-| delivered messages | MASim transport before decisions | Empty list when none are due | React only to routed notices |
-| pending lifecycles | MASim transport at every coordinate | Empty list when none exist | Avoid treating pending delivery as receipt |
-
-Persistent world fields are environment-owned. Backend reasoning and unobserved individual variation are transient and are not written into authoritative state.
+At coordinate open, the runtime supplies sealed public state, newly delivered
+messages, this actor's outgoing pending lifecycles, and structured memory of
+received messages and its own prior dispositions. The first memory is empty.
+A previous receipt remains available with its original receipt tick; absence
+is not inferred receipt. Pending private traffic is invisible to its recipient.
+Same-tick results become known at the next coordinate. No historical stage
+label, later Draft fact, opaque generated identifier, or other actor's private
+result is a decision input.
 
 ## 6. Choice model and heterogeneity
 
-The admissible intents are `acknowledge_evacuation`, `report_health_concerns`, `report_persistent_impacts` plus `no_op`. Heterogeneity may concern evacuation compliance, trust, exposure, symptoms, displacement, and claim participation, but the current Rule baseline selects no distributional parameters. Missing notices permit `no_op`; a delivered notice does not prove agreement. Correlated or subgroup behavior requires an explicitly configured successor.
+The population can acknowledge a received evacuation order, report health
+concerns after return advice, report persistent concerns in the later review
+interval, or wait. These report choices are separate from compliance, actual
+exposure, diagnosis, displacement measurement, and compensation receipt.
+
+The selected Rule rows use retained notices and the population's earlier
+reported state. They complete once accepted and may wait inside their own
+windows. The return-advice dependency is a modeling choice; it is not evidence
+that residents could report symptoms only after official advice. No microdata
+support a distribution over compliance, trust, exposure, or claim participation,
+so this remains one aggregate reporting interface. A subgroup choice would need
+new semantic support rather than hidden per-person backend behavior.
 
 ## 7. Intent and environment-result boundary
 
@@ -52,16 +64,22 @@ The population emits typed reports or acknowledgements. The environment checks t
 
 ## 8. Configuration and uncertainty
 
-Logical timing, aggregation level, communication latency, and the deterministic Rule row are selected by configuration. Meaningful sensitivity axes include subgroup splitting, delayed acknowledgement, and absent return advice. No exact preference, risk, or compliance parameter belongs to this semantic identity.
+Shared configuration sets aggregate scope, logical opportunities, and routing;
+Rule configuration selects message/state guards, priorities, and bounded waiting.
+These choices can test delayed or absent notices without fabricating individual
+preferences. A rejected report is preserved in next-coordinate own-action memory;
+an accepted report is not repeated automatically. New subgroup weights or
+independent resident trajectories require source support and a semantic successor.
 
 ## 9. Worked cases and falsification
 
-- A delivered evacuation order permits acknowledgement; an undelivered order does not.
-- A return advisory may be followed by a concern report without asserting that return was safe or unsafe.
-- Persistent concern can be reported after earlier concern state; it cannot overwrite legal or cleanup fields.
-- Splitting the population into materially different subgroups should change only a successor configuration or semantic parent, never hidden backend state.
+- A delayed evacuation order can still be acknowledged inside the response window; a missing order stays missing.
+- Return advice received previously remains known when a later concern report is considered.
+- Missing return advice leaves initial concern reporting inactive under this policy; the resulting open record is reportable, not a failed checksum.
+- Persistent concerns require an earlier report and a later availability boundary, not a new medical finding.
+- Individual symptom trajectories, distributional compliance, and verified causal attribution cannot be inferred from the aggregate record.
 
-The model is falsified as a representation contract if a resident unit needs distinct authority or information that aggregation makes causally decisive.
+The representation needs a successor if materially different resident groups require distinct information, authority, or response states.
 
 ## 10. Limitations and source anchors
 

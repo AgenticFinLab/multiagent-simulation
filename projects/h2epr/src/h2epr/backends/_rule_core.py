@@ -11,6 +11,7 @@ from typing import Any, Mapping
 import jsonschema
 
 from h2epr.benchmark.package import EventPackage
+from h2epr.canonical import canonical_sha256
 from h2epr.masim_kernel import ActionIntent, MessageIntent
 from h2epr.runtime._environment_core import condition_matches
 
@@ -54,12 +55,16 @@ class _DeclarativeRuleBackendBase:
         settings = package.backend_configuration["settings"]
         self.policy_id = settings["policy_id"]
         self.default_action = settings["default_action"]
-        self.rules_by_actor_coordinate: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        self.rules_by_actor: dict[str, list[dict[str, Any]]] = {}
         for row in settings["decision_rules"]:
-            key = row["actor_id"], row["coordinate_id"]
-            self.rules_by_actor_coordinate.setdefault(key, []).append(copy.deepcopy(row))
-        for rows in self.rules_by_actor_coordinate.values():
+            self.rules_by_actor.setdefault(row["actor_id"], []).append(copy.deepcopy(row))
+        for rows in self.rules_by_actor.values():
             rows.sort(key=lambda row: (row["priority"], row["rule_id"]))
+        self.tick_by_coordinate = {
+            row["coordinate_id"]: row["logical_tick"]
+            for row in package.scenario["timeline"]
+        }
+        self._attempts: dict[str, tuple[int, str]] = {}
         self.route_by_pair = {
             (row["source_id"], row["target_id"]): copy.deepcopy(row)
             for row in package.scenario["communication_routes"]
@@ -78,33 +83,79 @@ class _DeclarativeRuleBackendBase:
         contract = observation["contract"]
         if guard["kind"] == "state":
             try:
-                value = contract["public_state"]["entities"][guard["entity_id"]][
-                    guard["field_name"]
-                ]
+                fields = {
+                    **contract["public_state"]["entities"].get(guard["entity_id"], {}),
+                    **contract["private_state"]["entities"].get(guard["entity_id"], {}),
+                }
+                value = fields[guard["field_name"]]
             except KeyError as exc:
                 raise _RuleBackendCoreError(
                     f"rule_guard_state_missing:{guard['entity_id']}:{guard['field_name']}"
                 ) from exc
             return condition_matches(value, guard["operator"], guard["value"])
-        if guard["kind"] == "message_received":
+        if guard["kind"] in {"message_received", "message_known"}:
+            messages = (
+                contract["delivered_messages"]
+                if guard["kind"] == "message_received"
+                else contract["memory"]["received_messages"]
+            )
             return any(
                 message["message_kind"] == guard["message_kind"]
                 and (
                     "sender_id" not in guard
                     or message["sender_id"] == guard["sender_id"]
                 )
-                for message in contract["delivered_messages"]
+                and ("max_age_ticks" not in guard or
+                     contract["logical_tick"] - message["first_consumable_tick"]
+                     <= guard["max_age_ticks"])
+                for message in messages
             )
         raise _RuleBackendCoreError(f"rule_guard_kind_unknown:{guard['kind']}")
+
+    @staticmethod
+    def _information_identity(contract: Mapping[str, Any]) -> str:
+        """Only visible information can reopen a denied attempt.
+
+        A tick, global state-version bump, generated ID, or the denial itself
+        is not new information about feasibility. Own results are inspected
+        separately to prevent repeat submission after acceptance.
+        """
+        return canonical_sha256({
+            "public": contract["public_state"]["entities"],
+            "private": contract["private_state"]["entities"],
+            "received_messages": contract["memory"]["received_messages"],
+            "pending_lifecycles": contract["pending_lifecycles"],
+        })
+
+    def _eligible(self, row: Mapping[str, Any], observation: Mapping[str, Any]) -> bool:
+        contract = observation["contract"]
+        if "coordinate_id" in row:
+            return row["coordinate_id"] == observation["runtime"]["coordinate"]["coordinate_id"]
+        activation = row["activation"]
+        start = self.tick_by_coordinate[activation["start_coordinate_id"]]
+        end = self.tick_by_coordinate[activation["end_coordinate_id"]]
+        if not start <= contract["logical_tick"] <= end:
+            return False
+        attempt = self._attempts.get(row["rule_id"])
+        if attempt is None:
+            return True
+        tick, information = attempt
+        result = next((item for item in contract["memory"]["own_actions"]
+                       if item["logical_tick"] == tick), None)
+        if result is None:
+            raise _RuleBackendCoreError("rule_prior_action_result_missing")
+        if result["status"] == "accepted":
+            return False
+        return information != self._information_identity(contract)
 
     def _choose_rule(
         self, actor_id: str, observation: Mapping[str, Any]
     ) -> dict[str, Any] | None:
-        coordinate_id = observation["runtime"]["coordinate"]["coordinate_id"]
         matches = [
             row
-            for row in self.rules_by_actor_coordinate.get((actor_id, coordinate_id), [])
-            if all(self._guard_matches(guard, observation) for guard in row["guards"])
+            for row in self.rules_by_actor.get(actor_id, [])
+            if self._eligible(row, observation)
+            and all(self._guard_matches(guard, observation) for guard in row["guards"])
         ]
         return copy.deepcopy(matches[0]) if matches else None
 
@@ -124,7 +175,7 @@ class _DeclarativeRuleBackendBase:
                 "reason_code": "no_declared_rule_matched",
             }
             message_specs: list[dict[str, Any]] = []
-            reason = "No declared Rule row matched this actor and coordinate."
+            reason = "No applicable, uncompleted Rule row matched the available information."
             rule_id = "default.no_op"
             guard_count = 0
         else:
@@ -213,6 +264,8 @@ class _DeclarativeRuleBackendBase:
         }
         _validate(projection, "participant-decision.schema.json", f"decision:{actor_id}")
         self._decision_projections[(logical_tick, actor_id)] = projection
+        if rule is not None and "activation" in rule:
+            self._attempts[rule_id] = (logical_tick, self._information_identity(contract))
         return action, tuple(messages)
 
     async def decide(

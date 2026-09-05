@@ -6,7 +6,14 @@ This Scenario turns the fully exposed `H2EPR-0551` Draft into a 20-coordinate, d
 
 ## 2. Event boundary and process coverage
 
-The opening state precedes the represented detection in Luanda. Endogenous transitions cover dual laboratory reports, confirmation recording, case-surge reporting, local vaccination, cross-border risk, two emergency assessments, scaled response, progress updates, Uganda's related outbreak-end declaration, and continuing surveillance. Individual infection, clinical treatment, mosquito dynamics, vaccine stock conservation, dose administration, mortality, effectiveness, and any later surveillance outcome lie outside the world model.
+The opening contains institutional detection and response records, not a
+susceptible/infected population simulation. Choices cover dual laboratory
+statements, confirmation recording, case-surge reports, local campaigns,
+cross-border risk documentation, two committee reviews, response records,
+progress statements, Uganda's declaration, and continuing surveillance.
+Individual infection, diagnosis, vector dynamics, vaccine stock, dose
+administration, mortality, intervention effectiveness, and later surveillance
+outcomes are outside the world model.
 
 ## 3. Dataset basis, exposure, and time boundary
 
@@ -22,11 +29,17 @@ Seven named organizational or committee Agents own bounded public choices. One P
 
 ## 6. World, institutions, relationships, and resources
 
-Twenty-six public fields distinguish detection, two laboratory reports, confirmation, surge reporting, two campaign phases, risk, meetings, briefings, assessments, national response and progress, Uganda's declaration, and four surveillance states. These are process labels. They do not measure infections, doses, stock, immunity, transmission, or successful containment. Distinct concurrent writes conflict; identical set writes may coexist under semantic ordering.
+Twenty-six public record fields distinguish detection, two laboratory reports, confirmation, surge reporting, two campaign phases, risk, meetings, briefings, assessments, national response records and progress, Uganda's declaration, and four surveillance states. These are process labels. They do not measure infections, doses, stock, immunity, transmission, or successful containment. Distinct concurrent writes conflict; identical set writes may coexist under semantic ordering.
 
 ## 7. Observation and communication routing
 
-Every actor sees the same sealed public prestate plus messages delivered to it and its pending lifecycle references. Sample referrals, laboratory confirmations, campaign notices, briefings, assessments, guidance, progress updates, declarations, and surveillance updates use explicit directed routes. Missing delivery yields an empty observation; full-Draft exposure never makes later information visible early.
+Actors receive sealed public prestate, their delivered messages, outgoing
+pending lifecycles, and trace-derived received/own-action memory. The recipient
+cannot see a private pending message. Retained reports preserve receipt time;
+the actor's current result becomes known at the next coordinate. All 17 routes
+select one-tick latency. WHO can combine two laboratory or country reports
+across ticks, and the Population can retain c13 guidance until c14. This removes
+arrival-time alignment without changing the exposed earliest decision intervals.
 
 ## 8. Intent, adjudication, lifecycle, and result
 
@@ -34,15 +47,29 @@ Twenty-six non-default intents and `no_op` have exact actors, targets, parameter
 
 ## 9. Configuration, variants, termination, and identity
 
-Shared configuration selects coordinates, opening values, routes, observation timing, and termination. Rule configuration selects decisions only. Semantic identity changes with actorization, information, authority, field meaning, or mechanism; selected timing and rows change configuration identity. Termination requires all 26 configured process states and zero unresolved transport, while surveillance remains deliberately ongoing.
+Shared configuration selects the 20 opportunities, opening records, routes,
+and finite horizon. Rule configuration selects bounded waiting windows and
+priorities; accepted rows do not repeat, and rejected rows reconsider only after
+information changes. All rows end by c19, leaving c20 for delivery accounting.
+The 26 outcome expectations are descriptive, not required endpoint equalities.
+Actual trace, seals, replay, graph coverage, and zero unresolved transport remain
+mandatory even when a review or campaign response stays open. Any changed
+authority, information, or state meaning creates a new package identity and
+requires fresh downstream evidence at the stable current paths.
 
 ## 10. Worked cases, falsification, and limitations
 
-- Without a sample-referral message, neither laboratory Rule row fires.
-- WHO records initial confirmation only after both independent laboratory reports.
-- Country briefings and committee assessment remain distinct lifecycles.
-- Angola and DRC update separate response fields concurrently without conflict.
-- A campaign-participation intent does not establish dose receipt or coverage.
-- The terminal barrier closes transport while surveillance fields remain ongoing.
+- A missing referral prevents a laboratory report; differently timed lab reports remain combinable in WHO memory.
+- Missing country briefings can leave an assessment pending. The finite run may still produce a valid replay and graph.
+- A committee assessment, WHO guidance, country response record, and Population participation are four distinct products.
+- Uganda's declaration is independent of the WHO assessment; `not_declared` is not an assertion of early active infection.
+- Public response records do not prove vaccination, absence of transmission, or successful containment.
+- The terminal barrier accounts for transport while surveillance remains an open process.
 
-The Scenario is falsified if a consequential source choice is hidden as world state, P_3's scope drift is treated as stable microdata, a Draft relation row overrides declared authority, future information leaks backward, or replay cannot reproduce each delta. The open-ended source boundary and absence of epidemiological calibration remain explicit.
+The committee statement content is selected from the exposed Draft; this
+baseline does not implement a risk classifier choosing among all possible
+assessments. Paired-message requirements and ordered windows are authored
+dependencies, not recovered internal institutional protocols. P_3 scope drift,
+P_7 travel aggregation, contradictory Draft relations, and the open-ended source
+boundary remain explicit losses. Unauthorized authority, early private
+information, lost received memory, or unreplayable effects falsify the contract.

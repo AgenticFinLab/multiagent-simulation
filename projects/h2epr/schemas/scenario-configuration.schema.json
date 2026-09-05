@@ -5,17 +5,7 @@
   "description": "Selects typed shared-world or backend decision values and records exact value provenance without redefining semantic parents.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schema_version",
-    "configuration_id",
-    "configuration_version",
-    "event_id",
-    "configuration_kind",
-    "semantic_parent_ids",
-    "settings",
-    "value_provenance",
-    "configuration_sha256"
-  ],
+  "required": ["schema_version", "configuration_id", "configuration_version", "event_id", "configuration_kind", "semantic_parent_ids", "settings", "value_provenance", "configuration_sha256"],
   "properties": {
     "schema_version": {"const": "h2epr.scenario-configuration.v3"},
     "configuration_id": {"type": "string", "minLength": 1},
@@ -33,7 +23,11 @@
   },
   "allOf": [
     {
-      "if": {"properties": {"configuration_kind": {"const": "shared_comparison"}}},
+      "if": {
+        "properties": {
+          "configuration_kind": {"const": "shared_comparison"}
+        }
+      },
       "then": {
         "properties": {
           "settings": {"$ref": "#/$defs/sharedSettings"}
@@ -41,7 +35,11 @@
       }
     },
     {
-      "if": {"properties": {"configuration_kind": {"const": "backend_rule"}}},
+      "if": {
+        "properties": {
+          "configuration_kind": {"const": "backend_rule"}
+        }
+      },
       "then": {
         "properties": {
           "settings": {"$ref": "#/$defs/ruleSettings"}
@@ -94,27 +92,44 @@
     "sharedSettings": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "purpose",
-        "exposure_mode",
-        "active_actor_ids",
-        "timeline",
-        "initial_state",
-        "communication_routes",
-        "observation_contract",
-        "termination",
-        "assumptions"
-      ],
+      "required": ["purpose", "exposure_mode", "active_actor_ids", "timeline", "initial_state", "communication_routes", "observation_contract", "termination", "assumptions"],
       "properties": {
         "purpose": {"type": "string", "minLength": 1},
         "exposure_mode": {"enum": ["prefix_clean", "full_draft_exposed"]},
         "active_actor_ids": {"$ref": "#/$defs/ids"},
-        "timeline": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/coordinate"}},
-        "initial_state": {"type": "object", "required": ["state_version", "entities"], "properties": {"state_version": {"const": 0}, "entities": {"type": "object", "minProperties": 1}}, "additionalProperties": false},
-        "communication_routes": {"type": "array", "items": {"$ref": "#/$defs/route"}},
+        "timeline": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/coordinate"}
+        },
+        "initial_state": {
+          "type": "object",
+          "required": ["state_version", "entities"],
+          "properties": {
+            "state_version": {"const": 0},
+            "entities": {"type": "object", "minProperties": 1}
+          },
+          "additionalProperties": false
+        },
+        "communication_routes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/route"}
+        },
         "observation_contract": {"type": "object", "minProperties": 1},
-        "termination": {"type": "object", "required": ["require_all_ticks", "require_no_unresolved_messages"], "properties": {"require_all_ticks": {"const": true}, "require_no_unresolved_messages": {"const": true}}, "additionalProperties": false},
-        "assumptions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+        "termination": {
+          "type": "object",
+          "required": ["require_all_ticks", "require_no_unresolved_messages"],
+          "properties": {
+            "require_all_ticks": {"const": true},
+            "require_no_unresolved_messages": {"const": true}
+          },
+          "additionalProperties": false
+        },
+        "assumptions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
       }
     },
     "guard": {
@@ -136,9 +151,10 @@
           "additionalProperties": false,
           "required": ["kind", "message_kind"],
           "properties": {
-            "kind": {"const": "message_received"},
+            "kind": {"enum": ["message_received", "message_known"]},
             "message_kind": {"type": "string", "minLength": 1},
-            "sender_id": {"type": "string", "minLength": 1}
+            "sender_id": {"type": "string", "minLength": 1},
+            "max_age_ticks": {"type": "integer", "minimum": 0}
           }
         }
       ]
@@ -156,17 +172,51 @@
     "rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["rule_id", "actor_id", "coordinate_id", "priority", "guards", "action", "messages", "reason"],
+      "required": ["rule_id", "actor_id", "priority", "guards", "action", "messages", "reason"],
       "properties": {
         "rule_id": {"type": "string", "minLength": 1},
         "actor_id": {"type": "string", "minLength": 1},
         "coordinate_id": {"type": "string", "minLength": 1},
         "priority": {"type": "integer", "minimum": 0},
-        "guards": {"type": "array", "items": {"$ref": "#/$defs/guard"}},
-        "action": {"type": "object", "additionalProperties": false, "required": ["action_type", "parameters"], "properties": {"action_type": {"type": "string", "minLength": 1}, "parameters": {"type": "object"}}},
-        "messages": {"type": "array", "items": {"$ref": "#/$defs/message"}},
-        "reason": {"type": "string", "minLength": 1}
-      }
+        "guards": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/guard"}
+        },
+        "action": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["action_type", "parameters"],
+          "properties": {
+            "action_type": {"type": "string", "minLength": 1},
+            "parameters": {"type": "object"}
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/message"}
+        },
+        "reason": {"type": "string", "minLength": 1},
+        "activation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start_coordinate_id", "end_coordinate_id", "retry_policy"],
+          "properties": {
+            "start_coordinate_id": {"type": "string", "minLength": 1},
+            "end_coordinate_id": {"type": "string", "minLength": 1},
+            "retry_policy": {"const": "on_new_information"}
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["coordinate_id"],
+          "not": {"required": ["activation"]}
+        },
+        {
+          "required": ["activation"],
+          "not": {"required": ["coordinate_id"]}
+        }
+      ]
     },
     "ruleSettings": {
       "type": "object",
@@ -178,7 +228,11 @@
         "model_access": {"const": "denied"},
         "network_access": {"const": "denied"},
         "default_action": {"const": "no_op"},
-        "decision_rules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/rule"}}
+        "decision_rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/rule"}
+        }
       }
     }
   }

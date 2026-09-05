@@ -38,10 +38,12 @@ requirements remain in the linked standards, templates, Skills, and tests.
     least two current rows, publish cross-event conformance over the complete
     registry; otherwise record it as not applicable.
 
-For multiple events, backends, or seeds, insert the
+For a planned comparison across events, backends, or seeds, insert the
 [experiment-planning Skill](skills/experiment-planning/SKILL.md) before
 materialization. Admission fixes the intended denominator and failure policy;
-it does not launch runs or replace per-run verification.
+it does not launch runs or replace per-run verification. Construction checks,
+synthetic behavioral probes, A/B repeatability, and current-registry contract
+conformance are verification work, not a comparative study by themselves.
 
 The synthetic contract tests demonstrate the required structure without
 making a historical event normative. Derive every event-specific term from

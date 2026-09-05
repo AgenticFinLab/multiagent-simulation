@@ -29,6 +29,14 @@ For a backend-specific configuration, record only decision-production settings.
 Rule, LLM, and RuleLLM may differ here without renaming the shared package.
 Backend configurations use the same exhaustive provenance and coverage rule.
 
+A Rule row selects either an exact `coordinate_id` or an `activation` window
+with `start_coordinate_id`, `end_coordinate_id`, and
+`retry_policy: on_new_information`. Both endpoints belong to the shared
+timeline. A window is inclusive; acceptance completes that row for the run.
+Priorities must be distinct for overlapping rows of the same actor. Record
+why waiting, retrying, or expiry is appropriate and leave enough declared
+transport time after the last possible outbound message.
+
 ## Validation and promotion
 
 Require schema validity, exact parent hashes, actor/interface closure, no hidden

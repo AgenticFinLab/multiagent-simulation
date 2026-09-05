@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "h2epr.failed-attempt.v1",
+  "title": "H2EPR failed attempt receipt",
+  "description": "Preserves local partial execution evidence and a typed failure. It is never a complete run release or a resumable checkpoint.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "run_id", "run_manifest_sha256", "exception_type", "failure_code", "sealed_logical_ticks", "trace_record_count", "trace_errors", "unresolved_message_intent_ids", "unresolved_recipient_ids", "complete_run_release_eligible", "output_files", "receipt_sha256"],
+  "properties": {
+    "schema_version": {"const": "h2epr.failed-attempt.v1"},
+    "status": {"const": "failed"},
+    "run_id": {"type": "string", "minLength": 1},
+    "run_manifest_sha256": {"$ref": "#/$defs/sha"},
+    "exception_type": {"type": "string", "minLength": 1},
+    "failure_code": {"type": "string"},
+    "sealed_logical_ticks": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "minimum": 1}},
+    "trace_record_count": {"type": "integer", "minimum": 0},
+    "trace_errors": {"$ref": "#/$defs/strings"},
+    "unresolved_message_intent_ids": {"$ref": "#/$defs/strings"},
+    "unresolved_recipient_ids": {"$ref": "#/$defs/strings"},
+    "complete_run_release_eligible": {"const": false},
+    "output_files": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "object", "additionalProperties": false, "required": ["relative_path", "sha256", "size_bytes"], "properties": {"relative_path": {"enum": ["run_manifest.json", "simulation_trace.jsonl", "partial_state.json", "coordinate_results.json", "tick_seals.json"]}, "sha256": {"$ref": "#/$defs/sha"}, "size_bytes": {"type": "integer", "minimum": 0}}}},
+    "receipt_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "strings": {"type": "array", "items": {"type": "string"}}
+  }
+}

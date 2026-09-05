@@ -146,6 +146,8 @@ def compile_generated_epg(
     action_by_intent: dict[str, str] = {}
     message_by_intent: dict[str, str] = {}
     disposition_by_id: dict[str, str] = {}
+    own_result_by_actor_tick: dict[tuple[str, int], str] = {}
+    deliveries_by_actor_tick: dict[tuple[str, int], list[str]] = {}
     delta_nodes_by_tick: dict[int, list[str]] = {}
     tick_commit_by_tick: dict[int, str] = {}
     tick_seal_nodes: list[str] = []
@@ -169,12 +171,15 @@ def compile_generated_epg(
             add_edge(_edge("emitted_by", node_id, participant_nodes[payload["actor_id"]], [record["trace_id"]]))
         elif record_type == "action_disposition":
             disposition_by_id[payload["disposition_id"]] = node_id
+            own_result_by_actor_tick[(payload["actor_id"], tick)] = node_id
         elif record_type == "message_intent":
             message_by_intent[payload["message_intent_id"]] = node_id
             add_edge(_edge("sent_by", node_id, participant_nodes[payload["sender_id"]], [record["trace_id"]]))
             add_edge(_edge("addressed_to", node_id, participant_nodes[payload["recipient_id"]], [record["trace_id"]]))
         elif record_type == "message_disposition":
             disposition_by_id[payload["disposition_id"]] = node_id
+            if payload["status"] == "delivered":
+                deliveries_by_actor_tick.setdefault((payload["recipient_id"], tick), []).append(node_id)
         elif record_type == "state_delta":
             delta_nodes_by_tick.setdefault(tick, []).append(node_id)
             entity_node = entity_nodes.get(payload["entity_id"])
@@ -204,7 +209,22 @@ def compile_generated_epg(
         trace_id = record["trace_id"]
         node_id = trace_node_by_id[trace_id]
         tick = record["logical_tick"]
-        if record_type == "participant_decision":
+        if record_type == "observation":
+            actor_id = payload["contract"]["actor_id"]
+            # Cumulative memory has a linear provenance chain. It does not
+            # assert that every available item caused the selected decision.
+            if tick > 1:
+                prior = observation_by_actor_tick.get((actor_id, tick - 1))
+                result = own_result_by_actor_tick.get((actor_id, tick - 1))
+                if prior is None or result is None:
+                    raise GeneratedEPGError("observation_memory_predecessor_missing")
+                for relation, parent in (("retains_memory_from", prior), ("learns_result_from", result)):
+                    add_edge(_edge(relation, node_id, parent,
+                                   [trace_id, parent.removeprefix("record.")]))
+            for delivery in deliveries_by_actor_tick.get((actor_id, tick), []):
+                add_edge(_edge("received_from", node_id, delivery,
+                               [trace_id, delivery.removeprefix("record.")]))
+        elif record_type == "participant_decision":
             observation = observation_by_actor_tick.get((payload["actor_id"], tick))
             if observation is None:
                 raise GeneratedEPGError("decision_observation_missing")

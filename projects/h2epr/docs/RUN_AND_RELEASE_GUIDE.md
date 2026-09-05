@@ -24,6 +24,13 @@ At each logical coordinate the runner:
 8. emits annotations and transport transitions; and
 9. closes the tick seal.
 
+The next observation includes runtime-derived memory of prior own action
+dispositions and messages actually received. Pending transport is visible to
+its sender; a recipient does not learn of a private queued message before
+delivery. Draft stage, episode and action labels remain trace navigation
+metadata, outside the backend observation. A logical coordinate identifies
+time availability without certifying that its associated Draft action occurred.
+
 The environment owns intent admission, parameter and authority checks,
 preconditions, conflict handling, effects, and disposition. The backend owns
 decision production. MASim owns the event-process values, append-only
@@ -96,3 +103,16 @@ Preserve failed custody. Route package or semantic failures upstream,
 decision-contract failures to the backend, effect/authority failures to the
 scenario, trace/replay failures to runtime, graph failures to the graph
 compiler, and evidence mismatch to publication. Do not patch generated output.
+
+After package admission, materialization writes the manifest and checkpoints
+each sealed coordinate. A caught setup, execution, finalization, or output
+failure preserves the available trace, tick seals, coordinate results,
+`partial_state.json`, and `failure-receipt.json`. The receipt records the
+failure, sealed ticks and unresolved transport; it is ineligible for a complete
+release. A process killed without cleanup may leave only the last checkpoint.
+Disk failure can prevent even that checkpoint from being written.
+
+These checkpoints support diagnosis, not exact resume. Restart in fresh
+custody after correcting the owning cause. Unmet `outcome_expectations` are
+instead recorded in an otherwise valid run receipt and independently
+recomputed from replayed terminal state; they do not create a failed attempt.

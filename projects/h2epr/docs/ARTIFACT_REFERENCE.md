@@ -32,7 +32,8 @@ listing sibling files.
 `scenario-interface.json` states the portable actor/state contract and exact
 implementation identifiers. `scenario-mechanism.json` defines typed state
 fields, intent handlers, parameter domains, preconditions, deterministic
-effects, message kinds, annotations, conflict policy, and terminal invariants.
+effects, message kinds, annotations, conflict policy, safety invariants, and
+descriptive outcome expectations.
 The reader-facing Scenario Definition explains why those fields exist and
 where the dataset stops supporting detail.
 
@@ -45,7 +46,8 @@ Shared configuration selects:
 - terminal transport policy and assumptions.
 
 Backend configuration selects decision-production controls. Rule configuration
-contains deterministic coordinate/actor rows, guards, a typed action, optional
+contains deterministic actor rows with activation windows or justified fixed
+coordinates, guards, a typed action, optional
 messages, and `no_op` as the default. Every top-level setting is covered by one
 provenance pointer or one reviewed typed exemption. Admission receipts are
 rederived from parents; they are not trusted merely because they self-hash.
@@ -81,12 +83,20 @@ manifest identity and binding, but `package_sha256` must remain unchanged.
 | Generated EPG | trace-derived graph with one first-class node per trace record |
 | coordinate results | derived per-coordinate summaries |
 | run receipt | output inventory, counts, closure claims, and local custody identity |
+| outcome assessments in run receipt | each expectation's actual replayed value and match result; never an integrity-success flag |
+| failed-attempt receipt | diagnostic partial custody, sealed ticks, typed failure and unresolved transport; no complete release or exact resume claim |
 | determinism receipt | exact A/B comparison plus linked generated-ID invariance |
 
 The compact tracked release contains identities and receipts, not the full
 trace or graph. Publication reopens raw custody, validates the hash chain and
 seals, replays state, rebuilds summaries and graph coverage, and rematerializes
 deterministic Rule runs before accepting the release.
+
+The observation contract retains each actor's own action dispositions and
+actual received messages. Publication reconstructs this memory and the visible
+state projection from prior trace evidence; it does not trust producer memory
+or outcome flags. Graph links make delivery and cumulative memory provenance
+traversable without treating available information as proven causal influence.
 
 ## Report and experiment artifacts
 

@@ -53,6 +53,11 @@ List activation conditions, forbidden information, persistent participant
 state, its update events, and its owner. Transient model reasoning is not
 persistent state.
 
+Distinguish messages delivered now from previously received information and
+the actor's own prior action dispositions. State which decisions can reopen,
+what new information makes a retry meaningful, and when information becomes
+stale. A rejected intent is evidence of an attempt, not a completed outcome.
+
 ## 6. Admissible decision semantics
 
 For each decision situation, define:

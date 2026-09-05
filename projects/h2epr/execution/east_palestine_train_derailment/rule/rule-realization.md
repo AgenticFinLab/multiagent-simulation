@@ -2,7 +2,7 @@
 
 ## Identity and semantic parents
 
-Realization `h2epr.0196.rule-realization.v1` attaches the registered declarative Rule backend to configuration `h2epr.0196.rule.v1` and the seven exact semantic parents. Four implementation files are hash-pinned in `realization.json`.
+Realization `h2epr.0196.rule-realization.v2` attaches the registered declarative Rule backend to configuration `h2epr.0196.rule.v2` and the seven exact semantic parents. Four implementation files are hash-pinned in `realization.json`.
 
 ## Actor and capability coverage
 
@@ -10,7 +10,7 @@ Every current actor uses `h2epr.backends.rule.DeclarativeRuleBackend` with obser
 
 ## Decision production
 
-Rules are selected by actor, coordinate, ascending priority, and stable rule ID after all state or delivered-message guards pass. A missing match produces typed `no_op`. Model and network access are denied. Opaque generated identifiers do not participate in semantic ordering.
+Rules are considered within each actor's inclusive activation windows, using ascending priority and stable rule ID after public-state or retained-message guards pass. Accepted rows complete once. Missing information causes waiting; a rejected row may retry when visible state, known messages, or outgoing lifecycle information changes. Advancing the clock alone does not trigger a retry. A missing match produces typed `no_op`. Model and network access are denied. Opaque generated identifiers do not participate in semantic ordering.
 
 ## Failure routing
 

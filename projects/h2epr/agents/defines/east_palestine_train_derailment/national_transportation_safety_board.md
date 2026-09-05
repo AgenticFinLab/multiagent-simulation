@@ -26,21 +26,22 @@ The source participant appears at the following complete Draft anchors. These an
 
 ## 4. Event role, relationships, and authority
 
-The Agent may emit only its registered intents and messages over declared routes. It cannot mutate state, declare delivery, validate another institution's authority, or turn an announced action into an observed result. Its counterparties and public fields are fixed by the participant interface and Scenario Mechanism.
+The NTSB interface receives incident information, opens a preliminary investigation, and sends the represented investigation notice. Investigation status is a process record, distinct from a final cause finding. DOJ retains its own later filing choice.
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Check declared preconditions |
-| delivered messages | MASim transport before decisions | Empty list when none are due | Activate message-gated choices |
-| pending lifecycles | MASim transport at every coordinate | Empty list when none exist | Keep submission distinct from delivery |
-
-World state is persistent under environment ownership. Backend reasoning is transient. Future Draft facts are unavailable before their logical coordinate even though construction is full-Draft-exposed.
+At coordinate open, the runtime supplies sealed public state, newly delivered
+messages, this actor's outgoing pending lifecycles, and structured memory of
+received messages and its own prior dispositions. The first memory is empty.
+A previous receipt remains available with its original receipt tick; absence
+is not inferred receipt. Pending private traffic is invisible to its recipient.
+Same-tick results become known at the next coordinate. No historical stage
+label, later Draft fact, opaque generated identifier, or other actor's private
+result is a decision input.
 
 ## 6. Admissible decision semantics
 
-The admissible non-default intents are `open_investigation`. A declared coordinate, required message or state precondition, and eligible target must all match. Missing or adverse information leads to `no_op` or a typed rejection; it does not authorize a substitute act. The backend retains only the choice permitted by configuration and may not invent success.
+`open_investigation` is available after the initial incident opportunity and can wait for a routed alert. Once accepted, it completes this represented row. The preliminary notice is retained by DOJ when delivered; no five-tick delay is needed to make it coincide with a legal filing. The modeled NTSB-to-DOJ communication dependency is structural: Draft role anchors support the actors, not proof that this notice was legally necessary.
 
 ## 7. Intent and environment-result boundary
 
@@ -48,16 +49,23 @@ Each intent carries a typed target and may create declared message intents. The 
 
 ## 8. Configurable dimensions and uncertainty
 
-Coordinate selection, route latency, rule priority, and action activation are selected in shared or Rule configuration. Alternative timing and abstention are sensitivity choices. No fixed personality, probability, model prompt, or guaranteed outcome is part of this Definition.
+Shared configuration selects the opening world, clock opportunities, and
+communication latency. Rule configuration selects priority, information guards,
+and bounded activation windows within the semantic choice surface. These are
+uncalibrated construction choices. A window permits reconsideration; it does
+not guarantee a different decision. Accepted rows complete once; rejected rows
+may retry after visible state, received messages, or outgoing lifecycle
+information changes. The clock alone is not new information. No fixed
+personality, probability, or guaranteed endpoint belongs to this Definition.
 
 ## 9. Worked cases and contract falsification
 
-- With the required state and message, the configured intent is admissible; without either, `no_op` is valid.
-- An invalid target or payload is rejected by the environment and cannot be repaired silently.
-- A sent message remains pending until MASim routes it; the Agent cannot observe it early.
-- A backend substitution or use of a later Draft fact at an earlier coordinate violates the contract.
+- Delay the incident alert inside the investigation window: the NTSB can open later.
+- Remove that alert: the preliminary investigation can remain unstarted in a valid completed run.
+- An accepted opening does not authorize repeated notices or a final cause finding.
+- A notice delivered before the legal window must not make DOJ file before that window opens.
 
-The Definition is falsified if `national_transportation_safety_board` requires authority outside the investigative authority's choice to open and communicate a preliminary investigation state or if removing its modeled choice leaves the generated process unchanged under a meaningful perturbation.
+A target/authority violation, early private-message exposure, unexplained loss of received memory, or a physical/legal effect attributed to the participant rather than its environment falsifies this contract. A missing consequential authority requires a semantic successor, not an extra backend exception.
 
 ## 10. Limitations and source anchors
 

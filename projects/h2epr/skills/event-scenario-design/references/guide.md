@@ -33,12 +33,19 @@ to reduce the roster.
 | resource | units, conservation, allocation and conflict policy |
 | lifecycle | initial, pending, terminal states and transition owners |
 | annotation | condition, participants, one-shot behavior, no mutation authority |
-| termination | coordinate completion, transport barrier, state invariants |
+| termination | coordinate completion, terminal transport, safety/integrity constraints |
+| outcome expectation | named descriptive comparison with actual terminal state; no mutation or publication-gating authority |
 
 Every registered intent, including `no_op`, has one handler. Validate all
 concurrent intents against the same sealed prestate. Detect the full writer set
 before mutation; reject distinct writes and allow only explicitly idempotent
 same-value writes under the current conflict contract.
+
+The horizon bounds observation and interaction. It does not guarantee that a
+request, remedy or institutional process has finished. Test a legal open final
+state that still seals and replays, and a separate unresolved-transport case
+that cannot publish. Desired historical outcomes belong in descriptive
+expectations, never in integrity invariants.
 
 ## Interface-closure cases
 

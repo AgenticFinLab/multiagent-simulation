@@ -186,20 +186,17 @@ class _BenchmarkEngineBase:
             public_state=public_state,
             private_state=private_state,
             delivered_messages=delivered_messages,
-            prior_generated_state={
-                "coordinate_id": coordinate["coordinate_id"],
-                "stage_id": coordinate["stage_id"],
-                "episode_id": coordinate["episode_id"],
-            },
+            prior_generated_state=copy.deepcopy(self.participant_memory[actor_id]),
         ).to_dict()
         contract = {
-            "schema_version": "h2epr.participant-observation.v2",
+            "schema_version": "h2epr.participant-observation.v3",
             "actor_id": actor_id,
             "logical_tick": logical_tick,
             "public_state": public_state,
             "private_state": private_state,
             "delivered_messages": copy.deepcopy(list(delivered_messages)),
             "pending_lifecycles": self._pending_lifecycles(actor_id),
+            "memory": copy.deepcopy(self.participant_memory[actor_id]),
             "permitted_action_types": copy.deepcopy(
                 self.package.scenario["action_spaces"][actor_id]
             ),
@@ -207,7 +204,10 @@ class _BenchmarkEngineBase:
         return {
             "contract": contract,
             "runtime": {
-                "coordinate": copy.deepcopy(dict(coordinate)),
+                "coordinate": {
+                    "coordinate_id": coordinate["coordinate_id"],
+                    "logical_tick": logical_tick,
+                },
                 "prestate_version": state["state_version"],
                 "prestate_sha256": prestate_sha256,
                 "physical_masim_round": logical_tick,
@@ -486,7 +486,7 @@ class _BenchmarkEngineBase:
                 action_key = f"action.{row['payload']['action_type']}"
                 counts[action_key] = counts.get(action_key, 0) + 1
         receipt = {
-            "schema_version": "h2epr.run-receipt.v3",
+            "schema_version": "h2epr.run-receipt.v4",
             "run_id": self.manifest["run_id"],
             "package_sha256": self.package.package_sha256,
             "binding_sha256": self.package.binding_sha256,
@@ -499,6 +499,19 @@ class _BenchmarkEngineBase:
             "trace_coverage_passed": not graph["trace_coverage"]["unreferenced_trace_ids"],
             "counts": dict(sorted(counts.items())),
             "unresolved_transport_count": len(unresolved_ids),
+            "outcome_assessments": [
+                {
+                    "expectation_id": row["expectation_id"],
+                    "observed_value": copy.deepcopy(
+                        final_state["entities"][row["entity_id"]][row["field_name"]]
+                    ),
+                    "met": condition_matches(
+                        final_state["entities"][row["entity_id"]][row["field_name"]],
+                        row["operator"], row["value"],
+                    ),
+                }
+                for row in self.package.scenario["mechanism"].get("outcome_expectations", [])
+            ],
             "claim_boundary": copy.deepcopy(self.package.manifest["claim_boundary"]),
             "custody": {
                 "relative_locator": ".local-runtime/h2epr-simulation/runs/unpublished",

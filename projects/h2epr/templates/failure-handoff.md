@@ -21,6 +21,11 @@
 
 Preserve failed custody. A semantic, identity, integrity, or protected-exposure
 failure is not made retryable by changing a timeout or seed.
+When a materialization has `failure-receipt.json`, record its exact hash, sealed
+ticks and unresolved transport. `partial_state.json` may include an unsealed
+coordinate and is not a resumable authoritative checkpoint. A later retry
+uses a fresh root; an open domain outcome in a valid run is not an execution
+failure.
 
 ## Boundary at stop
 

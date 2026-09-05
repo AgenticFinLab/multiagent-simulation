@@ -2,15 +2,15 @@
 
 ## Closure identity
 
-This review closes roster `h2epr.0196.roster.v1`, actor map `h2epr.0196.actor-map.v1`, seven semantic parents, participant interface `h2epr.0196.participant-interface.v1`, Scenario Interface `h2epr.0196.scenario-interface.v1`, and Mechanism `h2epr.0196.scenario-mechanism.v1` under Source Profile `h2epr.0196.source-profile.v1`.
+This review closes roster `h2epr.0196.roster.v1`, actor map `h2epr.0196.actor-map.v2`, seven semantic parents, participant interface `h2epr.0196.participant-interface.v2`, Scenario Interface `h2epr.0196.scenario-interface.v2`, and Mechanism `h2epr.0196.scenario-mechanism.v2` under Source Profile `h2epr.0196.source-profile.v1`.
 
 ## Participant and capability assembly
 
-Every active actor appears exactly once in the actor map, semantic index, participant interface, Scenario actor universe, and Rule realization. Each receives the three runtime observations, its event-specific intents, and `no_op`. No source participant is dropped or duplicated.
+Every active actor appears exactly once in the actor map, semantic index, participant interface, Scenario actor universe, and Rule realization. Each receives the four registered runtime observations, including participant memory, its event-specific intents, and `no_op`. No source participant is dropped or duplicated.
 
 ## Observation production and delivery
 
-Public state comes from the sealed coordinate prestate. Delivered and pending message views come from MASim transport. Missing delivery is an empty list, not inferred receipt. Full-Draft exposure is a construction fact; later Draft content is unavailable to earlier runtime coordinates.
+Public state comes from the sealed coordinate prestate. Delivered and pending message views come from MASim transport. Missing delivery is an empty list, not inferred receipt. Previously delivered messages and own dispositions persist as trace-derived memory; pending lifecycles expose only outgoing traffic. Full-Draft exposure is a construction fact; later Draft content is unavailable to earlier runtime coordinates.
 
 ## Intent, communication, adjudication, and result
 
@@ -18,11 +18,11 @@ Each intent resolves to one mechanism handler with matching actor and target set
 
 ## State, institutions, and resources
 
-The eleven event fields have one public owner and one reducer path. Cleanup, investigation, legal, and settlement states are process records rather than participant-owned truth. The model asserts no chemical, financial, or medical conservation quantity.
+The twelve event fields have one public owner and one reducer path. Cleanup, investigation, legal, and settlement states are process records rather than participant-owned truth. The model asserts no chemical, financial, or medical conservation quantity.
 
 ## Structural identity and representative cases
 
-Name erasure leaves actor IDs and authority intact. Swapping NTSB and DOJ roles breaks intent closure. An invalid target fails handler admission. A missing EPA route prevents package admission. Delayed settlement delivery remains pending until the final barrier. Replay must reproduce every delta and terminal value.
+Name erasure leaves actor IDs and authority intact. Swapping NTSB and DOJ roles breaks intent closure. An invalid target fails handler admission. A missing EPA route prevents package admission. Delayed settlement delivery remains pending until the final barrier. Replay must reproduce every actual delta and terminal value. Unmet descriptive expectations do not invalidate replay; unresolved transport or a broken seal does.
 
 ## Gaps and verdict
 

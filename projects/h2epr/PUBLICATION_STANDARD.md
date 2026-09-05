@@ -107,6 +107,11 @@ and claim limits. A closeout accounts for every attempt, retry, failure,
 exclusion, and unavailable analysis. Only independently verified run releases
 enter a published comparison.
 
+Construction regression and conformance checks are distinct from a comparative
+study. A valid run may contain rejected requests and unmet outcome expectations;
+those results remain in its reading. Actual incomplete attempts retain failed
+custody and cannot enter the set of complete releases.
+
 ## Commands and Git quality
 
 Reproduction commands start at the repository root and do not depend on hidden

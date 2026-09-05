@@ -20,6 +20,9 @@ attachment evidence.
    intent with at least one decision row, use a typed no-op default, keep
    semantic actor prefixes stable under opaque ID perturbation, and deny model
    and network access.
+   Use bounded activation windows for reopenable decisions. Test prior receipt
+   memory, changed-information retry, acceptance without duplicate submission,
+   and expiry; reserve an exact coordinate for a justified time-fixed choice.
 5. For LLM, close prompt projection, structured output, parser, retry,
    unavailability, timeout, malformed output, and provenance.
 6. For RuleLLM, close proposal, hard constraints, bounded repair, rejection,

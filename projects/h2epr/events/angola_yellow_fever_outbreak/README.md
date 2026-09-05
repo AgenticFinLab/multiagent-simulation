@@ -40,7 +40,7 @@ copied from inconsistent relation rows.
 
 | Backend | Status | Current evidence or failure |
 |---|---|---|
-| Rule | implemented | admitted configuration and realization; package binding `be5013c…a269`; independently verified [run release](../../releases/angola_yellow_fever_outbreak/rule/) |
+| Rule | implemented | admitted configuration and realization; current package binding; independently verified [run release](../../releases/angola_yellow_fever_outbreak/rule/) |
 | LLM | planned | no registered implementation, model provenance, parser, retry, or failure evidence; admission fails closed |
 | RuleLLM | planned | no proposal/admission implementation or repair evidence; admission fails closed |
 
@@ -49,38 +49,27 @@ entries declare availability status and cannot act as fallback backends.
 
 ## Current result
 
-The accepted canonical seed-0 Rule run is
-`run.2c5f37a8e456f99bdb1eff02`. Package SHA-256 is
-`d6456af798b2593d264b18f7b1a4f0bf360682cfe36a26965ed3d29dbfe5c2b6`;
-run-manifest SHA-256 is
-`32527f4ebacc54e2762a392d28daf5d0c0b9b7297c44ae9f79e738b392c37dcb`;
-trace SHA-256 is
-`edec83529744119588cc50c14acb83c270f93699335121ecc791a858b404b1e0`;
-final-state SHA-256 is
-`0a0b2245ca514c0ad69a212a0f0338cc836ad08065a301e1d024bd75aae700a4`;
-and the Generated EPG seal is
-`e76b4c4960a607af51ab274bb0634834562cc54ef8da4af1d05fb89ff7cd346f`.
+The current canonical seed-0 Rule run is `run.c8e90196fadcf5a18b9b9f9a`. Its
+8 actors execute 20 coordinates and produce
+826 trace records, 866 graph nodes, and
+2,481 graph edges. Exact identities, deterministic A/B evidence,
+generated-ID invariance, replay, and terminal transport are in the
+[run release](../../releases/angola_yellow_fever_outbreak/rule/).
 
-Eight actors execute 20 coordinates. The trace has 826 records; the
-trace-derived graph has 866 nodes and 2,147 edges; terminal transport has zero
-unresolved messages. Canonical A/B outputs are byte-identical, the
-generated-ID perturbation preserves semantic trace/graph and exact final
-state, and authoritative replay passes. The
-[simulation-only reading](../../reports/angola_yellow_fever_outbreak/rule/simulation-reading.md)
-traverses every record, node, and edge. Raw custody remains under ignored
-`.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/current/`.
+The current policy uses bounded activation windows, retained received messages,
+and own-action memory. Descriptive expectations are distinct from validity:
+trace, seals, actual-state replay, graph provenance, and zero unresolved
+transport remain mandatory. The
+[simulation reading](../../reports/angola_yellow_fever_outbreak/rule/simulation-reading.md)
+reviews the full output with a complete machine scan and coordinate-level
+semantic analysis. Raw custody is retained under ignored
+`.local-runtime/h2epr-simulation/runs/benchmark/angola_yellow_fever_outbreak/rule/2026-09-05-behavior/`.
 
-This event is one of two rows in `current-events.json`. The
-[two-event Rule conformance release](../../releases/cross-event/rule/) covers
-the complete registry and passes with receipt
-`0d5d612447e8541e4f5f2f387574649a9d7f2f7880e9de7f31a674445bf88364`.
-
-Validation uses `python -B -m h2epr.cli validate-package`, three fresh
-materializations, `python -B -m h2epr.cli identity-conformance`, independent
-`publish-run-release`, `python -B -m h2epr.cli validate-registry`, independent
-`publish-cross-event-release`, and the complete dependency-light unittest
-suite from the repository root with
-`PYTHONPATH=projects/h2epr/src:projects/h2epr/tests`.
+The [current-event registry](../current-events.json) and
+[cross-event Rule conformance](../../releases/cross-event/rule/) cover the
+current event set. Use the maintained CLI and complete unittest suite for
+package admission, fresh materialization, independent publication, and
+registry verification.
 
 ## Claim boundary
 
@@ -94,10 +83,6 @@ result.
 It does not support historical fit, parameter calibration, held-out evaluation
 or performance, vaccination or public-health effectiveness, medical causality,
 policy conclusions, scientific validity, or universal generality. Values such
-as `participating`, `implemented_fractional`,
+as `participating`, `fractional_response_recorded`,
 `no_recent_confirmed_cases_reported`, and `declared_ended` remain modeled
 process or report states.
-
-The next legal action is a separately authorized third unseen event,
-perturbation, or backend implementation. This release does not authorize
-LLM/RuleLLM development or scientific evaluation.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Mapping, Protocol
+from typing import Any, Mapping, Protocol
 
 from h2epr.masim_kernel import ActionIntent, MessageIntent
 
@@ -24,3 +24,6 @@ class DecisionBackend(Protocol):
 
     async def shutdown(self) -> None:
         """Release backend-local resources."""
+
+    def decision_projection(self, logical_tick: int, actor_id: str) -> dict[str, Any]:
+        """Return the typed, traceable projection of a decision already made."""

@@ -7,7 +7,7 @@ executable in the current offline environment.
 |---|---|
 | `benchmark` | Source admission, semantic compilation, package identities, planned-backend failure, tamper and path boundaries |
 | `semantic` | Agent/Population, roster, interface, scenario, configuration, manifest, and checksum closure |
-| `runtime` | Three timelines, decisions, environment effects, transport, trace, seals, replay, graph, determinism, identity invariance, and cross-event conformance |
+| `runtime` | Synthetic timelines, windowed activation, received/own-result memory, delayed and missing information, rejection/reopening, valid open outcomes, failed-attempt custody, environment effects, transport, trace, seals, replay, graph, determinism, and cross-event conformance |
 | `publication` | Independent custody derivation, compact releases, readings, and resealed-forgery rejection |
 | `experiments` | Plan identity, package/binding admission, custody uniqueness, model-control parity, scheduling, failures, analysis, and claim limits |
 | `standards` | Schema catalog, Skill inventory, current-only repository shape, local links, and publication surface |

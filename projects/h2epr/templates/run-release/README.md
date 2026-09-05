@@ -21,6 +21,9 @@ can be byte-identical. The determinism receipt hash-links the independently
 derived identity-conformance receipt. The run receipt records the ignored
 custody locator and inventory hash, exact trace coverage, and zero unresolved
 transport.
+The current run receipt also reports independently rederived outcome
+assessments. These may be false in a valid release. Failed-attempt receipts and
+partial state are diagnostic custody, not substitutes for a run release.
 
 Publish only from three already sealed custody roots:
 

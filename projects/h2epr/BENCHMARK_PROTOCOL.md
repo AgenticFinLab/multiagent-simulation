@@ -88,6 +88,13 @@ Engineering closure requires:
 These properties make the generated process auditable. They do not make it
 historically correct.
 
+An unmet outcome expectation or a domain request left open at the horizon is
+a generated result, not an integrity failure. Complete execution still requires
+all declared coordinates, exact replay, sealed graph evidence and terminal
+transport. Desired historical outcomes must not be used to filter otherwise
+valid releases. Failed-attempt custody preserves incomplete evidence without
+claiming engineering closure.
+
 ## Claim language
 
 An accepted release may support statements about package validation, Rule

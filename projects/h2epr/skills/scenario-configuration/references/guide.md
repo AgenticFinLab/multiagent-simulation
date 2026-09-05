@@ -17,6 +17,13 @@ belong to the run manifest or experiment plan.
 A value appearing in the wrong layer is a contract failure even when it is
 schema-valid.
 
+For a Rule activation window, select existing start/end coordinates and the
+declared changed-information retry policy. Reject reversed windows and equal
+priorities on overlapping rows of one actor. Check that a row's final possible
+message still has time for terminal delivery. Observation guards may read only
+public fields or the actor's own declared private fields. Document remembered
+message freshness; do not replace a missing private delivery with global state.
+
 ## Provenance classes
 
 Each selected value has exactly one JSON Pointer and one basis:

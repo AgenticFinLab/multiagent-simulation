@@ -126,6 +126,22 @@ pre-state. Distinct concurrent writers to the same field are rejected as a
 batch; identical writes are idempotent and ordered by semantic content.
 Opaque generated IDs and input ordering do not decide outcomes.
 
+Participant observations contain public state, the actor's own declared private
+state, actual deliveries, outgoing pending transport, and runtime-derived
+memory. Memory retains received messages and prior own action dispositions;
+it has no world-mutation authority. Draft stage/episode labels remain trace
+navigation metadata and are not exposed as decision-time facts.
+
+Rule can evaluate a decision throughout a declared window. A rejected attempt
+can reopen after relevant observable information changes; acceptance completes
+that row without repeated submission. Exact-coordinate rows remain available
+for justified time-fixed choices. The environment still decides every result.
+
+The bounded horizon closes execution, not every domain process. Safety
+invariants remain mandatory; named outcome expectations are descriptive and
+can be unmet in a valid release. Runtime failures preserve partial custody and
+a failed-attempt receipt without claiming a complete run or exact resume.
+
 ### MASim boundary
 
 H2EPR uses the tracked MASim event-process implementation for action and
@@ -150,6 +166,12 @@ navigation nodes for the event, coordinates, participants, and state entities
 do not replace trace provenance. Validation requires exact trace coverage,
 valid edge endpoints, matching source-trace identity, and a deterministic
 graph seal.
+
+Observation nodes link to actual deliveries, prior own dispositions, and the
+preceding observation's accumulated memory. These links show information
+availability; they do not establish that each remembered item causally
+determined the decision. Stage-entry nodes record configured time boundaries,
+not independently emergent historical stages.
 
 ### Release and report
 

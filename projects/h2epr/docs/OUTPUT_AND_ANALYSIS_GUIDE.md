@@ -68,6 +68,14 @@ normalization, missing-value behavior, and interpretation limits are accepted.
 High degree or centrality is a property of the generated representation, not
 automatically historical importance or causal power.
 
+`received_from` links an observation to a delivered message;
+`learns_result_from` links it to the actor's preceding disposition;
+`retains_memory_from` links successive observations of the same actor. Read
+these as provenance of available information. An item present in memory may
+have had no effect on the selected Rule row. Configured stage-entry and
+coordinate labels also remain navigation metadata, not evidence that the
+corresponding Draft action occurred.
+
 ## Draft-facing description
 
 When the full Draft was exposed during construction, comparison can identify

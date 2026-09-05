@@ -5,35 +5,51 @@
   "description": "Defines authoritative state fields, typed intent handlers, messages, annotations, conflict policy, and termination invariants for the declarative environment.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schema_version",
-    "mechanism_id",
-    "mechanism_version",
-    "event_id",
-    "state_fields",
-    "intent_handlers",
-    "message_kinds",
-    "annotations",
-    "conflict_policy",
-    "termination_invariants",
-    "mechanism_sha256"
-  ],
+  "required": ["schema_version", "mechanism_id", "mechanism_version", "event_id", "state_fields", "intent_handlers", "message_kinds", "annotations", "conflict_policy", "termination_invariants", "mechanism_sha256"],
   "properties": {
     "schema_version": {"const": "h2epr.scenario-mechanism.v4"},
     "mechanism_id": {"type": "string", "minLength": 1},
     "mechanism_version": {"type": "string", "minLength": 1},
     "event_id": {"type": "string", "pattern": "^H2EPR-[0-9]{4}$"},
-    "state_fields": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/stateField"}},
-    "intent_handlers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/handler"}},
-    "message_kinds": {"type": "array", "items": {"$ref": "#/$defs/messageKind"}},
-    "annotations": {"type": "array", "items": {"$ref": "#/$defs/annotation"}},
+    "state_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/stateField"}
+    },
+    "intent_handlers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/handler"}
+    },
+    "message_kinds": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/messageKind"}
+    },
+    "annotations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/annotation"}
+    },
     "conflict_policy": {"const": "reject_distinct_concurrent_writes_allow_idempotent_same_value"},
-    "termination_invariants": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/condition"}},
-    "mechanism_sha256": {"$ref": "#/$defs/sha"}
+    "termination_invariants": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/condition"},
+      "description": "Safety/integrity conditions, never desired historical outcomes; an empty list permits any domain-valid terminal state."
+    },
+    "mechanism_sha256": {"$ref": "#/$defs/sha"},
+    "outcome_expectations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/outcomeExpectation"},
+      "description": "Descriptive terminal comparisons. An unmet expectation is a result, not an integrity failure."
+    }
   },
   "$defs": {
     "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
     "stateField": {
       "type": "object",
       "additionalProperties": false,
@@ -85,8 +101,14 @@
         "delta_class": {"type": "string", "minLength": 1}
       },
       "oneOf": [
-        {"required": ["value"], "not": {"required": ["value_from_parameter"]}},
-        {"required": ["value_from_parameter"], "not": {"required": ["value"]}}
+        {
+          "required": ["value"],
+          "not": {"required": ["value_from_parameter"]}
+        },
+        {
+          "required": ["value_from_parameter"],
+          "not": {"required": ["value"]}
+        }
       ]
     },
     "handler": {
@@ -98,9 +120,18 @@
         "eligible_actors": {"$ref": "#/$defs/ids"},
         "eligible_targets": {"$ref": "#/$defs/ids"},
         "target_parameter": {"type": "string", "minLength": 1},
-        "parameter_domains": {"type": "array", "items": {"$ref": "#/$defs/parameterDomain"}},
-        "preconditions": {"type": "array", "items": {"$ref": "#/$defs/condition"}},
-        "effects": {"type": "array", "items": {"$ref": "#/$defs/effect"}}
+        "parameter_domains": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/parameterDomain"}
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/condition"}
+        },
+        "effects": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/effect"}
+        }
       }
     },
     "messageKind": {
@@ -121,9 +152,30 @@
       "properties": {
         "annotation_id": {"type": "string", "minLength": 1},
         "label": {"type": "string", "minLength": 1},
-        "when_all": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/condition"}},
-        "participant_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "when_all": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/condition"}
+        },
+        "participant_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
         "one_shot": {"type": "boolean"}
+      }
+    },
+    "outcomeExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_id", "field_name", "operator", "value", "expectation_id", "label"],
+      "properties": {
+        "entity_id": {"type": "string", "minLength": 1},
+        "field_name": {"type": "string", "minLength": 1},
+        "operator": {"enum": ["equals", "not_equals", "contains", "gte", "lte"]},
+        "value": {},
+        "expectation_id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1}
       }
     }
   }

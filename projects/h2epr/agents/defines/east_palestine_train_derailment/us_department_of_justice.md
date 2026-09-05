@@ -25,21 +25,22 @@ The source participant appears at the following complete Draft anchors. These an
 
 ## 4. Event role, relationships, and authority
 
-The Agent may emit only its registered intents and messages over declared routes. It cannot mutate state, declare delivery, validate another institution's authority, or turn an announced action into an observed result. Its counterparties and public fields are fixed by the participant interface and Scenario Mechanism.
+DOJ owns the represented federal civil filing after an investigation notice is available. Ohio owns a separate state filing, and courts and settlement counterparties are not folded into DOJ. The absence of a court actor limits this model to a filing record, not a legal judgment.
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Check declared preconditions |
-| delivered messages | MASim transport before decisions | Empty list when none are due | Activate message-gated choices |
-| pending lifecycles | MASim transport at every coordinate | Empty list when none exist | Keep submission distinct from delivery |
-
-World state is persistent under environment ownership. Backend reasoning is transient. Future Draft facts are unavailable before their logical coordinate even though construction is full-Draft-exposed.
+At coordinate open, the runtime supplies sealed public state, newly delivered
+messages, this actor's outgoing pending lifecycles, and structured memory of
+received messages and its own prior dispositions. The first memory is empty.
+A previous receipt remains available with its original receipt tick; absence
+is not inferred receipt. Pending private traffic is invisible to its recipient.
+Same-tick results become known at the next coordinate. No historical stage
+label, later Draft fact, opaque generated identifier, or other actor's private
+result is a decision input.
 
 ## 6. Admissible decision semantics
 
-The admissible non-default intents are `file_federal_civil_action`. A declared coordinate, required message or state precondition, and eligible target must all match. Missing or adverse information leads to `no_op` or a typed rejection; it does not authorize a substitute act. The backend retains only the choice permitted by configuration and may not invent success.
+`file_federal_civil_action` becomes available at the legal-action interval. The notice may have arrived several ticks earlier and remains in received memory. Waiting and later filing are legal policy outputs; silence does not manufacture an investigation finding. The notice requirement is a documented modeling assumption because the exposed Draft does not supply an internal prosecutorial decision protocol.
 
 ## 7. Intent and environment-result boundary
 
@@ -47,16 +48,23 @@ Each intent carries a typed target and may create declared message intents. The 
 
 ## 8. Configurable dimensions and uncertainty
 
-Coordinate selection, route latency, rule priority, and action activation are selected in shared or Rule configuration. Alternative timing and abstention are sensitivity choices. No fixed personality, probability, model prompt, or guaranteed outcome is part of this Definition.
+Shared configuration selects the opening world, clock opportunities, and
+communication latency. Rule configuration selects priority, information guards,
+and bounded activation windows within the semantic choice surface. These are
+uncalibrated construction choices. A window permits reconsideration; it does
+not guarantee a different decision. Accepted rows complete once; rejected rows
+may retry after visible state, received messages, or outgoing lifecycle
+information changes. The clock alone is not new information. No fixed
+personality, probability, or guaranteed endpoint belongs to this Definition.
 
 ## 9. Worked cases and contract falsification
 
-- With the required state and message, the configured intent is admissible; without either, `no_op` is valid.
-- An invalid target or payload is rejected by the environment and cannot be repaired silently.
-- A sent message remains pending until MASim routes it; the Agent cannot observe it early.
-- A backend substitution or use of a later Draft fact at an earlier coordinate violates the contract.
+- Deliver the notice early: DOJ waits until its legal window instead of treating receipt as an immediate mandate.
+- Deliver it late within that window: DOJ can still file.
+- Never deliver it: a valid finite run can end with the federal filing absent and its descriptive expectation unmet.
+- Reject a target outside the legal record: neither state nor federal status is silently repaired.
 
-The Definition is falsified if `us_department_of_justice` requires authority outside the federal enforcement choice to file the civil action exposed by the Draft or if removing its modeled choice leaves the generated process unchanged under a meaningful perturbation.
+A target/authority violation, early private-message exposure, unexplained loss of received memory, or a physical/legal effect attributed to the participant rather than its environment falsifies this contract. A missing consequential authority requires a semantic successor, not an extra backend exception.
 
 ## 10. Limitations and source anchors
 

@@ -1,15 +1,57 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "h2epr.participant-observation.v2",
+  "$id": "h2epr.participant-observation.v3",
   "title": "H2EPR participant observation",
-  "description": "Provides one actor with a sealed decision-time view of public state, delivered messages, and pending lifecycle references.",
+  "description": "One actor's sealed public/private view, actual deliveries, outgoing pending transport, and runtime-derived memory of received information and its own dispositions.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "actor_id", "logical_tick", "public_state", "private_state", "delivered_messages", "pending_lifecycles", "permitted_action_types"],
+  "required": ["schema_version", "actor_id", "logical_tick", "public_state", "private_state", "delivered_messages", "pending_lifecycles", "permitted_action_types", "memory"],
   "properties": {
-    "schema_version": {"const": "h2epr.participant-observation.v2"}, "actor_id": {"type": "string", "minLength": 1}, "logical_tick": {"type": "integer", "minimum": 0},
-    "public_state": {"type": "object"}, "private_state": {"type": "object"},
-    "delivered_messages": {"type": "array", "items": {"type": "object"}}, "pending_lifecycles": {"type": "array", "items": {"type": "object"}},
-    "permitted_action_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+    "schema_version": {"const": "h2epr.participant-observation.v3"},
+    "actor_id": {"type": "string", "minLength": 1},
+    "logical_tick": {"type": "integer", "minimum": 0},
+    "public_state": {"type": "object"},
+    "private_state": {"type": "object"},
+    "delivered_messages": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "pending_lifecycles": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "permitted_action_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["received_messages", "own_actions"],
+      "properties": {
+        "received_messages": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
+        "own_actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["logical_tick", "action_type", "parameters", "status", "reason_code", "lifecycle_state"],
+            "properties": {
+              "logical_tick": {"type": "integer", "minimum": 1},
+              "action_type": {"type": "string", "minLength": 1},
+              "parameters": {"type": "object"},
+              "status": {"enum": ["accepted", "rejected"]},
+              "reason_code": {"type": "string", "minLength": 1},
+              "lifecycle_state": {"enum": ["applied", "no_effect", "rejected"]}
+            }
+          }
+        }
+      }
+    }
   }
 }

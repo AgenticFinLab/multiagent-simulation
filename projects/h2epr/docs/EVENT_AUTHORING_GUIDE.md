@@ -116,11 +116,26 @@ Shared configuration covers the complete mechanism field universe and ordered
 Draft stage/episode coordinates. Every route is explicit. Every top-level
 setting has provenance or a reviewed bounded-unavailability exemption.
 
-Rule configuration should be the smallest deterministic construction baseline
-supported by the exposed Draft. A row states actor, coordinate, priority,
-guards, typed action, messages, and reason. It must exercise every non-`no_op`
-intent at least once. Missing rows produce a typed `no_op`; they must not invoke
-hidden defaults.
+Rule configuration expresses when a participant can act and which available
+information justifies that choice. Each row declares an actor, priority,
+guards, action, messages, and reason. Prefer a bounded activation window for
+decisions that may wait for information. An exact coordinate is appropriate
+only for an explicitly time-fixed choice, with that limitation recorded.
+Declare at least one path for every non-`no_op` intent; static coverage does not
+prove that the path will be reached in a run.
+
+Windowed rows complete after acceptance. Rejected attempts reopen only when
+the actor's visible state, received information, or outgoing pending lifecycle
+changes. An unchanged clock or global state-version increment does not justify
+resubmission. `message_received` tests this tick's deliveries; `message_known`
+tests remembered deliveries, optionally bounded by `max_age_ticks`. Missing
+information produces a typed `no_op`, and may remain missing at the horizon.
+
+Keep desired terminal outcomes in `outcome_expectations`. Reserve
+`termination_invariants` for safety or integrity constraints, such as resource
+conservation, and allow the list to be empty. Reaching the bounded horizon with
+an unfulfilled request is a model result. Broken trace, replay, or unresolved
+transport prevents a complete release.
 
 ## 7. Review before execution
 

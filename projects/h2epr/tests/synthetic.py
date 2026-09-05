@@ -12,7 +12,7 @@ import os
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 from h2epr.benchmark._compiler_core import (
     _derive_configuration_admission_receipt,
@@ -304,8 +304,16 @@ def _source_documents(
 def build_synthetic_event(
     workspace: Path,
     vocabulary: SyntheticVocabulary,
+    *,
+    mechanism_transform: Callable[[dict[str, Any]], None] | None = None,
+    shared_settings_transform: Callable[[dict[str, Any]], None] | None = None,
+    rule_settings_transform: Callable[[dict[str, Any]], None] | None = None,
 ) -> SyntheticEvent:
-    """Create and compile one complete temporary Rule event package."""
+    """Compile a temporary fixture, including caller-declared negative cases.
+
+    Transforms run before dependent receipts and identities are derived. They
+    never mutate an admitted package or bypass normal compiler admission.
+    """
 
     project_root = workspace / "project"
     data_root = workspace / "data"
@@ -529,6 +537,7 @@ def build_synthetic_event(
         "obs.public_state",
         "obs.delivered_messages",
         "obs.pending_lifecycles",
+        "obs.participant_memory",
     ]
     lifecycle_ids = ["action_disposition", "message_delivery"]
     observation_registry = _sealed(
@@ -558,12 +567,21 @@ def build_synthetic_event(
                 },
                 {
                     "observation_id": "obs.pending_lifecycles",
-                    "meaning": "Nonterminal message lifecycle references.",
+                    "meaning": "This actor's outgoing nonterminal message lifecycle references.",
                     "producer": "masim.AppendOnlyTransport",
                     "consumers": active_ids,
                     "availability": "At every coordinate.",
                     "missing_behavior": "Use an empty list.",
                     "visibility": "lifecycle_reference",
+                },
+                {
+                    "observation_id": "obs.participant_memory",
+                    "meaning": "Trace-derived received messages and own prior action dispositions.",
+                    "producer": "h2epr.runtime.benchmark_runner.v3",
+                    "consumers": active_ids,
+                    "availability": "At coordinate open; current deliveries join before decisions.",
+                    "missing_behavior": "Empty on the first coordinate; malformed memory fails.",
+                    "visibility": "actor_private",
                 },
             ],
             "registry_sha256": SHA_PLACEHOLDER,
@@ -929,6 +947,9 @@ def build_synthetic_event(
         },
         "mechanism_sha256",
     )
+    if mechanism_transform is not None:
+        mechanism_transform(mechanism)
+        _sealed(mechanism, "mechanism_sha256")
     scenario_root = project_root / "scenarios" / vocabulary.slug
     _write(scenario_root / "scenario-interface.json", scenario_interface)
     _write(scenario_root / "scenario-mechanism.json", mechanism)
@@ -1019,7 +1040,7 @@ def build_synthetic_event(
             }
         ],
         "observation_contract": {
-            "schema_version": "h2epr.participant-observation.v2",
+            "schema_version": "h2epr.participant-observation.v3",
             "sealed_prestate_per_coordinate": True,
             "message_delivery_phase": "before_decision_collection",
             "same_coordinate_write_visibility": "forbidden",
@@ -1032,6 +1053,8 @@ def build_synthetic_event(
             "Logical coordinates and one-tick latency are synthetic contract choices."
         ],
     }
+    if shared_settings_transform is not None:
+        shared_settings_transform(shared_settings)
     shared_configuration = _sealed(
         {
             "schema_version": "h2epr.scenario-configuration.v3",
@@ -1156,6 +1179,8 @@ def build_synthetic_event(
             },
         ],
     }
+    if rule_settings_transform is not None:
+        rule_settings_transform(rule_settings)
     rule_configuration = _sealed(
         {
             "schema_version": "h2epr.scenario-configuration.v3",

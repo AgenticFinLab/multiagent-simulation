@@ -25,6 +25,10 @@ stages. Cite trace or graph record IDs for direct run facts.
 Classify terminal values as closed lifecycles, persistent outcomes, or
 deliberately open states. Do not invent a closing transition because a field
 name sounds temporary.
+Report each declared outcome expectation against its actual terminal value.
+Distinguish unmet expectations, valid rejected intents, and missing behavior
+from evidence-integrity failures. Describe any waiting, remembered information
+and reopening that materially affected the trajectory.
 
 ## Mechanism reading
 

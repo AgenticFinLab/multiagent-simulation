@@ -15,6 +15,7 @@ or draft directories.
 | Scenario and values | `scenario-interface`, `scenario-mechanism`, `scenario-configuration`, configuration admission and coverage | world semantics and selected values |
 | release and package | `semantic-release-manifest`, `semantic-asset-index`, `event-package-assembly`, compiled products, package manifest, backend realization and binding | immutable parents and compiled identity |
 | runtime evidence | observation, decision, trace record, tick/run seals, run manifest/receipt, replay receipt, Generated EPG, determinism and conformance receipts | execution, integrity, replay, and graph evidence |
+| incomplete attempt | `failed-attempt` | local diagnostic prefix, failure and terminal accounting; ineligible for complete publication |
 | experiment preflight | experiment plan and admission receipt | read-only comparison planning |
 | repository discovery | current-event registry | sole current event publication paths |
 

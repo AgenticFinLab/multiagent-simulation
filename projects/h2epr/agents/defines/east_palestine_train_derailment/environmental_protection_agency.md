@@ -25,21 +25,22 @@ The source participant appears at the following complete Draft anchors. These an
 
 ## 4. Event role, relationships, and authority
 
-The Agent may emit only its registered intents and messages over declared routes. It cannot mutate state, declare delivery, validate another institution's authority, or turn an announced action into an observed result. Its counterparties and public fields are fixed by the participant interface and Scenario Mechanism.
+EPA reads the response instruction and resident concern report, then may open the represented cleanup oversight and notify the railroad. The two messages can arrive at different ticks. EPA has oversight authority in this abstraction; the railroad owns its response to the directive, and neither owns a scientific finding about cleanup effectiveness.
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Check declared preconditions |
-| delivered messages | MASim transport before decisions | Empty list when none are due | Activate message-gated choices |
-| pending lifecycles | MASim transport at every coordinate | Empty list when none exist | Keep submission distinct from delivery |
-
-World state is persistent under environment ownership. Backend reasoning is transient. Future Draft facts are unavailable before their logical coordinate even though construction is full-Draft-exposed.
+At coordinate open, the runtime supplies sealed public state, newly delivered
+messages, this actor's outgoing pending lifecycles, and structured memory of
+received messages and its own prior dispositions. The first memory is empty.
+A previous receipt remains available with its original receipt tick; absence
+is not inferred receipt. Pending private traffic is invisible to its recipient.
+Same-tick results become known at the next coordinate. No historical stage
+label, later Draft fact, opaque generated identifier, or other actor's private
+result is a decision input.
 
 ## 6. Admissible decision semantics
 
-The admissible non-default intents are `start_cleanup_oversight`. A declared coordinate, required message or state precondition, and eligible target must all match. Missing or adverse information leads to `no_op` or a typed rejection; it does not authorize a substitute act. The backend retains only the choice permitted by configuration and may not invent success.
+`start_cleanup_oversight` uses retained `response_instruction` and `health_report` information plus the corresponding public record preconditions. Requiring both messages is an explicit construction choice, not an assertion that resident reporting is a legal prerequisite for EPA action. Waiting for the second message preserves the first. The Rule row is available from the cleanup interval and completes once accepted; no successful physical remediation is inferred.
 
 ## 7. Intent and environment-result boundary
 
@@ -47,16 +48,23 @@ Each intent carries a typed target and may create declared message intents. The 
 
 ## 8. Configurable dimensions and uncertainty
 
-Coordinate selection, route latency, rule priority, and action activation are selected in shared or Rule configuration. Alternative timing and abstention are sensitivity choices. No fixed personality, probability, model prompt, or guaranteed outcome is part of this Definition.
+Shared configuration selects the opening world, clock opportunities, and
+communication latency. Rule configuration selects priority, information guards,
+and bounded activation windows within the semantic choice surface. These are
+uncalibrated construction choices. A window permits reconsideration; it does
+not guarantee a different decision. Accepted rows complete once; rejected rows
+may retry after visible state, received messages, or outgoing lifecycle
+information changes. The clock alone is not new information. No fixed
+personality, probability, or guaranteed endpoint belongs to this Definition.
 
 ## 9. Worked cases and contract falsification
 
-- With the required state and message, the configured intent is admissible; without either, `no_op` is valid.
-- An invalid target or payload is rejected by the environment and cannot be repaired silently.
-- A sent message remains pending until MASim routes it; the Agent cannot observe it early.
-- A backend substitution or use of a later Draft fact at an earlier coordinate violates the contract.
+- Deliver the instruction at c04 and health report at c06: both are known when oversight is considered at c06.
+- Withhold the health report: oversight can remain open under this chosen baseline, exposing the sensitivity of the authored dependency.
+- A rejected oversight request is known next tick and is reconsidered only after observed information changes.
+- A cleanup directive does not imply railroad acceptance, completed removal, or verified environmental safety.
 
-The Definition is falsified if `environmental_protection_agency` requires authority outside the federal environmental oversight choice to initiate the exposed cleanup regime or if removing its modeled choice leaves the generated process unchanged under a meaningful perturbation.
+A target/authority violation, early private-message exposure, unexplained loss of received memory, or a physical/legal effect attributed to the participant rather than its environment falsifies this contract. A missing consequential authority requires a semantic successor, not an extra backend exception.
 
 ## 10. Limitations and source anchors
 

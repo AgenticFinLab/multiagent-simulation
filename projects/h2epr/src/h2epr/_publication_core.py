@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import tempfile
 from contextlib import contextmanager
@@ -30,6 +31,7 @@ from h2epr.runtime.benchmark_runner import (
     materialize_run,
 )
 from h2epr.runtime.environment import apply_delta
+from h2epr.runtime._environment_core import condition_matches
 from h2epr.runtime.generated_epg import (
     GeneratedEPGError,
     compile_generated_epg,
@@ -258,6 +260,10 @@ def _verify_trace_semantics(
     action_intents: dict[str, Mapping[str, Any]] = {}
     message_intents: dict[str, Mapping[str, Any]] = {}
     message_disposition_ids: set[str] = set()
+    memory = {actor: {"received_messages": [], "own_actions": []}
+              for actor in expected_actors}
+    latest_transport: dict[str, Mapping[str, Any]] = {}
+    prestate = copy.deepcopy(package.scenario["initial_state"])
 
     try:
         for coordinate in package.scenario["timeline"]:
@@ -291,6 +297,26 @@ def _verify_trace_semantics(
                 for row in rows
                 if row["record_type"] == "state_delta"
             ]
+            delivered: dict[str, list[dict[str, Any]]] = {actor: [] for actor in expected_actors}
+            for row in rows:
+                if row["record_type"] != "message_disposition" or row["payload"]["status"] != "delivered":
+                    continue
+                disposition = row["payload"]
+                message_id = disposition["message_intent_id"]
+                _require(message_id in message_intents, "run_delivery_precedes_submission")
+                source = message_intents[message_id]
+                due = source["logical_tick"] + source["latency_ticks"]
+                _require(logical_tick >= due, "run_delivery_precedes_availability")
+                latest_transport[message_id] = disposition
+                delivered[source["recipient_id"]].append({
+                    "sender_id": source["sender_id"], "recipient_id": source["recipient_id"],
+                    "send_tick": source["logical_tick"], "earliest_delivery_tick": due,
+                    "due_tick": due, "first_consumable_tick": logical_tick,
+                    "message_kind": source["message_kind"], "payload": source["payload"],
+                })
+            for actor_id in expected_actors:
+                delivered[actor_id].sort(key=canonical_sha256)
+                memory[actor_id]["received_messages"].extend(delivered[actor_id])
 
             observation_by_actor = {
                 row["contract"]["actor_id"]: row for row in observations
@@ -341,6 +367,32 @@ def _verify_trace_semantics(
                     "participant-decision.schema.json",
                     f"run_decision:{logical_tick}:{actor_id}",
                 )
+                _require(contract["delivered_messages"] == delivered[actor_id]
+                         and contract["memory"] == memory[actor_id],
+                         f"run_observation_memory_not_trace_derived:{logical_tick}:{actor_id}")
+                expected_pending = sorted([
+                    {"lifecycle_id": "message_delivery", "status": item["status"],
+                     "counterparty_id": item["recipient_id"]}
+                    for item in latest_transport.values()
+                    if item["sender_id"] == actor_id and item["status"] not in {
+                        "delivered", "expired", "rejected", "duplicate", "failed"
+                    }
+                ], key=canonical_sha256)
+                _require(contract["pending_lifecycles"] == expected_pending,
+                         f"run_pending_lifecycle_projection_mismatch:{logical_tick}:{actor_id}")
+                for visibility, key in (("public", "public_state"), ("actor_private", "private_state")):
+                    entities: dict[str, dict[str, Any]] = {}
+                    for field in package.scenario["mechanism"]["state_fields"]:
+                        if field["visibility"] != visibility or (
+                            visibility == "actor_private" and field["entity_id"] != actor_id
+                        ):
+                            continue
+                        entities.setdefault(field["entity_id"], {})[field["field_name"]] = (
+                            prestate["entities"][field["entity_id"]][field["field_name"]]
+                        )
+                    _require(contract[key] == {"state_version": prestate["state_version"],
+                                               "entities": entities},
+                             f"run_state_visibility_projection_mismatch:{logical_tick}:{actor_id}")
                 try:
                     ActionIntent(**action)
                 except (TypeError, ValueError) as exc:
@@ -351,7 +403,10 @@ def _verify_trace_semantics(
                     contract["logical_tick"] == logical_tick
                     and decision["logical_tick"] == logical_tick
                     and action["logical_tick"] == logical_tick
-                    and runtime["coordinate"] == coordinate
+                    and runtime["coordinate"] == {
+                        "coordinate_id": coordinate["coordinate_id"],
+                        "logical_tick": logical_tick,
+                    }
                     and runtime["prestate_version"] == action["prestate_version"]
                     and runtime["prestate_sha256"] == action["prestate_sha256"]
                     and action["run_id"] == manifest["run_id"]
@@ -427,6 +482,12 @@ def _verify_trace_semantics(
                     disposition["lifecycle_state"] == expected_lifecycle,
                     f"run_disposition_lifecycle_mismatch:{logical_tick}:{intent_id}",
                 )
+                memory[action["actor_id"]]["own_actions"].append({
+                    "logical_tick": logical_tick, "action_type": action["action_type"],
+                    "parameters": action["parameters"], "status": disposition["status"],
+                    "reason_code": disposition["reason_code"],
+                    "lifecycle_state": disposition["lifecycle_state"],
+                })
                 for delta_id in disposition["state_delta_ids"]:
                     _require(
                         delta_id in delta_by_id
@@ -442,6 +503,12 @@ def _verify_trace_semantics(
                     == set(disposition["state_delta_ids"]),
                     f"run_delta_disposition_mismatch:{logical_tick}:{intent_id}",
                 )
+            for delta in deltas:
+                apply_delta(prestate, delta)
+            prestate["state_version"] += 1
+            for row in rows:
+                if row["record_type"] == "message_disposition" and row["payload"]["status"] != "duplicate":
+                    latest_transport[row["payload"]["message_intent_id"]] = row["payload"]
         for row in trace:
             if row["record_type"] != "message_disposition":
                 continue
@@ -527,6 +594,7 @@ def _verify_run_custody(
     ),
     output_roles: Sequence[str] = OUTPUT_ROLES,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    _require(not (root / "failure-receipt.json").exists(), "failed_attempt_not_publishable")
     manifest_path = _safe_custody_file(root, "run_manifest.json")
     receipt_path = _safe_custody_file(root, "run_receipt.json")
     manifest = _read_json(manifest_path)
@@ -647,6 +715,19 @@ def _verify_run_custody(
     except (KeyError, TypeError, ValueError) as exc:
         raise _PublicationCoreError("run_authoritative_replay_failed") from exc
     _require(replayed == final_state, "run_authoritative_replay_mismatch")
+    expected_outcomes = [
+        {
+            "expectation_id": row["expectation_id"],
+            "observed_value": replayed["entities"][row["entity_id"]][row["field_name"]],
+            "met": condition_matches(
+                replayed["entities"][row["entity_id"]][row["field_name"]],
+                row["operator"], row["value"],
+            ),
+        }
+        for row in package.scenario["mechanism"].get("outcome_expectations", [])
+    ]
+    _require(receipt["outcome_assessments"] == expected_outcomes,
+             "run_outcome_assessment_not_independently_derived")
 
     replay_receipt = _read_json(
         _safe_custody_file(root, "replay_receipt.json")

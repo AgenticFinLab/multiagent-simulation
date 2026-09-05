@@ -29,21 +29,28 @@ The source participant appears at every Draft anchor below. These anchors establ
 
 ## 4. Event role, relationships, and authority
 
-The Agent may emit only registered intents and messages over declared routes. Draft relation rows are not executable authority because several reverse direction or name the wrong participant. The Agent cannot mutate state, declare delivery, validate another institution, or convert a report into a public-health outcome.
+DRC reports the represented imported cases, briefs the committee, records a
+fractional-dose response, supplies progress information, and sustains domestic
+surveillance. It does not own Angola decisions, WHO assessments, travel behavior,
+or vaccine efficacy. The imported-case report is a statement, not modeled infection.
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Check declared preconditions |
-| delivered messages | MASim transport before decisions | Empty when none are due | Activate message-gated choices |
-| pending lifecycles | MASim transport | Empty when none exist | Keep request and delivery distinct |
-
-Future Draft facts are unavailable before their logical coordinate. World state is persistent under environment ownership; backend reasoning is transient.
+At coordinate open, the actor receives sealed public state, its newly delivered
+messages, only its outgoing pending lifecycles, and structured received/own-action
+memory. Received messages retain their receipt tick. Its own accepted, rejected,
+and no-op results become available at the next coordinate. Private pending
+messages are not exposed to a recipient; absent information stays absent.
+Runtime clock coordinates contain no historical stage label or future Draft
+fact. Memory is evidence-derived, not an invented private deliberation.
 
 ## 6. Admissible decision semantics
 
-The admissible non-default intents are `report_imported_cases`, `submit_drc_briefing`, `implement_drc_scaled_response`, `submit_drc_progress`, `activate_drc_surveillance`. A declared coordinate and every state or message guard must match. Missing, stale, or adverse information yields `no_op` or a typed rejection, never a substitute act. Exact Rule rows and model settings remain outside this Definition.
+The initial report reads the recorded outbreak confirmation. Subsequent
+briefing and response choices wait for retained WHO messages. A response record
+is separate from a later progress report, and each has its own earliest window.
+The fractional-dose label records the selected response strategy without a
+stock ledger, dosing model, administration count, or effectiveness estimate.
 
 ## 7. Intent and environment-result boundary
 
@@ -51,17 +58,23 @@ Each intent carries a typed target and may create declared messages. The environ
 
 ## 8. Configurable dimensions and uncertainty
 
-Coordinate selection, route latency, decision priority, and activation are configuration values. Abstention, delay, or omitted participation are sensitivity choices. No personality, probability, prompt, threshold, or guaranteed result is fixed here.
+Shared configuration selects the finite clock, public opening records, and
+transport latency. Rule configuration selects bounded availability windows,
+priority, and message/state guards within the semantic choice surface. These
+are uncalibrated construction choices. A row completes once accepted; after a
+rejection it may retry when visible state, received information, or outgoing
+lifecycle information changes. The clock alone does not reopen it. No fixed
+personality, probability, epidemiological threshold, or guaranteed outcome is
+part of the Definition.
 
 ## 9. Worked cases and contract falsification
 
-- Required state and messages permit the relevant intent; missing evidence permits `no_op`.
-- An invalid target or payload is rejected without silent repair.
-- A sent report remains pending until transport delivers it.
-- Environment denial does not rewrite the participant's original intent.
-- Changing a material delivered message may change the response while semantic identity remains stable.
+- Withhold the committee invitation: DRC can report imported cases while its briefing remains absent.
+- Delay response guidance inside its window: DRC can respond later without repeating an accepted report.
+- Reject an Angola target from a DRC intent: no foreign response field changes.
+- A no-recent-cases report is not independent evidence that transmission ended.
 
-The Definition is falsified if `drc_ministry_of_health` needs authority outside DRC's imported-case reporting, committee briefing conditions, scaled response, progress reporting, and surveillance choices or if its modeled choice is causally inert under every meaningful perturbation.
+Early private-message exposure, lost received memory, unauthorized state writes, or attribution of an unmodeled health effect to a participant falsifies the contract. New authority or materially independent internal units require a semantic successor.
 
 ## 10. Limitations and source anchors
 

@@ -9,6 +9,13 @@ precedence, thresholds or ordered categories, selected intent, parameters,
 message behavior, pending-result handling, and justified no-op cases. Exact
 values belong to the Rule backend configuration.
 
+For windowed rows, state how an initial absence becomes a later opportunity,
+how acceptance prevents duplicate submission, and which information change
+reopens a rejection. Test a missing notice, delayed receipt, stale remembered
+notice, unchanged denial, and changed-condition retry. The backend receives
+the actor's own action history and actual received messages; it does not read
+other actors' private histories or Draft stage/action labels as observations.
+
 Test every permitted intent, required failure branch, generated-ID invariance,
 and at least one perturbation per material condition. Permute reducer input and
 opaque IDs for every concurrent-write case; Rule selection and environment

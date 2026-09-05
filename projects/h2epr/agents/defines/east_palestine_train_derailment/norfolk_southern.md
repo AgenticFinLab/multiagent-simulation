@@ -32,21 +32,22 @@ The source participant appears at the following complete Draft anchors. These an
 
 ## 4. Event role, relationships, and authority
 
-The Agent may emit only its registered intents and messages over declared routes. It cannot mutate state, declare delivery, validate another institution's authority, or turn an announced action into an observed result. Its counterparties and public fields are fixed by the participant interface and Scenario Mechanism.
+The derailment is already present in the opening world. The operator can report it, wait for an EPA cleanup directive before recording characterization work, and announce the exposed class-settlement step after the represented legal filings. These are separate choices. A notification never causes the derailment, and an announcement never transfers compensation.
 
 ## 5. Decision situations, observations, and state
 
-| Observation | Producer and availability | Missing or stale rule | Use |
-|---|---|---|---|
-| public state | Runtime at coordinate open | Fail if absent | Check declared preconditions |
-| delivered messages | MASim transport before decisions | Empty list when none are due | Activate message-gated choices |
-| pending lifecycles | MASim transport at every coordinate | Empty list when none exist | Keep submission distinct from delivery |
-
-World state is persistent under environment ownership. Backend reasoning is transient. Future Draft facts are unavailable before their logical coordinate even though construction is full-Draft-exposed.
+At coordinate open, the runtime supplies sealed public state, newly delivered
+messages, this actor's outgoing pending lifecycles, and structured memory of
+received messages and its own prior dispositions. The first memory is empty.
+A previous receipt remains available with its original receipt tick; absence
+is not inferred receipt. Pending private traffic is invisible to its recipient.
+Same-tick results become known at the next coordinate. No historical stage
+label, later Draft fact, opaque generated identifier, or other actor's private
+result is a decision input.
 
 ## 6. Admissible decision semantics
 
-The admissible non-default intents are `report_derailment`, `advance_cleanup`, `announce_class_settlement`. A declared coordinate, required message or state precondition, and eligible target must all match. Missing or adverse information leads to `no_op` or a typed rejection; it does not authorize a substitute act. The backend retains only the choice permitted by configuration and may not invent success.
+At the opening, `report_derailment` changes only `incident.notification_status`. An EPA directive received at an earlier tick remains available for `advance_cleanup`; an undelivered directive does not. `announce_class_settlement` has a later availability boundary and requires the two public filing records. The Rule policy chooses these actions once, or waits while their information is missing. Its reporting chain and filing-to-settlement dependency are authored assumptions rather than inferred corporate deliberation.
 
 ## 7. Intent and environment-result boundary
 
@@ -54,16 +55,23 @@ Each intent carries a typed target and may create declared message intents. The 
 
 ## 8. Configurable dimensions and uncertainty
 
-Coordinate selection, route latency, rule priority, and action activation are selected in shared or Rule configuration. Alternative timing and abstention are sensitivity choices. No fixed personality, probability, model prompt, or guaranteed outcome is part of this Definition.
+Shared configuration selects the opening world, clock opportunities, and
+communication latency. Rule configuration selects priority, information guards,
+and bounded activation windows within the semantic choice surface. These are
+uncalibrated construction choices. A window permits reconsideration; it does
+not guarantee a different decision. Accepted rows complete once; rejected rows
+may retry after visible state, received messages, or outgoing lifecycle
+information changes. The clock alone is not new information. No fixed
+personality, probability, or guaranteed endpoint belongs to this Definition.
 
 ## 9. Worked cases and contract falsification
 
-- With the required state and message, the configured intent is admissible; without either, `no_op` is valid.
-- An invalid target or payload is rejected by the environment and cannot be repaired silently.
-- A sent message remains pending until MASim routes it; the Agent cannot observe it early.
-- A backend substitution or use of a later Draft fact at an earlier coordinate violates the contract.
+- Remove the EPA directive: the railroad can retain its incident notification while cleanup remains open.
+- Delay that directive inside the cleanup window: the choice can reopen without moving the opening derailment.
+- Reject an invalid cleanup target: the next observation contains that rejection, not a fabricated completed action.
+- A settlement notice leaves payment execution and individual receipt unmodeled.
 
-The Definition is falsified if `norfolk_southern` requires authority outside the railroad organization's incident notification, cleanup-response, and settlement-announcement choices or if removing its modeled choice leaves the generated process unchanged under a meaningful perturbation.
+A target/authority violation, early private-message exposure, unexplained loss of received memory, or a physical/legal effect attributed to the participant rather than its environment falsifies this contract. A missing consequential authority requires a semantic successor, not an extra backend exception.
 
 ## 10. Limitations and source anchors
 

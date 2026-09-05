@@ -27,7 +27,7 @@ class SchemaCatalogTests(unittest.TestCase):
     def test_catalog_is_complete_and_every_schema_is_valid(self) -> None:
         catalog = _strict_json(SCHEMA_ROOT / "catalog.json")
         declared = catalog["schemas"]
-        self.assertEqual(35, len(declared))
+        self.assertIn("failed-attempt.schema.json", declared)
         self.assertEqual(len(declared), len(set(declared)))
         self.assertEqual(
             set(declared),

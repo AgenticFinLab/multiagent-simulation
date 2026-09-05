@@ -24,8 +24,9 @@ tick seal, and the configured barrier order. Record hashes form one append-only
 chain. The run seal commits the terminal state and final preseal record.
 
 No message lifecycle may remain nonterminal at closeout. A deliberately open
-domain state is permitted only when the Scenario termination contract allows
-it; transport openness is not.
+domain state is compatible with a complete horizon. Outcome expectations are
+reported separately and may be unmet; safety/integrity constraints still hold.
+Transport openness prevents a complete release.
 
 ## Independent verification
 
@@ -42,6 +43,12 @@ it; transport openness is not.
    output plus run receipt byte for byte.
 6. Compare the identity probe semantically while requiring opaque generated
    identities to differ where intended.
+
+Reconstruct participant memory from actual delivered messages and prior own
+action dispositions, check public/private projection against the sealed
+prestate, and recompute outcome assessments from replayed terminal state.
+Neither an invented remembered message nor a producer-resealed expectation
+flag is acceptable evidence.
 
 Outer checksums or producer `passed` fields never replace these derivations.
 

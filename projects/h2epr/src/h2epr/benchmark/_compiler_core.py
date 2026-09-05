@@ -455,6 +455,8 @@ def _validate_semantic_closure(
     settings = configuration["settings"]
     _require(settings["active_actor_ids"] == active_ids, "configuration_actor_universe_mismatch")
     _require(settings["exposure_mode"] == assets.source_profile["exposure_mode"], "configuration_exposure_mode_mismatch")
+    _require(settings["observation_contract"].get("schema_version") == "h2epr.participant-observation.v3",
+             "configuration_observation_contract_mismatch")
 
     observations = _unique(
         values["observation_registry"]["observations"],
@@ -511,6 +513,14 @@ def _validate_semantic_closure(
         f"entities.{entity}.{field}" for entity, field in field_keys
     }
     _require(scenario_fields == expected_scenario_fields, "scenario_interface_state_field_mismatch")
+    interface_fields = _unique(scenario_interface["state_fields"], "field_id", "scenario_field")
+    for field in mechanism["state_fields"]:
+        projection = interface_fields[f"entities.{field['entity_id']}.{field['field_name']}"]
+        _require(projection["visibility"] == field["visibility"]
+                 and projection["update_authority"] == field["update_authority"],
+                 "scenario_interface_state_authority_mismatch")
+        _require(field["visibility"] != "actor_private" or field["entity_id"] in active_ids,
+                 "actor_private_state_owner_unknown")
     _require(scenario_interface["observation_registry_id"] == values["observation_registry"]["registry_id"], "scenario_observation_registry_mismatch")
     _require(scenario_interface["intent_registry_id"] == values["intent_registry"]["registry_id"], "scenario_intent_registry_mismatch")
     _require(scenario_interface["lifecycle_registry_id"] == values["lifecycle_registry"]["registry_id"], "scenario_lifecycle_registry_mismatch")
@@ -566,6 +576,10 @@ def _validate_semantic_closure(
             _require(_condition_field(condition) in field_keys, f"annotation_field_unknown:{annotation['annotation_id']}")
     for condition in mechanism["termination_invariants"]:
         _require(_condition_field(condition) in field_keys, "termination_invariant_field_unknown")
+    expectations = mechanism.get("outcome_expectations", [])
+    _unique(expectations, "expectation_id", "outcome_expectation")
+    for condition in expectations:
+        _require(_condition_field(condition) in field_keys, "outcome_expectation_field_unknown")
 
     derived = _derive_configuration_admission_receipt(
         configuration=configuration,
@@ -634,14 +648,14 @@ def _validate_rule_release(
     )
     settings = backend_configuration["settings"]
     _require(settings["deterministic"] and settings["model_access"] == "denied" and settings["network_access"] == "denied", "rule_backend_boundary_mismatch")
-    coordinate_ids = {row["coordinate_id"] for row in scenario["timeline"]}
+    coordinate_ticks = {row["coordinate_id"]: row["logical_tick"] for row in scenario["timeline"]}
     message_kinds = _unique(mechanism["message_kinds"], "message_kind", "message_kind")
     route_pairs = {
         (row["source_id"], row["target_id"]): row
         for row in scenario["communication_routes"]
     }
     rule_ids: set[str] = set()
-    rule_slots: set[tuple[str, str, int]] = set()
+    rule_slots: set[tuple[str, int, int]] = set()
     used_intents: set[str] = set()
     for rule in settings["decision_rules"]:
         rule_id = rule["rule_id"]
@@ -649,10 +663,21 @@ def _validate_rule_release(
         rule_ids.add(rule_id)
         actor_id = rule["actor_id"]
         _require(actor_id in active_ids, f"rule_actor_unknown:{rule_id}")
-        _require(rule["coordinate_id"] in coordinate_ids, f"rule_coordinate_unknown:{rule_id}")
-        slot = actor_id, rule["coordinate_id"], rule["priority"]
-        _require(slot not in rule_slots, f"rule_priority_slot_duplicate:{rule_id}")
-        rule_slots.add(slot)
+        if "coordinate_id" in rule:
+            _require(rule["coordinate_id"] in coordinate_ticks, f"rule_coordinate_unknown:{rule_id}")
+            ticks = [coordinate_ticks[rule["coordinate_id"]]]
+        else:
+            activation = rule["activation"]
+            start_id, end_id = activation["start_coordinate_id"], activation["end_coordinate_id"]
+            _require(start_id in coordinate_ticks and end_id in coordinate_ticks,
+                     f"rule_activation_coordinate_unknown:{rule_id}")
+            start, end = coordinate_ticks[start_id], coordinate_ticks[end_id]
+            _require(start <= end, f"rule_activation_window_reversed:{rule_id}")
+            ticks = range(start, end + 1)
+        for tick in ticks:
+            slot = actor_id, tick, rule["priority"]
+            _require(slot not in rule_slots, f"rule_priority_slot_duplicate:{rule_id}")
+            rule_slots.add(slot)
         action_type = rule["action"]["action_type"]
         _require(action_type in interface_by_actor[actor_id]["intent_ids"], f"rule_action_not_permitted:{rule_id}")
         used_intents.add(action_type)
@@ -661,13 +686,21 @@ def _validate_rule_release(
         _require(target in handler["eligible_targets"], f"rule_action_target_invalid:{rule_id}")
         for guard in rule["guards"]:
             if guard["kind"] == "state":
+                fields = {_state_field_key(row): row for row in mechanism["state_fields"]}
                 _require(
-                    _condition_field(guard)
-                    in {_state_field_key(row) for row in mechanism["state_fields"]},
+                    _condition_field(guard) in fields,
                     f"rule_guard_field_unknown:{rule_id}",
                 )
+                field = fields[_condition_field(guard)]
+                _require(field["visibility"] == "public" or (
+                    field["visibility"] == "actor_private" and field["entity_id"] == actor_id
+                ), f"rule_guard_state_visibility_forbidden:{rule_id}")
             else:
                 _require(guard["message_kind"] in message_kinds, f"rule_guard_message_kind_unknown:{rule_id}")
+                kind = message_kinds[guard["message_kind"]]
+                _require(actor_id in kind["eligible_recipients"], f"rule_guard_recipient_ineligible:{rule_id}")
+                if "sender_id" in guard:
+                    _require(guard["sender_id"] in kind["eligible_senders"], f"rule_guard_sender_ineligible:{rule_id}")
         for message in rule["messages"]:
             kind = message["message_type"]
             recipient = message["recipient_id"]
@@ -677,7 +710,7 @@ def _validate_rule_release(
             _require(recipient in declaration["eligible_recipients"], f"rule_message_recipient_ineligible:{rule_id}")
             _require((actor_id, recipient) in route_pairs, f"rule_message_route_missing:{rule_id}")
     declared_non_noop = {row["intent_id"] for row in mechanism["intent_handlers"]} - {"no_op"}
-    _require(used_intents == declared_non_noop, "rule_intent_coverage_mismatch")
+    _require(used_intents - {"no_op"} == declared_non_noop, "rule_intent_coverage_mismatch")
 
     derived_backend_receipt = _derive_rule_configuration_admission_receipt(
         configuration=backend_configuration,

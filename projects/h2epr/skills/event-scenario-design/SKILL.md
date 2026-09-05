@@ -24,7 +24,7 @@ routing, and release evidence.
 6. Publish `scenario-mechanism.json`: typed state fields, one handler for every
    registry intent including `no_op`, parameter domains, preconditions,
    deterministic effects, message kinds, conflict policy, annotation rules,
-   and termination invariants.
+   safety invariants and separately named outcome expectations.
 7. Declare configurable dimensions and domains without selecting exact values.
 8. Complete the Interface Closure and adversarial cases, including distinct
    concurrent writes, idempotent same-value writes, missing routes, and a

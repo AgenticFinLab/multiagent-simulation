@@ -14,7 +14,7 @@ The Draft contains relation-direction and participant-semantic inconsistencies. 
 
 | Backend | Status | Current evidence or failure |
 |---|---|---|
-| Rule | implemented | admitted configuration and realization; package binding `9588486a…a4b17d`; independently verified [run release](../../releases/east_palestine_train_derailment/rule/) |
+| Rule | implemented | admitted configuration and realization; current package binding; independently verified [run release](../../releases/east_palestine_train_derailment/rule/) |
 | LLM | planned | no registered implementation, model provenance, parser, retry, or failure evidence; admission fails closed |
 | RuleLLM | planned | no proposal/admission implementation or repair evidence; admission fails closed |
 
@@ -22,23 +22,30 @@ Attaching Rule leaves the package-core identity unchanged. Planned catalog entri
 
 ## Current result
 
-The accepted canonical seed-0 Rule run is `run.4cc6658590d5447313ff426b`. Package SHA-256 is `f1f30080e857417ed06cb45b3cbb25b37ea5a7fac72339978185f37dd657e297`; run-manifest SHA-256 is `2e9b537403377fc0d8f8f5f17e12c71239a0b1611161cc2070dcf501ea97f399`; trace SHA-256 is `a90e4b657e6f46c137e5d847a1e77da378f9309614e72be0fb1e66551cd7438a`; final-state SHA-256 is `1b7dbf7b8e8e85bd7ff1fa172fd544d6d57a434d572fa1f446ade7d4333d5599`; and the Generated EPG seal is `b36314507aa0b70878f8346ccec20df418cb804401fe91ffc63ca3754ec0eab2`.
+The current canonical seed-0 Rule run is `run.af195d6305dad7006bc55759`. Its
+7 actors execute 11 coordinates and produce
+405 trace records, 432 graph nodes, and
+1,210 graph edges. Exact identities, deterministic A/B evidence,
+generated-ID invariance, replay, and terminal transport are in the
+[run release](../../releases/east_palestine_train_derailment/rule/).
 
-Seven actors execute 11 coordinates. The trace has 405 records; the trace-derived graph has 432 nodes and 1,056 edges; terminal transport has zero unresolved messages. Canonical A/B outputs are byte-identical, the generated-ID perturbation preserves semantic trace/graph and exact final state, and authoritative replay passes. The [simulation-only reading](../../reports/east_palestine_train_derailment/rule/simulation-reading.md) traverses every record, node, and edge. Raw custody remains under ignored `.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/current/`.
+The current policy uses bounded activation windows, retained received messages,
+and own-action memory. Descriptive expectations are distinct from validity:
+trace, seals, actual-state replay, graph provenance, and zero unresolved
+transport remain mandatory. The
+[simulation reading](../../reports/east_palestine_train_derailment/rule/simulation-reading.md)
+reviews the full output with a complete machine scan and coordinate-level
+semantic analysis. Raw custody is retained under ignored
+`.local-runtime/h2epr-simulation/runs/benchmark/east_palestine_train_derailment/rule/2026-09-05-behavior/`.
 
-This event is one of two rows in `current-events.json`. The
-[two-event Rule conformance release](../../releases/cross-event/rule/) covers
-the complete registry and passes with receipt
-`0d5d612447e8541e4f5f2f387574649a9d7f2f7880e9de7f31a674445bf88364`.
-
-Validation uses `python -B -m h2epr.cli validate-package`, three fresh materializations, independent `publish-run-release`, `python -B -m h2epr.cli validate-registry`, and the complete dependency-light unittest suite from the repository root with `PYTHONPATH=projects/h2epr/src:projects/h2epr/tests`.
+The [current-event registry](../current-events.json) and
+[cross-event Rule conformance](../../releases/cross-event/rule/) cover the
+current event set. Use the maintained CLI and complete unittest suite for
+package admission, fresh materialization, independent publication, and
+registry verification.
 
 ## Claim boundary
 
 The current result supports dataset-conditioned semantic construction, package admission, deterministic Rule execution, integrity seals, authoritative replay, trace-derived graph provenance, and a bounded simulation-only process description. Full-Draft exposure and explicit logical-time compression are part of that result.
 
 It does not support historical fit, parameter calibration, held-out evaluation or performance, cleanup or policy effectiveness, medical or environmental causality, scientific validity, or universal generality. Process labels such as `filed`, `characterization`, and `announced` do not prove downstream implementation or real-world outcome.
-
-The next legal action is a separately authorized third unseen event,
-perturbation, or future backend comparison. This release does not authorize
-LLM/RuleLLM development or scientific evaluation.
