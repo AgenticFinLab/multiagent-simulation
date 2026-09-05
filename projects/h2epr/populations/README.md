@@ -23,3 +23,6 @@ selects eight named Agents and no Population. That explicit zero is valid;
 directory symmetry does not require inventing an unsupported aggregate choice.
 H2EPR-0481 uses three aggregate choice units: [global purchasers, mainland test-unit
 owners and mainland regular purchasers](models/samsung_galaxy_note7_battery_recall_crisis/).
+H2EPR-0616 keeps its affected-patient cohort as explicit initial context because
+the Draft exposes no patient-authored choice; it therefore has no current
+Population Model.

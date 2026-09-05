@@ -20,4 +20,5 @@ values are under
 [`east_palestine_train_derailment/`](east_palestine_train_derailment/),
 [`angola_yellow_fever_outbreak/`](angola_yellow_fever_outbreak/), and
 [`baoneng_vanke_takeover_battle/`](baoneng_vanke_takeover_battle/), and
-[`samsung_galaxy_note7_battery_recall_crisis/`](samsung_galaxy_note7_battery_recall_crisis/).
+[`samsung_galaxy_note7_battery_recall_crisis/`](samsung_galaxy_note7_battery_recall_crisis/), and
+[`singhealth_data_breach/`](singhealth_data_breach/).

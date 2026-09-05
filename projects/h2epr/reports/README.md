@@ -21,4 +21,6 @@ Rule](angola_yellow_fever_outbreak/rule/simulation-reading.md), and
 [H2EPR-1031 Baoneng–Vanke Takeover Battle,
 Rule](baoneng_vanke_takeover_battle/rule/simulation-reading.md), and
 [H2EPR-0481 Samsung Galaxy Note7 Battery Recall Crisis,
-Rule](samsung_galaxy_note7_battery_recall_crisis/rule/simulation-reading.md).
+Rule](samsung_galaxy_note7_battery_recall_crisis/rule/simulation-reading.md), and
+[H2EPR-0616 SingHealth Data Breach,
+Rule](singhealth_data_breach/rule/simulation-reading.md).
