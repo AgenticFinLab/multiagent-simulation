@@ -1,4 +1,4 @@
-# Samsung Galaxy Note7 Battery Recall Crisis Rule run release Rule run release
+# Samsung Galaxy Note7 Battery Recall Crisis Rule run release
 
 This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0481`. Raw trace, state, seals, replay output, and Generated

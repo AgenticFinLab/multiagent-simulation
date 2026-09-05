@@ -1,4 +1,4 @@
-# SingHealth Data Breach Rule run release Rule run release
+# SingHealth Data Breach Rule run release
 
 This compact release records the dataset-conditioned Rule materialization of
 `H2EPR-0616`. Raw trace, state, seals, replay output, and Generated

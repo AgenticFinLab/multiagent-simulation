@@ -26,3 +26,7 @@ owners and mainland regular purchasers](models/samsung_galaxy_note7_battery_reca
 H2EPR-0616 keeps its affected-patient cohort as explicit initial context because
 the Draft exposes no patient-authored choice; it therefore has no current
 Population Model.
+H2EPR-0288 uses three aggregate choice units: [general public depositors, New
+York trust companies and NYCH member banks](models/panic_of_1907/). Each model
+owns a bounded group-level record without inventing individual trajectories,
+unanimity, weights or financial quantities.

@@ -18,7 +18,8 @@ Current configurations are listed indirectly by
 [events/current-events.json](../events/current-events.json). The current
 values are under
 [`east_palestine_train_derailment/`](east_palestine_train_derailment/),
-[`angola_yellow_fever_outbreak/`](angola_yellow_fever_outbreak/), and
-[`baoneng_vanke_takeover_battle/`](baoneng_vanke_takeover_battle/), and
-[`samsung_galaxy_note7_battery_recall_crisis/`](samsung_galaxy_note7_battery_recall_crisis/), and
-[`singhealth_data_breach/`](singhealth_data_breach/).
+[`angola_yellow_fever_outbreak/`](angola_yellow_fever_outbreak/),
+[`baoneng_vanke_takeover_battle/`](baoneng_vanke_takeover_battle/),
+[`samsung_galaxy_note7_battery_recall_crisis/`](samsung_galaxy_note7_battery_recall_crisis/),
+[`singhealth_data_breach/`](singhealth_data_breach/), and
+[`panic_of_1907/`](panic_of_1907/).
